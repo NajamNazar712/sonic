@@ -24,32 +24,6 @@
                         @if(($crm_details['status_id'] == 5))
                             (Re-Open)
                         @endif
-                        <div class="text-right mb-1">
-                            @if(session('role_id'))
-                                @if(($crm_details['status_id'] == 2 || $crm_details['status_id'] == 3) && ($crm_details->agent['id'] == Auth::id())))
-                                    <button type="button" class="btn btn-primary width-10-per" id="tag"><span
-                                                class="d-none d-lg-block" style="color: white">Tag</span></button>
-                                @endif
-                                @if(($crm_details['status_id'] == 2) && ($crm_details->agent['id'] == Auth::id()))
-                                    <button type="button" class="btn btn-primary width-10-per" id="un_tag"><span
-                                                class="d-none d-lg-block" style="color: white">Un Tag</span></button>
-                                @endif
-                                
-                                @if(($crm_details['status_id'] == 2))
-                                    @if((session('role_id') == 1 || in_array(352, session('permissions'))))
-                                        <button type="button" class="btn @if($escalation_status_flag == true) btn-danger @else btn-primary @endif width-10-per" id="halt_start_escalation" value="@if($escalation_status_flag == true) 0 @else 1 @endif"><span
-                                                    class="d-none d-lg-block" style="color: white">@if($escalation_status_flag == true) Halt Escalation @else Start Escalation @endif</span></button>
-                                    @endif
-                                    @if((session('role_id') == 1 || in_array(353, session('permissions'))))
-                                        @if($escalation_log_flag == true)
-                                            <button type="button" class="btn btn-primary width-10-per" id="escalate"><span
-                                                        class="d-none d-lg-block" style="color: white">Escalate</span></button>
-                                        @endif
-                                    @endif
-                                @endif
-                            @endif
-
-                        </div>
                     </h1>
                     <div class="card">
                         <div class="card-content" aria-expanded="true">
@@ -268,11 +242,11 @@
                                                                             <span class="d-none d-lg-block">Resolve</span>
                                                                         </button>
                                                                     @endif --}}
-                                                                    @if(session('role_id') == 1 || session('role_id') == 6 || $crm_details->agent['id'] == Auth::id() || in_array(184, session('permissions')))
+                                                                    {{-- @if(session('role_id') == 1 || session('role_id') == 6 || $crm_details->agent['id'] == Auth::id() || in_array(184, session('permissions')))
                                                                         <button id="valid" type="submit" class="btn btn-success mr-1">
                                                                             <span class="d-none d-lg-block">Resolve</span>
                                                                         </button>
-                                                                    @endif
+                                                                    @endif --}}
                                                                 @elseif($crm_details['status_id'] == 4 && (in_array(186, session('permissions')) || session('role_id') == 1 || session('role_id') == 6 || $crm_details->agent['id'] == Auth::id()))
                                                                 <input type="hidden" id="valid_close_reason" name="valid_close_reason"
                                                                     value="0">    
@@ -320,7 +294,7 @@
                                                                     </button>
                                                                 
                                                                 @endif
-                                                                <button id="invalid" type="submit" class="btn btn-danger">
+                                                                {{-- <button id="invalid" type="submit" class="btn btn-danger">
                                                                     <span class="d-none d-lg-block">
                                                                         @if($crm_details['status_id'] == 1 ||$crm_details['status_id'] == 2 ||$crm_details['status_id'] == 3 || $crm_details['status_id'] == 5)
                                                                             Invalid
@@ -328,7 +302,7 @@
                                                                             Close
                                                                         @endif
                                                                     </span>
-                                                                </button>
+                                                                </button> --}}
                                                             @endif
                                                         </form>
                                                     </div>
@@ -452,17 +426,17 @@
                                             </section>
                                             @if(session('role_id'))
                                                 @if(session('role_id') == 1 || session('role_id') == 6 || ($crm_details->status_id == 1 &&  $crm_details->agent_id == Auth::id()) || ($crm_details->launched_by == 0 && $crm_details->launched_by_id == Auth::id()) || in_array(201, session('permissions')) || ($sale_person && $sale_person->admin_id == Auth::id()) || (in_array(session('role_id'), [8, 9 ,10]) && (in_array($crm_details->shipment->pickup_address->city->hub_id, session('hubs')) || in_array($crm_details->shipment->consignee_city->hub_id, session('hubs')))))
-                                                    <section class="chat-app-form pb-0">
-                                                        <form class="chat-app-input row" id="chat_form">
-                                                            <fieldset
-                                                                    class="form-group position-relative has-icon-left col-9 m-0 ">
-                                                                <input type="hidden" id="last_comment_id"
-                                                                    value="{{$last_comment_id}}">
+                                                    {{-- <section class="chat-app-form pb-0"> --}}
+                                                        {{-- <form class="chat-app-input row" id="chat_form"> --}}
+                                                            {{-- <fieldset --}}
+                                                                    {{-- class="form-group position-relative has-icon-left col-9 m-0 "> --}}
+                                                                {{-- <input type="hidden" id="last_comment_id" --}}
+                                                                    {{-- value="{{$last_comment_id}}"> --}}
                                                                 {{--<input type="text" class="form-control" id="chat_input"--}}
                                                                     {{--placeholder="Type your message">--}}
-                                                                <textarea  id="chat_input" class="form-control height-200 summernote" placeholder="Type your message" @if($crm_details->case_nature_id != 3) @if(($crm_details->shipment->shipment_type == 1 && session('department_id') == 8)) disabled @endif @endif></textarea>
-                                                            </fieldset>
-                                                            <div class="display-inline-block col-3">
+                                                                {{-- <textarea  id="chat_input" class="form-control height-200 summernote" placeholder="Type your message" @if($crm_details->case_nature_id != 3) @if(($crm_details->shipment->shipment_type == 1 && session('department_id') == 8)) disabled @endif @endif></textarea> --}}
+                                                            {{-- </fieldset> --}}
+                                                            {{-- <div class="display-inline-block col-3">
                                                                 <fieldset
                                                                         class="form-group has-icon-left m-0 mb-1 ml-2">
                                                                     <button id="chat_send" type="button"
@@ -516,9 +490,9 @@
                                                         @if($crm_details->case_nature_id == 4 && (session('role_id') == 1 || in_array(543, session('permissions'))))
                                                             <label><i>Please select checkbox next to Shipper button to send the comment via email to shipper.</i></label>
                                                         @endif
-                                                    </section>
+                                                    </section> --}}
                                                 <div class="row justify-content-center mt-1">
-                                                    <div class="col-2">
+                                                    {{-- <div class="col-2">
                                                         <button class="btn btn-primary"><a class="white" href="{{route('admin.crm.claim.product_image', ['id' => $crm_details->id])}}" target="_blank">View Product</a></button>
                                                     </div>
                                                     <div class="col-2">
@@ -526,7 +500,7 @@
                                                     </div>
                                                     <div class="col-3">
                                                         <button class="btn btn-social btn-primary mb-1 ml-1" type="button" id="image_upload_btn"><span class="la la-picture-o"></span>Attachment Upload</button>
-                                                    </div>
+                                                    </div> --}}
                                                     <div class="row">
                                                     @if ($crm_details->damage_product_picture != null && $crm_details->product_packaging_picture != null && $crm_details->actual_product_picture != null)
                                                     <div class="col-3 mr-2">

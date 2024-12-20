@@ -988,10 +988,14 @@
                                         $count = $count + 1;
                                         shipment += '<tr>';
                                         shipment += '<td>' + $count + '</td>';
-                                        if (crm_request.status_id === 1 || crm_request.status_id === 5) {
-                                            shipment += '<td>' + crm_request.status + ' (' + crm_request.id + ')</td>';
-                                        }
-                                        else {
+                                        if (crm_request.status_id === 1 || crm_request
+                                            .status_id === 5) {
+                                            shipment += '<td>' + crm_request.status +
+                                                '(<a class="btn btn-sm btn-outline-info align-middle" href="' +
+                                                complain_route + crm_request.id +
+                                                '" target="_blank">(' + crm_request.id +
+                                                ')</a>)</td>';
+                                        } else {
                                             shipment += '<td>' + crm_request.status + '</td>';
                                         }
                                         shipment += '<td>' + crm_request.created_at + '</td>';
@@ -1151,34 +1155,34 @@
             });
 
         });
-        // $('#tracking').on('click', '.delivery_note_print', function() {
-        //     id = $(this).attr('data-id');
-        //     $.ajax({
-        //             url: '{!! route('admin.delivery.receive.print') !!}',
-        //             method: 'POST',
-        //             data: {
-        //                 'id': id,
-        //                 '_token': '{{ csrf_token() }}'
-        //             }
-        //         })
-        //         .done(function(data) {
-        //             var tab = window.open('', '_blank');
+        $('#tracking').on('click', '.delivery_note_print', function() {
+            id = $(this).attr('data-id');
+            $.ajax({
+                    url: '{!! route('retail.tracking.print') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                .done(function(data) {
+                    var tab = window.open('', '_blank');
 
-        //             if (!tab) {
-        //                 swal({
-        //                     title: 'Popup Blocker Enabled!',
-        //                     text: 'Please add this site to your exception list.',
-        //                     icon: 'error',
-        //                     closeOnClickOutside: false,
-        //                     closeOnEsc: false
-        //                 });
-        //             } else {
-        //                 tab.document.write(data);
-        //                 tab.document.close();
-        //                 tab.focus();
-        //             }
-        //         });
-        // });
+                    if (!tab) {
+                        swal({
+                            title: 'Popup Blocker Enabled!',
+                            text: 'Please add this site to your exception list.',
+                            icon: 'error',
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+                    } else {
+                        tab.document.write(data);
+                        tab.document.close();
+                        tab.focus();
+                    }
+                });
+        });
         $('#tracking').on('click', '.rider_information', function() {
                 id = $(this).attr('data-id');
                 var showRiderResponseBtn = $(this).attr('data-showRiderRespone');
