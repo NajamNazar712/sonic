@@ -41,14 +41,14 @@ class ApolloShipmentCronController extends Controller
         if($journeys->isNotEmpty()) {
 
             $client = new \GuzzleHttp\Client([
-                'base_uri' => env('APOLLO_API_URL'),
+                'base_uri' => rtrim(env('APOLLO_API_URL'), '/'),
                 'http_errors' => FALSE,
                 'connect_timeout' => 60,
                 'timeout' => 60
             ]);
 
             try {
-                $response = $client->post('/sonic/shipments/journeys/bulk-create', [
+                $response = $client->post('sonic/shipments/journeys/bulk-create', [
                     'json' => [
                         'journeys' => $journeys,
                     ]
