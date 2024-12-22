@@ -539,9 +539,7 @@ class DeliveryController extends Controller
                     return '-';
                 }
             })->editColumn('entry_method', function ($shipment) {
-                return $shipment->entry_method === null
-                    ? 'Not Scanned'
-                    : ($shipment->entry_method == 1 ? 'Scanned' : 'Manual');
+                return  ($shipment->entry_method == 1 ? 'Scanned' : 'Manual');
             })->rawColumns(['tracking_number_link','status_date','action']);
 
 

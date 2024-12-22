@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+
 use App\Http\Models\ZoneCitiesGst;
 use App\MakePaymentTempTable;
 use App\ShipmentAdditionalCharges;
@@ -170,7 +171,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
         return $amount_in_words;
     }
 
-    static private function international_gst()
+    static public function international_gst()
     {
         $gst_charges = GlobalSettings::where('type', 'international_gst_rate');
         if ($gst_charges->exists()) {
@@ -181,7 +182,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
         }
     }
 
-    static private function gst($zone_id,$city_id = Null)
+    static public function gst($zone_id,$city_id = Null)
     {
         $zone = Zone::find($zone_id);
         if (!is_null($city_id) && $city_id !== '') {
@@ -4452,25 +4453,38 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
 
         if ($shipment->exists()) {
             $shipment = $shipment->first();
+            $arrival_charges_applied = ShipmentAdditionalCharges::check_additional_charges($shipment->id,true,false,false);
+
 //            [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 44, 45, 46]
             if (!in_array($shipment->shipper_status_id, [32, 33, 34, 35, 36, 37, 38, 46])) {
                 $message = '';
                 $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment->id);
-
+                if($arrival_charges_applied){
+                    $pending_payment_shipment = $pending_payment_shipment->where('type',3);
+                }
                 if ($pending_payment_shipment->exists()) {
                     $message = 'Shipment\'s payment is pending or already processed';
                 } else {
                     $done_payment_shipment = DonePaymentShipment::where('shipment_id', $shipment->id);
+                    if($arrival_charges_applied){
+                        $done_payment_shipment = $done_payment_shipment->where('type',3);
+                    }
                     if ($done_payment_shipment->exists()) {
                         $message = 'Shipment\'s payment is pending or already processed';
                     } else {
                         $account_type_id = $shipment->user->account_type_id;
                         if ($account_type_id == 2) {
                             $pending_invoice_shipment = PendingInvoiceShipment::where('shipment_id', $shipment->id);
+                            if($arrival_charges_applied){
+                                $pending_invoice_shipment = $pending_invoice_shipment->where('type',3);
+                            }
                             if ($pending_invoice_shipment->exists()) {
                                 $message = 'A Invoice Payment of given Shipment is in Pending';
                             } else {
                                 $invoice_shipment = InvoiceShipment::where('shipment_id', $shipment->id);
+                                if($arrival_charges_applied){
+                                    $invoice_shipment = $invoice_shipment->where('type',3);
+                                }
 
                                 if ($invoice_shipment->exists()) {
                                     $message = 'A Invoice Payment of given Shipment has already been Processed';
@@ -4546,8 +4560,10 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
 
         $fuel_result = ShipmentChargesController::calculate_fuel_surcharge($shipment->user->account_type_id, $shipment->user_id, $shipment->shipping_mode_id, $weight_result['weight_charges']);
 
-        if ($fuel_result && $weight_result) {
-            $new_charges = $weight_result['weight_charges'] + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $fuel_result['fuel_surcharge'] + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->packaging_material_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->packaging_charges;
+        if ($fuel_result || $weight_result) {
+            $weight_charges = isset($weight_result['weight_charges']) ? $weight_result['weight_charges'] : 0;
+            $fuel_surcharge = isset($fuel_result['fuel_surcharge'] ) ? $fuel_result['fuel_surcharge']  : 0;
+            $new_charges = $weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->packaging_material_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->packaging_charges;
 
             return response()->json(['status' => 1, 'new_charges' => $new_charges]);
         } else {
@@ -4576,6 +4592,8 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             $replacement_weight = $request->input('replacement_weight');
         }
         $old_shipment_weight = $shipment->actual_weight;
+        $arrival_charges_applied = ShipmentAdditionalCharges::check_additional_charges($shipment->id,true,false,false);
+
 
         if ($request->has('replacement_checkbox')) {
             $shipment->actual_weight = $weight;
@@ -4591,8 +4609,12 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
         ShipmentChargesController::faf_charges($shipment_id);
         $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment_id);
         $shipment = Shipment::find($shipment_id);
-        $new_weight_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->packaging_material_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->packaging_charges+$faf_charges;
 
+        if($arrival_charges_applied){
+            $new_weight_charges = $shipment->weight_charges + $shipment->fuel_surcharge +$faf_charges;
+        }else{
+            $new_weight_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->packaging_material_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->packaging_charges+$faf_charges;
+        }
         $change_shipment_weight = new ChangeShipmentWeightLog();
 
         $change_shipment_weight->shipment_id = $shipment->id;
@@ -4605,8 +4627,15 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
 
         $adjustment_amount = $previous_weight_charges - $new_weight_charges;
 
-        $pending_payment = PendingPaymentShipment::where('shipment_id', $shipment->id);
-
+        $account_type_id = $shipment->user->account_type_id;
+        if($account_type_id == 1){
+            $pending_payment = PendingPaymentShipment::where('shipment_id', $shipment->id);
+        }else{
+            $pending_payment = PendingInvoiceShipment::where('shipment_id', $shipment->id);
+        }
+        if($arrival_charges_applied){
+            $pending_payment = $pending_payment->where('type',3);
+        }
         if ($pending_payment->exists()) {
             $pending_payment = $pending_payment->first();
 
@@ -4621,7 +4650,15 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
 
             self::add_adjustment($shipment->id, $adjustment_amount, 'Change Shipment Weight Adjustment', 12, $new_weight_charges);
         } else {
-            $done_payment = DonePaymentShipment::where('shipment_id', $shipment->id);
+            $account_type_id = $shipment->user->account_type_id;
+            if($account_type_id == 1){
+                $done_payment = DonePaymentShipment::where('shipment_id', $shipment->id);
+            }else{
+                $done_payment = InvoiceShipment::where('shipment_id', $shipment->id);
+            }
+            if($arrival_charges_applied){
+                $done_payment = $done_payment->where('type',3);
+            }
             if ($done_payment->exists()) {
                 $done_payment = $done_payment->first();
 
@@ -4750,8 +4787,12 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                         if ($shipment->booking_type_id == 2) {
                             continue;
                         }
-
-                        $previous_weight_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->packaging_material_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->packaging_charges+$faf_charges_old;
+                        $arrival_charges_applied = ShipmentAdditionalCharges::check_additional_charges($shipment->id,true,false,false);
+                        if($arrival_charges_applied){
+                            $previous_weight_charges = $shipment->weight_charges + $shipment->fuel_surcharge +$faf_charges_old;
+                        }else{
+                            $previous_weight_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->packaging_material_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->packaging_charges+$faf_charges_old;
+                        }
 
                         if ($shipment->actual_weight == null) {
                             return redirect()->route('admin.finance.change_shipment_weight.index')->with('error', 'Shipment is not arrived yet so weight can not be changed!');
@@ -4769,7 +4810,11 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                         ShipmentChargesController::faf_charges($shipment_id);
                         $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment_id);
                         $shipment = $shipment->refresh();
-                        $new_weight_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->packaging_material_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->packaging_charges+$faf_charges;
+                        if($arrival_charges_applied){
+                            $new_weight_charges = $shipment->weight_charges + $shipment->fuel_surcharge +$faf_charges;
+                        }else{
+                            $new_weight_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->packaging_material_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->packaging_charges+$faf_charges;
+                        }
 
                         $change_shipment_weight = new ChangeShipmentWeightLog();
 
@@ -4783,7 +4828,15 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
 
                         $adjustment_amount = $previous_weight_charges - $new_weight_charges;
 
-                        $pending_payment = PendingPaymentShipment::where('shipment_id', $shipment->id);
+                        $account_type_id = $shipment->user->account_type_id;
+                        if($account_type_id == 1){
+                            $pending_payment = PendingPaymentShipment::where('shipment_id', $shipment->id);
+                        }else{
+                            $pending_payment = PendingInvoiceShipment::where('shipment_id', $shipment->id);
+                        }
+                        if($arrival_charges_applied){
+                            $pending_payment = $pending_payment->where('type',3);
+                        }
 
                         if ($pending_payment->exists()) {
                             $pending_payment = $pending_payment->first();
@@ -4798,8 +4851,17 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                             $adjustment_amount += $previous_gst - $new_gst;
 
                             self::add_adjustment($shipment->id, $adjustment_amount, 'Change Shipment Weight Adjustment', 12, $new_weight_charges);
+
                         } else {
-                            $done_payment = DonePaymentShipment::where('shipment_id', $shipment->id);
+                            $account_type_id = $shipment->user->account_type_id;
+                            if($account_type_id == 1){
+                                $done_payment = DonePaymentShipment::where('shipment_id', $shipment->id);
+                            }else{
+                                $done_payment = InvoiceShipment::where('shipment_id', $shipment->id);
+                            }
+                            if($arrival_charges_applied){
+                                $done_payment = $done_payment->where('type',3);
+                            }
                             if ($done_payment->exists()) {
                                 $done_payment = $done_payment->first();
 
@@ -4816,8 +4878,6 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                                 self::add_adjustment($shipment->id, $adjustment_amount, 'Change Shipment Weight Adjustment', 12, $new_weight_charges);
                             }
                         }
-
-
                         $tracking_numbers['Row #' . $row_id] = $tracking;
 
                     }
@@ -4852,18 +4912,17 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
         $messages = [
             'required' => ':attribute is Required.',
             'integer' => ':attribute must be an Integer.',
-            'exists' => 'Given :attribute is Invalid.',
+            'exists' => 'Given :attribute is Invalid / not ready for update.',
         ];
-
         $rules = [
             'tracking_number' => ['required', 'integer', Rule::exists('shipments', 'tracking_number')->where(function ($query) {
-                // $query->whereNotIn('shipper_status_id', [32, 33, 34, 35, 36, 37, 38, 46]);
-                $query->whereNotIn('shipper_status_id', [32, 33, 34, 35, 46]);
+                $query->whereNotIn('shipper_status_id', [32, 33, 34, 35, 36, 37, 38, 46]);
             })],
             'actual_weight' => ['required', 'numeric', 'between:0.01,100000'],
         ];
 
         $fields = [0 => 'tracking_number', 1 => 'actual_weight'];
+
 
         if ($file = $request->file('shipments')) {
             $spreadsheet = IOFactory::createReaderForFile($file);
@@ -4874,6 +4933,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
 
             if (isset($spreadsheet)) {
                 $header_correct = TRUE;
+
                 foreach ($spreadsheet[0] as $index => $header_value) {
                     if ($index == 2) {
                     } elseif (!isset($header[$index]) || $header_value != $header[$index]) {
@@ -4881,6 +4941,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                         break;
                     }
                 }
+
                 if (!$header_correct) {
                     return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
                 } else {
@@ -4892,6 +4953,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             if ($trackingNumberCount > 500) {
                 return redirect()->back()->with('error', 'Number of tracking numbers exceeds 500.');
             }
+
 
             if (!empty($spreadsheet) || !isset($spreadsheet)) {
                 $rows = array();
@@ -4936,9 +4998,9 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                         if (!Shipment::where('tracking_number', $row['tracking_number'])->exists()) {
                             $errors['Row #' . $row_id][] = 'Shipment is already updated from Booked Status #' . $row['tracking_number'];
                         }
-                        // if (Shipment::where('tracking_number', $row['tracking_number'])->where('booking_type_id', 2)->exists()) {
-                        //     $errors['Row #' . $row_id][] = 'Replacement shipment can not updated from excel #' . $row['tracking_number'];
-                        // }
+                        if (Shipment::where('tracking_number', $row['tracking_number'])->where('booking_type_id', 2)->exists()) {
+                            $errors['Row #' . $row_id][] = 'Replacement shipment can not updated from excel #' . $row['tracking_number'];
+                        }
                     }
                 }
                 if (empty($errors)) {
@@ -4950,44 +5012,60 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                         $shipment = Shipment::where('tracking_number', $tracking)->first();
                         $shipment_id = $shipment->id;
                         $replacement_weight = null;
-
+                        $faf_charges_old = ShipmentAdditionalCharges::fetch_faf_charges($shipment_id);
                         if ($shipment->booking_type_id == 2) {
                             continue;
                         }
-
-                        $previous_weight_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->packaging_material_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->packaging_charges;
+                        $arrival_charges_applied = ShipmentAdditionalCharges::check_additional_charges($shipment->id,true,false,false);
+                        if($arrival_charges_applied){
+                            $previous_weight_charges = $shipment->weight_charges + $shipment->fuel_surcharge +$faf_charges_old;
+                        }else{
+                            $previous_weight_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->packaging_material_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->packaging_charges+$faf_charges_old;
+                        }
 
                         if ($shipment->actual_weight == null) {
-                            return redirect()->route('admin.finance.change_shipment_weight.index')->with('error', $row['tracking_number'] . ' Shipment has not arrived yet so weight charges cannot be viewed!');
+                            return redirect()->route('admin.finance.change_shipment_weight.index')->with('error', 'Shipment is not arrived yet so weight can not be changed!');
                         }
 
                         $old_shipment_weight = $shipment->actual_weight;
 
 
-                        // $shipment->actual_weight = $weight;
-                        // $shipment->save();
+                        $shipment->actual_weight = $weight;
+                        $shipment->save();
 
 
                         ShipmentChargesController::weight($shipment_id);
                         ShipmentChargesController::fuel_surcharge($shipment_id);
                         ShipmentChargesController::faf_charges($shipment_id);
-
+                        $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment_id);
                         $shipment = $shipment->refresh();
-                        $new_weight_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->packaging_material_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->packaging_charges;
+                        if($arrival_charges_applied){
+                            $new_weight_charges = $shipment->weight_charges + $shipment->fuel_surcharge +$faf_charges;
+                        }else{
+                            $new_weight_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->packaging_material_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->packaging_charges+$faf_charges;
+                        }
 
-                        // Disable the entry of logs on view
-                        // $change_shipment_weight = new ChangeShipmentWeightLog();
-                        // $change_shipment_weight->shipment_id = $shipment->id;
-                        // $change_shipment_weight->old_weight = $old_shipment_weight;
-                        // $change_shipment_weight->new_weight = $weight;
-                        // $change_shipment_weight->admin_id = Auth::id();
-                        // $change_shipment_weight->old_charges = $previous_weight_charges;
-                        // $change_shipment_weight->new_charges = $new_weight_charges;
-                        // $change_shipment_weight->save();
+                        $change_shipment_weight = new ChangeShipmentWeightLog();
+
+                        $change_shipment_weight->shipment_id = $shipment->id;
+                        $change_shipment_weight->old_weight = $old_shipment_weight;
+                        $change_shipment_weight->new_weight = $weight;
+                        $change_shipment_weight->admin_id = Auth::id();
+                        $change_shipment_weight->old_charges = $previous_weight_charges;
+                        $change_shipment_weight->new_charges = $new_weight_charges;
+                        $change_shipment_weight->save();
 
                         $adjustment_amount = $previous_weight_charges - $new_weight_charges;
 
-                        $pending_payment = PendingPaymentShipment::where('shipment_id', $shipment->id);
+                        $account_type_id = $shipment->user->account_type_id;
+                        if($account_type_id == 1){
+                            $pending_payment = PendingPaymentShipment::where('shipment_id', $shipment->id);
+                        }else{
+                            $pending_payment = PendingInvoiceShipment::where('shipment_id', $shipment->id);
+                        }
+                        if($arrival_charges_applied){
+                            $pending_payment = $pending_payment->where('type',3);
+                        }
 
                         if ($pending_payment->exists()) {
                             $pending_payment = $pending_payment->first();
@@ -5002,8 +5080,17 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                             $adjustment_amount += $previous_gst - $new_gst;
 
                             self::add_adjustment($shipment->id, $adjustment_amount, 'Change Shipment Weight Adjustment', 12, $new_weight_charges);
+
                         } else {
-                            $done_payment = DonePaymentShipment::where('shipment_id', $shipment->id);
+                            $account_type_id = $shipment->user->account_type_id;
+                            if($account_type_id == 1){
+                                $done_payment = DonePaymentShipment::where('shipment_id', $shipment->id);
+                            }else{
+                                $done_payment = InvoiceShipment::where('shipment_id', $shipment->id);
+                            }
+                            if($arrival_charges_applied){
+                                $done_payment = $done_payment->where('type',3);
+                            }
                             if ($done_payment->exists()) {
                                 $done_payment = $done_payment->first();
 
@@ -5020,8 +5107,6 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                                 self::add_adjustment($shipment->id, $adjustment_amount, 'Change Shipment Weight Adjustment', 12, $new_weight_charges);
                             }
                         }
-
-
                         $tracking_numbers['Row #' . $row_id] = $tracking;
 
                     }
@@ -5120,8 +5205,11 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             } else {
                 return redirect()->back()->with('error', 'No Shipments in File');
             }
+
         }
+
     }
+
 
 
     static public function add_adjustment($shipment_id, $payable, $payable_remarks = '', $adjustment_type = NULL, $charges = NULL,$transaction_id = null)
@@ -12825,7 +12913,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                       <tbody>
                         <tr>
                           <td class="color primary" style="width: 150px;"><strong>Amount in Words</strong></td>
-                          <td class="color secondary">' . self::amount_to_words($total_invoice_amount[$gst]) . ' Only</td>
+                          <td class="color secondary">' . self::amount_to_words(ROUND($total_invoice_amount[$gst], 0, PHP_ROUND_HALF_DOWN)) . ' Only</td>
                         </tr>
                       </tbody>
                     </table>
@@ -18803,7 +18891,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                       <tbody>
                         <tr>
                           <td class="color primary" style="width: 150px;"><strong>Amount in Words</strong></td>
-                          <td class="color secondary">' . self::amount_to_words($total_invoice_amount) . ' Only</td>
+                          <td class="color secondary">' . self::amount_to_words(ROUND($total_invoice_amount, 0, PHP_ROUND_HALF_DOWN)) . ' Only</td>
                         </tr>
                       </tbody>
                     </table>
@@ -19348,7 +19436,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                 $valid = FALSE;
             }
             if ($valid) {
-                if($sms_charges_status == 1) {
+                if($sms_charges_status == 1 && $type != 3 ) {
                     $shipment_sms_count = 0;
                     $shipment_sms = ShipmentSmsLogs::select('notification_id', DB::raw('count(*) as count'))->where('shipment_id' , $shipment->id)->where('paid', 0)->groupBy('notification_id')->get();
 
@@ -19383,7 +19471,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                         }else{
                             $pending_payment->total_shipments = $pending_payment->total_shipments + 1;
                             if($pending_payment->arrival_shipment -1 == 0 && $pending_payment->arrival_shipment < $pending_payment->total_shipments){
-                                $pending_payment->arrival_shipment =  $pending_payment->total_shipments;
+                                $pending_payment->arrival_shipment =  isset($pending_payment->pending_payment_shipments_arrival) ? count($pending_payment->pending_payment_shipments_arrival) : $pending_payment->total_shipments;
                             }
                         }
                         if ($type == 0) {
@@ -20875,7 +20963,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             }
 
             if ($valid) {
-                if ($sms_charges_status == 1) {
+                if ($sms_charges_status == 1 && $type != 3) {
                     $shipment_sms_count = 0;
                     $shipment_sms = ShipmentSmsLogs::select('notification_id', DB::raw('count(*) as count'))->where('shipment_id', $shipment->id)->where('paid', 0)->groupBy('notification_id')->get();
 

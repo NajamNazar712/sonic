@@ -15710,9 +15710,7 @@ class AdminReportsController extends Controller
                 }
             })
             ->editColumn('entry_method', function ($shipment) {
-                return $shipment->entry_method === null
-                    ? 'Not Scanned'
-                    : ($shipment->entry_method == 1 ? 'Scanned' : 'Manual');
+                return  ($shipment->entry_method == 1 ? 'Scanned' : 'Manual');
             })
             ->addColumn('total_attempt', function ($shipment) {
                 $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment->shId);
@@ -15846,13 +15844,9 @@ class AdminReportsController extends Controller
                     }
                 }
 
-                $rowArray['entry_method'] = $rowArray['entry_method'] === null
-                    ? 'Not Scanned'
-                    : ($rowArray['entry_method'] == 1 ? 'Scanned' : 'Manual');
+                $rowArray['entry_method'] =  ($rowArray['entry_method'] == 1 ? 'Scanned' : 'Manual');
 
-                $filteredArray = [];
-
-                // Iterate over $fieldsToRetrieve to maintain sequence
+                $filteredArray = [];// Iterate over $fieldsToRetrieve to maintain sequence
                 foreach ($fieldsToRetrieve as $field) {
                     // Check if the field exists in the row array
                     if (array_key_exists($field, $rowArray)) {

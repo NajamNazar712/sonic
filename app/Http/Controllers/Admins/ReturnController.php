@@ -127,15 +127,15 @@ class ReturnController extends Controller
             // ->leftJoin('bolt_undelivered_reason_map_counts as burmc','burmc.shipment_id','=','shipments.id')
             ->leftJoin('delivery_note_shipments', 'delivery_note_shipments.shipment_id', '=', 'shipments.id')
             ->leftJoin('delivery_notes', 'delivery_notes.id', '=', 'delivery_note_shipments.delivery_note_id')
-            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
-            ->join('cities as h', 'dc.hub_id', '=', 'h.id')
+            ->leftJoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->leftJoin('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->leftJoin('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->leftJoin('cities as h', 'dc.hub_id', '=', 'h.id')
             ->leftJoin('zones as z', 'dc.zone_id', '=', 'z.id')
             ->leftJoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
             ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
 
-            ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
+            ->leftJoin('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
             ->leftjoin('consignee_address_areas as cas', 'cas.shipment_id', '=', 'shipments.id')
             ->leftjoin('city_areas as ca', 'ca.id', '=', 'cas.city_area_id')
             ->leftJoin('shipments_journey', function ($join) use ($connection) {
@@ -188,7 +188,7 @@ class ReturnController extends Controller
                         DB::connection($connection)->raw('(select max(id) from crm_requests where crm_requests.shipment_id = shipments.id)')
                     );
             })
-            ->leftjoin('rv_shipment_assign_agents as new_ras', function ($join) use ($connection) {
+            ->leftJoin('rv_shipment_assign_agents as new_ras', function ($join) use ($connection) {
                 $join->on('new_ras.shipment_id', '=', 'shipments.id')
                     ->where(
                         'new_ras.id',

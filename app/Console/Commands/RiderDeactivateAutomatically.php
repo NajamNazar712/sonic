@@ -90,7 +90,7 @@ class RiderDeactivateAutomatically extends Command
                     $riders = Rider::wherein("id", $data)->get();
                     foreach ($riders as $key => $datum) {
                         $data_set = Rider::find($datum->id);
-                        if($data_set->rider_main_category_id == 3) {
+                        if($data_set->rider_main_category_id == 3 || $data_set->rider_category_id == 6 ) {
                             unset($data[$key]);
                         } else {
                             $data_set->status = 0;
