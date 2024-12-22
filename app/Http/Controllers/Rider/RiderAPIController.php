@@ -149,7 +149,7 @@ use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use App\Http\Controllers\EmployeeAttendanceController;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\AdminPickupsController;
-use App\http\Models\Admin\ReturnReasonMandatoryShipper;
+use App\Http\Models\Admin\ReturnReasonMandatoryShipper;
 use App\Http\Models\Rider\RiderReturnDeliveryActionLog;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Rider\RiderReturnNoteRequestShipment;
