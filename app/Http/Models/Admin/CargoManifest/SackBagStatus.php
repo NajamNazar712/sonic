@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\models\admin\cargomanifest;
+namespace app\Http\Models\Admin\cargomanifest;
 
 use Illuminate\Database\Eloquent\Model;
 
