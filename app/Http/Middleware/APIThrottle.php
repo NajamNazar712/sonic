@@ -3,7 +3,6 @@
 namespace App\Http\Middleware;
 
 use Illuminate\Routing\Middleware\ThrottleRequests as Middleware;
-
 use Closure;
 
 class APIThrottle extends Middleware
@@ -15,10 +14,11 @@ class APIThrottle extends Middleware
      * @param  \Closure  $next
      * @param  int|string  $maxAttempts
      * @param  float|int  $decayMinutes
+     * @param  string  $prefix
      * @return mixed
      * @throws \Illuminate\Http\Exceptions\ThrottleRequestsException
      */
-    public function handle($request, Closure $next, $maxAttempts = 60, $decayMinutes = 1)
+    public function handle($request, Closure $next, $maxAttempts = 60, $decayMinutes = 1, $prefix = '')
     {
         $key = $this->resolveRequestSignature($request);
 
@@ -33,7 +33,8 @@ class APIThrottle extends Middleware
         $response = $next($request);
 
         return $this->addHeaders(
-            $response, $maxAttempts,
+            $response,
+            $maxAttempts,
             $this->calculateRemainingAttempts($key, $maxAttempts)
         );
     }
