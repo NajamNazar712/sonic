@@ -25,7 +25,7 @@ class APIThrottle extends Middleware
         $maxAttempts = $this->resolveMaxAttempts($request, $maxAttempts);
 
         if ($this->limiter->tooManyAttempts($key, $maxAttempts)) {
-            return $this->buildException($key, $maxAttempts);
+            return $this->buildException($request, $key, $maxAttempts);
         }
 
         $this->limiter->hit($key, $decayMinutes);
@@ -33,8 +33,7 @@ class APIThrottle extends Middleware
         $response = $next($request);
 
         return $this->addHeaders(
-            $response,
-            $maxAttempts,
+            $response, $maxAttempts,
             $this->calculateRemainingAttempts($key, $maxAttempts)
         );
     }
@@ -42,11 +41,13 @@ class APIThrottle extends Middleware
     /**
      * Create a 'too many attempts' exception.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @param  string  $key
      * @param  int  $maxAttempts
-     * @return \Illuminate\Http\Exceptions\ThrottleRequestsException
+     * @param  callable|null  $responseCallback
+     * @return \Illuminate\Http\Exceptions\ThrottleRequestsException|\Illuminate\Http\JsonResponse
      */
-    protected function buildException($key, $maxAttempts)
+    protected function buildException($request, $key, $maxAttempts, $responseCallback = null)
     {
         $retryAfter = $this->getTimeUntilNextRetry($key);
 
@@ -56,6 +57,14 @@ class APIThrottle extends Middleware
             $retryAfter
         );
 
-        return response()->json(['status' => 1, 'message' => 'Too many requests!'], 200, $headers);
+        if ($responseCallback) {
+            return $responseCallback($request, $headers);
+        }
+
+        return response()->json(
+            ['status' => 1, 'message' => 'Too many requests!'],
+            429,
+            $headers
+        );
     }
 }
