@@ -10341,7 +10341,26 @@ class DeliveryController extends Controller
 
     public static function get_segment_type($table, $ids, $segment, $sub_segment, $type = null, $column)
     {
-       return 0;
+        return 0;
+//        $shipment_ids = $type === null
+//            ? DB::table($table)->whereIn($column, $ids)->pluck('shipment_id')
+//            : $ids;
+//
+//        return Shipment::whereIn('id', $shipment_ids)
+//            ->whereHas('user', function ($query) use ($segment, $sub_segment) {
+//                if (is_array($segment)) {
+//                    $query->whereIn('segment_id', $segment);
+//                } else {
+//                    $query->where('segment_id', $segment);
+//                }
+//
+//                if (is_array($sub_segment)) {
+//                    $query->whereIn('sub_segment_id', $sub_segment);
+//                } else {
+//                    $query->where('sub_segment_id', $sub_segment);
+//                }
+//            })
+//            ->count();
     }
 
 
