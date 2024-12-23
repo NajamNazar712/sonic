@@ -2437,12 +2437,12 @@ class AdminTrackingController extends Controller
                             $tracking_numbers['Row #' . $row_id] = $tracking;
                         }
 
-                        $shipments = Shipment::whereIn('id', $shipment_ids);
-                        if ($shipments->exists()) {
+                        $shipments = DB::connection('reports')->table('shipments')->whereIn('id', $shipment_ids)->get();
+                        if (count($shipments) > 0) {
                             ShipmentPosition::where('tracked_by', Auth::id())->delete();
-                            $shipments = $shipments->get();
+
                             foreach ($shipments as $shipment){
-                                                                $shipment_detail = array();
+                                $shipment_detail = array();
 
                                 $last_shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->orderBy('id', 'desc')->first();
                                 if($last_shipment_journey){
@@ -2709,7 +2709,7 @@ class AdminTrackingController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),616);
         }
 
-        $shipment_positions = ShipmentPosition::leftJoin('shipments as s','s.id','=','shipment_positions.shipment_id')
+        $shipment_positions =   DB::connection('reports')->table('shipment_positions')->leftJoin('shipments as s','s.id','=','shipment_positions.shipment_id')
         ->leftJoin('users as u','u.id','=','s.user_id')
         ->leftJoin('shipments_journey as sj','sj.shipment_id','=','shipment_positions.shipment_id')
         ->leftJoin('admins as a','a.id','=','sj.admin_id')
