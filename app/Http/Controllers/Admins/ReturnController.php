@@ -120,7 +120,7 @@ class ReturnController extends Controller
     private function shipments($type = 1)
     {
 
-        $connection = 'mysql';
+        $connection = 'reports';
 
         $shipments = DB::connection($connection)->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->leftjoin('rcp_tat_options as tat_options', 'tat_options.id', '=', 'u.rcp_tat_option_id')
