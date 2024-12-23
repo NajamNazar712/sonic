@@ -9,10 +9,20 @@
                     <h1 class="mb-1">
 
                         @php
-                            $statusCheck = in_array($crm_details['status_id'], [2, 3]);
-                            $roleCheck = session('role_id') == 1;
-                            $agentCheck = isset($crm_details->agent) && $crm_details->agent['id'] == Auth::id();
-                            $permissionCheck = is_array(session('permissions')) && in_array(185, session('permissions'));
+                            // Tag
+                            $statusCheckTag = in_array($crm_details['status_id'], [2, 3]);
+                            $roleCheckTag = session('role_id') == 1;
+                            $agentCheckTag = isset($crm_details->agent) && $crm_details->agent['id'] == Auth::id();
+                            $permissionCheckTag = is_array(session('permissions')) && in_array(185, session('permissions'));
+
+                            // Un tag
+                            $statusCheckUnTag = isset($crm_details['status_id']) && $crm_details['status_id'] == 2;
+                            $roleCheckUnTag = session('role_id') == 1;
+                            $agentCheckUnTag = isset($crm_details->agent['id']) && $crm_details->agent['id'] == Auth::id();
+                            $permissionCheckUnTag = is_array(session('permissions')) && in_array(309, session('permissions'));
+
+                            // Valid and invalid form
+                            $validFormCheckAgent = isset($crm_details->agent['id']) && $crm_details->agent['id'] == Auth::id();
                         @endphp
 
                         Request Details ({{str_pad($crm_details->id, 6, '0', STR_PAD_LEFT)}})
@@ -38,7 +48,7 @@
                                 </button>
                             @endif --}}
 
-                            @if($statusCheck && ($roleCheck || $agentCheck || $permissionCheck))
+                            @if($statusCheckTag && ($roleCheckTag || $agentCheckTag || $permissionCheckTag))
                                 <button type="button" class="btn btn-primary width-10-per" id="tag">
                                     <span class="d-none d-lg-block" style="color: white">Tag</span>
                                 </button>
@@ -50,7 +60,7 @@
                                 </button>
                             @endif --}}
 
-                            @if($statusCheck && ($roleCheck || $agentCheck || $permissionCheck))
+                            @if($statusCheckUnTag && ($roleCheckUnTag || $agentCheckUnTag || $permissionCheckUnTag))
                                 <button type="button" class="btn btn-primary width-10-per" id="un_tag">
                                     <span class="d-none d-lg-block" style="color: white">Un Tag</span>
                                 </button>
@@ -268,15 +278,12 @@
                                             </tbody>
                                         </table>
                                         <div class="row justify-content-center">
-                                            @if(session('role_id') == 1 || session('role_id') == 6 || $crm_details->agent['id'] == Auth::id() || in_array(184, session('permissions')) || ((($tag_check['crm_request_tagging_type_id'] ?? null) == 1 && ($tag_check['tagged_id'] ?? null) == $tag_permission) || (($tag_check['crm_request_tagging_type_id'] ?? null) == 2 && ($tag_check['tagged_id'] ?? null) == Auth::id()) || $escalation_tagged_check == true || (in_array(session('role_id'), [8, 9 ,10]) && (in_array($crm_details->shipment->pickup_address->city->hub_id, session('hubs')) || in_array($crm_details->shipment->consignee_city->hub_id, session('hubs'))))))
+                                            @if(session('role_id') == 1 || session('role_id') == 6 || $validFormCheckAgent || in_array(184, session('permissions')) || ((($tag_check['crm_request_tagging_type_id'] ?? null) == 1 && ($tag_check['tagged_id'] ?? null) == $tag_permission) || (($tag_check['crm_request_tagging_type_id'] ?? null) == 2 && ($tag_check['tagged_id'] ?? null) == Auth::id()) || $escalation_tagged_check == true || (in_array(session('role_id'), [8, 9 ,10]) && (in_array($crm_details->shipment->pickup_address->city->hub_id, session('hubs')) || in_array($crm_details->shipment->consignee_city->hub_id, session('hubs'))))))
                                                 <div class="text-center">
-                                                    <form id="valid_form" method="post"
-                                                          action="{{route('admin.crm.valid')}}">
+                                                    <form id="valid_form" method="post" action="{{route('admin.crm.valid')}}">
                                                         @csrf
-                                                        <input type="hidden" id="req_id" name="req_id"
-                                                               value="{{$crm_details->id}}">
-                                                        <input type="hidden" id="prev_status" name="prev_status"
-                                                               value="{{$crm_details->status_id}}">
+                                                        <input type="hidden" id="req_id" name="req_id" value="{{$crm_details->id}}">
+                                                        <input type="hidden" id="prev_status" name="prev_status" value="{{$crm_details->status_id}}">
                                                         @if($crm_details['status_id'] != 3)
                                                             @if($crm_details['status_id'] == 1 ||$crm_details['status_id'] == 5)
                                                                 <button id="valid" type="submit"class="btn btn-success mr-1">
@@ -290,12 +297,12 @@
                                                                         <span class="d-none d-lg-block">Resolve</span>
                                                                     </button>
                                                                 @endif --}}
-                                                                @if(session('role_id') == 1 || session('role_id') == 6 || $crm_details->agent['id'] == Auth::id() || in_array(184, session('permissions')))
+                                                                @if(session('role_id') == 1 || session('role_id') == 6 || $validFormCheckAgent || in_array(184, session('permissions')))
                                                                     <button id="valid" type="submit" class="btn btn-success mr-1">
                                                                         <span class="d-none d-lg-block">Resolve</span>
                                                                     </button>
                                                                 @endif
-                                                            @elseif($crm_details['status_id'] == 4 && (in_array(186, session('permissions')) || session('role_id') == 1 || session('role_id') == 6 || $crm_details->agent['id'] == Auth::id()))
+                                                            @elseif($crm_details['status_id'] == 4 && (in_array(186, session('permissions')) || session('role_id') == 1 || session('role_id') == 6 || $validFormCheckAgent))
                                                             <input type="hidden" id="valid_close_reason" name="valid_close_reason"
                                                                    value="0">    
                                                             <button id="valid" type="submit"
@@ -309,7 +316,7 @@
                                                     </form>
                                                 </div>
                                             @endif
-                                            @if(session('role_id') == 1 || session('role_id') == 6 || $crm_details->agent['id'] == Auth::id() || in_array(184, session('permissions')))
+                                            @if(session('role_id') == 1 || session('role_id') == 6 || $validFormCheckAgent || in_array(184, session('permissions')))
                                                 <div class="text-center">
                                                     <form id="invalid_form" method="post"
                                                           action="{{route('admin.crm.invalid')}}">
