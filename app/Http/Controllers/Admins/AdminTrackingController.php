@@ -2439,9 +2439,25 @@ class AdminTrackingController extends Controller
                         }
 
                         // $shipments = DB::connection('reports')->table('shipments')->whereIn('id', $shipment_ids)->get();
-                        $shipments = Shipment::with(['pickup_address.city', 'consignee_city'])
-                            ->whereIn('id', $shipment_ids)
-                            ->get();
+
+                        // $shipments = Shipment::with(['pickup_address.city', 'consignee_city'])
+                        //     ->whereIn('id', $shipment_ids)
+                        //     ->get();
+
+                        $shipments = DB::connection('reports')
+                            ->table('shipments')
+                            ->whereIn('shipments.id', $shipment_ids)
+                            ->leftJoin('user_shipping_infos', 'shipments.pickup_address_id', '=', 'user_shipping_infos.id')
+                            ->leftJoin('cities as consignee_city', 'shipments.consignee_city_id', '=', 'consignee_city.id')
+                            ->leftJoin('cities as pickup_city', 'user_shipping_infos.city_id', '=', 'pickup_city.id')
+                            ->select(
+                                'shipments.*',
+                                'user_shipping_infos.*',
+                                'pickup_city.name as pickup_city_name',
+                                'consignee_city.name as consignee_city_name'
+                            )
+                        ->get();
+
                         if (count($shipments) > 0) {
                             ShipmentPosition::where('tracked_by', Auth::id())->delete();
 
@@ -2655,8 +2671,12 @@ class AdminTrackingController extends Controller
                                 $shipment_position = new ShipmentPosition();
                                 $shipment_position->shipment_id = $shipment->id;
                                 $shipment_position->tracking_number = $shipment->tracking_number;
-                                $shipment_position->origin = $shipment->pickup_address->city->name;
-                                $shipment_position->destination = $shipment->consignee_city->name;
+                                // $shipment_position->origin = $shipment->pickup_address->city->name;
+                                // $shipment_position->destination = $shipment->consignee_city->name;
+
+                                $shipment_position->origin = $shipment->pickup_city_name;
+                                $shipment_position->destination = $shipment->consignee_city_name;                            
+
                                 $shipment_position->status = $last_shipment_journey->shipment_status_shipper->name ?? '-';
                                 $shipment_position->status_at =  Carbon::parse($last_shipment_journey->created_at ?? null)->format('Y-m-d H:i:s') ?? '-';
                                 $shipment_position->status_by = $shipment_journey_status_by;
