@@ -1344,6 +1344,8 @@ class DeliveryController extends Controller
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->leftjoin('zones as z', 'oc.zone_id', '=', 'z.id')
             ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_notes.updated_by')
+            ->leftjoin('delivery_note_shipments', 'delivery_note_shipments.delivery_note_id', 'delivery_notes.id')
+            ->leftjoin('shipments', 'delivery_note_shipments.shipment_id', '=', 'shipments.id') // Join with shipments table
             ->select(
                 'delivery_notes.id as delivery_note',
                 'delivery_notes.id as delivery_note_id',
@@ -1358,7 +1360,6 @@ class DeliveryController extends Controller
                 'delivery_notes.shipments_count',
                 'delivery_notes.shipments_count as shipments_count_link',
                 'delivery_notes.pending_status',
-                'delivery_notes.created_at',
                 'delivery_notes.last_updated_at',
                 'ad.name as updated_by',
                 'delivery_notes.special_rider',
@@ -1373,10 +1374,12 @@ class DeliveryController extends Controller
                 'rider_types.name as rt',
                 'delivery_notes.created_via_app as created_via',
                 'riders.trax_id as rider_trax_id',
-                'cas.name as city_area_name'
-            )
-            ->where('delivery_notes.status', 0);
+                'cas.name as city_area_name',
+                DB::raw('SUM(shipments.actual_weight) as total_weight') // Calculate total weight
 
+            )
+            ->where('delivery_notes.status', 0)
+            ->groupBy('delivery_notes.id'); // Group by delivery_note_id to calculate SUM
 
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
@@ -1498,10 +1501,6 @@ class DeliveryController extends Controller
                 } else {
                     $query->whereRaw('false');
                 }
-            })->addColumn('total_weight', function($result){
-                $shipments = DeliveryNoteShipment::where('delivery_note_id',$result->delivery_note)->pluck('shipment_id')->toArray();
-                $total_weight = Shipment::whereIn('id',$shipments)->sum('actual_weight');
-                return $total_weight;
             })
             ->addColumn('excel_ecom_cod', function($result){
                 $count = 0;
@@ -7168,9 +7167,11 @@ class DeliveryController extends Controller
             ->leftjoin('zones as zn', 'zn.id', '=', 'c.zone_id')
             ->leftjoin('hbl_konnect_transaction_delivery_notes as hktdn', 'hktdn.delivery_note_id', '=', 'delivery_notes.id')
             ->leftjoin('one_link_out_for_delivery_shipment_payments as one_link_cash', 'delivery_notes.id', '=', 'one_link_cash.delivery_note_id')
+            ->leftjoin('delivery_note_shipments', 'delivery_note_shipments.delivery_note_id', 'delivery_notes.id')
+            ->leftjoin('shipments', 'delivery_note_shipments.shipment_id', '=', 'shipments.id') // Join with shipments table
 
 
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.trax_id as rider_trax_id','riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at','delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount','delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.status', 'delivery_notes.pending_status','delivery_notes.cash_collection_status', 'delivery_notes.dncc_status', 'delivery_notes.last_updated_at', 'delivery_notes.cash_collected_by','ccb.name as cash_collected', 'delivery_notes.cash_collected_at', 'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone','rdns.status as updated_via_app', 'rd.id as rider_delivery_id', 'rd.delivered_status as delivered_status', 'rd.picture_path as picture_path', 'rt.name as rider_type','zn.name as zone_name', 'hktdn.transactions_amount as transactions_amount', 'hktdn.cash_amount as cash_amount', 'delivery_notes.one_link_payment_count','delivery_notes.created_via_app as created_via', 'riders.operation_rider_id', 'ca.name as area','one_link_cash.transaction_amount as one_link_amount'])
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.trax_id as rider_trax_id','riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at','delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount','delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.status', 'delivery_notes.pending_status','delivery_notes.cash_collection_status', 'delivery_notes.dncc_status', 'delivery_notes.last_updated_at', 'delivery_notes.cash_collected_by','ccb.name as cash_collected', 'delivery_notes.cash_collected_at', 'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone','rdns.status as updated_via_app', 'rd.id as rider_delivery_id', 'rd.delivered_status as delivered_status', 'rd.picture_path as picture_path', 'rt.name as rider_type','zn.name as zone_name', 'hktdn.transactions_amount as transactions_amount', 'hktdn.cash_amount as cash_amount', 'delivery_notes.one_link_payment_count','delivery_notes.created_via_app as created_via', 'riders.operation_rider_id', 'ca.name as area','one_link_cash.transaction_amount as one_link_amount', DB::raw('SUM(shipments.actual_weight) as total_weight')])
 
             ->where('riders.operation_rider_id', $request->get('operation_rider_id'))
             ->when($request->get('delivery_note_numbers'),function($data) use ($deliveryNoteNumbers){
@@ -7199,11 +7200,6 @@ class DeliveryController extends Controller
                 {
                     return (['link' => '<span id="myButton">' . $amount . '</span>', 'sum' => $amount]);
                 }
-            })
-            ->addColumn('total_weight', function($deliveries){
-                $shipments = DeliveryNoteShipment::where('delivery_note_id',$deliveries->delivery_note)->pluck('shipment_id')->toArray();
-                $total_weight = Shipment::whereIn('id',$shipments)->sum('actual_weight');
-                return $total_weight;
             })
             ->editColumn('fintech_amount_percent', function ($deliveries) {
                 $dncc_amount = $deliveries->amount;
