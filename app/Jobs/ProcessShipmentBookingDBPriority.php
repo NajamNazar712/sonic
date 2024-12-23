@@ -488,16 +488,22 @@ class ProcessShipmentBookingDBPriority implements ShouldQueue
 
             // Maintaining shipper segment logs on booking when different origin and destination
             try {
-                if ($pickup_city_id != $consignee_city_id)
-                {
-                    ShipperSegmentLogs::create([
-                        'shipment_id' => $shipment_id,
-                        'segment_id' => auth()->user()->segment_id,
-                        'sub_segment_id' => auth()->user()->sub_segment_id
-                    ]);
+                $user_id = Shipment::where('id', $shipment_id)->select('user_id')->first();
+                if ($user_id) {
+                    if ($pickup_city_id != $consignee_city_id){
+                        ShipperSegmentLogs::create([
+                            'shipment_id' => $shipment_id,
+                            'segment_id' => auth()->user()->segment_id,
+                            'sub_segment_id' => auth()->user()->sub_segment_id
+                        ]);
+                    } else {
+                        Log::warning('No segment information found for user ' . $user_id->user_id . ' on shipment ' . $shipment_id . ' from Priority Shipper portal excel upload');
+                    }
+                } else {
+                    Log::warning('No user found for shipment from Priority Shipper portal excel upload ' . $shipment_id);
                 }
             } catch (\Exception $e) {
-                Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
+                Log::error('Error creating shipper segment log from excel booking ' . $shipment_id . ': ' . $e->getMessage());
             }
         }
     }
