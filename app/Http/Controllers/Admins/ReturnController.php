@@ -5279,7 +5279,8 @@ class ReturnController extends Controller
                     $return_note_image = new ReturnNoteImage();
                     $return_note_image->return_note_id = $return_note_id;
                     $return_note_image->image = $generated_image_name;
-                    $return_note_image->user_id = $request->shipper_name[$index];
+                    $return_note_image->user_id = $request->shipper_name ? $request->shipper_name[$index] : NULL;
+                    // $return_note_image->user_id = $request->shipper_name[$index];
                     $return_note_image->save();
                     $flag = TRUE;
                 }
