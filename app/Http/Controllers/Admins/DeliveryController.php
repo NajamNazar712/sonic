@@ -10333,32 +10333,30 @@ class DeliveryController extends Controller
         }
     }
 
-
-
-    public static function get_segment_type($table, $ids, $segment, $sub_segment, $type = null, $column)
+    public static function get_segment_type($table, $ids, $segment, $subSegment, $type = null, $column)
     {
-        return 0;
-//        $shipment_ids = $type === null
-//            ? DB::table($table)->whereIn($column, $ids)->pluck('shipment_id')
-//            : $ids;
-//
-//        return Shipment::whereIn('id', $shipment_ids)
-//            ->whereHas('user', function ($query) use ($segment, $sub_segment) {
-//                if (is_array($segment)) {
-//                    $query->whereIn('segment_id', $segment);
-//                } else {
-//                    $query->where('segment_id', $segment);
-//                }
-//
-//                if (is_array($sub_segment)) {
-//                    $query->whereIn('sub_segment_id', $sub_segment);
-//                } else {
-//                    $query->where('sub_segment_id', $sub_segment);
-//                }
-//            })
-//            ->count();
-    }
+        $shipmentIdsQuery = DB::connection('reports')->table($table)->whereIn($column, $ids);
 
+        if ($type === null) {
+            $shipmentIds = $shipmentIdsQuery->pluck('shipment_id');
+        } else {
+            $shipmentIds = $ids;
+        }
+
+        $query = DB::connection('reports')->table('shipments')
+            ->join('users', 'users.id', '=', 'shipments.user_id')
+            ->whereIn('shipments.id', $shipmentIds);
+
+        if ($segment) {
+            $query->whereIn('users.segment_id', (array) $segment);
+        }
+
+        if ($subSegment) {
+            $query->whereIn('users.sub_segment_id', (array) $subSegment);
+        }
+
+        return $query->count();
+    }
 
     public static function get_delivered_shipments($dn_ids){
         $dncc_status = array(14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38);
