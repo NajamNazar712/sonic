@@ -79,6 +79,7 @@ use App\Http\Models\Admin\DeliveryShipmentsReceivedOperation;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\CrmCaseNatureRemark;
 use App\Http\Models\InterceptReBookRequestHistory;
+use App\Http\Models\Shipper\UserShippingInfo;
 
 class AdminTrackingController extends Controller
 {
@@ -2437,16 +2438,19 @@ class AdminTrackingController extends Controller
                             $tracking_numbers['Row #' . $row_id] = $tracking;
                         }
 
-                        $shipments = DB::connection('reports')->table('shipments')->whereIn('id', $shipment_ids)->get();
+                        // $shipments = DB::connection('reports')->table('shipments')->whereIn('id', $shipment_ids)->get();
+                        $shipments = Shipment::with(['pickup_address.city', 'consignee_city'])
+                            ->whereIn('id', $shipment_ids)
+                            ->get();
                         if (count($shipments) > 0) {
                             ShipmentPosition::where('tracked_by', Auth::id())->delete();
 
                             foreach ($shipments as $shipment){
                                 $shipment_detail = array();
 
+                                $shipment_journey_status_by = '-';
                                 $last_shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->orderBy('id', 'desc')->first();
                                 if($last_shipment_journey){
-
                                     if($last_shipment_journey->user_id != null && $last_shipment_journey->name != null){
                                         $shipment_journey_status_by = $last_shipment_journey->user->name . ' (Shipper)';
                                     }
@@ -2457,9 +2461,9 @@ class AdminTrackingController extends Controller
                                         $shipment_journey_status_by = $last_shipment_journey->rider->name . ' (Rider)';
                                     }
                                 }
-                                else{
-                                    $shipment_journey_status_by ='-';
-                                }
+                                // else{
+                                //     $shipment_journey_status_by ='-';
+                                // }
 
                                 //Last screen location without Tracking Screens
                                 $last_scanned_location = ShipmentScanningJourney::where('shipment_id', $shipment->id)->whereNotIn('screen_location_id', [9, 18])->orderBy('id', 'desc');
