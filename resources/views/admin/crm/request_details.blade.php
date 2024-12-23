@@ -44,10 +44,18 @@
                                 </button>
                             @endif
 
-                            @if(($crm_details['status_id'] == 2) && (session('role_id') == 1 || $crm_details->agent['id'] == Auth::id() || in_array(309, session('permissions'))))
-                                <button type="button" class="btn btn-primary width-10-per" id="un_tag"><span
-                                            class="d-none d-lg-block" style="color: white">Un Tag</span></button>
+                            {{-- @if(($crm_details['status_id'] == 2) && (session('role_id') == 1 || $crm_details->agent['id'] == Auth::id() || in_array(309, session('permissions'))))
+                                <button type="button" class="btn btn-primary width-10-per" id="un_tag">
+                                    <span class="d-none d-lg-block" style="color: white">Un Tag</span>
+                                </button>
+                            @endif --}}
+
+                            @if($statusCheck && ($roleCheck || $agentCheck || $permissionCheck))
+                                <button type="button" class="btn btn-primary width-10-per" id="un_tag">
+                                    <span class="d-none d-lg-block" style="color: white">Un Tag</span>
+                                </button>
                             @endif
+
                             @if((session('role_id') == 1 || in_array(213, session('permissions'))))
                                 <button type="button" class="btn btn-primary width-10-per" id="edit_request"><span
                                             class="d-none d-lg-block" style="color: white">Edit Request</span></button>
