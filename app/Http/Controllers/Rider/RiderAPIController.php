@@ -8958,7 +8958,7 @@ class RiderAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
 
-            try {
+//            try {
                 //code...
                 $success_flag = false;
 
@@ -9256,12 +9256,12 @@ class RiderAPIController extends Controller
                 }
 
                 return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id, 'user_excluded_otp_shippers'=>$user_excluded_otp_shippers, 'success' => $success_flag]);
-            } catch (\Throwable $th) {
-                $this->createDeliveryNoteErrorLog($request->delivery_note_id, $request->shipment_id, $th->getMessage());
-                return response()->json(['status' => 1, 'message' => 'Something Went Wrong!']);
-
-                //throw $th;
-            }
+//            } catch (\Throwable $th) {
+//                $this->createDeliveryNoteErrorLog($request->delivery_note_id, $request->shipment_id, $th->getMessage());
+//                return response()->json(['status' => 1, 'message' => 'Something Went Wrong!']);
+//
+//                //throw $th;
+//            }
         }
     }
 
