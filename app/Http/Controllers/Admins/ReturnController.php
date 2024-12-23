@@ -91,7 +91,7 @@ use App\Http\Models\PackagingMaterialRequestHistory;
 use App\Http\Controllers\EmployeeAttendanceController;
 use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
 use App\Http\Controllers\Admins\AdminFinanceController;
-use App\http\Models\Admin\ReturnReasonMandatoryShipper;
+use App\Http\Models\Admin\ReturnReasonMandatoryShipper;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\ReturnConfirmationPendingSmsAttempt;
