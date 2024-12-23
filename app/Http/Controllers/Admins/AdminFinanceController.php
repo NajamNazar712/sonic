@@ -1586,14 +1586,17 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                     $deposit_details->amount = $request->new_amount[$row];
                     $deposit_details->save();
                     $file_name = 'new_deposit_slip_' . $row;
-                    $image = $request->file($file_name);
                     $extension = 'png';
                     $random = rand(1000, 100000);
                     $now = Carbon::now();
                     $time = $now->year . '_' . $now->month;
-                    $slip = $time . $random . Auth::id() . '.' . $extension;
-                    $image->move(public_path('uploads/sdn'), $slip);
-
+                    if($request->has($file_name)) {
+                        $image = $request->file($file_name);
+                        $slip = $time . $random . Auth::id() . '.' . $extension;
+                        $image->move(public_path('uploads/sdn'), $slip);
+                    } else {
+                        $slip = '';
+                    }
                     $deposit_details->image = $slip;
                     $deposit_details->save();
                 }
