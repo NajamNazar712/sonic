@@ -396,7 +396,7 @@ class ProcessRetailShipmentBookingDB implements ShouldQueue
                         Log::warning('No segment information found for user ' . $user_id->user_id . ' on shipment ' . $shipment_id . ' from Retail excel upload');
                     }
                 } else {
-                    Log::warning('No user found for shipment ' . $shipment_id);
+                    Log::warning('No user found for shipment from Retail excel upload ' . $shipment_id);
                 }
             }
         } catch (\Exception $e) {
