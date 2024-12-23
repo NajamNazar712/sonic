@@ -7,7 +7,14 @@
             <div class="content-wrapper">
                 <div class="content-body">
                     <h1 class="mb-1">
-                        {{--                        {{dd($crm_details['status_id'])}}--}}
+
+                        @php
+                            $statusCheck = in_array($crm_details['status_id'], [2, 3]);
+                            $roleCheck = session('role_id') == 1;
+                            $agentCheck = isset($crm_details->agent) && $crm_details->agent['id'] == Auth::id();
+                            $permissionCheck = is_array(session('permissions')) && in_array(185, session('permissions'));
+                        @endphp
+
                         Request Details ({{str_pad($crm_details->id, 6, '0', STR_PAD_LEFT)}})
                         @if(($crm_details['status_id'] == 1))
                             (Launched)
@@ -25,10 +32,18 @@
                             (Re-Open)
                         @endif
                         <div class="text-right mb-1">
-                            @if(($crm_details['status_id'] == 2 || $crm_details['status_id'] == 3) && (session('role_id') == 1 || $crm_details->agent['id'] == Auth::id() || in_array(185, session('permissions'))))
-                                <button type="button" class="btn btn-primary width-10-per" id="tag"><span
-                                            class="d-none d-lg-block" style="color: white">Tag</span></button>
+                            {{-- @if(($crm_details['status_id'] == 2 || $crm_details['status_id'] == 3) && (session('role_id') == 1 || $crm_details->agent['id'] == Auth::id() || in_array(185, session('permissions'))))
+                                <button type="button" class="btn btn-primary width-10-per" id="tag">
+                                    <span class="d-none d-lg-block" style="color: white">Tag</span>
+                                </button>
+                            @endif --}}
+
+                            @if($statusCheck && ($roleCheck || $agentCheck || $permissionCheck))
+                                <button type="button" class="btn btn-primary width-10-per" id="tag">
+                                    <span class="d-none d-lg-block" style="color: white">Tag</span>
+                                </button>
                             @endif
+
                             @if(($crm_details['status_id'] == 2) && (session('role_id') == 1 || $crm_details->agent['id'] == Auth::id() || in_array(309, session('permissions'))))
                                 <button type="button" class="btn btn-primary width-10-per" id="un_tag"><span
                                             class="d-none d-lg-block" style="color: white">Un Tag</span></button>
