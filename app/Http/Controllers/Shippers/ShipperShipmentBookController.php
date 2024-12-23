@@ -576,11 +576,6 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function store(Request $request) {
-
-        // dd(
-        //     $request->all()
-        // );
-
         $user_id = session('user_id');
         $rules = [
             'replacement_parcel_img' => ['nullable', 'mimes:png,jpeg,jpg'],
@@ -758,7 +753,7 @@ class ShipperShipmentBookController extends Controller
                     $package_type = FALSE;
                 }
 
-//                    $pickup_date = $request->input('pickup_date_formatted');
+                // $pickup_date = $request->input('pickup_date_formatted');
 
                 if ($request->filled('special_instructions')) {
                     $special_instructions = $request->input('special_instructions');
@@ -1084,7 +1079,7 @@ class ShipperShipmentBookController extends Controller
                         ]);
                     }
                 } catch (\Exception $e) {
-                    Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
+                    Log::error('Error creating shipper segment log from shipment public function store(Request $request)' . $shipment_id . ': ' . $e->getMessage());
                 }
                 return redirect()->back()->with(['success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'print' => $print]);
             }
@@ -3039,16 +3034,16 @@ class ShipperShipmentBookController extends Controller
         });
 
 
-//        Validator::extend('check_parcel_value', function ($attribute, $value, $parameters, $validator) use ($user_id) {
-//            $data = $validator->getData();
-//            $amount = $data['amount'];
-//            $parcel_value = $data['parcel_value'];
-//            if ($amount == 0) {
-//                return false;
-//            } else {
-//                return true;
-//            }
-//        });
+        //    Validator::extend('check_parcel_value', function ($attribute, $value, $parameters, $validator) use ($user_id) {
+        //        $data = $validator->getData();
+        //        $amount = $data['amount'];
+        //        $parcel_value = $data['parcel_value'];
+        //        if ($amount == 0) {
+        //            return false;
+        //        } else {
+        //            return true;
+        //        }
+        //    });
 
         $names = [
             'service_type_id' => 'Service Type ID',
@@ -3215,13 +3210,13 @@ class ShipperShipmentBookController extends Controller
             })],
             'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'nullable', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
             'amount' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,20', 'min:0','negative_balance'],
-//            'parcel_value' => [
-//                'required_if:amount,0',
-//                'nullable',
-//                'integer',
-//                'digits_between:1,20' ,
-//                //'check_parcel_value',
-//            'min:1'],
+            // 'parcel_value' => [
+            //     'required_if:amount,0',
+            //     'nullable',
+            //     'integer',
+            //     'digits_between:1,20' ,
+            //     //'check_parcel_value',
+            // 'min:1'],
 
             'try_and_buy_charges' => ['required_if:service_type_id,3', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
             // 'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
@@ -3523,19 +3518,19 @@ class ShipperShipmentBookController extends Controller
                     }
                     
 
-//                    if (!empty(trim($row['order_id']))) {
-//                        if (empty($order_ids)) {
-//                            $order_ids[] = $row['order_id'];
-//                            $order_id_row[$row['order_id']] = $row_id;
-//                        } else {
-//                            if (in_array($row['order_id'], $order_ids, true)) {
-//                                $errors[$row_id]['order_id'] = 'Same Order ID as of Row #' . $order_id_row[$row['order_id']];
-//                            } else {
-//                                $order_ids[] = $row['order_id'];
-//                                $order_id_row[$row['order_id']] = $row_id;
-//                            }
-//                        }
-//                    } order id duplicate check remove by subhan requirement 28-august-2024
+                    // if (!empty(trim($row['order_id']))) {
+                    //     if (empty($order_ids)) {
+                    //         $order_ids[] = $row['order_id'];
+                    //         $order_id_row[$row['order_id']] = $row_id;
+                    //     } else {
+                    //         if (in_array($row['order_id'], $order_ids, true)) {
+                    //             $errors[$row_id]['order_id'] = 'Same Order ID as of Row #' . $order_id_row[$row['order_id']];
+                    //         } else {
+                    //             $order_ids[] = $row['order_id'];
+                    //             $order_id_row[$row['order_id']] = $row_id;
+                    //         }
+                    //     }
+                    // } order id duplicate check remove by subhan requirement 28-august-2024
 
                     if ($row['service_type_id'] != 5) {
                         $user_shipping_info = UserShippingInfo::find($row['pickup_address_id']);
@@ -4555,7 +4550,7 @@ class ShipperShipmentBookController extends Controller
                         ]);
                     }
                 } catch (\Exception $e) {
-                    Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
+                    Log::error('Error creating shipper segment log for shipment from public function corporate_store(Request $request)' . $shipment_id . ': ' . $e->getMessage());
                 }
 
                 return redirect()->back()->with(['success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'print' => $print]);

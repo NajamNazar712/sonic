@@ -497,7 +497,7 @@ class ProcessShipmentBookingDBPriority implements ShouldQueue
                     ]);
                 }
             } catch (\Exception $e) {
-                Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
+                Log::error('Error creating shipper segment log from excel booking ' . $shipment_id . ': ' . $e->getMessage());
             }
         }
     }
