@@ -2786,7 +2786,7 @@ class AdminCargoManifestController extends Controller
                 $totalWeight = 0;
             
                 foreach ($segmentNames as $index => $name) {
-                    if (trim($name) === 'Logistics') {
+                    if (trim($name) === 'Logistics' && isset($segmentWeights[$index]) && !empty($segmentWeights[$index])) {
                         $totalWeight += (float)$segmentWeights[$index];
                     }
                 }
@@ -2798,7 +2798,7 @@ class AdminCargoManifestController extends Controller
                 $totalWeight = 0;
             
                 foreach ($segmentNames as $index => $name) {
-                    if (trim($name) === 'Express') {
+                    if (trim($name) === 'Express' && isset($segmentWeights[$index]) && !empty($segmentWeights[$index])) {
                         $totalWeight += (float)$segmentWeights[$index];
                     }
                 }
@@ -2810,7 +2810,7 @@ class AdminCargoManifestController extends Controller
                 $totalWeight = 0;
             
                 foreach ($segmentNames as $index => $name) {
-                    if (trim($name) === 'Warehouse') {
+                    if (trim($name) === 'Warehouse' && isset($segmentWeights[$index]) && !empty($segmentWeights[$index])) {
                         $totalWeight += (float)$segmentWeights[$index];
                     }
                 }
@@ -2822,7 +2822,7 @@ class AdminCargoManifestController extends Controller
                 $totalWeight = 0;
             
                 foreach ($segmentNames as $index => $name) {
-                    if (trim($name) === 'International') {
+                    if (trim($name) === 'International' && isset($segmentWeights[$index]) && !empty($segmentWeights[$index])) {
                         $totalWeight += (float)$segmentWeights[$index];
                     }
                 }
@@ -2834,7 +2834,7 @@ class AdminCargoManifestController extends Controller
                 $totalWeight = 0;
             
                 foreach ($segmentNames as $index => $name) {
-                    if (trim($name) === 'COD') {
+                    if (trim($name) === 'COD' && isset($segmentWeights[$index]) && !empty($segmentWeights[$index])) {
                         $totalWeight += (float)$segmentWeights[$index];
                     }
                 }
@@ -2846,7 +2846,7 @@ class AdminCargoManifestController extends Controller
                 $totalWeight = 0;
             
                 foreach ($segmentNames as $index => $name) {
-                    if (trim($name) === 'Hyperlocal') {
+                    if (trim($name) === 'Hyperlocal' && isset($segmentWeights[$index]) && !empty($segmentWeights[$index])) {
                         $totalWeight += (float)$segmentWeights[$index];
                     }
                 }
@@ -2858,7 +2858,7 @@ class AdminCargoManifestController extends Controller
                 $totalWeight = 0;
             
                 foreach ($segmentNames as $index => $name) {
-                    if (trim($name) === 'FOD') {
+                    if (trim($name) === 'FOD' && isset($segmentWeights[$index]) && !empty($segmentWeights[$index])) {
                         $totalWeight += (float)$segmentWeights[$index];
                     }
                 }
@@ -2870,7 +2870,7 @@ class AdminCargoManifestController extends Controller
                 $totalWeight = 0;
             
                 foreach ($segmentNames as $index => $name) {
-                    if (trim($name) === 'Retail') {
+                    if (trim($name) === 'Retail' && isset($segmentWeights[$index]) && !empty($segmentWeights[$index])) {
                         $totalWeight += (float)$segmentWeights[$index];
                     }
                 }
@@ -5511,7 +5511,7 @@ class AdminCargoManifestController extends Controller
                 $totalWeight = 0;
             
                 foreach ($segmentNames as $index => $name) {
-                    if (trim($name) === 'Logistics') {
+                    if (trim($name) === 'Logistics' && isset($segmentWeights[$index]) && !empty($segmentWeights[$index])) {
                         $totalWeight += (float)$segmentWeights[$index];
                     }
                 }
@@ -5523,7 +5523,7 @@ class AdminCargoManifestController extends Controller
                 $totalWeight = 0;
             
                 foreach ($segmentNames as $index => $name) {
-                    if (trim($name) === 'Express') {
+                    if (trim($name) === 'Express' && isset($segmentWeights[$index]) && !empty($segmentWeights[$index])) {
                         $totalWeight += (float)$segmentWeights[$index];
                     }
                 }
@@ -5535,7 +5535,7 @@ class AdminCargoManifestController extends Controller
                 $totalWeight = 0;
             
                 foreach ($segmentNames as $index => $name) {
-                    if (trim($name) === 'Warehouse') {
+                    if (trim($name) === 'Warehouse' && isset($segmentWeights[$index]) && !empty($segmentWeights[$index])) {
                         $totalWeight += (float)$segmentWeights[$index];
                     }
                 }
@@ -5547,7 +5547,7 @@ class AdminCargoManifestController extends Controller
                 $totalWeight = 0;
             
                 foreach ($segmentNames as $index => $name) {
-                    if (trim($name) === 'International') {
+                    if (trim($name) === 'International' && isset($segmentWeights[$index]) && !empty($segmentWeights[$index])) {
                         $totalWeight += (float)$segmentWeights[$index];
                     }
                 }
@@ -5559,7 +5559,7 @@ class AdminCargoManifestController extends Controller
                 $totalWeight = 0;
             
                 foreach ($segmentNames as $index => $name) {
-                    if (trim($name) === 'COD') {
+                    if (trim($name) === 'COD' && isset($segmentWeights[$index]) && !empty($segmentWeights[$index])) {
                         $totalWeight += (float)$segmentWeights[$index];
                     }
                 }
@@ -5571,7 +5571,7 @@ class AdminCargoManifestController extends Controller
                 $totalWeight = 0;
             
                 foreach ($segmentNames as $index => $name) {
-                    if (trim($name) === 'Hyperlocal') {
+                    if (trim($name) === 'Hyperlocal' && isset($segmentWeights[$index]) && !empty($segmentWeights[$index])) {
                         $totalWeight += (float)$segmentWeights[$index];
                     }
                 }
@@ -5583,7 +5583,7 @@ class AdminCargoManifestController extends Controller
                 $totalWeight = 0;
             
                 foreach ($segmentNames as $index => $name) {
-                    if (trim($name) === 'FOD') {
+                    if (trim($name) === 'FOD' && isset($segmentWeights[$index]) && !empty($segmentWeights[$index])) {
                         $totalWeight += (float)$segmentWeights[$index];
                     }
                 }
@@ -5595,7 +5595,7 @@ class AdminCargoManifestController extends Controller
                 $totalWeight = 0;
             
                 foreach ($segmentNames as $index => $name) {
-                    if (trim($name) === 'Retail') {
+                    if (trim($name) === 'Retail' && isset($segmentWeights[$index]) && !empty($segmentWeights[$index])) {
                         $totalWeight += (float)$segmentWeights[$index];
                     }
                 }

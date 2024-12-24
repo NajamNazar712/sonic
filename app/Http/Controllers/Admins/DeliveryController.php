@@ -7155,7 +7155,7 @@ class DeliveryController extends Controller
         $deliveries = DB::connection($connection)->table('delivery_notes')
             ->join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
-            ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
+            ->leftjoin('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->leftjoin('admins as ccb', 'delivery_notes.cash_collected_by', '=', 'ccb.id')
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
