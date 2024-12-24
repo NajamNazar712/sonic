@@ -1552,7 +1552,7 @@ trait RvTrait
     public function get_call_status_history(Request $request, $shipment = null)
     {
         $mergedArray = [];
-        $data = RvAgentCallHistory::with(['rv_call_finding' => function ($query) {
+        $data = RvAgentCallHistory::select('rv_agent_call_histories.updated_at as updated' , 'rv_agent_call_histories.remarks' ,'rv_agent_call_histories.call_finding_id','rv_agent_call_histories.shipment_id', 'rv_agent_call_histories.updated_by_id' )->with(['rv_call_finding' => function ($query) {
             $query->select('id', 'name');
         }, 'shipment.status_shipper' => function ($query) {
             $query->select('id', 'name');
