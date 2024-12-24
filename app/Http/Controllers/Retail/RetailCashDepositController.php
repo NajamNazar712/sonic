@@ -14,6 +14,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
+use Log;
 
 class RetailCashDepositController extends Controller
 {
@@ -171,8 +172,9 @@ class RetailCashDepositController extends Controller
 
     public function print(Request $request){
         $cash_deposit_id = $request->id;
-        $cash_deposit = RetailCashDeposit::find($cash_deposit_id);
-        $cash_deposit_shipments = $cash_deposit->shipments;
+        $cash_deposit = RetailCashDeposit::find(0);
+        if($cash_deposit) {
+            $cash_deposit_shipments = $cash_deposit->shipments;
         $cash_deposit_total_cns = RetailCashDepositShipment::join('shipments as s','s.id','retail_cash_deposit_shipments.shipment_id')
                 ->where('retail_cash_deposit_shipments.cash_deposit_id',$cash_deposit_id)
                 ->whereNotIn('s.shipper_status_id',[17,25])->count();
@@ -394,7 +396,13 @@ class RetailCashDepositController extends Controller
                   </body>
                 </html>
             ';
-        return $html;
+            return $html;
+        } else {
+            Log::info("Retail Cash Deposit ID . $cash_deposit_id");
+            $html ='Something went wrong';
+            return $html;
+        }
+        
     }
 
     public function finalize_rncc(Request $request){
