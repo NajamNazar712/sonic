@@ -500,8 +500,8 @@ class ProcessShipmentBookingDB implements ShouldQueue
                     {
                         ShipperSegmentLogs::create([
                             'shipment_id' => $shipment_id,
-                            'segment_id' => auth()->user()->segment_id,
-                            'sub_segment_id' => auth()->user()->sub_segment_id
+                            'segment_id' => isset(auth()->user()->segment_id) ? auth()->user()->segment_id : 0,
+                            'sub_segment_id' => isset(auth()->user()->sub_segment_id) ? auth()->user()->sub_segment_id : 0
                         ]);
                     } else {
                         Log::warning('No segment information found for user ' . $user_id->user_id . ' on shipment ' . $shipment_id . ' from Shipper portal excel upload');
