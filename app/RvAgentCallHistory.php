@@ -11,6 +11,10 @@ class RvAgentCallHistory extends Model
    //     return $this->belongsTo('App\Http\Models\Admin\SubStatusCallFinding', 'call_finding_id', 'id');
    //  }
 
+    protected $casts = [
+        'updated_at' => "datetime:Y-m-d H:i:s",
+        'created_at' => "datetime:Y-m-d H:i:s",
+    ];
    public function rv_call_finding()
     {
        return $this->belongsTo('App\RvAssignAgentSubStatus', 'call_finding_id');
