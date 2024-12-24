@@ -2714,10 +2714,15 @@ class ReturnController extends Controller
     public function get_riders_by_hub(Request $request)
     {
         $hub_id = $request->hub_id;
-        return Rider::where('status', 1)
-            ->whereHas('city', function ($query) use ($hub_id) {
-                $query->where('hub_id', $hub_id);
-            })->where('riders.operation_rider_id', 2)->get(['id', 'name', 'route_id', 'trax_id']);
+        $city = City::find($hub_id);
+        if($city->business_category_id == 1){
+            return Rider::where(['status' => 1, 'operation_rider_id' => 2])->get(['id', 'name', 'route_id', 'trax_id']);
+        }else{
+            return Rider::where('status', 1)
+                ->whereHas('city', function ($query) use ($hub_id) {
+                    $query->where('hub_id', $hub_id);
+                })->where('riders.operation_rider_id', 2)->get(['id', 'name', 'route_id', 'trax_id']);
+        }
     }
 
     public function get_shipment_details(Request $request)
