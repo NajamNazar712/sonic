@@ -2252,7 +2252,7 @@ class V2AdminPickupsController extends Controller
             $shipment_item = ShipmentItem::find($request->tracking_number);
             if ($shipment_item) {
                 $shipment = Shipment::find($shipment_item->shipment_id);
-                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62 || $shipment->shipper_status_id == 64) {
+                if ($shipment && ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62 || $shipment->shipper_status_id == 64)) {
                     $details = array();
                     $shipment_items = ShipmentItem::where('shipment_id', $shipment->id)->pluck('id')->toArray();
                     $shipment_items_count = count($shipment_items);
