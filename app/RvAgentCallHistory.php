@@ -15,6 +15,10 @@ class RvAgentCallHistory extends Model
         'updated_at' => "datetime:Y-m-d H:i:s",
         'created_at' => "datetime:Y-m-d H:i:s",
     ];
+    protected function serializeDate(\DateTimeInterface $date)
+    {
+        return $date->format('Y-m-d H:i:s');
+    }
    public function rv_call_finding()
     {
        return $this->belongsTo('App\RvAssignAgentSubStatus', 'call_finding_id');
