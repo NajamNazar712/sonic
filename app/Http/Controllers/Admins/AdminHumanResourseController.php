@@ -3321,6 +3321,13 @@ class AdminHumanResourseController extends Controller
              $payslips->whereIn('hub_id', session('hubs'));
          }
 
+        if ($request->get('search_payslip_month')) {
+            $month = $request->get('search_payslip_month');
+            $from = Carbon::parse($month)->startOfMonth()->toDateString();
+            $to = Carbon::parse($month)->endOfMonth()->toDateString();
+            $payslips->whereBetween('employee_payslips.payroll_month', [$from, $to]);
+        }
+
         $datatable = Datatables::of($payslips)
             ->editColumn('total_salary', function ($payslip) {
                 if($payslip->total_salary == null){
@@ -3354,12 +3361,7 @@ class AdminHumanResourseController extends Controller
                 return $dropdown;
             });
 
-        if ($request->get('search_payslip_month')) {
-            $month = $request->get('search_payslip_month');
-            $from = Carbon::parse($month)->startOfMonth()->toDateString();
-            $to = Carbon::parse($month)->endOfMonth()->toDateString();
-            $datatable->whereBetween('employee_payslips.payroll_month', [$from, $to]);
-        }
+
         return $datatable->make(true);
 
     }
