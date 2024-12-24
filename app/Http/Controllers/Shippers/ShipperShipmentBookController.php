@@ -2047,20 +2047,23 @@ class ShipperShipmentBookController extends Controller
                         $shipment_details .= $table_start;
 
                         $item = $shipment->items->first();
+                        $product_name = ($item && $item->product->product_name) ? $item->product->product_name : '-';
+                        $item_quantity = ($item && $item->quantity) ? $item->quantity : '-';
+                        $item_description = ($item && $item->description) ? $item->description : '-';
 
                         $shipment_details .= '
                               <tr>
                                 <td rowspan="2" class="align-middle color primary border twice-top twice-bottom"><strong>Item</strong></td>
                                 <td class="color secondary border twice-top"><strong>Type</strong></td>
-                                <td colspan="2" class="border twice-top">' . $item->product->product_name . '</td>
+                                <td colspan="2" class="border twice-top">' . $product_name . '</td>
                                 <td class="color secondary border twice-top"><strong>Quantity</strong></td>
-                                <td>' . $item->quantity . '</td>
+                                <td>' . $item_quantity . '</td>
                                 <td colspan="1" class="color secondary border twice-top"><strong>Piece(s)</strong></td>
                                 <td>' . $shipment->pieces . '</td>
                               </tr>
                               <tr>
                                 <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                                <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+                                <td colspan="6" class="border twice-bottom">' . $item_description . '</td>
                               </tr>
                     ';
 
@@ -2074,12 +2077,15 @@ class ShipperShipmentBookController extends Controller
                             $shipment_details .= $table_start;
 
                             $item = $shipment->items->first();
+                            $product_name = ($item && $item->product->product_name) ? $item->product->product_name : '-';
+                            $item_quantity = ($item && $item->quantity) ? $item->quantity : '-';
+                            $item_description = ($item && $item->description) ? $item->description : '-';
 
                             $shipment_details .= '
                               <tr>
                                 <td rowspan="2" class="align-middle color primary border twice-top twice-bottom"><strong>Item</strong></td>
                                 <td class="color secondary border twice-top"><strong>Type</strong></td>
-                                <td colspan="2" class="border twice-top">' . $item->product->product_name . '</td>
+                                <td colspan="2" class="border twice-top">' . $product_name . '</td>
                                 <td class="color secondary border twice-top"><strong>Quantity</strong></td>
                                 <td>' . $item->quantity . '</td>
                                 <td colspan="1" class="color secondary border twice-top"><strong>Piece(s)</strong></td>
@@ -2087,7 +2093,7 @@ class ShipperShipmentBookController extends Controller
                               </tr>
                               <tr>
                                 <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                                <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+                                <td colspan="6" class="border twice-bottom">' . $item_description . '</td>
                               </tr>
                     ';
 
@@ -4855,19 +4861,24 @@ class ShipperShipmentBookController extends Controller
                 $shipment_details .= $table_start;
 
                 $item = $shipment->items->first();
+                $product_name = ($item && $item->product->product_name) ? $item->product->product_name : '-';
+                $item_quantity = ($item && $item->quantity) ? $item->quantity : '-';
+                $item_description = ($item && $item->description) ? $item->description : '-';
+
+                
 
                 $shipment_details .= '
                         <tr>
                           <td rowspan="2" class="align-middle color primary border twice-top twice-bottom"><strong>Item</strong></td>
                           <td class="color secondary border twice-top"><strong>Type</strong></td>
-                          <td colspan="2" class="border twice-top">' . $item->product->product_name . '</td>
+                          <td colspan="2" class="border twice-top">' . $product_name . '</td>
                           <td class="color secondary border twice-top"><strong>Quantity</strong></td>
-                          <td>' . $item->quantity . '</td>
+                          <td>' . $item_quantity . '</td>
                           <td colspan="2" class="border twice-top"></td>
                         </tr>
                         <tr>
                           <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                          <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+                          <td colspan="6" class="border twice-bottom">' . $item_description . '</td>
                         </tr>
             ';
 
