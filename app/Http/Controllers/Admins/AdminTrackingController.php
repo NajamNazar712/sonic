@@ -2451,7 +2451,8 @@ class AdminTrackingController extends Controller
                             ->leftJoin('cities as consignee_city', 'shipments.consignee_city_id', '=', 'consignee_city.id')
                             ->leftJoin('cities as pickup_city', 'user_shipping_infos.city_id', '=', 'pickup_city.id')
                             ->select(
-                                'shipments.*',
+                                'shipments.id as shipment_id',
+                                'shipments.tracking_number as tracking_number',
                                 'user_shipping_infos.*',
                                 'pickup_city.name as pickup_city_name',
                                 'consignee_city.name as consignee_city_name'
@@ -2463,9 +2464,7 @@ class AdminTrackingController extends Controller
 
                             foreach ($shipments as $shipment){
                                 $shipment_detail = array();
-
-                                $shipment_journey_status_by = '-';
-                                $last_shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->orderBy('id', 'desc')->first();
+                                $last_shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->shipment_id)->orderBy('id', 'desc')->first();
                                 if($last_shipment_journey){
                                     if($last_shipment_journey->user_id != null && $last_shipment_journey->name != null){
                                         $shipment_journey_status_by = $last_shipment_journey->user->name . ' (Shipper)';
@@ -2477,12 +2476,11 @@ class AdminTrackingController extends Controller
                                         $shipment_journey_status_by = $last_shipment_journey->rider->name . ' (Rider)';
                                     }
                                 }
-                                // else{
-                                //     $shipment_journey_status_by ='-';
-                                // }
-
+                                else{
+                                    $shipment_journey_status_by ='-';
+                                }
                                 //Last screen location without Tracking Screens
-                                $last_scanned_location = ShipmentScanningJourney::where('shipment_id', $shipment->id)->whereNotIn('screen_location_id', [9, 18])->orderBy('id', 'desc');
+                                $last_scanned_location = ShipmentScanningJourney::where('shipment_id', $shipment->shipment_id)->whereNotIn('screen_location_id', [9, 18])->orderBy('id', 'desc');
 
                                 if($last_scanned_location->exists()){
                                     $last_scanned_location_flag = true;
@@ -2604,7 +2602,7 @@ class AdminTrackingController extends Controller
 
 
                                 $handover = '';
-                                $handover_shipment = HandoverShipments::where('shipment_id', $shipment->id)->orderBy('id', 'desc');
+                                $handover_shipment = HandoverShipments::where('shipment_id', $shipment->shipment_id)->orderBy('id', 'desc');
                                 if($handover_shipment->exists()){
                                     $handover_shipment = $handover_shipment->first();
                                     $handover = Handover::find($handover_shipment->handover_id);
@@ -2669,10 +2667,12 @@ class AdminTrackingController extends Controller
                                 }
 
                                 $shipment_position = new ShipmentPosition();
-                                $shipment_position->shipment_id = $shipment->id;
-                                $shipment_position->tracking_number = $shipment->tracking_number;
+                                // $shipment_position->shipment_id = $shipment->id;
                                 // $shipment_position->origin = $shipment->pickup_address->city->name;
                                 // $shipment_position->destination = $shipment->consignee_city->name;
+
+                                $shipment_position->shipment_id = $shipment->shipment_id;
+                                $shipment_position->tracking_number = $shipment->tracking_number;
 
                                 $shipment_position->origin = $shipment->pickup_city_name;
                                 $shipment_position->destination = $shipment->consignee_city_name;                            
