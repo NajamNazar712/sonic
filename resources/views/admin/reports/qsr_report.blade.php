@@ -230,7 +230,7 @@
                         <th class="border-primary border-darken-1">Bag Seal Number</th>
                         <th class="border-primary border-darken-1">Bag Status</th>
                         <th class="border-primary border-darken-1">Service</th>
-                        <th class="border-primary border-darken-1">Arrival Date</th>
+                        <th class="border-primary border-darken-1">Origin Arrival Date</th>
                         <th class="border-primary border-darken-1">Destination Arrival Date</th>
                         <th class="border-primary border-darken-1">Last Status Date</th>
                         <th class="border-primary border-darken-1">Booked Status Date</th>

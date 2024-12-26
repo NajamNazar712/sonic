@@ -15463,14 +15463,35 @@ class AdminReportsController extends Controller
             // ->leftJoin('shipment_scanning_journey_area_logs as ssjal_hss', 'ssjal_hss.shipment_scanning_journey_id', '=', 'ssj_hss.id')
             // ->leftJoin('city_areas as ca_scanning', 'ssjal.area_id', '=', 'ca_scanning.id')
 
+            // ->leftJoin('shipments_journey as destination_sj', function ($join) {
+            //     $join->on('destination_sj.shipment_id', '=', 'shipments.id')
+            //         ->where(
+            //             'destination_sj.id',
+            //             '=',
+            //             DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 4)')
+            //         );
+            // })
+            
             ->leftJoin('shipments_journey as destination_sj', function ($join) {
                 $join->on('destination_sj.shipment_id', '=', 'shipments.id')
-                    ->where(
-                        'destination_sj.id',
-                        '=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 4)')
-                    );
+                        ->where(function ($query) {
+                            // First check if status 4 (Arrived at Destination)
+                            $query->where('destination_sj.shipper_status_id', '=', 4)
+                                ->orWhere(function ($query) {
+                                        // If not, check status 2 (Arrived at Origin)
+                                        $query->where('destination_sj.shipper_status_id', '=', 2)
+                                            ->whereNotExists(function ($query) {
+                                                // Check if a status 4 record exists for this shipment_id
+                                                $query->select(DB::raw(1))
+                                                    ->from('shipments_journey')
+                                                    ->whereRaw('shipments_journey.shipment_id = shipments.id')
+                                                    ->where('shipments_journey.shipper_status_id', 4);
+                                            });
+                                    });
+                        })
+                ->where('destination_sj.id', '=', DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id in (4, 2))'));
             })
+
             ->select($select)
             ->groupBy('shipments.id');
 
