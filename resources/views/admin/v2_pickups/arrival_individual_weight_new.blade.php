@@ -691,7 +691,7 @@
                                if(parseInt(weight) >=50 && sub_segment == 5)
                                 {
                                     swal({
-                                        text: 'Are you certain about proceeding when your weight surpasses 50KG??',
+                                        text: 'Are you certain about proceeding when your weight surpasses 49KG on COD Segment??',
                                         // text: 'Do you agree to add this weight?',
                                         title: 'Are You Sure',
                                         icon: 'warning',

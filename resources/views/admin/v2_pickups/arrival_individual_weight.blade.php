@@ -565,7 +565,7 @@
                                sub_segment = data.subSegment;
                                 if(parseInt(weight) >= 50 && sub_segment == 5 ){
                                     swal({
-                                        text: 'Are you certain about proceeding when your weight surpasses 100KG on COD Segment??',
+                                        text: 'Are you certain about proceeding when your weight surpasses 49KG on COD Segment??',
                                         title: 'Are You Sure',
                                         icon: 'warning',
                                         buttons: {
