@@ -65,9 +65,10 @@ class ShipperReportsController extends Controller
 
         $connection = 'reports';
         if (empty($request->get('search_tracking')) && empty($request->get('search_date_from')) && empty($request->get('dr_search_date_from'))) {
-            $sales = DB::connection($connection)->table('shipments')->whereRaw('FALSE');
-            $datatable = Datatables::of($sales);
-            return $datatable->make(true);
+            // $sales = DB::connection($connection)->table('shipments')->whereRaw('FALSE');
+            // $datatable = Datatables::of($sales);
+            // return $datatable->make(true);
+            return Datatables::of(collect([]))->make(true); // setting this because sorter throwing error when user click on sorter on empty records 
         }
 
         $sales = DB::connection($connection)->table('shipments')->join('users as u', 'u.id', '=', 'shipments.user_id')
