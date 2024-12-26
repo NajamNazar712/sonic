@@ -1954,7 +1954,7 @@
                                 // scanning history button
                                 @if (session('role_id') == 1 || in_array(1020, session('permissions'))) {
                                     shipment += '<div class="position-relative" style="top: -3px;">';
-                                    shipment += '<form id="scanHistoryForm" action="{{ route('admin.scanning_history.details_new') }}" method="POST" target="_blank">';
+                                    shipment += '<form id="scanHistoryForm" action="{{ route('admin.scanning_history.details_new') }}" method="GET" target="_blank">';
                                     shipment += '@csrf';
                                     shipment += '<input type="hidden" name="tracking_number" value="' + details.tracking_number + '" />';
                                     shipment += '<input type="hidden" name="search_type" value="1" />';

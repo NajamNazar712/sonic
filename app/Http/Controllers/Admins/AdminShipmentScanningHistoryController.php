@@ -200,6 +200,7 @@ class AdminShipmentScanningHistoryController extends Controller
 
     public function details_new(Request $request){
         $details = array();
+        $data = array();
         if($request->has('search_type') && $request->search_type == 1){
             $flag = false;
             $tracking_number = $request->tracking_number;
