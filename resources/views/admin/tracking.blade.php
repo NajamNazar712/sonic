@@ -788,7 +788,7 @@
                                 $('#call_history').removeClass('d-none');
                             }
                             $.each(response.data, function(index, value) {
-                                var dateTimeParts = value.data.updated?.split(' ') || ['-', '-']; // Fallback if updated_at is invalid
+                                var dateTimeParts = value.data.updated_at?.split(' ') || ['-', '-']; // Fallback if updated_at is invalid
                                 var row = $('<tr>');
                                 // row.append($('<td>').text(index + 1)); 
                                 row.append($('<td>').text(dateTimeParts[0])); // Display date
