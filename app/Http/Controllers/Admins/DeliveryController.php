@@ -7172,7 +7172,7 @@ class DeliveryController extends Controller
             ->leftjoin('city_areas as ca', 'ca.id', '=', 'riders.area_id')
             ->leftJoin('zones as zn', function ($join) {
                 $join->on('zn.id', '=', DB::raw("CASE 
-                    WHEN riders.operation_rider_id = 2 and riders.status = 1 THEN oc.zone_id
+                    WHEN (riders.operation_rider_id = 2 and riders.status = 1) THEN oc.zone_id
                     ELSE c.zone_id 
                 END"));
             })
