@@ -2181,7 +2181,7 @@ class RiderAPIController extends Controller
         } else {
             $rider_deliveries = DeliveryNote::join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
                 ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
-                ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
+                ->leftjoin('routes', 'delivery_notes.route_id', '=', 'routes.id')
                 ->leftjoin('admins as ccb', 'delivery_notes.cash_collected_by', '=', 'ccb.id')
                 ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
                 ->join('delivery_note_shipments', 'delivery_note_shipments.delivery_note_id', '=', 'delivery_notes.id')

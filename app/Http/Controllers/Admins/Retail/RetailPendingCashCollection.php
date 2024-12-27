@@ -27,7 +27,7 @@ class RetailPendingCashCollection extends Controller
         $deliveries = DeliveryNote::
         join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
-            ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
+            ->leftjoin('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->leftjoin('retail_franchises as rf','rf.default_hub','=','delivery_notes.hub_id')  //to be removed in future
             ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
