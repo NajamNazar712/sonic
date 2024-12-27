@@ -4254,7 +4254,7 @@ class DeliveryController extends Controller
             $category = $rider->rider_category->name;
             $route = $delivery_note_details->route;
             if ($route){
-                $route_name = $route->code . ' (' . $delivery_note_details->route->start . ' to ' . $delivery_note_details->route->end . ')';
+                $route_name = $route->code . ' (' . $route->start . ' to ' . $route->end . ')';
             } else {
                 $route_name = "-";
             }
