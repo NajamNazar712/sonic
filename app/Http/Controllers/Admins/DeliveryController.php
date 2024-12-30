@@ -7176,7 +7176,14 @@ class DeliveryController extends Controller
             ->leftjoin('rider_deliveries as rd', 'rd.delivery_note_id', '=', 'delivery_notes.id')
             ->leftjoin('rider_types as rt', 'rt.id', '=', 'riders.rider_type_id')
             ->leftjoin('cities as c', 'c.id', '=', 'riders.city_id')
-            ->leftjoin('city_areas as ca', 'ca.id', '=', 'riders.area_id')
+            ->leftJoin('city_areas as ca', function ($join) {
+                $join->on('ca.id', '=', DB::raw("
+                    CASE 
+                        WHEN (riders.operation_rider_id = 2 AND riders.status = 1) THEN admins.area_id
+                        ELSE riders.area_id
+                    END
+                "));
+            })
             ->leftJoin('zones as zn', function ($join) {
                 $join->on('zn.id', '=', DB::raw("CASE 
                     WHEN (riders.operation_rider_id = 2 and riders.status = 1) THEN oc.zone_id
