@@ -482,17 +482,18 @@ class RegisterController extends Controller
                 case '2':
                 case '4':
                 case '5':
-                    $payment_cycle_days = $data['selected_days'];
+                    $payment_cycle_days = isset($data['selected_days']) ? $data['selected_days'] : 0;
                     break;
                 case '6':
-                    $payment_cycle_days = $data['fortnite'];
+                    $payment_cycle_days = isset($data['fortnite']) ? $data['fortnite'] : 0;
                     break;
                 case '3':
-                    $payment_cycle_days = $data['monthly'];
+                    $payment_cycle_days = isset($data['monthly']) ? $data['monthly'] : 0;
                     break;
                 default:
                     $payment_cycle_days = 0;
             }
+
 
             if (isset($data['wordpress_account']) && $data['wordpress_account'] == 1) {
                 $newUser = User::updateOrCreate(
