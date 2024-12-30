@@ -2934,7 +2934,7 @@ class AdminReportsController extends Controller
             ->leftjoin('shipments', 'shipments.id', '=', 'dns.shipment_id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
             ->join('rider_categories', 'rider_categories.id', '=', 'riders.rider_category_id')
-            ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
+            ->leftjoin('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->leftjoin('admins as ccb', 'delivery_notes.cash_collected_by', '=', 'ccb.id')
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
