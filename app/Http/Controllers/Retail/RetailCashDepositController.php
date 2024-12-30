@@ -172,7 +172,7 @@ class RetailCashDepositController extends Controller
 
     public function print(Request $request){
         $cash_deposit_id = $request->id;
-        $cash_deposit = RetailCashDeposit::find(0);
+        $cash_deposit = RetailCashDeposit::find($cash_deposit_id);
         if($cash_deposit) {
             $cash_deposit_shipments = $cash_deposit->shipments;
         $cash_deposit_total_cns = RetailCashDepositShipment::join('shipments as s','s.id','retail_cash_deposit_shipments.shipment_id')
