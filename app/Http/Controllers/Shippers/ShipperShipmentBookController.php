@@ -4548,7 +4548,7 @@ class ShipperShipmentBookController extends Controller
 
                 try {
                     // Maintaining shipper segment logs on booking when origin and destination are different
-                    if ($consignee_city_id != $user_shipping_info->city_id) {
+                    if ($consignee_city_id != $pickup_city_id) {
                         ShipperSegmentLogs::create([
                             'shipment_id' => $shipment_id,
                             'segment_id' => auth()->user()->segment_id,
