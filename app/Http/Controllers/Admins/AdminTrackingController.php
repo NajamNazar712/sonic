@@ -801,7 +801,7 @@ class AdminTrackingController extends Controller
                     $details['consignee_name'] = $shipment->consignee_name;
                     $details['consignee_address'] = $shipment->consignee_address;
                     $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->latest('id')->first();
-                    $details['status'] = $journey->shipment_status_shipper->name;
+                    $details['status'] = ($journey && $journey->shipment_status_shipper->name) ? $journey->shipment_status_shipper->name : '-';
                     if ($journey->status_reason_id != null) {
 
                         $details['reason'] = $journey->shipment_status_reason->name;

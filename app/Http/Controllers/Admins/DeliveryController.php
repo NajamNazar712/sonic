@@ -4252,7 +4252,13 @@ class DeliveryController extends Controller
             $city_name = $delivery_note_details->hub->name;
             $rider_name = $rider->name;
             $category = $rider->rider_category->name;
-            $route_name = $delivery_note_details->route->code . ' (' . $delivery_note_details->route->start . ' to ' . $delivery_note_details->route->end . ')';
+            $route = $delivery_note_details->route;
+            if ($route){
+                $route_name = $route->code . ' (' . $route->start . ' to ' . $route->end . ')';
+            } else {
+                $route_name = "-";
+            }
+
             $main_details = '
                       <table class="table table-sm table-bordered border">
                         <tbody>
