@@ -6380,8 +6380,12 @@ class DeliveryController extends Controller
                 $dncc_note_route = $dncc_note->route;
                 if ($dncc_note_route){
                     $route_name = $dncc_note_route->code;
+                    $route_start = $dncc_note_route->start;
+                    $route_end = $dncc_note_route->end;
                 } else {
                     $route_name = "-";
+                    $route_start = "-";
+                    $route_end = "-";
                 }
 
                 $shipment_details_row_start = '
@@ -6389,7 +6393,7 @@ class DeliveryController extends Controller
                             <td>' . $total_dncc . '</td>
                             <td>' . str_pad($dncc_note->id, 6, '0', STR_PAD_LEFT) . '</td>
                             <td>' . $dncc_note->rider->name . '</td>
-                            <td>' . $route_name . '( ' . $dncc_note_route->start . ' to ' . $dncc_note_route->end . ' )' . '</td>
+                            <td>' . $route_name . '( ' . $route_start . ' to ' . $route_end . ' )' . '</td>
                             <td>' . $dncc_note->shipments_count . '</td>
                             <td>' . $dncc_note->delivered_shipments . '</td>
                             <td>Rs ' . number_format($dncc_note->received_cod_amount) . '</td>
