@@ -9219,7 +9219,14 @@ class DeliveryController extends Controller
     {
         if (DeliveryNoteRequests::where('rider_id', $request->rider_id)->where('status', 1)->exists()) {
             return redirect()->route('admin.delivery.note.request_index')->with(['error' => 'Request Already Present']);
-        } else {
+        } 
+        if (!$request->has('dncc') || is_null($request->dncc)) {
+            return redirect()->route('admin.delivery.note.request_index')->with(['error' => 'Delivery note received amount is required']);
+        }
+        if (!$request->has('amount') || is_null($request->amount)) {
+            return redirect()->route('admin.delivery.note.request_index')->with(['error' => 'Delivery note requested amount is required']);
+        }
+        else {
             $note = new DeliveryNoteRequests();
             $note->rider_id = $request->rider_id;
             $note->dn_received_amount = $request->dncc;
