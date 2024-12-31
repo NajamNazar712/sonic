@@ -1298,10 +1298,10 @@ class VisionSoftAPIController extends Controller
         }
 
     }
-    static public function cod_payable_excel($startDate = null , $endDate = null){
+    static public function cod_payable_excel(){
 
-//        $startDate = Carbon::now()->subDays(1)->format('Y-m-d 00:00:01');
-//        $endDate = Carbon::now()->subDays(1)->format('Y-m-d 23:59:59');
+        $startDate = Carbon::now()->subDays(1)->format('Y-m-d 00:00:01');
+        $endDate = Carbon::now()->subDays(1)->format('Y-m-d 23:59:59');
 
         // $shippers = User::join('shipments as s', 's.user_id', '=', 'users.id')
         //     ->join('shipments_journey as sj', function($join) use ($startDate,$endDate) {
@@ -1388,10 +1388,10 @@ class VisionSoftAPIController extends Controller
         }
     }
 
-    static public function cod_receivable_excel($startDate = null,$endDate = null){
+    static public function cod_receivable_excel(){
 
-//        $startDate = Carbon::now()->subDays(1)->format('Y-m-d 00:00:01');
-//        $endDate = Carbon::now()->subDays(1)->format('Y-m-d 23:59:59');
+        $startDate = Carbon::now()->subDays(1)->format('Y-m-d 00:00:01');
+        $endDate = Carbon::now()->subDays(1)->format('Y-m-d 23:59:59');
 
         // $cities = City::join('shipments as s', 's.consignee_city_id', '=', 'cities.id')
         //     ->join('cities as hc', 'hc.id', '=', 'cities.hub_id')
