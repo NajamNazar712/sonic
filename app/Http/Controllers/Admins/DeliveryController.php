@@ -6377,13 +6377,19 @@ class DeliveryController extends Controller
             foreach ($dncc_ids as $dncc) {
                 $total_dncc++;
                 $dncc_note = DeliveryNote::find($dncc->delivery_note_id);
+                $dncc_note_route = $dncc_note->route;
+                if ($dncc_note_route){
+                    $route_name = $dncc_note_route->code;
+                } else {
+                    $route_name = "-";
+                }
 
                 $shipment_details_row_start = '
                           <tr>
                             <td>' . $total_dncc . '</td>
                             <td>' . str_pad($dncc_note->id, 6, '0', STR_PAD_LEFT) . '</td>
                             <td>' . $dncc_note->rider->name . '</td>
-                            <td>' . $dncc_note->route->code . '( ' . $dncc_note->route->start . ' to ' . $dncc_note->route->end . ' )' . '</td>
+                            <td>' . $route_name . '( ' . $dncc_note_route->start . ' to ' . $dncc_note_route->end . ' )' . '</td>
                             <td>' . $dncc_note->shipments_count . '</td>
                             <td>' . $dncc_note->delivered_shipments . '</td>
                             <td>Rs ' . number_format($dncc_note->received_cod_amount) . '</td>
@@ -9211,7 +9217,14 @@ class DeliveryController extends Controller
     {
         if (DeliveryNoteRequests::where('rider_id', $request->rider_id)->where('status', 1)->exists()) {
             return redirect()->route('admin.delivery.note.request_index')->with(['error' => 'Request Already Present']);
-        } else {
+        } 
+        if (!$request->has('dncc') || is_null($request->dncc)) {
+            return redirect()->route('admin.delivery.note.request_index')->with(['error' => 'Delivery note received amount is required']);
+        }
+        if (!$request->has('amount') || is_null($request->amount)) {
+            return redirect()->route('admin.delivery.note.request_index')->with(['error' => 'Delivery note requested amount is required']);
+        }
+        else {
             $note = new DeliveryNoteRequests();
             $note->rider_id = $request->rider_id;
             $note->dn_received_amount = $request->dncc;

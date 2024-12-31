@@ -401,7 +401,7 @@ class DailyPickupSalesReportController extends Controller
     
         //sub-segment wise
 
-        $sub_segment_wise_header['header'] = ['S. No.','Sub Segment', 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','Avg/Parcel Revenue','Actual Weight','Avg Actual Weight/Parcel','Avg Revenue on Actual Weight','Chargeable Weight','Avg. Chargeable Weight/Parcel','Avg. Revenue On Chargeable Weight','Collection Amount','Avg. Amount Collection','% Rev. on Amount Collection'];
+        $sub_segment_wise_header['header'] = ['S. No.','Segment','Sub Segment', 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','Avg/Parcel Revenue','Actual Weight','Avg Actual Weight/Parcel','Avg Revenue on Actual Weight','Chargeable Weight','Avg. Chargeable Weight/Parcel','Avg. Revenue On Chargeable Weight','Collection Amount','Avg. Amount Collection','% Rev. on Amount Collection'];
 
 
         $sub_segment_wise_details = self::daily_pickup_sales_sub_segment_wise($date_from,$date_to);
@@ -439,7 +439,7 @@ class DailyPickupSalesReportController extends Controller
             $total_sub_segment_avg_amount_collection += $sub_segment_total['avg_amount_collection'];
             $total_sub_segment_rev_amount_collection += $sub_segment_total['revenue_amount_collection'];
 
-            $sub_segment_wise_data[] = [$sub_segment_total['serial'],$sub_segment_total['sub_segment'],number_format(round($sub_segment_total['booked'])),$sub_segment_total['received'],number_format($sub_segment_total['revenue_wo_gst']),number_format($sub_segment_total['avg_parcel_rev']) ,number_format($sub_segment_total['actual_weight']),number_format($sub_segment_total['avg_actual_weight']),round($sub_segment_total['avg_rev_actual_weight']),number_format($sub_segment_total['chargeable_weight']),number_format($sub_segment_total['avg_chargeable_weight']),round($sub_segment_total['avg_rev_chargeable_weight']),$sub_segment_total['collection_amount'],$sub_segment_total['avg_amount_collection'],round( $sub_segment_total['revenue_amount_collection']) .'%'];
+            $sub_segment_wise_data[] = [$sub_segment_total['serial'],$sub_segment_total['segment'], $sub_segment_total['sub_segment'],number_format(round($sub_segment_total['booked'])),$sub_segment_total['received'],number_format($sub_segment_total['revenue_wo_gst']),number_format($sub_segment_total['avg_parcel_rev']) ,number_format($sub_segment_total['actual_weight']),number_format($sub_segment_total['avg_actual_weight']),round($sub_segment_total['avg_rev_actual_weight']),number_format($sub_segment_total['chargeable_weight']),number_format($sub_segment_total['avg_chargeable_weight']),round($sub_segment_total['avg_rev_chargeable_weight']),$sub_segment_total['collection_amount'],$sub_segment_total['avg_amount_collection'],round( $sub_segment_total['revenue_amount_collection']) .'%'];
         }
 
         $total_sub_segment_avg_parcel_revenue = ($total_sub_segment_received != 0) ? $total_sub_segment_revenue_wo_gst / $total_sub_segment_received:0;
@@ -451,7 +451,7 @@ class DailyPickupSalesReportController extends Controller
         $total_rev_on_cash_collection = ($total_sub_segment_collection_amount != 0) ? $total_sub_segment_revenue_wo_gst / $total_sub_segment_collection_amount:0;
         $total_rev_on_cash_collection = $total_rev_on_cash_collection * 100;
 
-        $sub_segment_wise_footer[] = ['Grand Total.',' ',number_format(round($total_sub_segment_booked)),$total_sub_segment_received,number_format(round($total_sub_segment_revenue_wo_gst)),number_format($total_sub_segment_avg_parcel_revenue) ,number_format($total_sub_segment_actual_weight),number_format($total_avg_actual_weight),number_format($total_avg_rev_actual_weight),number_format($total_sub_segment_chargeable_weight),number_format($total_avg_chargeable_weight),number_format($total_avg_rev_chargeable_weight),$total_sub_segment_collection_amount,number_format($total_avg_cash_collection),number_format($total_rev_on_cash_collection) .'%'];
+        $sub_segment_wise_footer[] = ['Grand Total.',' ',' ',number_format(round($total_sub_segment_booked)),$total_sub_segment_received,number_format(round($total_sub_segment_revenue_wo_gst)),number_format($total_sub_segment_avg_parcel_revenue) ,number_format($total_sub_segment_actual_weight),number_format($total_avg_actual_weight),number_format($total_avg_rev_actual_weight),number_format($total_sub_segment_chargeable_weight),number_format($total_avg_chargeable_weight),number_format($total_avg_rev_chargeable_weight),$total_sub_segment_collection_amount,number_format($total_avg_cash_collection),number_format($total_rev_on_cash_collection) .'%'];
 
         $sub_segment_wise_details = array_merge($sub_segment_wise_header,$sub_segment_wise_data,$sub_segment_wise_footer);
 
@@ -533,7 +533,7 @@ class DailyPickupSalesReportController extends Controller
         $count_details = $count_details + $total_shipper_count + 4;
 
         //sub-segment
-        $total_style_cell = "D$count_details".":R".$count_details;
+        $total_style_cell = "D$count_details".":S".$count_details;
         $sheet->getStyle($total_style_cell)->applyFromArray($total_cell_st);
         $sheet->getStyle($total_style_cell)->applyFromArray($cell_st);
         $sheet->getStyle($total_style_cell)->getAlignment()->setWrapText(true);
@@ -547,7 +547,7 @@ class DailyPickupSalesReportController extends Controller
         $sheet->fromArray($sub_segment_wise_details,NULL,$details_shipper_cell,true);
         $sub_segment_wise_count = count($sub_segment_wise_details);
         $total_segment_count = $sub_segment_wise_count + $count_details -1;
-        $total_style_cell = "D$total_segment_count".":R".$total_segment_count;
+        $total_style_cell = "D$total_segment_count".":S".$total_segment_count;
         $sheet->getStyle($total_style_cell)->applyFromArray($total_cell_st);
 
     
@@ -2647,7 +2647,11 @@ class DailyPickupSalesReportController extends Controller
     static public function daily_pickup_sales_sub_segment_wise($date_from,$date_to){
 
         $data = array();
-        $sub_segments = SubCategorySegment::all();
+        // $sub_segments = SubCategorySegment::all();
+        $sub_segments = DB::table('sub_category_segments')
+        ->leftJoin('segments', 'segments.id', '=', 'sub_category_segments.segment_id')
+        ->select('sub_category_segments.*', 'segments.name as segment_name')
+        ->get();
 
         $serial = 1;
         foreach($sub_segments as $sub_segment){
@@ -2698,6 +2702,7 @@ class DailyPickupSalesReportController extends Controller
             }
 
             $data[$sub_segment->id]['serial'] = $serial;
+            $data[$sub_segment->id]['segment'] = $sub_segment->segment_name;
             $data[$sub_segment->id]['sub_segment'] = $sub_segment->name;
             $data[$sub_segment->id]['booked'] = $booked;
             $data[$sub_segment->id]['received'] = $received;
