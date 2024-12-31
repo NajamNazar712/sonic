@@ -4574,14 +4574,7 @@ class DeliveryController extends Controller
             $city_name = $delivery_note_details->hub->name;
             $rider_name = $rider->name;
             $category = $rider->rider_category->name;
-
-            // $route_name = $delivery_note_details->route->code . ' (' . $delivery_note_details->route->start . ' to ' . $delivery_note_details->route->end . ')';
-            $route = $delivery_note_details->route;
-            if ($route){
-                $route_name = $route->code . ' (' . $route->start . ' to ' . $route->end . ')';
-            } else {
-                $route_name = "-";
-            }
+            $route_name = $delivery_note_details->route->code . ' (' . $delivery_note_details->route->start . ' to ' . $delivery_note_details->route->end . ')';
             $main_details = '
                       <table class="table table-sm table-bordered border">
                         <tbody>
@@ -4723,7 +4716,12 @@ class DeliveryController extends Controller
             ->leftjoin('hbl_konnect_transaction_delivery_notes as hktdn', 'hktdn.delivery_note_id', '=', 'delivery_notes.id')
             ->leftjoin('rider_types as rt', 'rt.id', '=', 'riders.rider_type_id')
             ->leftjoin('cities as c', 'c.id', '=', 'riders.city_id')
-            ->leftjoin('zones as zn', 'zn.id', '=', 'c.zone_id')
+            ->leftJoin('zones as zn', function ($join) {
+                $join->on('zn.id', '=', DB::raw("CASE 
+                    WHEN (riders.operation_rider_id = 2 and riders.status = 1) THEN oc.zone_id
+                    ELSE c.zone_id 
+                END"));
+            })
             ->leftjoin('city_areas as ca', 'ca.id', '=', 'riders.area_id')
             ->leftjoin('one_link_out_for_delivery_shipment_payments as one_link_cash', 'delivery_notes.id', '=', 'one_link_cash.delivery_note_id')
 
