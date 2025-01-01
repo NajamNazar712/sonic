@@ -575,6 +575,7 @@ class Kernel extends ConsoleKernel
 //        $schedule->command('storage:amazon')->dailyAt('15:05')->runInBackground();
 //        $schedule->command('email:revenuereport_lastmonth 2')->dailyAt('11:15')->runInBackground();
 //        $schedule->command('email:revenuereport_lastmonth 3')->dailyAt('11:30')->runInBackground();
+        $schedule->command('apollo:fetch-shipments-status')->everyFiveMinutes()->runInBackground();
 
     }
     /**
