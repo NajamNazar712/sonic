@@ -165,6 +165,7 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\lastMileAppReportCountUpdate',
         '\App\Console\Commands\RunSpecificJob',
         '\App\Console\Commands\DeleteDuplicateArrival',
+        '\App\Console\Commands\ApolloShipmentFetchStatus',
 
         ];
 
