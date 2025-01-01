@@ -13861,8 +13861,6 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             'invoices.invoice_type as invoice_type', DB::raw('NULL as payment_type'), DB::raw('2 as account_type'), 'is.id as is_id',
             'invoices.deposited_amount as deposited_amount','invoices.adjusted_amount as adjusted_amount','sts.status as star_status', 'invoices.total_sms_charges as sms_charges')
             ->where('ubi.default_bank', 1);
-
-
         if (session('department_id') == 7 && !in_array(session('id'), session('sale_users_bypass'))) {
             $invoice->whereIn('invoices.user_id', $request->search_shipper);
         }else{
@@ -13890,28 +13888,26 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             }
         }
 
-
         if ($request->get('invoice_from') && $request->get('invoice_to')) {
-            $from = date('Y-m-d 00:00:00', strtotime($request->get('invoice_from')));
-            $to = date('Y-m-d 23:59:59', strtotime($request->get('invoice_to')));
+            // $from = date('Y-m-d 00:00:00', strtotime($request->get('invoice_from')));
+            // $to = date('Y-m-d 23:59:59', strtotime($request->get('invoice_to')));
+            $from = Carbon::createFromFormat('d F, Y', $request->get('invoice_from'))->startOfDay()->toDateTimeString();
+            $to = Carbon::createFromFormat('d F, Y', $request->get('invoice_to'))->endOfDay()->toDateTimeString();
             $invoice->whereBetween('invoices.invoicing_date', [$from, $to]);
-
         }
 
         if ($request->get('generation_from') && $request->get('generation_to')) {
-            $from = date('Y-m-d 00:00:00', strtotime($request->get('generation_from')));
-            $to = date('Y-m-d 23:59:59', strtotime($request->get('generation_to')));
+            // $from = date('Y-m-d 00:00:00', strtotime($request->get('generation_from')));
+            // $to = date('Y-m-d 23:59:59', strtotime($request->get('generation_to')));
+            $from = Carbon::createFromFormat('d F, Y', $request->get('generation_from'))->startOfDay();
+            $to = Carbon::createFromFormat('d F, Y', $request->get('generation_to'))->endOfDay();
             $invoice->whereBetween('invoices.created_at', [$from, $to]);
-
         }
 
         if ($request->get('star_shipper_filter') == 1) {
             $invoice->where('invoices.star_status', 1);
         }
-
-
         $invoices = DB::query()->fromSub($reim_invoice->union($invoice), 'invoices');
-
 
         $datatables = Datatables::of($invoices)
             ->setRowAttr([
@@ -14132,10 +14128,10 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                 $add_adjustment = '<button type="button" class="dropdown-item add_adjustment"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Adjustment</div></button>';
 
                 $dropdown = '
-              <div class="btn-group">
-                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                <div class="dropdown-menu dropdown-menu-sm">
-            ';
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                ';
 
                 $dropdown .= $export_to_excel_button;
 
@@ -14147,9 +14143,9 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                     $dropdown .= $add_adjustment;
                 }
 
-//                if ((session('role_id') == 1 || in_array(122, session('permissions'))) && $invoice->status_id != 3) {
-//                    $dropdown .= $mark_as_received_button;
-//                }
+                // if ((session('role_id') == 1 || in_array(122, session('permissions'))) && $invoice->status_id != 3) {
+                //     $dropdown .= $mark_as_received_button;
+                // }
 
                 $dropdown .= $origin_wise_print_button;
                 $dropdown .= $gst_wise_print_button;
@@ -14159,12 +14155,25 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                     $dropdown .= $upload_deposit_slip_button;
                 }
                 $dropdown .= '
-                </div>
-              </div>
-            ';
+                    </div>
+                    </div>
+                ';
 
                 return $dropdown;
             })
+
+            // shipper name filter
+            ->filterColumn('shipper', function ($query, $keyword) {
+                if ($keyword) {
+                    $query->where('shipper', 'like', "%{$keyword}%");
+                }
+            })
+
+            // Add ordering to the shipper column based on `u.name`
+            ->orderColumn('shipper', function ($query, $order) {
+                $query->orderBy('shipper', $order);
+            })
+
             ->rawColumns(['shipper','invoice_number_btn','deposit_slip','invoice_adjustment', 'action']);
 
         return $datatables->make(true);
