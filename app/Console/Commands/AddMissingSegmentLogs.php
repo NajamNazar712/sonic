@@ -28,8 +28,8 @@ class AddMissingSegmentLogs extends Command
      */
     public function handle()
     {
-        // One hour ago
-        $startTime = now()->subHour()->format('Y-m-d H:i:s');
+        // 10 minutes ago
+        $startTime = now()->subMinutes(10)->format('Y-m-d H:i:s');
         // Current time
         $endTime = now()->format('Y-m-d H:i:s');
 
