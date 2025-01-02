@@ -162,7 +162,7 @@ class AdminNotificationsController extends Controller
 
             $totalItems = count($emails);
             
-            $chunkSize = 45;
+            $chunkSize = 25;
             $chunks = array_chunk($emails, $chunkSize);
            
             foreach ($chunks as $parsed_emails) {

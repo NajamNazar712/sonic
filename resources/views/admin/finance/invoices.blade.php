@@ -709,7 +709,7 @@
 
 											if (index === -1) {
 												selected_rows.push(id);
-												console.log(selected_rows)
+												// console.log(selected_rows)
 											}
 
 											table.button('.mark_as_received_all_btn').enable();
@@ -785,7 +785,7 @@
 								isInitialLoad = false;
 								return true; // Allow initial load
 							}
-							console.log(check_sale_shippers());
+							// console.log(check_sale_shippers());
 							if (check_sale_shippers()) {
 								toastr.error('Select One Shipper', 'Error!', {
 									positionClass: 'toast-top-center',
@@ -801,7 +801,15 @@
 							{data:'account', name: 'account_type', class: 'align-middle text-center account'},
 							{data:'invoice_number_btn', name: 'invoice_number_btn', class: 'align-middle text-center invoice_number_btn'},
 							{data:'shipper_account_id', name: 'shipper_account_id', class: 'align-middle text-center shipper_account_id'},
-							{data:'shipper', name: 'shipper', class: 'align-middle text-center shipper'},
+
+							{
+								data:'shipper', 
+								name: 'shipper', 
+								class: 'align-middle text-center shipper', 
+								orderable: true, 
+								searchable: true,
+							},
+
 							{data:'sales_person_name', name: 'sales_person_name', class: 'align-middle text-center sales_person_name'},
 							{data:'city', name: 'city', class: 'align-middle text-center city'},
 							{data:'total_charges', name: 'total_charges', class: 'align-middle text-center total_charges'},
@@ -901,12 +909,6 @@
                                             }).wrap(td);
                                 }*/
 
-								else if($(header).is('.invoice_type')){
-									$(invoice_type_select).appendTo($(search))
-											.on( 'change', function () {
-												column.search($(this).val(), false, false, true).draw();
-											} ).wrap(td);
-								}
 								else {
 									var current = $(input).appendTo($(search)).on('change', function() {
 										column.search($(this).val(), false, false, true).draw();

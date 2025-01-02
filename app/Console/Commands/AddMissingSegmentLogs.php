@@ -28,8 +28,8 @@ class AddMissingSegmentLogs extends Command
      */
     public function handle()
     {
-        // One hour ago
-        $startTime = now()->subHour()->format('Y-m-d H:i:s');
+        // 10 minutes ago
+        $startTime = now()->subMinutes(10)->format('Y-m-d H:i:s');
         // Current time
         $endTime = now()->format('Y-m-d H:i:s');
 
@@ -37,8 +37,13 @@ class AddMissingSegmentLogs extends Command
         ->leftJoin('users', 'users.id', '=', 'shipments.user_id')
         ->leftJoin('user_shipping_infos', 'user_shipping_infos.id', '=', 'shipments.pickup_address_id')
         ->leftJoin('shipper_segment_logs', 'shipper_segment_logs.shipment_id', '=', 'shipments.id')
+
         // get the missing entries
         ->whereNull('shipper_segment_logs.shipment_id')
+
+        // Only select shipments created from 21st December 2024 and onwards
+        ->whereDate('shipments.created_at', '>=', '2024-12-21')
+
         // Only select shipments in the time interval
         ->whereBetween('shipments.created_at', [$startTime, $endTime])
         ->select(

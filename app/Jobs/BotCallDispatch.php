@@ -47,7 +47,7 @@ class BotCallDispatch implements ShouldQueue
 
         if ($botRecordData) {
 
-            $client = new Client(['base_uri' => $botRecordData['base_uri'], 'http_errors' => FALSE, 'connect_timeout' => 90, 'timeout' => 90, 'verify' => false]);
+            $client = new Client(['base_uri' => $botRecordData['base_uri'], 'http_errors' => FALSE, 'connect_timeout' => 120, 'timeout' => 120, 'verify' => false]);
             $response = $client->post('', [
                 'json' => $botRecordData['post']
             ]);
