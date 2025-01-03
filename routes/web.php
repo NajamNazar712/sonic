@@ -629,6 +629,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::post('ratting_submit', 'Shippers\NpsSurveyShipperController@ratting_submit')->name('ratting_submit');
         Route::post('nps_skip', 'Shippers\NpsSurveyShipperController@nps_skip')->name('nps_skip');
     });
+
+    Route::prefix('wallet')->name('wallet.')->group(function () {
+        Route::get('login', 'FingaIntegrationController@login')->name('login');
+        Route::get('signup', 'FingaIntegrationController@signup')->name('signup');
+    });
 });
 
 Route::prefix('agent')->name('agent.')->group(function () {
