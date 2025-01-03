@@ -41,7 +41,7 @@ class ApolloShipmentCronController extends Controller
         if($journeys->isNotEmpty()) {
 
             $client = new \GuzzleHttp\Client([
-                'base_uri' => 'https://api-apollo-staging.sonic.pk/api/',
+                'base_uri' => 'https://movere-staging.sonic.pk/api/',
                 'http_errors' => FALSE,
                 'connect_timeout' => 60,
                 'timeout' => 60
@@ -64,7 +64,7 @@ class ApolloShipmentCronController extends Controller
                     // Log failure response if necessary
                     Log::channel('apolloJobLog')->error('API response does not indicate success', [
                         'response' => $responseData,
-                        'journeys' => $journeys
+//                        'journeys' => $journeys
                     ]);
                 }
             } catch (RequestException $e) {
