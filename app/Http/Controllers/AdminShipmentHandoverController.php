@@ -1052,17 +1052,17 @@ class AdminShipmentHandoverController extends Controller
           });
 
           if ($hub = $request->get('search_hub')) {
-              $datatable->where('handovers.hub', '=', $hub);
+              $handover_list->where('handovers.hub', '=', $hub);
           }
 
           if ($from_admin = $request->get('search_from_admin')) {
-              $datatable->where('handovers.from', '=', $from_admin);
+              $handover_list->where('handovers.from', '=', $from_admin);
           }
           if ($to_admin = $request->get('search_to_admin')) {
-              $datatable->where('handovers.to', '=', $to_admin);
+              $handover_list->where('handovers.to', '=', $to_admin);
           }
           if ($bag_number = $request->get('search_bag_number')) {
-            $datatable->where('handovers.bag_number', '=', $bag_number);
+            $handover_list->where('handovers.bag_number', '=', $bag_number);
           }
 
           if ($search_area = $request->get('search_area')) {
@@ -1075,7 +1075,7 @@ class AdminShipmentHandoverController extends Controller
                 ->select('name')
                 ->first();
 
-          $datatable->where(function($query) use ($area_name) {
+            $handover_list->where(function($query) use ($area_name) {
             $query->where('c_from.name', '=', $area_name->name)
               ->orWhere('c_to.name', '=', $area_name->name);
           });

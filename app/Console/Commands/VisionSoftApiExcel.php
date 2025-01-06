@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Http\Controllers\Admins\VisionSoftAPIController;
 use App\Http\Controllers\NotificationsController;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class VisionSoftApiExcel extends Command
@@ -39,6 +40,8 @@ class VisionSoftApiExcel extends Command
      */
     public function handle()
     {
+
+
         $cod_payment_excel = VisionSoftAPIController::cod_payable_excel();
         $cod_receivable_excel = VisionSoftAPIController::cod_receivable_excel();
         $links = "";
@@ -52,5 +55,7 @@ class VisionSoftApiExcel extends Command
         if(!empty($cod_payment_excel) || !empty($cod_receivable_excel)) {
             NotificationsController::send(213, $links);
         }
+
+
     }
 }
