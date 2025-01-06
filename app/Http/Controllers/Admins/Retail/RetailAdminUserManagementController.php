@@ -189,7 +189,7 @@ class RetailAdminUserManagementController extends Controller
 
         $franchise = RetailFranchise::join('admins as a', 'a.id', '=', 'retail_franchises.updated_by')
             ->join('cities as c', 'c.id', '=', 'retail_franchises.default_hub')
-            ->select('retail_franchises.id', 'retail_franchises.name', 'retail_franchises.phone_no', 'retail_franchises.email', 'retail_franchises.cnic', 'c.name as default_hub', 'c.id as default_hub_id', 'a.name as updated_by', 'retail_franchises.status', 'retail_franchises.code', 'retail_franchises.location_latitude', 'retail_franchises.location_longitude', 'retail_franchises.created_at', 'retail_franchises.updated_at', 'retail_franchises.discount','retail_franchises.insurance');
+            ->select('retail_franchises.id', 'retail_franchises.name', 'retail_franchises.phone_no', 'retail_franchises.email', 'retail_franchises.cnic', 'c.name as default_hub', 'c.id as default_hub_id', 'a.name as updated_by', 'retail_franchises.status', 'retail_franchises.code', 'retail_franchises.location_latitude', 'retail_franchises.location_longitude', 'retail_franchises.created_at as created', 'retail_franchises.updated_at as updated', 'retail_franchises.discount','retail_franchises.insurance');
 
         $datatables = Datatables::of($franchise)
             ->editColumn('status', function ($data) {
@@ -1208,7 +1208,7 @@ class RetailAdminUserManagementController extends Controller
         }
         $trax_center = RetailTraxCenter::join('admins as a', 'a.id', '=', 'retail_trax_centers.updated_by')
             ->join('cities as c', 'c.id', '=', 'retail_trax_centers.default_hub')
-            ->select('retail_trax_centers.id', 'retail_trax_centers.name', 'retail_trax_centers.phone_no', 'retail_trax_centers.email', 'retail_trax_centers.cnic', 'c.name as default_hub', 'c.id as default_hub_id', 'a.name as updated_by', 'retail_trax_centers.status', 'retail_trax_centers.code', 'retail_trax_centers.location_latitude', 'retail_trax_centers.location_longitude', 'retail_trax_centers.created_at', 'retail_trax_centers.updated_at','retail_trax_centers.discount','retail_trax_centers.insurance');
+            ->select('retail_trax_centers.id', 'retail_trax_centers.name', 'retail_trax_centers.phone_no', 'retail_trax_centers.email', 'retail_trax_centers.cnic', 'c.name as default_hub', 'c.id as default_hub_id', 'a.name as updated_by', 'retail_trax_centers.status', 'retail_trax_centers.code', 'retail_trax_centers.location_latitude', 'retail_trax_centers.location_longitude', 'retail_trax_centers.created_at as created', 'retail_trax_centers.updated_at as updated','retail_trax_centers.discount','retail_trax_centers.insurance');
 
         $datatables = Datatables::of($trax_center)
             ->editColumn('status', function ($data) {
@@ -1520,7 +1520,7 @@ class RetailAdminUserManagementController extends Controller
             ->Join('zones as z', 'z.id', '=', 'c.zone_id')
             ->select('retail_users.id', 'retail_users.trax_id', 'retail_users.name',
              'retail_users.phone_no', 'retail_users.cnic', 'retail_users.address',
-              'retail_users.category', 'retail_users.created_at', 'retail_users.updated_at',
+              'retail_users.category', 'retail_users.created_at as created', 'retail_users.updated_at as updated',
                'retail_users.status', 'c.name as city', 'c.id as city_id', 'h.name as hub', 'h.id as hub_id',
                'z.name as zone',  
                'ac.name as created_by', 

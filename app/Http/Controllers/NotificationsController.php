@@ -351,7 +351,7 @@ class NotificationsController extends Controller
         }
     }
 
-    static public function send($id, $reference_1_id, $reference_2_id = NULL, $reference_3_id = NULL)
+    static public function send($id, $reference_1_id, $reference_2_id = NULL, $reference_3_id = NULL,$array_data = array())
     {
         $notification = Notification::find($id);
 
@@ -2747,9 +2747,9 @@ class NotificationsController extends Controller
                     if ($ceo) {
                         $to[] = $ceo->email;
                     }*/
-                    $to = ['waqas@trax.pk', 'noman.aziz@trax.pk', 'asad.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'nadir.qureshi@trax.pk', 'hammad.saleem@trax.pk', 'hassan.arman@trax.pk', 'm.sohail@trax.pk', 'ghazanfar.ali@trax.pk'];
+                    $to = ['waqas@trax.pk', 'asad.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'nadir.qureshi@trax.pk', 'hammad.saleem@trax.pk', 'hassan.arman@trax.pk', 'm.sohail@trax.pk', 'ghazanfar.ali@trax.pk', 'Tauseef.sarfaraz@trax.pk', 'Mansoor.ahmad@trax.pk'];
 
-                    $bcc = ['faisal.hasan@trax.pk'];
+                    $bcc = ['Sahban.ghani@trax.pk'];
                     self::email($subject, $body, $to, $cc, $bcc);
                 } else if ($id == 27) {
 
@@ -6018,6 +6018,7 @@ class NotificationsController extends Controller
                         $to[] = 'aftab.qidwai@trax.pk';
                         $to[] = 'wajiha.majeed@trax.pk';
                         $to[] = 'huzaifa.aamir@trax.pk';
+                        $to[] = 'anas.mazhar@trax.pk';
 
                         self::email($subject, $body, $to, NULL, $bcc);
                     }
@@ -11312,6 +11313,14 @@ class NotificationsController extends Controller
                         }
 
                     }
+
+                }
+                else if($id == 234) {
+                    $subject = $notification->subject;
+                    
+                    $body = $array_data['text'];
+                    $to = $array_data['phone'];
+                    self::sms($body, $to, NULL,NULL, $id);
 
                 }
 

@@ -147,8 +147,12 @@ class ShipperReceivingSheetHistoryController extends Controller
 
       foreach ($receiving_sheet_shipments as $receiving_sheet_shipment) {
         $shipment = Shipment::find($receiving_sheet_shipment->shipment_id);
+        // $tracking_numbers[] = $shipment->tracking_number;
 
-        $tracking_numbers[] = $shipment->tracking_number;
+        // Only add the tracking number if the shipment exists
+        if ($shipment){
+          $tracking_numbers[] = $shipment->tracking_number;
+        }
       }
 
       return $tracking_numbers;

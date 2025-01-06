@@ -11,6 +11,11 @@
                 @include('admin.inc.messages')
                 <div id="search_form" class="row mb-2 justify-content-center">
                     <div class="col-4">
+                        <div class="form-group">
+                            <input type="text" id ="tracking_number_filter" name="tracking_number_filter" class="form-control tracking_number_filter" placeholder="Filter by Tracking Number*" data-tags-input-name="tracking_number_filter">
+                        </div>
+                    </div>
+                    <div class="col-4">
                         <div class="form-group input-group ml">
                             <div class="input-group-prepend">
                                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -150,8 +155,8 @@
                                             </div>
 
                                             <div class="col">
-                                                <label>Image<span class="text-danger">*</span></label>
-                                                <input type="file" name="picture_attached" id="picture_attached" class="form-control picture_attached" title="Select File" accept="image/*" data-rule-required="true" data-msg-required="Image is required">
+                                                <label>Image</label>
+                                                <input type="file" name="picture_attached" id="picture_attached" class="form-control picture_attached" title="Select File" accept="image/*">
                                             </div>
                                         </div>
                                         <div class="form-group ml-1 ">
@@ -342,7 +347,12 @@
                     formData.append('quantity', $('#quantity').val());
                     formData.append('remarks', $('#remarks').val());
                     formData.append('odr_nature', $('#odr_nature').val());
-                    formData.append('picture_attached', $('#picture_attached')[0].files[0]);
+                    let pictureInput = $('#picture_attached')[0].files;
+                    if (pictureInput.length > 0) {
+                        // Append the selected file to FormData
+                        formData.append('picture_attached', pictureInput[0]);
+                    }
+                    //formData.append('picture_attached', $('#picture_attached')[0].files[0]);
                     formData.append('_token', '{{ csrf_token() }}');
                     // AJAX request
                     $.ajax({
@@ -497,6 +507,7 @@
                     data: function(d) {
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                        d.tracking_filter = $('input[name="tracking_number_filter"]').val();
                     }
                 },
                 rowId: 'shId',
@@ -513,14 +524,14 @@
                     { data:'shipper_name' ,name: 'users.name', class: 'align-middle shipper_name'},
                     { data:'origin' ,name: 'citi.name', class: 'align-middle origin'},
                     { data:'destination' ,name: 'c.name', class: 'align-middle destination'},
-                    { data:'quantity_by_shipper' ,name: 'shipment.pieces', class: 'align-middle quantity_by_shipper'},
+                    { data:'quantity_by_shipper' ,name: 'shipments.pieces', class: 'align-middle quantity_by_shipper'},
                     { data:'cod_value' ,name: 'shipments.amount', class: 'align-middle cod_value'},
                     { data:'shipment_content_by_shipper', name: 'si.description', class: 'align-middle shipment_content_by_shipper'},
-                    { data:'images' ,name: 'rdinary_discrepancy_reports.picture_path', class: 'align-middle images'},
-                    { data:'quantity_by_admin' ,name: 'is.quantity', class: 'align-middle quantity_by_admin text-center'},
+                    { data:'images' ,name: 'rdinary_discrepancy_reports.picture_path', class: 'align-middle images' ,orderable:false},
+                    { data:'quantity_by_admin' ,name: 'ordinary_discrepancy_reports.quantity', class: 'align-middle quantity_by_admin text-center'},
                     { data:'remarks_by_admin' ,name: 'ordinary_discrepancy_reports.remarks', class: 'align-middle remarks_by_admin'},
                     { data:'odr_nature' ,name: 'odr_nature', class: 'align-middle odr_nature'},
-                    { data:'created_at' ,name: 'ordinary_discrepancy_reports.created_at', class: 'align-middle created_at'},
+                    { data:'created' ,name: 'ordinary_discrepancy_reports.created_at', class: 'align-middle created'},
                     { data:'updated_by' ,name: 'admins.name', class: 'align-middle updated_by'},
                     { data:'admin_hub' ,name: 'ch.name', class: 'align-middle admin_hub'},
                     

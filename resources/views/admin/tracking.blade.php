@@ -788,7 +788,7 @@
                                 $('#call_history').removeClass('d-none');
                             }
                             $.each(response.data, function(index, value) {
-                                var dateTimeParts = value.data.updated_at.split(' ');
+                                var dateTimeParts = value.data.updated_at?.split(' ') || ['-', '-']; // Fallback if updated_at is invalid
                                 var row = $('<tr>');
                                 // row.append($('<td>').text(index + 1)); 
                                 row.append($('<td>').text(dateTimeParts[0])); // Display date
@@ -2706,6 +2706,7 @@
                         '<th class="border-primary border-darken-1">Product Content</th>' +
                         '<th class="border-primary border-darken-1">Remarks</th>' +
                         '<th class="border-primary border-darken-1">Added By</th>' +
+                        '<th class="border-primary border-darken-1">Hub</th>' +
                         '<th class="border-primary border-darken-1">Quantity</th>' +
                         '<th class="border-primary border-darken-1">Image</th>' +
                         '<th class="border-primary border-darken-1">Created At</th>' +
@@ -2722,9 +2723,10 @@
                                 modalContent += '<td>' + data.product_content + '</td>'; 
                                 modalContent += '<td>' + data.remarks + '</td>'; 
                                 modalContent += '<td>' + data.created_by + '</td>';
+                                modalContent += '<td>' + data.hub_name + '</td>';
                                 modalContent += '<td>' + data.quantity + '</td>';
                                 modalContent += '<td>' + data.image_html + '</td>'; 
-                                modalContent += '<td>' + data.created_at + '</td>';
+                                modalContent += '<td>' + data.created + '</td>';
                                 modalContent += '</tr>';                            
                         });
 

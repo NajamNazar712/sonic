@@ -443,7 +443,7 @@
 					{data: 'id', name: 'notifications.id', class: 'align-middle id'},
 					{data: 'name', name: 'notifications.name', class: 'align-middle name'},
 					{data: 'type', name: 'nt.id', class: 'align-middle type'},
-					{data: 'updated_at', name: 'notifications.updated_at', class: 'align-middle updated_at'},
+					{data: 'updated', name: 'notifications.updated_at', class: 'align-middle updated_at'},
 					{data: 'updated_by', name: 'a.name', class: 'align-middle updated_by'},
 					{data: 'status', name: 'notifications.status', class: 'align-middle status'},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}

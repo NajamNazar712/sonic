@@ -139,7 +139,7 @@
                     },
                     {data: 'shipper_name', name: 'u.name', class: 'align-middle shipper_name'},
                     {data: 'status', name: 'star_shippers.status', class: 'align-middle status'},
-                    {data: 'created_at', name: 'star_shippers.created_at', class: 'align-middle created_at'},
+                    {data: 'created', name: 'star_shippers.created_at', class: 'align-middle created_at'},
                     {
                         data: 'action',
                         name: 'action',

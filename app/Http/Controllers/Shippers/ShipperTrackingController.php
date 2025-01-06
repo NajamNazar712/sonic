@@ -312,7 +312,7 @@ class ShipperTrackingController extends Controller
                         $details['order_information']['booking_type_id'] = $shipment->booking_type_id;
 
                         if ($shipment->booking_type_id != 4) {
-                            $details['order_information']['amount'] = $shipment->amount;
+                            $details['order_information']['amount'] = number_format($shipment->amount);
                         }
                         else {
                             if ($shipment->charges_mode_id == 1) {

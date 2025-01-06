@@ -271,7 +271,7 @@
                             columns.push({data: 'department', name: 'ad.name', class: 'align-middle department'});
                             columns.push({
                                 data: 'designation',
-                                name: 'a.designation',
+                                name: 'ed.name',
                                 class: 'align-middle designation'
                             });
                             $.each(data.period, function (i, date) {

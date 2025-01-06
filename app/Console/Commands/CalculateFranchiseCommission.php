@@ -267,7 +267,7 @@ class CalculateFranchiseCommission extends Command
             'rs.retail_user_id'
         ])
         ->get();
-
+        $bulkInsertData = [];    
         foreach ($shipments as $shipment) {
             $weight_charges = $shipment->total_charges - $shipment->gst_amount;
             $net_commission = ($shipment->product_percentage / 100) * $shipment->weight_charges;
@@ -290,6 +290,8 @@ class CalculateFranchiseCommission extends Command
                 'franchise_gst_amount' => $shipment->gst_amount,
                 'total_charges' => $shipment->total_charges,
                 'weight_charges' => $shipment->weight_charges,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
             ];
             // error_log('bulkInsertData'.print_r($bulkInsertData, true));
 

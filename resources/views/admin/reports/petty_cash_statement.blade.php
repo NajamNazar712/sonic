@@ -423,7 +423,7 @@
                     {data: 'status', name: 'petty_cash_statement_details.status', class: 'align-middle status'},
                     {data: 'statement_link', name: 'pcs.id', class: 'align-middle statement_link'},
                     {data: 'hub_name', name: 'h.name', class: 'align-middle hub_name'},
-                    {data: 'zone_name', name: 'zone.name', class: 'align-middle zone_name'},
+                    {data: 'zone_name', name: 'z.name', class: 'align-middle zone_name'},
                     {data: 'petty_cash_statement_link', name: 'shipments.tracking_number', class: 'align-middle petty_cash_statement_link'},
                     {data: 'statement_reference_no', name: 'pcs.reference_no', class: 'align-middle statement_reference_no'},
                     {data: 'created_at', name: 'pcs.created_at', class: 'align-middle created_at'},
