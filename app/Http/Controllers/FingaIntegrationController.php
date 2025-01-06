@@ -101,7 +101,7 @@ class FingaIntegrationController extends Controller
                 $body = json_decode($body);
                 FingaApiLog::create([
                     'nature' => 'on-boarding',
-                    'status' => $body->status,
+                    'status' => isset($body->status) ? $body->status : 0,
                     'details' => isset($body->users) ? json_encode($body->users) : json_encode($body),
                 ]);
 
