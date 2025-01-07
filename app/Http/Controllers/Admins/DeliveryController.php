@@ -4339,7 +4339,9 @@ class DeliveryController extends Controller
                 ->join('users AS u', 'u.id', '=', 's.user_id')
                 ->join('sub_category_segments AS scs', 'scs.id', '=', 'u.sub_segment_id')
                 ->whereIn('s.shipper_status_id', $dncc_status)
+                ->whereIn('s.id', $shipment_ids)
                 ->where('dns.delivery_note_id', $request->id)
+                ->whereNotIn('dns.status',[8,10,11])
                 ->groupBy('scs.name', 'dns.delivery_note_id')
                 ->get();
 
