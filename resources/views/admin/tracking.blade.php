@@ -185,7 +185,9 @@
                                     <div class="col-6 d-none" id="alternate_phone_input">
                                         <fieldset class="form-group">
                                             <input type="text" name="alternate_phone" class="form-control"
-                                                id="alternate_phone" placeholder="Enter Alternate Number">
+                                                id="alternate_phone" placeholder="Enter Alternate Number"
+                                                data-rule-required="true" data-msg-required="Alternate Number is required"
+                                                >
                                         </fieldset>
                                     </div>
                                     {{-- <div class="col-6 d-none" id="cod_amount_input">
