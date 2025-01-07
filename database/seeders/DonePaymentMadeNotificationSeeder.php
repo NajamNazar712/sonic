@@ -26,7 +26,7 @@ class DonePaymentMadeNotificationSeeder extends Seeder
                 'type_id' => 2, 
                 'subject' => NULL, 
                 'body' => 'Done Payment Report', 
-                'updated_by' => Auth::id(),
+                'updated_by' => 1,
                 'status' => 1
             ),
         ));
