@@ -22,10 +22,10 @@ class DonePaymentMadeNotificationSeeder extends Seeder
                 'id' => 235, 
                 'created_at' => $timestamp, 
                 'updated_at' => $timestamp, 
-                'name' => 'Done Payment SMS', 
-                'type_id' => 2, 
+                'name' => 'Done Payment Email', 
+                'type_id' => 1, 
                 'subject' => NULL, 
-                'body' => 'Done Payment Report', 
+                'body' => 'Done Payment Report [link]', 
                 'updated_by' => 1,
                 'status' => 1
             ),
