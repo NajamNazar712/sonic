@@ -11408,7 +11408,7 @@ class NotificationsController extends Controller
                         // $to[] = 'syed.furqan@trax.pk';
                         // $to[] = 'm.sohail@trax.pk';
                         // $to[] = 'fawad.ahmed@trax.pk';
-                        // $to[] = 'aftab.qidwai@trax.pk';
+                        $to[] = 'aftab.qidwai@trax.pk';
                         // $to[] = 'wajiha.majeed@trax.pk';
                         // $to[] = 'huzaifa.aamir@trax.pk';
                         $to[] = 'anas.mazhar@trax.pk';

@@ -24,8 +24,8 @@ class DonePaymentMadeNotificationSeeder extends Seeder
                 'updated_at' => $timestamp, 
                 'name' => 'Done Payment Email', 
                 'type_id' => 1, 
-                'subject' => NULL, 
-                'body' => 'Done Payment Report [link]', 
+                'subject' => 'Download link for Done Payment Report', 
+                'body' => 'Done Payment Report' . PHP_EOL . '[link]', 
                 'updated_by' => 1,
                 'status' => 1
             ),
