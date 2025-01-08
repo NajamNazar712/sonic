@@ -106,6 +106,22 @@ return [
             'strict' => false,
             'engine' => null,
         ],
+
+        'apollo_db' => [
+            'driver' => 'mysql',
+            'host' => env('DB_HOST_APOLLO', '127.0.0.1'),
+            'port' => env('DB_PORT_APOLLO', '3306'),
+            'database' => env('DB_DATABASE_APOLLO', 'forge'),
+            'username' => env('DB_USERNAME_APOLLO', 'forge'),
+            'password' => env('DB_PASSWORD_APOLLO', ''),
+            'unix_socket' => env('DB_SOCKET_APOLLO',  env('DB_SOCKET', '')),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'strict' => false,
+            'engine' => null,
+        ],
+
     ],
 
     /*

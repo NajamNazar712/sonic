@@ -838,7 +838,7 @@ class AdminShipmentHandoverController extends Controller
             'hss.shipment_id',
             DB::raw("COUNT(DISTINCT excess_handover_shipments.id) AS excess_shipments")
         ]);
-    
+
     if ($tracking_number = $request->get('search_tracking')) {
         $handover_list->where('s.tracking_number', $tracking_number);
     }
@@ -1081,7 +1081,6 @@ class AdminShipmentHandoverController extends Controller
           });
         } 
         return  $datatable->rawColumns(['shipment_pieces','remaining_shipment_count','excess_shipments','shipment_count'])->make(true);
-
       }
 
     public function handover_shipments_count(Request $request){
