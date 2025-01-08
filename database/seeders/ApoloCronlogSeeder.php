@@ -1,8 +1,12 @@
 <?php
 
-use Illuminate\Database\Seeder;
+namespace Database\Seeders;
 
-class ApoloCronlogSeeder extends Seeder
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+
+class ApolloCronJobLogsSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -16,8 +20,8 @@ class ApoloCronlogSeeder extends Seeder
                 'id' => 1,
                 'job_name' => 'apollo:fetch-shipments-status',
                 'last_run_time' => null,  // Set to `null` initially or use `Carbon::now()` if needed
-                'created_at' => \Carbon\Carbon::now(),
-                'updated_at' => \Carbon\Carbon::now(),
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
             ]
         ]);
     }
