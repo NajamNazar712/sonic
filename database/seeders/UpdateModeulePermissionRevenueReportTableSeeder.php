@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 
-class UpdateModulePermissionRevenueReportTableSeeder extends Seeder
+class UpdateModeulePermissionRevenueReportTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
