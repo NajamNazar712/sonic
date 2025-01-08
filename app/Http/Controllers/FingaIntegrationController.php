@@ -12,7 +12,7 @@ use App\Models\FingaApiLog;
 class FingaIntegrationController extends Controller
 {
 
-    private static function getToken($api) {
+    public static function getToken($api) {
 
         $response = Http::withHeaders([
             'accept' => 'application/json',
