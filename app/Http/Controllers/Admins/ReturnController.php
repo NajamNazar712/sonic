@@ -7273,6 +7273,7 @@ class ReturnController extends Controller
 //            ->whereDate('rider_return_note_requests.created_at', Carbon::today())
 //            ->where('rider_return_note_requests.status', 0)
             ->select('rider_return_note_requests.id as id', 'rider_return_note_requests.id as request_note_id', 'rider_return_note_requests.created_at as date', 'r.name as rider_name', 'c.name as hub', 'ro.code as code', 'ro.start as start', 'ro.end as end', 'rider_return_note_requests.shipment_count as shipments_count', 'rider_return_note_requests.shipment_count as shipments_count_link', 'z.name as zone_name', 'r.operation_rider_id', 'r.rider_type_id', 'rider_types.name as rt', 'ad.name as admin_name', 'rider_return_note_requests.updated_at as updated')
+            ->whereBetween('rider_return_note_requests.created_at', ['2024-01-01 00:00:00', now()->toDateTimeString()])
             ->orderBy('rider_return_note_requests.id', 'DESC');
 
         // dd($return_note_requests->get());
