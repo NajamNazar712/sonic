@@ -6,7 +6,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
-class ApolloCronJobLogsSeeder extends Seeder
+class ApoloCronlogSeeder extends Seeder
 {
     /**
      * Run the database seeds.
