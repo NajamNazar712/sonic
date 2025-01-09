@@ -13,8 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('done_payment_shipments', function (Blueprint $table) {
-            $table->string('transaction_id')->nullable();
+        Schema::table('finga_api_logs', function (Blueprint $table) {
+            $table->integer('shipment_id')->nullable();
         });
     }
 
@@ -25,8 +25,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('done_payment_shipments', function (Blueprint $table) {
-            $table->dropColumn('transaction_id');
+        Schema::table('finga_api_logs', function (Blueprint $table) {
+            $table->dropColumn('shipment_id');
         });
     }
 };

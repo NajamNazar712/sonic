@@ -99,11 +99,13 @@ class FingaIntegrationController extends Controller
             } else {
                 $body = $response->getBody();
                 $body = json_decode($body);
-                FingaApiLog::create([
-                    'nature' => 'on-boarding',
-                    'status' => $body->status,
-                    'details' => isset($body->users) ? json_encode($body->users) : json_encode($body),
-                ]);
+
+                $this->apiLog('on-boarding-response', 'error', $body ,null);
+                // FingaApiLog::create([
+                //     'nature' => 'on-boarding-response',
+                //     'status' => $body->status,
+                //     'details' => isset($body->users) ? json_encode($body->users) : json_encode($body),
+                // ]);
 
                 return redirect()->back()->with('finga_error', 'Unable to Process Wallet Request. Please contact with your Sales Person');
             }
@@ -136,6 +138,16 @@ class FingaIntegrationController extends Controller
             return $body->url;
         }
 
+    }
+
+    public static function apiLog($nature, $status, $details, $shipment_id) {
+
+        FingaApiLog::create([
+            'nature' => $nature,
+            'status' => $status,
+            'details' => $details ? json_encode($details, JSON_PRETTY_PRINT) : null, // Save as JSON
+            'shipment_id' => $shipment_id
+        ]);
     }
 
 }
