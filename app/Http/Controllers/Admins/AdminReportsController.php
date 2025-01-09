@@ -4397,7 +4397,7 @@ class AdminReportsController extends Controller
         }
 
         return $datatable
-        ->rawColumns(['statement_link', 'petty_cash_statement_link', 'sdn_id_link', 'dncc_link'])
+        ->rawColumns(['statement_link', 'petty_cash_statement_link', 'sdn_id_link', 'dncc_link', 'account_head', 'account_title', 'statement_reference_no'])
         ->make(true);
     }
 
