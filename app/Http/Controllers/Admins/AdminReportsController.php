@@ -15262,6 +15262,7 @@ class AdminReportsController extends Controller
             'adjustment.adjustment_amount as adjusted_amount',
             'scs.name as sub_segment',
             'cargo_status.name as cargo_status',
+            'cargo_status.id as cargo_status_id',
             'cmb.seal_number as seal_number',
             'bs.name as bag_status',
             'sjfa.created_at as first_attempt_date',
@@ -15614,6 +15615,16 @@ class AdminReportsController extends Controller
             //     }
             // })
             ->editColumn('current_hub', function ($shipment) {
+                // error_log('pp'.print_r($shipment,true));
+                if(in_array($shipment->ShipperStatusId ,[3,49])){
+                    if(in_array($shipment->cargo_status_id,[3, 4, 7, 8, 9,6])){ //Shipment In Transit || Shipment Misrouted Forwarded concered hub change reference TO-6939
+                        return $shipment->destination;
+                    }elseif($shipment->cargo_status_id == 3){
+                        return $shipment->destination;
+                    }
+                }elseif($shipment->ShipperStatusId == 18){
+                    return $shipment->origin;
+                }
                 if ($shipment->current_hub_id != null) {
                     return $shipment->current_hub_name;
                 } else {
