@@ -192,7 +192,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('saleperson:numbers')->dailyAt('06:00')->runInBackground();
         $schedule->command('month:average')->dailyAt('06:00')->runInBackground();
         $schedule->command('hubwise:split')->dailyAt('06:00')->runInBackground();
-        $schedule->command('lastmile:countupdate')->dailyAt('06:30')->runInBackground();
+        // $schedule->command('lastmile:countupdate')->dailyAt('06:30')->runInBackground();
         $schedule->command('count:pendingpaymentshipments')->dailyAt('06:00')->runInBackground();
         $schedule->command('crm:closed_reason')->dailyAt('23:50')->runInBackground();
         $schedule->command('crm:progress_report')->dailyAt('23:57')->runInBackground();
