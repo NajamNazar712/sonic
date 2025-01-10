@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Shippers;
 
 use App\Http\Controllers\FingaIntegrationController;
+use App\Models\WalletUser;
 use Illuminate\Support\Facades\Log;
 use Auth;
 use Carbon\Carbon;
@@ -2645,9 +2646,9 @@ class ShipperDashboardController extends Controller
                 'email'=>'required|email|between:0,100',
             ]);
             $flag = true;
-            $user = User::where('email', $request->email)->orWhere('phone', $request->phone)->first();
+            $user = WalletUser::where('email', $request->email)->orWhere('phone', $request->phone)->first();
             if($user){
-                if(session('user_id') == $user->id) {
+                if(session('user_id') == $user->user_id) {
                     $flag = true;
                 }
                 else{
@@ -2655,11 +2656,17 @@ class ShipperDashboardController extends Controller
                 }
             }
             if($flag == true){
-                User::where('id', session('user_id'))->update(['name' => $request->name,'cnic' => $request->cnic, 'phone' => $request->phone, 'email' => $request->email,
-                    'updated_by_type' => 0, 'updated_by_id' => session('user_id')]);
 
+                $data = [
+                    'name'=>$request->name,
+                    'cnic'=>$request->cnic,
+                    'phone'=>$request->phone,
+                    'email'=>$request->email,
+                    'user_id'=>session('user_id'),
+                    'status'=>1,
+                ];
 
-                $finja = FingaIntegrationController::signUp();
+                $finja = FingaIntegrationController::signUp($data);
                 if (isset($finja['error'])) {
                     $finjaArray = json_decode(json_encode($finja), true);
 
@@ -2669,16 +2676,19 @@ class ShipperDashboardController extends Controller
 
                     session()->flash('errorMessages', $errorMessages);
 
-                    return redirect()->back();
+                    return response()->json(['status' => 0, 'error'=>$errorMessages]);
                 }else{
-                    return view('client.finja_dashboard')->with(['url'=>$finja['url']]);
+                    $data['wallet_id'] =$finja['wallet_id'];
+                    WalletUser::wallet_create($data);
+
+                    return response()->json(['status' => 1, 'url'=>$finja['url']]);
                 }
             }
             else{
-                return redirect()->back()->with(['error'=>"Email Address and Phone Number must be unique"]);
+                return redirect()->back()->with(['error'=>["Email Address and Phone Number must be unique"]]);
+
             }
         }
-
-        return redirect()->back()->with(['success'=>"Profile Information Successfully Updated"]);
+        return response()->json(['status' => 1, 'success'=>'Profile Information Successfully Updated"']);
     }
 }

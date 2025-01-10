@@ -45,24 +45,25 @@ class FingaIntegrationController extends Controller
         }
     }
 
-    public static function signUp() {
+    public static function signUp($user = array()) {
 
+        $user = (object) $user;
         $api = config('app.FINGA_URL');
         $token = self::getToken($api);
         $cnic_front = '';
         $cnic_back = '';
+        $user_id = session('user_id');
 
         if($token) {
             $result = array();
-            $user = Auth::user()->refresh();
-            $user_documents = UserDocumentAttachment::where('user_id', $user->id)->first();
+            $user_documents = UserDocumentAttachment::where('user_id', $user_id)->first();
             if($user_documents) {
-                $cnic_front = Storage::url('users_attached_documents/' . $user->id . '/' . $user_documents->cnic_front_image);
-                $cnic_back = Storage::url('users_attached_documents/' . $user->id . '/' . $user_documents->cnic_back_image);
+                $cnic_front = Storage::url('users_attached_documents/' . $user_id . '/' . $user_documents->cnic_front_image);
+                $cnic_back = Storage::url('users_attached_documents/' . $user_id . '/' . $user_documents->cnic_back_image);
             }
 
             $requestPayload = [
-                "client_id" => $user->id,
+                "client_id" => $user_id,
                 "client_name" => $user->name,
                 "users" => [
                     [
@@ -91,8 +92,6 @@ class FingaIntegrationController extends Controller
            
                 $body = $response->getBody();
                 $body = json_decode($body);
-                $user->wallet_id = $body->wallet_id;
-                $user->save();
 
                 $mobile_no = $body->users[0]->mobile_no;
                 $cnic = $body->users[0]->cnic;
@@ -101,7 +100,8 @@ class FingaIntegrationController extends Controller
                 $url = self::getLoginUrl($api, $token, $mobile_no, $cnic, $email);
 
                 $result['url'] = $url;
-                
+                $result['wallet_id'] = $body->wallet_id;
+
             } else {
                 $body = $response->getBody();
                 $body = json_decode($body);

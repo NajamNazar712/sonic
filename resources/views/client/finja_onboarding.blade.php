@@ -14,15 +14,8 @@
                     <div class="card-content" aria-expanded="true" style="height: 100%; padding: 0;">
                         <div class="card-body">
                             <div class="card-text">
-                                @if(session('errorMessages'))
-                                    <ul>
-                                        @foreach(session('errorMessages') as $message)
-                                            <li style="color: red">{{ $message }}</li>
-                                        @endforeach
-                                    </ul>
-                                @endif
                             </div>
-                            <form id="main-form" class="form form-horizontal" method="post" action="{{route('cod.update.profile_wallet')}}">
+                            <form id="main-form" class="form form-horizontal"  novalidate="novalidate">
                                 @csrf
                                 <div class="form-body">
                                     <h4 class="form-section">Profile Information (Please verify your profile information before sign up to wallet)</h4>
@@ -68,7 +61,7 @@
 
                                     </div>
                                     <div class="form-actions right">
-                                        <input type="submit" class="btn btn-primary" value="Signup to Wallet" >
+                                        <button type="submit" class="btn btn-primary"  >Signup to Wallet</button>
                                     </div>
                                 </div>
                             </form>
@@ -81,57 +74,64 @@
 
 @endsection
 
-@section('css')
-    <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/vendors/css/forms/selects/select2.min.css') }}">
-    <link rel="stylesheet" type="text/css"
-          href="{{ asset('app-assets/vendors/css/tables/datatable/datatables.min.css') }}">
-    <link rel="stylesheet" type="text/css"
-          href="{{ asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/vendors/css/extensions/toastr.css') }}">
 
-    <style>
-        /* body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-        }
-        iframe {
-            position: absolute;
-            width: 80%;
-            height: 80%;
-            left: 10%;
-            border: none;
-        } */
-    </style>
+@section('css')
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 @endsection
 
 @section('js')
-    <script src="{{ asset('app-assets/vendors/js/forms/select/select2.full.min.js') }}" type="text/javascript"></script>
-    <script src="{{ asset('app-assets/vendors/js/tables/datatable/datatables.min.js') }}" type="text/javascript"></script>
-    <script src="{{ asset('app-assets/vendors/js/forms/select/selectize.min.js') }}" type="text/javascript"></script>
-    <script src="{{ asset('app-assets/vendors/js/forms/tags/tagging.min.js') }}" type="text/javascript"></script>
-    <script src="{{ asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js') }}" type="text/javascript">
-    </script>
-    <script src="{{ asset('app-assets/vendors/js/extensions/toastr.min.js') }}" type="text/javascript"></script>
-    <script src="{{ asset('app-assets/vendors/js/extensions/sweetalert.min.js') }}" type="text/javascript"></script>
-    <script src="{{ asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js') }}"
-            type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 
 
     <script>
-        $( "#main-form" ).validate({
-            errorClass:"danger",
-            normalizer: function(value) {
-                return $.trim(value);
-            },
-            errorPlacement: function(error, element) {
-                error.addClass('w-100').appendTo(element.parent('.form-group'));
-            },
-            submitHandler: function(form) {
+        $(document).ready(function () {
+            $( "#main-form" ).validate({
+                errorClass: "danger",
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $.ajax({
+                        url: '{{ route('cod.update.profile_wallet') }}',
+                        method: 'POST',
+                        data: $(form).serialize(),  // Serialize form data properly
+                        dataType: 'json', // Ensure proper response format
+                        success: function(data) {
+                            if(data.status == 0) {
+                                $('.error-messages').remove();
 
-                form.submit();
+                                if (data.status === 0 && data.error.length > 0) {
+                                    let errorList = $('<ul class="error-messages text-danger mt-2"></ul>');
 
-            }
+                                    $.each(data.error, function (index, message) {
+                                        errorList.append('<li>' + message + '</li>');
+                                    });
+                                    $('.card-text').html(errorList); // Append errors after the `.card` element
+                                }
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error(xhr.responseText);
+
+                        }
+                    });
+                }
+            });
+
+
         });
     </script>
 @endsection
