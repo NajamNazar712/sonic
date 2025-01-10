@@ -8,5 +8,5 @@ use Illuminate\Database\Eloquent\Model;
 class FingaApiLog extends Model
 {
     use HasFactory;
-    protected $fillable = ['nature', 'status','details'];
+    protected $fillable = ['nature', 'status','details', 'shipment_id'];
 }

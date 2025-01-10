@@ -13,13 +13,16 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('shipment_additional_charges', function (Blueprint $table) {
+        Schema::create('finja_log_settlement_records', function (Blueprint $table) {
+            $table->id();
+            $table->integer('shipment_id')->index();
             $table->boolean('wallet_log_updated')->default(0);
             $table->boolean('wallet_settlement_updated')->default(0);
             $table->boolean('wallet_adjustment_updated')->default(0);
             $table->timestamp('wallet_log_updated_at')->nullabe();
             $table->timestamp('wallet_settlement_updated_at')->nullabe();
             $table->timestamp('wallet_adjustment_updated_at')->nullabe();
+            $table->timestamps();
         });
     }
 
@@ -30,8 +33,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('shipment_additional_charges', function (Blueprint $table) {
-            $table->dropColumn(['wallet_log_updated', 'wallet_settlement_updated', 'wallet_adjustment_updated', 'wallet_log_updated_at', 'wallet_settlement_updated_at','wallet_adjustment_updated_at']);
-        });
+        Schema::dropIfExists('finja_log_settlement_records');
     }
 };

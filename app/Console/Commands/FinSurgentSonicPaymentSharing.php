@@ -19,9 +19,12 @@ use App\Http\Models\ShipmentServicesCharges;
 use App\Http\Controllers\AdminFinanceController;
 use App\ShipmentAdditionalCharges;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Http;
+use App\Http\Traits\FinSurgentLogTrait;
 
 class FinSurgentSonicPaymentSharing extends Command
 {
+    use FinSurgentLogTrait;
     /**
      * The name and signature of the console command.
      *
@@ -47,16 +50,22 @@ class FinSurgentSonicPaymentSharing extends Command
        
         foreach($pending_payment_wallet_users as $pending_payment) {
             
-            $pending_payment_shipment_ids = PendingPaymentShipment::leftjoin('shipment_additional_charges as sac', 'pending_payment_shipments.shipment_id', '=', 'sac.shipment_id' )->where('pending_payment_shipments.pending_payment_id', $pending_payment->id)->where('pending_payment_shipments.type', 3)-where('sac.wallet_log_updated', 1)->select(['pending_payment_shipments.*'])->get();
+            $pending_payment_shipment_ids = PendingPaymentShipment::leftJoin('finja_log_settlement_records as sac', 'pending_payment_shipments.shipment_id', '=', 'sac.shipment_id')
+            ->where('pending_payment_shipments.pending_payment_id', $pending_payment->id)
+            ->where('pending_payment_shipments.type', 3)
+            ->where(function ($query) {
+                $query->whereNull('sac.id') 
+                    ->orWhere('sac.wallet_log_updated', 0);
+            })
+            ->select(['pending_payment_shipments.*'])
+            ->get();
 
             foreach ($pending_payment_shipment_ids as $pending_payment_shipment) {
-               
                 if ($pending_payment_shipment) {
 
                     $shipment = Shipment::find($pending_payment_shipment->shipment_id);
-
+                    $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($pending_payment_shipment->shipment_id);
                     $charges = $shipment->weight_charges + $shipment->fuel_surcharge + $faf_charges;
-
                     if($charges != $pending_payment_shipment->charges) {
 
                         if ($shipment->business_category_id == 1) { 
@@ -75,47 +84,19 @@ class FinSurgentSonicPaymentSharing extends Command
 
                     }
                         
-                    $api = env('FINGA_URL');
-                    $token = FingaIntegrationController::getToken($api);
-                    
-                    if($token) {
-                        
                         $requestPayload = [
                             "client_id" => $pending_payment->user_id,
                             "wallet_id" => $pending_payment->wallet_id,
-                            "reference_id" => $pending_payment_shipment->id,
+                            "reference_id" => (string) Str::uuid(),
                             "shipment_id" =>  $pending_payment_shipment->shipment_id,
                             "amount" => $shipment->amount,
                             "charges" => [
-                                'arrival_charges' => $shipment->weight_charges,
-                                'fuel_surcharge' => $shipment->fuel_surcharge,
-                                'faf_charges' => $faf_charges
+                                'arrival_charges' =>  intval($shipment->weight_charges),
+                                'fuel_surcharge' =>  intval($shipment->fuel_surcharge),
+                                'faf_charges' => intval($faf_charges)
                             ]
                         ];
-            
-                        $response = Http::withHeaders([
-                            'accept' => 'application/json',
-                            'Authorization' => "Bearer " . $token,
-                        
-                        ])->post($api.'transactions/log/payment', $requestPayload);
-
-                        FingaIntegrationController::apiLog('log-request', 1, $requestPayload ,$pending_payment_shipment->shipment_id);
-
-                        if($response->successful()) { 
-                            
-                            $body = $response->getBody();
-                            $body = json_decode($body);
-
-                            FingaIntegrationController::apiLog('log-response', 'success', $body ,$pending_payment_shipment->shipment_id);
-
-                            ShipmentAdditionalCharges::where('shipment_id',$pending_payment_shipment->shipment_id)->update(['wallet_log_updated' => true, 'wallet_log_updated_at' => Carbon::now()]);
-
-                        } else {
-                            $body = $response->getBody();
-                            $body = json_decode($body);
-                            FingaIntegrationController::apiLog('log-response', 'error', $body ,$pending_payment_shipment->shipment_id);
-                        }
-                    }
+                        $this->arrival_shipment_logs($requestPayload, $pending_payment_shipment);
                 }
             }
         }

@@ -101,12 +101,6 @@ class FingaIntegrationController extends Controller
                 $body = json_decode($body);
 
                 $this->apiLog('on-boarding-response', 'error', $body ,null);
-                // FingaApiLog::create([
-                //     'nature' => 'on-boarding-response',
-                //     'status' => $body->status,
-                //     'details' => isset($body->users) ? json_encode($body->users) : json_encode($body),
-                // ]);
-
                 return redirect()->back()->with('finga_error', 'Unable to Process Wallet Request. Please contact with your Sales Person');
             }
             
