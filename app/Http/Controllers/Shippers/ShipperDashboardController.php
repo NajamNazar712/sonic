@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\Http\Controllers\FingaIntegrationController;
 use Illuminate\Support\Facades\Log;
 use Auth;
 use Carbon\Carbon;
@@ -2631,5 +2632,53 @@ class ShipperDashboardController extends Controller
         if($user->status == 1){
             session(['status' => 2]);
         }
+    }
+
+    public function updateProfileWallet(Request $request)
+    {
+        //1 for Admin, 0 for User
+        if (session('user_type') == 1) {
+            $request->validate([
+                'cnic'=>'required|string|max:255',
+                'name'=>'required|string|max:255',
+                'phone'=>'required|string|max:255',
+                'email'=>'required|email|between:0,100',
+            ]);
+            $flag = true;
+            $user = User::where('email', $request->email)->orWhere('phone', $request->phone)->first();
+            if($user){
+                if(session('user_id') == $user->id) {
+                    $flag = true;
+                }
+                else{
+                    $flag = false;
+                }
+            }
+            if($flag == true){
+                User::where('id', session('user_id'))->update(['name' => $request->name,'cnic' => $request->cnic, 'phone' => $request->phone, 'email' => $request->email,
+                    'updated_by_type' => 0, 'updated_by_id' => session('user_id')]);
+
+
+                $finja = FingaIntegrationController::signUp();
+                if (isset($finja['error'])) {
+                    $finjaArray = json_decode(json_encode($finja), true);
+
+                    $errorMessages = collect($finjaArray['error']['users'][0]['message'])
+                        ->flatten()
+                        ->all();
+
+                    session()->flash('errorMessages', $errorMessages);
+
+                    return redirect()->back();
+                }else{
+                    return view('client.finja_dashboard')->with(['url'=>$finja['url']]);
+                }
+            }
+            else{
+                return redirect()->back()->with(['error'=>"Email Address and Phone Number must be unique"]);
+            }
+        }
+
+        return redirect()->back()->with(['success'=>"Profile Information Successfully Updated"]);
     }
 }

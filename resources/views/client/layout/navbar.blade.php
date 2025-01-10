@@ -61,14 +61,13 @@
                 @if(session('status') == 3)
                       @if(session('user_type') == 1)
                         <a class="dropdown-item" href="{{ route('cod.edit.profile') }}"><span class="menu-title"><i class="ft-user"></i>Profile</span></a>
-                      @endif
 
                       @if(Auth::user()->wallet_id != null)
-                      <a class="dropdown-item" href="{{ route('cod.wallet.login') }}"><span class="menu-title"><i class="ft-file"></i>Wallet</span></a>
+                          <a class="dropdown-item" href="{{ route('cod.wallet.login') }}"><span class="menu-title"><i class="ft-file"></i>Wallet</span></a>
                       @else
-                      <a class="dropdown-item" href="{{ route('cod.wallet.signup') }}"><span class="menu-title"><i class="ft-file"></i>Sign-Up for Wallet</span></a>
+                          <a class="dropdown-item" href="{{ route('cod.wallet.on_boarding') }}"><span class="menu-title"><i class="ft-file"></i>Sign-Up for Wallet</span></a>
                       @endif
-
+                      @endif
                       <a class="dropdown-item" href="{{ route('cod.resources.index') }}"><span class="menu-title"><i class="ft-file"></i>Resources</span></a>
                       @if(session('sale_person_status') == 1)
                           <a class="dropdown-item" href="{{ route('cod.contacts') }}"><span class="menu-title"><i class="ft-phone"></i>Contacts</span></a>
