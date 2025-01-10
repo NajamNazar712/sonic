@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Models\Shipper\User;
+use App\Http\Models\UserDocumentAttachment;
+use App\Http\Models\WalletUser;
+use App\Models\FingaApiLog;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
-use App\Http\Models\UserDocumentAttachment;
-use App\Models\FingaApiLog;
 
 class FingaIntegrationController extends Controller
 {
@@ -33,35 +34,40 @@ class FingaIntegrationController extends Controller
 
     }
     public function login(Request $request) {
+        $wallet = auth()->user()->load('wallet');
+        $user = isset($wallet->wallet)??null;
+        if($user) {
+            $api = config('app.FINGA_URL');
+            $user = WalletUser::where('user_id', session('user_id'))->where('substitute_user_id', 0)->first();
+            $token = $this->getToken($api);
+            $url = $this->getLoginUrl($api, $token, $user->phone, $user->cnic, $user->email);
 
-        $api = env('FINGA_URL');
-        $user = Auth::user();
-        $token = $this->getToken($api);
-        $url = $this->getLoginUrl($api, $token, $user->phone, $user->cnic, $user->email);
-
-        if($url) {
-            return view('client.finga_dashboard')->with(['url'=> $url]);
+            if ($url) {
+                return view('client.finja_dashboard')->with(['url' => $url]);
+            }
         }
+        return  redirect()->back();
     }
 
-    public function signUp(Request $request) {
+    public static function signUp($user = array()) {
 
-        $api = env('FINGA_URL');
-        $token = $this->getToken($api); 
+        $user = (object) $user;
+        $api = config('app.FINGA_URL');
+        $token = self::getToken($api);
         $cnic_front = '';
         $cnic_back = '';
+        $user_id = session('user_id');
 
         if($token) {
-
-            $user = Auth::user();
-            $user_documents = UserDocumentAttachment::where('user_id', $user->id)->first();
+            $result = array();
+            $user_documents = UserDocumentAttachment::where('user_id', $user_id)->first();
             if($user_documents) {
-                $cnic_front = Storage::url('users_attached_documents/' . $user->id . '/' . $user_documents->cnic_front_image);
-                $cnic_back = Storage::url('users_attached_documents/' . $user->id . '/' . $user_documents->cnic_back_image);
+                $cnic_front = Storage::url('users_attached_documents/' . $user_id . '/' . $user_documents->cnic_front_image);
+                $cnic_back = Storage::url('users_attached_documents/' . $user_id . '/' . $user_documents->cnic_back_image);
             }
 
             $requestPayload = [
-                "client_id" => $user->id,
+                "client_id" => $user_id,
                 "client_name" => $user->name,
                 "users" => [
                     [
@@ -90,26 +96,26 @@ class FingaIntegrationController extends Controller
            
                 $body = $response->getBody();
                 $body = json_decode($body);
-                $user->wallet_id = $body->wallet_id;
-                $user->save();
 
                 $mobile_no = $body->users[0]->mobile_no;
                 $cnic = $body->users[0]->cnic;
                 $email = $body->users[0]->email;
 
-                $url = $this->getLoginUrl($api, $token, $mobile_no, $cnic, $email);
+                $url = self::getLoginUrl($api, $token, $mobile_no, $cnic, $email);
 
-                if($url) {
-                    return view('client.finga_dashboard')->with(['url'=> $url]);
-                }
-                
+                $result['url'] = $url;
+                $result['wallet_id'] = $body->wallet_id;
+
             } else {
                 $body = $response->getBody();
                 $body = json_decode($body);
 
                 $this->apiLog('on-boarding-response', 'error', $body ,null);
-                return redirect()->back()->with('finga_error', 'Unable to Process Wallet Request. Please contact with your Sales Person');
+            
+               $result['error'] = $body;
             }
+
+            return $result;
             
         }
     } 
@@ -149,6 +155,15 @@ class FingaIntegrationController extends Controller
             'details' => $details ? json_encode($details, JSON_PRETTY_PRINT) : null, // Save as JSON
             'shipment_id' => $shipment_id
         ]);
+    }
+    
+    public function on_boarding(Request  $request){
+        if(session('user_type') == 1) {
+            $user = User::find(session('user_id'));
+            return view('client.finja_onboarding')->with(['user' => $user]);
+        }else{
+            return redirect()->back();
+        }
     }
 
 }
