@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Models\Shipper\User;
+use App\Http\Models\UserDocumentAttachment;
+use App\Http\Models\WalletUser;
+use App\Models\FingaApiLog;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
-use App\Http\Models\UserDocumentAttachment;
-use App\Models\FingaApiLog;
 
 class FingaIntegrationController extends Controller
 {
@@ -34,15 +34,19 @@ class FingaIntegrationController extends Controller
 
     }
     public function login(Request $request) {
+        $wallet = auth()->user()->load('wallet');
+        $user = isset($wallet->wallet)??null;
+        if($user) {
+            $api = config('app.FINGA_URL');
+            $user = WalletUser::where('user_id', session('user_id'))->where('substitute_user_id', 0)->first();
+            $token = $this->getToken($api);
+            $url = $this->getLoginUrl($api, $token, $user->phone, $user->cnic, $user->email);
 
-        $api = config('app.FINGA_URL');
-        $user = Auth::user();
-        $token = $this->getToken($api);
-        $url = $this->getLoginUrl($api, $token, $user->phone, $user->cnic, $user->email);
-
-        if($url) {
-            return view('client.finja_dashboard')->with(['url'=> $url]);
+            if ($url) {
+                return view('client.finja_dashboard')->with(['url' => $url]);
+            }
         }
+        return  redirect()->back();
     }
 
     public static function signUp($user = array()) {

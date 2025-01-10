@@ -121,6 +121,8 @@
                                     });
                                     $('.card-text').html(errorList); // Append errors after the `.card` element
                                 }
+                            }else{
+                                window.location.href = '{{ url('cod/wallet/login') }}'
                             }
                         },
                         error: function(xhr, status, error) {

@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Models;
+namespace App\Http\Models;
 
-use AWS\CRT\HTTP\Request;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 

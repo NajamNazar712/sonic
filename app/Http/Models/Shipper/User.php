@@ -1,9 +1,8 @@
 <?php
 
 namespace App\Http\Models\Shipper;
-use App\Http\Models\CityInfo;
-use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
@@ -101,4 +100,9 @@ class User extends Authenticatable
     {
         return $this->belongsTo('App\Http\Models\Admin\Lead\Lead', 'lead_id', 'id');
     }
+
+    public function wallet() {
+        return $this->hasOne('App\Http\Models\WalletUser','user_id', 'id')->where('substitute_user_id',0);
+    }
+
 }
