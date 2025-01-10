@@ -22,7 +22,7 @@ return new class extends Migration
             $table->integer('wallet_id');
             $table->integer('user_id');
             $table->integer('substitute_user_id')->default(0);
-            $table->boolean('active')->default(0);
+            $table->boolean('status')->default(0);
             $table->timestamps();
         });
     }
