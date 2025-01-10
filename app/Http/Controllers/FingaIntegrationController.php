@@ -59,12 +59,8 @@ class FingaIntegrationController extends Controller
                 $cnic_front = Storage::url('users_attached_documents/' . $user->id . '/' . $user_documents->cnic_front_image);
                 $cnic_back = Storage::url('users_attached_documents/' . $user->id . '/' . $user_documents->cnic_back_image);
             }
-            
-            $response = Http::withHeaders([
-                'accept' => 'application/json',
-                'Authorization' => "Bearer " . $token,
-            
-            ])->post($api.'wallet/onboard-users/', [
+
+            $requestPayload = [
                 "client_id" => $user->id,
                 "client_name" => $user->name,
                 "users" => [
@@ -77,6 +73,17 @@ class FingaIntegrationController extends Controller
                         "cnic_back_image_url" => $cnic_front
                     ]
                 ]
+            ];
+
+            $response = Http::withHeaders([
+                'accept' => 'application/json',
+                'Authorization' => "Bearer " . $token,
+            ])->post($api . 'wallet/onboard-users/', $requestPayload);
+
+            FingaApiLog::create([
+                'nature' => 'request',
+                'status' => 1,
+                'details' => json_encode($requestPayload, JSON_PRETTY_PRINT), // Save as JSON
             ]);
 
             if($response->successful()) { 
