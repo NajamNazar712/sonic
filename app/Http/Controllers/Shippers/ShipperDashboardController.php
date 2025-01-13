@@ -2633,10 +2633,10 @@ class ShipperDashboardController extends Controller
             $user = WalletUser::where('email', $request->email)->orWhere('phone', $request->phone)->first();
             if($user){
                 if(session('user_id') == $user->user_id) {
-                    $flag = true;
+                    $flag = false;
                 }
                 else{
-                    $flag = false;
+                    $flag = true;
                 }
             }
             if($flag == true){
@@ -2671,8 +2671,8 @@ class ShipperDashboardController extends Controller
                 }
             }
             else{
-                return redirect()->back()->with(['error'=>["Email Address and Phone Number must be unique"]]);
-
+                //return redirect()->back()->with(['error'=>["Email Address and Phone Number must be unique"]]);
+                return response()->json(['status' => 10, 'error'=>'Email Address and Phone Number must be unique']);
             }
         }
         return response()->json(['status' => 1, 'success'=>'Profile Information Successfully Updated"']);
