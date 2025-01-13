@@ -2667,7 +2667,7 @@ class ShipperDashboardController extends Controller
 
                     // //return response()->json(['status' => 1, 'url'=>$finja['url']]);
                     // return view('client.finja_dashboard')->with(['url' => $finja['url']]);
-                    $dashboardUrl = route('client.finja_dashboard', ['url' => $finja['url']]);
+                    $dashboardUrl = route('cod.wallet.finja_dashboard', ['url' => $finja['url']]);
                     return response()->json(['status' => 1, 'redirect_url' => $dashboardUrl]);
 
                 }

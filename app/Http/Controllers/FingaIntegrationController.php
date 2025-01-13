@@ -168,4 +168,11 @@ class FingaIntegrationController extends Controller
         }
     }
 
+    public function finja_dashboard($url) {
+
+        if($url) {
+            return view('client.finja_dashboard')->with(['url' => $url]);
+        }
+    }
+
 }

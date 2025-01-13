@@ -633,6 +633,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
 
     Route::prefix('wallet')->name('wallet.')->group(function () {
         Route::get('login', 'FingaIntegrationController@login')->name('login');
+        Route::get('finja_dashboard', 'FingaIntegrationController@finja_dashboard')->name('finja_dashboard');
         Route::get('on_boarding', 'FingaIntegrationController@on_boarding')->name('on_boarding');
         Route::get('signup', 'FingaIntegrationController@signup')->name('signup');
     });
