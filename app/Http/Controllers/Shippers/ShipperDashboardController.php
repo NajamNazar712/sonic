@@ -2665,7 +2665,8 @@ class ShipperDashboardController extends Controller
                     $data['wallet_id'] =$finja['wallet_id'];
                     WalletUser::wallet_create($data);
 
-                    return response()->json(['status' => 1, 'url'=>$finja['url']]);
+                    //return response()->json(['status' => 1, 'url'=>$finja['url']]);
+                    return view('client.finja_dashboard')->with(['url' => $finja['url']]);
                 }
             }
             else{
