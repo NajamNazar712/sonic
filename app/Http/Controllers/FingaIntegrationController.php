@@ -168,9 +168,10 @@ class FingaIntegrationController extends Controller
         }
     }
 
-    public function finja_dashboard($url) {
+    public function finja_dashboard(Request  $request) {
 
-        if($url) {
+        $url = $request->input('url'); // Get 'url' from the request
+        if ($url) {
             return view('client.finja_dashboard')->with(['url' => $url]);
         }
     }
