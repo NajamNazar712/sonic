@@ -110,7 +110,7 @@ class FingaIntegrationController extends Controller
                 $body = $response->getBody();
                 $body = json_decode($body);
 
-                $this->apiLog('on-boarding-response', 'error', $body ,null);
+                self::apiLog('on-boarding-response', 'error', $body ,null);
             
                $result['error'] = $body;
             }

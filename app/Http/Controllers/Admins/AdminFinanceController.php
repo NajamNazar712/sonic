@@ -7583,11 +7583,59 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                         $done_payment->save();
 
                         $pending_payment->delete();
-
+                        $pending_logs = []; 
                         foreach ($pending_payment_shipment_ids as $pending_payment_shipment_id) {
                             $pending_payment_shipment = PendingPaymentShipment::find($pending_payment_shipment_id);
-
+                            
                             if ($pending_payment_shipment) {
+
+                                // $shipment = Shipment::with(['user.wallet'])->find($pending_payment_shipment->shipment_id);
+                                // if($shipment->user->wallet) {
+                                //     if($pending_payment_shipment->type == 3) {
+                                //         $log_bid = isWalletLogUpdated($pending_payment_shipment->shipment_id);
+                                //         if(!$log_bid) {
+                                //             $pending_logs[$pending_payment_shipment_id] = [
+                                //                 "wallet_id" => $shipment->user->wallet->wallet_id,
+                                //                 "client_id" => $shipment->id, 
+                                //                 "reference_id" => $shipment->reference_id, 
+                                //                 "shipment_id" => $shipment->id, 
+                                //                 "amount" => $shipment->amount, 
+                                //                 "charges" => [
+                                //                     'arrival_charges' =>  intval($shipment->weight_charges),
+                                //                     'fuel_surcharge' =>  intval($shipment->fuel_surcharge),
+                                //                     'faf_charges' => $shipment->faf_charges_data ? intval($shipment->faf_charges_data->faf_charges) : 0,
+                                //                 ]
+                                //             ]; 
+                                //         }
+                                //         $finja_status = 0;
+
+                                //     } elseif($pending_payment_shipment->type == 0 || $pending_payment_shipment->type == 0 ) {
+                                //         $log_bid = isWalletLogUpdated($pending_payment_shipment->shipment_id);
+                                //         $settlement_bid = isWalletSettlementUpdated($pending_payment_shipment->shipm1nt_id);
+                                //         if(!$log_bid) {
+                                //             if(!array_key_exists($pending_payment_shipment->shipment_id, $pending_logs)) {
+                                //                 $pending_logs[$pending_payment_shipment_id] = [
+                                //                     "wallet_id" => $shipment->user->wallet->wallet_id,
+                                //                     "client_id" => $shipment->id, 
+                                //                     "reference_id" => $shipment->reference_id, 
+                                //                     "shipment_id" => $shipment->id, 
+                                //                     "amount" => $shipment->amount, 
+                                //                     "charges" => [
+                                //                         'arrival_charges' =>  0
+                                //                     ]
+                                //                 ];
+                                //             }
+                                //             $finja_status = 1;
+                                //         } elseif($settlement_bid) {
+                                //             $finja_status = 2;
+                                //         } else {
+                                //             $finja_status = 1;
+                                //         }
+                                //     } elseif($pending_payment_shipment->type == 2 ) {
+                                //         $log_bid = isWalletLogUpdated($pending_payment_shipment->shipment_id);
+
+                                //     }
+                                // }
                                 $done_payment_shipment = new DonePaymentShipment();
 
                                 $done_payment_shipment->created_at = $pending_payment_shipment->created_at;
@@ -21125,4 +21173,6 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
         }
         return false;
     }
+
+
 }
