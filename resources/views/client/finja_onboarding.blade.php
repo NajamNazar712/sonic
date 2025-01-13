@@ -110,7 +110,7 @@
                         data: $(form).serialize(),  // Serialize form data properly
                         dataType: 'json', // Ensure proper response format
                         success: function(data) {
-                            console.log(data);
+                            
                             if(data.status == 0) {
                                 $('.error-messages').remove();
 

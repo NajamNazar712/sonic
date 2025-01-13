@@ -2633,10 +2633,10 @@ class ShipperDashboardController extends Controller
             $user = WalletUser::where('email', $request->email)->orWhere('phone', $request->phone)->first();
             if($user){
                 if(session('user_id') == $user->user_id) {
-                    $flag = false;
+                    $flag = true;
                 }
                 else{
-                    $flag = true;
+                    $flag = false;
                 }
             }
             if($flag == true){
