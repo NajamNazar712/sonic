@@ -1018,6 +1018,14 @@
                                     $('#account_details').addClass('d-none');
                                 }
                             }
+
+                            else if (data.status == 2){
+                                $('#iban_no').val('');
+                                $('#account_no').val('');
+                                $('#bank').val('').trigger('change');
+                                $('#account_details').removeClass('d-none');
+                            }
+
                             else{
                                 complete_shipper_info = false;
                                 first_shipment = true;
