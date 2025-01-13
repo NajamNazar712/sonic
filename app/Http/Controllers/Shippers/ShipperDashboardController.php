@@ -2672,7 +2672,7 @@ class ShipperDashboardController extends Controller
             }
             else{
                 //return redirect()->back()->with(['error'=>["Email Address and Phone Number must be unique"]]);
-                return response()->json(['status' => 0, 'error'=>'Email Address and Phone Number must be unique']);
+                return response()->json(['status' => 0, 'error'=>['Email Address and Phone Number must be unique']]);
             }
         }
         return response()->json(['status' => 1, 'success'=>'Profile Information Successfully Updated"']);
