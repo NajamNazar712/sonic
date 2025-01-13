@@ -81,7 +81,7 @@ class FingaIntegrationController extends Controller
                 ]
             ];
 
-            $url = self::getLoginUrl($api, $token, $mobile_no, $cnic, $email);
+            $url = self::getLoginUrl($api, $token, $user->phone, $user->cnic, $user->email);
             $response = Http::withHeaders([
                 'accept' => 'application/json',
                 'Authorization' => "Bearer " . $token,
