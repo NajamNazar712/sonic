@@ -19,6 +19,7 @@ use App\Http\Controllers\AdminFinanceController;
 use App\ShipmentAdditionalCharges;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
+use App\Models\FinjaLogSettlementRecord;
 
 
 trait FinSurgentLogTrait 
@@ -47,8 +48,6 @@ trait FinSurgentLogTrait
                     $body = json_decode($body);
     
                     FingaIntegrationController::apiLog('log-response', 'success', $body ,$pending_payment_shipment->shipment_id);
-    
-                    FinjaLogSettlementRecord::where('shipment_id',$pending_payment_shipment->shipment_id)->update(['wallet_log_updated' => true, 'wallet_log_updated_at' => Carbon::now()]);
 
                     FinjaLogSettlementRecord::updateOrCreate(
                         // Condition to find the record
