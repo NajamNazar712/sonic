@@ -102,6 +102,7 @@ class FingaIntegrationController extends Controller
                 $email = $body->users[0]->email;
 
                 $url = self::getLoginUrl($api, $token, $mobile_no, $cnic, $email);
+                self::apiLog('on-boarding-response', 'success', $body ,null);
 
                 $result['url'] = $url;
                 $result['wallet_id'] = $body->wallet_id;
