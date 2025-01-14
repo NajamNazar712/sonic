@@ -134,7 +134,11 @@ use App\Http\Models\NotificationSetting;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use App\Http\Models\ShipmentLedger;
-use Illuminate\Support\Str;class AdminFinanceController extends Controller
+use Illuminate\Support\Str;
+use App\Jobs\WalletLogDispatchJob;
+use App\Models\FinjaLogSettlementRecord;
+
+class AdminFinanceController extends Controller
 {
     static public function sdn_action_logs($sdn_id, $status_id, $admin_id, $previous_bank_id = null, $new_bank_id = null, $previous_amount = null, $new_amount = null, $deposit_slip_image = null)
     {
@@ -7527,7 +7531,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             //            }
             //        }
 
-
+            $pending_logs = []; 
             foreach ($pending_payment_shipment_ids as $pending_payment_id => $pending_payment_shipment_ids) {
                 $total_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment_id)->count();
                 $selected_shipments = count($pending_payment_shipment_ids);
@@ -7583,7 +7587,6 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                         $done_payment->save();
 
                         $pending_payment->delete();
-                        $pending_logs = []; 
                         foreach ($pending_payment_shipment_ids as $pending_payment_shipment_id) {
                             $pending_payment_shipment = PendingPaymentShipment::find($pending_payment_shipment_id);
                             
@@ -7592,12 +7595,12 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                                 $shipment = Shipment::with(['user.wallet'])->find($pending_payment_shipment->shipment_id);
                                 if($shipment->user->wallet) {
                                     if($pending_payment_shipment->type == 3) {
-                                        $log_bid = isWalletLogUpdated($pending_payment_shipment->shipment_id);
+                                        $log_bid = $this->isWalletLogUpdated($pending_payment_shipment->shipment_id);
                                         if(!$log_bid) {
-                                            $pending_logs[$pending_payment_shipment_id] = [
+                                            $pending_logs[$pending_payment_shipment->shipment_id] = [
                                                 "wallet_id" => $shipment->user->wallet->wallet_id,
-                                                "client_id" => $shipment->id, 
-                                                "reference_id" => $shipment->reference_id, 
+                                                "client_id" => $shipment->user->id, 
+                                                "reference_id" => (string) Str::uuid(), 
                                                 "shipment_id" => $shipment->id, 
                                                 "amount" => $shipment->amount, 
                                                 "charges" => [
@@ -7610,14 +7613,14 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                                         $finja_status = 0;
 
                                     } elseif($pending_payment_shipment->type == 0 || $pending_payment_shipment->type == 1 || $pending_payment_shipment->type == 2 ) {
-                                        $log_bid = isWalletLogUpdated($pending_payment_shipment->shipment_id);
-                                        $settlement_bid = isWalletSettlementUpdated($pending_payment_shipment->shipm1nt_id);
+                                        $log_bid = $this->isWalletLogUpdated($pending_payment_shipment->shipment_id);
+                                        $settlement_bid = $this->isWalletSettlementUpdated($pending_payment_shipment->shipm1nt_id);
                                         if(!$log_bid) {
                                             if(!array_key_exists($pending_payment_shipment->shipment_id, $pending_logs)) {
-                                                $pending_logs[$pending_payment_shipment_id] = [
+                                                $pending_logs[$pending_payment_shipment->shipment_id] = [
                                                     "wallet_id" => $shipment->user->wallet->wallet_id,
-                                                    "client_id" => $shipment->id, 
-                                                    "reference_id" => $shipment->reference_id, 
+                                                    "client_id" =>  $shipment->user->id, 
+                                                    "reference_id" => (string) Str::uuid(), 
                                                     "shipment_id" => $shipment->id, 
                                                     "amount" => $shipment->amount, 
                                                     "charges" => [
@@ -7646,6 +7649,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                                 $done_payment_shipment->payable = $pending_payment_shipment->payable;
                                 $done_payment_shipment->sms_charges = $pending_payment_shipment->sms_charges;
                                 $done_payment->company_bank_id = $company_bank;
+                                $done_payment_shipment->wallet_action_bid = $finja_status;
 
                                 $done_payment_shipment->save();
 
@@ -7735,7 +7739,50 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                         foreach ($pending_payment_shipment_ids as $pending_payment_shipment_id) {
                             $pending_payment_shipment = PendingPaymentShipment::find($pending_payment_shipment_id);
                             if ($pending_payment_shipment) {
+                                $shipment = Shipment::with(['user.wallet'])->find($pending_payment_shipment->shipment_id);
+                                if($shipment->user->wallet) {
+                                    if($pending_payment_shipment->type == 3) {
+                                        $log_bid = $this->isWalletLogUpdated($pending_payment_shipment->shipment_id);
+                                        if(!$log_bid) {
+                                            $pending_logs[$pending_payment_shipment->shipment_id] = [
+                                                "wallet_id" => $shipment->user->wallet->wallet_id,
+                                                "client_id" =>  $shipment->user->id, 
+                                                "reference_id" => (string) Str::uuid(), 
+                                                "shipment_id" => $shipment->id, 
+                                                "amount" => $shipment->amount, 
+                                                "charges" => [
+                                                    'arrival_charges' =>  intval($shipment->weight_charges),
+                                                    'fuel_surcharge' =>  intval($shipment->fuel_surcharge),
+                                                    'faf_charges' => $shipment->faf_charges_data ? intval($shipment->faf_charges_data->faf_charges) : 0,
+                                                ]
+                                            ]; 
+                                        }
+                                        $finja_status = 0;
 
+                                    } elseif($pending_payment_shipment->type == 0 || $pending_payment_shipment->type == 1 || $pending_payment_shipment->type == 2 ) {
+                                        $log_bid = $this->isWalletLogUpdated($pending_payment_shipment->shipment_id);
+                                        $settlement_bid = $this->isWalletSettlementUpdated($pending_payment_shipment->shipm1nt_id);
+                                        if(!$log_bid) {
+                                            if(!array_key_exists($pending_payment_shipment->shipment_id, $pending_logs)) {
+                                                $pending_logs[$pending_payment_shipment->shipment_id] = [
+                                                    "wallet_id" => $shipment->user->wallet->wallet_id,
+                                                    "client_id" => $shipment->user->id, 
+                                                    "reference_id" => (string) Str::uuid(), 
+                                                    "shipment_id" => $shipment->id, 
+                                                    "amount" => $shipment->amount, 
+                                                    "charges" => [
+                                                        'arrival_charges' =>  0
+                                                    ]
+                                                ];
+                                            }
+                                            $finja_status = 1;
+                                        } elseif($settlement_bid) {
+                                            $finja_status = 2;
+                                        } else {
+                                            $finja_status = 1;
+                                        }
+                                    }
+                                }
 
                                 if ($pending_payment_shipment->type == 0) {
                                     $delivered_shipments++;
@@ -7763,6 +7810,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                                 $done_payment_shipment->payable = $pending_payment_shipment->payable;
                                 $done_payment_shipment->sms_charges = $pending_payment_shipment->sms_charges;
                                 $done_payment->company_bank_id = $company_bank;
+                                $done_payment_shipment->wallet_action_bid = $finja_status;
 
                                 $done_payment_shipment->save();
 
@@ -7845,6 +7893,10 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                 }
             }
 
+            if(count($pending_logs) > 0) {
+                WalletLogDispatchJob::dispatch($pending_logs);
+            }
+            
             return redirect()->back()->with(['success' => 'Payment(s) has been Made.', 'print' => $done_payment_ids]);
         }else{
             return redirect()->back()->with(['success' => 'Given Ids Already Processed']);
@@ -21164,12 +21216,22 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
     public static function isWalletLogUpdated($shipment_id)
     {
        
-        $logRecord = FinjaLogSettlementRecords::where('shipment_id', $shipment_id)->first();
+        $logRecord = FinjaLogSettlementRecord::where('shipment_id', $shipment_id)->first();
         if ($logRecord && $logRecord->wallet_log_updated == 1) {
             return true;
         }
         return false;
     }
 
+    public static function isWalletSettlementUpdated($shipment_id)
+    {
+       
+        $logRecord = FinjaLogSettlementRecord::where('shipment_id', $shipment_id)->first();
+        if ($logRecord && $logRecord->wallet_settlement_updated == 1) {
+            return true;
+        }
+        return false;
+    }
+    
 
 }

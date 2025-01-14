@@ -30,6 +30,14 @@ trait FinSurgentLogTrait
 
         try {
 
+            if (is_object($pending_payment_shipment)) {
+                // Access data using the object
+                $shipmentId = $pending_payment_shipment->shipment_id;
+            } elseif (is_int($pending_payment_shipment)) {
+                // Use the integer directly
+                $shipmentId = $pending_payment_shipment;
+            } 
+
             $api = env('FINGA_URL');
             $token = FingaIntegrationController::getToken($api);
 
@@ -40,21 +48,21 @@ trait FinSurgentLogTrait
                 
                 ])->post($api.'transactions/log/payment', $requestPayload);
     
-                FingaIntegrationController::apiLog('log-request', 1, $requestPayload ,$pending_payment_shipment->shipment_id);
+                FingaIntegrationController::apiLog('log-request', 1, $requestPayload ,$shipmentId);
     
                 if($response->successful()) { 
                     
                     $body = $response->getBody();
                     $body = json_decode($body);
     
-                    FingaIntegrationController::apiLog('log-response', 'success', $body ,$pending_payment_shipment->shipment_id);
+                    FingaIntegrationController::apiLog('log-response', 'success', $body ,$shipmentId);
 
                     FinjaLogSettlementRecord::updateOrCreate(
                         // Condition to find the record
-                        ['shipment_id' => $pending_payment_shipment->shipment_id],
+                        ['shipment_id' => $shipmentId],
                         // Data to update or create
                         [
-                            'shipment_id' => $pending_payment_shipment->shipment_id,
+                            'shipment_id' => $shipmentId,
                             'wallet_log_updated' => true,
                             'wallet_log_updated_at' => Carbon::now(),
                         ]
@@ -63,7 +71,7 @@ trait FinSurgentLogTrait
                 } else {
                     $body = $response->getBody();
                     $body = json_decode($body);
-                    FingaIntegrationController::apiLog('log-response', 'error', $body ,$pending_payment_shipment->shipment_id);
+                    FingaIntegrationController::apiLog('log-response', 'error', $body ,$shipmentId);
                 }
             }
 
@@ -73,7 +81,7 @@ trait FinSurgentLogTrait
                 'error' => $th->getMessage(),
                 'code' => $th->getCode()
             ];
-            FingaIntegrationController::apiLog('log-response', 'exception', $errorBody, $pending_payment_shipment->shipment_id);
+            FingaIntegrationController::apiLog('log-response', 'exception', $errorBody, $shipmentId);
         }
 
     }

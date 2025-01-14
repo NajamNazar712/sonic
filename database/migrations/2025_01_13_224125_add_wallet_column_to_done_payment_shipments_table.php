@@ -13,8 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->integer('wallet_id')->nullable();
+        Schema::table('done_payment_shipments', function (Blueprint $table) {
+            $table->integer('wallet_action_bid')->default(0);
         });
     }
 
@@ -25,8 +25,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('wallet_id');
+        Schema::table('done_payment_shipments', function (Blueprint $table) {
+            $table->dropColumn('wallet_action_bid');
         });
     }
 };
