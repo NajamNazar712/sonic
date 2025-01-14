@@ -135,6 +135,7 @@ class lastMileAppReportCountUpdate extends Command
                     $rwds->at_20_count = $at_20_count;
                     $rwds->at_21_count = $at_21_count;
                     $rwds->at_22_count = $at_22_count;
+                    $rwds->at_23_count = 0;
                     $rwds->after_23_count = $after_23_count;
                     $rwds->shipment_update_count = $shipment_count;
                     $rwds->via_rider_count = $shipment_count;
