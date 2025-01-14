@@ -114,11 +114,12 @@ class AdminCRMController extends Controller
     }
 
     public function add_request(Request $request){
-
         // only allow retail COD bookings to change COD amount
-        $retail_shipment = RetailShipment::where('shipment_id', $request->shipment_id);
-        if ($retail_shipment->exists()) {
-            $retail_shipment = $retail_shipment->first();
+        
+        // Check if the request contains a single shipment or multiple shipments
+        $shipment_ids = $request->shipment_id ? [$request->shipment_id] : $request->shipment_ids;
+        $retail_shipments = RetailShipment::whereIn('shipment_id', $shipment_ids)->get();
+        foreach ($retail_shipments as $retail_shipment) {
             if ($retail_shipment->shipping_mode != 3) {
                 return ['status' => 0, 'error' => 'Retail Shipment amount can\'t be changed!'];
             }
