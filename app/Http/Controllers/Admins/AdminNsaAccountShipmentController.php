@@ -272,17 +272,19 @@ class AdminNsaAccountShipmentController extends Controller
                                 if ($nsa_shipment) {
                                     V2AdminPickupsController::cancel($nsa_shipment->id);
                                     $status_id = 2;
-                                    $nsa_user_array = [
-                                        7762,
-                                        10354,
-                                        37791,
-                                        38106,
-                                        33688,
-                                        14110,
-                                        37791
-                                    ];
+                                    // $nsa_user_array = [
+                                    //     7762,
+                                    //     10354,
+                                    //     37791,
+                                    //     38106,
+                                    //     33688,
+                                    //     14110,
+                                    //     37791
+                                    // ];
 
-                                    if (in_array($nsa_shipment->user_id, $nsa_user_array)) {
+                                    $nsa_user_array = GlobalSettings::where('type', 'update_telenor_user_on_arrival')->pluck('text')->first();
+                                    $nsa_user_array = explode(', ', $nsa_user_array);
+                                    if (in_array((string)$nsa_shipment->user_id, $nsa_user_array)) {
                                         $admin_id = Auth::id();
                                     }
                                     else {
