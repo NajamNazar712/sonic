@@ -266,13 +266,13 @@
                     scrollX: true, scrollY: '500px',
                     // deferLoading:0,
                     buttons: [
-                        // {
-                        //     extend: 'excelHtml5',
-                        //     title: 'Shipment Report',   
-                        //     className: 'btn btn-primary excel',
-                        //     text:'<i class="la la-file-excel-o"></i> Excel',
-                        //     footer: true
-                        // },
+                        {
+                            extend: 'excelHtml5',
+                            title: 'Shipment Report',   
+                            className: 'btn btn-primary excel',
+                            text:'<i class="la la-file-excel-o"></i> Excel',
+                            footer: true
+                        },
                     ],
                     lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                     autoWidth:false,
