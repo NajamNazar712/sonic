@@ -164,6 +164,7 @@ class FlyerShipperController extends Controller
                     }
                     return $dropdown;
                 })
+                ->rawColumns(['action', 'status'])
                 ->make(true);
         }
         return view('view');

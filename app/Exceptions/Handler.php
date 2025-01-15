@@ -4,6 +4,7 @@ namespace App\Exceptions;
 
 use Exception;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Support\Arr;
 
 class Handler extends ExceptionHandler
 {
@@ -51,7 +52,7 @@ class Handler extends ExceptionHandler
         $class = get_class($exception);
         switch ($class){
             case 'Illuminate\Auth\AuthenticationException':
-                $guard = array_get($exception->guards(), 0);
+                $guard = Arr::get($exception->guards(), 0);
                 switch ($guard) {
                     case 'admin':
                         $login = 'admin.login';
