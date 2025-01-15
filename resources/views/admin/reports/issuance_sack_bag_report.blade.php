@@ -254,9 +254,15 @@
                                 format: {
                                     body: function (data, row, column, node) {
                                         // Serial number column
-                                        if (column === 0) {
+                                        if (column === 0)
+                                        {
                                             var info = table.page.info();
                                             return row + 1 + info.page * info.length;
+                                        }
+
+                                        if (column === 2)
+                                        {
+                                            return $('<div>').html(data).text().trim();
                                         }
                                         return data;
                                     }
