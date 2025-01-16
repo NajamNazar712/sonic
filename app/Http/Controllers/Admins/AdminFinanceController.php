@@ -9107,20 +9107,20 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             $shipment_weight = $shipment->actual_weight;
             $weight_charges = $shipment->weight_charges;
 
-            if ($done_payment_shipment->type == 3) {
-                $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->id);
-                if ($change_shipment_weight_log->exists()) {
-                    $change_shipment_weight_log = $change_shipment_weight_log->first();
-
-                    $done_payment_shipment_date = Carbon::parse($done_payment_shipment->created_at);
-                    $change_shipment_weight_log_date = Carbon::parse($change_shipment_weight_log->created_at);
-
-                    if ($change_shipment_weight_log_date->gt($done_payment_shipment_date)) {
-                        $shipment_weight = $change_shipment_weight_log->old_weight;
-                        $weight_charges = $change_shipment_weight_log->old_charges;
-                    }
-                }
-            }
+//            if ($done_payment_shipment->type == 3) {
+//                $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->id);
+//                if ($change_shipment_weight_log->exists()) {
+//                    $change_shipment_weight_log = $change_shipment_weight_log->first();
+//
+//                    $done_payment_shipment_date = Carbon::parse($done_payment_shipment->created_at);
+//                    $change_shipment_weight_log_date = Carbon::parse($change_shipment_weight_log->created_at);
+//
+//                    if ($change_shipment_weight_log_date->gt($done_payment_shipment_date)) {
+//                        $shipment_weight = $change_shipment_weight_log->old_weight;
+//                        $weight_charges = $change_shipment_weight_log->old_charges;
+//                    }
+//                }
+//            }
 
             if ($done_payment_shipment->type == 0) {
                 $type = 'Delivered';
