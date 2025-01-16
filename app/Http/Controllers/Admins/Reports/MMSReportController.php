@@ -248,7 +248,7 @@ class MMSReportController extends Controller
             ->orderColumn('consignee_phone', 'shipments.consignee_phone_number_1 $1, shipments.consignee_phone_number_2 $1');
 
         if ($tracking = $request->get('search_tracking')) {
-            $datatable->where('shipments.tracking_number', '=', $tracking);
+            $sales->where('shipments.tracking_number', '=', $tracking);
         }
 
         $search_shipper = $request->get('search_shipper');
@@ -263,19 +263,21 @@ class MMSReportController extends Controller
                 $whereInArray[] = $search_shipper;
             }
 
-            $datatable->whereIn('shipments.user_id', $whereInArray);
+            $sales->whereIn('shipments.user_id', $whereInArray);
         }
         
         if ($destination = $request->get('search_destination')) {
-            $datatable->where('dc.id', '=', $destination);
+            $sales->where('dc.id', '=', $destination);
         }
         if ($hub = $request->get('search_hub')) {
-            $datatable->where('h.id', '=', $hub);
+            $sales->where('h.id', '=', $hub);
         }
         if ($status = $request->get('search_status')) {
-            $datatable->where('ss.id', '=', $status);
+            $sales->where('ss.id', '=', $status);
         }
 
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['tracking_number_link'])
+        ->make(true);
     }
 }

@@ -16,6 +16,13 @@
 
 				<div class="container">
 					<div class="row">
+						<div class="col-3">
+							<fieldset class="form-group">
+								<select name="search_shipper[]" id="search_shipper" class="form-control select2" multiple >
+
+								</select>
+							</fieldset>
+						</div>
 						<div class="col-md-3">
 							<div class="form-group input-group">
 								<div class="input-group-prepend">
@@ -363,10 +370,41 @@
 			<script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
 			<script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
+			<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+			<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+			<script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+			<script src="{{asset('/app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+			<script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
+
+
 
 			<script>
 
 				$(document).ready(function () {
+
+					$('#search_shipper').select2({
+						width:'100%',
+						placeholder:"Select Shipper",
+						allowClear:true,
+						multiple: true,
+						minimumInputLength: 2,
+						ajax: {
+							dataType: 'json',
+							url:  '{!! route('admin.accounts.shipper_names.dropdown_invoice',['type'=>'active']) !!}',
+							data: function (params) {
+								return {
+									search: params.term,
+								}
+							},
+							processResults: function (data) {
+								return {
+									results: data
+								};
+							},
+							delay: 700,
+						}
+					});
+
 					$('#search_filter').prepend('<option value="" selected="selected"></option>').select2({
 						placeholder: 'Search',
 						width: '100%',
@@ -498,6 +536,7 @@
 									d.invoice_to = $('#invoice_to').val();
 									d.generation_from = $('#generation_from').val();
 									d.generation_to = $('#generation_to').val();
+									d.search_shipper = $('#search_shipper').val();
 								},
 
 								data: params,
@@ -577,7 +616,7 @@
 							return {body: body, header: head};
 						}
 					});
-
+					let isInitialLoad = true;
 					var selected_rows = [];
 					var table = $('#datatable').DataTable({
 						dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -670,7 +709,7 @@
 
 											if (index === -1) {
 												selected_rows.push(id);
-												console.log(selected_rows)
+												// console.log(selected_rows)
 											}
 
 											table.button('.mark_as_received_all_btn').enable();
@@ -736,17 +775,41 @@
 								d.generation_from = $('#generation_from').val();
 								d.generation_to = $('#generation_to').val();
 								d.star_shipper_filter = $('#star_shippers_filter').val();
+								d.search_shipper = $('#search_shipper').val();
 							}
 						},
 						rowId: 'id',
 						order: [[12	, 'desc']],
+						"preDrawCallback": function(settings) {
+							if (isInitialLoad) {
+								isInitialLoad = false;
+								return true; // Allow initial load
+							}
+							// console.log(check_sale_shippers());
+							if (check_sale_shippers()) {
+								toastr.error('Select One Shipper', 'Error!', {
+									positionClass: 'toast-top-center',
+									containerId: 'toast-top-center'
+								});
+								return false; // Prevent the redraw
+							}
+							return true; // Allow redraw
+						},
 						columns: [
 							{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
 							{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 							{data:'account', name: 'account_type', class: 'align-middle text-center account'},
 							{data:'invoice_number_btn', name: 'invoice_number_btn', class: 'align-middle text-center invoice_number_btn'},
 							{data:'shipper_account_id', name: 'shipper_account_id', class: 'align-middle text-center shipper_account_id'},
-							{data:'shipper', name: 'shipper', class: 'align-middle text-center shipper'},
+
+							{
+								data:'shipper', 
+								name: 'shipper', 
+								class: 'align-middle text-center shipper', 
+								orderable: true, 
+								searchable: true,
+							},
+
 							{data:'sales_person_name', name: 'sales_person_name', class: 'align-middle text-center sales_person_name'},
 							{data:'city', name: 'city', class: 'align-middle text-center city'},
 							{data:'total_charges', name: 'total_charges', class: 'align-middle text-center total_charges'},
@@ -846,12 +909,6 @@
                                             }).wrap(td);
                                 }*/
 
-								else if($(header).is('.invoice_type')){
-									$(invoice_type_select).appendTo($(search))
-											.on( 'change', function () {
-												column.search($(this).val(), false, false, true).draw();
-											} ).wrap(td);
-								}
 								else {
 									var current = $(input).appendTo($(search)).on('change', function() {
 										column.search($(this).val(), false, false, true).draw();
@@ -1412,6 +1469,27 @@
 							}
 						}
 					});
+
+					function check_sale_shippers(){
+						<?php
+						$re_shipper = false;
+						if(session('department_id') == 7 && !in_array(session('id'), session('sale_users_bypass'))){
+							$re_shipper = true;
+						}
+						?>
+
+						var re_shipper = '{{ ($re_shipper) ? 1 : 0 }}';
+
+						if (re_shipper == 1) { // Compare as a number
+							var search_shippers = $('#search_shipper').val();
+							if (search_shippers.length > 0) {
+								return false;
+							} else {
+								return true;
+							}
+						}
+						return false; // If not re_shipper, always allow
+					}
 					$('#search_filter_btn').on('click',function () {
 						table.draw(true);
 					});

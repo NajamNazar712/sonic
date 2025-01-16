@@ -246,7 +246,7 @@
                                 row.push(values.junction_1);
                                 row.push(values.junction_2);
                                 row.push(values.receiver);
-                                row.push(values.updated_at);
+                                row.push(values.updated);
                                 row.push(values.updated_by);
 
 
@@ -298,7 +298,7 @@
                     {data: 'junction_1', name: 'jc1.name', class: 'align-middle junction_1'},
                     {data: 'junction_2', name: 'jc2.name', class: 'align-middle junction_2'},
                     {data: 'receiver', name: 'ar.name', class: 'align-middle receiver'},
-                    {data: 'updated_at', name: 'junction_mappings.updated_at', class: 'align-middle updated_at'},
+                    {data: 'updated', name: 'junction_mappings.updated_at', class: 'align-middle updated_at'},
                     {data: 'updated_by', name: 'a.name', class: 'align-middle updated_by'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],

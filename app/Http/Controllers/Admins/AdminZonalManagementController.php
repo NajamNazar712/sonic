@@ -38,7 +38,7 @@ class AdminZonalManagementController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),347);
         }
         $zones = Zone::leftjoin('business_categories as bc', 'bc.id', '=', 'zones.business_category_id')
-            ->select('zones.id', 'zones.created_at', 'zones.updated_at', 'zones.name', 'zones.gst', 'zones.status', 'zones.business_category_id', 'bc.name as business_category');
+            ->select('zones.id', 'zones.created_at as created', 'zones.updated_at as updated', 'zones.name', 'zones.gst', 'zones.status', 'zones.business_category_id', 'bc.name as business_category');
 
         $datatables = Datatables::of($zones)
             ->editColumn('status', function ($zone) {
@@ -87,7 +87,7 @@ class AdminZonalManagementController extends Controller
             ';
 
                 return $dropdown;
-            });
+            })->rawColumns(['action']);
 
         return $datatables->make(true);
     }
@@ -303,7 +303,7 @@ class AdminZonalManagementController extends Controller
             return redirect()->back()->with(['success' => 'Zone: ' . $request->input('name') . ' has been added!']); 
     }
 
-    public function check_zone_name(Request $request, $id) {
+    public function check_zone_name(Request $request, $id = null) {
         
         if ($request->filled('name')) {
           $name = Zone::where('name', $request->input('name'));

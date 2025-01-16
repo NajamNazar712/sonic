@@ -657,7 +657,7 @@
                     {data: 'remarks', name: 'v2_disputes.remarks', class: 'align-middle remarks'},
                     {data: 'status', name: 'ds.name', class: 'align-middle status' , orderable: false, searchable: false},
                     {data: 'added_by', name: 'ab.name', class: 'align-middle added_by'},
-                    {data: 'created_at', name: 'v2_disputes.created_at', class: 'align-middle created_at'},
+                    {data: 'created', name: 'v2_disputes.created_at', class: 'align-middle created_at'},
                     {data: 'updated_by', name: 'ub.name', class: 'align-middle updated_by'},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false},
                 ],

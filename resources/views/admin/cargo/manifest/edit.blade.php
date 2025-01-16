@@ -120,7 +120,7 @@
                                                                 }
                                                             @endphp
                                                             <div class="form-group">
-                                                                <select multiple="multiple" name="vehicles[{{$key + 1}}][]" id="vehicles_{{$key + 1}}" class="vehicles_select" data-msg-required="Vehicle is Required" data-rule-required="true">
+                                                                <select multiple="multiple" name="vehicles[{{$key + 1}}][]" id="vehicles_{{$key + 1}}" class="vehicles_select">
                                                                     @foreach($vehicles as $vehicle)
                                                                         <option value="{{$vehicle->id}}" {{in_array($vehicle->id,$v_array) ? 'selected' : ''}}>{{$vehicle->reg_number}}</option>
                                                                     @endforeach
@@ -270,7 +270,7 @@
             function make_vehicle_select(index)
             {
                 vehicles = `<div class="form-group">
-                                    <select multiple="multiple" name="vehicles[${index}][]" id="vehicles_${index}" class="vehicles_select" data-msg-required="Vehicle is Required" data-rule-required="true">
+                                    <select multiple="multiple" name="vehicles[${index}][]" id="vehicles_${index}" class="vehicles_select">
                                         @foreach($vehicles as $vehicle)
                 <option value="{{$vehicle->id}}">{{$vehicle->reg_number}}</option>
                                         @endforeach
@@ -326,7 +326,7 @@
 
                 $("#edit_mapping .vehicles_select").select2({
                     width: '100%',
-                    placeholder: 'Vehicle Numbers*'
+                    placeholder: 'Vehicle Numbers'
                 }).bind('select2:select', function(e){
                     var current_val = e.params.data.id;
                     var select = $(this);
@@ -347,7 +347,7 @@
 
             $("#edit_mapping .vehicles_select").select2({
                 width: '100%',
-                placeholder: 'Vehicle Numbers*'
+                placeholder: 'Vehicle Numbers'
             }).bind('select2:select', function(e){
                 var current_val = e.params.data.id;
                 var select = $(this);

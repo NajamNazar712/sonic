@@ -239,7 +239,7 @@
                                     <div class="col-10">
                                         <fieldset class="form-group">
                                             <select name="case_nature_tclaim" id="case_nature_claim"
-                                                class="form-control select2">
+                                                class="form-control select2" data-rule-required="true" data-msg-required="Select claim type">
                                                 @foreach ($case_nature_type_claims as $claim)
                                                     <option value="{{ $claim->id }}">{{ $claim->type }}</option>
                                                 @endforeach
@@ -381,7 +381,7 @@
                                         @if ($claim->remarks_visibility == 1)
                                             <div class="col-10 d-none" id="case_nature_claim_remarks_div">
                                                 <fieldset class="form-group">
-                                                    <select name="description[]" id="case_nature_claim_remarks" class="form-control select2" multiple="multiple">
+                                                    <select name="description[]" id="case_nature_claim_remarks" class="form-control select2" multiple="multiple" data-rule-required="true" data-msg-required="Claim remarks is required.">
                                                         
                                                     </select>
                                                 </fieldset>
@@ -1181,10 +1181,20 @@
                 dropdownParent: $('#add_request_form')
             }).on('change', function() {
                 var id = parseInt($(this).val());
-                
+                $('#AddNewRequest').attr('disabled',false);
+                $('#case_nature_claim').val('').trigger('change');
+                $('#case_nature_complaints').val('').trigger('change');
+                $('#case_nature_requests').val('').trigger('change');
+                $('#claim_product_cost').val('');
+                $('#claim_description_new').val('');
+                var shipment_id = $('#requested_shipment_id').val();
                 $.ajax({
                     url: '{{ route('cod.tracking.shipper_visibility') }}',
-                    type: 'GET',
+                    type: 'POST',
+                    data: { 
+                        'id': id,
+                        'shipment_id': shipment_id,
+                    },
                     headers: {
                         'Accept': 'application/json',
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -1198,7 +1208,7 @@
                             $('#request_claims').addClass('d-none');
 
                             // Update options based on response.case_nature_type_complaints
-                            updateOptions('#request_complaints_select', response.case_nature_type_complaints);
+                            updateOptions('#case_nature_complaints', response.case_nature_types);
                         } else if (id === 2) {
                             $('#request_complaints').addClass('d-none');
                             $('#request_service').removeClass('d-none');
@@ -1207,7 +1217,7 @@
                             $('#request_claims').addClass('d-none');
 
                             // Update options based on response.case_nature_type_service_requests
-                            updateOptions('#request_service_select', response.case_nature_type_service_requests);
+                            updateOptions('#case_nature_requests', response.case_nature_types);
                         } else if (id === 3) {
                             $('#request_complaints').addClass('d-none');
                             $('#request_service').addClass('d-none');
@@ -1224,7 +1234,7 @@
                             $('#AddNewRequest').removeClass('d-none');
 
                             // Update options based on response.case_nature_type_claims
-                            updateOptions('#request_claims_select', response.case_nature_type_claims);
+                            updateOptions('#case_nature_claim', response.case_nature_types);
                         } else {
                             $('#request_complaints').addClass('d-none');
                             $('#request_service').addClass('d-none');
@@ -1244,12 +1254,13 @@
             function updateOptions(selectElementId, optionsData) {
                 var $select = $(selectElementId);
                 // Clear existing options
-                $select.empty();
+                //$select.empty();
+                $select.find('option:not(:first)').remove();
                 // Append new options
                 $.each(optionsData, function(index, option) {
                     $select.append($('<option>', {
                         value: option.id,
-                        text: option.name
+                        text: option.type
                     }));
                 });
                 // Trigger change event
@@ -1440,8 +1451,8 @@
                                 $('#claim_description_div_new').addClass('d-none');
                                 $('#claim_description_div').addClass('d-none');
                             } else {
-                                $('#claim_description_div_new').removeClass('d-none');
-                                $('#claim_description_div').addClass('d-none');
+                                $('#claim_description_div_new').addClass('d-none');
+                                $('#claim_description_div').removeClass('d-none');
                             }
                         },
                         error: function(jqXHR, textStatus, errorThrown) {
@@ -1798,7 +1809,8 @@
 
                         var formData = new FormData($('#add_request_form')[0]);
                         var claim_description = '';
-                        if (!$('#case_nature_claim_remarks_div').hasClass('d-none')) {
+                        if ($('#case_nature_claim_remarks_div').length && !$('#case_nature_claim_remarks_div').hasClass('d-none')) {
+                            
                             var selectedOptions = $('#case_nature_claim_remarks option:selected');
                             var selectedTexts = [];
                             var useTextarea = false;
@@ -1837,6 +1849,14 @@
                         if (!case_nature_claim_id) {
                             nature_flag = false;
                             var error = "Please select Claim type!";
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                        if (!claim_description) {
+                            nature_flag = false;
+                            var error = "Either a claim description or remarks are required!";
                             toastr.error(error, 'Error!', {
                                 positionClass: 'toast-top-center',
                                 containerId: 'toast-top-center'
@@ -2185,6 +2205,7 @@
                 $('#alternate_phone').val('');
                 // $('#cod_amount_input').addClass('d-none');
                 // $('#cod_amount').val('');
+                $('#AddNewRequest').attr('disabled',false);
             });
 
 
@@ -2231,7 +2252,7 @@
                                 var updated_at = value.data.updated_at;
                                 var trimmedDateTime = updated_at.substring(0, 10);
                                 var trimmedTime = updated_at.substring(11, 19);
-                                var call_finding_id = 'Unresponsive';
+                                var call_finding_id = value.data.call_status ?? 'Not Connected';
                                 var call_finding_reason_id = value.data.rv_call_finding.name;
 
                                 var remarks = value.data.remarks;

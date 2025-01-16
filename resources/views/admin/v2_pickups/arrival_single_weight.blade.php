@@ -836,6 +836,7 @@
 
             $('#arrival_of_shipments_form').on('submit', function(e) {
                 e.preventDefault();
+                $('#arrival_of_shipments_form button.confirm').prop('disabled', true);
                 var url = '{!! route('admin.v2_pickups.arrival.bulk.weight_bypass') !!}';
                 var csrfToken = $('meta[name="csrf-token"]').attr('content');
                 var dataTable = $('#datatable').DataTable();

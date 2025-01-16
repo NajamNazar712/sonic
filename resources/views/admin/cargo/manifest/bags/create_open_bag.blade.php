@@ -140,6 +140,7 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/quagga/quagga.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('js/detectActions.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/custom.js')}}" type="text/javascript"></script>
 
     <script>
@@ -211,6 +212,7 @@
                                 'hub_id': hub_id,
                                 'shipping_mode_id': shipping_mode_id,
                                 'bag_type': bag_type,
+                                'action': window.lastAction,
                                 '_token': '{{ csrf_token() }}'
                             },
                             // timeout: 30000,
@@ -536,6 +538,7 @@
                         data: {
                             'tracking_number': tracking_number,
                             'pieces_confirm': 1,
+                            'action':window.lastAction,
                             '_token': '{{ csrf_token() }}'
                         }
                     })

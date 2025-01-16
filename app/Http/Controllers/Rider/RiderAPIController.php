@@ -66,7 +66,7 @@ use App\RiderWiseDeliveryNoteSummary;
 use App\Http\Models\ConsigneeLocation;
 use App\Http\Models\Handover\Handover;
 use App\Http\Models\HR\EmployeeGender;
-use App\http\Models\HR\EmployeeNature;
+use App\Http\Models\HR\EmployeeNature;
 use App\Http\Models\PickupNoteRequest;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider\RiderRemark;
@@ -157,7 +157,7 @@ use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use App\Http\Controllers\EmployeeAttendanceController;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\AdminPickupsController;
-use App\http\Models\Admin\ReturnReasonMandatoryShipper;
+use App\Http\Models\Admin\ReturnReasonMandatoryShipper;
 use App\Http\Models\Rider\RiderReturnDeliveryActionLog;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Rider\RiderReturnNoteRequestShipment;
@@ -176,18 +176,17 @@ use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
 use App\Http\Models\Admin\TempRiderDelivery;
 use App\Http\Models\HR\EducationList;
 use App\Http\Models\NotificationSetting;
-use App\Jobs\ProcessRvShipmentTicket;
 use App\RvShipmentTicket;
 use App\Http\Models\PackagingMaterialTypes;
 use App\Http\Models\PackagingMaterialTypeSizes;
 use Illuminate\Support\Str;
 use App\Http\Models\Shipper\User;
 use App\RetailShipperNameVerification;
-
+use App\Http\Traits\RvTrait;
 
 class RiderAPIController extends Controller
 {
-    //use LastMileAppReportTrait;
+    use LastMileAppReportTrait, RvTrait;
 
     private $names = [
         'phone_number' => 'Phone Number',
@@ -2194,7 +2193,7 @@ class RiderAPIController extends Controller
         } else {
             $rider_deliveries = DeliveryNote::join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
                 ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
-                ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
+                ->leftjoin('routes', 'delivery_notes.route_id', '=', 'routes.id')
                 ->leftjoin('admins as ccb', 'delivery_notes.cash_collected_by', '=', 'ccb.id')
                 ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
                 ->join('delivery_note_shipments', 'delivery_note_shipments.delivery_note_id', '=', 'delivery_notes.id')
@@ -8974,7 +8973,7 @@ class RiderAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
 
-            try {
+//            try {
                 //code...
                 $success_flag = false;
 
@@ -8986,7 +8985,7 @@ class RiderAPIController extends Controller
                 ->select('nss.id', 'delivery_note_shipments.shipment_id', 'ns.shipper_toggle')
                 ->first();
                 
-                $user_excluded_otp_shippers = $user_excluded_otp_shippers['shipper_toggle'] ? $user_excluded_otp_shippers['shipper_toggle'] : 0;
+                $user_excluded_otp_shippers = isset($user_excluded_otp_shippers['shipper_toggle']) ? $user_excluded_otp_shippers['shipper_toggle'] : 0;
                 
                 $rider_id = $request->rider_id;
 
@@ -9272,12 +9271,12 @@ class RiderAPIController extends Controller
                 }
 
                 return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id, 'user_excluded_otp_shippers'=>$user_excluded_otp_shippers, 'success' => $success_flag]);
-            } catch (\Throwable $th) {
-                $this->createDeliveryNoteErrorLog($request->delivery_note_id, $request->shipment_id, $th->getMessage());
-                return response()->json(['status' => 1, 'message' => 'Something Went Wrong!']);
-
-                //throw $th;
-            }
+//            } catch (\Throwable $th) {
+//                $this->createDeliveryNoteErrorLog($request->delivery_note_id, $request->shipment_id, $th->getMessage());
+//                return response()->json(['status' => 1, 'message' => 'Something Went Wrong!']);
+//
+//                //throw $th;
+//            }
         }
     }
 
@@ -11841,14 +11840,7 @@ class RiderAPIController extends Controller
 
                                             if($shipper_status_id == 12) //if Shipper Status Id = 12 (Shipment - Reason Validation Required) Then fetch Those Shipments in Get Ticket
                                             {
-                                                $rvData = [
-                                                    'shipment_id' => $shipment->id,
-                                                    'shipper_status_id' => $shipper_status_id,
-                                                    'status_reason_id' => $request->status_reason_id,
-                                                    'shipment_user_id' => $shipment->user_id,
-                                                    'call_count' => 0
-                                                ];
-                                                dispatch(new ProcessRvShipmentTicket($rvData));
+                                                $this->rvshipmentticketInsert($shipment->id, $shipper_status_id, $request->status_reason_id, $shipment->user_id);
                                             }
 
                                             $rider_delivery_note_status = RiderDeliveryNoteStatus::where('delivery_note_id', $request->delivery_note_id);
@@ -12133,7 +12125,7 @@ class RiderAPIController extends Controller
                         if ($rider->api_token) {
                             $api_token = $rider->api_token;
                         } else {
-                            $api_token = uniqid(base64_encode(str_random(60)));
+                            $api_token = uniqid(base64_encode(Str::random(60)));
                             $rider->api_token = $api_token;
                         }
                         $rider->save();

@@ -129,10 +129,10 @@
                                     </div>
             
                                     <div class="input-group mb-2">
-                                        <input type="text" name="franchise_deduction" id="deduction_percentage" class="form-control deduction_percentage" placeholder="GST*"  value="" max="100" data-rule-required="true" data-msg-required="Commission GST Deduction is required">
-                                        <div class="input-group-append">
-                                            <span class="input-group-text" id="basic-addon2">%</span>
-                                        </div>
+                                        <input type="number" name="franchise_deduction" id="deduction_percentage" class="form-control deduction_percentage" placeholder="Deduction"  value="" max="100" data-rule-required="false" data-msg-required="Commission Deduction is required">
+                                        {{-- <div class="input-group-append">
+                                            <span class="input-group-text" id="basic-addon2"></span>
+                                        </div> --}}
                                     </div>
                                 </div>
 
@@ -550,8 +550,8 @@
                                 row.push(values.email);
                                 row.push(values.cnic);
                                 row.push(values.default_hub);
-                                row.push(values.created_at);
-                                row.push(values.updated_at);
+                                row.push(values.created);
+                                row.push(values.updated);
                                 row.push(values.updated_by);
                                 row.push(values.status);
                                 row.push(values.code);
@@ -607,8 +607,8 @@
                     { data:'email' ,name: 'retail_franchises.email', class: 'align-middle text-center email'},
                     { data:'cnic' ,name: 'retail_franchises.cnic', class: 'align-middle text-center cnic'},
                     { data:'default_hub' ,name: 'c.name', class: 'align-middle text-center default_hub'},
-                    { data:'created_at' ,name: 'retail_franchises.created_at', class: 'align-middle text-center created_at'},
-                    { data:'updated_at' ,name: 'retail_franchises.updated_at', class: 'align-middle text-center updated_at'},
+                    { data:'created' ,name: 'retail_franchises.created_at', class: 'align-middle text-center created_at'},
+                    { data:'updated' ,name: 'retail_franchises.updated_at', class: 'align-middle text-center updated_at'},
                     { data:'updated_by' ,name: 'a.name', class: 'align-middle text-center updated_by'},
                     { data:'status' ,name: 'retail_franchises.status', class: 'align-middle text-center status'},
                     { data:'code' ,name: 'retail_franchises.code', class: 'align-middle text-center code'},

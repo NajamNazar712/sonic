@@ -48,7 +48,7 @@ class SalesIncentiveController extends Controller
         $franchise = SalesTerritory::leftjoin('cities as c', 'c.id', '=', 'sales_territories.cityid')
             ->join('admins as a', 'a.id', '=', 'sales_territories.created_by')
             ->join('admins as b', 'b.id', '=', 'sales_territories.updated_by')
-            ->select('sales_territories.status as status','sales_territories.id as id','sales_territories.name as name','c.name as city','sales_territories.code as code','a.name as created_by','sales_territories.created_at as created_at','b.name as updated_by','sales_territories.updated_at as updated_at');
+            ->select('sales_territories.status as status','sales_territories.id as id','sales_territories.name as name','c.name as city','sales_territories.code as code','a.name as created_by','sales_territories.created_at as created','b.name as updated_by','sales_territories.updated_at as updated');
         
         $datatables = Datatables::of($franchise)
             ->editColumn('status', function ($data) {
@@ -84,7 +84,7 @@ class SalesIncentiveController extends Controller
                 }
                 else{ return ''; }
             
-        });
+        })->rawColumns(['action','users']);;
           
         return $datatables->make(true);
     }
@@ -253,7 +253,7 @@ class SalesIncentiveController extends Controller
         $franchise = SalesDesignation::join('admins as a', 'a.id', '=', 'sales_designations.created_by')
             ->join('admins as b', 'b.id', '=', 'sales_designations.updated_by')
             ->join('admin_roles as ar', 'ar.id', '=', 'sales_designations.designation')
-            ->select('sales_designations.status as status','sales_designations.id as id','ar.name as name','sales_designations.code as code','a.name as created_by','sales_designations.created_at as created_at','b.name as updated_by','sales_designations.updated_at as updated_at');
+            ->select('sales_designations.status as status','sales_designations.id as id','ar.name as name','sales_designations.code as code','a.name as created_by','sales_designations.created_at as created','b.name as updated_by','sales_designations.updated_at as updated');
         
         $datatables = Datatables::of($franchise)
             ->editColumn('status', function ($data) {
@@ -286,7 +286,7 @@ class SalesIncentiveController extends Controller
                 else
                 { return '';}
             
-        });
+        })->rawColumns(['action','location']);
           
         return $datatables->make(true);
     }

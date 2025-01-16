@@ -344,8 +344,19 @@
                             head.push('Area');
                             head.push('Rider Type');
                             head.push('Route');
+
                             head.push('No. Of Shipments');
+                            head.push('E-Comm (COD)');
+                            head.push('General Logistics (Retail)');
+                            head.push('General Logistics - E-Comm (Express)');
+                            head.push('Other Sub-Segments');
+
                             head.push('No. Of Shipments Delivered');
+                            head.push('E-Comm (COD)');
+                            head.push('General Logistics (Retail)');
+                            head.push('General Logistics - E-Comm (Express)');
+                            head.push('Other Sub-Segments');
+
                             head.push('Assigned By');
                             head.push('Assigned Date');
                             head.push('Updated By');
@@ -370,8 +381,19 @@
                                 row.push(values.area);
                                 row.push(values.rider_type);
                                 row.push(values.route);
+
                                 row.push(values.shipments_count);
+                                row.push(values.excel_ecom_cod);
+                                row.push(values.excel_general_retail);
+                                row.push(values.excel_general_ecom_express);
+                                row.push(values.excel_others);
+
                                 row.push(values.delivered_shipments);
+                                row.push(values.delivered_excel_ecom_cod);
+                                row.push(values.delivered_excel_general_retail);
+                                row.push(values.delivered_excel_general_ecom_express);
+                                row.push(values.delivered_excel_others);
+
                                 row.push(values.assignee);
                                 row.push(values.created_at);
                                 row.push(values.updated_by);
@@ -654,7 +676,7 @@
                     { data:'cash_collected' ,name: 'ccb.name', class: 'align-middle cash_collected'},
                     { data:'cash_collected_at' ,name: 'delivery_notes.cash_collected_at', class: 'align-middle cash_collected_at'},
                     { data:'amount' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle amount'},
-                    { data:'fintech_charges.link' ,name: 'fintech_charges.link', class: 'align-middle fintech_charges.link'},
+                    { data:'fintech_charges.link' ,name: 'fintech_charges.link', class: 'align-middle fintech_charges' , orderable: false, searchable: false},
                     { data:'transactions_amount_link' ,name: 'hktdn.transactions_amount', class: 'align-middle transactions_amount'},
                     { data:'cash_amount' ,name: 'hktdn.cash_amount', class: 'align-middle cash_amount', orderable: false, searchable: false},
                     { data:'one_link_payment_count_button' ,name: 'delivery_notes.one_link_payment_count', class: 'align-middle text-center one_link_payment_count'},
@@ -674,7 +696,7 @@
 
                     var fintech_sum = $(row).find('#myButton');
                     var dccn_amount = parseFloat(data.amount.replace(/,/g, ''));
-                    fintech_sum = fintech_sum[0].innerText
+                     fintech_sum = fintech_sum[0] ? fintech_sum[0].innerText : 0;
                     fintech_sum = parseFloat(fintech_sum)
 
                     if(data.transactions_amount == null){
@@ -702,7 +724,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.cash_amount') || $(header).is('.deposit_slip_view')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.cash_amount') || $(header).is('.deposit_slip_view') || $(header).is('.fintech_charges')) {
                             $(td).appendTo($(search));
                         }
                         else {

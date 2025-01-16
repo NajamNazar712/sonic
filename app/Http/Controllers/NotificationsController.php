@@ -133,6 +133,7 @@ use App\Http\Models\Admin\PendingCashCollectionAgingReport;
 use App\Http\Models\Excel_reports\RetailDonePaymentsReport;
 use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
 use App\Http\Models\Admin\ShipperVerificationPinCode as AdminShipperVerificationPinCode;
+use App\Http\Models\Admin\Retail\RetailShipment;
 
 
 class NotificationsController extends Controller
@@ -350,7 +351,7 @@ class NotificationsController extends Controller
         }
     }
 
-    static public function send($id, $reference_1_id, $reference_2_id = NULL, $reference_3_id = NULL)
+    static public function send($id, $reference_1_id, $reference_2_id = NULL, $reference_3_id = NULL,$array_data = array())
     {
         $notification = Notification::find($id);
 
@@ -2746,9 +2747,9 @@ class NotificationsController extends Controller
                     if ($ceo) {
                         $to[] = $ceo->email;
                     }*/
-                    $to = ['waqas@trax.pk', 'noman.aziz@trax.pk', 'asad.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'nadir.qureshi@trax.pk', 'hammad.saleem@trax.pk', 'hassan.arman@trax.pk', 'm.sohail@trax.pk', 'ghazanfar.ali@trax.pk'];
+                    $to = ['waqas@trax.pk', 'asad.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'nadir.qureshi@trax.pk', 'hammad.saleem@trax.pk', 'hassan.arman@trax.pk', 'm.sohail@trax.pk', 'ghazanfar.ali@trax.pk', 'Tauseef.sarfaraz@trax.pk', 'Mansoor.ahmad@trax.pk'];
 
-                    $bcc = ['faisal.hasan@trax.pk'];
+                    $bcc = ['Sahban.ghani@trax.pk'];
                     self::email($subject, $body, $to, $cc, $bcc);
                 } else if ($id == 27) {
 
@@ -6017,6 +6018,7 @@ class NotificationsController extends Controller
                         $to[] = 'aftab.qidwai@trax.pk';
                         $to[] = 'wajiha.majeed@trax.pk';
                         $to[] = 'huzaifa.aamir@trax.pk';
+                        $to[] = 'anas.mazhar@trax.pk';
 
                         self::email($subject, $body, $to, NULL, $bcc);
                     }
@@ -7087,17 +7089,22 @@ class NotificationsController extends Controller
                     self::sms($body, $to, NULL, NULL, $id);
                 } else if ($id == 115) {
                     $tracking_number = $reference_1_id;
-                    $shipment = Shipment::where('tracking_number', $tracking_number)->first('id');
+                    // $shipment = Shipment::where('tracking_number', $tracking_number)->first('id');
+                    $shipment = Shipment::where('tracking_number', $tracking_number)->pluck('id')->first();
                     $shipper_info_id = $reference_2_id;
+                    $total_charges = RetailShipment::where('shipment_id', $shipment)->first()->total_charges;
+
                     $body = $notification->body;
                     if ($tracking_number) {
                         $shipper_info = RetailShipperInfo::find($shipper_info_id);
-
                         if (strpos($body, '[tracking_number]') !== FALSE) {
                             $body = str_replace('[tracking_number]', $tracking_number, $body);
                         }
                         if (strpos($body, '[shipper]') !== FALSE) {
                             $body = str_replace('[shipper]', $shipper_info->name, $body);
+                        }
+                        if (strpos($body, '[total_charges]') !== FALSE) {
+                            $body = str_replace('[total_charges]', $total_charges, $body);
                         }
                         $to = $shipper_info->shipper_phone_no;
                         self::sms($body, $to, NULL,NULL, $id);
@@ -10114,9 +10121,9 @@ class NotificationsController extends Controller
                         $body = str_replace('[link]', $link, $body);
                     }
 
-                    $to = ['adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk', 'm.sohail@trax.pk', 'ghazanfar.ali@trax.pk'];
+                    $to = ['adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk','raheel.hassan@trax.pk','hammad.majid@trax.pk', 'm.sohail@trax.pk', 'ghazanfar.ali@trax.pk'];
 
-                    $cc = ["faisal.hasan@trax.pk", "asad.ahsan@trax.pk"];
+                    $cc = ["sahban.ghani@trax.pk", "asad.ahsan@trax.pk"];
 
                     self::email($subject, $body, $to, $cc);
                 } else if ($id == 210) {
@@ -10449,11 +10456,11 @@ class NotificationsController extends Controller
                         $body = str_replace('[link]', $link, $body);
                     }
 
-                    $to = ['tanveer.malik@trax.pk', 'muhammad.jawwad@trax.pk', 'fawad.ahmed@trax.pk', 'waqas@trax.pk',  'huzaifa.aamir@trax.pk', 'hammad.majid@trax.pk', 'ghazanfar.ali@trax.pk'];
+                    $to = ['syed.furqan@trax.pk','fawad.ahmed@trax.pk','hammad.majid@trax.pk'];
+                    $bcc = ["asad.ahsan@trax.pk", "sahban.ghani@trax.pk"];
+                    // $cc = ["faisal.hasan@trax.pk", "asad.ahsan@trax.pk"];
 
-                    $cc = ["faisal.hasan@trax.pk", "asad.ahsan@trax.pk"];
-
-                    self::email($subject, $body, $to, $cc);
+                    self::email($subject, $body, $to, $bcc);
                 } else if ($id == 215) {
 
                     $details = $reference_1_id;
@@ -11307,6 +11314,102 @@ class NotificationsController extends Controller
 
                     }
 
+                }
+                else if($id == 234) {
+                    $subject = $notification->subject;
+                    
+                    $body = $array_data['text'];
+                    $to = $array_data['phone'];
+                    self::sms($body, $to, NULL,NULL, $id);
+
+                }
+
+                else if ($id == 235) {
+                    $done_payment_report = DonePaymentsReport::get();
+                    if ($done_payment_report) {
+                        $date = Carbon::today()->format('Y-m-d');
+                        $subject = $notification->subject;
+                        $body = $notification->body;
+                        if (strpos($subject, '[date]') !== FALSE) {
+                            $subject = str_replace('[date]', $date, $subject);
+                        }
+
+                        if (strpos($body, '[date]') !== FALSE) {
+                            $body = str_replace('[date]', $date, $body);
+                        }
+
+                        $link = '<a href="' . $reference_2_id . '" target="_blank">Report</a>';
+
+                        if (strpos($subject, '[link]') !== FALSE) {
+                            $subject = str_replace('[link]', $link, $subject);
+                        }
+
+                        if (strpos($body, '[link]') !== FALSE) {
+                            $body = str_replace('[link]', $link, $body);
+                        }
+                        // $summary_html = '<div style="margin-bottom: 100px;"><table style="width:100%;">';
+                        // $summary_html .= '<thead><tr>
+                        //                    <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total Shippers</th>
+                        //                    <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total Amount</th>
+                        //                    </tr></thead><tbody>';
+                        // $shippers = array();
+                        // $html = '<table style="width:100%;">';
+                        // $html .= '<thead><tr>
+                        //                     <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">S No.</th>
+                        //                    <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Payment ID</th>
+                        //                    <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipper Name</th>
+                        //                    <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">IBAN Number</th>
+                        //                    <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Amount</th>
+                        //                    <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">IBFT Charges</th>
+                        //                    </tr></thead><tbody>';
+                        // $total_amount = 0;
+                        // $total_ibft_amount = 0;
+                        // $serial = 1;
+                        // foreach ($done_payment_report as $done_payment) {
+                        //     if (!in_array($done_payment->shipper_id, $shippers)) {
+                        //         $shippers[$done_payment->shipper_id] = $done_payment->shipper_id;
+                        //     }
+                        //     $html .= '<tr>';
+                        //     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
+                        //     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . str_pad($done_payment->payment_id, 6, '0', STR_PAD_LEFT) . '</td>';
+                        //     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $done_payment->shipper_name . '</td>';
+                        //     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $done_payment->iban_number . '</td>';
+                        //     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($done_payment->amount) . '</td>';
+                        //     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($done_payment->ibft_charges ?? 0) . '</td>';
+                        //     $html .= '</tr>';
+                        //     $total_amount = $total_amount + $done_payment->amount;
+                        //     $total_ibft_amount = $total_ibft_amount + $done_payment->ibft_charges;
+                        //     $serial++;
+                        // }
+                        // $html .= '<tr>';
+                        // $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total</td>';
+                        // $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+                        // $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+                        // $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+                        // $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($total_amount) . '</td>';
+                        // $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($total_ibft_amount) . '</td>';
+                        // $html .= '</tr>';
+                        // $html .= '</tbody></table>';
+
+                        // $summary_html .= '<tr>';
+                        // $summary_html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . count($shippers) . '</td>';
+                        // $summary_html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($total_amount) . '</td>';
+                        // $summary_html .= '</tr>';
+                        // $summary_html .= '</tbody></table></div>';
+
+                        // $html = $summary_html . $html;
+
+                        // if (strpos($body, '[preview]') !== FALSE) {
+                        //     $body = str_replace('[preview]', $body);
+                        // }
+
+                        $to = array();
+                        $bcc = array();
+                        $to[] = 'aftab.qidwai@trax.pk';
+                        $to[] = 'anas.mazhar@trax.pk';
+
+                        self::email($subject, $body, $to, NULL, $bcc);
+                    }
                 }
 
             }

@@ -57,7 +57,7 @@
                             </table>
 
                             <div class="text-center">
-                                <button type="submit" class="btn btn-primary mr-2" id="cargo_consignment_confirm" data-toggle="modal" data-target="#cargo_consignment" disabled="disabled">Confirm</button>
+                                <button type="submit" class="btn btn-primary mr-2" id="cargo_consignment_confirm" data-target="#cargo_consignment" disabled="disabled">Confirm</button>
                             </div>
 
                             <div class="modal fade" id="cargo_consignment" role="dialog" aria-labelledby="cargo_consignment_title" aria-hidden="true">
@@ -97,7 +97,7 @@
                                                             <label for="Destination">Destination</label>
                                                             <input type="hidden" class="destination_hub_id" name="destination_hub_id">
                                                             <input type="text" name="destination_hub_name" class="destination_hub_name form-control" readonly>
-                                                            
+
                                                         </div>
                                                     </div>
                                                 </div>
@@ -214,7 +214,10 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/quagga/quagga.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('js/detectActions.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/custom.js')}}" type="text/javascript"></script>
+    <script src="{{asset('js/bagModalClose.js')}}" type="text/javascript"></script>
+
 
     <script>
         $(document).ready(function() {
@@ -296,6 +299,7 @@
                                 'hub_id': hub_id,
                                 'shipping_mode_id': shipping_mode_id,
                                 'bag_type': bag_type,
+                                'action': window.lastAction,
                                 '_token': '{{ csrf_token() }}'
                             },
                             // timeout: 30000,
@@ -409,8 +413,6 @@
             });
 
             $('#cargo_consignment_confirm').bind('click', function() {
-
-                blockPagePermanently();
                 $.ajax({
                     url: '{!! route('admin.cargo_manifest.bags.create.bag_details') !!}',
                     method: 'POST',
@@ -423,48 +425,51 @@
                     error: function (data) {
                         $('#cargo_consignment').modal('hide');
 
-                        UnblockPagePermanently();
-
                         toastr.error('Couldn\'t connect to server, check internet connection and re-enter!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     },
                     success: function (data) {
 
-                           open_box_ids = [];
-                           table.rows().every(function (index) {
-                               var node = $(this.node());
-                               if (node.find('td.open_box input').is(':checked')) {
-                                   open_box_ids.push(parseInt(node.attr('id')));
-                               }
-                           });
+                        if(data.status == 1){
+                            toastr.error(data.message, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }else{
+                            open_box_ids = [];
+                            table.rows().every(function (index) {
+                                var node = $(this.node());
+                                if (node.find('td.open_box input').is(':checked')) {
+                                    open_box_ids.push(parseInt(node.attr('id')));
+                                }
+                            });
 
-                           $('#cargo_consignment form .shipment_ids').val(shipment_ids);
-                           $('#cargo_consignment form .open_box_ids').val(open_box_ids);
+                            $('#cargo_consignment form .shipment_ids').val(shipment_ids);
+                            $('#cargo_consignment form .open_box_ids').val(open_box_ids);
 
-                           $('#cargo_consignment form .origin_hub_id').val(data.origin.id);
-                           $('#cargo_consignment form .origin_hub_name').val(data.origin.name);
+                            $('#cargo_consignment form .origin_hub_id').val(data.origin.id);
+                            $('#cargo_consignment form .origin_hub_name').val(data.origin.name);
 
-                           $('#cargo_consignment form .destination_hub_id').val(data.destination.id);
-                           $('#cargo_consignment form .destination_hub_name').val(data.destination.name);
+                            $('#cargo_consignment form .destination_hub_id').val(data.destination.id);
+                            $('#cargo_consignment form .destination_hub_name').val(data.destination.name);
+
+                            $('#cargo_consignment').modal('show');
 
 
+                            $('#cargo_consignment form .actual_weight').val(data.actual_weight);
 
-                           $('#cargo_consignment form .actual_weight').val(data.actual_weight);
+                            $('#cargo_consignment form input.seal_number').inputmask({
+                                'alias': 'integer',
+                                'allowMinus': false,
+                                'allowPlus': false
+                            });
 
-                           $('#cargo_consignment form input.seal_number').inputmask({
-                               'alias': 'integer',
-                               'allowMinus': false,
-                               'allowPlus': false
-                           });
+                            $('#cargo_consignment form input.seal_number').focus();
+                            $('#cargo_consignment form input.seal_number').on('change', function () {
+                                var seal = this.value;
+                                if (seal.length != 12 && seal.length != 13 && seal.length != 6 && seal.length != 7 && seal.length != 14 && seal.length != 15) {
+                                    this.value = '';
+                                }
+                            });
 
-                        $('#cargo_consignment form input.seal_number').focus();
-                           $('#cargo_consignment form input.seal_number').on('change', function () {
-                               var seal = this.value;
-                               if (seal.length != 12 && seal.length != 13 && seal.length != 6 && seal.length != 7 && seal.length != 14 && seal.length != 15) {
-                                   this.value = '';
-                               }
-                           });
-
-                        UnblockPagePermanently();
+                            UnblockPagePermanently();
+                        }
                     }
                 });
             });
@@ -513,6 +518,7 @@
                                     });
                                     $('#cargo_consignment form .transport_mode').prop("disabled", false);
                                     $('#cargo_consignment form .transport_mode_vendor').prop("disabled", false);
+                                    triggerModalCloseInAllTabs();
                                     form.submit();
 
                                 }
@@ -552,16 +558,16 @@
                                 });
                                 $('#cargo_consignment form .transport_mode').prop("disabled", false);
                                 $('#cargo_consignment form .transport_mode_vendor').prop("disabled", false);
+                                triggerModalCloseInAllTabs();
                                 form.submit();
                             }
                             else {
                                 $(form).find('button[type=submit]').prop('disabled', false);
-
                                 UnblockPagePermanently();
                             }
                         });
                     }
-                    
+
                 }
             });
 
@@ -715,6 +721,7 @@
                         data: {
                             'tracking_number': tracking_number,
                             'pieces_confirm': 1,
+                            'action': window.lastAction,
                             '_token': '{{ csrf_token() }}'
                         }
                     })
@@ -786,8 +793,8 @@
                 }else{
                       $("#sackbag_row").css('display','block');
                      $("#sack_bag_no").attr('data-rule-required', true).attr('data-msg-required', 'Sack Bag No is Required');
-                  
-                
+
+
 
                 }
             });

@@ -218,6 +218,7 @@ class RiderLogisticApiController extends Controller
                                         $logistic_booking->total_volumetric_weight = $booking['total_volumetric_weight'];
                                         $logistic_booking->user_type = 2; // 1 - Admin, 2 - Rider, 0 -> shipper
                                         $logistic_booking->created_by = $rider_id;
+                                        $logistic_booking->app_version = $booking['app_version_name'];
                                         $logistic_booking->payment_mode_id=1;
                                         $logistic_booking->save();
 
@@ -462,7 +463,7 @@ class RiderLogisticApiController extends Controller
                                 'pickup_address_list' => $pickup_address_list
                             ];
     
-    
+
                            return response()->json(['status'=>0,'shipper_detail'=> $shipper_detail]);
     
                         }
@@ -473,6 +474,7 @@ class RiderLogisticApiController extends Controller
 
         public function store_image(Request $request) {
 
+           // Log::channel('code_test_log')->error('logistic CN Number: '. $request->cn_number);
             $rules = [ 
                 'booking_image' => ['required', 'mimes:png,jpeg,jpg'],
                 'cn_number' => ['required']
@@ -488,131 +490,34 @@ class RiderLogisticApiController extends Controller
                 return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
             }else {
 
-                $booking_id = TraxLogisticBooking::where('cn_number', $request->cn_number);
-                if($booking_id->exists())
-                {
-                    $booking_id = $booking_id->pluck('id')->first();
-                    $image = new TraxLogisticBookingImages();
-                    $time = Carbon::now()->timestamp;
-                    $image_name =$booking_id . '_' . $time . '.png';
-                    $image_path = 'logistic_bookings/' . $image_name;
-                    Storage::disk('public')->put($image_path, file_get_contents($request->booking_image));
-                    $image->booking_id = $booking_id;
-                    $image->image_name = $image_name;
-                    $image->image_path = $image_path;
-                    $image->save();
-                    return response()->json(['status' => 0, 'message' => 'Image has been stored!']);
-                } else {
-                    return response()->json(['status' => 1, 'error' => 'Image not save','cn_number' => $request->cn_number]);
-
+                try {
+                    $booking_id = TraxLogisticBooking::where('cn_number', $request->cn_number);
+                    if($booking_id->exists())
+                    {
+                        $booking_id = $booking_id->pluck('id')->first();
+                        $image = new TraxLogisticBookingImages();
+                        $time = Carbon::now()->timestamp;
+                        $image_name =$booking_id . '_' . $time . '.png';
+                        $image_path = 'logistic_bookings/' . $image_name;
+                        Log::channel('code_test_log')->error('logistic image_path: '. $image_path.' booking_image - > '.$request->booking_image);
+                        // Storage::disk('public')->put($image_path, file_get_contents($request->booking_image));
+                       Storage::disk('s4')->put($image_path, file_get_contents($request->booking_image));
+                        $image->booking_id = $booking_id;
+                        $image->image_name = $image_name;
+                        $image->image_path = $image_path;
+                        $image->save();
+                        return response()->json(['status' => 0, 'message' => 'Image has been stored!']);
+                    } else {
+                        return response()->json(['status' => 1, 'error' => 'Image not save','cn_number' => $request->cn_number]);
+                    }
+                } catch (\Exception $ex) {
+                    Log::channel('code_test_log')->error('logistic-booking-image: ' . json_encode($ex->getMessage()));
+                    return response()->json(['status' => 1, 'message' => 'An error occurred while storing the image:'.$ex->getMessage()]);
                 }
-
-
             }
 
         }
 
-        //    public function logistic_booking_store(Request $request)
-//    {
-//
-//        $bookig_data=$request->booking_data;
-//        $rider_id = $request->rider_id;
-//
-//        try {
-//            DB::beginTransaction();
-//
-//            $currentTimestamp = Carbon::now();
-//
-//            $logisticBookings = [];
-//            $bookingPieces = [];
-//            $itemReferences = [];
-//            $itemInsurances = [];
-//
-//            if (isset($bookig_data))
-//            {
-//                foreach ($bookig_data as $booking) {
-//                    $logisticBookings[] = [
-//                        'shipper_id' => $booking['shipper_id'],
-//                        'cn_number' => $booking['cn_number'],
-//                        'booking_date' => $booking['booking_date'],
-//                        'product_id' => $booking['product_id'],
-//                        'service_id' => $booking['service_id'],
-//                        'destination_id' => $booking['destination_id'],
-//                        'shipper_reference' => $booking['shipper_reference'],
-//                        'consignee_name' => $booking['consignee_name'],
-//                        'total_pieces' => $booking['total_pieces'],
-//                        'consignee_phone_1' => $booking['consignee_phone_1'],
-//                        'total_dense_weight' => $booking['total_dense_weight'],
-//                        'total_volumetric_weight' => $booking['total_volumetric_weight'],
-//                        'user_type' => 2,
-//                        'created_by' => $rider_id,
-//                        'created_at' => $currentTimestamp,
-//                        'updated_at' => $currentTimestamp,
-//                    ];
-//
-//                    if (isset($booking['booking_pieces_data'])) {
-//                        foreach ($booking['booking_pieces_data'] as $pieces_data) {
-//                            $bookingPieces[] = [
-//                                'from_pieces' => $pieces_data['from_pieces'],
-//                                'to_pieces' => $pieces_data['to_pieces'],
-//                                'quantity' => $pieces_data['quantity'],
-//                                'user_type' => 2,
-//                                'created_by' => $rider_id,
-//                                'created_at' => $currentTimestamp,
-//                                'updated_at' => $currentTimestamp,
-//                            ];
-//                        }
-//                    }
-//
-//                    if (isset($booking['item_refernces_data'])) {
-//                        foreach ($booking['item_refernces_data'] as $item_data) {
-//                            foreach ($item_data['item_detail'] as $detail) {
-//                                $itemReferences[] = [
-//                                    'item_code' => $item_data['item_code'],
-//                                    'width' => $detail['width'],
-//                                    'height' => $detail['height'],
-//                                    'length' => $detail['length'],
-//                                    'weight' => $detail['weight'],
-//                                    'no_piece' => $detail['no_piece'],
-//                                    'user_type' => 2,
-//                                    'created_by' => $rider_id,
-//                                    'created_at' => $currentTimestamp,
-//                                    'updated_at' => $currentTimestamp,
-//                                ];
-//                            }
-//                        }
-//                    }
-//
-//                    if (isset($booking['item_insurance_data'])) {
-//                        foreach ($booking['item_insurance_data'] as $item_insurance) {
-//                            $itemInsurances[] = [
-//                                'special_handling_id' => $item_insurance['special_handling_id'],
-//                                'insurance' => $item_insurance['insurance'],
-//                                'item_code' => $item_insurance['item_code'],
-//                                'user_type' => 2,
-//                                'created_by' => $rider_id,
-//                                'created_at' => $currentTimestamp,
-//                                'updated_at' => $currentTimestamp,
-//                            ];
-//                        }
-//                    }
-//                }
-//            }
-//
-//            TraxLogisticBooking::insert($logisticBookings);
-//            TraxBookingPiece::insert($bookingPieces);
-//            TraxItemRefernce::insert($itemReferences);
-//            TraxItemInsurance::insert($itemInsurances);
-//
-//            DB::commit();
-//            return response()->json(['status'=>0,'success'=>'Booking Completed Successfully']);
-//
-//        }catch (\Exception $ex) {
-//            dd($ex->getMessage());
-//            DB::rollback();
-//            return response()->json(['status'=>1,'error'=>'Something went wrong!']);
-//        }
-//    }
 
 
 

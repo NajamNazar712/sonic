@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class RetailUserFamilyInformation extends Model
 {
+    protected $table = 'retail_user_family_informations';
     protected $fillable = [
         'retail_user_id',
         'family_member_name',

@@ -17,7 +17,7 @@ use App\Http\Models\Admin\Admin;
 use App\Http\Models\SaleTierTag;
 use App\Http\Models\StarShipper;
 use App\LostShipmentResponsible;
-use Yajra\Datatables\Datatables;
+use Yajra\DataTables\DataTables;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\RiderDelivery;
 use App\Http\Models\CRM\CrmRequest;
@@ -78,6 +78,8 @@ use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\Admin\DeliveryShipmentsReceivedOperation;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\CrmCaseNatureRemark;
+use App\Http\Models\InterceptReBookRequestHistory;
+use App\Http\Models\Shipper\UserShippingInfo;
 
 class AdminTrackingController extends Controller
 {
@@ -94,6 +96,34 @@ class AdminTrackingController extends Controller
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id', 1)->get();
         $case_nature_channels = CrmRequestChannel::where('id', '!=', 1)->get();
         $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id', 1)->get();
+        $dept_id = Auth::user()->role->department_id;
+        if($dept_id != 1 ) {
+        
+            $case_nature_type_complaints = $case_nature_type_complaints->filter(function ($case_nature_type_complaints) use ($dept_id) {
+                $complaints_dept = json_decode($case_nature_type_complaints->admin_departments, true);
+                if (is_null($complaints_dept)) {
+                    return false;
+                }
+                // Check if the dept_id is in the admin_departments array
+                return in_array($dept_id, $complaints_dept);
+            });
+            $case_nature_type_service_requests = $case_nature_type_service_requests->filter(function ($case_nature_type_service_requests) use ($dept_id) {
+                $services_dept = json_decode($case_nature_type_service_requests->admin_departments, true);
+                if (is_null($services_dept)) {
+                    return false;
+                }
+                // Check if the dept_id is in the admin_departments array
+                return in_array($dept_id, $services_dept);
+            });
+            $case_nature_type_claims = $case_nature_type_claims->filter(function ($case_nature_type_claims) use ($dept_id) {
+                $claims_dept = json_decode($case_nature_type_claims->admin_departments, true);
+                if (is_null($claims_dept)) {
+                    return false;
+                }
+                // Check if the dept_id is in the admin_departments array
+                return in_array($dept_id, $claims_dept);
+            });
+        }
         $return_confirm_reason_ids = DB::table('shipment_status_shipment_status_reason')->where('shipment_status_id', 20)->whereNotIn('shipment_status_reason_id', [2, 55,56,13])->pluck('shipment_status_reason_id')->toArray();
         $return_confirm_reasons = ShipmentStatusReason::whereIn('id', $return_confirm_reason_ids)->select('id', 'name')->get();
         $consignee_refused_reasons = ConsigneeRefusedReason::where('status', 1)->select('id', 'reasons')->where('status', 1)->get();
@@ -140,7 +170,50 @@ class AdminTrackingController extends Controller
     }
 
 
-
+    public function updated_crm_request_nature_types(Request $request)
+    {
+        $shipment_id = $request->input('shipment_id');
+        $shipment_status = Shipment::where('id', $shipment_id)->pluck('shipper_status_id')->first();
+        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id', 1)->get();
+        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id', 1)->get();
+        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id', 1)->get();
+        $dept_id = Auth::user()->role->department_id;
+        if($dept_id != 1) {
+            $case_nature_type_complaints = $case_nature_type_complaints->filter(function ($case_nature_type_complaints) use ($dept_id, $shipment_status) {
+                $complaints_dept = json_decode($case_nature_type_complaints->admin_departments, true);
+                $complaints_status = json_decode($case_nature_type_complaints->shipment_status, true);
+                
+                if (is_null($complaints_dept) || is_null($complaints_status)) {
+                    return false;
+                }
+                // Check if the dept_id is in the admin_departments array
+                return (in_array($dept_id, $complaints_dept) && in_array($shipment_status, $complaints_status));
+            });
+            $case_nature_type_service_requests = $case_nature_type_service_requests->filter(function ($case_nature_type_service_requests) use ($dept_id, $shipment_status) {
+                $services_dept = json_decode($case_nature_type_service_requests->admin_departments, true);
+                $services_status = json_decode($case_nature_type_service_requests->shipment_status, true);
+                if (is_null($services_dept) || is_null($services_status)) {
+                    return false;
+                }
+                // Check if the dept_id is in the admin_departments array
+                return (in_array($dept_id, $services_dept) && in_array($shipment_status, $services_status)) ;
+            });
+            $case_nature_type_claims = $case_nature_type_claims->filter(function ($case_nature_type_claims) use ($dept_id, $shipment_status) {
+                $claims_dept = json_decode($case_nature_type_claims->admin_departments, true);
+                $claims_status = json_decode($case_nature_type_claims->shipment_status, true);
+                if (is_null($claims_dept) || is_null($claims_status)) {
+                    return false;
+                }
+                // Check if the dept_id is in the admin_departments array
+                return (in_array($dept_id, $claims_dept) && in_array($shipment_status, $claims_status));
+            });
+        }   
+        return response()->json([
+            'case_nature_type_complaints' => $case_nature_type_complaints,
+            'case_nature_type_service_requests' => $case_nature_type_service_requests,
+            'case_nature_type_claims' => $case_nature_type_claims
+        ]);
+    }
     public function track(Request $request)
     {
         $tracking_numbers = explode(',', $request->tracking_numbers);
@@ -728,7 +801,7 @@ class AdminTrackingController extends Controller
                     $details['consignee_name'] = $shipment->consignee_name;
                     $details['consignee_address'] = $shipment->consignee_address;
                     $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->latest('id')->first();
-                    $details['status'] = $journey->shipment_status_shipper->name;
+                    $details['status'] = ($journey && $journey->shipment_status_shipper->name) ? $journey->shipment_status_shipper->name : '-';
                     if ($journey->status_reason_id != null) {
 
                         $details['reason'] = $journey->shipment_status_reason->name;
@@ -759,7 +832,7 @@ class AdminTrackingController extends Controller
                         $details['complaint'] = $crm->id;
                     }
 
-                    ShipmentScanningJourneyController::add($shipment->id ,8,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
+                    ShipmentScanningJourneyController::add($shipment->id ,8,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL, $request->action);
                     return response()->json(['status' => 1, 'details' => $details]);
                 } else {
                     return response()->json(['status' => 0, 'error' => 'You are not allowed for given Tracking Number!']);
@@ -919,7 +992,8 @@ class AdminTrackingController extends Controller
                 ';
 
                 return $dropdown;
-            });
+            })
+            ->rawColumns(['tracking_number_link', 'action']);
         return $datatable->make(true);
     }
 
@@ -1191,7 +1265,20 @@ class AdminTrackingController extends Controller
                         $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
                         $details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
                         $details['consignee']['destination'] = $shipment->consignee_city->name;
-                        $details['consignee']['address'] = $shipment->consignee_address;
+
+                        $consignee_address = InterceptReBookRequestHistory::where('shipment_id', $shipment->id)
+                        ->select([
+                            'new_consignee_address',
+                        ])
+                        ->first();
+
+                        if ($consignee_address){
+                            $details['consignee']['address'] = $consignee_address->new_consignee_address;
+                        } else {
+                            $details['consignee']['address'] = $shipment->consignee_address;
+                        }
+
+                        // $details['consignee']['address'] = $shipment->consignee_address;
                         $details['consignee']['email'] = $shipment->consignee_email;
 
                         $details['consignee']['crm_status'] = 0;
@@ -1254,10 +1341,13 @@ class AdminTrackingController extends Controller
 
                         $fintech_payment  = FintechPaymentDetails::join('trax_pay_transactions','fintech_payment_details.trax_pay_id','trax_pay_transactions.id')
                             ->where('trax_pay_transactions.shipment_id',$shipment->id)
-                            ->orderBy('fintech_payment_details.id', 'desc');
+                            ->orderBy('fintech_payment_details.id', 'desc')
+                            ->select('fintech_payment_details.transaction_id')
+                            ->first();
 
-                        if($fintech_payment->exists()){
-                            $fintech_paid = '<button class="btn btn-sm btn-success align-middle"> Paid <i class="la la-lg la-credit-card"></i></button>';
+                        if(!empty($fintech_payment)){
+                            $transaction_id = $fintech_payment->transaction_id;
+                            $fintech_paid = '<button class="btn btn-sm btn-success align-middle"> Paid <br> PayFast('.$transaction_id.') <i class="la la-lg la-credit-card"></i></button>';
                         }
 
                         if ($shipment->booking_type_id != 4) {
@@ -1847,6 +1937,15 @@ class AdminTrackingController extends Controller
 
                                 
                                 $journey_details = array();
+
+                                // bag number
+                                $bag_number = Handover::where('id', $journey->handover_id)->select('bag_number')->first();
+                                if (!$bag_number || is_null($bag_number->bag_number)) {
+                                    $journey_details['bag_number'] = '-';
+                                } else {
+                                    $journey_details['bag_number'] = $bag_number->bag_number;
+                                }
+                                // $journey_details['bag_number'] = $bag_number->bag_number;
                                 $journey_details['handover_id'] = $journey->handover_id;
                                 $journey_details['status'] = $journey->my_status->name;
                                 $journey_details['area_log'] = $this->setJourneyDetails($scanning_data);
@@ -2358,16 +2457,34 @@ class AdminTrackingController extends Controller
                             $tracking_numbers['Row #' . $row_id] = $tracking;
                         }
 
-                        $shipments = Shipment::whereIn('id', $shipment_ids);
-                        if ($shipments->exists()) {
+                        // $shipments = DB::connection('reports')->table('shipments')->whereIn('id', $shipment_ids)->get();
+
+                        // $shipments = Shipment::with(['pickup_address.city', 'consignee_city'])
+                        //     ->whereIn('id', $shipment_ids)
+                        //     ->get();
+
+                        $shipments = DB::connection('reports')
+                            ->table('shipments')
+                            ->whereIn('shipments.id', $shipment_ids)
+                            ->leftJoin('user_shipping_infos', 'shipments.pickup_address_id', '=', 'user_shipping_infos.id')
+                            ->leftJoin('cities as consignee_city', 'shipments.consignee_city_id', '=', 'consignee_city.id')
+                            ->leftJoin('cities as pickup_city', 'user_shipping_infos.city_id', '=', 'pickup_city.id')
+                            ->select(
+                                'shipments.id as shipment_id',
+                                'shipments.tracking_number as tracking_number',
+                                'user_shipping_infos.*',
+                                'pickup_city.name as pickup_city_name',
+                                'consignee_city.name as consignee_city_name'
+                            )
+                        ->get();
+
+                        if (count($shipments) > 0) {
                             ShipmentPosition::where('tracked_by', Auth::id())->delete();
-                            $shipments = $shipments->get();
+
                             foreach ($shipments as $shipment){
-                                                                $shipment_detail = array();
-
-                                $last_shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->orderBy('id', 'desc')->first();
+                                $shipment_detail = array();
+                                $last_shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->shipment_id)->orderBy('id', 'desc')->first();
                                 if($last_shipment_journey){
-
                                     if($last_shipment_journey->user_id != null && $last_shipment_journey->name != null){
                                         $shipment_journey_status_by = $last_shipment_journey->user->name . ' (Shipper)';
                                     }
@@ -2381,9 +2498,8 @@ class AdminTrackingController extends Controller
                                 else{
                                     $shipment_journey_status_by ='-';
                                 }
-
                                 //Last screen location without Tracking Screens
-                                $last_scanned_location = ShipmentScanningJourney::where('shipment_id', $shipment->id)->whereNotIn('screen_location_id', [9, 18])->orderBy('id', 'desc');
+                                $last_scanned_location = ShipmentScanningJourney::where('shipment_id', $shipment->shipment_id)->whereNotIn('screen_location_id', [9, 18])->orderBy('id', 'desc');
 
                                 if($last_scanned_location->exists()){
                                     $last_scanned_location_flag = true;
@@ -2505,7 +2621,7 @@ class AdminTrackingController extends Controller
 
 
                                 $handover = '';
-                                $handover_shipment = HandoverShipments::where('shipment_id', $shipment->id)->orderBy('id', 'desc');
+                                $handover_shipment = HandoverShipments::where('shipment_id', $shipment->shipment_id)->orderBy('id', 'desc');
                                 if($handover_shipment->exists()){
                                     $handover_shipment = $handover_shipment->first();
                                     $handover = Handover::find($handover_shipment->handover_id);
@@ -2570,10 +2686,16 @@ class AdminTrackingController extends Controller
                                 }
 
                                 $shipment_position = new ShipmentPosition();
-                                $shipment_position->shipment_id = $shipment->id;
+                                // $shipment_position->shipment_id = $shipment->id;
+                                // $shipment_position->origin = $shipment->pickup_address->city->name;
+                                // $shipment_position->destination = $shipment->consignee_city->name;
+
+                                $shipment_position->shipment_id = $shipment->shipment_id;
                                 $shipment_position->tracking_number = $shipment->tracking_number;
-                                $shipment_position->origin = $shipment->pickup_address->city->name;
-                                $shipment_position->destination = $shipment->consignee_city->name;
+
+                                $shipment_position->origin = $shipment->pickup_city_name;
+                                $shipment_position->destination = $shipment->consignee_city_name;                            
+
                                 $shipment_position->status = $last_shipment_journey->shipment_status_shipper->name ?? '-';
                                 $shipment_position->status_at =  Carbon::parse($last_shipment_journey->created_at ?? null)->format('Y-m-d H:i:s') ?? '-';
                                 $shipment_position->status_by = $shipment_journey_status_by;
@@ -2630,7 +2752,7 @@ class AdminTrackingController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),616);
         }
 
-        $shipment_positions = ShipmentPosition::leftJoin('shipments as s','s.id','=','shipment_positions.shipment_id')
+        $shipment_positions =   DB::connection('reports')->table('shipment_positions')->leftJoin('shipments as s','s.id','=','shipment_positions.shipment_id')
         ->leftJoin('users as u','u.id','=','s.user_id')
         ->leftJoin('shipments_journey as sj','sj.shipment_id','=','shipment_positions.shipment_id')
         ->leftJoin('admins as a','a.id','=','sj.admin_id')
@@ -2678,7 +2800,7 @@ class AdminTrackingController extends Controller
         ->select(['shipment_positions.tracking_number', 'shipment_positions.origin', 'shipment_positions.destination', 'shipment_positions.status', 'shipment_positions.status_at', 'shipment_positions.status_by', 'shipment_positions.screen_location', 'shipment_positions.city', 'shipment_positions.scanned_by', 'shipment_positions.scanned_at',  'shipment_positions.handover_created_by', 'shipment_positions.handover_created_at', 'shipment_positions.handover_from', 'shipment_positions.handover_to', 'shipment_positions.handover_received_by', 'shipment_positions.handover_received_at', 'u.name as shipper_name','s.amount as cod_value','a.trax_id' ,'sj.admin_id as admin_id','s.id as shipment_id','sjl.shipment_id as journey_latest_id',
         'sjl.updated_at as journey_latest_updated_at',
         'sjl.shipper_status_id as latest_shipper_status_id','s.shipper_status_id as shipper_status_id','ssj.id as ssj_id', 'ca_scanning.name as scanning_city_area_name',
-        's.consignee_address', 's.actual_weight','shipment_positions.scanned_by_user_type as scanned_by_user_type','shipment_positions.scanned_by_id as scanned_by_id','sj_arrival.created_at as arrival', 'ssj.created_at as last_scanned_at'
+        's.consignee_address', 's.actual_weight','shipment_positions.scanned_by_user_type as scanned_by_user_type','shipment_positions.scanned_by_id as scanned_by_id','sj_arrival.created_at as arrival', 'ssj.created_at as last_scanned_at', 'ssj.entry_method as entry_method'
         ])
         ->where('tracked_by', Auth::id())->groupBy('shipment_positions.shipment_id');
         // dd($shipment_positions->get()->toArray());
@@ -2782,7 +2904,11 @@ class AdminTrackingController extends Controller
                 }else{
                     return '-';
                 }
+            })->editColumn('entry_method', function ($shipment) {
+                return  ($shipment->entry_method == 1 ? 'Scanned' : 'Manual');
             });
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['tracking_number_link'])
+        ->make(true);
     }
 }

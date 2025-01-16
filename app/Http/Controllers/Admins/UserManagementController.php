@@ -31,6 +31,8 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\AdminRoleModulePermission;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\Admins\AdminHumanResourseController;
+use App\Http\Models\Admin\UserRoleManagementLog;
+
 use Illuminate\Support\Facades\Log;
 use PhpParser\Parser\Multiple;
 
@@ -109,7 +111,7 @@ class UserManagementController extends Controller
                 $join->on('ahat.admin_id', '=', 'admins.id')
                     ->where('ahat.id', '=', DB::raw('(SELECT MAX(id) FROM admin_hub_access_types WHERE admin_hub_access_types.admin_id = admins.id)'));
             })
-        ->select('admins.id', 'admins.name', 'admins.phone_number', 'admins.email', 'admins.cnic', 'ar.name as role', 'ad.name as department', 'admins.created_at', 'admins.updated_at', 'a.name as updated_by', 'admins.status', 'h.name as default_hub','admins.trax_id as trax_id','ed.name as designation','admins.official_phone_number','emp.first_inactive','ed.name as designation_name', 'bg.name as blood_group', 'emp.emergency_contact as emergency_contact_no', 'emp.emergency_contact_person as emergency_contact_person','admins.management_user as management_user', 'ad.id as admin_dept_id', 'ahat.hub_access_type as hat');
+        ->select('admins.id', 'admins.name', 'admins.phone_number', 'admins.email', 'admins.cnic', 'ar.name as role', 'ad.name as department', 'admins.created_at as created', 'admins.updated_at as updated', 'a.name as updated_by', 'admins.status', 'h.name as default_hub','admins.trax_id as trax_id','ed.name as designation','admins.official_phone_number','emp.first_inactive','ed.name as designation_name', 'bg.name as blood_group', 'emp.emergency_contact as emergency_contact_no', 'emp.emergency_contact_person as emergency_contact_person','admins.management_user as management_user', 'ad.id as admin_dept_id', 'ahat.hub_access_type as hat');
 
         if (!in_array(session('role_id'), [1, 58, 70, 63])) {
             $users = $users
@@ -253,7 +255,7 @@ class UserManagementController extends Controller
                 if ($keyword != '') {
                     $query->where('ar.name', 'like', '%' . $keyword . '%')->orWhere('ad.name', 'like', '%' . $keyword . '%');
                 }
-            });
+            })->rawColumns(['action','ahat']);
 
         return $datatables->make(true);
     }
@@ -632,10 +634,25 @@ class UserManagementController extends Controller
 
                 $admin_hub->save();
             }
+            $deleted_name_hubs = City::whereIn('id', $delete_hub_ids)->pluck('name')
+            ->implode(', ');
 
 
         } else {
+            $delete_hub_ids = [];
+            $current_hub_ids = AdminHub::where('admin_id', $id)->pluck('hub_id')->toArray();
+            $deleted_name_hubs = City::whereIn('id', $delete_hub_ids)->pluck('name')
+            ->implode(', ');
             AdminHub::where('admin_id', $id)->delete();
+        }
+        if(!empty($deleted_name_hubs)) {
+            $array['Deleted Hubs'] = $deleted_name_hubs;
+            $record = new UserRoleManagementLog;
+            $record->changed_by_id = Auth::id();
+            $record->data = json_encode($array);
+            $record->changed_in_record_id = $id;
+            $record->screen_name = 'User Management';
+            $record->save();
         }
 
         if ($admin->duplicate_user == 0) {
@@ -673,7 +690,7 @@ class UserManagementController extends Controller
     {
         $roles = AdminRole::join('admin_departments as ad', 'admin_roles.department_id', '=', 'ad.id')
             ->join('admins as a', 'admin_roles.updated_by', '=', 'a.id')
-            ->select('admin_roles.id', 'admin_roles.name', 'admin_roles.is_active', 'ad.name as department', 'admin_roles.created_at', 'admin_roles.updated_at', 'a.name as updated_by');
+            ->select('admin_roles.id', 'admin_roles.name', 'admin_roles.is_active', 'ad.name as department', 'admin_roles.created_at as created', 'admin_roles.updated_at as updated', 'a.name as updated_by');
 
         $datatables = Datatables::of($roles)
             ->addColumn('is_active', function ($role) {
@@ -703,7 +720,7 @@ class UserManagementController extends Controller
                 } else {
                     return '';
                 }
-            });
+            })->rawColumns(['action']);
 
         return $datatables->make(true);
     }
@@ -1012,9 +1029,26 @@ class UserManagementController extends Controller
 
                 $admin_role_module_permission->save();
             }
+
+            $deleted_name_permissions = ModulePermission::whereIn('id', $delete_permission_ids)->pluck('name')
+            ->implode(', ');
+            
         } else {
+            $current_permission_ids = AdminRoleModulePermission::where('role_id', $id)->pluck('permission_id')->toArray();
+            $deleted_name_permissions = ModulePermission::whereIn('id', $current_permission_ids)->pluck('name')
+            ->implode(', ');
             AdminRoleModulePermission::where('role_id', $id)->delete();
         }
+            if(!empty($deleted_name_permissions)) {
+                $array['Deleted Permissions'] = $deleted_name_permissions;
+                $record = new UserRoleManagementLog;
+                $record->changed_by_id = Auth::id();
+                $record->data = json_encode($array);
+                $record->changed_in_record_id = $id;
+                $record->screen_name = 'Role Management';
+                $record->save();
+            }
+            
 
         return redirect()->route('admin.user_management.roles.index')->with(['success' => 'Role: ' . $request->input('name') . ' has been updated!']);
     }

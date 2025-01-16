@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Rider extends Model
 {
+     // Format dates as 'YYYY-MM-DD HH:mm:ss'
+    protected function serializeDate(\DateTimeInterface $date)
+    {
+        return $date->format('Y-m-d H:i:s');
+    }
     protected $fillable = [
         'city_id', 'name', 'phone', 'cnic', 'address', 'route_id', 'rider_main_category_id', 'rider_category_id', 'status', 'pin', 'special_rider_checkbox', 'created_by', 'updated_by', 'trax_id', 'rider_type_id', 'operation_rider_id', 'employee_id', 'ccd', 'shift_id', 'reporting_location_id','incentive_amount','area_id' ,'allow_delivered_status'
     ];

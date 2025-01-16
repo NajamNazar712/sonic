@@ -173,7 +173,7 @@ class ShipperInterceptReBookController extends Controller
                                 
                         }
 
-                            request()->request->add(['shipment_id' => $request->shipment_id]);
+                            $request->merge(['shipment_id' => $request->shipment_id]);
 
                             $updated_by_id = Auth::id();
                             $updated_type_id = 3; //updated by shipper;
@@ -249,7 +249,7 @@ class ShipperInterceptReBookController extends Controller
                                 
                         }
 
-                            request()->request->add(['shipment_id' => $request->shipment_id]);
+                            $request->merge(['shipment_id' => $request->shipment_id]);
                             $updated_by_id = Auth::id();
                             $updated_type_id = 3; //updated by shipper;
                             $update_rv_assign_agent_status_id = 4; //intercept approved

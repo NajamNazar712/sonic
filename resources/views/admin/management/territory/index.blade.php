@@ -195,9 +195,9 @@
                                 row.push(values.name);
                                 row.push(values.city);
                                 row.push(values.created_by);
-                                row.push(values.created_at);
+                                row.push(values.created);
                                 row.push(values.updated_by);
-                                row.push(values.updated_at);
+                                row.push(values.updated);
                                 row.push(values.status);
                                 body.push(row);
                             });
@@ -246,9 +246,9 @@
                     {data: 'name', name: 'territories.name', class: 'align-middle name'},
                     {data: 'city', name: 'c.name', class: 'align-middle city'},
                     {data: 'created_by', name: 'a.name', class: 'align-middle created_by'},
-                    {data: 'created_at', name: 'territories.created_at', class: 'align-middle created_at'},
+                    {data: 'created', name: 'territories.created_at', class: 'align-middle created_at'},
                     {data: 'updated_by', name: 'ad.name', class: 'align-middle updated_by'},
-                    {data: 'updated_at', name: 'territories.updated_at', class: 'align-middle updated_at'},
+                    {data: 'updated', name: 'territories.updated_at', class: 'align-middle updated_at'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {orderable: false,data: 'action', name: 'action', class: 'align-middle action',},
                 ],

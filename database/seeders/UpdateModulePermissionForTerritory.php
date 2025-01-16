@@ -1,0 +1,20 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+
+class UpdateModulePermissionForTerritory extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        DB::table('module_permissions')->insert(array(
+            array('id' => 443, 'name' => 'Territory - View', 'module_id' => 12),
+        ));
+    }
+}

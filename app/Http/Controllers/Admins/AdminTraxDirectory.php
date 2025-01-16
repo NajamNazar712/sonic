@@ -47,17 +47,17 @@ class AdminTraxDirectory extends Controller
             });
 
         if($request->search_city_id){
-            $datatable->where('e.city_id', $request->search_city_id);
+            $admin->where('e.city_id', $request->search_city_id);
         }
         if($request->search_name){
-            $datatable->where('e.name', 'like','%' . $request->search_name . '%');
+            $admin->where('e.name', 'like','%' . $request->search_name . '%');
         }
         if($request->search_phone){
             $phone = $request->search_phone;
-            $datatable->where('e.official_phone_number', $phone)->orwhere('e.phone_number', $phone);
+            $admin->where('e.official_phone_number', $phone)->orwhere('e.phone_number', $phone);
         }
         if($request->search_trax_id){
-            $datatable->where('e.trax_id', $request->search_trax_id);
+            $admin->where('e.trax_id', $request->search_trax_id);
         }
 
         return $datatable->make(true);

@@ -34,6 +34,7 @@ use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use DB;
 use App\Http\Models\CrmCaseNatureRemark;
+use App\Http\Models\InterceptReBookRequestHistory;
 
 class ShipperTrackingController extends Controller
 {
@@ -78,11 +79,22 @@ class ShipperTrackingController extends Controller
 
     public function shipper_visibility(Request $request)
     {
-        $nature_id = $request->input('nature_id');
+        $nature_id = $request->input('id');
+        $shipment_id = $request->input('shipment_id');
+        //dd($shipment_id);
+        $shipment_status = Shipment::where('id', $shipment_id)->pluck('shipper_status_id')->first();
         $case_nature_types = CrmRequestCaseNatureType::where('nature_id', '=', $nature_id)
             ->where('status_id', 1)
             ->where('shipper_visibility', 1)
-            ->get();
+            ->get()->filter(function ($case_nature_types) use ($shipment_status) {
+                $status = json_decode($case_nature_types->shipment_status, true);
+                if (is_null($status)) {
+                    return false;
+                }
+                // Check if the dept_id is in the admin_departments array
+                return in_array($shipment_status, $status);
+            });
+            //dd($case_nature_types);
         return response()->json([
             'case_nature_types' => $case_nature_types,
         ]);
@@ -219,7 +231,20 @@ class ShipperTrackingController extends Controller
                         $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
                         $details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
                         $details['consignee']['destination'] = $shipment->consignee_city->name;
-                        $details['consignee']['address'] = $shipment->consignee_address;
+
+                        $consignee_address = InterceptReBookRequestHistory::where('shipment_id', $shipment->id)
+                        ->select([
+                            'new_consignee_address',
+                        ])
+                        ->first();
+
+                        if ($consignee_address){
+                            $details['consignee']['address'] = $consignee_address->new_consignee_address;
+                        } else {
+                            $details['consignee']['address'] = $shipment->consignee_address;
+                        }
+                        // $details['consignee']['address'] = $shipment->consignee_address;
+
                         $details['consignee']['email'] = $shipment->consignee_email;
                         $details['consignee']['crm_status'] = 0;
 
@@ -287,7 +312,7 @@ class ShipperTrackingController extends Controller
                         $details['order_information']['booking_type_id'] = $shipment->booking_type_id;
 
                         if ($shipment->booking_type_id != 4) {
-                            $details['order_information']['amount'] = $shipment->amount;
+                            $details['order_information']['amount'] = number_format($shipment->amount);
                         }
                         else {
                             if ($shipment->charges_mode_id == 1) {
@@ -383,7 +408,8 @@ class ShipperTrackingController extends Controller
 
                                     $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
 
-                                    if(in_array($journey->shipper_status_id, [8,17,20,52,54])){
+                                    if(in_array($journey->shipper_status_id, [8,17,20,52,54,12,66])){
+                                        //12 and 66 status added for remarks (RVR and Requested Call Reattempt).
                                         $journey_details['status_remarks'] = ($journey->remarks) ? $journey->remarks : '';
                                     }else{
                                         $journey_details['status_remarks'] = '';

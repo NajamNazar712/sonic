@@ -25,7 +25,7 @@ class AdminAPIDWSToken
                 $admin = $admin->first();
 
                 if ($admin->status) {
-                    $request->request->add(['admin_id' => $admin->id]);
+                    $request->merge(['admin_id' => $admin->id]);
 
                     return $next($request);
                 }

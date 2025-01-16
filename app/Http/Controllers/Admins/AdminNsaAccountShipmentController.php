@@ -236,6 +236,7 @@ class AdminNsaAccountShipmentController extends Controller
                             $settings = $settings->first();
                             $nsa_accounts = array_map('intval', explode(',', $settings->text));
                         }
+
                         if (count($nsa_accounts) > 0) {
                             if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('user_id', $nsa_accounts)->where('shipper_status_id', 1)->exists()) {
                                 $errors['Row #' . $row_id][] = 'Shipment not found with Tracking Number #' . $row['tracking_number'];
@@ -273,11 +274,12 @@ class AdminNsaAccountShipmentController extends Controller
 
                                     $status_id = 2;
 
-                                    if (in_array($nsa_shipment->user_id, [7762, 10354])) {
+                                    if (in_array($nsa_shipment->user_id, [7762, 10354,37791,38106])) {
                                         $admin_id = Auth::id();
                                     }
                                     else {
                                         $admin_id = 50;
+                                        
                                     }
 
                                     ShipmentsJourneyController::add($nsa_shipment->id, $status_id, $status_id, NULL, NULL, NULL, $admin_id);
@@ -293,7 +295,7 @@ class AdminNsaAccountShipmentController extends Controller
                                     $nsa_shipment->shipper_status_id = $status_id;
                                     $nsa_shipment->consignee_status_id = $status_id;
 
-                                    if (in_array($nsa_shipment->user_id, [7762, 10354])) {
+                                    if (in_array($nsa_shipment->user_id, [7762, 10354,37791,38106])) {
                                         $nsa_shipment->actual_weight = $nsa_shipment->estimated_weight;
                                     }
                                     else {
@@ -465,10 +467,13 @@ class AdminNsaAccountShipmentController extends Controller
                         foreach ($nsa_shipments as $nsa_shipment) {
                             if (in_array($nsa_shipment->user_id, [7762, 10354])) {
                                 $rider_id = 1837;
+                                // $rider_id = 11887;
                                 $admin_id = Auth::id();
                             }
                             else {
-                                $rider_id = $settings->setting_value;
+                                // 03250 ----> new rider id for express shippers
+                                // $rider_id = $settings->setting_value;
+                                $rider_id = 11887;
                                 $admin_id = 50;
                             }
 
@@ -483,7 +488,6 @@ class AdminNsaAccountShipmentController extends Controller
                                 }
                             }
                         }
-
                         $order = false;
                         if ($shipments_count != 0) {
                             $note = DeliveryNote::create([
@@ -524,7 +528,8 @@ class AdminNsaAccountShipmentController extends Controller
                                 $admin_id = Auth::id();
                             }
                             else {
-                                $rider_id = $settings->setting_value;
+                                // $rider_id = $settings->setting_value;
+                                $rider_id = 11887;
                                 $admin_id = 50;
                             }
 
@@ -537,9 +542,14 @@ class AdminNsaAccountShipmentController extends Controller
                                 }
                             }
 
-                            ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, $admin_id, $note->id, $rider_id);
-                            ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, $admin_id, $note->id, NULL, 0,$received_refused_by);
-                            ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, $admin_id, $note->id, NULL, 1,$received_refused_by);
+                            // ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, $admin_id, $note->id, $rider_id);
+                            // ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, $admin_id, $note->id, NULL, 0,$received_refused_by);
+                            // ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, $admin_id, $note->id, NULL, 1,$received_refused_by);
+
+                            ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, NULL, $note->id, $rider_id);
+                            ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, NULL, $note->id, NULL, 0, $received_refused_by, $rider_id);
+                            ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, NULL, $note->id, NULL, 1, $received_refused_by, $rider_id);
+                            
                             DeliveryNoteShipment::where(['delivery_note_id' => $note->id, 'shipment_id' => $shipment_data->id])->update(['status' => 1]);
                         }
                         // foreach ($valid_shipments as $index => $shipment) {
@@ -611,7 +621,8 @@ class AdminNsaAccountShipmentController extends Controller
         if ($nsa_shipments->exists()) {
             $nsa_shipments = $nsa_shipments->get();
             $settings = GlobalSettings::where('type', 'nsa_accounts')->first();
-            $rider_id = $settings->setting_value;
+            // $rider_id = $settings->setting_value;
+            $rider_id = 3250;
             $valid_shipments = array();
             $shipments_count = 0;
             $total_cod_amount = 0;
@@ -954,7 +965,12 @@ class AdminNsaAccountShipmentController extends Controller
                     if ($nsa_shipments->exists()) {
                         $nsa_shipments = $nsa_shipments->get();
                         $settings = GlobalSettings::where('type', 'nsa_accounts')->first();
-                        $rider_id = $settings->setting_value;
+
+
+                        // $rider_id = $settings->setting_value;
+                        $rider_id = 11887;
+
+
                         $valid_shipments = array();
                         $shipments_count = 0;
                         $total_cod_amount = 0;
@@ -1016,16 +1032,22 @@ class AdminNsaAccountShipmentController extends Controller
                                         }
                                     }
 
-                                    ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, 50, $note->id, $rider_id);
-                                    ShipmentsJourneyController::add($shipment, 12, 12, 34, NULL, NULL, 50, $note->id, NULL, 0,$received_by);
-                                    ShipmentsJourneyController::add($shipment, 20, 20, 34, NULL, NULL, 50, $note->id, NULL, 1,$received_by);
+                                    // ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, 50, $note->id, $rider_id);
+                                    // ShipmentsJourneyController::add($shipment, 12, 12, 34, NULL, NULL, 50, $note->id, NULL, 0,$received_by);
+                                    // ShipmentsJourneyController::add($shipment, 20, 20, 34, NULL, NULL, 50, $note->id, NULL, 1,$received_by);
+
+                                    ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, NULL, $note->id, NULL, 0, $received_by, $rider_id);
+                                    ShipmentsJourneyController::add($shipment, 12, 12, 34, NULL, NULL, NULL, $note->id, NULL, 0, $received_by, $rider_id);
+                                    ShipmentsJourneyController::add($shipment, 20, 20, 34, NULL, NULL, NULL, $note->id, NULL, 1, $received_by, $rider_id);  
+
                                     DeliveryNoteShipment::where(['delivery_note_id' => $note->id, 'shipment_id' => $shipment_data->id])->update(['status' => 1]);
                                 }
 
                                 DeliveryNote::where('id', $note->id)->update(['delivered_shipments' => 0, 'verified_by' => 50, 'received_cod_amount' => 0, 'status' => 1, 'last_updated_at' => Carbon::now(), 'status_verified_at' => Carbon::now()]);
                             }
 
-                            $note = ReturnNote::create(['hub_id' => 202, 'rider_id' => 274, 'route_id' => 2, 'shipments_count' => $shipments_count, 'admin_id' => 346, 'status' => 3]);
+                            // $note = ReturnNote::create(['hub_id' => 202, 'rider_id' => 274, 'route_id' => 2, 'shipments_count' => $shipments_count, 'admin_id' => 346, 'status' => 3]);
+                            $note = ReturnNote::create(['hub_id' => 202, 'rider_id' => 11887, 'route_id' => 2, 'shipments_count' => $shipments_count, 'admin_id' => 346, 'status' => 3]);
                             if ($note) {
                                 foreach ($valid_shipments as $shipment_id) {
                                     $shipment = Shipment::where('id', $shipment_id);
@@ -1035,8 +1057,11 @@ class AdminNsaAccountShipmentController extends Controller
                                     $shipment->shipper_status_id = 25;
                                     $shipment->consignee_status_id = 25;
                                     $shipment->save();
-                                    ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, 50, $note->id, $rider_id);
-                                    ShipmentsJourneyController::add($shipment->id, 25, 25, NULL, NULL, NULL, 50, $note->id, $rider_id);
+                                    // ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, 50, $note->id, $rider_id);
+                                    // ShipmentsJourneyController::add($shipment->id, 25, 25, NULL, NULL, NULL, 50, $note->id, $rider_id);
+
+                                    ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, NULL, $note->id, NULL, 1, $received_by, $rider_id);
+                                    ShipmentsJourneyController::add($shipment->id, 25, 25, NULL, NULL, NULL, NULL, $note->id, NULL, 1, $received_by, $rider_id); 
                                 }
                             }
                         }

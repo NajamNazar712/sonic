@@ -30,8 +30,6 @@ class AdminRetailReportController extends Controller
 
         $retail_centers = DB::connection('reports')->table('retail_trax_centers')->where('status', 1)->select('id','name')->get();
         $retail_franchises = DB::connection('reports')->table('retail_franchises')->where('status', 1)->select('id','name')->get();
-
-
         $cities = DB::connection('reports')->table('cities')->select('id','name')->get();
         $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
         $statuses = DB::connection('reports')->table('shipment_status')->whereNotIn('id',[1,17])->get();
@@ -116,7 +114,7 @@ class AdminRetailReportController extends Controller
             if (!empty($rncc_numbers)) {
                 $sales->whereIn('rcds.cash_deposit_id', $rncc_numbers);
             }
-//            $sales->groupBy('pns.retail_pickup_note_id');
+            // $sales->groupBy('pns.retail_pickup_note_id');
 
             $from_id = DB::connection('reports')->table('shipments_journey')->where('created_at', '>=', $from)->min('id');
              if (!empty($from_id)) {
@@ -247,25 +245,25 @@ class AdminRetailReportController extends Controller
             });
 
         if($tracking = $request->get('search_tracking')){
-            $datatable->where('shipments.tracking_number', '=', $tracking);
+            $sales->where('shipments.tracking_number', '=', $tracking);
         }
         if($center = $request->get('search_retail_center')){
-            $datatable->where('rf.id', '=', $center);
+            $sales->where('rc.id', '=', $center);
         }
         if($franchise = $request->get('search_retail_franchise')){
-            $datatable->where('rf.id', '=', $franchise);
+            $sales->where('rf.id', '=', $franchise);
         }
         if($origin = $request->get('search_origin')){
-            $datatable->where('oc.id', '=', $origin);
+            $sales->where('oc.id', '=', $origin);
         }
         if($destination = $request->get('search_destination')){
-            $datatable->where('dc.id', '=', $destination);
+            $sales->where('dc.id', '=', $destination);
         }
         if($hub = $request->get('search_hub')){
-            $datatable->where('h.id', '=', $hub);
+            $sales->where('h.id', '=', $hub);
         }
         if($status = $request->get('search_status')){
-            $datatable->where('ss.id', '=', $status);
+            $sales->where('ss.id', '=', $status);
         }
         return $datatable->make(true);
     }

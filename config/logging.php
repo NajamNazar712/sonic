@@ -56,6 +56,16 @@ return [
             'path' => storage_path('logs/cronJobLog.log'),
             'level' => 'debug',
         ],
+        'apolloJobLog' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/apolloJobLog.log'),
+            'level' => 'debug',
+        ],
+        'botCallJobLog' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/botCallJobLog.log'),
+            'level' => 'debug',
+        ],
         'trax_pay_test' => [
             'driver' => 'single',
             'path' => storage_path('logs/trax_pay_test.log'),

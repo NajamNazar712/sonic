@@ -87,7 +87,7 @@ class NpsController extends Controller
                 } else {
                     return '';
                 }
-            });
+            })->rawColumns(['shippers','questions','action']);
 
 
         return $datatables->make(true);

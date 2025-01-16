@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\admins\CronControllers;
+namespace app\Http\Controllers\Admins\CronControllers;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;

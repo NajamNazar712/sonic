@@ -465,6 +465,7 @@ class Permission
 
             'finance.tracking_number_wise_dncc_info.index' => 984,
             'finance.tracking_number_wise_dncc_info.list' => 984,
+            'finance.shipment_ledger.index' => 1017,
 
             'petty_cash.make.index' => 145,
             'petty_cash.statements.index' => 146,
@@ -647,8 +648,8 @@ class Permission
 
             'reports.fintech_report.index' => 896,
             'reports.fintech_report.list' => 896,
-            'reports.ordinary_discrepancy_report.index' => 901,
-            'reports.ordinary_discrepancy_report.list' => 901,
+            'reports.operation_disorder_report.index' => 901,
+            'reports.operation_disorder_report.list' => 901,
             'reports.ibft_report.index' => 915,
             'reports.ibft_report.list' => 915,
 
@@ -1271,6 +1272,7 @@ class Permission
             'reports.debriefing.agent_list' => 676,
             'reports.debriefing.agent_index' => 676,
             'reports.rvr_call_history.index'=>950,
+            'reports.rvr_reattempt.index'=>1008,
 
             'finance.ftl_invoice.index' => 509,
             'settings.debriefing_time_setting.index' => 526,
@@ -1439,6 +1441,7 @@ class Permission
             'settings.consignee_refused_otp_bypass.index' => 826,
             'otp_history.index' => 827,
             'settings.star_shippers.index' => 846,
+            'settings.alist_shipper.index' => 846,
             'settings.auto_delivery_note_verification.index' => 836,
             'reports.revenue_report_by_invoice.index' => 839,
             'return.return_confirm_otp.index' => 849,
@@ -1626,7 +1629,8 @@ class Permission
 
             'crm.bulk_claim.index' => 19,
 
-
+            'admin.reports.bot_rvr.index' => 1010,
+            'admin.reports.bot_rvr_log.index' => 1011
 
         ]
     ];
@@ -1640,6 +1644,7 @@ class Permission
      */
     public function handle($request, Closure $next)
     {
+       
         if (Auth::guard('admin')->check()) {
             $action = str_replace('admin.', '', $request->route()->getName());
             if (session('department_id') == 7) {
@@ -1658,7 +1663,7 @@ class Permission
             } else {
                 session(['sale_users_bypass' => []]);
             }
-
+            
             if (session('role_id') == 1 || !isset($this->actions['admin'][$action]) || in_array($this->actions['admin'][$action], session('permissions')) || (substr($action, 0, 4) == 'crm.' && session('role_id') == 6)) {
                 return $next($request);
             } else {

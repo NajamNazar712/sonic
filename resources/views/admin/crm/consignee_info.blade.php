@@ -205,7 +205,7 @@
                                 row.push(values.added_by);
                                 row.push(values.tagged);
                                 row.push(values.tagged_to);
-                                row.push(values.created_at);
+                                row.push(values.created);
                                 row.push(values.agent_assigned_date);
                                 row.push(values.agent_assigned_by);
                                 row.push(values.address);
@@ -274,7 +274,7 @@
                     {data: 'tagged', name: 'crt.crm_request_tagging_type_id', class: 'align-middle tagged'},
                     {data: 'tagged_to', name: 'tagged_to', class: 'align-middle tagged_to'},
                     {data: 'tagged_date', name: 'crth.created_at', class: 'align-middle tagged_date'},
-                    {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
+                    {data: 'created', name: 'crm_requests.created_at', class: 'align-middle created_at'},
                     {data: 'agent_assigned_date', name: 'resa.created_at', class: 'align-middle agent_assigned_date'},
                     {data: 'agent_assigned_by', name: 'resby.name', class: 'align-middle agent_assigned_by'},
                     {data: 'address', name: 'crm_requests.address', class: 'align-middle address'},

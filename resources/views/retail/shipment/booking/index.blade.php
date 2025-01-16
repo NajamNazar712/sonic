@@ -324,7 +324,7 @@
                                     <div class="form-group col">
                                         <label for="account_name">Account Number:
                                             <span class="danger">*</span></label>
-                                        <input type="text" class="form-control required" value="" name="account_no" id="account_no" placeholder="Account Number*">
+                                        <input type="text" class="form-control required" value="" name="account_no" id="account_no" placeholder="Account Number*" autocomplete="off">
                                     </div>
                                     <div class="form-group col">
                                         <label for="bank">
@@ -1018,6 +1018,14 @@
                                     $('#account_details').addClass('d-none');
                                 }
                             }
+
+                            else if (data.status == 2){
+                                $('#iban_no').val('');
+                                $('#account_no').val('');
+                                $('#bank').val('').trigger('change');
+                                $('#account_details').removeClass('d-none');
+                            }
+
                             else{
                                 complete_shipper_info = false;
                                 first_shipment = true;
@@ -1209,12 +1217,20 @@
                         // },
                         maxlength: 255,
                     },
+                    parcel_amount: {
+                        required: true,
+                        min: 2
+                    }
                 },
                 messages: {
                     consignee_address: {
                         required: "Address Is Required",
                         maxlength :"Address can be maximum 255 characters",
                     },
+                    parcel_amount: {
+                        required: "Parcel Value is required",
+                        min: "Parcel Value must be greater than 1"
+                    }
                 },
                 normalizer: function(value) {
                     return $.trim(value);
@@ -1276,6 +1292,7 @@
                         }).done(function (data) {
                             if (data.status == 1) {
                                 retail_discount_percentage = data.data.discount_percentage;
+                                $('#retail_discount_percentage').val(retail_discount_percentage);
 
                                 calculateRates(shipping_mode_id,business_category,destination,weight,trax_box,length,breadth, insurance, packaging, height, admin_discount, admin_discount_type, retail_discount_applied, retail_discount_percentage);
 
@@ -1768,6 +1785,8 @@
                 var quantity = $(this).val();
                 $(this).val(quantity.replace(/[^0-9]/g, ''));
             });
+
+            $('#account_no').attr('autocomplete', 'off');
 
         });
     </script>

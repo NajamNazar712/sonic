@@ -189,7 +189,7 @@ class RetailAdminUserManagementController extends Controller
 
         $franchise = RetailFranchise::join('admins as a', 'a.id', '=', 'retail_franchises.updated_by')
             ->join('cities as c', 'c.id', '=', 'retail_franchises.default_hub')
-            ->select('retail_franchises.id', 'retail_franchises.name', 'retail_franchises.phone_no', 'retail_franchises.email', 'retail_franchises.cnic', 'c.name as default_hub', 'c.id as default_hub_id', 'a.name as updated_by', 'retail_franchises.status', 'retail_franchises.code', 'retail_franchises.location_latitude', 'retail_franchises.location_longitude', 'retail_franchises.created_at', 'retail_franchises.updated_at', 'retail_franchises.discount','retail_franchises.insurance');
+            ->select('retail_franchises.id', 'retail_franchises.name', 'retail_franchises.phone_no', 'retail_franchises.email', 'retail_franchises.cnic', 'c.name as default_hub', 'c.id as default_hub_id', 'a.name as updated_by', 'retail_franchises.status', 'retail_franchises.code', 'retail_franchises.location_latitude', 'retail_franchises.location_longitude', 'retail_franchises.created_at as created', 'retail_franchises.updated_at as updated', 'retail_franchises.discount','retail_franchises.insurance');
 
         $datatables = Datatables::of($franchise)
             ->editColumn('status', function ($data) {
@@ -248,7 +248,7 @@ class RetailAdminUserManagementController extends Controller
                 } else {
                     return '';
                 }
-            });
+            })->rawColumns(['action','location']);
             
         return $datatables->make(true);
     }
@@ -284,7 +284,7 @@ class RetailAdminUserManagementController extends Controller
     {
         $request->validate([
             'attachment_1' => 'required|mimes:jpeg,png,jpg,pdf,doc,docx|max:2048',
-            'franchise_deduction' => 'required|numeric',
+            // 'franchise_deduction' => 'required|numeric',
             'franchise_withholding' => 'required|numeric',
             'name' => 'required',
             'phone_number' => 'required',
@@ -654,7 +654,7 @@ class RetailAdminUserManagementController extends Controller
     
         $grouped_data = [];
         foreach ($retail_commissions as $record) {
-            $grouped_data[$record->trax_center_name][] = $record;
+            $grouped_data[$record->retail_user_name][] = $record;
         }
     
         foreach ($grouped_data as $franchise_name => $records) {
@@ -1028,7 +1028,7 @@ class RetailAdminUserManagementController extends Controller
 
             // Deduction GST tax row
             $html .= '<tr>';
-            $html .= '<td class="text-center" colspan="6"><strong>GST ' . ($data->commission_gst_deduction_percent ?? 0) . '%</strong></td>';
+            $html .= '<td class="text-center" colspan="6"><strong>Deduction ' . ($data->commission_gst_deduction_percent ?? 0) . '</strong></td>';
             $html .= '<td><strong>' . number_format(round($deduction_amount)) . '</strong></td>';
             $html .= '</tr>';
 
@@ -1182,7 +1182,7 @@ class RetailAdminUserManagementController extends Controller
         $paid_status = $request->paid_status;
         $query = RetailUserCommission::where('month', $month);
         if (!empty($franchise)) {
-            $query->where('franchise_id', $franchise);
+            $query->where('retail_user_id', $franchise);
         }
         if (!empty($paid_status) || $paid_status == '0') {
             $query->where('is_paid', $paid_status);
@@ -1208,7 +1208,7 @@ class RetailAdminUserManagementController extends Controller
         }
         $trax_center = RetailTraxCenter::join('admins as a', 'a.id', '=', 'retail_trax_centers.updated_by')
             ->join('cities as c', 'c.id', '=', 'retail_trax_centers.default_hub')
-            ->select('retail_trax_centers.id', 'retail_trax_centers.name', 'retail_trax_centers.phone_no', 'retail_trax_centers.email', 'retail_trax_centers.cnic', 'c.name as default_hub', 'c.id as default_hub_id', 'a.name as updated_by', 'retail_trax_centers.status', 'retail_trax_centers.code', 'retail_trax_centers.location_latitude', 'retail_trax_centers.location_longitude', 'retail_trax_centers.created_at', 'retail_trax_centers.updated_at','retail_trax_centers.discount','retail_trax_centers.insurance');
+            ->select('retail_trax_centers.id', 'retail_trax_centers.name', 'retail_trax_centers.phone_no', 'retail_trax_centers.email', 'retail_trax_centers.cnic', 'c.name as default_hub', 'c.id as default_hub_id', 'a.name as updated_by', 'retail_trax_centers.status', 'retail_trax_centers.code', 'retail_trax_centers.location_latitude', 'retail_trax_centers.location_longitude', 'retail_trax_centers.created_at as created', 'retail_trax_centers.updated_at as updated','retail_trax_centers.discount','retail_trax_centers.insurance');
 
         $datatables = Datatables::of($trax_center)
             ->editColumn('status', function ($data) {
@@ -1276,7 +1276,7 @@ class RetailAdminUserManagementController extends Controller
                 } else {
                     return '';
                 }
-            });
+            })->rawColumns(['action','location']);
         return $datatables->make(true);
     }
 
@@ -1520,7 +1520,7 @@ class RetailAdminUserManagementController extends Controller
             ->Join('zones as z', 'z.id', '=', 'c.zone_id')
             ->select('retail_users.id', 'retail_users.trax_id', 'retail_users.name',
              'retail_users.phone_no', 'retail_users.cnic', 'retail_users.address',
-              'retail_users.category', 'retail_users.created_at', 'retail_users.updated_at',
+              'retail_users.category', 'retail_users.created_at as created', 'retail_users.updated_at as updated',
                'retail_users.status', 'c.name as city', 'c.id as city_id', 'h.name as hub', 'h.id as hub_id',
                'z.name as zone',  
                'ac.name as created_by', 
@@ -1619,7 +1619,7 @@ class RetailAdminUserManagementController extends Controller
                 } else {
                     return '';
                 }
-            });
+            })->rawColumns(['action']);
         return $datatables->make(true);
     }
 

@@ -46,7 +46,7 @@ class AdminNotificationsController extends Controller
     public function list(Request $request) {
         $notifications = Notification::join('notification_types as nt', 'notifications.type_id', '=', 'nt.id')
         ->join('admins as a', 'notifications.updated_by', '=', 'a.id')
-        ->select('notifications.id', 'notifications.name', 'notifications.type_id', 'nt.name as type', 'notifications.updated_at', 'a.name as updated_by', 'notifications.status');
+        ->select('notifications.id', 'notifications.name', 'notifications.type_id', 'nt.name as type', 'notifications.updated_at as updated', 'a.name as updated_by', 'notifications.status');
 
         $datatables = Datatables::of($notifications)
         ->setRowAttr([
@@ -87,7 +87,7 @@ class AdminNotificationsController extends Controller
             ';
 
             return $dropdown;
-        });
+        })->rawColumns(['action']);
 
         return $datatables->make(true);
     }
@@ -161,13 +161,19 @@ class AdminNotificationsController extends Controller
 
 
             $totalItems = count($emails);
-            $chunkSize = 50;
-            for ($offset = 0; $offset < $totalItems; $offset += $chunkSize) {
-                $parsed_emails = array_slice($emails, $offset, $chunkSize);
-                
-                NotificationsController::custom(1, $subject, $body, $parsed_emails,$from_email);
-                
+            
+            $chunkSize = 25;
+            $chunks = array_chunk($emails, $chunkSize);
+           
+            foreach ($chunks as $parsed_emails) {
+                NotificationsController::custom(1, $subject, $body, $parsed_emails, $from_email);
             }
+            // for ($offset = 0; $offset < $totalItems; $offset += $chunkSize) {
+            //     $parsed_emails = array_slice($emails, $offset, $chunkSize);
+                
+            //     NotificationsController::custom(1, $subject, $body, $parsed_emails,$from_email);
+                
+            // }
             return redirect()->back()->with('success', 'Custom Email Sent');
         }
         else {
@@ -736,7 +742,7 @@ class AdminNotificationsController extends Controller
         else if ($id == 115){
             $details['receiver'] = ['Shipper Phone Number'];
 
-            $details['fields'] = ['shipper','tracking_number'];
+            $details['fields'] = ['shipper','tracking_number', 'total_charges'];
         }
         else if ($id == 116){
             $details['receiver'] = ['Shipper Phone Number'];
@@ -1195,7 +1201,8 @@ class AdminNotificationsController extends Controller
         }
         else if ($id == 214)
         {
-            $details['receiver'] = ['tanveer.malik@trax.pk','muhammad.jawwad@trax.pk','fawad.ahmed@trax.pk','waqas@trax.pk','huzaifa.aamir@trax.pk','hammad.majid@trax.pk','ghazanfar.ali@trax.pk','CC-muhammad.waqas@trax.pk','CC-faisal.hasan@trax.pk','CC-asad.ahsan@trax.pk'];
+            // $details['receiver'] = ['tanveer.malik@trax.pk','muhammad.jawwad@trax.pk','fawad.ahmed@trax.pk','waqas@trax.pk','huzaifa.aamir@trax.pk','hammad.majid@trax.pk','ghazanfar.ali@trax.pk','CC-muhammad.waqas@trax.pk','CC-faisal.hasan@trax.pk','CC-asad.ahsan@trax.pk'];
+            $details['receiver'] = ['syed.furqan@trax.pk','fawad.ahmed@trax.pk','hammad.majid@trax.pk','BCC-(asad.ahsan@trax.pk,sahban.ghani@trax.pk)'];
 
             $details['fields'] = ['link'];
         }
@@ -1263,6 +1270,12 @@ class AdminNotificationsController extends Controller
 
             $details['fields'] = ['Booking_at','preview'];
         }
+        else if ($id == 234)
+        {
+            $details['receiver'] = [''];
+
+            $details['fields'] = [''];
+        }
 
         return $details;
     }
@@ -1324,7 +1337,7 @@ class AdminNotificationsController extends Controller
     {
         $notifications = AppNotification::join('admins as a', 'app_notifications.updated_by', '=', 'a.id')
             ->join('app_types as at', 'app_notifications.app_id', '=', 'at.id')
-            ->select('app_notifications.id as id', 'app_notifications.name as name', 'app_notifications.app_id as app_id', 'app_notifications.updated_at as updated_at', 'a.name as updated_by', 'app_notifications.status as status', 'at.name as app_name');
+            ->select('app_notifications.id as id', 'app_notifications.name as name', 'app_notifications.app_id as app_id', 'app_notifications.updated_at as updated', 'a.name as updated_by', 'app_notifications.status as status', 'at.name as app_name');
         $datatables = Datatables::of($notifications)
             ->setRowAttr([
                 'data-type' => function($notification) {
@@ -1367,7 +1380,7 @@ class AdminNotificationsController extends Controller
                 } else {
                     return "";
                 }
-            });
+            })->rawColumns(['action']);
 
         return $datatables->make(true);
     }

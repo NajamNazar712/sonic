@@ -26,6 +26,7 @@ use App\Http\Models\Shippers\ShipperPickupController;
     Route::post('store_device_token', 'APIController@store_device_token')->name('store_device_token');
     Route::post('delete_device_token', 'APIController@delete_device_token')->name('delete_device_token');
     Route::post('rcp_sms_from_consignee', 'APIController@rcp_sms_from_consignee')->name('rcp_sms_from_consignee');
+    Route::post('fin_sms', 'APIController@fin_sms')->name('fin_sms');
 
     Route::post('employee_attendance_details', 'APIController@employee_checkin')->name('employee_attendance_details');
 
@@ -608,6 +609,10 @@ use App\Http\Models\Shippers\ShipperPickupController;
             });
 
 
+            //APIs for Bot Calling
+        Route::get('bot_get_ticket/{tracking_number?}', 'Agent\BotCallingController@bot_get_ticket_details')->name('bot_get_ticket');
+        Route::post('bot_submit_ticket', 'Agent\BotCallingController@bot_submit_ticket')->name('bot_submit_ticket');
+
         });
 
         Route::middleware('AdminAPIDWSToken')->group(function () {
@@ -721,6 +726,8 @@ use App\Http\Models\Shippers\ShipperPickupController;
 
             Route::post('retail_note_information', 'APIController@hbl_konnect_retail_note_cash_collection_information')->name('retail_note_information');
             Route::post('retail_note_transaction_information', 'APIController@hbl_konnect_retail_note_cash_collection_transactions')->name('retail_note_transaction_information');
+            Route::post('clone_retail_note_transaction_information2', 'APIController@hbl_konnect_retail_note_cash_collection_transactions_2')->name('retail_note_transaction_information2');
+
         });
         Route::prefix('easypaisa')->name('easypaisa.')->group(function () {
             Route::post('delivery_note_information', 'APIController@hbl_konnect_delivery_note_information')->name('delivery_note_information');

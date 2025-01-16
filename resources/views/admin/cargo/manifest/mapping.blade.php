@@ -158,7 +158,7 @@
                                 row.push(values.destination);
                                 row.push(values.junctions);
                                 row.push(values.status);
-                                row.push(values.updated_at);
+                                row.push(values.updated);
                                 row.push(values.updated_by);
 
 
@@ -212,7 +212,7 @@
                     {data: 'destination_display', name:"dc.name", class: 'align-middle destination',orderable: false},
                     {data: 'junctions_display', class: 'align-middle junctions',orderable: false},
                     {data: 'status', name:"status",  class: 'align-middle status'},
-                    {data: 'updated_at', name: 'updated_at', class: 'align-middle updated_at'},
+                    {data: 'updated', name: 'v2_junction_mappings.updated_at', class: 'align-middle updated_at'},
                     {data: 'updated_by', name: 'a.name', class: 'align-middle updated_by'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
@@ -378,7 +378,7 @@
             function make_vehicle_select(index)
             {
                 vehicles = `<div class="form-group">
-                                <select multiple="multiple" name="vehicles[${index}][]" id="vehicles_${index}" class="vehicles_select" data-msg-required="Vehicle is Required" data-rule-required="true">
+                                <select multiple="multiple" name="vehicles[${index}][]" id="vehicles_${index}" class="vehicles_select">
                                     @foreach($vehicles as $vehicle)
                                         <option value="{{$vehicle->id}}">{{$vehicle->reg_number}}</option>
                                     @endforeach
@@ -433,7 +433,7 @@
 
                 $("#add_mapping form .vehicles_select").select2({
                     width: '100%',
-                    placeholder: 'Vehicle Numbers*'
+                    placeholder: 'Vehicle Numbers'
                 }).bind('select2:select', function(e){
                     var current_val = e.params.data.id;
                     var select = $(this);

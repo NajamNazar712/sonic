@@ -22,7 +22,7 @@ class ShipperAPIToken
             $shipper = User::where('api_token', $api_token);
             if ($shipper->exists()) {
                 $shipper = $shipper->first();
-                $request->request->add(['shipper_id' => $shipper->id]);
+                $request->merge(['shipper_id' => $shipper->id]);
                 return $next($request);
             } else {
                 return response()->json([

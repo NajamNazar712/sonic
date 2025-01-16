@@ -220,6 +220,7 @@
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/custom.js')}}" type="text/javascript"></script>
+    <script src="{{asset('js/detectActions.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -342,107 +343,29 @@
                 var hub_id = $('#hub_id').val();
                 var shipper_id = $('#shipper_id').val();
 
-                if (tracking != '') {
-                    scan.attr('disabled', true);
-                    if(table.row().count() == 0) {
-                        blockPagePermanently();
-                        $.ajax({
-                            url: '{{route('admin.return.create.shipment_details')}}',
-                            type: 'POST',
-                            data: {
-                                'tracking': tracking,
-                                'shipper_id': shipper_id,
-                                '_token': '{{ csrf_token() }}'
-                            }
-                        })
-                            .done(function (data) {
-
-                            if (data.status == 1) {
-                                UnblockPagePermanently();
-                                scan_sound(2);
-                                toastr.error(data.error, 'Error!', {
-                                    positionClass: 'toast-top-center',
-                                    containerId: 'toast-top-center'
-                                });
-                            }
-                            else if(data.status == 2){
-                                $('#scan_piece_tracking_number').prop('disabled', true);
-                                $('#scan_piece_tracking_number').val(tracking);
-                                $('#piece_confirm').prop('disabled', true);
-                                if(data.details.scanned_shipment_piece){
-                                    var piece_index = $.inArray(parseInt(data.details.scanned_shipment_piece), all_shipment_piece_ids);
-                                    if (piece_index === -1) {
-                                        var piece_remove_button = '<button type="button" class="btn btn-icon btn-danger"><i class="la la-close"></i></button>';
-                                        var piece_rowNo = piece_table.rows().count();
-                                        piece_table.row.add([piece_rowNo + 1, data.details.scanned_shipment_piece, data.details.tracking_number, piece_remove_button]).node().id = data.details.scanned_shipment_piece;
-                                        piece_table.draw(false);
-                                        piece_table.columns.adjust().draw();
-                                        scan_sound(1);
-                                        shipment_piece_ids.push(data.details.scanned_shipment_piece);
-                                        $('#piece_shipment_id').val(data.details.id);
-                                        $('#piece_tracking_number').val(data.details.tracking_number);
-                                        $('#piece_shipment_count').val(data.details.pieces);
-                                        $('#total_piece_count').html('Total Shipment Piece(s): ' + data.details.pieces);
-                                        // all_shipment_item_ids.push(data.scanned_shipment_item);
-                                        var check = parseInt(piece_rowNo) + 1;
-                                        if(parseInt(data.details.piece) === parseInt(check)){
-                                            $('#scan_piece_tracking_number').prop('disabled', false);
-                                            $('#piece_confirm').prop('disabled', false);
-                                        }
-                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                        $('#ShipmentPiecesModal').modal('show');
-                                    }
-                                    else{
-                                        toastr.error('Shipment has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                    }
-                                }
-                                else{
-                                    $('#piece_shipment_id').val(data.details.id);
-                                    $('#piece_tracking_number').val(data.details.tracking_number);
-                                    $('#piece_shipment_count').val(data.details.pieces_count);
-                                    $('#total_piece_count').html('Total Shipment Pieces: ' + data.details.pieces_count);
-                                    $('#ShipmentPiecesModal').modal('show');
-                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                }
-                                $('#add_shipment_form button.add').prop('disabled', false);
-
-                                $('#arrival_of_shipments_form button.confirm').prop('disabled', false);
-                                $('#shipper_id').val(data.shipper_id);
-                                UnblockPagePermanently();
-                            } else {
-                                var rowNo = table.rows().count();
-                                var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger returnnoterow"><i class="la la-close"></i></a>';
-                                var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';
-
-                                var row = table.row.add([rowNo + 1, data.tracking_number, data.destination, data.consignee_name, data.phone, data.address, data.amount, data.service_type, data.shipment_status, open_box, remove]).node().id = data.shId;
-                                table.draw(false);
-                                $('tr#'+row).attr('class',data.class);
-                                scan_sound(1);
-                                UnblockPagePermanently();
-                                shipment_ids.push(data.shId);
-                                $('#hub_id').val(data.hub);
-                                $('#shipper_id').val(data.shipper_id);
-                            }
-
-                            scan.val('');
-                            scan.attr('disabled', false);
-                            scan.focus();
-                        });
-                    }
-                    else {
-                        if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking)) === -1) {
+                if (tracking.trim() == "" || tracking == null){
+                    scan_sound(2);
+                    toastr.error(
+                        'Tracking Number is required!', 'Error!', 
+                        {positionClass: 'toast-top-center', containerId: 'toast-top-center'}
+                    );
+                } else {
+                    if (tracking != '') {
+                        scan.attr('disabled', true);
+                        if(table.row().count() == 0) {
                             blockPagePermanently();
                             $.ajax({
                                 url: '{{route('admin.return.create.shipment_details')}}',
                                 type: 'POST',
                                 data: {
                                     'tracking': tracking,
-                                    'hub_id':hub_id,
-                                    'shipper_id':shipper_id,
+                                    'shipper_id': shipper_id,
+                                    'action': window.lastAction,
                                     '_token': '{{ csrf_token() }}'
                                 }
                             })
                                 .done(function (data) {
+
                                 if (data.status == 1) {
                                     UnblockPagePermanently();
                                     scan_sound(2);
@@ -495,8 +418,7 @@
                                     $('#arrival_of_shipments_form button.confirm').prop('disabled', false);
                                     $('#shipper_id').val(data.shipper_id);
                                     UnblockPagePermanently();
-                                }
-                                else {
+                                } else {
                                     var rowNo = table.rows().count();
                                     var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger returnnoterow"><i class="la la-close"></i></a>';
                                     var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';
@@ -507,25 +429,114 @@
                                     scan_sound(1);
                                     UnblockPagePermanently();
                                     shipment_ids.push(data.shId);
+                                    $('#hub_id').val(data.hub);
                                     $('#shipper_id').val(data.shipper_id);
-                                    table.order([0, 'desc']).draw();
                                 }
 
                                 scan.val('');
                                 scan.attr('disabled', false);
                                 scan.focus();
                             });
-                        } else {
-                            scan_sound(2);
-                            var error = 'Tracking Number already scanned!';
-                            toastr.error(error, 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
+                        }
+                        else {
+                            if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking)) === -1) {
+                                blockPagePermanently();
+                                $.ajax({
+                                    url: '{{route('admin.return.create.shipment_details')}}',
+                                    type: 'POST',
+                                    data: {
+                                        'tracking': tracking,
+                                        'hub_id':hub_id,
+                                        'shipper_id':shipper_id,
+                                        'action': window.lastAction,
+                                        '_token': '{{ csrf_token() }}'
+                                    }
+                                })
+                                    .done(function (data) {
+                                    if (data.status == 1) {
+                                        UnblockPagePermanently();
+                                        scan_sound(2);
+                                        toastr.error(data.error, 'Error!', {
+                                            positionClass: 'toast-top-center',
+                                            containerId: 'toast-top-center'
+                                        });
+                                    }
+                                    else if(data.status == 2){
+                                        $('#scan_piece_tracking_number').prop('disabled', true);
+                                        $('#scan_piece_tracking_number').val(tracking);
+                                        $('#piece_confirm').prop('disabled', true);
+                                        if(data.details.scanned_shipment_piece){
+                                            var piece_index = $.inArray(parseInt(data.details.scanned_shipment_piece), all_shipment_piece_ids);
+                                            if (piece_index === -1) {
+                                                var piece_remove_button = '<button type="button" class="btn btn-icon btn-danger"><i class="la la-close"></i></button>';
+                                                var piece_rowNo = piece_table.rows().count();
+                                                piece_table.row.add([piece_rowNo + 1, data.details.scanned_shipment_piece, data.details.tracking_number, piece_remove_button]).node().id = data.details.scanned_shipment_piece;
+                                                piece_table.draw(false);
+                                                piece_table.columns.adjust().draw();
+                                                scan_sound(1);
+                                                shipment_piece_ids.push(data.details.scanned_shipment_piece);
+                                                $('#piece_shipment_id').val(data.details.id);
+                                                $('#piece_tracking_number').val(data.details.tracking_number);
+                                                $('#piece_shipment_count').val(data.details.pieces);
+                                                $('#total_piece_count').html('Total Shipment Piece(s): ' + data.details.pieces);
+                                                // all_shipment_item_ids.push(data.scanned_shipment_item);
+                                                var check = parseInt(piece_rowNo) + 1;
+                                                if(parseInt(data.details.piece) === parseInt(check)){
+                                                    $('#scan_piece_tracking_number').prop('disabled', false);
+                                                    $('#piece_confirm').prop('disabled', false);
+                                                }
+                                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                                $('#ShipmentPiecesModal').modal('show');
+                                            }
+                                            else{
+                                                toastr.error('Shipment has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                            }
+                                        }
+                                        else{
+                                            $('#piece_shipment_id').val(data.details.id);
+                                            $('#piece_tracking_number').val(data.details.tracking_number);
+                                            $('#piece_shipment_count').val(data.details.pieces_count);
+                                            $('#total_piece_count').html('Total Shipment Pieces: ' + data.details.pieces_count);
+                                            $('#ShipmentPiecesModal').modal('show');
+                                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                        }
+                                        $('#add_shipment_form button.add').prop('disabled', false);
 
-                            scan.val('');
-                            scan.attr('disabled', false);
-                            scan.focus();
+                                        $('#arrival_of_shipments_form button.confirm').prop('disabled', false);
+                                        $('#shipper_id').val(data.shipper_id);
+                                        UnblockPagePermanently();
+                                    }
+                                    else {
+                                        var rowNo = table.rows().count();
+                                        var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger returnnoterow"><i class="la la-close"></i></a>';
+                                        var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';
+
+                                        var row = table.row.add([rowNo + 1, data.tracking_number, data.destination, data.consignee_name, data.phone, data.address, data.amount, data.service_type, data.shipment_status, open_box, remove]).node().id = data.shId;
+                                        table.draw(false);
+                                        $('tr#'+row).attr('class',data.class);
+                                        scan_sound(1);
+                                        UnblockPagePermanently();
+                                        shipment_ids.push(data.shId);
+                                        $('#shipper_id').val(data.shipper_id);
+                                        table.order([0, 'desc']).draw();
+                                    }
+
+                                    scan.val('');
+                                    scan.attr('disabled', false);
+                                    scan.focus();
+                                });
+                            } else {
+                                scan_sound(2);
+                                var error = 'Tracking Number already scanned!';
+                                toastr.error(error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+
+                                scan.val('');
+                                scan.attr('disabled', false);
+                                scan.focus();
+                            }
                         }
                     }
                 }
@@ -729,6 +740,7 @@
                             data: {
                                 'tracking': tracking_number,
                                 'pieces_confirm': 1,
+                                'action': window.lastAction,
                                 '_token': '{{ csrf_token() }}'
                             }
                         })

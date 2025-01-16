@@ -499,6 +499,7 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/sweetalert.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('js/detectActions.js')}}" type="text/javascript"></script>
 
 
 
@@ -748,6 +749,7 @@
                                 type:'POST',
                                 data: {
                                     'tracking':tracking,
+                                    'action': window.lastAction,
                                     '_token': '{!! csrf_token() !!}'
                                 }
                             }).done(function (data) {
@@ -774,6 +776,7 @@
                                     type:'POST',
                                     data: {
                                         'tracking':tracking,
+                                        'action': window.lastAction,
                                         '_token':'{!! csrf_token() !!}'
                                     }
                                 }).done(function (data) {
@@ -809,6 +812,7 @@
                             type:'POST',
                             data: {
                                 'tracking':tracking,
+                                'action': window.lastAction,
                                 '_token': '{!! csrf_token() !!}'
                             }
                         }).done(function (data) {

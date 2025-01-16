@@ -36,6 +36,7 @@
 										<th class="border-primary border-darken-1">Delivered Shipment(s)</th>
 										<th class="border-primary border-darken-1">Returned Shipment(s)</th>
 										<th class="border-primary border-darken-1">Adjusted Shipment(s)</th>
+										<th class="border-primary border-darken-1">Arrival Shipment(s)</th>
 										<th class="border-primary border-darken-1">Fintech Shipment(s)</th>
 										<th class="border-primary border-darken-1">Total Amount</th>
 										<th class="border-primary border-darken-1">Total Charges</th>
@@ -96,6 +97,25 @@
 									<div class="modal-content">
 										<div class="modal-header">
 											<h4 class="modal-title" id="adjusted_shipments_title">Adjusted Shipment(s)</h4>
+
+											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+												<span aria-hidden="true">×</span>
+											</button>
+										</div>
+										<div class="modal-body text-center">
+										</div>
+										<div class="modal-footer">
+											<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div class="modal fade" id="arrival_shipments" role="dialog" aria-labelledby="arrival_shipments_title" aria-hidden="true">
+								<div class="modal-dialog modal-sm" role="document">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h4 class="modal-title" id="arrival_shipments_title">Arrival Shipment(s)</h4>
 
 											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 												<span aria-hidden="true">×</span>
@@ -218,6 +238,7 @@
                             head.push('Delivered Shipment(s)');
                             head.push('Returned Shipment(s)');
                             head.push('Adjusted Shipment(s)');
+                            head.push('Arrival Shipment(s)');
                             head.push('Fintech Shipment(s)');
                             head.push('Total Amount');
                             head.push('Total Charges');
@@ -244,6 +265,7 @@
                                 row.push(values.delivered_shipments_count);
                                 row.push(values.returned_shipments_count);
                                 row.push(values.adjusted_shipments_count);
+                                row.push(values.arrival_shipments_count);
                                 row.push(values.count_fintech_shipments);
                                 row.push(values.total_amount);
                                 row.push(values.total_charges);
@@ -305,6 +327,7 @@
 					{data:'delivered_shipments', name: 'done_payments.delivered_shipments', class: 'align-middle text-center delivered_shipments'},
 					{data:'returned_shipments', name: 'done_payments.returned_shipments', class: 'align-middle text-center returned_shipments'},
 					{data:'adjusted_shipments', name: 'done_payments.adjusted_shipments', class: 'align-middle text-center adjusted_shipments'},
+					{data:'arrival_shipments', name: 'done_payments.arrival_shipment', class: 'align-middle text-center arrival_shipments'},
 					{data:'count_fintech_shipments', name: 'count_fintech_shipments', class: 'align-middle text-center count_fintech_shipments', orderable: false, searchable: false},
 					{data:'total_amount', name: 'total_amount', class: 'align-middle text-center total_amount', sortable: false},
 					{data:'total_charges', name: 'total_charges', class: 'align-middle text-center total_charges', sortable: false},
@@ -515,6 +538,34 @@
 						$('#adjusted_shipments .modal-body').html(tracking_numbers);
 
 						$('#adjusted_shipments').modal('show');
+					}
+				});
+			});
+
+			$('#datatable tbody').on('click', 'tr td.arrival_shipments button', function() {
+				var id = parseInt($(this).parents('tr').attr('id'));
+
+				$('#arrival_shipments .modal-body').html('');
+
+				$.ajax({
+					url: '{!! route('cod.finance.payments.arrival_shipments') !!}',
+					method: 'POST',
+					data: {
+						'_token': '{{ csrf_token() }}',
+						'id': id
+					}
+				})
+				.done(function(data) {
+					if (data) {
+						var tracking_numbers = '';
+
+						$.each(data, function(index, tracking_number) {
+							tracking_numbers += tracking_number + '<br/>';
+						});
+
+						$('#arrival_shipments .modal-body').html(tracking_numbers);
+
+						$('#arrival_shipments').modal('show');
 					}
 				});
 			});

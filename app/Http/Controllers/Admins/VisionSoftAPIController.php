@@ -39,6 +39,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PHPExcel_Style_Fill;
 use PHPExcel_Cell;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 
 class VisionSoftAPIController extends Controller
 {
@@ -1297,20 +1298,50 @@ class VisionSoftAPIController extends Controller
         }
 
     }
-    static public function cod_payable_excel(){
+    static public function cod_payable_excel($st, $end){
+        $startDate = $st;
+        $endDate = $end;
+        // $startDate = Carbon::now()->subDays(1)->format('Y-m-d 00:00:01');
+        // $endDate = Carbon::now()->subDays(1)->format('Y-m-d 23:59:59');
 
-        $startDate = Carbon::now()->subDays(1)->format('Y-m-d 00:00:01');
-        $endDate = Carbon::now()->subDays(1)->format('Y-m-d 23:59:59');
-
-        $shippers = User::join('shipments as s', 's.user_id', '=', 'users.id')
-            ->join('shipments_journey as sj', function($join) use ($startDate,$endDate) {
-                $join->on('sj.shipment_id', '=', 's.id')
-                    ->where('sj.id', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id IN (14, 30, 36, 37, 20) and shipments_journey.verification = 1 and shipments_journey.created_at BETWEEN  "' . $startDate . '" AND "' . $endDate . '")'));
-            })->join('cities as c','c.id','=','users.city_id')
-            ->select('users.id as account_id', 'users.name as account_name','c.name as city', DB::raw('(select sum(s.amount)) as amount'))
-            ->whereBetween('sj.created_at', [$startDate, $endDate])
-            ->groupBy('users.id')
-            ->get();
+        // $shippers = User::join('shipments as s', 's.user_id', '=', 'users.id')
+        //     ->join('shipments_journey as sj', function($join) use ($startDate,$endDate) {
+        //         $join->on('sj.shipment_id', '=', 's.id')
+        //             ->where('sj.id', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id IN (14, 30, 36, 37, 20) and shipments_journey.verification = 1 and shipments_journey.created_at BETWEEN  "' . $startDate . '" AND "' . $endDate . '")'));
+        //     })->join('cities as c','c.id','=','users.city_id')
+        //     ->select('users.id as account_id', 'users.name as account_name','c.name as city', DB::raw('(select sum(s.amount)) as amount'))
+        //     ->whereBetween('sj.created_at', [$startDate, $endDate])
+        //     ->groupBy('users.id')
+        //     ->get();
+        $shippers = DB::select(
+            "SELECT 
+                users.id AS account_id, 
+                users.name AS account_name,
+                cities.name AS city, 
+                SUM(s.amount) AS amount
+            FROM 
+                users
+            JOIN 
+                shipments AS s ON s.user_id = users.id
+            JOIN 
+                shipments_journey AS sj3 ON sj3.shipment_id = s.id
+                AND sj3.id = (
+                    SELECT MAX(sj4.id)
+                    FROM shipments_journey AS sj4
+                    WHERE sj4.shipment_id = s.id
+                )
+            JOIN shipments_journey AS sj ON sj.shipment_id = s.id
+                AND sj.id = (
+                    SELECT MAX(sj2.id)
+                    FROM shipments_journey AS sj2
+                    WHERE sj2.shipment_id = s.id
+                    AND sj2.shipper_status_id IN (14, 30, 36, 37)
+                    AND sj2.verification = 1
+                )
+                AND sj.id = sj3.id
+            JOIN cities ON cities.id = users.city_id
+            WHERE sj.created_at BETWEEN '$startDate' AND '$endDate'
+            GROUP BY users.id");
         if(count($shippers) > 0){
 
             $shipper_array['header'] = ['S. No.','Account ID', 'Account Name','City', 'Amount'];
@@ -1336,7 +1367,7 @@ class VisionSoftAPIController extends Controller
             $sheet->fromArray($shipper_array, NULL, 'A2', true);
             $sheet->getStyle("A2:J2")->applyFromArray($cell_st);
             // $sheet->getStyle('G')->getFont()->getColor()->setARGB('FFFF00');
-            //$sheet->getStyle($tas)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('C7E0B4');
+            //$sheet->getStyle($tas)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('C7E0B4');
 
             // $sheet->getStyle('H')->getFont()->getColor()->setARGB('00FF00');
             $sheet->setTitle('COD Payable');
@@ -1358,28 +1389,53 @@ class VisionSoftAPIController extends Controller
         }
     }
 
-    static public function cod_receivable_excel(){
+    static public function cod_receivable_excel($st,$end){
 
-        $startDate = Carbon::now()->subDays(1)->format('Y-m-d 00:00:01');
-        $endDate = Carbon::now()->subDays(1)->format('Y-m-d 23:59:59');
+        $startDate = $st;
+        $endDate = $end;
 
-        $cities = City::join('shipments as s', 's.consignee_city_id', '=', 'cities.id')
-            ->join('cities as hc', 'hc.id', '=', 'cities.hub_id')
-            ->join('shipments_journey as sj', function($join) use($startDate,$endDate) {
-                $join->on('sj.shipment_id', '=', 's.id')
-                    ->where('sj.id', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id IN (14, 30, 36, 37, 20) and shipments_journey.verification = 1 and shipments_journey.created_at BETWEEN  "' . $startDate . '" AND "' . $endDate . '")'));
-            })
-            ->select('hc.id as hub_id', DB::raw('(select sum(s.amount)) as amount'))
-            ->whereBetween('sj.created_at', [$startDate, $endDate])
-            ->whereNotIn('s.user_id', [8761, 9358])
-            ->groupBy('hc.id')
-            ->get();
+        // $cities = City::join('shipments as s', 's.consignee_city_id', '=', 'cities.id')
+        //     ->join('cities as hc', 'hc.id', '=', 'cities.hub_id')
+        //     ->join('shipments_journey as sj', function($join) use($startDate,$endDate) {
+        //         $join->on('sj.shipment_id', '=', 's.id')
+        //             ->where('sj.id', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id IN (14, 30, 36, 37, 20) and shipments_journey.verification = 1 and shipments_journey.created_at BETWEEN  "' . $startDate . '" AND "' . $endDate . '")'));
+        //     })
+        //     ->select('hc.id as hub_id', DB::raw('(select sum(s.amount)) as amount'))
+        //     ->whereBetween('sj.created_at', [$startDate, $endDate])
+        //     ->whereNotIn('s.user_id', [8761, 9358])
+        //     ->groupBy('hc.id')
+        //     ->get();
+        $cities = DB::select(
+            "SELECT hc.id AS hub_id, 
+                SUM(s.amount) AS amount,
+                hc.name AS hub_name
+            FROM cities
+            JOIN shipments AS s ON s.consignee_city_id = cities.id
+            JOIN cities AS hc ON hc.id = cities.hub_id
+            JOIN shipments_journey AS sj3 ON sj3.shipment_id = s.id
+                AND sj3.id = (
+                    SELECT MAX(sj4.id)
+                    FROM shipments_journey AS sj4
+                    WHERE sj4.shipment_id = s.id
+                )
+            JOIN shipments_journey AS sj ON sj.shipment_id = s.id
+                AND sj.id = (
+                    SELECT MAX(sj2.id)
+                    FROM shipments_journey AS sj2
+                    WHERE sj2.shipment_id = s.id
+                    AND sj2.shipper_status_id IN (14, 30, 36, 37)
+                    AND sj2.verification = 1
+                )
+                AND sj.id = sj3.id
+            WHERE sj.created_at BETWEEN '$startDate' AND '$endDate'
+            GROUP BY hc.id"
+        );
         if(count($cities) > 0){
-            $shipper_array['header'] = ['S. No.','HUB ID', 'Amount'];
+            $shipper_array['header'] = ['S. No.','HUB ID', 'HUB Name','Amount'];
             $serial = 1;
 
             foreach ($cities as $value){
-                $shipper_array[] = ['serial' => $serial, 'HUB ID' => $value->hub_id, 'Amount' => number_format($value->amount)];
+                $shipper_array[] = ['serial' => $serial, 'HUB ID' => $value->hub_id, 'HUB Name' => $value->hub_name, 'Amount' => number_format($value->amount)];
                 $serial++;
             }
 
@@ -1398,7 +1454,7 @@ class VisionSoftAPIController extends Controller
             $sheet->fromArray($shipper_array, NULL, 'A2', true);
             $sheet->getStyle("A2:J2")->applyFromArray($cell_st);
             // $sheet->getStyle('G')->getFont()->getColor()->setARGB('FFFF00');
-            //$sheet->getStyle($tas)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('C7E0B4');
+            //$sheet->getStyle($tas)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('C7E0B4');
 
             // $sheet->getStyle('H')->getFont()->getColor()->setARGB('00FF00');
             $sheet->setTitle('COD Receivable');

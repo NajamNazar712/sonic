@@ -206,6 +206,7 @@
     <script src="{{asset('app-assets/vendors/js/forms/icheck/icheck.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/js/scripts/forms/checkbox-radio.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('js/detectActions.js')}}" type="text/javascript"></script>
 
 
 
@@ -355,75 +356,81 @@
                     }
                     var tracking_number = $.trim($(form).find('input.tracking_number').val());
 
-                    form.reset();
+                    if (tracking_number == ''){
+                        toastr.error('Tracking number is required', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        scan_sound(2);
+                        $('#scan_shipment_form button.add').prop('disabled', false);
+                    } else {
+                        form.reset();
+                        if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
+                            blockPagePermanently();
+                            $.ajax({
+                                url: '{!! route('admin.vigilance.note.info') !!}',
+                                method: 'POST',
+                                data: {
+                                    'rider_id': rider_id,
+                                    'note_type': note_type,
+                                    'tracking_number': tracking_number,
+                                    'action': window.lastAction,
+                                    '_token': '{{ csrf_token() }}'
+                                }
+                            })
+                                .done(function(data) {
+                                    if (data.status == 1) {
+                                        UnblockPagePermanently();
+                                        id = data.details.id;
+                                        var index = $.inArray(id, shipment_ids);
+                                        if (index === -1) {
+                                            var rowNo = vtable.rows().count();
+                                            var shipment_id = data.details.id;
+                                            vtable.row.add([rowNo + 1, data.details.verify, data.details.tracking_number, data.details.note, data.details.origin, data.details.destination,data.details.status_date,data.details.shipment_status, data.details.amount, data.details.assignee, data.details.created_at]).node().id = shipment_id;
+                                            vtable.draw(false);
+                                            if(data.details.verify_id == 1){
+                                                scan_sound(1);
+                                            }else{
+                                                scan_sound(2);
+                                            }
+                                            vtable.order([0, 'desc']).draw();
+                                            var verify_id = data.details.verify_id;
+                                            shipment_ids.push(shipment_id);
+                                            shipments_verify.push(verify_id);
+                                            if(verify_id == 1){
+                                                $('#verify_datatable tr#'+ id + ' td.verify').addClass('vf');
+                                            }
+                                            else{
+                                                $('#verify_datatable tr#'+ id + ' td.verify').addClass('ex');
+                                            }
 
-                    if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
-                        blockPagePermanently();
-                        $.ajax({
-                            url: '{!! route('admin.vigilance.note.info') !!}',
-                            method: 'POST',
-                            data: {
-                                'rider_id': rider_id,
-                                'note_type': note_type,
-                                'tracking_number': tracking_number,
-                                '_token': '{{ csrf_token() }}'
-                            }
-                        })
-                            .done(function(data) {
-                                if (data.status == 1) {
-                                    UnblockPagePermanently();
-                                    id = data.details.id;
-                                    var index = $.inArray(id, shipment_ids);
-                                    if (index === -1) {
-                                        var rowNo = vtable.rows().count();
-                                        var shipment_id = data.details.id;
-                                        vtable.row.add([rowNo + 1, data.details.verify, data.details.tracking_number, data.details.note, data.details.origin, data.details.destination,data.details.status_date,data.details.shipment_status, data.details.amount, data.details.assignee, data.details.created_at]).node().id = shipment_id;
-                                        vtable.draw(false);
-                                        if(data.details.verify_id == 1){
-                                            scan_sound(1);
+                                            $('#datatable tr#'+ shipment_id).remove();
+
+                                            $('#scan_shipment_form button.add').prop('disabled', false);
+
+                                            $('#verify_shipment_form_submit').prop('disabled', false);
+
+                                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                         }else{
+                                            UnblockPagePermanently();
+                                            $('#scan_shipment_form button.add').prop('disabled', false);
                                             scan_sound(2);
+                                            toastr.error('Tracking Number Already Scanned', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                         }
-                                        vtable.order([0, 'desc']).draw();
-                                        var verify_id = data.details.verify_id;
-                                        shipment_ids.push(shipment_id);
-                                        shipments_verify.push(verify_id);
-                                        if(verify_id == 1){
-                                            $('#verify_datatable tr#'+ id + ' td.verify').addClass('vf');
-                                        }
-                                        else{
-                                            $('#verify_datatable tr#'+ id + ' td.verify').addClass('ex');
-                                        }
-
-                                        $('#datatable tr#'+ shipment_id).remove();
-
-                                        $('#scan_shipment_form button.add').prop('disabled', false);
-
-                                        $('#verify_shipment_form_submit').prop('disabled', false);
-
-                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                    }else{
+                                    }
+                                    else {
                                         UnblockPagePermanently();
                                         $('#scan_shipment_form button.add').prop('disabled', false);
                                         scan_sound(2);
-                                        toastr.error('Tracking Number Already Scanned', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                     }
-                                }
-                                else {
-                                    UnblockPagePermanently();
-                                    $('#scan_shipment_form button.add').prop('disabled', false);
-                                    scan_sound(2);
-                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                }
-                            });
-                    }
-                    else {
-                        $('#scan_shipment_form button.add').prop('disabled', false);
-                        scan_sound(2);
-                        toastr.error('Shipment has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    }
+                                });
+                        }
+                        else {
+                            $('#scan_shipment_form button.add').prop('disabled', false);
+                            scan_sound(2);
+                            toastr.error('Shipment has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
 
-                    return false;
+                        return false;
+                    }
                 }
             });
 

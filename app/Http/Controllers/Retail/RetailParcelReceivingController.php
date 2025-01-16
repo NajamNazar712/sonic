@@ -67,7 +67,9 @@ class RetailParcelReceivingController extends Controller
             $to = $request->get('search_to');
             $cash_deposit->whereBetween('retail_parcel_receivings.created_at', [$from, $to]);
         }
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['shipments_button', 'performa_button'])
+        ->make(true);
     }
 
     public function shipments(Request $request)
@@ -425,7 +427,9 @@ class RetailParcelReceivingController extends Controller
             $to = $request->get('search_to');
             $other_parcel_list->whereBetween('other_parcel_receivings.created_at', [$from, $to]);
         }
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['shipments_button', 'performa_button'])
+        ->make(true);
     }
 
     public function other_generate()

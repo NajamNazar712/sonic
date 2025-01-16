@@ -109,7 +109,7 @@
                     {data: 'mark_as', name: 'crm_escalations.mark_as', class: 'align-middle mark_as'},
                     {data: 'comment', name: 'crm_escalations.comment', class: 'align-middle comment'},
                     {data: 'status', name: 'crm_escalations.status', class: 'align-middle status'},
-                    {data: 'updated_at', name: 'crm_escalations.updated_at', class: 'align-middle updated_at'},
+                    {data: 'updated', name: 'crm_escalations.updated_at', class: 'align-middle updated_at'},
                     {data: 'updated_by', name: 'a.name', class: 'align-middle updated_by'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
