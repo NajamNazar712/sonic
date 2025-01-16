@@ -3,25 +3,15 @@
 @section('title', 'Finga Dashboard')
 
 @section('content')
-    <div class="app-content content">
-        <div class="content-wrapper">
-            <div class="content-body">
-                <h1 class="mb-1">
-                    Finga Dashboard
-                </h1>
-
-                <div class="card" style="height: 100vh; margin: 0; padding: 0; border: none;">
-                <div class="card-content" aria-expanded="true" style="height: 100%; padding: 0;">
-                    <div class="card-body" style="height: 100%; padding: 0;">
-                        <div class="col-12" style="height: 100%; padding: 0;">
-                            <iframe src="{{ $url }}" title="Dashboard" style="width: 100%; height: 100%; border: none;"></iframe>
+<div class="card" style="height: 100vh; margin: 0; padding: 0; border: none;">
+                    <div class="card-content" aria-expanded="true" style="height: 100%; padding: 0;">
+                        <div class="card-body" style="height: 100%; padding: 0;">
+                            <div class="col-12" style="height: 100%; padding: 0;">
+                                <iframe src="{{ $url }}" title="Dashboard" style="width: 100%; height: 100%; border: none;"></iframe>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>    
-            </div>
-        </div>
-    </div>
+                </div> 
 
 @endsection
 
