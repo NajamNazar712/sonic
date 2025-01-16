@@ -34,7 +34,7 @@
                                                 <div class="form-group col-md-9">
                                                     <label>Phone Number 1:</label>
                                                     <span class="danger">*</span>
-                                                    <input type="text" id="phone" class="form-control border-primary" data-rule-required="true" data-msg-required="Phone Number is required" value="{{$user->phone}}" name="phone" required data-rule-remote="{{ route('cod.profile.shipper_phone_unique', ['id' => $user->id]) }}" data-msg-remote="Phone must be unique">
+                                                    <input type="text" id="phone" class="form-control border-primary" data-rule-required="true" data-msg-required="Phone Number is required" value="{{$user->phone}}" name="phone" required data-rule-remote="{{ route('cod.profile.shipper_phone_unique', ['id' => $user->id, 'type'=>'wallet']) }}" data-msg-remote="Phone must be unique">
                                                 </div>
                                             </div>
                                         </div>

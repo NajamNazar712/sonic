@@ -2162,18 +2162,35 @@ class ShipperDashboardController extends Controller
 
     public function shipper_phone_unique(Request $request) {
         if ($request->filled('phone')) {
-            $user = User::where('phone', $request->input('phone'));
 
-            if ($request->has('id')) {
-                $user = $user->where('id', '!=', $request->input('id'));
-            }
+            if($request->has('type')) {
+                $user = WalletUser::where('phone', $request->input('phone'));
 
-            if (!$user->exists()) {
-                return 'true';
+                if ($request->has('id')) {
+                    $user = $user->where('user_id', '!=', $request->input('id'));
+                }
+
+                if (!$user->exists()) {
+                    return 'true';
+                }
+                else {
+                    return 'false';
+                }
+            } else {
+                $user = User::where('phone', $request->input('phone'));
+
+                if ($request->has('id')) {
+                    $user = $user->where('id', '!=', $request->input('id'));
+                }
+
+                if (!$user->exists()) {
+                    return 'true';
+                }
+                else {
+                    return 'false';
+                }
             }
-            else {
-                return 'false';
-            }
+            
         }
         else {
             return 'true';

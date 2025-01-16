@@ -6568,7 +6568,8 @@ class AdminFinanceController extends Controller
 //            ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
             ->leftjoin('pending_shipments_for_payments as psfp', 'psfp.user_id', '=', 'pending_payments.user_id')
             ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
-            ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', 'ppc.amount as total_amount', 'ppc.charges as total_charges','u.payment_cycle_days as payment_cycle_days', 'ppc.gst as total_gst', 'ppc.wht as total_wht', 'ppc.payable as total_payable', 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'pc.name as payment_cycle', 'pc.id as payment_cycle_id','u.documents_status', DB::raw('IFNULL(psfp.pending_shipments_count,0) as total_pending_shipments'),'sts.status as star_status', 'u.id as user_id', 'ppc.sms_charges as total_sms_charges');
+            ->leftjoin('wallet_users as wu', 'wu.user_id', 'u.id')
+            ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', 'ppc.amount as total_amount', 'ppc.charges as total_charges','u.payment_cycle_days as payment_cycle_days', 'ppc.gst as total_gst', 'ppc.wht as total_wht', 'ppc.payable as total_payable', 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'pc.name as payment_cycle', 'pc.id as payment_cycle_id','u.documents_status', DB::raw('IFNULL(psfp.pending_shipments_count,0) as total_pending_shipments'),'sts.status as star_status', 'u.id as user_id', 'ppc.sms_charges as total_sms_charges', 'wu.id as wallet_user');
             // ->groupBy('pending_payments.id'); // removed by the instruction of waqas bhai
 
         // dd($pending_payments);
@@ -6688,6 +6689,15 @@ class AdminFinanceController extends Controller
 
         if ($request->get('star_shipper_filter') == 1) {
             $pending_payments->where('sts.status', 1);
+        }
+
+        if ($wallet_user = $request->get('wallet_filter')) {
+            if($wallet_user == 1) {
+                $pending_payments->whereNotNull('wu.id');
+
+            } else {
+                $pending_payments->whereNull('wu.id');
+            }
         }
 
         $datatables = Datatables::of($pending_payments)
@@ -7598,15 +7608,19 @@ class AdminFinanceController extends Controller
                                         $log_bid = $this->isWalletLogUpdated($pending_payment_shipment->shipment_id);
                                         if(!$log_bid) {
                                             $pending_logs[$pending_payment_shipment->shipment_id] = [
+                                                "shipmentId" => $shipment->id,
                                                 "wallet_id" => $shipment->user->wallet->wallet_id,
                                                 "client_id" => $shipment->user->id, 
                                                 "reference_id" => (string) Str::uuid(), 
-                                                "shipment_id" => $shipment->id, 
+                                                "shipment_id" => $shipment->tracking_number, 
                                                 "amount" => $shipment->amount, 
+                                                "order_created_date" => $shipment->created_at,
                                                 "charges" => [
                                                     'arrival_charges' =>  intval($shipment->weight_charges),
                                                     'fuel_surcharge' =>  intval($shipment->fuel_surcharge),
                                                     'faf_charges' => $shipment->faf_charges_data ? intval($shipment->faf_charges_data->faf_charges) : 0,
+                                                    'arrival_charges_gst' => intval($pending_payment_shipment->gst),
+                                                    'arrival_sms_charges' => intval($pending_payment_shipment->sms_charges)
                                                 ]
                                             ]; 
                                         }
@@ -7618,11 +7632,13 @@ class AdminFinanceController extends Controller
                                         if(!$log_bid) {
                                             if(!array_key_exists($pending_payment_shipment->shipment_id, $pending_logs)) {
                                                 $pending_logs[$pending_payment_shipment->shipment_id] = [
+                                                    "shipmentId" => $shipment->id,
                                                     "wallet_id" => $shipment->user->wallet->wallet_id,
                                                     "client_id" =>  $shipment->user->id, 
                                                     "reference_id" => (string) Str::uuid(), 
-                                                    "shipment_id" => $shipment->id, 
+                                                    "shipment_id" => $shipment->tracking_number, 
                                                     "amount" => $shipment->amount, 
+                                                    "order_created_date" => $shipment->created_at,
                                                     "charges" => [
                                                         'arrival_charges' =>  0
                                                     ]
@@ -7745,15 +7761,19 @@ class AdminFinanceController extends Controller
                                         $log_bid = $this->isWalletLogUpdated($pending_payment_shipment->shipment_id);
                                         if(!$log_bid) {
                                             $pending_logs[$pending_payment_shipment->shipment_id] = [
+                                                "shipmentId" => $shipment->id,
                                                 "wallet_id" => $shipment->user->wallet->wallet_id,
                                                 "client_id" =>  $shipment->user->id, 
                                                 "reference_id" => (string) Str::uuid(), 
-                                                "shipment_id" => $shipment->id, 
-                                                "amount" => $shipment->amount, 
+                                                "shipment_id" => $shipment->tracking_number, 
+                                                "amount" => $shipment->amount,
+                                                "order_created_date" => $shipment->created_at,
                                                 "charges" => [
                                                     'arrival_charges' =>  intval($shipment->weight_charges),
                                                     'fuel_surcharge' =>  intval($shipment->fuel_surcharge),
                                                     'faf_charges' => $shipment->faf_charges_data ? intval($shipment->faf_charges_data->faf_charges) : 0,
+                                                    'arrival_charges_gst' => intval($pending_payment_shipment->gst),
+                                                    'arrival_sms_charges' => intval($pending_payment_shipment->sms_charges)
                                                 ]
                                             ]; 
                                         }
@@ -7765,11 +7785,13 @@ class AdminFinanceController extends Controller
                                         if(!$log_bid) {
                                             if(!array_key_exists($pending_payment_shipment->shipment_id, $pending_logs)) {
                                                 $pending_logs[$pending_payment_shipment->shipment_id] = [
+                                                    "shipmentId" => $shipment->id,
                                                     "wallet_id" => $shipment->user->wallet->wallet_id,
                                                     "client_id" => $shipment->user->id, 
                                                     "reference_id" => (string) Str::uuid(), 
-                                                    "shipment_id" => $shipment->id, 
+                                                    "shipment_id" => $shipment->tracking_number, 
                                                     "amount" => $shipment->amount, 
+                                                    "order_created_date" => $shipment->created_at,
                                                     "charges" => [
                                                         'arrival_charges' =>  0
                                                     ]
