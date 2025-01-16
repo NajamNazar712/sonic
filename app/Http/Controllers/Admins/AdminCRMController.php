@@ -89,6 +89,7 @@ use App\Http\Models\CRM\CrmClosedReason;
 use App\Http\Models\CRM\CrmClosedReasonStatus;
 use App\Http\Models\ShipmentDetail;
 use Illuminate\Support\MessageBag;
+use App\Http\Models\Admin\Retail\RetailShipment;
 
 class AdminCRMController extends Controller
 {
@@ -113,12 +114,23 @@ class AdminCRMController extends Controller
     }
 
     public function add_request(Request $request){
+        // only allow retail COD bookings to change COD amount
+        
+        // Check if the request contains a single shipment or multiple shipments
+        $shipment_ids = $request->shipment_id ? [$request->shipment_id] : $request->shipment_ids;
+        $retail_shipments = RetailShipment::whereIn('shipment_id', $shipment_ids)->get();
+        foreach ($retail_shipments as $retail_shipment) {
+            if ($retail_shipment->shipping_mode != 3) {
+                return ['status' => 0, 'error' => 'Retail Shipment amount can\'t be changed!'];
+            }
+        }
+
         $nature_id = $request->case_nature_id;
         $complaint_id = $request->complaint_id;
         $channel_id = $request->channel_id;
         $receiving_sheet_id = $request->receiving_sheet_id;
         $launched_by = Admin::find(Auth::id())->name;
-//        if($complaint_id == 23 && $receiving_sheet_id != null){
+        // if($complaint_id == 23 && $receiving_sheet_id != null){
         if($request->has('alternate_phone')){
             if($request->alternate_phone){
                 $alternate_phone = $request->alternate_phone;
@@ -145,7 +157,7 @@ class AdminCRMController extends Controller
 
         if($complaint_id == 23){
             $description_text = $request->description ;
-//            $description = '<strong>' .'Receiving Sheet No: ' .$receiving_sheet_id. '</strong>'. PHP_EOL. $description_text;
+            // $description = '<strong>' .'Receiving Sheet No: ' .$receiving_sheet_id. '</strong>'. PHP_EOL. $description_text;
             $description = $description_text;
         }
         else{
