@@ -57,7 +57,7 @@ class ProcessOTPSMSITS implements ShouldQueue
 
     private function its($sms, $name, $otp) {
         try {
-            $client = new Client(['base_uri' => 'https://voicegateway.its.com.pk/api', 'http_errors' => FALSE, 'connect_timeout' => 120, 'timeout' => 120]);
+            $client = new Client(['base_uri' => 'https://voicegateway.its.com.pk/api', 'http_errors' => FALSE, 'connect_timeout' => 120, 'timeout' => 120, 'verify' => false]);
 
             $response = $client->get('', [
                 'query' => [
