@@ -117,7 +117,12 @@ class AdminCRMController extends Controller
         // only allow retail COD bookings to change COD amount
         
         // Check if the request contains a single shipment or multiple shipments
-        $shipment_ids = $request->shipment_id ? [$request->shipment_id] : $request->shipment_ids;
+        $shipment_ids = $request->shipment_id 
+            ? [$request->shipment_id] 
+            : (is_string($request->shipment_ids) 
+                ? explode(',', $request->shipment_ids) 
+                : (is_array($request->shipment_ids) ? $request->shipment_ids : [])
+            );
         $retail_shipments = RetailShipment::whereIn('shipment_id', $shipment_ids)->get();
         foreach ($retail_shipments as $retail_shipment) {
             if ($retail_shipment->shipping_mode != 3) {
