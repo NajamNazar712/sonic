@@ -101,7 +101,7 @@
                                 row.push(index + 1);
                                 row.push(values.origin);
                                 row.push(values.cut_off_time);
-                                row.push(values.updated_at);
+                                row.push(values.updated);
                                 row.push(values.updated_by);
 
                                 body.push(row);
@@ -140,7 +140,7 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'origin', name:'cities.name', class: 'align-middle origin'},
                     {data: 'cut_off_time', name: 'cities.cut_off_time', class: 'align-middle cut_off_time'},
-                    {data: 'updated_at', name: 'cities.cut_off_time_updated_at', class: 'align-middle updated_at'},
+                    {data: 'updated', name: 'cities.cut_off_time_updated_at', class: 'align-middle updated_at'},
                     {data: 'updated_by', name: 'a.name', class: 'align-middle updated_by'},
                     {data: 'action', class: 'align-middle action', orderable: false, searchable: false}
 

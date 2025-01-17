@@ -195,7 +195,7 @@ class VigilanceController extends Controller
             ->join('admins AS ad', 'delivery_notes.admin_id', '=', 'ad.id')
             ->join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
-            ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
+            ->leftjoin('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->leftjoin('admins as cb', 'cb.id', '=', 'vigilance_verifications.created_by')
             ->select(['delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'cb.name as created_by', 'vigilance_verifications.id as vigilance_id', 'vigilance_verifications.created_at as created_at', 'vigilance_verifications.verify_shipments_count', 'vigilance_verifications.excess_shipments_count', 'delivery_notes.shipments_count', 'delivery_notes.status', 'delivery_notes.pending_status', 'delivery_notes.cash_collection_status', 'delivery_notes.dncc_status', 'delivery_notes.special_rider_name','delivery_notes.created_at as asigned_date','ad.name as asignee', DB::raw(' `shipments_count` - `verify_shipments_count` AS  unverify_shipments_order')]);
         if (session('role_id') != 1) {
@@ -306,9 +306,11 @@ class VigilanceController extends Controller
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatable->whereBetween('vigilance_verifications.created_at', [$from, $to]);
+            $deliveries->whereBetween('vigilance_verifications.created_at', [$from, $to]);
         }
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['delivery_note', 'shipments_count_link', 'excess_shipments_link', 'verify_shipments_link', 'unverify_shipments_link'])
+        ->make(true);
 
     }
     public function verification_excess_cns(Request $request){
@@ -446,7 +448,9 @@ class VigilanceController extends Controller
                     return str_pad($deliveries->note_id, 6, '0', STR_PAD_LEFT);
                 });
 
-            return $datatables->make(true);
+            return $datatables
+            ->rawColumns(['tracking_number_link'])
+            ->make(true);
         }
         else{
             $return_note = ReturnNote::join('return_note_shipments as rns', 'rns.return_note_id', '=', 'return_notes.id')
@@ -488,7 +492,9 @@ class VigilanceController extends Controller
                     return str_pad($return->note_id, 6, '0', STR_PAD_LEFT);
                 });
 
-            return $datatables->make(true);
+            return $datatables
+            ->rawColumns(['tracking_number_link'])
+            ->make(true);
         }
 
     }
@@ -731,30 +737,32 @@ class VigilanceController extends Controller
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatable->whereBetween('vigilance_notes.created_at', [$from, $to]);
+            $vigilance->whereBetween('vigilance_notes.created_at', [$from, $to]);
         }
 
         if ($tracking_number = $request->get('search_tracking_no')) {
-            $datatable->join('vigilance_note_shipments as vns', 'vigilance_notes.id', '=', 'vns.vigilance_note_id')
+            $vigilance->join('vigilance_note_shipments as vns', 'vigilance_notes.id', '=', 'vns.vigilance_note_id')
                 ->join('shipments as s', 'vns.shipment_id', '=', 's.id')
                 ->where('s.tracking_number', '=', $tracking_number);
         }
 
         if ($delivery_note = $request->get('search_delivery_note')) {
-            $datatable->leftjoin('vigilance_note_shipments as vns', 'vigilance_notes.id', '=', 'vns.vigilance_note_id')
+            $vigilance->leftjoin('vigilance_note_shipments as vns', 'vigilance_notes.id', '=', 'vns.vigilance_note_id')
                 ->where('vns.note_id', '=', $delivery_note)
                 ->where('vigilance_notes.vigilance_note_type_id', 1)
             ->groupBy('vigilance_notes.id');
         }
         if ($return_note = $request->get('search_return_note')) {
-            $datatable->leftjoin('vigilance_note_shipments as vns', 'vigilance_notes.id', '=', 'vns.vigilance_note_id')
+            $vigilance->leftjoin('vigilance_note_shipments as vns', 'vigilance_notes.id', '=', 'vns.vigilance_note_id')
                 ->where('vns.note_id', '=', $return_note)
                 // ->where('vgigilance_notes.vigilance_note_type_id', 2)
                 ->where('vigilance_notes.vigilance_note_type_id', 2)
                 ->groupBy('vigilance_notes.id');;
         }
 
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['shipments_count_link', 'excess_shipments_link', 'verify_shipments_link'])
+        ->make(true);
 
     }
 

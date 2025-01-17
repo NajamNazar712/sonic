@@ -124,14 +124,14 @@ use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
 use App\Http\Models\Admin\StationDepositeNoteActionLog;
 use App\Http\Traits\RvTrait;
+use App\Http\Traits\CommonTrait;
 use App\Jobs\ProcessRvShipmentTicket;
 use App\RvShipmentTicket;
 use GuzzleHttp\Client;
-
 class DeliveryController extends Controller
 {
 
-    use RvTrait;
+    use RvTrait, CommonTrait;
     public function __construct()
     {
         $this->middleware('auth:admin');
@@ -345,6 +345,16 @@ class DeliveryController extends Controller
             $shipments = $shipments->where('h.id', '=', $hub);
         }
 
+
+        if ($mode = $request->get('search_shipping_mode')) {
+
+            $shipments->where('sm.id', '=', $mode);
+        }
+
+        if ($request->get('star_shipper_filter') == 1) {
+            $shipments->where('sts.status', 1);
+        }
+
         if ($area = $request->get('search_area')) {
             $shipments = $shipments->where('caa.city_area_id', '=', $area);
         }
@@ -530,16 +540,8 @@ class DeliveryController extends Controller
                 }
             })->editColumn('entry_method', function ($shipment) {
                 return  ($shipment->entry_method == 1 ? 'Scanned' : 'Manual');
-            });
-            
-        if ($mode = $request->get('search_shipping_mode')) {
+            })->rawColumns(['tracking_number_link','status_date','action']);
 
-            $datatables->where('sm.id', '=', $mode);
-        }
-
-        if ($request->get('star_shipper_filter') == 1) {
-            $datatables->where('sts.status', 1);
-        }
 
         return $datatables->make(true);
     }
@@ -1076,12 +1078,13 @@ class DeliveryController extends Controller
 
     public function create_delivery_note(Request $request)
     {
+        $holdInCheck = $request->holdInCheck ?? true; //TO-6892
 
         if ($request->hub_id == '') {
             return redirect()->back()->with('error', 'Hub not found!');
         }
 
-        if ($request->selected_route_id == '') {
+        if ($request->selected_route_id == '' && !$holdInCheck) { //TO-6892
             return redirect()->back()->with('error', 'Route not selected!');
         }
 
@@ -1153,7 +1156,7 @@ class DeliveryController extends Controller
                 $note = DeliveryNote::create([
                     'hub_id' => $request->hub_id,
                     'rider_id' => $request->selected_rider_id,
-                    'route_id' => $request->selected_route_id,
+                    'route_id' => empty($request->selected_route_id) ? '1837' : $request->selected_route_id,  //TO-6892
                     'shipments_count' => $shipments_count,
                     'admin_id' => $admin,
                     'total_cod_amount' => $total_cod_amount,
@@ -1341,6 +1344,8 @@ class DeliveryController extends Controller
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->leftjoin('zones as z', 'oc.zone_id', '=', 'z.id')
             ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_notes.updated_by')
+            ->leftjoin('delivery_note_shipments', 'delivery_note_shipments.delivery_note_id', 'delivery_notes.id')
+            ->leftjoin('shipments', 'delivery_note_shipments.shipment_id', '=', 'shipments.id') // Join with shipments table
             ->select(
                 'delivery_notes.id as delivery_note',
                 'delivery_notes.id as delivery_note_id',
@@ -1355,7 +1360,6 @@ class DeliveryController extends Controller
                 'delivery_notes.shipments_count',
                 'delivery_notes.shipments_count as shipments_count_link',
                 'delivery_notes.pending_status',
-                'delivery_notes.created_at',
                 'delivery_notes.last_updated_at',
                 'ad.name as updated_by',
                 'delivery_notes.special_rider',
@@ -1370,13 +1374,24 @@ class DeliveryController extends Controller
                 'rider_types.name as rt',
                 'delivery_notes.created_via_app as created_via',
                 'riders.trax_id as rider_trax_id',
-                'cas.name as city_area_name'
-            )
-            ->where('delivery_notes.status', 0);
+                'cas.name as city_area_name',
+                DB::raw('SUM(shipments.actual_weight) as total_weight') // Calculate total weight
 
+            )
+            ->where('delivery_notes.status', 0)
+            ->groupBy('delivery_notes.id'); // Group by delivery_note_id to calculate SUM
 
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
+        }
+
+        if ($tracking_number = $request->get('search_tracking')) {
+            $deliveries->join('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
+                ->join('shipments as s', 'dns.shipment_id', '=', 's.id')
+                ->where('s.tracking_number', '=', $tracking_number);
+        }
+        if ($delivery_note_number = $request->get('delivery_note_number')) {
+            $deliveries->where('delivery_notes.id', '=', $delivery_note_number);
         }
 
         $datatables = Datatables::of($deliveries)
@@ -1486,10 +1501,6 @@ class DeliveryController extends Controller
                 } else {
                     $query->whereRaw('false');
                 }
-            })->addColumn('total_weight', function($result){
-                $shipments = DeliveryNoteShipment::where('delivery_note_id',$result->delivery_note)->pluck('shipment_id')->toArray();
-                $total_weight = Shipment::whereIn('id',$shipments)->sum('actual_weight');
-                return $total_weight;
             })
             ->addColumn('excel_ecom_cod', function($result){
                 $count = 0;
@@ -1552,8 +1563,8 @@ class DeliveryController extends Controller
             })
             ->addColumn("action", function ($result) {
                 $statusUpdate = route('admin.delivery.receive.status', ['id' => $result->delivery_note]);
-                $route = route('admin.delivery.receive.update', ['note' => $result->delivery_note]);
-                $verifyStatus = route('admin.delivery.receive.status.verify', ['note' => $result->delivery_note]);
+                $route = route('admin.delivery.receive.update', ['id' => $result->delivery_note]);
+                $verifyStatus = route('admin.delivery.receive.status.verify', ['id' => $result->delivery_note]);
 
                 $receive_button = '<a href="' . $statusUpdate . '" class="dropdown-item" data-target-id="' . $result->delivery_note . '" class=""><i class="ft-plus-circle primary"></i> Receive</a>';
                 $shift_shipment_button = '<a href="' . $route . '" class="dropdown-item deliverynoteupdate" data-target-id="' . $result->delivery_note . '"><i class="ft-plus-circle primary"></i> Edit Shipment</a>';
@@ -1615,16 +1626,10 @@ class DeliveryController extends Controller
                 } else {
                     return '';
                 }
-            });
+            })->rawColumns(['delivery_note','shipments_count_link','action']);
 
-        if ($tracking_number = $request->get('search_tracking')) {
-            $datatables->join('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
-                ->join('shipments as s', 'dns.shipment_id', '=', 's.id')
-                ->where('s.tracking_number', '=', $tracking_number);
-        }
-        if ($delivery_note_number = $request->get('delivery_note_number')) {
-            $datatables->where('delivery_notes.id', '=', $delivery_note_number);
-        }
+
+
         return $datatables->make(true);
     }
 
@@ -1791,382 +1796,10 @@ class DeliveryController extends Controller
 
     public function received_print(Request $request)
     {
-        //        dd($request);
+            //    dd($request);
         $delivery_note_id = $request->id;
-        $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
-
-        $html = '
-                <!doctype html>
-                <html lang="en">
-                  <head>
-                    <meta charset="utf-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-                    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
-                    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/fonts/line-awesome/css/line-awesome.min.css') . '">
-
-                    <title>Delivery Note</title>
-
-                    <style>
-                      @page {
-                        size: A4 portrait;
-                      }
-
-                      * {
-                        -webkit-print-color-adjust: exact !important;
-                        color-adjust: exact !important;
-                      }
-
-                      body {
-                        background: none !important;
-                        color: #09262e !important;
-                        font-size: 0.9rem !important;
-                      }
-
-                      hr {
-                        border-top: 1px dashed #000000;
-                      }
-
-                      /*table.table-bordered {
-                        page-break-inside: avoid;
-                      }*/
-
-                      table.table-bordered tbody tr td {
-                        border: 1px solid #09262e !important;
-                      }
-
-                      .color.primary {
-                        background: #c8c8c8 !important;
-                      }
-
-                      .color.secondary {
-                        background: #ebebeb !important;
-                      }
-
-                      .border {
-                        border: 1px solid #09262e !important;
-                      }
-
-                      td.replacement span {
-                        width: 22px;
-                      }
-
-                      td.replacement span img {
-                        display: block;
-                        width: 100%;
-                        margin: auto;
-                        background: #c8c8c8;
-                        border-radius: 25px;
-                      }
-
-                      td.try_and_buy span {
-                        width: 22px;
-                      }
-
-                      td.try_and_buy span img {
-                        display: block;
-                        width: 100%;
-                        margin: auto;
-                        background: #c8c8c8;
-                        border-radius: 25px;
-                      }
-                      
-                      td.complaint {
-                            background: #09262e !important;
-                            color: #ffffff;
-                       }
-                      td.details_changed {
-                            background: #000000 !important;
-                            color: #ffffff;
-                       }
-                    </style>
-                  </head>
-                  <body>
-                    <div>
-      ';
-        $delivery_note = DeliveryNote::where('id', $request->id);
-        if ($delivery_note->exists()) {
-            $total_weight = 0;
-            $total_shipments = 0;
-            $total_cod_amount = 0;
-            $shipments = DeliveryNoteShipment::where('delivery_note_id', $request->id)->select('shipment_id')->orderBy('ordering', 'asc', 'shipment_id', 'asc')->get();
-
-            $shipment_details = '
-                      <table class="table table-sm table-bordered border">
-                        <tbody>
-                          <tr>
-                            <td class="color primary"><strong>S. No.</strong></td>
-                            <td class="color primary"><strong>Tracking No.</strong></td>
-                            <td class="color primary"><strong>Client Name & Phone</strong></td>
-                            <td class="color primary"><strong>Consignee Name & Phone No(s).</strong></td>
-                            <td class="color primary"><strong>Consignee Address</strong></td>
-                            <td class="color primary"><strong>Service Type</strong></td>
-                            <td class="color primary"><strong>Item Qty</strong></td>
-                            <td class="color primary"><strong>Weight</strong></td>
-                            <td class="color primary"><strong>Collection Amount</strong></td>
-                            <td class="color primary"><strong>Special Instructions</strong></td>
-                            <td class="color primary"><strong>Open Shipment</strong></td>
-                            <td class="color primary"><strong>Remarks</strong></td>
-                            <td class="color primary" style="width:200px;"><strong>Receiver\'s Name</strong></td>
-                            <td class="color primary" style="width:200px;"><strong>Sign</strong></td>
-                          </tr>
-        ';
-
-
-            foreach ($shipments as $parcel) {
-                $total_shipments++;
-                $shipment = Shipment::find($parcel->shipment_id);
-                $total_weight += (float) $shipment->actual_weight;
-                $class = null;
-                $details_change_class = null;
-                if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
-                    $class = 'complaint';
-                } elseif (ShipmentInformationLog::where('shipment_id', $shipment->id)->exists()) {
-                    $details_change_class = 'details_changed';
-                }
-                $check_walk_in = GlobalSettings::where('type', 'Walk-In')->first();
-                if ($check_walk_in['setting_value'] == $shipment->user->id) {
-                    $user_details = 'Walk-In (' . $shipment->pickup_address->poc . ') | ' . $shipment->pickup_address->phone;
-                } else {
-                    $user_details = $shipment->user->name . ' | ' . $shipment->user->phone . (($shipment->phone2) ? (' / ' . $shipment->phone2) : '');
-                }
-                $ccd_icon = '';
-                if ($shipment->payment_mode_id == 2) {
-                    $tracking_number = '<b>' . $shipment->tracking_number . ' </b><br/><span><i class="la la-credit-card"></i>(Credit Card on Delivery-CCD)</span>';
-                } else {
-                    $tracking_number = $shipment->tracking_number;
-                }
-                $consignee_address = '';
-                if ($shipment->consignee_address != null) {
-                    $consignee_address = $shipment->consignee_address;
-                }
-
-                $shipment_details_row_start = '
-                          <tr>
-                            <td class="' . $class . '">' . $total_shipments . '</td>
-                            <td class="' . $class . '">' . $tracking_number . '</td>
-                            <td class="' . $class . '">' . $user_details . '</td>
-                            <td class="' . $class . ' ' . $details_change_class . '">' . $shipment->consignee_name . ' | ' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
-                             <td class="' . $class . '">' . $consignee_address . '</td>
-                           
-                ';
-
-                if ($shipment->booking_type_id == 1) {
-                    $shipment_details_row_start .= '
-                    <td class="' . $class . '">' . $shipment->booking_type->booking_type . '</td>
-                ';
-                } else if ($shipment->booking_type_id == 2) {
-                    $shipment_details_row_start .= '
-                    <td class="replacement ' . $class . '"><span class="align-middle">' . $shipment->booking_type->booking_type . '</span><span class="d-inline-block align-middle float-right"><img src="' . asset('img/replacement.png') . '"></span></td>
-                ';
-                } else if ($shipment->booking_type_id == 3) {
-                    $shipment_details_row_start .= '
-                    <td class="try_and_buy ' . $class . '"><span class="align-middle">' . $shipment->booking_type->booking_type . '</span><span class="d-inline-block align-middle float-right"><img src="' . asset('img/try_and_buy.png') . '"></span></td>
-                ';
-                } else {
-                    $shipment_details_row_start .= '
-                    <td class="' . $class . '">' . $shipment->booking_type->booking_type . '</td>
-                ';
-                }
-
-                $shipment_details_row_start .= '
-                    <td class="' . $class . '">' . $shipment->items->sum('quantity') . '</td>';
-                $shipment_details_row_start .= '
-                    <td class="' . $class . '">' . $shipment->actual_weight . '</td>';
-
-                if ($shipment->booking_type_id != 4 || ($shipment->booking_type_id == 4 && $shipment->charges_mode_id == 2)) {
-                    $shipment_details_row_start .= '
-                            <td class="' . $class . '">Rs ' . number_format($shipment->amount) . '</td>
-                    ';
-
-                    $total_cod_amount += $shipment->amount;
-                } else {
-                    $shipment_details_row_start .= '
-                            <td class="' . $class . '">Rs 0</td>
-                    ';
-                }
-                if ($shipment->special_instructions != null) {
-                    $shipment_details_row_start .= '<td class="' . $class . ' ' . $details_change_class . '">' . $shipment->special_instructions . '</td>';
-                } else {
-                    $shipment_details_row_start .= '<td class="' . $class . ' ' . $details_change_class . '">-</td>';
-                }
-                if ($shipment->shipment_detail()->exists()) {
-                    if ($shipment->shipment_detail->is_open == 1) {
-                        $shipment_details_row_start .= '
-                    <td class="' . $class . '"><strong> Yes <span><img src="' . asset('img/open_box_icon.png') . '" ></span></strong></td>';
-                    } else {
-                        $shipment_details_row_start .= '
-                    <td class="' . $class . '"><strong> No <span></span></strong></td>';
-                    }
-                } else {
-                    $shipment_details_row_start .= '
-                    <td class="' . $class . '"><strong> No <span></span></strong></td>';
-                }
-                $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', '!=', 5)->where('remarks', '!=', null)->select('remarks');
-
-                if ($shipment_journey->exists()) {
-                    $shipment_journey = $shipment_journey->latest()->first();
-
-                    $shipment_details_row_start .= '
-                            <td class="' . $class . '">' . $shipment_journey->remarks . '</td>
-                    ';
-                } else {
-                    $shipment_details_row_start .= '
-                            <td class="' . $class . '"></td>
-                    ';
-                }
-
-
-                $shipment_details_row_start .= '
-                            <td class="' . $class . '"></td>
-                            <td class="' . $class . '"></td>
-                          </tr>
-                ';
-
-                $shipment_details .= $shipment_details_row_start;
-
-                if ($shipment->booking_type_id == 3) {
-                    $total_Shipment_items = 0;
-                    foreach ($shipment->items as $shipment_item) {
-                        $total_Shipment_items++;
-                        $shipment_details_row_start = '
-                          <tr>
-                            <td class="' . $class . '">' . $total_shipments . '.' . $total_Shipment_items . '</td>
-                            <td class="' . $class . '">' . $shipment_item->id . ' (' . $shipment->tracking_number . ')</td>
-                            <td class="' . $class . '"><b>Product Type:</b></td>
-                            <td class="' . $class . '">' . $shipment_item->product->product_name . '</td>
-                            <td class="' . $class . '">' . $shipment_item->description . '</td>
-                ';
-                        $shipment_details_row_start .= '
-                    <td class="try_and_buy ' . $class . '"><span class="align-middle">' . $shipment->booking_type->booking_type . '</span><span class="d-inline-block align-middle float-right"><img src="' . asset('img/try_and_buy.png') . '"></span></td>
-                ';
-
-                        $shipment_details_row_start .= '
-                    <td class="' . $class . '">' . $shipment_item->quantity . '</td>';
-
-                        $shipment_details_row_start .= '
-                            <td class="' . $class . '">Rs ' . number_format($shipment_item->price) . '</td>
-                    ';
-                        $shipment_details_row_start .= '<td class="' . $class . '">-</td>';
-
-                        $shipment_details_row_start .= '
-                        <td class="' . $class . '"></td>
-                    ';
-
-
-                        $shipment_details_row_start .= '
-                            <td class="' . $class . '"></td>
-                            <td class="' . $class . '"></td>
-                          </tr>
-                ';
-
-                        $shipment_details .= $shipment_details_row_start;
-                    }
-                }
-            }
-            $shipment_details .= '
-                        </tbody>
-                      </table>
-        ';
-            $delivery_note_details = DeliveryNote::where('id', $request->id)->first();
-            $rider = Rider::where('id', $delivery_note_details->rider_id)->first();
-            $city_name = $delivery_note_details->hub->name;
-            $delivery_note = $delivery_note->first();
-            $rider_id = NULL;
-            if ($delivery_note->special_rider) {
-                $rider_name = $rider->name . ' ( ' . $delivery_note->special_rider_name . ' )';
-            } else {
-                $rider_name = $rider->name;
-                $rider_id = $rider->trax_id;
-            }
-            $category = $rider->rider_category->name;
-            $route_name = $delivery_note_details->route->code . '( ' . $delivery_note_details->route->start . ' to ' . $delivery_note_details->route->end . ' )';
-
-            //HBL Konnect Integration
-            $hbl_transactions_amount = 0;
-            $hbl_transactions_delivery_note = HblKonnectTransactionDeliveryNote::where('delivery_note_id', $request->id);
-            if ($hbl_transactions_delivery_note->exists()) {
-                $hbl_transactions_delivery_note = $hbl_transactions_delivery_note->first();
-                $hbl_transactions_amount = $hbl_transactions_delivery_note->transactions_amount;
-                $cash_amount = $hbl_transactions_delivery_note->cash_amount;
-            } else {
-                $cash_amount = $delivery_note->recived_cod_amount;
-            }
-            //HBL Konnect Integration
-            $main_details = '
-                      <table class="table table-sm table-bordered border">
-                        <tbody>
-                          <tr>
-                            <td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>
-                            <td class="text-center align-middle color primary"><strong>Delivery Note</strong></td>
-                            <td class="text-center align-middle color secondary">Created at ' . $delivery_note_details->created_at . '</br> by ' . ucfirst($delivery_note_details->admin->name) . '</td>
-                            <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
-                          </tr>
-                          <tr>
-                            <td class="color secondary"><strong>Rider Name</strong></td>
-                            <td>' . $rider_name . '</td>
-                            <td colspan="2" rowspan="9" class="pl-1 pr-1 text-center align-middle">
-                              <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($request->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
-                              <span><strong>' . str_pad($request->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td class="color secondary"><strong>Rider Trax ID</strong></td>
-                            <td>' . $rider_id . '</td>
-                          </tr>
-                          <tr>
-                            <td class="color secondary"><strong>Category</strong></td>
-                            <td>' . $category . '</td>
-                          </tr>
-                          <tr>
-                            <td class="color secondary"><strong>Route</strong></td>
-                            <td>' . $route_name . '</td>
-                          </tr>
-                          <tr>
-                            <td class="color secondary"><strong>City</strong></td>
-                            <td>' . $city_name . '</td>
-                          </tr>
-                          <tr>
-                            <td class="color secondary"><strong>Total Collection Amount</strong></td>
-                            <td>Rs ' . number_format($total_cod_amount) . '</td>
-                          </tr>
-                          <tr>
-                            <td class="color secondary"><strong>HBL Transactions Amount</strong></td>
-                            <td>Rs ' . number_format($hbl_transactions_amount) . '</td>
-                          </tr>
-                          <tr>
-                            <td class="color secondary"><strong>Cash Amount</strong></td>
-                            <td>Rs ' . number_format($cash_amount) . '</td>
-                          </tr>
-                          <tr>
-                            <td class="color secondary"><strong>Total Shipments</strong></td>
-                            <td>' . $total_shipments . '</td>
-                          </tr>
-                          <tr>
-                            <td class="color secondary"><strong>Total Weight (Kg)</strong></td>
-                            <td>' . $total_weight . '</td>
-                          </tr>
-                        </tbody>
-                      </table>
-        ';
-            $html .= $main_details;
-            $html .= $shipment_details;
-        }
-
-
-        $html .= '
-                    </div>
-
-                    <script>
-                      window.onload = function() {
-                        window.print();
-                      }
-                    </script>
-                  </body>
-                </html>
-      ';
-
-        return $html;
+        $data = $this->receiveDeliveryPrint($delivery_note_id);
+        return $data;
     }
 
 
@@ -2505,6 +2138,7 @@ class DeliveryController extends Controller
                       <a href='javascript:void(0);' class='dropdown-item clear'><i class='ft-rotate-cw primary'></i> Clear</a>                                         
                     </div></span>";
             })
+            ->rawColumns(['action','relation', 'cnic', 'ccd_image','remarks', 'reason', 'status','open_box' ,'received_or_refused_by'])
             ->make(true);
     }
 
@@ -3852,6 +3486,7 @@ class DeliveryController extends Controller
             //                    return $relation;
             //                }
             //            })
+            ->rawColumns(['ccd_image','existing_location', 'rider_location', 'confirm_location', 'open_box' ,'fake_status', 'call_verification', 'remarks' ,'reason', 'status', 'consignee_phone' ,'tracking_number_link'])
             ->make(true);
     }
 
@@ -4617,7 +4252,13 @@ class DeliveryController extends Controller
             $city_name = $delivery_note_details->hub->name;
             $rider_name = $rider->name;
             $category = $rider->rider_category->name;
-            $route_name = $delivery_note_details->route->code . ' (' . $delivery_note_details->route->start . ' to ' . $delivery_note_details->route->end . ')';
+            $route = $delivery_note_details->route;
+            if ($route){
+                $route_name = $route->code . ' (' . $route->start . ' to ' . $route->end . ')';
+            } else {
+                $route_name = "-";
+            }
+
             $main_details = '
                       <table class="table table-sm table-bordered border">
                         <tbody>
@@ -4628,7 +4269,6 @@ class DeliveryController extends Controller
             } else {
                 $main_details .= '<td class="text-center align-middle color primary"><strong>Delivery Note Cash Collection</strong></td>';
             }
-
 
             $main_details .= '<td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
                           </tr>
@@ -4677,7 +4317,7 @@ class DeliveryController extends Controller
                       </table>
         ';
             $main_details .= '
-                      <div class="mt-2 manual_form">
+                      <div class="mt-1 manual_form">
                       <div class="row  mt-1">
                          <div class="col">
                             <div class="text-right">
@@ -4687,8 +4327,51 @@ class DeliveryController extends Controller
                           </div>
                         </div>
                         <hr>';
+
+            $sub_seg_shipments = DB::table('delivery_note_shipments as dns')
+                ->select(
+                    'dns.delivery_note_id',
+                    'scs.name AS sub_segment',
+                    DB::raw('COUNT(s.id) AS no_of_delivered_shipments'),
+                    DB::raw('SUM(s.received_amount) AS cod_amount')
+                )
+                ->join('shipments AS s', 's.id', '=', 'dns.shipment_id')
+                ->join('users AS u', 'u.id', '=', 's.user_id')
+                ->join('sub_category_segments AS scs', 'scs.id', '=', 'u.sub_segment_id')
+                ->whereIn('s.shipper_status_id', $dncc_status)
+                ->whereIn('s.id', $shipment_ids)
+                ->where('dns.delivery_note_id', $request->id)
+                ->whereNotIn('dns.status',[8,10,11])
+                ->groupBy('scs.name', 'dns.delivery_note_id')
+                ->get();
+
+            if (count($sub_seg_shipments) > 0) {
+                $main_details .= '
+                    <table class="table table-sm table-bordered border small">
+                        <tbody>
+                        <tr>
+                            <td class="text-center align-middle color primary" colspan="3"><strong>Delivery Note Cash Collection</strong></td>
+                        </tr>
+                        <tr>
+                            <td class="text-center align-middle"><strong>Sub Segment</strong></td>
+                            <td class="text-center align-middle"><strong>No. of Delivered Shipments</strong></td>
+                            <td class="text-center align-middle"><strong>COD Amount</strong></td>
+                        </tr>';
+    
+                foreach ($sub_seg_shipments as $sub_seg) {
+                    $main_details .= '<tr>
+                        <td class="color secondary"><strong>' . $sub_seg->sub_segment . '</strong></td>
+                        <td class="text-center align-middle">' . $sub_seg->no_of_delivered_shipments . '</td>
+                        <td class="text-center align-middle">' . $sub_seg->cod_amount . '</td>
+                    </tr>';          
+                }
+    
+                $main_details .= '</tbody>
+                    </table>
+                    <hr>';
+            }
+            
             $html .= $main_details;
-            $html .= '</br></br></br></br></br></br>';
             $html .= $main_details;
             //            $html .= '<div class="row justify-content-end mt-2">
             //                                    <div class="col-3 ">
@@ -5069,13 +4752,18 @@ class DeliveryController extends Controller
         $deliveries = DB::connection($connection)->table('delivery_notes')
             ->join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
-            ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
+            ->leftjoin('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
             ->leftjoin('hbl_konnect_transaction_delivery_notes as hktdn', 'hktdn.delivery_note_id', '=', 'delivery_notes.id')
             ->leftjoin('rider_types as rt', 'rt.id', '=', 'riders.rider_type_id')
             ->leftjoin('cities as c', 'c.id', '=', 'riders.city_id')
-            ->leftjoin('zones as zn', 'zn.id', '=', 'c.zone_id')
+            ->leftJoin('zones as zn', function ($join) {
+                $join->on('zn.id', '=', DB::raw("CASE 
+                    WHEN (riders.operation_rider_id = 2 and riders.status = 1) THEN oc.zone_id
+                    ELSE c.zone_id 
+                END"));
+            })
             ->leftjoin('city_areas as ca', 'ca.id', '=', 'riders.area_id')
             ->leftjoin('one_link_out_for_delivery_shipment_payments as one_link_cash', 'delivery_notes.id', '=', 'one_link_cash.delivery_note_id')
 
@@ -5086,6 +4774,15 @@ class DeliveryController extends Controller
             ->where('delivery_notes.pending_status', 1);
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
+        }
+        if ($tracking_number = $request->get('tracking_numbers')) {
+            $deliveries->join('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
+                ->join('shipments as s', 'dns.shipment_id', '=', 's.id')
+                ->whereIn('s.tracking_number', explode(',', $tracking_number))
+                ->groupBy('delivery_notes.id');
+        }
+        if ($dncc = $request->get('dncc')) {
+            $deliveries->whereIn('delivery_notes.id', explode(',', $dncc));
         }
 
         $datatable = Datatables::of($deliveries)
@@ -5213,16 +4910,9 @@ class DeliveryController extends Controller
                 } else {
                     return '-';
                 }
-            });
-        if ($tracking_number = $request->get('tracking_numbers')) {
-            $datatable->join('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
-                ->join('shipments as s', 'dns.shipment_id', '=', 's.id')
-                ->whereIn('s.tracking_number', explode(',', $tracking_number))
-                ->groupBy('delivery_notes.id');
-        }
-        if ($dncc = $request->get('dncc')) {
-            $datatable->whereIn('delivery_notes.id', explode(',', $dncc));
-        }
+            })->rawColumns(['delivery_note','count_fintech_shipments.link','transactions_amount_link','one_link_payment_count_button','shipments_count_link','delivered_shipments_link','ccd_image','action']);
+
+
         return $datatable->make(true);
     }
 
@@ -5364,7 +5054,7 @@ class DeliveryController extends Controller
 
         $deliveries = DeliveryNote::join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
-            ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
+            ->leftjoin('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->leftjoin('admins as ccb', 'ccb.id', '=', 'delivery_notes.cash_collected_by')
             ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
@@ -5381,6 +5071,19 @@ class DeliveryController extends Controller
 
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
+        }
+
+        if ($tracking_number = $request->get('tracking_numbers')) {
+            $deliveries->join('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
+                ->join('shipments as s', 'dns.shipment_id', '=', 's.id')
+                ->whereIn('s.tracking_number', explode(',', $tracking_number))
+                ->groupBy('delivery_notes.id');
+        }
+        if ($dncc = $request->get('dncc')) {
+            $deliveries->whereIn('delivery_notes.id', explode(',', $dncc));
+        }
+        if ($legend_id = $request->get('legend_filter')) {
+            $deliveries->whereIn('delivery_notes.cash_collection_status', [2, 3]);
         }
 
         $datatable = Datatables::of($deliveries)
@@ -5556,24 +5259,13 @@ class DeliveryController extends Controller
                     $count = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, [1,2], [1,3,4,6,8,9,10,11], 'delivered', 'delivery_note_id');
                 }
                 return $count > 0 ? $count : '-';
-            });
+            })->rawColumns(['delivery_note', 'fintech_charges.link', 'shipments_count_link', 'one_link_payment_count_button','deposit_slip_view','transactions_amount_link','action' ,'delivered_shipments_link']);
         //        if ($tracking_number = $request->get('search_tracking')) {
         //            $datatable->join('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
         //                ->join('shipments as s', 'dns.shipment_id', '=', 's.id')
         //                ->where('s.tracking_number', '=', $tracking_number);
         //        }
-        if ($tracking_number = $request->get('tracking_numbers')) {
-            $datatable->join('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
-                ->join('shipments as s', 'dns.shipment_id', '=', 's.id')
-                ->whereIn('s.tracking_number', explode(',', $tracking_number))
-                ->groupBy('delivery_notes.id');
-        }
-        if ($dncc = $request->get('dncc')) {
-            $datatable->whereIn('delivery_notes.id', explode(',', $dncc));
-        }
-        if ($legend_id = $request->get('legend_filter')) {
-            $datatable->whereIn('delivery_notes.cash_collection_status', [2, 3]);
-        }
+
         return $datatable->make(true);
     }
 
@@ -5863,7 +5555,7 @@ class DeliveryController extends Controller
         $dncc_ids = session('dncc_ids');
         $deliveries = DeliveryNote::join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
-            ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
+            ->leftjoin('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->select(['delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'delivery_notes.received_cod_amount', 'delivery_notes.shipments_count', 'delivery_notes.delivered_shipments'])
             ->whereIn('delivery_notes.id', $dncc_ids);
 
@@ -5907,6 +5599,7 @@ class DeliveryController extends Controller
                 $reason = '<input class="form-control" name="remarks[' . $deliveries->delivery_note_id . ']" placeholder="Enter Remarks">';
                 return $reason;
             })
+            ->rawColumns(['remarks'])
             ->make(true);
     }
 
@@ -5995,6 +5688,74 @@ class DeliveryController extends Controller
             $sdn = $sdn->whereIn('oc.hub_id', session('hubs'));
         }
 
+
+        if ($tracking_number = $request->get('search_tracking')) {
+            $shipment = Shipment::where('tracking_number', $tracking_number)->get()->first();
+            if ($shipment) {
+                $sdn->join('delivery_note_station_deposit_notes as dnsdn', 'station_deposit_notes.id', '=', 'dnsdn.station_deposit_note_id')
+                    ->join('delivery_notes as dn', 'dnsdn.delivery_note_id', '=', 'dn.id')
+                    ->join('delivery_note_shipments as dnss', 'dnss.delivery_note_id', '=', 'dn.id')
+                    ->join('shipments as s', 'dnss.shipment_id', '=', 's.id')
+                    ->where('s.tracking_number', '=', $tracking_number)
+                    ->groupBy('station_deposit_notes.id');
+            }
+            // $datatable->join('delivery_note_station_deposit_notes as dnsdn', 'station_deposit_notes.id', '=', 'dnsdn.station_deposit_note_id')
+            //     ->join('delivery_notes as dn', 'dnsdn.delivery_note_id', '=', 'dn.id')
+            //     ->join('delivery_note_shipments as dnss', 'dnss.delivery_note_id', '=', 'dn.id')
+            //     ->join('shipments as s', 'dnss.shipment_id', '=', 's.id')
+            //     ->where('s.tracking_number', '=', $tracking_number)
+            //     ->orWhere(function ($query) use ($tracking_number) {
+            //         $query->join('pickup_note_station_deposit_notes as pnsdn', 'station_deposit_notes.id', '=', 'pnsdn.station_deposit_note_id')
+            //             ->join('retail_pickup_notes as rpn', 'pnsdn.retail_pickup_note_id', '=', 'rpn.id')
+            //             ->join('retail_pickup_note_shipments as rpns', 'rpns.retail_pickup_note_id', '=', 'rpn.id')
+            //             ->join('shipments as s', 'rpns.shipment_id', '=', 's.id')
+            //             ->where('s.tracking_number', '=', $tracking_number);
+            //     })
+            //     ->groupBy('station_deposit_notes.id');
+
+
+
+        }
+        if ($tracking_number = $request->get('search_tracking_retail')) {
+            $shipment = Shipment::where('tracking_number', $tracking_number)->get()->first();
+            if ($shipment) {
+                // $retail_shipment = RetailShipment::where('shipment_id',$shipment->id);
+                // if($retail_shipment->exists()){
+                $sdn->join('pickup_note_station_deposit_notes as pnsdn', 'station_deposit_notes.id', '=', 'pnsdn.station_deposit_note_id')
+                    ->join('retail_pickup_notes as rpn', 'pnsdn.retail_pickup_note_id', '=', 'rpn.id')
+                    ->join('retail_pickup_note_shipments as rpns', 'rpns.retail_pickup_note_id', '=', 'rpn.id')
+                    ->join('shipments as rs', 'rpns.shipment_id', '=', 'rs.id')
+                    ->where('rs.tracking_number', '=', $tracking_number)
+                    ->groupBy('station_deposit_notes.id');
+                // }
+            }
+        }
+
+
+        if ($dncc = $request->get('scan_dncc')) {
+            $sdn->join('delivery_note_station_deposit_notes as dnsdns', 'station_deposit_notes.id', '=', 'dnsdns.station_deposit_note_id')
+                ->where('dnsdns.delivery_note_id', '=', $dncc)
+                ->groupBy('station_deposit_notes.id');
+        }
+        if ($rncc = $request->get('scan_rncc')) {
+            $sdn->join('pickup_note_station_deposit_notes as pnsdn', 'station_deposit_notes.id', '=', 'pnsdn.station_deposit_note_id')
+                ->where('pnsdn.retail_pickup_note_id', '=', $rncc)
+                ->groupBy('station_deposit_notes.id');
+        }
+        if ($sdn_request = $request->get('scan_sdn')) {
+            $sdn->whereIn('station_deposit_notes.id', explode(',', $sdn_request));
+        }
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $sdn->whereBetween('station_deposit_notes.status_updated_at', [$from, $to]);
+        }
+        if ($request->get('search_date_from_deposited') && $request->get('search_date_to_deposited')) {
+            $from = $request->get('search_date_from_deposited');
+            $to = $request->get('search_date_to_deposited');
+            $sdn->where('station_deposit_notes.status', 1);
+            $sdn->whereBetween('station_deposit_notes.created_at', [$from, $to]);
+        }
         $datatable = Datatables::of($sdn)
             ->setRowAttr([
                 'data-type' => function ($sdn) {
@@ -6379,7 +6140,9 @@ class DeliveryController extends Controller
                 } else {
                     return '-';
                 }
-            });
+            })
+            ->rawColumns(['sdn','adjusted_reference_link','deposit_slip', 'dncc_link','delivered_shipments_link' , 'action']);
+
 
         // ->filterColumn('zone', function ($query, $keyword) {
         //     if ($keyword == 0) {
@@ -6394,73 +6157,7 @@ class DeliveryController extends Controller
         //         $query->whereRaw('false');
         //     }
         // });
-        if ($tracking_number = $request->get('search_tracking')) {
-            $shipment = Shipment::where('tracking_number', $tracking_number)->get()->first();
-            if ($shipment) {
-                $datatable->join('delivery_note_station_deposit_notes as dnsdn', 'station_deposit_notes.id', '=', 'dnsdn.station_deposit_note_id')
-                    ->join('delivery_notes as dn', 'dnsdn.delivery_note_id', '=', 'dn.id')
-                    ->join('delivery_note_shipments as dnss', 'dnss.delivery_note_id', '=', 'dn.id')
-                    ->join('shipments as s', 'dnss.shipment_id', '=', 's.id')
-                    ->where('s.tracking_number', '=', $tracking_number)
-                    ->groupBy('station_deposit_notes.id');
-            }
-            // $datatable->join('delivery_note_station_deposit_notes as dnsdn', 'station_deposit_notes.id', '=', 'dnsdn.station_deposit_note_id')
-            //     ->join('delivery_notes as dn', 'dnsdn.delivery_note_id', '=', 'dn.id')
-            //     ->join('delivery_note_shipments as dnss', 'dnss.delivery_note_id', '=', 'dn.id')
-            //     ->join('shipments as s', 'dnss.shipment_id', '=', 's.id')
-            //     ->where('s.tracking_number', '=', $tracking_number)
-            //     ->orWhere(function ($query) use ($tracking_number) {
-            //         $query->join('pickup_note_station_deposit_notes as pnsdn', 'station_deposit_notes.id', '=', 'pnsdn.station_deposit_note_id')
-            //             ->join('retail_pickup_notes as rpn', 'pnsdn.retail_pickup_note_id', '=', 'rpn.id')
-            //             ->join('retail_pickup_note_shipments as rpns', 'rpns.retail_pickup_note_id', '=', 'rpn.id')
-            //             ->join('shipments as s', 'rpns.shipment_id', '=', 's.id')
-            //             ->where('s.tracking_number', '=', $tracking_number);
-            //     })
-            //     ->groupBy('station_deposit_notes.id');
-
-
-
-        }
-        if ($tracking_number = $request->get('search_tracking_retail')) {
-            $shipment = Shipment::where('tracking_number', $tracking_number)->get()->first();
-            if ($shipment) {
-                // $retail_shipment = RetailShipment::where('shipment_id',$shipment->id);
-                // if($retail_shipment->exists()){
-                $datatable->join('pickup_note_station_deposit_notes as pnsdn', 'station_deposit_notes.id', '=', 'pnsdn.station_deposit_note_id')
-                    ->join('retail_pickup_notes as rpn', 'pnsdn.retail_pickup_note_id', '=', 'rpn.id')
-                    ->join('retail_pickup_note_shipments as rpns', 'rpns.retail_pickup_note_id', '=', 'rpn.id')
-                    ->join('shipments as rs', 'rpns.shipment_id', '=', 'rs.id')
-                    ->where('rs.tracking_number', '=', $tracking_number)
-                    ->groupBy('station_deposit_notes.id');
-                // }
-            }
-        }
-
-
-        if ($dncc = $request->get('scan_dncc')) {
-            $datatable->join('delivery_note_station_deposit_notes as dnsdns', 'station_deposit_notes.id', '=', 'dnsdns.station_deposit_note_id')
-                ->where('dnsdns.delivery_note_id', '=', $dncc)
-                ->groupBy('station_deposit_notes.id');
-        }
-        if ($rncc = $request->get('scan_rncc')) {
-            $datatable->join('pickup_note_station_deposit_notes as pnsdn', 'station_deposit_notes.id', '=', 'pnsdn.station_deposit_note_id')
-                ->where('pnsdn.retail_pickup_note_id', '=', $rncc)
-                ->groupBy('station_deposit_notes.id');
-        }
-        if ($sdn = $request->get('scan_sdn')) {
-            $datatable->whereIn('station_deposit_notes.id', explode(',', $sdn));
-        }
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $datatable->whereBetween('station_deposit_notes.status_updated_at', [$from, $to]);
-        }
-        if ($request->get('search_date_from_deposited') && $request->get('search_date_to_deposited')) {
-            $from = $request->get('search_date_from_deposited');
-            $to = $request->get('search_date_to_deposited');
-            $datatable->where('station_deposit_notes.status', 1);
-            $datatable->whereBetween('station_deposit_notes.created_at', [$from, $to]);
-        }
+        
         return $datatable->make(true);
     }
 
@@ -6544,7 +6241,7 @@ class DeliveryController extends Controller
             ->join('delivery_notes', 'delivery_notes.id', '=', 'dnsdn.delivery_note_id')
             ->join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
-            ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
+            ->leftjoin('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->select(['delivery_notes.id as dncc', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'delivery_notes.received_cod_amount', 'delivery_notes.shipments_count', 'delivery_notes.delivered_shipments', 'delivery_notes.expense', 'delivery_notes.net_amount', 'delivery_notes.remarks'])
             ->where('station_deposit_notes.id', $id);
 
@@ -6722,13 +6419,23 @@ class DeliveryController extends Controller
             foreach ($dncc_ids as $dncc) {
                 $total_dncc++;
                 $dncc_note = DeliveryNote::find($dncc->delivery_note_id);
+                $dncc_note_route = $dncc_note->route;
+                if ($dncc_note_route){
+                    $route_name = $dncc_note_route->code;
+                    $route_start = $dncc_note_route->start;
+                    $route_end = $dncc_note_route->end;
+                } else {
+                    $route_name = "-";
+                    $route_start = "-";
+                    $route_end = "-";
+                }
 
                 $shipment_details_row_start = '
                           <tr>
                             <td>' . $total_dncc . '</td>
                             <td>' . str_pad($dncc_note->id, 6, '0', STR_PAD_LEFT) . '</td>
                             <td>' . $dncc_note->rider->name . '</td>
-                            <td>' . $dncc_note->route->code . '( ' . $dncc_note->route->start . ' to ' . $dncc_note->route->end . ' )' . '</td>
+                            <td>' . $route_name . '( ' . $route_start . ' to ' . $route_end . ' )' . '</td>
                             <td>' . $dncc_note->shipments_count . '</td>
                             <td>' . $dncc_note->delivered_shipments . '</td>
                             <td>Rs ' . number_format($dncc_note->received_cod_amount) . '</td>
@@ -6908,6 +6615,7 @@ class DeliveryController extends Controller
                     $query->whereRaw('false');
                 }
             })
+            ->rawColumns(['tracking_number_link', 'status_date'])
             ->make(true);
     }
 
@@ -7510,7 +7218,7 @@ class DeliveryController extends Controller
         $deliveries = DB::connection($connection)->table('delivery_notes')
             ->join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
-            ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
+            ->leftjoin('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->leftjoin('admins as ccb', 'delivery_notes.cash_collected_by', '=', 'ccb.id')
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
@@ -7518,13 +7226,27 @@ class DeliveryController extends Controller
             ->leftjoin('rider_deliveries as rd', 'rd.delivery_note_id', '=', 'delivery_notes.id')
             ->leftjoin('rider_types as rt', 'rt.id', '=', 'riders.rider_type_id')
             ->leftjoin('cities as c', 'c.id', '=', 'riders.city_id')
-            ->leftjoin('city_areas as ca', 'ca.id', '=', 'riders.area_id')
-            ->leftjoin('zones as zn', 'zn.id', '=', 'c.zone_id')
+            ->leftJoin('city_areas as ca', function ($join) {
+                $join->on('ca.id', '=', DB::raw("
+                    CASE 
+                        WHEN (riders.operation_rider_id = 2 AND riders.status = 1) THEN admins.area_id
+                        ELSE riders.area_id
+                    END
+                "));
+            })
+            ->leftJoin('zones as zn', function ($join) {
+                $join->on('zn.id', '=', DB::raw("CASE 
+                    WHEN (riders.operation_rider_id = 2 and riders.status = 1) THEN oc.zone_id
+                    ELSE c.zone_id 
+                END"));
+            })
             ->leftjoin('hbl_konnect_transaction_delivery_notes as hktdn', 'hktdn.delivery_note_id', '=', 'delivery_notes.id')
             ->leftjoin('one_link_out_for_delivery_shipment_payments as one_link_cash', 'delivery_notes.id', '=', 'one_link_cash.delivery_note_id')
+            ->leftjoin('delivery_note_shipments', 'delivery_note_shipments.delivery_note_id', 'delivery_notes.id')
+            ->leftjoin('shipments', 'delivery_note_shipments.shipment_id', '=', 'shipments.id') // Join with shipments table
 
 
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.trax_id as rider_trax_id','riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at','delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount','delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.status', 'delivery_notes.pending_status','delivery_notes.cash_collection_status', 'delivery_notes.dncc_status', 'delivery_notes.last_updated_at', 'delivery_notes.cash_collected_by','ccb.name as cash_collected', 'delivery_notes.cash_collected_at', 'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone','rdns.status as updated_via_app', 'rd.id as rider_delivery_id', 'rd.delivered_status as delivered_status', 'rd.picture_path as picture_path', 'rt.name as rider_type','zn.name as zone_name', 'hktdn.transactions_amount as transactions_amount', 'hktdn.cash_amount as cash_amount', 'delivery_notes.one_link_payment_count','delivery_notes.created_via_app as created_via', 'riders.operation_rider_id', 'ca.name as area','one_link_cash.transaction_amount as one_link_amount'])
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.trax_id as rider_trax_id','riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at','delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount','delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.status', 'delivery_notes.pending_status','delivery_notes.cash_collection_status', 'delivery_notes.dncc_status', 'delivery_notes.last_updated_at', 'delivery_notes.cash_collected_by','ccb.name as cash_collected', 'delivery_notes.cash_collected_at', 'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone','rdns.status as updated_via_app', 'rd.id as rider_delivery_id', 'rd.delivered_status as delivered_status', 'rd.picture_path as picture_path', 'rt.name as rider_type','zn.name as zone_name', 'hktdn.transactions_amount as transactions_amount', 'hktdn.cash_amount as cash_amount', 'delivery_notes.one_link_payment_count','delivery_notes.created_via_app as created_via', 'riders.operation_rider_id', 'ca.name as area','one_link_cash.transaction_amount as one_link_amount', DB::raw('SUM(shipments.actual_weight) as total_weight')])
 
             ->where('riders.operation_rider_id', $request->get('operation_rider_id'))
             ->when($request->get('delivery_note_numbers'),function($data) use ($deliveryNoteNumbers){
@@ -7533,6 +7255,11 @@ class DeliveryController extends Controller
             ->groupBy('delivery_notes.id');
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
+        }
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $deliveries->whereBetween('delivery_notes.created_at', [$from, $to]);
         }
 
         $datatable = Datatables::of($deliveries)
@@ -7548,11 +7275,6 @@ class DeliveryController extends Controller
                 {
                     return (['link' => '<span id="myButton">' . $amount . '</span>', 'sum' => $amount]);
                 }
-            })
-            ->addColumn('total_weight', function($deliveries){
-                $shipments = DeliveryNoteShipment::where('delivery_note_id',$deliveries->delivery_note)->pluck('shipment_id')->toArray();
-                $total_weight = Shipment::whereIn('id',$shipments)->sum('actual_weight');
-                return $total_weight;
             })
             ->editColumn('fintech_amount_percent', function ($deliveries) {
                 $dncc_amount = $deliveries->amount;
@@ -7839,12 +7561,8 @@ class DeliveryController extends Controller
                     $count = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, [1,2], [1,3,4,6,8,9,10,11], 'delivered', 'delivery_note_id');
                 }
                 return $count > 0 ? $count : '-';
-            });
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $datatable->whereBetween('delivery_notes.created_at', [$from, $to]);
-        }
+            })->rawColumns(['transactions_amount_link','one_link_payment_count_button','delivered_shipments_link','shipments_count_link','delivery_note','fintech_shipments_charges.link']);
+
         return $datatable->make(true);
     }
 
@@ -7863,6 +7581,12 @@ class DeliveryController extends Controller
             ->select(['s.tracking_number', 'rider_deliveries.picture_path', 'rider_deliveries.delivered_status', 'rider_deliveries.delivery_note_id as delivery_note_id', 'dn.pending_status', 'ca.name as area'])
             ->where('rider_deliveries.delivered_status', '1');
 
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $deliveries->whereIn('s.tracking_number', explode(',', $tracking_numbers));
+        }
+        if ($delivery_note_ids = $request->get('search_delivery_note_ids')) {
+            $deliveries->whereIn('rider_deliveries.delivery_note_id', explode(',', $delivery_note_ids));
+        }
 
         $datatable = Datatables::of($deliveries)
             ->editColumn('delivery_note', function ($deliveries) {
@@ -7893,13 +7617,8 @@ class DeliveryController extends Controller
                 } else {
                     return '-';
                 }
-            });
-        if ($tracking_numbers = $request->get('tracking_numbers')) {
-            $datatable->whereIn('s.tracking_number', explode(',', $tracking_numbers));
-        }
-        if ($delivery_note_ids = $request->get('search_delivery_note_ids')) {
-            $datatable->whereIn('rider_deliveries.delivery_note_id', explode(',', $delivery_note_ids));
-        }
+            })->rawColumns(['delivery_note','tracking_number','picture_path']);
+
         return $datatable->make(true);
     }
 
@@ -8243,6 +7962,7 @@ class DeliveryController extends Controller
                     return 'Different Consignee';
                 }
             })
+            ->rawColumns(['tracking_number_link'])
             ->make(true);
     }
 
@@ -8475,6 +8195,13 @@ class DeliveryController extends Controller
             ->select('delivery_note_shipments.delivery_note_id as delivery_note_id', 'delivery_note_shipments.shipment_id as shipment_id', 'dn.id as delivery_note', 's.amount as amount', 'h.name as hub', 'r.name as rider', 'ss.name as status', 'dn.created_at as created_at')
             ->where('delivery_note_shipments.fake_status', 1);
 
+        if ($request->has('search_tracking_no')) {
+            $tracking_number = $request->get('search_tracking_no');
+        } else {
+            $tracking_number = null;
+        }
+        $fake_status->where('s.tracking_number', '=', $tracking_number);
+
         $datatables = Datatables::of($fake_status)
             ->editColumn('tracking_number_link', function ($fake_status) {
                 $route = route('admin.tracking.index');
@@ -8485,13 +8212,8 @@ class DeliveryController extends Controller
             })
             ->editColumn('amount', function ($shipment) {
                 return number_format($shipment->amount);
-            });
-        if ($request->has('search_tracking_no')) {
-            $tracking_number = $request->get('search_tracking_no');
-        } else {
-            $tracking_number = null;
-        }
-        $datatables->where('s.tracking_number', '=', $tracking_number);
+            })->rawColumns(['tracking_number_link']);
+
 
         return $datatables->make(true);
     }
@@ -8561,7 +8283,9 @@ class DeliveryController extends Controller
                 return $amount;
             });
 
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['tracking_number_link', 'reason', 'amount'])
+        ->make(true);
     }
 
     public function replacement_not_collected_re_attempt(Request $request)
@@ -8825,7 +8549,7 @@ class DeliveryController extends Controller
         $replacement_to_regular_logs = ReplacementToRegularLog::leftjoin('shipments as s', 's.id', '=', 'replacement_to_regular_logs.shipment_id')
             ->leftjoin('products as p', 'p.id', '=', 'replacement_to_regular_logs.product_type_id')
             ->leftjoin('admins as a', 'a.id', '=', 'replacement_to_regular_logs.updated_by')
-            ->select('s.tracking_number as tracking_number', 'p.product_name as product_type', 'replacement_to_regular_logs.replacement_charges as replacement_charges', 'replacement_to_regular_logs.item_description as item_description', 'replacement_to_regular_logs.item_quantity as item_quantity', 'replacement_to_regular_logs.item_price as item_price', 'replacement_to_regular_logs.insurance as insurance', 'replacement_to_regular_logs.created_at as created_at');
+            ->select('s.tracking_number as tracking_number', 'p.product_name as product_type', 'replacement_to_regular_logs.replacement_charges as replacement_charges', 'replacement_to_regular_logs.item_description as item_description', 'replacement_to_regular_logs.item_quantity as item_quantity', 'replacement_to_regular_logs.item_price as item_price', 'replacement_to_regular_logs.insurance as insurance', 'replacement_to_regular_logs.created_at as created');
 
         $datatables = Datatables::of($replacement_to_regular_logs)
             ->editColumn('tracking_number_link', function ($shipment) {
@@ -8847,7 +8571,9 @@ class DeliveryController extends Controller
                 }
             });
 
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['tracking_number_link'])
+        ->make(true);
     }
 
     public function sdn_slip_view(Request $request)
@@ -9280,33 +9006,49 @@ class DeliveryController extends Controller
 
     public function operation_riders(Request $request)
     {
-
         $operation_id = $request->operation_rider_type;
-
-        $riders = Rider::leftjoin('cities as c', 'riders.city_id', '=', 'c.id')
-            ->leftjoin('cities as h', 'c.hub_id', '=', 'h.id')
-            //            ->select(['riders.*','h.name as hub_name'])
-            ->where('riders.operation_rider_id', $operation_id)
-            ->whereNotNull('riders.employee_id')
-            ->where('riders.status', 1);
-        if (session('role_id') != 1) {
-            if ($operation_id == 1) {
-                if (!$request->has('carrefour')) {
-                    $riders->where('riders.rider_type_id', 2);
+        $holdInCheck = false;
+        if($operation_id != 1){
+            /*TO-6892*/
+            $riders = Rider::leftjoin('cities as c', 'riders.city_id', '=', 'c.id')
+                ->leftjoin('cities as h', 'c.hub_id', '=', 'h.id')->whereIn('riders.name', [
+                    'NSA/OSA',
+                    'Incomplete Address',
+                    'Hold for Self Collection',
+                    'Friday/ Saturday Closed',
+                    'Restricted Area',
+                    'Hold in OPS',
+                    'Damaged',
+                    'Delivery Stopped',
+                    'Wrong Destination'
+            ])  ->where('riders.status', 1)
+                ->where('blacklist', 0);
+            $holdInCheck = true;
+            /*END*/
+        }else{
+            $riders = Rider::leftjoin('cities as c', 'riders.city_id', '=', 'c.id')
+                ->leftjoin('cities as h', 'c.hub_id', '=', 'h.id')
+                ->where('riders.operation_rider_id', $operation_id)
+                ->whereNotNull('riders.employee_id')
+                ->where('riders.status', 1);
+            if (session('role_id') != 1) {
+                if ($operation_id == 1) {
+                    if (!$request->has('carrefour')) {
+                        $riders->where('riders.rider_type_id', 2);
+                    }
                 }
+            }
+
+            if (session('role_id') != 1) {
+                $riders = $riders->whereHas('city', function ($query) {
+                    $query->whereIn('hub_id', session('hubs'));
+                });
             }
         }
 
-
-        if (session('role_id') != 1) {
-            $riders = $riders->whereHas('city', function ($query) {
-                $query->whereIn('hub_id', session('hubs'));
-            });
-        }
         if ($riders) {
             $riders = $riders->select('riders.id', 'riders.name', 'riders.trax_id', 'h.name as hub_name')->get();
-            //            dd($riders);
-            return response()->json(['status' => 1, 'riders' => $riders, 'success' => 'Riders Found']);
+            return response()->json(['status' => 1, 'holdInCheck' => $holdInCheck, 'riders' => $riders, 'success' => 'Riders Found']);
         } else {
             return response()->json(['status' => 0, 'error' => 'No Riders Found']);
         }
@@ -9380,7 +9122,7 @@ class DeliveryController extends Controller
         }
 
         ShipmentScanningJourneyController::add($shipment->id ,21,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL, $request->action);
-        return response()->json(['status' => 0, 'details' => ['row_id' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'status' => $journey->shipment_status_shipper->name, 'reason' => $journey->shipment_status_reason->name ?? null, 'remarks' => $journey->remarks, 'status_date' => date('Y-m-d H:i:s', strtotime($journey->created_at)), 'origin' => $shipment->pickup_address->city->name, 'destination' => $shipment->consignee_city->name, 'amount' => $shipment->amount, 'shipper_name' => $shipment->user->name, 'class' => $class]]);
+        return response()->json(['status' => 0, 'details' => ['row_id' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'status' => $journey->shipment_status_shipper->name ?? null, 'reason' => $journey->shipment_status_reason->name ?? null, 'remarks' => $journey->remarks, 'status_date' => date('Y-m-d H:i:s', strtotime($journey->created_at)), 'origin' => $shipment->pickup_address->city->name ?? null, 'destination' => $shipment->consignee_city->name ?? null, 'amount' => $shipment->amount, 'shipper_name' => $shipment->user->name ?? null , 'class' => $class]]);
     }
 
     public function quick_receiving_submit(Request $request)
@@ -9521,7 +9263,14 @@ class DeliveryController extends Controller
     {
         if (DeliveryNoteRequests::where('rider_id', $request->rider_id)->where('status', 1)->exists()) {
             return redirect()->route('admin.delivery.note.request_index')->with(['error' => 'Request Already Present']);
-        } else {
+        } 
+        if (!$request->has('dncc') || is_null($request->dncc)) {
+            return redirect()->route('admin.delivery.note.request_index')->with(['error' => 'Delivery note received amount is required']);
+        }
+        if (!$request->has('amount') || is_null($request->amount)) {
+            return redirect()->route('admin.delivery.note.request_index')->with(['error' => 'Delivery note requested amount is required']);
+        }
+        else {
             $note = new DeliveryNoteRequests();
             $note->rider_id = $request->rider_id;
             $note->dn_received_amount = $request->dncc;
@@ -10078,7 +9827,7 @@ class DeliveryController extends Controller
                 } else {
                     return '';
                 }
-            });
+            })->rawColumns(['shipments_count_link','action']);
         return $datatables->make(true);
     }
 
@@ -10220,7 +9969,8 @@ class DeliveryController extends Controller
                         $payment_link = $payment_details['payment_link'];
                         $url = $payment_details['url'];
                         $trans_id = $payment_details['id'];
-                        $shipments_id = array_wrap($shipment);
+                        $shipments_id = is_array($shipment) ? $shipment : [$shipment];
+
                         CountFintechCharges::dispatch($shipments_id, $payment_link, $rand, $url , $trans_id);
                         NotificationsController::send(10, $note->id, $shipment);
                         NotificationsController::send(11, $note->id, $shipment);
@@ -10536,7 +10286,7 @@ class DeliveryController extends Controller
                     $location = '-';
                 }
                 return $location;
-            });
+            })->rawColumns(['tracking_number_link','location']);
         return $datatable->make(true);
     }
 
@@ -10596,6 +10346,15 @@ class DeliveryController extends Controller
             ->where('delivery_notes.id', '>', $delivery_note_id) //open for production
             ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as excel_delivery_note', 'riders.name as rider', 'riders.trax_id as riderID', 'sh.tracking_number as tracking_number', 'sh.tracking_number as excel_tracking_number', 'delivery_notes.created_at as created_at']);
 
+        $delivery_note_numbers = $request->get('delivery_note_number');
+        if (is_array($delivery_note_numbers) && count($delivery_note_numbers) > 0) {
+            $shipments->whereIn('dns.delivery_note_id', $delivery_note_numbers);
+        }
+        $rider_id = $request->get('rider_id');
+        if (isset($rider_id) && $rider_id != null) {
+            $shipments->where('riders.trax_id', $rider_id);
+        }
+
         $datatables = Datatables::of($shipments)
             ->editColumn('delivery_note', function ($deliveries) {
                 return "<a href='javascript:void(0);' data-id=" . $deliveries->delivery_note . " class='printdeliverynote'><u>" . str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT) . "</u></a>";
@@ -10604,16 +10363,9 @@ class DeliveryController extends Controller
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$deliveries->tracking_number' class='tracking' target='_blank'>$deliveries->tracking_number</a></u>";
 
-            });
+            })->rawColumns(['delivery_note','tracking_number']);
 
-        $delivery_note_numbers = $request->get('delivery_note_number');
-        if (is_array($delivery_note_numbers) && count($delivery_note_numbers) > 0) {
-            $datatables->whereIn('dns.delivery_note_id', $delivery_note_numbers);
-        }
-        $rider_id = $request->get('rider_id');
-        if (isset($rider_id) && $rider_id != null) {
-            $datatables->where('riders.trax_id', $rider_id);
-        }
+
 
         return $datatables->make(true);
     }
@@ -10663,31 +10415,30 @@ class DeliveryController extends Controller
         }
     }
 
-
-
-    public static function get_segment_type($table, $ids, $segment, $sub_segment, $type = null, $column)
+    public static function get_segment_type($table, $ids, $segment, $subSegment, $type = null, $column)
     {
-        $shipment_ids = $type === null
-            ? DB::table($table)->whereIn($column, $ids)->pluck('shipment_id')
-            : $ids;
+        $shipmentIdsQuery = DB::connection('reports')->table($table)->whereIn($column, $ids);
 
-        return Shipment::whereIn('id', $shipment_ids)
-            ->whereHas('user', function ($query) use ($segment, $sub_segment) {
-                if (is_array($segment)) {
-                    $query->whereIn('segment_id', $segment);
-                } else {
-                    $query->where('segment_id', $segment);
-                }
+        if ($type === null) {
+            $shipmentIds = $shipmentIdsQuery->pluck('shipment_id');
+        } else {
+            $shipmentIds = $ids;
+        }
 
-                if (is_array($sub_segment)) {
-                    $query->whereIn('sub_segment_id', $sub_segment);
-                } else {
-                    $query->where('sub_segment_id', $sub_segment);
-                }
-            })
-            ->count();
+        $query = DB::connection('reports')->table('shipments')
+            ->join('users', 'users.id', '=', 'shipments.user_id')
+            ->whereIn('shipments.id', $shipmentIds);
+
+        if ($segment) {
+            $query->whereIn('users.segment_id', (array) $segment);
+        }
+
+        if ($subSegment) {
+            $query->whereIn('users.sub_segment_id', (array) $subSegment);
+        }
+
+        return $query->count();
     }
-
 
     public static function get_delivered_shipments($dn_ids){
         $dncc_status = array(14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38);

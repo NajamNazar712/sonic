@@ -50,6 +50,20 @@ class RiderDeactivateAutomatically extends Command
      */
     public function handle()
     {
+        $names = [
+            'NSA/OSA',
+            'Incomplete Address',
+            'Hold for Self Collection',
+            'Friday/ Saturday Closed',
+            'Restricted Area',
+            'Hold in OPS',
+            'Damaged',
+            'Delivery Stopped',
+            'Wrong Destination'
+        ];
+
+        $riderExcluded = Rider::whereIn('name', $names)->where('city_id', '!=', 0)->pluck('id')->toArray();
+
         $settings = GlobalSettings::where('type', 'rider_deactivation_cron_status');
         if($settings->exists()){
             $settings = $settings->first();
@@ -59,10 +73,11 @@ class RiderDeactivateAutomatically extends Command
                 if($cron_days->exists()){
                     $cron_days = $cron_days->first();
                     $days = $cron_days->setting_value;
+                    $days = $cron_days->setting_value;
                 }
                 $date_week_age = Carbon::now()->subDays($days)->toDateTimeString();
                 $today = Carbon::now()->toDateTimeString();
-                $rider_ids = Rider::where('status', 1)->whereDate('created_at', '<', $date_week_age)->pluck('id')->toArray();
+                $rider_ids = Rider::where('status', 1)->whereNotIn('id', $riderExcluded)->whereDate('created_at', '<', $date_week_age)->pluck('id')->toArray();
                 $deliveries  = DeliveryNote::whereBetween('created_at', [$date_week_age, $today])->pluck('rider_id')->toArray();
                 $v2_pickups  = V2PickupNote::whereBetween('created_at', [$date_week_age, $today])->pluck('rider_id')->toArray();
                 $return_notes  = ReturnNote::whereBetween('created_at', [$date_week_age, $today])->pluck('rider_id')->toArray();

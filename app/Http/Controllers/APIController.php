@@ -130,7 +130,8 @@ use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransaction;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionDeliveryNote;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransactionRetail;
-
+use Illuminate\Support\Str;
+use App\Http\Models\ShipperSegmentLogs;
 
 class APIController extends Controller
 {
@@ -1539,6 +1540,18 @@ class APIController extends Controller
                 }
             }
 
+            try {
+                // Maintaining shipper segment logs on booking when origin and destination are different
+                if ($consignee_city_id != $pickup_city_id) {
+                    ShipperSegmentLogs::create([
+                        'shipment_id' => $shipment_id,
+                        'segment_id' => $user_type->segment_id,
+                        'sub_segment_id' => $user_type->sub_segment_id
+                    ]);
+                }
+            } catch (\Exception $e) {
+                Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
+            }
             return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number]);
         }
     }
@@ -1802,6 +1815,19 @@ class APIController extends Controller
                 }
             }
 
+            try {
+                // Maintaining shipper segment logs on booking when origin and destination are different
+                if ($consignee_city_id != $pickup_city_id) {
+                    ShipperSegmentLogs::create([
+                        'shipment_id' => $shipment_id,
+                        'segment_id' => $user_type->segment_id,
+                        'sub_segment_id' => $user_type->sub_segment_id
+                    ]);
+                }
+            } catch (\Exception $e) {
+                Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
+            }
+            
             return response()->json(['status' => 1, 'message' => 'Shipment Booked with Tracking Number: ' . $tracking_number]);
         }
     }
@@ -1858,13 +1884,13 @@ class APIController extends Controller
 
                     $filename = 'air_waybill' . '.jpg';
 
-                    return $image->setOption('disable-smart-width', true)->setOption('width', 1280)->download($filename);
+                    return $image->setOption('disable-smart-width', true)->setOption('width', 1280)->setOption('enable-local-file-access', true)->download($filename);
                 } else {
                     $pdf = SnappyPDF::loadHTML($air_waybill);
 
                     $filename = 'air_waybill' . '.pdf';
 
-                    return $pdf->download($filename);
+                    return $pdf->setOption('enable-local-file-access', true)->download($filename);
                 }
             } else {
                 return response()->json(['status' => 1, 'message' => 'Already Received']);
@@ -2472,13 +2498,13 @@ class APIController extends Controller
 
                 $filename = 'receiving_sheet_' . $receiving_sheet_id . '.jpg';
 
-                return $image->setOption('disable-smart-width', true)->download($filename);
+                return $image->setOption('disable-smart-width', true)->setOption('enable-local-file-access', true)->download($filename);
             } else {
                 $pdf = SnappyPDF::loadHTML($receiving_sheet);
 
                 $filename = 'receiving_sheet_' . $receiving_sheet_id . '.pdf';
 
-                return $pdf->download($filename);
+                return $pdf->setOption('enable-local-file-access', true)->download($filename);
             }
         }
     }
@@ -2529,13 +2555,13 @@ class APIController extends Controller
 
                 $filename = 'receiving_sheet_' . $receiving_sheet_id . '.jpg';
 
-                return $image->setOption('disable-smart-width', true)->download($filename);
+                return $image->setOption('disable-smart-width', true)->setOption('enable-local-file-access', true)->download($filename);
             } else {
                 $pdf = SnappyPDF::loadHTML($receiving_sheet);
 
                 $filename = 'receiving_sheet_' . $receiving_sheet_id . '.pdf';
 
-                return $pdf->download($filename);
+                return $pdf->setOption('enable-local-file-access', true)->download($filename);
             }
         }
     }
@@ -3420,6 +3446,20 @@ class APIController extends Controller
                     return response()->json(['status' => 0, 'message' => 'Please view this video so that you can follow required process. In case process is not followed completely we will not be able to process this shipment!', 'tracking_number' => $tracking_number, 'video' => $video]);
                 }
             }
+
+            try {
+                // Maintaining shipper segment logs on booking when origin and destination are different
+                if ($consignee_city_id != $pickup_city_id) {
+                    ShipperSegmentLogs::create([
+                        'shipment_id' => $shipment_id,
+                        'segment_id' => $user_type->segment_id,
+                        'sub_segment_id' => $user_type->sub_segment_id
+                    ]);
+                }
+            } catch (\Exception $e) {
+                Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
+            }
+
             return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number, 'reference_number' => $reference_number]);
         }
     }
@@ -3477,13 +3517,13 @@ class APIController extends Controller
 
                     $filename = 'air_waybill' . '.jpg';
 
-                    return $image->setOption('disable-smart-width', true)->setOption('width', 1280)->download($filename);
+                    return $image->setOption('disable-smart-width', true)->setOption('width', 1280)->setOption('enable-local-file-access', true)->download($filename);
                 } else {
                     $pdf = SnappyPDF::loadHTML($air_waybill);
 
                     $filename = 'air_waybill' . '.pdf';
 
-                    return $pdf->download($filename);
+                    return $pdf->setOption('enable-local-file-access', true)->download($filename);
                 }
             } else {
                 return response()->json(['status' => 1, 'message' => 'Already Received']);
@@ -4081,7 +4121,7 @@ class APIController extends Controller
                                 if ($admin->api_token) {
                                     $information['api_token'] = $admin->api_token;
                                 } else {
-                                    $api_token = uniqid(base64_encode(str_random(60)));
+                                    $api_token = uniqid(base64_encode(Str::random(60)));
 
                                     $admin->api_token = $api_token;
 
@@ -4146,7 +4186,7 @@ class APIController extends Controller
                                 if ($rider->api_token) {
                                     $information['api_token'] = $rider->api_token;
                                 } else {
-                                    $api_token = uniqid(base64_encode(str_random(60)));
+                                    $api_token = uniqid(base64_encode(Str::random(60)));
 
                                     $rider->api_token = $api_token;
 
@@ -4218,7 +4258,7 @@ class APIController extends Controller
                                 if ($retail_user->api_token) {
                                     $information['api_token'] = $retail_user->api_token;
                                 } else {
-                                    $api_token = uniqid(base64_encode(str_random(60)));
+                                    $api_token = uniqid(base64_encode(Str::random(60)));
 
                                     $retail_user->api_token = $api_token;
 
@@ -8425,7 +8465,7 @@ class APIController extends Controller
                                 }
 
                                 if (!$user->api_token) {
-                                    $api_token = uniqid(base64_encode(str_random(60)));
+                                    $api_token = uniqid(base64_encode(Str::random(60)));
                                     $user->api_token = $api_token;
                                     $user->save();
                                 }
@@ -8520,7 +8560,7 @@ class APIController extends Controller
                                     if ($rider->api_token) {
                                         $api_token = $rider->api_token;
                                     } else {
-                                        $api_token = uniqid(base64_encode(str_random(60)));
+                                        $api_token = uniqid(base64_encode(Str::random(60)));
                                         $rider->api_token = $api_token;
                                     }
                                     $rider->save();
@@ -9814,6 +9854,19 @@ class APIController extends Controller
 
                     return response()->json(['status' => 0, 'message' => 'Please view this video so that you can follow required process. In case process is not followed completely we will not be able to process this shipment!', 'tracking_number' => $tracking_number, 'video' => $video]);
                 }
+            }
+
+            try {
+                // Maintaining shipper segment logs on booking when origin and destination are different
+                if ($consignee_city->id != $pickup_city_id) {
+                    ShipperSegmentLogs::create([
+                        'shipment_id' => $shipment_id,
+                        'segment_id' => $user_type->segment_id,
+                        'sub_segment_id' => $user_type->sub_segment_id
+                    ]);
+                }
+            } catch (\Exception $e) {
+                Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
             }
 
             return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number]);

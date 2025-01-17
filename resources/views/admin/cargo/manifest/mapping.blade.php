@@ -158,7 +158,7 @@
                                 row.push(values.destination);
                                 row.push(values.junctions);
                                 row.push(values.status);
-                                row.push(values.updated_at);
+                                row.push(values.updated);
                                 row.push(values.updated_by);
 
 
@@ -212,7 +212,7 @@
                     {data: 'destination_display', name:"dc.name", class: 'align-middle destination',orderable: false},
                     {data: 'junctions_display', class: 'align-middle junctions',orderable: false},
                     {data: 'status', name:"status",  class: 'align-middle status'},
-                    {data: 'updated_at', name: 'updated_at', class: 'align-middle updated_at'},
+                    {data: 'updated', name: 'v2_junction_mappings.updated_at', class: 'align-middle updated_at'},
                     {data: 'updated_by', name: 'a.name', class: 'align-middle updated_by'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],

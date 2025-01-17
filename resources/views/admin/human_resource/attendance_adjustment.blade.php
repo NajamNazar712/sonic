@@ -243,9 +243,9 @@
                     {data: 'applied_reason', name: 'employee_attendance_adjustments.applied_reason', class: 'align-middle applied_reason', orderable: false},
                     {data: 'reject_reason', name: 'employee_attendance_adjustments.rejected_reason', class: 'align-middle reject_reason', orderable: false},
                     {data: 'date', name: 'employee_attendance_adjustments.date', class: 'align-middle date'},
-                    {data: 'requested', name: 'employee_leaves.created_at', class: 'align-middle requested'},
+                    {data: 'requested', name: 'employee_attendance_adjustments.created_at', class: 'align-middle requested'},
                     {data: 'updated_by', name: 'u.name', class: 'align-middle updated_by'},
-                    {data: 'updated', name: 'employee_leaves.updated_at', class: 'align-middle updated'},
+                    {data: 'updated', name: 'employee_attendance_adjustments.updated_at', class: 'align-middle updated'},
                 ],
                 rowCallback: function (row, data, index) {
                     var info = table.page.info();

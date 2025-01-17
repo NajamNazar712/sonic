@@ -3213,7 +3213,7 @@ class AdminCargoController extends Controller
             ->leftjoin('cities as jc2','jc2.id', '=', 'junction_mappings.junction_2')
             ->join('admins as a','a.id', '=', 'junction_mappings.updated_by')
             ->leftjoin('admins as ar','ar.id', '=', 'junction_mappings.receiver')
-            ->select('junction_mappings.id as id', 'junction_mappings.updated_at as updated_at','oc.name as origin','dc.name as destination','jc1.name as junction_1', 'jc2.name as junction_2', 'ar.name as receiver', 'a.name as updated_by');
+            ->select('junction_mappings.id as id', 'junction_mappings.updated_at as updated','oc.name as origin','dc.name as destination','jc1.name as junction_1', 'jc2.name as junction_2', 'ar.name as receiver', 'a.name as updated_by');
 
         return Datatables::of($mapping)
             ->editColumn('junction_2',function ($mapping){
@@ -3244,6 +3244,7 @@ class AdminCargoController extends Controller
 
                     return $dropdown;
             })
+            ->rawColumns(['action'])
             ->make(true);
     }
 

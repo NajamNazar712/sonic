@@ -549,7 +549,7 @@
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                     {data: 'shipper_phone',name:'u.phone',class: 'align-middle shipper_phone'},
                     {data: 'tagged_sale_person',name:'a.name',class: 'align-middle tagged_sale_person'},
-                    {data: 'created_at', name: 'packaging_material_requests.created_at', class: 'align-middle created_at'},
+                    {data: 'created', name: 'packaging_material_requests.created_at', class: 'align-middle created_at'},
                     {data: 'city', name: 'ct.name', class: 'align-middle city'},
                     {data: 'total_quantity_button', class: 'align-middle total_quantity_button',orderable: false, searchable: false},
                     {data: 'amount', name: 'packaging_material_requests.amount', class: 'align-middle amount'},

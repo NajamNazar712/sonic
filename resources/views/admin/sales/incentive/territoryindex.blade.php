@@ -224,9 +224,9 @@
                                 row.push(values.city);
                                 row.push(values.code);
                                 row.push(values.created_by);
-                                row.push(values.created_at);
+                                row.push(values.created);
                                 row.push(values.updated_by);
-                                row.push(values.updated_at);
+                                row.push(values.updated);
                                 row.push(values.status);
                                 body.push(row);
                             });
@@ -279,9 +279,9 @@
                     { data:'code' ,name: 'sales_territories.code', class: 'align-middle text-center code'},
                     { data:'users' ,name: 'users', class: 'align-middle text-center users', orderable: false, searchable: false},
                     { data:'created_by' ,name: 'a.name', class: 'align-middle text-center created_by'},
-                    { data:'created_at' ,name: 'sales_territories.created_at', class: 'align-middle text-center created_at'},
+                    { data:'created' ,name: 'sales_territories.created_at', class: 'align-middle text-center created_at'},
                     { data:'updated_by' ,name: 'b.name', class: 'align-middle text-center updated_by'},
-                    { data:'updated_at' ,name: 'sales_territories.updated_at', class: 'align-middle text-center updated_at'},
+                    { data:'updated' ,name: 'sales_territories.updated_at', class: 'align-middle text-center updated_at'},
                     { data:'status' ,name: 'sales_territories.status', class: 'align-middle text-center status'},
                     { data:'action' ,name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false},
 

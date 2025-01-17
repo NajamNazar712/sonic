@@ -66,7 +66,7 @@ class lastMileAppReportCountUpdate extends Command
                $at_20_count = 0;
                $at_21_count = 0;
                $at_22_count = 0;
-               $at_23_count = 0;
+               $after_23_count = 0;
                $rider = RiderWiseDeliveryNoteShipment::select(
                     'rwdnsum_id',
                     DB::raw('COUNT(*) AS count'),
@@ -113,8 +113,11 @@ class lastMileAppReportCountUpdate extends Command
                          elseif($update->time == 21){
                               $at_21_count = $update->count;
                          }
-                         elseif($update->time == 22 || $update->time == 23){
-                              $at_23_count = $update->count;
+                         elseif($update->time == 22){
+                              $at_22_count = $update->count;
+                         }
+                         elseif($update->time >= 23 && $update->time <= 24){
+                              $after_23_count = $update->count;
                          }
                          $shipment_count += $update->count;
                     }
@@ -131,8 +134,11 @@ class lastMileAppReportCountUpdate extends Command
                     $rwds->at_19_count = $at_19_count;
                     $rwds->at_20_count = $at_20_count;
                     $rwds->at_21_count = $at_21_count;
-                    $rwds->at_23_count = $at_23_count;
+                    $rwds->at_22_count = $at_22_count;
+                    $rwds->at_23_count = 0;
+                    $rwds->after_23_count = $after_23_count;
                     $rwds->shipment_update_count = $shipment_count;
+                    $rwds->delivery_note_shipments_count = $shipment_count;
                     $rwds->via_rider_count = $shipment_count;
                     if($rwds->isDirty()){
                          $rwds->save();

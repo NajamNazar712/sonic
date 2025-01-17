@@ -167,6 +167,8 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\DeleteDuplicateArrival',
         '\App\Console\Commands\UpdateInvoiceChargesMonthly',
         '\App\Console\Commands\UpdateArrivalChargesIssue',
+        \App\Console\Commands\AddMissingSegmentLogs::class,
+        '\App\Console\Commands\ApolloShipmentFetchStatus',
 
         ];
 
@@ -567,10 +569,10 @@ class Kernel extends ConsoleKernel
 //        $schedule->command('logistic:shipper-bookings')->dailyAt('06:00')->runInBackground();
 //        $schedule->command('hourly-logistic:shipper-bookings')->hourly()->runInBackground();
         $schedule->command('delete:short-url-data')->dailyAt('01:00')->runInBackground();
-        $schedule->command('supervisord:restart')
-        // ->cron('0 9,13,16 * * *')
-            ->everyThirtyMinutes()
-            ->runInBackground();
+//        $schedule->command('supervisord:restart')
+//        // ->cron('0 9,13,16 * * *')
+//            ->everyThirtyMinutes()
+//            ->runInBackground();
 
         $schedule->command('update:zero_arrival_charges')->hourly()->runInBackground();
         $schedule->command('delete:duplicate_arrival')->hourly()->runInBackground();
@@ -580,6 +582,8 @@ class Kernel extends ConsoleKernel
 //        $schedule->command('email:revenuereport_lastmonth 2')->dailyAt('11:15')->runInBackground();
 //        $schedule->command('email:revenuereport_lastmonth 3')->dailyAt('11:30')->runInBackground();
 
+        $schedule->command('update:shipper_segment_logs')->everyFiveMinutes()->runInBackground();
+        $schedule->command('apollo:fetch-shipments-status')->everyFiveMinutes()->runInBackground();
     }
     /**
      * Register the commands for the application.

@@ -114,6 +114,21 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+
+            // function for handling special characters
+            function parseHtmlEntities(data, keys) {
+                let parser = new DOMParser();
+                return data.map(item => {
+                    keys.forEach(key => {
+                        if (item[key]) {
+                            item[key] = parser.parseFromString(item[key], "text/html").documentElement.textContent;
+                        }
+                    });
+                    return item;
+                });
+            }
+
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -147,9 +162,33 @@
                             // head.push('Consolidation ID');
 
                             $.each(result.data, function(index, values) {
+
+                                // Specify the keys you want to parse for HTML entities
+                                let keysToParse = [
+                                    'tracking',
+                                    'order_id',
+                                    'origin',
+                                    'destination',
+                                    'hub',
+                                    'consignee_name',
+                                    'consignee_phone_number_1',
+                                    'consignee_phone_number_2',
+                                    'consignee_address',
+                                    'amount',
+                                    'mode',
+                                    'service_type',
+                                    'status',
+                                    'reason',
+                                    'remarks',
+                                    'nsa_osa_estimated_charges',
+                                    'arrival',
+                                    'last_status_date'
+                                ];
+
+                                // Parse the values for these keys
+                                values = parseHtmlEntities([values], keysToParse)[0];
+
                                 row = [];
-
-
                                 row.push(index + 1);
                                 row.push(values.tracking);
                                 row.push(values.order_id);

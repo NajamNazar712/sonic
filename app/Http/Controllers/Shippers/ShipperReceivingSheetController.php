@@ -225,6 +225,7 @@ class ShipperReceivingSheetController extends Controller
                     $query->whereNotNull('rs.id');
                 }
             })
+            ->rawColumns(['receiving_sheet','action'])
             ->make(true);
     }
 
@@ -1198,14 +1199,14 @@ class ShipperReceivingSheetController extends Controller
             }
         }
 
-        $datatable = Datatables::of($shipments);
-
         if ($request->get('search_to') && $request->get('search_from')) {
-            $datatable->whereBetween('rs.created_at', [$request->get('search_from'), $request->get('search_to')]);
+            $shipments->whereBetween('rs.created_at', [$request->get('search_from'), $request->get('search_to')]);
         }
         else {
-            $datatable->whereRaw('false');
+            $shipments->whereRaw('false');
         }
+        $datatable = Datatables::of($shipments);
+
 
         return $datatable->make(true);
     }

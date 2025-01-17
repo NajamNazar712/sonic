@@ -229,6 +229,7 @@ class SamedayController extends Controller
                     return '';
                 }
             })
+            ->rawColumns(['tracking_number','remaining_time','action'])
             ->make(true);
     }
 }

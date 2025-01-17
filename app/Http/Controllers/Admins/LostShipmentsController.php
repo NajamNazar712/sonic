@@ -435,7 +435,7 @@ class LostShipmentsController extends Controller
                     }
                 })
 
-                
+                ->rawColumns(['tracking_number_link', 'responsible_person_shipment', 'action'])
                 ->make(true);
               
                 
@@ -594,7 +594,7 @@ class LostShipmentsController extends Controller
                         if($cargo_manifest_bag_shipments->exists()){
                             $cargo_manifest_bag_shipments = $cargo_manifest_bag_shipments->latest()->first();
                             $bag = CargoManifestBag::find($cargo_manifest_bag_shipments->cargo_manifest_bag_id);
-                            if($bag && $bag->status_id != 8){
+                            if ($bag && !in_array($bag->status_id, [7, 8])) {
                                 if(ManifestBagLostShipment::where('bag_id',$bag->id)->where('shipment_id',$shipment->id)->exists()){
                                     return response()->json(['status' => 0, 'error' => 'Shipment already marked lost for the current bag']);
                                 }
@@ -899,7 +899,7 @@ class LostShipmentsController extends Controller
                             if($cargo_manifest_bag_shipments->exists()){
                                 $cargo_manifest_bag_shipments = $cargo_manifest_bag_shipments->latest()->first();
                                 $bag = CargoManifestBag::find($cargo_manifest_bag_shipments->cargo_manifest_bag_id);
-                                if($bag && $bag->status_id != 8){
+                                if ($bag && !in_array($bag->status_id, [7, 8])) {
                                     if(ManifestBagLostShipment::where('bag_id',$bag->id)->where('shipment_id',$shipment->id)->exists()){
                                         $error[$row_id]['tracking_number'] = $tracking;
                                         $error[$row_id]['error_msg'] = "Shipment already marked lost for the current bag!";

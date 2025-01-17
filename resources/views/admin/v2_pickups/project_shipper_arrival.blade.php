@@ -276,8 +276,6 @@
                 });
             @endif
             @if (session('shipment_ids'))
-                debugger;
-                console.log(@json(session('shipment_ids')));
                 var url = '{!! route('admin.v2_pickups.pending.project_arrival_print') !!}';
                 $.ajax({
                     url: url,

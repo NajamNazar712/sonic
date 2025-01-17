@@ -318,37 +318,37 @@ class V2AdminReportController extends Controller
         });
 
         if($department = $request->get('search_department')){
-            $datatables->where('v2_pickup_reports.department_id', '=', $department);
+            $pickup_report->where('v2_pickup_reports.department_id', '=', $department);
         }
 
         if($salesperson = $request->get('search_salesperson')){
-            $datatables->where('a.name', '=', $salesperson);
+            $pickup_report->where('a.name', '=', $salesperson);
         }
 
         if($origin = $request->get('search_origin')){
-            $datatables->where('ci.id', '=', $origin);
+            $pickup_report->where('ci.id', '=', $origin);
         }
 
         if($category = $request->get('search_category')){
-            $datatables->where('v2_pickup_reports.category_id', '=', $category);
+            $pickup_report->where('v2_pickup_reports.category_id', '=', $category);
         }
 
         if($pickup_status = $request->get('search_pickup_status')){
-            $datatables->where('v2_pickup_reports.status_id', '=', $pickup_status);
+            $pickup_report->where('v2_pickup_reports.status_id', '=', $pickup_status);
         }
 
         if($cut_off_time = $request->get('search_cut_off_time')){
             if($cut_off_time == 0){
-                $datatables->whereNull('v.after_cut_off_time');
+                $pickup_report->whereNull('v.after_cut_off_time');
             }else if($cut_off_time == 1){
-                $datatables->where('v.after_cut_off_time', '=', $cut_off_time);
+                $pickup_report->where('v.after_cut_off_time', '=', $cut_off_time);
             }
         }
 
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatables->whereBetween('v2_pickup_reports.date', [$from,$to]);
+            $pickup_report->whereBetween('v2_pickup_reports.date', [$from,$to]);
         }
 
         return $datatables->make(true);

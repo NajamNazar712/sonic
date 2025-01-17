@@ -359,7 +359,7 @@ class AdminPackagingMaterialController extends Controller
                     ->where('spt.id', '=', DB::raw('(select max(id) from sale_person_tags where sale_person_tags.user_id = packaging_material_requests.user_id and sale_person_tags.status = 0)'));
             })
             ->leftJoin('admins as a','a.id','=','spt.admin_id')
-            ->select(['packaging_material_requests.id as request_id', 'u.name as shipper', 'packaging_material_requests.created_at', 'ct.name as city', 'packaging_material_requests.address', 'ppm.mode', 'packaging_material_requests.amount', 'packaging_material_requests.tracking_number', 'packaging_material_requests.tracking_number as tracking_number_link', 'pmrs.name as status', 'packaging_material_requests.status_id as status_id', DB::raw('sum(pmrd.quantity) as total_quantity'), 's.id as shipment_id', 's.shipper_status_id as shipper_status_id', 's.booking_type_id as booking_type_id', 's.created_at as confirmed_date', 'sj.remarks as remarks', 'rb.name as requested_by', 'u.phone as shipper_phone','a.name as tagged_sale_person'])
+            ->select(['packaging_material_requests.id as request_id', 'u.name as shipper', 'packaging_material_requests.created_at', 'ct.name as city', 'packaging_material_requests.address', 'ppm.mode', 'packaging_material_requests.amount', 'packaging_material_requests.tracking_number', 'packaging_material_requests.tracking_number as tracking_number_link', 'pmrs.name as status', 'packaging_material_requests.status_id as status_id', DB::raw('sum(pmrd.quantity) as total_quantity'), 's.id as shipment_id', 's.shipper_status_id as shipper_status_id', 's.booking_type_id as booking_type_id', 's.created_at as confirmed_date', 'sj.remarks as remarks', 'rb.name as requested_by', 'u.phone as shipper_phone','a.name as tagged_sale_person', 'packaging_material_requests.created_at as created'])
             ->groupBy('packaging_material_requests.id')
             ->having('total_quantity', '>', 0);
 
@@ -462,7 +462,9 @@ class AdminPackagingMaterialController extends Controller
             }
 
     //
-            return $datatables->make(true);
+            return $datatables
+            ->rawColumns(['tracking_number_link', 'total_quantity_button', 'action'])
+            ->make(true);
     }
 
     public function request_update(Request $request)
@@ -1253,7 +1255,7 @@ class AdminPackagingMaterialController extends Controller
         }
         $types = PackagingMaterialTypes::leftjoin('admins as ac', 'ac.id', '=', 'packaging_material_types.created_by')
             ->leftjoin('admins as au', 'au.id', '=', 'packaging_material_types.updated_by')
-            ->select('packaging_material_types.id', 'packaging_material_types.type', 'packaging_material_types.category', 'packaging_material_types.description', 'packaging_material_types.status', 'packaging_material_types.created_at', 'packaging_material_types.updated_at', 'ac.name as created_by', 'au.name as updated_by','packaging_material_types.packaging_type');
+            ->select('packaging_material_types.id', 'packaging_material_types.type', 'packaging_material_types.category', 'packaging_material_types.description', 'packaging_material_types.status', 'packaging_material_types.created_at as created', 'packaging_material_types.updated_at', 'ac.name as created_by', 'au.name as updated_by','packaging_material_types.packaging_type');
         return Datatables::of($types)
             ->editColumn('status', function ($type) {
                 if ($type->status == 0) {
@@ -1354,6 +1356,7 @@ class AdminPackagingMaterialController extends Controller
                 }
                 return $dropdown;
             })
+            ->rawColumns(['action'])
             ->make(true);
     }
 
@@ -1745,7 +1748,7 @@ class AdminPackagingMaterialController extends Controller
             ->leftJoin('warehouse_fulfilment_hubs as wfh', function ($join) {
                 $join->on('wfh.warehouse_id', '=', 'warehouses.id');
             })
-            ->select('warehouses.id', 'h.name as hub', 'warehouses.status', 'warehouses.created_at', 'warehouses.updated_at', 'ac.name as created_by', 'au.name as updated_by', DB::raw('count(wfh.id) as associated_hubs'))
+            ->select('warehouses.id', 'h.name as hub', 'warehouses.status', 'warehouses.created_at as created', 'warehouses.updated_at', 'ac.name as created_by', 'au.name as updated_by', DB::raw('count(wfh.id) as associated_hubs'))
             ->where('warehouses.master_type', '!=', 1)
             ->groupBy('warehouses.id');
         return Datatables::of($types)
@@ -1813,6 +1816,7 @@ class AdminPackagingMaterialController extends Controller
                 }
                 return $dropdown;
             })
+            ->rawColumns(['associated_hubs_button', 'action'])
             ->make(true);
     }
 

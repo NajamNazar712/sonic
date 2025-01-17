@@ -52,6 +52,7 @@ use PHPExcel_Cell;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 
 class AdminReportsEmailController extends Controller
 {
@@ -206,16 +207,16 @@ class AdminReportsEmailController extends Controller
         $sheet->fromArray($sale_person_array, NULL, 'A2', true);
         $sheet->getStyle("A2:J2")->applyFromArray($cell_st);
         // $sheet->getStyle('G')->getFont()->getColor()->setARGB('FFFF00');
-        $sheet->getStyle($ts)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('FFE699');
-        $sheet->getStyle($tas)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('C7E0B4');
+        $sheet->getStyle($ts)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('FFE699');
+        $sheet->getStyle($tas)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('C7E0B4');
         $sheet->getStyle($tr)
             ->getFill()
-            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->setFillType(Fill::FILL_SOLID)
             ->getStartColor()
             ->setRGB('FFE699');
         $sheet->getStyle($tar)
             ->getFill()
-            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->setFillType(Fill::FILL_SOLID)
             ->getStartColor()
             ->setRGB('C7E0B4');
         // $sheet->getStyle('H')->getFont()->getColor()->setARGB('00FF00');
@@ -603,7 +604,7 @@ class AdminReportsEmailController extends Controller
                     ->setBold(true);
                 $sheet->getStyle($ra)
                     ->getFill()
-                    ->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)
+                    ->setFillType(\Fill::FILL_SOLID)
                     ->getStartColor()
                     ->setRGB('CECECE');
             }
@@ -708,7 +709,7 @@ class AdminReportsEmailController extends Controller
                         ->setBold(true);
                     $sheet->getStyle($a)
                         ->getFill()
-                        ->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)
+                        ->setFillType(\Fill::FILL_SOLID)
                         ->getStartColor()
                         ->setRGB('CECECE');
                 }
@@ -780,7 +781,7 @@ class AdminReportsEmailController extends Controller
                 ->setBold(true);
             $sheet->getStyle($ha)
                 ->getFill()
-                ->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)
+                ->setFillType(\Fill::FILL_SOLID)
                 ->getStartColor()
                 ->setRGB('CECECE');
         }
@@ -1393,6 +1394,7 @@ class AdminReportsEmailController extends Controller
             $file_name = public_path() . "/reports/done_payment_report_" . $date_file_name . ".xlsx";
             $writer->save($file_name);
 
+            NotificationsController::send(235, $date, url('/') . '/' . $file_name_without_path);
             NotificationsController::send(82, $date, url('/') . '/' . $file_name_without_path);
         }
     }
@@ -2163,7 +2165,7 @@ class AdminReportsEmailController extends Controller
         $status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59);
         $deliveries = DeliveryNote::join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
-            ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
+            ->leftjoin('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_notes.updated_by')
             ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id',  'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'delivery_notes.created_at', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.pending_status', 'delivery_notes.created_at','delivery_notes.last_updated_at','ad.name as updated_by','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','delivery_notes.delivered_shipments as delivered_shipments',DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 0) AS shipments_unverified_count')])
@@ -2775,7 +2777,7 @@ class AdminReportsEmailController extends Controller
             $sheet->getDefaultColumnDimension()->setWidth(20);
             $sheet->fromArray($overland_aging_day_wise, NULL, 'D4', true);
             $sheet->getStyle("D2:P2")->getFill()
-                ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+                ->setFillType(Fill::FILL_SOLID)
                 ->getStartColor()
                 ->setRGB('CECECE');
 
@@ -2786,7 +2788,7 @@ class AdminReportsEmailController extends Controller
 
             $sheet->getStyle($total_style_cell)
                 ->getFill()
-                ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+                ->setFillType(Fill::FILL_SOLID)
                 ->getStartColor()
                 ->setRGB('CECECE');
 
@@ -2801,7 +2803,7 @@ class AdminReportsEmailController extends Controller
 
             $sheet->getStyle($total_style_cell)
                 ->getFill()
-                ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+                ->setFillType(Fill::FILL_SOLID)
                 ->getStartColor()
                 ->setRGB('CECECE');
 
@@ -2815,7 +2817,7 @@ class AdminReportsEmailController extends Controller
             $sheet->mergeCells('D18:M18');
             $sheet->getStyle($total_style_cell)
                 ->getFill()
-                ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+                ->setFillType(Fill::FILL_SOLID)
                 ->getStartColor()
                 ->setRGB('CECECE');
             $sheet->getStyle($total_style_cell)->applyFromArray($cell_st);
@@ -2825,7 +2827,7 @@ class AdminReportsEmailController extends Controller
 
             $sheet->getStyle($total_style_cell)
                 ->getFill()
-                ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+                ->setFillType(Fill::FILL_SOLID)
                 ->getStartColor()
                 ->setRGB('CECECE');
 
@@ -2841,7 +2843,7 @@ class AdminReportsEmailController extends Controller
 
             $sheet->getStyle($total_style_cell)
                 ->getFill()
-                ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+                ->setFillType(Fill::FILL_SOLID)
                 ->getStartColor()
                 ->setRGB('CECECE');
 
@@ -2858,7 +2860,7 @@ class AdminReportsEmailController extends Controller
             $sheet->mergeCells('D' . $count_column . ':M' . $count_column);
             $sheet->getStyle($total_style_cell)
                 ->getFill()
-                ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+                ->setFillType(Fill::FILL_SOLID)
                 ->getStartColor()
                 ->setRGB('CECECE');
             $sheet->getStyle($total_style_cell)->applyFromArray($cell_st);
@@ -2872,7 +2874,7 @@ class AdminReportsEmailController extends Controller
 
             $sheet->getStyle($total_style_cell)
                 ->getFill()
-                ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+                ->setFillType(Fill::FILL_SOLID)
                 ->getStartColor()
                 ->setRGB('CECECE');
             $sheet->getStyle($total_style_cell)->applyFromArray($cell_st);
@@ -2889,7 +2891,7 @@ class AdminReportsEmailController extends Controller
 
             $sheet->getStyle($total_style_cell)
                 ->getFill()
-                ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+                ->setFillType(Fill::FILL_SOLID)
                 ->getStartColor()
                 ->setRGB('CECECE');
 
@@ -2905,7 +2907,7 @@ class AdminReportsEmailController extends Controller
 
             $sheet->getStyle($total_style_cell)
                 ->getFill()
-                ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+                ->setFillType(Fill::FILL_SOLID)
                 ->getStartColor()
                 ->setRGB('CECECE');
 

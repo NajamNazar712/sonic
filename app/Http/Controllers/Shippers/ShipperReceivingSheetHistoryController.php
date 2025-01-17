@@ -36,6 +36,11 @@ class ShipperReceivingSheetHistoryController extends Controller
       ->where('usi.user_id', session('user_id'))
       ->groupBy('receiving_sheet_received.pickup_address_id');
 
+        if ($tracking_number = $request->get('tracking_number')) {
+            $receiving_sheet_received->leftjoin('shipments as s', 's.id', '=', 'receiving_sheet_received.shipment_id')
+                ->where('s.tracking_number', '=', $tracking_number);
+        }
+
       $datatable = Datatables::of($receiving_sheet_received)
       ->editColumn('received', function($receiving_sheet_received) {
         return '<button class="btn btn-sm btn-outline-info align-middle">' . $receiving_sheet_received->received . '</button>';
@@ -52,12 +57,9 @@ class ShipperReceivingSheetHistoryController extends Controller
       });
       
 
-      if ($tracking_number = $request->get('tracking_number')) {
-        $datatable->leftjoin('shipments as s', 's.id', '=', 'receiving_sheet_received.shipment_id')
-        ->where('s.tracking_number', '=', $tracking_number);
-      }
 
-      return $datatable->make(true);
+
+      return $datatable->rawColumns(['received','action'])->make(true);
     }
 
     public function receiving_sheet_list(Request $request) {
@@ -74,6 +76,12 @@ class ShipperReceivingSheetHistoryController extends Controller
                         ->where('surs.substitute_user_id', '=', Auth::id());
                 });
             }
+        }
+
+        if ($tracking_number = $request->get('tracking_number')) {
+            $receiving_sheet->leftjoin('receiving_sheet_shipments as rss', 'rss.receiving_sheet_id', '=', 'receiving_sheets.id')
+                ->leftjoin('shipments as s', 's.id', '=', 'rss.shipment_id')
+                ->where('s.tracking_number', '=', $tracking_number);
         }
       $datatable = Datatables::of($receiving_sheet)
       ->addColumn('id_padded', function($receiving_sheet) {
@@ -127,13 +135,9 @@ class ShipperReceivingSheetHistoryController extends Controller
         }
       });
     
-      if ($tracking_number = $request->get('tracking_number')) {
-        $datatable->leftjoin('receiving_sheet_shipments as rss', 'rss.receiving_sheet_id', '=', 'receiving_sheets.id')
-        ->leftjoin('shipments as s', 's.id', '=', 'rss.shipment_id')
-        ->where('s.tracking_number', '=', $tracking_number);
-      }
 
-      return $datatable->make(true);
+
+      return $datatable->rawColumns(['receiving_sheet_id','booked','received','short_received','action'])->make(true);
     }
 
     public function booked_shipments(Request $request) {
@@ -143,8 +147,12 @@ class ShipperReceivingSheetHistoryController extends Controller
 
       foreach ($receiving_sheet_shipments as $receiving_sheet_shipment) {
         $shipment = Shipment::find($receiving_sheet_shipment->shipment_id);
+        // $tracking_numbers[] = $shipment->tracking_number;
 
-        $tracking_numbers[] = $shipment->tracking_number;
+        // Only add the tracking number if the shipment exists
+        if ($shipment){
+          $tracking_numbers[] = $shipment->tracking_number;
+        }
       }
 
       return $tracking_numbers;

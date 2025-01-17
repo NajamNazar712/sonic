@@ -75,7 +75,7 @@ class ShipperSubstituteAccountManagementController extends Controller
         }
       });
 
-      return $datatables->make(true);
+      return $datatables->rawColumns(['action'])->make(true);
     }
 
     public function email(Request $request) {
