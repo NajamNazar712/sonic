@@ -57,6 +57,7 @@ class UpdateArrivalChargesIssue extends Command
                 'pending_payment_shipments.pending_payment_id',
                 'z.id AS zone_id',
                 'oc.id AS city_id',
+                'cswl.id AS cswl_id',
                 DB::raw('COALESCE(shipments.weight_charges, 0) AS weight_charges'),
                 DB::raw('COALESCE(sac.faf_charges, 0) AS faf_charges'),
                 DB::raw('COALESCE(shipments.fuel_surcharge, 0) AS fuel_surcharge'),
@@ -71,8 +72,13 @@ class UpdateArrivalChargesIssue extends Command
                 DB::raw('COALESCE(z.gst, 0.13) AS gst')
             )
             ->leftJoin('shipments', 'pending_payment_shipments.shipment_id', '=', 'shipments.id')
+            ->leftjoin('change_shipment_weight_logs as cswl', function ($join) {
+                $join->on('cswl.shipment_id', '=', 'shipments.id')
+                    ->where('cswl.id', '=', DB::raw('(SELECT MAX(id) FROM change_shipment_weight_logs WHERE shipment_id = shipments.id)'));
+            })
             ->leftJoin('shipment_additional_charges AS sac', 'sac.shipment_id', '=', 'shipments.id')
             ->leftJoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+
             ->leftJoin('users', 'shipments.user_id', '=', 'users.id')
             ->leftJoin('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->leftJoin('zones AS z', 'z.id', '=', 'oc.zone_id')
@@ -86,20 +92,21 @@ class UpdateArrivalChargesIssue extends Command
 
         $pending_payment_id = array();
         foreach ($query as $value){
-            $new_weight_charges = $value->new_charges;
-            if ($value->business_category_id == 1) {
-                $new_gst = ROUND(($new_weight_charges * AdminFinanceController::gst($value->zone_id,$value->city_id)), 2, PHP_ROUND_HALF_DOWN);
-            } else {
-                $new_gst = ROUND(($new_weight_charges * AdminFinanceController::international_gst()), 2, PHP_ROUND_HALF_DOWN);
+            if(empty($value->cswl_id)) {
+                $new_weight_charges = $value->new_charges;
+                if ($value->business_category_id == 1) {
+                    $new_gst = ROUND(($new_weight_charges * AdminFinanceController::gst($value->zone_id, $value->city_id)), 2, PHP_ROUND_HALF_DOWN);
+                } else {
+                    $new_gst = ROUND(($new_weight_charges * AdminFinanceController::international_gst()), 2, PHP_ROUND_HALF_DOWN);
+                }
+                $payable = $new_weight_charges + $new_gst;
+                $pending_payment_id[$value->pending_payment_id] = $value->pending_payment_id;
+
+
+                if (!empty($payable) && !empty($value->pending_payment_shipment_id)) {
+                    PendingPaymentShipment::where('id', $value->pending_payment_shipment_id)->update(['charges' => $new_weight_charges, 'gst' => $new_gst, 'payable' => $payable]);
+                }
             }
-            $payable = $new_weight_charges + $new_gst;
-            $pending_payment_id[$value->pending_payment_id] = $value->pending_payment_id;
-
-
-            if(!empty($payable) &&  !empty($value->pending_payment_shipment_id)) {
-                PendingPaymentShipment::where('id', $value->pending_payment_shipment_id)->update(['charges' => $new_weight_charges, 'gst' => $new_gst, 'payable' => $payable]);
-            }
-
         }
 
         if(count($pending_payment_id) > 0) {
