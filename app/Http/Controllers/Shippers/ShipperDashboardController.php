@@ -126,7 +126,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
-
+use App\Jobs\WalletSignUpLPendingRecordLogs;
 
 //use Illuminate\Support\Facades\Auth;
 
@@ -2681,7 +2681,7 @@ class ShipperDashboardController extends Controller
                 }else{
                     $data['wallet_id'] =$finja['wallet_id'];
                     WalletUser::wallet_create($data);
-
+                    WalletSignUpLPendingRecordLogs::dispatch(session('user_id'));
                     $dashboardUrl = route('cod.wallet.finja_dashboard', ['url' => $finja['url']]);
                     return response()->json(['status' => 1, 'redirect_url' => $dashboardUrl]);
 

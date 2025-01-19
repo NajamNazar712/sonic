@@ -10130,11 +10130,30 @@ class APIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Message Received']);
         }
 
-
-
-
-
     }
 
+    public function fintech_charges(Request $request) {
+
+        $rules = [
+            'tracking_number' => ['required', 'exists:shipments,tracking_number'],
+            'charges' => ['required', 'numeric'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $shipment_id = Shipment::where('tracking_number', $request->tracking_number)->value('id');
+            ShipmentAdditionalCharges::where('shipment_id', $shipment_id)->update([
+                'wallet_charges' => $request->charges,
+                'wallet_charges_updated_at' => Carbon::now()
+            ]);
+
+            return response()->json(['status' => 1, 'message' => 'Charges updated against this shipment.']);
+        }
+    }
 
 }

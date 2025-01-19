@@ -85,7 +85,6 @@ class FinSurgentSonicPaymentSharing extends Command
                         }
                     }
                         $requestPayload = [
-                            "shipmentId" => $shipment->id,
                             "client_id" => $pending_payment->user_id,
                             "wallet_id" => $pending_payment->wallet_id,
                             "reference_id" => (string) Str::uuid(),

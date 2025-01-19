@@ -7543,6 +7543,7 @@ class AdminFinanceController extends Controller
 
             $pending_logs = []; 
             foreach ($pending_payment_shipment_ids as $pending_payment_id => $pending_payment_shipment_ids) {
+                $finja_status = 0;
                 $total_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment_id)->count();
                 $selected_shipments = count($pending_payment_shipment_ids);
 
@@ -7626,9 +7627,9 @@ class AdminFinanceController extends Controller
                                         }
                                         $finja_status = 0;
 
-                                    } elseif($pending_payment_shipment->type == 0 || $pending_payment_shipment->type == 1 || $pending_payment_shipment->type == 2 ) {
+                                    } elseif($pending_payment_shipment->type == 0 || $pending_payment_shipment->type == 1) {
                                         $log_bid = $this->isWalletLogUpdated($pending_payment_shipment->shipment_id);
-                                        $settlement_bid = $this->isWalletSettlementUpdated($pending_payment_shipment->shipm1nt_id);
+                                        $settlement_bid = $this->isWalletSettlementUpdated($pending_payment_shipment->shipment_id);
                                         if(!$log_bid) {
                                             if(!array_key_exists($pending_payment_shipment->shipment_id, $pending_logs)) {
                                                 $pending_logs[$pending_payment_shipment->shipment_id] = [
@@ -7650,6 +7651,8 @@ class AdminFinanceController extends Controller
                                         } else {
                                             $finja_status = 1;
                                         }
+                                    } elseif( $pending_payment_shipment->type == 2) {
+                                        $finja_status = 2;
                                     }
                                 }
                                 $done_payment_shipment = new DonePaymentShipment();
@@ -7779,9 +7782,9 @@ class AdminFinanceController extends Controller
                                         }
                                         $finja_status = 0;
 
-                                    } elseif($pending_payment_shipment->type == 0 || $pending_payment_shipment->type == 1 || $pending_payment_shipment->type == 2 ) {
+                                    } elseif($pending_payment_shipment->type == 0 || $pending_payment_shipment->type == 1 ) {
                                         $log_bid = $this->isWalletLogUpdated($pending_payment_shipment->shipment_id);
-                                        $settlement_bid = $this->isWalletSettlementUpdated($pending_payment_shipment->shipm1nt_id);
+                                        $settlement_bid = $this->isWalletSettlementUpdated($pending_payment_shipment->shipment_id);
                                         if(!$log_bid) {
                                             if(!array_key_exists($pending_payment_shipment->shipment_id, $pending_logs)) {
                                                 $pending_logs[$pending_payment_shipment->shipment_id] = [
@@ -7803,6 +7806,8 @@ class AdminFinanceController extends Controller
                                         } else {
                                             $finja_status = 1;
                                         }
+                                    } elseif($pending_payment_shipment->type == 2) {
+                                        $finja_status = 2;
                                     }
                                 }
 
