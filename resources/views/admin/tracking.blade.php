@@ -185,7 +185,9 @@
                                     <div class="col-6 d-none" id="alternate_phone_input">
                                         <fieldset class="form-group">
                                             <input type="text" name="alternate_phone" class="form-control"
-                                                id="alternate_phone" placeholder="Enter Alternate Number">
+                                                id="alternate_phone" placeholder="Enter Alternate Number"
+                                                data-rule-required="true" data-msg-required="Alternate Number is required"
+                                                >
                                         </fieldset>
                                     </div>
                                     {{-- <div class="col-6 d-none" id="cod_amount_input">
@@ -1006,7 +1008,6 @@
             }).bind('change', function() {
                 var id = parseInt($(this).val());
                 var shipment_id = $('#requested_shipment_id').val();
-                console.log(shipment_id);
                 $.ajax({
                     url: '{{ route('admin.crm.request.updated_crm_request_nature_types') }}',
                     type: 'POST',
@@ -3128,7 +3129,6 @@
             }
             else{
                 $('#cod_change').addClass('d-none');
-
             }
         });
 

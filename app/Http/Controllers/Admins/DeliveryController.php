@@ -4270,7 +4270,6 @@ class DeliveryController extends Controller
                 $main_details .= '<td class="text-center align-middle color primary"><strong>Delivery Note Cash Collection</strong></td>';
             }
 
-
             $main_details .= '<td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
                           </tr>
                           <tr>
@@ -4318,7 +4317,7 @@ class DeliveryController extends Controller
                       </table>
         ';
             $main_details .= '
-                      <div class="mt-2 manual_form">
+                      <div class="mt-1 manual_form">
                       <div class="row  mt-1">
                          <div class="col">
                             <div class="text-right">
@@ -4328,8 +4327,51 @@ class DeliveryController extends Controller
                           </div>
                         </div>
                         <hr>';
+
+            $sub_seg_shipments = DB::table('delivery_note_shipments as dns')
+                ->select(
+                    'dns.delivery_note_id',
+                    'scs.name AS sub_segment',
+                    DB::raw('COUNT(s.id) AS no_of_delivered_shipments'),
+                    DB::raw('SUM(s.received_amount) AS cod_amount')
+                )
+                ->join('shipments AS s', 's.id', '=', 'dns.shipment_id')
+                ->join('users AS u', 'u.id', '=', 's.user_id')
+                ->join('sub_category_segments AS scs', 'scs.id', '=', 'u.sub_segment_id')
+                ->whereIn('s.shipper_status_id', $dncc_status)
+                ->whereIn('s.id', $shipment_ids)
+                ->where('dns.delivery_note_id', $request->id)
+                ->whereNotIn('dns.status',[8,10,11])
+                ->groupBy('scs.name', 'dns.delivery_note_id')
+                ->get();
+
+            if (count($sub_seg_shipments) > 0) {
+                $main_details .= '
+                    <table class="table table-sm table-bordered border small">
+                        <tbody>
+                        <tr>
+                            <td class="text-center align-middle color primary" colspan="3"><strong>Delivery Note Cash Collection</strong></td>
+                        </tr>
+                        <tr>
+                            <td class="text-center align-middle"><strong>Sub Segment</strong></td>
+                            <td class="text-center align-middle"><strong>No. of Delivered Shipments</strong></td>
+                            <td class="text-center align-middle"><strong>COD Amount</strong></td>
+                        </tr>';
+    
+                foreach ($sub_seg_shipments as $sub_seg) {
+                    $main_details .= '<tr>
+                        <td class="color secondary"><strong>' . $sub_seg->sub_segment . '</strong></td>
+                        <td class="text-center align-middle">' . $sub_seg->no_of_delivered_shipments . '</td>
+                        <td class="text-center align-middle">' . $sub_seg->cod_amount . '</td>
+                    </tr>';          
+                }
+    
+                $main_details .= '</tbody>
+                    </table>
+                    <hr>';
+            }
+            
             $html .= $main_details;
-            $html .= '</br></br></br></br></br></br>';
             $html .= $main_details;
             //            $html .= '<div class="row justify-content-end mt-2">
             //                                    <div class="col-3 ">

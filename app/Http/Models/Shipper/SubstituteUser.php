@@ -25,4 +25,10 @@ class SubstituteUser extends Authenticatable
     public function shipper() {
         return $this->belongsTo('App\Http\Models\Shipper\User', 'user_id', 'id');
     }
+
+    // Format dates as 'YYYY-MM-DD HH:mm:ss'
+    protected function serializeDate(\DateTimeInterface $date)
+    {
+        return $date->format('Y-m-d H:i:s');
+    }
 }
