@@ -1542,7 +1542,7 @@ class AdminReportsEmailController extends Controller
 //        Log::channel('cronJobLog')->info('s ' .'report:retail Running');
         try{
 
-            $retail_done_payments = RetailDonePaymentCalculation::whereDate('created_at', '2025-01-20');
+            $retail_done_payments = RetailDonePaymentCalculation::whereDate('created_at', $date);
             RetailDonePaymentsReport::truncate();
             if($retail_done_payments->exists()){
                 $total_amount = 0;
@@ -1617,14 +1617,12 @@ class AdminReportsEmailController extends Controller
                 $file_name_without_path = "reports/retail_done_payment_report_" . $date_file_name . ".xlsx";
                 $file_name = public_path() . "/reports/retail_done_payment_report_" . $date_file_name . ".xlsx";   
                 $writer->save($file_name);
-                $to = ['anas.mazhar@trax.pk'
-                // 'aftab.qidwai@trax.pk'
-                ];
+                $to = ['anas.mazhar@trax.pk', 'aftab.qidwai@trax.pk'];
                 $mail = Mail::to($to);
                 $link = '<a href="' .  url('/') . '/' . $file_name_without_path . '" target="_blank">Report</a>';
                 $mail->send(new ReportsEmail("Retail Payment", 'Retail Payment Report Link ' . ' ' . $link, null));
             
-                // NotificationsController::send(141, $date, url('/') . '/' . $file_name_without_path);
+                NotificationsController::send(141, $date, url('/') . '/' . $file_name_without_path);
 //                Log::channel('cronJobLog')->info('s ' .'report:retail End');
             }
         }catch(\Throwable $th){
