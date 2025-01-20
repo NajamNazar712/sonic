@@ -258,7 +258,7 @@
                                 row.push(values.trigger);
                                 row.push(values.percent);
                                 row.push(values.color);
-                                row.push(values.updated_at);
+                                row.push(values.updated);
                                 row.push(values.updated_by);
                                 body.push(row);
                             });
@@ -291,7 +291,7 @@
                     {data: 'trigger', name: 'lead_progress_settings.trigger', class: 'align-middle name'},
                     {data: 'percent', name: 'lead_progress_settings.percent', class: 'align-middle percent'},
                     {data: 'color', name: 'lead_progress_settings.color', class: 'align-middle color'},
-                    {data: 'updated_at', name: 'lead_progress_settings.updated_at', class: 'align-middle updated_at'},
+                    {data: 'updated', name: 'lead_progress_settings.updated_at', class: 'align-middle updated_at'},
                     {data: 'updated_by', name: 'a.name', class: 'align-middle updated_by'},
                     {data: 'action', name: 'action', class: 'align-middle action'},
 

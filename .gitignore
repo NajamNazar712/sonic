@@ -5,6 +5,7 @@
 /public/qsr_pending_deliveries_reports
 /storage/*.key
 /vendor
+/vendor2
 /.phpintel
 /.idea
 /.vscode

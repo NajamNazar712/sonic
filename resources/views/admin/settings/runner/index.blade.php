@@ -224,7 +224,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.runner);
-                                row.push(values.created_at);
+                                row.push(values.created);
                                 row.push(values.created_by);
                                 row.push(values.status);
 
@@ -271,7 +271,7 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle text-center serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'runner', name: 'runners.name', class: 'align-middle text-center runner'},
-                    {data: 'created_at', name: 'runners.created_at', class: 'align-middle text-center created_at'},
+                    {data: 'created', name: 'runners.created_at', class: 'align-middle text-center created_at'},
                     {data: 'created_by', name: 'a.name', class: 'align-middle text-center created_by'},
                     {data: 'status', name: 'runners.status', class: 'align-middle text-center status'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}

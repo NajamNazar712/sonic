@@ -41,7 +41,7 @@ class UpdateArrivalChargesCommand extends Command
     public function handle()
     {
 
-        $startDate =  Carbon::now()->subDays(2)->format('Y-m-d 00:00:00');
+        $startDate =  Carbon::now()->subDay(1)->format('Y-m-d 00:00:00');
         $endDate = Carbon::now()->format('Y-m-d 23:59:59');
 
 
@@ -51,7 +51,7 @@ class UpdateArrivalChargesCommand extends Command
                 $join->on('pending_payment_shipments.shipment_id', '=', 'shipments.id')
                     ->where('pending_payment_shipments.type', 3);
             })
-            ->whereBetween('shipments.created_at', [$startDate, $endDate])
+            ->whereBetween('pending_payment_shipments.created_at', [$startDate, $endDate])
             ->where('users.account_type_id', 1)
             ->where('pending_payment_shipments.type', 3)
             ->whereNull('shipment_additional_charges.shipment_id')
@@ -63,7 +63,7 @@ class UpdateArrivalChargesCommand extends Command
         $shipments2 = Shipment::leftJoin('shipment_additional_charges', 'shipment_additional_charges.shipment_id', '=', 'shipments.id')
             ->leftJoin('users', 'users.id', '=', 'shipments.user_id')
             ->leftJoin('pending_invoice_shipments', 'pending_invoice_shipments.shipment_id', '=', 'shipments.id')
-            ->whereBetween('shipments.created_at', [$startDate, $endDate])
+            ->whereBetween('pending_invoice_shipments.created_at', [$startDate, $endDate])
             ->where('users.account_type_id', 2)
             ->where('pending_invoice_shipments.type', 3)
             ->whereNull('shipment_additional_charges.shipment_id')

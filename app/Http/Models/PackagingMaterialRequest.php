@@ -16,4 +16,10 @@ class PackagingMaterialRequest extends Model
         return $this->hasMany('App\Http\Models\PackagingMaterialRequestDetail');
     }
 
+    // Format dates as 'YYYY-MM-DD HH:mm:ss'
+    protected function serializeDate(\DateTimeInterface $date)
+    {
+        return $date->format('Y-m-d H:i:s');
+    }
+
 }

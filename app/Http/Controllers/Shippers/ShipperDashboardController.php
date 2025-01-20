@@ -2504,6 +2504,9 @@ class ShipperDashboardController extends Controller
         // $cities = PickupType::find(1)->cities()->orderBy('city_name')->get();
         $invoicing_cycle = InvoicingCycle::all();
 
+        // in case when the if condition fails so to avoid undefined variable errors
+        $riders_permanent = collect();
+        $weight = collect();
 
         if (!RateStatus::where('user_id', $user->id)->exists()) {
             $weight = StandardWeightCharge::all()->groupBy('shipping_mode_id');

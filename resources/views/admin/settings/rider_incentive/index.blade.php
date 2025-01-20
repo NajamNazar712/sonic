@@ -328,7 +328,7 @@
                                 row.push(values.added_by);
                                 row.push(values.added_at);
                                 row.push(values.last_updated_by);
-                                row.push(values.updated_at);
+                                row.push(values.updated);
                                 body.push(row);
                             });
                         },
@@ -368,7 +368,7 @@
                     {data: 'added_by', name: 'ab.name', class: 'align-middle added_by'},
                     {data: 'added_at', name: 'riders_incentive_settings.created_at', class: 'align-middle added_at'},
                     {data: 'last_updated_by', name: 'ub.name', class: 'align-middle last_updated_by'},
-                    {data: 'updated_at', name: 'riders_incentive_settings.updated_at', class: 'align-middle updated_at'},
+                    {data: 'updated', name: 'riders_incentive_settings.updated_at', class: 'align-middle updated_at'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
