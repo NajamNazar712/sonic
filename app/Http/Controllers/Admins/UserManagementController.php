@@ -639,6 +639,7 @@ class UserManagementController extends Controller
 
 
         } else {
+            $delete_hub_ids = [];
             $current_hub_ids = AdminHub::where('admin_id', $id)->pluck('hub_id')->toArray();
             $deleted_name_hubs = City::whereIn('id', $delete_hub_ids)->pluck('name')
             ->implode(', ');
@@ -689,7 +690,7 @@ class UserManagementController extends Controller
     {
         $roles = AdminRole::join('admin_departments as ad', 'admin_roles.department_id', '=', 'ad.id')
             ->join('admins as a', 'admin_roles.updated_by', '=', 'a.id')
-            ->select('admin_roles.id', 'admin_roles.name', 'admin_roles.is_active', 'ad.name as department', 'admin_roles.created_at', 'admin_roles.updated_at', 'a.name as updated_by');
+            ->select('admin_roles.id', 'admin_roles.name', 'admin_roles.is_active', 'ad.name as department', 'admin_roles.created_at as created', 'admin_roles.updated_at as updated', 'a.name as updated_by');
 
         $datatables = Datatables::of($roles)
             ->addColumn('is_active', function ($role) {

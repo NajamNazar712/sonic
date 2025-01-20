@@ -137,7 +137,7 @@
                                             </tr>
                                             @foreach ($crm_closed_cases as $crm_closed_case)
                                                         @php
-                                                            $type = App\Http\Models\CRM\ CrmRequestCaseNatureType::where('id', $crm_closed_case['case_nature_type_id'])->value('type');
+                                                            $type = App\Http\Models\CRM\CrmRequestCaseNatureType::where('id', $crm_closed_case['case_nature_type_id'])->value('type');
                                                             $resolved_within = $crm_closed_case['created_at']->diffInDays($crm_closed_case['updated_at']);
                                                             $resolution = App\Http\Models\ShipmentsJourney::where('shipment_id', $crm_closed_case['shipment_id'])->latest()->first();
                                                             $resolution = App\Http\Models\ShipmentStatusReason::where('id', $resolution["shipper_status_id"])->latest()->first();

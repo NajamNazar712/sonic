@@ -20,4 +20,10 @@ class CargoManifestBagShipments extends Model
         return $this->belongsTo('App\Http\Models\Admin\CargoManifest\ManifestBag','cargo_manifest_bag_id','cargo_manifest_bag_id')->orderBy('created_at','desc');
     }
 
+    // Format dates as 'YYYY-MM-DD HH:mm:ss'
+    protected function serializeDate(\DateTimeInterface $date)
+    {
+        return $date->format('Y-m-d H:i:s');
+    }
+
 }

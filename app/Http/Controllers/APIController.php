@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\FafCharges;
+use App\FinjaSmsLog;
 use App\ShipmentAdditionalCharges;
 use DB;
 use SnappyPDF;
@@ -130,7 +131,7 @@ use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionDeliveryNote;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransactionRetail;
 use Illuminate\Support\Str;
-
+use App\Http\Models\ShipperSegmentLogs;
 
 class APIController extends Controller
 {
@@ -1539,6 +1540,18 @@ class APIController extends Controller
                 }
             }
 
+            try {
+                // Maintaining shipper segment logs on booking when origin and destination are different
+                if ($consignee_city_id != $pickup_city_id) {
+                    ShipperSegmentLogs::create([
+                        'shipment_id' => $shipment_id,
+                        'segment_id' => $user_type->segment_id,
+                        'sub_segment_id' => $user_type->sub_segment_id
+                    ]);
+                }
+            } catch (\Exception $e) {
+                Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
+            }
             return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number]);
         }
     }
@@ -1802,6 +1815,19 @@ class APIController extends Controller
                 }
             }
 
+            try {
+                // Maintaining shipper segment logs on booking when origin and destination are different
+                if ($consignee_city_id != $pickup_city_id) {
+                    ShipperSegmentLogs::create([
+                        'shipment_id' => $shipment_id,
+                        'segment_id' => $user_type->segment_id,
+                        'sub_segment_id' => $user_type->sub_segment_id
+                    ]);
+                }
+            } catch (\Exception $e) {
+                Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
+            }
+            
             return response()->json(['status' => 1, 'message' => 'Shipment Booked with Tracking Number: ' . $tracking_number]);
         }
     }
@@ -3420,6 +3446,20 @@ class APIController extends Controller
                     return response()->json(['status' => 0, 'message' => 'Please view this video so that you can follow required process. In case process is not followed completely we will not be able to process this shipment!', 'tracking_number' => $tracking_number, 'video' => $video]);
                 }
             }
+
+            try {
+                // Maintaining shipper segment logs on booking when origin and destination are different
+                if ($consignee_city_id != $pickup_city_id) {
+                    ShipperSegmentLogs::create([
+                        'shipment_id' => $shipment_id,
+                        'segment_id' => $user_type->segment_id,
+                        'sub_segment_id' => $user_type->sub_segment_id
+                    ]);
+                }
+            } catch (\Exception $e) {
+                Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
+            }
+
             return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number, 'reference_number' => $reference_number]);
         }
     }
@@ -9816,6 +9856,19 @@ class APIController extends Controller
                 }
             }
 
+            try {
+                // Maintaining shipper segment logs on booking when origin and destination are different
+                if ($consignee_city->id != $pickup_city_id) {
+                    ShipperSegmentLogs::create([
+                        'shipment_id' => $shipment_id,
+                        'segment_id' => $user_type->segment_id,
+                        'sub_segment_id' => $user_type->sub_segment_id
+                    ]);
+                }
+            } catch (\Exception $e) {
+                Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
+            }
+
             return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number]);
         }
     }
@@ -10038,6 +10091,49 @@ class APIController extends Controller
         } else {
             return ['status' => 0, 'message' => 'Access Denied!'];
         }
+    }
+
+    public function fin_sms(Request $request)
+    {
+
+        $rules = [
+            'phone' => ['required'],
+            'text' => ['required', 'min:1','max:160'],
+            'source' => ['required'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $phone = $request->phone;
+            $text = $request->text;
+            $source = $request->source;
+
+            $array =  array(
+                'phone'=>$phone,
+                'text'=>$text,
+                'source'=>$source,
+            );
+
+            NotificationsController::send(234, 0,0,0,$array);
+
+            $finja_sms_log = new FinjaSmsLog();
+            $finja_sms_log->phone = $phone;
+            $finja_sms_log->text = $text;
+            $finja_sms_log->source = $source;
+            $finja_sms_log->save();
+
+            return response()->json(['status' => 1, 'message' => 'Message Received']);
+        }
+
+
+
+
+
     }
 
 

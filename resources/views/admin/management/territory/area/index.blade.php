@@ -233,9 +233,9 @@
                                 row.push(index + 1);
                                 row.push(values.area);
                                 row.push(values.territory);
-                                row.push(values.created_at);
+                                row.push(values.created);
                                 row.push(values.created_by);
-                                row.push(values.updated_at);
+                                row.push(values.updated);
                                 row.push(values.updated_by);
                                 row.push(values.area_status);
                                 body.push(row);
@@ -445,9 +445,9 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'area', name: 'area_territories.name', class: 'align-middle area'},
                     {data: 'territory', name: 't.name', class: 'align-middle territory'},
-                    {data: 'created_at', name: 'area_territories.created_at', class: 'align-middle created_at'},
+                    {data: 'created', name: 'area_territories.created_at', class: 'align-middle created_at'},
                     {data: 'created_by', name: 'a.created_by', class: 'align-middle created_by'},
-                    {data: 'updated_at', name: 'area_territories.updated_at', class: 'align-middle updated_at'},
+                    {data: 'updated', name: 'area_territories.updated_at', class: 'align-middle updated_at'},
                     {data: 'updated_by', name: 'ad.updated_at', class: 'align-middle created_by'},
                     {data: 'area_status', name: 'area_status', class: 'align-middle area_status'},
                     {data: 'action', orderable: false, name: 'action', class: 'align-middle action',},

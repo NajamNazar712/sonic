@@ -33,6 +33,8 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use Session;
 use Validator;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\ShipperSegmentLogs;
+use Illuminate\Support\Facades\Log;
 
 class ShipperInternationalShipmentBookController extends Controller
 {
@@ -303,6 +305,20 @@ class ShipperInternationalShipmentBookController extends Controller
                 NotificationsController::send(153, $shipment_id);
             }
         }
+
+        try {
+            // Maintaining shipper segment logs on booking when origin and destination are different
+            if ($consignee_city_id != $pickup_city_id) {
+                ShipperSegmentLogs::create([
+                    'shipment_id' => $shipment_id,
+                    'segment_id' => auth()->user()->segment_id,
+                    'sub_segment_id' => auth()->user()->sub_segment_id
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
+        }
+
         return redirect()->back()->with(['success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'print' => $print]);
     }
     public function excel_index() {

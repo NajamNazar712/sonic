@@ -2934,7 +2934,7 @@ class AdminReportsController extends Controller
             ->leftjoin('shipments', 'shipments.id', '=', 'dns.shipment_id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
             ->join('rider_categories', 'rider_categories.id', '=', 'riders.rider_category_id')
-            ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
+            ->leftjoin('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->leftjoin('admins as ccb', 'delivery_notes.cash_collected_by', '=', 'ccb.id')
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
@@ -3484,7 +3484,12 @@ class AdminReportsController extends Controller
                     ->where('is.type', '!=',2 );
             })
             ->leftjoin('invoices', 'is.invoice_id', '=', 'invoices.id')
+
+
             ->leftjoin('international_shipments as ibs', 'ibs.shipment_id', '=', 'shipments.id')
+
+
+
             ->leftjoin('riders as r', 'r.id', '=', 'sj.rider_id')
             ->leftJoin('business_categories as bc', 'bc.id', '=', 'shipments.business_category_id')
             ->leftJoin('sub_category_segments as scs', 'u.sub_segment_id', '=', 'scs.id')
@@ -3523,13 +3528,11 @@ class AdminReportsController extends Controller
             ->leftJoin('sale_tier_tags as st', 'st.user_id', '=', 'u.id')
             ->leftJoin('admins as rf', 'rf.id', '=', 'st.ref')
             ->leftjoin('shipment_additional_charges as faf_charges', 'faf_charges.shipment_id', '=', 'shipments.id')
-            ->select( 'invoices.invoice_number', 'r.name as ridername', 'ssr.name as reason', 'sjr.remarks as remark', 'p.product_name as category', 'si.description as description', 'shipments.id as shipment_id', 'shipments.fintech_charges as fintech_charges', 'shipments.order_id as order_id', 'shipments.tracking_number as tracking_number_link', 'u.id as account_no', 'u.name as shipper', 'usi.pickup_address as shipper_address', 'ss.name as current_status', 'bt.booking_type as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.amount as s_collection_amount', 'sps.name as payment_status', 'shipments.actual_weight', 'shipments.weight_charges', 'shipments.cash_handling_charges', 'shipments.insurance_charges', 'shipments.return_charges', 'shipments.replacement_charges', 'shipments.fuel_surcharge', 'shipments.try_and_buy_charges', 'shipments.packaging_material_charges', DB::raw('SUM(pps.charges) as p_total_charges'), DB::raw('SUM(pps.amount) as p_collection_amount'), DB::raw('SUM(pps.payable) as p_net_payable'), DB::raw('SUM(pps.gst) as p_gst'), DB::raw('SUM(dps.amount) as d_collection_amount'), DB::raw('SUM(dps.charges) as d_total_charges'), DB::raw('SUM(dps.payable) as d_net_payable'), DB::raw('SUM(dps.gst) as d_gst'), 'sm.mode as shipping_mode', 'sm.id as shipping_mode_id', 'shipments.chargeable_weight', 'dr.created_at as delivered_or_returned', 'z.name as zone', 'zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.id', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges', 'u.account_type_id as account_type_id', DB::raw('SUM(is.gst) as is_gst'), DB::raw('SUM(pis.gst) as pis_gst'), 'shipments.packaging_charges', 'dr.received_or_refused_by', 'shipments.special_instructions', 'shipments.intercept_charges', 'bc.name as business_shipment_type', 'ibs.international_tracking_number', 'usi.vendor', 'dr.shipper_status_id as dr_status_id', 'shipments.shipment_type', 'rc.name as return_city', 'dr.cnic as dr_cnic', 'dr.relation as dr_relation', 'shipments.consignee_address as consignee_address', 'scs.name as sub_segment', 'sjfa.created_at as first_attempt_date', 'spjpaid_date.created_at as paid_date', 'spjproceed_date.created_at as processed_date', 'si.quantity as item_quantity', 'shipments.pieces as pieces', 'scun.id as scun_id', 'rf.id as ref_id', 'rf.name as ref', 'och.name as origin_hub', 'shipments.tracking_number as tracking_number_excel', DB::raw('SUM(pps.sms_charges) as pps_sms_charges'), DB::raw('SUM(dps.sms_charges) as dps_sms_charges'), DB::raw('SUM(pis.sms_charges) as pis_sms_charges'), DB::raw('SUM(is.sms_charges) as is_sms_charges'), DB::raw('SUM(faf_charges.faf_charges) as faf_charges'), DB::raw('SUM(ss_charge.reverse_pickup_charges) as reverse_pickup_charges'))
+            ->select( 'invoices.invoice_number', 'r.name as ridername', 'ssr.name as reason', 'sjr.remarks as remark', 'p.product_name as category', 'si.description as description', 'shipments.id as shipment_id', 'shipments.fintech_charges as fintech_charges', 'shipments.order_id as order_id', 'shipments.tracking_number as tracking_number_link', 'u.id as account_no', 'u.name as shipper', 'usi.pickup_address as shipper_address', 'ss.name as current_status', 'bt.booking_type as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.amount as s_collection_amount', 'sps.name as payment_status', 'shipments.actual_weight', 'shipments.weight_charges', 'shipments.cash_handling_charges', 'shipments.insurance_charges', 'shipments.return_charges', 'shipments.replacement_charges', 'shipments.fuel_surcharge', 'shipments.try_and_buy_charges', 'shipments.packaging_material_charges', DB::raw('SUM(pps.charges) as p_total_charges'), DB::raw('SUM(pps.amount) as p_collection_amount'), DB::raw('SUM(pps.payable) as p_net_payable'), DB::raw('SUM(pps.gst) as p_gst'), DB::raw('SUM(dps.amount) as d_collection_amount'), DB::raw('SUM(dps.charges) as d_total_charges'), DB::raw('SUM(dps.payable) as d_net_payable'), DB::raw('SUM(dps.gst) as d_gst'), 'sm.mode as shipping_mode', 'sm.id as shipping_mode_id', 'shipments.chargeable_weight', 'dr.created_at as delivered_or_returned', 'z.name as zone', 'zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.id', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges', 'u.account_type_id as account_type_id', DB::raw('SUM(is.gst) as is_gst'), DB::raw('SUM(pis.gst) as pis_gst'), 'shipments.packaging_charges', 'dr.received_or_refused_by', 'shipments.special_instructions', 'shipments.intercept_charges', 'bc.name as business_shipment_type', 'ibs.international_tracking_number', 'usi.vendor', 'dr.shipper_status_id as dr_status_id', 'shipments.shipment_type', 'rc.name as return_city', 'dr.cnic as dr_cnic', 'dr.relation as dr_relation', 'shipments.consignee_address as consignee_address', 'scs.name as sub_segment', 'sjfa.created_at as first_attempt_date', 'spjpaid_date.created_at as paid_date', 'spjproceed_date.created_at as processed_date', 'si.quantity as item_quantity', 'shipments.pieces as pieces', 'scun.id as scun_id', 'rf.id as ref_id', 'rf.name as ref', 'och.name as origin_hub', 'shipments.tracking_number as tracking_number_excel', DB::raw('SUM(pps.sms_charges) as pps_sms_charges'), DB::raw('SUM(dps.sms_charges) as dps_sms_charges'), DB::raw('SUM(pis.sms_charges) as pis_sms_charges'), DB::raw('SUM(is.sms_charges) as is_sms_charges'), DB::raw('SUM(faf_charges.faf_charges) as faf_charges'), DB::raw('SUM(ss_charge.reverse_pickup_charges) as reverse_pickup_charges'), 'ibs.cost')
             ->whereNotIn('shipments.shipper_status_id', [1, 17])
             ->whereNotIn('u.id', [8761, 9358])
 //            ->whereBetween('sj.created_at', [$from, $to])
             ->groupBy('shipments.id');
-
-
         $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
 
         if ($from_id->exists()) {
@@ -14188,7 +14191,7 @@ class AdminReportsController extends Controller
                 'ordinary_discrepancy_reports.picture_path as images',
                 'ordinary_discrepancy_reports.quantity as quantity_by_admin',
                 'ordinary_discrepancy_reports.remarks as remarks_by_admin',
-                'ordinary_discrepancy_reports.created_at as created_at',
+                'ordinary_discrepancy_reports.created_at as created',
                 'admins.name as updated_by',
                 'ch.name as admin_hub',
                 'odr_natures.name  as odr_nature'
@@ -14217,6 +14220,10 @@ class AdminReportsController extends Controller
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
             $tracking_data->whereBetween('ordinary_discrepancy_reports.created_at', [$from, $to]);
+        }
+
+        if ($search_tracking_no = $request->get('tracking_filter')) {
+            $tracking_data->where('shipments.tracking_number', $search_tracking_no);
         }
 
         return $datatables
@@ -14295,8 +14302,6 @@ class AdminReportsController extends Controller
             $directory = 'ordinary_discrepancy_report\attachment' . $data->id . '';
             Storage::disk('public')->putFileAs($directory, $file, $filename);
             $image = $directory . '/' . $filename;
-        } else {
-            return redirect()->back()->with('error', 'Incomplete Information!');
         }
 
         $ordinary_discrepancy_reports = new OrdinaryDiscrepancyReport;
@@ -14305,7 +14310,7 @@ class AdminReportsController extends Controller
         $ordinary_discrepancy_reports->shipment_status_id = $data->shipper_status_id;
         $ordinary_discrepancy_reports->city_id = $data->consignee_city_id;
         $ordinary_discrepancy_reports->product_content = $request->shipment_content_admin;
-        $ordinary_discrepancy_reports->picture_path = $image;
+        $ordinary_discrepancy_reports->picture_path = $image ?? null;
         $ordinary_discrepancy_reports->quantity = $request->quantity;
         $ordinary_discrepancy_reports->remarks = $request->remarks;
         $ordinary_discrepancy_reports->admin_id = Auth::id();
@@ -15747,9 +15752,7 @@ class AdminReportsController extends Controller
                 }
             })
             ->editColumn('entry_method', function ($shipment) {
-                return $shipment->entry_method === null
-                    ? 'Not Scanned'
-                    : ($shipment->entry_method == 1 ? 'Scanned' : 'Manual');
+                return  ($shipment->entry_method == 1 ? 'Scanned' : 'Manual');
             })
             ->addColumn('total_attempt', function ($shipment) {
                 $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment->shId);
@@ -15886,13 +15889,9 @@ class AdminReportsController extends Controller
                     }
                 }
 
-                $rowArray['entry_method'] = $rowArray['entry_method'] === null
-                    ? 'Not Scanned'
-                    : ($rowArray['entry_method'] == 1 ? 'Scanned' : 'Manual');
+                $rowArray['entry_method'] =  ($rowArray['entry_method'] == 1 ? 'Scanned' : 'Manual');
 
-                $filteredArray = [];
-
-                // Iterate over $fieldsToRetrieve to maintain sequence
+                $filteredArray = [];// Iterate over $fieldsToRetrieve to maintain sequence
                 foreach ($fieldsToRetrieve as $field) {
                     // Check if the field exists in the row array
                     if (array_key_exists($field, $rowArray)) {
@@ -16038,7 +16037,8 @@ class AdminReportsController extends Controller
     {
         $details = OrdinaryDiscrepancyReport::leftjoin('odr_natures', 'odr_natures.id', 'ordinary_discrepancy_reports.odr_nature_id')
         ->leftjoin('admins', 'admins.id', 'ordinary_discrepancy_reports.admin_id')
-        ->select(['ordinary_discrepancy_reports.*' , 'odr_natures.name as odr_nature', 'admins.name as created_by'])
+        ->leftjoin('cities as hub', 'hub.id', 'admins.default_hub_id')
+        ->select(['ordinary_discrepancy_reports.product_content' , 'ordinary_discrepancy_reports.remarks', 'ordinary_discrepancy_reports.quantity' ,'ordinary_discrepancy_reports.picture_path', 'ordinary_discrepancy_reports.created_at as created', 'ordinary_discrepancy_reports.created_at','odr_natures.name as odr_nature', 'admins.name as created_by', 'hub.name as hub_name'])
         ->where('ordinary_discrepancy_reports.shipment_id', $request->shipment_id)
         ->latest('created_at')
         ->get();

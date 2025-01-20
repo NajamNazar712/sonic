@@ -67,7 +67,7 @@
 				serverSide: true,
 				ajax: '{{ route('admin.user_management.logs.list') }}',
 				rowId: 'id',
-				//order: [[5, 'desc']],
+				order: [[7, 'desc']],
 				columns: [
 					{data: 'screen_name', name: 'user_role_management_logs.screen_name', class: 'align-middle screen_name'},
 					{data: 'changed_by_name', name: 'changed_by.name', class: 'align-middle changed_by_name'},
@@ -76,7 +76,7 @@
 					{data: 'trax_id', name: 'changed_in.trax_id', class: 'align-middle trax_id'},
 					{data: 'dept_name', name: 'd.name', class: 'align-middle dept_name'},
 					{data: 'data', name: 'user_role_management_logs.data', class: 'align-middle data'},
-					{data: 'created_at', name: 'user_role_management_logs.created_at', class: 'align-middle created_at'},
+					{data: 'created', name: 'user_role_management_logs.created_at', class: 'align-middle created_at'},
 				],
 				rowCallback: function(row, data, index) {
 					// var info = table.page.info();

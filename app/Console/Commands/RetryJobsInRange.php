@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Artisan;
 
 class RetryJobsInRange extends Command
 {
-    protected $signature = 'queue:retry-range {startId} {endId}';
+    protected $signature = 'queue:retry-range {startId=0} {endId=0} {queue=null}';
     protected $description = 'Retry failed jobs in a specific job ID range';
 
     public function __construct()
@@ -20,11 +20,17 @@ class RetryJobsInRange extends Command
     {
         $startId = (int) $this->argument('startId');
         $endId = (int) $this->argument('endId');
-
+        $queue = (string) $this->argument('queue');
         // Fetch failed jobs within the range from the failed_jobs table
-        $failedJobs = DB::table('failed_jobs')
-            ->whereBetween('id', [$startId, $endId])
-            ->get();
+        if($queue != null){
+            $failedJobs = DB::table('failed_jobs')
+            ->where('queue',$queue)
+                ->get();
+        }else{
+            $failedJobs = DB::table('failed_jobs')
+                ->whereBetween('id', [$startId, $endId])
+                ->get();
+        }
 
         if ($failedJobs->isEmpty()) {
             $this->info('No failed jobs found in the specified range.');
