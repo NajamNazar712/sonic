@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\FafCharges;
 use App\FinjaSmsLog;
+use App\Http\Models\WalletUser;
+use App\Models\FinjaRequestLog;
 use App\ShipmentAdditionalCharges;
 use DB;
 use SnappyPDF;
@@ -10136,6 +10138,7 @@ class APIController extends Controller
 
         $rules = [
             'tracking_number' => ['required', 'exists:shipments,tracking_number'],
+            'wallet_id' => ['required', 'exists:wallet_users,wallet_id'],
             'charges' => ['required', 'numeric'],
         ];
 
@@ -10146,6 +10149,10 @@ class APIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
+            $finja_request_log = new FinjaRequestLog();
+            $finja_request_log->requested = json_encode($request->all());
+            $finja_request_log->ip_address = $request->ip();
+            $finja_request_log->save();
             $shipment_id = Shipment::where('tracking_number', $request->tracking_number)->value('id');
             ShipmentAdditionalCharges::where('shipment_id', $shipment_id)->update([
                 'wallet_charges' => $request->charges,
@@ -10155,5 +10162,33 @@ class APIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Charges updated against this shipment.']);
         }
     }
+    public function fintech_getToken(Request $request) {
+
+        $rules = [
+            'wallet_id' => ['required', 'exists:wallet_users,wallet_id'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $Wallet = WalletUser::with('wallet_user')->where('wallet_id',$request->wallet_id)->first();
+            if(isset($Wallet->wallet_user)) {
+                $user = $Wallet->wallet_user;
+                if (empty($user->api_token)) {
+                    $user->api_token = uniqid(base64_encode(Str::random(60)));
+                    $user->save();
+                }
+                return response()->json(['status' => 1,'wallet_id'=> $request->wallet_id,'token' =>  $user->api_token]);
+            }
+
+            return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => 'USer Not Found']);
+        }
+    }
+
+
 
 }
