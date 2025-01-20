@@ -143,6 +143,7 @@ class AdminPackagingMaterialController extends Controller
 
                 return $dropdown;
             })
+            ->rawColumns(['tracking_number_link', 'action'])
             ->make(true);
     }
 
@@ -359,7 +360,8 @@ class AdminPackagingMaterialController extends Controller
                     ->where('spt.id', '=', DB::raw('(select max(id) from sale_person_tags where sale_person_tags.user_id = packaging_material_requests.user_id and sale_person_tags.status = 0)'));
             })
             ->leftJoin('admins as a','a.id','=','spt.admin_id')
-            ->select(['packaging_material_requests.id as request_id', 'u.name as shipper', 'packaging_material_requests.created_at', 'ct.name as city', 'packaging_material_requests.address', 'ppm.mode', 'packaging_material_requests.amount', 'packaging_material_requests.tracking_number', 'packaging_material_requests.tracking_number as tracking_number_link', 'pmrs.name as status', 'packaging_material_requests.status_id as status_id', DB::raw('sum(pmrd.quantity) as total_quantity'), 's.id as shipment_id', 's.shipper_status_id as shipper_status_id', 's.booking_type_id as booking_type_id', 's.created_at as confirmed_date', 'sj.remarks as remarks', 'rb.name as requested_by', 'u.phone as shipper_phone','a.name as tagged_sale_person', 'packaging_material_requests.created_at as created'])
+            ->leftJoin('substitute_users','substitute_users.id','=','packaging_material_requests.requested_by')
+            ->select(['packaging_material_requests.id as request_id', 'u.name as shipper', 'packaging_material_requests.created_at', 'ct.name as city', 'packaging_material_requests.address', 'ppm.mode', 'packaging_material_requests.amount', 'packaging_material_requests.tracking_number', 'packaging_material_requests.tracking_number as tracking_number_link', 'pmrs.name as status', 'packaging_material_requests.status_id as status_id', DB::raw('sum(pmrd.quantity) as total_quantity'), 's.id as shipment_id', 's.shipper_status_id as shipper_status_id', 's.booking_type_id as booking_type_id', 's.created_at as confirmed_date', 'sj.remarks as remarks', 'rb.name as requested_by', 'u.phone as shipper_phone','a.name as tagged_sale_person', 'packaging_material_requests.created_at as created', 'substitute_users.name as substitute_user'])
             ->groupBy('packaging_material_requests.id')
             ->having('total_quantity', '>', 0);
 
@@ -412,9 +414,18 @@ class AdminPackagingMaterialController extends Controller
                     $query->whereRaw('false');
                 }
             })
-            ->editColumn('amount', function ($shipment) {
+            ->editColumn('amount', function ($shipment) {   
                 return number_format($shipment->amount);
             })
+
+            ->editColumn('substitute_user', function ($shipment) {   
+                if ($shipment->substitute_user == null || $shipment->substitute_user == '') {
+                    return '-';
+                } else {
+                    return $shipment->substitute_user;
+                }
+            })
+
             ->addColumn('action', function ($packaging) {
                 if ((session('role_id') == 1 || in_array(226, session('permissions')) || in_array(227, session('permissions'))) && ($packaging->status_id == 1 || $packaging->status_id == 2)) {
                     $dropdown = '
@@ -458,7 +469,7 @@ class AdminPackagingMaterialController extends Controller
             if ($request->get('requested_from_date') && $request->get('requested_to_date')) {
                 $from = date('Y-m-d 00:00:01', strtotime($request->get('requested_from_date')));
                 $to = date('Y-m-d 23:59:59', strtotime($request->get('requested_to_date')));
-                $datatables->whereBetween('packaging_material_requests.created_at', [$from, $to]);
+                $requests->whereBetween('packaging_material_requests.created_at', [$from, $to]);
             }
 
     //
@@ -1316,7 +1327,7 @@ class AdminPackagingMaterialController extends Controller
                 }
                 else if ($keyword == 'selected' || $keyword == 'selected shipper' || $keyword == 'shipper') {
                     $query->where('packaging_material_types.packaging_type', 4);
-                }
+                } 
                 else if ($keyword == 'marco') {
                     $query->where('packaging_material_types.packaging_type', 5);
                 }
