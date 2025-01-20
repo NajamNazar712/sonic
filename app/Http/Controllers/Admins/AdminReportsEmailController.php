@@ -44,6 +44,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Excel_reports\RetailDonePaymentsReport;
 use App\Http\Models\RetailDonePaymentCalculation;
+use App\Mail\ReportsEmail;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
