@@ -53,7 +53,7 @@ class V2AdminDisputeShipmentsController extends Controller
         ->join('v2_dispute_reasons as dr', 'dr.id', '=', 'v2_disputes.reason_id')
         ->join('v2_dispute_statuses as ds', 'ds.id', '=', 'v2_disputes.status_id')
         ->leftjoin('admins as ub', 'ub.id', '=', 'v2_disputes.updated_by')
-        ->select(['v2_disputes.id as dispute_id','v2_disputes.shipment_id', 'v2_disputes.remarks', 'v2_disputes.image', 'ab.name as added_by', 'ub.name as updated_by', 'v2_disputes.created_at', 'v2_disputes.updated_at', 'shipments.tracking_number', 'shipments.actual_weight', 'shipments.amount as cod_amount', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper', 'usi.poc as poc', 'dr.name as reason', 'ds.name as status', 'v2_disputes.status_id', 'v2_disputes.reason_id']);
+        ->select(['v2_disputes.id as dispute_id','v2_disputes.shipment_id', 'v2_disputes.remarks', 'v2_disputes.image', 'ab.name as added_by', 'ub.name as updated_by', 'v2_disputes.created_at as created', 'v2_disputes.updated_at', 'shipments.tracking_number', 'shipments.actual_weight', 'shipments.amount as cod_amount', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper', 'usi.poc as poc', 'dr.name as reason', 'ds.name as status', 'v2_disputes.status_id', 'v2_disputes.reason_id']);
         if (session('role_id') != 1) {
             $dispute = $dispute->where(function ($query) {
                 $query->whereIn('oc.hub_id', session('hubs'))

@@ -37,7 +37,7 @@ use App\Http\Models\HR\EmployeeLeave;
 use App\Http\Models\HR\StaffCategory;
 use App\Http\Models\Admin\EmployeeLog;
 use App\Http\Models\HR\EmployeeGender;
-use App\http\Models\HR\EmployeeNature;
+use App\Http\Models\HR\EmployeeNature;
 use App\Http\Models\HR\EmployeeStatus;
 use App\Http\Models\ReportingLocation;
 use Barryvdh\Snappy\Facades\SnappyPdf;
@@ -434,7 +434,12 @@ class AdminHumanResourseController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(), 57);
         $rider_type = RiderType::all();
         $route = Route::all();
-        $operation_rider_category = OperationRidersCategory::all();
+
+        /* TO-6892 */
+        //$operation_rider_category = OperationRidersCategory::all();
+        $operation_rider_category = OperationRidersCategory::find(1);
+        /* */
+
         $rider_categories = RiderCategory::all();
         $rider_main_categories = RiderMainCategory::all();
         $route_types = RouteType::all();
@@ -1396,7 +1401,7 @@ class AdminHumanResourseController extends Controller
         $genders = EmployeeGender::all();
         $rider_types = RiderType::all();
         $main_categories = RiderMainCategory::all();
-        $functional_categories = OperationRidersCategory::all();
+        $functional_categories = OperationRidersCategory::find(1);
         $sub_categories = RiderCategory::all();
         $rider_routes = Route::all();
         $rider_functional_category = $employee->rider->operation_rider_id ?? null;
@@ -1532,28 +1537,28 @@ class AdminHumanResourseController extends Controller
 
 
         if ($employee->employee_type_id == 1) {
-            $admin = Admin::where('trax_id', $employee->trax_id)->where('trax_id', '!=', null);
-            if ($admin->exists()) {
-                $admin = $admin->first();
+                $adminQuery = Admin::where('trax_id', $employee->trax_id)->where('trax_id', '!=', null);
+                if ($adminQuery->exists()) { 
+                    $admin = $adminQuery->first();
 
-//                if ($admin->designation_id != $employee->designation_id) {
-//                    AdminHub::where('admin_id', $admin->id)->delete();
-//
-//                    $hubs = EmployeeDesignationHub::where('designation_id', $employee->designation_id)->get(['hub_id']);
-//                    if (count($hubs) == 0) {
-//                        $admin_hub = new AdminHub();
-//                        $admin_hub->admin_id = $admin->id;
-//                        $admin_hub->hub_id = $employee->city->hub_city->id;
-//                        $admin_hub->save();
-//                    } else {
-//                        foreach ($hubs as $hub) {
-//                            $admin_hub = new AdminHub();
-//                            $admin_hub->admin_id = $admin->id;
-//                            $admin_hub->hub_id = $hub->hub_id;
-//                            $admin_hub->save();
-//                        }
-//                    }
-//                }
+                    // if ($admin->designation_id != $employee->designation_id) {
+                    //     AdminHub::where('admin_id', $admin->id)->delete();
+
+                    //     $hubs = EmployeeDesignationHub::where('designation_id', $employee->designation_id)->get(['hub_id']);
+                    //     if (count($hubs) == 0) {
+                    //         $admin_hub = new AdminHub();
+                    //         $admin_hub->admin_id = $admin->id;
+                    //         $admin_hub->hub_id = $employee->city->hub_city->id;
+                    //         $admin_hub->save();
+                    //     } else {
+                    //         foreach ($hubs as $hub) {
+                    //             $admin_hub = new AdminHub();
+                    //             $admin_hub->admin_id = $admin->id;
+                    //             $admin_hub->hub_id = $hub->hub_id;
+                    //             $admin_hub->save();
+                    //         }
+                    //     }
+                    // }
 
                 }
                 if ($role_flag == true) {
@@ -3316,6 +3321,13 @@ class AdminHumanResourseController extends Controller
              $payslips->whereIn('hub_id', session('hubs'));
          }
 
+        if ($request->get('search_payslip_month')) {
+            $month = $request->get('search_payslip_month');
+            $from = Carbon::parse($month)->startOfMonth()->toDateString();
+            $to = Carbon::parse($month)->endOfMonth()->toDateString();
+            $payslips->whereBetween('employee_payslips.payroll_month', [$from, $to]);
+        }
+
         $datatable = Datatables::of($payslips)
             ->editColumn('total_salary', function ($payslip) {
                 if($payslip->total_salary == null){
@@ -3349,12 +3361,7 @@ class AdminHumanResourseController extends Controller
                 return $dropdown;
             });
 
-        if ($request->get('search_payslip_month')) {
-            $month = $request->get('search_payslip_month');
-            $from = Carbon::parse($month)->startOfMonth()->toDateString();
-            $to = Carbon::parse($month)->endOfMonth()->toDateString();
-            $datatable->whereBetween('employee_payslips.payroll_month', [$from, $to]);
-        }
+
         return $datatable->make(true);
 
     }

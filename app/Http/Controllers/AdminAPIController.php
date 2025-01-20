@@ -57,7 +57,7 @@ use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteImage;
 use App\Http\Models\Admin\ReturnNoteShipment;
-use App\http\Models\Admin\ReturnReasonMandatoryShipper;
+use App\Http\Models\Admin\ReturnReasonMandatoryShipper;
 use App\Http\Models\Admin\RiderCategoryByPass;
 use App\Http\Models\Admin\RiderType;
 use App\Http\Models\Admin\SalePersonTarget;

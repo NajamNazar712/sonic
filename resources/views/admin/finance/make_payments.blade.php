@@ -1470,7 +1470,7 @@
                         class: 'align-middle status'
                     },
                     {
-                        data: 'created_at',
+                        data: 'created',
                         name: 'pending_payment_shipments.created_at',
                         class: 'align-middle created_at'
                     },

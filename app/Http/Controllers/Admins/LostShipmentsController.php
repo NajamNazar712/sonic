@@ -488,7 +488,8 @@ class LostShipmentsController extends Controller
 //                    }
                     }
 
-                    $this->updateLostShipmentApproval($shipment, 'rejection_count', 1);  
+                    $this->updateLostShipmentApproval($shipment, 'rejection_count', 1);
+
 
                 }
             }
@@ -596,7 +597,7 @@ class LostShipmentsController extends Controller
                         if($cargo_manifest_bag_shipments->exists()){
                             $cargo_manifest_bag_shipments = $cargo_manifest_bag_shipments->latest()->first();
                             $bag = CargoManifestBag::find($cargo_manifest_bag_shipments->cargo_manifest_bag_id);
-                            if($bag){
+                            if ($bag && !in_array($bag->status_id, [7, 8])) {
                                 if(ManifestBagLostShipment::where('bag_id',$bag->id)->where('shipment_id',$shipment->id)->exists()){
                                     return response()->json(['status' => 0, 'error' => 'Shipment already marked lost for the current bag']);
                                 }
@@ -736,11 +737,11 @@ class LostShipmentsController extends Controller
                     ShipmentsJourneyController::add($shipment_details->id, 18, NULL, $shipment_status_reason_for_shipment_lost_id, $remarks[$shipment_details->id],NULL,Auth::id(), NULL, NULL, 0);
 
                     $lostShipmentTime = ShipmentsJourney::where([
-                        'shipment_id' => $shipment,
+                        'shipment_id' => $shipment_details->id,
                         'shipper_status_id' => 18,
                     ])->latest()->first();
 
-                    $lostShipmentsTime[$shipment] = !empty($lostShipmentTime->created_at) ? $lostShipmentTime->created_at : now();
+                    $lostShipmentsTime[$shipment_details->id] = !empty($lostShipmentTime->created_at) ? $lostShipmentTime->created_at : now();
 
                     $lost_shipments_array[] = $shipment;
 
@@ -901,7 +902,7 @@ class LostShipmentsController extends Controller
                             if($cargo_manifest_bag_shipments->exists()){
                                 $cargo_manifest_bag_shipments = $cargo_manifest_bag_shipments->latest()->first();
                                 $bag = CargoManifestBag::find($cargo_manifest_bag_shipments->cargo_manifest_bag_id);
-                                if($bag){
+                                if ($bag && !in_array($bag->status_id, [7, 8])) {
                                     if(ManifestBagLostShipment::where('bag_id',$bag->id)->where('shipment_id',$shipment->id)->exists()){
                                         $error[$row_id]['tracking_number'] = $tracking;
                                         $error[$row_id]['error_msg'] = "Shipment already marked lost for the current bag!";
@@ -970,6 +971,15 @@ class LostShipmentsController extends Controller
     public function shipment_approve_status(Request $request){
         
         foreach ($request->shipment_ids as $shipment_id) {
+            $cargo_manifest_bag_shipments = CargoManifestBagShipments::where('shipment_id', $shipment_id);
+            if($cargo_manifest_bag_shipments->exists()){
+                $cargo_manifest_bag_shipments = $cargo_manifest_bag_shipments->latest()->first();
+                $bag = CargoManifestBag::find($cargo_manifest_bag_shipments->cargo_manifest_bag_id);
+                if($bag->status_id != 7){
+                    $bag->status_id = 8;
+                    $bag->save();
+                }
+            }
             ShipmentsJourneyController::add($shipment_id, 18, NULL, NULL, NULL, NULL, Auth::id(), NULL, NULL, $request->approve);
             $this->updateLostShipmentApproval($shipment_id, 'approval_count', 1);
         }
