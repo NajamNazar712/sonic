@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\FafCharges;
 use App\FinjaSmsLog;
+use App\Http\Models\WalletUser;
 use App\ShipmentAdditionalCharges;
 use DB;
 use SnappyPDF;
@@ -10155,5 +10156,30 @@ class APIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Charges updated against this shipment.']);
         }
     }
+    public function fintech_getToken(Request $request) {
+
+        $rules = [
+            'wallet_id' => ['required', 'exists:wallet_users,wallet_id'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $Wallet_user = WalletUser::find($request->wallet_id);
+            $user = $Wallet_user->wallet_user;
+            if(empty($user->api_token)){
+                $user->api_token =  uniqid(base64_encode(Str::random(60)));
+                $user->save();
+            }
+
+            return response()->json(['status' => 1, 'token' =>  $user->api_token]);
+        }
+    }
+
+
 
 }

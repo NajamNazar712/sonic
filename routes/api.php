@@ -27,6 +27,7 @@ use Illuminate\Http\Request;
     Route::post('rcp_sms_from_consignee', 'APIController@rcp_sms_from_consignee')->name('rcp_sms_from_consignee');
     Route::post('fin_sms', 'APIController@fin_sms')->name('fin_sms');
     Route::post('fintech_charges','APIController@fintech_charges')->name('fintech_charges');
+    Route::post('fintech_getToken','APIController@fintech_getToken')->name('fintech_getToken');
 
     Route::post('employee_attendance_details', 'APIController@employee_checkin')->name('employee_attendance_details');
 
