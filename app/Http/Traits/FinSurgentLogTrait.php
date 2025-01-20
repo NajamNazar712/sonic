@@ -38,7 +38,7 @@ trait FinSurgentLogTrait
                 $shipmentId = $pending_payment_shipment;
             } 
 
-            $api = env('FINGA_URL');
+            $api = config('app.FINGA_URL');
             $token = FingaIntegrationController::getToken($api);
 
             if($token) {
