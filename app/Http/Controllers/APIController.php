@@ -10139,7 +10139,7 @@ class APIController extends Controller
         $rules = [
             'tracking_number' => ['required', 'exists:shipments,tracking_number'],
             'wallet_id' => ['required', 'exists:wallet_users,wallet_id'],
-            'charges' => ['required', 'numeric'],
+            'charges' => ['required', 'numeric', 'min:0', 'max:100000'],
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
