@@ -10169,7 +10169,7 @@ class APIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $Wallet = WalletUser::find($request->wallet_id);
+            $Wallet = WalletUser::with('wallet_user')->where('wallet_id',$request->wallet_id)->first();
             if(isset($Wallet->wallet_user)) {
                 $user = $Wallet->wallet_user;
                 if (empty($user->api_token)) {
