@@ -1397,8 +1397,8 @@ class AdminReportsEmailController extends Controller
             $writer->save($file_name);
             $to = ['anas.mazhar@trax.pk', 'aftab.qidwai@trax.pk'];
             $mail = Mail::to($to);
-            $link = '<a href="' . $file_name_without_path . '" target="_blank">Report</a>';
-            $mail->send(new ReportsEmail("Done Payment",'Done Payment Report Link' . url('/') . '/' . $link,null));
+            $link = '<a href="' .  url('/') . '/' .$file_name_without_path . '" target="_blank">Report</a>';
+            $mail->send(new ReportsEmail("Done Payment",'Done Payment Report Link' .$link,null));
             
             // NotificationsController::send(82, $date, url('/') . '/' . $file_name_without_path);
         }
