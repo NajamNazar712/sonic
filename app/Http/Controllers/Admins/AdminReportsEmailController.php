@@ -52,6 +52,7 @@ use PHPExcel_Cell;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 
 class AdminReportsEmailController extends Controller
@@ -1293,7 +1294,7 @@ class AdminReportsEmailController extends Controller
     }
 
 	static public function done_payment($date){
-        $done_payments = DonePaymentCalculation::whereDate('created_at', $date);
+        $done_payments = DonePaymentCalculation::whereDate('created_at', '2025-01-20');
         DonePaymentsReport::truncate();
         if($done_payments->exists()){
             $total_amount = 0;
@@ -1393,8 +1394,11 @@ class AdminReportsEmailController extends Controller
             $file_name_without_path = "reports/done_payment_report_" . $date_file_name . ".xlsx";
             $file_name = public_path() . "/reports/done_payment_report_" . $date_file_name . ".xlsx";
             $writer->save($file_name);
-
-            NotificationsController::send(235, $date, url('/') . '/' . $file_name_without_path);
+            $to = ['anas.mazhar@trax.pk', 'aftab.qidwai@trax.pk'];
+            $mail = Mail::to($to);
+            $link = '<a href="' . $file_name_without_path . '" target="_blank">Report</a>';
+            $mail->send(new ReportsEmail("Done Payment Report Link", $link,null));
+            
             NotificationsController::send(82, $date, url('/') . '/' . $file_name_without_path);
         }
     }
