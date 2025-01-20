@@ -61,6 +61,7 @@
                             <th class="border-primary border-darken-1">Destination</th>
                             <th class="border-primary border-darken-1">Hub</th>
                             <th class="border-primary border-darken-1">Amount</th>
+                            <th class="border-primary border-darken-1">Parcel Value</th>
                             <th class="border-primary border-darken-1">Remarks</th>
                             <th class="border-primary border-darken-1">Shipping Mode</th>
                             <th class="border-primary border-darken-1">Service Type</th>
@@ -152,6 +153,7 @@ label.error {
                     {name: 'destination', class: 'align-middle destination form-group', orderable: false},
                     {name: 'hub', class: 'align-middle hub form-group', orderable: false},
                     {name: 'amount', class: 'align-middle amount', orderable: false},
+                    {name: 'parcel_value', class: 'align-middle parcel_value', orderable: false},
                     {name: 'remarks', class: 'align-middle remarks', orderable: false},
                     {name: 'mode', class: 'align-middle mode', orderable: false},
                     {name: 'service_type', class: 'align-middle service_type', orderable: false},
@@ -210,7 +212,20 @@ label.error {
                                         var rowNo = table.rows().count();
 
                                         var action = '<a href="javascript:void(0);" class="btn btn-icon btn-danger removerow" data-shipment_id="' + data.details.id + '"><i class="la la-close"></i></a>';
-                                        table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper_name, data.details.origin, data.details.destination, data.details.hub, data.details.amount, data.details.remarks,data.details.mode,data.details.service_type, data.details.action_button ,action]).node().id = data.details.id;
+                                        table.row.add([
+                                            rowNo + 1, data.details.tracking_number, 
+                                            data.details.shipper_name, 
+                                            data.details.origin, 
+                                            data.details.destination, 
+                                            data.details.hub, 
+                                            data.details.amount, 
+                                            data.details.parcel_value,
+                                            data.details.remarks,
+                                            data.details.mode,
+                                            data.details.service_type, 
+                                            data.details.action_button,
+                                            action
+                                        ]).node().id = data.details.id;
                                         table.draw(false);
                                         scan_sound(1);
                                         table.order([0, 'desc']).draw();
@@ -289,6 +304,7 @@ label.error {
                                     // $.each(shipmentData, function(id, shipment2){
                                         var index = $.inArray(id, shipment_ids);
                                         shipment = shipmentData[id];
+                                        
                                         if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(shipment.tracking_number)) === -1) {
                                             var rowNo = table.rows().count();
        
@@ -301,12 +317,15 @@ label.error {
                                            shipment.destination,
                                            shipment.hub,
                                            shipment.amount,
+                                           shipment.parcel_value,
                                            shipment.remarks,
                                            shipment.mode,
                                            shipment.service_type, 
                                            shipment.action_button,
                                            action
                                        ]).node().id = id;
+                                       console.log(shipment);
+                                       
        
                                         table.draw(false);
                                         scan_sound(1);
