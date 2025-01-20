@@ -115,7 +115,7 @@ class AdminCRMController extends Controller
 
     public function add_request(Request $request){
         // only allow retail COD bookings to change COD amount
-        
+
         // Check if the request contains a single shipment or multiple shipments
         $shipment_ids = $request->shipment_id 
             ? [$request->shipment_id] 
@@ -124,9 +124,12 @@ class AdminCRMController extends Controller
                 : (is_array($request->shipment_ids) ? $request->shipment_ids : [])
             );
         $retail_shipments = RetailShipment::whereIn('shipment_id', $shipment_ids)->get();
-        foreach ($retail_shipments as $retail_shipment) {
-            if ($retail_shipment->shipping_mode != 3) {
-                return ['status' => 0, 'error' => 'Retail Shipment amount can\'t be changed!'];
+
+        if (request()->complaint_id == 12 && $retail_shipments->isNotEmpty()) {
+            foreach ($retail_shipments as $retail_shipment) {
+                if ($retail_shipment->shipping_mode != 3) {
+                    return ['status' => 0, 'error' => 'Retail Shipment amount can\'t be changed!'];
+                }
             }
         }
 
