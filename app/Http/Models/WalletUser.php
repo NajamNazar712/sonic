@@ -18,7 +18,7 @@ class WalletUser extends Model
 
     public function wallet_user()
     {
-        return $this->belongsTo('App\Http\Models\Shipper\User');
+        return $this->belongsTo('App\Http\Models\Shipper\User','user_id','id');
 
     }
 }

@@ -10169,14 +10169,17 @@ class APIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $Wallet_user = WalletUser::find($request->wallet_id);
-            $user = $Wallet_user->wallet_user;
-            if(empty($user->api_token)){
-                $user->api_token =  uniqid(base64_encode(Str::random(60)));
-                $user->save();
+            $Wallet = WalletUser::find($request->wallet_id);
+            if(isset($Wallet->wallet_user)) {
+                $user = $Wallet->wallet_user;
+                if (empty($user->api_token)) {
+                    $user->api_token = uniqid(base64_encode(Str::random(60)));
+                    $user->save();
+                }
+                return response()->json(['status' => 1,'wallet_id'=> $request->wallet_id,'token' =>  $user->api_token]);
             }
 
-            return response()->json(['status' => 1, 'token' =>  $user->api_token]);
+            return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => 'USer Not Found']);
         }
     }
 
