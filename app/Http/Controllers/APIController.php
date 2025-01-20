@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\FafCharges;
 use App\FinjaSmsLog;
 use App\Http\Models\WalletUser;
+use App\Models\FinjaRequestLog;
 use App\ShipmentAdditionalCharges;
 use DB;
 use SnappyPDF;
@@ -10137,6 +10138,7 @@ class APIController extends Controller
 
         $rules = [
             'tracking_number' => ['required', 'exists:shipments,tracking_number'],
+            'wallet_id' => ['required', 'exists:wallet_users,wallet_id'],
             'charges' => ['required', 'numeric'],
         ];
 
@@ -10147,6 +10149,10 @@ class APIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
+            $finja_request_log = new FinjaRequestLog();
+            $finja_request_log->requested = json_encode($request->all());
+            $finja_request_log->ip_address = $request->ip();
+            $finja_request_log->save();
             $shipment_id = Shipment::where('tracking_number', $request->tracking_number)->value('id');
             ShipmentAdditionalCharges::where('shipment_id', $shipment_id)->update([
                 'wallet_charges' => $request->charges,
