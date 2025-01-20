@@ -466,11 +466,18 @@ class AdminPackagingMaterialController extends Controller
                 return $dropdown;
             });
 
+            // if ($request->get('requested_from_date') && $request->get('requested_to_date')) {
+            //     $from = date('Y-m-d 00:00:01', strtotime($request->get('requested_from_date')));
+            //     $to = date('Y-m-d 23:59:59', strtotime($request->get('requested_to_date')));
+            //     $requests->whereBetween('packaging_material_requests.created_at', [$from, $to]);
+            // }
+
             if ($request->get('requested_from_date') && $request->get('requested_to_date')) {
-                $from = date('Y-m-d 00:00:01', strtotime($request->get('requested_from_date')));
-                $to = date('Y-m-d 23:59:59', strtotime($request->get('requested_to_date')));
+                $from = \Carbon\Carbon::createFromFormat('d F, Y', $request->get('requested_from_date'))->startOfDay()->toDateTimeString();
+                $to = \Carbon\Carbon::createFromFormat('d F, Y', $request->get('requested_to_date'))->endOfDay()->toDateTimeString();
                 $requests->whereBetween('packaging_material_requests.created_at', [$from, $to]);
             }
+            
 
     //
             return $datatables
