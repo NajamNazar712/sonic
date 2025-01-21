@@ -137,6 +137,8 @@ use App\Http\Models\ShipmentLedger;
 use Illuminate\Support\Str;
 use App\Jobs\WalletLogDispatchJob;
 use App\Models\FinjaLogSettlementRecord;
+use App\Jobs\WalletSettlementFromDonePayments;
+use App\Models\FingaApiLog;
 
 class AdminFinanceController extends Controller
 {
@@ -8224,6 +8226,7 @@ class AdminFinanceController extends Controller
             })
             //leftJoin to join as admin will always present
             ->join('admins as sale_admin','sale_admin.id','=','spt.admin_id')
+            ->leftjoin('wallet_users as wu', 'wu.user_id', 'u.id')
             ->select('done_payments.user_id as user_id', 'done_payments.id as id', 'done_payments.id as payment_id', 'u.name as shipper', 
             'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 
             'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 
@@ -8233,7 +8236,7 @@ class AdminFinanceController extends Controller
             'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 'done_payments.ibft_charges', 
             'dpc.packaging_charges', 'dpc.adjustment as adjustment_charges', 'done_payments.status_updated_at as status_updated_at', 
             'dpc.wht as total_wht', 'done_payments.created_at as start_date', 'done_payments.updated_at as end_date', 'ad.name as admin_name', 
-            'done_payments.updated_at as updated_at','sts.status as star_status','u.payment_cycle_days as payment_cycle_days','pc.name as payment_cycle', 'pc.id as payment_cycle_id', 'dpc.sms_charges as total_sms_charges','done_payments.arrival_shipment as arrival_shipment_shipments_count','done_payments.arrival_shipment', 'sale_admin.name as sale_person_name');
+            'done_payments.updated_at as updated_at','sts.status as star_status','u.payment_cycle_days as payment_cycle_days','pc.name as payment_cycle', 'pc.id as payment_cycle_id', 'dpc.sms_charges as total_sms_charges','done_payments.arrival_shipment as arrival_shipment_shipments_count','done_payments.arrival_shipment', 'sale_admin.name as sale_person_name','wu.id as wallet_user');
 
         if (session('department_id') == 7) {
             if (!in_array(session('id'), session('sale_users_bypass'))) {
@@ -8341,6 +8344,14 @@ class AdminFinanceController extends Controller
              $done_payments->where('sts.status', 1);
         }
 
+        if ($wallet_user = $request->get('wallet_filter')) {
+            if($wallet_user == 1) {
+                $done_payments->whereNotNull('wu.id');
+
+            } else {
+                $done_payments->whereNull('wu.id');
+            }
+        }
 
         $datatables = Datatables::of($done_payments)
             ->setTotalRecords($count)
@@ -8356,6 +8367,14 @@ class AdminFinanceController extends Controller
                     return '<p><i class="star_shippers_icon"></i>' . $done_payment->shipper . '</p>';
                 } else {
                     return $done_payment->shipper;
+                }
+            })
+            ->addColumn('wallet_error_logs', function ($done_payment) {
+                
+                if($done_payment->status == 3) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle wallet_error_log" data-target-id="' . $done_payment->id . '"> Wallet Error Logs</button>';
+                } else {
+                    return '-';
                 }
             })
             ->addColumn('id_padded', function ($done_payment) {
@@ -8504,6 +8523,8 @@ class AdminFinanceController extends Controller
                     return 'Paid';
                 } else if ($done_payment->status == 2) {
                     return 'Reverted';
+                } else if ($done_payment->status == 3) {
+                    return 'Settlement Requested';
                 } else {
                     return 'Unknown';
                 }
@@ -8514,6 +8535,9 @@ class AdminFinanceController extends Controller
                 } else if ($done_payment->status == 1) {
                     return $done_payment->status_updated_at;
                 } else if ($done_payment->status == 2) {
+                    return $done_payment->status_updated_at;
+                }
+                else if ($done_payment->status == 3) {
                     return $done_payment->status_updated_at;
                 } else {
                     return 'Unknown';
@@ -8612,6 +8636,12 @@ class AdminFinanceController extends Controller
                   <div class="dropdown-menu dropdown-menu-sm">
                     <button type="button" class="dropdown-item view_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Details</div></button>
                     <button type="button" class="dropdown-item view_status_history"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Status History</div></button>';
+                
+                if($done_payment->wallet_user != null && ($done_payment->status == 0 || $done_payment->status == 3)) {
+                    // $dropdown .= '<button type="button" class="dropdown-item update_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Paid / Re-try</div></button>';
+
+                    $dropdown .= '<button type="button" class="dropdown-item wallet_settlement" data-target-id=' . $done_payment->id . '  rel="wallet_settlement"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Paid / Re-try</div></button>';
+                }
 
                 if (session('role_id') == 1 || session('department_id') == 4) {
                     $dropdown .= '<button type="button" class="dropdown-item update_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update Details</div></button>';
@@ -8650,7 +8680,7 @@ class AdminFinanceController extends Controller
                 }
             })
             ->orderColumn('phone_numbers', 'u.phone $1, u.phone2 $1')
-            ->rawColumns(['shipper','payment_id','delivered_shipments','returned_shipments','adjusted_shipments','arrival_shipment', 'action']);
+            ->rawColumns(['shipper','payment_id','delivered_shipments','returned_shipments','adjusted_shipments','arrival_shipment', 'action', 'wallet_error_logs']);
 
         
         return $datatables->make(true);
@@ -21260,5 +21290,45 @@ class AdminFinanceController extends Controller
         return false;
     }
     
+
+    public function mark_settlement(Request $request) {
+
+        $done_payment = DonePayment::where('id',  $request->id)->update(['status' => 3, 'status_updated_at' => Carbon::now()]);
+
+        if($done_payment) {
+            WalletSettlementFromDonePayments::dispatch($request->id);
+        }
+
+        return response()->json(['status'=> 1 , 'success' => 'Wallet Settlement Request sent.!']);
+
+    }
+
+    public function wallet_error_logs(Request $request) {
+
+        $done_payment_shipments = DonePaymentShipment::join('shipments as s','s.id', 'done_payment_shipments.shipment_id')
+        ->join('finja_log_settlement_records as sac', 'done_payment_shipments.shipment_id', '=', 'sac.shipment_id')
+        ->where('done_payment_shipments.done_payment_id', $request->id)
+        ->where('done_payment_shipments.wallet_action_bid', 1)
+        ->where(function ($query) {
+            $query->where('sac.wallet_settlement_updated', 0);
+        })
+        ->select(['done_payment_shipments.shipment_id', 's.tracking_number'])->get();
+
+        $data = [];
+        foreach($done_payment_shipments as $dps) {
+
+            $record = FingaApiLog::where('shipment_id', $dps->id)->where('nature', 'settlement-response')->where('status', 'error')->latest()->first();
+
+            if($record) {
+
+                $data[] = [
+                    'tracking_number' => $dps->tracking_number,
+                    'created_at' => $record->created_at,
+                    'error' => $record->details
+                ];
+            }
+        }
+        return response()->json(['data' => $data]);
+    }
 
 }

@@ -1734,6 +1734,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('generate_report_to_email', 'Admins\AdminFinanceController@done_payments_generate_report_to_email')->name('generate_report_to_email');
             Route::post('excel_store', 'Admins\AdminFinanceController@done_payments_excel_store')->name('excel_store');
             Route::get('view_status_history', 'Admins\AdminFinanceController@view_status_history')->name('view_status_history');
+            Route::get('mark_settlement', 'Admins\AdminFinanceController@mark_settlement')->name('mark_settlement');
+            Route::get('wallet_error_logs', 'Admins\AdminFinanceController@wallet_error_logs')->name('wallet_error_logs');
+            
         });
 
         Route::prefix('invoices')->name('invoices.')->group(function () {
