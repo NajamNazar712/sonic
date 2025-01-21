@@ -76,23 +76,23 @@
 
 									<div class="row align-items-center justify-content-center">
 										<div class="col-2">
-{{--											<h3 class="heading" data-toggle="tooltip" data-placement="bottom" title data-original-title="For view estimated shipment charges only."><strong>For Bulk Shipment (update plus view)</strong></h3>--}}
+											<h3 class="heading" data-toggle="tooltip" data-placement="bottom" title data-original-title="For view estimated shipment charges only."><strong>For Bulk Shipment (View)</strong></h3>
 										</div>
 										<div class="col-4">
 											<div class="form-group">
-{{--												<input type="file" name="shipments" class="w-100 p-1 border-primary" title="Select File" data-rule-required="true" data-msg-required="File is required" data-rule-extension="xls|xlsx" data-msg-extension="Only file with extension xls or xlsx allowed" data-rule-accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-msg-accept="Only Excel file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">--}}
+												<input type="file" name="shipments" class="w-100 p-1 border-primary" title="Select File" data-rule-required="true" data-msg-required="File is required" data-rule-extension="xls|xlsx" data-msg-extension="Only file with extension xls or xlsx allowed" data-rule-accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-msg-accept="Only Excel file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
 											</div>
 										</div>
 
 										<div class="col-1">
 											<div class="form-group">
-{{--												<button type="submit" name="upload" class="btn btn-primary">Upload</button>--}}
+												<button type="submit" name="upload" class="btn btn-primary">Upload</button>
 											</div>
 										</div>
 
 										<div class="col-2">
 											<div class="form-group">
-{{--												<a href="{{ asset('file/Bulk Shipment Weight Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>--}}
+												<a href="{{ asset('file/Bulk Shipment Weight Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
 											</div>
 										</div>
 									</div>
