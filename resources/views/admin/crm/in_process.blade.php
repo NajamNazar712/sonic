@@ -411,7 +411,8 @@
                                 row.push(values.arrival);                                     // Arrival Date
                                 row.push(values.arrival_today);                                // Arrival to Today (TAT)
                                 row.push(values.status);                                      // Shipment Status
-                                row.push(values.last_status_date);                            // Last Status Date
+                                // row.push(values.last_status_date);                            // Last Status Date
+                                row.push(values.last_date_status);                            // Last Status Date
                                 row.push(values.last_status_today);                            // Last status to Today (TAT)
                                 row.push(values.last_status_updated_by);                      // Last status by
                                 row.push(values.case_nature);                                 // Case Nature
@@ -806,7 +807,8 @@
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},                               // Arrival Date
                     {data: 'arrival_today', name: 'arrival_today', class: 'align-middle arrival_today', orderable: false, searchable: false}, // Arrival to Today (TAT)
                     {data: 'status', name: 'status', class: 'align-middle shipment_status'},                               // Shipment Status
-                    {data: 'last_status_date', name: 'crm_requests.updated_at', class: 'align-middle last_status_date'},          // Last Status Date
+                    // {data: 'last_status_date', name: 'crm_requests.updated_at', class: 'align-middle last_status_date'},          // Last Status Date
+                    {data: 'last_date_status', name: 'last_updated_sj.created_at', class: 'align-middle last_date_status'},          // Last Status Date from shipments journey
                     {data: 'last_status_today', name: 's.updated_at', class: 'align-middle last_status_today', orderable: false}, // Last status to Today (TAT)
                     {data: 'last_status_updated_by', name: 'last_status_upd_by.name', class: 'align-middle last_status_updated_by'},                // Last status by
                     {data: 'case_nature', name: 'crcn.id', class: 'align-middle case_nature'},                             // Case Nature
