@@ -1172,6 +1172,7 @@
 							'<input type="hidden" id="wallet_payment_id" value = '+ id +'>'+
 							'<th class="border-primary border-darken-1">S. No.</th>' +
 							'<th class="border-primary border-darken-1">Tracking Number</th>' +
+							'<th class="border-primary border-darken-1">Type</th>' +
 							'<th class="border-primary border-darken-1">Error</th>' +
 							'<th class="border-primary border-darken-1">Created At</th>' +
 							
@@ -1185,6 +1186,7 @@
 									modalContent += '<tr>';
 									modalContent += '<td>' + (index + 1) + '</td>'; 
 									modalContent += '<td>' + data.tracking_number + '</td>'; 
+									modalContent += '<td>' + data.type + '</td>'; 
 									modalContent += '<td>' + data.error + '</td>'; 
 									modalContent += '<td>' + data.created_at + '</td>'; 
 									modalContent += '</tr>';                            
