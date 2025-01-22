@@ -14,8 +14,8 @@
                     <div class="row justify-content-center">
                         <div class="col-3">
                             <div class="form-group">
-                                <input type="text" name="tracking_numbers" id="dncc_number" class="dt_search tracking_numbers"
-                                    placeholder="DNCC Number(s)" data-tags-input-name="dncc_number">
+                                <input type="text" name="tracking_numbers" id="tracking_number" class="dt_search tracking_numbers"
+                                    placeholder="Tracking Number(s)" data-tags-input-name="tracking_number">
                             </div>
                         </div>
                         <div class="form-group ml-1">
@@ -136,9 +136,9 @@
                 params.length = -1;
                 params.excel = true;
                 var jsonResult = $.ajax({
-                    url: '{{ route('admin.finance.dncc_wise_tracking_number_info.list') }}',
+                    url: '{{ route('admin.reports.lost_and_case_closed_summary_report.list') }}',
                     data: function(d) {
-                        d.tracking_numbers = $('#dncc_number').val();
+                        d.tracking_numbers = $('#tracking_number').val();
                     },
                     data: params,
                     success: function(result) {
@@ -195,9 +195,9 @@
             },
             serverSide: true,
             ajax: {
-                url: '{{ route('admin.finance.dncc_wise_tracking_number_info.list') }}',
+                url: '{{ route('admin.reports.lost_and_case_closed_summary_report.list') }}',
                 data: function(d) {
-                    d.dncc_numbers = $('#dncc_number').val();
+                    d.tracking_numbers = $('#tracking_number').val();
                 }
             },
             rowId: 'shId',
@@ -242,8 +242,8 @@
         });
 
         //Selectize
-        var select = $('#dncc_number').selectize({
-            placeholder: 'DNCC Number(s)',
+        var select = $('#tracking_number').selectize({
+            placeholder: 'Tracking Number(s)',
             delimiter: ',',
             createOnBlur: true,
             persist: false,
@@ -270,8 +270,8 @@
         });
 
         $('#track_form').bind('submit', function(e) {
-            var dncc_numbers = $('#track_form .dncc_numbers').val();
-            if (dncc_numbers != '') {
+            var tracking_numbers = $('#track_form .tracking_numbers').val();
+            if (tracking_numbers != '') {
                 table.draw();
             }
             e.preventDefault();

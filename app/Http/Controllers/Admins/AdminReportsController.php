@@ -16087,9 +16087,25 @@ class AdminReportsController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 815);
         }
+        $trackingNumbers = explode(',', $request->tracking_numbers);
 
+        dd($trackingNumbers);
 
-        // $query = 
+        $query = DB::connection('reports')->table('shipments')
+        ->leftJoin('shipments_journey as sj', function ($join)  {
+            $join->on('sj.shipment_id', '=', 'shipments.id')
+                ->whereIn('sj.shipper_status_id', [14, 30, 36, 37])
+                ->where(
+                    'sj.id',
+                    '=',
+                    DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(18))')
+                );
+        })
+        ->leftJoin('lost_shipment_responsibles as lsr', 'lsr.shipment_id', 'shipments.id')
+        ->select(
+            'shipments.id',
+            'shipments.'
+        );
 
 
 
