@@ -20403,7 +20403,11 @@ class AdminFinanceController extends Controller
     public function wallet_user_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 816);
-        return view('admin.finance.wallet.index');
+        if (session('role_id') == 1 || in_array(1022, session('permissions'))) {
+            return view('admin.finance.wallet.index');
+        } else {
+            return redirect()->route('admin.access_denied');
+        }
     }
 
     public function walle_user_list(Request $request)
