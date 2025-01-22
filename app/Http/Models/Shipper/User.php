@@ -104,5 +104,8 @@ class User extends Authenticatable
     public function wallet() {
         return $this->hasOne('App\Http\Models\WalletUser','user_id', 'id')->where('substitute_user_id',0);
     }
+  public function sub_users() {
+        return $this->hasMany('App\Http\Models\Shipper\SubstituteUser','user_id', 'id')->where('status',1);
+    }
 
 }

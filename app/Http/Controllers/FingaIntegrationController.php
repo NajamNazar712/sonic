@@ -9,10 +9,14 @@ use App\Models\FingaApiLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
-
+use Auth;
 class FingaIntegrationController extends Controller
 {
 
+    public function __construct() {
+        $this->middleware('auth:web,substitute_users');
+        $this->middleware('Permission')->except('wordpress_access_denied', 'wordpressAddressView','wordpressBankView');
+    }
     public static function getToken($api) {
 
         $response = Http::withHeaders([
@@ -34,29 +38,38 @@ class FingaIntegrationController extends Controller
 
     }
     public function login(Request $request) {
-        $wallet = auth()->user()->load('wallet');
-        $user = isset($wallet->wallet)??null;
-        if($user) {
-            $api = config('app.FINGA_URL');
-            $user = WalletUser::where('user_id', session('user_id'))->where('substitute_user_id', 0)->first();
-            $token = $this->getToken($api);
-            $url = $this->getLoginUrl($api, $token, $user->phone, $user->cnic, $user->email);
 
-            if ($url) {
-                return view('client.finja_dashboard')->with(['url' => $url]);
-            }
+        $api = config('app.FINGA_URL');
+        $token = $this->getToken($api);
+        if (session('user_type') == 1) {
+            $user = WalletUser::where('user_id', session('user_id'))->where('substitute_user_id', 0)->first();
+        }else{
+            $user = WalletUser::where('user_id', session('user_id'))->where('substitute_user_id', session('substitute_user_id'))->first();
         }
-        return  redirect()->back();
+
+        if(!empty($user)) {
+
+            $phone = $user->phone;
+            $cnic = $user->cnic;
+            $email = $user->email;
+
+            $url = $this->getLoginUrl($api, $token, $phone, $cnic, $email);
+
+            return view('client.finja_dashboard')->with(['url' => $url]);
+        }else{
+            return redirect()->back();
+        }
+
     }
 
     public static function signUp($user = array()) {
 
-        $user = (object) $user;
         $api = config('app.FINGA_URL');
         $token = self::getToken($api);
         $cnic_front = '';
         $cnic_back = '';
         $user_id = session('user_id');
+        $parent_user = User::find($user_id);
 
         if($token) {
             $result = array();
@@ -67,62 +80,83 @@ class FingaIntegrationController extends Controller
             }
 
             $requestPayload = [
-                "client_id" => $user_id,
-                "client_name" => $user->name,
-                "users" => [
-                    [
-                        "cnic" => $user->cnic,
-                        "email" => $user->email,
-                        "mobile_no" => $user->phone,
-                        "name" => $user->name,
-                        "cnic_front_image_url" => $cnic_front,
-                        "cnic_back_image_url" => $cnic_front
-                    ]
-                ]
+                "client_id" => $parent_user->id,
+                "client_name" => $parent_user->name,
             ];
+            foreach ($user as $key2=> $data){
+                $requestPayload['users'][] =  [
+                    "cnic" => $data['cnic'],
+                    "email" => $data['email'],
+                    "mobile_no" => $data['phone'],
+                    "name" => $data['name'],
+                    "cnic_front_image_url" => $cnic_front,
+                    "cnic_back_image_url" => $cnic_back
+                ];
+            }
 
-            $url = self::getLoginUrl($api, $token, $user->phone, $user->cnic, $user->email);
-            $response = Http::withHeaders([
-                'accept' => 'application/json',
-                'Authorization' => "Bearer " . $token,
-            ])->post($api . 'wallet/onboard-users/', $requestPayload);
 
-            FingaApiLog::create([
-                'nature' => 'request',
-                'status' => 1,
-                'details' => json_encode($requestPayload, JSON_PRETTY_PRINT), // Save as JSON
-            ]);
+            $response = Http::withHeaders(['accept' => 'application/json','Authorization' => "Bearer " . $token,])->post($api . 'wallet/onboard-users/', $requestPayload);
+            FingaApiLog::create(['nature' => 'request','status' => 1,'details' => json_encode($requestPayload, JSON_PRETTY_PRINT)]);
 
-            if($response->successful()) { 
-           
+            if ($response->successful()) {
                 $body = $response->getBody();
                 $body = json_decode($body);
 
-                $mobile_no = $body->users[0]->mobile_no;
-                $cnic = $body->users[0]->cnic;
-                $email = $body->users[0]->email;
+                self::apiLog('on-boarding-response', 'success', $body, null);
 
-                
-                self::apiLog('on-boarding-response', 'success', $body ,null);
 
-                $result['url'] = $url;
-                $result['wallet_id'] = $body->wallet_id;
+                // Ensure the error structure is an array
+                $success = [
+                    'status' => $body->status ?? 'success',
+                    'wallet_id' => $body->wallet_id ?? null,
+                    'users' => []
+                ];
+
+                if (!empty($body->users)) {
+                    foreach ($body->users as $user) {
+                        $success['users'][] = [
+                            'mobile_no' => $user->mobile_no ?? null,
+                            'email' => $user->email ?? null,
+                            'cnic' => $user->cnic ?? null,
+                            'id' => $user->id ?? null,
+                        ];
+                    }
+                }
+                $result = $success;
+
 
             } else {
                 $body = $response->getBody();
                 $body = json_decode($body);
 
-                self::apiLog('on-boarding-response', 'error', $body ,null);
-            
-               $result['error'] = $body;
+                // Ensure the error structure is an array
+                $errorData = [
+                    'status' => $body->status ?? 'error',
+                    'wallet_id' => $body->wallet_id ?? null,
+                    'users' => []
+                ];
+
+                if (!empty($body->users)) {
+                    foreach ($body->users as $user) {
+                        $errorData['users'][] = [
+                            'mobile_no' => $user->mobile_no ?? null,
+                            'status' => $user->status ?? 'error',
+                            'message' => (array)($user->message ?? []),
+                        ];
+                    }
+                }
+
+                self::apiLog('on-boarding-response', 'error', $body, null);
+                $result['error'] = $errorData;
             }
-
             return $result;
-            
         }
-    } 
 
-    private static function getLoginUrl($api, $token, $mobile_no, $cnic, $email ) {
+    }
+
+
+
+    public static function getLoginUrl($api, $token, $mobile_no, $cnic, $email ) {
 
         $mobile_no = str_replace('-', '', $mobile_no);
         $mobile_no = ltrim($mobile_no, '0');
@@ -163,6 +197,18 @@ class FingaIntegrationController extends Controller
         if(session('user_type') == 1) {
             $user = User::find(session('user_id'));
             return view('client.finja_onboarding')->with(['user' => $user]);
+        }else{
+            return redirect()->back();
+        }
+    }
+    public function wallet_user(Request  $request){
+        if(session('user_type') == 1) {
+            $user = User::find(session('user_id'));
+            if(isset($user->sub_users)) {
+                return view('client.finja_onboarding_substitute')->with(['user' => $user]);
+            }else{
+                return redirect()->back();
+            }
         }else{
             return redirect()->back();
         }

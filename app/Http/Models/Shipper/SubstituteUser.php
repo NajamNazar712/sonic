@@ -25,4 +25,8 @@ class SubstituteUser extends Authenticatable
     public function shipper() {
         return $this->belongsTo('App\Http\Models\Shipper\User', 'user_id', 'id');
     }
+
+    public function sub_wallet() {
+        return $this->belongsTo('App\Http\Models\WalletUser','id', 'substitute_user_id');
+    }
 }

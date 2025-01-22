@@ -125,9 +125,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Yajra\Datatables\Datatables;
 use App\Jobs\WalletSignUpLPendingRecordLogs;
-
+use Validator;
 //use Illuminate\Support\Facades\Auth;
 
 class ShipperDashboardController extends Controller
@@ -2636,62 +2637,154 @@ class ShipperDashboardController extends Controller
         }
     }
 
-    public function updateProfileWallet(Request $request)
+    public function SignInWalletUser(Request $request)
     {
-        //1 for Admin, 0 for User
+
         if (session('user_type') == 1) {
-            $request->validate([
-                'cnic'=>'required|string|max:255',
-                'name'=>'required|string|max:255',
-                'phone'=>'required|string|max:255',
-                'email'=>'required|email|between:0,100',
-            ]);
-            $flag = true;
-            $user = WalletUser::where('email', $request->email)->orWhere('phone', $request->phone)->first();
-            if($user){
-                if(session('user_id') == $user->user_id) {
-                    $flag = true;
+            $login_request = $request->input('login_request',null);
+            if($login_request){
+                $api = config('app.FINGA_URL');
+                $token = FingaIntegrationController::getToken($api);
+                $url = FingaIntegrationController::getLoginUrl($api, $token, $request->phone, $request->cnic, $request->email);
+                $dashboardUrl = route('cod.wallet.finja_dashboard', ['url' => $url]);
+                return response()->json(['status' => 1, 'redirect_url' => $dashboardUrl]);
+
+            }
+        }
+    }
+
+    public function updateprofilewalletbulk(Request $request)
+    {
+        if (session('user_type') == 1) {
+
+            $names = [
+                'name' => 'Name ',
+                'phone' => 'Phone',
+                'cnic' => 'CNIC',
+                'email' => 'Email',
+            ];
+
+            $messages = [
+                'required' => ':attribute is Required.',
+                'required_if' => ':attribute is Required when :other is :value.',
+                'filled' => ':attribute is Optional but cannot be Empty if Present.',
+                'integer' => ':attribute must be an Integer.',
+                'numeric' => ':attribute must be a Number.',
+                'boolean' => ':attribute must be 0 or 1.',
+                'digits_between' => ':attribute must be between :min and :max Digits.',
+                'email' => ':attribute must be a Valid Email Address.',
+                'exists' => 'Given :attribute is of Invalid ID.',
+                'unique' => ':attribute is already Present.',
+                'date_format' => ':attribute must be of valid Format, required Format is: YYYY-MM-DD.',
+                'in' => ':attribute must be No or Yes.',
+                'check_duplicate' => 'Phone Or Email Already Exists',
+                'check_cnic' => 'Cnic Already Exists',
+                'phone' => 'Phone starts with 03 or 923 followed by 9 digits',
+                'name' => 'Only alphabetic characters and spaces',
+            ];
+
+            $rules = [
+                'name' => ['required', 'max:255', 'regex:/^[a-zA-Z\s]+$/'],
+                'email' => ['required', 'max:255', 'email', 'check_duplicate'],
+                'phone' => ['required', 'max:255', 'regex:/^(03|923)[0-9]{2,3}-?[0-9]{7}$/'],
+                'cnic' => ['required', 'max:255','check_cnic']
+            ];
+
+
+            Validator::extend('check_duplicate', function ($attribute, $value, $parameters, $validator)  {
+                $data = $validator->getData();
+                $phone = $data['phone'];
+                $email = $data['email'];
+
+                $user = WalletUser::where('email', $email)->orWhere('phone', $phone);
+                if($user->exists()) {
+                    return FALSE;
+                } else{
+                    return true;
                 }
-                else{
-                    $flag = false;
+            });
+
+            Validator::extend('check_cnic', function ($attribute, $value, $parameters, $validator)  {
+                $data = $validator->getData();
+                $cnic = $data['cnic'];;
+
+                $user = WalletUser::where('cnic', $cnic);
+                if($user->exists()) {
+                    return FALSE;
+                } else{
+                    return true;
+                }
+            });
+            $errors = array();
+            $data = array();
+
+            foreach ($request->users as $key => $row) {
+                $row_id = $row['id'];
+                $validate = Validator::make($row, $rules, $messages);
+
+                $validate->setAttributeNames($names);
+
+                if ($validate->fails()) {
+                    foreach ($validate->errors()->toArray() as $key => $error_array) {
+                        foreach ($error_array as $error) {
+                            if (!isset($errors[$row_id][$key])) {
+                                $errors[$row_id][$key] = $error;
+                            }
+                        }
+                    }
+
+
+                } else {
+                    $data[$key] = [
+                        'name' => $row['name'],
+                        'cnic' => $row['cnic'],
+                        'phone' => $row['phone'],
+                        'email' => $row['email'],
+                        'user_id' => session('user_id'),
+                        'status' => 1,
+                        'substitute_user_id' => isset($row['substitute_user_id']) ? $row['substitute_user_id'] : 0
+                    ];
                 }
             }
-            if($flag == true){
+            if(!empty($errors)){
+                return response()->json(['status' => 0, 'error' => $errors]);
+            }else{
 
-                $data = [
-                    'name'=>$request->name,
-                    'cnic'=>$request->cnic,
-                    'phone'=>$request->phone,
-                    'email'=>$request->email,
-                    'user_id'=>session('user_id'),
-                    'status'=>1,
-                ];
-
+                $api = config('app.FINGA_URL');
+                $token = FingaIntegrationController::getToken($api);
+                $login_data = collect($data)->first();
+                $url = FingaIntegrationController::getLoginUrl($api, $token, $login_data['phone'], $login_data['cnic'], $login_data['email']);
                 $finja = FingaIntegrationController::signUp($data);
+
                 if (isset($finja['error'])) {
                     $finjaArray = json_decode(json_encode($finja), true);
 
-                    $errorMessages = collect($finjaArray['error']['users'][0]['message'])
-                        ->flatten()
-                        ->all();
+                    $errorMessages = collect($finjaArray['error']['users']);
 
-                    session()->flash('errorMessages', $errorMessages);
+                    foreach ($errorMessages as $error_val){
+                        $key = array_key_first(array_filter($data, function ($row) use ($error_val) {
+                            return $row['phone'] === $error_val['mobile_no'];
+                        }));
 
-                    return response()->json(['status' => 0, 'error'=>$errorMessages]);
-                }else{
-                    $data['wallet_id'] =$finja['wallet_id'];
+                        $data[$key]['message'] = $error_val['message'];
+
+                    }
+                    return response()->json(['status' => 0, 'error_2' => $data]);
+                } else {
+
+                    $final['url'] = $url;
+                    foreach ($data as $key=>$value) {
+                        $data[$key]['wallet_id'] = $finja['wallet_id'];
+                    }
                     WalletUser::wallet_create($data);
                     WalletSignUpLPendingRecordLogs::dispatch(session('user_id'));
-                    $dashboardUrl = route('cod.wallet.finja_dashboard', ['url' => $finja['url']]);
-                    return response()->json(['status' => 1, 'redirect_url' => $dashboardUrl]);
+                    return response()->json(['status' => 1, 'output' => $final]);
 
                 }
             }
-            else{
-                //return redirect()->back()->with(['error'=>["Email Address and Phone Number must be unique"]]);
-                return response()->json(['status' => 0, 'error'=>['Email Address and Phone Number must be unique']]);
-            }
+
         }
+
         return response()->json(['status' => 1, 'success'=>'Profile Information Successfully Updated"']);
     }
 }

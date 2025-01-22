@@ -3,7 +3,12 @@
 @section('title', 'Finga Dashboard')
 
 @section('content')
-<div class="card" style="height: 100vh; margin: 0; padding: 0; border: none;">
+    <div class="app-content content">
+        <div class="content-wrapper">
+            <div class="content-header row">
+            </div>
+            <div class="content-body">
+                 <div class="card" style="height: 100vh; margin: 0; padding: 0; border: none;">
                     <div class="card-content" aria-expanded="true" style="height: 100%; padding: 0;">
                         <div class="card-body" style="height: 100%; padding: 0;">
                             <div class="col-12" style="height: 100%; padding: 0;">
@@ -11,7 +16,10 @@
                             </div>
                         </div>
                     </div>
-                </div> 
+                </div>
+            </div>
+        </div>
+    </div>
 
 @endsection
 
