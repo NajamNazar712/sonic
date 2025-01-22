@@ -40,6 +40,8 @@ class WalletSettlementFromDonePayments implements ShouldQueue
     {
         
         $done_payment_shipments = DonePaymentShipment::join('shipments as s','s.id', 'done_payment_shipments.shipment_id')
+        ->leftjoin('shipment_additional_charges as sc', 'sc.shipment_id', 's.id')
+        ->leftjoin('shipment_services_charges as ssc', 'ssc.shipment_id', 's.id')
         ->join('wallet_users as wu', 'wu.user_id', 's.user_id')
         ->join('finja_log_settlement_records as sac', 'done_payment_shipments.shipment_id', '=', 'sac.shipment_id')
         ->where('done_payment_shipments.done_payment_id', $this->payment_id)
@@ -47,7 +49,7 @@ class WalletSettlementFromDonePayments implements ShouldQueue
         // ->where(function ($query) {
         //     $query->where('sac.wallet_settlement_updated', 0);
         // })
-        ->select(['done_payment_shipments.*', 'wu.user_id as user_id', 'wu.wallet_id as wallet_id', 's.tracking_number', 's.cash_handling_charges', 's.insurance_charges','s.replacement_charges','s.try_and_buy_charges','s.intercept_charges','s.nsa_osa_charges','s.esc_charges','s.return_charges', 'sac.wallet_settlement_updated', 's.weight_charges', 's.fuel_surcharge'])->get();
+        ->select(['done_payment_shipments.*', 'wu.user_id as user_id', 'wu.wallet_id as wallet_id', 's.tracking_number', 's.cash_handling_charges', 's.insurance_charges','s.replacement_charges','s.try_and_buy_charges','s.intercept_charges','s.nsa_osa_charges','s.esc_charges','s.return_charges', 'sac.wallet_settlement_updated', 's.weight_charges', 's.fuel_surcharge','sc.faf_charges', 'ssc.reverse_pickup_charges'])->get();
         //Log::info($done_payment_shipments);
         $successfull_record = [];
 
@@ -64,10 +66,8 @@ class WalletSettlementFromDonePayments implements ShouldQueue
                     "shipment_id" =>  $dps->tracking_number,
                     "amount" => $dps->amount,
                     "charges" => [
-                        'faf_charges' =>  0,
-                        'arrival_charges_gst' => 0,
-                        'arrival_sms_charges' => 0,
-                        'arrival_charges' =>  intval($dps->weight_charges),
+                        'faf_charges' =>  intval($dps->faf_charges),
+                        'weight_charges' =>  intval($dps->weight_charges),
                         'fuel_surcharge' =>  intval($dps->fuel_surcharge),
                         'cash_handling_charges' => intval($dps->cash_handling_charges),
                         'insurance_charges' => intval($dps->insurance_charges),
@@ -76,7 +76,7 @@ class WalletSettlementFromDonePayments implements ShouldQueue
                         'intercept_charges' => intval($dps->intercept_charges),
                         'non_service_area_charges' => intval($dps->nsa_osa_charges),
                         'esc_charges' => intval($dps->esc_charges),
-                        'reverse_pickup_charges' => 0,
+                        'reverse_pickup_charges' => intval($dps->reverse_pickup_charges),
                         'return_charges' => intval($dps->return_charges),
                         'gst_charges' => intval($dps->gst),
                         'sms_charges' => intval($dps->sms_charges)

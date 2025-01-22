@@ -7619,7 +7619,7 @@ class AdminFinanceController extends Controller
                                                 "amount" => $shipment->amount, 
                                                 "order_created_date" => $shipment->created_at,
                                                 "charges" => [
-                                                    'arrival_charges' =>  intval($shipment->weight_charges),
+                                                    'weight_charges' =>  intval($shipment->weight_charges),
                                                     'fuel_surcharge' =>  intval($shipment->fuel_surcharge),
                                                     'faf_charges' => $shipment->faf_charges_data ? intval($shipment->faf_charges_data->faf_charges) : 0,
                                                     'arrival_charges_gst' => intval($pending_payment_shipment->gst),
@@ -7643,7 +7643,7 @@ class AdminFinanceController extends Controller
                                                     "amount" => $shipment->amount, 
                                                     "order_created_date" => $shipment->created_at,
                                                     "charges" => [
-                                                        'arrival_charges' =>  0
+                                                        'weight_charges' =>  0
                                                     ]
                                                 ];
                                             }
@@ -7666,7 +7666,7 @@ class AdminFinanceController extends Controller
                                                 "amount" => $shipment->amount, 
                                                 "order_created_date" => $shipment->created_at,
                                                 "charges" => [
-                                                    'arrival_charges' =>  0
+                                                    'weight_charges' =>  0
                                                 ]
                                             ]; 
                                         }
@@ -7790,7 +7790,7 @@ class AdminFinanceController extends Controller
                                                 "amount" => $shipment->amount,
                                                 "order_created_date" => $shipment->created_at,
                                                 "charges" => [
-                                                    'arrival_charges' =>  intval($shipment->weight_charges),
+                                                    'weight_charges' =>  intval($shipment->weight_charges),
                                                     'fuel_surcharge' =>  intval($shipment->fuel_surcharge),
                                                     'faf_charges' => $shipment->faf_charges_data ? intval($shipment->faf_charges_data->faf_charges) : 0,
                                                     'arrival_charges_gst' => intval($pending_payment_shipment->gst),
@@ -7814,7 +7814,7 @@ class AdminFinanceController extends Controller
                                                     "amount" => $shipment->amount, 
                                                     "order_created_date" => $shipment->created_at,
                                                     "charges" => [
-                                                        'arrival_charges' =>  0
+                                                        'weight_charges' =>  0
                                                     ]
                                                 ];
                                             }
@@ -7836,7 +7836,7 @@ class AdminFinanceController extends Controller
                                                 "amount" => $shipment->amount, 
                                                 "order_created_date" => $shipment->created_at,
                                                 "charges" => [
-                                                    'arrival_charges' =>  0
+                                                    'weight_charges' =>  0
                                                 ]
                                             ]; 
                                         }
