@@ -41,12 +41,14 @@ class FingaIntegrationController extends Controller
 
         $api = config('app.FINGA_URL');
         $token = $this->getToken($api);
-        if (session('user_type') == 1) {
-            $user = WalletUser::where('user_id', session('user_id'))->where('substitute_user_id', 0)->first();
-        }else{
-            $user = WalletUser::where('user_id', session('user_id'))->where('substitute_user_id', session('substitute_user_id'))->first();
-        }
+        $user = WalletUser::where('user_id', session('user_id'));
 
+        if (session('user_type') == 1) {
+            $user->where('substitute_user_id', 0);
+        } else {
+            $user->where('substitute_user_id', session('substitute_user_id'));
+        }
+        $user = $user->first();
         if(!empty($user)) {
 
             $phone = $user->phone;
