@@ -51,14 +51,14 @@
                                 <tbody>
                                 @foreach($user->sub_users as $key => $value)
                                         <?php
-                                        $check_box = false;
+                                        $wallet_check = false;
                                         if ($value->sub_wallet) {
                                             $name = $value->sub_wallet->name;
                                             $email = $value->sub_wallet->email;
                                             $phone = $value->sub_wallet->phone;
                                             $cnic = $value->sub_wallet->cnic;
+                                            $wallet_check = true;
                                         } else {
-                                            $check_box = true;
                                             $name = $value->name;
                                             $email = $value->email;
                                             $phone = $value->phone_number;
@@ -67,16 +67,16 @@
                                         ?>
                                     <tr id="row-{{ $value->id }}">
                                         <td>
-                                        @if(($check_box))
+                                        @if((!$wallet_check))
                                             <input  type="checkbox" value="{{$value->id}}" class="selectRowCheckbox">
                                         @endif
                                         </td>
 
                                         <td>{{ $value->id}}</td>
-                                        <td><input type="text" id="name-{{ $value->id }}" class="form-control" value="{{ $name }}" name="name" required></td>
-                                        <td><input type="text" id="phone-{{ $value->id }}" class="form-control" value="{{ $phone }}" name="phone" required></td>
-                                        <td><input type="text" id="cnic-{{ $value->id }}" class="form-control" value="{{ $cnic }}" name="cnic"></td>
-                                        <td><input type="email" id="email-{{ $value->id }}" class="form-control" value="{{ $email }}" name="email" required></td>
+                                        <td><input type="text" id="name-{{ $value->id }}" {{ ($wallet_check) ? 'readonly': '' }} class="form-control" value="{{ $name }}" name="name" required></td>
+                                        <td><input type="text" id="phone-{{ $value->id }}" {{ ($wallet_check) ? 'readonly': '' }} class="form-control" value="{{ $phone }}" name="phone" required></td>
+                                        <td><input type="text" id="cnic-{{ $value->id }}" {{ ($wallet_check) ? 'readonly': '' }} class="form-control" value="{{ $cnic }}" name="cnic"></td>
+                                        <td><input type="email" id="email-{{ $value->id }}" {{ ($wallet_check) ? 'readonly': '' }} class="form-control" value="{{ $email }}" name="email" required></td>
                                         <td>
                                             @csrf
                                             <input type="hidden" name="substitute_user_id" value="{{ $value->id }}">
