@@ -16071,4 +16071,60 @@ class AdminReportsController extends Controller
 
         return response()->json(['details' => $details]);
     }
+
+    public function lost_and_case_closed_summary_list(Request $request)
+    {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 804);
+        }
+        $from_date = $request->has('search_date_from') && !empty($request->search_date_from)
+            ? Carbon::parse($request->search_date_from)->startOfDay()
+            : null;
+        $to_date = $request->has('search_date_to') && !empty($request->search_date_to)
+            ? Carbon::parse($request->search_date_to)->endOfDay()
+            : null;
+
+        $query = DB::connection('reports')->table('reversion_delivered_shipments')
+        ->leftJoin('shipments','shipments.id','reversion_delivered_shipments.shipment_id')
+        ->leftJoin('shipments_journey as dr', function ($join)  {
+                $join->on('dr.shipment_id', '=', 'shipments.id')
+                    ->whereIn('dr.shipper_status_id', [14, 30, 36, 37])
+                    ->where(
+                        'dr.id',
+                        '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14, 30, 36, 37))')
+                    );
+         })
+        ->leftJoin('shipment_status', 'shipment_status.id', '=', 'shipments.shipper_status_id')
+        ->leftJoin('admins', 'admins.id', '=', 'reversion_delivered_shipments.reverted_by')
+        ->leftJoin('cities', 'cities.id', '=', 'shipments.consignee_city_id')
+        ->select(
+            'shipments.tracking_number',
+            'shipments.consignee_name',
+            'shipments.consignee_address',
+            'shipments.consignee_phone_number_1',
+            'shipments.consignee_city_id',
+            'shipments.amount',
+            'reversion_delivered_shipments.dncc',
+            'dr.created_at AS delivered_at',
+            'reversion_delivered_shipments.created_at AS reverted_at',
+            'shipment_status.name AS current_status',
+            'admins.name AS admin_name',
+            'cities.name AS consignee_city_name'
+        )
+        ->whereNotNull('shipments.tracking_number')
+        ;
+
+        if ($from_date && $to_date){
+            $query->whereBetween('reversion_delivered_shipments.created_at', [$from_date, $to_date]);
+        }
+        $datatable = Datatables::of($query)
+        ->editColumn('tracking_number', function ($shipments) {
+            $route = route('admin.tracking.index');
+            return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+        });
+        return $datatable
+        ->rawColumns(['tracking_number'])
+        ->make(true);
+    }
 }
