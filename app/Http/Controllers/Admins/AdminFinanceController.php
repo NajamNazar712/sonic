@@ -20426,8 +20426,7 @@ class AdminFinanceController extends Controller
                 'wallet_users.cnic as wallet_user_cnic',
                 'users.name as parent_user_name',
                 'substitute_users.name as substitute_name'
-            )->get();
-            // dd($wallet_users);
+            );
         $datatables = Datatables::of($wallet_users);
         return $datatables->make(true); 
     }
