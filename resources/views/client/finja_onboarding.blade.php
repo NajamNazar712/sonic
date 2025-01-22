@@ -91,6 +91,7 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/extensions/sweetalert.min.js')}}" type="text/javascript"></script>
 
 
     <script>
@@ -104,32 +105,115 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
+
+                    var formData = new FormData();
+
+                    // Add CSRF token
+                    formData.append('_token', '{{ csrf_token() }}');
+
+
+                    var rowId = 0;
+
+                    formData.append(`users[${rowId}][id]`, rowId);
+                    formData.append(`users[${rowId}][name]`, $('#name').val());
+                    formData.append(`users[${rowId}][phone]`, $('#phone').val());
+                    formData.append(`users[${rowId}][cnic]`, $('#cnic').val());
+                    formData.append(`users[${rowId}][email]`, $('#email').val());
+
+
                     $.ajax({
-                        url: '{{ route('cod.update.profile_wallet') }}',
+                        url: '{{ route('cod.update.bulk.profile_wallet') }}',
                         method: 'POST',
-                        data: $(form).serialize(),  // Serialize form data properly
-                        dataType: 'json', // Ensure proper response format
-                        success: function(data) {
-                            
-                            if(data.status == 0) {
-                                $('.error-messages').remove();
+                        processData: false,
+                        contentType: false,
+                        data: formData,
+                        success: function (data) {
 
-                                if (data.status === 0 && data.error.length > 0) {
-                                    let errorList = $('<ul class="error-messages text-danger mt-2"></ul>');
+                            if (data.status === 0) {
 
-                                    $.each(data.error, function (index, message) {
-                                        errorList.append('<li>' + message + '</li>');
+                                if (data.error) {
+                                    var summaryErrorMessages = '<ul style="color: #e56464;">';
+                                    $.each(data.error, function (rowId, errors) {
+
+                                        var errorMessages = '<ul>';
+                                        summaryErrorMessages += `<li><strong>Row ${rowId}:</strong></li><ul>`;
+
+                                        // Iterate over errors for the row
+                                        $.each(errors, function (field, message) {
+                                            // Append individual field errors to the row and summary
+                                            errorMessages += `<li><strong>${field}:</strong> ${message}</li>`;
+                                            summaryErrorMessages += `<li><strong>${field}:</strong> ${message}</li>`;
+                                        });
+
+                                        errorMessages += '</ul>';
+                                        summaryErrorMessages += '</ul>';
                                     });
-                                    $('.card-text').html(errorList); // Append errors after the `.card` element
                                 }
-                            }
-                            else{
-                                window.location.href = data.redirect_url;
+                                summaryErrorMessages += '</ul>';
+
+                                swal({
+                                    content: (() => {
+                                        let content = document.createElement('div');
+                                        content.innerHTML = summaryErrorMessages;
+                                        return content;
+                                    })(),
+                                    title: 'Errors Found!',
+                                    icon: 'warning',
+                                    className: 'custom-swal-width' // Optional: Use custom class for wider modal
+                                });
+
+
+                                if (data.error_2) {
+                                    let summaryErrorMessages = '<ul style="color: #e56464;">';
+
+                                    // Iterate through the rows in error_2
+                                    $.each(data.error_2, function (rowId, rowData) {
+
+
+                                        summaryErrorMessages += `<li>Row ID: ${rowId}</li><ul>`;
+
+                                        // Display the specific errors for each field in the row
+                                        if (rowData.message) {
+                                            $.each(rowData.message, function (field, messages) {
+                                                $.each(messages, function (index, message) {
+                                                    summaryErrorMessages += `<li>${field}: ${message}</li>`;
+                                                });
+                                            });
+                                        }
+
+                                        summaryErrorMessages += '</ul>';
+                                    });
+
+                                    let scrollableContent = document.createElement('div');
+                                    scrollableContent.style.maxHeight = '400px'; // Adjust the height as needed
+                                    scrollableContent.style.overflowY = 'auto';  // Add vertical scrolling
+                                    scrollableContent.style.padding = '10px';   // Optional: Add padding for readability
+                                    scrollableContent.innerHTML = summaryErrorMessages;
+
+                                    swal({
+                                        content: scrollableContent,
+                                        title: 'Error!',
+                                        className: 'custom-swal-width',
+                                        text: 'Errors occurred in the following rows.',
+                                        icon: 'warning',
+                                    });
+                                }
+
+
+
+
+                            } else {
+                                swal({
+                                    title: 'Success',
+                                    text: 'Success',
+                                    icon: 'success',
+                                });
+                                var rdUrl = data.output.url ;
+                                window.location.href = `{{ url('cod/wallet/finja_dashboard') }}?url=${rdUrl}`;
                             }
                         },
-                        error: function(xhr, status, error) {
+                        error: function (xhr) {
                             console.error(xhr.responseText);
-
                         }
                     });
                 }

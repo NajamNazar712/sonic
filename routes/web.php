@@ -476,7 +476,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::post('add_shipper_id', 'Shippers\ShipperDashboardController@storeShipperId')->name('add.shipper_id');
     Route::get('/profile', 'Shippers\ShipperDashboardController@userProfile')->name('edit.profile');
     Route::post('updateprofile', 'Shippers\ShipperDashboardController@updateProfile')->name('update.profile');
-    Route::post('updateprofilewallet', 'Shippers\ShipperDashboardController@updateProfileWallet')->name('update.profile_wallet');
+    Route::post('SignInWalletUser', 'Shippers\ShipperDashboardController@SignInWalletUser')->name('SignInWalletUser');
+    Route::post('updateprofilewalletbulk', 'Shippers\ShipperDashboardController@updateprofilewalletbulk')->name('update.bulk.profile_wallet');
     Route::post('update/profile/password', 'Shippers\ShipperDashboardController@update_profile_password')->name('update.profile.password');
     Route::get('getpickups', 'Shippers\ShipperDashboardController@getPickups')->name('get.pickups');
     Route::get('getbanks', 'Shippers\ShipperDashboardController@getBanks')->name('get.banks');
@@ -636,6 +637,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::get('finja_dashboard', 'FingaIntegrationController@finja_dashboard')->name('finja_dashboard');
         Route::get('on_boarding', 'FingaIntegrationController@on_boarding')->name('on_boarding');
         Route::get('signup', 'FingaIntegrationController@signup')->name('signup');
+        Route::get('wallet_user', 'FingaIntegrationController@wallet_user')->name('users');
     });
 });
 
