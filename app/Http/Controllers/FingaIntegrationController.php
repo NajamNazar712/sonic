@@ -9,10 +9,14 @@ use App\Models\FingaApiLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
-
+use Auth;
 class FingaIntegrationController extends Controller
 {
 
+    public function __construct() {
+        $this->middleware('auth:web,substitute_users');
+        $this->middleware('Permission')->except('wordpress_access_denied', 'wordpressAddressView','wordpressBankView');
+    }
     public static function getToken($api) {
 
         $response = Http::withHeaders([
@@ -34,19 +38,28 @@ class FingaIntegrationController extends Controller
 
     }
     public function login(Request $request) {
-        $wallet = auth()->user()->load('wallet');
-        $user = isset($wallet->wallet)??null;
-        if($user) {
-            $api = config('app.FINGA_URL');
-            $user = WalletUser::where('user_id', session('user_id'))->where('substitute_user_id', 0)->first();
-            $token = $this->getToken($api);
-            $url = $this->getLoginUrl($api, $token, $user->phone, $user->cnic, $user->email);
 
-            if ($url) {
-                return view('client.finja_dashboard')->with(['url' => $url]);
-            }
+        $api = config('app.FINGA_URL');
+        $token = $this->getToken($api);
+        if (session('user_type') == 1) {
+            $user = WalletUser::where('user_id', session('user_id'))->where('substitute_user_id', 0)->first();
+        }else{
+            $user = WalletUser::where('user_id', session('user_id'))->where('substitute_user_id', session('substitute_user_id'))->first();
         }
-        return  redirect()->back();
+
+        if(!empty($user)) {
+
+            $phone = $user->phone;
+            $cnic = $user->cnic;
+            $email = $user->email;
+
+            $url = $this->getLoginUrl($api, $token, $phone, $cnic, $email);
+
+            return view('client.finja_dashboard')->with(['url' => $url]);
+        }else{
+            return redirect()->back();
+        }
+
     }
 
     public static function signUp($user = array()) {
