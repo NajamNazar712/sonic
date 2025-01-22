@@ -2538,7 +2538,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@shipment_reversal_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@shipment_reversal_list')->name('list');
         });
-
+        
         Route::prefix('lost_and_case_closed_summary')->name('lost_and_case_closed_summary_report.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@lost_and_case_closed_summary_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@lost_and_case_closed_summary_list')->name('list');
