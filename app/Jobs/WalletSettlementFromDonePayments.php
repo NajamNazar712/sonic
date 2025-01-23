@@ -49,7 +49,7 @@ class WalletSettlementFromDonePayments implements ShouldQueue
     public function handle()
     {
         
-        $done_payment_shipments = DonePaymentShipment::with('shipment')->join('shipments as s','s.id', 'done_payment_shipments.shipment_id')
+        $done_payment_shipments = DonePaymentShipment::join('shipments as s','s.id', 'done_payment_shipments.shipment_id')
         ->leftjoin('shipment_additional_charges as sc', 'sc.shipment_id', 's.id')
         ->leftjoin('shipment_services_charges as ssc', 'ssc.shipment_id', 's.id')
         ->leftjoin('wallet_users as wu', function ($join) {
@@ -62,14 +62,14 @@ class WalletSettlementFromDonePayments implements ShouldQueue
         // ->where(function ($query) {
         //     $query->where('sac.wallet_settlement_updated', 0);
         // })
-        ->select(['done_payment_shipments.*', 'wu.user_id as user_id', 'wu.wallet_id as wallet_id', 's.tracking_number', 's.cash_handling_charges', 's.insurance_charges','s.replacement_charges','s.try_and_buy_charges','s.intercept_charges','s.nsa_osa_charges','s.esc_charges','s.return_charges', 'sac.wallet_settlement_updated', 's.weight_charges', 's.fuel_surcharge','sc.faf_charges', 'ssc.reverse_pickup_charges'])->get();
-        //Log::info($done_payment_shipments);
+        ->select(['done_payment_shipments.*', 'wu.user_id as user_id', 'wu.wallet_id as wallet_id', 's.tracking_number', 's.cash_handling_charges', 's.insurance_charges','s.replacement_charges','s.try_and_buy_charges','s.intercept_charges','s.nsa_osa_charges','s.esc_charges','s.return_charges', 'sac.wallet_settlement_updated', 's.weight_charges', 's.fuel_surcharge','sc.faf_charges', 'ssc.reverse_pickup_charges', 'sc.wallet_charges'])->get();
+        //dd($done_payment_shipments);
         $successfull_record = [];
         $api = config('app.FINGA_URL');
         $token = FingaIntegrationController::getToken($api);
         foreach($done_payment_shipments as $dps) {
             $shipmentId = $dps->shipment_id;
-            $shipment = $done_payment_shipments->shipment;
+            $shipment = Shipment::find($shipmentId);
             if($dps->wallet_action_bid == 1 && $dps->wallet_settlement_updated == 0) {
                 $requestPayload = [
                     "client_id" => $dps->user_id,
@@ -78,20 +78,21 @@ class WalletSettlementFromDonePayments implements ShouldQueue
                     "shipment_id" =>  $dps->tracking_number,
                     "amount" => $dps->amount,
                     "charges" => [
-                        'faf_charges' =>  intval($dps->faf_charges),
-                        'weight_charges' =>  intval($dps->weight_charges),
-                        'fuel_surcharge' =>  intval($dps->fuel_surcharge),
-                        'cash_handling_charges' => intval($dps->cash_handling_charges),
-                        'insurance_charges' => intval($dps->insurance_charges),
-                        'replacement_charges' => intval($dps->replacement_charges), 
-                        'try_and_buy_charges' => intval($dps->try_and_buy_charges),
-                        'intercept_charges' => intval($dps->intercept_charges),
-                        'non_service_area_charges' => intval($dps->nsa_osa_charges),
-                        'esc_charges' => intval($dps->esc_charges),
-                        'reverse_pickup_charges' => intval($dps->reverse_pickup_charges),
-                        'return_charges' => intval($dps->return_charges),
-                        'gst_charges' => intval($dps->gst),
-                        'sms_charges' => intval($dps->sms_charges)
+                        'faf_charges' =>  floatval($dps->faf_charges),
+                        'weight_charges' =>  floatval($dps->weight_charges),
+                        'fuel_surcharge' =>  floatval($dps->fuel_surcharge),
+                        'cash_handling_charges' => floatval($dps->cash_handling_charges),
+                        'insurance_charges' => floatval($dps->insurance_charges),
+                        'replacement_charges' => floatval($dps->replacement_charges), 
+                        'try_and_buy_charges' => floatval($dps->try_and_buy_charges),
+                        'intercept_charges' => floatval($dps->intercept_charges),
+                        'non_service_area_charges' => floatval($dps->nsa_osa_charges),
+                        'esc_charges' => floatval($dps->esc_charges),
+                        'reverse_pickup_charges' => floatval($dps->reverse_pickup_charges),
+                        'return_charges' => floatval($dps->return_charges),
+                        'gst_charges' => floatval($dps->gst),
+                        'sms_charges' => floatval($dps->sms_charges),
+                        'fintech_charges' => floatval($dps->wallet_charges)
                     ]
                 ];
                 $request_nature = 'settlement-request';
@@ -107,9 +108,9 @@ class WalletSettlementFromDonePayments implements ShouldQueue
                 $requestPayload = [
                     "client_id" => $dps->user_id,
                     "wallet_id" => $dps->wallet_id,
-                    "reference_id" => (string) Str::uuid(),
+                    "reference_id" => $dps->id,
                     "shipment_id" =>  $dps->tracking_number,
-                    "amount" => intval($dps->payable),
+                    "amount" => floatval($dps->payable),
                 ];
                 $request_nature = 'adjustment-request';
                 $response_nature = 'adjustment-response';
