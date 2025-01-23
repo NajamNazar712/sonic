@@ -89,6 +89,7 @@ use App\Http\Models\CRM\CrmClosedReason;
 use App\Http\Models\CRM\CrmClosedReasonStatus;
 use App\Http\Models\ShipmentDetail;
 use Illuminate\Support\MessageBag;
+use App\Http\Models\Admin\Retail\RetailShipment;
 
 class AdminCRMController extends Controller
 {
@@ -113,12 +114,31 @@ class AdminCRMController extends Controller
     }
 
     public function add_request(Request $request){
+        // only allow retail COD bookings to change COD amount
+
+        // Check if the request contains a single shipment or multiple shipments
+        $shipment_ids = $request->shipment_id 
+            ? [$request->shipment_id] 
+            : (is_string($request->shipment_ids) 
+                ? explode(',', $request->shipment_ids) 
+                : (is_array($request->shipment_ids) ? $request->shipment_ids : [])
+            );
+        $retail_shipments = RetailShipment::whereIn('shipment_id', $shipment_ids)->get();
+
+        if (request()->complaint_id == 12 && $retail_shipments->isNotEmpty()) {
+            foreach ($retail_shipments as $retail_shipment) {
+                if ($retail_shipment->shipping_mode != 3) {
+                    return ['status' => 0, 'error' => 'Retail Shipment amount can\'t be changed!'];
+                }
+            }
+        }
+
         $nature_id = $request->case_nature_id;
         $complaint_id = $request->complaint_id;
         $channel_id = $request->channel_id;
         $receiving_sheet_id = $request->receiving_sheet_id;
         $launched_by = Admin::find(Auth::id())->name;
-//        if($complaint_id == 23 && $receiving_sheet_id != null){
+        // if($complaint_id == 23 && $receiving_sheet_id != null){
         if($request->has('alternate_phone')){
             if($request->alternate_phone){
                 $alternate_phone = $request->alternate_phone;
@@ -145,7 +165,7 @@ class AdminCRMController extends Controller
 
         if($complaint_id == 23){
             $description_text = $request->description ;
-//            $description = '<strong>' .'Receiving Sheet No: ' .$receiving_sheet_id. '</strong>'. PHP_EOL. $description_text;
+            // $description = '<strong>' .'Receiving Sheet No: ' .$receiving_sheet_id. '</strong>'. PHP_EOL. $description_text;
             $description = $description_text;
         }
         else{
@@ -2094,7 +2114,7 @@ class AdminCRMController extends Controller
             })
             ->leftjoin('riders as last_rider_status_upd_by', 'last_rider_status_upd_by.id', '=', 'last_rider_updated_sj.rider_id')
             ->leftjoin('shipment_status_reason as ssr', 'ssr.id', '=', 'last_rider_updated_sj.status_reason_id')
-            ->select('sj.created_at as arrival','crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'cu.name as consignee_users', 'ru.name as retail_users', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','crm_requests.description as descr','at.name as tagged_admin', 'adp.name as tagged_department', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id', 'ss.name as status','ss.id as shipment_status_id', 'user.name as shipper_name', 'oc.name as origin','och.name as origin_hub','ocz.name as origin_zone', 'dc.name as destination', 'dh.name as hub', 'crt.crm_request_tagging_type_id as tagged_type', 'res.created_at as valid_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id', 'res.created_at as agent_assigned_date', 'resby.name as agent_assigned_by', 'crth.created_at as tagged_date', 'z.name as zone','crsh.created_at as reopen_date','crm_requests.address as address', 'crm_requests.address_latitude as address_latitude','crm_requests.address_longitude as address_longitude','at.id as tagged_admin_id', 'crm_requests.case_nature_id','crm_requests.shipment_id','sts.status as star_status', 'sj.updated_at as arrival_date','crm_requests.updated_at as last_status_date','s.updated_at as last_status_today','last_status_upd_by.name as last_status_updated_by','ca.name as sub_hub','s.parcel_value as parcel_value','s.amount as cod_value','seg.name as segment','s.actual_weight as actual_weight','ad1.name as sale_person','ad2.name as kae' ,'last_rider_status_upd_by.name as last_updated_rider', 'ssr.name as last_rider_reason', 'crm_requests.created_at as created')
+            ->select('sj.created_at as arrival','crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'cu.name as consignee_users', 'ru.name as retail_users', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','crm_requests.description as descr','at.name as tagged_admin', 'adp.name as tagged_department', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id', 'ss.name as status','ss.id as shipment_status_id', 'user.name as shipper_name', 'oc.name as origin','och.name as origin_hub','ocz.name as origin_zone', 'dc.name as destination', 'dh.name as hub', 'crt.crm_request_tagging_type_id as tagged_type', 'res.created_at as valid_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id', 'res.created_at as agent_assigned_date', 'resby.name as agent_assigned_by', 'crth.created_at as tagged_date', 'z.name as zone','crsh.created_at as reopen_date','crm_requests.address as address', 'crm_requests.address_latitude as address_latitude','crm_requests.address_longitude as address_longitude','at.id as tagged_admin_id', 'crm_requests.case_nature_id','crm_requests.shipment_id','sts.status as star_status', 'sj.updated_at as arrival_date','crm_requests.updated_at as last_status_date','s.updated_at as last_status_today','last_status_upd_by.name as last_status_updated_by','ca.name as sub_hub','s.parcel_value as parcel_value','s.amount as cod_value','seg.name as segment','s.actual_weight as actual_weight','ad1.name as sale_person','ad2.name as kae' ,'last_rider_status_upd_by.name as last_updated_rider', 'ssr.name as last_rider_reason', 'crm_requests.created_at as created', 'last_updated_sj.created_at as last_date_status')
             ->where('crm_requests.status_id', 2)
             ->groupBy('crm_requests.id');
 

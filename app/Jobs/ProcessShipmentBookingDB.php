@@ -493,7 +493,6 @@ class ProcessShipmentBookingDB implements ShouldQueue
             }
 
             try {
-
                 if ($pickup_city_id != $consignee_city_id)
                 {
                     ShipperSegmentLogs::create([
@@ -502,7 +501,6 @@ class ProcessShipmentBookingDB implements ShouldQueue
                         'sub_segment_id' => isset(auth()->user()->sub_segment_id) ? auth()->user()->sub_segment_id : 0
                     ]);
                 }
-
             } catch (\Exception $e) {
                 Log::error('Error creating shipper segment log from Shipper portal excel booking ' . $shipment_id . ': ' . $e->getMessage());
             }

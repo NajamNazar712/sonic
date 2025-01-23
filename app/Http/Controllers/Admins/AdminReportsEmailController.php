@@ -44,6 +44,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Excel_reports\RetailDonePaymentsReport;
 use App\Http\Models\RetailDonePaymentCalculation;
+use App\Mail\ReportsEmail;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -52,6 +53,7 @@ use PHPExcel_Cell;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 
 class AdminReportsEmailController extends Controller
@@ -1393,7 +1395,11 @@ class AdminReportsEmailController extends Controller
             $file_name_without_path = "reports/done_payment_report_" . $date_file_name . ".xlsx";
             $file_name = public_path() . "/reports/done_payment_report_" . $date_file_name . ".xlsx";
             $writer->save($file_name);
-
+            $to = ['anas.mazhar@trax.pk', 'aftab.qidwai@trax.pk'];
+            $mail = Mail::to($to);
+            $link = '<a href="' .  url('/') . '/' .$file_name_without_path . '" target="_blank">Report</a>';
+            $mail->send(new ReportsEmail("Done Payment",'Done Payment Report Link '.' '.$link,null));
+            
             NotificationsController::send(82, $date, url('/') . '/' . $file_name_without_path);
         }
     }
@@ -1611,7 +1617,11 @@ class AdminReportsEmailController extends Controller
                 $file_name_without_path = "reports/retail_done_payment_report_" . $date_file_name . ".xlsx";
                 $file_name = public_path() . "/reports/retail_done_payment_report_" . $date_file_name . ".xlsx";   
                 $writer->save($file_name);
-                
+                $to = ['anas.mazhar@trax.pk', 'aftab.qidwai@trax.pk'];
+                $mail = Mail::to($to);
+                $link = '<a href="' .  url('/') . '/' . $file_name_without_path . '" target="_blank">Report</a>';
+                $mail->send(new ReportsEmail("Retail Payment", 'Retail Payment Report Link ' . ' ' . $link, null));
+            
                 NotificationsController::send(141, $date, url('/') . '/' . $file_name_without_path);
 //                Log::channel('cronJobLog')->info('s ' .'report:retail End');
             }

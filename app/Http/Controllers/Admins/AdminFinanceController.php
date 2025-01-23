@@ -4921,7 +4921,7 @@ class AdminFinanceController extends Controller
         $messages = [
             'required' => ':attribute is Required.',
             'integer' => ':attribute must be an Integer.',
-            'exists' => 'Given :attribute is Invalid / not ready for update.',
+            'exists' => 'Given :attribute is Invalid',
         ];
         $rules = [
             'tracking_number' => ['required', 'integer', Rule::exists('shipments', 'tracking_number')->where(function ($query) {
@@ -5004,12 +5004,12 @@ class AdminFinanceController extends Controller
                                 }
                             }
                         }
-                        if (!Shipment::where('tracking_number', $row['tracking_number'])->exists()) {
-                            $errors['Row #' . $row_id][] = 'Shipment is already updated from Booked Status #' . $row['tracking_number'];
-                        }
-                        if (Shipment::where('tracking_number', $row['tracking_number'])->where('booking_type_id', 2)->exists()) {
-                            $errors['Row #' . $row_id][] = 'Replacement shipment can not updated from excel #' . $row['tracking_number'];
-                        }
+                        // if (!Shipment::where('tracking_number', $row['tracking_number'])->exists()) {
+                        //     $errors['Row #' . $row_id][] = 'Shipment is already updated from Booked Status #' . $row['tracking_number'];
+                        // }
+                        // if (Shipment::where('tracking_number', $row['tracking_number'])->where('booking_type_id', 2)->exists()) {
+                        //     $errors['Row #' . $row_id][] = 'Replacement shipment can not updated from excel #' . $row['tracking_number'];
+                        // }
                     }
                 }
                 if (empty($errors)) {
@@ -5033,19 +5033,19 @@ class AdminFinanceController extends Controller
                         }
 
                         if ($shipment->actual_weight == null) {
-                            return redirect()->route('admin.finance.change_shipment_weight.index')->with('error', 'Shipment is not arrived yet so weight can not be changed!');
+                            return redirect()->route('admin.finance.change_shipment_weight.index')->with('error', 'Shipment is not arrived yet!');
                         }
 
                         $old_shipment_weight = $shipment->actual_weight;
 
+                        // $shipment->actual_weight = $weight;
+                        // $shipment->save();
 
-                        $shipment->actual_weight = $weight;
-                        $shipment->save();
+                        $weight_view = ShipmentChargesController::weight_view($shipment_id, $weight);
+                        $weight_charges_calculated = $weight_view['weight_charges'] ?? 0;
+                        $fuel_surcharge_view = ShipmentChargesController::fuel_surcharge_view($shipment_id, $weight_charges_calculated);
+                        $faf_charges_view = ShipmentChargesController::faf_charges_view($shipment_id, $weight_charges_calculated);
 
-
-                        ShipmentChargesController::weight($shipment_id);
-                        ShipmentChargesController::fuel_surcharge($shipment_id);
-                        ShipmentChargesController::faf_charges($shipment_id);
                         $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment_id);
                         $shipment = $shipment->refresh();
                         if($arrival_charges_applied){
@@ -5054,15 +5054,14 @@ class AdminFinanceController extends Controller
                             $new_weight_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->packaging_material_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->packaging_charges+$faf_charges;
                         }
 
-                        $change_shipment_weight = new ChangeShipmentWeightLog();
-
-                        $change_shipment_weight->shipment_id = $shipment->id;
-                        $change_shipment_weight->old_weight = $old_shipment_weight;
-                        $change_shipment_weight->new_weight = $weight;
-                        $change_shipment_weight->admin_id = Auth::id();
-                        $change_shipment_weight->old_charges = $previous_weight_charges;
-                        $change_shipment_weight->new_charges = $new_weight_charges;
-                        $change_shipment_weight->save();
+                        // $change_shipment_weight = new ChangeShipmentWeightLog();
+                        // $change_shipment_weight->shipment_id = $shipment->id;
+                        // $change_shipment_weight->old_weight = $old_shipment_weight;
+                        // $change_shipment_weight->new_weight = $weight;
+                        // $change_shipment_weight->admin_id = Auth::id();
+                        // $change_shipment_weight->old_charges = $previous_weight_charges;
+                        // $change_shipment_weight->new_charges = $new_weight_charges;
+                        // $change_shipment_weight->save();
 
                         $adjustment_amount = $previous_weight_charges - $new_weight_charges;
 
@@ -5119,6 +5118,7 @@ class AdminFinanceController extends Controller
                         $tracking_numbers['Row #' . $row_id] = $tracking;
 
                     }
+
                     $tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
                         return $row . ': ' . $tracking_number;
                     }, array_keys($tracking_numbers), $tracking_numbers));
@@ -5149,16 +5149,17 @@ class AdminFinanceController extends Controller
 
                     // Write data rows starting from second row
                     foreach ($rows as $key => $row) {
+
                         $shipment = Shipment::where('tracking_number', $row['tracking_number'])->first();
                         $rowData = [
                             $row['tracking_number'],
                             $row['actual_weight'],
                             $shipment->amount,
-                            $shipment->weight_charges,
+                            $weight_charges_calculated,
                             $shipment->cash_handling_charges,
                             $shipment->insurance_charges,
                             $shipment->return_charges,
-                            $shipment->fuel_surcharge,
+                            $fuel_surcharge_view['fuel_surcharge'],
                             $shipment->replacement_charges,
                             $shipment->try_and_buy_charges,
                             $shipment->intercept_charges,
@@ -9292,20 +9293,20 @@ class AdminFinanceController extends Controller
             $shipment_weight = $shipment->actual_weight;
             $weight_charges = $shipment->weight_charges;
 
-            if ($done_payment_shipment->type != 2) {
-                $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->id);
-                if ($change_shipment_weight_log->exists()) {
-                    $change_shipment_weight_log = $change_shipment_weight_log->first();
-
-                    $done_payment_shipment_date = Carbon::parse($done_payment_shipment->created_at);
-                    $change_shipment_weight_log_date = Carbon::parse($change_shipment_weight_log->created_at);
-
-                    if ($change_shipment_weight_log_date->gt($done_payment_shipment_date)) {
-                        $shipment_weight = $change_shipment_weight_log->old_weight;
-                        $weight_charges = $change_shipment_weight_log->old_charges;
-                    }
-                }
-            }
+//            if ($done_payment_shipment->type == 3) {
+//                $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->id);
+//                if ($change_shipment_weight_log->exists()) {
+//                    $change_shipment_weight_log = $change_shipment_weight_log->first();
+//
+//                    $done_payment_shipment_date = Carbon::parse($done_payment_shipment->created_at);
+//                    $change_shipment_weight_log_date = Carbon::parse($change_shipment_weight_log->created_at);
+//
+//                    if ($change_shipment_weight_log_date->gt($done_payment_shipment_date)) {
+//                        $shipment_weight = $change_shipment_weight_log->old_weight;
+//                        $weight_charges = $change_shipment_weight_log->old_charges;
+//                    }
+//                }
+//            }
 
             if ($done_payment_shipment->type == 0) {
                 $type = 'Delivered';
@@ -9567,7 +9568,7 @@ class AdminFinanceController extends Controller
                                     </tr>
                                   </tbody>
                                 </table>
-                                <span style="color: red">* 13% GST is applicable for Sindh Region 16% GST for Punjab .KPK</span>
+                                <span style="color: red">* 15% GST is applicable for Sindh Region 16% GST for Punjab .KPK</span>
                             </div>
                         </div>
                       </div>
@@ -9656,20 +9657,20 @@ class AdminFinanceController extends Controller
             $shipment_weight = $shipment->actual_weight;
             $weight_charges = $shipment->weight_charges;
 
-            if ($done_payment_shipment->type != 2) {
-                $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->id);
-                if ($change_shipment_weight_log->exists()) {
-                    $change_shipment_weight_log = $change_shipment_weight_log->first();
-
-                    $done_payment_shipment_date = Carbon::parse($done_payment_shipment->created_at);
-                    $change_shipment_weight_log_date = Carbon::parse($change_shipment_weight_log->created_at);
-
-                    if ($change_shipment_weight_log_date->gt($done_payment_shipment_date)) {
-                        $shipment_weight = $change_shipment_weight_log->old_weight;
-                        $weight_charges = $change_shipment_weight_log->old_charges;
-                    }
-                }
-            }
+//            if ($done_payment_shipment->type != 2) {
+//                $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->id);
+//                if ($change_shipment_weight_log->exists()) {
+//                    $change_shipment_weight_log = $change_shipment_weight_log->first();
+//
+//                    $done_payment_shipment_date = Carbon::parse($done_payment_shipment->created_at);
+//                    $change_shipment_weight_log_date = Carbon::parse($change_shipment_weight_log->created_at);
+//
+//                    if ($change_shipment_weight_log_date->gt($done_payment_shipment_date)) {
+//                        $shipment_weight = $change_shipment_weight_log->old_weight;
+//                        $weight_charges = $change_shipment_weight_log->old_charges;
+//                    }
+//                }
+//            }
 
             if ($done_payment_shipment->type == 0) {
                 $type = 'Delivered';
@@ -14046,8 +14047,6 @@ class AdminFinanceController extends Controller
             'invoices.invoice_type as invoice_type', DB::raw('NULL as payment_type'), DB::raw('2 as account_type'), 'is.id as is_id',
             'invoices.deposited_amount as deposited_amount','invoices.adjusted_amount as adjusted_amount','sts.status as star_status', 'invoices.total_sms_charges as sms_charges')
             ->where('ubi.default_bank', 1);
-
-
         if (session('department_id') == 7 && !in_array(session('id'), session('sale_users_bypass'))) {
             $invoice->whereIn('invoices.user_id', $request->search_shipper);
         }else{
@@ -14075,28 +14074,26 @@ class AdminFinanceController extends Controller
             }
         }
 
-
         if ($request->get('invoice_from') && $request->get('invoice_to')) {
-            $from = date('Y-m-d 00:00:00', strtotime($request->get('invoice_from')));
-            $to = date('Y-m-d 23:59:59', strtotime($request->get('invoice_to')));
+            // $from = date('Y-m-d 00:00:00', strtotime($request->get('invoice_from')));
+            // $to = date('Y-m-d 23:59:59', strtotime($request->get('invoice_to')));
+            $from = Carbon::createFromFormat('d F, Y', $request->get('invoice_from'))->startOfDay()->toDateTimeString();
+            $to = Carbon::createFromFormat('d F, Y', $request->get('invoice_to'))->endOfDay()->toDateTimeString();
             $invoice->whereBetween('invoices.invoicing_date', [$from, $to]);
-
         }
 
         if ($request->get('generation_from') && $request->get('generation_to')) {
-            $from = date('Y-m-d 00:00:00', strtotime($request->get('generation_from')));
-            $to = date('Y-m-d 23:59:59', strtotime($request->get('generation_to')));
+            // $from = date('Y-m-d 00:00:00', strtotime($request->get('generation_from')));
+            // $to = date('Y-m-d 23:59:59', strtotime($request->get('generation_to')));
+            $from = Carbon::createFromFormat('d F, Y', $request->get('generation_from'))->startOfDay();
+            $to = Carbon::createFromFormat('d F, Y', $request->get('generation_to'))->endOfDay();
             $invoice->whereBetween('invoices.created_at', [$from, $to]);
-
         }
 
         if ($request->get('star_shipper_filter') == 1) {
             $invoice->where('invoices.star_status', 1);
         }
-
-
         $invoices = DB::query()->fromSub($reim_invoice->union($invoice), 'invoices');
-
 
         $datatables = Datatables::of($invoices)
             ->setRowAttr([
@@ -14317,10 +14314,10 @@ class AdminFinanceController extends Controller
                 $add_adjustment = '<button type="button" class="dropdown-item add_adjustment"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Adjustment</div></button>';
 
                 $dropdown = '
-              <div class="btn-group">
-                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                <div class="dropdown-menu dropdown-menu-sm">
-            ';
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                ';
 
                 $dropdown .= $export_to_excel_button;
 
@@ -14332,9 +14329,9 @@ class AdminFinanceController extends Controller
                     $dropdown .= $add_adjustment;
                 }
 
-//                if ((session('role_id') == 1 || in_array(122, session('permissions'))) && $invoice->status_id != 3) {
-//                    $dropdown .= $mark_as_received_button;
-//                }
+                // if ((session('role_id') == 1 || in_array(122, session('permissions'))) && $invoice->status_id != 3) {
+                //     $dropdown .= $mark_as_received_button;
+                // }
 
                 $dropdown .= $origin_wise_print_button;
                 $dropdown .= $gst_wise_print_button;
@@ -14344,12 +14341,25 @@ class AdminFinanceController extends Controller
                     $dropdown .= $upload_deposit_slip_button;
                 }
                 $dropdown .= '
-                </div>
-              </div>
-            ';
+                    </div>
+                    </div>
+                ';
 
                 return $dropdown;
             })
+
+            // shipper name filter
+            ->filterColumn('shipper', function ($query, $keyword) {
+                if ($keyword) {
+                    $query->where('shipper', 'like', "%{$keyword}%");
+                }
+            })
+
+            // Add ordering to the shipper column based on `u.name`
+            ->orderColumn('shipper', function ($query, $order) {
+                $query->orderBy('shipper', $order);
+            })
+
             ->rawColumns(['shipper','invoice_number_btn','deposit_slip','invoice_adjustment', 'action']);
 
         return $datatables->make(true);
@@ -15131,20 +15141,20 @@ class AdminFinanceController extends Controller
                     $shipment_weight = $shipment->actual_weight;
                     $weight_charges = $shipment->weight_charges;
 
-                    if ($invoice_shipment->type != 2) {
-                        $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->id);
-                        if ($change_shipment_weight_log->exists()) {
-                            $change_shipment_weight_log = $change_shipment_weight_log->first();
-
-                            $invoice_shipment_date = Carbon::parse($invoice_shipment->created_at);
-                            $change_shipment_weight_log_date = Carbon::parse($change_shipment_weight_log->created_at);
-
-                            if ($change_shipment_weight_log_date->gt($invoice_shipment_date)) {
-                                $shipment_weight = $change_shipment_weight_log->old_weight;
-                                $weight_charges = $change_shipment_weight_log->old_charges;
-                            }
-                        }
-                    }
+//                    if ($invoice_shipment->type != 2) {
+//                        $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->id);
+//                        if ($change_shipment_weight_log->exists()) {
+//                            $change_shipment_weight_log = $change_shipment_weight_log->first();
+//
+//                            $invoice_shipment_date = Carbon::parse($invoice_shipment->created_at);
+//                            $change_shipment_weight_log_date = Carbon::parse($change_shipment_weight_log->created_at);
+//
+//                            if ($change_shipment_weight_log_date->gt($invoice_shipment_date)) {
+//                                $shipment_weight = $change_shipment_weight_log->old_weight;
+//                                $weight_charges = $change_shipment_weight_log->old_charges;
+//                            }
+//                        }
+//                    }
 
                     if ($invoice_shipment->type != 2 || ($invoice_shipment->type == 2 && $invoice_shipment->payable < 0)) {
                         $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
@@ -17600,7 +17610,7 @@ class AdminFinanceController extends Controller
                                     </tr>
                                   </tbody>
                                 </table>
-                                <span style="color: red">* 13% GST is applicable for Sindh Region 16% GST for Punjab & KPK</span>
+                                <span style="color: red">* 15% GST is applicable for Sindh Region 16% GST for Punjab & KPK</span>
                             </div>
                         </div>
                       </div>

@@ -759,11 +759,27 @@ class RegisterController extends Controller
         }
     
     }
-    public function email_verified($id)
+    // public function email_verified($id)
+    // {
+    //     $user = User::find($id);
+    //     $user->email_verified = 1;
+    //     $user->save();
+    //     return view('client.register_success')->with(['verify' => 1]);
+    // }
+
+    public function email_verified($id = null)
     {
-        $user = User::find($id);
-        $user->email_verified = 1;
-        $user->save();
+        if ($id == null) {
+            $id = request()->user_id;
+        }
+
+        if ($id) {
+            $user = User::find($id);
+            if ($user) {
+                $user->email_verified = 1;
+                $user->save();
+            }
+        }
         return view('client.register_success')->with(['verify' => 1]);
     }
 

@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 
-class zUpdateNotificationForTaggingHistory extends Seeder
+class UpdateNotificationForTaggingHistory extends Seeder
 {
     /**
      * Run the database seeds.

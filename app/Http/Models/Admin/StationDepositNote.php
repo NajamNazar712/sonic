@@ -11,9 +11,15 @@ class StationDepositNote extends Model
     ];
     
     protected $table = 'station_deposit_notes';
-    protected $casts = [
-        'created_at' => "datetime:Y-m-d H:i:s",
-    ];
+    // protected $casts = [
+    //     'created_at' => "datetime:Y-m-d H:i:s",
+    // ];
+    
+    protected function serializeDate(\DateTimeInterface $date)
+    {
+        return $date->format('Y-m-d H:i:s');
+    }
+    
     public function hub(){
             return $this->belongsTo('App\Http\Models\City', 'hub_id', 'id');
     }

@@ -68,7 +68,7 @@ class ShipperReportsController extends Controller
             // $sales = DB::connection($connection)->table('shipments')->whereRaw('FALSE');
             // $datatable = Datatables::of($sales);
             // return $datatable->make(true);
-            return Datatables::of(collect([]))->make(true); // setting this because sorter throwing error when user click on sorter on empty records 
+            return Datatables::of(collect([]))->make(true); // setting this because sorter throwing error when user click on sorter on empty records
         }
 
         $sales = DB::connection($connection)->table('shipments')->join('users as u', 'u.id', '=', 'shipments.user_id')
