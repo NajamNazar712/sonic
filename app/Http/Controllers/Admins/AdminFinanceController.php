@@ -7619,7 +7619,7 @@ class AdminFinanceController extends Controller
                                                 "amount" => $shipment->amount, 
                                                 "order_created_date" => $shipment->created_at,
                                                 "charges" => [
-                                                    'arrival_charges' =>  intval($shipment->weight_charges),
+                                                    'weight_charges' =>  intval($shipment->weight_charges),
                                                     'fuel_surcharge' =>  intval($shipment->fuel_surcharge),
                                                     'faf_charges' => $shipment->faf_charges_data ? intval($shipment->faf_charges_data->faf_charges) : 0,
                                                     'arrival_charges_gst' => intval($pending_payment_shipment->gst),
@@ -7643,7 +7643,7 @@ class AdminFinanceController extends Controller
                                                     "amount" => $shipment->amount, 
                                                     "order_created_date" => $shipment->created_at,
                                                     "charges" => [
-                                                        'arrival_charges' =>  0
+                                                        'weight_charges' =>  0
                                                     ]
                                                 ];
                                             }
@@ -7654,6 +7654,22 @@ class AdminFinanceController extends Controller
                                             $finja_status = 1;
                                         }
                                     } elseif( $pending_payment_shipment->type == 2) {
+
+                                        $log_bid = $this->isWalletLogUpdated($pending_payment_shipment->shipment_id);
+                                        if(!$log_bid) {
+                                            $pending_logs[$pending_payment_shipment->shipment_id] = [
+                                                "shipmentId" => $shipment->id,
+                                                "wallet_id" => $shipment->user->wallet->wallet_id,
+                                                "client_id" => $shipment->user->id, 
+                                                "reference_id" => (string) Str::uuid(), 
+                                                "shipment_id" => $shipment->tracking_number, 
+                                                "amount" => $shipment->amount, 
+                                                "order_created_date" => $shipment->created_at,
+                                                "charges" => [
+                                                    'weight_charges' =>  0
+                                                ]
+                                            ]; 
+                                        }
                                         $finja_status = 2;
                                     }
                                 }
@@ -7774,7 +7790,7 @@ class AdminFinanceController extends Controller
                                                 "amount" => $shipment->amount,
                                                 "order_created_date" => $shipment->created_at,
                                                 "charges" => [
-                                                    'arrival_charges' =>  intval($shipment->weight_charges),
+                                                    'weight_charges' =>  intval($shipment->weight_charges),
                                                     'fuel_surcharge' =>  intval($shipment->fuel_surcharge),
                                                     'faf_charges' => $shipment->faf_charges_data ? intval($shipment->faf_charges_data->faf_charges) : 0,
                                                     'arrival_charges_gst' => intval($pending_payment_shipment->gst),
@@ -7798,7 +7814,7 @@ class AdminFinanceController extends Controller
                                                     "amount" => $shipment->amount, 
                                                     "order_created_date" => $shipment->created_at,
                                                     "charges" => [
-                                                        'arrival_charges' =>  0
+                                                        'weight_charges' =>  0
                                                     ]
                                                 ];
                                             }
@@ -7809,6 +7825,21 @@ class AdminFinanceController extends Controller
                                             $finja_status = 1;
                                         }
                                     } elseif($pending_payment_shipment->type == 2) {
+                                        $log_bid = $this->isWalletLogUpdated($pending_payment_shipment->shipment_id);
+                                        if(!$log_bid) {
+                                            $pending_logs[$pending_payment_shipment->shipment_id] = [
+                                                "shipmentId" => $shipment->id,
+                                                "wallet_id" => $shipment->user->wallet->wallet_id,
+                                                "client_id" => $shipment->user->id, 
+                                                "reference_id" => (string) Str::uuid(), 
+                                                "shipment_id" => $shipment->tracking_number, 
+                                                "amount" => $shipment->amount, 
+                                                "order_created_date" => $shipment->created_at,
+                                                "charges" => [
+                                                    'weight_charges' =>  0
+                                                ]
+                                            ]; 
+                                        }
                                         $finja_status = 2;
                                     }
                                 }
@@ -21339,23 +21370,35 @@ class AdminFinanceController extends Controller
         $done_payment_shipments = DonePaymentShipment::join('shipments as s','s.id', 'done_payment_shipments.shipment_id')
         ->join('finja_log_settlement_records as sac', 'done_payment_shipments.shipment_id', '=', 'sac.shipment_id')
         ->where('done_payment_shipments.done_payment_id', $request->id)
-        ->where('done_payment_shipments.wallet_action_bid', 1)
-        ->where(function ($query) {
-            $query->where('sac.wallet_settlement_updated', 0);
-        })
-        ->select(['done_payment_shipments.shipment_id', 's.tracking_number'])->get();
-
+        ->whereIn('done_payment_shipments.wallet_action_bid', [1,2])
+        ->select(['done_payment_shipments.shipment_id', 's.tracking_number', 'done_payment_shipments.type'])->get();
         $data = [];
         foreach($done_payment_shipments as $dps) {
 
-            $record = FingaApiLog::where('shipment_id', $dps->id)->where('nature', 'settlement-response')->where('status', 'error')->latest()->first();
-
+            $record = FingaApiLog::where('shipment_id', $dps->shipment_id)
+            ->where('status', 'error')
+            ->where(function ($query) {
+                $query->where('nature', 'settlement-response')
+                      ->orWhere('nature', 'adjustment-response');
+            })
+            ->latest()
+            ->first();
+            
             if($record) {
+
+                if($dps->type == 0) {
+                    $type = 'Delivered';
+                } elseif($dps->type == 1){
+                    $type = 'Returned';
+                } else {
+                    $type = 'Adjustment';
+                }
 
                 $data[] = [
                     'tracking_number' => $dps->tracking_number,
                     'created_at' => $record->created_at,
-                    'error' => $record->details
+                    'error' => $record->details,
+                    'type' => $type
                 ];
             }
         }
