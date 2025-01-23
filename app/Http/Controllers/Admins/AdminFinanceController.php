@@ -6581,7 +6581,10 @@ class AdminFinanceController extends Controller
 //            ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
             ->leftjoin('pending_shipments_for_payments as psfp', 'psfp.user_id', '=', 'pending_payments.user_id')
             ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
-            ->leftjoin('wallet_users as wu', 'wu.user_id', 'u.id')
+            ->leftjoin('wallet_users as wu', function ($join) {
+                 $join->on('wu.user_id', '=', 'u.id')
+                    ->where('wu.substitute_user_id', '0');
+            })
             ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', 'ppc.amount as total_amount', 'ppc.charges as total_charges','u.payment_cycle_days as payment_cycle_days', 'ppc.gst as total_gst', 'ppc.wht as total_wht', 'ppc.payable as total_payable', 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'pc.name as payment_cycle', 'pc.id as payment_cycle_id','u.documents_status', DB::raw('IFNULL(psfp.pending_shipments_count,0) as total_pending_shipments'),'sts.status as star_status', 'u.id as user_id', 'ppc.sms_charges as total_sms_charges', 'wu.id as wallet_user');
             // ->groupBy('pending_payments.id'); // removed by the instruction of waqas bhai
 
@@ -8268,7 +8271,10 @@ class AdminFinanceController extends Controller
             })
             //leftJoin to join as admin will always present
             ->join('admins as sale_admin','sale_admin.id','=','spt.admin_id')
-            ->leftjoin('wallet_users as wu', 'wu.user_id', 'u.id')
+            ->leftjoin('wallet_users as wu', function ($join) {
+                $join->on('wu.user_id', '=', 'u.id')
+                    ->where('wu.substitute_user_id', '0');
+            })
             ->select('done_payments.user_id as user_id', 'done_payments.id as id', 'done_payments.id as payment_id', 'u.name as shipper', 
             'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 
             'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 
