@@ -148,6 +148,19 @@ class ShipperTrackingController extends Controller
             $shipment = Shipment::where('tracking_number', $tracking_number);
     		if ($shipment->exists()) {
                 $shipment = $shipment->first();
+
+                $sub_segment_name = '-';
+                $sub_segment = DB::table('shipper_segment_logs')
+                ->leftJoin('sub_category_segments', 'sub_category_segments.id', 'shipper_segment_logs.sub_segment_id')
+                ->where('shipment_id', $shipment->id)
+                ->select('sub_category_segments.name')
+                ->first();
+
+                if ($sub_segment && $sub_segment->name)
+                {
+                    $sub_segment_name = $sub_segment->name;
+                }
+
                 $sub_shipment = true;
                 if(session('user_type') == 2){
                     if(session('restriction') == 1){
@@ -334,6 +347,8 @@ class ShipperTrackingController extends Controller
                         $details['order_information']['instructions'] = $shipment->special_instructions;
                         $details['order_information']['pieces'] = $shipment->pieces;
                         $details['order_information']['business_category'] = $shipment->business_category->name;
+
+                        $details['order_information']['sub_segment'] = $sub_segment_name;
 
                         foreach ($shipment->shipment_journey as $journey) {
                             if($journey->shipper_status_id != '67'){
