@@ -15,20 +15,29 @@ use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use App\Models\FinjaLogSettlementRecord;
+use App\Http\Controllers\ShipmentsPaymentJourneyController;
+use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\CRM\CrmRequestStatusHistory;
+use App\Http\Models\CRM\CrmRequestTagging;
+use App\Http\Controllers\CRM\CRMCommentController;
+use App\Http\Models\Shipper\User;
+use App\Http\Models\Shipment;
 
 class WalletSettlementFromDonePayments implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected $payment_id;
+    protected $id;
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($payment_id)
+    public function __construct($payment_id,$id)
     {
         $this->payment_id = $payment_id;
+        $this->id = $id;
     }
 
     /**
@@ -136,6 +145,57 @@ class WalletSettlementFromDonePayments implements ShouldQueue
                         DonePaymentShipment::where('id', $dps->id)->update(['wallet_action_bid' => 3]);
 
                         $successfull_record[] = $dps->id;
+                        if ($dps->type == 1) {
+                            $shipment->payment_status_id = 7;
+    
+                            $shipment->save();
+    
+                            ShipmentsPaymentJourneyController::add($dps->shipment_id, 7, $this->id, '', $this->payment_id);
+                        } else if ($dps->type == 3) {
+                            $shipment->payment_status_id = 12;
+    
+                            $shipment->save();
+    
+                            ShipmentsPaymentJourneyController::add($dps->shipment_id, 12, $this->id, '', $this->payment_id);
+                        } else {
+                            $shipment->payment_status_id = 3;
+    
+                            $shipment->save();
+    
+                            //---------x-----------x-------------
+                            // Start Auto Close Complaints
+                            $crm_request = CrmRequest::where('shipment_id', $dps->shipment_id)->where('status_id', 2)->first();
+                            
+                            if ($crm_request) { 
+                                $shipperName = User::find(Shipment::where('id', $dps->shipment_id)->select('user_id')->first()->user_id)->name;
+                                
+                                if ($crm_request->status_id == 2) {//if crm request is in_process
+                                    CrmRequest::where('id', $crm_request->id)->update([
+                                        'status_id' => 4 // Closed status
+                                    ]);
+                                    CrmRequestStatusHistory::create([
+                                        'crm_request_id' => $crm_request->id,
+                                        'status_id' => 4,
+                                        'agent_id' => Auth::id()
+                                    ]);
+                                    
+                                    CrmRequestTagging::where('crm_request_id', $crm_request->id)->delete();
+    
+                                    $comment = 'Dear '.$shipperName.',
+                                            Thank you for reaching us out! 
+                                            Your complaint has been resolved, and the payment has been paid. We appreciate your patience and understanding throughout this process. In case of any further query regarding this shipment you may reach us out within 48 hrs.
+                                            Regards,
+                                            Team CRM
+                                            TRAX';
+                                    
+                                    CRMCommentController::add($crm_request->id, 306, 0, 0, $comment, 0, 0);
+                                }
+                            }
+                            // End Auto Close Complaints
+                            //---------x-----------x-------------
+    
+                            ShipmentsPaymentJourneyController::add($dps->shipment_id, 3, $this->id, '', $this->payment_id);
+                        }
         
                     } else {
                         $body = $response->getBody();
@@ -159,7 +219,6 @@ class WalletSettlementFromDonePayments implements ShouldQueue
         if($actual_count > 0 &&  count($successfull_record) == $actual_count ) {
 
             DonePayment::where('id',  $this->payment_id)->update(['status' => 1, 'status_updated_at' => Carbon::now()]);
-
         }
     }
 }
