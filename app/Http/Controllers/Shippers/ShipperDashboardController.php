@@ -2774,8 +2774,11 @@ class ShipperDashboardController extends Controller
                 } else {
 
                     $final['url'] = $url;
+                    //$url = route('cod.wallet.finja_dashboard', ['url' => $finja['url']]);
                     foreach ($data as $key=>$value) {
                         $data[$key]['wallet_id'] = $finja['wallet_id'];
+                        $data[$key]['created_at'] = Carbon::now();
+                        $data[$key]['updated_at'] = Carbon::now();
                     }
                     WalletUser::wallet_create($data);
                     WalletSignUpLPendingRecordLogs::dispatch(session('user_id'));

@@ -905,7 +905,7 @@
 
 					$('td:eq(1)', row).html(index + 1 + info.page * info.length);
 
-					if (data.status != 'Paid' && data.wallet_user == null) {
+					if (data.status != 'Paid' && data.is_wallet_payment == 0) {
 						$('td:eq(0)', row).addClass('select-checkbox');
 
 						if ($.inArray(data.id, selected_rows) !== -1) {
