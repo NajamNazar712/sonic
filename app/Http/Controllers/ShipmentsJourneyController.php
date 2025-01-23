@@ -157,7 +157,10 @@ class ShipmentsJourneyController extends Controller
 
         if(in_array($shipper_status_id, [5,8,13,14,18,20,25,36,37,38,60])) {
             
-            $shipment = Shipment::join('wallet_users', 'shipments.user_id', 'wallet_users.user_id')->where('shipments.id', $shipment_id)->first();
+            $shipment = Shipment::leftjoin('wallet_users as u', function ($join) {
+                $join->on('u.user_id', '=', 'shipments.user_id')
+                   ->where('u.substitute_user_id', '0');
+            })->where('shipments.id', $shipment_id)->first();
             if($shipment) {
                 $data = [
                     'tracking_number' => $shipment->tracking_number,

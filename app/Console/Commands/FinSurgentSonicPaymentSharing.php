@@ -46,7 +46,10 @@ class FinSurgentSonicPaymentSharing extends Command
      */
     public function handle()
     {
-        $pending_payment_wallet_users = PendingPayment::join('wallet_users as u', 'pending_payments.user_id', '=', 'u.user_id')->select(['pending_payments.*', 'u.wallet_id', 'u.user_id as user_id'])->get();
+        $pending_payment_wallet_users = PendingPayment::join('wallet_users as u', function ($join) {
+            $join->on('u.user_id', '=', 'pending_payments.user_id')
+               ->where('u.substitute_user_id', '0');
+       })->select(['pending_payments.*', 'u.wallet_id', 'u.user_id as user_id'])->get();
        
         foreach($pending_payment_wallet_users as $pending_payment) {
             

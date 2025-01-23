@@ -39,7 +39,10 @@ class WalletSignUpLPendingRecordLogs implements ShouldQueue
     public function handle()
     {
         $user_id = $this->data;
-        $pending_payment_ids = PendingPayment::join('wallet_users as u', 'pending_payments.user_id', '=', 'u.user_id')->where('pending_payments.user_id', $user_id)
+        $pending_payment_ids = PendingPayment::join('wallet_users as u', function ($join) {
+            $join->on('u.user_id', '=', 'pending_payments.user_id')
+               ->where('u.substitute_user_id', '0');
+       })->where('pending_payments.user_id', $user_id)
         ->pluck('pending_payments.id');
         
         foreach ($pending_payment_ids as $pending_payment ){
@@ -54,9 +57,12 @@ class WalletSignUpLPendingRecordLogs implements ShouldQueue
             ->select(['pending_payment_shipments.*'])
             ->get();
             foreach($pending_payment_shipments as $pending_payment_shipment) {
-                $shipment = Shipment::join('wallet_users', 'shipments.user_id', '=', 'wallet_users.user_id')
+                $shipment = Shipment::leftjoin('wallet_users as u', function ($join) {
+                    $join->on('u.user_id', '=', 'shipments.user_id')
+                       ->where('u.substitute_user_id', '0');
+                })
                 ->where('shipments.id', $pending_payment_shipment->shipment_id)
-                ->select('shipments.*', 'wallet_users.wallet_id as wallet_user_id')
+                ->select('shipments.*', 'u.wallet_id as wallet_user_id')
                 ->first();
                 if($pending_payment_shipment->type == 3) {
                     $log_bid =  AdminFinanceController::isWalletLogUpdated($pending_payment_shipment->shipment_id);
