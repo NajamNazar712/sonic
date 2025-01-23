@@ -3642,7 +3642,11 @@ class NotificationsController extends Controller
                                 $body = str_replace('[shipments_detail]', $shipment_details, $body);
                             }
 
-                            $to = $pickup_request->pickup_address->email;
+                            if (ShipperNotificationEmail::where('user_id', $pickup_request->shipper_id)->exists()) {
+                                $to = ShipperNotificationEmail::where('user_id', $pickup_request->shipper_id)->whereNotNull('email')->pluck('email')->toArray();
+                            } else {
+                                $to = $pickup_request->pickup_address->email;
+                            }
                             self::email($subject, $body, $to);
                         }
                     } else if ($id == 44) {
@@ -6018,6 +6022,7 @@ class NotificationsController extends Controller
                         $to[] = 'aftab.qidwai@trax.pk';
                         $to[] = 'wajiha.majeed@trax.pk';
                         $to[] = 'huzaifa.aamir@trax.pk';
+                        $to[] = 'anas.mazhar@trax.pk';
 
                         self::email($subject, $body, $to, NULL, $bcc);
                     }
@@ -11321,6 +11326,94 @@ class NotificationsController extends Controller
                     $to = $array_data['phone'];
                     self::sms($body, $to, NULL,NULL, $id);
 
+                }
+
+                else if ($id == 235) {
+                    $done_payment_report = DonePaymentsReport::get();
+                    if ($done_payment_report) {
+                        $date = Carbon::today()->format('Y-m-d');
+                        $subject = $notification->subject;
+                        $body = $notification->body;
+                        if (strpos($subject, '[date]') !== FALSE) {
+                            $subject = str_replace('[date]', $date, $subject);
+                        }
+
+                        if (strpos($body, '[date]') !== FALSE) {
+                            $body = str_replace('[date]', $date, $body);
+                        }
+
+                        $link = '<a href="' . $reference_2_id . '" target="_blank">Report</a>';
+
+                        if (strpos($subject, '[link]') !== FALSE) {
+                            $subject = str_replace('[link]', $link, $subject);
+                        }
+
+                        if (strpos($body, '[link]') !== FALSE) {
+                            $body = str_replace('[link]', $link, $body);
+                        }
+                        // $summary_html = '<div style="margin-bottom: 100px;"><table style="width:100%;">';
+                        // $summary_html .= '<thead><tr>
+                        //                    <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total Shippers</th>
+                        //                    <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total Amount</th>
+                        //                    </tr></thead><tbody>';
+                        // $shippers = array();
+                        // $html = '<table style="width:100%;">';
+                        // $html .= '<thead><tr>
+                        //                     <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">S No.</th>
+                        //                    <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Payment ID</th>
+                        //                    <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipper Name</th>
+                        //                    <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">IBAN Number</th>
+                        //                    <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Amount</th>
+                        //                    <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">IBFT Charges</th>
+                        //                    </tr></thead><tbody>';
+                        // $total_amount = 0;
+                        // $total_ibft_amount = 0;
+                        // $serial = 1;
+                        // foreach ($done_payment_report as $done_payment) {
+                        //     if (!in_array($done_payment->shipper_id, $shippers)) {
+                        //         $shippers[$done_payment->shipper_id] = $done_payment->shipper_id;
+                        //     }
+                        //     $html .= '<tr>';
+                        //     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
+                        //     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . str_pad($done_payment->payment_id, 6, '0', STR_PAD_LEFT) . '</td>';
+                        //     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $done_payment->shipper_name . '</td>';
+                        //     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $done_payment->iban_number . '</td>';
+                        //     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($done_payment->amount) . '</td>';
+                        //     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($done_payment->ibft_charges ?? 0) . '</td>';
+                        //     $html .= '</tr>';
+                        //     $total_amount = $total_amount + $done_payment->amount;
+                        //     $total_ibft_amount = $total_ibft_amount + $done_payment->ibft_charges;
+                        //     $serial++;
+                        // }
+                        // $html .= '<tr>';
+                        // $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total</td>';
+                        // $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+                        // $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+                        // $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+                        // $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($total_amount) . '</td>';
+                        // $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($total_ibft_amount) . '</td>';
+                        // $html .= '</tr>';
+                        // $html .= '</tbody></table>';
+
+                        // $summary_html .= '<tr>';
+                        // $summary_html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . count($shippers) . '</td>';
+                        // $summary_html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($total_amount) . '</td>';
+                        // $summary_html .= '</tr>';
+                        // $summary_html .= '</tbody></table></div>';
+
+                        // $html = $summary_html . $html;
+
+                        // if (strpos($body, '[preview]') !== FALSE) {
+                        //     $body = str_replace('[preview]', $body);
+                        // }
+
+                        $to = array();
+                        $bcc = array();
+                        $to[] = 'aftab.qidwai@trax.pk';
+                        $to[] = 'anas.mazhar@trax.pk';
+
+                        self::email($subject, $body, $to, NULL, $bcc);
+                    }
                 }
 
             }

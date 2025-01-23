@@ -120,4 +120,14 @@ class ShipmentAdditionalCharges extends Model
         return $charges;
     }
 
+    static function fetch_wallet_charges($shipment_id){
+        $shipment_additional_charges = ShipmentAdditionalCharges::where('shipment_id', $shipment_id)->latest()->first();
+        if(!empty($shipment_additional_charges)){
+            $wallet_charges = $shipment_additional_charges->wallet_charges;
+        }else{
+            $wallet_charges = 0;
+        }
+        return $wallet_charges;
+    }
+
 }

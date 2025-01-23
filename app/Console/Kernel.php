@@ -167,6 +167,8 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\DeleteDuplicateArrival',
         '\App\Console\Commands\UpdateInvoiceChargesMonthly',
         '\App\Console\Commands\UpdateArrivalChargesIssue',
+        \App\Console\Commands\AddMissingSegmentLogs::class,
+        '\App\Console\Commands\ApolloShipmentFetchStatus',
 
         ];
 
@@ -580,6 +582,8 @@ class Kernel extends ConsoleKernel
 //        $schedule->command('email:revenuereport_lastmonth 2')->dailyAt('11:15')->runInBackground();
 //        $schedule->command('email:revenuereport_lastmonth 3')->dailyAt('11:30')->runInBackground();
 
+        $schedule->command('update:shipper_segment_logs')->everyFiveMinutes()->runInBackground();
+        $schedule->command('apollo:fetch-shipments-status')->everyFiveMinutes()->runInBackground();
     }
     /**
      * Register the commands for the application.

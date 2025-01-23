@@ -43,7 +43,7 @@ class UpdateInvoiceChargesMonthly extends Command
     public function handle()
     {
 
-        $startDate =  Carbon::now()->subDays(1)->format('Y-m-d 00:00:00');
+        $startDate =  Carbon::now()->subDays(6)->format('Y-m-d 00:00:00');
         $endDate = Carbon::now()->format('Y-m-d 23:59:59');
 
         $query = DB::table('invoice_shipments')
@@ -83,7 +83,6 @@ class UpdateInvoiceChargesMonthly extends Command
             ->having('new_charges', '!=', DB::raw('invoice_charges'))
             ->groupBy('invoice_shipments.shipment_id')
             ->get();
-
 
         $invoice_id = array();
         foreach ($query as $value){

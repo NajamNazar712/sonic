@@ -6,7 +6,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-class BoltUndeliveredReasonAgainstBookingTypesSeeder extends Seeder
+class BoltUndeliveredReasonAgainstBookingTypeSeeder extends Seeder
 {
     /**
      * Run the database seeds.

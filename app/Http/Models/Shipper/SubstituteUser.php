@@ -26,7 +26,16 @@ class SubstituteUser extends Authenticatable
         return $this->belongsTo('App\Http\Models\Shipper\User', 'user_id', 'id');
     }
 
+    // Format dates as 'YYYY-MM-DD HH:mm:ss'
+    protected function serializeDate(\DateTimeInterface $date)
+    {
+        return $date->format('Y-m-d H:i:s');
+    }
+
+
     public function sub_wallet() {
         return $this->belongsTo('App\Http\Models\WalletUser','id', 'substitute_user_id');
     }
+
+
 }
