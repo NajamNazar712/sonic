@@ -20431,6 +20431,36 @@ class AdminFinanceController extends Controller
         return response()->json(['data' => $payment_shipments]);
     }
 
+    public function wallet_user_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 816);
+        if (session('role_id') == 1 || in_array(1022, session('permissions'))) {
+            return view('admin.finance.wallet.index');
+        } else {
+            return redirect()->route('admin.access_denied');
+        }
+    }
+
+    public function walle_user_list(Request $request)
+    {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 817);
+        }
+        $wallet_users = DB::table('wallet_users')
+            ->leftJoin('users', 'users.id', 'wallet_users.user_id')
+            ->leftJoin('substitute_users', 'substitute_users.id', 'wallet_users.substitute_user_id')
+            ->select(
+                'wallet_users.id as wallet_user_id',
+                'wallet_users.name as wallet_user_name',
+                'wallet_users.email as wallet_user_email',
+                'wallet_users.phone as wallet_user_phone',
+                'wallet_users.cnic as wallet_user_cnic',
+                'users.name as parent_user_name',
+                'substitute_users.name as substitute_name'
+            );
+        $datatables = Datatables::of($wallet_users);
+        return $datatables->make(true); 
+    }
 
 
     public function payment()

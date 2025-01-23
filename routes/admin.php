@@ -1828,6 +1828,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminFinanceController@service_charges_ledger_index')->name('index');
             Route::get('list', 'Admins\AdminFinanceController@service_charges_ledger_list')->name('list');
         });
+
+        Route::prefix('wallet_users')->name('wallet_users.')->group(function () {
+            Route::get('', 'Admins\AdminFinanceController@wallet_user_index')->name('index');
+            Route::get('list', 'Admins\AdminFinanceController@walle_user_list')->name('list');
+        });
     });
 
     Route::prefix('petty_cash')->name('petty_cash.')->group(function () {

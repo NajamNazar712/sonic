@@ -11,6 +11,7 @@ use Illuminate\Queue\SerializesModels;
 use App\Http\Controllers\FingaIntegrationController;
 use App\Http\Models\DonePaymentShipment;
 use App\Http\Models\DonePayment;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
@@ -51,8 +52,11 @@ class WalletSettlementFromDonePayments implements ShouldQueue
         $done_payment_shipments = DonePaymentShipment::join('shipments as s','s.id', 'done_payment_shipments.shipment_id')
         ->leftjoin('shipment_additional_charges as sc', 'sc.shipment_id', 's.id')
         ->leftjoin('shipment_services_charges as ssc', 'ssc.shipment_id', 's.id')
-        ->join('wallet_users as wu', 'wu.user_id', 's.user_id')
-        ->join('finja_log_settlement_records as sac', 'done_payment_shipments.shipment_id', '=', 'sac.shipment_id')
+        ->leftjoin('wallet_users as wu', function ($join) {
+            $join->on('wu.user_id', '=', 's.user_id')
+                ->where('wu.substitute_user_id', '0');
+        })
+        ->leftjoin('finja_log_settlement_records as sac', 'done_payment_shipments.shipment_id', '=', 'sac.shipment_id')
         ->where('done_payment_shipments.done_payment_id', $this->payment_id)
         ->whereIn('done_payment_shipments.wallet_action_bid', [1,2])
         // ->where(function ($query) {
@@ -61,17 +65,15 @@ class WalletSettlementFromDonePayments implements ShouldQueue
         ->select(['done_payment_shipments.*', 'wu.user_id as user_id', 'wu.wallet_id as wallet_id', 's.tracking_number', 's.cash_handling_charges', 's.insurance_charges','s.replacement_charges','s.try_and_buy_charges','s.intercept_charges','s.nsa_osa_charges','s.esc_charges','s.return_charges', 'sac.wallet_settlement_updated', 's.weight_charges', 's.fuel_surcharge','sc.faf_charges', 'ssc.reverse_pickup_charges'])->get();
         //Log::info($done_payment_shipments);
         $successfull_record = [];
-
+        $api = config('app.FINGA_URL');
+        $token = FingaIntegrationController::getToken($api);
         foreach($done_payment_shipments as $dps) {
             $shipmentId = $dps->shipment_id;
-            $api = config('app.FINGA_URL');
-            $token = FingaIntegrationController::getToken($api);
-
             if($dps->wallet_action_bid == 1 && $dps->wallet_settlement_updated == 0) {
                 $requestPayload = [
                     "client_id" => $dps->user_id,
                     "wallet_id" => $dps->wallet_id,
-                    "reference_id" => (string) Str::uuid(),
+                    "reference_id" => $dps->id,
                     "shipment_id" =>  $dps->tracking_number,
                     "amount" => $dps->amount,
                     "charges" => [
