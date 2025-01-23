@@ -648,6 +648,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                     Route::post('shipment_details', 'Admins\V2Pickup\V2AdminPickupsController@arrival_try_and_buy_shipment_details')->name('shipment_details');
                 });
                 Route::post('store', 'Admins\V2Pickup\V2AdminPickupsController@individual_arrival_submit')->name('store');
+                Route::post('shipment_sub_segment_check', 'Admins\V2Pickup\V2AdminPickupsController@arrival_individual_shipment_sub_segment_check')->name('shipment_sub_segment_check');
             });
 
             Route::prefix('project_shippers')->name('project_shippers.')->group(function () {
@@ -3688,6 +3689,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('scanning_history')->name('scanning_history.')->group(function () {
         Route::get('', 'Admins\AdminShipmentScanningHistoryController@index')->name('index');
         Route::post('details', 'Admins\AdminShipmentScanningHistoryController@details')->name('details');
+        Route::get('details_new', 'Admins\AdminShipmentScanningHistoryController@details_new')->name('details_new');
     });
     Route::prefix('airway_journey')->name('airway_journey.')->group(function () {
         Route::get('', 'AdminAirwayBillJournyController@index')->name('index');
