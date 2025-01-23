@@ -1,9 +1,9 @@
 @extends('admin.layout.master')
-@section('title', 'Wallet Users')
+@section('title', 'Wallet Customers')
 
 @section('content')
     <h1 class="mb-1">
-        Wallet Users
+        Wallet Customers
     </h1>
 
     <div class="card">
@@ -14,11 +14,12 @@
                     <thead>
                         <tr role="row" class="bg-primary white">
                             <th class="border-primary border-darken-1">S. No.</th>
+                            <th class="border-primary border-darken-1">Wallet ID</th>
                             <th class="border-primary border-darken-1">Wallet Shipper name</th>
                             <th class="border-primary border-darken-1">Shipper Email</th>
                             <th class="border-primary border-darken-1">Shipper Phone</th>
                             <th class="border-primary border-darken-1">Shipper CNIC</th>
-                            <th class="border-primary border-darken-1">Shipper Main Account </th>
+                            <th class="border-primary border-darken-1">Parent Shipper</th>
                             <th class="border-primary border-darken-1">Substitute User</th>
                         </tr>
                     </thead>
@@ -66,16 +67,18 @@
                         head = [];
 
                         head.push('S.No');
+                        head.push('Wallet ID');
                         head.push('Wallet User Name');
                         head.push('Shipper Email');
                         head.push('Shipper Phone');
                         head.push('Shipper CNIC');
-                        head.push('Shipper Main Account');
+                        head.push('Parent Shipper');
                         head.push('Substitute User');
 
                         $.each(result.data, function(index, values) {
                             row = [];
                             row.push(index + 1);
+                            row.push(values.wallet_id);
                             row.push(values.wallet_user_name);
                             row.push(values.wallet_user_email);
                             row.push(values.wallet_user_phone);
@@ -142,6 +145,13 @@
                 },
 
                 {
+                    data: 'wallet_id',
+                    name: 'wallet_id',
+                    class: 'align-middle wallet_id',
+                    orderable: false
+                },
+
+                {
                     data: 'wallet_user_name',
                     name: 'wallet_users.name',
                     class: 'align-middle wallet_user_name',
@@ -182,7 +192,6 @@
                     class: 'align-middle substitute_name',
                     orderable: false
                 },
-
             ],
         });
         table.draw();
