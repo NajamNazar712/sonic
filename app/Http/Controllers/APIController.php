@@ -10153,17 +10153,17 @@ class APIController extends Controller
             $shipment_id = Shipment::where('tracking_number', $request->tracking_number)->value('id');
             $pending_payment_shipments = PendingPaymentShipment::where('shipment_id',$shipment_id)->whereIn('type',[0,1])->latest()->first();
 
+            $finja_request_log = new FinjaRequestLog();
+            $finja_request_log->requested = json_encode($request->all());
+            $finja_request_log->ip_address = $request->ip();
+            $finja_request_log->save();
+
+            ShipmentAdditionalCharges::where('shipment_id', $shipment_id)->update([
+                'wallet_charges' => $request->charges,
+                'wallet_charges_updated_at' => Carbon::now()
+            ]);
+
             if(!empty($pending_payment_shipments)){
-                $finja_request_log = new FinjaRequestLog();
-                $finja_request_log->requested = json_encode($request->all());
-                $finja_request_log->ip_address = $request->ip();
-                $finja_request_log->save();
-
-                ShipmentAdditionalCharges::where('shipment_id', $shipment_id)->update([
-                    'wallet_charges' => $request->charges,
-                    'wallet_charges_updated_at' => Carbon::now()
-                ]);
-
                 AdminFinanceController::update_payment($shipment_id,$pending_payment_shipments->type);
 
                 return response()->json(['status' => 1, 'message' => 'Charges updated against this shipment.']);
