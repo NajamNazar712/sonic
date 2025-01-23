@@ -92,11 +92,11 @@ class FinSurgentSonicPaymentSharing extends Command
                             "amount" => $shipment->amount,
                             "order_created_date" => $shipment->created_at,
                             "charges" => [
-                                'weight_charges' =>  intval($shipment->weight_charges),
-                                'fuel_surcharge' =>  intval($shipment->fuel_surcharge),
-                                'faf_charges' => intval($faf_charges),
-                                'arrival_charges_gst' => intval($gst),
-                                'arrival_sms_charges' => intval($pending_payment_shipment->sms_charges)
+                                'weight_charges' =>   floatval($shipment->weight_charges),
+                                'fuel_surcharge' =>   floatval($shipment->fuel_surcharge),
+                                'faf_charges' =>  floatval($faf_charges),
+                                'arrival_charges_gst' =>  floatval($gst),
+                                'arrival_sms_charges' =>  floatval($pending_payment_shipment->sms_charges)
                             ]
                         ];
                         $this->arrival_shipment_logs($requestPayload, $pending_payment_shipment);

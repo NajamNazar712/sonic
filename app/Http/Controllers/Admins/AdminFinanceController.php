@@ -7630,11 +7630,11 @@ class AdminFinanceController extends Controller
                                                 "amount" => $shipment->amount, 
                                                 "order_created_date" => $shipment->created_at,
                                                 "charges" => [
-                                                    'weight_charges' =>  intval($shipment->weight_charges),
-                                                    'fuel_surcharge' =>  intval($shipment->fuel_surcharge),
-                                                    'faf_charges' => $shipment->faf_charges_data ? intval($shipment->faf_charges_data->faf_charges) : 0,
-                                                    'arrival_charges_gst' => intval($pending_payment_shipment->gst),
-                                                    'arrival_sms_charges' => intval($pending_payment_shipment->sms_charges)
+                                                    'weight_charges' =>  floatval($shipment->weight_charges),
+                                                    'fuel_surcharge' =>  floatval($shipment->fuel_surcharge),
+                                                    'faf_charges' => $shipment->faf_charges_data ? floatval($shipment->faf_charges_data->faf_charges) : 0,
+                                                    'arrival_charges_gst' => floatval($pending_payment_shipment->gst),
+                                                    'arrival_sms_charges' => floatval($pending_payment_shipment->sms_charges)
                                                 ]
                                             ]; 
                                         }
@@ -7801,11 +7801,11 @@ class AdminFinanceController extends Controller
                                                 "amount" => $shipment->amount,
                                                 "order_created_date" => $shipment->created_at,
                                                 "charges" => [
-                                                    'weight_charges' =>  intval($shipment->weight_charges),
-                                                    'fuel_surcharge' =>  intval($shipment->fuel_surcharge),
-                                                    'faf_charges' => $shipment->faf_charges_data ? intval($shipment->faf_charges_data->faf_charges) : 0,
-                                                    'arrival_charges_gst' => intval($pending_payment_shipment->gst),
-                                                    'arrival_sms_charges' => intval($pending_payment_shipment->sms_charges)
+                                                    'weight_charges' =>  floatval($shipment->weight_charges),
+                                                    'fuel_surcharge' =>  floatval($shipment->fuel_surcharge),
+                                                    'faf_charges' => $shipment->faf_charges_data ? floatval($shipment->faf_charges_data->faf_charges) : 0,
+                                                    'arrival_charges_gst' => floatval($pending_payment_shipment->gst),
+                                                    'arrival_sms_charges' => floatval($pending_payment_shipment->sms_charges)
                                                 ]
                                             ]; 
                                         }
