@@ -14,8 +14,9 @@
                     <div class="row justify-content-center">
                         <div class="col-3">
                             <div class="form-group">
-                                <input type="text" name="tracking_numbers" id="tracking_number" class="dt_search tracking_numbers"
-                                    placeholder="Tracking Number(s)" data-tags-input-name="tracking_number">
+                                <input type="text" name="tracking_numbers" id="tracking_number"
+                                    class="dt_search tracking_numbers" placeholder="Tracking Number(s)"
+                                    data-tags-input-name="tracking_number">
                             </div>
                         </div>
                         <div class="form-group ml-1">
@@ -29,9 +30,17 @@
                         <tr role="row" class="bg-primary white">
                             <th class="border-primary border-darken-1">S. No.</th>
                             <th class="border-primary border-darken-1">Tracking No.</th>
-                            <th class="border-primary border-darken-1">DNCC #</th>
-                            <th class="border-primary border-darken-1">Shipment Arrived at</th>
-                            <th class="border-primary border-darken-1">Shipment Status</th>
+                            <th class="border-primary border-darken-1">Shipper Name</th>
+                            <th class="border-primary border-darken-1">Defaulter Name</th>
+                            <th class="border-primary border-darken-1">Trax Id</th>
+                            <th class="border-primary border-darken-1">Active or Inactive Status</th>
+                            <th class="border-primary border-darken-1">Responsible City</th>
+                            <th class="border-primary border-darken-1">Shipment Last Status</th>
+                            <th class="border-primary border-darken-1">Lost Requested By</th>
+                            <th class="border-primary border-darken-1">Approved By</th>
+                            <th class="border-primary border-darken-1">COD Amount</th>
+                            <th class="border-primary border-darken-1">Parcel Value</th>
+                            <th class="border-primary border-darken-1">Case Closed Remarks</th>
                         </tr>
                     </thead>
                 </table>
@@ -144,18 +153,27 @@
                     success: function(result) {
                         head = [];
                         head.push('S.No');
-                        head.push('DNCC #');
                         head.push('Tracking .No');
-                        head.push('Shipment Arrived at');
-                        head.push('Shipment Status');
+                        head.push('Shipper Name');
+                        head.push('Defaulter Name');
+                        head.push('Trax Id');
+                        head.push('Active or Inactive Status');
+                        head.push('Responsible City');
+                        head.push('Shipment Last Status');
+                        head.push('Lost Requested By');
+                        head.push('Approved By');
+                        head.push('COD Amount');
+                        head.push('Parcel Value');
+                        head.push('Case Closed Remarks');
 
                         $.each(result.data, function(index, values) {
                             row = [];
                             row.push(index + 1);
-                            row.push(values.dncc_no);
-                            row.push(values.tracking_number);
-                            row.push(values.created_at);
-                            row.push(values.shipment_status);
+                            row.push(values.shipment_tracking_number);
+                            row.push(values.shipper_name);
+                            row.push(values.defaulter_name);
+                            row.push(values.trax_id);
+                            row.push(values.employee_status);
 
                             body.push(row);
                         });
@@ -174,7 +192,7 @@
             dom: '<"d-inline-block"l><"pull-right"B>tipr',
             buttons: [{
                     extend: 'excel',
-                    title: 'DNCC Wise Tracking Number Info',
+                    title: 'Lost/Case Closed Summary Report',
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 },
@@ -204,40 +222,57 @@
             order: [
                 [1, 'desc']
             ],
-            columns: [{
+            columns: [
+                {
                     orderable: false,
                     searchable: false,
                     name: 'serial_number',
                     class: 'align-middle serial_number',
                     targets: 0,
-                    render: function(data, type, row, meta) {
+                    render: function (data, type, row, meta) {
                         return meta.row + 1;
                     }
                 },
                 {
-                    data: 'tracking_number',
-                    name: 'tracking_number',
-                    class: 'align-middle',
-                    orderable: false
+                    data: 'shipment_tracking_number',
+                    name: 'shipment_tracking_number'
                 },
                 {
-                    data: 'dncc_no',
-                    name: 'dncc_no',
-                    class: 'align-middle dncc_no',
-                    orderable: false
+                    data: 'shipper_name',
+                    name: 'shipper_name'
                 },
                 {
-                    data: 'created_at',
-                    name: 'created_at',
-                    class: 'align-middle dncc_created_at',
-                    orderable: false
+                    data: 'defaulter_name',
+                    name: 'defaulter_name'
                 },
                 {
-                    data: 'shipment_status',
-                    name: 'shipment_status',
-                    class: 'align-middle shipment_status',
-                    orderable: false
+                    data: 'responsible_city',
+                    name: 'responsible_city'
                 },
+                {
+                    data: 'latest_shipment_status',
+                    name: 'latest_shipment_status'
+                },
+                {
+                    data: 'lost_requested_by',
+                    name: 'lost_requested_by'
+                },
+                {
+                    data: 'lost_approved_by',
+                    name: 'lost_approved_by'
+                },
+                {
+                    data: 'cod_amount',
+                    name: 'cod_amount'
+                },
+                {
+                    data: 'parcel_value',
+                    name: 'parcel_value'
+                },
+                {
+                    data: 'case_closed_remarks',
+                    name: 'case_closed_remarks'
+                }
             ],
         });
 
