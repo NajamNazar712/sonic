@@ -49,7 +49,7 @@ class WalletSettlementFromDonePayments implements ShouldQueue
     public function handle()
     {
         
-        $done_payment_shipments = DonePaymentShipment::join('shipments as s','s.id', 'done_payment_shipments.shipment_id')
+        $done_payment_shipments = DonePaymentShipment::with('shipment')->join('shipments as s','s.id', 'done_payment_shipments.shipment_id')
         ->leftjoin('shipment_additional_charges as sc', 'sc.shipment_id', 's.id')
         ->leftjoin('shipment_services_charges as ssc', 'ssc.shipment_id', 's.id')
         ->leftjoin('wallet_users as wu', function ($join) {
@@ -69,6 +69,7 @@ class WalletSettlementFromDonePayments implements ShouldQueue
         $token = FingaIntegrationController::getToken($api);
         foreach($done_payment_shipments as $dps) {
             $shipmentId = $dps->shipment_id;
+            $shipment = $done_payment_shipments->shipment;
             if($dps->wallet_action_bid == 1 && $dps->wallet_settlement_updated == 0) {
                 $requestPayload = [
                     "client_id" => $dps->user_id,
