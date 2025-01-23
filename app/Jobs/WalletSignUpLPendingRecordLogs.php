@@ -69,7 +69,7 @@ class WalletSignUpLPendingRecordLogs implements ShouldQueue
                             "amount" => $shipment->amount,
                             "order_created_date" => $shipment->created_at,
                             "charges" => [
-                                'arrival_charges' =>  intval($shipment->weight_charges),
+                                'weight_charges' =>  intval($shipment->weight_charges),
                                 'fuel_surcharge' =>  intval($shipment->fuel_surcharge),
                                 'faf_charges' => $shipment->faf_charges_data ? intval($shipment->faf_charges_data->faf_charges) : 0,
                                 'arrival_charges_gst' => intval($pending_payment_shipment->gst),
@@ -79,7 +79,7 @@ class WalletSignUpLPendingRecordLogs implements ShouldQueue
                         $this->arrival_shipment_logs($requestPayload,  $shipment->id);
                     }
         
-                } elseif(in_array($pending_payment_shipment->type, [0, 1])) {
+                } elseif(in_array($pending_payment_shipment->type, [0, 1, 2])) {
                     $log_bid = AdminFinanceController::isWalletLogUpdated($pending_payment_shipment->shipment_id);
                     if(!$log_bid) {
                         $requestPayload = [
@@ -90,7 +90,7 @@ class WalletSignUpLPendingRecordLogs implements ShouldQueue
                             "amount" => $shipment->amount, 
                             "order_created_date" => $shipment->created_at,
                             "charges" => [
-                                'arrival_charges' =>  0
+                                'weight_charges' =>  0
                             ]
                         ];
                         $this->arrival_shipment_logs($requestPayload,  $shipment->id);
