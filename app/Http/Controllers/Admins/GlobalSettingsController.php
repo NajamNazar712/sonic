@@ -169,6 +169,7 @@ use App\Http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
 use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyBlacklisted;
 use App\RvShipmentTicket;
 use App\Http\Models\CrmCaseNatureRemark;
+use App\Models\WalletShipperSetting;
 
 class GlobalSettingsController extends Controller
 {
@@ -10206,5 +10207,91 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'FaF Percent Updated !!!');
 
 
+    }
+
+    public function wallet_shippers_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 818);
+        $shippers = User::where('status', '=', 3)
+            ->where('blacklist', 0)
+            ->where('account_type_id', 1)
+            ->get();
+        return view('admin.settings.wallet_shippers.index')->with(['shippers' => $shippers]);
+    }
+    
+
+    public function wallet_shippers_list()
+    {
+        $wallet_shippers = WalletShipperSetting::join('users as u', 'wallet_shipper_settings.user_id', '=', 'u.id')
+            ->select('u.name as shipper_name', 'wallet_shipper_settings.id as id', 'wallet_shipper_settings.status as status', 'wallet_shipper_settings.created_at as created');
+
+        $datatables = Datatables::of($wallet_shippers);
+            // ->editColumn('status', function ($wallet_shippers) {
+            //     if ($wallet_shippers->status == 1) {
+            //         return 'Enable';
+            //     } else {
+            //         return 'Disable';
+            //     }
+            // })
+            // ->addColumn('action', function ($wallet_shippers) {
+            //     if (session('role_id') == 1 || count(array_intersect([1007, 848], session('permissions'))) !== 0) {
+
+            //         $dropdown = '<div class="btn-group">
+            //         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+            //         <div class="dropdown-menu dropdown-menu-sm">
+            //         ';
+            //         if (session('role_id') == 1 || in_array(1025, session('permissions'))) {
+            //             if ($wallet_shippers ->status == 1) {
+
+            //                 $dropdown .= ' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+            //             } else {
+            //                 $dropdown .= ' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+            //             }
+            //         }
+
+            //         $dropdown .= '</div></div>';
+            //         return $dropdown;
+            //     } else {
+            //         return '';
+            //     }
+            // });
+        return $datatables->make(true);
+    }
+    
+    public function wallet_shippers_add(Request $request)
+    {
+        $shipper_id = $request->wallet_shipper_id;
+       
+        if (!empty($shipper_id)) {
+            $shipper_exist = WalletShipperSetting::where('user_id', $shipper_id);
+            if ($shipper_exist->exists()) {
+                return redirect()->back()->with('error', 'Already Exist !');
+            } else {
+                $new_shipper = new WalletShipperSetting();
+                $new_shipper->user_id = $shipper_id;
+                $new_shipper->add_by = Auth::id();
+                $new_shipper->save();
+
+                return redirect()->back()->with('success', 'Updated!');
+            }
+        } else {
+            return redirect()->back()->with('error', 'Shipper Required !');
+        }
+    }
+
+    public function wallet_shippers_enable_disable(Request $request)
+    {
+        $wallet_shipper = WalletShipperSetting::find($request->id);
+       
+        if ($wallet_shipper->status == 1) {
+            $wallet_shipper->status = 0;
+           
+            $wallet_shipper->save();
+            return redirect()->back()->with('success', 'Shipper Disabled !');
+        } else {
+            $wallet_shipper->status = 1;
+            $wallet_shipper->save();
+            return redirect()->back()->with('success', 'Shipper Enabled !');
+        }
     }
 }
