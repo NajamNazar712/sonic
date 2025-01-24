@@ -61,7 +61,7 @@
 
                                     </div>
                                     <div class="form-actions right">
-                                        <button type="submit" class="btn btn-primary"  >Signup to Wallet</button>
+                                        <button type="submit" id="signup_button" class="btn btn-primary"  >Signup to Wallet</button>
                                     </div>
                                 </div>
                             </form>
@@ -105,6 +105,33 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
+                    $('#signup_button').prop('disabled',true);
+                    swal({
+                        title: "Processing...",
+                        text: "Please wait while we process your request.",
+                        content: (() => {
+                            // Create a container for the spinner
+                            let content = document.createElement("div");
+                            content.innerHTML = `
+                            <div style="display: flex; justify-content: center; align-items: center;">
+                                <div class="spinner" style="width: 30px; height: 30px; border: 4px solid rgba(0,0,0,0.2); border-top: 4px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                            </div>
+                        `;
+                            return content;
+                        })(),
+                        buttons: false, // Disable buttons
+                        closeOnClickOutside: false, // Disable outside click
+                        closeOnEsc: false // Disable escape key
+                    });
+
+                    const style = document.createElement("style");
+                    style.textContent = `
+                    @keyframes spin {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
+                    }`;
+                    document.head.appendChild(style);
+
 
                     var formData = new FormData();
 
@@ -128,6 +155,8 @@
                         contentType: false,
                         data: formData,
                         success: function (data) {
+
+                            swal.close();
 
                             if (data.status === 0) {
 
@@ -211,8 +240,12 @@
                                 var rdUrl = data.output.url ;
                                 window.location.href = `{{ url('cod/wallet/finja_dashboard') }}?url=${rdUrl}`;
                             }
+                            $('#signup_button').prop('disabled',false);
                         },
                         error: function (xhr) {
+                            $('#signup_button').prop('disabled',false);
+                            swal.close();
+
                             console.error(xhr.responseText);
                         }
                     });
