@@ -7771,19 +7771,26 @@ class AdminFinanceController extends Controller
                         $done_payment->adjusted_shipments = 0;
                         $done_payment->user_bank_info_id = $user_bank_id;
                         $done_payment->company_bank_id = $company_bank;
-                        $done_payment->is_wallet_payment = WalletUser::where('user_id', $pending_payment->user_id)->exists() ? 1 :  0;
 
-                        $user_ibft_charge = UserIbftCharge::where('user_id', $pending_payment->user_id)->first();
-                        if ($user_ibft_charge) {
-                            $done_payment->ibft_charges = $user_ibft_charge->current_charges;
-                        } else {
-                            $settings = GlobalSettings::where('type', 'ibft_charges');
+                        $wallet_check = WalletUser::where('user_id', $pending_payment->user_id)->exists() ? 1 :  0;
 
-                            if ($settings->exists()) {
-                                $settings = $settings->first();
+                        $done_payment->is_wallet_payment = $wallet_check;
 
-                                $done_payment->ibft_charges = $settings->setting_value;
+                        if($wallet_check == 0) {
+                            $user_ibft_charge = UserIbftCharge::where('user_id', $pending_payment->user_id)->first();
+                            if ($user_ibft_charge) {
+                                $done_payment->ibft_charges = $user_ibft_charge->current_charges;
+                            } else {
+                                $settings = GlobalSettings::where('type', 'ibft_charges');
+
+                                if ($settings->exists()) {
+                                    $settings = $settings->first();
+
+                                    $done_payment->ibft_charges = $settings->setting_value;
+                                }
                             }
+                        }else{
+                            $done_payment->ibft_charges = 0;
                         }
 
 
@@ -9299,6 +9306,7 @@ class AdminFinanceController extends Controller
         $total_fintech_charges = 0;
         $total_sms_charges = 0;
 		$total_faf_charges = 0;
+		$total_wallet_charges = 0;
         $calculate_total_fintech_charges = [];
         foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
 
@@ -9313,6 +9321,7 @@ class AdminFinanceController extends Controller
                 $service_charges = 0;
             }
             $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment->id);
+            $wallet_charges = ShipmentAdditionalCharges::fetch_wallet_charges($shipment->id);
             $arrival_charges_applied = ShipmentAdditionalCharges::check_additional_charges($shipment->id,true,false,false);;
             $shipment_weight = $shipment->actual_weight;
             $weight_charges = $shipment->weight_charges;
@@ -9359,6 +9368,8 @@ class AdminFinanceController extends Controller
                               <td>' . $shipment_weight . '</td>
                               <td>' . number_format($done_payment_shipment->amount) . '</td>
                               <td>' . (($done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? number_format($weight_charges, 2) : '0') . '</td>
+                              <td>' . (($done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? number_format($faf_charges, 2) : '0') . '</td>
+                              <td>' . (($done_payment_shipment->type != 2) ? number_format($wallet_charges, 2) : '0') . '</td>
                               <td>' . (($done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? number_format($shipment->cash_handling_charges, 2) : '0') . '</td>
                               <td>' . (($done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
                               <td>' . (($done_payment_shipment->type == 2) ? number_format($done_payment_shipment->payable, 2) : '0') . '</td>
@@ -9398,6 +9409,7 @@ class AdminFinanceController extends Controller
                             $total_insurance_charges += $shipment->insurance_charges;
                             $total_intercept_charges += $shipment->intercept_charges;
                             $total_nsa_osa_charges += $shipment->nsa_osa_charges;
+                            $total_wallet_charges += $wallet_charges;
                             if(!$arrival_charges_applied){
                                 $total_weight_charges += $shipment->weight_charges;
                                 $total_fuel_surcharge += $shipment->fuel_surcharge;
@@ -9433,6 +9445,8 @@ class AdminFinanceController extends Controller
                                 <td class="color primary"><strong>Total</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_collection_amount) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_weight_charges, 2) . '</strong></td>
+                                <td class="color secondary"><strong>' . number_format($total_faf_charges, 2) . '</strong></td>
+                                <td class="color secondary"><strong>' . number_format($total_wallet_charges, 2) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_cash_handling_charges, 2) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_nsa_osa_charges, 2) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_adjustments, 2) . '</strong></td>
@@ -9478,6 +9492,8 @@ class AdminFinanceController extends Controller
                               <td class="color primary"><strong>Weight (kg)</strong></td>
                               <td class="color primary"><strong>Collection Amount (PKR)</strong></td>
                               <td class="color primary"><strong>Weight Charges (PKR)</strong></td>
+                              <td class="color primary"><strong>Faf Charges (PKR)</strong></td>
+                              <td class="color primary"><strong>Wallet Charges (PKR)</strong></td>
                               <td class="color primary"><strong>Cash Handling Charges (PKR)</strong></td>
                               <td class="color primary"><strong>OSA Charges (PKR)</strong></td>
                               <td class="color primary"><strong>Adjustments (PKR)</strong></td>
@@ -9539,6 +9555,10 @@ class AdminFinanceController extends Controller
                                      <tr>
                                         <td class="color secondary"><strong>Total Faf Charges</strong></td>
                                         <td>' . number_format($total_faf_charges, 2) . '</td>
+                                    </tr>
+                                     <tr>
+                                        <td class="color secondary"><strong>Total Wallet Charges</strong></td>
+                                        <td>' . number_format($total_wallet_charges, 2) . '</td>
                                     </tr>
                                     <tr>
                                         <td class="color secondary"><strong>Total Intercept Charges</strong></td>
