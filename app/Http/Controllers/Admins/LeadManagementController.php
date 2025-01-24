@@ -32,6 +32,7 @@ use App\Models\Admin\Lead\LeadCallStatusLog;
 use App\Http\Models\ServiceList;
 use App\Http\Models\Shipper\User;
 use Illuminate\Support\Str;
+use App\Http\Models\Admin\Lead\EditLeadLogs;
 
 class LeadManagementController extends Controller
 {
@@ -305,7 +306,23 @@ class LeadManagementController extends Controller
                     if ((session('role_id') == 1 || (in_array(696, session('permissions')) && (!in_array($lead->status_id, [9, 12]))))) {
                         $dropdown .= '<button type="button"  class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
                     }
-                } 
+                }
+                
+                if($lead->via_channel == 'Sonic' || !isset($lead->via_channel)){
+                    if ((session('role_id') == 1 )) {
+                        $dropdown .= '
+                        <button type="button" class="dropdown-item view_logs">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col-2">
+                                    <i class="ft-edit"></i>
+                                </div>
+                                <div class="col-9 offset-1">
+                                    View Logs
+                                </div>
+                            </div>
+                        </button>';
+                    }
+                }
 
 
 
@@ -924,7 +941,6 @@ class LeadManagementController extends Controller
     }
 
     public function edit(Request $request){
-
         $lead_id = $request->edit_lead_id;
         if ($lead_id) {
             $lead = Lead::find($lead_id);
@@ -939,6 +955,37 @@ class LeadManagementController extends Controller
                 $lead->reference_id = $request->edit_reference_id;
                 $lead->status_id = 15;
                 $lead->service_id = $request->service_id;
+
+                try{
+                    // maintain logs when editing leads
+                    $changedFields = [];
+                    $fieldNames = [
+                        'city_id' => 'City',
+                        'territory_id' => 'Territory',
+                        'territory_area_id' => 'Territory Area',
+                        'phone_number' => 'Phone Number',
+                        'email_address' => 'Email Address',
+                        'brand' => 'Brand',
+                        'company' => 'Company',
+                        'service_id' => 'Service',
+                        'edit_reference_id' => 'Reference ID',
+                    ];
+
+                    foreach ($fieldNames as $field => $fieldName) {
+                        if ($lead->isDirty($field)) {;
+                            $changedFields[] = $fieldName;
+                        }
+                    }
+                    EditLeadLogs::create([
+                        'lead_id' => $lead->id,
+                        'trax_id' => Auth::user()->trax_id,
+                        'admin_name' => Auth::user()->name,
+                        'edited_fields' => implode(', ', $changedFields)
+                    ]);
+                } catch(\Exception $e){
+                    Log::error('Error creating log entry: ' . $e->getMessage());
+                }
+
                 $lead->save();
 
                 LeadTaggingController::auto_tagging($lead->id, Auth::id());
@@ -1088,5 +1135,20 @@ class LeadManagementController extends Controller
             'email_address_exists' => $emailAddressExists,
             'company_exists' => $companyExists,
         ]);
+    }
+
+    public function view_logs(Request $request){
+        $logs = EditLeadLogs::where('lead_id', $request->lead_id)->get();
+        if ($logs->isNotEmpty()) {
+            return response()->json([
+                'status' => 0,
+                'logs' => $logs
+            ]);
+        } else {
+            return response()->json([
+                'status' => 1,
+                'message' => 'No logs found for this lead.'
+            ]);
+        }
     }
 }

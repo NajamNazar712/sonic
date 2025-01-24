@@ -3978,6 +3978,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('add', 'Admins\LeadManagementController@add')->name('add');
         Route::get('edit_service_list', 'Admins\LeadManagementController@edit_service_list')->name('edit_service_list');
         Route::post('/check-lead', 'Admins\LeadManagementController@checkLead')->name('check.lead');
+        Route::get('view_logs', 'Admins\LeadManagementController@view_logs')->name('view_logs');
 
     });
 
