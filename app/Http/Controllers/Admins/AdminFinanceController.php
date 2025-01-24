@@ -6707,15 +6707,14 @@ class AdminFinanceController extends Controller
         if ($request->get('star_shipper_filter') == 1) {
             $pending_payments->where('sts.status', 1);
         }
+        $wallet_user = $request->input('wallet_filter',0);
+        if($wallet_user == 1) {
+            $pending_payments->whereNotNull('wu.id');
 
-        if ($wallet_user = $request->get('wallet_filter')) {
-            if($wallet_user == 1) {
-                $pending_payments->whereNotNull('wu.id');
-
-            } else {
-                $pending_payments->whereNull('wu.id');
-            }
+        } else {
+            $pending_payments->whereNull('wu.id');
         }
+        
 
         $datatables = Datatables::of($pending_payments)
             ->setRowAttr([
