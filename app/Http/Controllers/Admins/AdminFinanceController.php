@@ -7597,20 +7597,25 @@ class AdminFinanceController extends Controller
                         $done_payment->arrival_shipment = $pending_payment->arrival_shipment;
                         $done_payment->user_bank_info_id = $user_bank_id;
                         $done_payment->company_bank_id = $company_bank;
+                        $wallet_check = WalletUser::where('user_id', $pending_payment->user_id)->exists() ? 1 :  0;
 
-                        $done_payment->is_wallet_payment = WalletUser::where('user_id', $pending_payment->user_id)->exists() ? 1 :  0;
-                    
-                        $user_ibft_charge = UserIbftCharge::where('user_id', $pending_payment->user_id)->first();
-                        if ($user_ibft_charge) {
-                            $done_payment->ibft_charges = $user_ibft_charge->current_charges;
-                        } else {
-                            $settings = GlobalSettings::where('type', 'ibft_charges');
+                        $done_payment->is_wallet_payment = $wallet_check;
 
-                            if ($settings->exists()) {
-                                $settings = $settings->first();
+                        if($wallet_check == 0) {
+                            $user_ibft_charge = UserIbftCharge::where('user_id', $pending_payment->user_id)->first();
+                            if ($user_ibft_charge) {
+                                $done_payment->ibft_charges = $user_ibft_charge->current_charges;
+                            } else {
+                                $settings = GlobalSettings::where('type', 'ibft_charges');
 
-                                $done_payment->ibft_charges = $settings->setting_value;
+                                if ($settings->exists()) {
+                                    $settings = $settings->first();
+
+                                    $done_payment->ibft_charges = $settings->setting_value;
+                                }
                             }
+                        }else{
+                            $done_payment->ibft_charges = 0;
                         }
 
                         $done_payment->save();
