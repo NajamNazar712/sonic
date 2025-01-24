@@ -85,7 +85,7 @@ class WalletSignUpLPendingRecordLogs implements ShouldQueue
                         $this->arrival_shipment_logs($requestPayload,  $shipment->id);
                     }
         
-                } elseif(in_array($pending_payment_shipment->type, [0, 1, 2])) {
+                } elseif(in_array($pending_payment_shipment->type, [0, 1])) {
                     $log_bid = AdminFinanceController::isWalletLogUpdated($pending_payment_shipment->shipment_id);
                     if(!$log_bid) {
                         $requestPayload = [
@@ -101,6 +101,22 @@ class WalletSignUpLPendingRecordLogs implements ShouldQueue
                         ];
                         $this->arrival_shipment_logs($requestPayload,  $shipment->id);
                     } 
+                } elseif($pending_payment_shipment->type == 2) {
+                    $log_bid = AdminFinanceController::isWalletLogUpdated($pending_payment_shipment->shipment_id);
+                    if(!$log_bid) {
+                        $requestPayload = [
+                            "wallet_id" =>$shipment->wallet_id,
+                            "client_id" => $shipment->user_id, 
+                            "reference_id" => (string) Str::uuid(), 
+                            "shipment_id" => $shipment->tracking_number, 
+                            "amount" => 0, 
+                            "order_created_date" => $shipment->created_at,
+                            "charges" => [
+                                'weight_charges' =>  0
+                            ]
+                        ];
+                        $this->arrival_shipment_logs($requestPayload,  $shipment->id);
+                    }
                 }
             }
         }

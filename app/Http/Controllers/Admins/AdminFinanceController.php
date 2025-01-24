@@ -7684,7 +7684,7 @@ class AdminFinanceController extends Controller
                                                 "client_id" => $shipment->user->id, 
                                                 "reference_id" => (string) Str::uuid(), 
                                                 "shipment_id" => $shipment->tracking_number, 
-                                                "amount" => $shipment->amount, 
+                                                "amount" => 0, 
                                                 "order_created_date" => $shipment->created_at,
                                                 "charges" => [
                                                     'weight_charges' =>  0
@@ -7862,7 +7862,7 @@ class AdminFinanceController extends Controller
                                                 "client_id" => $shipment->user->id, 
                                                 "reference_id" => (string) Str::uuid(), 
                                                 "shipment_id" => $shipment->tracking_number, 
-                                                "amount" => $shipment->amount, 
+                                                "amount" => 0, 
                                                 "order_created_date" => $shipment->created_at,
                                                 "charges" => [
                                                     'weight_charges' =>  0
