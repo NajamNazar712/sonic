@@ -3444,6 +3444,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('add', 'Admins\GlobalSettingsController@star_shippers_add')->name('add');
             Route::post('enable_disable', 'Admins\GlobalSettingsController@star_shippers_enable_disable')->name('enable_disable');
         });
+
+        Route::prefix('wallet_shippers')->name('wallet_shippers.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@wallet_shippers_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@wallet_shippers_list')->name('list');
+            Route::post('add', 'Admins\GlobalSettingsController@wallet_shippers_add')->name('add');
+            Route::post('enable_disable', 'Admins\GlobalSettingsController@wallet_shippers_enable_disable')->name('enable_disable');
+        });
         Route::prefix('alist_shippers')->name('alist_shippers.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@aListShippersIndex')->name('index');
             Route::get('list', 'Admins\GlobalSettingsController@aListShipperView')->name('list');
