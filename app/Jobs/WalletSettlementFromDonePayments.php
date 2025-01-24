@@ -97,7 +97,7 @@ class WalletSettlementFromDonePayments implements ShouldQueue
                 ];
                 $request_nature = 'settlement-request';
                 $response_nature = 'settlement-response';
-                $api .= 'transactions/log/settlement';
+                $url = $api.'transactions/log/settlement';
                 $data = [
                     'shipment_id' => $dps->shipment_id,
                     'wallet_settlement_updated' => true,
@@ -114,7 +114,7 @@ class WalletSettlementFromDonePayments implements ShouldQueue
                 ];
                 $request_nature = 'adjustment-request';
                 $response_nature = 'adjustment-response';
-                $api .= 'transactions/log/adjustment';
+                $url = $api.'transactions/log/adjustment';
                 $data = [
                     'shipment_id' => $dps->shipment_id,
                     'wallet_adjustment_updated' => true,
@@ -129,7 +129,7 @@ class WalletSettlementFromDonePayments implements ShouldQueue
                         'accept' => 'application/json',
                         'Authorization' => "Bearer " . $token,
                     
-                    ])->post($api, $requestPayload);
+                    ])->post($url, $requestPayload);
         
                     FingaIntegrationController::apiLog($request_nature, 1, $requestPayload ,$shipmentId);
         

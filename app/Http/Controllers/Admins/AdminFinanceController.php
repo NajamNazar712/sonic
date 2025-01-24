@@ -139,6 +139,7 @@ use App\Jobs\WalletLogDispatchJob;
 use App\Models\FinjaLogSettlementRecord;
 use App\Jobs\WalletSettlementFromDonePayments;
 use App\Models\FingaApiLog;
+use App\Http\Models\WalletUser;
 
 class AdminFinanceController extends Controller
 {
@@ -7597,7 +7598,8 @@ class AdminFinanceController extends Controller
                         $done_payment->user_bank_info_id = $user_bank_id;
                         $done_payment->company_bank_id = $company_bank;
 
-
+                        $done_payment->is_wallet_payment = WalletUser::where('user_id', $pending_payment->user_id)->exists() ? 1 :  0;
+                    
                         $user_ibft_charge = UserIbftCharge::where('user_id', $pending_payment->user_id)->first();
                         if ($user_ibft_charge) {
                             $done_payment->ibft_charges = $user_ibft_charge->current_charges;
@@ -7764,6 +7766,7 @@ class AdminFinanceController extends Controller
                         $done_payment->adjusted_shipments = 0;
                         $done_payment->user_bank_info_id = $user_bank_id;
                         $done_payment->company_bank_id = $company_bank;
+                        $done_payment->is_wallet_payment = WalletUser::where('user_id', $pending_payment->user_id)->exists() ? 1 :  0;
 
                         $user_ibft_charge = UserIbftCharge::where('user_id', $pending_payment->user_id)->first();
                         if ($user_ibft_charge) {
@@ -8284,7 +8287,7 @@ class AdminFinanceController extends Controller
             'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 'done_payments.ibft_charges', 
             'dpc.packaging_charges', 'dpc.adjustment as adjustment_charges', 'done_payments.status_updated_at as status_updated_at', 
             'dpc.wht as total_wht', 'done_payments.created_at as start_date', 'done_payments.updated_at as end_date', 'ad.name as admin_name', 
-            'done_payments.updated_at as updated_at','sts.status as star_status','u.payment_cycle_days as payment_cycle_days','pc.name as payment_cycle', 'pc.id as payment_cycle_id', 'dpc.sms_charges as total_sms_charges','done_payments.arrival_shipment as arrival_shipment_shipments_count','done_payments.arrival_shipment', 'sale_admin.name as sale_person_name','wu.id as wallet_user');
+            'done_payments.updated_at as updated_at','sts.status as star_status','u.payment_cycle_days as payment_cycle_days','pc.name as payment_cycle', 'pc.id as payment_cycle_id', 'dpc.sms_charges as total_sms_charges','done_payments.arrival_shipment as arrival_shipment_shipments_count','done_payments.arrival_shipment', 'sale_admin.name as sale_person_name','wu.id as wallet_user' , 'done_payments.is_wallet_payment');
 
         if (session('department_id') == 7) {
             if (!in_array(session('id'), session('sale_users_bypass'))) {
@@ -8685,7 +8688,7 @@ class AdminFinanceController extends Controller
                     <button type="button" class="dropdown-item view_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Details</div></button>
                     <button type="button" class="dropdown-item view_status_history"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Status History</div></button>';
                 
-                if($done_payment->wallet_user != null && ($done_payment->status == 0 || $done_payment->status == 3)) {
+                if($done_payment->wallet_user != null && $done_payment->is_wallet_payment == 1 && ($done_payment->status == 0 || $done_payment->status == 3)) {
                     // $dropdown .= '<button type="button" class="dropdown-item update_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Paid / Re-try</div></button>';
 
                     $dropdown .= '<button type="button" class="dropdown-item wallet_settlement" data-target-id=' . $done_payment->id . '  rel="wallet_settlement"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Paid / Re-try</div></button>';
