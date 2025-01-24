@@ -60,8 +60,26 @@
                                         </div>
 
                                     </div>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="form-group row">
+                                                <div class="form-group col-md-9">
+                                                    <label for="confirm" class="form-label">&nbsp;</label>
+                                                    <input
+                                                            type="checkbox"
+                                                            id="confirm"
+                                                            class=""
+                                                            onclick=""
+                                                            name="confirm"
+                                                    >
+                                                    <span>By signing up for the wallet, all your payments will be start crediting directly to your wallet. Please check this box to agree.</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <div class="form-actions right">
-                                        <button type="submit" id="signup_button" class="btn btn-primary"  >Signup to Wallet</button>
+                                        <button type="submit" id="signup_button" class="btn btn-primary" disabled >Signup to Wallet</button>
                                     </div>
                                 </div>
                             </form>
@@ -95,6 +113,18 @@
 
 
     <script>
+        $(document).ready(function () {
+            // Monitor checkbox state
+            $('#confirm').on('change', function () {
+                // Enable or disable the button based on the checkbox state
+                if ($(this).is(':checked')) {
+                    $('#signup_button').prop('disabled', false); // Enable button
+                } else {
+                    $('#signup_button').prop('disabled', true); // Disable button
+                }
+            });
+        });
+
         $(document).ready(function () {
             $( "#main-form" ).validate({
                 errorClass: "danger",
