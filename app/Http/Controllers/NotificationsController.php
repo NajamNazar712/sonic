@@ -3642,7 +3642,11 @@ class NotificationsController extends Controller
                                 $body = str_replace('[shipments_detail]', $shipment_details, $body);
                             }
 
-                            $to = $pickup_request->pickup_address->email;
+                            if (ShipperNotificationEmail::where('user_id', $pickup_request->shipper_id)->exists()) {
+                                $to = ShipperNotificationEmail::where('user_id', $pickup_request->shipper_id)->whereNotNull('email')->pluck('email')->toArray();
+                            } else {
+                                $to = $pickup_request->pickup_address->email;
+                            }
                             self::email($subject, $body, $to);
                         }
                     } else if ($id == 44) {
