@@ -169,11 +169,20 @@
                         $.each(result.data, function(index, values) {
                             row = [];
                             row.push(index + 1);
-                            row.push(values.shipment_tracking_number);
+                            // row.push(values.shipment_tracking_number);
+                            var trackingNumber = $(values.shipment_tracking_number).text();
+                            row.push(trackingNumber);
                             row.push(values.shipper_name);
                             row.push(values.defaulter_name);
                             row.push(values.trax_id);
                             row.push(values.employee_status);
+                            row.push(values.responsible_city);
+                            row.push(values.latest_shipment_status);
+                            row.push(values.lost_requested_by);
+                            row.push(values.lost_approved_by);
+                            row.push(values.cod_amount);
+                            row.push(values.parcel_value);
+                            row.push(values.case_closed_remarks);
 
                             body.push(row);
                         });
@@ -192,7 +201,7 @@
             dom: '<"d-inline-block"l><"pull-right"B>tipr',
             buttons: [{
                     extend: 'excel',
-                    title: 'Lost/Case Closed Summary Report',
+                    title: 'Lost and Case Closed Summary Report',
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 },
@@ -218,7 +227,7 @@
                     d.tracking_numbers = $('#tracking_number').val();
                 }
             },
-            rowId: 'shId',
+            rowId: 'shipment_id',
             order: [
                 [1, 'desc']
             ],
@@ -234,54 +243,97 @@
                     }
                 },
                 {
+                    orderable: true,
+                    searchable: true,
+                    class: 'align-middle shipment_tracking_number',
                     data: 'shipment_tracking_number',
                     name: 'shipment_tracking_number'
                 },
                 {
+                    orderable: true,
+                    searchable: true,
+                    class: 'align-middle shipper_name',
                     data: 'shipper_name',
                     name: 'shipper_name'
                 },
                 {
+                    orderable: true,
+                    searchable: true,
+                    class: 'align-middle defaulter_name',
                     data: 'defaulter_name',
                     name: 'defaulter_name'
                 },
                 {
+                    orderable: true,
+                    searchable: true,
+                    class: 'align-middle trax_id',
                     data: 'trax_id',
                     name: 'trax_id'
                 },
                 {
+                    orderable: true,
+                    searchable: true,
+                    class: 'align-middle employee_status',
                     data: 'employee_status',
                     name: 'employee_status'
                 },
                 {
+                    orderable: true,
+                    searchable: true,
+                    class: 'align-middle responsible_city',
                     data: 'responsible_city',
                     name: 'responsible_city'
                 },
                 {
+                    orderable: true,
+                    searchable: true,
+                    class: 'align-middle latest_shipment_status',
                     data: 'latest_shipment_status',
                     name: 'latest_shipment_status'
                 },
                 {
+                    orderable: true,
+                    searchable: true,
+                    class: 'align-middle lost_requested_by',
                     data: 'lost_requested_by',
                     name: 'lost_requested_by'
                 },
                 {
+                    orderable: true,
+                    searchable: true,
+                    class: 'align-middle lost_approved_by',
                     data: 'lost_approved_by',
                     name: 'lost_approved_by'
                 },
                 {
+                    orderable: true,
+                    searchable: true,
+                    class: 'align-middle cod_amount',
                     data: 'cod_amount',
                     name: 'cod_amount'
                 },
                 {
+                    orderable: true,
+                    searchable: true,
+                    class: 'align-middle parcel_value',
                     data: 'parcel_value',
                     name: 'parcel_value'
                 },
                 {
+                    orderable: true,
+                    searchable: true,
+                    class: 'align-middle case_closed_remarks',
                     data: 'case_closed_remarks',
                     name: 'case_closed_remarks'
                 }
             ],
+            rowCallback: function(row, data, index) {
+                var info = table.page.info();
+                $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+            },
+            initComplete: function() {
+                this.api().table().columns.adjust();
+            }
         });
 
         //Selectize

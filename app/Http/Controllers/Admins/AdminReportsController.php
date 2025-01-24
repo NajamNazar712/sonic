@@ -16084,10 +16084,40 @@ class AdminReportsController extends Controller
 
     public function lost_and_case_closed_summary_list(Request $request)
     {
+        /**
+         * 18 is lost
+         * 51 is case closed
+         */
+
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 815);
         }
         $trackingNumbers = explode(',', $request->tracking_numbers);
+
+        $filteredShipments = DB::connection('reports')->table('shipments')
+        ->join('shipments_journey as sj', 'sj.shipment_id', '=', 'shipments.id')
+        ->whereIn('sj.shipper_status_id', [18, 51])
+        ->whereIn('shipments.tracking_number', $trackingNumbers)
+        ->where(function ($query) {
+            // Condition 1: Shipment with just one status of 18
+            $query->whereRaw('(SELECT COUNT(*) FROM shipments_journey WHERE shipments_journey.shipment_id = shipments.id AND shipments_journey.shipper_status_id = 18) = 1')
+
+                // Condition 2: Shipment with exactly two consecutive statuses 18, 18
+                ->orWhereRaw("
+                    (SELECT GROUP_CONCAT(shipper_status_id ORDER BY id DESC SEPARATOR ',') 
+                    FROM shipments_journey 
+                    WHERE shipment_id = shipments.id LIMIT 2) = '18,18'
+                ")
+
+                // Condition 3: Shipment with statuses 18, 18, 51
+                ->orWhereRaw("
+                    (SELECT GROUP_CONCAT(shipper_status_id ORDER BY id DESC SEPARATOR ',') 
+                    FROM shipments_journey 
+                    WHERE shipment_id = shipments.id LIMIT 3) = '51,18,18'
+                ");
+        })
+        ->select('shipments.tracking_number')
+        ->pluck('shipments.tracking_number');
 
         $lost_and_closed_shipments = DB::connection('reports')->table('shipments')
             // latest shipment journey
@@ -16106,25 +16136,6 @@ class AdminReportsController extends Controller
                         )
                     );
             })
-
-            // latest 3 journey that are lost and case closed
-            ->leftJoin(DB::raw('(
-                    SELECT sj_inner.*
-                    FROM shipments_journey sj_inner
-                    JOIN (
-                        SELECT id
-                        FROM (
-                            SELECT id, shipment_id,
-                            ROW_NUMBER() OVER (PARTITION BY shipment_id ORDER BY id DESC) AS row_num
-                            FROM shipments_journey
-                            WHERE shipper_status_id IN (18, 51)
-                        ) ranked
-                        WHERE row_num <= 3
-                    ) top_three ON sj_inner.id = top_three.id
-                ) as lost_case_closed_sj'), function ($join) {
-                    $join->on('lost_case_closed_sj.shipment_id', '=', 'shipments.id');
-            })
-            
 
             ->leftJoin('admins as sj_admin', 'sj_admin.id', '=', 'sj.admin_id')
             ->leftJoin('lost_shipment_responsibles as lsr', 'lsr.shipment_id', '=', 'shipments.id')
@@ -16161,7 +16172,8 @@ class AdminReportsController extends Controller
             ->leftJoin('users', 'users.id', '=', 'shipments.user_id')
             ->leftJoin('cities', 'cities.id', '=', 'sj.city_id')
             ->leftJoin('shipment_status', 'shipment_status.id', '=', 'shipments.shipper_status_id')
-            ->whereIn('shipments.tracking_number', $trackingNumbers)
+            ->whereIn('shipments.tracking_number', $filteredShipments)
+            ->distinct()
             ->select(
                 'shipments.tracking_number as shipment_tracking_number',
                 'users.name as shipper_name',
@@ -16181,9 +16193,9 @@ class AdminReportsController extends Controller
                 'sj_admin.name as lost_approved_by',
                 'shipments.amount as cod_amount',
                 'shipments.parcel_value as parcel_value',
-                'sj.shipper_status_id as shipment_status'
+                'sj.shipper_status_id as shipment_status',
+                'sj.remarks as case_closed_remarks' 
             );
-
         $datatable = Datatables::of($lost_and_closed_shipments)
         ->editColumn('shipment_tracking_number', function ($shipments) {
             $route = route('admin.tracking.index');
@@ -16191,6 +16203,9 @@ class AdminReportsController extends Controller
         })
         ->addColumn('defaulter_name', function ($shipments) {
             return $shipments->admin_name . ' ' . $shipments->rider_name;
+        })
+        ->orderColumn('defaulter_name', function ($query, $direction) {
+            $query->orderBy('admin_name', $direction)->orderBy('rider_name', $direction);
         })
 
         ->addColumn('employee_status', function ($shipments) {
@@ -16203,26 +16218,29 @@ class AdminReportsController extends Controller
             $riderEmployeeStatus = $statusMapping[$shipments->rider_status] ?? '';
             return $adminEmployeeStatus . ' ' . $riderEmployeeStatus;
         })
+        ->orderColumn('employee_status', function ($query, $direction) {
+            $query->orderBy('admin_status', $direction)->orderBy('rider_status', $direction);
+        })
 
         ->addColumn('trax_id', function ($shipments) {
             return $shipments->admin_trax_id . ' ' . $shipments->rider_trax_id;
         })
-
-        ->editColumn('case_closed_remarks', function($shipments) {
-
-            dd($shipments);
-            // $case_closed_remarks = '-';
-            // if ($shipments->shipper_status_id == 51) {
-            //     $case_closed_remarks = $shipments->remarks;
-            // }
-            // return $case_closed_remarks;
+        ->orderColumn('trax_id', function ($query, $direction) {
+            $query->orderBy('admin_trax_id', $direction)->orderBy('rider_trax_id', $direction);
         })
-        ;
 
+        ->addColumn('case_closed_remarks', function ($shipments) {
+            if ($shipments->latest_shipment_status == 51) {
+                return $shipments->case_closed_remarks ?: '-';
+            }
+            return '-';
+        })
+        ->orderColumn('case_closed_remarks', function ($query, $direction) {
+            $query->orderByRaw("CASE WHEN latest_shipment_status = 51 THEN case_closed_remarks ELSE '-' END $direction");
+        });
 
         return $datatable
         ->rawColumns(['shipment_tracking_number'])
-        ->make(true)
-        ;
+        ->make(true);
     }
 }
