@@ -16090,6 +16090,7 @@ class AdminReportsController extends Controller
         $trackingNumbers = explode(',', $request->tracking_numbers);
 
         $lost_and_closed_shipments = DB::connection('reports')->table('shipments')
+            // latest shipment journey
             ->leftJoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->whereIn('sj.shipper_status_id', [18, 51])
@@ -16105,8 +16106,30 @@ class AdminReportsController extends Controller
                         )
                     );
             })
+
+            // latest 3 journey that are lost and case closed
+            ->leftJoin(DB::raw('(
+                    SELECT sj_inner.*
+                    FROM shipments_journey sj_inner
+                    JOIN (
+                        SELECT id
+                        FROM (
+                            SELECT id, shipment_id,
+                            ROW_NUMBER() OVER (PARTITION BY shipment_id ORDER BY id DESC) AS row_num
+                            FROM shipments_journey
+                            WHERE shipper_status_id IN (18, 51)
+                        ) ranked
+                        WHERE row_num <= 3
+                    ) top_three ON sj_inner.id = top_three.id
+                ) as lost_case_closed_sj'), function ($join) {
+                    $join->on('lost_case_closed_sj.shipment_id', '=', 'shipments.id');
+            })
+            
+
             ->leftJoin('admins as sj_admin', 'sj_admin.id', '=', 'sj.admin_id')
             ->leftJoin('lost_shipment_responsibles as lsr', 'lsr.shipment_id', '=', 'shipments.id')
+
+            // lost requesting admin
             ->leftJoin('admins as lost_requested_admin', function ($join) {
                 $join->on('lost_requested_admin.id', '=', DB::connection('reports')->raw('
                     (
@@ -16120,6 +16143,7 @@ class AdminReportsController extends Controller
                     )
                 '));
             })
+
             // admin details
             ->leftJoin('admins as defaulter_admin', function ($join) {
                 $join->on('defaulter_admin.id', '=', 'lsr.user_id')
@@ -16130,8 +16154,10 @@ class AdminReportsController extends Controller
                 $join->on('riders.id', '=', 'lsr.user_id')
                     ->where('lsr.user_type', '=', 2);
             })
-            ->leftJoin('employees as admin_employees', 'admin_employees.id', '=', 'defaulter_admin.employee_id')
-            ->leftJoin('employees as rider_employees', 'rider_employees.id', '=', 'riders.employee_id')
+
+            ->leftJoin('employees as admin_employee', 'admin_employee.trax_id', 'defaulter_admin.trax_id')
+            ->leftJoin('employees as rider_employee', 'rider_employee.trax_id', 'riders.trax_id')
+
             ->leftJoin('users', 'users.id', '=', 'shipments.user_id')
             ->leftJoin('cities', 'cities.id', '=', 'sj.city_id')
             ->leftJoin('shipment_status', 'shipment_status.id', '=', 'shipments.shipper_status_id')
@@ -16140,13 +16166,14 @@ class AdminReportsController extends Controller
                 'shipments.tracking_number as shipment_tracking_number',
                 'users.name as shipper_name',
 
-                'admin_employees.name as defaulter_admin_name',
-                'admin_employees.status_id as defaulter_admin_status',
-                'admin_employees.trax_id as defaulter_admin_trax_id',
+                'defaulter_admin.name as admin_name',
+                'riders.name as rider_name',
 
-                'rider_employees.name as defaulter_rider_name',
-                'rider_employees.status_id as defaulter_rider_status',
-                'rider_employees.trax_id as defaulter_rider_trax_id',
+                'defaulter_admin.trax_id as admin_trax_id',
+                'riders.trax_id as rider_trax_id',
+
+                'admin_employee.status_id as admin_status',
+                'rider_employee.status_id as rider_status',
 
                 'cities.name as responsible_city',
                 'shipment_status.name as latest_shipment_status',
@@ -16154,13 +16181,41 @@ class AdminReportsController extends Controller
                 'sj_admin.name as lost_approved_by',
                 'shipments.amount as cod_amount',
                 'shipments.parcel_value as parcel_value',
-                DB::raw('CASE WHEN sj.shipper_status_id = 51 THEN sj.remarks ELSE NULL END AS case_closed_remarks')
+                'sj.shipper_status_id as shipment_status'
             );
 
         $datatable = Datatables::of($lost_and_closed_shipments)
         ->editColumn('shipment_tracking_number', function ($shipments) {
             $route = route('admin.tracking.index');
             return "<u><a href='{$route}?tracking_number=$shipments->shipment_tracking_number' class='tracking' target='_blank'>$shipments->shipment_tracking_number</a></u>";
+        })
+        ->addColumn('defaulter_name', function ($shipments) {
+            return $shipments->admin_name . ' ' . $shipments->rider_name;
+        })
+
+        ->addColumn('employee_status', function ($shipments) {
+            $statusMapping = [
+                1 => "Active",
+                2 => "Inactive",
+                3 => "Active - No Info",
+            ];
+            $adminEmployeeStatus = $statusMapping[$shipments->admin_status] ?? '';
+            $riderEmployeeStatus = $statusMapping[$shipments->rider_status] ?? '';
+            return $adminEmployeeStatus . ' ' . $riderEmployeeStatus;
+        })
+
+        ->addColumn('trax_id', function ($shipments) {
+            return $shipments->admin_trax_id . ' ' . $shipments->rider_trax_id;
+        })
+
+        ->editColumn('case_closed_remarks', function($shipments) {
+
+            dd($shipments);
+            // $case_closed_remarks = '-';
+            // if ($shipments->shipper_status_id == 51) {
+            //     $case_closed_remarks = $shipments->remarks;
+            // }
+            // return $case_closed_remarks;
         })
         ;
 

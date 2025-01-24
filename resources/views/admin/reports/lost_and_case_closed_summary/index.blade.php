@@ -246,6 +246,14 @@
                     name: 'defaulter_name'
                 },
                 {
+                    data: 'trax_id',
+                    name: 'trax_id'
+                },
+                {
+                    data: 'employee_status',
+                    name: 'employee_status'
+                },
+                {
                     data: 'responsible_city',
                     name: 'responsible_city'
                 },
