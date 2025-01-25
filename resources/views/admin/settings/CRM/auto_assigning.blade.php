@@ -127,7 +127,10 @@
                 // $('#case_nature_id').val('').trigger('change.select2');
             });
 
-
+            $(document).on('click', '.read-more', function () {
+                $(this).closest('ul').find('.hidden-text').toggle(); // Toggle hidden items
+                $(this).text($(this).text() === 'Read more' ? 'Read less' : 'Read more'); // Toggle link text
+            });
             // $('#case_nature_id').prepend('<option selected></option>').select2({
             //     width:'100%',
             //     placeholder:"Select Case Nature",

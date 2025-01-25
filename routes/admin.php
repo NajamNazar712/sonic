@@ -3004,6 +3004,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('add', 'Admins\GlobalSettingsController@add_auto_assign_agent')->name('add');
             Route::get('global_status', 'Admins\GlobalSettingsController@global_status')->name('global_status');
             Route::post('get_sub_segments', 'Admins\GlobalSettingsController@get_sub_segments')->name('get_sub_segments');
+            Route::post('get_origin_areas','Admins\GlobalSettingsController@get_origin_areas')->name('get_origin_areas');
+            Route::post('get_origin_hub','Admins\GlobalSettingsController@get_origin_hub')->name('get_origin_hub');
         });
 
         Route::prefix('auto_tagging')->name('auto_tagging.')->group(function () {

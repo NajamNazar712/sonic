@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Admins;
 use App\FafCharges;
 use App\FafChargesGlobal;
 use App\FafChargesGlobalHistory;
+use App\Http\Models\Admin\CrmAgentAutoAssignOriginArea;
+use App\Http\Models\Admin\CrmAgentAutoAssignOriginHub;
+use App\Http\Models\Admin\CrmAgentAutoAssignOriginZone;
 use Carbon\Carbon;
 use App\Http\Models\City;
 use App\Http\Models\Zone;
@@ -5704,6 +5707,7 @@ class GlobalSettingsController extends Controller
                 'ad.name as agent_name',
             ]);
 
+
         $datatables = Datatables::of($roles)
             ->addColumn('action', function ($roles) {
                 if (session('role_id') == 1 || in_array(618, session('permissions'))) {
@@ -5722,74 +5726,217 @@ class GlobalSettingsController extends Controller
                     }
 
                     $dropdown .= '</div>
-                  </div>
-          ';
+                  </div>';
 
                     return $dropdown;
                 } else {
                     return '';
                 }
             })
-            ->addColumn('zone', function ($roles) {
+//            ->addColumn('zone', function ($roles) {
+//                $zone = "<ul>";
+//                foreach ($roles->zones as $value) {
+//                    $zone .= "<li>" . $value->zones->name . "</li>";
+//                }
+//                return $zone . "</ul>";
+//            })
+              ->addColumn('zone', function ($roles) {
                 $zone = "<ul>";
+                $counter = 0;
                 foreach ($roles->zones as $value) {
-                    $zone .= "<li>" . $value->zones->name . "</li>";
+                    if ($counter < 3) {
+                        $zone .= "<li>" . $value->zones->name . "</li>";
+                    } else {
+                        $zone .= "<li class='hidden-text' style='display:none;'>" . $value->zones->name . "</li>";
+                    }
+                    $counter++;
+                }
+                if ($counter > 3) {
+                    $zone .= "<li><a href='javascript:void(0)' class='read-more'>Read more</a></li>";
                 }
                 return $zone . "</ul>";
             })
+//            ->addColumn('hub', function ($roles) {
+//                $hub = "<ul>";
+//                foreach ($roles->hubs as $value) {
+//                    $hub .= "<li>" . $value->hubs->name . "</li>";
+//                }
+//                return $hub . "</ul>";
+//            })
             ->addColumn('hub', function ($roles) {
                 $hub = "<ul>";
+                $counter = 0;
                 foreach ($roles->hubs as $value) {
-                    $hub .= "<li>" . $value->hubs->name . "</li>";
+                    if ($counter < 3) {
+                        $hub .= "<li>" . $value->hubs->name . "</li>";
+                    } else {
+                        $hub .= "<li class='hidden-text' style='display:none;'>" . $value->hubs->name . "</li>";
+                    }
+                    $counter++;
+                }
+                if ($counter > 3) {
+                    $hub .= "<li><a href='javascript:void(0)' class='read-more'>Read more</a></li>";
                 }
                 return $hub . "</ul>";
             })
+//            ->addColumn('case_nature', function ($roles) {
+//                $case_natures = "<ul>";
+//                foreach ($roles->case_natures as $value) {
+//                    $case_natures .= "<li>" . $value->case_natures->name . "</li>";
+//                }
+//                return $case_natures . "</ul>";
+//            })
             ->addColumn('case_nature', function ($roles) {
                 $case_natures = "<ul>";
+                $counter = 0;
                 foreach ($roles->case_natures as $value) {
-                    $case_natures .= "<li>" . $value->case_natures->name . "</li>";
+                    if ($counter < 3) {
+                        $case_natures .= "<li>" . $value->case_natures->name . "</li>";
+                    } else {
+                        $case_natures .= "<li class='hidden-text' style='display:none;'>" . $value->case_natures->name . "</li>";
+                    }
+                    $counter++;
+                }
+                if ($counter > 3) {
+                    $case_natures .= "<li><a href='javascript:void(0)' class='read-more'>Read more</a></li>";
                 }
                 return $case_natures . "</ul>";
             })
+//            ->addColumn('case_nature_type', function ($roles) {
+//                $case_natures_type = "<ul>";
+//                foreach ($roles->case_nature_types as $value) {
+//                    $case_natures_type .= "<li>" . $value->case_nature_types->type . "</li>";
+//                }
+//                return $case_natures_type . "</ul>";
+//            })
             ->addColumn('case_nature_type', function ($roles) {
                 $case_natures_type = "<ul>";
+                $counter = 0; // Initialize counter
                 foreach ($roles->case_nature_types as $value) {
-                    $case_natures_type .= "<li>" . $value->case_nature_types->type . "</li>";
+                    if ($counter < 3) { // Show only the first 3 items
+                        $case_natures_type .= "<li>" . $value->case_nature_types->type . "</li>";
+                    } else {
+                        $case_natures_type .= "<li class='hidden-text' style='display:none;'>" . $value->case_nature_types->type . "</li>";
+                    }
+                    $counter++;
+                }
+                if ($counter > 3) {
+                    $case_natures_type .= "<li><a href='javascript:void(0)' class='read-more'>Read more</a></li>";
                 }
                 return $case_natures_type . "</ul>";
             })
             ->addColumn('business_segment', function ($roles) {
                 $business_segment = "<ul>";
+                $counter = 0;
                 foreach ($roles->business_types as $value) {
-                    $business_segment .= "<li>" . $value->business_types->name . "</li>";
+                    if ($counter < 3) {
+                        $business_segment .= "<li>" . $value->business_types->name . "</li>";
+                    } else {
+                        $business_segment .= "<li class='hidden-text' style='display:none;'>" . $value->business_types->name . "</li>";
+                    }
+                    $counter++;
+                }
+                if ($counter > 3) {
+                    $business_segment .= "<li><a href='javascript:void(0)' class='read-more'>Read more</a></li>";
                 }
                 return $business_segment . "</ul>";
             })
-            ->addColumn('sub_business_segment', function ($roles) {
+//            ->addColumn('business_segment', function ($roles) {
+//                $business_segment = "<ul>";
+//                foreach ($roles->business_types as $value) {
+//                    $business_segment .= "<li>" . $value->business_types->name . "</li>";
+//                }
+//                return $business_segment . "</ul>";
+//            })
+//            ->addColumn('sub_business_segment', function ($roles) {
+//                $sub_business_types = "<ul>";
+//                foreach ($roles->sub_business_types as $value) {
+//                    $sub_business_types .= "<li>" . $value->sub_business_types->name . "</li>";
+//                }
+//                return $sub_business_types . "</ul>";
+//            })
+             ->addColumn('sub_business_segment', function ($roles) {
                 $sub_business_types = "<ul>";
+                $counter = 0;
                 foreach ($roles->sub_business_types as $value) {
-                    $sub_business_types .= "<li>" . $value->sub_business_types->name . "</li>";
+                    if ($counter < 3) {
+                        $sub_business_types .= "<li>" . $value->sub_business_types->name . "</li>";
+                    } else {
+                        $sub_business_types .= "<li class='hidden-text' style='display:none;'>" . $value->sub_business_types->name . "</li>";
+                    }
+                    $counter++;
+                }
+                if ($counter > 3) {
+                    $sub_business_types .= "<li><a href='javascript:void(0)' class='read-more'>Read more</a></li>";
                 }
                 return $sub_business_types . "</ul>";
             })
+//            ->addColumn('shipper_key', function ($roles) {
+//                $shipper_key = "<ul>";
+//                foreach ($roles->shipper_keys as $value) {
+//                    $shipper_key .= "<li>" . $value->shipper_keys->name . "</li>";
+//                }
+//                return $shipper_key . "</ul>";
+//            })
             ->addColumn('shipper_key', function ($roles) {
                 $shipper_key = "<ul>";
+                $counter = 0;
                 foreach ($roles->shipper_keys as $value) {
-                    $shipper_key .= "<li>" . $value->shipper_keys->name . "</li>";
+                    if ($counter < 3) {
+                        $shipper_key .= "<li>" . $value->shipper_keys->name . "</li>";
+                    } else {
+                        $shipper_key .= "<li class='hidden-text' style='display:none;'>" . $value->shipper_keys->name . "</li>";
+                    }
+                    $counter++;
+                }
+                if ($counter > 3) {
+                    $shipper_key .= "<li><a href='javascript:void(0)' class='read-more'>Read more</a></li>";
                 }
                 return $shipper_key . "</ul>";
             })
+//            ->addColumn('shipper_non_key', function ($roles) {
+//                $shipper_non_key = "<ul>";
+//                foreach ($roles->shipper_non_keys as $value) {
+//                    $shipper_non_key .= "<li>" . $value->shipper_non_keys->name . "</li>";
+//                }
+//                return $shipper_non_key . "</ul>";
+//            })
             ->addColumn('shipper_non_key', function ($roles) {
                 $shipper_non_key = "<ul>";
+                $counter = 0;
                 foreach ($roles->shipper_non_keys as $value) {
-                    $shipper_non_key .= "<li>" . $value->shipper_non_keys->name . "</li>";
+                    if ($counter < 3) {
+                        $shipper_non_key .= "<li>" . $value->shipper_non_keys->name . "</li>";
+                    } else {
+                        $shipper_non_key .= "<li class='hidden-text' style='display:none;'>" . $value->shipper_non_keys->name . "</li>";
+                    }
+                    $counter++;
+                }
+                if ($counter > 3) {
+                    $shipper_non_key .= "<li><a href='javascript:void(0)' class='read-more'>Read more</a></li>";
                 }
                 return $shipper_non_key . "</ul>";
             })
+//            ->addColumn('shipment_status', function ($roles) {
+//                $shipment_statuses = "<ul>";
+//                foreach ($roles->shipment_statuses as $value) {
+//                    $shipment_statuses .= "<li>" . $value->shipment_statuses->name . "</li>";
+//                }
+//                return $shipment_statuses . "</ul>";
+//            })
             ->addColumn('shipment_status', function ($roles) {
                 $shipment_statuses = "<ul>";
+                $counter = 0; // Initialize counter
                 foreach ($roles->shipment_statuses as $value) {
-                    $shipment_statuses .= "<li>" . $value->shipment_statuses->name . "</li>";
+                    if ($counter < 3) { // Show only the first 3 statuses
+                        $shipment_statuses .= "<li>" . $value->shipment_statuses->name . "</li>";
+                    } else {
+                        $shipment_statuses .= "<li class='hidden-text' style='display:none;'>" . $value->shipment_statuses->name . "</li>";
+                    }
+                    $counter++;
+                }
+                if ($counter > 3) {
+                    $shipment_statuses .= "<li><a href='javascript:void(0)' class='read-more'>Read more</a></li>";
                 }
                 return $shipment_statuses . "</ul>";
             })
@@ -5817,7 +5964,7 @@ class GlobalSettingsController extends Controller
 
     public function crm_auto_assigning_edit($id)
     {
-        $selected_agent =  CrmAgentAutoAssign::with('zones.zones', 'hubs.hubs', 'case_natures', 'case_nature_types', 'business_types', 'sub_business_types', 'shipper_keys', 'shipper_non_keys', 'shipment_statuses')
+        $selected_agent =  CrmAgentAutoAssign::with('origin_zones.zones','origin_hubs.hubs','origin_areas.city_area','zones.zones', 'hubs.hubs', 'case_natures', 'case_nature_types', 'business_types', 'sub_business_types', 'shipper_keys', 'shipper_non_keys', 'shipment_statuses')
             ->join('admins as ad', 'ad.id', '=', 'crm_agent_auto_assigns.agent_id')
             ->select([
                 'crm_agent_auto_assigns.id',
@@ -5831,7 +5978,7 @@ class GlobalSettingsController extends Controller
         if ($selected_agent->exists()) {
             $selected_agent = $selected_agent->first();
 
-            $agents = Admin::select('id', 'name')->whereIn('role_id', [37, 28])->get(); //37,28 role
+            $agents = Admin::select('id', 'name')->whereIn('role_id', [37, 28,43,67,75,115])->get(); //37,28 role // add kam roles
             $zones = Zone::where('status', 1)->where('business_category_id', 1)->get();
             $case_natures = CrmRequestCaseNature::all();
             $segments = Segment::all();
@@ -5857,13 +6004,19 @@ class GlobalSettingsController extends Controller
             $zn = $selected_agent->zones->pluck('zone_id')->toArray();
             $hubs = City::whereIn('zone_id', $zn)->get();
 
+            $origin_zone_ids = $selected_agent->origin_zones->pluck('origin_zone_id')->toArray();
+            $origin_hubs = City::where('hub',1)->whereIn('zone_id', $origin_zone_ids)->get();
+
+            $origin_ids = $selected_agent->origin_hubs->pluck('origin_hub_id')->toArray();
+            $origin_areas = CityArea::whereIn('city_id',$origin_ids)->get();
+
             $cn = $selected_agent->case_natures->pluck('case_nature_id')->toArray();
             $case_nature_types = CrmRequestCaseNatureType::whereIn('nature_id', $cn)->get();
 
             $bsi = $selected_agent->business_types->pluck('business_segment_id')->toArray();
             $sub_segment = SubCategorySegment::whereIn('segment_id', $bsi)->select('id', 'name')->orderby('name', 'asc')->get();
 
-            return view('admin.settings.CRM.edit_auto_assign')->with(['selected_agent' => $selected_agent, 'agents' => $agents, 'zones' => $zones, 'case_natures' => $case_natures, 'segments' => $segments, 'sub_segment' => $sub_segment, 'shipper_key' => $shipper_key, 'shipper_non_key' => $shipper_non_key, 'shipment_status' => $shipment_status, 'hubs' => $hubs, 'case_nature_types' => $case_nature_types]);
+            return view('admin.settings.CRM.edit_auto_assign')->with(['selected_agent' => $selected_agent, 'agents' => $agents, 'origin_hubs'=>$origin_hubs,'origin_areas'=>$origin_areas,'zones' => $zones, 'case_natures' => $case_natures, 'segments' => $segments, 'sub_segment' => $sub_segment, 'shipper_key' => $shipper_key, 'shipper_non_key' => $shipper_non_key, 'shipment_status' => $shipment_status, 'hubs' => $hubs, 'case_nature_types' => $case_nature_types]);
         } else {
             return redirect()->route('admin.settings.auto_assigning.index')->with(['error' => 'No Agent Found With Given ID']);
         }
@@ -5873,6 +6026,7 @@ class GlobalSettingsController extends Controller
 
     public function crm_auto_assigning_submit(Request $request)
     {
+
         $admin_id = isset($request->admin_id) ? $request->admin_id : $request->id;
         if (isset($request->id)) {
 
@@ -5886,6 +6040,10 @@ class GlobalSettingsController extends Controller
             CrmAgentAutoAssignShipper::where('agent_id', $admin_id)->delete();
             CrmAgentAutoAssignSNKey::where('agent_id', $admin_id)->delete();
             CrmAgentAutoAssignSubSegment::where('agent_id', $admin_id)->delete();
+            CrmAgentAutoAssignOriginHub::where('agent_id', $admin_id)->delete();
+            CrmAgentAutoAssignOriginArea::where('agent_id',$admin_id)->delete();
+            CrmAgentAutoAssignOriginZone::where('agent_id',$admin_id)->delete();
+
         }
         $crm_agent = CrmAgentAutoAssign::where('agent_id', $admin_id);
         if (!$crm_agent->exists()) {
@@ -5900,6 +6058,10 @@ class GlobalSettingsController extends Controller
             $shipper_non_key_id = $request->input('shipper_non_key_id', null);
             $business_segment_id = $request->input('business_segment_id', null);
             $sub_business_segment_id = $request->input('sub_business_segment_id', null);
+
+            $origin_zone_id = $request->input('origin_zone_id', null);
+            $origin_id = $request->input('origin_id', null);
+            $origin_area_id = $request->input('origin_area_id', null);
 
             $crm_agent = new CrmAgentAutoAssign();
             $crm_agent->agent_id = $agents;
@@ -5987,6 +6149,38 @@ class GlobalSettingsController extends Controller
                 }
                 CrmAgentAutoAssignShipStatus::insert($ss);
             }
+
+            if (!empty($origin_zone_id)) {
+                foreach ($origin_zone_id as $key => $value) {
+                    $zn[$key]['agent_id'] = $agents;
+                    $zn[$key]['origin_zone_id'] = $value;
+                    $zn[$key]['created_at'] = Carbon::now();
+                    $zn[$key]['updated_at'] = Carbon::now();
+                }
+                CrmAgentAutoAssignOriginZone::insert($zn);
+            }
+
+            if (!empty($origin_id)) {
+                foreach ($origin_id as $key => $value) {
+                    $hub[$key]['agent_id'] = $agents;
+                    $hub[$key]['origin_hub_id'] = $value;
+                    $hub[$key]['created_at'] = Carbon::now();
+                    $hub[$key]['updated_at'] = Carbon::now();
+                }
+                CrmAgentAutoAssignOriginHub::insert($hub);
+            }
+
+            if (!empty($origin_area_id)) {
+                foreach ($origin_area_id as $key => $value) {
+                    $hub[$key]['agent_id'] = $agents;
+                    $hub[$key]['origin_area_id'] = $value;
+                    $hub[$key]['created_at'] = Carbon::now();
+                    $hub[$key]['updated_at'] = Carbon::now();
+                }
+                CrmAgentAutoAssignOriginArea::insert($hub);
+            }
+
+
 
             if (isset($request->id)) {
 
@@ -9482,7 +9676,7 @@ class GlobalSettingsController extends Controller
     public function add_auto_assign_agent()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 661);
-        $agents = Admin::select('id', 'name')->whereIn('role_id', [37, 28])->get(); //37,28 role
+        $agents = Admin::select('id', 'name','role_id')->whereIn('role_id', [37, 28,43,67,75,115])->where('status',1)->get(); //37,28 role
         $zones = Zone::where('status', 1)->where('business_category_id', 1)->get();
         $case_natures = CrmRequestCaseNature::all();
         $segments = Segment::all();
@@ -9494,8 +9688,11 @@ class GlobalSettingsController extends Controller
             ->where('blacklist', '=', 0)
             ->whereDoesntHave('sale_tier_tags')
             ->get();
-        return view('admin.settings.CRM.add_auto_assign')->with(['agents' => $agents, 'zones' => $zones, 'case_natures' => $case_natures, 'segments' => $segments, 'shipper_key' => $shipper_key, 'shipper_non_key' => $shipper_non_key, 'shipment_status' => $shipment_status]);
+
+        $origins = City::select('id','name')->where('status',1)->get();
+        return view('admin.settings.CRM.add_auto_assign')->with(['origins'=>$origins,'agents' => $agents, 'zones' => $zones, 'case_natures' => $case_natures, 'segments' => $segments, 'shipper_key' => $shipper_key, 'shipper_non_key' => $shipper_non_key, 'shipment_status' => $shipment_status]);
     }
+
     public function global_status(Request $request)
     {
         $settings = GlobalSettings::where('type', '=', 'crm_agent_auto_assigning');
@@ -9524,6 +9721,27 @@ class GlobalSettingsController extends Controller
         }
     }
 
+    public function get_origin_areas(Request $request)
+    {
+        if (isset($request->origin_ids)) {
+            $origin_ids = $request->origin_ids;
+            $origin_areas = CityArea::whereIn('city_id', $origin_ids)->select('id', 'name')->orderby('name', 'asc')->get();
+            return response()->json(['status' => 1, 'origin_areas' => $origin_areas]);
+        } else {
+            return response()->json(['status' => 0, 'error' => 'No data Found']);
+        }
+    }
+    public function get_origin_hub(Request $request)
+    {
+        if (isset($request->origin_zone_id)) {
+            $zone = $request->origin_zone_id;
+            $origin_hubs = City::where('hub', 1)->whereIn('zone_id', $zone)->select('id', 'name')->orderby('name', 'asc')->get();
+
+            return response()->json(['status' => 1, 'origin_hubs' => $origin_hubs]);
+        } else {
+            return response()->json(['status' => 0, 'error' => 'No data Found']);
+        }
+    }
     public function airway_bill_address_visibility_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 680);
