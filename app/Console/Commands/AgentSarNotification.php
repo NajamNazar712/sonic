@@ -60,10 +60,7 @@ class AgentSarNotification extends Command
 
             $nowSub16Hours = Carbon::now()->subHours(16)->toDateTimeString();
             $nowSub24Hours = Carbon::now()->subHours(24)->toDateTimeString();
-            // $nowSub48Hours = Carbon::now()->subHours(48)->toDateTimeString();
-            $dateTime = Carbon::createFromFormat('Y-m-d H:i:s', '2025-01-24 23:15:00');
-            $nowSub48Hours = $dateTime->subHours(48)->toDateTimeString();
-
+            $nowSub48Hours = Carbon::now()->subHours(48)->toDateTimeString();
             $nowSub48Hours = Carbon::parse($nowSub48Hours)->addMinutes(44)->format('Y-m-d H:i:s');
            
             // rv_assign_agent_status_id' 7 (Shipper Advised Request) and Check If State Is 2 (Unassign Assigned)
@@ -82,18 +79,18 @@ class AgentSarNotification extends Command
             //Combine the results for sending in single email
             $sendEmail = $sendEmails->union($sendEmailofRefusalShipments)->get();
             // If there are shipments that meet the conditions, send Email Notification to shipper for each shipment
-            // if ($sendEmail->isNotEmpty()) {
+            if ($sendEmail->isNotEmpty()) {
 
-            //     foreach ($sendEmail as $shipment) {
-            //         // if shipment status is unresponsive Increment the unresponsive_email_count for each shipment after sending the email
-            //         if($shipment->rv_assign_agent_status_id == 7){
-            //             $shipment->increment('unresponsive_email_count');
-            //             $shipment->unresponsive_email_time = $currentDateTime;
-            //             $shipment->save();
-            //         }
-            //     }
-            //     NotificationsController::send(220, $sendEmail);
-            // }
+                foreach ($sendEmail as $shipment) {
+                    // if shipment status is unresponsive Increment the unresponsive_email_count for each shipment after sending the email
+                    if($shipment->rv_assign_agent_status_id == 7){
+                        $shipment->increment('unresponsive_email_count');
+                        $shipment->unresponsive_email_time = $currentDateTime;
+                        $shipment->save();
+                    }
+                }
+                NotificationsController::send(220, $sendEmail);
+            }
 
             // When there is no response from the shipper within 24 hours of the "Shipper Advise Requested" status being set on the shipment, 
             // the system will automatically update the shipment status to "Return Confirm."
@@ -149,49 +146,49 @@ class AgentSarNotification extends Command
             // When there is no response from the shipper within 24 hours of the "Shipper Advise Requested" status after refusal on call status, 
             // the system will automatically update the shipment status to "Return Confirm."
             
-            // $refusal_call_shipments = RvShipmentAssignAgent::join('shipments', function ($join) {
-            //     $join->on('rv_shipment_assign_agents.shipment_id', '=', 'shipments.id')
-            //         ->where('shipments.shipper_status_id', '=', 65);
-            //     })
-            //     ->where('rv_assign_agent_status_id', 8)
-            //     ->where('rv_state_id', 2)
-            //     ->where('rv_shipment_assign_agents.updated_at', '<=', $nowSub24Hours)
-            //     ->get();
+            $refusal_call_shipments = RvShipmentAssignAgent::join('shipments', function ($join) {
+                $join->on('rv_shipment_assign_agents.shipment_id', '=', 'shipments.id')
+                    ->where('shipments.shipper_status_id', '=', 65);
+                })
+                ->where('rv_assign_agent_status_id', 8)
+                ->where('rv_state_id', 2)
+                ->where('rv_shipment_assign_agents.updated_at', '<=', $nowSub24Hours)
+                ->get();
                 
-            // if ($refusal_call_shipments->isNotEmpty()) {
-            //     foreach ($refusal_call_shipments as $refusal_call_shipment) {
-            //         $refusal_call_shipment->update(['rv_assign_agent_status_id' => 1, 'rv_assign_agent_sub_status_id' => null,'rv_state_id' => 4]);
+            if ($refusal_call_shipments->isNotEmpty()) {
+                foreach ($refusal_call_shipments as $refusal_call_shipment) {
+                    $refusal_call_shipment->update(['rv_assign_agent_status_id' => 1, 'rv_assign_agent_sub_status_id' => null,'rv_state_id' => 4]);
 
-            //         $request = (object) [
-            //             'shipment_id' => $refusal_call_shipment->shipment_id,
-            //             'remarks' => $refusal_call_shipment->remarks,
-            //             'rv_assign_agent_sub_status_id' => Null,
-            //             'consignee_refused_reasons' => Null,
-            //         ];
-            //         $globalAdminId = 346;
-            //         $this->return_confirm($request,$globalAdminId);
+                    $request = (object) [
+                        'shipment_id' => $refusal_call_shipment->shipment_id,
+                        'remarks' => $refusal_call_shipment->remarks,
+                        'rv_assign_agent_sub_status_id' => Null,
+                        'consignee_refused_reasons' => Null,
+                    ];
+                    $globalAdminId = 346;
+                    $this->return_confirm($request,$globalAdminId);
 
-            //         $data = [
-            //             'rv_shipment_assign_agent_id' => $refusal_call_shipment->id,
-            //             'agent_id' => $refusal_call_shipment->agent_id,
-            //             'shipments_journey_id' => $refusal_call_shipment->shipments_journey_id,
-            //             'last_shipments_journey_id' => $refusal_call_shipment->last_shipments_journey_id,
-            //             'shipment_id' => $refusal_call_shipment->shipment_id,
-            //             'rv_assign_agent_status_id' => $refusal_call_shipment->rv_assign_agent_status_id,
-            //             'rv_assign_agent_sub_status_id' => Null,
-            //             'rv_state_id' => $refusal_call_shipment->rv_state_id,
-            //             'updated_type_id' => 1,
-            //             'updated_by_id' =>  Null,
-            //             'is_fake_status' => $refusal_call_shipment->is_fake_status,
-            //             'rv_fake_status_id' => $refusal_call_shipment->rv_fake_status_id,
-            //             'remarks' => $refusal_call_shipment->remarks,
-            //             'call_to_id' => $refusal_call_shipment->call_to_id,
-            //             'assigned_to_type_id' => $refusal_call_shipment->assigned_to_type_id,
-            //             'assigned_by' => $refusal_call_shipment->assigned_by,
-            //         ];
-            //         $this->data_rv_shipment_assign_agent_details($data);
-            //     }
-            // }
+                    $data = [
+                        'rv_shipment_assign_agent_id' => $refusal_call_shipment->id,
+                        'agent_id' => $refusal_call_shipment->agent_id,
+                        'shipments_journey_id' => $refusal_call_shipment->shipments_journey_id,
+                        'last_shipments_journey_id' => $refusal_call_shipment->last_shipments_journey_id,
+                        'shipment_id' => $refusal_call_shipment->shipment_id,
+                        'rv_assign_agent_status_id' => $refusal_call_shipment->rv_assign_agent_status_id,
+                        'rv_assign_agent_sub_status_id' => Null,
+                        'rv_state_id' => $refusal_call_shipment->rv_state_id,
+                        'updated_type_id' => 1,
+                        'updated_by_id' =>  Null,
+                        'is_fake_status' => $refusal_call_shipment->is_fake_status,
+                        'rv_fake_status_id' => $refusal_call_shipment->rv_fake_status_id,
+                        'remarks' => $refusal_call_shipment->remarks,
+                        'call_to_id' => $refusal_call_shipment->call_to_id,
+                        'assigned_to_type_id' => $refusal_call_shipment->assigned_to_type_id,
+                        'assigned_by' => $refusal_call_shipment->assigned_by,
+                    ];
+                    $this->data_rv_shipment_assign_agent_details($data);
+                }
+            }
 
 //            Log::channel('cronJobLog')->info('s ' .'agent:sarnotification Completedagent:sarnotification Completed');
 
