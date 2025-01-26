@@ -144,20 +144,20 @@
                                         <div class="col-6">
                                             <div class="form-group">
                                                 <label>Shipper with KAM &nbsp;(<input type="checkbox" class="checkAll"  >Select All)</label>
-                                                <select name="shipper_key_id[]" id="shipper_key_id" class="form-control select2" multiple="multiple"  >
-                                                    @foreach($shipper_key as $cn)
-                                                        <option value="{{ $cn->id }}" > {{ $cn->name }} </option>
-                                                    @endforeach
+                                                <select name="shipper_key_id[]" disabled id="shipper_key_id" class="form-control select2" multiple="multiple"  >
+{{--                                                    @foreach($shipper_key as $cn)--}}
+{{--                                                        <option value="{{ $cn->id }}" > {{ $cn->name }} </option>--}}
+{{--                                                    @endforeach--}}
                                                 </select>
                                             </div>
                                         </div>
                                         <div class="col-6">
                                             <div class="form-group">
-                                                <label>Shipper without KAM &nbsp;(<input type="checkbox" class="checkAll"  >Select All)</label>
-                                                <select name="shipper_non_key_id[]" id="shipper_non_key_id" class="form-control select2" multiple="multiple"  >
-                                                    @foreach($shipper_non_key as $cn)
-                                                        <option value="{{ $cn->id }}" > {{ $cn->name }} </option>
-                                                    @endforeach
+                                                <label>Shipper without KAM &nbsp;(<input type="checkbox" class="checkAll" id="shipper_non_checkbox"  >Select All)</label>
+                                                <select name="shipper_non_key_id[]" disabled id="shipper_non_key_id" class="form-control select2" multiple="multiple"  >
+{{--                                                    @foreach($shipper_non_key as $cn)--}}
+{{--                                                        <option value="{{ $cn->id }}" > {{ $cn->name }} </option>--}}
+{{--                                                    @endforeach--}}
                                                 </select>
                                             </div>
                                         </div>
@@ -193,6 +193,49 @@
 
     <script>
         $(document).ready(function() {
+
+            function getShipperKey() {
+
+                $.ajax({
+                    url:'{!! route("admin.settings.auto_assigning.get_shipper_key") !!}',
+                    method: 'GET'
+                }).done(function (data) {
+                    if(data.status == 1){
+                        $('#shipper_key_id').removeAttr('disabled');
+                        let options = "";
+                        $.each(data.shipper_keys, function(index, field) {
+                            options+=`<option value='${field.id}' >${field.name}<option>`;
+                        });
+                        $('#shipper_key_id').append(options);
+
+                        $('#shipper_key_id').find('option').filter(function() {
+                            return $.trim($(this).text()) === '';
+                        }).remove();
+                    }
+                })
+            }
+            function getShipperNonKey() {
+
+                $.ajax({
+                    url:'{!! route("admin.settings.auto_assigning.get_shipper_non_key") !!}',
+                    method: 'GET'
+                }).done(function (data) {
+                    if(data.status == 1){
+                        $('#shipper_non_key_id').removeAttr('disabled');
+                        let options = "";
+                        $.each(data.shipper_non_keys, function(index, field) {
+                            options+=`<option value='${field.id}' >${field.name}<option>`;
+                        });
+                        $('#shipper_non_key_id').append(options);
+
+                        $('#shipper_non_key_id').find('option').filter(function() {
+                            return $.trim($(this).text()) === '';
+                        }).remove();
+                    }
+                })
+            }
+
+
 
             $('#AssignAgentModal').on('hidden.bs.modal', function () {
                 // $("agent_id").select2('val', '')
@@ -292,13 +335,17 @@
                 allowClear:true,
                 dropdownParent:$('#crm_agent_assign')
             }).bind('change',function (){
+                $('#shipper_key_id').attr('disabled','disabled');
+                $('#shipper_key_id').empty();
+                $('#shipper_non_key_id').attr('disabled','disabled');
+                $('#shipper_non_key_id').empty();
+
                 var role_id = $(this).find(':selected').data('role_id');
                 if(role_id==28 || role_id==37){
-                    $('#shipper_key_id').attr('disabled','disabled');
-                    $('#shipper_non_key_id').removeAttr('disabled');
+                    getShipperNonKey()
+
                 } else if (role_id==43 || role_id==67 || role_id==75 || role_id==115) {
-                    $('#shipper_non_key_id').attr('disabled','disabled');
-                    $('#shipper_key_id').removeAttr('disabled');
+                    getShipperKey();
                 }
 
             });

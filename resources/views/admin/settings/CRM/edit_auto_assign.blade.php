@@ -72,13 +72,13 @@
                                         </div>
                                     </div>
 
-                                @php  $origin_zone_id  = $selected_agent->origin_zones->pluck('zone_id')->toArray(); @endphp
+                                @php  $origin_zone_id  = $selected_agent->origin_zones->pluck('origin_zone_id')->toArray(); @endphp
 
                                 <div class="row">
                                     <div class="col-4">
                                         <div class="form-group">
                                             <label>Origin Zone&nbsp;(<input type="checkbox" class="checkAll" >Select All)</label>
-                                            <select name="zone_id[]" id="zone_id" class="form-control select2" multiple="multiple">
+                                            <select name="origin_zone_id[]" id="origin_zone_id" class="form-control select2" multiple="multiple">
                                                 <option value="" disabled>Select</option>
                                                 @foreach($zones as $zone)
                                                     <option value="{{ $zone->id }}" {{ in_array($zone->id, $origin_zone_id)  ? 'selected' : '' }}> {{ $zone->name }} </option>
@@ -89,10 +89,10 @@
                                     <div class="col-4">
                                         <div class="form-group">
                                             <label>Origin Hub (<input type="checkbox" class="checkAll" >Select All)</label>
-                                            <select name="origin_id[]" disabled id="origin_id" class="form-control select2" multiple="multiple">
-                                                @foreach($origin_hubs as $origin_hub)
-                                                    <option value="{{ $origin_hub->id }}" > {{ $origin_hub->name }} </option>
-                                                @endforeach
+                                            <select name="origin_id[]"  id="origin_id" class="form-control select2" multiple="multiple">
+{{--                                                @foreach($origin_hubs as $origin_hub)--}}
+{{--                                                    <option value="{{ $origin_hub->id }}" > {{ $origin_hub->name }} </option>--}}
+{{--                                                @endforeach--}}
                                             </select>
                                         </div>
                                     </div>
@@ -101,9 +101,9 @@
                                             <div class="form-group">
                                                 <label>Origin Area&nbsp;(<input type="checkbox" class="checkAll"  >Select All)</label>
                                                 <select name="origin_area_id[]" disabled id="origin_area_id" class="form-control select2" multiple="multiple"  >
-                                                    @foreach($origin_areas as $origin_area)
-                                                        <option value="{{ $origin_area->id }}" > {{ $origin_area->name }} </option>
-                                                    @endforeach
+{{--                                                    @foreach($origin_areas as $origin_area)--}}
+{{--                                                        <option value="{{ $origin_area->id }}" > {{ $origin_area->name }} </option>--}}
+{{--                                                    @endforeach--}}
                                                 </select>
                                             </div>
                                         </div>
@@ -226,8 +226,11 @@
             let zone = $('#zone_id').val();
             getHubs(zone);
 
-            let origin_zone = $('origin_zone_id').val();
-            getOriginHubs(origin_zone)
+            let origin_zone = $('#origin_zone_id').val();
+            getOriginHubs(origin_zone);
+
+            let origin_area = $("#origin_id").val();
+            getOriginAreas(origin_area);
 
             let case_nature = $('#case_nature_id').val();
             getCaseNatureType(case_nature);
@@ -238,6 +241,10 @@
             var hb = @jSON($selected_agent->hubs->pluck('hub_id')->toArray());
             var cnt = @jSON($selected_agent->case_nature_types->pluck('case_nature_type_id')->toArray());
             var sbs = @jSON($selected_agent->sub_business_types->pluck('sub_segment_id')->toArray());
+            var ohb = @jSON($selected_agent->origin_hubs->pluck('origin_hub_id')->toArray());
+            var ora = @jSON($selected_agent->origin_areas->pluck('origin_area_id')->toArray());
+
+
 
             function getHubs(zone) {
                 $('#hub_id').attr('disabled','disabled');
@@ -268,6 +275,7 @@
             }
 
             function getOriginHubs(origin_zone) {
+                console.log(origin_zone);
                 $('#origin_id').attr('disabled','disabled');
                 $('#origin_id').empty();
                 $.ajax({
@@ -282,11 +290,11 @@
                         $('#origin_id').removeAttr('disabled');
                         let options = "";
                         $.each(data.origin_hubs, function(index, field) {
-                            let selected = (hb.includes(field.id)) ? 'selected' : '';
+                            let selected = (ohb.includes(field.id)) ? 'selected' : '';
                             options+=`<option value='${field.id}' ${selected} >${field.name}<option>`;
                         });
                         $('#origin_id').append(options).trigger('change');
-                        hb = [];
+                        ohb = [];
 
                         $('#origin_id').find('option').filter(function() {
                             return $.trim($(this).text()) === '';
@@ -310,11 +318,11 @@
                         $('#origin_area_id').removeAttr('disabled');
                         let options = "";
                         $.each(data.origin_areas, function(index, field) {
-                            let selected = (hb.includes(field.id)) ? 'selected' : '';
+                            let selected = (ora.includes(field.id)) ? 'selected' : '';
                             options+=`<option value='${field.id}' ${selected} >${field.name}<option>`;
                         });
                         $('#origin_area_id').append(options).trigger('change');
-
+                        ora = [];
                         $('#origin_area_id').find('option').filter(function() {
                             return $.trim($(this).text()) === '';
                         }).remove();
@@ -385,6 +393,7 @@
                 // $("agent_id").select2('val', '')
                 $('#agent_id').val('').trigger('change.select2');
                 $('#zone_id').val('').trigger('change.select2');
+                $('#origin_zone_id').val('').trigger('change.select2');
                 // $('#case_nature_id').val('').trigger('change.select2');
             });
             $('#agent_id').prepend('<option selected></option>').select2({
@@ -460,6 +469,7 @@
             }).bind('change', function() {
 
                 var zone = $(this).val();
+                console.log(zone);
                 getOriginHubs(zone);
 
             });

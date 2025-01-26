@@ -54,9 +54,14 @@ class AutoAssignCrmAgentNew extends Command
 
                 $crm_requests = CrmRequest::leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
                     ->leftjoin('users as shipper', 'shipper.id', '=', 's.user_id')
+                    ->leftjoin('user_shipping_infos as usi','usi.id','=','s.pickup_address_id')
                     ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
                     ->leftjoin('cities as h', 'h.id', '=', 'dc.hub_id')
                     ->leftjoin('zones as z', 'z.id', '=', 'dc.zone_id')
+                    ->leftjoin('cities as oc', 'oc.id', '=', 'usi.city_id')
+                    ->leftjoin('cities as oh', 'oh.id', '=', 'oc.hub_id')
+                    ->leftjoin('zones as oz', 'oz.id', '=', 'oc.zone_id')
+                    ->leftjoin('city_areas as ca', 'ca.city_id', '=', 'oc.id')
                     ->leftjoin('sale_tier_tags as shipper_key', function ($join) {
                         $join->on('shipper_key.user_id', '=', 's.user_id')
                             ->WhereNotNull('shipper_key.kam');
@@ -72,6 +77,10 @@ class AutoAssignCrmAgentNew extends Command
                         'z.id as zone_id',
                         'dc.id as city_id',
                         'h.id as hub_id',
+                        'oz.id as origin_zone_id',
+                        'oc.id as origin_id',
+                        'oh.id as origin_hub_id',
+                        'ca.id as origin_area_id',
                         's.shipper_status_id as shipment_status_id',
                         'shipper.segment_id as business_segment_id',
                         'shipper.sub_segment_id as sub_segment_id',
@@ -86,7 +95,7 @@ class AutoAssignCrmAgentNew extends Command
                     $crm_requests = $crm_requests->get();
                     foreach ($crm_requests as $value) {
 
-                        $crm_agent =  CrmAgentAutoAssign::with('zones.zones','hubs.hubs','case_natures','case_nature_types','business_types','sub_business_types','shipper_keys','shipper_non_keys','shipment_statuses')
+                        $crm_agent =  CrmAgentAutoAssign::with('origin_zones.zones','origin_hubs.hubs','origin_areas.city_area','zones.zones','hubs.hubs','case_natures','case_nature_types','business_types','sub_business_types','shipper_keys','shipper_non_keys','shipment_statuses')
                             ->select([
                                 'crm_agent_auto_assigns.id',
                                 'crm_agent_auto_assigns.agent_id',
@@ -95,8 +104,13 @@ class AutoAssignCrmAgentNew extends Command
                             ])->where('crm_agent_auto_assigns.status', 1)
                             ->where(function ($query) use ($value) {
                                 if (!empty($value->zone_id)) {
-                                    $query->WhereHas('zones', function ($query) use ($value) {
+                                    $query->orWhereHas('zones', function ($query) use ($value) {
                                         $query->where('zone_id', $value->zone_id);
+                                    });
+                                }
+                                if (!empty($value->origin_zone_id)) {
+                                    $query->orWhereHas('origin_zones', function ($query) use ($value) {
+                                        $query->where('origin_zone_id', $value->origin_zone_id);
                                     });
                                 }
                                 if (!empty($value->case_nature_id)) {
@@ -118,13 +132,25 @@ class AutoAssignCrmAgentNew extends Command
                                 $shipper_keys = isset($val->shipper_keys) ? $val->shipper_keys->pluck('shipper_key_id')->toArray(): [];
                                 $shipper_non_keys = isset($val->shipper_non_keys) ? $val->shipper_non_keys->pluck('shipper_non_key_id')->toArray(): [];
                                 $shipment_statuses = isset($val->shipment_statuses) ? $val->shipment_statuses->pluck('shipment_status_id')->toArray(): [];
+                                $origin_hubs = isset($val->origin_hubs) ?  $val->origin_hubs->pluck('origin_hub_id')->toArray() : [];
+                                $origin_areas = isset($val->origin_areas) ?  $val->origin_areas->pluck('origin_area_id')->toArray() : [];
 
-                               if(count($hubs) > 0){
-                                   if (!empty($value->hub_id)) {
-                                       if(!in_array($value->hub_id,$hubs)){
-                                           $return = 0;
+                               if(count($origin_hubs) > 0 || count($hubs) > 0) {
+                                   $originHubMatch = true;
+                                   $hubMatch = true;
+
+                                   if(!empty($value->origin_hub_id)) {
+                                       if(!in_array($value->origin_hub_id,$origin_hubs)){
+                                           $originHubMatch = false;
                                        }
                                    }
+
+                                   if(!empty($value->hub_id)){
+                                       if(!in_array($value->hub_id,$hubs)){
+                                           $hubMatch = false;
+                                       }
+                                   }
+                                   $return = ($originHubMatch || $hubMatch) ? 1 : 0;
                                }
                                if(count($case_nature_type_id) > 0){
                                    if (!empty($value->case_nature_type_id)) {
@@ -167,6 +193,13 @@ class AutoAssignCrmAgentNew extends Command
                                            $return = 0;
                                        }
                                    }
+                               }
+                               if(count($origin_areas) > 0){
+                                    if (!empty($value->origin_area_id)) {
+                                        if(!in_array($value->origin_area_id,$origin_areas)){
+                                            $return = 0;
+                                        }
+                                    }
                                }
 
                                if($return == 1){
@@ -217,6 +250,5 @@ class AutoAssignCrmAgentNew extends Command
                 }
             }
         }
-
     }
 }
