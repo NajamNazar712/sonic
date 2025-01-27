@@ -10,7 +10,7 @@ class DonePaymentShipment extends Model
 		return $this->belongsTo('App\Http\Models\Shipment');
 	}
     public function shipment_archive() {
-		return $this->belongsTo('App\ShipmentsArchieve');
+		return $this->belongsTo('App\ShipmentsArchieve','shipment_id','id');
 	}
 
     public function done_payment() {
