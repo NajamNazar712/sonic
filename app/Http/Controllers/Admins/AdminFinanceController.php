@@ -9101,6 +9101,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             } else {
                 $shipment = $done_payment_shipment->shipment;
             }
+            
             if (!empty($shipment)) {
                 $service_charges = ShipmentServicesCharges::where('shipment_id', $shipment->id);
                 if ($service_charges->exists()) {
