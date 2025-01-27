@@ -3652,7 +3652,7 @@ class NotificationsController extends Controller
                                     $to = $pickup_request->pickup_address->email;
                                 }
                                 self::email($subject, $body, $to);
-                                V2PickupRequestShipment::whereIn('id',$update_ids)->update(['email_sent'=>1]);
+//                                V2PickupRequestShipment::whereIn('id',$update_ids)->update(['email_sent'=>1]);
 
                             }
                         }
