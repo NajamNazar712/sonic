@@ -1072,12 +1072,28 @@ class ShipperShipmentBookController extends Controller
 
                     try {
                         // Maintaining shipper segment logs on booking
-                        ShipperSegmentLogs::create([
-                            'shipment_id' => $shipment_id,
-                            'segment_id' => auth()->user()->segment_id,
-                            'sub_segment_id' => auth()->user()->sub_segment_id
-                        ]);
+                        $segment_id = '';
+                        $sub_segment_id = '';
+                        $user_id = '';
 
+                        if (session('substitute_user_id')) {
+                            $user_id = auth()->user()->user_id;
+                            $user = User::find($user_id);
+                            $segment_id = $user->segment_id;
+                            $sub_segment_id = $user->sub_segment_id;
+
+                            ShipperSegmentLogs::create([
+                                'shipment_id' => $shipment_id,
+                                'segment_id' => $segment_id,
+                                'sub_segment_id' => $sub_segment_id
+                            ]);
+                        } else {
+                            ShipperSegmentLogs::create([
+                                'shipment_id' => $shipment_id,
+                                'segment_id' => auth()->user()->segment_id,
+                                'sub_segment_id' => auth()->user()->sub_segment_id
+                            ]);    
+                        }
                         // if ($consignee_city_id != $user_shipping_info->city_id) {
                         //     ShipperSegmentLogs::create([
                         //         'shipment_id' => $shipment_id,
@@ -4092,7 +4108,6 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function corporate_store(Request $request) {
-
         $rules = [
             'replacement_parcel_img' => ['nullable', 'mimes:png,jpeg,jpg'],
         ];
@@ -4579,11 +4594,28 @@ class ShipperShipmentBookController extends Controller
 
                 try {
                     // Maintaining shipper segment logs on booking
-                    ShipperSegmentLogs::create([
-                        'shipment_id' => $shipment_id,
-                        'segment_id' => auth()->user()->segment_id,
-                        'sub_segment_id' => auth()->user()->sub_segment_id
-                    ]);
+                    $segment_id = '';
+                    $sub_segment_id = '';
+                    $user_id = '';
+                    if (session('substitute_user_id')) {
+                        $user_id = auth()->user()->user_id;
+                        $user = User::find($user_id);
+                        $segment_id = $user->segment_id;
+                        $sub_segment_id = $user->sub_segment_id;
+
+                        ShipperSegmentLogs::create([
+                            'shipment_id' => $shipment_id,
+                            'segment_id' => $segment_id,
+                            'sub_segment_id' => $sub_segment_id
+                        ]);
+                    } else {
+                        ShipperSegmentLogs::create([
+                            'shipment_id' => $shipment_id,
+                            'segment_id' => auth()->user()->segment_id,
+                            'sub_segment_id' => auth()->user()->sub_segment_id
+                        ]);
+                    }
+
                     // if ($consignee_city_id != $pickup_city_id) {
                     //     ShipperSegmentLogs::create([
                     //         'shipment_id' => $shipment_id,
