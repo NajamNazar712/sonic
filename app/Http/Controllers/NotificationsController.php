@@ -3622,7 +3622,7 @@ class NotificationsController extends Controller
                                 $body = str_replace('[vendor]', $vendor, $body);
                             }
 
-                            $assigned_shipments = $pickup_request->pickup_request_shipments;
+                            $assigned_shipments = $pickup_request->pickup_request_shipments_email;
 
                             if(count($assigned_shipments) > 0) {
                                 $assigned_shipments_array = $assigned_shipments->toArray();
@@ -3652,7 +3652,7 @@ class NotificationsController extends Controller
                                     $to = $pickup_request->pickup_address->email;
                                 }
                                 self::email($subject, $body, $to);
-//                                V2PickupRequestShipment::whereIn('id',$update_ids)->update(['email_sent'=>1]);
+                                V2PickupRequestShipment::whereIn('id',$update_ids)->update(['email_sent'=>1]);
 
                             }
                         }
