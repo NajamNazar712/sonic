@@ -299,6 +299,10 @@ class AdminCnController extends Controller
 
     public function  cn_issue_to_rider_list(Request $request)
     {
+        $cn_number_from = (int) $request->get('cn_number_from');
+        $cn_number_to = (int) $request->get('cn_number_to');
+        $employee_id = $request->get('employee_id');
+
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 774);
         }
@@ -314,6 +318,35 @@ class AdminCnController extends Controller
         {
             $trax_cn_issue_rider = $trax_cn_issue_rider->whereIn('trax_cn_issue_to_riders.area_code',$hub_ids);
         }
+
+
+        if ($request->get('employee_id')) {
+            if (strpos($request->get('employee_id'), '%') !== false) {
+                $trax_cn_issue_rider = $trax_cn_issue_rider->where('rd.trax_id', 'like', $employee_id); 
+            } else {
+                $trax_cn_issue_rider = $trax_cn_issue_rider->where('rd.trax_id', '=', $employee_id);
+            }
+        }
+
+        if ($request->get('cn_number_from') && $request->get('cn_number_to')) {
+            $trax_cn_issue_rider = $trax_cn_issue_rider->where(function($query) use ($cn_number_from, $cn_number_to) {
+                $query->where(function($query) use ($cn_number_from, $cn_number_to) {
+                    $query->where('cn_from', '<=', $cn_number_to)
+                        ->where('cn_to', '>=', $cn_number_from);
+                });
+            });
+        }
+
+        // if ($request->get('cn_number_from') && $request->get('cn_number_to')) {
+        //     $trax_cn_issue_rider = $trax_cn_issue_rider->where(function($query) use ($cn_number_from, $cn_number_to) {
+        //         $query->whereBetween('cn_from', [$cn_number_from, $cn_number_to])
+        //             ->orWhereBetween('cn_to', [$cn_number_from, $cn_number_to])
+        //             ->orWhere(function($query) use ($cn_number_from, $cn_number_to) {
+        //                 $query->where('cn_from', '<=', $cn_number_from)
+        //                     ->where('cn_to', '>=', $cn_number_to);
+        //             });
+        //     });
+        // }
 
         $datatables = Datatables::of($trax_cn_issue_rider)
             ->addColumn('action',function ($trax_cn_issue_rider){
