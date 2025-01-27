@@ -83,6 +83,15 @@ class ProcessRvShipmentTicket implements ShouldQueue
 
             if (in_array($this->shipment['shipment_user_id'], $onlyShippers)) { //Mark Shipper Disabled if It's user id found in Only Shippers
                 $isShipperDisabled = 1;
+                //This works on the halt shipper. If the first attempt is disabled, the second attempt will follow the current RVR process.T0-6980
+                $rvShipmentTicket = RvShipmentTicket::where(['shipment_id'=>$this->shipment['shipment_id'],'halt_shipper'=> 1])->first();
+                if($rvShipmentTicket){
+                    RvShipmentAssignAgent::where('shipment_id',$this->shipment['shipment_id'])->update(['unresponsive_count' => 0, 'unresponsive_email_count' => 0]);
+                    $rvShipmentTicket->halt_shipper = 0;
+                    $rvShipmentTicket->deleted_at = null;
+                    $rvShipmentTicket->save();
+                    $isShipperDisabled = 0;
+                }
             }
             // $userId = [2234, 23825, 13060, 1049];
             // Log::channel('cronJobLog')->info('s ' . 'rv_shipment_ticket Saved');
