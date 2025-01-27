@@ -76,7 +76,7 @@ class WalletSettlementFromDonePayments implements ShouldQueue
                     "wallet_id" => $dps->wallet_id,
                     "reference_id" => $dps->id,
                     "shipment_id" =>  $dps->tracking_number,
-                    "amount" => $dps->amount,
+                    "amount" => $dps->type == 0 ? $dps->amount : 0,
                     "charges" => [
                         'faf_charges' =>  floatval($dps->faf_charges),
                         'weight_charges' =>  floatval($dps->weight_charges),
@@ -92,7 +92,6 @@ class WalletSettlementFromDonePayments implements ShouldQueue
                         'return_charges' => floatval($dps->return_charges),
                         'gst_charges' => floatval($dps->gst),
                         'sms_charges' => floatval($dps->sms_charges),
-                        'fintech_charges' => floatval($dps->wallet_charges)
                     ]
                 ];
                 $request_nature = 'settlement-request';
