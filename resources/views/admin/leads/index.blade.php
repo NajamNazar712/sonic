@@ -2333,7 +2333,14 @@
                                     logs.forEach(function (log) {
                                         let editedFieldsFormatted = log.edited_fields
                                             .split(', ')
-                                            .map(field => field.trim())
+                                            .map(field => {
+                                                // Split the field at "->", keep the "->" and make the part after it bold
+                                                let parts = field.split('->');
+                                                if (parts.length > 1) {
+                                                    return parts[0] + ' <strong>' + '-> ' + parts[1].trim() + '</strong>';
+                                                }
+                                                return field; // Return as is if "->" is not found
+                                            })
                                             .join('<br>'); // Add line breaks between fields
 
                                         logContent += '<tr>';
