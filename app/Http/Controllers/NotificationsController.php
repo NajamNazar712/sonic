@@ -3622,7 +3622,7 @@ class NotificationsController extends Controller
                                 $body = str_replace('[vendor]', $vendor, $body);
                             }
 
-                            $assigned_shipments = $pickup_request->pickup_request_shipments_email;
+                            $assigned_shipments = $pickup_request->pickup_request_shipments;
 
                             if(count($assigned_shipments) > 0) {
                                 $assigned_shipments_array = $assigned_shipments->toArray();
