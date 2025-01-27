@@ -776,7 +776,7 @@
     {{--    todo bulk status model end--}}
 
     <div class="modal fade" id="logs_modal" role="dialog" aria-labelledby="logs_modal_title" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title" id="add_remarks_title">Lead Edit Logs</h4>
@@ -2321,14 +2321,29 @@
                                 var logs = data.logs;
                                 var logContent = '';
                                 if (logs.length > 0) {
+                                    // logs.forEach(function (log) {
+                                    //     logContent += '<tr>';
+                                    //     logContent += '<td>' + log.trax_id + '</td>';
+                                    //     logContent += '<td>' + log.admin_name + '</td>';
+                                    //     logContent += '<td>' + log.edited_fields + '</td>';
+                                    //     logContent += '<td>' + log.created_at + '</td>';
+                                    //     logContent += '</tr>';
+                                    // });
+
                                     logs.forEach(function (log) {
+                                        let editedFieldsFormatted = log.edited_fields
+                                            .split(', ')
+                                            .map(field => field.trim())
+                                            .join('<br>'); // Add line breaks between fields
+
                                         logContent += '<tr>';
                                         logContent += '<td>' + log.trax_id + '</td>';
                                         logContent += '<td>' + log.admin_name + '</td>';
-                                        logContent += '<td>' + log.edited_fields + '</td>';
+                                        logContent += '<td>' + editedFieldsFormatted + '</td>';
                                         logContent += '<td>' + log.created_at + '</td>';
                                         logContent += '</tr>';
                                     });
+
                                     $('#logs_modal table tbody').html(logContent);
                                     $('#logs_modal').modal('show');
                                 } else {

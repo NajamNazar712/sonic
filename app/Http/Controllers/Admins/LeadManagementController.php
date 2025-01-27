@@ -971,11 +971,17 @@ class LeadManagementController extends Controller
                         'edit_reference_id' => 'Reference ID',
                     ];
 
+                    // foreach ($fieldNames as $field => $fieldName) {
+                    //     if ($lead->isDirty($field)) {;
+                    //         $changedFields[] = $fieldName;
+                    //     }
+                    // }
                     foreach ($fieldNames as $field => $fieldName) {
-                        if ($lead->isDirty($field)) {;
-                            $changedFields[] = $fieldName;
+                        if ($lead->isDirty($field)) {
+                            $changedFields[] = $fieldName . ': ' . $lead->getOriginal($field) . ' -> ' . $lead->$field;
                         }
                     }
+
                     EditLeadLogs::create([
                         'lead_id' => $lead->id,
                         'trax_id' => Auth::user()->trax_id,
@@ -1138,7 +1144,7 @@ class LeadManagementController extends Controller
     }
 
     public function view_logs(Request $request){
-        $logs = EditLeadLogs::where('lead_id', $request->lead_id)->get();
+        $logs = EditLeadLogs::where('lead_id', $request->lead_id)->orderBy('created_at', 'desc')->get();
         if ($logs->isNotEmpty()) {
             return response()->json([
                 'status' => 0,
