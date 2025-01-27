@@ -15385,7 +15385,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
         }
         $adjustment_log->shipment_id = $shipment_id;
         $adjustment_log->adjustment_type_id = $adjustment_type;
-        $adjustment_log->admin_id = Auth::id();
+        $adjustment_log->admin_id = Auth::id() ?? 346; //Incase rvr return confirm then will be default set it global adminid.
         $adjustment_log->adjustment_amount = $adjustment_amount;
         $adjustment_log->remarks = $remarks;
         $adjustment_log->pending_id = $pending_id;
