@@ -64,7 +64,7 @@ class AgentSarNotification extends Command
             $nowSub16Hours = Carbon::now()->subHours(16)->toDateTimeString();
             $nowSub24Hours = Carbon::now()->subHours(24)->toDateTimeString();
             $nowSub48Hours = Carbon::now()->subHours(48)->toDateTimeString();
-            $date = Carbon::now()->format('Y-m-d');
+            $date = Carbon::now()->subDay(1)->format('Y-m-d');
             $nowSub48Hours = Carbon::parse($nowSub48Hours)->addMinutes(44)->format('Y-m-d H:i:s');
             
             // rv_assign_agent_status_id' 7 (Shipper Advised Request) and Check If State Is 2 (Unassign Assigned)
@@ -197,12 +197,14 @@ class AgentSarNotification extends Command
                 $join->on('rv_shipment_tickets.shipment_id', '=', 'shipments_journey.shipment_id')
                     ->where('shipments_journey.shipper_status_id', '=', 12)
                     ->where('shipments_journey.verification',1)
-                    ->whereDate('shipments_journey.created_at', $date);
-            })
-            ->where('disabled_shipper',1)
-            ->where('halt_shipper',0)
-            ->whereDate('rv_shipment_tickets.updated_at',$date)
-            ->select('rv_shipment_tickets.*', 'shipments_journey.id as journeyId')->get();
+                    ->where('shipments_journey.created_at','>=',$date.' 23:15:00')
+                    ->where('rv_shipment_tickets.updated_at','<=',date('Y-m-d').'23:14:59');
+                })
+                ->where('disabled_shipper',1)
+                ->where('halt_shipper',0)
+                ->where('rv_shipment_tickets.updated_at','>=',$date.' 23:15:59')
+                ->where('rv_shipment_tickets.updated_at','<=', date('Y-m-d').'23:14:59')
+                ->select('rv_shipment_tickets.*', 'shipments_journey.id as journeyId')->get();
 
             if($haltShipper->isNotEmpty()){
                 foreach($haltShipper->toArray() as $insertData){
