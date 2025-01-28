@@ -16,7 +16,7 @@ use App\Http\Models\UserIbftCharge;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentServicesCharges;
-use App\Http\Controllers\AdminFinanceController;
+use App\Http\Controllers\Admins\AdminFinanceController;
 use App\ShipmentAdditionalCharges;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
