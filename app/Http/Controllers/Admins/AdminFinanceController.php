@@ -16703,10 +16703,12 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
 
         $done_payments = RetailDonePayment::join('retail_shipper_infos as rsi', 'retail_done_payments.user_id', '=', 'rsi.id')
             ->join('cities as c', 'rsi.city_id', '=', 'c.id')
+            ->join('retail_done_payment_shipments as rs','rs.retail_done_payment_id','=','retail_done_payments.id')
+            ->join('retail_shipments as rs_name','rs_name.id','=','rs.shipment_id')
             ->leftjoin('retail_done_payment_calculations as dpc', 'dpc.retail_done_payment_id', '=', 'retail_done_payments.id')
             ->leftJoin('banks_lists as ubi', 'ubi.id', '=', 'rsi.bank_id')
             ->leftjoin('banks_lists as b', 'retail_done_payments.company_bank_id', '=', 'b.id')
-            ->select('retail_done_payments.id as id', 'dpc.retail_done_payment_id as payment_done_id', 'retail_done_payments.id as payment_id', 'rsi.shipper_name as shipper', 'c.name as city', 'rsi.shipper_phone_no as shipper_phone', 'rsi.shipper_address', 'retail_done_payments.total_shipments', 'retail_done_payments.delivered_shipments', 'retail_done_payments.delivered_shipments as delivered_shipments_count', 'retail_done_payments.adjusted_shipments', 'retail_done_payments.adjusted_shipments as adjusted_shipments_count', 'dpc.amount as total_amount', 'dpc.payable as total_payable', 'ubi.name as bank', 'retail_done_payments.reference_number', 'retail_done_payments.created_at as done_at', 'b.name as company_bank', 'retail_done_payments.status', 'retail_done_payments.ibft_charges', 'dpc.adjustment as adjustment_charges', 'retail_done_payments.status_updated_at as status_updated_at');
+            ->select('retail_done_payments.id as id', 'dpc.retail_done_payment_id as payment_done_id', 'retail_done_payments.id as payment_id', 'rs_name.shipper_name as shipper', 'c.name as city', 'rsi.shipper_phone_no as shipper_phone', 'rsi.shipper_address', 'retail_done_payments.total_shipments', 'retail_done_payments.delivered_shipments', 'retail_done_payments.delivered_shipments as delivered_shipments_count', 'retail_done_payments.adjusted_shipments', 'retail_done_payments.adjusted_shipments as adjusted_shipments_count', 'dpc.amount as total_amount', 'dpc.payable as total_payable', 'ubi.name as bank', 'retail_done_payments.reference_number', 'retail_done_payments.created_at as done_at', 'b.name as company_bank', 'retail_done_payments.status', 'retail_done_payments.ibft_charges', 'dpc.adjustment as adjustment_charges', 'retail_done_payments.status_updated_at as status_updated_at');
 
         if (session('role_id') != 1) {
             $done_payments = $done_payments->whereIn('c.hub_id', session('hubs'));
