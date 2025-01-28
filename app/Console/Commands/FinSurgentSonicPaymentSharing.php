@@ -68,41 +68,43 @@ class FinSurgentSonicPaymentSharing extends Command
                 if ($pending_payment_shipment) {
 
                     $shipment = Shipment::find($pending_payment_shipment->shipment_id);
-                    $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($pending_payment_shipment->shipment_id);
-                    $charges = $shipment->weight_charges + $shipment->fuel_surcharge + $faf_charges;
-                    $gst = $pending_payment_shipment->gst;
-                    if($charges != $pending_payment_shipment->charges) {
+                    if (!empty($shipment)) {
+                        $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($pending_payment_shipment->shipment_id);
+                        $charges = $shipment->weight_charges + $shipment->fuel_surcharge + $faf_charges;
+                        $gst = $pending_payment_shipment->gst;
+                        if ($charges != $pending_payment_shipment->charges) {
 
-                        if ($shipment->business_category_id == 1) { 
+                            if ($shipment->business_category_id == 1) {
 
-                            $gst = ROUND(($charges * AdminFinanceController::gst($shipment->pickup_address->city->zone_id, $shipment->pickup_address->city_id)), 2, PHP_ROUND_HALF_DOWN);
+                                $gst = ROUND(($charges * AdminFinanceController::gst($shipment->pickup_address->city->zone_id, $shipment->pickup_address->city_id)), 2, PHP_ROUND_HALF_DOWN);
 
-                        } else {
-                            $gst = ROUND(($charges * AdminFinanceController::international_gst()), 2, PHP_ROUND_HALF_DOWN);
+                            } else {
+                                $gst = ROUND(($charges * AdminFinanceController::international_gst()), 2, PHP_ROUND_HALF_DOWN);
+                            }
+
+                            $payable = $charges + $gst;
+                            $pending_payment_id[$pending_payment_shipment->pending_payment_id] = $pending_payment_shipment->pending_payment_id;
+                            if (!empty($payable)) {
+                                PendingPaymentShipment::where('id', $pending_payment_shipment->id)->update(['charges' => $charges, 'gst' => $gst, 'payable' => $payable]);
+                            }
                         }
-                        
-                        $payable = $charges + $gst;
-                        $pending_payment_id[$pending_payment_shipment->pending_payment_id] = $pending_payment_shipment->pending_payment_id;
-                        if(!empty($payable) ) {
-                            PendingPaymentShipment::where('id',  $pending_payment_shipment->id)->update(['charges' => $charges, 'gst' => $gst, 'payable' => $payable]);
-                        }
-                    }
                         $requestPayload = [
                             "client_id" => $pending_payment->user_id,
                             "wallet_id" => $pending_payment->wallet_id,
-                            "reference_id" => (string) Str::uuid(),
-                            "shipment_id" =>  $shipment->tracking_number,
+                            "reference_id" => (string)Str::uuid(),
+                            "shipment_id" => $shipment->tracking_number,
                             "amount" => $shipment->amount,
                             "order_created_date" => $shipment->created_at,
                             "charges" => [
-                                'weight_charges' =>   floatval($shipment->weight_charges),
-                                'fuel_surcharge' =>   floatval($shipment->fuel_surcharge),
-                                'faf_charges' =>  floatval($faf_charges),
-                                'arrival_charges_gst' =>  floatval($gst),
-                                'arrival_sms_charges' =>  floatval($pending_payment_shipment->sms_charges)
+                                'weight_charges' => floatval($shipment->weight_charges),
+                                'fuel_surcharge' => floatval($shipment->fuel_surcharge),
+                                'faf_charges' => floatval($faf_charges),
+                                'arrival_charges_gst' => floatval($gst),
+                                'arrival_sms_charges' => floatval($pending_payment_shipment->sms_charges)
                             ]
                         ];
                         $this->arrival_shipment_logs($requestPayload, $pending_payment_shipment);
+                    }
                 }
             }
 
