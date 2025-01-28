@@ -3626,7 +3626,8 @@ class NotificationsController extends Controller
 
                             if(count($assigned_shipments) > 0) {
                                 $assigned_shipments_array = $assigned_shipments->toArray();
-                                $update_ids = array_column($assigned_shipments_array, 'id');
+                                $update_ids = array_column($assigned_shipments_array, 'shipment_id');
+                                V2PickupRequestShipment::whereIn('shipment_id',$update_ids)->update(['email_sent'=>1]);
                                 $shipment_details = '<table style="width:100%;">';
                                 $shipment_details .= '<thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Tracking Number.</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Item Description</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Destination</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Quantity</th></tr></thead>';
                                 $shipment_details .= '<tbody>';
@@ -3652,7 +3653,7 @@ class NotificationsController extends Controller
                                     $to = $pickup_request->pickup_address->email;
                                 }
                                 self::email($subject, $body, $to);
-                                V2PickupRequestShipment::whereIn('id',$update_ids)->update(['email_sent'=>1]);
+
 
                             }
                         }
