@@ -21,6 +21,7 @@ use App\ShipmentAdditionalCharges;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use App\Http\Traits\FinSurgentLogTrait;
+use DB;
 
 class FinSurgentSonicPaymentSharing extends Command
 {
