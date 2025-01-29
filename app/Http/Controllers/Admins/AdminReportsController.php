@@ -16092,32 +16092,45 @@ class AdminReportsController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 815);
         }
-        $trackingNumbers = explode(',', $request->tracking_numbers);
 
+        $trackingNumbers = explode(',', $request->tracking_numbers);
+        
         $filteredShipments = DB::connection('reports')->table('shipments')
         ->join('shipments_journey as sj', 'sj.shipment_id', '=', 'shipments.id')
-        ->whereIn('sj.shipper_status_id', [18, 51])
         ->whereIn('shipments.tracking_number', $trackingNumbers)
         ->where(function ($query) {
-            // Condition 1: Shipment with just one status of 18
-            $query->whereRaw('(SELECT COUNT(*) FROM shipments_journey WHERE shipments_journey.shipment_id = shipments.id AND shipments_journey.shipper_status_id = 18) = 1')
-
-                // Condition 2: Shipment with exactly two consecutive statuses 18, 18
-                ->orWhereRaw("
-                    (SELECT GROUP_CONCAT(shipper_status_id ORDER BY id DESC SEPARATOR ',') 
+            $query->whereRaw('(SELECT COUNT(*) FROM shipments_journey WHERE shipments_journey.shipment_id = shipments.id AND shipments_journey.shipper_status_id = 18) >= 1')
+                ->orWhereRaw("(
+                    SELECT GROUP_CONCAT(shipper_status_id ORDER BY shipments_journey.id DESC SEPARATOR ',') 
                     FROM shipments_journey 
-                    WHERE shipment_id = shipments.id LIMIT 2) = '18,18'
+                    WHERE shipment_id = shipments.id 
+                    ORDER BY shipments_journey.id DESC LIMIT 2) = '18,18'
                 ")
-
-                // Condition 3: Shipment with statuses 18, 18, 51
-                ->orWhereRaw("
-                    (SELECT GROUP_CONCAT(shipper_status_id ORDER BY id DESC SEPARATOR ',') 
+                ->orWhereRaw("(
+                    SELECT GROUP_CONCAT(shipper_status_id ORDER BY shipments_journey.id DESC SEPARATOR ',') 
                     FROM shipments_journey 
-                    WHERE shipment_id = shipments.id LIMIT 3) = '51,18,18'
+                    WHERE shipment_id = shipments.id 
+                    ORDER BY shipments_journey.id DESC LIMIT 3) = '18,18,51'
                 ");
         })
+        ->whereNotExists(function ($query) {
+            // After '18,18,51', no other status except 18 or 51
+            $query->selectRaw(1)
+                ->from('shipments_journey as sj2')
+                ->whereRaw('sj2.shipment_id = shipments.id')
+                ->whereRaw('sj2.id > (SELECT MAX(id) FROM shipments_journey WHERE shipments_journey.shipment_id = shipments.id AND shipments_journey.shipper_status_id = 51)')
+                ->whereNotIn('sj2.shipper_status_id', [18, 51]);
+        })
+        ->whereNotExists(function ($query) {
+            // After '18, 18', no other status except 51
+            $query->selectRaw(1)
+                ->from('shipments_journey as sj2')
+                ->whereRaw('sj2.shipment_id = shipments.id')
+                ->whereRaw('sj2.id > (SELECT MAX(id) FROM shipments_journey WHERE shipments_journey.shipment_id = shipments.id AND shipments_journey.shipper_status_id = 18)')
+                ->where('sj2.shipper_status_id', '!=', 51);
+        })
         ->select('shipments.tracking_number')
-        ->pluck('shipments.tracking_number');
+        ->pluck('tracking_number');
 
         $lost_and_closed_shipments = DB::connection('reports')->table('shipments')
             // latest shipment journey
@@ -16147,13 +16160,27 @@ class AdminReportsController extends Controller
                         select admin_sj.admin_id 
                         from shipments_journey as admin_sj 
                         where admin_sj.shipment_id = shipments.id 
-                        and admin_sj.shipper_status_id = 18 
-                        and admin_sj.status_reason_id IS NOT NULL 
+                        and admin_sj.shipper_status_id = 18
                         order by admin_sj.id desc 
                         limit 1
                     )
                 '));
             })
+
+            ->leftJoin('admins as lost_approved_by', function ($join) {
+                $join->on('lost_approved_by.id', '=', DB::connection('reports')->raw('
+                    (
+                        select admin_sj.admin_id 
+                        from shipments_journey as admin_sj 
+                        where admin_sj.shipment_id = shipments.id 
+                        and admin_sj.shipper_status_id = 18
+                        order by admin_sj.id desc 
+                        limit 1 offset 1
+                    )
+                '));
+            })
+            
+            
 
             // admin details
             ->leftJoin('admins as defaulter_admin', function ($join) {
@@ -16190,7 +16217,7 @@ class AdminReportsController extends Controller
                 'cities.name as responsible_city',
                 'shipment_status.name as latest_shipment_status',
                 'lost_requested_admin.name as lost_requested_by',
-                'sj_admin.name as lost_approved_by',
+                'lost_approved_by.name as lost_approved_by',
                 'shipments.amount as cod_amount',
                 'shipments.parcel_value as parcel_value',
                 'sj.shipper_status_id as shipment_status',
@@ -16201,6 +16228,13 @@ class AdminReportsController extends Controller
             $route = route('admin.tracking.index');
             return "<u><a href='{$route}?tracking_number=$shipments->shipment_tracking_number' class='tracking' target='_blank'>$shipments->shipment_tracking_number</a></u>";
         })
+        ->editColumn('lost_approved_by', function ($shipments) {
+            $lost_approved_by = '-';
+            if ($shipments->lost_approved_by != null || $shipments->lost_approved_by != '') {
+                $lost_approved_by = $shipments->lost_approved_by;
+            }
+            return $lost_approved_by;
+        }) 
         ->addColumn('defaulter_name', function ($shipments) {
             return $shipments->admin_name . ' ' . $shipments->rider_name;
         })

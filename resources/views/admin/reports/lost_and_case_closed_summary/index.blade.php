@@ -363,13 +363,19 @@
                 }
             },
         });
+        
+        // $('#track_form').bind('submit', function(e) {
+        //     var tracking_numbers = $('#track_form .tracking_numbers').val();
+        //     if (tracking_numbers != '') {
+        //         table.draw();
+        //     }
+        // });
 
-        $('#track_form').bind('submit', function(e) {
-            var tracking_numbers = $('#track_form .tracking_numbers').val();
-            if (tracking_numbers != '') {
-                table.draw();
-            }
+        table.draw();
+        $('#track_form').on('submit', function (e) {
             e.preventDefault();
+            table.draw();
         });
+
     </script>
 @endsection
