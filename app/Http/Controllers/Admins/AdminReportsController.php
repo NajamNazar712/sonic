@@ -16186,8 +16186,6 @@ class AdminReportsController extends Controller
                     )
                 '));
             })
-            
-            
 
             // admin details
             ->leftJoin('admins as defaulter_admin', function ($join) {
@@ -16202,7 +16200,6 @@ class AdminReportsController extends Controller
 
             ->leftJoin('employees as admin_employee', 'admin_employee.trax_id', 'defaulter_admin.trax_id')
             ->leftJoin('employees as rider_employee', 'rider_employee.trax_id', 'riders.trax_id')
-
             ->leftJoin('users', 'users.id', '=', 'shipments.user_id')
             ->leftJoin('cities', 'cities.id', '=', 'sj.city_id')
             ->leftJoin('shipment_status', 'shipment_status.id', '=', 'shipments.shipper_status_id')
@@ -16278,6 +16275,57 @@ class AdminReportsController extends Controller
         })
         ->orderColumn('case_closed_remarks', function ($query, $direction) {
             $query->orderByRaw("CASE WHEN latest_shipment_status = 51 THEN case_closed_remarks ELSE '-' END $direction");
+        })
+        ->filterColumn('responsible_city', function ($query, $keyword) {
+            $query->where('cities.name', 'like', "%$keyword%");
+        })
+        ->filterColumn('latest_shipment_status', function ($query, $keyword) {
+            $query->where('shipment_status.name', 'like', "%$keyword%");
+        })
+        ->filterColumn('lost_requested_by', function ($query, $keyword) {
+            $query->where('lost_requested_admin.name', 'like', "%$keyword%");
+        })
+
+        ->filterColumn('lost_approved_by', function ($query, $keyword) {
+            $query->where('lost_approved_by.name', 'like', "%$keyword%");
+        })
+
+        ->filterColumn('cod_amount', function ($query, $keyword) {
+            $query->where('shipments.amount', 'like', "%$keyword%");
+        })
+        ->filterColumn('parcel_value', function ($query, $keyword) {
+            $query->where('shipments.parcel_value', 'like', "%$keyword%");
+        })
+        ->filterColumn('shipper_name', function ($query, $keyword) {
+            $query->where('users.name', 'like', "%$keyword%");
+        })
+        ->filterColumn('defaulter_name', function ($query, $keyword) {
+            $query->where('defaulter_admin.name', 'like', "%$keyword%")
+                ->orWhere('riders.name', 'like', "%$keyword%");
+        })
+        
+        ->filterColumn('employee_status', function ($query, $keyword) {
+            // Query the employee_statuses table to get the matching status name
+            $statusName = DB::table('employee_statuses')
+                ->where('name', 'like', "%$keyword%")
+                ->pluck('name')
+                ->first(); // Get the first match
+            
+            if ($statusName) {
+                // Filter by both admin_status and rider_status based on the matched name
+                $query->where(function ($query) use ($statusName) {
+                    $query->where('admin_status', '=', $statusName)
+                        ->orWhere('rider_status', '=', $statusName);
+                });
+            }
+        })
+
+        ->filterColumn('trax_id', function ($query, $keyword) {
+            $query->where('defaulter_admin.trax_id', 'like', "%$keyword%")
+                    ->orWhere('riders.trax_id', 'like', "%$keyword%");
+        })
+        ->filterColumn('case_closed_remarks', function ($query, $keyword) {
+            $query->whereRaw("CASE WHEN latest_shipment_status = 51 THEN case_closed_remarks ELSE '-' END like ?", ["%$keyword%"]);
         });
 
         return $datatable
