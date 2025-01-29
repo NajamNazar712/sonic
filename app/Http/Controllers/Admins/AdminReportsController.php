@@ -16097,37 +16097,44 @@ class AdminReportsController extends Controller
         
         $filteredShipments = DB::connection('reports')->table('shipments')
         ->join('shipments_journey as sj', 'sj.shipment_id', '=', 'shipments.id')
-        ->whereIn('shipments.tracking_number', $trackingNumbers)
-        ->where(function ($query) {
-            $query->whereRaw('(SELECT COUNT(*) FROM shipments_journey WHERE shipments_journey.shipment_id = shipments.id AND shipments_journey.shipper_status_id = 18) >= 1')
-                ->orWhereRaw("(
-                    SELECT GROUP_CONCAT(shipper_status_id ORDER BY shipments_journey.id DESC SEPARATOR ',') 
-                    FROM shipments_journey 
-                    WHERE shipment_id = shipments.id 
-                    ORDER BY shipments_journey.id DESC LIMIT 2) = '18,18'
-                ")
-                ->orWhereRaw("(
-                    SELECT GROUP_CONCAT(shipper_status_id ORDER BY shipments_journey.id DESC SEPARATOR ',') 
-                    FROM shipments_journey 
-                    WHERE shipment_id = shipments.id 
-                    ORDER BY shipments_journey.id DESC LIMIT 3) = '18,18,51'
-                ");
-        })
-        ->whereNotExists(function ($query) {
-            // After '18,18,51', no other status except 18 or 51
-            $query->selectRaw(1)
-                ->from('shipments_journey as sj2')
-                ->whereRaw('sj2.shipment_id = shipments.id')
-                ->whereRaw('sj2.id > (SELECT MAX(id) FROM shipments_journey WHERE shipments_journey.shipment_id = shipments.id AND shipments_journey.shipper_status_id = 51)')
-                ->whereNotIn('sj2.shipper_status_id', [18, 51]);
-        })
-        ->whereNotExists(function ($query) {
-            // After '18, 18', no other status except 51
-            $query->selectRaw(1)
-                ->from('shipments_journey as sj2')
-                ->whereRaw('sj2.shipment_id = shipments.id')
-                ->whereRaw('sj2.id > (SELECT MAX(id) FROM shipments_journey WHERE shipments_journey.shipment_id = shipments.id AND shipments_journey.shipper_status_id = 18)')
-                ->where('sj2.shipper_status_id', '!=', 51);
+        ->where(function ($query) use ($trackingNumbers) {
+            // If tracking numbers are provided, filter by them
+            if (!empty($trackingNumbers[0])) {
+                $query->whereIn('shipments.tracking_number', $trackingNumbers);
+            }
+            
+            // Apply the other conditions regardless of tracking numbers
+            $query->where(function ($query) {
+                $query->whereRaw('(SELECT COUNT(*) FROM shipments_journey WHERE shipments_journey.shipment_id = shipments.id AND shipments_journey.shipper_status_id = 18) >= 1')
+                    ->orWhereRaw("(
+                        SELECT GROUP_CONCAT(shipper_status_id ORDER BY shipments_journey.id DESC SEPARATOR ',') 
+                        FROM shipments_journey 
+                        WHERE shipment_id = shipments.id 
+                        ORDER BY shipments_journey.id DESC LIMIT 2) = '18,18'
+                    ")
+                    ->orWhereRaw("(
+                        SELECT GROUP_CONCAT(shipper_status_id ORDER BY shipments_journey.id DESC SEPARATOR ',') 
+                        FROM shipments_journey 
+                        WHERE shipment_id = shipments.id 
+                        ORDER BY shipments_journey.id DESC LIMIT 3) = '18,18,51'
+                    ");
+            })
+            ->whereNotExists(function ($query) {
+                // After '18,18,51', no other status except 18 or 51
+                $query->selectRaw(1)
+                    ->from('shipments_journey as new_journey')
+                    ->whereRaw('new_journey.shipment_id = shipments.id')
+                    ->whereRaw('new_journey.id > (SELECT MAX(id) FROM shipments_journey WHERE shipments_journey.shipment_id = shipments.id AND shipments_journey.shipper_status_id = 51)')
+                    ->whereNotIn('new_journey.shipper_status_id', [18, 51]);
+            })
+            ->whereNotExists(function ($query) {
+                // After '18, 18', no other status except 51
+                $query->selectRaw(1)
+                    ->from('shipments_journey as new_journey')
+                    ->whereRaw('new_journey.shipment_id = shipments.id')
+                    ->whereRaw('new_journey.id > (SELECT MAX(id) FROM shipments_journey WHERE shipments_journey.shipment_id = shipments.id AND shipments_journey.shipper_status_id = 18)')
+                    ->where('new_journey.shipper_status_id', '!=', 51);
+            });
         })
         ->select('shipments.tracking_number')
         ->pluck('tracking_number');
