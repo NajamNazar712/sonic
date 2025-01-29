@@ -411,7 +411,7 @@
                                 row.push(values.requested_by);
                                 row.push(values.approved_by);
                                 row.push(values.approved_at);
-                                row.push(values.updated_at);
+                                row.push(values.updated);
                                 row.push(values.card_status);
 
                                 body.push(row);
@@ -493,7 +493,7 @@
                     {data: 'requested_by', name: 'requested_by', class: 'align-middle requested_by'},
                     {data: 'approved_by', name: 'approved_by', class: 'align-middle approved_by'},
                     {data: 'approved_at', name: 'approved_at', class: 'align-middle approved_at'},
-                    {data: 'updated_at', name: 'updated_at', class: 'align-middle updated_at'},
+                    {data: 'updated', name: 'fuel_card_requests.updated_at', class: 'align-middle updated_at'},
                     {data: 'card_status', orderable: false, name: 'card_status', class: 'align-middle card_status'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],

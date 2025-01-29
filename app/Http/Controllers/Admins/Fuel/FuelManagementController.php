@@ -76,7 +76,7 @@ class FuelManagementController extends Controller
                     ->where('fuel_card_requests.card_holder_type_id', '=',DB::raw(3))
                     ->whereNotNull('fuel_card_requests.card_holder_id');
             })
-            ->select('fcrt.name as card_request_type','fuel_card_requests.id as id','fuel_card_requests.fuel_request_id as fuel_request_id','fuel_card_requests.fuel_request_id as fuel_request_id_for_excel','fuel_card_requests.card_number as card_number','fuel_card_requests.card_holder_id as card_holder','cht.name as card_holder_type','fuel_card_requests.card_holder_type_id as card_holder_type_id','fuel_card_requests.amount as amount','ft.name as fuel_type','fdt.name as fuel_deduction_type','fuel_card_requests.fuel_deduction_type_id as fuel_deduction_type_id','requested_by.name as requested_by','approved_by.name as approved_by','fuel_card_requests.approved_at as approved_at','fuel_card_requests.updated_at as updated_at','staff.name as staff_name','rider.name as rider_name','fleet.name as fleet_name','fuel_card_requests.status as status','fuel_card_requests.card_request_type_id as card_request_type_id');
+            ->select('fcrt.name as card_request_type','fuel_card_requests.id as id','fuel_card_requests.fuel_request_id as fuel_request_id','fuel_card_requests.fuel_request_id as fuel_request_id_for_excel','fuel_card_requests.card_number as card_number','fuel_card_requests.card_holder_id as card_holder','cht.name as card_holder_type','fuel_card_requests.card_holder_type_id as card_holder_type_id','fuel_card_requests.amount as amount','ft.name as fuel_type','fdt.name as fuel_deduction_type','fuel_card_requests.fuel_deduction_type_id as fuel_deduction_type_id','requested_by.name as requested_by','approved_by.name as approved_by','fuel_card_requests.approved_at as approved_at','fuel_card_requests.updated_at as updated','staff.name as staff_name','rider.name as rider_name','fleet.name as fleet_name','fuel_card_requests.status as status','fuel_card_requests.card_request_type_id as card_request_type_id');
 
         if($request->get('card_number') && $request->get('card_number') != ''){
             $card_number = explode(',',$request->get('card_number'));
@@ -223,6 +223,7 @@ class FuelManagementController extends Controller
                     });
                 }
             })
+            ->rawColumns(['action','fuel_request_id'])
             ->make(true);
     }
 

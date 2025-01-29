@@ -273,7 +273,7 @@ class TeamLeadDashboardController extends Controller
                 } else {
                     return '';
                 }
-            });
+            })->rawColumns(['shipments','action']);
 
         return $datatable->make(true);
     }
@@ -361,39 +361,30 @@ class TeamLeadDashboardController extends Controller
         $datatable = Datatables::of($assigned_agent_shipment)
             ->editColumn('status', function ($assigned_agent_shipment) {
                 $status = RvAssignAgentStatus::where('id', $assigned_agent_shipment->status)->first();
-                if ($status['name']) {
-                    return $status['name'];
-                } else {
-                    return '-----';
-                }
+                return $status ? $status->name : '-----';
             })
 
             ->editColumn('sub_status', function ($assigned_agent_shipment) {
                 $sub_status = RvAssignAgentSubStatus::where('id', $assigned_agent_shipment->sub_status)->first();
-                if ($sub_status['name']) {
-                    return $sub_status['name'];
-                } else {
-                    return '-----';
-                }
+                return $sub_status ? $sub_status->name : '-----';
             })
+
             ->editColumn('state', function ($assigned_agent_shipment) {
                 $state = RvState::where('id', $assigned_agent_shipment->state)->first();
-                if ($state['name']) {
-                    return $state['name'];
-                } else {
-                    return '-----';
-                }
+                return $state ? $state->name : '-----';
             })
 
             ->editColumn('updated_by', function ($assigned_agent_shipment) {
                 $admin = Admin::where('id', $assigned_agent_shipment->updated_by)->first();
-                return ($admin['name']);
+                return $admin ? $admin->name : 'Unknown';
             })
 
             ->editColumn('tracking_number', function ($assigned_agent_shipment) {
                 $route = route('admin.tracking.index');
                 return '<p><a href="' . $route . '?tracking_number=' . $assigned_agent_shipment->tracking_number . '" style="text-decoration: underline;">' . $assigned_agent_shipment->tracking_number . '</a></p>';
-            });
+            })
+            ->rawColumns(['tracking_number']);
+
 
         return $datatable->make(true);
     }

@@ -230,7 +230,8 @@
                         <th class="border-primary border-darken-1">Bag Seal Number</th>
                         <th class="border-primary border-darken-1">Bag Status</th>
                         <th class="border-primary border-darken-1">Service</th>
-                        <th class="border-primary border-darken-1">Arrival Date</th>
+                        <th class="border-primary border-darken-1">Origin Arrival Date</th>
+                        <th class="border-primary border-darken-1">Destination Arrival Date</th>
                         <th class="border-primary border-darken-1">Last Status Date</th>
                         <th class="border-primary border-darken-1">Booked Status Date</th>
                         <th class="border-primary border-darken-1">Shipping Mode</th>
@@ -241,16 +242,16 @@
                         <th class="border-primary border-darken-1">Concerned Hub</th>
                         <th class="border-primary border-darken-1">Return City</th>
                         <th class="border-primary border-darken-1">Zone</th>
-                        <th class="border-primary border-darken-1">Product Type</th>
+                        {{-- <th class="border-primary border-darken-1">Product Type</th> --}}
                         <th class="border-primary border-darken-1">Product Description</th>
                         <th class="border-primary border-darken-1">Collection Amount</th>
                         <th class="border-primary border-darken-1">Aging (Arrival)</th>
                         <th class="border-primary border-darken-1">Aging (Last Status)</th>
-                        <th class="border-primary border-darken-1">Request #</th>
-                        <th class="border-primary border-darken-1">Request Status</th>
-                        <th class="border-primary border-darken-1">Case Nature</th>
-                        <th class="border-primary border-darken-1">Case Nature Type</th>
-                        <th class="border-primary border-darken-1">Adjusted amount</th>
+                        {{-- <th class="border-primary border-darken-1">Request #</th> --}}
+                        {{-- <th class="border-primary border-darken-1">Request Status</th> --}}
+                        {{-- <th class="border-primary border-darken-1">Case Nature</th> --}}
+                        {{-- <th class="border-primary border-darken-1">Case Nature Type</th> --}}
+                        {{-- <th class="border-primary border-darken-1">Adjusted amount</th> --}}
                     </tr>
                     </thead>
                 </table>
@@ -714,10 +715,10 @@
                     // {data: 'scanning_city_area_name', name: 'ca_scanning.name', as:'scanning_city_area_name', class: 'align-middle scanning_city_area_name',text:'Location Status Area',value:'scanning_city_area_name',download:true},
                     // {data: 'location_status', name: 'ssjal.location_status', as:'location_status', class: 'align-middle location_status',text:'Location Status',value:'location_status',download:true},
                     
-                    {data: 'last_location_screen_location_name', name: 'shipment_scanning_screen_locations.name', as:'last_location_screen_location_name', class: 'align-middle last_location_screen_location_name',text:'Last Location Screen Location Name',value:'last_location_screen_location_name',download:true},
+                    {data: 'last_location_screen_location_name', name: 'last_screen_location.name', as:'last_location_screen_location_name', class: 'align-middle last_location_screen_location_name',text:'Last Location Screen Location Name',value:'last_location_screen_location_name',download:true},
                     {data: 'ca_scanning_last_location_name', name: 'ca_scanning_last_location_name.name', as:'ca_scanning_last_location_name', class: 'align-middle ca_scanning_last_location_name',text:'Sub Hub',value:'ca_scanning_last_location_name',download:true},
                     {data: 'last_location_updated_at', name: 'ssjal_last_location.updated_at', as:'last_location_updated_at', class: 'align-middle last_location_updated_at',text:'Last Location Updated At',value:'last_location_updated_at',download:true},
-                    {data: 'entry_method', name: 'ssjal_last_location.entry_method', as:'entry_method', class: 'align-middle entry_method',text:'Entry Method',value:'entry_method',download:true},
+                    {data: 'entry_method', name: 'ssj_last_location.entry_method', as:'entry_method', class: 'align-middle entry_method',text:'Entry Method',value:'entry_method',download:true},
 
                     {data: 'reason', name: 'ssr.name', as:'reason', class: 'align-middle reason',text:'Reason',value:'reason',download:true},
                     {data: 'remarks', name: 'sjr.remarks', class: 'align-middle remarks',text:'Remarks',value:'remarks',download:true},
@@ -728,7 +729,10 @@
                     {data: 'seal_number', name: 'cmb.seal_number', class: 'align-middle history_status',text:'Bag Seal Number',value:'seal_number',download:true},
                     {data: 'bag_status', name: 'bs.name', as:'bag_status', class: 'align-middle history_status',text:'Bag Status',value:'bag_status',download:true},
                     {data: 'service_type', name: 'bt.booking_type', class: 'align-middle service_type',text:'Service Type',value:'service_type',download:true},
-                    {data: 'arrival', name: 'sj.created_at', as:'arrival', class: 'align-middle arrival',text:'Arrival',value:'arrival',download:true},
+                    {data: 'arrival', name: 'sj.created_at', as:'arrival', class: 'align-middle arrival',text:'Origin Arrival Date',value:'arrival',download:true},
+                    // New column start
+                    {data: 'destination_arrival_date', as: 'destination_arrival_date', name:'destination_arrival_date', class: 'align-middle destination_arrival_date', text:'Destination Arrival Date', value:'destination_arrival_date', download:true},
+                    // New column end
                     {data: 'last_status_date', name: 'journey.created_at', as:'last_status_date', class: 'align-middle last_status_date',text:'Last Status Date',value:'last_status_date',download:true},
                     {data: 'created_at', name: 'shipments.created_at', as:'created_at', class: 'align-middle created_at',text:'Booked Status Date',value:'created_at',download:true},
                     {data: 'shipping_mode', name: 'sm.mode', class: 'align-middle shipping_mode',text:'Shipping Mode',value:'shipping_mode',download:true},
@@ -739,16 +743,16 @@
                     {data: 'current_hub', name: 'cmbh.name', as:'current_hub_name', class: 'align-middle current_hub',text:'Concerned Hub',value:'current_hub_name',download:true},
                     {data: 'return_city', name: 'rc.name',as:'return_city', class: 'align-middle return_city',text:'Return City',value:'return_city',download:true},
                     {data: 'zone', name: 'z.name',as:'zone',class: 'align-middle zone',text:'Zone',value:'zone',download:true},
-                    {data: 'product_type', name: 'p.product_name', class: 'align-middle product_type',text:'Product Type',value:'product_type',download:true},
+                    // {data: 'product_type', name: 'p.product_name', class: 'align-middle product_type',text:'Product Type',value:'product_type',download:true},
                     {data: 'description', name: 'si.description', class: 'align-middle description',text:'Product Description',value:'description',download:true},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount',text:'Amount',value:'amount',download:true},
                     {data: 'aging', name: 'aging', class: 'align-middle aging',orderable: false, searchable: false,text:'Aging (Arrival)',value:'aging',download:true},
                     {data: 'aging_last_status', name: 'aging_last_status', class: 'align-middle aging',orderable: false, searchable: false,text:'Aging (Last Status)',value:'aging_last_status',download:true},
-                    {data: 'crm_id_padded_link', name: 'cr.id', as:'crm_request_id', class: 'align-middle crm_id_padded',text:'Request #',value:'crm_id_padded',download:true},
-                    {data: 'crm_request_status', name: 'crs.name', as:'crm_request_status', class: 'align-middle crm_request_status',text:'Request Status',value:'crm_request_status',download:true},
-                    {data: 'crm_request_case_nature', name: 'crcn.name',as:'crm_request_case_nature', class: 'align-middle crm_request_case_nature',text:'Case Nature',value:'crm_request_case_nature',download:true},
-                    {data: 'crm_request_case_nature_type', name: 'crcnt.type', class: 'align-middle crm_request_case_nature_type',text:'Case Nature Type',value:'crm_request_case_nature_type',download:true},
-                    {data: 'adjusted_amount', name: 'adjustment.adjustment_amount', class: 'align-middle adjusted_amount',text:'Adjusted amount',value:'adjusted_amount',download:true},
+                    // {data: 'crm_id_padded_link', name: 'cr.id', as:'crm_request_id', class: 'align-middle crm_id_padded',text:'Request #',value:'crm_id_padded',download:true},
+                    // {data: 'crm_request_status', name: 'crs.name', as:'crm_request_status', class: 'align-middle crm_request_status',text:'Request Status',value:'crm_request_status',download:true},
+                    // {data: 'crm_request_case_nature', name: 'crcn.name',as:'crm_request_case_nature', class: 'align-middle crm_request_case_nature',text:'Case Nature',value:'crm_request_case_nature',download:true},
+                    // {data: 'crm_request_case_nature_type', name: 'crcnt.type', class: 'align-middle crm_request_case_nature_type',text:'Case Nature Type',value:'crm_request_case_nature_type',download:true},
+                    // {data: 'adjusted_amount', name: 'adjustment.adjustment_amount', class: 'align-middle adjusted_amount',text:'Adjusted amount',value:'adjusted_amount',download:true},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

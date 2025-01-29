@@ -87,6 +87,12 @@ class ShipperFinanceController extends Controller
                 ->orwhereIn('done_payments.user_id', session('sister_users'));
         });
 
+        if ($tracking_number = $request->get('tracking_number')) {
+            $done_payments->join('shipments as s', 'dps.shipment_id', '=', 's.id')
+                ->where('s.tracking_number', '=', $tracking_number);
+        }
+
+
         $datatables = Datatables::of($done_payments)
             ->addColumn('id_padded', function ($done_payment) {
                 return str_pad($done_payment->id, 6, '0', STR_PAD_LEFT);
@@ -252,12 +258,8 @@ class ShipperFinanceController extends Controller
             })
             ->orderColumn('phone_numbers', 'u.phone $1, u.phone2 $1');
 
-        if ($tracking_number = $request->get('tracking_number')) {
-            $datatables->join('shipments as s', 'dps.shipment_id', '=', 's.id')
-                ->where('s.tracking_number', '=', $tracking_number);
-        }
 
-        return $datatables->make(true);
+        return $datatables->rawColumns(['count_fintech_shipments','delivered_shipments','returned_shipments','adjusted_shipments','arrival_shipments','action'])->make(true);
     }
 
     public function payments_delivered_shipments(Request $request)
@@ -537,20 +539,20 @@ class ShipperFinanceController extends Controller
 
 
 
-            if ($done_payment_shipment->type != 2) {
-                $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->id);
-                if ($change_shipment_weight_log->exists()) {
-                    $change_shipment_weight_log = $change_shipment_weight_log->first();
-
-                    $done_payment_shipment_date = Carbon::parse($done_payment_shipment->created_at);
-                    $change_shipment_weight_log_date = Carbon::parse($change_shipment_weight_log->created_at);
-
-                    if ($change_shipment_weight_log_date->gt($done_payment_shipment_date)) {
-                        $shipment_weight = $change_shipment_weight_log->old_weight;
-                        $weight_charges = $change_shipment_weight_log->old_charges;
-                    }
-                }
-            }
+//            if ($done_payment_shipment->type != 2) {
+//                $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->id);
+//                if ($change_shipment_weight_log->exists()) {
+//                    $change_shipment_weight_log = $change_shipment_weight_log->first();
+//
+//                    $done_payment_shipment_date = Carbon::parse($done_payment_shipment->created_at);
+//                    $change_shipment_weight_log_date = Carbon::parse($change_shipment_weight_log->created_at);
+//
+//                    if ($change_shipment_weight_log_date->gt($done_payment_shipment_date)) {
+//                        $shipment_weight = $change_shipment_weight_log->old_weight;
+//                        $weight_charges = $change_shipment_weight_log->old_charges;
+//                    }
+//                }
+//            }
 
 
             if ($done_payment_shipment->type == 0) {
@@ -801,7 +803,7 @@ class ShipperFinanceController extends Controller
                                     </tr>
                                   </tbody>
                                 </table>
-                                <span style="color: red">* 13% GST is applicable for Sindh Region 16% GST for Punjab .KPK</span>
+                                <span style="color: red">* 15% GST is applicable for Sindh Region 16% GST for Punjab .KPK</span>
                             </div>
                         </div>
                       </div>
@@ -868,20 +870,20 @@ class ShipperFinanceController extends Controller
                 $shipment_weight = $shipment->actual_weight;
                 $weight_charges = $shipment->weight_charges;
 
-                if ($done_payment_shipment->type != 2) {
-                    $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->id);
-                    if ($change_shipment_weight_log->exists()) {
-                        $change_shipment_weight_log = $change_shipment_weight_log->first();
-
-                        $done_payment_shipment_date = Carbon::parse($done_payment_shipment->created_at);
-                        $change_shipment_weight_log_date = Carbon::parse($change_shipment_weight_log->created_at);
-
-                        if ($change_shipment_weight_log_date->gt($done_payment_shipment_date)) {
-                            $shipment_weight = $change_shipment_weight_log->old_weight;
-                            $weight_charges = $change_shipment_weight_log->old_charges;
-                        }
-                    }
-                }
+//                if ($done_payment_shipment->type != 2) {
+//                    $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->id);
+//                    if ($change_shipment_weight_log->exists()) {
+//                        $change_shipment_weight_log = $change_shipment_weight_log->first();
+//
+//                        $done_payment_shipment_date = Carbon::parse($done_payment_shipment->created_at);
+//                        $change_shipment_weight_log_date = Carbon::parse($change_shipment_weight_log->created_at);
+//
+//                        if ($change_shipment_weight_log_date->gt($done_payment_shipment_date)) {
+//                            $shipment_weight = $change_shipment_weight_log->old_weight;
+//                            $weight_charges = $change_shipment_weight_log->old_charges;
+//                        }
+//                    }
+//                }
 
                 if ($done_payment_shipment->type == 0) {
                     $type = 'Delivered';
@@ -1109,7 +1111,7 @@ class ShipperFinanceController extends Controller
                 } else {
                     $query->whereRaw('false');
                 }
-            });
+            })->rawColumns(['tracking_number']);
 
         return $datatables->make(true);
     }
@@ -1216,7 +1218,7 @@ class ShipperFinanceController extends Controller
             ';
 
                 return $dropdown;
-            });
+            })->rawColumns(['invoice_number_button','action']);
 
         return $datatables->make(true);
     }

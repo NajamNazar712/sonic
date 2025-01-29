@@ -30,6 +30,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class RetailAPIController extends Controller
 {
@@ -92,7 +93,7 @@ class RetailAPIController extends Controller
                     if ($user->api_token) {
                         $information['api_token'] = $user->api_token;
                     } else {
-                        $api_token = uniqid(base64_encode(str_random(60)));
+                        $api_token = uniqid(base64_encode(Str::random(60)));
 
                         $user->api_token = $api_token;
 

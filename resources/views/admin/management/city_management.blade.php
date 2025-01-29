@@ -193,7 +193,7 @@
                                 row.push(values.created_by);
                                 row.push(values.created_at);
                                 row.push(values.updated_by);
-                                row.push(values.updated_at);
+                                row.push(values.updated);
                                 row.push(values.address);
                                 row.push(values.booking_enable_status);
 
@@ -407,7 +407,7 @@
                     {data: 'created_by', name: 'c.name', class: 'align-middle created_by'},
                     {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
                     {data: 'updated_by', name: 'a.name', class: 'align-middle updated_by'},
-                    {data: 'updated_at', name: 'ch.created_at', class: 'align-middle updated_at'},
+                    {data: 'updated', name: 'ch.created_at', class: 'align-middle updated_at'},
                     {data: 'location', name: 'location', class: 'align-middle location', orderable: false, searchable: false},
                     {data: 'hub_location', name: 'hub_location', class: 'align-middle hub_location', orderable: false, searchable: false},
                     {data: 'osa_list', name: 'osa_list', class: 'align-middle osa_list', orderable: false, searchable: false},

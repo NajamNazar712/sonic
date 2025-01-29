@@ -397,7 +397,7 @@
                     {data: 'approved_status', name: 'approved_status', class: 'align-middle text-center approved_status'},
                     {data: 'adjusted_percentage', name: 'sar.adjusted_percentage', class: 'align-middle adjusted_percentage'},
                     {data: 'cod_amount', name: 's.amount', class: 'align-middle cod_amount'},
-                    {data: 'adjusted_amount', name: 'adjustment.adjustment_amount', class: 'align-middle adjusted_amount'},
+                    {data: 'adjusted_amount', name: 'adjusted_amount', class: 'align-middle adjusted_amount'},
                     {data: 'remaining_amount', name: 'remaining_amount', class: 'align-middle remaining_amount'},
                     
                 ],

@@ -62,6 +62,9 @@ use App\Http\Models\TotalSumFranchiseCommission;
 use App\Http\Models\TotalSumRetailTraxCenter;
 use App\Http\Models\RetailFranchiseCharge;
 use App\RetailDiscountCode;
+use Illuminate\Support\Facades\Log;
+use App\Http\Models\ShipperSegmentLogs;
+use App\Http\Models\Shipper\User;
 
 class RetailShipmentBookController extends Controller
 {
@@ -372,8 +375,17 @@ class RetailShipmentBookController extends Controller
         $pieces_quantity = $request->input('pieces');
         $business_category_id = $request->input('business_category');
 
+        $parcelAmount = $request->input('parcel_amount');
+        $parcelAmount = trim($parcelAmount);
+        $parcelAmount = str_replace(',', '', $parcelAmount);
+        $parcelAmoutInShipment = (float)$parcelAmount;
 
-        $shipment_id = $this->book($user_id, 1, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $r_amount, $payment_mode_id, $charges_mode_id , $try_and_buy_charges, $pieces_quantity, $business_category_id, $length, $breadth, $height);
+        $quantity = $request->input('quantity');
+        $quantity = trim($quantity);
+        $quantity = str_replace(',', '', $quantity);
+        $quantityForShipmentItem = (int)$quantity;
+
+        $shipment_id = $this->book($user_id, 1, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $r_amount, $payment_mode_id, $charges_mode_id , $try_and_buy_charges, $pieces_quantity, $business_category_id, $length, $breadth, $height, $parcelAmoutInShipment);
 
         if($request->input('business_category') == 2) {
             $international_shipment_booking = new InternationalShipment();
@@ -388,7 +400,8 @@ class RetailShipmentBookController extends Controller
 
         $item_description = NULL;
 
-        $item_quantity = 1;
+        // $item_quantity = 1;
+        $item_quantity = $quantityForShipmentItem;
 
         if ($request->input('insurance_offered') == 1) {
             $price = str_replace(',', '', $request->input('insurance_amount'));
@@ -637,6 +650,25 @@ class RetailShipmentBookController extends Controller
         $retail_reference->save();
 
         $this->previous_names_verify_update($request->shipper_phone_no,$request->shipper_name,$request->shipper_cnic,$request->shipper_address, $shipper_info->id);
+
+        try {
+            // Maintaining shipper segment logs on booking when origin and destination are different
+            if ($consignee_city_id != $user_shipping_info->city_id) {
+
+                $user_id = Shipment::where('id', $shipment_id)->select('user_id')->first();
+                $user_segments = User::where('id', $user_id->user_id)
+                ->select(['segment_id', 'sub_segment_id'])
+                ->first();
+
+                ShipperSegmentLogs::create([
+                    'shipment_id' => $shipment_id,
+                    'segment_id' => $user_segments->segment_id,
+                    'sub_segment_id' => $user_segments->sub_segment_id
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Error creating shipper segment log from Retail order form' . $shipment_id . ': ' . $e->getMessage());
+        }
 
         if($request->book_button == 0){
             return response()->json(['status' => 1, 'success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'shipment_id' => $shipment_id]);
@@ -1159,7 +1191,7 @@ class RetailShipmentBookController extends Controller
                               <span><strong>' . $shipment_item->id . '</strong></span>
                             </td>
                             <td rowspan="7" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
-                                <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment_item->id, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
+                                <img src="data:image/png;base64,' . DNS2D::getBarcodePNG((string)$shipment_item->id, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
                             </td>
                             <tr>
                                 <td class="color secondary border twice-top twice-left"><strong>Type</strong></td>
@@ -1183,7 +1215,7 @@ class RetailShipmentBookController extends Controller
                               <span><strong>' . $shipment->tracking_number . '</strong></span>
                             </td>
                             <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
-                                <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
+                                <img src="data:image/png;base64,' . DNS2D::getBarcodePNG((string)$shipment->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
                             </td>
                           </tr>
                         </tbody>
@@ -1214,7 +1246,7 @@ class RetailShipmentBookController extends Controller
                               <span><strong>' . $shipment->tracking_number . '</strong></span>
                             </td>
                             <td rowspan="7" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
-                                <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE', 12, 12) . '" class="d-block mx-auto">
+                                <img src="data:image/png;base64,' . DNS2D::getBarcodePNG((string)$shipment->tracking_number, 'QRCODE', 12, 12) . '" class="d-block mx-auto">
                             </td>
                     ';
 
@@ -1525,7 +1557,7 @@ class RetailShipmentBookController extends Controller
                                   <span><strong>' . $piece->tracking_number . '</strong></span>
                                 </td>
                                 <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
-                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($piece->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
+                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG((string)$piece->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
                                 </td>
                                 <td rowspan="1" class="color primary border twice-left"><strong>Origin</strong></td>
                                 <td rowspan="1" class="border">' . $shipment->pickup_address->city->name . '</td>
@@ -1537,7 +1569,7 @@ class RetailShipmentBookController extends Controller
                                 <span><strong>' . $shipment->tracking_number . '</strong></span>
                             </td>
                             <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
-                                <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
+                                <img src="data:image/png;base64,' . DNS2D::getBarcodePNG((string)$shipment->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
                             </td>
                             <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right"><span class="piece_number"><strong>' . $piece->numbering. '/' .$shipment->pieces . '</strong></span>
                             </td>
@@ -1883,7 +1915,9 @@ class RetailShipmentBookController extends Controller
 
                 return $dropdown;
             });
-        return  $datatable->make(true);
+        return  $datatable
+        ->rawColumns(['tracking_number_link', 'slip_image', 'action'])
+        ->make(true);
     }
 
     public function tracking_slip_upload(Request $request){
@@ -1927,10 +1961,12 @@ class RetailShipmentBookController extends Controller
 
         if ($request->get('search_date')) {
             $date = $request->get('search_date');
-            $datatable->whereDate('retail_shipments.created_at', $date);
+            $shipments->whereDate('retail_shipments.created_at', $date);
         }
 
-        return  $datatable->make(true);
+        return $datatable
+        ->rawColumns(['tracking_number_link'])
+        ->make(true);
     }
 
     public function excel_index() {
@@ -1985,6 +2021,10 @@ class RetailShipmentBookController extends Controller
             'account_number' => 'Account Number',
             'bank_id' => 'Bank ID',
             'special_instruction' => 'Special Instruction',
+            'admin_discount' => 'Admin Discount',
+            'admin_discount_type' => 'Admin Discount Type',
+            'parcel_amount' => 'Parcel Value',
+            'quantity' => 'Quantity',
         ];
 
         $messages = [
@@ -2038,7 +2078,10 @@ class RetailShipmentBookController extends Controller
             'account_number' => ['nullable', 'numeric'],
             'bank_id' => ['nullable', 'integer', 'between:1,100', Rule::exists('banks_lists', 'id')],
             'special_instruction' => ['nullable', 'between:1,190'],
-            
+            'admin_discount_type' => ['nullable'],
+            'admin_discount' => ['nullable', 'between:1,100'],
+            'parcel_amount' => ['required'],
+            'quantity' => ['required'],
         ];
 
         if($file = $request->file('shipments')) {
@@ -2048,8 +2091,48 @@ class RetailShipmentBookController extends Controller
         }
 
         if (isset($spreadsheet)) {
-                $fields = [0 => 'product_id', 1 => 'business_category_id', 2 => 'shipping_mode_id', 3 => 'destination', 4 => 'volumetric_weight', 5 => 'weight', 6 => 'length', 7 => 'breadth', 8 => 'height', 9 => 'pieces', 10 => 'payment_mode_id', 11 => 'charges_mode_id', 12 => 'shipper_cell_number', 13 => 'shipper_name', 14 => 'shipper_cnic', 15 => 'shipper_address', 16 => 'consignee_cell_number', 17 => 'consignee_name', 18 => 'consignee_cnic', 19 => 'consignee_address', 20 => 'order_id', 21 =>'insurance_offered',22 => 'insurance_value', 23 =>'packaging_charges',24 => 'trax_box_id', 25 => 'iban_number', 26 => 'account_number', 27 => 'bank_id', 28 => 'special_instruction'];
-            if (count($spreadsheet[0]) != 29){
+                // $fields = [0 => 'product_id', 1 => 'business_category_id', 2 => 'shipping_mode_id', 3 => 'destination', 4 => 'volumetric_weight', 5 => 'weight', 6 => 'length', 7 => 'breadth', 8 => 'height', 9 => 'pieces', 10 => 'payment_mode_id', 11 => 'charges_mode_id', 12 => 'shipper_cell_number', 13 => 'shipper_name', 14 => 'shipper_cnic', 15 => 'shipper_address', 16 => 'consignee_cell_number', 17 => 'consignee_name', 18 => 'consignee_cnic', 19 => 'consignee_address', 20 => 'order_id', 21 =>'insurance_offered',22 => 'insurance_value', 23 =>'packaging_charges',24 => 'trax_box_id', 25 => 'iban_number', 26 => 'account_number', 27 => 'bank_id', 28 => 'special_instruction'];
+
+                $fields = [
+                    0 => 'product_id',
+                    1 => 'business_category_id',
+                    2 => 'shipping_mode_id',
+                    3 => 'destination',
+                    4 => 'volumetric_weight',
+                    5 => 'weight',
+                    6 => 'length',
+                    7 => 'breadth',
+                    8 => 'height',
+                    9 => 'pieces',
+                    10 => 'payment_mode_id',
+                    11 => 'charges_mode_id',
+                    12 => 'shipper_cell_number',
+                    13 => 'shipper_name',
+                    14 => 'shipper_cnic',
+                    15 => 'shipper_address',
+                    16 => 'consignee_cell_number',
+                    17 => 'consignee_name',
+                    18 => 'consignee_cnic',
+                    19 => 'consignee_address',
+                    20 => 'order_id',
+                    21 => 'insurance_offered',
+                    22 => 'insurance_value',
+                    23 => 'packaging_charges',
+                    24 => 'trax_box_id',
+                    25 => 'iban_number',
+                    26 => 'account_number',
+                    27 => 'bank_id',
+                    28 => 'special_instruction',
+                    29 => 'admin_discount',
+                    30 => 'admin_discount_type',
+                    31 => 'parcel_amount',
+                    32 => 'quantity'
+                ];
+
+            // if (count($spreadsheet[0]) != 29){
+            //     return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+            // }
+            if (count($spreadsheet[0]) != count($fields)){
                 return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
             }
             unset($spreadsheet[0]);
@@ -2445,8 +2528,7 @@ class RetailShipmentBookController extends Controller
         $paid_status = $request->paid_status;
 
         $retail_user_commission = RetailUserCommission::where('franchise_id', $user->id)->first();
-        $retail_franchise_code = RetailFranchise::pluck('code');
-        $franchise_commission = RetailFranchiseCommission::whereIn('franchise_code', $retail_franchise_code)->first(); 
+        $franchise_commission = RetailFranchiseCommission::where('franchise_code', $user->store->code)->first(); 
 
         if ($retail_user_commission && $user->id == $retail_user_commission->franchise_id){
             $query = RetailUserCommission::where('month', $month)
@@ -2464,7 +2546,7 @@ class RetailShipmentBookController extends Controller
                 'data' => $results,
             ]);
         }
-        elseif ($franchise_commission->franchise_code == $user->store->code)
+        else
         {
             $query = RetailFranchiseCommission::where('month', $month)
             ->where('franchise_code', $user->store->code)

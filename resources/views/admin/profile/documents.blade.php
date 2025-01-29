@@ -366,36 +366,6 @@
                 }
             });
 
-            // $('.approve').on('click', function() {
-            //     swal({
-            //         title: 'Are You Sure?',
-            //         text: 'Select Yes to approve documents',
-            //         icon: 'warning',
-            //         buttons: {
-            //             cancel: {
-            //                 text: 'No',
-            //                 value: null,
-            //                 visible: true,
-            //                 closeModal: true,
-            //             },
-            //             confirm: {
-            //                 text: 'Yes',
-            //                 value: true,
-            //                 visible: true,
-            //                 closeModal: true
-            //             }
-            //         },
-            //         closeOnClickOutside: false,
-            //         closeOnEsc: false,
-            //         dangerMode: true
-            //     }).then(function (confirm) {
-                    // if(confirm){
-                    //     var route = '{!!route('admin.accounts.documents.approve', ['id' => $id, 'approve' => 1, 'reject' => "null"])!!}';
-                    //     window.location.href = route;
-                    // }
-            //     });
-            // });
-
             $('.approve').on('click', function() {
                 $('#duplicate_modal').modal('show');
                 var url = window.location.href;
@@ -468,7 +438,7 @@
             });
 
             $('#approveBtn').on('click', function() {
-                var route = '{{ route("admin.accounts.documents.approve", ["id" => $id, "approve" => 1, "reject" => "null"]) }}';
+                var route = '{{ route("admin.accounts.documents.approve", ["id" => $id, "approve" => 1, "reason" => "null"]) }}';
                 window.location.href = route;
             });
 

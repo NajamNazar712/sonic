@@ -2003,7 +2003,6 @@
                                              }else{
                                             $e_ol_discount_insurance_sw = '';
                                             }
-                                            @en
                                             @endphp
                                             <div class="col text-center">
                                                 <fieldset>

@@ -33,7 +33,7 @@ use App\Http\Models\CityHistory;
 use App\Http\Models\CityOsaRate;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\SaleTierTag;
-use Yajra\Datatables\Datatables;
+use Yajra\DataTables\DataTables;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\DeliveryType;
 use App\Http\Models\PaymentCycle;
@@ -9459,9 +9459,25 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             ->where('created_at', '<', $user->created_at)
             ->pluck('id')
             ->toArray();
+
+        // $similarUsersPhone = User::whereNotNull('phone')
+        //     ->where('phone', '!=', '')
+        //     ->where('phone', $duplicate->phone)
+        //     ->where('id', '!=', $shipper_id)
+        //     ->where('created_at', '<', $user->created_at)
+        //     ->pluck('id')
+        //     ->toArray();
     
         // Get user IDs with same CNIC
-        $similarUsersCnic = User::where('cnic', $duplicate->cnic)
+        // $similarUsersCnic = User::where('cnic', $duplicate->cnic)
+        //     ->where('id', '!=', $shipper_id)
+        //     ->where('created_at', '<', $user->created_at)
+        //     ->pluck('id')
+        //     ->toArray();
+
+        $similarUsersCnic = User::whereNotNull('cnic')
+            ->where('cnic', '!=', '')
+            ->where('cnic', $duplicate->cnic)
             ->where('id', '!=', $shipper_id)
             ->where('created_at', '<', $user->created_at)
             ->pluck('id')
@@ -10205,6 +10221,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
                 }
             })
+            ->rawColumns(['lead_id_link', 'duplication', 'id_padded', 'action'])
             ->make(true);
 
     }
@@ -10837,6 +10854,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
                 return $dropdown;
             })
+            ->rawColumns(['lead_id_link', 'duplication', 'id_padded', 'action'])
             ->make(true);
 
     }
@@ -10919,6 +10937,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
                 return $dropdown;
             })
+            ->rawColumns(['id_padded', 'action'])
             ->make(true);
 
     }
@@ -11153,7 +11172,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
             ->leftjoin('business_categories as bc', 'bc.id', '=', 'cities.business_category_id')
             ->join('zones as z', 'cities.zone_id', '=', 'z.id')
-            ->select(['cities.id as city_id', 'cities.city_code as city_code', 'cities.id as id', 'cities.name as name', 'h.name as hub', 'cities.hub_id', 'z.name as zone', 'cities.hub as isHub', 'cities.status as status', 'ch.created_at as updated_at', 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat', 'cities.location_latitude', 'cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category', 'cities.hub_location_latitude', 'cities.hub_location_longitude', 'cities.iata_code as iata_code','cities.booking_enable_status as booking_enable_status', 'c.name as created_by', 'cities.created_at as created_at'])
+            ->select(['cities.id as city_id', 'cities.city_code as city_code', 'cities.id as id', 'cities.name as name', 'h.name as hub', 'cities.hub_id', 'z.name as zone', 'cities.hub as isHub', 'cities.status as status', 'ch.created_at as updated', 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat', 'cities.location_latitude', 'cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category', 'cities.hub_location_latitude', 'cities.hub_location_longitude', 'cities.iata_code as iata_code','cities.booking_enable_status as booking_enable_status', 'c.name as created_by', 'cities.created_at as created_at'])
             ->where('cities.permanent_disabled',0);
 
         return Datatables::of($cities)
@@ -11258,6 +11277,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 return '-';
             })
 
+            ->rawColumns(['location','hub_location','osa_list','action'])
             ->make(true);
     }
 
@@ -12075,7 +12095,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         $routes = Route::join('cities', 'routes.city_id', '=', 'cities.id')
             ->leftjoin('route_types as rt', 'rt.id', '=', 'routes.route_type_id')
             ->leftjoin('riders', 'riders.route_id', '=', 'routes.id')
-            ->select(['cities.name as city', 'routes.id as id', 'routes.code as code', 'routes.start', 'routes.end', 'routes.junction', 'routes.status as status', 'routes.created_at', 'rt.id as route_type_id ', 'rt.name as route_type', 'riders.name as rider']);
+            ->select(['cities.name as city', 'routes.id as id', 'routes.code as code', 'routes.start', 'routes.end', 'routes.junction', 'routes.status as status', 'routes.created_at as created', 'rt.id as route_type_id ', 'rt.name as route_type', 'riders.name as rider']);
 
         if (session('role_id') != 1) {
             $routes = $routes->whereIn('cities.hub_id', session('hubs'));
@@ -12132,6 +12152,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                     return '';
                 }
             })
+            ->rawColumns(['action'])
             ->make(true);
     }
 
@@ -12700,7 +12721,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
         $merged_accounts = MergedAccountHead::leftjoin('admins as ac', 'ac.id', '=', 'merged_account_heads.created_by')
             ->leftjoin('admins as au', 'au.id', '=', 'merged_account_heads.updated_by')
-            ->select('merged_account_heads.id as id', 'merged_account_heads.name as name', 'merged_account_heads.created_at as created_at', 'merged_account_heads.updated_at as updated_at', 'ac.name as created_by', 'au.name as updated_by', DB::raw('(select count(id) from merged_sister_accounts where merged_sister_accounts.merged_head_id = merged_account_heads.id) as accounts'));
+            ->select('merged_account_heads.id as id', 'merged_account_heads.name as name', 'merged_account_heads.created_at as created', 'merged_account_heads.updated_at as updated_at', 'ac.name as created_by', 'au.name as updated_by', DB::raw('(select count(id) from merged_sister_accounts where merged_sister_accounts.merged_head_id = merged_account_heads.id) as accounts'));
         return Datatables::of($merged_accounts)
             ->editColumn('accounts_button', function ($users) {
                 return '<div class="text-center"><button type="button" class="btn btn-sm btn-outline-info accounts_button">' . $users->accounts . '</button></div>';
@@ -12739,6 +12760,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 }
                 return $dropdown;
             })
+            ->rawColumns(['accounts_button', 'action'])
             ->make(true);
 
     }
@@ -13859,6 +13881,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
                 return $dropdown;
             })
+            ->rawColumns(['action'])
             ->make(true);
     }
 
@@ -14039,6 +14062,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
                 return $url =  $surveyReport->url;
             })
+            ->rawColumns(['url', 'answers', 'url_excel'])
             ->make(true);
     }
 
@@ -14654,7 +14678,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             'shipment_receiver_details.receiver_name as receiverName',
             'shipment_receiver_details.receiver_cnic as receiverCnic',
             'shipment_receiver_details.receiver_relationship as relationship',
-            'shipment_receiver_details.created_at',
+            'shipment_receiver_details.created_at as created',
             'admins.name as created_by'
             );
 

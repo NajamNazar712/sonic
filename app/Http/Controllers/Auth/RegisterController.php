@@ -44,6 +44,7 @@ use Illuminate\Foundation\Auth\RegistersUsers;
 use App\Http\Models\Commission\SalesCommission;
 use App\Http\Models\Commission\SalesCommissionUser;
 use App\Http\Controllers\Admins\AdminDashboardController;
+use Illuminate\Support\Str;
 
 class RegisterController extends Controller
 {
@@ -481,17 +482,18 @@ class RegisterController extends Controller
                 case '2':
                 case '4':
                 case '5':
-                    $payment_cycle_days = $data['selected_days'];
+                    $payment_cycle_days = isset($data['selected_days']) ? $data['selected_days'] : 0;
                     break;
                 case '6':
-                    $payment_cycle_days = $data['fortnite'];
+                    $payment_cycle_days = isset($data['fortnite']) ? $data['fortnite'] : 0;
                     break;
                 case '3':
-                    $payment_cycle_days = $data['monthly'];
+                    $payment_cycle_days = isset($data['monthly']) ? $data['monthly'] : 0;
                     break;
                 default:
                     $payment_cycle_days = 0;
             }
+
 
             if (isset($data['wordpress_account']) && $data['wordpress_account'] == 1) {
                 $newUser = User::updateOrCreate(
@@ -517,7 +519,7 @@ class RegisterController extends Controller
                         'sub_segment_id' => $data['sub_segments'],
                         'referral_id' => $referral_id,
                         'lead_id' => $lead_id,
-                        'api_token' => uniqid(base64_encode(str_random(60))),
+                        'api_token' => uniqid(base64_encode(Str::random(60))),
                         'territory_id' =>  $territory_id,
                         'payment_cycle_id' =>  $data['payment_cycles'],
                         'payment_cycle_days' => $payment_cycle_days
@@ -556,7 +558,7 @@ class RegisterController extends Controller
                     'sub_segment_id' => $data['sub_segments'],
                     'referral_id' => $referral_id,
                     'lead_id' => $lead_id,
-                    'api_token' => uniqid(base64_encode(str_random(60))),
+                    'api_token' => uniqid(base64_encode(Str::random(60))),
                     'territory_id' =>  $territory_id,
                     'payment_cycle_id' =>  $data['payment_cycles'],
                     'payment_cycle_days' => $payment_cycle_days
@@ -676,7 +678,7 @@ class RegisterController extends Controller
 
             self::duplicate_user_info($newUser->id, $data['name'], $data['phone'], $data['phone2'], $data['cnic'], $iban_array);
 
-            $token = uniqid(base64_encode(str_random(60)));
+            $token = uniqid(base64_encode(Str::random(60)));
             $crf_terms_and_conditions = new CRFTermsConditions();
             $crf_terms_and_conditions->user_id = $newUser->id;
             $crf_terms_and_conditions->token = $token;
@@ -757,11 +759,27 @@ class RegisterController extends Controller
         }
     
     }
-    public function email_verified($id)
+    // public function email_verified($id)
+    // {
+    //     $user = User::find($id);
+    //     $user->email_verified = 1;
+    //     $user->save();
+    //     return view('client.register_success')->with(['verify' => 1]);
+    // }
+
+    public function email_verified($id = null)
     {
-        $user = User::find($id);
-        $user->email_verified = 1;
-        $user->save();
+        if ($id == null) {
+            $id = request()->user_id;
+        }
+
+        if ($id) {
+            $user = User::find($id);
+            if ($user) {
+                $user->email_verified = 1;
+                $user->save();
+            }
+        }
         return view('client.register_success')->with(['verify' => 1]);
     }
 

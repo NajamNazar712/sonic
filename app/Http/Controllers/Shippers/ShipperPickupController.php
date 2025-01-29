@@ -195,6 +195,7 @@ class ShipperPickupController extends Controller
 //                    return 0;
 //                }
             })
+            ->rawColumns(['view_details','action','scanned_button','received_button','booked_button'])
             ->make(true);
     }
 

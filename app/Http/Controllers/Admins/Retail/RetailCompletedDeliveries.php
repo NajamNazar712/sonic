@@ -51,6 +51,11 @@ class RetailCompletedDeliveries extends Controller
             ->where('retail_pickup_notes.status', 4)
             ->where('retail_pickup_notes.pncc_status', '=', 0);
 
+        if ($tracking_number = $request->get('search_tracking')) {
+            $deliveries->join('retail_pickup_note_shipments as rpns', 'retail_pickup_notes.id', '=', 'rpns.retail_pickup_note_id')
+                ->join('shipments as s', 'rpns.shipment_id', '=', 's.id')
+                ->where('s.tracking_number', '=', $tracking_number);
+        }
 
         $datatable = Datatables::of($deliveries)
             ->setRowAttr([
@@ -89,12 +94,8 @@ class RetailCompletedDeliveries extends Controller
                 }else{
                     return $user->retail_trax_center_code;
                 }
-            });
-        if ($tracking_number = $request->get('search_tracking')) {
-            $datatable->join('retail_pickup_note_shipments as rpns', 'retail_pickup_notes.id', '=', 'rpns.retail_pickup_note_id')
-                ->join('shipments as s', 'rpns.shipment_id', '=', 's.id')
-                ->where('s.tracking_number', '=', $tracking_number);
-        }
+            })->rawColumns(['count']);
+
 
         return $datatable->make(true);
 

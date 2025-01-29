@@ -587,6 +587,7 @@ class AdminPettyCashController extends Controller
                 
 
             })
+            ->rawColumns(['account_head','account_title','city_name', 'employee_trax_id' , 'employee_name', 'employee_designation','dncc','delivered_shipments', 'expense_details', 'amount', 'reference_no', 'remarks', 'reference_document' ,'action', 'cost_centre'])
             ->make(true);
     }
 
@@ -660,7 +661,7 @@ class AdminPettyCashController extends Controller
             ->leftjoin('admins as fab', 'fab.id', '=', 'petty_cash_statements.finance_approved_by')
             ->leftjoin('admins as pccb', 'pccb.id', '=', 'petty_cash_statements.checked_by')
             ->leftjoin('shipments', 'shipments.id', '=', 'petty_cash_statements.shipment_id')
-            ->select('petty_cash_statements.id as statement_id', 'petty_cash_statements.id as statement_link', 'h.name as hub_name','o.name as origin_hub_name','d.name as destination_hub_name', 'petty_cash_statements.reference_no', 'petty_cash_statements.from', 'petty_cash_statements.to', 'cb.name as created_by', 'petty_cash_statements.created_at', 'sab.name as station_approved_by', 'petty_cash_statements.station_approved_at', 'oab.name as operation_approved_by', 'petty_cash_statements.operation_approved_at', 'fab.name as finance_approved_by', 'petty_cash_statements.finance_approved_at', 'petty_cash_statements.status', 'petty_cash_statements.total_amount','sab.name as finance_apprved_by', 'petty_cash_statements.finance_approved_at', 'petty_cash_statements.checked_at', 'pccb.name as checked_by','petty_cash_statements.date')
+            ->select('petty_cash_statements.id as statement_id', 'petty_cash_statements.id as statement_link', 'h.name as hub_name','o.name as origin_hub_name','d.name as destination_hub_name', 'petty_cash_statements.reference_no', 'petty_cash_statements.from', 'petty_cash_statements.to', 'cb.name as created_by', 'petty_cash_statements.created_at as created', 'sab.name as station_approved_by', 'petty_cash_statements.station_approved_at', 'oab.name as operation_approved_by', 'petty_cash_statements.operation_approved_at', 'fab.name as finance_approved_by', 'petty_cash_statements.finance_approved_at', 'petty_cash_statements.status', 'petty_cash_statements.total_amount','sab.name as finance_apprved_by', 'petty_cash_statements.finance_approved_at', 'petty_cash_statements.checked_at', 'pccb.name as checked_by','petty_cash_statements.date')
             ->whereIn('petty_cash_statements.status', [0, 1, 2, 7]);
 
         if (session('role_id') != 1) {
@@ -670,6 +671,22 @@ class AdminPettyCashController extends Controller
                     ->orWhere('petty_cash_statements.created_by', Auth::id())
                     ->orWhereIn('petty_cash_statements.hub_id', session('hubs'));
                 });
+        }
+
+        if ($hub = $request->get('search_hub')) {
+            $petty->where('h.id', '=', $hub);
+        }
+
+        if ($zone = $request->get('search_zone')) {
+            $petty->where('h.zone_id', '=', $zone);
+        }
+        if ($search_date = $request->get('search_creation_date')) {
+            $petty->whereDate('petty_cash_statements.created_at', $search_date);
+        }
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $petty->whereBetween('petty_cash_statements.created_at', [$from, $to]);
         }
 
         $petty = Datatables::of($petty)
@@ -733,22 +750,8 @@ class AdminPettyCashController extends Controller
                     }
                 }
                 return $dropdown;
-            });
-        if ($hub = $request->get('search_hub')) {
-            $petty->where('h.id', '=', $hub);
-        }
-
-        if ($zone = $request->get('search_zone')) {
-            $petty->where('h.zone_id', '=', $zone);
-        }
-        if ($search_date = $request->get('search_creation_date')) {
-            $petty->whereDate('petty_cash_statements.created_at', $search_date);
-        }
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $petty->whereBetween('petty_cash_statements.created_at', [$from, $to]);
-        }
+            })
+            ->rawColumns(['statement_link','sdn_update_logs', 'action']);        
 
         return $petty->make(true);
     }
@@ -1057,7 +1060,7 @@ class AdminPettyCashController extends Controller
             ->leftjoin('admins as oab', 'oab.id', '=', 'petty_cash_statements.operation_approved_by')
             ->leftjoin('admins as fab', 'fab.id', '=', 'petty_cash_statements.finance_approved_by')
             ->leftjoin('shipments', 'shipments.id', '=', 'petty_cash_statements.shipment_id')
-            ->select('petty_cash_statements.id as statement_id', 'petty_cash_statements.id as statement_link', 'h.name as hub_name', 'petty_cash_statements.reference_no','o.name as origin_hub_name','d.name as destination_hub_name', 'petty_cash_statements.from', 'petty_cash_statements.to', 'cb.name as created_by', 'petty_cash_statements.created_at', 'sab.name as station_approved_by', 'petty_cash_statements.station_approved_at', 'oab.name as operation_approved_by', 'petty_cash_statements.operation_approved_at', 'fab.name as finance_approved_by', 'petty_cash_statements.finance_approved_at', 'petty_cash_statements.status', 'petty_cash_statements.total_amount','petty_cash_statements.date')
+            ->select('petty_cash_statements.id as statement_id', 'petty_cash_statements.id as statement_link', 'h.name as hub_name', 'petty_cash_statements.reference_no','o.name as origin_hub_name','d.name as destination_hub_name', 'petty_cash_statements.from', 'petty_cash_statements.to', 'cb.name as created_by', 'petty_cash_statements.created_at as created', 'sab.name as station_approved_by', 'petty_cash_statements.station_approved_at', 'oab.name as operation_approved_by', 'petty_cash_statements.operation_approved_at', 'fab.name as finance_approved_by', 'petty_cash_statements.finance_approved_at', 'petty_cash_statements.status', 'petty_cash_statements.total_amount','petty_cash_statements.date')
             ->whereIn('petty_cash_statements.status', [3, 4, 5]);
 
         if (session('role_id') != 1) {
@@ -1067,6 +1070,12 @@ class AdminPettyCashController extends Controller
                 ->orWhere('petty_cash_statements.created_by', Auth::id())
                 ->orWhereIn('petty_cash_statements.hub_id', session('hubs'));
             });
+        }
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $petty->whereBetween('petty_cash_statements.finance_approved_at', [$from,$to]);
         }
 
         $petty = Datatables::of($petty)
@@ -1115,7 +1124,7 @@ class AdminPettyCashController extends Controller
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
-            ';
+                ';
 
                             if (session('role_id') == 1 || in_array(461, session('permissions'))) {
 
@@ -1131,13 +1140,10 @@ class AdminPettyCashController extends Controller
                         }
                 }
                 return $dropdown;
-            });
+            })
+            ->rawColumns(['statement_link', 'sdn_update_logs', 'action']);
 
-            if ($request->get('search_date_from') && $request->get('search_date_to')) {
-                $from = $request->get('search_date_from');
-                $to = $request->get('search_date_to');
-                $petty->whereBetween('petty_cash_statements.finance_approved_at', [$from,$to]);
-            }
+            
         return $petty->make(true);
     }
 
@@ -1318,7 +1324,8 @@ class AdminPettyCashController extends Controller
                 {
                     $dropdown = '--';
                 }
-                })->make(true);
+                })->rawColumns(['amount','action', 'reference_document'])
+                ->make(true);
     }
 
     public function rejected_petty_cash_statements_index()
@@ -1341,7 +1348,7 @@ class AdminPettyCashController extends Controller
             ->leftjoin('admins as sab', 'sab.id', '=', 'petty_cash_statements.station_approved_by')
             ->leftjoin('admins as oab', 'oab.id', '=', 'petty_cash_statements.operation_approved_by')
             ->leftjoin('admins as fab', 'fab.id', '=', 'petty_cash_statements.finance_approved_by')
-            ->select('petty_cash_statements.id as statement_id', 'petty_cash_statements.id as statement_link', 'h.name as hub_name', 'petty_cash_statements.reference_no','o.name as origin_hub_name','d.name as destination_hub_name', 'petty_cash_statements.from', 'petty_cash_statements.to', 'cb.name as created_by', 'petty_cash_statements.created_at', 'sab.name as station_approved_by', 'petty_cash_statements.station_approved_at', 'oab.name as operation_approved_by', 'petty_cash_statements.operation_approved_at', 'fab.name as finance_approved_by', 'petty_cash_statements.finance_approved_at', 'petty_cash_statements.status', 'petty_cash_statements.total_amount', 'petty_cash_statements.date')
+            ->select('petty_cash_statements.id as statement_id', 'petty_cash_statements.id as statement_link', 'h.name as hub_name', 'petty_cash_statements.reference_no','o.name as origin_hub_name','d.name as destination_hub_name', 'petty_cash_statements.from', 'petty_cash_statements.to', 'cb.name as created_by', 'petty_cash_statements.created_at as created', 'sab.name as station_approved_by', 'petty_cash_statements.station_approved_at', 'oab.name as operation_approved_by', 'petty_cash_statements.operation_approved_at', 'fab.name as finance_approved_by', 'petty_cash_statements.finance_approved_at', 'petty_cash_statements.status', 'petty_cash_statements.total_amount', 'petty_cash_statements.date')
             ->where('petty_cash_statements.status', 6);
 
         if (session('role_id') != 1) {
@@ -1399,6 +1406,7 @@ class AdminPettyCashController extends Controller
                 }
                 return $dropdown;
             })
+            ->rawColumns(['statement_link','action'])
             ->make(true);
         return $petty;
     }
@@ -1768,7 +1776,7 @@ class AdminPettyCashController extends Controller
             ->leftjoin('cities as o', 'o.id', '=', 'petty_cash_statement_drafts.origin_hub_id')
             ->leftjoin('cities as d', 'd.id', '=', 'petty_cash_statement_drafts.destination_hub_id')
             ->join('admins as cb', 'cb.id', '=', 'petty_cash_statement_drafts.created_by')
-            ->select('petty_cash_statement_drafts.id as draft_id', 'h.name as hub_name','o.name as origin_hub_name','d.name as destination_hub_name', 'petty_cash_statement_drafts.reference_no', 'petty_cash_statement_drafts.from', 'petty_cash_statement_drafts.to', 'cb.name as created_by', 'petty_cash_statement_drafts.created_at', 'petty_cash_statement_drafts.total_amount','petty_cash_statement_drafts.date');
+            ->select('petty_cash_statement_drafts.id as draft_id', 'h.name as hub_name','o.name as origin_hub_name','d.name as destination_hub_name', 'petty_cash_statement_drafts.reference_no', 'petty_cash_statement_drafts.from', 'petty_cash_statement_drafts.to', 'cb.name as created_by', 'petty_cash_statement_drafts.created_at as created', 'petty_cash_statement_drafts.total_amount','petty_cash_statement_drafts.date');
 
         if (session('role_id') != 1) {
             $petty = $petty->where(function ($query) {
@@ -2634,7 +2642,7 @@ class AdminPettyCashController extends Controller
             ->leftjoin('cities as d', 'd.id', '=', 'advance_petty_cash_statements.destination_hub_id')
             ->leftjoin('advance_petty_cash_statement_statuses as apcs','advance_petty_cash_statements.status_id','=','apcs.id')
             ->join('admins as cb', 'cb.id', '=', 'advance_petty_cash_statements.created_by')
-            ->select('advance_petty_cash_statements.id as statement_id', 'advance_petty_cash_statements.id as statement_link', 'h.name as hub_name','o.name as origin_hub_name','d.name as destination_hub_name', 'advance_petty_cash_statements.reference_no', 'advance_petty_cash_statements.from', 'advance_petty_cash_statements.to', 'cb.name as created_by', 'advance_petty_cash_statements.created_at',  'advance_petty_cash_statements.status_id as status','advance_petty_cash_statements.created_at as created_at','apcs.name as status_name','advance_petty_cash_statements.total_amount as total_amount','advance_petty_cash_statements.amount_availed as amount_availed','advance_petty_cash_statements.balance as balance_amount','apcs.name as status_name')
+            ->select('advance_petty_cash_statements.id as statement_id', 'advance_petty_cash_statements.id as statement_link', 'h.name as hub_name','o.name as origin_hub_name','d.name as destination_hub_name', 'advance_petty_cash_statements.reference_no', 'advance_petty_cash_statements.from', 'advance_petty_cash_statements.to', 'cb.name as created_by', 'advance_petty_cash_statements.created_at',  'advance_petty_cash_statements.status_id as status','advance_petty_cash_statements.created_at as created','apcs.name as status_name','advance_petty_cash_statements.total_amount as total_amount','advance_petty_cash_statements.amount_availed as amount_availed','advance_petty_cash_statements.balance as balance_amount','apcs.name as status_name')
             ->whereIn('advance_petty_cash_statements.status_id', [1, 2]);
 
 
@@ -2645,6 +2653,27 @@ class AdminPettyCashController extends Controller
                     ->orWhere('advance_petty_cash_statements.created_by', Auth::id())
                     ->orWhereIn('advance_petty_cash_statements.hub_id', session('hubs'));
             });
+        }
+
+        if ($hub = $request->get('search_hub')) {
+            $petty->where('h.id', '=', $hub);
+        }
+
+        if ($zone = $request->get('search_zone')) {
+            $petty->where('h.zone_id', '=', $zone);
+        }
+        if ($request->get('search_date_from')) {
+            $petty->whereDate('advance_petty_cash_statements.from', Carbon::parse($request->get('search_date_from'))->format('Y-m-d'));
+        }
+
+        if ($request->get('search_date_to')) {
+            $petty->whereDate('advance_petty_cash_statements.to',Carbon::parse($request->get('search_date_to'))->format('Y-m-d'));
+        }
+
+        if ($request->get('search_creation_date_from') && $request->get('search_creation_date_to')) {
+            $from = $request->get('search_creation_date_from');
+            $to = $request->get('search_creation_date_to');
+            $petty->whereBetween('advance_petty_cash_statements.created_at', [$from, $to]);
         }
 
         $petty = Datatables::of($petty)
@@ -2687,7 +2716,7 @@ class AdminPettyCashController extends Controller
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
-            ';  
+                ';  
                 $petty_details = AdvancePettyCashStatementDetail::where('petty_cash_id',$petty->statement_id); 
 
                 if ($petty->status == 1 && ($petty->total_amount != $petty->amount_availed)) {
@@ -2700,27 +2729,8 @@ class AdminPettyCashController extends Controller
             if($petty->status == 1){
                 return $dropdown;
             }
-            });
-        if ($hub = $request->get('search_hub')) {
-            $petty->where('h.id', '=', $hub);
-        }
-
-        if ($zone = $request->get('search_zone')) {
-            $petty->where('h.zone_id', '=', $zone);
-        }
-        if ($request->get('search_date_from')) {
-            $petty->whereDate('advance_petty_cash_statements.from', Carbon::parse($request->get('search_date_from'))->format('Y-m-d'));
-        }
-
-        if ($request->get('search_date_to')) {
-            $petty->whereDate('advance_petty_cash_statements.to',Carbon::parse($request->get('search_date_to'))->format('Y-m-d'));
-        }
-
-        if ($request->get('search_creation_date_from') && $request->get('search_creation_date_to')) {
-            $from = $request->get('search_creation_date_from');
-            $to = $request->get('search_creation_date_to');
-            $petty->whereBetween('advance_petty_cash_statements.created_at', [$from, $to]);
-        }
+            })
+            ->rawColumns(['statement_link', 'sdn_update_logs','action']);
        
         return $petty->make(true);
     }
@@ -3093,6 +3103,7 @@ class AdminPettyCashController extends Controller
                 
 
             })
+            ->rawColumns(['account_head','account_title','city_name', 'employee_trax_id' , 'employee_name', 'employee_designation','dncc','delivered_shipments', 'expense_details', 'amount', 'reference_no', 'remarks', 'reference_document' ,'action', 'cost_centre'])
             ->make(true);
     }
 

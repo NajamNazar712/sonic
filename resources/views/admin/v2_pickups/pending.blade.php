@@ -552,7 +552,7 @@
                             row = [];
 
                             row.push(index + 1);
-                            row.push(values.pickup_request_id);
+                            row.push(values.id);
                             row.push(values.requested_date);
                             row.push(values.current_rider);
                             row.push(values.last_rider);
@@ -739,7 +739,7 @@
                 {data: 'shipments_rider_picked', name: 'vpr.shipments', class: 'align-middle shipments_rider_picked'},
                 // {data: 'received_link', name: 'v2_pickup_requests.received', class: 'align-middle received_link text-center'},
                 {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
-                {data: 'sale_person', name: 'sale_person', class: 'align-middle sale_person'},
+                {data: 'sale_person', name: 'sales_person.name', class: 'align-middle sale_person'},
                 {data: 'territory', name: 't.name', class: 'align-middle territory'},
                 {data: 'contact_person', name: 'usi.poc', class: 'align-middle contact_person'},
                 // {data: 'type', name: 'booking_types.booking_type', class: 'align-middle type'},

@@ -185,7 +185,9 @@
                                     <div class="col-6 d-none" id="alternate_phone_input">
                                         <fieldset class="form-group">
                                             <input type="text" name="alternate_phone" class="form-control"
-                                                id="alternate_phone" placeholder="Enter Alternate Number">
+                                                id="alternate_phone" placeholder="Enter Alternate Number"
+                                                data-rule-required="true" data-msg-required="Alternate Number is required"
+                                                >
                                         </fieldset>
                                     </div>
                                     {{-- <div class="col-6 d-none" id="cod_amount_input">
@@ -788,7 +790,7 @@
                                 $('#call_history').removeClass('d-none');
                             }
                             $.each(response.data, function(index, value) {
-                                var dateTimeParts = value.data.updated_at.split(' ');
+                                var dateTimeParts = value.data.updated_at?.split(' ') || ['-', '-']; // Fallback if updated_at is invalid
                                 var row = $('<tr>');
                                 // row.append($('<td>').text(index + 1)); 
                                 row.append($('<td>').text(dateTimeParts[0])); // Display date
@@ -1006,7 +1008,6 @@
             }).bind('change', function() {
                 var id = parseInt($(this).val());
                 var shipment_id = $('#requested_shipment_id').val();
-                console.log(shipment_id);
                 $.ajax({
                     url: '{{ route('admin.crm.request.updated_crm_request_nature_types') }}',
                     type: 'POST',
@@ -1947,9 +1948,34 @@
                                 shipment += '</div>';
                                 shipment += '</div>';
 
-
                                 shipment += '<div class="col-12 mt-2">';
+                                shipment += '<div class="d-flex justify-content-between">';
                                 shipment += '<h4><u>Tracking History</u></h4>';
+
+                                // scanning history button
+                                // @if (session('role_id') == 1 || in_array(1020, session('permissions'))) {
+                                //     shipment += '<div class="position-relative" style="top: -3px;">';
+                                //     shipment += '<form id="scanHistoryForm" action="{{ route('admin.scanning_history.details_new') }}" method="GET" target="_blank">';
+                                //     shipment += '@csrf';
+                                //     shipment += '<input type="hidden" name="tracking_number" value="' + details.tracking_number + '" />';
+                                //     shipment += '<input type="hidden" name="search_type" value="1" />';
+                                //     shipment += '</form>';
+                                //     shipment += '<a href="#" onclick="document.getElementById(\'scanHistoryForm\').submit(); return false;" class="btn btn-secondary">Scan history</a>';
+                                //     shipment += '</div>';
+                                // }
+                                // @endif
+
+                                shipment += '<div class="position-relative" style="top: -3px;">';
+                                shipment += '<form id="scanHistoryForm" action="{{ route('admin.scanning_history.details_new') }}" method="GET" target="_blank">';
+                                shipment += '@csrf';
+                                shipment += '<input type="hidden" name="tracking_number" value="' + details.tracking_number + '" />';
+                                shipment += '<input type="hidden" name="search_type" value="1" />';
+                                shipment += '</form>';
+                                shipment += '<a href="#" onclick="document.getElementById(\'scanHistoryForm\').submit(); return false;" class="btn btn-secondary">Scan history</a>';
+                                shipment += '</div>';
+
+                                shipment += '</div>';
+
                                 shipment += '<div class="border table-responsive">';
                                 shipment += '<table class="table table-sm table-borderless datatable tracking_history">';
                                 shipment += '<thead>';
@@ -2706,6 +2732,7 @@
                         '<th class="border-primary border-darken-1">Product Content</th>' +
                         '<th class="border-primary border-darken-1">Remarks</th>' +
                         '<th class="border-primary border-darken-1">Added By</th>' +
+                        '<th class="border-primary border-darken-1">Hub</th>' +
                         '<th class="border-primary border-darken-1">Quantity</th>' +
                         '<th class="border-primary border-darken-1">Image</th>' +
                         '<th class="border-primary border-darken-1">Created At</th>' +
@@ -2722,9 +2749,10 @@
                                 modalContent += '<td>' + data.product_content + '</td>'; 
                                 modalContent += '<td>' + data.remarks + '</td>'; 
                                 modalContent += '<td>' + data.created_by + '</td>';
+                                modalContent += '<td>' + data.hub_name + '</td>';
                                 modalContent += '<td>' + data.quantity + '</td>';
                                 modalContent += '<td>' + data.image_html + '</td>'; 
-                                modalContent += '<td>' + data.created_at + '</td>';
+                                modalContent += '<td>' + data.created + '</td>';
                                 modalContent += '</tr>';                            
                         });
 
@@ -3126,7 +3154,6 @@
             }
             else{
                 $('#cod_change').addClass('d-none');
-
             }
         });
 

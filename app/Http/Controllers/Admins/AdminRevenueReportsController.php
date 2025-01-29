@@ -254,7 +254,7 @@ class AdminRevenueReportsController extends Controller
 
         $spreadsheet->getActiveSheet()->getStyle('B')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
         $spreadsheet->getActiveSheet()->getStyle('C')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-        $spreadsheet->getActiveSheet()->getStyle('H')->getNumberFormat()->setFormatCode(PHPExcel_Style_NumberFormat::FORMAT_TEXT);
+        $spreadsheet->getActiveSheet()->getStyle('H')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_TEXT);
         $spreadsheet->getActiveSheet()->getStyle('K')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
         $spreadsheet->getActiveSheet()->getStyle('L')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
         $spreadsheet->getActiveSheet()->getStyle('U')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
@@ -539,34 +539,37 @@ class AdminRevenueReportsController extends Controller
 
         $spreadsheet = new Spreadsheet();
 
-        $spreadsheet->getActiveSheet()->getStyle('B')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-        $spreadsheet->getActiveSheet()->getStyle('C')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-        $spreadsheet->getActiveSheet()->getStyle('H')->getNumberFormat()->setFormatCode(PHPExcel_Style_NumberFormat::FORMAT_TEXT);
-        $spreadsheet->getActiveSheet()->getStyle('K')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-        $spreadsheet->getActiveSheet()->getStyle('L')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-        $spreadsheet->getActiveSheet()->getStyle('U')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-        $spreadsheet->getActiveSheet()->getStyle('V')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-        $spreadsheet->getActiveSheet()->getStyle('W')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-        $spreadsheet->getActiveSheet()->getStyle('X')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-        $spreadsheet->getActiveSheet()->getStyle('Y')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-        $spreadsheet->getActiveSheet()->getStyle('Z')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-        $spreadsheet->getActiveSheet()->getStyle('AA')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-        $spreadsheet->getActiveSheet()->getStyle('AB')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-        $spreadsheet->getActiveSheet()->getStyle('AC')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-        $spreadsheet->getActiveSheet()->getStyle('AD')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-        $spreadsheet->getActiveSheet()->getStyle('AE')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-        $spreadsheet->getActiveSheet()->getStyle('AF')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-        $spreadsheet->getActiveSheet()->getStyle('AG')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-        $spreadsheet->getActiveSheet()->getStyle('AH')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-        $spreadsheet->getActiveSheet()->getStyle('AI')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-        $spreadsheet->getActiveSheet()->getStyle('AJ')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-        $spreadsheet->getActiveSheet()->getStyle('AK')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-        $spreadsheet->getActiveSheet()->getStyle('AL')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+// Define columns for number formatting
+        $columns = [
+            'B', 'C', 'K', 'L', 'U', 'V', 'W', 'X', 'Y', 'Z',
+            'AA', 'AB', 'AC', 'AD', 'AE', 'AF', 'AG', 'AH',
+            'AI', 'AJ', 'AK', 'AL'
+        ];
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:AM1')->getFont()->setBold(TRUE);
+// Set number format for specified columns
+        foreach ($columns as $column) {
+            $spreadsheet->getActiveSheet()
+                ->getStyle($column)
+                ->getNumberFormat()
+                ->setFormatCode(NumberFormat::FORMAT_NUMBER);
+        }
 
+// Set text format for column H
+        $spreadsheet->getActiveSheet()
+            ->getStyle('H')
+            ->getNumberFormat()
+            ->setFormatCode(NumberFormat::FORMAT_TEXT);
+
+// Apply bold formatting to the first row
+        $spreadsheet->getActiveSheet()
+            ->getStyle('A1:AM1')
+            ->getFont()
+            ->setBold(true);
+
+// Add data to the spreadsheet
         $spreadsheet->getActiveSheet()->fromArray($details);
 
+// Save the spreadsheet to an XLSX file
         $writer = new Xlsx($spreadsheet);
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -829,7 +832,7 @@ class AdminRevenueReportsController extends Controller
 
         $spreadsheet->getActiveSheet()->getStyle('B')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
         $spreadsheet->getActiveSheet()->getStyle('C')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-        $spreadsheet->getActiveSheet()->getStyle('H')->getNumberFormat()->setFormatCode(PHPExcel_Style_NumberFormat::FORMAT_TEXT);
+        $spreadsheet->getActiveSheet()->getStyle('H')->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT);
         $spreadsheet->getActiveSheet()->getStyle('K')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
         $spreadsheet->getActiveSheet()->getStyle('L')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
         $spreadsheet->getActiveSheet()->getStyle('U')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
@@ -970,25 +973,25 @@ class AdminRevenueReportsController extends Controller
             });
 
             if($search_invoice_number = $request->get('search_invoice_number')){
-                $datatable->where('rbi.invoice_number','=', $search_invoice_number);
+                $invoice->where('rbi.invoice_number','=', $search_invoice_number);
             }
             if($shipper = $request->get('search_shipper')){
-                $datatable->where('rbi.user_id','=', $shipper);
+                $invoice->where('rbi.user_id','=', $shipper);
             }
             if ($origin = $request->get('search_origin')) {
-                $datatable->where('oc.id', '=', $origin);
+                $invoice->where('oc.id', '=', $origin);
             }
             if ($search_segment = $request->get('search_segment')) {
-                $datatable->where('users.segment_id', '=', $search_segment);
+                $invoice->where('users.segment_id', '=', $search_segment);
             }
             if ($search_sub_segment = $request->get('search_sub_segment')) {
-                $datatable->where('users.sub_segment_id', '=', $search_sub_segment);
+                $invoice->where('users.sub_segment_id', '=', $search_sub_segment);
             }
             if ($search_account_type = $request->get('search_account_type')) {
-                $datatable->where('users.account_type_id', '=', $search_account_type);
+                $invoice->where('users.account_type_id', '=', $search_account_type);
             }
             if ($search_business_category = $request->get('search_business_category')) {
-                $datatable->where('rbi.business_category_id', '=', $search_business_category);
+                $invoice->where('rbi.business_category_id', '=', $search_business_category);
             }
 
             return $datatable->make(true);

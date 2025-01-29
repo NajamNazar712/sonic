@@ -55,6 +55,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Validator;
+use Illuminate\Support\Str;
 
 class ShipperAPIController extends Controller
 {
@@ -145,7 +146,7 @@ class ShipperAPIController extends Controller
                     if ($shipper->api_token) {
                         $information['api_token'] = $shipper->api_token;
                     } else {
-                        $api_token = uniqid(base64_encode(str_random(60)));
+                        $api_token = uniqid(base64_encode(Str::random(60)));
 
                         $shipper->api_token = $api_token;
 
@@ -598,7 +599,7 @@ class ShipperAPIController extends Controller
                     }
 
                            
-                            request()->request->add(['shipment_id' => $request->shipment_id]);
+                            $request->merge(['shipment_id' => $request->shipment_id]);
                             //$updated_type_id updated by shipper = 3
                             //$updated_rv_assign_agent_status_id to return confirm i.e is 1
                             //$updated_rv_state_id updating rv status to 4 i.e completed 
@@ -675,7 +676,7 @@ class ShipperAPIController extends Controller
                                 $return_assign_log->save();
                             }
 
-                            request()->request->add(['shipment_id' => $request->shipment_id]);
+                            $request->merge(['shipment_id' => $request->shipment_id]);
                             //$updated_by_id updated by shipper = $shipper_id
                             //$updated_type_id updated by shipper = 3
                             //$updated_rv_assign_agent_status_id to reattempt i.e is 2
@@ -708,7 +709,7 @@ class ShipperAPIController extends Controller
                             }
 
                           
-                            request()->request->add(['shipment_id' => $request->shipment_id]);
+                            $request->merge(['shipment_id' => $request->shipment_id]);
                             //$updated_by_id updated by shipper = $shipper_id
                             //$updated_type_id updated by substitute_user = 4
                             //$updated_rv_assign_agent_status_id, reattempt i.e is 2
@@ -869,7 +870,7 @@ class ShipperAPIController extends Controller
                         }
                             
                         
-                        request()->request->add(['shipment_id' => $request->shipment_id]);
+                        $request->merge(['shipment_id' => $request->shipment_id]);
                             //$updated_by_id updated by shipper = $user_id
                             //$updated_type_id updated by Shipper = 3
                             //$updated_rv_assign_agent_status_id to Intercept approved i.e is 4
@@ -937,7 +938,7 @@ class ShipperAPIController extends Controller
                                     
                             }
 
-                            request()->request->add(['shipment_id' => $request->shipment_id]);
+                            $request->merge(['shipment_id' => $request->shipment_id]);
                             //$updated_by_id updated by shipper = $user_id
                             //$updated_type_id updated by Shipper = 3
                             //$updated_rv_assign_agent_status_id, intercept requested i.e is 3

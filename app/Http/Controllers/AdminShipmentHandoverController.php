@@ -838,22 +838,28 @@ class AdminShipmentHandoverController extends Controller
             'hss.shipment_id',
             DB::raw("COUNT(DISTINCT excess_handover_shipments.id) AS excess_shipments")
         ]);
-    
-      // if($tracking_number = $request->get('search_tracking')) {
-      //   $handover_list->where('s.tracking_number', $tracking_number);
-      // }
 
-      if ($tracking_number = $request->get('search_tracking')) {
-        $shipment = Shipment::where('tracking_number', $tracking_number)->first();
-        $handover_list->where(function ($query) use ($tracking_number, $shipment) {
-            $query->where('s.tracking_number', $tracking_number)
-              ->orWhere('excess_handover_shipments.shipment_ids', optional($shipment)->id);
-        });
-      }
-      
-      $handover_list->whereBetween('handovers.created_at', [$from, $to])
-      // ->orderBy('handovers.id', 'DESC')
-      ->groupBy('handovers.id');
+    if ($tracking_number = $request->get('search_tracking')) {
+        $handover_list->where('s.tracking_number', $tracking_number);
+    }
+
+    if ($hub = $request->get('search_hub')) {
+      $handover_list->where('handovers.hub', '=', $hub);
+    }
+
+    if ($from_admin = $request->get('search_from_admin')) {
+        $handover_list->where('handovers.from', '=', $from_admin);
+    }
+    if ($to_admin = $request->get('search_to_admin')) {
+        $handover_list->where('handovers.to', '=', $to_admin);
+    }
+    if ($bag_number = $request->get('search_bag_number')) {
+      $handover_list->where('handovers.bag_number', '=', $bag_number);
+    }
+
+    $handover_list->whereBetween('handovers.created_at', [$from, $to])
+        // ->orderBy('handovers.id', 'DESC')
+        ->groupBy('handovers.id');
     
         $datatable = Datatables::of($handover_list)
             ->addColumn('handover_id_padded', function ($handover) {
@@ -1006,7 +1012,6 @@ class AdminShipmentHandoverController extends Controller
           ->addColumn('shipment_pieces', function($handover_list) {
               return '<button class="btn btn-sm btn-outline-info shipment_pieces align-middle">Piece(s) Breakup</button>';
           })
-
           ->editColumn('created_at_area', function($handover_list) {
             $forward_location_status = $handover_list->forward_location_status === 0 ? 'Off-site' : ($handover_list->forward_location_status === 1 ? 'On-site' : '-');
             $forwarded_area_name = $handover_list->forwarded_area_name ?? '-';
@@ -1047,17 +1052,17 @@ class AdminShipmentHandoverController extends Controller
           });
 
           if ($hub = $request->get('search_hub')) {
-              $datatable->where('handovers.hub', '=', $hub);
+              $handover_list->where('handovers.hub', '=', $hub);
           }
 
           if ($from_admin = $request->get('search_from_admin')) {
-              $datatable->where('handovers.from', '=', $from_admin);
+              $handover_list->where('handovers.from', '=', $from_admin);
           }
           if ($to_admin = $request->get('search_to_admin')) {
-              $datatable->where('handovers.to', '=', $to_admin);
+              $handover_list->where('handovers.to', '=', $to_admin);
           }
           if ($bag_number = $request->get('search_bag_number')) {
-            $datatable->where('handovers.bag_number', '=', $bag_number);
+            $handover_list->where('handovers.bag_number', '=', $bag_number);
           }
 
           if ($search_area = $request->get('search_area')) {
@@ -1070,13 +1075,12 @@ class AdminShipmentHandoverController extends Controller
                 ->select('name')
                 ->first();
 
-            $datatable->where(function($query) use ($area_name) {
-              $query->where('c_from.name', '=', $area_name->name)
-                ->orWhere('c_to.name', '=', $area_name->name);
-            });
-          } 
-          return  $datatable->make(true);
-
+            $handover_list->where(function($query) use ($area_name) {
+            $query->where('c_from.name', '=', $area_name->name)
+              ->orWhere('c_to.name', '=', $area_name->name);
+          });
+        } 
+        return  $datatable->rawColumns(['shipment_pieces','remaining_shipment_count','excess_shipments','shipment_count'])->make(true);
       }
 
     public function handover_shipments_count(Request $request){
@@ -1431,7 +1435,7 @@ class AdminShipmentHandoverController extends Controller
 
                     return $dropdown;
 
-            });
+            })->rawColumns(['action']);
 
         return  $datatable->make(true);
 
@@ -1654,7 +1658,9 @@ class AdminShipmentHandoverController extends Controller
         $route = route('admin.tracking.index');
         return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
       });
-      return $datatable->make(true);
+      return $datatable
+      ->rawColumns(['tracking_number'])
+      ->make(true);
     }
 
     // public function same_hub_handover_count(Request $request)

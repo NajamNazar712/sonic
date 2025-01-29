@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class RouteManagement extends Model
 {
+    protected $table = 'route_managements';
     public function starting_point() {
         return $this->belongsTo('App\Http\Models\City', 'starting_point_id', 'id');
     }

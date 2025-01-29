@@ -147,7 +147,7 @@ use App\Http\Models\OvernightOverlandReportOriginHubs;
 use App\Http\Models\Admin\CrmAgentAutoAssignCaseNature;
 use App\Http\Models\Admin\CrmAgentAutoAssignShipStatus;
 use App\Http\Models\Admin\CrmAgentAutoAssignSubSegment;
-use App\http\Models\Admin\ReturnReasonMandatoryShipper;
+use App\Http\Models\Admin\ReturnReasonMandatoryShipper;
 use App\Http\Models\Rates\HistoryCorporateWeightCharge;
 use App\Http\Models\TelenorShipmentStatusEstimatedTime;
 use App\Http\Models\Webhook\ShipmentStatusSubscription;
@@ -410,6 +410,7 @@ class GlobalSettingsController extends Controller
                     return '';
                 }
             })
+            ->rawColumns(['action'])
             ->make(true);
     }
 
@@ -522,6 +523,7 @@ class GlobalSettingsController extends Controller
                     return '';
                 }
             })
+            ->rawColumns(['action'])
             ->make(true);
     }
 
@@ -647,6 +649,7 @@ class GlobalSettingsController extends Controller
 
                 return $dropdown;
             })
+            ->rawColumns(['action'])
             ->make(true);
     }
 
@@ -1767,7 +1770,7 @@ class GlobalSettingsController extends Controller
                     $dropdown = '';
                 }
                 return $dropdown;
-            });
+            })->rawColumns(['action']);
         return $datatable->make(true);
     }
 
@@ -2039,7 +2042,7 @@ class GlobalSettingsController extends Controller
         $multiple_sale_tagging = MultipleSaleLead::leftjoin('admins as a', 'a.id', '=', 'multiple_sale_leads.admin_id')
             ->leftjoin('admins as ua', 'ua.id', '=', 'multiple_sale_leads.updated_by')
             ->leftjoin('multiple_sale_taggings as mst', 'mst.lead_id', '=', 'multiple_sale_leads.id')
-            ->select('multiple_sale_leads.id as id', 'a.name as head_admin', 'a.id as head_admin_id', DB::raw('count(mst.id) as tagged_admins'), 'ua.name as updated_by', 'multiple_sale_leads.updated_at as updated_at')
+            ->select('multiple_sale_leads.id as id', 'a.name as head_admin', 'a.id as head_admin_id', DB::raw('count(mst.id) as tagged_admins'), 'ua.name as updated_by', 'multiple_sale_leads.updated_at as updated')
             ->groupBy('a.name');
 
         return Datatables::of($multiple_sale_tagging)
@@ -2059,7 +2062,7 @@ class GlobalSettingsController extends Controller
                 $dropdown .= '<button type="button" data-target-id=' . $leads->head_admin_id . ' class="dropdown-item assign" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus"></i></div><div class="col-9 offset-1">Assign</div></button>';
 
                 return $dropdown;
-            })->make(true);
+           })->rawColumns(['action','tagged_admins_count'])->make(true);
     }
 
     public function multiple_sale_tagging_submit(Request $request)
@@ -2559,7 +2562,7 @@ class GlobalSettingsController extends Controller
         }
 
         $setting = City::leftjoin('admins as a', 'a.id', '=', 'cities.cut_off_time_updated_by')
-            ->select('cities.id as origin_id', 'cities.name as origin', 'cities.cut_off_time as cut_off_time', 'cities.cut_off_time_updated_at as updated_at', 'a.name as updated_by')
+            ->select('cities.id as origin_id', 'cities.name as origin', 'cities.cut_off_time as cut_off_time', 'cities.cut_off_time_updated_at as updated', 'a.name as updated_by')
             ->where('cities.hub', 1);
         return Datatables::of($setting)
             ->addColumn('action', function ($requests) {
@@ -2571,7 +2574,7 @@ class GlobalSettingsController extends Controller
             ';
                 $dropdown .= '<button type="button" data-target-id=' . $requests->origin_id . ' class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
                 return $dropdown;
-            })->make(true);
+            })->rawColumns(['action'])->make(true);
     }
 
     public function overnight_overland_cargo_report_rad_tat_submit(Request $request)
@@ -2812,7 +2815,7 @@ class GlobalSettingsController extends Controller
         $blacklist = BlacklistSetting::join('admins as a', 'a.id', '=', 'blacklist_settings.added_by')
             ->leftjoin('admins as u', 'u.id', '=', 'blacklist_settings.updated_by')
             ->join('blacklist_labelings as bl', 'bl.id', '=', 'blacklist_settings.labeling_id')
-            ->select('blacklist_settings.id as category_id', 'blacklist_settings.name as category_name', 'bl.name as labeling_name', 'a.name as added_by', 'u.name as updated_by', 'blacklist_settings.status', 'blacklist_settings.created_at as added_at', 'blacklist_settings.updated_at');
+            ->select('blacklist_settings.id as category_id', 'blacklist_settings.name as category_name', 'bl.name as labeling_name', 'a.name as added_by', 'u.name as updated_by', 'blacklist_settings.status', 'blacklist_settings.created_at as added_at', 'blacklist_settings.updated_at as updated');
         $datatable = Datatables::of($blacklist)
             ->addColumn('category_status', function ($data) {
                 if ($data->status == 0) {
@@ -2838,7 +2841,7 @@ class GlobalSettingsController extends Controller
                 }
 
                 return $dropdown;
-            });
+            })->rawColumns(['action']);
 
         return $datatable->make(true);
     }
@@ -3144,7 +3147,7 @@ class GlobalSettingsController extends Controller
                 $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
 
                 return $dropdown;
-            });
+            })->rawColumns(['action']);
 
         return $datatable->make(true);
     }
@@ -3498,7 +3501,7 @@ class GlobalSettingsController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 367);
         }
         $holidays = Holiday::leftjoin('admins as a', 'a.id', '=', 'holidays.created_by')
-            ->select('holidays.reason as reason', 'holidays.holiday as holiday', 'holidays.created_at as created_at', 'a.name as created_by');
+            ->select('holidays.reason as reason', 'holidays.holiday as holiday', 'holidays.created_at as created', 'a.name as created_by');
 
         return Datatables::of($holidays)
             ->make(true);
@@ -3745,7 +3748,7 @@ class GlobalSettingsController extends Controller
         }
         $restricted_parcels_attempt = RestrictParcelsAttempt::join('users as u', 'u.id', '=', 'restrict_parcels_attempts.shipper_id')
             ->join('admins as a', 'a.id', '=', 'restrict_parcels_attempts.updated_by')
-            ->select('restrict_parcels_attempts.id', 'u.name as shipper', 'restrict_parcels_attempts.attempt_days', 'restrict_parcels_attempts.status', 'restrict_parcels_attempts.created_at', 'restrict_parcels_attempts.updated_at', 'a.name as updated_by');
+            ->select('restrict_parcels_attempts.id', 'u.name as shipper', 'restrict_parcels_attempts.attempt_days', 'restrict_parcels_attempts.status', 'restrict_parcels_attempts.created_at as created', 'restrict_parcels_attempts.updated_at as updated', 'a.name as updated_by');
         $datatable = Datatables::of($restricted_parcels_attempt)
             ->editColumn('status', function ($data) {
                 if ($data->status == 1) {
@@ -3770,7 +3773,7 @@ class GlobalSettingsController extends Controller
                 }
 
                 return $dropdown;
-            });
+            })->rawColumns(['action']);
 
         return $datatable->make(true);
     }
@@ -3854,7 +3857,7 @@ class GlobalSettingsController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 252);
         }
         $runner_report = Runner::join('admins as a', 'a.id', '=', 'runners.created_by')
-            ->select('runners.id as id', 'runners.name as runner', 'runners.created_at', 'a.name as created_by', 'runners.status as status');
+            ->select('runners.id as id', 'runners.name as runner', 'runners.created_at as created', 'a.name as created_by', 'runners.status as status');
         $datatable = Datatables::of($runner_report)
             ->editColumn('status', function ($runner) {
                 if ($runner->status == 0 || $runner->status == 1) {
@@ -3879,7 +3882,7 @@ class GlobalSettingsController extends Controller
                     $dropdown .= $disable;
                 }
                 return $dropdown;
-            });
+            })->rawColumns(['action']);
         return $datatable->make(true);
     }
 
@@ -4031,9 +4034,9 @@ class GlobalSettingsController extends Controller
         $fintechSetup =  new FintechCompany();
         $FintechValues = $fintechSetup::leftJoin('admins AS created_by', 'created_by.id', '=', 'fintech_companies.added_by')
             ->leftJoin('admins AS updated_by', 'updated_by.id', '=', 'fintech_companies.updated_by')
-            ->select(['fintech_companies.*', 'created_by.name as admin1', 'updated_by.name as admin2'])
-            ->orderBy('fintech_companies.id', 'DESC')
-            ->get();
+            ->select(['fintech_companies.company_name', 'fintech_companies.status',  'fintech_companies.added_by','fintech_companies.updated_by','fintech_companies.created_at as added','fintech_companies.updated_at as updated' ,'created_by.name as admin1', 'updated_by.name as admin2' ,'fintech_companies.id']);
+            //->orderBy('fintech_companies.id', 'DESC');
+            //->get();
 
         $datatable = Datatables::of($FintechValues)
             ->editColumn('status', function ($data) {
@@ -4060,7 +4063,7 @@ class GlobalSettingsController extends Controller
                     $dropdown .= $edit . $enable;
                     return $dropdown;
                 }
-            });
+            })->rawColumns(['action']);
 
 
 
@@ -4410,6 +4413,7 @@ class GlobalSettingsController extends Controller
 
                 return $dropdown;
             })
+            ->rawColumns(['action'])
             ->make(true);
     }
 
@@ -4461,6 +4465,7 @@ class GlobalSettingsController extends Controller
 
                 return $dropdown;
             })
+            ->rawColumns(['action'])
             ->make(true);
     }
 
@@ -4905,7 +4910,7 @@ class GlobalSettingsController extends Controller
             ->join('riders_shipment_weight_ranges as rswr', 'rswr.id', '=', 'riders_incentive_settings.rider_shipment_weight_range_id')
             ->join('admins as ab', 'ab.id', '=', 'riders_incentive_settings.added_by')
             ->leftjoin('admins as ub', 'ub.id', '=', 'riders_incentive_settings.last_updated_by')
-            ->select('riders_incentive_settings.id as row_id', 'riders_incentive_settings.value', 'rc.name as rider_category', 'rspt.name as payment_type', 'rswr.name as weight_range', 'ab.name as added_by', 'ub.name as last_updated_by', 'riders_incentive_settings.created_at as added_at', 'riders_incentive_settings.updated_at');
+            ->select('riders_incentive_settings.id as row_id', 'riders_incentive_settings.value', 'rc.name as rider_category', 'rspt.name as payment_type', 'rswr.name as weight_range', 'ab.name as added_by', 'ub.name as last_updated_by', 'riders_incentive_settings.created_at as added_at', 'riders_incentive_settings.updated_at as updated');
         return Datatables::of($types)
             ->addColumn('action', function ($types) {
                 $dropdown = '
@@ -4918,6 +4923,7 @@ class GlobalSettingsController extends Controller
 
                 return $dropdown;
             })
+            ->rawColumns(['action'])
             ->make(true);
     }
 
@@ -5070,6 +5076,7 @@ class GlobalSettingsController extends Controller
                 }
                 return $dropdown;
             })
+            ->rawColumns(['action'])
             ->make(true);
     }
 
@@ -5136,7 +5143,7 @@ class GlobalSettingsController extends Controller
                     $dropdown .= $disable;
                 }
                 return $dropdown;
-            });
+            })->rawColumns(['action']);
         return $datatable->make(true);
     }
 
@@ -5342,7 +5349,7 @@ class GlobalSettingsController extends Controller
                     $dropdown .= $disable;
                 }
                 return $dropdown;
-            });
+            })->rawColumns(['action','junctions','starting_id','end_id']);
         return $datatable->make(true);
     }
 
@@ -5441,7 +5448,7 @@ class GlobalSettingsController extends Controller
     public function shipment_status_eta_list(Request $request)
     {
         $shipment_status = TelenorShipmentStatusEstimatedTime::join('shipment_status as ss', 'ss.id', '=', 'telenor_shipment_status_estimated_times.shipper_status_id')
-            ->select('telenor_shipment_status_estimated_times.id', 'telenor_shipment_status_estimated_times.shipper_status_id', 'ss.name as status_name', 'telenor_shipment_status_estimated_times.eta as eta', 'telenor_shipment_status_estimated_times.updated_at');
+            ->select('telenor_shipment_status_estimated_times.id', 'telenor_shipment_status_estimated_times.shipper_status_id', 'ss.name as status_name', 'telenor_shipment_status_estimated_times.eta as eta', 'telenor_shipment_status_estimated_times.updated_at as updated');
 
         $datatable = Datatables::of($shipment_status)
             ->addColumn('action', function ($data) {
@@ -5454,7 +5461,7 @@ class GlobalSettingsController extends Controller
                   </div>
           ';
                 return $dropdown;
-            });
+            })->rawColumns(['action']);
         return $datatable->make(true);
     }
 
@@ -5692,7 +5699,7 @@ class GlobalSettingsController extends Controller
             ->select([
                 'crm_agent_auto_assigns.id',
                 'crm_agent_auto_assigns.agent_id',
-                'crm_agent_auto_assigns.created_at',
+                'crm_agent_auto_assigns.created_at as created',
                 'crm_agent_auto_assigns.status',
                 'ad.name as agent_name',
             ]);
@@ -5792,7 +5799,16 @@ class GlobalSettingsController extends Controller
                 } else {
                     return 'Disable';
                 }
-            });
+            })->rawColumns([   'zone',
+                'hub',
+                'case_nature',
+                'case_nature_type',
+                'business_segment',
+                'sub_business_segment',
+                'shipper_key',
+                'shipper_non_key',
+                'shipment_status',
+                'action']);
 
 
         return $datatables->make(true);
@@ -6151,7 +6167,9 @@ class GlobalSettingsController extends Controller
                 }
             });
 
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['case_nature_type', 'case_natue', 'city_area_name', 'action'])
+        ->make(true);
     }
 
     public function hub_areas(Request $request)
@@ -6786,7 +6804,7 @@ class GlobalSettingsController extends Controller
             })
             ->addColumn('service2_link', function ($roles) {
                 return '<button class="btn btn-sm btn-outline-info align-middle services_link" id="' . $roles->id . '"><span class="align-middle">' . $roles->service2 . '</span></button>';
-            });
+            })->rawColumns(['action','service2_link']);;
 
         return $datatables->make(true);
     }
@@ -6929,7 +6947,7 @@ class GlobalSettingsController extends Controller
                 } else {
                     return 'Disable';
                 }
-            });
+            })->rawColumns(['action']);
 
         return $datatables->make(true);
     }
@@ -7005,7 +7023,7 @@ class GlobalSettingsController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 498);
         }
         $notifications = LeadNotification::join('admins as a', 'lead_notifications.updated_by', '=', 'a.id')
-            ->select('lead_notifications.id', 'lead_notifications.name', 'lead_notifications.type_id as type', 'lead_notifications.updated_at', 'a.name as updated_by', 'lead_notifications.status');
+            ->select('lead_notifications.id', 'lead_notifications.name', 'lead_notifications.type_id as type', 'lead_notifications.updated_at as updated', 'a.name as updated_by', 'lead_notifications.status');
 
         $datatables = Datatables::of($notifications)
             ->setRowAttr([
@@ -7052,7 +7070,7 @@ class GlobalSettingsController extends Controller
             ';
 
                 return $dropdown;
-            });
+            })->rawColumns(['action']);
 
         return $datatables->make(true);
     }
@@ -7341,6 +7359,7 @@ class GlobalSettingsController extends Controller
 
     public function return_reason_mandatory_index()
     {
+        
         ActivityTrailController::createActivityTrailLog(Auth::id(), 510);
         $already_added_shippers = ReturnReasonMandatoryShipper::pluck('shipper_id')->toArray();
         $shippers = User::join('cities as c', 'users.city_id', '=', 'c.id')
@@ -7518,6 +7537,7 @@ class GlobalSettingsController extends Controller
             'c.name as city_name',
             'auto_tag_territories.status',
             't.name as territory_name', 
+            'auto_tag_territories.created_at as created',
             DB::raw("
                 IF(
                     (
@@ -7537,7 +7557,7 @@ class GlobalSettingsController extends Controller
                     '-'
                 ) as territory_names")
         )
-        ->orderBy('auto_tag_territories.created_at', 'desc')
+        //->orderBy('auto_tag_territories.created_at', 'desc')
         ->groupBy('auto_tag_territories.admin_id');
 
         $datatables = Datatables::of($roles)
@@ -7577,7 +7597,7 @@ class GlobalSettingsController extends Controller
                 } else {
                     return $roles->city_name;
                 }
-            });
+            })->rawColumns(['action']);
 
         return $datatables->make(true);
     }
@@ -7755,7 +7775,9 @@ class GlobalSettingsController extends Controller
                 }
             });
 
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['action'])
+        ->make(true);
     }
 
     public function referral_name(Request $request)
@@ -7856,7 +7878,9 @@ class GlobalSettingsController extends Controller
                 }
             });
 
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['action'])
+        ->make(true);
     }
 
     public function lost_shipment_shippers_add(Request $request)
@@ -7916,7 +7940,9 @@ class GlobalSettingsController extends Controller
                 }
             });
 
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['action'])
+        ->make(true);
     }
 
     public function lost_shipment_admins_add(Request $request)
@@ -7987,7 +8013,7 @@ class GlobalSettingsController extends Controller
         $admins = DeliveryLocationMapping::join('admins as ad', 'ad.id', '=', 'delivery_location_mappings.added_by')
             ->join('cities as ct', 'ct.id', '=', 'delivery_location_mappings.city_id')
             ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_location_mappings.updated_by')
-            ->select('delivery_location_mappings.id', 'delivery_location_mappings.area_name', 'ct.name as city_name', 'ub.name as updated_by', 'ad.name as added_by', 'delivery_location_mappings.updated_at', 'delivery_location_mappings.status');
+            ->select('delivery_location_mappings.id', 'delivery_location_mappings.area_name', 'ct.name as city_name', 'ub.name as updated_by', 'ad.name as added_by', 'delivery_location_mappings.updated_at as updated', 'delivery_location_mappings.status');
         $datatables = Datatables::of($admins)
             ->addColumn('status', function ($admins) {
                 if ($admins->status == 1) {
@@ -8018,7 +8044,7 @@ class GlobalSettingsController extends Controller
                 } else {
                     return '';
                 }
-            });
+            })->rawColumns(['action']);
 
         return $datatables->make(true);
     }
@@ -8191,7 +8217,7 @@ class GlobalSettingsController extends Controller
         $admins = BookingDestinationMapping::join('admins as ad', 'ad.id', '=', 'booking_destination_mappings.added_by')
             ->join('cities as ct', 'ct.id', '=', 'booking_destination_mappings.city_id')
             ->leftjoin('admins as ub', 'ub.id', '=', 'booking_destination_mappings.updated_by')
-            ->select('booking_destination_mappings.id', 'ct.name as city_name', 'ub.name as updated_by', 'ad.name as added_by', 'booking_destination_mappings.updated_at', 'booking_destination_mappings.status');
+            ->select('booking_destination_mappings.id', 'ct.name as city_name', 'ub.name as updated_by', 'ad.name as added_by', 'booking_destination_mappings.updated_at as updated', 'booking_destination_mappings.status');
         $datatables = Datatables::of($admins)
             ->addColumn('status', function ($admins) {
                 if ($admins->status == 1) {
@@ -8222,7 +8248,7 @@ class GlobalSettingsController extends Controller
                 } else {
                     return '';
                 }
-            });
+            })->rawColumns(['action']);
 
         return $datatables->make(true);
     }
@@ -8744,7 +8770,7 @@ class GlobalSettingsController extends Controller
     public function star_shippers_list()
     {
         $star_shippers = StarShipper::join('users as u', 'star_shippers.user_id', '=', 'u.id')
-            ->select('u.name as shipper_name', 'star_shippers.id as id', 'star_shippers.status as status', 'star_shippers.created_at as created_at');
+            ->select('u.name as shipper_name', 'star_shippers.id as id', 'star_shippers.status as status', 'star_shippers.created_at as created');
 
         $datatables = Datatables::of($star_shippers)
             ->editColumn('status', function ($star_shippers) {
@@ -8782,7 +8808,7 @@ class GlobalSettingsController extends Controller
     public function aListShipperView()
     {
         $alistShipper = SpecifiedShipper::join('users as u', 'specified_shippers.user_id', '=', 'u.id')
-            ->select('u.name as shipper_name', 'specified_shippers.id as id', 'specified_shippers.status as status', 'specified_shippers.created_at as created_at');
+            ->select('u.name as shipper_name', 'specified_shippers.id as id', 'specified_shippers.status as status', 'specified_shippers.created_at as created');
 
         $datatables = Datatables::of($alistShipper)
             ->editColumn('status', function ($alistShipper) {
@@ -8814,7 +8840,9 @@ class GlobalSettingsController extends Controller
                     return '';
                 }
             });
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['action'])
+        ->make(true);
     }
 
     public function star_shippers_add(Request $request)
@@ -9630,7 +9658,7 @@ class GlobalSettingsController extends Controller
                     ';
                 }
                 return $dropdown;
-            });
+            })->rawColumns(['action','hubs']);
 
         return $datatable->make(true);
     }
@@ -9779,7 +9807,8 @@ class GlobalSettingsController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 87);
         }
 
-        $products = Product::select('id as product_type_id', 'product_name')->orderby('product_type_id', 'desc');
+        $products = Product::select('id as product_type_id', 'product_name');
+        // ->orderby('product_type_id', 'desc');
 
         $datatables = Datatables::of($products)
             ->addColumn('action', function ($product_type) {
@@ -9797,7 +9826,7 @@ class GlobalSettingsController extends Controller
                         </div>
                     ';
                 return $dropdown;
-            });
+            })->rawColumns(['action']);
         return $datatables->make(true);
     }
 
@@ -10105,7 +10134,7 @@ class GlobalSettingsController extends Controller
                 'lead_progress_settings.percent as percent',
                 'lead_progress_settings.color as color',
                 'a.name as updated_by',
-                'lead_progress_settings.updated_at as updated_at'
+                'lead_progress_settings.updated_at as updated'
             );
         $datatable = Datatables::of($query)
             ->addColumn('action', function ($datatable) {
@@ -10119,7 +10148,9 @@ class GlobalSettingsController extends Controller
 
                 return $dropdown;
             });
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['action'])
+        ->make(true);
     }
 
     public function lead_progress_update(Request $request)

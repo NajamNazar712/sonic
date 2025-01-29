@@ -887,7 +887,7 @@ class ShipperDashboardController extends Controller
                 }
             });
 
-            return $datatable->make(true);
+            return $datatable->rawColumns(['tracking_number','action'])->make(true);
     }
     public function order_cancel(Request $request){
         $shipment_id = $request->shipment_id;
@@ -1615,6 +1615,18 @@ class ShipperDashboardController extends Controller
             ->select('shipments.tracking_number as tracking_number','shipments.tracking_number as tracking_id', 'shipments.order_id as order_number', 'dps.done_payment_id as payment_id', 'bl.name as bank_name', 'dps.created_at as payment_date', 'dps.payable as cod', 'dps.type as type','ubi.iban as account_detail')
             ->where('shipments.user_id', session('user_id'))->orderBy('dps.created_at','desc');
 
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $shipments->whereBetween('dps.created_at', [$from,$to]);
+        }
+        if ($request->get('cod_payable_from') && $request->get('cod_payable_to')) {
+            $from = $request->get('cod_payable_from');
+            $to = $request->get('cod_payable_to');
+            $shipments->whereBetween('dps.payable', [$from,$to]);
+        }
+
         $datatable=Datatables::of($shipments)
             ->editColumn('tracking_number', function ($shipments) {
                 $route = route('cod.tracking.index');
@@ -1653,18 +1665,8 @@ class ShipperDashboardController extends Controller
             else{
                 return 'Adjusted';
             }
-            });
+            })->rawColumns(['tracking_number']);
 
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $datatable->whereBetween('dps.created_at', [$from,$to]);
-        }
-        if ($request->get('cod_payable_from') && $request->get('cod_payable_to')) {
-            $from = $request->get('cod_payable_from');
-            $to = $request->get('cod_payable_to');
-            $datatable->whereBetween('dps.payable', [$from,$to]);
-        }
 
         return $datatable->make(true);
 
@@ -2239,6 +2241,22 @@ class ShipperDashboardController extends Controller
             }
         }
 
+        if ($tracking_number = $request->get('tracking_number')) {
+            $shipments->where('shipments.tracking_number', $tracking_number);
+        }
+
+        if ($phone_number = $request->get('phone_number')) {
+            $shipments->where('shipments.consignee_phone_number_1', $phone_number);
+        }
+
+        if ($order_id = $request->get('order_id')) {
+            $shipments->where('shipments.order_id',$order_id);
+        }
+
+        if (!$request->get('tracking_number') && !$request->get('phone_number') && !$request->get('order_id')) {
+            $shipments->whereRaw('FALSE');
+        }
+
         $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number', function ($shipments) {
                 $route = route('cod.tracking.index');
@@ -2257,23 +2275,9 @@ class ShipperDashboardController extends Controller
                 return number_format($shipment->amount);
             });
 
-        if ($tracking_number = $request->get('tracking_number')) {
-            $datatable->where('shipments.tracking_number', $tracking_number);
-        }
 
-        if ($phone_number = $request->get('phone_number')) {
-            $datatable->where('shipments.consignee_phone_number_1', $phone_number);
-        }
 
-        if ($order_id = $request->get('order_id')) {
-            $datatable->where('shipments.order_id',$order_id);
-        }
-
-        if (!$request->get('tracking_number') && !$request->get('phone_number') && !$request->get('order_id')) {
-            $datatable->whereRaw('FALSE');
-        }
-
-        return $datatable->make(true);
+        return $datatable->rawColumns(['tracking_number'])->make(true);
     }
 
     public function agreement_status(Request $request){
@@ -2500,6 +2504,9 @@ class ShipperDashboardController extends Controller
         // $cities = PickupType::find(1)->cities()->orderBy('city_name')->get();
         $invoicing_cycle = InvoicingCycle::all();
 
+        // in case when the if condition fails so to avoid undefined variable errors
+        $riders_permanent = collect();
+        $weight = collect();
 
         if (!RateStatus::where('user_id', $user->id)->exists()) {
             $weight = StandardWeightCharge::all()->groupBy('shipping_mode_id');

@@ -24,7 +24,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
-use Yajra\Datatables\Datatables;
+use Yajra\DataTables\DataTables;
 use function foo\func;
 
 class AdminCnController extends Controller
@@ -171,8 +171,8 @@ class AdminCnController extends Controller
                 } else{
                     return '';
                 }
-            });
-
+            })
+            ->rawColumns(['action']);
 
         return $datatables->make(true);
     }
@@ -345,8 +345,8 @@ class AdminCnController extends Controller
                 } else{
                     return '';
                 }
-            });
-
+            })
+            ->rawColumns(['action']);
 
         return $datatables->make(true);
     }

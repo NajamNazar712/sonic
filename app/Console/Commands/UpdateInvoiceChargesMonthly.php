@@ -43,7 +43,7 @@ class UpdateInvoiceChargesMonthly extends Command
     public function handle()
     {
 
-        $startDate =  Carbon::now()->subDays(1)->format('Y-m-d 00:00:00');
+        $startDate =  Carbon::now()->subDays(6)->format('Y-m-d 00:00:00');
         $endDate = Carbon::now()->format('Y-m-d 23:59:59');
 
         $query = DB::table('invoice_shipments')
@@ -72,15 +72,17 @@ class UpdateInvoiceChargesMonthly extends Command
             ->leftJoin('invoices', 'invoices.id', '=', 'invoice_shipments.invoice_id')
             ->leftJoin('shipment_additional_charges AS sac', 'sac.shipment_id', '=', 'shipments.id')
             ->leftJoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->leftJoin('users', 'shipments.user_id', '=', 'users.id')
             ->leftJoin('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->leftJoin('zones AS z', 'z.id', '=', 'oc.zone_id')
             ->where('invoice_shipments.type', 3)
+            ->where('shipments.shipment_type', 1)
+            ->where('users.account_type_id', 2)
             ->whereBetween('invoices.invoicing_date', [$startDate,$endDate])
 //            ->where('invoices.user_id', 14814)
             ->having('new_charges', '!=', DB::raw('invoice_charges'))
             ->groupBy('invoice_shipments.shipment_id')
             ->get();
-
 
         $invoice_id = array();
         foreach ($query as $value){

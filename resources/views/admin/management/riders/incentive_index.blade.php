@@ -167,9 +167,9 @@
                                 row.push(values.category);
                                 row.push(values.status);
                                 row.push(values.created_by);
-                                row.push(values.created_at);
+                                row.push(values.created);
                                 row.push(values.updated_by);
-                                row.push(values.updated_at);
+                                row.push(values.updated);
                                 body.push(row);
                             });
                         },
@@ -305,9 +305,9 @@
                     {data: 'category', name: 'rider_categories.id', class: 'align-middle category'},
                     {data: 'status', name: 'riders.status', class: 'align-middle status'},
                     {data: 'created_by', name: 'cb.name', class: 'align-middle created_by'},
-                    {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
+                    {data: 'created', name: 'riders.created_at', class: 'align-middle created_at'},
                     {data: 'updated_by', name: 'ub.name', class: 'align-middle updated_by'},
-                    {data: 'updated_at', name: 'riders.updated_at', class: 'align-middle updated_at'},
+                    {data: 'updated', name: 'riders.updated_at', class: 'align-middle updated_at'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
