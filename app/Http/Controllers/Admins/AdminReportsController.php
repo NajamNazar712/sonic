@@ -16209,7 +16209,7 @@ class AdminReportsController extends Controller
             ->whereIn('shipments.tracking_number', $filteredShipments)
             ->distinct()
             ->select(
-                'shipments.tracking_number as shipment_tracking_number',
+                'shipments.tracking_number',
                 'users.name as shipper_name',
 
                 'defaulter_admin.name as admin_name',
@@ -16231,9 +16231,9 @@ class AdminReportsController extends Controller
                 'sj.remarks as case_closed_remarks' 
             );
         $datatable = Datatables::of($lost_and_closed_shipments)
-        ->editColumn('shipment_tracking_number', function ($shipments) {
+        ->editColumn('tracking_number', function ($shipments) {
             $route = route('admin.tracking.index');
-            return "<u><a href='{$route}?tracking_number=$shipments->shipment_tracking_number' class='tracking' target='_blank'>$shipments->shipment_tracking_number</a></u>";
+            return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
         })
         ->editColumn('lost_approved_by', function ($shipments) {
             $lost_approved_by = '-';
@@ -16281,7 +16281,7 @@ class AdminReportsController extends Controller
         });
 
         return $datatable
-        ->rawColumns(['shipment_tracking_number'])
+        ->rawColumns(['tracking_number'])
         ->make(true);
     }
 }

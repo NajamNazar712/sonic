@@ -170,7 +170,7 @@
                             row = [];
                             row.push(index + 1);
                             // row.push(values.shipment_tracking_number);
-                            var trackingNumber = $(values.shipment_tracking_number).text();
+                            var trackingNumber = $(values.tracking_number).text();
                             row.push(trackingNumber);
                             row.push(values.shipper_name);
                             row.push(values.defaulter_name);
@@ -231,23 +231,22 @@
             order: [
                 [1, 'desc']
             ],
-            columns: [
-                {
+            columns: [{
                     orderable: false,
                     searchable: false,
                     name: 'serial_number',
                     class: 'align-middle serial_number',
                     targets: 0,
-                    render: function (data, type, row, meta) {
+                    render: function(data, type, row, meta) {
                         return meta.row + 1;
                     }
                 },
                 {
                     orderable: true,
                     searchable: true,
-                    class: 'align-middle shipment_tracking_number',
-                    data: 'shipment_tracking_number',
-                    name: 'shipment_tracking_number'
+                    class: 'align-middle tracking_number',
+                    data: 'tracking_number',
+                    name: 'tracking_number'
                 },
                 {
                     orderable: true,
@@ -331,9 +330,36 @@
                 var info = table.page.info();
                 $('td:eq(0)', row).html(index + 1 + info.page * info.length);
             },
+
             initComplete: function() {
+                var searchRow = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this
+                    .api().table().header());
+
+                this.api().columns().every(function() {
+                    var column = this;
+                    var header = $(column.header());
+                    var td = $(
+                    '<td style="padding:5px;" class="border-primary border-lighten-2"></td>');
+
+                    // Create input field for searchable columns
+                    var input = $(
+                            '<input type="text" class="form-control form-control-sm input-sm primary">')
+                        .appendTo(td)
+                        .on('change', function() {
+                            column.search($(this).val()).draw();
+                        });
+
+                    // Restore previous search values if present
+                    if (column.search()) {
+                        input.val(column.search());
+                    }
+
+                    td.appendTo(searchRow);
+                });
+
                 this.api().table().columns.adjust();
             }
+
         });
 
         //Selectize
@@ -363,7 +389,7 @@
                 }
             },
         });
-        
+
         // $('#track_form').bind('submit', function(e) {
         //     var tracking_numbers = $('#track_form .tracking_numbers').val();
         //     if (tracking_numbers != '') {
@@ -372,10 +398,9 @@
         // });
 
         table.draw();
-        $('#track_form').on('submit', function (e) {
+        $('#track_form').on('submit', function(e) {
             e.preventDefault();
             table.draw();
         });
-
     </script>
 @endsection
