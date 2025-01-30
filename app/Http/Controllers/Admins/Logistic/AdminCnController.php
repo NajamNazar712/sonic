@@ -301,7 +301,6 @@ class AdminCnController extends Controller
     {
         $cn_number_from = (int) $request->get('cn_number_from');
         $cn_number_to = (int) $request->get('cn_number_to');
-        $employee_id = $request->get('employee_id');
 
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 774);
@@ -319,6 +318,21 @@ class AdminCnController extends Controller
             $trax_cn_issue_rider = $trax_cn_issue_rider->whereIn('trax_cn_issue_to_riders.area_code',$hub_ids);
         }
 
+        if ($cn_number_from != null && $cn_number_to == null) {
+            $cn_number_to = $cn_number_from;  // Set the end range to the start range
+        } elseif ($cn_number_from == null && $cn_number_to != null) {
+            $cn_number_from = $cn_number_to;  // Set the start range to the end range
+        }
+        
+        if ($cn_number_from && $cn_number_to) {
+            $trax_cn_issue_rider = $trax_cn_issue_rider->where(function($query) use ($cn_number_from, $cn_number_to) {
+                $query->where(function($query) use ($cn_number_from, $cn_number_to) {
+                    $query->where('cn_from', '<=', $cn_number_to)
+                        ->where('cn_to', '>=', $cn_number_from);
+                });
+            });
+        }
+
         $employee_ids = $request->get('employee_id');
         if ($employee_ids) {
             $employee_ids = explode(',', $employee_ids);
@@ -331,15 +345,6 @@ class AdminCnController extends Controller
                         $query->orWhere('rd.trax_id', '=', $employee_id);
                     }
                 }
-            });
-        }
-
-        if ($request->get('cn_number_from') && $request->get('cn_number_to')) {
-            $trax_cn_issue_rider = $trax_cn_issue_rider->where(function($query) use ($cn_number_from, $cn_number_to) {
-                $query->where(function($query) use ($cn_number_from, $cn_number_to) {
-                    $query->where('cn_from', '<=', $cn_number_to)
-                        ->where('cn_to', '>=', $cn_number_from);
-                });
             });
         }
 
