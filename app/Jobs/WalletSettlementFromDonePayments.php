@@ -58,7 +58,7 @@ class WalletSettlementFromDonePayments implements ShouldQueue
         })
         ->leftjoin('finja_log_settlement_records as sac', 'done_payment_shipments.shipment_id', '=', 'sac.shipment_id')
         ->where('done_payment_shipments.done_payment_id', $this->payment_id)
-        ->whereIn('done_payment_shipments.wallet_action_bid', [1,2])
+        ->whereIn('done_payment_shipments.wallet_action_bid', [0,1,2])
         // ->where(function ($query) {
         //     $query->where('sac.wallet_settlement_updated', 0);
         // })
@@ -103,7 +103,7 @@ class WalletSettlementFromDonePayments implements ShouldQueue
                     'wallet_settlement_updated_at' => Carbon::now(),
                 ];
 
-            } else {
+            } elseif($dps->wallet_action_bid == 2) {
                 $requestPayload = [
                     "client_id" => $dps->user_id,
                     "wallet_id" => $dps->wallet_id,
@@ -118,6 +118,26 @@ class WalletSettlementFromDonePayments implements ShouldQueue
                     'shipment_id' => $dps->shipment_id,
                     'wallet_adjustment_updated' => true,
                     'wallet_adjustment_updated_at' => Carbon::now(),
+                ];
+            } elseif($dps->wallet_action_bid == 0) {
+                $requestPayload = [
+                    "client_id" => $dps->user_id,
+                    "wallet_id" => $dps->wallet_id,
+                    "shipment_id" =>  $dps->tracking_number,
+                    "charges" => [
+                        'faf_charges' =>  floatval($dps->faf_charges),
+                        'weight_charges' =>  floatval($dps->weight_charges),
+                        'fuel_surcharge' =>  floatval($dps->fuel_surcharge),
+                        'arrival_charges_gst' => floatval($dps->gst),
+                    ]
+                ];
+                $request_nature = 'log-charge-request';
+                $response_nature = 'log-charge-response';
+                $url = $api.'transactions/log/charge';
+                $data = [
+                    'shipment_id' => $dps->shipment_id,
+                    'wallet_log_charges_updated' => true,
+                    'wallet_log_charges_updated_at' => Carbon::now(),
                 ];
             }
 

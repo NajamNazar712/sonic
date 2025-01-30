@@ -6567,7 +6567,7 @@ class AdminFinanceController extends Controller
         $pending_payments = DB::connection('mysql')->table('pending_payments')
             ->join('users as u', 'pending_payments.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
-            ->join('user_bank_infos as ubi', function ($join) {
+            ->leftjoin('user_bank_infos as ubi', function ($join) {
                 $join->on('pending_payments.user_id', '=', 'ubi.user_id')
                     ->where('ubi.id', '=', DB::raw(
                         '(select max(id) from user_bank_infos where user_id = pending_payments.user_id and default_bank = 1)'
@@ -6575,7 +6575,7 @@ class AdminFinanceController extends Controller
             })
             ->join('banks_lists as ub', 'ubi.bank_name', '=', 'ub.id')
             ->join('payment_cycles as pc', 'u.payment_cycle_id', '=', 'pc.id')
-            ->join('cities as bc', 'ubi.city_id', '=', 'bc.id')
+            ->leftjoin('cities as bc', 'ubi.city_id', '=', 'bc.id')
 //            ->join('pending_payment_shipments as pps', 'pending_payments.id', '=', 'pps.pending_payment_id')
             ->leftjoin('pending_payment_calculations as ppc', 'ppc.pending_payment_id', '=', 'pending_payments.id')
 //            ->join('shipments as s', 's.id', '=', 'pps.shipment_id')
@@ -7638,13 +7638,13 @@ class AdminFinanceController extends Controller
                                                 "shipment_id" => $shipment->tracking_number, 
                                                 "amount" => $shipment->amount, 
                                                 "order_created_date" => $shipment->created_at,
-                                                "charges" => [
-                                                    'weight_charges' =>  floatval($shipment->weight_charges),
-                                                    'fuel_surcharge' =>  floatval($shipment->fuel_surcharge),
-                                                    'faf_charges' => $shipment->faf_charges_data ? floatval($shipment->faf_charges_data->faf_charges) : 0,
-                                                    'arrival_charges_gst' => floatval($pending_payment_shipment->gst),
-                                                    'arrival_sms_charges' => floatval($pending_payment_shipment->sms_charges)
-                                                ]
+                                                // "charges" => [
+                                                //     'weight_charges' =>  floatval($shipment->weight_charges),
+                                                //     'fuel_surcharge' =>  floatval($shipment->fuel_surcharge),
+                                                //     'faf_charges' => $shipment->faf_charges_data ? floatval($shipment->faf_charges_data->faf_charges) : 0,
+                                                //     'arrival_charges_gst' => floatval($pending_payment_shipment->gst),
+                                                //     'arrival_sms_charges' => floatval($pending_payment_shipment->sms_charges)
+                                                // ]
                                             ]; 
                                         }
                                         $finja_status = 0;
@@ -7662,9 +7662,9 @@ class AdminFinanceController extends Controller
                                                     "shipment_id" => $shipment->tracking_number, 
                                                     "amount" => $shipment->amount, 
                                                     "order_created_date" => $shipment->created_at,
-                                                    "charges" => [
-                                                        'weight_charges' =>  0
-                                                    ]
+                                                    // "charges" => [
+                                                    //     'weight_charges' =>  0
+                                                    // ]
                                                 ];
                                             }
                                             $finja_status = 1;
@@ -7685,9 +7685,9 @@ class AdminFinanceController extends Controller
                                                 "shipment_id" => $shipment->tracking_number, 
                                                 "amount" => 0, 
                                                 "order_created_date" => $shipment->created_at,
-                                                "charges" => [
-                                                    'weight_charges' =>  0
-                                                ]
+                                                // "charges" => [
+                                                //     'weight_charges' =>  0
+                                                // ]
                                             ]; 
                                         }
                                         $finja_status = 2;
@@ -7817,13 +7817,13 @@ class AdminFinanceController extends Controller
                                                 "shipment_id" => $shipment->tracking_number, 
                                                 "amount" => $shipment->amount,
                                                 "order_created_date" => $shipment->created_at,
-                                                "charges" => [
-                                                    'weight_charges' =>  floatval($shipment->weight_charges),
-                                                    'fuel_surcharge' =>  floatval($shipment->fuel_surcharge),
-                                                    'faf_charges' => $shipment->faf_charges_data ? floatval($shipment->faf_charges_data->faf_charges) : 0,
-                                                    'arrival_charges_gst' => floatval($pending_payment_shipment->gst),
-                                                    'arrival_sms_charges' => floatval($pending_payment_shipment->sms_charges)
-                                                ]
+                                                // "charges" => [
+                                                //     'weight_charges' =>  floatval($shipment->weight_charges),
+                                                //     'fuel_surcharge' =>  floatval($shipment->fuel_surcharge),
+                                                //     'faf_charges' => $shipment->faf_charges_data ? floatval($shipment->faf_charges_data->faf_charges) : 0,
+                                                //     'arrival_charges_gst' => floatval($pending_payment_shipment->gst),
+                                                //     'arrival_sms_charges' => floatval($pending_payment_shipment->sms_charges)
+                                                // ]
                                             ]; 
                                         }
                                         $finja_status = 0;
@@ -7841,9 +7841,9 @@ class AdminFinanceController extends Controller
                                                     "shipment_id" => $shipment->tracking_number, 
                                                     "amount" => $shipment->amount, 
                                                     "order_created_date" => $shipment->created_at,
-                                                    "charges" => [
-                                                        'weight_charges' =>  0
-                                                    ]
+                                                    // "charges" => [
+                                                    //     'weight_charges' =>  0
+                                                    // ]
                                                 ];
                                             }
                                             $finja_status = 1;
@@ -7863,9 +7863,9 @@ class AdminFinanceController extends Controller
                                                 "shipment_id" => $shipment->tracking_number, 
                                                 "amount" => 0, 
                                                 "order_created_date" => $shipment->created_at,
-                                                "charges" => [
-                                                    'weight_charges' =>  0
-                                                ]
+                                                // "charges" => [
+                                                //     'weight_charges' =>  0
+                                                // ]
                                             ]; 
                                         }
                                         $finja_status = 2;
@@ -21485,7 +21485,7 @@ class AdminFinanceController extends Controller
                     $type = 'Delivered';
                 } elseif($dps->type == 1){
                     $type = 'Returned';
-                } else {
+                } elseif($dps->type == 2) {
                     $type = 'Adjustment';
                 }
 

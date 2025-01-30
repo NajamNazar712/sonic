@@ -74,13 +74,13 @@ class WalletSignUpLPendingRecordLogs implements ShouldQueue
                             "shipment_id" => $shipment->tracking_number, 
                             "amount" => $shipment->amount,
                             "order_created_date" => $shipment->created_at,
-                            "charges" => [
-                                'weight_charges' =>  floatval($shipment->weight_charges),
-                                'fuel_surcharge' =>  floatval($shipment->fuel_surcharge),
-                                'faf_charges' => $shipment->faf_charges_data ? floatval($shipment->faf_charges_data->faf_charges) : 0,
-                                'arrival_charges_gst' => floatval($pending_payment_shipment->gst),
-                                'arrival_sms_charges' => floatval($pending_payment_shipment->sms_charges)
-                            ]
+                            // "charges" => [
+                            //     'weight_charges' =>  floatval($shipment->weight_charges),
+                            //     'fuel_surcharge' =>  floatval($shipment->fuel_surcharge),
+                            //     'faf_charges' => $shipment->faf_charges_data ? floatval($shipment->faf_charges_data->faf_charges) : 0,
+                            //     'arrival_charges_gst' => floatval($pending_payment_shipment->gst),
+                            //     'arrival_sms_charges' => floatval($pending_payment_shipment->sms_charges)
+                            // ]remvoed as per new requirement
                         ]; 
                         $this->arrival_shipment_logs($requestPayload,  $shipment->id);
                     }
@@ -95,9 +95,9 @@ class WalletSignUpLPendingRecordLogs implements ShouldQueue
                             "shipment_id" => $shipment->tracking_number, 
                             "amount" => $shipment->amount, 
                             "order_created_date" => $shipment->created_at,
-                            "charges" => [
-                                'weight_charges' =>  0
-                            ]
+                            // "charges" => [
+                            //     'weight_charges' =>  0
+                            // ] remvoed as per new requirement
                         ];
                         $this->arrival_shipment_logs($requestPayload,  $shipment->id);
                     } 
@@ -111,9 +111,9 @@ class WalletSignUpLPendingRecordLogs implements ShouldQueue
                             "shipment_id" => $shipment->tracking_number, 
                             "amount" => 0, 
                             "order_created_date" => $shipment->created_at,
-                            "charges" => [
-                                'weight_charges' =>  0
-                            ]
+                            // "charges" => [
+                            //     'weight_charges' =>  0
+                            // ] remvoed as per new requirement
                         ];
                         $this->arrival_shipment_logs($requestPayload,  $shipment->id);
                     }
