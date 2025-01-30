@@ -319,8 +319,9 @@ class AdminCnController extends Controller
             $trax_cn_issue_rider = $trax_cn_issue_rider->whereIn('trax_cn_issue_to_riders.area_code',$hub_ids);
         }
 
-        $employee_ids = explode(',', $request->get('employee_id'));
+        $employee_ids = $request->get('employee_id');
         if ($employee_ids) {
+            $employee_ids = explode(',', $employee_ids);
             $trax_cn_issue_rider = $trax_cn_issue_rider->where(function ($query) use ($employee_ids) {
                 foreach ($employee_ids as $employee_id) {
                     $employee_id = trim($employee_id);
@@ -341,17 +342,6 @@ class AdminCnController extends Controller
                 });
             });
         }
-
-        // if ($request->get('cn_number_from') && $request->get('cn_number_to')) {
-        //     $trax_cn_issue_rider = $trax_cn_issue_rider->where(function($query) use ($cn_number_from, $cn_number_to) {
-        //         $query->whereBetween('cn_from', [$cn_number_from, $cn_number_to])
-        //             ->orWhereBetween('cn_to', [$cn_number_from, $cn_number_to])
-        //             ->orWhere(function($query) use ($cn_number_from, $cn_number_to) {
-        //                 $query->where('cn_from', '<=', $cn_number_from)
-        //                     ->where('cn_to', '>=', $cn_number_to);
-        //             });
-        //     });
-        // }
 
         $datatables = Datatables::of($trax_cn_issue_rider)
             ->addColumn('action',function ($trax_cn_issue_rider){
