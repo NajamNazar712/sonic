@@ -61,7 +61,7 @@ class AgentSarNotification extends Command
             $nowSub16Hours = Carbon::now()->subHours(16)->toDateTimeString();
             // $nowSub24Hours = Carbon::now()->subHours(24)->toDateTimeString();
             // $nowSub48Hours = Carbon::now()->subHours(48)->toDateTimeString();
-            $dateTime = Carbon::createFromFormat('Y-m-d H:i:s', '2025-01-27 23:15:00');
+            $dateTime = Carbon::createFromFormat('Y-m-d H:i:s', '2025-01-29 23:15:00');
             $nowSub48Hours = $dateTime->subHours(48)->toDateTimeString();
             $nowSub24Hours = $dateTime->subHours(24)->toDateTimeString();
 
