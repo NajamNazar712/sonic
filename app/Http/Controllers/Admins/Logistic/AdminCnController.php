@@ -319,13 +319,18 @@ class AdminCnController extends Controller
             $trax_cn_issue_rider = $trax_cn_issue_rider->whereIn('trax_cn_issue_to_riders.area_code',$hub_ids);
         }
 
-
-        if ($request->get('employee_id')) {
-            if (strpos($request->get('employee_id'), '%') !== false) {
-                $trax_cn_issue_rider = $trax_cn_issue_rider->where('rd.trax_id', 'like', $employee_id); 
-            } else {
-                $trax_cn_issue_rider = $trax_cn_issue_rider->where('rd.trax_id', '=', $employee_id);
-            }
+        $employee_ids = explode(',', $request->get('employee_id'));
+        if ($employee_ids) {
+            $trax_cn_issue_rider = $trax_cn_issue_rider->where(function ($query) use ($employee_ids) {
+                foreach ($employee_ids as $employee_id) {
+                    $employee_id = trim($employee_id);
+                    if (strpos($employee_id, '%') !== false) {
+                        $query->orWhere('rd.trax_id', 'like', $employee_id);
+                    } else {
+                        $query->orWhere('rd.trax_id', '=', $employee_id);
+                    }
+                }
+            });
         }
 
         if ($request->get('cn_number_from') && $request->get('cn_number_to')) {
