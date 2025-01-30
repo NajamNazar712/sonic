@@ -130,7 +130,7 @@
                                                             </div>
                                                             @php
                                                                 // Get sms_charges value from the $shipper object
-                                                                $sms_charge = isset($shipper->sms_charges) ? $shipper->sms_charges : null;
+                                                                $sms_charge = isset($sms_charge->sms_charges) ? $sms_charge->sms_charges : $shipper->sms_charges;
                                                             @endphp
 
                                                             <input type="text"
