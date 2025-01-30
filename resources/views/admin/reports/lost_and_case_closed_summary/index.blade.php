@@ -293,16 +293,16 @@
                 {
                     orderable: true,
                     searchable: true,
-                    class: 'align-middle lost_requested_by',
-                    data: 'lost_requested_by',
-                    name: 'lost_requested_by'
+                    class: 'align-middle lost_approved_by',
+                    data: 'lost_approved_by',
+                    name: 'lost_approved_by'
                 },
                 {
                     orderable: true,
                     searchable: true,
-                    class: 'align-middle lost_approved_by',
-                    data: 'lost_approved_by',
-                    name: 'lost_approved_by'
+                    class: 'align-middle lost_requested_by',
+                    data: 'lost_requested_by',
+                    name: 'lost_requested_by'
                 },
                 {
                     orderable: true,
