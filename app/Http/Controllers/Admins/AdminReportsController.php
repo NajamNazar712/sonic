@@ -16305,17 +16305,11 @@ class AdminReportsController extends Controller
         })
         
         ->filterColumn('employee_status', function ($query, $keyword) {
-            // Query the employee_statuses table to get the matching status name
-            $statusName = DB::table('employee_statuses')
-                ->where('name', 'like', "%$keyword%")
-                ->pluck('name')
-                ->first(); // Get the first match
-            
-            if ($statusName) {
-                // Filter by both admin_status and rider_status based on the matched name
-                $query->where(function ($query) use ($statusName) {
-                    $query->where('admin_status', '=', $statusName)
-                        ->orWhere('rider_status', '=', $statusName);
+            // Ensure the keyword is a valid integer (1, 2, or 3)
+            if (in_array($keyword, [1, 2, 3])) {
+                $query->where(function ($query) use ($keyword) {
+                    $query->where('admin_employee.status_id', '=', $keyword)
+                        ->orWhere('rider_employee.status_id', '=', $keyword);
                 });
             }
         })

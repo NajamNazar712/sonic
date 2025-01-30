@@ -335,23 +335,47 @@
                 var searchRow = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this
                     .api().table().header());
 
-                this.api().columns().every(function() {
+                this.api().columns().every(function(index) {
                     var column = this;
                     var header = $(column.header());
                     var td = $(
                     '<td style="padding:5px;" class="border-primary border-lighten-2"></td>');
 
-                    // Create input field for searchable columns
-                    var input = $(
-                            '<input type="text" class="form-control form-control-sm input-sm primary">')
-                        .appendTo(td)
-                        .on('change', function() {
-                            column.search($(this).val()).draw();
-                        });
+                    // Skip search bar for serial_number (index 0) and case_closed_remarks
+                    if (index === 0 || header.hasClass('case_closed_remarks')) {
+                        td.appendTo(searchRow);
+                        return;
+                    }
 
-                    // Restore previous search values if present
-                    if (column.search()) {
-                        input.val(column.search());
+                    // Add select dropdown for employee_status column
+                    if (header.hasClass('employee_status')) {
+                        var select = $(
+                                '<select class="form-control form-control-sm input-sm primary">' +
+                                '<option value="1">Active</option>' +
+                                '<option value="2">Inactive</option>' +
+                                '<option value="3">Active - No Info</option>' +
+                                '</select>')
+                            .appendTo(td)
+                            .on('change', function() {
+                                column.search($(this).val()).draw();
+                            });
+
+                        if (column.search()) {
+                            select.val(column.search());
+                        }
+                    } else {
+                        // Create input field for other searchable columns
+                        var input = $(
+                                '<input type="text" class="form-control form-control-sm input-sm primary">'
+                                )
+                            .appendTo(td)
+                            .on('change', function() {
+                                column.search($(this).val()).draw();
+                            });
+
+                        if (column.search()) {
+                            input.val(column.search());
+                        }
                     }
 
                     td.appendTo(searchRow);
@@ -359,6 +383,7 @@
 
                 this.api().table().columns.adjust();
             }
+
 
         });
 
