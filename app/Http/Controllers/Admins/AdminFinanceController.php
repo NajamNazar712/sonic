@@ -9492,7 +9492,7 @@ class AdminFinanceController extends Controller
                               <td class="color primary"><strong>Collection Amount (PKR)</strong></td>
                               <td class="color primary"><strong>Weight Charges (PKR)</strong></td>
                               <td class="color primary"><strong>Faf Charges (PKR)</strong></td>
-                              <td class="color primary"><strong>Wallet Charges (PKR)</strong></td>
+                              <td class="color primary"><strong>Finova Charges (PKR)</strong></td>
                               <td class="color primary"><strong>Cash Handling Charges (PKR)</strong></td>
                               <td class="color primary"><strong>OSA Charges (PKR)</strong></td>
                               <td class="color primary"><strong>Adjustments (PKR)</strong></td>
@@ -9556,7 +9556,7 @@ class AdminFinanceController extends Controller
                                         <td>' . number_format($total_faf_charges, 2) . '</td>
                                     </tr>
                                      <tr>
-                                        <td class="color secondary"><strong>Total Wallet Charges</strong></td>
+                                        <td class="color secondary"><strong>Total Finova Charges</strong></td>
                                         <td>' . number_format($total_wallet_charges, 2) . '</td>
                                     </tr>
                                     <tr>

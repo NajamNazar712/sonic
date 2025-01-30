@@ -1258,33 +1258,48 @@ class ShipperDashboardController extends Controller
     }
 
     public function getBanks(Request $request){
-        $banks = UserBankInfo::join('cities as c','user_bank_infos.city_id','=','c.id')
+        $banks = UserBankInfo::leftJoin('cities as c','user_bank_infos.city_id','=','c.id')
         ->leftJoin('banks_lists as bl','bl.id','=','user_bank_infos.bank_name')
-        ->select(['user_bank_infos.id as bank_row_id','user_bank_infos.bank_branch','user_bank_infos.account_no','user_bank_infos.account_title','user_bank_infos.iban','c.name as city','bl.name as bank_name','user_bank_infos.default_bank'])
-        ->where('user_id', session('user_id'));
+        ->leftjoin('wallet_users as wu', function ($join) {
+            $join->on('wu.user_id', '=', 'user_bank_infos.user_id')
+               ->where('wu.substitute_user_id', '0');
+        })
+        ->select(['user_bank_infos.id as bank_row_id','user_bank_infos.bank_branch','user_bank_infos.account_no','user_bank_infos.account_title','user_bank_infos.iban','c.name as city','bl.name as bank_name','user_bank_infos.default_bank', 'wu.user_id as wallet_user'])
+        ->where('user_bank_infos.user_id', session('user_id'));
 
         return Datatables::of($banks)
         ->addColumn('action', function ($bank) {
 
-            $dropdown = '
+            if(!$bank->wallet_user) {
+                $dropdown = '
                 <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">
-            ';
-            $default_button = '<button type="button" class="dropdown-item default"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Make Default</div></button>';
+                ';
+                $default_button = '<button type="button" class="dropdown-item default"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Make Default</div></button>';
 
-            if ($bank->default_bank) {
-                $dropdown = 'Default Address';
+                if ($bank->default_bank) {
+                    $dropdown = 'Default Address';
 
-            }else{
-                $dropdown .= $default_button;
-            }
-            
+                }else{
+                    $dropdown .= $default_button;
+                }
+                
 
-            $dropdown .= '
+                $dropdown .= '
+                        </div>
                     </div>
-                </div>
-            ';
+                ';
+
+                
+            } else {
+                if ($bank->default_bank) {
+                    $dropdown = 'Default Address';
+
+                }else{
+                    $dropdown = '';
+                }
+            }
 
             return $dropdown;
         })->make(true);
@@ -2719,6 +2734,7 @@ class ShipperDashboardController extends Controller
             $errors = array();
             $data = array();
 
+            $bank = 0;
             foreach ($request->users as $key => $row) {
                 $row_id = $row['id'];
                 $validate = Validator::make($row, $rules, $messages);
@@ -2781,6 +2797,27 @@ class ShipperDashboardController extends Controller
                         $data[$key]['updated_at'] = Carbon::now();
                     }
                     WalletUser::wallet_create($data);
+                    
+                    $hasSubstituteZero = array_filter($data, function ($item) {
+                        return isset($item['substitute_user_id']) && $item['substitute_user_id'] == 0;
+                    });
+                    if (!empty($hasSubstituteZero)) {
+                        if(UserBankInfo::where('user_id',session('user_id'))->exists())
+                        {
+                            UserBankInfo::where('user_id', session('user_id'))->update(['default_bank' => 0]);
+                        }
+                        $user_bank = new UserBankInfo();
+                        $user_bank->user_id = session('user_id');
+                        $user_bank->bank_name = 48;
+                        $user_bank->bank_branch = 'N/A';
+                        $user_bank->account_no = 'N/A';
+                        $user_bank->account_title = 'N/A';
+                        $user_bank->iban = 'N/A';
+                        $user_bank->city_id = 0 ;
+                        $user_bank->default_bank = 1; // always make the new bank info as default
+                        $user_bank->save();
+
+                    }
                     WalletSignUpLPendingRecordLogs::dispatch(session('user_id'));
                     return response()->json(['status' => 1, 'output' => $final]);
 
