@@ -16088,360 +16088,168 @@ class AdminReportsController extends Controller
          * 18 is lost
          * 51 is case closed
          */
-
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 815);
         }
         $trackingNumbers = explode(',', $request->tracking_numbers);
-        $filteredShipments = DB::connection('reports')->table('shipments')
-            ->join('shipments_journey as sj', 'sj.shipment_id', '=', 'shipments.id')
-            ->where(function ($query) use ($trackingNumbers) {
-                // Filter by tracking number if provided
-                if (!empty($trackingNumbers[0])) {
-                    $query->whereIn('shipments.tracking_number', $trackingNumbers);
-                }
+        $searchDateFrom = $request->input('search_date_from');
+        $searchDateTo = $request->input('search_date_to');
+
+        $startDate = $searchDateFrom ? Carbon::createFromFormat('d F, Y', $searchDateFrom)->startOfDay() : now()->subMonths(4)->startOfDay();
+        $endDate = $searchDateTo ? Carbon::createFromFormat('d F, Y', $searchDateTo)->endOfDay() : now()->endOfDay();
+
+
+        $lost_and_closed_shipments = DB::table('shipments')
+            ->select(
+                // 'shipments.id as shipment_id',
+                'shipments.tracking_number',
+                'lost_shipment_responsibles.*',
+                'admins.name AS admin_name',
+                'riders.name AS rider_name',
+                'admin_employees.trax_id as admin_trax_id',
+                'rider_employees.trax_id as rider_trax_id',
+                'city.name AS responsible_city',
+                'requested_admins.name AS requested_admin_name',
+                'request_approved_admins.name AS request_approved_admin',
+                'user_shipment.name as shipper_name',
+                'shipments.amount as cod_amount',
+                'shipments.parcel_value as parcel_value',
+                'admin_status.name as admin_status',
+                'rider_status.name as rider_status',
+                'shipment_status.name as latest_shipment_status',
+                DB::raw('(
+                    SELECT GROUP_CONCAT(shipper_status_id)
+                    FROM shipments_journey
+                    WHERE shipments_journey.shipment_id = shipments.id
+                    AND id >= sjl.id
+                ) AS jour'),
+                'case_closed_remarks.remarks AS case_closed_remarks'
+            )
+            ->leftJoin('shipments_journey AS sjl', function($join) {
+                $join->on('sjl.shipment_id', '=', 'shipments.id')
+                    ->whereRaw('sjl.id = (SELECT MAX(id) FROM shipments_journey WHERE shipments_journey.shipment_id = shipments.id AND shipments_journey.shipper_status_id = 18 AND shipments_journey.verification = 0)');
             })
-            ->select('shipments.tracking_number', 'sj.shipper_status_id')
-            ->get()
-            ->groupBy('tracking_number'); // Group by tracking number to handle each shipment separately
-        $results = [];
-        
-        foreach ($filteredShipments as $trackingNumber => $journeys) {
-            $sequence = $journeys->pluck('shipper_status_id')->toArray();
-            
-            // Check if the sequence contains 18, 18, 51 and handle accordingly
-            if (in_array(18, $sequence) && in_array(51, $sequence)) {
-                // If the sequence contains 18, 18, 51 (valid sequence), keep the sequence as it is
-                $results[$trackingNumber] = $sequence;
-            } elseif (in_array(18, $sequence)) {
-                // If 18 is present but there is no valid end like 51, reset to latest 18 or 18, 18
-                $validSequence = [];
-                
-                // Find the most recent 18 or 18,18 (check if the last 18 is valid)
-                $index = array_search(18, array_reverse($sequence)); // Find the latest occurrence of 18
-                
-                // Slice the sequence for the latest 18 or 18,18
-                if ($index !== false) {
-                    $validSequence = array_slice($sequence, count($sequence) - $index - 2, 2);
-                    
-                    // Ensure that any subsequent status after 18, 18 or 18 is excluded
-                    if (count($validSequence) == 2 && $validSequence[0] == 18 && $validSequence[1] == 18) {
-                        $results[$trackingNumber] = $validSequence;
-                    } else {
-                        // If there's no valid sequence after 18, 18, return just 18
-                        $results[$trackingNumber] = [18];
-                    }
-                } else {
-                    // Handle other scenarios or invalid sequences (not 18 or 51)
-                    $results[$trackingNumber] = [];
-                }
-            } else {
-                // Handle other scenarios or invalid sequences (not 18 or 51)
-                $results[$trackingNumber] = [];
-            }
-        }
-
-        $validTrackingNumbers = array_keys($results);
-        $validSequence = array_values($results);
-        $lost_and_closed_shipments = DB::connection('reports')->table('shipments');
-
-        // Apply leftJoin conditionally based on the presence of breaks in the sequence
-        $lost_and_closed_shipments = $lost_and_closed_shipments->leftJoin('shipments_journey as sj', function ($join) use ($validSequence) {
-            $join->on('sj.shipment_id', '=', 'shipments.id')
-                ->whereIn('sj.shipper_status_id', [18, 51]);
-
-                if (in_array(18, $validSequence[0]) && count($validSequence) === 1) {
-                // If the valid sequence is only 18, apply created_at filtering for latest 18
-                $join->where(
-                    'sj.created_at',
-                    '=',
-                    DB::connection('reports')->raw('
-                        (
-                            select max(created_at) from shipments_journey 
-                            where shipments_journey.shipment_id = shipments.id 
-                            and shipments_journey.shipper_status_id In(18, 51)
-                            and shipments_journey.created_at = 
-                                (
-                                    select max(created_at) from shipments_journey as sj_sub
-                                    where sj_sub.shipment_id = shipments.id
-                                    and sj_sub.shipper_status_id = 18
-                                    and not exists (
-                                        select 1 from shipments_journey as sj_next
-                                        where sj_next.shipment_id = shipments.id
-                                        and sj_next.shipper_status_id = 13
-                                        and sj_next.created_at > sj_sub.created_at
-                                    )
-                                    order by sj_sub.created_at desc
-                                    limit 1
-                                )
-                        )'
-                    )
-                );
-            } else {
-                // If there are breaks in the sequence, use the original max(id) approach
-                $join->where(
-                    'sj.id',
-                    '=',
-                    DB::connection('reports')->raw('
-                        (
-                            select max(id) from shipments_journey 
-                            where shipments_journey.shipment_id = shipments.id 
-                            and shipments_journey.shipper_status_id In(18, 51)
-                        )'
-                    )
-                );
-            }
-        });
-
-
-        $lost_and_closed_shipments = $lost_and_closed_shipments->leftJoin('admins as lost_requested_admin', function ($join) use ($validSequence) {
-            if (in_array(18, $validSequence[0]) && count($validSequence) === 1) {
-                // When only 18 is in the sequence, use created_at to select the latest occurrence
-                $join->on('lost_requested_admin.id', '=', DB::connection('reports')->raw('
-                    (
-                        select admin_sj.admin_id 
-                        from shipments_journey as admin_sj 
-                        where admin_sj.shipment_id = shipments.id 
-                        and admin_sj.shipper_status_id = 18
-                        order by admin_sj.created_at desc 
-                        limit 1
-                    )
-                '));
-            } else {
-                // If there is a sequence with breaks or multiple statuses, use the original logic
-                $join->on('lost_requested_admin.id', '=', DB::connection('reports')->raw('
-                    (
-                        select admin_sj.admin_id 
-                        from shipments_journey as admin_sj 
-                        where admin_sj.shipment_id = shipments.id 
-                        and admin_sj.shipper_status_id = 18
-                        order by admin_sj.created_at desc 
-                        limit 1
-                    )
-                '));
-            }
-        });
-        
-        // lost approved by admin
-        $lost_and_closed_shipments = $lost_and_closed_shipments->leftJoin('admins as lost_approved_by', function ($join) use ($validSequence) {
-            if (in_array(18, $validSequence[0]) && count($validSequence) === 1) {
-                // When only 18 is in the sequence, use created_at to select the latest occurrence
-                $join->on('lost_approved_by.id', '=', DB::connection('reports')->raw('
-                    (
-                        select admin_sj.admin_id 
-                        from shipments_journey as admin_sj 
-                        where admin_sj.shipment_id = shipments.id 
-                        and admin_sj.shipper_status_id = 18
-                        order by admin_sj.created_at desc 
-                        limit 1 offset 1
-                    )
-                '));
-            } else {
-                // If there is a sequence with breaks or multiple statuses, use the original logic
-                $join->on('lost_approved_by.id', '=', DB::connection('reports')->raw('
-                    (
-                        select admin_sj.admin_id 
-                        from shipments_journey as admin_sj 
-                        where admin_sj.shipment_id = shipments.id 
-                        and admin_sj.shipper_status_id = 18
-                        order by admin_sj.created_at desc 
-                        limit 1 offset 1
-                    )
-                '));
-            }
-        });
-
-
-        $lost_and_closed_shipments = $lost_and_closed_shipments->leftJoin('shipments_journey as sj_shipment_status', function ($join) {
-            $join->on('sj_shipment_status.shipment_id', '=', 'sj.shipment_id')
-                ->whereIn('sj_shipment_status.shipper_status_id', [18, 51])
-                ->where('sj_shipment_status.created_at', '=', DB::connection('reports')->raw('
-                    (
-                        SELECT MAX(created_at) 
-                        FROM shipments_journey as sj_sub
-                        WHERE sj_sub.shipment_id = sj.shipment_id
-                        AND sj_sub.shipper_status_id IN (18, 51)
-                    )
-                '));
-        });
-        
-        if (in_array(18, $validSequence[0]) && count($validSequence) === 1) {
-            $lost_and_closed_shipments = $lost_and_closed_shipments
-                ->leftJoin('lost_shipment_responsibles as lsr', function ($join) {
-                    $join->on('lsr.shipment_id', '=', 'sj.shipment_id')
-                        ->whereRaw('lsr.created_at = (
-                            SELECT MAX(lsr_sub.created_at) 
-                            FROM lost_shipment_responsibles AS lsr_sub
-                            WHERE lsr_sub.shipment_id = sj.shipment_id
-                        )');
-                });
-        } else {
-            $lost_and_closed_shipments = $lost_and_closed_shipments->leftJoin('lost_shipment_responsibles as lsr', function ($join) {
-                $join->on('lsr.shipment_id', '=', 'sj.shipment_id');
-            });
-        }
-        
-        // Admin details (Join with admins table)
-        $lost_and_closed_shipments = $lost_and_closed_shipments
-            ->leftJoin('admins as defaulter_admin', function ($join) {
-                $join->on('defaulter_admin.id', '=', 'lsr.user_id')
-                    ->where('lsr.user_type', '=', 1);  // user_type = 1 for admins
+            ->leftJoin('admins AS requested_admins', 'sjl.admin_id', '=', 'requested_admins.id')
+            ->leftJoin('shipments_journey AS lost_approved', function($join) {
+                $join->on('lost_approved.shipment_id', '=', 'shipments.id')
+                    ->whereRaw('lost_approved.id = (SELECT MAX(id) FROM shipments_journey WHERE shipments_journey.shipment_id = shipments.id AND shipments_journey.shipper_status_id = 18 AND shipments_journey.verification = 1)');
             })
-        // Rider details (Join with riders table)
-            ->leftJoin('riders', function ($join) {
-                $join->on('riders.id', '=', 'lsr.user_id')
-                    ->where('lsr.user_type', '=', 2);  // user_type = 2 for riders
+            ->leftJoin('admins AS request_approved_admins', 'lost_approved.admin_id', '=', 'request_approved_admins.id')
+            ->leftJoin('lost_shipment_responsibles', function($join) {
+                $join->on('lost_shipment_responsibles.shipment_id', '=', 'shipments.id')
+                    ->whereBetween('lost_shipment_responsibles.updated_at', [DB::raw('sjl.updated_at'), DB::raw('DATE_ADD(sjl.updated_at, INTERVAL 50 SECOND)')]);
             })
-        
+            ->leftJoin('admins', 'lost_shipment_responsibles.user_id', '=', 'admins.id')
+            ->leftJoin('employees AS employees_admins', function($join) {
+                $join->on('employees_admins.id', '=', 'admins.trax_id')
+                    ->where('employees_admins.employee_type_id', 1);
+            })
+            ->leftJoin('riders', 'lost_shipment_responsibles.user_id', '=', 'riders.id')
+            ->leftJoin('employees AS employees_riders', function($join) {
+                $join->on('employees_riders.id', '=', 'riders.trax_id')
+                    ->where('employees_riders.employee_type_id', 2);
+            })
+            ->leftJoin('employees as rider_employees', 'rider_employees.trax_id' , 'riders.trax_id')
+            ->leftJoin('employees as admin_employees', 'admin_employees.trax_id' , 'admins.trax_id')
+            ->leftJoin('employee_statuses as admin_status', 'admin_status.id', 'admin_employees.status_id')
+            ->leftJoin('employee_statuses as rider_status', 'rider_status.id', 'rider_employees.status_id')
+            ->leftJoin('cities AS city', 'city.id', '=', 'sjl.city_id')
+            ->leftJoin('users AS user_shipment', 'user_shipment.id', '=', 'shipments.user_id')
+            ->leftJoin('shipments_journey AS case_closed_remarks', function($join) {
+                $join->on('case_closed_remarks.shipment_id', '=', 'shipments.id')
+                    ->where('case_closed_remarks.shipper_status_id', 51)
+                    ->whereRaw('case_closed_remarks.id = (SELECT MAX(id) FROM shipments_journey WHERE shipments_journey.shipment_id = shipments.id AND shipments_journey.shipper_status_id = 51)');
+            })
+            ->leftJoin('shipment_status', 'shipment_status.id', '=', 'shipments.shipper_status_id')
+            ->whereIn('shipments.shipper_status_id', [18, 51])
+            ->whereBetween('shipments.created_at', [$startDate, $endDate]);
 
-        ->leftJoin('employees as admin_employee', 'admin_employee.trax_id', 'defaulter_admin.trax_id')
-        ->leftJoin('employees as rider_employee', 'rider_employee.trax_id', 'riders.trax_id')
-        ->leftJoin('users', 'users.id', '=', 'shipments.user_id')
-        ->leftJoin('cities', 'cities.id', '=', 'sj.city_id')
-        ->leftJoin('shipment_status', 'shipment_status.id', '=', 'shipments.shipper_status_id');
-
-        $lost_and_closed_shipments = $lost_and_closed_shipments
-        // Lost requested admin
-        ->leftJoin('admins as lost_requested_admin_alias', function ($join) use ($validSequence) {
-            if (in_array(18, $validSequence) && count($validSequence) === 2) {
-                // Apply the sequence logic for 18 if there is only 2 valid sequences
-                $join->on('lost_requested_admin_alias.id', '=', DB::connection('reports')->raw('
-                    (
-                        select admin_sj.admin_id 
-                        from shipments_journey as admin_sj 
-                        where admin_sj.shipment_id = shipments.id 
-                        and admin_sj.shipper_status_id = 18
-                        order by admin_sj.created_at desc 
-                        limit 1
-                    )
-                '));
-            } else {
-                // Use original logic if there are breaks in the sequence
-                $join->on('lost_requested_admin_alias.id', '=', DB::connection('reports')->raw('
-                    (
-                        select admin_sj.admin_id 
-                        from shipments_journey as admin_sj 
-                        where admin_sj.shipment_id = shipments.id 
-                        and admin_sj.shipper_status_id = 18
-                        order by admin_sj.created_at desc 
-                        limit 1
-                    )
-                '));
+            if (!empty($trackingNumbers) && is_array($trackingNumbers) && count(array_filter($trackingNumbers, fn($value) => $value !== "")) > 0) {
+                $lost_and_closed_shipments->whereIn('shipments.tracking_number', $trackingNumbers);
             }
-        })
-        // Lost approved by admin
-        ->leftJoin('admins as lost_approved_by_alias', function ($join) use ($validSequence) {
-            if (in_array(18, $validSequence) && count($validSequence) === 1) {
-                // Apply the sequence logic for 18 if there is only one valid sequence
-                $join->on('lost_approved_by_alias.id', '=', DB::connection('reports')->raw('
-                    (
-                        select admin_sj.admin_id 
-                        from shipments_journey as admin_sj 
-                        where admin_sj.shipment_id = shipments.id 
-                        and admin_sj.shipper_status_id = 18
-                        order by admin_sj.created_at desc 
-                        limit 1 offset 1
-                    )
-                '));
-            } else {
-                // Use original logic if there are breaks in the sequence
-                $join->on('lost_approved_by_alias.id', '=', DB::connection('reports')->raw('
-                    (
-                        select admin_sj.admin_id 
-                        from shipments_journey as admin_sj 
-                        where admin_sj.shipment_id = shipments.id 
-                        and admin_sj.shipper_status_id = 18
-                        order by admin_sj.created_at desc 
-                        limit 1 offset 1
-                    )
-                '));
-            }
-        })
 
-        ->whereIn('shipments.tracking_number', $validTrackingNumbers) // Pass the filtered tracking numbers here
-        ->distinct()
-        ->select(
-            'shipments.tracking_number',
-            'users.name as shipper_name', 
-            'defaulter_admin.name as admin_name',
-            'riders.name as rider_name',
-            'defaulter_admin.trax_id as admin_trax_id',
-            'riders.trax_id as rider_trax_id',
-            'admin_employee.status_id as admin_status',
-            'rider_employee.status_id as rider_status',
-            'cities.name as responsible_city',
-            'shipment_status.name as latest_shipment_status',
-            'lost_requested_admin_alias.name as lost_requested_by',
-            'lost_approved_by_alias.name as lost_approved_by',
-            'shipments.amount as cod_amount',
-            'shipments.parcel_value as parcel_value',
-            'sj_shipment_status.shipper_status_id as shipment_status',  // Correctly select shipper_status_id from shipments_journey
-            'sj_shipment_status.remarks as case_closed_remarks'         // Correctly select remarks from shipments_journey
-        );
+            $lost_and_closed_shipments->havingRaw('
+                (
+                    SELECT GROUP_CONCAT(shipper_status_id)
+                    FROM shipments_journey
+                    WHERE shipments_journey.shipment_id = shipments.id
+                    AND id >= sjl.id
+                ) REGEXP "(^|,)18(,|$)"
+                OR
+                (
+                    SELECT GROUP_CONCAT(shipper_status_id)
+                    FROM shipments_journey
+                    WHERE shipments_journey.shipment_id = shipments.id
+                    AND id >= sjl.id
+                ) REGEXP "(^|,)18,18(,|$)"
+                OR
+                (
+                    SELECT GROUP_CONCAT(shipper_status_id)
+                    FROM shipments_journey
+                    WHERE shipments_journey.shipment_id = shipments.id
+                    AND id >= sjl.id
+                ) REGEXP "(^|,)18,18,51(,|$)"
+            ')
+            ->havingRaw('NOT (
+                SELECT GROUP_CONCAT(shipper_status_id)
+                FROM shipments_journey
+                WHERE shipments_journey.shipment_id = shipments.id
+                AND id >= sjl.id
+            ) REGEXP "[^18,51]"');
 
         $datatable = Datatables::of($lost_and_closed_shipments)
         ->editColumn('tracking_number', function ($shipments) {
             $route = route('admin.tracking.index');
             return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
         })
-        ->editColumn('lost_approved_by', function ($shipments) {
+        ->editColumn('request_approved_admin', function ($shipments) {
             $lost_approved_by = '-';
-            if ($shipments->lost_approved_by != null || $shipments->lost_approved_by != '') {
-                $lost_approved_by = $shipments->lost_approved_by;
+            if ($shipments->request_approved_admin != null || $shipments->request_approved_admin != '') {
+                $lost_approved_by = $shipments->request_approved_admin;
             }
             return $lost_approved_by;
-        }) 
+        })
         ->addColumn('defaulter_name', function ($shipments) {
             return $shipments->admin_name . ' ' . $shipments->rider_name;
         })
         ->orderColumn('defaulter_name', function ($query, $direction) {
             $query->orderBy('admin_name', $direction)->orderBy('rider_name', $direction);
         })
-
         ->addColumn('employee_status', function ($shipments) {
-            $statusMapping = [
-                1 => "Active",
-                2 => "Inactive",
-                3 => "Active - No Info",
-            ];
-            $adminEmployeeStatus = $statusMapping[$shipments->admin_status] ?? '';
-            $riderEmployeeStatus = $statusMapping[$shipments->rider_status] ?? '';
+            $adminEmployeeStatus = $shipments->admin_status ?? '';
+            $riderEmployeeStatus = $shipments->rider_status ?? '';
             return $adminEmployeeStatus . ' ' . $riderEmployeeStatus;
         })
         ->orderColumn('employee_status', function ($query, $direction) {
             $query->orderBy('admin_status', $direction)->orderBy('rider_status', $direction);
         })
-
         ->addColumn('trax_id', function ($shipments) {
             return $shipments->admin_trax_id . ' ' . $shipments->rider_trax_id;
         })
         ->orderColumn('trax_id', function ($query, $direction) {
             $query->orderBy('admin_trax_id', $direction)->orderBy('rider_trax_id', $direction);
         })
-
         ->addColumn('case_closed_remarks', function ($shipments) {
-            if ($shipments->latest_shipment_status == 51) {
+            if ($shipments->case_closed_remarks == 51) {
                 return $shipments->case_closed_remarks ?: '-';
             }
             return '-';
         })
         ->orderColumn('case_closed_remarks', function ($query, $direction) {
-            $query->orderByRaw("CASE WHEN latest_shipment_status = 51 THEN case_closed_remarks ELSE '-' END $direction");
+            $query->orderByRaw("CASE WHEN case_closed_remarks = 51 THEN case_closed_remarks ELSE '-' END $direction");
         })
         ->filterColumn('responsible_city', function ($query, $keyword) {
-            $query->where('cities.name', 'like', "%$keyword%");
+            $query->where('city.name', 'like', "%$keyword%");
         })
         ->filterColumn('latest_shipment_status', function ($query, $keyword) {
             $query->where('shipment_status.name', 'like', "%$keyword%");
         })
-        ->filterColumn('lost_requested_by', function ($query, $keyword) {
-            $query->where('lost_requested_admin.name', 'like', "%$keyword%");
+        ->filterColumn('requested_admin_name', function ($query, $keyword) {
+            $query->where('requested_admins.name', 'like', "%$keyword%");
         })
-
         ->filterColumn('lost_approved_by', function ($query, $keyword) {
             $query->where('lost_approved_by.name', 'like', "%$keyword%");
         })
-
         ->filterColumn('cod_amount', function ($query, $keyword) {
             $query->where('shipments.amount', 'like', "%$keyword%");
         })
@@ -16449,33 +16257,50 @@ class AdminReportsController extends Controller
             $query->where('shipments.parcel_value', 'like', "%$keyword%");
         })
         ->filterColumn('shipper_name', function ($query, $keyword) {
-            $query->where('users.name', 'like', "%$keyword%");
+            $query->where('user_shipment.name', 'like', "%$keyword%");
         })
         ->filterColumn('defaulter_name', function ($query, $keyword) {
-            $query->where('defaulter_admin.name', 'like', "%$keyword%")
+            $query->where('admins.name', 'like', "%$keyword%")
                 ->orWhere('riders.name', 'like', "%$keyword%");
         })
-        
         ->filterColumn('employee_status', function ($query, $keyword) {
-            // Ensure the keyword is a valid integer (1, 2, or 3)
-            if (in_array($keyword, [1, 2, 3])) {
-                $query->where(function ($query) use ($keyword) {
-                    $query->where('admin_employee.status_id', '=', $keyword)
-                        ->orWhere('rider_employee.status_id', '=', $keyword);
-                });
+            $statusMap = [
+                1 => 'Active',
+                2 => 'Inactive',
+                3 => 'Active - No Info',
+            ];
+        
+            // Check if the keyword exists in the mapping array
+            if (isset($statusMap[$keyword])) {
+                $status = $statusMap[$keyword];
+                
+                // If the keyword is 1 or 3 (both are related to 'Active' statuses)
+                if ($keyword == 1 || $keyword == 3) {
+                    // Exact match for Active statuses (1 and 3)
+                    $query->where(function ($query) use ($status) {
+                        $query->where('admin_status.name', $status)
+                            ->orWhere('rider_status.name', $status);
+                    });
+                } else {
+                    // For 'Inactive' status (2), we use LIKE for partial matching
+                    $query->where(function ($query) use ($status) {
+                        $query->where('admin_status.name', 'LIKE', "%{$status}%")
+                            ->orWhere('rider_status.name', 'LIKE', "%{$status}%");
+                    });
+                }
             }
         })
-
         ->filterColumn('trax_id', function ($query, $keyword) {
-            $query->where('defaulter_admin.trax_id', 'like', "%$keyword%")
-                    ->orWhere('riders.trax_id', 'like', "%$keyword%");
+            $query->where('admin_employees.trax_id', 'like', "%$keyword%")
+                    ->orWhere('rider_employees.trax_id', 'like', "%$keyword%");
         })
         ->filterColumn('case_closed_remarks', function ($query, $keyword) {
-            $query->whereRaw("CASE WHEN latest_shipment_status = 51 THEN case_closed_remarks ELSE '-' END like ?", ["%$keyword%"]);
+            $query->whereRaw("CASE WHEN case_closed_remarks  = 51 THEN case_closed_remarks ELSE '-' END like ?", ["%$keyword%"]);
         });
-
         return $datatable
         ->rawColumns(['tracking_number'])
         ->make(true);
     }
+
+
 }

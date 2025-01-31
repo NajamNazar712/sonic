@@ -10,20 +10,45 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-                <form id="track_form" class="mb-1" novalidate="novalidate">
-                    <div class="row justify-content-center">
-                        <div class="col-3">
-                            <div class="form-group">
-                                <input type="text" name="tracking_numbers" id="tracking_number"
-                                    class="dt_search tracking_numbers" placeholder="Tracking Number(s)"
-                                    data-tags-input-name="tracking_number">
-                            </div>
-                        </div>
-                        <div class="form-group ml-1">
-                            <button type="submit" class="btn btn-primary">Search</button>
+                <div class="row justify-content-center">
+                    <div class="col-3">
+                        <div class="form-group">
+                            <input type="text" name="tracking_numbers" id="tracking_number"
+                                class="dt_search tracking_numbers" placeholder="Tracking Number(s)"
+                                data-tags-input-name="tracking_number">
                         </div>
                     </div>
-                </form>
+
+                    <div class="col-3">
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                    <span class="la la-calendar-o"></span>
+                                </span>
+                            </div>
+                            <input type="text" name="date_from"
+                                class="form-control pickadate bg-primary border-primary white rounded-right"
+                                id="date_from" placeholder="Date (From)">
+                        </div>
+                    </div>
+
+                    <div class="col-3">
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                    <span class="la la-calendar-o"></span>
+                                </span>
+                            </div>
+                            <input type="text" name="date_to"
+                                class="form-control pickadate bg-primary border-primary white rounded-right"
+                                id="date_to" placeholder="Date (To)">
+                        </div>
+                    </div>
+
+                    <div class="form-group ml-1">
+                        <button type="button" id="search_filter_btn" class="btn btn-primary">Search</button>
+                    </div>
+                </div>
 
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
@@ -53,6 +78,8 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/vendors/css/extensions/toastr.css') }}">
     <link rel="stylesheet" type="text/css"
         href="{{ asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/vendors/css/pickers/pickadate/pickadate.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/css/plugins/pickers/daterange/daterange.min.css') }}">
 
 
     <style>
@@ -136,7 +163,50 @@
     <script src="{{ asset('app-assets/vendors/js/extensions/toastr.min.js') }}" type="text/javascript"></script>
     <script src="{{ asset('js/datatable_buttons.js') }}" type="text/javascript"></script>
 
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
+
     <script type="text/javascript">
+
+        $('#date_from').pickadate({
+            firstDay: 1,
+            clear: '',
+            selectYears: true,
+            selectMonths: true,
+            formatSubmit: 'yyyy-mm-dd',
+            hiddenSuffix: '_formatted',
+            onSet: function (context) {
+                    if (context.select) {
+                        const fromPicker = $('#date_from').pickadate('picker');
+                        const toPicker = $('#date_to').pickadate('picker');
+                        toPicker.set('min', fromPicker.get('select'));
+                        const maxDate = new Date(fromPicker.get('select').pick);
+                        maxDate.setMonth(maxDate.getMonth() + 3);
+                        toPicker.set('max', maxDate);
+                    }
+                }
+        });
+
+        $('#date_to').pickadate({
+            firstDay: 1,
+            clear: '',
+            selectYears: true,
+            selectMonths: true,
+            formatSubmit: 'yyyy-mm-dd',
+            hiddenSuffix: '_formatted',
+            onSet: function (context) {
+                    if (context.select) {
+                        const toPicker = $('#date_to').pickadate('picker');
+                        const fromPicker = $('#date_from').pickadate('picker');
+                        fromPicker.set('max', toPicker.get('select'));
+                        const minDate = new Date(toPicker.get('select').pick);
+                        minDate.setMonth(minDate.getMonth() - 3);
+                        fromPicker.set('min', minDate);
+                    }
+                }
+        });
+
         jQuery.fn.DataTable.Api.register('buttons.exportData()', function(options) {
             if (this.context.length) {
                 body = [];
@@ -146,10 +216,8 @@
                 params.excel = true;
                 var jsonResult = $.ajax({
                     url: '{{ route('admin.reports.lost_and_case_closed_summary_report.list') }}',
-                    data: function(d) {
-                        d.tracking_numbers = $('#tracking_number').val();
-                    },
                     data: params,
+                    method: 'POST',
                     success: function(result) {
                         head = [];
                         head.push('S.No');
@@ -223,7 +291,11 @@
             serverSide: true,
             ajax: {
                 url: '{{ route('admin.reports.lost_and_case_closed_summary_report.list') }}',
+                method: 'POST',
                 data: function(d) {
+                    d._token = '{{ csrf_token() }}'
+                    d.search_date_from = $('input[name="date_from"]').val();
+                    d.search_date_to = $('input[name="date_to"]').val();
                     d.tracking_numbers = $('#tracking_number').val();
                 }
             },
@@ -293,16 +365,16 @@
                 {
                     orderable: true,
                     searchable: true,
-                    class: 'align-middle lost_approved_by',
-                    data: 'lost_approved_by',
-                    name: 'lost_approved_by'
+                    class: 'align-middle request_approved_admin',
+                    data: 'request_approved_admin',
+                    name: 'request_approved_admin'
                 },
                 {
                     orderable: true,
                     searchable: true,
-                    class: 'align-middle lost_requested_by',
-                    data: 'lost_requested_by',
-                    name: 'lost_requested_by'
+                    class: 'align-middle requested_admin_name',
+                    data: 'requested_admin_name',
+                    name: 'requested_admin_name'
                 },
                 {
                     orderable: true,
@@ -339,7 +411,7 @@
                     var column = this;
                     var header = $(column.header());
                     var td = $(
-                    '<td style="padding:5px;" class="border-primary border-lighten-2"></td>');
+                        '<td style="padding:5px;" class="border-primary border-lighten-2"></td>');
 
                     // Skip search bar for serial_number (index 0) and case_closed_remarks
                     if (index === 0 || header.hasClass('case_closed_remarks')) {
@@ -367,7 +439,7 @@
                         // Create input field for other searchable columns
                         var input = $(
                                 '<input type="text" class="form-control form-control-sm input-sm primary">'
-                                )
+                            )
                             .appendTo(td)
                             .on('change', function() {
                                 column.search($(this).val()).draw();
@@ -423,8 +495,7 @@
         // });
 
         table.draw();
-        $('#track_form').on('submit', function(e) {
-            e.preventDefault();
+        $('#search_filter_btn').on('click', function() {
             table.draw();
         });
     </script>
