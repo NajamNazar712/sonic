@@ -3606,8 +3606,9 @@ class NotificationsController extends Controller
                         }
                     }
                 } else if ($id == 43) {
-                    $pickup_request = V2PickupRequest::find($reference_1_id);
+                    $pickup_request = V2PickupRequest::with(['pickup_address','shipper','pickup_request_shipments.shipment'])->where('id',$reference_1_id)->where('email_sent',0)->first();
                     if ($pickup_request) {
+                        V2PickupRequest::where('id',$reference_1_id)->update(['email_sent',1]);
                         $vendor = $pickup_request->pickup_address->vendor;
                         if ($vendor != null) {
                             $shipper_name = $pickup_request->shipper->name;
@@ -3622,12 +3623,9 @@ class NotificationsController extends Controller
                                 $body = str_replace('[vendor]', $vendor, $body);
                             }
 
-                            $assigned_shipments = $pickup_request->pickup_request_shipments_email;
+                            $assigned_shipments = $pickup_request->pickup_request_shipments;
 
                             if(count($assigned_shipments) > 0) {
-                                $assigned_shipments_array = $assigned_shipments->toArray();
-                                $update_ids = array_column($assigned_shipments_array, 'shipment_id');
-                                V2PickupRequestShipment::whereIn('shipment_id',$update_ids)->update(['email_sent'=>1]);
                                 $shipment_details = '<table style="width:100%;">';
                                 $shipment_details .= '<thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Tracking Number.</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Item Description</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Destination</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Quantity</th></tr></thead>';
                                 $shipment_details .= '<tbody>';

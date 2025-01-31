@@ -21,9 +21,6 @@ class V2PickupRequest extends Model
     public function pickup_request_shipments() {
         return $this->hasMany('App\Http\Models\V2Pickup\V2PickupRequestShipment', 'pickup_request_id');
     }
-    public function pickup_request_shipments_email() {
-        return $this->hasMany('App\Http\Models\V2Pickup\V2PickupRequestShipment', 'pickup_request_id')->where('email_sent',0);
-    }
     public function pickup_request_received_shipments() {
         return $this->hasMany('App\Http\Models\V2Pickup\V2PickupReceivedShipment', 'pickup_request_id');
     }
