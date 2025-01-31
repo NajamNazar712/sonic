@@ -246,8 +246,8 @@
                             row.push(values.employee_status);
                             row.push(values.responsible_city);
                             row.push(values.latest_shipment_status);
-                            row.push(values.lost_requested_by);
-                            row.push(values.lost_approved_by);
+                            row.push(values.requested_admin_name);
+                            row.push(values.request_approved_admin);
                             row.push(values.cod_amount);
                             row.push(values.parcel_value);
                             row.push(values.case_closed_remarks);
