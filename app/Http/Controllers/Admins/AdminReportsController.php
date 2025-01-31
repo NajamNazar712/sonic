@@ -15616,11 +15616,11 @@ class AdminReportsController extends Controller
             // })
             ->editColumn('current_hub', function ($shipment) {
                 // error_log('pp'.print_r($shipment,true));
-                if(in_array($shipment->shipper_status_id ,[3])){
+                if(in_array($shipment->shipper_status_id ,[49, 3])){
                     if(in_array($shipment->cargo_status_id,[4, 7, 8, 9,6])){ //Shipment In Transit || Shipment Misrouted Forwarded concered hub change reference TO-6939
                         return $shipment->destination;
                     }
-                }elseif(in_array($shipment->shipper_status_id ,[49, 26, 73,32, 70, 21, 76])){
+                }elseif(in_array($shipment->shipper_status_id ,[26, 73,32, 70, 21, 76])){
                     if(in_array($shipment->cargo_status_id,[4, 7, 8, 9,6])){ //Shipment In Transit || Shipment Misrouted Forwarded concered hub change reference TO-6939
                         return $shipment->origin;
                     }
