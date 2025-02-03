@@ -6704,7 +6704,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                 $req = 'pending_payments';
 
                 $fn_charges = $this->calculate_fintech_charges_bulk($shipment, $req);
-                return $fn_charges;
+                return 0;
             })
             ->editColumn('shipper', function ($shipment) {
                 if ($shipment->star_status == 1) {
