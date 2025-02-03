@@ -706,6 +706,7 @@
 
                             $.each(result.data, function(index, values) {
                                 row = [];
+                                console.log('va'+values)
 
                                 row.push(index + 1);
                                 row.push(values.shipper);
