@@ -703,10 +703,10 @@
                             head.push('Payment Cycle');
                             head.push('Payment Cycle Days');
                             head.push('Return Shipments Avg. Aging');
-
+console.log(result.data)
                             $.each(result.data, function(index, values) {
                                 row = [];
-                                console.log(values)
+                                
 
                                 row.push(index + 1);
                                 row.push(values.shipper);
