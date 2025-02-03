@@ -46,7 +46,10 @@
                     </div>
 
                     <div class="form-group ml-1">
-                        <button type="button" id="search_filter_btn" class="btn btn-primary">Search</button>
+                        <button type="button" id="search_filter_btn" class="btn btn-outline-primary btn-min-width">
+                            <i class="la la-search"></i>
+                            Search
+                        </button>
                     </div>
                 </div>
 
@@ -66,6 +69,7 @@
                             <th class="border-primary border-darken-1">COD Amount</th>
                             <th class="border-primary border-darken-1">Parcel Value</th>
                             <th class="border-primary border-darken-1">Case Closed Remarks</th>
+                            <th class="border-primary border-darken-1">Date and Time</th>
                         </tr>
                     </thead>
                 </table>
@@ -177,15 +181,8 @@
             formatSubmit: 'yyyy-mm-dd',
             hiddenSuffix: '_formatted',
             onSet: function (context) {
-                    if (context.select) {
-                        const fromPicker = $('#date_from').pickadate('picker');
-                        const toPicker = $('#date_to').pickadate('picker');
-                        toPicker.set('min', fromPicker.get('select'));
-                        const maxDate = new Date(fromPicker.get('select').pick);
-                        maxDate.setMonth(maxDate.getMonth() + 3);
-                        toPicker.set('max', maxDate);
-                    }
-                }
+                
+            }
         });
 
         $('#date_to').pickadate({
@@ -196,16 +193,10 @@
             formatSubmit: 'yyyy-mm-dd',
             hiddenSuffix: '_formatted',
             onSet: function (context) {
-                    if (context.select) {
-                        const toPicker = $('#date_to').pickadate('picker');
-                        const fromPicker = $('#date_from').pickadate('picker');
-                        fromPicker.set('max', toPicker.get('select'));
-                        const minDate = new Date(toPicker.get('select').pick);
-                        minDate.setMonth(minDate.getMonth() - 3);
-                        fromPicker.set('min', minDate);
-                    }
-                }
+                
+            }
         });
+
 
         jQuery.fn.DataTable.Api.register('buttons.exportData()', function(options) {
             if (this.context.length) {
@@ -233,6 +224,7 @@
                         head.push('COD Amount');
                         head.push('Parcel Value');
                         head.push('Case Closed Remarks');
+                        head.push('Date and Time');
 
                         $.each(result.data, function(index, values) {
                             row = [];
@@ -251,6 +243,7 @@
                             row.push(values.cod_amount);
                             row.push(values.parcel_value);
                             row.push(values.case_closed_remarks);
+                            row.push(values.latest_shipment);
 
                             body.push(row);
                         });
@@ -299,9 +292,9 @@
                     d.tracking_numbers = $('#tracking_number').val();
                 }
             },
-            rowId: 'shipment_id',
+            rowId: 'latest_shipment',
             order: [
-                [1, 'desc']
+                [13, 'desc']
             ],
             columns: [{
                     orderable: false,
@@ -396,6 +389,13 @@
                     class: 'align-middle case_closed_remarks',
                     data: 'case_closed_remarks',
                     name: 'case_closed_remarks'
+                },
+                {
+                    orderable: true,
+                    searchable: true,
+                    class: 'align-middle latest_shipment',
+                    data: 'latest_shipment',
+                    name: 'latest_shipment'
                 }
             ],
             rowCallback: function(row, data, index) {
@@ -423,6 +423,7 @@
                     if (header.hasClass('employee_status')) {
                         var select = $(
                                 '<select class="form-control form-control-sm input-sm primary">' +
+                                '<option value="0">All</option>' +
                                 '<option value="1">Active</option>' +
                                 '<option value="2">Inactive</option>' +
                                 '<option value="3">Active - No Info</option>' +

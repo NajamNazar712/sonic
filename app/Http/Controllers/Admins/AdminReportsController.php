@@ -16101,7 +16101,7 @@ class AdminReportsController extends Controller
 
         $lost_and_closed_shipments = DB::table('shipments')
             ->select(
-                // 'shipments.id as shipment_id',
+                'shipments.updated_at as latest_shipment',
                 'shipments.tracking_number',
                 'lost_shipment_responsibles.*',
                 'admins.name AS admin_name',
@@ -16161,11 +16161,12 @@ class AdminReportsController extends Controller
                     ->whereRaw('case_closed_remarks.id = (SELECT MAX(id) FROM shipments_journey WHERE shipments_journey.shipment_id = shipments.id AND shipments_journey.shipper_status_id = 51)');
             })
             ->leftJoin('shipment_status', 'shipment_status.id', '=', 'shipments.shipper_status_id')
-            ->whereIn('shipments.shipper_status_id', [18, 51])
-            ->whereBetween('shipments.created_at', [$startDate, $endDate]);
+            ->whereIn('shipments.shipper_status_id', [18, 51]);
 
             if (!empty($trackingNumbers) && is_array($trackingNumbers) && count(array_filter($trackingNumbers, fn($value) => $value !== "")) > 0) {
                 $lost_and_closed_shipments->whereIn('shipments.tracking_number', $trackingNumbers);
+            } else {
+                $lost_and_closed_shipments->whereBetween('shipments.updated_at', [$startDate, $endDate]);
             }
 
             $lost_and_closed_shipments->havingRaw('
@@ -16265,6 +16266,7 @@ class AdminReportsController extends Controller
         })
         ->filterColumn('employee_status', function ($query, $keyword) {
             $statusMap = [
+                0 => 'All Status',
                 1 => 'Active',
                 2 => 'Inactive',
                 3 => 'Active - No Info',
@@ -16273,7 +16275,6 @@ class AdminReportsController extends Controller
             // Check if the keyword exists in the mapping array
             if (isset($statusMap[$keyword])) {
                 $status = $statusMap[$keyword];
-                
                 // If the keyword is 1 or 3 (both are related to 'Active' statuses)
                 if ($keyword == 1 || $keyword == 3) {
                     // Exact match for Active statuses (1 and 3)
@@ -16281,7 +16282,7 @@ class AdminReportsController extends Controller
                         $query->where('admin_status.name', $status)
                             ->orWhere('rider_status.name', $status);
                     });
-                } else {
+                } elseif ($keyword == 2) {
                     // For 'Inactive' status (2), we use LIKE for partial matching
                     $query->where(function ($query) use ($status) {
                         $query->where('admin_status.name', 'LIKE', "%{$status}%")
@@ -16294,13 +16295,13 @@ class AdminReportsController extends Controller
             $query->where('admin_employees.trax_id', 'like', "%$keyword%")
                     ->orWhere('rider_employees.trax_id', 'like', "%$keyword%");
         })
-        ->filterColumn('case_closed_remarks', function ($query, $keyword) {
-            $query->whereRaw("CASE WHEN case_closed_remarks  = 51 THEN case_closed_remarks ELSE '-' END like ?", ["%$keyword%"]);
+        ->filterColumn('latest_shipment', function ($query, $keyword) {
+            if ($keyword) {
+                $query->where('shipments.updated_at', 'LIKE', "%{$keyword}%");
+            }
         });
         return $datatable
         ->rawColumns(['tracking_number'])
         ->make(true);
     }
-
-
 }
