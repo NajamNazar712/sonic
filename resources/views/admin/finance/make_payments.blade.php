@@ -673,14 +673,15 @@
                         url: '{{ route('admin.finance.make_payments.list') }}',
                         data: params,
                         success: function(result) {
+                            console.log(result)
                             head = [];
 
                             head.push('S.No');
-                            head.push('Shipper');
-                            head.push('City');
-                            head.push('Phone No(s).');
-                            head.push('Address');
-                            head.push('Created Datetime');
+                            // head.push('Shipper');
+                            // head.push('City');
+                            // head.push('Phone No(s).');
+                            // head.push('Address');
+                            // head.push('Created Datetime');
                             head.push('Total Shipments');
                             head.push('Total Pending Shipments');
                             head.push('Delivered Shipments');
@@ -708,11 +709,11 @@
                                 
 
                                 row.push(index + 1);
-                                row.push(values.shipper);
-                                row.push(values.city);
-                                row.push(values.phone_numbers);
-                                row.push(values.address);
-                                row.push(values.created_at);
+                                // row.push(values.shipper);
+                                // row.push(values.city);
+                                // row.push(values.phone_numbers);
+                                // row.push(values.address);
+                                // row.push(values.created_at);
                                 row.push(values.total_shipments);
                                 row.push(values.total_pending_shipments);
                                 row.push(values.delivered_shipments_count);
