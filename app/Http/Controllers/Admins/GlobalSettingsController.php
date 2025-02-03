@@ -5970,7 +5970,7 @@ class GlobalSettingsController extends Controller
         if ($selected_agent->exists()) {
             $selected_agent = $selected_agent->first();
 
-            $agents = Admin::select('id', 'name')->whereIn('role_id', [37, 28,43,67,75,115])->get(); //37,28 role // add kam roles
+            $agents = Admin::select('id', 'name','role_id')->whereIn('role_id', [37, 28,43,67,75,115])->get(); //37,28 role // add kam roles
             $zones = Zone::where('status', 1)->where('business_category_id', 1)->get();
             $case_natures = CrmRequestCaseNature::all();
             $segments = Segment::all();
@@ -6028,24 +6028,27 @@ class GlobalSettingsController extends Controller
     {
 
         try {
+            DB::beginTransaction();
             $admin_id = isset($request->admin_id) ? $request->admin_id : $request->id;
-            if (isset($request->id)) {
+            $current_agent_id = $request->id;
+            if (isset($current_agent_id)) {
 
-                CrmAgentAutoAssign::where('agent_id', $admin_id)->delete();
-                CrmAgentAutoAssignHub::where('agent_id', $admin_id)->delete();
-                CrmAgentAutoAssignZone::where('agent_id', $admin_id)->delete();
-                CrmAgentAutoAssignShipStatus::where('agent_id', $admin_id)->delete();
-                CrmAgentAutoAssignCnType::where('agent_id', $admin_id)->delete();
-                CrmAgentAutoAssignCaseNature::where('agent_id', $admin_id)->delete();
-                CrmAgentAutoAssignBusSeg::where('agent_id', $admin_id)->delete();
-                CrmAgentAutoAssignShipper::where('agent_id', $admin_id)->delete();
-                CrmAgentAutoAssignSNKey::where('agent_id', $admin_id)->delete();
-                CrmAgentAutoAssignSubSegment::where('agent_id', $admin_id)->delete();
-                CrmAgentAutoAssignOriginHub::where('agent_id', $admin_id)->delete();
-                CrmAgentAutoAssignOriginArea::where('agent_id',$admin_id)->delete();
-                CrmAgentAutoAssignOriginZone::where('agent_id',$admin_id)->delete();
+                CrmAgentAutoAssign::where('agent_id', $current_agent_id)->delete();
+                CrmAgentAutoAssignHub::where('agent_id', $current_agent_id)->delete();
+                CrmAgentAutoAssignZone::where('agent_id', $current_agent_id)->delete();
+                CrmAgentAutoAssignShipStatus::where('agent_id', $current_agent_id)->delete();
+                CrmAgentAutoAssignCnType::where('agent_id', $current_agent_id)->delete();
+                CrmAgentAutoAssignCaseNature::where('agent_id', $current_agent_id)->delete();
+                CrmAgentAutoAssignBusSeg::where('agent_id', $current_agent_id)->delete();
+                CrmAgentAutoAssignShipper::where('agent_id', $current_agent_id)->delete();
+                CrmAgentAutoAssignSNKey::where('agent_id', $current_agent_id)->delete();
+                CrmAgentAutoAssignSubSegment::where('agent_id', $current_agent_id)->delete();
+                CrmAgentAutoAssignOriginHub::where('agent_id', $current_agent_id)->delete();
+                CrmAgentAutoAssignOriginArea::where('agent_id',$current_agent_id)->delete();
+                CrmAgentAutoAssignOriginZone::where('agent_id',$current_agent_id)->delete();
 
             }
+
             $crm_agent = CrmAgentAutoAssign::where('agent_id', $admin_id);
             if (!$crm_agent->exists()) {
 
@@ -6181,17 +6184,20 @@ class GlobalSettingsController extends Controller
                     CrmAgentAutoAssignOriginArea::insert($origin_area);
                 }
 
-                if (isset($request->id)) {
+                DB::commit();
 
+                if (isset($request->id)) {
                     return redirect()->route('admin.settings.auto_assigning.index')->with('success', 'Edit Agent Successfully!');
                 } else {
                     return redirect()->route('admin.settings.auto_assigning.index')->with('success', 'Agent Added!');
                 }
             } else {
+                DB::rollBack();
                 return redirect()->route('admin.settings.auto_assigning.index')->with('error', 'Agent Already Exists!');
             }
         }catch (\Exception $ex){
-            dd($ex->getMessage());
+            DB::rollBack();
+            return redirect()->route('admin.settings.auto_assigning.index')->with('error', 'Internal Server Error');
         }
     }
 

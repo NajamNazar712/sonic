@@ -22,11 +22,10 @@
                                     <div class="col-6">
                                         <div class="form-group">
                                             <label>Agent*</label>
-                                            <select name="admin_id" id="agent_id" class="form-control select2" required data-rule-required="true" data-msg-required="Agent is required" disabled>
-                                                @foreach($agents as $agent)
-                                                <option value="{{ $agent->id }}" >{{ $agent->name }}
-                                                </option>
-                                                @endforeach
+                                                <select name="admin_id" id="agent_id" class="form-control select2" required data-rule-required="true" data-msg-required="Agent is required">
+                                                    @foreach($agents as $agent)
+                                                         <option value="{{ $agent->id }}" data-role_id="{{$agent->role_id}}" >{{ $agent->name }} </option>
+                                                    @endforeach
                                                 </select>
                                                 <input type="hidden" name="id" value="{{ $selected_agent->agent_id }}" />
                                             </div>
@@ -223,6 +222,47 @@
     <script>
         $(document).ready(function() {
 
+            function getShipperKey() {
+
+                $.ajax({
+                    url:'{!! route("admin.settings.auto_assigning.get_shipper_key") !!}',
+                    method: 'GET'
+                }).done(function (data) {
+                    if(data.status == 1){
+                        $('#shipper_key_id').removeAttr('disabled');
+                        let options = "";
+                        $.each(data.shipper_keys, function(index, field) {
+                            options+=`<option value='${field.id}' >${field.name}<option>`;
+                        });
+                        $('#shipper_key_id').append(options);
+
+                        $('#shipper_key_id').find('option').filter(function() {
+                            return $.trim($(this).text()) === '';
+                        }).remove();
+                    }
+                })
+            }
+            function getShipperNonKey() {
+
+                $.ajax({
+                    url:'{!! route("admin.settings.auto_assigning.get_shipper_non_key") !!}',
+                    method: 'GET'
+                }).done(function (data) {
+                    if(data.status == 1){
+                        $('#shipper_non_key_id').removeAttr('disabled');
+                        let options = "";
+                        $.each(data.shipper_non_keys, function(index, field) {
+                            options+=`<option value='${field.id}' >${field.name}<option>`;
+                        });
+                        $('#shipper_non_key_id').append(options);
+
+                        $('#shipper_non_key_id').find('option').filter(function() {
+                            return $.trim($(this).text()) === '';
+                        }).remove();
+                    }
+                })
+            }
+
             let zone = $('#zone_id').val();
             getHubs(zone);
 
@@ -401,7 +441,22 @@
                 placeholder:"Select Agent",
                 allowClear:true,
                 dropdownParent:$('#crm_agent_assign')
-            }).val({{ $selected_agent->agent_id }}).trigger('change');
+            }).val({{ $selected_agent->agent_id }}).trigger('change').bind('change',function (){
+                $('#shipper_key_id').attr('disabled','disabled');
+                $('#shipper_key_id').empty();
+                $('#shipper_non_key_id').attr('disabled','disabled');
+                $('#shipper_non_key_id').empty();
+
+                var role_id = $(this).find(':selected').data('role_id');
+                if(role_id==28 || role_id==37){
+                    getShipperNonKey()
+
+                } else if (role_id==43 || role_id==67 || role_id==75 || role_id==115) {
+                    getShipperKey();
+                }
+
+            });
+
 
             $('#case_nature_id').select2({
                 width:'100%',
