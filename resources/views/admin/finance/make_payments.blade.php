@@ -673,7 +673,6 @@
                         url: '{{ route('admin.finance.make_payments.list') }}',
                         data: params,
                         success: function(result) {
-                            console.log(result)
                             head = [];
 
                             head.push('S.No');
