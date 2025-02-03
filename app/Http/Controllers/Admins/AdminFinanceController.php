@@ -6699,13 +6699,13 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                 return number_format(($pending_payments->total_charges + $pending_payments->total_gst + $pending_payments->total_sms_charges), 2);
 
             })
-            ->editColumn('fintech_charges', function ($shipment) {
+            // ->editColumn('fintech_charges', function ($shipment) {
 
-                $req = 'pending_payments';
+            //     $req = 'pending_payments';
 
-                $fn_charges = $this->calculate_fintech_charges_bulk($shipment, $req);
-                return $fn_charges;
-            })
+            //     $fn_charges = $this->calculate_fintech_charges_bulk($shipment, $req);
+            //     return $fn_charges;
+            // })
             ->editColumn('shipper', function ($shipment) {
                 if ($shipment->star_status == 1) {
                     return '<p><i class="star_shippers_icon"></i>' . $shipment->shipper . '</p>';
