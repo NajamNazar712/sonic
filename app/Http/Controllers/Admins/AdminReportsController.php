@@ -16098,105 +16098,94 @@ class AdminReportsController extends Controller
         $startDate = $searchDateFrom ? Carbon::createFromFormat('d F, Y', $searchDateFrom)->startOfDay() : now()->subMonths(4)->startOfDay();
         $endDate = $searchDateTo ? Carbon::createFromFormat('d F, Y', $searchDateTo)->endOfDay() : now()->endOfDay();
 
-
         $lost_and_closed_shipments = DB::table('shipments')
-            ->select(
-                'shipments.updated_at as latest_shipment',
-                'shipments.tracking_number',
-                'lost_shipment_responsibles.*',
-                'admins.name AS admin_name',
-                'riders.name AS rider_name',
-                'admin_employees.trax_id as admin_trax_id',
-                'rider_employees.trax_id as rider_trax_id',
-                'city.name AS responsible_city',
-                'requested_admins.name AS requested_admin_name',
-                'request_approved_admins.name AS request_approved_admin',
-                'user_shipment.name as shipper_name',
-                'shipments.amount as cod_amount',
-                'shipments.parcel_value as parcel_value',
-                'admin_status.name as admin_status',
-                'rider_status.name as rider_status',
-                'shipment_status.name as latest_shipment_status',
-                DB::raw('(
-                    SELECT GROUP_CONCAT(shipper_status_id)
-                    FROM shipments_journey
-                    WHERE shipments_journey.shipment_id = shipments.id
-                    AND id >= sjl.id
-                ) AS jour'),
-                'case_closed_remarks.remarks AS case_closed_remarks'
-            )
-            ->leftJoin('shipments_journey AS sjl', function($join) {
-                $join->on('sjl.shipment_id', '=', 'shipments.id')
-                    ->whereRaw('sjl.id = (SELECT MAX(id) FROM shipments_journey WHERE shipments_journey.shipment_id = shipments.id AND shipments_journey.shipper_status_id = 18 AND shipments_journey.verification = 0)');
-            })
-            ->leftJoin('admins AS requested_admins', 'sjl.admin_id', '=', 'requested_admins.id')
-            ->leftJoin('shipments_journey AS lost_approved', function($join) {
-                $join->on('lost_approved.shipment_id', '=', 'shipments.id')
-                    ->whereRaw('lost_approved.id = (SELECT MAX(id) FROM shipments_journey WHERE shipments_journey.shipment_id = shipments.id AND shipments_journey.shipper_status_id = 18 AND shipments_journey.verification = 1)');
-            })
-            ->leftJoin('admins AS request_approved_admins', 'lost_approved.admin_id', '=', 'request_approved_admins.id')
-            ->leftJoin('lost_shipment_responsibles', function($join) {
-                $join->on('lost_shipment_responsibles.shipment_id', '=', 'shipments.id')
-                    ->whereBetween('lost_shipment_responsibles.updated_at', [DB::raw('sjl.updated_at'), DB::raw('DATE_ADD(sjl.updated_at, INTERVAL 50 SECOND)')]);
-            })
-            ->leftJoin('admins', 'lost_shipment_responsibles.user_id', '=', 'admins.id')
-            ->leftJoin('employees AS employees_admins', function($join) {
-                $join->on('employees_admins.id', '=', 'admins.trax_id')
-                    ->where('employees_admins.employee_type_id', 1);
-            })
-            ->leftJoin('riders', 'lost_shipment_responsibles.user_id', '=', 'riders.id')
-            ->leftJoin('employees AS employees_riders', function($join) {
-                $join->on('employees_riders.id', '=', 'riders.trax_id')
-                    ->where('employees_riders.employee_type_id', 2);
-            })
-            ->leftJoin('employees as rider_employees', 'rider_employees.trax_id' , 'riders.trax_id')
-            ->leftJoin('employees as admin_employees', 'admin_employees.trax_id' , 'admins.trax_id')
-            ->leftJoin('employee_statuses as admin_status', 'admin_status.id', 'admin_employees.status_id')
-            ->leftJoin('employee_statuses as rider_status', 'rider_status.id', 'rider_employees.status_id')
-            ->leftJoin('cities AS city', 'city.id', '=', 'sjl.city_id')
-            ->leftJoin('users AS user_shipment', 'user_shipment.id', '=', 'shipments.user_id')
-            ->leftJoin('shipments_journey AS case_closed_remarks', function($join) {
-                $join->on('case_closed_remarks.shipment_id', '=', 'shipments.id')
-                    ->where('case_closed_remarks.shipper_status_id', 51)
-                    ->whereRaw('case_closed_remarks.id = (SELECT MAX(id) FROM shipments_journey WHERE shipments_journey.shipment_id = shipments.id AND shipments_journey.shipper_status_id = 51)');
-            })
-            ->leftJoin('shipment_status', 'shipment_status.id', '=', 'shipments.shipper_status_id')
-            ->whereIn('shipments.shipper_status_id', [18, 51]);
-
-            if (!empty($trackingNumbers) && is_array($trackingNumbers) && count(array_filter($trackingNumbers, fn($value) => $value !== "")) > 0) {
-                $lost_and_closed_shipments->whereIn('shipments.tracking_number', $trackingNumbers);
-            } else {
-                $lost_and_closed_shipments->whereBetween('shipments.updated_at', [$startDate, $endDate]);
-            }
-
-            $lost_and_closed_shipments->havingRaw('
-                (
-                    SELECT GROUP_CONCAT(shipper_status_id)
-                    FROM shipments_journey
-                    WHERE shipments_journey.shipment_id = shipments.id
-                    AND id >= sjl.id
-                ) REGEXP "(^|,)18(,|$)"
-                OR
-                (
-                    SELECT GROUP_CONCAT(shipper_status_id)
-                    FROM shipments_journey
-                    WHERE shipments_journey.shipment_id = shipments.id
-                    AND id >= sjl.id
-                ) REGEXP "(^|,)18,18(,|$)"
-                OR
-                (
-                    SELECT GROUP_CONCAT(shipper_status_id)
-                    FROM shipments_journey
-                    WHERE shipments_journey.shipment_id = shipments.id
-                    AND id >= sjl.id
-                ) REGEXP "(^|,)18,18,51(,|$)"
-            ')
-            ->havingRaw('NOT (
+        ->select(
+            'shipments.updated_at AS latest_shipment',
+            'shipments.tracking_number',
+            'lost_shipment_responsibles.*',
+            'admins.name AS admin_name',
+            'riders.name AS rider_name',
+            'admin_employees.trax_id AS admin_trax_id',
+            'rider_employees.trax_id AS rider_trax_id',
+            'city.name AS responsible_city',
+            'requested_admins.name AS requested_admin_name',
+            'request_approved_admins.name AS request_approved_admin',
+            'user_shipment.name AS shipper_name',
+            'shipments.amount AS cod_amount',
+            'shipments.parcel_value AS parcel_value',
+            'admin_status.name AS admin_status',
+            'rider_status.name AS rider_status',
+            'shipment_status.name AS latest_shipment_status',
+            DB::raw('(
                 SELECT GROUP_CONCAT(shipper_status_id)
                 FROM shipments_journey
                 WHERE shipments_journey.shipment_id = shipments.id
                 AND id >= sjl.id
-            ) REGEXP "[^18,51]"');
+            ) AS jour'),
+            'case_closed_remarks.remarks AS case_closed_remarks',
+            'sjl.created_at AS requested_date_time',
+            'lost_approved.created_at AS approval_date_time'
+        )
+        ->leftJoin('shipments_journey AS sjl', function($join) {
+            $join->on('sjl.shipment_id', '=', 'shipments.id')
+                ->whereRaw('sjl.id = (
+                    SELECT MAX(id)
+                    FROM shipments_journey
+                    WHERE shipments_journey.shipment_id = shipments.id
+                    AND shipments_journey.shipper_status_id = 18
+                    AND shipments_journey.verification = 0
+                )');
+        })
+        ->leftJoin('admins AS requested_admins', 'sjl.admin_id', '=', 'requested_admins.id')
+        ->leftJoin('shipments_journey AS lost_approved', function($join) {
+            $join->on('lost_approved.shipment_id', '=', 'shipments.id')
+                ->whereRaw('lost_approved.id = (
+                    SELECT MAX(id)
+                    FROM shipments_journey
+                    WHERE shipments_journey.shipment_id = shipments.id
+                    AND shipments_journey.shipper_status_id = 18
+                    AND shipments_journey.verification = 1
+                )');
+        })
+        ->leftJoin('admins AS request_approved_admins', 'lost_approved.admin_id', '=', 'request_approved_admins.id')
+        ->leftJoin('lost_shipment_responsibles', function($join) {
+            $join->on('lost_shipment_responsibles.shipment_id', '=', 'shipments.id')
+                ->whereRaw('lost_shipment_responsibles.updated_at BETWEEN sjl.updated_at AND DATE_ADD(sjl.updated_at, INTERVAL 50 SECOND)');
+        })
+        ->leftJoin('admins', 'lost_shipment_responsibles.user_id', '=', 'admins.id')
+        ->leftJoin('employees AS employees_admins', function($join) {
+            $join->on('employees_admins.id', '=', 'admins.trax_id')
+                ->where('employees_admins.employee_type_id', 1);
+        })
+        ->leftJoin('riders', 'lost_shipment_responsibles.user_id', '=', 'riders.id')
+        ->leftJoin('employees AS employees_riders', function($join) {
+            $join->on('employees_riders.id', '=', 'riders.trax_id')
+                ->where('employees_riders.employee_type_id', 2);
+        })
+        ->leftJoin('employees AS rider_employees', 'rider_employees.trax_id', '=', 'riders.trax_id')
+        ->leftJoin('employees AS admin_employees', 'admin_employees.trax_id', '=', 'admins.trax_id')
+        ->leftJoin('employee_statuses AS admin_status', 'admin_status.id', '=', 'admin_employees.status_id')
+        ->leftJoin('employee_statuses AS rider_status', 'rider_status.id', '=', 'rider_employees.status_id')
+        ->leftJoin('cities AS city', 'city.id', '=', 'sjl.city_id')
+        ->leftJoin('users AS user_shipment', 'user_shipment.id', '=', 'shipments.user_id')
+        ->leftJoin('shipments_journey AS case_closed_remarks', function($join) {
+            $join->on('case_closed_remarks.shipment_id', '=', 'shipments.id')
+                ->where('case_closed_remarks.shipper_status_id', 51)
+                ->whereRaw('case_closed_remarks.id = (
+                    SELECT MAX(id)
+                    FROM shipments_journey
+                    WHERE shipments_journey.shipment_id = shipments.id
+                    AND shipments_journey.shipper_status_id = 51
+                )');
+        })
+        ->leftJoin('shipment_status', 'shipment_status.id', '=', 'shipments.shipper_status_id')
+        ->distinct()
+        ->whereIn('shipments.shipper_status_id', [18, 51]);
+        if (!empty($trackingNumbers) && is_array($trackingNumbers) && count(array_filter($trackingNumbers, fn($value) => $value !== "")) > 0) {
+            $lost_and_closed_shipments->whereIn('shipments.tracking_number', $trackingNumbers);
+        } else {
+            $lost_and_closed_shipments->whereBetween('shipments.updated_at', [$startDate, $endDate]);
+        }
 
         $datatable = Datatables::of($lost_and_closed_shipments)
         ->editColumn('tracking_number', function ($shipments) {

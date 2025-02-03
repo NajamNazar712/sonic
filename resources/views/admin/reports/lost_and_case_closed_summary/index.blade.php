@@ -69,7 +69,8 @@
                             <th class="border-primary border-darken-1">COD Amount</th>
                             <th class="border-primary border-darken-1">Parcel Value</th>
                             <th class="border-primary border-darken-1">Case Closed Remarks</th>
-                            <th class="border-primary border-darken-1">Date and Time</th>
+                            <th class="border-primary border-darken-1">Lost requested date/time</th>
+                            <th class="border-primary border-darken-1">Approved by date/time</th>
                         </tr>
                     </thead>
                 </table>
@@ -224,7 +225,8 @@
                         head.push('COD Amount');
                         head.push('Parcel Value');
                         head.push('Case Closed Remarks');
-                        head.push('Date and Time');
+                        head.push('Lost requested date/time');
+                        head.push('Approved requested date/time');
 
                         $.each(result.data, function(index, values) {
                             row = [];
@@ -243,7 +245,8 @@
                             row.push(values.cod_amount);
                             row.push(values.parcel_value);
                             row.push(values.case_closed_remarks);
-                            row.push(values.latest_shipment);
+                            row.push(values.requested_date_time);
+                            row.push(values.approval_date_time);
 
                             body.push(row);
                         });
@@ -393,9 +396,16 @@
                 {
                     orderable: true,
                     searchable: true,
-                    class: 'align-middle latest_shipment',
-                    data: 'latest_shipment',
-                    name: 'latest_shipment'
+                    class: 'align-middle requested_date_time',
+                    data: 'requested_date_time',
+                    name: 'requested_date_time'
+                },
+                {
+                    orderable: true,
+                    searchable: true,
+                    class: 'align-middle approval_date_time',
+                    data: 'approval_date_time',
+                    name: 'approval_date_time'
                 }
             ],
             rowCallback: function(row, data, index) {
