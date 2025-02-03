@@ -7060,13 +7060,27 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
         } else {
             $fintech = DonePaymentShipment::where('done_payment_id', $shipments->id)->where('type', 0)->pluck('shipment_id')->toArray();
         }
+        $totalSum = 0;
 
-        $values = shipmentFintechCharges::whereIn('shipment_id', $fintech)->where('applied_to', 1)->sum('fintech_charges');
-        if ($values > 0) {
-            return number_format($values, 2);
-        } else {
-            return 0;
+        if (!empty($fintech)) {
+            $chunks = array_chunk($fintech, 1000); // Adjust chunk size if needed
+
+            foreach ($chunks as $chunk) {
+                $totalSum += ShipmentFintechCharges::whereIn('shipment_id', $chunk)
+                    ->where('applied_to', 1)
+                    ->sum('fintech_charges');
+            }
         }
+        
+        return $totalSum > 0 ? number_format($totalSum, 2) : 0;
+
+        // $values = shipmentFintechCharges::whereIn('shipment_id', $fintech)->where('applied_to', 1)->sum('fintech_charges');
+        
+        // if ($values > 0) {
+        //     return number_format($values, 2);
+        // } else {
+        //     return 0;
+        // }
     }
 
     public function make_payments_shipment_list(Request $request)
