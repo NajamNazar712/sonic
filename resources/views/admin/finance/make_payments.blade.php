@@ -675,38 +675,38 @@
                         success: function(result) {
                             head = [];
 
-                            // head.push('S.No');
-                            // head.push('Shipper');
-                            // head.push('City');
-                            // head.push('Phone No(s).');
-                            // head.push('Address');
-                            // head.push('Created Datetime');
-                            // head.push('Total Shipments');
-                            // head.push('Total Pending Shipments');
-                            // head.push('Delivered Shipments');
-                            // head.push('Returned Shipments');
-                            // head.push('Adjusted Shipments');
-                            // head.push('Total Amount');
-                            // head.push('Total Charges');
-                            // head.push('Total GST');
-                            // head.push('Total WHT');
-                            // head.push('Total Per SMS Charges');
+                            head.push('S.No');
+                            head.push('Shipper');
+                            head.push('City');
+                            head.push('Phone No(s).');
+                            head.push('Address');
+                            head.push('Created Datetime');
+                            head.push('Total Shipments');
+                            head.push('Total Pending Shipments');
+                            head.push('Delivered Shipments');
+                            head.push('Returned Shipments');
+                            head.push('Adjusted Shipments');
+                            head.push('Total Amount');
+                            head.push('Total Charges');
+                            head.push('Total GST');
+                            head.push('Total WHT');
+                            head.push('Total Per SMS Charges');
                             // head.push('Packing Charges');
-                            // head.push('Total Deductable');
-                            // head.push('Total Payable');
-                            // head.push('Bank');
-                            // head.push('Bank Branch');
-                            // head.push('Account No.');
-                            // head.push('Account Title');
-                            // head.push('IBAN');
-                            // head.push('Account City');
-                            // head.push('Payment Cycle');
-                            // head.push('Payment Cycle Days');
-                            // head.push('Return Shipments Avg. Aging');
+                            head.push('Total Deductable');
+                            head.push('Total Payable');
+                            head.push('Bank');
+                            head.push('Bank Branch');
+                            head.push('Account No.');
+                            head.push('Account Title');
+                            head.push('IBAN');
+                            head.push('Account City');
+                            head.push('Payment Cycle');
+                            head.push('Payment Cycle Days');
+                            head.push('Return Shipments Avg. Aging');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
-                                console.log('va'+values)
+                                console.log(values)
 
                                 row.push(index + 1);
                                 row.push(values.shipper);
