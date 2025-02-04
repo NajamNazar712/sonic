@@ -9,6 +9,7 @@ use App\Http\Models\DonePaymentCalculation;
 use App\Http\Models\PendingPaymentShipment;
 use App\Http\Models\PendingPaymentCalculation;
 use App\Http\Controllers\FingaIntegrationController;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Http\Models\UserIbftCharge;
@@ -26,15 +27,15 @@ trait FinSurgentLogTrait
 {
 
 
-    static function arrival_shipment_logs($requestPayload, $pending_payment_shipment) {
+    static function arrival_shipment_logs($requestPayload, $pending_payment_shipment,$shipment_id = null) {
 
         try {
 
-            if (is_object($pending_payment_shipment)) {
-                // Access data using the object
+            if(!empty($shipment_id)){
+                $shipmentId = $shipment_id;
+            }else if (is_object($pending_payment_shipment)) {
                 $shipmentId = $pending_payment_shipment->shipment_id;
             } elseif (is_int($pending_payment_shipment)) {
-                // Use the integer directly
                 $shipmentId = $pending_payment_shipment;
             } 
 
@@ -84,6 +85,33 @@ trait FinSurgentLogTrait
             FingaIntegrationController::apiLog('log-response', 'exception', $errorBody, $shipmentId);
         }
 
+    }
+
+    static function updatePaymentBeforeLog($shipment,$pending_payment_shipment){
+        if(empty($shipment)) {
+            $shipment = Shipment::find($pending_payment_shipment->shipment_id);
+        }
+        $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($pending_payment_shipment->shipment_id);
+        $charges = $shipment->weight_charges + $shipment->fuel_surcharge + $faf_charges;
+        $gst = $pending_payment_shipment->gst;
+        $pending_payment_id = 0;
+        if ($charges != $pending_payment_shipment->charges) {
+            if ($shipment->business_category_id == 1) {
+                $gst = ROUND(($charges * \App\Http\Controllers\Admins\AdminFinanceController::gst($shipment->pickup_address->city->zone_id, $shipment->pickup_address->city_id)), 2, PHP_ROUND_HALF_DOWN);
+            } else {
+                $gst = ROUND(($charges * AdminFinanceController::international_gst()), 2, PHP_ROUND_HALF_DOWN);
+            }
+
+            $payable = $charges + $gst;
+            $pending_payment_id = $pending_payment_shipment->pending_payment_id;
+            if (!empty($payable)) {
+                PendingPaymentShipment::where('id', $pending_payment_shipment->id)->update(['charges' => $charges, 'gst' => $gst, 'payable' => $payable]);
+            }
+        }
+
+        if ($pending_payment_id != 0) {
+            $results = DB::select('CALL update_pending_payment_statistics(?)', [$pending_payment_id]);
+        }
     }
 
 }

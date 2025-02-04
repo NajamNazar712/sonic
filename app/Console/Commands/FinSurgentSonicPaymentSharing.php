@@ -64,31 +64,13 @@ class FinSurgentSonicPaymentSharing extends Command
             ->select(['pending_payment_shipments.*'])
             ->get();
 
-            $pending_payment_id = array();
             foreach ($pending_payment_shipment_ids as $pending_payment_shipment) {
                 if ($pending_payment_shipment) {
 
                     $shipment = Shipment::find($pending_payment_shipment->shipment_id);
                     if (!empty($shipment)) {
-                        $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($pending_payment_shipment->shipment_id);
-                        $charges = $shipment->weight_charges + $shipment->fuel_surcharge + $faf_charges;
-                        $gst = $pending_payment_shipment->gst;
-                        if ($charges != $pending_payment_shipment->charges) {
+                        $this->updatePaymentBeforeLog($shipment, $pending_payment_shipment);
 
-                            if ($shipment->business_category_id == 1) {
-
-                                $gst = ROUND(($charges * AdminFinanceController::gst($shipment->pickup_address->city->zone_id, $shipment->pickup_address->city_id)), 2, PHP_ROUND_HALF_DOWN);
-
-                            } else {
-                                $gst = ROUND(($charges * AdminFinanceController::international_gst()), 2, PHP_ROUND_HALF_DOWN);
-                            }
-
-                            $payable = $charges + $gst;
-                            $pending_payment_id[$pending_payment_shipment->pending_payment_id] = $pending_payment_shipment->pending_payment_id;
-                            if (!empty($payable)) {
-                                PendingPaymentShipment::where('id', $pending_payment_shipment->id)->update(['charges' => $charges, 'gst' => $gst, 'payable' => $payable]);
-                            }
-                        }
                         $requestPayload = [
                             "client_id" => $pending_payment->user_id,
                             "wallet_id" => $pending_payment->wallet_id,
@@ -108,39 +90,6 @@ class FinSurgentSonicPaymentSharing extends Command
                     }
                 }
             }
-
-            if(count($pending_payment_id) > 0) {
-                $pendingPaymentsCalc = DB::table('pending_payment_shipments')
-                ->select(
-                    'pending_payment_shipments.pending_payment_id',
-                    'pending_payment_calculations.payable',
-                    DB::raw('SUM(pending_payment_shipments.amount) as total_amount'),
-                    DB::raw('SUM(pending_payment_shipments.charges) as total_charges'),
-                    DB::raw('SUM(pending_payment_shipments.gst) as total_gst'),
-                    DB::raw('SUM(pending_payment_shipments.sms_charges) as total_sms_charges'),
-                    DB::raw('SUM(pending_payment_shipments.payable) as total_payable'),
-                    DB::raw('SUM(pending_payment_shipments.wht) as total_wht')
-                )
-                ->join('pending_payment_calculations', 'pending_payment_shipments.pending_payment_id', '=', 'pending_payment_calculations.pending_payment_id')
-                ->join('pending_payments', 'pending_payment_calculations.pending_payment_id', '=', 'pending_payments.id')
-                ->whereIn('pending_payment_calculations.pending_payment_id', $pending_payment->id)
-                ->groupBy('pending_payment_shipments.pending_payment_id')
-                ->havingRaw('SUM(pending_payment_shipments.payable) != pending_payment_calculations.payable')
-                ->get();
-
-                foreach ($pendingPaymentsCalc as $payment) {
-                    DB::table('pending_payment_calculations')
-                        ->where('pending_payment_id', $payment->pending_payment_id)
-                        ->update([
-                            'amount' => $payment->total_amount,
-                            'charges' => $payment->total_charges,
-                            'gst' => $payment->total_gst,
-                            'sms_charges' => $payment->total_sms_charges,
-                            'payable' => $payment->total_payable,
-                            'wht' => $payment->total_wht,
-                        ]);
-                }
-            } 
         }
         return Command::SUCCESS;
     }
