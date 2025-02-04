@@ -9684,7 +9684,7 @@ class GlobalSettingsController extends Controller
     public function add_auto_assign_agent()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 661);
-        $agents = Admin::select('id', 'name','role_id')->whereIn('role_id', [37, 28,43,67,75,115])s->get(); //37,28 role
+        $agents = Admin::select('id', 'name','role_id')->whereIn('role_id', [37, 28,43,67,75,115])->where('status',1)->get(); //37,28 role
         $zones = Zone::where('status', 1)->where('business_category_id', 1)->get();
         $case_natures = CrmRequestCaseNature::all();
         $segments = Segment::all();
