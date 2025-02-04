@@ -387,8 +387,8 @@
                     name: 'parcel_value'
                 },
                 {
-                    orderable: true,
-                    searchable: true,
+                    orderable: false,
+                    searchable: false,
                     class: 'align-middle case_closed_remarks',
                     data: 'case_closed_remarks',
                     name: 'case_closed_remarks'

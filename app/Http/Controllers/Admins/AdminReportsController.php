@@ -16168,16 +16168,50 @@ class AdminReportsController extends Controller
         ->leftJoin('employee_statuses AS rider_status', 'rider_status.id', '=', 'rider_employees.status_id')
         ->leftJoin('cities AS city', 'city.id', '=', 'sjl.city_id')
         ->leftJoin('users AS user_shipment', 'user_shipment.id', '=', 'shipments.user_id')
+
         ->leftJoin('shipments_journey AS case_closed_remarks', function($join) {
             $join->on('case_closed_remarks.shipment_id', '=', 'shipments.id')
                 ->where('case_closed_remarks.shipper_status_id', 51)
                 ->whereRaw('case_closed_remarks.id = (
-                    SELECT MAX(id)
-                    FROM shipments_journey
-                    WHERE shipments_journey.shipment_id = shipments.id
-                    AND shipments_journey.shipper_status_id = 51
+                    SELECT MAX(sj1.id)
+                    FROM shipments_journey AS sj1
+                    WHERE sj1.shipment_id = shipments.id
+                    AND sj1.shipper_status_id = 51
+                    AND EXISTS (
+                        SELECT 1
+                        FROM shipments_journey AS sj2
+                        WHERE sj2.shipment_id = shipments.id
+                        AND sj2.shipper_status_id = 18
+                        AND sj2.id < sj1.id
+                        ORDER BY sj2.id DESC
+                        LIMIT 1
+                    )
+                    AND NOT EXISTS (
+                        SELECT 1
+                        FROM shipments_journey AS sj3
+                        WHERE sj3.shipment_id = shipments.id
+                        AND sj3.id BETWEEN (
+                            SELECT id FROM shipments_journey WHERE shipment_id = shipments.id AND shipper_status_id = 18 ORDER BY id DESC LIMIT 1
+                        ) AND sj1.id
+                        AND sj3.shipper_status_id NOT IN (18, 51)
+                    )
                 )');
         })
+
+
+        // ->leftJoin('shipments_journey AS case_closed_remarks', function($join) {
+        //     $join->on('case_closed_remarks.shipment_id', '=', 'shipments.id')
+        //         ->where('case_closed_remarks.shipper_status_id', 51)
+        //         ->whereRaw('case_closed_remarks.id = (
+        //             SELECT MAX(id)
+        //             FROM shipments_journey
+        //             WHERE shipments_journey.shipment_id = shipments.id
+        //             AND shipments_journey.shipper_status_id = 51
+        //         )');
+        // })
+
+
+
         ->leftJoin('shipment_status', 'shipment_status.id', '=', 'shipments.shipper_status_id')
         ->distinct()
         ->whereIn('shipments.shipper_status_id', [18, 51]);
