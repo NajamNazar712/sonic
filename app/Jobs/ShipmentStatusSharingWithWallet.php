@@ -18,6 +18,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use App\Models\FinjaLogSettlementRecord;
 use Illuminate\Support\Str;
+use App\Jobs\CODAmountChangeSendToWallet;
 
 class ShipmentStatusSharingWithWallet implements ShouldQueue
 {
@@ -126,6 +127,19 @@ class ShipmentStatusSharingWithWallet implements ShouldQueue
                 $this->arrival_shipment_logs($requestPayload, null,$shipment_log_not_sent->id);
             }
 
+            $cod_charges = FinjaLogSettlementRecord::where('shipment_id', $shipment_id)->first();
+            if($cod_charges && $cod_charges->logged_cod_amount !=  $shipment_log_not_sent->amount) {
+
+                $data = [
+                    'shipment_id' => $shipment_id,
+                    'tracking_number' => $shipment_log_not_sent->tracking_number,
+                    'client_id' =>  $shipment_log_not_sent->user_id,
+                    'wallet_id' => $shipment_log_not_sent->wallet_id,
+                    'amount' => $shipment_log_not_sent->amount
+                ];
+                CODAmountChangeSendToWallet::dispatch($data);
+
+            }
 
             $requestPayload = [
                 'shipment_id' => $tracking_number,

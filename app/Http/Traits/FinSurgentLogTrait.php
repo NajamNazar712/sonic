@@ -66,6 +66,7 @@ trait FinSurgentLogTrait
                             'shipment_id' => $shipmentId,
                             'wallet_log_updated' => true,
                             'wallet_log_updated_at' => Carbon::now(),
+                            'logged_cod_charges' => $requestPayload['amount']
                         ]
                     );
     

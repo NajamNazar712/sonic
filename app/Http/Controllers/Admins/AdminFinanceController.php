@@ -142,6 +142,7 @@ use App\Models\FingaApiLog;
 use App\Http\Models\WalletUser;
 use App\Http\Controllers\FingaIntegrationController;
 use Illuminate\Support\Facades\Http;
+use App\Jobs\CODAmountChangeSendToWallet;
 
 
 class AdminFinanceController extends Controller
@@ -4453,43 +4454,7 @@ class AdminFinanceController extends Controller
         if(WalletUser::where('user_id', $shipment->user_id)->where('substitute_user_id', 0)->exists()) {
 
             $log_bid = $this->isWalletLogUpdated($shipment_id);
-            if($log_bid) {
-
-                $api = config('app.FINGA_URL');
-                $token = FingaIntegrationController::getToken($api);
-    
-                if($token) {
-
-                    $requestPayload = [
-                        "client_id" => $pending_payment->user_id,
-                        "wallet_id" => $shipment->user->wallet->wallet_id,
-                        "shipment_id" => $shipment->tracking_number,
-                        "amount" => $shipment->amount,
-                    ];
-                    $response = Http::withHeaders([
-                        'accept' => 'application/json',
-                        'Authorization' => "Bearer " . $token,
-                    
-                    ])->post($api.'transactions/log/change', $requestPayload);
-        
-                    FingaIntegrationController::apiLog('amount-change-request', 1, $requestPayload ,$shipment_id);
-        
-                    if($response->successful()) { 
-                        
-                        $body = $response->getBody();
-                        $body = json_decode($body);
-        
-                        FingaIntegrationController::apiLog('amount-change-response', 'success', $body ,$shipment_id);
-        
-                    } else {
-                        $body = $response->getBody();
-                        $body = json_decode($body);
-                        FingaIntegrationController::apiLog('amount-change-response', 'error', $body ,$shipment_id);
-                    }
-                }
-
-            } else{
-
+            if(!$log_bid) {
                 $requestPayload = [
                     "shipmentId" => $shipment_id,
                     "wallet_id" => $shipment->user->wallet->wallet_id,
@@ -4498,21 +4463,21 @@ class AdminFinanceController extends Controller
                     "shipment_id" => $shipment->tracking_number, 
                     "amount" => $shipment->amount, 
                     "order_created_date" => $shipment->created_at,
-                    // "charges" => [
-                    //     'weight_charges' =>  floatval($shipment->weight_charges),
-                    //     'fuel_surcharge' =>  floatval($shipment->fuel_surcharge),
-                    //     'faf_charges' => $shipment->faf_charges_data ? floatval($shipment->faf_charges_data->faf_charges) : 0,
-                    //     'arrival_charges_gst' => floatval($pending_payment_shipment->gst),
-                    //     'arrival_sms_charges' => floatval($pending_payment_shipment->sms_charges)
-                    // ]
                 ]; 
+                $this->arrival_shipment_logs($requestPayload, null, $shipment_id);
+            } 
 
-
-            }
-
+            $data = [
+                'shipment_id' => $shipment_id,
+                'tracking_number' => $shipment->tracking_number,
+                'client_id' => $shipment->user->id,
+                'wallet_id' => $shipment->user->wallet->wallet_id,
+                'amount' => $shipment->amount
+            ];
+            CODAmountChangeSendToWallet::dispatch($data);
         }
 
-        ShipmentChargesController::cash_handling($shipment_id);
+        ShipmentChargesController::cash_handling($shipment);
 
         return redirect()->route('admin.finance.change_shipment_amount.index')->with('success', 'Shipment\'s amount has been changed');
     }
