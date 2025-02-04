@@ -21,7 +21,7 @@ class ShipmentsPaymentJourneyController extends Controller
 
 		$shipment_payment_journey->shipment_id = $shipment_id;
 		$shipment_payment_journey->status_id = $status_id;
-		$shipment_payment_journey->admin_id = $admin_id;
+		$shipment_payment_journey->admin_id = $admin_id ?? 346;
 		$shipment_payment_journey->payable_remarks = $payable_remarks;
 		$shipment_payment_journey->payment_id = $done_payment_id;
 

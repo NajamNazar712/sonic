@@ -7089,13 +7089,27 @@ class AdminFinanceController extends Controller
         } else {
             $fintech = DonePaymentShipment::where('done_payment_id', $shipments->id)->where('type', 0)->pluck('shipment_id')->toArray();
         }
+        $totalSum = 0;
 
-        $values = shipmentFintechCharges::whereIn('shipment_id', $fintech)->where('applied_to', 1)->sum('fintech_charges');
-        if ($values > 0) {
-            return number_format($values, 2);
-        } else {
-            return 0;
+        if (!empty($fintech)) {
+            $chunks = array_chunk($fintech, 1000); // Adjust chunk size if needed
+
+            foreach ($chunks as $chunk) {
+                $totalSum += ShipmentFintechCharges::whereIn('shipment_id', $chunk)
+                    ->where('applied_to', 1)
+                    ->sum('fintech_charges');
+            }
         }
+        
+        return $totalSum > 0 ? number_format($totalSum, 2) : 0;
+
+        // $values = shipmentFintechCharges::whereIn('shipment_id', $fintech)->where('applied_to', 1)->sum('fintech_charges');
+        
+        // if ($values > 0) {
+        //     return number_format($values, 2);
+        // } else {
+        //     return 0;
+        // }
     }
 
     public function make_payments_shipment_list(Request $request)
@@ -8697,6 +8711,7 @@ class AdminFinanceController extends Controller
                   <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                   <div class="dropdown-menu dropdown-menu-sm">
                     <button type="button" class="dropdown-item view_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Details</div></button>
+                    <button type="button" class="dropdown-item view_details_archive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Details Archieve</div></button>
                     <button type="button" class="dropdown-item view_status_history"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Status History</div></button>';
                 
                 if($done_payment->wallet_user != null && $done_payment->is_wallet_payment == 1 && ($done_payment->status == 0 || $done_payment->status == 3)) {
@@ -9167,7 +9182,7 @@ class AdminFinanceController extends Controller
         } else {
             $shipper_bank = UserBankInfo::find($done_payment->user_bank_info_id);
         }
-
+        $old = $request->input('old',0);
 
         $account_type_id = $shipper->account_type_id;
 
@@ -9311,19 +9326,24 @@ class AdminFinanceController extends Controller
 
             $done_fintech_charges = $this->calculate_fintech_charges($done_payment_shipment->shipment_id);
             $calculate_total_fintech_charges[] = $done_fintech_charges;
-            $shipment = $done_payment_shipment->shipment;
-            $service_charges = ShipmentServicesCharges::where('shipment_id', $shipment->id);
-            if ($service_charges->exists()) {
-                $service_charges = $service_charges->first();
-                $service_charges = $service_charges->reverse_pickup_charges;
+            if ($old) {
+                $shipment = $done_payment_shipment->shipment_archive;
             } else {
-                $service_charges = 0;
+                $shipment = $done_payment_shipment->shipment;
             }
-            $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment->id);
-            $wallet_charges = ShipmentAdditionalCharges::fetch_wallet_charges($shipment->id);
-            $arrival_charges_applied = ShipmentAdditionalCharges::check_additional_charges($shipment->id,true,false,false);;
-            $shipment_weight = $shipment->actual_weight;
-            $weight_charges = $shipment->weight_charges;
+            
+            if (!empty($shipment)) {
+                $service_charges = ShipmentServicesCharges::where('shipment_id', $shipment->id);
+                if ($service_charges->exists()) {
+                    $service_charges = $service_charges->first();
+                    $service_charges = $service_charges->reverse_pickup_charges;
+                } else {
+                    $service_charges = 0;
+                }
+                $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment->id);
+                $arrival_charges_applied = ShipmentAdditionalCharges::check_additional_charges($shipment->id, true, false, false);;
+                $shipment_weight = $shipment->actual_weight;
+                $weight_charges = $shipment->weight_charges;
 
 //            if ($done_payment_shipment->type == 3) {
 //                $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->id);
@@ -9340,19 +9360,19 @@ class AdminFinanceController extends Controller
 //                }
 //            }
 
-            if ($done_payment_shipment->type == 0) {
-                $type = 'Delivered';
-            } else if ($done_payment_shipment->type == 1) {
-                $type = 'Returned';
-            }else if ($done_payment_shipment->type == 3) {
-                $type = 'Arrival';
-            } else {
-                $type = 'Adjusted';
-            }
+                if ($done_payment_shipment->type == 0) {
+                    $type = 'Delivered';
+                } else if ($done_payment_shipment->type == 1) {
+                    $type = 'Returned';
+                } else if ($done_payment_shipment->type == 3) {
+                    $type = 'Arrival';
+                } else {
+                    $type = 'Adjusted';
+                }
 
-            $pickup_address = $shipment->pickup_address;
+                $pickup_address = $shipment->pickup_address;
 
-            $shipment_details .= '
+                $shipment_details .= '
                             <tr>
                               <td>' . $serial_number . '</td>
                               <td>' . $shipment->tracking_number . '</td>
@@ -9382,59 +9402,59 @@ class AdminFinanceController extends Controller
                             </tr>
             ';
 
-            $serial_number++;
+                $serial_number++;
 
-            if (1 == 1) {
-                if ($done_payment_shipment->type != 2) {
-                    if ($done_payment_shipment->charges != 0) {
-                        if ($done_payment_shipment->type == 0) {
-                            $total_collection_amount += $done_payment_shipment->amount;
-                            $total_cash_handling_charges += $shipment->cash_handling_charges;
-                            $total_replacement_charges += $shipment->replacement_charges;
-                            $total_try_and_buy_charges += $shipment->try_and_buy_charges;
-                            $total_reverse_pickup_charges += $service_charges;
-                        } else {
-                            $total_return_charges += $shipment->return_charges;
-                        }
-
-                        if($done_payment_shipment->type == 3) {
-                            $total_weight_charges += $shipment->weight_charges;
-                            $total_fuel_surcharge += $shipment->fuel_surcharge;
-                            $total_faf_charges += $faf_charges;
-                        }else{
-                            if ($shipment->packaging_material_request) {
-                                $total_packaging_material_charges += $shipment->packaging_material_charges;
+                if (1 == 1) {
+                    if ($done_payment_shipment->type != 2) {
+                        if ($done_payment_shipment->charges != 0) {
+                            if ($done_payment_shipment->type == 0) {
+                                $total_collection_amount += $done_payment_shipment->amount;
+                                $total_cash_handling_charges += $shipment->cash_handling_charges;
+                                $total_replacement_charges += $shipment->replacement_charges;
+                                $total_try_and_buy_charges += $shipment->try_and_buy_charges;
+                                $total_reverse_pickup_charges += $service_charges;
+                            } else {
+                                $total_return_charges += $shipment->return_charges;
                             }
-                            $total_insurance_charges += $shipment->insurance_charges;
-                            $total_intercept_charges += $shipment->intercept_charges;
-                            $total_nsa_osa_charges += $shipment->nsa_osa_charges;
-                            $total_wallet_charges += $wallet_charges;
-                            if(!$arrival_charges_applied){
+
+                            if ($done_payment_shipment->type == 3) {
                                 $total_weight_charges += $shipment->weight_charges;
                                 $total_fuel_surcharge += $shipment->fuel_surcharge;
                                 $total_faf_charges += $faf_charges;
+                            } else {
+                                if ($shipment->packaging_material_request) {
+                                    $total_packaging_material_charges += $shipment->packaging_material_charges;
+                                }
+                                $total_insurance_charges += $shipment->insurance_charges;
+                                $total_intercept_charges += $shipment->intercept_charges;
+                                $total_nsa_osa_charges += $shipment->nsa_osa_charges;
+                                if (!$arrival_charges_applied) {
+                                    $total_weight_charges += $shipment->weight_charges;
+                                    $total_fuel_surcharge += $shipment->fuel_surcharge;
+                                    $total_faf_charges += $faf_charges;
+                                }
                             }
+                        } else if ($done_payment_shipment->type == 0) {
+                            $total_collection_amount += $done_payment_shipment->amount;
                         }
-                    } else if ($done_payment_shipment->type == 0) {
-                        $total_collection_amount += $done_payment_shipment->amount;
+                    } else {
+                        $total_adjustments += $done_payment_shipment->payable;
                     }
+
+                    $total_gst += $done_payment_shipment->gst;
+                    $total_wht += $done_payment_shipment->wht;
+                    $total_charges += $done_payment_shipment->charges;
+                    $total_payable += $done_payment_shipment->payable;
+                    $total_sms_charges += $done_payment_shipment->sms_charges;
                 } else {
-                    $total_adjustments += $done_payment_shipment->payable;
-                }
+                    if ($done_payment_shipment->type == 0) {
+                        $total_collection_amount += $done_payment_shipment->amount;
+                    } else if ($done_payment_shipment->type == 2) {
+                        $total_adjustments += $done_payment_shipment->payable;
+                    }
 
-                $total_gst += $done_payment_shipment->gst;
-                $total_wht += $done_payment_shipment->wht;
-                $total_charges += $done_payment_shipment->charges;
-                $total_payable += $done_payment_shipment->payable;
-                $total_sms_charges += $done_payment_shipment->sms_charges;
-            } else {
-                if ($done_payment_shipment->type == 0) {
-                    $total_collection_amount += $done_payment_shipment->amount;
-                } else if ($done_payment_shipment->type == 2) {
-                    $total_adjustments += $done_payment_shipment->payable;
+                    $total_payable += $done_payment_shipment->payable;
                 }
-
-                $total_payable += $done_payment_shipment->payable;
             }
         }
 
@@ -15605,7 +15625,7 @@ class AdminFinanceController extends Controller
         }
         $adjustment_log->shipment_id = $shipment_id;
         $adjustment_log->adjustment_type_id = $adjustment_type;
-        $adjustment_log->admin_id = Auth::id();
+        $adjustment_log->admin_id = Auth::id() ?? 346; //Incase rvr return confirm then will be default set it global adminid.
         $adjustment_log->adjustment_amount = $adjustment_amount;
         $adjustment_log->remarks = $remarks;
         $adjustment_log->pending_id = $pending_id;
