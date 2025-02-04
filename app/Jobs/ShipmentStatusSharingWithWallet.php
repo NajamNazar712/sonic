@@ -111,7 +111,7 @@ class ShipmentStatusSharingWithWallet implements ShouldQueue
                 ->where(function ($query) {
                     $query->whereNull('sac.id')
                         ->orWhere('sac.wallet_log_updated', 0);
-                })->where('shipments.id',$shipment_id )
+                })->where('shipments.id', $shipment_id)
                 ->select(['shipments.*', 'u.wallet_id'])
                 ->first();
 
@@ -127,18 +127,19 @@ class ShipmentStatusSharingWithWallet implements ShouldQueue
                 $this->arrival_shipment_logs($requestPayload, null,$shipment_log_not_sent->id);
             }
 
-            $cod_charges = FinjaLogSettlementRecord::where('shipment_id', $shipment_id)->first();
-            if($cod_charges && $cod_charges->logged_cod_amount !=  $shipment_log_not_sent->amount) {
+            $cod_charges = FinjaLogSettlementRecord::where('shipment_id', $shipment_id)
+            ->first();
+            $shipment = Shipment::find($shipment_id);
+            if($cod_charges && $cod_charges->logged_cod_amount !=  $shipment->amount) {
 
                 $data = [
                     'shipment_id' => $shipment_id,
-                    'tracking_number' => $shipment_log_not_sent->tracking_number,
-                    'client_id' =>  $shipment_log_not_sent->user_id,
-                    'wallet_id' => $shipment_log_not_sent->wallet_id,
-                    'amount' => $shipment_log_not_sent->amount
+                    'tracking_number' => $shipment->tracking_number,
+                    'client_id' =>  $shipment->user_id,
+                    'wallet_id' => $shipment->wallet_id,
+                    'amount' => $shipment->amount
                 ];
                 CODAmountChangeSendToWallet::dispatch($data);
-
             }
 
             $requestPayload = [
