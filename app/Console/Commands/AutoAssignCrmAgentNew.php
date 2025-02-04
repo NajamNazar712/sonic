@@ -135,23 +135,39 @@ class AutoAssignCrmAgentNew extends Command
                                 $origin_hubs = isset($val->origin_hubs) ?  $val->origin_hubs->pluck('origin_hub_id')->toArray() : [];
                                 $origin_areas = isset($val->origin_areas) ?  $val->origin_areas->pluck('origin_area_id')->toArray() : [];
 
-                               if(count($origin_hubs) > 0 || count($hubs) > 0) {
-                                   $originHubMatch = true;
-                                   $hubMatch = true;
+//                               if(count($origin_hubs) > 0 || count($hubs) > 0) {
+//                                   $originHubMatch = true;
+//                                   $hubMatch = true;
+//
+//                                   if(!empty($value->origin_hub_id)) {
+//                                       if(!in_array($value->origin_hub_id,$origin_hubs)){
+//                                           $originHubMatch = false;
+//                                       }
+//                                   }
+//
+//                                   if(!empty($value->hub_id)){
+//                                       if(!in_array($value->hub_id,$hubs)){
+//                                           $hubMatch = false;
+//                                       }
+//                                   }
+//                                   $return = ($originHubMatch || $hubMatch) ? 1 : 0;
+//                               }
+                                if(count($origin_hubs) > 0){
+                                    if (!empty($value->origin_hub_id)) {
+                                        if(!in_array($value->origin_hub_id,$origin_hubs)){
+                                            $return = 0;
+                                        }
+                                    }
+                                }
+                                //DESTINATION HUB
+                                if(count($hubs) > 0){
+                                    if (!empty($value->hub_id)) {
+                                        if(!in_array($value->hub_id,$hubs)){
+                                            $return = 0;
+                                        }
+                                    }
+                                }
 
-                                   if(!empty($value->origin_hub_id)) {
-                                       if(!in_array($value->origin_hub_id,$origin_hubs)){
-                                           $originHubMatch = false;
-                                       }
-                                   }
-
-                                   if(!empty($value->hub_id)){
-                                       if(!in_array($value->hub_id,$hubs)){
-                                           $hubMatch = false;
-                                       }
-                                   }
-                                   $return = ($originHubMatch || $hubMatch) ? 1 : 0;
-                               }
                                if(count($case_nature_type_id) > 0){
                                    if (!empty($value->case_nature_type_id)) {
                                        if(!in_array($value->case_nature_type_id,$case_nature_type_id)){
