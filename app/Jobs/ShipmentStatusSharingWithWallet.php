@@ -111,7 +111,7 @@ class ShipmentStatusSharingWithWallet implements ShouldQueue
                 ->where(function ($query) {
                     $query->whereNull('sac.id')
                         ->orWhere('sac.wallet_log_updated', 0);
-                })
+                })->where('shipments.id',$shipment_id )
                 ->select(['shipments.*', 'u.wallet_id'])
                 ->first();
 
