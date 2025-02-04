@@ -16145,6 +16145,13 @@ class AdminReportsController extends Controller
                     WHERE shipments_journey.shipment_id = shipments.id
                     AND shipments_journey.shipper_status_id = 18
                     AND shipments_journey.verification = 1
+                    AND shipments_journey.id > (
+                        SELECT MAX(id)
+                        FROM shipments_journey
+                        WHERE shipments_journey.shipment_id = shipments.id
+                        AND shipments_journey.shipper_status_id = 18
+                        AND shipments_journey.verification = 0
+                    )
                 )');
         })
         ->leftJoin('admins AS request_approved_admins', 'lost_approved.admin_id', '=', 'request_approved_admins.id')
@@ -16177,21 +16184,21 @@ class AdminReportsController extends Controller
                     FROM shipments_journey AS sj1
                     WHERE sj1.shipment_id = shipments.id
                     AND sj1.shipper_status_id = 51
-                    AND EXISTS (
-                        SELECT 1
+                    AND sj1.id > (
+                        SELECT MAX(sj2.id)
                         FROM shipments_journey AS sj2
                         WHERE sj2.shipment_id = shipments.id
                         AND sj2.shipper_status_id = 18
-                        AND sj2.id < sj1.id
-                        ORDER BY sj2.id DESC
-                        LIMIT 1
                     )
                     AND NOT EXISTS (
                         SELECT 1
                         FROM shipments_journey AS sj3
                         WHERE sj3.shipment_id = shipments.id
                         AND sj3.id BETWEEN (
-                            SELECT id FROM shipments_journey WHERE shipment_id = shipments.id AND shipper_status_id = 18 ORDER BY id DESC LIMIT 1
+                            SELECT MAX(sj4.id) 
+                            FROM shipments_journey AS sj4 
+                            WHERE sj4.shipment_id = shipments.id 
+                            AND sj4.shipper_status_id = 18
                         ) AND sj1.id
                         AND sj3.shipper_status_id NOT IN (18, 51)
                     )
@@ -16305,7 +16312,17 @@ class AdminReportsController extends Controller
             if ($keyword) {
                 $query->where('shipments.updated_at', 'LIKE', "%{$keyword}%");
             }
-        });
+        })
+        ->editColumn('approval_date_time', function ($shipments) {
+            return !empty($shipments->lost_approved) ? $shipments->lost_approved : '-';
+        })
+        ->editColumn('parcel_value', function ($shipments) {
+            return !empty($shipments->parcel_value) ? $shipments->parcel_value : '-';
+        })
+        ->editColumn('cod_amount', function ($shipments) {
+            return !empty($shipments->cod_amount) ? $shipments->cod_amount : '-';
+        })
+        ;
         return $datatable
         ->rawColumns(['tracking_number'])
         ->make(true);
