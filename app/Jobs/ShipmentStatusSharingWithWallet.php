@@ -102,7 +102,7 @@ class ShipmentStatusSharingWithWallet implements ShouldQueue
             $status_code = $status_mapping[$status]['code'];
             $status_name = $status_mapping[$status]['name'];
 
-            $shipment_log_not_sent = Shipment::leftJoin('finja_log_settlement_records as sac', 'shipments.shipment_id', '=', 'sac.shipment_id')
+            $shipment_log_not_sent = Shipment::leftJoin('finja_log_settlement_records as sac', 'shipments.id', '=', 'sac.shipment_id')
                 ->join('wallet_users as u', function ($join) {
                     $join->on('u.user_id', '=', 'shipments.user_id')
                     ->where('u.substitute_user_id', '0');
