@@ -130,7 +130,7 @@ class ShipmentStatusSharingWithWallet implements ShouldQueue
             $cod_charges = FinjaLogSettlementRecord::where('shipment_id', $shipment_id)
             ->first();
             $shipment = Shipment::find($shipment_id);
-            if($cod_charges && $cod_charges->logged_cod_amount !=  $shipment->amount) {
+            if($cod_charges && $cod_charges->logged_cod_charges !=  $shipment->amount) {
 
                 $data = [
                     'shipment_id' => $shipment_id,

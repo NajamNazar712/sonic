@@ -11,6 +11,7 @@ use Illuminate\Queue\SerializesModels;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\FingaIntegrationController;
+use App\Models\FinjaLogSettlementRecord;
 
 
 class CODAmountChangeSendToWallet implements ShouldQueue
@@ -60,7 +61,11 @@ class CODAmountChangeSendToWallet implements ShouldQueue
                     
                     $body = $response->getBody();
                     $body = json_decode($body);
-    
+                    
+                    FinjaLogSettlementRecord::where('shipment_id', $this->data['shipment_id'])
+                    ->update([
+                        'logged_cod_charges' => $this->data['amount']
+                    ]);
                     FingaIntegrationController::apiLog('amount-change-response', 'success', $body ,$this->data['shipment_id']);
     
                 } else {

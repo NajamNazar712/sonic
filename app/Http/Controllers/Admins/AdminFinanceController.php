@@ -4451,32 +4451,6 @@ class AdminFinanceController extends Controller
 
         $shipment->save();
 
-        if(WalletUser::where('user_id', $shipment->user_id)->where('substitute_user_id', 0)->exists()) {
-
-            $log_bid = $this->isWalletLogUpdated($shipment_id);
-            if(!$log_bid) {
-                $requestPayload = [
-                    "shipmentId" => $shipment_id,
-                    "wallet_id" => $shipment->user->wallet->wallet_id,
-                    "client_id" => $shipment->user->id, 
-                    "reference_id" => (string) Str::uuid(), 
-                    "shipment_id" => $shipment->tracking_number, 
-                    "amount" => $shipment->amount, 
-                    "order_created_date" => $shipment->created_at,
-                ]; 
-                $this->arrival_shipment_logs($requestPayload, null, $shipment_id);
-            } 
-
-            $data = [
-                'shipment_id' => $shipment_id,
-                'tracking_number' => $shipment->tracking_number,
-                'client_id' => $shipment->user->id,
-                'wallet_id' => $shipment->user->wallet->wallet_id,
-                'amount' => $shipment->amount
-            ];
-            CODAmountChangeSendToWallet::dispatch($data);
-        }
-
         ShipmentChargesController::cash_handling($shipment);
 
         return redirect()->route('admin.finance.change_shipment_amount.index')->with('success', 'Shipment\'s amount has been changed');
