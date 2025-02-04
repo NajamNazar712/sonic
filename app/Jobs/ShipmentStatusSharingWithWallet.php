@@ -2,6 +2,8 @@
 
 namespace App\Jobs;
 
+use App\Http\Models\PendingPaymentShipment;
+use App\Http\Traits\FinSurgentLogTrait;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -15,10 +17,12 @@ use App\ShipmentAdditionalCharges;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use App\Models\FinjaLogSettlementRecord;
+use Illuminate\Support\Str;
 
 class ShipmentStatusSharingWithWallet implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use FinSurgentLogTrait;
 
     protected $data;
     /**
@@ -97,6 +101,32 @@ class ShipmentStatusSharingWithWallet implements ShouldQueue
             $tracking_number = $this->data['tracking_number'];
             $status_code = $status_mapping[$status]['code'];
             $status_name = $status_mapping[$status]['name'];
+
+            $shipment_log_not_sent = Shipment::leftJoin('finja_log_settlement_records as sac', 'shipments.id', '=', 'sac.shipment_id')
+                ->join('wallet_users as u', function ($join) {
+                    $join->on('u.user_id', '=', 'shipments.user_id')
+                    ->where('u.substitute_user_id', '0');
+                })
+                ->where(function ($query) {
+                    $query->whereNull('sac.id')
+                        ->orWhere('sac.wallet_log_updated', 0);
+                })
+                ->select(['shipments.*', 'u.wallet_id'])
+                ->first();
+
+            if(!empty($shipment_log_not_sent)){
+                $requestPayload = [
+                    "client_id" => $shipment_log_not_sent->user_id,
+                    "wallet_id" => $shipment_log_not_sent->wallet_id,
+                    "reference_id" => (string)Str::uuid(),
+                    "shipment_id" => $shipment_log_not_sent->tracking_number,
+                    "amount" => $shipment_log_not_sent->amount,
+                    "order_created_date" => $shipment_log_not_sent->created_at,
+                ];
+                $this->arrival_shipment_logs($requestPayload, null,$shipment_log_not_sent->id);
+            }
+
+
             $requestPayload = [
                 'shipment_id' => $tracking_number,
                 'status_code' => $status_code,

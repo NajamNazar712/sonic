@@ -1169,7 +1169,15 @@ function checkboxStatus() {
                             row.push(values.lead_id);
                             row.push(values.id);
                             row.push(values.account_type);
-                            row.push(values.name);
+                            // row.push(values.name);
+
+                            // Decode HTML entities for comapany name
+                            row.push((() => {
+                                const tempElement = document.createElement('textarea');
+                                tempElement.innerHTML = values.name;
+                                return tempElement.value;
+                            })());
+
                             row.push(values.poc);
                             //row.push(values.address);
                             row.push(values.zone);

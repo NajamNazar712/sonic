@@ -2463,6 +2463,8 @@ class AdminTrackingController extends Controller
                             ShipmentPosition::where('tracked_by', Auth::id())->delete();
 
                             foreach ($shipments as $shipment){
+                                // due to undefined variable
+                                $shipment_journey_status_by ='-';
                                 $shipment_detail = array();
                                 $last_shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->shipment_id)->orderBy('id', 'desc')->first();
                                 if($last_shipment_journey){

@@ -1320,6 +1320,35 @@
 						}
 					});
 				}
+				else if ($(this).hasClass('view_details_archive')) {
+					$.ajax({
+						url: '{!! route('admin.finance.done_payments.details_print') !!}',
+						method: 'POST',
+						data: {
+							'_token': '{{ csrf_token() }}',
+							'id': id,
+							'old':1,
+						}
+					})
+					.done(function(data) {
+						var tab = window.open('', '_blank');
+
+						if(!tab) {
+							swal({
+								title: 'Popup Blocker Enabled!',
+								text: 'Please add this site to your exception list.',
+								icon: 'error',
+								closeOnClickOutside: false,
+								closeOnEsc: false
+							});
+						}
+						else {
+							tab.document.write(data);
+							tab.document.close();
+							tab.focus();
+						}
+					});
+				}
 				else if ($(this).hasClass('update_details')) {
 					$.ajax({
 						url: '{!! route('admin.finance.done_payments.details') !!}',

@@ -128,10 +128,29 @@
                                                             <div class="input-group-prepend">
                                                                 <span class="input-group-text">SMS Charges</span>
                                                             </div>
-                                                            <input type="text" class="form-control @if(isset($e_sms_charge['sms_charges']) && ($sms_charge['sms_charges']) && $e_sms_charge->sms_charges != $sms_charge->sms_charges) changed @elseif(!isset($e_sms_charge['sms_charges']) && $existing == 1) new @endif" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_sms_charge['sms_charges']) && isset($sms_charge['sms_charges']) && $e_sms_charge->sms_charges !=$sms_charge->sms_charges) {{$e_sms_charge->sms_charges}} @endif" data-rule-required="true" data-msg-required="This field is required" data-rule-range="[0.01,100000]" data-msg-range="Charges needs to be from 0.01 to 100000" name="sms_charges" value="{{ (isset($sms_charge['sms_charges']) && $sms_charge->sms_charges != '')? $sms_charge->sms_charges : ''}}">
+                                                            @php
+                                                                // Get sms_charges value from the $shipper object
+                                                                $sms_charge = isset($sms_charge->sms_charges) ? $sms_charge->sms_charges : $shipper->sms_charges;
+                                                            @endphp
+
+                                                            <input type="text"
+                                                                   class="form-control
+                                                                  @if(isset($e_sms_charge['sms_charges']) && $sms_charge !== $e_sms_charge->sms_charges) changed
+                                                                  @elseif(!isset($e_sms_charge['sms_charges']) && $existing == 1) new @endif"
+                                                                   data-toggle="tooltip"
+                                                                   data-trigger="hover"
+                                                                   data-placement="top"
+                                                                   data-title="@if(isset($e_sms_charge['sms_charges']) && $e_sms_charge->sms_charges != $sms_charge) {{ $e_sms_charge->sms_charges }} @endif"
+                                                                   data-rule-required="true"
+                                                                   data-msg-required="This field is required"
+                                                                   data-rule-range="[0.01,100000]"
+                                                                   data-msg-range="Charges need to be from 0.01 to 100000"
+                                                                   name="sms_charges"
+                                                                   value="{{ isset($sms_charge) && $sms_charge != '' ? $sms_charge : '' }}">
                                                             <div class="input-group-append">
                                                                 <span class="input-group-text">PKR</span>
                                                             </div>
+
                                                         </div>
                                                     </fieldset>
                                                 </div>

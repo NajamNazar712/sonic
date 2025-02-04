@@ -694,6 +694,7 @@
                         url: '{{ route('admin.finance.make_payments.list') }}',
                         data: params,
                         success: function(result) {
+                            console.log(result)
                             head = [];
 
                             head.push('S.No');
@@ -724,9 +725,9 @@
                             head.push('Payment Cycle');
                             head.push('Payment Cycle Days');
                             head.push('Return Shipments Avg. Aging');
-
                             $.each(result.data, function(index, values) {
                                 row = [];
+                                
 
                                 row.push(index + 1);
                                 row.push(values.shipper);
