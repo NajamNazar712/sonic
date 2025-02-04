@@ -136,7 +136,7 @@ class ShipmentStatusSharingWithWallet implements ShouldQueue
                     'shipment_id' => $shipment_id,
                     'tracking_number' => $shipment->tracking_number,
                     'client_id' =>  $shipment->user_id,
-                    'wallet_id' => $shipment->wallet_id,
+                    'wallet_id' => $shipment->user->wallet->wallet_id,
                     'amount' => $shipment->amount
                 ];
                 CODAmountChangeSendToWallet::dispatch($data);
