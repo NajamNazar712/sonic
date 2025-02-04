@@ -174,6 +174,7 @@
 
     <script type="text/javascript">
 
+        // Start date
         $('#date_from').pickadate({
             firstDay: 1,
             clear: '',
@@ -182,10 +183,14 @@
             formatSubmit: 'yyyy-mm-dd',
             hiddenSuffix: '_formatted',
             onSet: function (context) {
-                
+                var selectedDate = this.get('select'); 
+                if (selectedDate) {
+                    $('#date_to').pickadate('picker').set('min', selectedDate);
+                }
             }
         });
 
+        // End date
         $('#date_to').pickadate({
             firstDay: 1,
             clear: '',
@@ -193,11 +198,7 @@
             selectMonths: true,
             formatSubmit: 'yyyy-mm-dd',
             hiddenSuffix: '_formatted',
-            onSet: function (context) {
-                
-            }
         });
-
 
         jQuery.fn.DataTable.Api.register('buttons.exportData()', function(options) {
             if (this.context.length) {

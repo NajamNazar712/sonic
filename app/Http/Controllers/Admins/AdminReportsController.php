@@ -16314,7 +16314,7 @@ class AdminReportsController extends Controller
             }
         })
         ->editColumn('approval_date_time', function ($shipments) {
-            return !empty($shipments->lost_approved) ? $shipments->lost_approved : '-';
+            return !empty($shipments->approval_date_time) ? $shipments->approval_date_time : '-';
         })
         ->editColumn('parcel_value', function ($shipments) {
             return !empty($shipments->parcel_value) ? $shipments->parcel_value : '-';
