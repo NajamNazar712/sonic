@@ -16198,20 +16198,6 @@ class AdminReportsController extends Controller
                 )');
         })
 
-
-        // ->leftJoin('shipments_journey AS case_closed_remarks', function($join) {
-        //     $join->on('case_closed_remarks.shipment_id', '=', 'shipments.id')
-        //         ->where('case_closed_remarks.shipper_status_id', 51)
-        //         ->whereRaw('case_closed_remarks.id = (
-        //             SELECT MAX(id)
-        //             FROM shipments_journey
-        //             WHERE shipments_journey.shipment_id = shipments.id
-        //             AND shipments_journey.shipper_status_id = 51
-        //         )');
-        // })
-
-
-
         ->leftJoin('shipment_status', 'shipment_status.id', '=', 'shipments.shipper_status_id')
         ->distinct()
         ->whereIn('shipments.shipper_status_id', [18, 51]);
@@ -16254,13 +16240,10 @@ class AdminReportsController extends Controller
             $query->orderBy('admin_trax_id', $direction)->orderBy('rider_trax_id', $direction);
         })
         ->addColumn('case_closed_remarks', function ($shipments) {
-            if ($shipments->case_closed_remarks == 51) {
+            if ($shipments->case_closed_remarks != "") {
                 return $shipments->case_closed_remarks ?: '-';
             }
             return '-';
-        })
-        ->orderColumn('case_closed_remarks', function ($query, $direction) {
-            $query->orderByRaw("CASE WHEN case_closed_remarks = 51 THEN case_closed_remarks ELSE '-' END $direction");
         })
         ->filterColumn('responsible_city', function ($query, $keyword) {
             $query->where('city.name', 'like', "%$keyword%");

@@ -65,12 +65,12 @@
                             <th class="border-primary border-darken-1">Responsible City</th>
                             <th class="border-primary border-darken-1">Shipment Last Status</th>
                             <th class="border-primary border-darken-1">Lost Requested By</th>
+                            <th class="border-primary border-darken-1">Lost requested date/time</th>
                             <th class="border-primary border-darken-1">Approved By</th>
+                            <th class="border-primary border-darken-1">Approved by date/time</th>
                             <th class="border-primary border-darken-1">COD Amount</th>
                             <th class="border-primary border-darken-1">Parcel Value</th>
                             <th class="border-primary border-darken-1">Case Closed Remarks</th>
-                            <th class="border-primary border-darken-1">Lost requested date/time</th>
-                            <th class="border-primary border-darken-1">Approved by date/time</th>
                         </tr>
                     </thead>
                 </table>
@@ -221,12 +221,12 @@
                         head.push('Responsible City');
                         head.push('Shipment Last Status');
                         head.push('Lost Requested By');
+                        head.push('Approved requested date/time');
                         head.push('Approved By');
+                        head.push('Lost requested date/time');
                         head.push('COD Amount');
                         head.push('Parcel Value');
                         head.push('Case Closed Remarks');
-                        head.push('Lost requested date/time');
-                        head.push('Approved requested date/time');
 
                         $.each(result.data, function(index, values) {
                             row = [];
@@ -241,12 +241,12 @@
                             row.push(values.responsible_city);
                             row.push(values.latest_shipment_status);
                             row.push(values.requested_admin_name);
+                            row.push(values.requested_date_time);
                             row.push(values.request_approved_admin);
+                            row.push(values.approval_date_time);
                             row.push(values.cod_amount);
                             row.push(values.parcel_value);
                             row.push(values.case_closed_remarks);
-                            row.push(values.requested_date_time);
-                            row.push(values.approval_date_time);
 
                             body.push(row);
                         });
@@ -361,6 +361,20 @@
                 {
                     orderable: true,
                     searchable: true,
+                    class: 'align-middle requested_admin_name',
+                    data: 'requested_admin_name',
+                    name: 'requested_admin_name'
+                },
+                {
+                    orderable: true,
+                    searchable: true,
+                    class: 'align-middle requested_date_time',
+                    data: 'requested_date_time',
+                    name: 'requested_date_time'
+                },
+                {
+                    orderable: true,
+                    searchable: true,
                     class: 'align-middle request_approved_admin',
                     data: 'request_approved_admin',
                     name: 'request_approved_admin'
@@ -368,9 +382,9 @@
                 {
                     orderable: true,
                     searchable: true,
-                    class: 'align-middle requested_admin_name',
-                    data: 'requested_admin_name',
-                    name: 'requested_admin_name'
+                    class: 'align-middle approval_date_time',
+                    data: 'approval_date_time',
+                    name: 'approval_date_time'
                 },
                 {
                     orderable: true,
@@ -392,20 +406,6 @@
                     class: 'align-middle case_closed_remarks',
                     data: 'case_closed_remarks',
                     name: 'case_closed_remarks'
-                },
-                {
-                    orderable: true,
-                    searchable: true,
-                    class: 'align-middle requested_date_time',
-                    data: 'requested_date_time',
-                    name: 'requested_date_time'
-                },
-                {
-                    orderable: true,
-                    searchable: true,
-                    class: 'align-middle approval_date_time',
-                    data: 'approval_date_time',
-                    name: 'approval_date_time'
                 }
             ],
             rowCallback: function(row, data, index) {
