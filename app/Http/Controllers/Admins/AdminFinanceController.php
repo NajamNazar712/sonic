@@ -9347,6 +9347,7 @@ class AdminFinanceController extends Controller
                 $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment->id);
                 $arrival_charges_applied = ShipmentAdditionalCharges::check_additional_charges($shipment->id, true, false, false);;
                 $shipment_weight = $shipment->actual_weight;
+                $wallet_charges = ShipmentAdditionalCharges::fetch_wallet_charges($shipment->id);
                 $weight_charges = $shipment->weight_charges;
 
 //            if ($done_payment_shipment->type == 3) {
