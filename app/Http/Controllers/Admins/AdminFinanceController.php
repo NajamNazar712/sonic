@@ -7695,13 +7695,21 @@ class AdminFinanceController extends Controller
 
                                         $log_bid = $this->isWalletLogUpdated($pending_payment_shipment->shipment_id);
                                         if(!$log_bid) {
+                                            
+                                            $status_array = [14, 25, 31, 38, 37, 18];
+                                            if(in_array($shipment->shipper_status_id, $status_array)) {
+                                                $cod_amount = 0;
+                                            } else {
+                                                $cod_amount = $shipment->amount;
+                                            }
+                                            
                                             $pending_logs[$pending_payment_shipment->shipment_id] = [
                                                 "shipmentId" => $shipment->id,
                                                 "wallet_id" => $shipment->user->wallet->wallet_id,
                                                 "client_id" => $shipment->user->id, 
                                                 "reference_id" => (string) Str::uuid(), 
                                                 "shipment_id" => $shipment->tracking_number, 
-                                                "amount" => 0, 
+                                                "amount" => $cod_amount,
                                                 "order_created_date" => $shipment->created_at,
                                                 // "charges" => [
                                                 //     'weight_charges' =>  0
