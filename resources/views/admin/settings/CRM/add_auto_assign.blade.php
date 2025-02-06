@@ -69,7 +69,7 @@
                                     <div class="row">
                                         <div class="col-4">
                                             <div class="form-group">
-                                                <label>Origin Zone&nbsp;(<input type="checkbox" class="checkAll" >Select All)</label>
+                                                <label>Origin Zone&nbsp;(<input type="checkbox" class="checkAll" id="origin_zone_id_checkbox">Select All)</label>
                                                 <select name="origin_zone_id[]" id="origin_zone_id" class="form-control select2" multiple="multiple">
                                                     @foreach($zones as $zone)
                                                         <option value="{{ $zone->id }}" > {{ $zone->name }} </option>
@@ -79,7 +79,7 @@
                                         </div>
                                         <div class="col-4">
                                             <div class="form-group">
-                                                <label>Origin Hub (<input type="checkbox" class="checkAll" >Select All)</label>
+                                                <label>Origin Hub (<input type="checkbox" class="checkAll" id="origin_id_checkbox" >Select All)</label>
                                                 <select name="origin_id[]" disabled id="origin_id" class="form-control select2" multiple="multiple">
 {{--                                                    @foreach($origins as $origin)--}}
 {{--                                                        <option value="{{ $origin->id }}" > {{ $origin->name }} </option>--}}
@@ -90,7 +90,7 @@
                                         <div class="col-4">
                                             <div class="form-group">
                                                 <div class="form-group">
-                                                    <label>Origin Area&nbsp;(<input type="checkbox" class="checkAll"  >Select All)</label>
+                                                    <label>Origin Area&nbsp;(<input type="checkbox" class="checkAll"  id="origin_area_id_checkbox" >Select All)</label>
                                                     <select name="origin_area_id[]" disabled id="origin_area_id" class="form-control select2" multiple="multiple"  >
 
                                                     </select>
@@ -254,6 +254,9 @@
                 var origin_zone_id = $(this).val();
                 $('#origin_id').attr('disabled','disabled');
                 $('#origin_id').empty();
+                $("#origin_area_id").attr('disabled','disabled');
+                $('#origin_area_id').empty();
+                $("#origin_id_checkbox,#origin_area_id_checkbox").prop('checked', false)
                 if(origin_zone_id!='') {
                     $.ajax({
                         url:'{!! route("admin.settings.auto_assigning.get_origin_hub") !!}',

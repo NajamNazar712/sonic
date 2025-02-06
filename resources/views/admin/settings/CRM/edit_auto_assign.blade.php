@@ -315,9 +315,11 @@
             }
 
             function getOriginHubs(origin_zone) {
-                console.log(origin_zone);
                 $('#origin_id').attr('disabled','disabled');
                 $('#origin_id').empty();
+                $("#origin_area_id").attr('disabled','disabled');
+                $('#origin_area_id').empty();
+                $("#origin_id_checkbox,#origin_area_id_checkbox").prop('checked', false);
                 $.ajax({
                     url:'{!! route("admin.settings.auto_assigning.get_origin_hub") !!}',
                     method: 'POST',
@@ -524,7 +526,6 @@
             }).bind('change', function() {
 
                 var zone = $(this).val();
-                console.log(zone);
                 getOriginHubs(zone);
 
             });
