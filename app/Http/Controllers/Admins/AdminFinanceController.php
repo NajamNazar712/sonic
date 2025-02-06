@@ -4451,7 +4451,7 @@ class AdminFinanceController extends Controller
 
         $shipment->save();
 
-        ShipmentChargesController::cash_handling($shipment);
+        ShipmentChargesController::cash_handling($shipment_id);
 
         return redirect()->route('admin.finance.change_shipment_amount.index')->with('success', 'Shipment\'s amount has been changed');
     }
