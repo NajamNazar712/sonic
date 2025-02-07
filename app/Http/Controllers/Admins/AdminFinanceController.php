@@ -9430,7 +9430,6 @@ class AdminFinanceController extends Controller
                             }
                             if ($done_payment_shipment->type == 1) {
                                 $total_return_charges += $shipment->return_charges;
-                               
                             }
 
                             if ($done_payment_shipment->type == 3) {
