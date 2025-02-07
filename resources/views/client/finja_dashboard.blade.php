@@ -1,6 +1,6 @@
 @extends('client.layout.master')
 
-@section('title', 'Finga Dashboard')
+@section('title', 'Sonic Payment Portal')
 
 @section('content')
     <div class="app-content content">
