@@ -81,7 +81,7 @@ class WalletSettlementFromDonePayments implements ShouldQueue
                         'faf_charges' =>  floatval($dps->faf_charges),
                         'weight_charges' =>  floatval($dps->weight_charges),
                         'fuel_surcharge' =>  floatval($dps->fuel_surcharge),
-                        'cash_handling_charges' => floatval($dps->cash_handling_charges),
+                        'cash_handling_charges' => $dps->type == 0 ? floatval($dps->cash_handling_charges) : 0,
                         'insurance_charges' => floatval($dps->insurance_charges),
                         'replacement_charges' => floatval($dps->replacement_charges), 
                         'try_and_buy_charges' => floatval($dps->try_and_buy_charges),
