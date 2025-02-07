@@ -75,22 +75,23 @@ class AutoDeliveryNoteVerify extends Command
                     $chunkSize = 1000; // Adjust if needed
                  
                     foreach (array_chunk($deliveryNoteShipmentsId, $chunkSize) as $shipmentChunk) {                        
-                        // Fetch all relevant shipments in one go (without chunking)
+                        // Fetch all relevant shipments in one go 
                         $shipments = Shipment::whereIn('id', $shipmentChunk)
                             ->whereNotIn('shipper_status_id', [30, 36, 37, 56])
                             ->where('booking_type_id', '!=', 6)
                             ->select('id', 'shipper_status_id', 'booking_type_id', 'packaging_material_request', 'packaging_material_charges', 'shipment_type')
-                            ->get(); // No chunking here
-                        $shipmentIds = array_column($shipments->toArray(), 'id');
-
+                            ->get(); 
                         // Fetch shipments journey data for the current chunk
-                        $shipments_journey = ShipmentsJourney::whereIn('shipment_id', $shipmentIds)
-                            ->orderBy('id', 'desc')
-                            ->get()
-                            ->keyBy('shipment_id');
+                        // $shipmentIds = array_column($shipments->toArray(), 'id');
+                        // $shipments_journey =
+                        // ShipmentsJourney::whereIn('shipment_id', $shipmentIds)
+                        // ->orderBy('id', 'desc')
+                        // ->get()
+                        // ->unique('shipment_id') // Keeps the first occurrence (highest id) per shipment_id
+                        //     ->keyBy('shipment_id');
+                            
                         foreach ($shipments as $shipment) {
-                            $journey = $shipments_journey[$shipment->id] ?? null;
-                            if (!$journey) continue;
+                            $journey =  $shipment->latest_shipment_journey;
                             ShipmentsJourneyController::add($journey->shipment_id, $journey->shipper_status_id, $journey->consignee_status_id, $journey->status_reason_id, $journey->remarks, $journey->user_id, 346, $journey->reference_1_id, $journey->reference_2_id, 1, $journey->received_or_refused_by, $journey->rider_id, $journey->cnic, $journey->relation);
 
                             if ($shipment->shipper_status_id == 14) {
