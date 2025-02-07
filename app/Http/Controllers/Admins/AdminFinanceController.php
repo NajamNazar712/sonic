@@ -9399,9 +9399,9 @@ class AdminFinanceController extends Controller
                               <td>' . $shipment->booking_type->booking_type . '</td>
                               <td>' . $shipment_weight . '</td>
                               <td>' . number_format($done_payment_shipment->amount) . '</td>
-                              <td>' . (($done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? number_format($weight_charges, 2) : '0') . '</td>
-                              <td>' . (($done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? number_format($faf_charges, 2) : '0') . '</td>
-                              <td>' . (($done_payment_shipment->type != 2) ? number_format($wallet_charges, 2) : '0') . '</td>
+                              <td>' . (($done_payment_shipment->type != 2 && ($done_payment_shipment->type == 3 || !$arrival_charges_applied)) ? number_format($weight_charges, 2) : '0') . '</td>
+                              <td>' . (($done_payment_shipment->type != 2 && ($done_payment_shipment->type == 3 || !$arrival_charges_applied)) ? number_format($faf_charges, 2) : '0') . '</td>
+                              <td>' . (($done_payment_shipment->type != 2 && $done_payment_shipment->type == 0) ? number_format($wallet_charges, 2) : '0') . '</td>
                               <td>' . (($done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? number_format($shipment->cash_handling_charges, 2) : '0') . '</td>
                               <td>' . (($done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
                               <td>' . (($done_payment_shipment->type == 2) ? number_format($done_payment_shipment->payable, 2) : '0') . '</td>
@@ -9426,7 +9426,9 @@ class AdminFinanceController extends Controller
                                 $total_replacement_charges += $shipment->replacement_charges;
                                 $total_try_and_buy_charges += $shipment->try_and_buy_charges;
                                 $total_reverse_pickup_charges += $service_charges;
-                            } else {
+                                $total_wallet_charges+=$wallet_charges;
+                            }
+                            if ($done_payment_shipment->type == 1) {
                                 $total_return_charges += $shipment->return_charges;
                             }
 
