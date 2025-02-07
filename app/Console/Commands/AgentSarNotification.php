@@ -198,12 +198,12 @@ class AgentSarNotification extends Command
                     ->where('shipments_journey.shipper_status_id', '=', 12)
                     ->where('shipments_journey.verification',1)
                     ->where('shipments_journey.created_at','>=',$date.' 23:15:00')
-                    ->where('rv_shipment_tickets.updated_at','<=',date('Y-m-d').'23:14:59');
+                    ->where('rv_shipment_tickets.updated_at','<=',date('Y-m-d').' 23:14:59');
                 })
                 ->where('disabled_shipper',1)
                 ->where('halt_shipper',0)
                 ->where('rv_shipment_tickets.updated_at','>=',$date.' 23:15:59')
-                ->where('rv_shipment_tickets.updated_at','<=', date('Y-m-d').'23:14:59')
+                ->where('rv_shipment_tickets.updated_at','<=', date('Y-m-d').' 23:14:59')
                 ->select('rv_shipment_tickets.*', 'shipments_journey.id as journeyId')->get();
 
             if($haltShipper->isNotEmpty()){
