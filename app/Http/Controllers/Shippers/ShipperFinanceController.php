@@ -608,7 +608,8 @@ class ShipperFinanceController extends Controller
                             $total_replacement_charges += $shipment->replacement_charges;
                             $total_try_and_buy_charges += $shipment->try_and_buy_charges;
                             $total_reverse_pickup_charges += $service_charges;
-                        } else {
+                        }
+                        if ($done_payment_shipment->type == 1) {
                             $total_return_charges += $shipment->return_charges;
                         }
 
