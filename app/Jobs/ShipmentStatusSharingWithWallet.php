@@ -91,6 +91,14 @@ class ShipmentStatusSharingWithWallet implements ShouldQueue
                 'code' => 'RU-CS',
                 'name' => 'Return - Unable to Return',
             ],
+            30 => [
+                'code' => 'RP-EC',
+                'name' => 'Replacement - Collected',
+            ],
+            31 => [
+                'code' => 'RP-DS',
+                'name' => 'Replacement - Delivered to Shipper',
+            ],
         ];
         $shipment_id = $this->data['shipment_id'];
         try {
