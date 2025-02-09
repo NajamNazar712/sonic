@@ -155,7 +155,7 @@ class ShipmentsJourneyController extends Controller
 
       $shipment_journey->save();
 
-        if(in_array($shipper_status_id, [5,8,13,14,18,20,25,36,37,38,60])) {
+        if(in_array($shipper_status_id, [5,8,13,14,18,20,25,36,37,38,60,30,31])) {
             
             $shipment = Shipment::join('wallet_users as u', function ($join) {
                 $join->on('u.user_id', '=', 'shipments.user_id')

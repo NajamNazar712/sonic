@@ -21506,7 +21506,7 @@ class AdminFinanceController extends Controller
         $done_payment_shipments = DonePaymentShipment::join('shipments as s','s.id', 'done_payment_shipments.shipment_id')
         ->join('finja_log_settlement_records as sac', 'done_payment_shipments.shipment_id', '=', 'sac.shipment_id')
         ->where('done_payment_shipments.done_payment_id', $request->id)
-        ->whereIn('done_payment_shipments.wallet_action_bid', [1,2])
+        ->whereIn('done_payment_shipments.wallet_action_bid', [0,1,2])
         ->select(['done_payment_shipments.shipment_id', 's.tracking_number', 'done_payment_shipments.type'])->get();
         $data = [];
         foreach($done_payment_shipments as $dps) {
@@ -21515,7 +21515,8 @@ class AdminFinanceController extends Controller
             ->where('status', 'error')
             ->where(function ($query) {
                 $query->where('nature', 'settlement-response')
-                      ->orWhere('nature', 'adjustment-response');
+                      ->orWhere('nature', 'adjustment-response')
+                      ->orWhere('nature', 'log-charge-response');
             })
             ->latest()
             ->first();
@@ -21528,6 +21529,8 @@ class AdminFinanceController extends Controller
                     $type = 'Returned';
                 } elseif($dps->type == 2) {
                     $type = 'Adjustment';
+                } elseif($dps->type == 2) {
+                    $type = 'Arrival';
                 }
 
                 $data[] = [
