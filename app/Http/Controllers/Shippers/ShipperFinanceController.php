@@ -516,6 +516,7 @@ class ShipperFinanceController extends Controller
         $total_fintech_charges = 0;
         $total_faf_charges = 0;
         $total_reverse_pickup_charges = 0;
+        $total_wallet_charges = 0;
 
         foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
             $shipment = $done_payment_shipment->shipment;
@@ -536,6 +537,7 @@ class ShipperFinanceController extends Controller
             $arrival_charges_applied = ShipmentAdditionalCharges::check_additional_charges($shipment->id,true,false,false);;
             $shipment_weight = $shipment->actual_weight;
             $weight_charges = $shipment->weight_charges;
+            $wallet_charges = ShipmentAdditionalCharges::fetch_wallet_charges($shipment->id);
 
 
 
@@ -583,7 +585,9 @@ class ShipperFinanceController extends Controller
                               <td>' . $shipment_weight . '</td>
                               <td>' . $item->description . '</td>
                               <td>' . number_format($done_payment_shipment->amount) . '</td>
-                              <td>' . (($done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0 && ($done_payment_shipment->type == 3 || (!$arrival_charges_applied))) ? number_format($weight_charges, 2) : '0') . '</td>
+                              <td>' . (($done_payment_shipment->type != 2 && ($done_payment_shipment->type == 3 || !$arrival_charges_applied)) ? number_format($weight_charges, 2) : '0') . '</td>
+                              <td>' . (($done_payment_shipment->type != 2 && ($done_payment_shipment->type == 3 || !$arrival_charges_applied)) ? number_format($faf_charges, 2) : '0') . '</td>
+                              <td>' . (($done_payment_shipment->type != 2 && $done_payment_shipment->type != 3) ? number_format($wallet_charges, 2) : '0') . '</td>
                               <td>' . (($done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? number_format($shipment->cash_handling_charges, 2) : '0') . '</td>
                               <td>' . (($done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
                               <td>' . (($done_payment_shipment->type == 2) ? number_format($done_payment_shipment->payable, 2) : '0') . '</td>
@@ -642,6 +646,9 @@ class ShipperFinanceController extends Controller
                 $total_charges += $done_payment_shipment->charges;
                 $total_payable += $done_payment_shipment->payable;
                 $total_sms_charges += $done_payment_shipment->sms_charges;
+                if ($done_payment_shipment->type == 0 || $done_payment_shipment->type == 1) {
+                    $total_wallet_charges += $wallet_charges;
+                }
             } else {
                 if ($done_payment_shipment->type == 0) {
                     $total_collection_amount += $done_payment_shipment->amount;
@@ -659,6 +666,8 @@ class ShipperFinanceController extends Controller
                                 <td class="color primary"><strong>Total</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_collection_amount) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_weight_charges, 2) . '</strong></td>
+                                <td class="color secondary"><strong>' . number_format($total_faf_charges, 2) . '</strong></td>
+                                <td class="color secondary"><strong>' . number_format($total_wallet_charges, 2) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_cash_handling_charges, 2) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_nsa_osa_charges, 2) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_adjustments, 2) . '</strong></td>
@@ -704,6 +713,8 @@ class ShipperFinanceController extends Controller
                               <td class="color primary"><strong>Item Description</strong></td>
                               <td class="color primary"><strong>Collection Amount (PKR)</strong></td>
                               <td class="color primary"><strong>Weight Charges (PKR)</strong></td>
+                              <td class="color primary"><strong>Faf Charges (PKR)</strong></td>
+                              <td class="color primary"><strong>Finova Charges (PKR)</strong></td>
                               <td class="color primary"><strong>Cash Handling Charges (PKR)</strong></td>
                               <td class="color primary"><strong>OSA Charges (PKR)</strong></td>
                               <td class="color primary"><strong>Adjustments (PKR)</strong></td>
@@ -757,6 +768,14 @@ class ShipperFinanceController extends Controller
                                     <tr>
                                         <td class="color secondary"><strong>Total Fuel Surcharge</strong></td>
                                         <td>' . number_format($total_fuel_surcharge, 2) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color secondary"><strong>Total Faf Charges</strong></td>
+                                        <td>' . number_format($total_faf_charges, 2) . '</td>
+                                    </tr>
+                                     <tr>
+                                        <td class="color secondary"><strong>Total Finova Charges</strong></td>
+                                        <td>' . number_format($total_wallet_charges, 2) . '</td>
                                     </tr>
                                     <tr>
                                         <td class="color secondary"><strong>Total Intercept Charges</strong></td>
@@ -830,7 +849,7 @@ class ShipperFinanceController extends Controller
 
         $details = array();
 
-        $details[] = ['S. No.', 'Tracking No.', 'Booking Date', 'Type', 'Order ID', 'Vendor', 'Origin', 'Consignee Name', 'Consignee Phone', 'Destination', 'Service Type', 'Weight (kg)', 'Collection Amount (PKR)', 'Weight Charges (PKR)', 'Cash Handling Charges (PKR)', 'OSA Charges (PKR)', 'Adjustments (PKR)','Total Charges (PKR)','GST','WHT','Net Retained Amount (PKR)','Net Disbursement Amount (PKR)
+        $details[] = ['S. No.', 'Tracking No.', 'Booking Date', 'Type', 'Order ID', 'Vendor', 'Origin', 'Consignee Name', 'Consignee Phone', 'Destination', 'Service Type', 'Weight (kg)', 'Collection Amount (PKR)', 'Weight Charges (PKR)','Fuel Surge Charge','Finoava Wallet Charges', 'Cash Handling Charges (PKR)', 'OSA Charges (PKR)', 'Adjustments (PKR)','Total Charges (PKR)','GST','WHT','Net Retained Amount (PKR)','Net Disbursement Amount (PKR)
 '];
 
         if ($done_payment && $done_payment->user_id == session('user_id')) {
@@ -857,6 +876,7 @@ class ShipperFinanceController extends Controller
             $total_sms_charges = 0;
             $total_faf_charges = 0;
             $total_reverse_pickup_charges = 0;
+            $total_wallet_charges = 0;
             foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
                 $shipment = $done_payment_shipment->shipment;
                 $service_charges = ShipmentServicesCharges::where('shipment_id', $shipment->id);
@@ -870,6 +890,8 @@ class ShipperFinanceController extends Controller
                 $arrival_charges_applied = ShipmentAdditionalCharges::check_additional_charges($shipment->id,true,false,false);;
                 $shipment_weight = $shipment->actual_weight;
                 $weight_charges = $shipment->weight_charges;
+                $wallet_charges = ShipmentAdditionalCharges::fetch_wallet_charges($shipment->id);
+
 
 //                if ($done_payment_shipment->type != 2) {
 //                    $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->id);
@@ -914,6 +936,8 @@ class ShipperFinanceController extends Controller
                 $row[] = $shipment_weight;
                 $row[] = $done_payment_shipment->amount;
                 $row[] = ((($done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0 && ($done_payment_shipment->type == 3 || (!$arrival_charges_applied)))) ? $weight_charges : 0);
+                $row[] = ((($done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0 && ($done_payment_shipment->type == 3 || (!$arrival_charges_applied)))) ? $faf_charges : 0);
+                $row[] = (($done_payment_shipment->type != 2 && $done_payment_shipment->charges != 3) ? $wallet_charges : 0);
                 $row[] = (($done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? $shipment->cash_handling_charges : 0);
                 $row[] = (($done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->nsa_osa_charges : 0);
                 $row[] = (($done_payment_shipment->type == 2) ? $done_payment_shipment->payable : 0);
@@ -937,7 +961,8 @@ class ShipperFinanceController extends Controller
                                 $total_replacement_charges += $shipment->replacement_charges;
                                 $total_try_and_buy_charges += $shipment->try_and_buy_charges;
                                 $total_reverse_pickup_charges += $service_charges;
-                            } else {
+                            }
+                            if ($done_payment_shipment->type == 1) {
                                 $total_return_charges += $shipment->return_charges;
                             }
 
@@ -970,6 +995,9 @@ class ShipperFinanceController extends Controller
                     $total_charges += $done_payment_shipment->charges;
                     $total_payable += $done_payment_shipment->payable;
                     $total_sms_charges += $done_payment_shipment->sms_charges;
+                    if ($done_payment_shipment->type == 0 || $done_payment_shipment->type == 1) {
+                        $total_wallet_charges += $wallet_charges;
+                    }
                 } else {
                     if ($done_payment_shipment->type == 0) {
                         $total_collection_amount += $done_payment_shipment->amount;
@@ -983,7 +1011,7 @@ class ShipperFinanceController extends Controller
 
             $total_columns = count($details[0]);
 
-            $summary = ['Total Weight Charges' => $total_weight_charges, 'Total Cash Handling Charges' => $total_cash_handling_charges, 'Total Insurance Charges' => $total_insurance_charges, 'Total Replacement Charges' => $total_replacement_charges, 'Total Try & Buy Charges' => $total_try_and_buy_charges, 'Total Return Charges' => $total_return_charges, 'Total Fuel Surcharge' => $total_fuel_surcharge, 'Total Faf Charges' => $total_faf_charges, 'Total Intercept Charges' => $total_intercept_charges, 'Total OSA Charges' => $total_nsa_osa_charges, 'Total Charges (w/o GST)' => ($total_charges - $total_packaging_material_charges), 'Total GST' => $total_gst,'Total WHT (Deductable)' => $total_wht, 'Total Packaging Material Charges' => $total_packaging_material_charges, 'Total Adjustments' => $total_adjustments, 'IBFT Charges' => $done_payment->ibft_charges,  'Overall Charges' => ($total_charges + $total_sms_charges + $total_gst - $total_adjustments + $done_payment->ibft_charges - $total_wht)];
+            $summary = ['Total Weight Charges' => $total_weight_charges, 'Total Cash Handling Charges' => $total_cash_handling_charges, 'Total Insurance Charges' => $total_insurance_charges, 'Total Replacement Charges' => $total_replacement_charges, 'Total Try & Buy Charges' => $total_try_and_buy_charges, 'Total Return Charges' => $total_return_charges, 'Total Fuel Surcharge' => $total_fuel_surcharge, 'Total Faf Charges' => $total_faf_charges,'Total Finova Charges'=>$total_wallet_charges, 'Total Intercept Charges' => $total_intercept_charges, 'Total OSA Charges' => $total_nsa_osa_charges, 'Total Charges (w/o GST)' => ($total_charges - $total_packaging_material_charges), 'Total GST' => $total_gst,'Total WHT (Deductable)' => $total_wht, 'Total Packaging Material Charges' => $total_packaging_material_charges, 'Total Adjustments' => $total_adjustments, 'IBFT Charges' => $done_payment->ibft_charges,  'Overall Charges' => ($total_charges + $total_sms_charges + $total_gst - $total_adjustments + $done_payment->ibft_charges - $total_wht)];
 
             $details[] = [];
 
