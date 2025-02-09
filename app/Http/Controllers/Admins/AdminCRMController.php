@@ -269,6 +269,7 @@ class AdminCRMController extends Controller
                                         else{
                                             if($complaint_id == 12 && $is_automated_cod_change)
                                             {
+
                                                 if($shipment->shipper_status_id == 5)
                                                 {
                                                     $description = $description. " (change old amouunt $shipment->amount to new amount $request->cod_new_amount )";
@@ -279,6 +280,12 @@ class AdminCRMController extends Controller
                                                     CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $is_automated_cod_change);
                                                 }
                                             }
+
+                                            // auto change service type
+                                            else if($complaint_id == 39 && in_array($shipment->shipper_status_id,[53,2,3,4,5,12,65,66,21,56])) {
+                                                $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, null,true);
+                                            }
+
                                             else{
                                                 $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL, $description);
                                             }
@@ -349,6 +356,11 @@ class AdminCRMController extends Controller
                                                 CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $is_automated_cod_change);
                                             }
                                         }
+                                        // auto change service type
+                                        else if($complaint_id == 39 && in_array($shipment->shipper_status_id,[53,2,3,4,5,12,65,66,21,56])) {
+                                            $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, null,true);
+                                        }
+
                                         else{
                                             $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL ,$description);
                                         }
@@ -574,6 +586,12 @@ class AdminCRMController extends Controller
                                             $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $is_automated_cod_change);
                                         }
                                     }
+
+                                    // auto change service type
+                                    else if($complaint_id == 39 && in_array($shipment->shipper_status_id,[53,2,3,4,5,12,65,66,21,56])) {
+                                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, null,true);
+                                    }
+
                                     else{
                                         $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL, $description);
                                     }
@@ -661,7 +679,9 @@ class AdminCRMController extends Controller
                                 $present_shipments[] = 'Complaint ID: '. $complain;
                                 $flag = true;
                             }
-                        }else{
+                        }
+                        else{
+
                             if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
                                 if(in_array($complaint_id, [11, 13])){
                                     $present_shipments[] = $shipment->tracking_number;
@@ -777,6 +797,10 @@ class AdminCRMController extends Controller
                                     {
                                         $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $is_automated_cod_change);
                                     }
+                                }
+                                // auto change service type
+                                else if($complaint_id == 39 && in_array($shipment->shipper_status_id,[53,2,3,4,5,12,65,66,21,56])) {
+                                    $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, null,true);
                                 }
                                 else{
                                     $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL, $description);
