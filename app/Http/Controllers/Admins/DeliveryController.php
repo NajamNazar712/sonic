@@ -3092,7 +3092,7 @@ class DeliveryController extends Controller
     public function receive_delivery_trybuys_submit(Request $request)
     {
         $item_ids = explode(',', $request->trybuy_id_list);
-        if (!empty($item_ids) && isset($item_ids[0]) && !empty($item_ids[0])) { 
+        if (!empty($item_ids) && isset($item_ids[0]) && !empty($item_ids[0])) {
             //            $cod = $request->trybuy_cod;
             $checked = $request->item_checked;
             $unchecked = $request->item_unchecked;
