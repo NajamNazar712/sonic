@@ -126,7 +126,7 @@ class WalletSignUpLPendingRecordLogs implements ShouldQueue
                         $this->arrival_shipment_logs($requestPayload,  $shipment->id);
                     }
                 }
-                if(in_array($shipment->shipper_status_id, [5,8,13,14,18,20,25,36,37,38,60,30,31])) {
+                if(in_array($shipment->shipper_status_id, [5,8,13,14,18,20,36,37,30])) {
                     $data = [
                         'tracking_number' => $shipment->tracking_number,
                         'status' => $shipment->shipper_status_id,
