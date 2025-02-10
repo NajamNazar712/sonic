@@ -15223,7 +15223,7 @@ class AdminReportsController extends Controller
         $connection = 'reports';
         $select =    [
             'z.name  as zone',
-            'p.product_name as product_type',
+            // 'p.product_name as product_type',
             'si.description as description',
             'ssr.name as reason',
             'sjr.remarks as remarks',
@@ -15254,12 +15254,12 @@ class AdminReportsController extends Controller
             'cmbh.id as current_hub_id',
             'shipments.shipper_status_id as shipper_status_id',
             'cr.missing_product_price as missing_product_price',
-            'cr.id as crm_request_id',
+            // 'cr.id as crm_request_id',
             'cr.damage_product_price as damage_product_price',
-            'crs.name as crm_request_status',
-            'crcn.name as crm_request_case_nature',
-            'crcnt.type as crm_request_case_nature_type',
-            'adjustment.adjustment_amount as adjusted_amount',
+            // 'crs.name as crm_request_status',
+            // 'crcn.name as crm_request_case_nature',
+            // 'crcnt.type as crm_request_case_nature_type',
+            // 'adjustment.adjustment_amount as adjusted_amount',
             'scs.name as sub_segment',
             'cargo_status.name as cargo_status',
             'cmb.seal_number as seal_number',
@@ -15280,7 +15280,8 @@ class AdminReportsController extends Controller
             'ssj_last_location.user_type as scanned_by_user_type',
             'ssj_last_location.admin_id as scanned_by_id',
             'last_screen_location.name as last_location_screen_location_name',
-            'ssj_last_location.entry_method as entry_method'
+            'ssj_last_location.entry_method as entry_method',
+            'destination_sj.created_at as destination_arrival_date'
         ];
         $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->leftJoin('sale_person_tags as spt', function($join){
@@ -15383,13 +15384,13 @@ class AdminReportsController extends Controller
                         DB::connection('reports')->raw('(select max(id) from crm_requests where crm_requests.shipment_id = shipments.id)')
                     );
             })
-            ->leftjoin('crm_request_statuses as crs', 'crs.id', '=', 'cr.status_id')
-            ->leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'cr.case_nature_id')
-            ->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'cr.case_nature_type_id')
-            ->leftjoin('adjustment_logs as adjustment', function ($join) {
-                $join->on('adjustment.shipment_id', '=', 'cr.shipment_id')
-                    ->where('adjustment.created_at', '=', DB::raw('(select max(created_at) from adjustment_logs where adjustment_logs.shipment_id = cr.shipment_id and adjustment_logs.adjustment_type_id IN (4,6,7,8,9,10,11) )'));
-            })
+            // ->leftjoin('crm_request_statuses as crs', 'crs.id', '=', 'cr.status_id')
+            // ->leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'cr.case_nature_id')
+            // ->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'cr.case_nature_type_id')
+            // ->leftjoin('adjustment_logs as adjustment', function ($join) {
+            //     $join->on('adjustment.shipment_id', '=', 'cr.shipment_id')
+            //         ->where('adjustment.created_at', '=', DB::raw('(select max(created_at) from adjustment_logs where adjustment_logs.shipment_id = cr.shipment_id and adjustment_logs.adjustment_type_id IN (4,6,7,8,9,10,11) )'));
+            // })
             ->leftjoin('cargo_manifest_bag_statuses as cargo_status', 'cargo_status.id', '=', 'cmb.status_id')
             ->leftjoin('bag_statuses as bs', 'bs.id', '=', 'cmb.status_id')
             ->leftJoin('shipments_journey as sjfa', function ($join) use ($connection) {
@@ -15463,15 +15464,43 @@ class AdminReportsController extends Controller
             ->leftJoin('city_areas as ca_scanning_last_location_name', 'ssjal_last_location.area_id', '=', 'ca_scanning_last_location_name.id')
             ->leftJoin('shipment_scanning_screen_locations as last_screen_location', 'last_screen_location.id', '=', 'ssj_last_location.screen_location_id')
 
-
             // ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'ssj.id')
             // ->leftJoin('shipment_scanning_journey_area_logs as ssjal_hss', 'ssjal_hss.shipment_scanning_journey_id', '=', 'ssj_hss.id')
             // ->leftJoin('city_areas as ca_scanning', 'ssjal.area_id', '=', 'ca_scanning.id')
+
+            // ->leftJoin('shipments_journey as destination_sj', function ($join) {
+            //     $join->on('destination_sj.shipment_id', '=', 'shipments.id')
+            //         ->where(
+            //             'destination_sj.id',
+            //             '=',
+            //             DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 4)')
+            //         );
+            // })
+            
+            ->leftJoin('shipments_journey as destination_sj', function ($join) {
+                $join->on('destination_sj.shipment_id', '=', 'shipments.id')
+                        ->where(function ($query) {
+                            // First check if status 4 (Arrived at Destination)
+                            $query->where('destination_sj.shipper_status_id', '=', 4)
+                                ->orWhere(function ($query) {
+                                        // If not, check status 2 (Arrived at Origin)
+                                        $query->where('destination_sj.shipper_status_id', '=', 2)
+                                            ->whereNotExists(function ($query) {
+                                                // Check if a status 4 record exists for this shipment_id
+                                                $query->select(DB::raw(1))
+                                                    ->from('shipments_journey')
+                                                    ->whereRaw('shipments_journey.shipment_id = shipments.id')
+                                                    ->where('shipments_journey.shipper_status_id', 4);
+                                            });
+                                    });
+                        })
+                ->where('destination_sj.id', '=', DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id in (4, 2))'));
+            })
+
             ->select($select)
             ->groupBy('shipments.id');
 
         $type = $request->get('search_types');
-
         if ($type && $type == 2) {
             $shipments = $shipments->whereNotIn('shipments.shipper_status_id', [1, 14, 17, 25, 31, 36, 38]);
         } else {
@@ -15578,6 +15607,19 @@ class AdminReportsController extends Controller
         }
         $shipments = $shipments->whereNotNull('shipments.tracking_number');
         $datatable = Datatables::of($shipments)
+
+            ->editColumn('destination_arrival_date', function ($shipment) {
+                if ($shipment->origin != $shipment->destination){
+                    if ($shipment->destination_arrival_date == null || $shipment->destination_arrival_date == ''){
+                        return '-';
+                    } else {
+                        return $shipment->destination_arrival_date;
+                    }
+                } else {
+                    return $shipment->arrival;
+                }
+            })
+
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
@@ -15652,41 +15694,41 @@ class AdminReportsController extends Controller
                     return $days;
                 }
             })
-            ->addColumn('crm_id_padded', function ($requests) {
-                if ($requests->crm_request_id) {
-                    return str_pad($requests->crm_request_id, 6, '0', STR_PAD_LEFT);
-                } else {
-                    return '-';
-                }
-            })
-            ->addColumn('crm_id_padded_link', function ($requests) {
-                if ($requests->crm_request_id) {
-                    return '<u><a href=' . route('admin.crm.request.details', ['id' => $requests->crm_request_id]) . '  target="_blank">' . str_pad($requests->crm_request_id, 6, '0', STR_PAD_LEFT) . '</a></u>';
-                } else {
-                    return '-';
-                }
-            })
-            ->editColumn('crm_request_status', function ($requests) {
-                if ($requests->crm_request_status) {
-                    return $requests->crm_request_status;
-                } else {
-                    return '-';
-                }
-            })
-            ->editColumn('crm_request_case_nature', function ($requests) {
-                if ($requests->crm_request_case_nature) {
-                    return $requests->crm_request_case_nature;
-                } else {
-                    return '-';
-                }
-            })
-            ->editColumn('crm_request_case_nature_type', function ($requests) {
-                if ($requests->crm_request_case_nature_type) {
-                    return $requests->crm_request_case_nature_type;
-                } else {
-                    return '-';
-                }
-            })
+            // ->addColumn('crm_id_padded', function ($requests) {
+            //     if ($requests->crm_request_id) {
+            //         return str_pad($requests->crm_request_id, 6, '0', STR_PAD_LEFT);
+            //     } else {
+            //         return '-';
+            //     }
+            // })
+            // ->addColumn('crm_id_padded_link', function ($requests) {
+            //     if ($requests->crm_request_id) {
+            //         return '<u><a href=' . route('admin.crm.request.details', ['id' => $requests->crm_request_id]) . '  target="_blank">' . str_pad($requests->crm_request_id, 6, '0', STR_PAD_LEFT) . '</a></u>';
+            //     } else {
+            //         return '-';
+            //     }
+            // })
+            // ->editColumn('crm_request_status', function ($requests) {
+            //     if ($requests->crm_request_status) {
+            //         return $requests->crm_request_status;
+            //     } else {
+            //         return '-';
+            //     }
+            // })
+            // ->editColumn('crm_request_case_nature', function ($requests) {
+            //     if ($requests->crm_request_case_nature) {
+            //         return $requests->crm_request_case_nature;
+            //     } else {
+            //         return '-';
+            //     }
+            // })
+            // ->editColumn('crm_request_case_nature_type', function ($requests) {
+            //     if ($requests->crm_request_case_nature_type) {
+            //         return $requests->crm_request_case_nature_type;
+            //     } else {
+            //         return '-';
+            //     }
+            // })
             ->editColumn('kam', function ($shipments) {
                 if($shipments->stt_kam_id == null) {
                     return $shipments->scu_kam_name;
@@ -15726,7 +15768,10 @@ class AdminReportsController extends Controller
                 }
 
                 return '-';
-            })->rawColumns(['crm_id_padded_link','tracking_number_link']);
+            })->rawColumns([
+                'crm_id_padded_link',
+                'tracking_number_link'
+            ]);
 
       
 

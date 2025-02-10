@@ -465,10 +465,9 @@
                                 row.push(values.quantity_by_admin);
                                 row.push(values.remarks_by_admin);
                                 row.push(values.odr_nature)
-                                row.push(values.created_at);
+                                row.push(values.created);
                                 row.push(values.updated_by);
                                 row.push(values.admin_hub);
-
                                 body.push(row);
                             });
                         },
