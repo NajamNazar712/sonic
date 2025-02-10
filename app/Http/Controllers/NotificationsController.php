@@ -3606,8 +3606,9 @@ class NotificationsController extends Controller
                         }
                     }
                 } else if ($id == 43) {
-                    $pickup_request = V2PickupRequest::find($reference_1_id);
+                    $pickup_request = V2PickupRequest::with(['pickup_address','shipper','pickup_request_shipments.shipment'])->where('id',$reference_1_id)->where('email_sent',0)->first();
                     if ($pickup_request) {
+                        V2PickupRequest::where('id',$reference_1_id)->update(['email_sent',1]);
                         $vendor = $pickup_request->pickup_address->vendor;
                         if ($vendor != null) {
                             $shipper_name = $pickup_request->shipper->name;
@@ -3623,31 +3624,36 @@ class NotificationsController extends Controller
                             }
 
                             $assigned_shipments = $pickup_request->pickup_request_shipments;
-                            $shipment_details = '<table style="width:100%;">';
-                            $shipment_details .= '<thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Tracking Number.</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Item Description</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Destination</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Quantity</th></tr></thead>';
-                            $shipment_details .= '<tbody>';
-                            foreach ($assigned_shipments as $assigned_shipment) {
-                                $shipment = $assigned_shipment->shipment;
-                                $items = ShipmentItem::where('shipment_id', $shipment->id)->first();
-                                $shipment_details .= '<tr>';
-                                $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->tracking_number . '</td>';
-                                $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($items->description) ? $items->description : '') . '</td>';
-                                $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->consignee_city->name . '</td>';
-                                $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $items->quantity . '</td>';
-                                $shipment_details .= '</tr>';
-                            }
-                            $shipment_details .= '</tbody></table>';
 
-                            if (strpos($body, '[shipments_detail]') !== FALSE) {
-                                $body = str_replace('[shipments_detail]', $shipment_details, $body);
-                            }
+                            if(count($assigned_shipments) > 0) {
+                                $shipment_details = '<table style="width:100%;">';
+                                $shipment_details .= '<thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Tracking Number.</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Item Description</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Destination</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Quantity</th></tr></thead>';
+                                $shipment_details .= '<tbody>';
+                                foreach ($assigned_shipments as $assigned_shipment) {
+                                    $shipment = $assigned_shipment->shipment;
+                                    $items = ShipmentItem::where('shipment_id', $shipment->id)->first();
+                                    $shipment_details .= '<tr>';
+                                    $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->tracking_number . '</td>';
+                                    $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($items->description) ? $items->description : '') . '</td>';
+                                    $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->consignee_city->name . '</td>';
+                                    $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $items->quantity . '</td>';
+                                    $shipment_details .= '</tr>';
+                                }
+                                $shipment_details .= '</tbody></table>';
 
-                            if (ShipperNotificationEmail::where('user_id', $pickup_request->shipper_id)->exists()) {
-                                $to = ShipperNotificationEmail::where('user_id', $pickup_request->shipper_id)->whereNotNull('email')->pluck('email')->toArray();
-                            } else {
-                                $to = $pickup_request->pickup_address->email;
+                                if (strpos($body, '[shipments_detail]') !== FALSE) {
+                                    $body = str_replace('[shipments_detail]', $shipment_details, $body);
+                                }
+
+                                if (ShipperNotificationEmail::where('user_id', $pickup_request->shipper_id)->exists()) {
+                                    $to = ShipperNotificationEmail::where('user_id', $pickup_request->shipper_id)->whereNotNull('email')->pluck('email')->toArray();
+                                } else {
+                                    $to = $pickup_request->pickup_address->email;
+                                }
+                                self::email($subject, $body, $to);
+
+
                             }
-                            self::email($subject, $body, $to);
                         }
                     } else if ($id == 44) {
                     }
