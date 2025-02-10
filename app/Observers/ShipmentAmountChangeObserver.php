@@ -21,7 +21,7 @@ class ShipmentAmountChangeObserver
      */
     public function updated(Shipment $shipment)
     {
-        if (!$shipment->wasChanged('amount') && $shipment->shipper_status_id == 1) {
+        if (!$shipment->wasChanged('amount') || $shipment->shipper_status_id == 1) {
            
             return; // Only run if cod_amount has changed
         }
