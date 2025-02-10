@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\CRM;
 
 use App\Http\Controllers\NotificationsController;
+use App\Http\Controllers\ReplacementToRegualrShipmemtController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\CRM\CrmRequest;
@@ -439,7 +440,7 @@ class CRMController extends Controller
                     
                 }
                 // auto change service type
-                else if($case_nature_type_id == 39 && $is_automated_service_type){
+                else if($case_nature_type_id == 39 && in_array($shipment->shipper_status_id,[53,2,3,4,5,12,65,66,21,56,30])){
                     $crm_request->status_id = 4;
                     $crm_request->save();
 
@@ -447,6 +448,8 @@ class CRMController extends Controller
                     $crm_request_status_history->crm_request_id = $id;
                     $crm_request_status_history->status_id = 4;
                     $crm_request_status_history->save();
+
+                    ReplacementToRegualrShipmemtController::replaceAutoWithRegularShipment($shipment->id,$shipment->amount,$launched_by_id);
 
                 }
             }

@@ -8312,6 +8312,7 @@ class DeliveryController extends Controller
 
     public function replacement_not_collected_regular_re_attempt(Request $request)
     {
+        dd($request->all());
         foreach ($request->shipment_ids as $shipment_id) {
             $shipment = Shipment::where('id', $shipment_id)->first();
             if ($shipment->warehouse == 1) {
