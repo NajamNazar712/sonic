@@ -167,7 +167,7 @@ class ShipmentsJourneyController extends Controller
                     'status' => $shipper_status_id,
                     'shipment_id' => $shipment_id
                 ];
-                ShipmentStatusSharingWithWallet::dispatch($data);
+                ShipmentStatusSharingWithWallet::dispatch($data, 1);
                 //self::share_status_with_wallet($shipment->tracking_number, $shipper_status_id, $shipment_id);
             }
         }

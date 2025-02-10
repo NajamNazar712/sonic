@@ -132,7 +132,7 @@ class WalletSignUpLPendingRecordLogs implements ShouldQueue
                         'status' => $shipment->shipper_status_id,
                         'shipment_id' => $shipment->id
                     ];
-                    ShipmentStatusSharingWithWallet::dispatch($data);
+                    ShipmentStatusSharingWithWallet::dispatch($data, 1);
                 }
             }
         }

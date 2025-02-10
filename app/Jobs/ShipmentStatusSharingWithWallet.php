@@ -26,15 +26,19 @@ class ShipmentStatusSharingWithWallet implements ShouldQueue
     use FinSurgentLogTrait;
 
     protected $data;
+    protected $type;
+
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(array $data)
+    public function __construct(array $data, $type)
     {
         //
         $this->data = $data;
+        $this->type = $type;
+
     }
 
     /**
@@ -88,14 +92,6 @@ class ShipmentStatusSharingWithWallet implements ShouldQueue
         $shipment_id = $this->data['shipment_id'];
         try {
 
-            $api = config('app.FINGA_URL');
-            $token = FingaIntegrationController::getToken($api);
-            
-            $status =  $this->data['status'];
-            $tracking_number = $this->data['tracking_number'];
-            $status_code = $status_mapping[$status]['code'];
-            $status_name = $status_mapping[$status]['name'];
-
             $shipment_log_not_sent = Shipment::leftJoin('finja_log_settlement_records as sac', 'shipments.id', '=', 'sac.shipment_id')
                 ->join('wallet_users as u', function ($join) {
                     $join->on('u.user_id', '=', 'shipments.user_id')
@@ -135,11 +131,22 @@ class ShipmentStatusSharingWithWallet implements ShouldQueue
                 CODAmountChangeSendToWallet::dispatch($data);
             }
 
-            $requestPayload = [
-                'shipment_id' => $tracking_number,
-                'status_code' => $status_code,
-                'status_name' =>  $status_name
-            ];
+            $api = config('app.FINGA_URL');
+            $token = FingaIntegrationController::getToken($api);
+            if($this->type == 1) {
+                $status =  $this->data['status'];
+                $tracking_number = $this->data['tracking_number'];
+                $status_code = $status_mapping[$status]['code'];
+                $status_name = $status_mapping[$status]['name'];
+                $requestPayload = [
+                    'shipment_id' => $tracking_number,
+                    'status_code' => $status_code,
+                    'status_name' =>  $status_name
+                ];
+            } elseif($this->type == 2) {
+                $requestPayload = $this->data['payload'];
+            }
+            
             if($token) {
                 $response = Http::withHeaders([
                     'accept' => 'application/json',
