@@ -73,76 +73,80 @@ class WebsiteLead extends Command
         $leads_added = array();
         $old_leads = array();
 
-        if($response->status == 0){
+        // if($response->status == 0){
+        if(($response->status ?? 0) == 0){
             $leads = $response->leads;
             foreach ($leads as $key => $lead) {
-                
-                if($lead->data && isset($lead->data->contact_person)){
+                try {
+                    if($lead->data && isset($lead->data->contact_person)){
                     
-                    $city = City::where('name', $lead->data->city_name[0])->first();
-                    if($city){
-                        $city_id = $city->id;
+                        $city_name = $lead->data->city_name[0] ?? '-';
+                        $city = $city_name !== '-' ? City::where('name', $city_name)->first() : '-';
+                        if($city){
+                            $city_id = $city->id;
+                            
+                        }
+                        else{
+                            self::old_api_request_delete($base_uri, [$lead->id]);
+                            continue;
+                        }
                         
+                        $services = ServiceList::where('name', $lead->data->service_name[0])->first();
+                        if($services){
+                            $service_id = $services->id;
+                        }
+                        else{
+                            self::old_api_request_delete($base_uri, [$lead->id]);
+                            continue;
+                        }
+                        
+                        $reference = LeadReference::where('name', $lead->data->reference_name[0])->first();
+                        if($reference){
+                            $reference_id = $reference->id;
+                        }
+                        else{
+                            self::old_api_request_delete($base_uri, [$lead->id]);
+                            continue;
+                        }
+    
+    
+                        $token = Str::random(8);
+    
+                        $lead_tagging = LeadTagging::where(['city_id' => $city_id, 'status' => 1])->first();
+                        
+                        $new_lead = new Lead();
+                        $new_lead->contact_person = $lead->data->contact_person;
+                        $new_lead->city_id = $city_id;
+                        $new_lead->phone_number = $lead->data->phone_number;
+                        $new_lead->email_address = $lead->data->email;
+                        $new_lead->requested_date = Carbon::now();
+                        $new_lead->sale_person_id = $lead_tagging ? $lead_tagging->sale_person_id : null;
+                        $new_lead->service_id = $service_id;
+                        $new_lead->ntn_number = $lead->data->ntn_number;
+                        $new_lead->average_shipment_per_week = $lead->data->avg_shipment;
+                        $new_lead->expected_shipments = $lead->data->avg_shipment;
+                        $new_lead->average_parcel_cod_amount = $lead->data->avg_parcel;
+                        $new_lead->business_address = $lead->data->business_address;
+                        $new_lead->company = $lead->data->company_name;
+                        $new_lead->company_name = $lead->data->company_name;
+                        $new_lead->business_registered_status = isset($lead->data->business_address) ? 1 : 0;
+                        $new_lead->reference_id = $reference_id;
+                        $new_lead->activation_code = $token;
+                        $new_lead->cnic_number = $lead->data->cnic_number;
+                        $new_lead->via_channel = 'Website';
+                        $new_lead->save();
+    
+                        $lead_log = new LeadLog();
+                        $lead_log->lead_id = $lead->id;
+                        $lead_log->prev_status_id = 1;
+                        $lead_log->status_id = 1;
+                        $lead_log->updated_by = 7;
+                        $lead_log->save();
+                        $leads_added[] = $new_lead->id;
+                        $old_leads[] = $lead->id;
                     }
-                    else{
-                        self::old_api_request_delete($base_uri, [$lead->id]);
-                        continue;
-                    }
-                    
-                    $services = ServiceList::where('name', $lead->data->service_name[0])->first();
-                    if($services){
-                        $service_id = $services->id;
-                    }
-                    else{
-                        self::old_api_request_delete($base_uri, [$lead->id]);
-                        continue;
-                    }
-                    
-                    $reference = LeadReference::where('name', $lead->data->reference_name[0])->first();
-                    if($reference){
-                        $reference_id = $reference->id;
-                    }
-                    else{
-                        self::old_api_request_delete($base_uri, [$lead->id]);
-                        continue;
-                    }
-
-
-                    $token = Str::random(8);
-
-                    $lead_tagging = LeadTagging::where(['city_id' => $city_id, 'status' => 1])->first();
-                    
-                    $new_lead = new Lead();
-                    $new_lead->contact_person = $lead->data->contact_person;
-                    $new_lead->city_id = $city_id;
-                    $new_lead->phone_number = $lead->data->phone_number;
-                    $new_lead->email_address = $lead->data->email;
-                    $new_lead->requested_date = Carbon::now();
-                    $new_lead->sale_person_id = $lead_tagging ? $lead_tagging->sale_person_id : null;
-                    $new_lead->service_id = $service_id;
-                    $new_lead->ntn_number = $lead->data->ntn_number;
-                    $new_lead->average_shipment_per_week = $lead->data->avg_shipment;
-                    $new_lead->expected_shipments = $lead->data->avg_shipment;
-                    $new_lead->average_parcel_cod_amount = $lead->data->avg_parcel;
-                    $new_lead->business_address = $lead->data->business_address;
-                    $new_lead->company = $lead->data->company_name;
-                    $new_lead->company_name = $lead->data->company_name;
-                    $new_lead->business_registered_status = isset($lead->data->business_address) ? 1 : 0;
-                    $new_lead->reference_id = $reference_id;
-                    $new_lead->activation_code = $token;
-                    $new_lead->cnic_number = $lead->data->cnic_number;
-                    $new_lead->via_channel = 'Website';
-                    $new_lead->save();
-
-                    $lead_log = new LeadLog();
-                    $lead_log->lead_id = $lead->id;
-                    $lead_log->prev_status_id = 1;
-                    $lead_log->status_id = 1;
-                    $lead_log->updated_by = 7;
-                    $lead_log->save();
-                    $leads_added[] = $new_lead->id;
-                    $old_leads[] = $lead->id;
-                                 
+                } catch (\Exception $error) {
+                    Log::error('Error creating lead for lead id: ' . $lead->id . ' - ' . $error->getMessage());
                 }
             }
         }
@@ -154,7 +158,7 @@ class WebsiteLead extends Command
             NotificationsController::send(230, $leads_added, Carbon::today());
         }
 
-//        Log::channel('cronJobLog')->info('s ' .'website:leads Running');
+        // Log::channel('cronJobLog')->info('s ' .'website:leads Running');
 
     }
 
