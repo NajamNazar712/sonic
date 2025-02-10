@@ -9357,7 +9357,7 @@ class AdminFinanceController extends Controller
                 $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment->id);
                 $arrival_charges_applied = ShipmentAdditionalCharges::check_additional_charges($shipment->id, true, false, false);;
                 $shipment_weight = $shipment->actual_weight;
-                $wallet_charges = ShipmentAdditionalCharges::fetch_wallet_charges($shipment->id);
+                $wallet_charges = ShipmentAdditionalCharges::show_wallet_charges_by_type($shipment->id,$done_payment_shipment->type);
                 $weight_charges = $shipment->weight_charges;
 
 //            if ($done_payment_shipment->type == 3) {
@@ -9403,7 +9403,7 @@ class AdminFinanceController extends Controller
                               <td>' . number_format($done_payment_shipment->amount) . '</td>
                               <td>' . (($done_payment_shipment->type != 2 && ($done_payment_shipment->type == 3 || !$arrival_charges_applied)) ? number_format($weight_charges, 2) : '0') . '</td>
                               <td>' . (($done_payment_shipment->type != 2 && ($done_payment_shipment->type == 3 || !$arrival_charges_applied)) ? number_format($faf_charges, 2) : '0') . '</td>
-                              <td>' . (($done_payment_shipment->type != 2 && $done_payment_shipment->type != 3) ? number_format($wallet_charges, 2) : '0') . '</td>
+                              <td>' . (($done_payment_shipment->type != 3) ? number_format($wallet_charges, 2) : '0') . '</td>
                               <td>' . (($done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? number_format($shipment->cash_handling_charges, 2) : '0') . '</td>
                               <td>' . (($done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
                               <td>' . (($done_payment_shipment->type == 2) ? number_format($done_payment_shipment->payable, 2) : '0') . '</td>
@@ -9463,9 +9463,8 @@ class AdminFinanceController extends Controller
                     $total_charges += $done_payment_shipment->charges;
                     $total_payable += $done_payment_shipment->payable;
                     $total_sms_charges += $done_payment_shipment->sms_charges;
-                    if ($done_payment_shipment->type == 0 || $done_payment_shipment->type == 1) {
-                       $total_wallet_charges += $wallet_charges;
-                    }
+                    $total_wallet_charges += $wallet_charges;
+
 
                     
                 } else {
@@ -19616,7 +19615,12 @@ class AdminFinanceController extends Controller
         $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment_id);
         $check_arrival = ShipmentAdditionalCharges::check_additional_charges($shipment_id,true);
         $service_charges = ShipmentServicesCharges::where('shipment_id', $shipment_id);
-        $wallet_charges = ShipmentAdditionalCharges::fetch_wallet_charges($shipment_id);
+        $get_wallet_charges_if_applicable = ShipmentAdditionalCharges::get_wallet_charges_if_applicable($shipment_id);
+        if($get_wallet_charges_if_applicable) {
+            $wallet_charges = ShipmentAdditionalCharges::fetch_wallet_charges($shipment_id);
+        }else{
+            $wallet_charges = 0;
+        }
         $transaction_id =  (string) Str::uuid();
         if ($service_charges->exists()) {
             $service_charges = $service_charges->first();
@@ -19720,6 +19724,9 @@ class AdminFinanceController extends Controller
                 $valid = FALSE;
             }
             if ($valid) {
+                if($get_wallet_charges_if_applicable  && $type != 3) {
+                    ShipmentAdditionalCharges::settle_wallet_finova_charges($shipment_id, $type);
+                }
                 if($sms_charges_status == 1 && $type != 3 ) {
                     $shipment_sms_count = 0;
                     $shipment_sms = ShipmentSmsLogs::select('notification_id', DB::raw('count(*) as count'))->where('shipment_id' , $shipment->id)->where('paid', 0)->groupBy('notification_id')->get();
@@ -21214,7 +21221,13 @@ class AdminFinanceController extends Controller
         $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment_id);
         $check_arrival = ShipmentAdditionalCharges::check_additional_charges($shipment_id, true);
         $service_charges = ShipmentServicesCharges::where('shipment_id', $shipment_id);
-        $wallet_charges = ShipmentAdditionalCharges::fetch_wallet_charges($shipment_id);
+
+        $get_wallet_charges_if_applicable = ShipmentAdditionalCharges::get_wallet_charges_if_applicable($shipment_id);
+        if($get_wallet_charges_if_applicable) {
+            $wallet_charges = ShipmentAdditionalCharges::fetch_wallet_charges($shipment_id);
+        }else{
+            $wallet_charges = 0;
+        }
 
         $transaction_id = (string)Str::uuid();
         if ($service_charges->exists()) {
@@ -21320,6 +21333,9 @@ class AdminFinanceController extends Controller
             }
 
             if ($valid) {
+                if($get_wallet_charges_if_applicable  && $type != 3) {
+                    ShipmentAdditionalCharges::settle_wallet_finova_charges($shipment_id, $type);
+                }
                 if ($sms_charges_status == 1 && $type != 3) {
                     $shipment_sms_count = 0;
                     $shipment_sms = ShipmentSmsLogs::select('notification_id', DB::raw('count(*) as count'))->where('shipment_id', $shipment->id)->where('paid', 0)->groupBy('notification_id')->get();

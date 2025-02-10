@@ -537,7 +537,7 @@ class ShipperFinanceController extends Controller
             $arrival_charges_applied = ShipmentAdditionalCharges::check_additional_charges($shipment->id,true,false,false);;
             $shipment_weight = $shipment->actual_weight;
             $weight_charges = $shipment->weight_charges;
-            $wallet_charges = ShipmentAdditionalCharges::fetch_wallet_charges($shipment->id);
+            $wallet_charges = ShipmentAdditionalCharges::show_wallet_charges_by_type($shipment->id,$done_payment_shipment->type);
 
 
 
@@ -587,7 +587,7 @@ class ShipperFinanceController extends Controller
                               <td>' . number_format($done_payment_shipment->amount) . '</td>
                               <td>' . (($done_payment_shipment->type != 2 && ($done_payment_shipment->type == 3 || !$arrival_charges_applied)) ? number_format($weight_charges, 2) : '0') . '</td>
                               <td>' . (($done_payment_shipment->type != 2 && ($done_payment_shipment->type == 3 || !$arrival_charges_applied)) ? number_format($faf_charges, 2) : '0') . '</td>
-                              <td>' . (($done_payment_shipment->type != 2 && $done_payment_shipment->type != 3) ? number_format($wallet_charges, 2) : '0') . '</td>
+                              <td>' . ($done_payment_shipment->type != 3 ? number_format($wallet_charges, 2) : '0') . '</td>
                               <td>' . (($done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? number_format($shipment->cash_handling_charges, 2) : '0') . '</td>
                               <td>' . (($done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
                               <td>' . (($done_payment_shipment->type == 2) ? number_format($done_payment_shipment->payable, 2) : '0') . '</td>
@@ -646,9 +646,7 @@ class ShipperFinanceController extends Controller
                 $total_charges += $done_payment_shipment->charges;
                 $total_payable += $done_payment_shipment->payable;
                 $total_sms_charges += $done_payment_shipment->sms_charges;
-                if ($done_payment_shipment->type == 0 || $done_payment_shipment->type == 1) {
-                    $total_wallet_charges += $wallet_charges;
-                }
+                $total_wallet_charges += $wallet_charges;
             } else {
                 if ($done_payment_shipment->type == 0) {
                     $total_collection_amount += $done_payment_shipment->amount;
@@ -890,7 +888,7 @@ class ShipperFinanceController extends Controller
                 $arrival_charges_applied = ShipmentAdditionalCharges::check_additional_charges($shipment->id,true,false,false);;
                 $shipment_weight = $shipment->actual_weight;
                 $weight_charges = $shipment->weight_charges;
-                $wallet_charges = ShipmentAdditionalCharges::fetch_wallet_charges($shipment->id);
+                $wallet_charges = ShipmentAdditionalCharges::show_wallet_charges_by_type($shipment->id,$done_payment_shipment->type);
 
 
 //                if ($done_payment_shipment->type != 2) {
@@ -937,7 +935,7 @@ class ShipperFinanceController extends Controller
                 $row[] = $done_payment_shipment->amount;
                 $row[] = ((($done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0 && ($done_payment_shipment->type == 3 || (!$arrival_charges_applied)))) ? $weight_charges : 0);
                 $row[] = ((($done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0 && ($done_payment_shipment->type == 3 || (!$arrival_charges_applied)))) ? $faf_charges : 0);
-                $row[] = (($done_payment_shipment->type != 2 && $done_payment_shipment->charges != 3) ? $wallet_charges : 0);
+                $row[] = ($done_payment_shipment->charges != 3 ? $wallet_charges : 0);
                 $row[] = (($done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? $shipment->cash_handling_charges : 0);
                 $row[] = (($done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->nsa_osa_charges : 0);
                 $row[] = (($done_payment_shipment->type == 2) ? $done_payment_shipment->payable : 0);
@@ -995,9 +993,7 @@ class ShipperFinanceController extends Controller
                     $total_charges += $done_payment_shipment->charges;
                     $total_payable += $done_payment_shipment->payable;
                     $total_sms_charges += $done_payment_shipment->sms_charges;
-                    if ($done_payment_shipment->type == 0 || $done_payment_shipment->type == 1) {
-                        $total_wallet_charges += $wallet_charges;
-                    }
+                    $total_wallet_charges += $wallet_charges;
                 } else {
                     if ($done_payment_shipment->type == 0) {
                         $total_collection_amount += $done_payment_shipment->amount;

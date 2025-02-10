@@ -7,6 +7,7 @@ use App\Http\Models\InvoiceShipment;
 use App\Http\Models\PendingInvoiceShipment;
 use App\Http\Models\PendingPaymentShipment;
 use App\Http\Models\Shipment;
+use App\Models\FinjaLogSettlementRecord;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 class ShipmentAdditionalCharges extends Model
@@ -121,13 +122,39 @@ class ShipmentAdditionalCharges extends Model
     }
 
     static function fetch_wallet_charges($shipment_id){
-        $shipment_additional_charges = ShipmentAdditionalCharges::where('shipment_id', $shipment_id)->latest()->first();
-        if(!empty($shipment_additional_charges)){
+        $wallet_charges = 0;
+        $shipment_additional_charges = ShipmentAdditionalCharges::where('shipment_id', $shipment_id)->whereNotNull('wallet_charges_updated_at')->latest()->first();
+        if (!empty($shipment_additional_charges)) {
             $wallet_charges = $shipment_additional_charges->wallet_charges;
-        }else{
-            $wallet_charges = 0;
         }
         return $wallet_charges;
+    }
+    static function get_wallet_charges_if_applicable($shipment_id) {
+        $has_unsettled_record = FinjaLogSettlementRecord::where('shipment_id', $shipment_id)
+            ->whereNull('wallet_charges_finova_settled')
+            ->exists();
+
+        $has_updated_wallet_charges = ShipmentAdditionalCharges::where('shipment_id', $shipment_id)
+            ->whereNotNull('wallet_charges_updated_at')
+            ->exists();
+
+        return $has_unsettled_record && $has_updated_wallet_charges;
+    }
+
+    static function show_wallet_charges_by_type($shipment_id,$type){
+        $wallet_charges = 0;
+        $exists = FinjaLogSettlementRecord::where('shipment_id', $shipment_id)->where('wallet_charges_finova_settled',$type)->exists();
+        if ($exists) {
+            $shipment_additional_charges = ShipmentAdditionalCharges::where('shipment_id', $shipment_id)->latest()->first();
+            if (!empty($shipment_additional_charges)) {
+                $wallet_charges = $shipment_additional_charges->wallet_charges;
+            }
+        }
+        return $wallet_charges;
+    }
+
+    static function settle_wallet_finova_charges($shipment_id,$type){
+        FinjaLogSettlementRecord::where('shipment_id', $shipment_id)->whereNull('wallet_charges_finova_settled')->update(['wallet_charges_finova_settled'=>$type,'wallet_charges_finova_settled_updated_at'=>date('Y-m-d H:i:s')]);
     }
 
 }
