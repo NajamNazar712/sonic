@@ -547,7 +547,7 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('comment:dailycrmclaimshipments')->dailyAt('14:00')->runInBackground();
         $schedule->command('rider:fuel_allocation')->dailyAt('04:00')->runInBackground();
-        $schedule->command('api:visionsoftexcel')->dailyAt('17:50')->runInBackground();
+        $schedule->command('api:visionsoftexcel')->dailyAt('07:00')->runInBackground();
 
         $auto_delivery_note_time = GlobalSettings::where('type', 'delivery_note_auto_verification_time');
         if ($auto_delivery_note_time->exists()) {
