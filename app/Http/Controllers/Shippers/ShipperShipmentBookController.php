@@ -3516,7 +3516,7 @@ class ShipperShipmentBookController extends Controller
                             'min:1',
                             'digits_between:1,20' ,
                             Rule::requiredIf(function () use ($row) {
-                                return $row['amount'] == 0 && ($row['service_type_id'] == 1 || $row['service_type_id'] == 2 );
+                                return isset($row['amount'])  && $row['amount'] == 0 && ($row['service_type_id'] == 1 || $row['service_type_id'] == 2 );
                             })
                         ];
                     }

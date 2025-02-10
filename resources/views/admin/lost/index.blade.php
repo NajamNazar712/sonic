@@ -365,6 +365,7 @@
                         head.push('Phone');
                         head.push('Address');
                         head.push('Collection Amount');
+                        head.push('Parcel Value');
                         head.push('Shipping Mode');
                         head.push('Service Type');
                         head.push('Remarks');
@@ -377,7 +378,7 @@
 
                         $.each(result.data, function(index, values) {
                             row = [];
-
+                            var parcel_value = (values.parcel_value == null || values.parcel_value == "") ? 0 : values.parcel_value;
 
                             row.push(index + 1);
                             row.push(values.tracking_number);
@@ -395,6 +396,7 @@
                             row.push(values.phone);
                             row.push(values.consignee_address);
                             row.push(values.amount);
+                            row.push(parcel_value);
                             row.push(values.shipping_mode);
                             row.push(values.service_type);
                             row.push(values.remarks);

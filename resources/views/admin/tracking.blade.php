@@ -1961,9 +1961,34 @@
                                 shipment += '</div>';
                                 shipment += '</div>';
 
-
                                 shipment += '<div class="col-12 mt-2">';
+                                shipment += '<div class="d-flex justify-content-between">';
                                 shipment += '<h4><u>Tracking History</u></h4>';
+
+                                // scanning history button
+                                // @if (session('role_id') == 1 || in_array(1020, session('permissions'))) {
+                                //     shipment += '<div class="position-relative" style="top: -3px;">';
+                                //     shipment += '<form id="scanHistoryForm" action="{{ route('admin.scanning_history.details_new') }}" method="GET" target="_blank">';
+                                //     shipment += '@csrf';
+                                //     shipment += '<input type="hidden" name="tracking_number" value="' + details.tracking_number + '" />';
+                                //     shipment += '<input type="hidden" name="search_type" value="1" />';
+                                //     shipment += '</form>';
+                                //     shipment += '<a href="#" onclick="document.getElementById(\'scanHistoryForm\').submit(); return false;" class="btn btn-secondary">Scan history</a>';
+                                //     shipment += '</div>';
+                                // }
+                                // @endif
+
+                                shipment += '<div class="position-relative" style="top: -3px;">';
+                                shipment += '<form id="scanHistoryForm" action="{{ route('admin.scanning_history.details_new') }}" method="GET" target="_blank">';
+                                shipment += '@csrf';
+                                shipment += '<input type="hidden" name="tracking_number" value="' + details.tracking_number + '" />';
+                                shipment += '<input type="hidden" name="search_type" value="1" />';
+                                shipment += '</form>';
+                                shipment += '<a href="#" onclick="document.getElementById(\'scanHistoryForm\').submit(); return false;" class="btn btn-secondary">Scan history</a>';
+                                shipment += '</div>';
+
+                                shipment += '</div>';
+
                                 shipment += '<div class="border table-responsive">';
                                 shipment += '<table class="table table-sm table-borderless datatable tracking_history">';
                                 shipment += '<thead>';
