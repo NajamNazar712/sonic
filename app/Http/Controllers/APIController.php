@@ -10167,10 +10167,8 @@ class APIController extends Controller
 
                 if (!empty($pending_payment_shipments)) {
                     AdminFinanceController::update_payment($shipment_id, $pending_payment_shipments->type);
-                    return response()->json(['status' => 1, 'message' => 'Charges updated against this shipment.']);
-                } else {
-                    return response()->json(['status' => 0, 'message' => 'Payment Already Processed', 'errors' => 'Error']);
                 }
+                return response()->json(['status' => 1, 'message' => 'Charges updated against this shipment.']);
             }else{
                 return response()->json(['status' => 0, 'message' => 'Payment Already Processed', 'errors' => 'Error']);
             }
