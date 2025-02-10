@@ -71,10 +71,6 @@ class ShipmentStatusSharingWithWallet implements ShouldQueue
                 'code' => 'RT-CO',
                 'name' => 'Return - Confirm',
             ],
-            25 => [
-                'code' => 'RT-DS',
-                'name' => 'Return - Delivered to Shipper',
-            ],
             36 => [
                 'code' => 'TB-DE',
                 'name' => 'Try & Buy - Delivered',
@@ -83,21 +79,10 @@ class ShipmentStatusSharingWithWallet implements ShouldQueue
                 'code' => 'TB-PD',
                 'name' => 'Try & Buy - Partial Delivered',
             ],
-            38 => [
-                'code' => 'TB-DS',
-                'name' => 'Try & Buy - Delivered to Shipper',
-            ],
-            60 => [
-                'code' => 'RU-CS',
-                'name' => 'Return - Unable to Return',
-            ],
+            
             30 => [
                 'code' => 'RP-EC',
                 'name' => 'Replacement - Collected',
-            ],
-            31 => [
-                'code' => 'RP-DS',
-                'name' => 'Replacement - Delivered to Shipper',
             ],
         ];
         $shipment_id = $this->data['shipment_id'];
