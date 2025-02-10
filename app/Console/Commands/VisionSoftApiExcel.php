@@ -40,22 +40,29 @@ class VisionSoftApiExcel extends Command
      */
     public function handle()
     {
+        $startDate = Carbon::now()->subMonth(1)->startOfMonth();
+        $endDate = Carbon::now()->subMonth(1)->endOfMonth();
 
+        for ($start = $startDate->copy(); $start->lte($endDate); $start->addDay()) {
+            $startOfDay = $start->copy()->startOfDay()->format('Y-m-d 00:00:01');
+            $endOfDay = $start->copy()->endOfDay()->format('Y-m-d 23:59:59');
 
-        $cod_payment_excel = VisionSoftAPIController::cod_payable_excel();
-        $cod_receivable_excel = VisionSoftAPIController::cod_receivable_excel();
-        $links = "";
+            $cod_payment_excel = VisionSoftAPIController::cod_payable_excel($startOfDay, $endOfDay);
+            $cod_receivable_excel = VisionSoftAPIController::cod_receivable_excel($startOfDay, $endOfDay);
 
-        if(!empty($cod_receivable_excel)) {
-            $links .= "<strong>COD Receivables: </strong> <br>" . "<a download='$cod_receivable_excel' href='$cod_receivable_excel' >$cod_receivable_excel</a>" . "<br>";
+            $links = "";
+            if (!empty($cod_receivable_excel)) {
+                $links .= "<strong>COD Receivables: </strong> <br>" .
+                    "<a download='$cod_receivable_excel' href='$cod_receivable_excel' >$cod_receivable_excel</a><br>";
+            }
+            if (!empty($cod_payment_excel)) {
+                $links .= "<strong>COD Payable: </strong> <br>" .
+                    "<a download='$cod_payment_excel' href='$cod_payment_excel' >$cod_payment_excel</a><br>";
+            }
+            if (!empty($cod_payment_excel) || !empty($cod_receivable_excel)) {
+                NotificationsController::send(213, $links);
+            }
         }
-        if(!empty($cod_payment_excel)) {
-            $links .= "<strong>COD Payable: </strong> <br>" . "<a download='$cod_payment_excel' href='$cod_payment_excel' >$cod_payment_excel</a>" . "<br>";
-        }
-        if(!empty($cod_payment_excel) || !empty($cod_receivable_excel)) {
-            NotificationsController::send(213, $links);
-        }
-
 
     }
 }
