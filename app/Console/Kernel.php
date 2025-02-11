@@ -170,6 +170,7 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\AddMissingSegmentLogs::class,
         '\App\Console\Commands\ApolloShipmentFetchStatus',
         '\App\Console\Commands\FinSurgentSonicPaymentSharing',
+        '\App\Console\Commands\FailedStatusRePushToWallet',
 
         ];
 
@@ -586,6 +587,7 @@ class Kernel extends ConsoleKernel
 //         $schedule->command('update:shipper_segment_logs')->everyFiveMinutes()->runInBackground();
 //         $schedule->command('apollo:fetch-shipments-status')->everyFiveMinutes()->runInBackground();
             $schedule->command('fingsurgent:sonic-payment')->everyMinute()->runInBackground();
+            $schedule->command('status:re-push-wallet')->everyMinute()->runInBackground();
 
     }
     /**

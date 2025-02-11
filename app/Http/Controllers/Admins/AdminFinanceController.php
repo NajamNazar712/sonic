@@ -7698,7 +7698,7 @@ class AdminFinanceController extends Controller
                                         $log_bid = $this->isWalletLogUpdated($pending_payment_shipment->shipment_id);
                                         if(!$log_bid) {
                                             
-                                            $status_array = [14, 25, 31, 38, 37, 18];
+                                            $status_array = [14, 25, 31, 38, 37, 18, 20];
                                             if(in_array($shipment->shipper_status_id, $status_array)) {
                                                 $cod_amount = 0;
                                             } else {
