@@ -21,7 +21,7 @@ class WalletLogDispatchJob implements ShouldQueue
      */
     public function __construct(array $data)
     {
-        //$this->queue = '';
+        $this->queue = 'wallet_log_dispatch_log';
         $this->data = $data;
     }
 

@@ -37,6 +37,7 @@ class WalletSettlementFromDonePayments implements ShouldQueue
      */
     public function __construct($payment_id,$id)
     {
+        $this->queue = 'wallet_settlement_form_done_payment';
         $this->payment_id = $payment_id;
         $this->id = $id;
     }

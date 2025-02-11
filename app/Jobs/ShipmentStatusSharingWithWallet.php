@@ -35,7 +35,7 @@ class ShipmentStatusSharingWithWallet implements ShouldQueue
      */
     public function __construct(array $data, $type)
     {
-        //
+        $this->queue = 'shipment_status_sharing_with_wallet';
         $this->data = $data;
         $this->type = $type;
 

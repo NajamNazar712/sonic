@@ -26,6 +26,7 @@ class CODAmountChangeSendToWallet implements ShouldQueue
      */
     public function __construct(array $data)
     {
+        $this->queue = 'cod_amount_change_send_to_wallet';
         $this->data = $data;
     }
 

@@ -28,7 +28,7 @@ class WalletSignUpLPendingRecordLogs implements ShouldQueue
      */
     public function __construct($data)
     {
-        //
+        $this->queue = 'wallet_signup_pending_record_log';
         $this->data = $data;
     }
 
@@ -40,7 +40,7 @@ class WalletSignUpLPendingRecordLogs implements ShouldQueue
     public function handle()
     {
         $user_id = $this->data;
-        $pending_payment_ids = PendingPayment::join('wallet_users as u', function ($join) {
+        $pending_payment_ids = PendingPayment::with('pending_payment_shipments')->join('wallet_users as u', function ($join) {
             $join->on('u.user_id', '=', 'pending_payments.user_id')
                ->where('u.substitute_user_id', '0');
        })->where('pending_payments.user_id', $user_id)
@@ -50,7 +50,7 @@ class WalletSignUpLPendingRecordLogs implements ShouldQueue
             
             $pending_payment_shipments = PendingPaymentShipment::leftJoin('finja_log_settlement_records as sac', 'pending_payment_shipments.shipment_id', '=', 'sac.shipment_id')
             ->where('pending_payment_shipments.pending_payment_id', $pending_payment)
-            ->whereIn('pending_payment_shipments.type', [0,1,3])
+            ->whereIn('pending_payment_shipments.type', [0,1,2,3])
             ->where(function ($query) {
                 $query->whereNull('sac.id') 
                     ->orWhere('sac.wallet_log_updated', 0);
@@ -90,7 +90,7 @@ class WalletSignUpLPendingRecordLogs implements ShouldQueue
                     $log_bid = AdminFinanceController::isWalletLogUpdated($pending_payment_shipment->shipment_id);
                     if(!$log_bid) {
                         $requestPayload = [
-                            "wallet_id" =>$shipment->wallet_id,
+                            "wallet_id" =>$shipment->wallet_user_id,
                             "client_id" => $shipment->user_id, 
                             "reference_id" => (string) Str::uuid(), 
                             "shipment_id" => $shipment->tracking_number, 
@@ -113,7 +113,7 @@ class WalletSignUpLPendingRecordLogs implements ShouldQueue
                             $cod_amount = $shipment->amount;
                         }
                         $requestPayload = [
-                            "wallet_id" =>$shipment->wallet_id,
+                            "wallet_id" =>$shipment->wallet_user_id,
                             "client_id" => $shipment->user_id, 
                             "reference_id" => (string) Str::uuid(), 
                             "shipment_id" => $shipment->tracking_number, 
