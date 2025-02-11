@@ -13917,6 +13917,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             $from = Carbon::createFromFormat('d F, Y', $request->get('invoice_from'))->startOfDay()->toDateTimeString();
             $to = Carbon::createFromFormat('d F, Y', $request->get('invoice_to'))->endOfDay()->toDateTimeString();
             $invoice->whereBetween('invoices.invoicing_date', [$from, $to]);
+            $reim_invoice->whereBetween('invoice_for_reimbursements.invoicing_date', [$from, $to]);
         }
 
         if ($request->get('generation_from') && $request->get('generation_to')) {
@@ -13925,6 +13926,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             $from = Carbon::createFromFormat('d F, Y', $request->get('generation_from'))->startOfDay();
             $to = Carbon::createFromFormat('d F, Y', $request->get('generation_to'))->endOfDay();
             $invoice->whereBetween('invoices.created_at', [$from, $to]);
+            $reim_invoice->whereBetween('invoice_for_reimbursements.created_at', [$from, $to]);
         }
 
         if ($request->get('star_shipper_filter') == 1) {
