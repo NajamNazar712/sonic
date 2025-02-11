@@ -33,11 +33,12 @@ class ShipmentStatusSharingWithWallet implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(array $data, $type)
+    public function __construct(array $data, $type,$token=null)
     {
         $this->queue = 'shipment_status_sharing_with_wallet';
         $this->data = $data;
         $this->type = $type;
+        $this->token = $token;
 
     }
 
@@ -90,6 +91,7 @@ class ShipmentStatusSharingWithWallet implements ShouldQueue
             ],
         ];
         $shipment_id = $this->data['shipment_id'];
+        $token2 = $this->token;
         try {
 
             $shipment_log_not_sent = Shipment::leftJoin('finja_log_settlement_records as sac', 'shipments.id', '=', 'sac.shipment_id')
@@ -113,7 +115,7 @@ class ShipmentStatusSharingWithWallet implements ShouldQueue
                     "amount" => $shipment_log_not_sent->amount,
                     "order_created_date" => $shipment_log_not_sent->created_at,
                 ];
-                $this->arrival_shipment_logs($requestPayload, null,$shipment_log_not_sent->id);
+                $this->arrival_shipment_logs($requestPayload, null,$shipment_log_not_sent->id,$token2);
             }
 
             $cod_charges = FinjaLogSettlementRecord::where('shipment_id', $shipment_id)

@@ -54,7 +54,8 @@ class FinSurgentSonicPaymentSharing extends Command
                 ->where('u.substitute_user_id', '0')
                 ->where('u.created_at', '<=', $date);
         })->select(['pending_payments.*', 'u.wallet_id', 'u.user_id as user_id'])->get();
-
+        $api = config('app.FINGA_URL');
+        $token = FingaIntegrationController::getToken($api);
        
         foreach($pending_payment_wallet_users as $pending_payment) {
             
@@ -90,7 +91,7 @@ class FinSurgentSonicPaymentSharing extends Command
                             //     'arrival_sms_charges' => floatval($pending_payment_shipment->sms_charges)
                             // ] // removed after new requierment
                         ];
-                        $this->arrival_shipment_logs($requestPayload, $pending_payment_shipment);
+                        $this->arrival_shipment_logs($requestPayload, $pending_payment_shipment,null,$token);
                     }
                 }
             }

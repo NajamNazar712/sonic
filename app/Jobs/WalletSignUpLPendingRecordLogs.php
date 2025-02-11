@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Http\Controllers\FingaIntegrationController;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -45,7 +46,10 @@ class WalletSignUpLPendingRecordLogs implements ShouldQueue
                ->where('u.substitute_user_id', '0');
        })->where('pending_payments.user_id', $user_id)
         ->pluck('pending_payments.id');
-        
+
+        $api = config('app.FINGA_URL');
+        $token = FingaIntegrationController::getToken($api);
+
         foreach ($pending_payment_ids as $pending_payment ){
             
             $pending_payment_shipments = PendingPaymentShipment::leftJoin('finja_log_settlement_records as sac', 'pending_payment_shipments.shipment_id', '=', 'sac.shipment_id')
@@ -83,7 +87,7 @@ class WalletSignUpLPendingRecordLogs implements ShouldQueue
                             //     'arrival_sms_charges' => floatval($pending_payment_shipment->sms_charges)
                             // ]remvoed as per new requirement
                         ]; 
-                        $this->arrival_shipment_logs($requestPayload,  $shipment->id);
+                        $this->arrival_shipment_logs($requestPayload,  $shipment->id,null,$token);
                     }
         
                 } elseif(in_array($pending_payment_shipment->type, [0, 1])) {
@@ -100,7 +104,7 @@ class WalletSignUpLPendingRecordLogs implements ShouldQueue
                             //     'weight_charges' =>  0
                             // ] remvoed as per new requirement
                         ];
-                        $this->arrival_shipment_logs($requestPayload,  $shipment->id);
+                        $this->arrival_shipment_logs($requestPayload,  $shipment->id,null,$token);
                     } 
                 } elseif($pending_payment_shipment->type == 2) {
                     $log_bid = AdminFinanceController::isWalletLogUpdated($pending_payment_shipment->shipment_id);
@@ -123,7 +127,7 @@ class WalletSignUpLPendingRecordLogs implements ShouldQueue
                             //     'weight_charges' =>  0
                             // ] remvoed as per new requirement
                         ];
-                        $this->arrival_shipment_logs($requestPayload,  $shipment->id);
+                        $this->arrival_shipment_logs($requestPayload,  $shipment->id,null,$token);
                     }
                 }
 
@@ -134,7 +138,7 @@ class WalletSignUpLPendingRecordLogs implements ShouldQueue
                         'status' => $shipment->shipper_status_id,
                         'shipment_id' => $shipment->id
                     ];
-                    ShipmentStatusSharingWithWallet::dispatch($data, 1);
+                    ShipmentStatusSharingWithWallet::dispatch($data, 1,$token);
                 }
             }
         }

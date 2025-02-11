@@ -27,7 +27,7 @@ trait FinSurgentLogTrait
 {
 
 
-    static function arrival_shipment_logs($requestPayload, $pending_payment_shipment,$shipment_id = null) {
+    static function arrival_shipment_logs($requestPayload, $pending_payment_shipment,$shipment_id = null,$token2 = null) {
 
         try {
 
@@ -40,7 +40,12 @@ trait FinSurgentLogTrait
             } 
 
             $api = config('app.FINGA_URL');
-            $token = FingaIntegrationController::getToken($api);
+            if(!empty($token2)){
+                $token = $token2;
+            }else{
+                $token = FingaIntegrationController::getToken($api);
+            }
+
 
             if($token) {
                 $response = Http::withHeaders([
