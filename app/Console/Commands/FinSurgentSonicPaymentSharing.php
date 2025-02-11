@@ -47,10 +47,14 @@ class FinSurgentSonicPaymentSharing extends Command
      */
     public function handle()
     {
-        $pending_payment_wallet_users = PendingPayment::join('wallet_users as u', function ($join) {
+
+        $date = Carbon::now()->subHours(2)->toDateTimeString();
+        $pending_payment_wallet_users = PendingPayment::join('wallet_users as u', function ($join) use ($date) {
             $join->on('u.user_id', '=', 'pending_payments.user_id')
-               ->where('u.substitute_user_id', '0');
-       })->select(['pending_payments.*', 'u.wallet_id', 'u.user_id as user_id'])->get();
+                ->where('u.substitute_user_id', '0')
+                ->where('u.created_at', '<=', $date);
+        })->select(['pending_payments.*', 'u.wallet_id', 'u.user_id as user_id'])->get();
+
        
         foreach($pending_payment_wallet_users as $pending_payment) {
             
