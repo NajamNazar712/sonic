@@ -132,7 +132,7 @@ class WalletSignUpLPendingRecordLogs implements ShouldQueue
                 }
 
                 $log_sent = AdminFinanceController::isWalletLogUpdated($shipment->id);
-                if(in_array($shipment->shipper_status_id, [5,8,13,14,18,20,36,37,30]) && $log_sent) {
+                if(in_array($shipment->shipper_status_id, [5,8,13,14,18,20,36,37,30]) && $log_sent && $pending_payment_shipment->type != 2) {
                     $data = [
                         'tracking_number' => $shipment->tracking_number,
                         'status' => $shipment->shipper_status_id,
