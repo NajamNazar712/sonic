@@ -230,7 +230,9 @@ class AgentSarNotification extends Command
                 NotificationsController::send(220, $haltShipper);
                 Shipment::whereIn('id', array_column($haltShipper->toArray(), 'shipment_id'))->update(['shipper_status_id'=>65, 'consignee_status_id'=>65]);
                 RvShipmentTicket::whereIn('shipment_id', array_column($haltShipper->toArray(), 'shipment_id'))->update(['halt_shipper' => 1, 'deleted_at' => date('Y-m-d h:i:s')]);
-                RvShipmentAssignAgent::whereIn('shipment_id', array_column($haltShipper->toArray(), 'shipment_id'))->whereDate('created_at',$date)->update(['unresponsive_count' => 3, 'unresponsive_email_count'=>1, 'unresponsive_email_time' => date('Y-m-d h:i:s')]);
+                RvShipmentAssignAgent::whereIn('shipment_id', array_column($haltShipper->toArray(), 'shipment_id'))
+                // ->whereDate('created_at',$date)
+                ->update(['unresponsive_count' => 3, 'unresponsive_email_count'=>1, 'unresponsive_email_time' => date('Y-m-d h:i:s')]);
             }
 //            Log::channel('cronJobLog')->info('s ' .'agent:sarnotification Completedagent:sarnotification Completed');
 
