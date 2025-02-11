@@ -2806,14 +2806,15 @@ class ShipperDashboardController extends Controller
                         {
                             UserBankInfo::where('user_id', session('user_id'))->update(['default_bank' => 0]);
                         }
+                        $user_city_id = User::where('id', session('user_id'))->value('city_id');
                         $user_bank = new UserBankInfo();
                         $user_bank->user_id = session('user_id');
                         $user_bank->bank_name = 48;
                         $user_bank->bank_branch = 'N/A';
-                        $user_bank->account_no = 'N/A';
+                        $user_bank->account_no = '923322149092';
                         $user_bank->account_title = 'N/A';
-                        $user_bank->iban = 'N/A';
-                        $user_bank->city_id = 202 ;
+                        $user_bank->iban = 'K06TMFB0000000087042403';
+                        $user_bank->city_id =  $user_city_id;
                         $user_bank->default_bank = 1; // always make the new bank info as default
                         $user_bank->save();
 
