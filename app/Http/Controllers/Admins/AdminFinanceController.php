@@ -21226,7 +21226,7 @@ class AdminFinanceController extends Controller
         if($get_wallet_charges_if_applicable) {
             $wallet_charges = ShipmentAdditionalCharges::fetch_wallet_charges($shipment_id);
         }else{
-            $wallet_charges = 0;
+            $wallet_charges = ShipmentAdditionalCharges::show_wallet_charges_by_type($shipment_id,$type);
         }
 
         $transaction_id = (string)Str::uuid();
