@@ -28,14 +28,14 @@
                                 @if(Auth::user()->wallet)
                                     <a class="nav-link d-inline-flex align-middle p-0" href="{{ route('cod.wallet.login') }}" target="_blank">
                                         <div class="m-0 bg-white primary rounded custom-nav-buttons-padding" style="background: rgb(67 118 98)!important">
-                                            <span class="d-inline-block d-md-none d-lg-none d-xl-inline-block align-middle font-weight-bold" style="color: white!important;">Wallet</span>
+                                            <span class="d-inline-block d-md-none d-lg-none d-xl-inline-block align-middle font-weight-bold" style="color: white!important;">Payments</span>
                                             <h2 class="d-inline-block m-0 align-middle primary"><i class="la la-money m-0" style="color: white!important;"></i></h2>
                                         </div>
                                     </a>
                                   @elseif(session('wallet_sign_up_allow'))
                                     <a class="nav-link d-inline-flex align-middle p-0" href="{{ route('cod.wallet.on_boarding') }}" target="_blank">
                                         <div class="m-0 bg-white primary rounded custom-nav-buttons-padding" style="background: rgb(67 118 98)!important">
-                                            <span class="d-inline-block d-md-none d-lg-none d-xl-inline-block align-middle font-weight-bold" style="color: white!important;">Wallet</span>
+                                            <span class="d-inline-block d-md-none d-lg-none d-xl-inline-block align-middle font-weight-bold" style="color: white!important;">Payments</span>
                                             <h2 class="d-inline-block m-0 align-middle primary"><i class="la la-money m-0" style="color: white!important;"></i></h2>
                                         </div>
                                     </a>
@@ -44,7 +44,7 @@
                                 @if(isset(auth()->user()->load('sub_wallet')->sub_wallet))
                                     <a class="nav-link d-inline-flex align-middle p-0" href="{{ route('cod.wallet.login') }}" target="_blank">
                                         <div class="m-0 bg-white primary rounded custom-nav-buttons-padding" style="background: rgb(67 118 98)!important">
-                                            <span class="d-inline-block d-md-none d-lg-none d-xl-inline-block align-middle font-weight-bold">Wallet</span>
+                                            <span class="d-inline-block d-md-none d-lg-none d-xl-inline-block align-middle font-weight-bold">Payments</span>
                                             <h2 class="d-inline-block m-0 align-middle primary"><i class="la la-money m-0" style="color: white!important;"></i></h2>
                                         </div>
                                     </a>
