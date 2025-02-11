@@ -35,9 +35,11 @@ use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use DB;
 use App\Http\Models\CrmCaseNatureRemark;
 use App\Http\Models\InterceptReBookRequestHistory;
+use App\Http\Traits\CommonTrait;
 
 class ShipperTrackingController extends Controller
 {
+    use CommonTrait;
     public function __construct() {
       $this->middleware('auth:web,substitute_users');
 
@@ -141,8 +143,9 @@ class ShipperTrackingController extends Controller
     	$tracking_numbers = explode(',', $request->tracking_numbers);
 
     	$tracking = array();
-
-    	foreach ($tracking_numbers as $tracking_number) {
+        $globalSetting = GlobalSettings::where(['setting_value' => 1, 'type' => 'specific_shipper_rider_view'])->first();
+        $riderDetailView = $globalSetting ? explode(',', $globalSetting->text) : null;
+        foreach ($tracking_numbers as $tracking_number) {
 //    		$shipment = Shipment::where('tracking_number', $tracking_number);
 
             $shipment = Shipment::where('tracking_number', $tracking_number);
@@ -405,7 +408,16 @@ class ShipperTrackingController extends Controller
 
                                         }
                                     }
-
+                                    if ($riderDetailView && $journey->reference_2_id && in_array(Auth::id(),$riderDetailView)) {
+                                        if (in_array($journey->shipper_status_id, [5, 23, 28, 34])) {
+                                            $rider = Rider::find($journey->reference_2_id);
+                                            if ($rider) {
+                                                $journey_details['status'] .= ' | <button class="btn btn-sm btn-outline-info align-middle rider_information" data-id="' . $rider->id . '">' . $rider->name . '</button>';
+                                            }
+                                        } else {
+                                            $journey_details['status'] .= ' | ' . str_pad($journey->reference_2_id, 6, '0', STR_PAD_LEFT);
+                                        }
+                                    }
                                     $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
 
                                     if(in_array($journey->shipper_status_id, [8,17,20,52,54,12,66])){
@@ -620,6 +632,9 @@ class ShipperTrackingController extends Controller
     	return $tracking;
     }
 
+    public function rider_information(Request $request){
+        return $this->riderInformation($request->id);
+    }
     public function order_index(){
 
         $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->get();
