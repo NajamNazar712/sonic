@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\FingaApiLog;
+use App\Jobs\ShipmentStatusSharingWithWallet;
 
 class FailedStatusRePushToWallet extends Command
 {
@@ -29,10 +30,20 @@ class FailedStatusRePushToWallet extends Command
     public function handle()
     {
 
-        $record = FingaApiLog::where('status', 'error')
+        $records = FingaApiLog::where('status', 'error')
             ->where('nature', 'shipment-status-response')
             ->get();
-            
+        
+        foreach($records  as $record) {
+            $request_id = $record->id - 1;
+            $request = FingaApiLog::where('id', $request_id)->first();
+
+            $data = [
+                'payload' => json_decode( $request->details),
+                'shipment_id' => $request->shipment_id
+            ];
+            ShipmentStatusSharingWithWallet::dispatch($data, 2);
+        }
         return Command::SUCCESS;
     }
 }
