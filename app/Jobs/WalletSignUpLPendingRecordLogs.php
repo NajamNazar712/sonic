@@ -117,7 +117,7 @@ class WalletSignUpLPendingRecordLogs implements ShouldQueue
                             "client_id" => $shipment->user_id, 
                             "reference_id" => (string) Str::uuid(), 
                             "shipment_id" => $shipment->tracking_number, 
-                            "amount" =>$cod_amount , 
+                            "amount" => $cod_amount, 
                             "order_created_date" => $shipment->created_at,
                             // "charges" => [
                             //     'weight_charges' =>  0
@@ -126,7 +126,9 @@ class WalletSignUpLPendingRecordLogs implements ShouldQueue
                         $this->arrival_shipment_logs($requestPayload,  $shipment->id);
                     }
                 }
-                if(in_array($shipment->shipper_status_id, [5,8,13,14,18,20,36,37,30])) {
+
+                $log_sent = AdminFinanceController::isWalletLogUpdated($shipment->id);
+                if(in_array($shipment->shipper_status_id, [5,8,13,14,18,20,36,37,30]) && $log_sent) {
                     $data = [
                         'tracking_number' => $shipment->tracking_number,
                         'status' => $shipment->shipper_status_id,
