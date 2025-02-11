@@ -581,7 +581,7 @@
 										row.push(values.account);
 										row.push(values.invoice_number);
 										row.push(values.shipper_account_id);
-										row.push(values.excel_shipper);
+                                        row.push(decodeHtmlEntities(values.excel_shipper));
 										row.push(values.sales_person_name);
 										row.push(values.city);
 										row.push(values.total_charges);
@@ -1516,6 +1516,11 @@
 						table.draw(true);
 						$('#star_shippers_filter').val(0);
 					});
+
+					function decodeHtmlEntities(str) {
+						let doc = new DOMParser().parseFromString(str, "text/html");
+						return doc.documentElement.textContent;
+					}
 
 				});
 			</script>
