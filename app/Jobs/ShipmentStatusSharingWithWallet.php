@@ -90,6 +90,59 @@ class ShipmentStatusSharingWithWallet implements ShouldQueue
                 'code' => 'RP-EC',
                 'name' => 'Replacement - Collected',
             ],
+            21 => [
+                'code' => 'RT-IT',
+                'name' => 'Return - In Transit',
+            ],
+            22 => [
+                'code' => 'RT-AOC',
+                'name' => 'Return - Arrived at Origin',
+            ],
+            23 => [
+                'code' => 'RT-DP',
+                'name' => 'Return - Dispatched',
+            ],
+            24 => [
+                'code' => 'RT-AF',
+                'name' => 'Return - Delivery Unsuccessful',
+            ],
+            25 => [
+                'code' => 'RT-DS',
+                'name' => 'Return - Delivered to Shipper',
+            ],
+
+            44 => [
+                'code' => 'R-RE',
+                'name' => 'Return - Rider Exchange',
+            ],
+            47 => [
+                'code' => 'R-NA',
+                'name' => 'Return - Not Attempted',
+            ],
+            48 => [
+                'code' => 'R-OH',
+                'name' => 'Return - On Hold',
+            ],
+            57 => [
+                'code' => 'RN-S',
+                'name' => 'Return Note Shifted',
+            ],
+            60 => [
+                'code' => 'RU-CS',
+                'name' => 'Return - Unable to Return',
+            ],
+            75 => [
+                'code' => 'RT-MR',
+                'name' => 'Return - Misrouted',
+            ],
+            76 => [
+                'code' => 'RT-MF',
+                'name' => 'Return - Misroute Forwarded',
+            ],
+            77 => [
+                'code' => 'RT-WM',
+                'name' => 'Return - Without Manifest',
+            ],
         ];
         $shipment_id = $this->data['shipment_id'];
         $token2 = $this->token;
