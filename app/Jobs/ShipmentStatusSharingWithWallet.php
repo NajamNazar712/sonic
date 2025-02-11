@@ -27,6 +27,7 @@ class ShipmentStatusSharingWithWallet implements ShouldQueue
 
     protected $data;
     protected $type;
+    protected $token;
 
     /**
      * Create a new job instance.
