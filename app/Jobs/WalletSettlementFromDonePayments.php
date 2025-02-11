@@ -74,7 +74,7 @@ class WalletSettlementFromDonePayments implements ShouldQueue
             if($dps->wallet_action_bid == 1 && $dps->wallet_settlement_updated == 0) {
 
                 $logCharged = FinjaLogSettlementRecord::where('shipment_id', $shipmentId)->first();
-                $logCharged = $logCharged->wallet_log_charges_updated;
+                $logCharged = isset($logCharged->wallet_log_charges_updated) ? $logCharged->wallet_log_charges_updated : 0;
                 
                 $requestPayload = [
                     "client_id" => $dps->user_id,
