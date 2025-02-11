@@ -135,7 +135,11 @@ class ShipmentStatusSharingWithWallet implements ShouldQueue
             }
 
             $api = config('app.FINGA_URL');
-            $token = FingaIntegrationController::getToken($api);
+            if(!empty($token2)){
+                $token = $token2;
+            }else{
+                $token = FingaIntegrationController::getToken($api);
+            }
             if($this->type == 1) {
                 $status =  $this->data['status'];
                 $tracking_number = $this->data['tracking_number'];
