@@ -46,6 +46,7 @@ use App\RvShipmentTicketDeleteTable;
 use Illuminate\Support\Facades\Log;
 use App\Jobs\ProcessRvShipmentTicket;
 use GuzzleHttp\Client;
+use App\Http\Models\Admin\DeliveryNote;
 
 trait RvTrait
 {
@@ -2137,5 +2138,16 @@ trait RvTrait
         RvCronLog::create([
             'message' => $message,
         ]);
+    }
+    public function remarksNSAOSAJourneyRVR($deliveryNoteId,$userId){
+        
+        $globalSetting = GlobalSettings::where(['setting_value'=>1,'type'=>'spec_shipper_remarks_nsa_osa'])->first();
+        $specShipperCheck = $globalSetting ? explode(',', $globalSetting->text) : null;
+
+        if($specShipperCheck && in_array($userId, $specShipperCheck)){
+            $delivery_note_data = DeliveryNote::find($deliveryNoteId);
+            $remarks = $delivery_note_data->rider->area->reporting_location->address ?? null;
+            return $remarks;
+        }
     }
 }

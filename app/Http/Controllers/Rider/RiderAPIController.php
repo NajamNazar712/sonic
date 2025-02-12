@@ -11820,6 +11820,9 @@ class RiderAPIController extends Controller
                                                 $remarks_id = $request->remarks_id;
                                             }
 
+                                            if (in_array($request->status_reason_id, [12, 34]) && $shipper_status_id == 12) {
+                                                $remarks = $this->remarksNSAOSAJourneyRVR($request->delivery_note_id, $shipment->user_id);
+                                            }
                                             ShipmentsJourneyController::add($shipment->id, $shipper_status_id, $shipper_status_id, $request->status_reason_id, $remarks, NULL, NULL, $request->delivery_note_id, NULL, 0, NULL, $rider_id, NULL, NULL, $remarks_id);
                                             DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 1, 'update_type' => 1]);
 
