@@ -26,7 +26,6 @@ use App\Http\Models\ShipmentPaymentStatus;
 use App\Http\Models\ReceivingSheetShipment;
 use App\Http\Models\Shipper\UserBankInfo;
 use App\Http\Models\Admin\ChangeShipmentWeightLog;
-use App\Http\Models\Admin\GlobalSettings;
 
 use Auth;
 use DB;
@@ -829,7 +828,7 @@ class ShipperFinanceController extends Controller
         $filename = 'sonic_payment_details_' . $request->id . '.xlsx';
 
         $details = array();
-
+        
         $details[] = ['S. No.', 'Tracking No.', 'Booking Date', 'Type', 'Order ID', 'Vendor', 'Origin', 'Consignee Name', 'Consignee Phone', 'Destination', 'Service Type', 'Weight (kg)', 'Collection Amount (PKR)', 'Weight Charges (PKR)', 'Cash Handling Charges (PKR)', 'OSA Charges (PKR)', 'Adjustments (PKR)','Total Charges (PKR)','GST','WHT','Net Retained Amount (PKR)','Net Disbursement Amount (PKR)
 '];
 
@@ -857,8 +856,6 @@ class ShipperFinanceController extends Controller
             $total_sms_charges = 0;
             $total_faf_charges = 0;
             $total_reverse_pickup_charges = 0;
-            $globalSetting = GlobalSettings::where(['setting_value' => 1, 'type' => 'spec_shipper_remarks_nsa_osa'])->first();
-            $specShipperCheck = $globalSetting ? explode(',', $globalSetting->text) : null;
             foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
                 $shipment = $done_payment_shipment->shipment;
                 $service_charges = ShipmentServicesCharges::where('shipment_id', $shipment->id);
@@ -925,16 +922,6 @@ class ShipperFinanceController extends Controller
                 $row[] = (($done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->wht, 2) : '0');
                 $row[] = (($done_payment_shipment->amount != 0) ? number_format($done_payment_shipment->amount - $done_payment_shipment->payable, 2) : '0');
                 $row[] = (($done_payment_shipment->payable != 0) ? number_format($done_payment_shipment->payable, 2) : '0');
-                $userId = $shipment->user_id;
-                if ($specShipperCheck && in_array($shipment->user_id, $specShipperCheck)) {
-                    if($done_payment_shipment->type == 0 || $done_payment_shipment->type == 1 && $shipment->shipping_mode_id == 1){
-                        $charges = DonePaymentShipment::where(['shipment_id' => $done_payment_shipment->shipment_id, 'type' => 3])->first()->charges;
-                        $row[] = (($done_payment_shipment->charges == 0) ? number_format($charges,2) : '0');
-                        
-                    }else{
-                        $row[] =  '0';
-                    }
-                }
                 $details[] = $row;
 
                 $serial_number++;
@@ -990,9 +977,6 @@ class ShipperFinanceController extends Controller
 
                     $total_payable += $done_payment_shipment->payable;
                 }
-            }
-            if ($specShipperCheck && in_array($userId, $specShipperCheck)) {
-                array_push($details[0], "AppliedCharges"); // This column shown only specified shipper
             }
             $total_columns = count($details[0]);
 
