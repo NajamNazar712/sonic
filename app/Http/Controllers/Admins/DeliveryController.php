@@ -2580,9 +2580,10 @@ class DeliveryController extends Controller
                         } else {
                             $remarks = null;
                             if ($request->status_drop[$shipment] == 12) {
-                                if(in_array($request->reason_drop[$shipment],[12,34]) && $request->status_drop[$shipment] == 12){
+                                if(in_array($request->reason_drop[$shipment],[12,34])){
                                     $remarks = $this->remarksNSAOSAJourneyRVR($delivery_note_id,$shipment_details->user_id);
                                 }
+                                dd($remarks);
                                 // $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment)->latest()->first();
                                 // if ($return_assign_shipment) {
                                 //     $return_assign_shipment->status = 0;
