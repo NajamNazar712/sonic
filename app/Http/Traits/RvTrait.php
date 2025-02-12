@@ -2143,10 +2143,10 @@ trait RvTrait
         
         $globalSetting = GlobalSettings::where(['setting_value'=>1,'type'=>'spec_shipper_remarks_nsa_osa'])->first();
         $specShipperCheck = $globalSetting ? explode(',', $globalSetting->text) : null;
+        
         if($specShipperCheck && in_array($userId, $specShipperCheck)){
             $delivery_note_data = DeliveryNote::find($deliveryNoteId);
             $remarks = $delivery_note_data->rider->area->reporting_location->address ?? null;
-            dd($delivery_note_data->rider->area);
             return $remarks;
         }
     }
