@@ -37,7 +37,8 @@ class FailedStatusRePushToWallet extends Command
             ->get();
 
         foreach ($records as $record) {
-            $request = FingaApiLog::where('request_id', $record->request_id)->first();
+            $request = FingaApiLog::where('id', $record->request_id)->first();
+
             if (!empty($request)) {
                 $data = [
                     'payload' => json_decode($request->details),
