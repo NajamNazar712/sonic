@@ -334,7 +334,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.entry_date);
-                                row.push(values.account_head);
+                                row.push(decodeHtmlEntities(values.account_head));
                                 row.push(decodeHtmlEntities(values.account_title));
                                 row.push(values.entry_city);
                                 row.push(decodeHtmlEntities(values.expense_details));
