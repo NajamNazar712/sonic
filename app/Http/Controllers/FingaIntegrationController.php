@@ -24,7 +24,7 @@ class FingaIntegrationController extends Controller
             
         ])->post($api.'login/', [
             "username" => "sonic",
-            "password" => "4TE7+r]7ddI2",
+            "password" => "9l2|_XTI4MiP",
         ]);
 
         if($response->successful()) { 
