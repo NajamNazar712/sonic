@@ -73,7 +73,12 @@
 
                         <a class="dropdown-toggle nav-link d-flex d-md-inline-flex align-middle dropdown-user-link" href="#" data-toggle="dropdown">
                 <span class="d-inline-block align-middle">
-                    <div class="text-bold-700 border-bottom-white text-right">{{ ucfirst(Auth::user()->name )}}</div>
+                    <div class="text-bold-700 border-bottom-white text-right" data-toggle="tooltip"
+                            data-trigger="hover"
+                            data-placement="top"
+                            data-title="{{ ucfirst(Auth::user()->name ) }}"> 
+                            {{ strlen(Auth::user()->name) > 20 ? substr(ucfirst(Auth::user()->name), 0, 20) . '...' : ucfirst(Auth::user()->name)}}
+                            </div>
 
                     @if (session('user_type') == 1)
                         <div class="border-top-white text-right">{{ str_pad(Auth::id(), 6, '0', STR_PAD_LEFT) }}</div>
