@@ -62,6 +62,7 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
 
         'APIToken' => \App\Http\Middleware\APIToken::class,
+        'FinvoWalletUser' => \App\Http\Middleware\FinvoWalletUserMiddleware::class,
         'Permission' => \App\Http\Middleware\Permission::class,
         'APIThrottle' => \App\Http\Middleware\APIThrottle::class,
 

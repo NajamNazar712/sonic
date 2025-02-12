@@ -1778,7 +1778,7 @@ function checkboxStatus() {
             serverSide: true,
            deferLoading: 0,
             rowId: 'id',
-            order: [[27, 'desc']],
+            order: [[17, 'desc']],
             ajax: {
                url: '{{ route('admin.accounts.active.ajax') }}',
                 method: 'post',
