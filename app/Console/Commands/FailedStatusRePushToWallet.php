@@ -30,20 +30,24 @@ class FailedStatusRePushToWallet extends Command
     public function handle()
     {
 
-        $records = FingaApiLog::where('status', 'error')
+        $records = FingaApiLog::where('status', ['error', 'exception'])
             ->where('nature', 'shipment-status-response')
+            ->whereNotNull('request_id')
+            ->orderby('shipment_id', 'desc')
             ->get();
-        
-        foreach($records  as $record) {
-            $request_id = $record->id - 1;
-            $request = FingaApiLog::where('id', $request_id)->first();
 
-            $data = [
-                'payload' => json_decode( $request->details),
-                'shipment_id' => $request->shipment_id
-            ];
-            ShipmentStatusSharingWithWallet::dispatch($data, 2);
+        foreach ($records as $record) {
+            $request = FingaApiLog::where('request_id', $record->request_id)->first();
+            if (!empty($request)) {
+                $data = [
+                    'payload' => json_decode($request->details),
+                    'shipment_id' => $request->shipment_id
+                ];
+                ShipmentStatusSharingWithWallet::dispatch($data, 2);
+
+                FingaApiLog::whereIN('id', [$record->id,$request->id])->delete();
+            }
         }
-        return Command::SUCCESS;
+        return 1;
     }
 }

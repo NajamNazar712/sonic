@@ -146,6 +146,20 @@ class ShipmentStatusSharingWithWallet implements ShouldQueue
         ];
         $shipment_id = $this->data['shipment_id'];
         $token2 = $this->token;
+        if($this->type == 1) {
+            $status =  $this->data['status'];
+            $tracking_number = $this->data['tracking_number'];
+            $status_code = $status_mapping[$status]['code'];
+            $status_name = $status_mapping[$status]['name'];
+            $requestPayload = [
+                'shipment_id' => $tracking_number,
+                'status_code' => $status_code,
+                'status_name' =>  $status_name
+            ];
+        } elseif($this->type == 2) {
+            $requestPayload = $this->data['payload'];
+        }
+        $request_id = FingaIntegrationController::apiLog('shipment-status-request', 1, $requestPayload ,$shipment_id);
         try {
 
             $shipment_log_not_sent = Shipment::leftJoin('finja_log_settlement_records as sac', 'shipments.id', '=', 'sac.shipment_id')
@@ -193,19 +207,7 @@ class ShipmentStatusSharingWithWallet implements ShouldQueue
             }else{
                 $token = FingaIntegrationController::getToken($api);
             }
-            if($this->type == 1) {
-                $status =  $this->data['status'];
-                $tracking_number = $this->data['tracking_number'];
-                $status_code = $status_mapping[$status]['code'];
-                $status_name = $status_mapping[$status]['name'];
-                $requestPayload = [
-                    'shipment_id' => $tracking_number,
-                    'status_code' => $status_code,
-                    'status_name' =>  $status_name
-                ];
-            } elseif($this->type == 2) {
-                $requestPayload = $this->data['payload'];
-            }
+
             
             if($token) {
                 $response = Http::withHeaders([
@@ -213,20 +215,18 @@ class ShipmentStatusSharingWithWallet implements ShouldQueue
                     'Authorization' => "Bearer " . $token,
                 
                 ])->post($api.'shipments/update/', $requestPayload);
-    
-                FingaIntegrationController::apiLog('shipment-status-request', 1, $requestPayload ,$shipment_id);
-    
+
                 if($response->successful()) { 
                     
                     $body = $response->getBody();
                     $body = json_decode($body);
     
-                    FingaIntegrationController::apiLog('shipment-status-response', 'success', $body ,$shipment_id);
+                    FingaIntegrationController::apiLog('shipment-status-response', 'success', $body ,$shipment_id,$request_id);
     
                 } else {
                     $body = $response->getBody();
                     $body = json_decode($body);
-                    FingaIntegrationController::apiLog('shipment-status-response', 'error', $body ,$shipment_id);
+                    FingaIntegrationController::apiLog('shipment-status-response', 'error', $body ,$shipment_id,$request_id);
                 }
             }
 
@@ -236,7 +236,7 @@ class ShipmentStatusSharingWithWallet implements ShouldQueue
                 'error' => $th->getMessage(),
                 'code' => $th->getCode()
             ];
-            FingaIntegrationController::apiLog('shipment-status-response', 'exception', $errorBody, $shipment_id);
+            FingaIntegrationController::apiLog('shipment-status-response', 'exception', $errorBody, $shipment_id,$request_id);
         }
     }
 }

@@ -185,14 +185,17 @@ class FingaIntegrationController extends Controller
 
     }
 
-    public static function apiLog($nature, $status, $details, $shipment_id) {
+    public static function apiLog($nature, $status, $details, $shipment_id,$request_id = null) {
 
-        FingaApiLog::create([
+        $newLog = FingaApiLog::create([
             'nature' => $nature,
             'status' => $status,
             'details' => $details ? json_encode($details, JSON_PRETTY_PRINT) : null, // Save as JSON
-            'shipment_id' => $shipment_id
+            'shipment_id' => $shipment_id,
+            'request_id'=>$request_id
         ]);
+        return $newLog->id;
+
     }
     
     public function on_boarding(Request  $request){
