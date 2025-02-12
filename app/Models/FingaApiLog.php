@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class FingaApiLog extends Model
 {
     use HasFactory;
-    protected $fillable = ['nature', 'status','details', 'shipment_id'];
+    protected $fillable = ['nature', 'status','details', 'shipment_id','request_id'];
 
      // Format dates as 'YYYY-MM-DD HH:mm:ss'
      protected function serializeDate(\DateTimeInterface $date)
