@@ -17,7 +17,7 @@ class UpdateBankListAddWalletBank extends Seeder
         $codes = array('Fin');
 
         $names = array(
-            'Finova Wallet',
+            ' Telenor Microfinance Bank / EasyPaisa',
         );
 
         $affilate = array(1);

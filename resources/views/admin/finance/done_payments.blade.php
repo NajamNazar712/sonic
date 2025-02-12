@@ -1428,6 +1428,32 @@
 
 				} else if ($(this).hasClass('wallet_settlement')) {
 
+					swal({
+                        title: "Processing...",
+                        text: "Please wait while we process your request.",
+                        content: (() => {
+                            // Create a container for the spinner
+                            let content = document.createElement("div");
+                            content.innerHTML = `
+                            <div style="display: flex; justify-content: center; align-items: center;">
+                                <div class="spinner" style="width: 30px; height: 30px; border: 4px solid rgba(0,0,0,0.2); border-top: 4px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                            </div>
+                        `;
+                            return content;
+                        })(),
+                        buttons: false, // Disable buttons
+                        closeOnClickOutside: false, // Disable outside click
+                        closeOnEsc: false // Disable escape key
+                    });
+
+                    const style = document.createElement("style");
+                    style.textContent = `
+                    @keyframes spin {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
+                    }`;
+                    document.head.appendChild(style);
+
 					$.ajax({
 						url: '{!! route('admin.finance.done_payments.mark_settlement') !!}',
 						method: 'GET',
@@ -1437,6 +1463,7 @@
 					})
 					.done(function(data) {
 						
+						swal.close();
 						if (data.status == 1) {
 							toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 						}

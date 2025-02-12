@@ -63,7 +63,7 @@ class WalletSettlementFromDonePayments implements ShouldQueue
         // ->where(function ($query) {
         //     $query->where('sac.wallet_settlement_updated', 0);
         // })
-        ->select(['done_payment_shipments.*', 'wu.user_id as user_id', 'wu.wallet_id as wallet_id', 's.tracking_number', 's.cash_handling_charges', 's.insurance_charges','s.replacement_charges','s.try_and_buy_charges','s.intercept_charges','s.nsa_osa_charges','s.esc_charges','s.return_charges', 'sac.wallet_settlement_updated', 's.weight_charges', 's.fuel_surcharge','sc.faf_charges', 'ssc.reverse_pickup_charges', 'sc.wallet_charges'])->get();
+        ->select(['done_payment_shipments.*', 'wu.user_id as user_id', 'wu.wallet_id as wallet_id', 's.tracking_number', 's.cash_handling_charges', 's.insurance_charges','s.replacement_charges','s.try_and_buy_charges','s.intercept_charges','s.nsa_osa_charges','s.esc_charges','s.return_charges', 'sac.wallet_settlement_updated', 's.weight_charges', 's.fuel_surcharge','sc.faf_charges', 'ssc.reverse_pickup_charges', 'sc.wallet_charges', 'sac.wallet_log_charges_updated'])->get();
         //dd($done_payment_shipments);
         $successfull_record = [];
         $api = config('app.FINGA_URL');
@@ -73,8 +73,8 @@ class WalletSettlementFromDonePayments implements ShouldQueue
             $shipment = Shipment::find($shipmentId);
             if($dps->wallet_action_bid == 1 && $dps->wallet_settlement_updated == 0) {
 
-                $logCharged = FinjaLogSettlementRecord::where('shipment_id', $shipmentId)->first();
-                $logCharged = isset($logCharged->wallet_log_charges_updated) ? $logCharged->wallet_log_charges_updated : 0;
+                //$logCharged = FinjaLogSettlementRecord::where('shipment_id', $shipmentId)->first();
+                $logCharged = !empty($dps->wallet_log_charges_updated) ? $dps->wallet_log_charges_updated : 0;
                 
                 $requestPayload = [
                     "client_id" => $dps->user_id,
