@@ -28,6 +28,7 @@ use Illuminate\Http\Request;
     Route::post('fintech_getToken','APIController@fintech_getToken')->name('fintech_getToken');
     Route::middleware('FinvoWalletUser')->group(function () {
         Route::post('fin_sms', 'APIController@fin_sms')->name('fin_sms');
+        Route::post('fintech_charges','APIController@fintech_charges')->name('fintech_charges');
     });
 
 
@@ -35,7 +36,6 @@ use Illuminate\Http\Request;
     Route::post('employee_attendance_details', 'APIController@employee_checkin')->name('employee_attendance_details');
 
     Route::middleware('APIToken')->group(function () {
-        Route::post('fintech_charges','APIController@fintech_charges')->name('fintech_charges');
         Route::post('verify', 'APIController@verify')->name('verify');
 
         Route::get('pickup_addresses', 'APIController@pickup_addresses')->name('pickup_addresses');
