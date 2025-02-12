@@ -2380,6 +2380,10 @@ class DeliveryController extends Controller
                             DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
                         }
                     } else {
+                        $remarks = null;
+                        if(in_array($selected_reason,[12,34]) && $selected_status == 12){
+                            $remarks = $this->remarksNSAOSAJourneyRVR($delivery_note_id,$shipment_details->user_id);
+                        }
                         if ($selected_status == 12) {
 
                             if (in_array(session('role_id'), [18, 19]) && $selected_status == 12 && in_array($selected_reason, [1, 6, 8, 19]) && ($rcp_sms_setting->setting_value == 1) && !ReturnConfirmationPendingSmsAttempt::where('shipment_id', $shipment)->where('status', 0)->exists()) {
@@ -2390,9 +2394,9 @@ class DeliveryController extends Controller
                         }
                         if ($shipment_details->shipper_status_id != $selected_status) {
                             if ($shipment_details->packaging_material_request == 0) {
-                                ShipmentsJourneyController::add($shipment, $selected_status, $selected_status, $selected_reason, $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0);
+                                ShipmentsJourneyController::add($shipment, $selected_status, $selected_status, $selected_reason, $remarks ?? $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0);
                             } else if ($shipment_details->packaging_material_charges != '' && $shipment_details->packaging_material_request == 1) {
-                                ShipmentsJourneyController::add($shipment, $selected_status, $selected_status, $selected_reason, $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0);
+                                ShipmentsJourneyController::add($shipment, $selected_status, $selected_status, $selected_reason, $remarks ?? $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0);
                             } else if ($shipment_details->packaging_material_charges == null && $shipment_details->packaging_material_request == 1) {
                                 if ($selected_status != 12) {
                                     ShipmentsJourneyController::add($shipment, $selected_status, $selected_status, $selected_reason, $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0);
@@ -2574,7 +2578,13 @@ class DeliveryController extends Controller
                                 DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
                             }
                         } else {
+                            $remarks = null;
                             if ($request->status_drop[$shipment] == 12) {
+                                
+                                if(in_array($request->reason_drop[$shipment],[12,34])){
+                                    $remarks = $this->remarksNSAOSAJourneyRVR($delivery_note_id,$shipment_details->user_id);
+                                }
+                                
                                 // $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment)->latest()->first();
                                 // if ($return_assign_shipment) {
                                 //     $return_assign_shipment->status = 0;
@@ -2656,9 +2666,9 @@ class DeliveryController extends Controller
                         if ($shipment_status->shipper_status_id != $request->status_drop[$shipment]) {
                             if ($shipment_status->packaging_material_request == 0) {
 
-                                ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($statusId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0, NULL, NULL, NULL, NULL, $request->remarks_id[$shipment]);
+                                ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($statusId) ? $request->reason_drop[$shipment] : null), $remarks ?? $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0, NULL, NULL, NULL, NULL, $request->remarks_id[$shipment]);
                             } else if ($shipment_status->packaging_material_charges != '' && $shipment_status->packaging_material_request == 1) {
-                                ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($statusId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0, NULL, NULL, NULL, NULL, $request->remarks_id[$shipment]);
+                                ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($statusId) ? $request->reason_drop[$shipment] : null), $remarks ??  $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0, NULL, NULL, NULL, NULL, $request->remarks_id[$shipment]);
                             } else if ($shipment_status->packaging_material_charges == null && $shipment_status->packaging_material_request == 1) {
                                 if ($request->status_drop[$shipment] != 12) {
                                     ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($statusId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0, NULL, NULL, NULL, NULL, $request->remarks_id[$shipment]);
