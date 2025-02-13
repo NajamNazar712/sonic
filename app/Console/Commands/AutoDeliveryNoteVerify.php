@@ -70,7 +70,7 @@ class AutoDeliveryNoteVerify extends Command
                         $excluded_hubs = array_map('intval', explode(',', $excluded_hubs_setting->text));
                     }
     
-                    $delivery_notes = DeliveryNote::whereDate('created_at', '>=', $date)->whereDate('created_at','<=','2025-02-12')->where(['status' => 0, 'pending_status' => 1])->whereNotIn('hub_id', $excluded_hubs);
+                    $delivery_notes = DeliveryNote::whereDate('created_at', '>=', $date)->where(['status' => 0, 'pending_status' => 1])->whereNotIn('hub_id', $excluded_hubs);
                     if ($delivery_notes->exists()) {
                         $deliveryNoteShipmentsId = DeliveryNoteShipment::whereIn('delivery_note_id', $delivery_notes->pluck('id'))
                             ->distinct()
