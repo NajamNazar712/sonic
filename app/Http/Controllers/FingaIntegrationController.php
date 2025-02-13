@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Auth;
+use Illuminate\Support\Facades\App;
 class FingaIntegrationController extends Controller
 {
 
@@ -18,13 +19,17 @@ class FingaIntegrationController extends Controller
         $this->middleware('Permission')->except('wordpress_access_denied', 'wordpressAddressView','wordpressBankView');
     }
     public static function getToken($api) {
-
+        if (App::environment('local') || App::environment('staging')) {
+            $password = "4TE7+r]7ddI2";
+        }else{
+            $password = "9l2|_XTI4MiP";
+        }
         $response = Http::withHeaders([
             'accept' => 'application/json',
             
         ])->post($api.'login/', [
             "username" => "sonic",
-            "password" => "9l2|_XTI4MiP",
+            "password" => $password,
         ]);
 
         if($response->successful()) { 
