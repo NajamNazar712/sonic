@@ -88,7 +88,6 @@ class ProcessRvShipmentTicket implements ShouldQueue
                 $rvShipmentTicket  = DB::table('rv_shipment_tickets')
                 ->where('shipment_id', $this->shipment['shipment_id'])
                 ->orWhereNotNull('deleted_at')
-                ->limit(1)
                 ->first();
                 Log::channel('cronJobLog')->info('s ' . 'rv_shipment_ticket data Saved'.json_encode($rvShipmentTicket));
                 
