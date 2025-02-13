@@ -24,7 +24,7 @@
 @endif
 
 {{-- Include Toastr --}}
-@section('css')
+@section('css_finja')
     <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/vendors/css/extensions/toastr.css') }}">
 @endsection
 
