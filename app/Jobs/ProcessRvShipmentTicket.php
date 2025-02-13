@@ -87,12 +87,11 @@ class ProcessRvShipmentTicket implements ShouldQueue
                 $rvShipmentTicket = RvShipmentTicket::withTrashed()
                 ->where(function ($query) {
                     $query->where('shipment_id', $this->shipment['shipment_id'])
-                        ->where('halt_shipper', 1);
+                    ->where('halt_shipper', 1);
                 })
                 ->orWhereNotNull('deleted_at')
                 ->first();
-
-                if($rvShipmentTicket){
+                if($rvShipmentTicket && $rvShipmentTicket->halt_shipper == 1){
                     RvShipmentAssignAgent::where('shipment_id',$this->shipment['shipment_id'])->update(['unresponsive_count' => 0, 'unresponsive_email_count' => 0]);
                     RvShipmentTicket::where('shipment_id',$this->shipment['shipment_id'])->update(['deleted_at' => NULL, 'halt_shipper' => 0]);
                     // $rvShipmentTicket->halt_shipper = 0;
