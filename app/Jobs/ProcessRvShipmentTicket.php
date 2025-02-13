@@ -85,18 +85,12 @@ class ProcessRvShipmentTicket implements ShouldQueue
                 $isShipperDisabled = 1;
                 //This works on the halt shipper. If the first attempt is disabled, the second attempt will follow the current RVR process.T0-6980
                 $rvShipmentTicket = RvShipmentTicket::withTrashed()
-                ->where(function ($query) {
-                    $query->where('shipment_id', $this->shipment['shipment_id'])
-                    ->where('halt_shipper', 1);
-                })
+                ->where('shipment_id', $this->shipment['shipment_id'])
                 ->orWhereNotNull('deleted_at')
                 ->first();
-                if($rvShipmentTicket && $rvShipmentTicket->halt_shipper == 1){
-                    RvShipmentAssignAgent::where('shipment_id',$this->shipment['shipment_id'])->update(['unresponsive_count' => 0, 'unresponsive_email_count' => 0]);
+                if($rvShipmentTicket->halt_shipper == 1){
+                    RvShipmentAssignAgent::where('shipment_id',$this->shipment['shipment_id'])->update(['unresponsive_count' => 0, 'unresponsive_email_count' => 0, 'rv_state_id'=>2, 'unresponsive_email_time'=>NULL, 'unresponsive_attempt_time'=>NULL]);
                     RvShipmentTicket::where('shipment_id',$this->shipment['shipment_id'])->update(['deleted_at' => NULL, 'halt_shipper' => 0]);
-                    // $rvShipmentTicket->halt_shipper = 0;
-                    // $rvShipmentTicket->deleted_at = null;
-                    // $rvShipmentTicket->save();
                     $isShipperDisabled = 0;
                 }
             }
