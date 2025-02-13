@@ -87,7 +87,6 @@ class ProcessRvShipmentTicket implements ShouldQueue
                 //This works on the halt shipper. If the first attempt is disabled, the second attempt will follow the current RVR process.T0-6980
                 $rvShipmentTicket  = DB::table('rv_shipment_tickets')
                 ->where('shipment_id', $this->shipment['shipment_id'])
-                ->orWhereNotNull('deleted_at')
                 ->first();
                 Log::channel('cronJobLog')->info('s ' . 'rv_shipment_ticket data Saved'.json_encode($rvShipmentTicket));
                 
