@@ -131,7 +131,7 @@ class AutoDeliveryNoteVerify extends Command
                                             AdminFinanceController::done_payment($shipment->id, 1);
                                         }
                                     }
-                                    ShipmentsJourneyController::add($shipment->id, 20, 20, $shipments_journey->status_reason_id, $shipments_journey->remarks, NULL, $globalAdminId, null, null, 1, null, null, null, null, null);
+                                    ShipmentsJourneyController::add($shipment->id, 20, 20, $journey->status_reason_id, $journey->remarks, NULL, $globalAdminId, null, null, 1, null, null, null, null, null);
                                     $shipment->save();
     
                                     //Remove Shipment from RV Shipment Ticket
