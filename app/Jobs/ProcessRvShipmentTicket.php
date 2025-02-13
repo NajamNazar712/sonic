@@ -88,7 +88,6 @@ class ProcessRvShipmentTicket implements ShouldQueue
                 $rvShipmentTicket  = DB::table('rv_shipment_tickets')
                 ->where('shipment_id', $this->shipment['shipment_id'])
                 ->first();
-                Log::channel('cronJobLog')->info('s ' . 'rv_shipment_ticket data Saved'.json_encode($rvShipmentTicket));
                 
                 if($rvShipmentTicket->halt_shipper == 1){
                     RvShipmentAssignAgent::where('shipment_id',$this->shipment['shipment_id'])->update(['unresponsive_count' => 0, 'unresponsive_email_count' => 0, 'rv_state_id'=>2, 'unresponsive_email_time'=>NULL, 'unresponsive_attempt_time'=>NULL]);
