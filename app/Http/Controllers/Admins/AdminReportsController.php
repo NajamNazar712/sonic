@@ -15262,6 +15262,7 @@ class AdminReportsController extends Controller
             // 'adjustment.adjustment_amount as adjusted_amount',
             'scs.name as sub_segment',
             'cargo_status.name as cargo_status',
+            'cargo_status.id as cargo_status_id',
             'cmb.seal_number as seal_number',
             'bs.name as bag_status',
             'sjfa.created_at as first_attempt_date',
@@ -15656,6 +15657,23 @@ class AdminReportsController extends Controller
             //     }
             // })
             ->editColumn('current_hub', function ($shipment) {
+                if(in_array($shipment->shipper_status_id ,[49, 3])){
+                    if(in_array($shipment->cargo_status_id,[3,2,4, 7, 8, 9,6])){ //Shipment In Transit || Shipment Misrouted Forwarded concered hub change reference TO-6939
+                        return $shipment->destination;
+                    }
+                }elseif(in_array($shipment->shipper_status_id ,[26, 73,32, 70, 76])){
+                    if(in_array($shipment->cargo_status_id,[4, 7, 8, 9,6])){ //Shipment In Transit || Shipment Misrouted Forwarded concered hub change reference TO-6939
+                        return $shipment->origin;
+                    }
+                }elseif(in_array($shipment->shipper_status_id,[18, 34, 23, 24, 47, 48,2])){
+                    return $shipment->origin;
+                }elseif(in_array($shipment->shipper_status_id,[54,55, 69,7, 4,8])){
+                    return $shipment->destination;
+                }elseif(in_array($shipment->shipper_status_id,[22, 21,75])){
+                    if($shipment->return_city != null){
+                        return $shipment->return_city;
+                    }
+                }
                 if ($shipment->current_hub_id != null) {
                     return $shipment->current_hub_name;
                 } else {
