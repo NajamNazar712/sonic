@@ -2036,7 +2036,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     //Reports start
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::prefix('qsr')->name('qsr.')->group(function () {
-            Route::get('', 'Admins\AdminReportsController@qsr_index')->name('index');
+            Route::get('', 'Admins\AdminReportsController@qsr_in    dex')->name('index');
             Route::post('list', 'Admins\AdminReportsController@qsr_list')->name('list');
             Route::get('updated_shippers_list', 'Admins\AdminReportsController@updated_shippers_list')->name('updated_shippers_list');
 
@@ -2545,6 +2545,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('shipment_reversal')->name('shipment_reversal_report.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@shipment_reversal_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@shipment_reversal_list')->name('list');
+        });
+        
+        Route::prefix('lost_and_case_closed_summary')->name('lost_and_case_closed_summary_report.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@lost_and_case_closed_summary_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@lost_and_case_closed_summary_list')->name('list');
         });
     });
 
