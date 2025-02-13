@@ -18,6 +18,7 @@ use App\Http\Models\Shipment;
 use App\RvShipmentAgent;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\DB;
 
 class ProcessRvShipmentTicket implements ShouldQueue
 {
@@ -84,10 +85,12 @@ class ProcessRvShipmentTicket implements ShouldQueue
             if (in_array($this->shipment['shipment_user_id'], $onlyShippers)) { //Mark Shipper Disabled if It's user id found in Only Shippers
                 $isShipperDisabled = 1;
                 //This works on the halt shipper. If the first attempt is disabled, the second attempt will follow the current RVR process.T0-6980
-                $rvShipmentTicket = RvShipmentTicket::withTrashed()
+                $rvShipmentTicket  = DB::table('rv_shipment_tickets')
                 ->where('shipment_id', $this->shipment['shipment_id'])
                 ->orWhereNotNull('deleted_at')
+                ->limit(1)
                 ->first();
+                
                 if($rvShipmentTicket->halt_shipper == 1){
                     RvShipmentAssignAgent::where('shipment_id',$this->shipment['shipment_id'])->update(['unresponsive_count' => 0, 'unresponsive_email_count' => 0, 'rv_state_id'=>2, 'unresponsive_email_time'=>NULL, 'unresponsive_attempt_time'=>NULL]);
                     RvShipmentTicket::where('shipment_id',$this->shipment['shipment_id'])->update(['deleted_at' => NULL, 'halt_shipper' => 0]);
