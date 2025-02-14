@@ -97,12 +97,15 @@ class ProcessRvShipmentTicket implements ShouldQueue
                         $rvShipmentAgent->unresponsive_attempt_time = NULL;
                         $isShipperDisabled = 0;
                     }
+                    $rvShipmentAgent->rv_state_id = 2;
+                    $rvShipmentAgent->save();
                 }
                 if (isset($rvShipmentAgent) && $rvShipmentAgent->call_count > 0) {
                     $isShipperDisabled = 0;
+                    $rvShipmentAgent->rv_state_id = 2;
+                    $rvShipmentAgent->save();
                 }
-                $rvShipmentAgent->rv_state_id = 2;
-                $rvShipmentAgent->save();
+                
             }
             
             // $userId = [2234, 23825, 13060, 1049];
