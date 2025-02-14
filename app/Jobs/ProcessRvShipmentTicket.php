@@ -98,7 +98,7 @@ class ProcessRvShipmentTicket implements ShouldQueue
                         $isShipperDisabled = 0;
                     }
                 }
-                if ($rvShipmentAgent->call_count > 0) {
+                if (isset($rvShipmentAgent) && $rvShipmentAgent->call_count > 0) {
                     $isShipperDisabled = 0;
                 }
                 $rvShipmentAgent->rv_state_id = 2;
