@@ -2036,7 +2036,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     //Reports start
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::prefix('qsr')->name('qsr.')->group(function () {
-            Route::get('', 'Admins\AdminReportsController@qsr_in    dex')->name('index');
+            Route::get('', 'Admins\AdminReportsController@qsr_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@qsr_list')->name('list');
             Route::get('updated_shippers_list', 'Admins\AdminReportsController@updated_shippers_list')->name('updated_shippers_list');
 
