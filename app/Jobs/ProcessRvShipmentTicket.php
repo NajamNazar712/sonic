@@ -90,7 +90,15 @@ class ProcessRvShipmentTicket implements ShouldQueue
                 ->first();
                 
                 if(isset($rvShipmentTicket->halt_shipper)){
-                    RvShipmentAssignAgent::where(['shipment_id'=>$this->shipment['shipment_id'],'call_count'=>0])->update(['unresponsive_count' => 0, 'unresponsive_email_count' => 0, 'rv_state_id'=>2, 'unresponsive_email_time'=>NULL, 'unresponsive_attempt_time'=>NULL]);
+                    $rvShipmentAgent = RvShipmentAssignAgent::where(['shipment_id'=>$this->shipment['shipment_id']])->first();
+                    if($rvShipmentAgent > 0){
+                        $rvShipmentAgent->unresponsive_count = 0;
+                        $rvShipmentAgent->unresponsive_email_count = 0;
+                        $rvShipmentAgent->unresponsive_email_time = NULL;
+                        $rvShipmentAgent->unresponsive_attempt_time = NULL;
+                    }
+                    $rvShipmentAgent->rv_state_id = 2;
+                    $rvShipmentAgent->save();
                     $isShipperDisabled = 0;
                 }
 
