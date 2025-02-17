@@ -13005,7 +13005,7 @@ class AdminReportsController extends Controller
         ->where('rv_shipment_assign_agent_details.rv_state_id', '!=', 1)
         ->where('rv_shipment_assign_agent_details.rv_assign_agent_status_id', '!=', '')
         ->whereColumn('rv_shipment_assign_agent_details.agent_id', 'rv_shipment_assign_agent_details.updated_by_id')
-        ->groupBy('rv_shipment_assign_agent_details.created_ats','rv_shipment_assign_agent_details.shipment_id');
+        ->groupBy('rv_shipment_assign_agent_details.created_at','rv_shipment_assign_agent_details.shipment_id');
 
         $datatable = Datatables::of($rv_report)
                     ->editColumn('tracking_number', function($rv_report) {
