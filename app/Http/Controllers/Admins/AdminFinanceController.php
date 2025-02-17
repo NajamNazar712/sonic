@@ -11655,6 +11655,9 @@ class AdminFinanceController extends Controller
         if ($invoice->invoice_type == 1) {
             foreach ($invoice->invoice_shipments as $invoice_shipment) {
                 $shipment = $invoice_shipment->shipment;
+                if(!isset($shipment->id)){
+                    $shipment =  $invoice_shipment->shipment_archieve;
+                }
                 $arrival_charges_applied = ShipmentAdditionalCharges::check_additional_charges($shipment->id,true,false,false);;
                 $service_charges = ShipmentServicesCharges::where('shipment_id', $shipment->id);
                 if ($service_charges->exists()) {
@@ -13590,6 +13593,9 @@ class AdminFinanceController extends Controller
 
         foreach ($invoice->invoice_shipments as $invoice_shipment) {
             $shipment = $invoice_shipment->shipment;
+            if(!isset($shipment->id)){
+                $shipment =  $invoice_shipment->shipment_archieve;
+            }
             $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment->id);
             $arrival_charges_applied = ShipmentAdditionalCharges::check_additional_charges($shipment->id,true,false,false);;
             $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
@@ -14842,6 +14848,9 @@ class AdminFinanceController extends Controller
 
         foreach ($invoice->invoice_shipments as $invoice_shipment) {
             $shipment = $invoice_shipment->shipment;
+            if(!isset($shipment->id)){
+                $shipment =  $invoice_shipment->shipment_archieve;
+            }
             $arrival_charges_applied = ShipmentAdditionalCharges::check_additional_charges($shipment->id,true,false,false);;
             $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
 
@@ -18936,6 +18945,9 @@ class AdminFinanceController extends Controller
         if ($invoice->invoice_type == 1) {
             foreach ($invoice->invoice_shipments as $invoice_shipment) {
                 $shipment = $invoice_shipment->shipment;
+                if(!isset($shipment->id)){
+                    $shipment =  $invoice_shipment->shipment_archieve;
+                }
                 $arrival_charges_applied = ShipmentAdditionalCharges::check_additional_charges($shipment->id,true,false,false);;
                 $service_charges = ShipmentServicesCharges::where('shipment_id', $shipment->id);
                 if ($service_charges->exists()) {
