@@ -38,6 +38,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use App\Http\Models\DonePaymentCalculation;
 use App\Http\Models\ShipmentLedger;
+use App\Http\Models\Admin\GlobalSettings;
 
 class ShipperFinanceController extends Controller
 {
@@ -845,10 +846,12 @@ class ShipperFinanceController extends Controller
 
         $filename = 'sonic_payment_details_' . $request->id . '.xlsx';
 
-        $details = array();
+        $details = array(); 
 
         $details[] = ['S. No.', 'Tracking No.', 'Booking Date', 'Type', 'Order ID', 'Vendor', 'Origin', 'Consignee Name', 'Consignee Phone', 'Destination', 'Service Type', 'Weight (kg)', 'Collection Amount (PKR)', 'Weight Charges (PKR)','Fuel Surge Charge','Finoava Wallet Charges', 'Cash Handling Charges (PKR)', 'OSA Charges (PKR)', 'Adjustments (PKR)','Total Charges (PKR)','GST','WHT','Net Retained Amount (PKR)','Net Disbursement Amount (PKR)
 '];
+        $globalSetting = GlobalSettings::where(['setting_value' => 1, 'type' => 'spec_shipper_remarks_nsa_osa'])->first();
+        $specShipperCheck = $globalSetting ? explode(',', $globalSetting->text) : null;
 
         if ($done_payment && $done_payment->user_id == session('user_id')) {
             $account_type_id = $done_payment->shipper->account_type_id;
@@ -945,7 +948,15 @@ class ShipperFinanceController extends Controller
                 $row[] = (($done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->wht, 2) : '0');
                 $row[] = (($done_payment_shipment->amount != 0) ? number_format($done_payment_shipment->amount - $done_payment_shipment->payable, 2) : '0');
                 $row[] = (($done_payment_shipment->payable != 0) ? number_format($done_payment_shipment->payable, 2) : '0');
-
+                $userId = $shipment->user_id;
+                if ($specShipperCheck && in_array($shipment->user_id, $specShipperCheck)) {
+                    if ($done_payment_shipment->type == 0 || $done_payment_shipment->type == 1 && $shipment->shipping_mode_id == 1) {
+                        $charges = DonePaymentShipment::where(['shipment_id' => $done_payment_shipment->shipment_id, 'type' => 3])->first()->charges;
+                        $row[] = (($done_payment_shipment->charges == 0) ? number_format($charges, 2) : '0');
+                    } else {
+                        $row[] = '0';
+                    }
+                }
                 $details[] = $row;
 
                 $serial_number++;
@@ -1004,7 +1015,9 @@ class ShipperFinanceController extends Controller
                     $total_payable += $done_payment_shipment->payable;
                 }
             }
-
+            if ($specShipperCheck && in_array($userId, $specShipperCheck)) {
+                array_push($details[0], "AppliedCharges"); // This column shown only specified shipper
+            }
             $total_columns = count($details[0]);
 
             $summary = ['Total Weight Charges' => $total_weight_charges, 'Total Cash Handling Charges' => $total_cash_handling_charges, 'Total Insurance Charges' => $total_insurance_charges, 'Total Replacement Charges' => $total_replacement_charges, 'Total Try & Buy Charges' => $total_try_and_buy_charges, 'Total Return Charges' => $total_return_charges, 'Total Fuel Surcharge' => $total_fuel_surcharge, 'Total Faf Charges' => $total_faf_charges,'Total Finova Charges'=>$total_wallet_charges, 'Total Intercept Charges' => $total_intercept_charges, 'Total OSA Charges' => $total_nsa_osa_charges, 'Total Charges (w/o GST)' => ($total_charges - $total_packaging_material_charges), 'Total GST' => $total_gst,'Total WHT (Deductable)' => $total_wht, 'Total Packaging Material Charges' => $total_packaging_material_charges, 'Total Adjustments' => $total_adjustments, 'IBFT Charges' => $done_payment->ibft_charges,  'Overall Charges' => ($total_charges + $total_sms_charges + $total_gst - $total_adjustments + $done_payment->ibft_charges - $total_wht)];
