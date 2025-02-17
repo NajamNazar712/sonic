@@ -106,5 +106,6 @@
 </style>
 
 @yield('css')
+@yield('css_finja')
 
 <link rel="stylesheet" type="text/css" href="{{asset('css/custom.css')}}">
