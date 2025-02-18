@@ -298,7 +298,7 @@
             },
             rowId: 'latest_shipment',
             order: [
-                [13, 'desc']
+                [9, 'desc']
             ],
             columns: [{
                     orderable: false,
@@ -433,7 +433,7 @@
                     // Add select dropdown for employee_status column
                     if (header.hasClass('employee_status')) {
                         var select = $(
-                                '<select class="form-control form-control-sm input-sm primary">' +
+                                '<select class="form-control form-control-sm input-sm">' +
                                 '<option value="0">All</option>' +
                                 '<option value="1">Active</option>' +
                                 '<option value="2">Inactive</option>' +
