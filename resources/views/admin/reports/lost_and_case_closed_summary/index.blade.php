@@ -1,4 +1,5 @@
 @extends('admin.layout.master')
+
 @section('title', 'Lost/Case Closed Summary Report')
 
 @section('content')
@@ -81,11 +82,13 @@
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/vendors/css/extensions/toastr.css') }}">
-    <link rel="stylesheet" type="text/css"
-        href="{{ asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/vendors/css/pickers/pickadate/pickadate.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/css/plugins/pickers/daterange/daterange.min.css') }}">
 
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/icheck.css')}}">
 
     <style>
         table.dataTable {
@@ -161,16 +164,20 @@
 @endsection
 
 @section('js')
-    <script src="{{ asset('app-assets/vendors/js/forms/select/selectize.min.js') }}" type="text/javascript"></script>
-    <script src="{{ asset('app-assets/vendors/js/forms/tags/tagging.min.js') }}" type="text/javascript"></script>
-    <script src="{{ asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js') }}" type="text/javascript">
-    </script>
-    <script src="{{ asset('app-assets/vendors/js/extensions/toastr.min.js') }}" type="text/javascript"></script>
-    <script src="{{ asset('js/datatable_buttons.js') }}" type="text/javascript"></script>
+<script src="{{ asset('app-assets/vendors/js/forms/tags/tagging.min.js') }}" type="text/javascript"></script>
+<script src="{{ asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js') }}" type="text/javascript"></script>
+<script src="{{ asset('app-assets/vendors/js/extensions/toastr.min.js') }}" type="text/javascript"></script>
+<script src="{{ asset('js/datatable_buttons.js') }}" type="text/javascript"></script>
 
-    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
+
+<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+<script src="{{asset('/app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/forms/icheck/icheck.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
 
@@ -418,6 +425,13 @@
                 var searchRow = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this
                     .api().table().header());
 
+                var status_dropdown = '<select class="select2 form-control" id="status_dropdown">' +
+                                        '<option value="0">All</option>' +
+                                        '<option value="1">Active</option>' +
+                                        '<option value="2">Inactive</option>' +
+                                        '<option value="3">Active - No Info</option>' +
+                                        '</select>'
+
                 this.api().columns().every(function(index) {
                     var column = this;
                     var header = $(column.header());
@@ -432,13 +446,7 @@
 
                     // Add select dropdown for employee_status column
                     if (header.hasClass('employee_status')) {
-                        var select = $(
-                                '<select class="form-control form-control-sm input-sm">' +
-                                '<option value="0">All</option>' +
-                                '<option value="1">Active</option>' +
-                                '<option value="2">Inactive</option>' +
-                                '<option value="3">Active - No Info</option>' +
-                                '</select>')
+                        var select = $(status_dropdown)
                             .appendTo(td)
                             .on('change', function() {
                                 column.search($(this).val()).draw();
@@ -469,6 +477,13 @@
             }
 
 
+        });
+
+        $("#status_dropdown").prepend('<option value="" selected></option>').select2({
+            placeholder: "Select Status",
+            width:'100%',
+            containerCssClass: 'select-xs',
+            dropdownCssClass: 'form-control-sm p-0'
         });
 
         //Selectize
