@@ -62,7 +62,7 @@
         </div>
     </div>
 
-    {{-- Get Support --}} 
+    {{-- Get Support --}}
     <div class="modal fade text-left" id="AddRequestModal" data-backdrop="static" tabindex="-1" role="dialog"
         aria-labelledby="AddRequestModal" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
@@ -592,11 +592,8 @@
 
             $('#complainant_phone').inputmask({
                 mask: '9999-9999999',
-                placeholder: '_',
-                showMaskOnHover: false,
-                showMaskOnFocus: false
+                'clearIncomplete': true
             });
-
 			var select = $('#track_form .tracking_numbers').selectize({
 				placeholder: 'Tracking Number(s)*',
 				delimiter: ',',
@@ -631,7 +628,6 @@
                 allowClear: true,
                 dropdownParent: $('#add_request_form')
             });
-
             @if (app('request')->has('tracking_number'))
                 track({{ app('request')->input('tracking_number') }});
             @endif

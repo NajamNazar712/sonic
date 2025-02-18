@@ -179,7 +179,7 @@
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Add Request</h4>
+                    <h4 class="modal-title white">Get Support</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -223,6 +223,23 @@
                                     <div class="col-10">
                                         <fieldset class="form-group">
                                             <textarea class="form-control" name="complaint_description" id="complaint_description" rows="5" placeholder="Enter Description Here..." data-rule-required="true" data-msg-required="Description is required"></textarea>
+                                        </fieldset>
+                                    </div>
+
+                                    <div class="col-10">
+                                        <fieldset class="form-group">
+                                            <select name="case_nature_complainant" id="case_nature_complainant"
+                                                    class="form-control select2" data-rule-required="true"
+                                                    data-msg-required="Complainant is required">
+                                                <option value="1">Consignee</option>
+                                                <option value="2">Shipper</option>
+                                            </select>
+                                        </fieldset>
+                                    </div>
+                                    <div class="col-10">
+                                        <fieldset class="form-group">
+                                            <input type="text" class="form-control" placeholder="Enter Phone Number" name="complainant_phone" id="complainant_phone"  data-rule-required="true"
+                                                   data-msg-required="Complainant Phone is required">
                                         </fieldset>
                                     </div>
                                 </div>
@@ -642,6 +659,17 @@
 				'allowPlus': false
 			});
 
+            $('#complainant_phone').inputmask({
+                mask: '9999-9999999',
+                'clearIncomplete': true
+            });
+
+            $('#case_nature_complainant').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: "Select Complainant",
+                allowClear: true,
+                dropdownParent: $('#add_request_form')
+            });
             var booking_from_date = $('#booking_from_date').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -938,7 +966,7 @@
                         }
                     },
                     {
-                        text: '<i class="la la-plus"></i> Add Request',
+                        text: '<i class="la la-plus"></i> Get Support',
                         className: 'btn btn-primary request_add',
                         action: function (e, dt, node, config) {
                             if (selected_rows.length > 0) {
@@ -2211,6 +2239,8 @@
                                             'description': description,
                                             'cod_new_amount': $('#new_amount').val(),
                                             'cod_remarks': $('#cod_remarks').val(),
+                                            'complainant_phone' : $('#complainant_phone').val(),
+                                            'case_nature_complainant' : $('#case_nature_complainant').val(),
                                             'is_zero_cod': is_zero_cod,
                                             'cod_parcel_value': $('#cod_parcel_value').val(),
                                             'is_automated_cod_change': 1,
@@ -2309,6 +2339,8 @@
                                     'case_nature_id': case_nature_id,
                                     'complaint_id': complaint_id,
                                     'description': description,
+                                    'complainant_phone' : $('#complainant_phone').val(),
+                                    'case_nature_complainant' : $('#case_nature_complainant').val(),
                                 }
                             })
                             .done(function (data) {
@@ -2407,6 +2439,8 @@
                 $('#receiving_sheet_div').addClass('d-none');
                 $('#alternate_phone_input').addClass('d-none');
                 $('#alternate_phone').val('');
+                $('#case_nature_complainant').val('').trigger('change');
+                $('#complainant_phone').val('');
                 // $('#cod_amount_input').addClass('d-none');
                 // $('#cod_amount').val('');
             });

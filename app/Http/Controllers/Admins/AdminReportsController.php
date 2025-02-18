@@ -6743,7 +6743,9 @@ class AdminReportsController extends Controller
             'si.quantity as shipment_quantity',
             's.pieces as pieces',
             's.actual_weight as actual_weight',
-            'ad2.name as kae'
+            'ad2.name as kae',
+            'crm_requests.complainant_phone as complainant_phone',
+            'crm_requests.case_nature_complainant as case_nature_complainant',
         ];
 
         $crm = DB::connection('reports')->table('crm_requests')->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
