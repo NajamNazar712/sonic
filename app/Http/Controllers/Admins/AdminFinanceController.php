@@ -5244,6 +5244,12 @@ class AdminFinanceController extends Controller
         $amount = 0;
         $charges = 0;
         $gst = 0;
+        $get_wallet_charges_if_applicable = ShipmentAdditionalCharges::get_wallet_charges_if_applicable($shipment_id);
+        if($get_wallet_charges_if_applicable) {
+            $wallet_charges = ShipmentAdditionalCharges::fetch_wallet_charges($shipment_id);
+        }else{
+            $wallet_charges = 0;
+        }
         if ($shipment->shipment_type == 1) {
             $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
 
@@ -5265,6 +5271,10 @@ class AdminFinanceController extends Controller
                 $pending_payment->arrival_shipment = 0;
 
                 $pending_payment->save();
+            }
+            if($get_wallet_charges_if_applicable) {
+                ShipmentAdditionalCharges::settle_wallet_finova_charges($shipment_id, 2);
+                $payable+=$wallet_charges;
             }
 
             $pending_payment_shipment = new PendingPaymentShipment();
@@ -6123,6 +6133,18 @@ class AdminFinanceController extends Controller
                         $pending_payment->arrival_shipment = 0;
 
                         $pending_payment->save();
+                    }
+
+                    $get_wallet_charges_if_applicable = ShipmentAdditionalCharges::get_wallet_charges_if_applicable($shipment_id);
+                    if($get_wallet_charges_if_applicable) {
+                        $wallet_charges = ShipmentAdditionalCharges::fetch_wallet_charges($shipment_id);
+                    }else{
+                        $wallet_charges = 0;
+                    }
+
+                    if($get_wallet_charges_if_applicable) {
+                        ShipmentAdditionalCharges::settle_wallet_finova_charges($shipment_id, 2);
+                        $payable+=$wallet_charges;
                     }
 
                     $pending_payment_shipment = new PendingPaymentShipment();
