@@ -922,6 +922,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\LostShipmentsController@lost_shipments_index')->name('index');
             Route::post('list', 'Admins\LostShipmentsController@lost_shipments_list')->name('list');
             Route::get('lost_responsible_list', 'Admins\LostShipmentsController@lost_responsible_list')->name('lost_responsible_list');
+            // for lost shipment screen only
+            Route::get('lost_shipment_responsible_list', 'Admins\LostShipmentsController@lost_shipment_responsible_list')->name('lost_shipment_responsible_list');
+            Route::get('old_lost_shipment_responsible_list', 'Admins\LostShipmentsController@old_lost_shipment_responsible_list')->name('old_lost_shipment_responsible_list');
 
             Route::post('confirm/status', 'Admins\LostShipmentsController@shipment_confirm_status')->name('confirm.status.lost');
             Route::post('reattempt/status', 'Admins\LostShipmentsController@shipment_reattempt_status')->name('reattempt.status.lost');
