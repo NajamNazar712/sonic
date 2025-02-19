@@ -625,7 +625,9 @@ class ShipperCRMController extends Controller
                     }
 
                 }
-                AdminCRMController::updateComplaintPhone($crm_request_padded_id ?? CrmRequest::max('id'), $request->case_nature_complainant, $request->complainant_phone);
+                if($nature_id == 1){
+                    AdminCRMController::updateComplaintPhone($crm_request_padded_id ?? CrmRequest::max('id'), $request->case_nature_complainant, $request->complainant_phone);
+                }
 
                 return ['status' => 1, 'success' => $message, 'flag' => $flag, 'already_existed_shipments' => $present_shipments, 'cannot_change' => $cannot_change];
 //            return ['status' => 1, 'success' => 'Request(s) successfully added'];
@@ -814,7 +816,9 @@ class ShipperCRMController extends Controller
                         }
                     }
                 }
-                AdminCRMController::updateComplaintPhone($crm_request_padded_id ?? CrmRequest::max('id'), $request->case_nature_complainant, $request->complainant_phone);
+                if($nature_id == 1){
+                    AdminCRMController::updateComplaintPhone($crm_request_padded_id ?? CrmRequest::max('id'), $request->case_nature_complainant, $request->complainant_phone);
+                }
                 return ['status' => 1, 'success' => $message, 'flag' => $flag, 'already_existed_shipments' => $present_shipments, 'cannot_change' => $cannot_change];
             }
             else{
