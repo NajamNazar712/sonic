@@ -2813,7 +2813,7 @@ class ShipperDashboardController extends Controller
                         $user_bank->bank_branch = 'N/A';
                         $user_bank->account_no = '923322149092';
                         $user_bank->account_title = 'N/A';
-                        $user_bank->iban = 'K06TMFB0000000087042403';
+                        $user_bank->iban = 'PK06TMFB0000000087042403';
                         $user_bank->city_id =  $user_city_id;
                         $user_bank->default_bank = 1; // always make the new bank info as default
                         $user_bank->save();
