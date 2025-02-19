@@ -407,6 +407,39 @@ class LostShipmentsController extends Controller
                         return 'Pending';
                     }
                 })
+
+                // Searching feature for status
+                ->filterColumn('lost_confirmation_status', function($query, $keyword) {
+                    $keyword = strtolower($keyword);
+                    if (str_contains('approved', $keyword)) {
+                        $query->where(function($q) {
+                            $q->where('lssc.approval_count', '>=', 1)
+                            ->where('lssc.cleared', 1)
+                            ->orWhere('shipments_journey.verification', 1);
+                        });
+                    } elseif (str_contains('pending', $keyword)) {
+                        $query->where(function($q) {
+                            $q->where('lssc.approval_count', '>=', 0)
+                                ->where('lssc.cleared', 0);
+                        });
+                    } 
+                    // Return no results if no match
+                    else {
+                        $query->whereRaw('1 = 0');
+                    }
+                })
+
+                // Ordering for confirm status
+                ->orderColumn('lost_confirmation_status', function($query, $order) {
+                    $direction = strtoupper($order) === 'ASC' ? 'asc' : 'desc';
+                    $query->orderByRaw("CASE
+                            WHEN (lssc.approval_count >= 1 AND lssc.cleared = 1) OR shipments_journey.verification = 1 THEN 1
+                            WHEN lssc.approval_count >= 0 AND lssc.cleared = 0 THEN 0
+                            ELSE 2
+                        END $direction")
+                    ->orderBy('shipments.id', $direction);
+                })
+
                 ->addColumn('action', function ($shipment) {
                     if (session('role_id') == 1 || in_array(944, session('permissions'))) {
 
