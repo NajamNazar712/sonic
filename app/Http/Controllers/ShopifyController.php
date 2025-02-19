@@ -168,6 +168,7 @@ class ShopifyController extends Controller
                                     <tr>
                                         <td>Quantity</td>
                                         <td>Item</td>
+                                        <td>Discount</td>
                                         <td>Price</td>
                                     </tr>
                                     
@@ -177,6 +178,7 @@ class ShopifyController extends Controller
                             $html .='<tr>
                                         <td>'. $item['quantity'] .'x</td>
                                         <td>'. $item['name'] .'</td>
+                                        <td>'. $item['discount'] .'</td>
                                         <td>Rs.'. $item['price'] .'</td>
                                     </tr>';
                         }
@@ -222,6 +224,9 @@ class ShopifyController extends Controller
                              </tr>
                              <tr>
                                  <td>Shipping: </td><td>Rs.'. $order['shipping'] .'</td>
+                             </tr>
+                              <tr>
+                                 <td>Total Discount: </td><td>Rs.'. $order['total_discount'] .'</td>
                              </tr>
                              <tr>
                                  <td><b>Total price:</b></td><td><b>Rs.'. $order['total_price'] .'</b></td>
