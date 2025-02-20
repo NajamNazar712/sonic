@@ -16075,11 +16075,7 @@ class AdminReportsController extends Controller
     public function lost_and_case_closed_summary_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 814);
-        if (session('role_id') == 1 || in_array(1021, session('permissions'))) {
-            return view('admin.reports.lost_and_case_closed_summary.index');
-        } else {
-            return redirect()->route('admin.access_denied');
-        }
+        return view('admin.reports.lost_and_case_closed_summary.index');
     }
 
     public function lost_and_case_closed_summary_list(Request $request)

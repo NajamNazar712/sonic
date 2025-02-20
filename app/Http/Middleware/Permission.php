@@ -658,6 +658,7 @@ class Permission
             'reports.issuance_sack_bag.index' => 937,
 
             'reports.shipment_reversal_report.index' => 1001,
+            'admin.reports.lost_and_case_closed_summary_report.index' => 1021,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
