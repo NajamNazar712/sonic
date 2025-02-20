@@ -398,7 +398,7 @@ class ProcessShipmentBooking implements ShouldQueue
         }
 
         NotificationsController::send(2, $shipment_id);
-        // ShipperShipmentBookController::addressAreaConsigneeShipper($shipment_id,$pickup_address_id,$consignee_city_id,$consignee_address);
+        ShipperShipmentBookController::addressAreaConsigneeShipper($shipment_id,$pickup_address_id,$consignee_city_id,$consignee_address);
 
     }
 }
