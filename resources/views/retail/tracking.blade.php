@@ -613,6 +613,10 @@
                                     shipment += '<td><strong>Quantity</strong></td>';
                                     // shipment += '<td>' + item.quantity + '</td>';
                                     shipment += '<td>' + details.order_information.quantity + '</td>';
+
+                                    shipment += '<td><strong>Sub Segment</strong></td>';
+                                    shipment += '<td>' + details.order_information.sub_segment + '</td>';
+
                                     shipment += '</tr>';
                                 });
 
@@ -642,15 +646,16 @@
                                 }
 
                                 shipment += '<tr>';
-                                shipment += '<td><strong>Parcel Value</strong></td>';
-                                shipment += '<td>' + details.order_information.parcel_value + '</td>';
-
                                 shipment += '</tr>';
                                 shipment += '<tr>';
                                 shipment += '<td><strong>Piece(s)</strong></td>';
                                 shipment += '<td>'+ details.order_information.pieces +'</td>';
                                 shipment += '<td><strong>Business Category</strong></td>';
                                 shipment += '<td>'+ details.order_information.business_category +'</td>';
+
+                                shipment += '<td><strong>Parcel Value</strong></td>';
+                                shipment += '<td>' + details.order_information.parcel_value + '</td>';
+
                                 shipment += '</tr>';
                                 shipment += '</tbody>';
                                 shipment += '</table>';

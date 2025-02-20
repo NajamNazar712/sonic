@@ -22,11 +22,10 @@
                                     <div class="col-6">
                                         <div class="form-group">
                                             <label>Agent*</label>
-                                            <select name="admin_id" id="agent_id" class="form-control select2" required data-rule-required="true" data-msg-required="Agent is required" disabled>
-                                                @foreach($agents as $agent)
-                                                <option value="{{ $agent->id }}" >{{ $agent->name }}
-                                                </option>
-                                                @endforeach
+                                                <select name="admin_id" id="agent_id" class="form-control select2" required data-rule-required="true" data-msg-required="Agent is required">
+                                                    @foreach($agents as $agent)
+                                                         <option value="{{ $agent->id }}" data-role_id="{{$agent->role_id}}" >{{ $agent->name }} </option>
+                                                    @endforeach
                                                 </select>
                                                 <input type="hidden" name="id" value="{{ $selected_agent->agent_id }}" />
                                             </div>
@@ -72,7 +71,43 @@
                                         </div>
                                     </div>
 
+                                @php  $origin_zone_id  = $selected_agent->origin_zones->pluck('origin_zone_id')->toArray(); @endphp
 
+                                <div class="row">
+                                    <div class="col-4">
+                                        <div class="form-group">
+                                            <label>Origin Zone&nbsp;(<input type="checkbox" class="checkAll" >Select All)</label>
+                                            <select name="origin_zone_id[]" id="origin_zone_id" class="form-control select2" multiple="multiple">
+                                                <option value="" disabled>Select</option>
+                                                @foreach($zones as $zone)
+                                                    <option value="{{ $zone->id }}" {{ in_array($zone->id, $origin_zone_id)  ? 'selected' : '' }}> {{ $zone->name }} </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="form-group">
+                                            <label>Origin Hub (<input type="checkbox" class="checkAll" >Select All)</label>
+                                            <select name="origin_id[]"  id="origin_id" class="form-control select2" multiple="multiple">
+{{--                                                @foreach($origin_hubs as $origin_hub)--}}
+{{--                                                    <option value="{{ $origin_hub->id }}" > {{ $origin_hub->name }} </option>--}}
+{{--                                                @endforeach--}}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="form-group">
+                                            <div class="form-group">
+                                                <label>Origin Area&nbsp;(<input type="checkbox" class="checkAll"  >Select All)</label>
+                                                <select name="origin_area_id[]" disabled id="origin_area_id" class="form-control select2" multiple="multiple"  >
+{{--                                                    @foreach($origin_areas as $origin_area)--}}
+{{--                                                        <option value="{{ $origin_area->id }}" > {{ $origin_area->name }} </option>--}}
+{{--                                                    @endforeach--}}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
                                     @php    $cnh = $selected_agent->case_natures->pluck('case_nature_id')->toArray(); @endphp
 
@@ -187,8 +222,55 @@
     <script>
         $(document).ready(function() {
 
+            function getShipperKey() {
+
+                $.ajax({
+                    url:'{!! route("admin.settings.auto_assigning.get_shipper_key") !!}',
+                    method: 'GET'
+                }).done(function (data) {
+                    if(data.status == 1){
+                        $('#shipper_key_id').removeAttr('disabled');
+                        let options = "";
+                        $.each(data.shipper_keys, function(index, field) {
+                            options+=`<option value='${field.id}' >${field.name}<option>`;
+                        });
+                        $('#shipper_key_id').append(options);
+
+                        $('#shipper_key_id').find('option').filter(function() {
+                            return $.trim($(this).text()) === '';
+                        }).remove();
+                    }
+                })
+            }
+            function getShipperNonKey() {
+
+                $.ajax({
+                    url:'{!! route("admin.settings.auto_assigning.get_shipper_non_key") !!}',
+                    method: 'GET'
+                }).done(function (data) {
+                    if(data.status == 1){
+                        $('#shipper_non_key_id').removeAttr('disabled');
+                        let options = "";
+                        $.each(data.shipper_non_keys, function(index, field) {
+                            options+=`<option value='${field.id}' >${field.name}<option>`;
+                        });
+                        $('#shipper_non_key_id').append(options);
+
+                        $('#shipper_non_key_id').find('option').filter(function() {
+                            return $.trim($(this).text()) === '';
+                        }).remove();
+                    }
+                })
+            }
+
             let zone = $('#zone_id').val();
             getHubs(zone);
+
+            let origin_zone = $('#origin_zone_id').val();
+            getOriginHubs(origin_zone);
+
+            let origin_area = $("#origin_id").val();
+            getOriginAreas(origin_area);
 
             let case_nature = $('#case_nature_id').val();
             getCaseNatureType(case_nature);
@@ -199,6 +281,10 @@
             var hb = @jSON($selected_agent->hubs->pluck('hub_id')->toArray());
             var cnt = @jSON($selected_agent->case_nature_types->pluck('case_nature_type_id')->toArray());
             var sbs = @jSON($selected_agent->sub_business_types->pluck('sub_segment_id')->toArray());
+            var ohb = @jSON($selected_agent->origin_hubs->pluck('origin_hub_id')->toArray());
+            var ora = @jSON($selected_agent->origin_areas->pluck('origin_area_id')->toArray());
+
+
 
             function getHubs(zone) {
                 $('#hub_id').attr('disabled','disabled');
@@ -222,6 +308,64 @@
                         hb = [];
 
                         $('#hub_id').find('option').filter(function() {
+                            return $.trim($(this).text()) === '';
+                        }).remove();
+                    }
+                })
+            }
+
+            function getOriginHubs(origin_zone) {
+                $('#origin_id').attr('disabled','disabled');
+                $('#origin_id').empty();
+                $("#origin_area_id").attr('disabled','disabled');
+                $('#origin_area_id').empty();
+                $("#origin_id_checkbox,#origin_area_id_checkbox").prop('checked', false);
+                $.ajax({
+                    url:'{!! route("admin.settings.auto_assigning.get_origin_hub") !!}',
+                    method: 'POST',
+                    data: {
+                        'origin_zone_id': origin_zone,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    if(data.status == 1){
+                        $('#origin_id').removeAttr('disabled');
+                        let options = "";
+                        $.each(data.origin_hubs, function(index, field) {
+                            let selected = (ohb.includes(field.id)) ? 'selected' : '';
+                            options+=`<option value='${field.id}' ${selected} >${field.name}<option>`;
+                        });
+                        $('#origin_id').append(options).trigger('change');
+                        ohb = [];
+
+                        $('#origin_id').find('option').filter(function() {
+                            return $.trim($(this).text()) === '';
+                        }).remove();
+                    }
+                })
+            }
+
+            function getOriginAreas(origin_area) {
+                $('#origin_area_id').attr('disabled','disabled');
+                $('#origin_area_id').empty();
+                $.ajax({
+                    url:'{!! route("admin.settings.auto_assigning.get_origin_areas") !!}',
+                    method: 'POST',
+                    data: {
+                        'origin_ids': origin_area,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    if(data.status == 1){
+                        $('#origin_area_id').removeAttr('disabled');
+                        let options = "";
+                        $.each(data.origin_areas, function(index, field) {
+                            let selected = (ora.includes(field.id)) ? 'selected' : '';
+                            options+=`<option value='${field.id}' ${selected} >${field.name}<option>`;
+                        });
+                        $('#origin_area_id').append(options).trigger('change');
+                        ora = [];
+                        $('#origin_area_id').find('option').filter(function() {
                             return $.trim($(this).text()) === '';
                         }).remove();
                     }
@@ -291,6 +435,7 @@
                 // $("agent_id").select2('val', '')
                 $('#agent_id').val('').trigger('change.select2');
                 $('#zone_id').val('').trigger('change.select2');
+                $('#origin_zone_id').val('').trigger('change.select2');
                 // $('#case_nature_id').val('').trigger('change.select2');
             });
             $('#agent_id').prepend('<option selected></option>').select2({
@@ -298,7 +443,22 @@
                 placeholder:"Select Agent",
                 allowClear:true,
                 dropdownParent:$('#crm_agent_assign')
-            }).val({{ $selected_agent->agent_id }}).trigger('change');
+            }).val({{ $selected_agent->agent_id }}).trigger('change').bind('change',function (){
+                $('#shipper_key_id').attr('disabled','disabled');
+                $('#shipper_key_id').empty();
+                $('#shipper_non_key_id').attr('disabled','disabled');
+                $('#shipper_non_key_id').empty();
+
+                var role_id = $(this).find(':selected').data('role_id');
+                if(role_id==28 || role_id==37){
+                    getShipperNonKey()
+
+                } else if (role_id==43 || role_id==67 || role_id==75 || role_id==115) {
+                    getShipperKey();
+                }
+
+            });
+
 
             $('#case_nature_id').select2({
                 width:'100%',
@@ -335,6 +495,7 @@
             }).bind('change', function() {
 
             });
+
             $('#zone_id').select2({
                 width:'100%',
                 placeholder:"Select Zone",
@@ -347,6 +508,7 @@
 
             });
 
+
             $('#hub_id').select2({
                 width:'100%',
                 placeholder:"Select Hub",
@@ -354,6 +516,35 @@
                 dropdownParent:$('#crm_agent_assign')
             }).bind('change', function() {
 
+            });
+
+            $('#origin_zone_id').select2({
+                width:'100%',
+                placeholder:"Select Zone",
+                allowClear:false,
+                dropdownParent:$('#crm_agent_assign')
+            }).bind('change', function() {
+
+                var zone = $(this).val();
+                getOriginHubs(zone);
+
+            });
+
+            $('#origin_id').select2({
+                width:'100%',
+                placeholder:"Select Hub Origin",
+                allowClear:false,
+                dropdownParent:$('#crm_agent_assign')
+            }).bind('change',function (){
+                var origin = $(this).val();
+                getOriginAreas(origin);
+            });
+
+            $('#origin_area_id').select2({
+                width:'100%',
+                placeholder:"Select Area",
+                allowClear:false,
+                dropdownParent:$('#crm_agent_assign')
             });
 
             $('#shipment_status_id').select2({

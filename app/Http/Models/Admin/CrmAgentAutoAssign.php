@@ -6,6 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class CrmAgentAutoAssign extends Model
 {
+    public function origin_zones() {
+        return $this->hasMany('App\Http\Models\Admin\CrmAgentAutoAssignOriginZone', 'agent_id', 'agent_id');
+    }
+    public function origin_hubs() {
+        return $this->hasMany('App\Http\Models\Admin\CrmAgentAutoAssignOriginHub', 'agent_id', 'agent_id');
+    }
+    public function origin_areas() {
+        return $this->hasMany('App\Http\Models\Admin\CrmAgentAutoAssignOriginArea', 'agent_id', 'agent_id');
+    }
     public function hubs() {
         return $this->hasMany('App\Http\Models\Admin\CrmAgentAutoAssignHub', 'agent_id', 'agent_id');
     }

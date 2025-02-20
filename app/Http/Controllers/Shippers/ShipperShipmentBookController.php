@@ -83,6 +83,7 @@ use SnappyPDF;
 use Validator;
 use App\Http\Models\ShipperSegmentLogs;
 use Illuminate\Support\Facades\Log;
+use DB;
 
 class ShipperShipmentBookController extends Controller
 {
@@ -1070,14 +1071,36 @@ class ShipperShipmentBookController extends Controller
                     }
 
                     try {
-                        // Maintaining shipper segment logs on booking when origin and destination are different
-                        if ($consignee_city_id != $user_shipping_info->city_id) {
+                        // Maintaining shipper segment logs on booking
+                        $segment_id = '';
+                        $sub_segment_id = '';
+                        $user_id = '';
+
+                        if (session('substitute_user_id')) {
+                            $user_id = auth()->user()->user_id;
+                            $user = User::find($user_id);
+                            $segment_id = $user->segment_id;
+                            $sub_segment_id = $user->sub_segment_id;
+
+                            ShipperSegmentLogs::create([
+                                'shipment_id' => $shipment_id,
+                                'segment_id' => $segment_id,
+                                'sub_segment_id' => $sub_segment_id
+                            ]);
+                        } else {
                             ShipperSegmentLogs::create([
                                 'shipment_id' => $shipment_id,
                                 'segment_id' => auth()->user()->segment_id,
                                 'sub_segment_id' => auth()->user()->sub_segment_id
-                            ]);
+                            ]);    
                         }
+                        // if ($consignee_city_id != $user_shipping_info->city_id) {
+                        //     ShipperSegmentLogs::create([
+                        //         'shipment_id' => $shipment_id,
+                        //         'segment_id' => auth()->user()->segment_id,
+                        //         'sub_segment_id' => auth()->user()->sub_segment_id
+                        //     ]);
+                        // }
                     } catch (\Exception $e) {
                         Log::error('Error creating shipper segment log from shipment public function store(Request $request)' . $shipment_id . ': ' . $e->getMessage());
                     }
@@ -1457,6 +1480,18 @@ class ShipperShipmentBookController extends Controller
         foreach ($ids as $id) {
 //            dd('sss');
             $shipment = Shipment::find($id);
+
+            $sub_segment_name = '-';
+            $sub_segment = DB::table('shipper_segment_logs')
+            ->leftJoin('sub_category_segments', 'sub_category_segments.id', 'shipper_segment_logs.sub_segment_id')
+            ->where('shipment_id', $shipment->id)
+            ->select('sub_category_segments.name')
+            ->first();
+
+            if ($sub_segment && $sub_segment->name)
+            {
+                $sub_segment_name = $sub_segment->name;
+            }
 
             if ($user_type != 2) {
                 ShipmentsAirWaybillJourneyController::add($id, $user_type, $user_id);
@@ -2063,7 +2098,10 @@ class ShipperShipmentBookController extends Controller
                               </tr>
                               <tr>
                                 <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                                <td colspan="6" class="border twice-bottom">' . $item_description . '</td>
+                                <td colspan="2" class="border twice-bottom">' . $item_description . '</td>
+
+                                <td class="color secondary border twice-bottom"><strong>Sub Segment</strong></td>
+                                <td colspan="4" class="border twice-bottom">' . $sub_segment_name . '</td>
                               </tr>
                     ';
 
@@ -2093,7 +2131,10 @@ class ShipperShipmentBookController extends Controller
                               </tr>
                               <tr>
                                 <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                                <td colspan="6" class="border twice-bottom">' . $item_description . '</td>
+                                <td colspan="2" class="border twice-bottom">' . $item_description . '</td>
+
+                                <td class="color secondary border twice-bottom"><strong>Sub Segment</strong></td>
+                                <td colspan="4" class="border twice-bottom">' . $sub_segment_name . '</td>
                               </tr>
                     ';
 
@@ -2118,7 +2159,10 @@ class ShipperShipmentBookController extends Controller
                               </tr>
                               <tr>
                                 <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                                <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+                                <td colspan="2" class="border twice-bottom">' . $item->description . '</td>
+
+                                <td class="color secondary border twice-bottom"><strong>Sub Segment</strong></td>
+                                <td colspan="4" class="border twice-bottom">' . $sub_segment_name . '</td>
                               </tr>
                     ';
 
@@ -2135,7 +2179,10 @@ class ShipperShipmentBookController extends Controller
                         </tr>
                         <tr>
                           <td style="color:#ffffff !important; background-color: #000000 !important;border-color:#ffffff !important" class=" border twice-bottom"><strong>Description</strong></td>
-                          <td colspan="6" style="color:#ffffff !important; background-color: #000000 !important;border-color:#ffffff !important" class="border twice-bottom">' . $item->description . '</td>
+                          <td colspan="2" style="color:#ffffff !important; background-color: #000000 !important;border-color:#ffffff !important" class="border twice-bottom">' . $item->description . '</td>
+
+                            <td class="color secondary border twice-bottom"><strong>Sub Segment</strong></td>
+                            <td colspan="4" class="border twice-bottom">' . $sub_segment_name . '</td>
                         </tr>
                     ';
 
@@ -4061,7 +4108,6 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function corporate_store(Request $request) {
-
         $rules = [
             'replacement_parcel_img' => ['nullable', 'mimes:png,jpeg,jpg'],
         ];
@@ -4547,14 +4593,36 @@ class ShipperShipmentBookController extends Controller
             }
 
                 try {
-                    // Maintaining shipper segment logs on booking when origin and destination are different
-                    if ($consignee_city_id != $pickup_city_id) {
+                    // Maintaining shipper segment logs on booking
+                    $segment_id = '';
+                    $sub_segment_id = '';
+                    $user_id = '';
+                    if (session('substitute_user_id')) {
+                        $user_id = auth()->user()->user_id;
+                        $user = User::find($user_id);
+                        $segment_id = $user->segment_id;
+                        $sub_segment_id = $user->sub_segment_id;
+
+                        ShipperSegmentLogs::create([
+                            'shipment_id' => $shipment_id,
+                            'segment_id' => $segment_id,
+                            'sub_segment_id' => $sub_segment_id
+                        ]);
+                    } else {
                         ShipperSegmentLogs::create([
                             'shipment_id' => $shipment_id,
                             'segment_id' => auth()->user()->segment_id,
                             'sub_segment_id' => auth()->user()->sub_segment_id
                         ]);
                     }
+
+                    // if ($consignee_city_id != $pickup_city_id) {
+                    //     ShipperSegmentLogs::create([
+                    //         'shipment_id' => $shipment_id,
+                    //         'segment_id' => auth()->user()->segment_id,
+                    //         'sub_segment_id' => auth()->user()->sub_segment_id
+                    //     ]);
+                    // }
                 } catch (\Exception $e) {
                     Log::error('Error creating shipper segment log for shipment from public function corporate_store(Request $request)' . $shipment_id . ': ' . $e->getMessage());
                 }
@@ -4663,6 +4731,17 @@ class ShipperShipmentBookController extends Controller
         $shipment_details = '';
 
         $shipment = Shipment::where('id', $request->ids)->first();
+        $sub_segment_name = '-';
+        $sub_segment = DB::table('shipper_segment_logs')
+        ->leftJoin('sub_category_segments', 'sub_category_segments.id', 'shipper_segment_logs.sub_segment_id')
+        ->where('shipment_id', $shipment->id)
+        ->select('sub_category_segments.name')
+        ->first();
+
+        if ($sub_segment && $sub_segment->name)
+        {
+            $sub_segment_name = $sub_segment->name;
+        }
 
 
         if ($request->has('admin') || session('user_id') == $shipment->user_id) {
@@ -4879,6 +4958,9 @@ class ShipperShipmentBookController extends Controller
                         <tr>
                           <td class="color secondary border twice-bottom"><strong>Description</strong></td>
                           <td colspan="6" class="border twice-bottom">' . $item_description . '</td>
+
+                            <td class="color secondary border twice-bottom"><strong>Sub Segment</strong></td>
+                            <td colspan="4" class="border twice-bottom">' . $sub_segment_name . '</td>
                         </tr>
             ';
 
@@ -4901,7 +4983,10 @@ class ShipperShipmentBookController extends Controller
                         </tr>
                         <tr>
                           <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                          <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+                          <td colspan="2" class="border twice-bottom">' . $item->description . '</td>
+
+                            <td class="color secondary border twice-bottom"><strong>Sub Segment</strong></td>
+                            <td colspan="4" class="border twice-bottom">' . $sub_segment_name . '</td>
                         </tr>
             ';
 
@@ -4918,7 +5003,10 @@ class ShipperShipmentBookController extends Controller
                         </tr>
                         <tr>
                           <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                          <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+                          <td colspan="2" class="border twice-bottom">' . $item->description . '</td>
+
+                            <td class="color secondary border twice-bottom"><strong>Sub Segment</strong></td>
+                            <td colspan="4" class="border twice-bottom">' . $sub_segment_name . '</td>
                         </tr>
             ';
 
@@ -4939,7 +5027,10 @@ class ShipperShipmentBookController extends Controller
                         </tr>
                         <tr>
                           <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                          <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+                          <td colspan="2" class="border twice-bottom">' . $item->description . '</td>
+
+                            <td class="color secondary border twice-bottom"><strong>Sub Segment</strong></td>
+                            <td colspan="4" class="border twice-bottom">' . $sub_segment_name . '</td>
                         </tr>
               ';
                 }
