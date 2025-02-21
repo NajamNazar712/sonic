@@ -61,7 +61,7 @@
                         <th class="border-primary border-darken-1">Rider</th>
                         <th class="border-primary border-darken-1">Rider Type</th>
                         <th class="border-primary border-darken-1">Hub</th>
-                        <th class="border-primary border-darken-1">No. Of Shipment(s)</th>
+                        <th class="border-primary border-darken-1">Overall Shipment(s)</th>
                         <th class="border-primary border-darken-1">Excess Shipment(s)</th>
                         <th class="border-primary border-darken-1">Verify Shipment(s)</th>
                         <th class="border-primary border-darken-1">Unverified Shipment(s)</th>
@@ -234,6 +234,12 @@
                 }
             });
 
+            function cleanHTMLData(htmlString) {
+                let tempDiv = document.createElement("div");
+                tempDiv.innerHTML = htmlString;
+                return tempDiv.textContent || tempDiv.innerText || "";
+            }
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -253,7 +259,7 @@
                             head.push('Rider');
                             head.push('Rider Type');
                             head.push('Hub');
-                            head.push('No. Of Shipments');
+                            head.push('Overall Shipments');
                             head.push('Excess Shipments');
                             head.push('Verify Shipments');
                             head.push('Unverified Shipments');
@@ -262,7 +268,6 @@
 
                             $.each(result.data, function(index, values) {
                                 row = [];
-
 
                                 row.push(index + 1);
                                 row.push(values.vigilance_note_id_padded);
@@ -273,7 +278,7 @@
                                 row.push(values.total_shipments_count);
                                 row.push(values.excess_shipments_count);
                                 row.push(values.verify_shipments_count);
-                                row.push(values.unverified_shipments_link);
+                                row.push(cleanHTMLData(values.unverified_shipments_link));
                                 row.push(values.created_by);
                                 row.push(values.created_at);
 
@@ -324,9 +329,9 @@
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
                     { data:'rider_type' ,name: 'rt.name', class: 'align-middle rider_type'},
                     { data:'hub' ,name: 'h.name', class: 'align-middle hub'},
-                    { data:'shipments_count_link' ,name: 'vigilance_notes.total_shipments_count', class: 'align-middle shipments_count_link text-center'},
-                    { data:'excess_shipments_link' ,name: 'vigilance_notes.excess_shipments_count', class: 'align-middle excess_shipments_link text-center'},
-                    { data:'verify_shipments_link' ,name: 'vigilance_notes.verify_shipments_count', class: 'align-middle verify_shipments_link text-center'},
+                    { data:'shipments_count_link' ,name: 'shipments_count_link', class: 'align-middle shipments_count_link text-center'},
+                    { data:'excess_shipments_link' ,name: 'excess_shipments_link', class: 'align-middle excess_shipments_link text-center'},
+                    { data:'verify_shipments_link' ,name: 'verify_shipments_link', class: 'align-middle verify_shipments_link text-center'},
                     { data:'unverified_shipments_link' ,name: 'unverified_shipments_link', class: 'align-middle unverified_shipments_link text-center'},
                     { data:'created_by' ,name: 'cb.name', class: 'align-middle created_by'},
                     { data:'created_at' ,name: 'created_at', class: 'align-middle created_at'},
