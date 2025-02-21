@@ -76,9 +76,12 @@ class AutoDeliveryNoteVerify extends Command
                             ->distinct()
                             ->pluck('shipment_id')
                             ->toArray(); // Convert to array for chunking
-                        $chunkSize = 1000; // Adjust if needed
-                     
-                        foreach (array_chunk($deliveryNoteShipmentsId, $chunkSize) as $shipmentChunk) {                        
+                        $totalShipments = count($deliveryNoteShipmentsId); // Total number of shipments
+                        $chunkSize = 1000; // Define the chunk size
+
+                        for ($offset = 0; $offset < $totalShipments; $offset += $chunkSize) {
+                            // Get the current chunk of shipment IDs
+                            $shipmentChunk = array_slice($deliveryNoteShipmentsId, $offset, $chunkSize);
                             // Fetch all relevant shipments in one go 
                             $shipments = Shipment::whereIn('id', $shipmentChunk)
                                 ->whereNotIn('shipper_status_id', [30, 36, 37, 56])
