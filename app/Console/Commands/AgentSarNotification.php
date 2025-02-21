@@ -209,13 +209,12 @@ class AgentSarNotification extends Command
                 ->where('rv_shipment_tickets.updated_at','>=',$date.' 23:15:59')
                 ->where('rv_shipment_tickets.updated_at','<=', date('Y-m-d').' 23:14:59')
                 ->select('rv_shipment_tickets.*', 'shipments_journey.id as journeyId')->get();
-
-            if($haltShipper->isNotEmpty()){
-                foreach($haltShipper->toArray() as $insertData){
+                if($haltShipper->isNotEmpty()){
+                    foreach($haltShipper->toArray() as $insertData){
                     $data = [
                         'agent_id' => 346, // testing purpose
                         'shipment_id' => $insertData['shipment_id'],
-                        'shipments_journey_id' => $insertData['shipment_id'],
+                        'shipments_journey_id' => $insertData['journeyId'],
                         'rv_assign_agent_status_id' => 7,
                         'rv_assign_agent_sub_status_id' => null,
                         'rv_assign_agent_sub_status_id' => null,
@@ -225,7 +224,7 @@ class AgentSarNotification extends Command
                         'updated_by_id' => 346
                     ];
                     $this->rv_shipment_assign($data);
-                    ShipmentsJourneyController::add($insertData['shipment_id'], 65, 65, 9, NULL, $insertData['shipment_user_id'], 346);
+                    ShipmentsJourneyController::add($insertData['shipment_id'], 65, 65, $insertData['shipment_status_reason_id'], NULL, $insertData['shipment_user_id'], 346);
                 }
                 NotificationsController::send(220, $haltShipper);
                 Shipment::whereIn('id', array_column($haltShipper->toArray(), 'shipment_id'))->update(['shipper_status_id'=>65, 'consignee_status_id'=>65]);
