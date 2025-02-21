@@ -316,7 +316,7 @@
                     }
                 },
                 rowId: 'vigilance_note_id',
-                order: [[10, 'desc']],
+                order: [[11, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'vigilance_note_id_padded' ,name: 'vigilance_notes.id', class: 'align-middle text-center vigilance_note'},
