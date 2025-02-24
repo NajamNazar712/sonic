@@ -169,7 +169,10 @@ use App\Http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
 use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyBlacklisted;
 use App\RvShipmentTicket;
 use App\Http\Models\CrmCaseNatureRemark;
+use App\Http\Models\InternationalUserRate;
+use App\Models\InternationalZonalMarginColumn;
 use App\Models\WalletShipperSetting;
+use Illuminate\Support\Str;
 
 class GlobalSettingsController extends Controller
 {
@@ -10293,5 +10296,39 @@ class GlobalSettingsController extends Controller
             $wallet_shipper->save();
             return redirect()->back()->with('success', 'Shipper Enabled !');
         }
+    }
+
+    public function zonal_margin_column_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 681);
+       
+        $zoneColumn = collect(InternationalStandardDhlRate::first())
+            ->keys()
+            ->filter(function ($key) {
+                return Str::startsWith($key, 'zone_');
+            })
+            ->values();
+        $marginColumn = collect(InternationalUserRate::first())
+            ->keys()
+            ->filter(function ($key) {
+                return Str::startsWith($key, 'margin_');
+            })
+            ->values();
+        $ZoneMarginColumn = InternationalZonalMarginColumn::where('type',1)->first();
+       
+        return view('admin.settings.international.zonal_margin_column_mapping')->with(['zoneColumn' => $zoneColumn, 'marginColumn' => $marginColumn , 'selectedMarginColumns' => ($ZoneMarginColumn->margin_column ??  null), 'selectedZoneColumn'=> ($ZoneMarginColumn->zone_column??  null)]);
+    }
+
+    public function ZoneMarginColumnSubmit(Request $request)
+    {
+        InternationalZonalMarginColumn::updateOrCreate(
+            ['type' => 1],
+            [
+            'type' => 1,
+            'margin_column'=> implode(',', $request->margin_column),
+            'zone_column'=> implode(',', $request->zone_column),
+            ]
+        );
+        return redirect()->back()->with('success', 'Zone & Margin Column Added!');
     }
 }
