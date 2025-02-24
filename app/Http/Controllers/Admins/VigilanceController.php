@@ -735,17 +735,17 @@ class VigilanceController extends Controller
                     $query->from('delivery_note_shipments as dns')
                         ->leftJoin('vigilance_note_shipments as vns', 'dns.delivery_note_id', '=', 'vns.note_id')
                         ->where('vns.vigilance_note_id', $row->vigilance_note_id)
-                        ->select('dns.shipment_id', DB::raw('dns.created_at as shipment_created_at')) // ✅ Explicit alias
+                        ->select('dns.shipment_id', DB::raw('dns.created_at as shipment_created_at'))
             
                         ->union(
                             DB::table('return_note_shipments as rns')
                                 ->leftJoin('vigilance_note_shipments as vns', 'rns.return_note_id', '=', 'vns.note_id')
                                 ->join('return_notes as rn', 'rns.return_note_id', '=', 'rn.id')
                                 ->where('vns.vigilance_note_id', $row->vigilance_note_id)
-                                ->select('rns.shipment_id', DB::raw('rn.created_at as shipment_created_at')) // ✅ Same alias
+                                ->select('rns.shipment_id', DB::raw('rn.created_at as shipment_created_at'))
                         );
-                }, 'union_table') // ✅ Alias for the subquery
-                ->whereBetween('shipment_created_at', [$from, $to]) // ✅ Single whereBetween applied after UNION
+                }, 'union_table')
+                ->whereBetween('shipment_created_at', [$from, $to])
                 ->distinct()
                 ->count('shipment_id');
             
@@ -754,15 +754,13 @@ class VigilanceController extends Controller
                     : 0;
             })
             
-            
-            
             ->addColumn('verify_shipments_link', function ($row) use ($from, $to) {
                 $verified_shipments = DB::table(function ($query) use ($row) {
                     $query->from('vigilance_note_shipments as vns')
                         ->leftJoin('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'vns.note_id')
                         ->where('vns.vigilance_note_id', $row->vigilance_note_id)
                         ->where('vns.verification_type', 1)
-                        ->select('vns.id', DB::raw('dns.created_at as shipment_created_at')) // ✅ Explicit alias
+                        ->select('vns.id', DB::raw('dns.created_at as shipment_created_at'))
                 
                         ->union(
                             DB::table('vigilance_note_shipments as vns')
@@ -770,32 +768,41 @@ class VigilanceController extends Controller
                                 ->leftJoin('return_notes as rn', 'rns.return_note_id', '=', 'rn.id')
                                 ->where('vns.vigilance_note_id', $row->vigilance_note_id)
                                 ->where('vns.verification_type', 1)
-                                ->select('vns.id', DB::raw('rn.created_at as shipment_created_at')) // ✅ Same alias
+                                ->select('vns.id', DB::raw('rn.created_at as shipment_created_at'))
                         );
-                }, 'union_table') // ✅ Assign alias to the subquery
-                ->whereBetween('shipment_created_at', [$from, $to]) // ✅ Now we can reference it
+                }, 'union_table')
+                ->whereBetween('shipment_created_at', [$from, $to])
                 ->count(DB::raw('DISTINCT id'));
-                
 
                 return $verified_shipments != 0 
                     ? '<button class="btn btn-sm btn-outline-info align-middle" noteId="'. $row->vigilance_note_id .'">' . $verified_shipments . '</button>' 
                     : 0;
             })
-            
-            ->addColumn('excess_shipments_link', function ($row) use ($from, $to) {
-                    $excess_shipments = DB::table('vigilance_note_shipments as vns')
-                    ->leftJoin('delivery_note_shipments as dns', 'dns.shipment_id', '=', 'vns.shipment_id')
-                    ->where('vns.vigilance_note_id', $row->vigilance_note_id)
-                    ->whereBetween('dns.created_at', [$from, $to])
-                    ->where('vns.verification_type', 2) 
-                    ->count(DB::raw('DISTINCT vns.id'));
 
-                if ($excess_shipments != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle" noteId="'. $row->vigilance_note_id .'">' . $excess_shipments . '</button>';
-                } else {
-                    return 0;
-                }
-            })
+            ->addColumn('excess_shipments_link', function ($row) use ($from, $to) {
+                $excess_shipments = DB::table(function ($query) use ($row, $from, $to) {
+                    $query->from('vigilance_note_shipments as vns')
+                        ->leftJoin('delivery_note_shipments as dns', 'dns.shipment_id', '=', 'vns.shipment_id')
+                        ->where('vns.vigilance_note_id', $row->vigilance_note_id)
+                        ->whereBetween('dns.created_at', [$from, $to])
+                        ->where('vns.verification_type', 2)
+                        ->select('vns.id')
+                    ->union(
+                        DB::table('vigilance_note_shipments as vns')
+                            ->leftJoin('return_note_shipments as rns', 'rns.shipment_id', '=', 'vns.shipment_id')
+                            ->join('return_notes as rn', 'rns.return_note_id', '=', 'rn.id')
+                            ->where('vns.vigilance_note_id', $row->vigilance_note_id)
+                            ->whereBetween('rn.created_at', [$from, $to])
+                            ->where('vns.verification_type', 2)
+                            ->select('vns.id')
+                    );
+                }, 'union_table')
+                ->count(DB::raw('DISTINCT id'));
+            
+                return ($excess_shipments != 0) 
+                    ? '<button class="btn btn-sm btn-outline-info align-middle" noteId="'. $row->vigilance_note_id .'">' . $excess_shipments . '</button>'
+                    : 0;
+            })            
             
             ->addColumn('unverified_shipments_link', function ($row) use ($from, $to) {
                 $total_shipments = DB::table('delivery_note_shipments as dns')
@@ -823,106 +830,198 @@ class VigilanceController extends Controller
 
             ->filterColumn('shipments_count_link', function ($query, $keyword) use ($from, $to) {
                 $query->whereRaw("
-                    (SELECT COUNT(DISTINCT dns.shipment_id) 
-                    FROM delivery_note_shipments dns
-                    LEFT JOIN vigilance_note_shipments vns 
-                        ON dns.delivery_note_id = vns.note_id
-                    WHERE vns.vigilance_note_id = vigilance_notes.id
-                    AND dns.created_at BETWEEN ? AND ?) = ?", [$from, $to, $keyword]);
-            })
+                    (SELECT COUNT(DISTINCT shipment_id) FROM (
+                        SELECT dns.shipment_id, dns.created_at, vns.vigilance_note_id
+                        FROM delivery_note_shipments dns
+                        LEFT JOIN vigilance_note_shipments vns ON dns.delivery_note_id = vns.note_id
+                        
+                        UNION
             
+                        SELECT rns.shipment_id, rn.created_at, vns.vigilance_note_id
+                        FROM return_note_shipments rns
+                        LEFT JOIN return_notes rn ON rns.return_note_id = rn.id
+                        LEFT JOIN vigilance_note_shipments vns ON rn.id = vns.note_id
+                    ) AS shipments 
+                    WHERE shipments.vigilance_note_id = vigilance_notes.id 
+                    AND shipments.created_at BETWEEN ? AND ?) = ?", [$from, $to, $keyword]);
+            })
+
             ->filterColumn('verify_shipments_link', function ($query, $keyword) use ($from, $to) {
                 $query->whereRaw("
-                    (SELECT COUNT(DISTINCT vns.id) 
-                    FROM vigilance_note_shipments vns
-                    LEFT JOIN delivery_note_shipments dns 
-                        ON dns.delivery_note_id = vns.note_id
-                    WHERE vns.vigilance_note_id = vigilance_notes.id
-                    AND vns.verification_type = 1
-                    AND dns.created_at BETWEEN ? AND ?) = ?", [$from, $to, $keyword]);
+                    (SELECT COUNT(DISTINCT id) FROM (
+                        SELECT vns.id, dns.created_at, vns.vigilance_note_id
+                        FROM vigilance_note_shipments vns
+                        LEFT JOIN delivery_note_shipments dns ON dns.delivery_note_id = vns.note_id
+                        WHERE vns.verification_type = 1
+                        
+                        UNION
+                        
+                        SELECT vns.id, rn.created_at, vns.vigilance_note_id
+                        FROM vigilance_note_shipments vns
+                        LEFT JOIN return_note_shipments rns ON rns.return_note_id = vns.note_id
+                        LEFT JOIN return_notes rn ON rns.return_note_id = rn.id
+                        WHERE vns.verification_type = 1
+                    ) AS shipments
+                    WHERE shipments.vigilance_note_id = vigilance_notes.id 
+                    AND shipments.created_at BETWEEN ? AND ?) = ?", [$from, $to, $keyword]);
             })
-            
+
             ->filterColumn('excess_shipments_link', function ($query, $keyword) use ($from, $to) {
                 $query->whereRaw("
-                    (SELECT COUNT(DISTINCT vns.id) 
-                    FROM vigilance_note_shipments vns
-                    LEFT JOIN delivery_note_shipments dns 
-                        ON dns.shipment_id = vns.shipment_id
-                    WHERE vns.vigilance_note_id = vigilance_notes.id
-                    AND vns.verification_type = 2
-                    AND dns.created_at BETWEEN ? AND ?) = ?", [$from, $to, $keyword]);
+                    (SELECT COUNT(DISTINCT id) FROM (
+                        SELECT vns.id, dns.created_at, vns.vigilance_note_id
+                        FROM vigilance_note_shipments vns
+                        LEFT JOIN delivery_note_shipments dns ON dns.shipment_id = vns.shipment_id
+                        WHERE vns.verification_type = 2
+                        
+                        UNION
+                        
+                        SELECT vns.id, rn.created_at, vns.vigilance_note_id
+                        FROM vigilance_note_shipments vns
+                        LEFT JOIN return_note_shipments rns ON rns.shipment_id = vns.shipment_id
+                        LEFT JOIN return_notes rn ON rns.return_note_id = rn.id
+                        WHERE vns.verification_type = 2
+                    ) AS shipments
+                    WHERE shipments.vigilance_note_id = vigilance_notes.id 
+                    AND shipments.created_at BETWEEN ? AND ?) = ?", [$from, $to, $keyword]);
             })
-            
+
             ->filterColumn('unverified_shipments_link', function ($query, $keyword) use ($from, $to) {
                 $query->whereRaw("
-                    (SELECT COUNT(DISTINCT dns.shipment_id) 
-                    FROM delivery_note_shipments dns
-                    LEFT JOIN vigilance_note_shipments vns 
-                        ON dns.delivery_note_id = vns.note_id
-                    WHERE vns.vigilance_note_id = vigilance_notes.id
-                    AND dns.created_at BETWEEN ? AND ?) 
-                    - 
-                    (SELECT COUNT(DISTINCT vns.id) 
-                    FROM vigilance_note_shipments vns
-                    LEFT JOIN delivery_note_shipments dns 
-                        ON dns.delivery_note_id = vns.note_id
-                    WHERE vns.vigilance_note_id = vigilance_notes.id
-                    AND vns.verification_type = 1
-                    AND dns.created_at BETWEEN ? AND ?) = ?", [$from, $to, $from, $to, $keyword]);
+                    (
+                        SELECT COUNT(DISTINCT shipment_id) FROM (
+                            SELECT dns.shipment_id, dns.created_at, vns.vigilance_note_id
+                            FROM delivery_note_shipments dns
+                            LEFT JOIN vigilance_note_shipments vns ON dns.delivery_note_id = vns.note_id
+                            
+                            UNION
+                            
+                            SELECT rns.shipment_id, rn.created_at, vns.vigilance_note_id
+                            FROM return_note_shipments rns
+                            LEFT JOIN return_notes rn ON rns.return_note_id = rn.id
+                            LEFT JOIN vigilance_note_shipments vns ON rn.id = vns.note_id
+                        ) AS shipments
+                        WHERE shipments.vigilance_note_id = vigilance_notes.id 
+                        AND shipments.created_at BETWEEN ? AND ?
+                    )
+                    -
+                    (
+                        SELECT COUNT(DISTINCT id) FROM (
+                            SELECT vns.id, dns.created_at, vns.vigilance_note_id
+                            FROM vigilance_note_shipments vns
+                            LEFT JOIN delivery_note_shipments dns ON dns.delivery_note_id = vns.note_id
+                            WHERE vns.verification_type = 1
+                            
+                            UNION
+                            
+                            SELECT vns.id, rn.created_at, vns.vigilance_note_id
+                            FROM vigilance_note_shipments vns
+                            LEFT JOIN return_note_shipments rns ON rns.return_note_id = vns.note_id
+                            LEFT JOIN return_notes rn ON rns.return_note_id = rn.id
+                            WHERE vns.verification_type = 1
+                        ) AS verified_shipments
+                        WHERE verified_shipments.vigilance_note_id = vigilance_notes.id 
+                        AND verified_shipments.created_at BETWEEN ? AND ?
+                    ) = ?", [$from, $to, $from, $to, $keyword]);
             })
-            
+
             ->orderColumn('shipments_count_link', function ($query, $direction) use ($from, $to) {
                 $query->orderByRaw("
-                    (SELECT COUNT(DISTINCT dns.shipment_id) 
-                    FROM delivery_note_shipments dns
-                    LEFT JOIN vigilance_note_shipments vns 
-                        ON dns.delivery_note_id = vns.note_id
-                    WHERE vns.vigilance_note_id = vigilance_notes.id
-                    AND dns.created_at BETWEEN ? AND ?) $direction", [$from, $to]);
+                    (SELECT COUNT(DISTINCT shipment_id) FROM (
+                        SELECT dns.shipment_id, dns.created_at, vns.vigilance_note_id
+                        FROM delivery_note_shipments dns
+                        LEFT JOIN vigilance_note_shipments vns ON dns.delivery_note_id = vns.note_id
+                        
+                        UNION
+                        
+                        SELECT rns.shipment_id, rn.created_at, vns.vigilance_note_id
+                        FROM return_note_shipments rns
+                        LEFT JOIN return_notes rn ON rns.return_note_id = rn.id
+                        LEFT JOIN vigilance_note_shipments vns ON rn.id = vns.note_id
+                    ) AS shipments
+                    WHERE shipments.vigilance_note_id = vigilance_notes.id 
+                    AND shipments.created_at BETWEEN ? AND ?) $direction", [$from, $to]);
             })
-            
+
             ->orderColumn('verify_shipments_link', function ($query, $direction) use ($from, $to) {
                 $query->orderByRaw("
-                    (SELECT COUNT(DISTINCT vns.id) 
-                    FROM vigilance_note_shipments vns
-                    LEFT JOIN delivery_note_shipments dns 
-                        ON dns.delivery_note_id = vns.note_id
-                    WHERE vns.vigilance_note_id = vigilance_notes.id
-                    AND vns.verification_type = 1
-                    AND dns.created_at BETWEEN ? AND ?) $direction", [$from, $to]);
+                    (SELECT COUNT(DISTINCT id) FROM (
+                        SELECT vns.id, dns.created_at, vns.vigilance_note_id
+                        FROM vigilance_note_shipments vns
+                        LEFT JOIN delivery_note_shipments dns ON dns.delivery_note_id = vns.note_id
+                        WHERE vns.verification_type = 1
+                        
+                        UNION
+                        
+                        SELECT vns.id, rn.created_at, vns.vigilance_note_id
+                        FROM vigilance_note_shipments vns
+                        LEFT JOIN return_note_shipments rns ON rns.return_note_id = vns.note_id
+                        LEFT JOIN return_notes rn ON rns.return_note_id = rn.id
+                        WHERE vns.verification_type = 1
+                    ) AS shipments
+                    WHERE shipments.vigilance_note_id = vigilance_notes.id 
+                    AND shipments.created_at BETWEEN ? AND ?) $direction", [$from, $to]);
             })
-            
+
             ->orderColumn('excess_shipments_link', function ($query, $direction) use ($from, $to) {
                 $query->orderByRaw("
-                    (SELECT COUNT(DISTINCT vns.id) 
-                    FROM vigilance_note_shipments vns
-                    LEFT JOIN delivery_note_shipments dns 
-                        ON dns.shipment_id = vns.shipment_id
-                    WHERE vns.vigilance_note_id = vigilance_notes.id
-                    AND vns.verification_type = 2
-                    AND dns.created_at BETWEEN ? AND ?) $direction", [$from, $to]);
-            })
-            
+                    (SELECT COUNT(DISTINCT id) FROM (
+                        SELECT vns.id, dns.created_at, vns.vigilance_note_id
+                        FROM vigilance_note_shipments vns
+                        LEFT JOIN delivery_note_shipments dns ON dns.shipment_id = vns.shipment_id
+                        WHERE vns.verification_type = 2
+                        
+                        UNION
+                        
+                        SELECT vns.id, rn.created_at, vns.vigilance_note_id
+                        FROM vigilance_note_shipments vns
+                        LEFT JOIN return_note_shipments rns ON rns.shipment_id = vns.shipment_id
+                        LEFT JOIN return_notes rn ON rns.return_note_id = rn.id
+                        WHERE vns.verification_type = 2
+                    ) AS shipments
+                    WHERE shipments.vigilance_note_id = vigilance_notes.id 
+                    AND shipments.created_at BETWEEN ? AND ?) $direction", [$from, $to]);
+            })            
+
             ->orderColumn('unverified_shipments_link', function ($query, $direction) use ($from, $to) {
                 $query->orderByRaw("
-                    ((SELECT COUNT(DISTINCT dns.shipment_id) 
-                    FROM delivery_note_shipments dns
-                    LEFT JOIN vigilance_note_shipments vns 
-                        ON dns.delivery_note_id = vns.note_id
-                    WHERE vns.vigilance_note_id = vigilance_notes.id
-                    AND dns.created_at BETWEEN ? AND ?) 
-                    - 
-                    (SELECT COUNT(DISTINCT vns.id) 
-                    FROM vigilance_note_shipments vns
-                    LEFT JOIN delivery_note_shipments dns 
-                        ON dns.delivery_note_id = vns.note_id
-                    WHERE vns.vigilance_note_id = vigilance_notes.id
-                    AND vns.verification_type = 1
-                    AND dns.created_at BETWEEN ? AND ?)) $direction", [$from, $to, $from, $to]);
-            })
-            
+                    (   
+                        (SELECT COUNT(DISTINCT shipment_id) FROM (
+                            SELECT dns.shipment_id, dns.created_at, vns.vigilance_note_id
+                            FROM delivery_note_shipments dns
+                            LEFT JOIN vigilance_note_shipments vns ON dns.delivery_note_id = vns.note_id
+                            
+                            UNION
+                            
+                            SELECT rns.shipment_id, rn.created_at, vns.vigilance_note_id
+                            FROM return_note_shipments rns
+                            LEFT JOIN return_notes rn ON rns.return_note_id = rn.id
+                            LEFT JOIN vigilance_note_shipments vns ON rn.id = vns.note_id
+                        ) AS total_shipments 
+                        WHERE total_shipments.vigilance_note_id = vigilance_notes.id 
+                        AND total_shipments.created_at BETWEEN ? AND ?)
+                        
+                        -
+                        
+                        (SELECT COUNT(DISTINCT id) FROM (
+                            SELECT vns.id, dns.created_at, vns.vigilance_note_id
+                            FROM vigilance_note_shipments vns
+                            LEFT JOIN delivery_note_shipments dns ON dns.delivery_note_id = vns.note_id
+                            WHERE vns.verification_type = 1
+                            
+                            UNION
+                            
+                            SELECT vns.id, rn.created_at, vns.vigilance_note_id
+                            FROM vigilance_note_shipments vns
+                            LEFT JOIN return_note_shipments rns ON rns.return_note_id = vns.note_id
+                            LEFT JOIN return_notes rn ON rns.return_note_id = rn.id
+                            WHERE vns.verification_type = 1
+                        ) AS verified_shipments 
+                        WHERE verified_shipments.vigilance_note_id = vigilance_notes.id 
+                        AND verified_shipments.created_at BETWEEN ? AND ?)
+                    ) $direction", [$from, $to, $from, $to]);
+            });
 
-            ;
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $vigilance->whereBetween('vigilance_notes.created_at', [$from, $to]);
         }
