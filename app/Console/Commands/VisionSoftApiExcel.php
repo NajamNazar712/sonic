@@ -40,8 +40,8 @@ class VisionSoftApiExcel extends Command
      */
     public function handle()
     {
-        $startDate = Carbon::now()->subDay();
-        $endDate = Carbon::now()->subDay();
+        $startDate = Carbon::now()->startOfMonth();
+        $endDate = Carbon::now();
 
         for ($start = $startDate->copy(); $start->lte($endDate); $start->addDay()) {
             $startOfDay = $start->copy()->startOfDay()->format('Y-m-d 00:00:01');
