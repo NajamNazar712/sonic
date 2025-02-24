@@ -731,32 +731,55 @@ class VigilanceController extends Controller
             })
 
             ->addColumn('shipments_count_link', function ($row) use ($from, $to) {
-                $shipments_count = DB::table('delivery_note_shipments as dns')
-                    ->leftJoin('vigilance_note_shipments as vns', 'dns.delivery_note_id', '=', 'vns.note_id')
-                    ->where('vns.vigilance_note_id', $row->vigilance_note_id)
-                    ->whereBetween('dns.created_at', [$from, $to])
-                    ->count(DB::raw('DISTINCT dns.shipment_id'));
-
-                if ($shipments_count != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle" noteId="'. $row->vigilance_note_id .'">' . $shipments_count . '</button>';
-                } else {
-                    return 0;
-                }
+                $shipments_count = DB::table(function ($query) use ($row) {
+                    $query->from('delivery_note_shipments as dns')
+                        ->leftJoin('vigilance_note_shipments as vns', 'dns.delivery_note_id', '=', 'vns.note_id')
+                        ->where('vns.vigilance_note_id', $row->vigilance_note_id)
+                        ->select('dns.shipment_id', DB::raw('dns.created_at as shipment_created_at')) // ✅ Explicit alias
+            
+                        ->union(
+                            DB::table('return_note_shipments as rns')
+                                ->leftJoin('vigilance_note_shipments as vns', 'rns.return_note_id', '=', 'vns.note_id')
+                                ->join('return_notes as rn', 'rns.return_note_id', '=', 'rn.id')
+                                ->where('vns.vigilance_note_id', $row->vigilance_note_id)
+                                ->select('rns.shipment_id', DB::raw('rn.created_at as shipment_created_at')) // ✅ Same alias
+                        );
+                }, 'union_table') // ✅ Alias for the subquery
+                ->whereBetween('shipment_created_at', [$from, $to]) // ✅ Single whereBetween applied after UNION
+                ->distinct()
+                ->count('shipment_id');
+            
+                return $shipments_count != 0 
+                    ? '<button class="btn btn-sm btn-outline-info align-middle" noteId="'. $row->vigilance_note_id .'">' . $shipments_count . '</button>' 
+                    : 0;
             })
             
+            
+            
             ->addColumn('verify_shipments_link', function ($row) use ($from, $to) {
-                $verified_shipments = DB::table('vigilance_note_shipments as vns')
-                    ->leftJoin('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'vns.note_id')
-                    ->where('vns.vigilance_note_id', $row->vigilance_note_id)
-                    ->where('vns.verification_type', 1)
-                    ->whereBetween('dns.created_at', [$from, $to])
-                    ->count(DB::raw('DISTINCT vns.id'));
+                $verified_shipments = DB::table(function ($query) use ($row) {
+                    $query->from('vigilance_note_shipments as vns')
+                        ->leftJoin('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'vns.note_id')
+                        ->where('vns.vigilance_note_id', $row->vigilance_note_id)
+                        ->where('vns.verification_type', 1)
+                        ->select('vns.id', DB::raw('dns.created_at as shipment_created_at')) // ✅ Explicit alias
+                
+                        ->union(
+                            DB::table('vigilance_note_shipments as vns')
+                                ->leftJoin('return_note_shipments as rns', 'rns.return_note_id', '=', 'vns.note_id')
+                                ->leftJoin('return_notes as rn', 'rns.return_note_id', '=', 'rn.id')
+                                ->where('vns.vigilance_note_id', $row->vigilance_note_id)
+                                ->where('vns.verification_type', 1)
+                                ->select('vns.id', DB::raw('rn.created_at as shipment_created_at')) // ✅ Same alias
+                        );
+                }, 'union_table') // ✅ Assign alias to the subquery
+                ->whereBetween('shipment_created_at', [$from, $to]) // ✅ Now we can reference it
+                ->count(DB::raw('DISTINCT id'));
+                
 
-                    if ($verified_shipments != 0) {
-                        return '<button class="btn btn-sm btn-outline-info align-middle" noteId="'. $row->vigilance_note_id .'">' . $verified_shipments . '</button>';
-                    } else {
-                        return 0;
-                    }
+                return $verified_shipments != 0 
+                    ? '<button class="btn btn-sm btn-outline-info align-middle" noteId="'. $row->vigilance_note_id .'">' . $verified_shipments . '</button>' 
+                    : 0;
             })
             
             ->addColumn('excess_shipments_link', function ($row) use ($from, $to) {
@@ -935,20 +958,34 @@ class VigilanceController extends Controller
         $to_date = $request->input('to_date');
         $vigilance_note_id = $request->input('vigilance_note_id');
 
-        $dncc_shipments = DeliveryNoteShipment::join('vigilance_note_shipments as vns', 'delivery_note_shipments.delivery_note_id', '=', 'vns.note_id')
-        ->where('vns.vigilance_note_id', $vigilance_note_id)
-        ->whereBetween('delivery_note_shipments.created_at', [$from_date, $to_date])
+        $dncc_shipments = DB::table(function ($query) use ($vigilance_note_id, $from_date, $to_date) {
+            $query->from('delivery_note_shipments as dns')
+                ->join('vigilance_note_shipments as vns', 'dns.delivery_note_id', '=', 'vns.note_id')
+                ->where('vns.vigilance_note_id', $vigilance_note_id)
+                ->select('dns.delivery_note_id as note_id', 'dns.shipment_id', 'dns.created_at')
+                
+                ->union(
+                    DB::table('return_note_shipments as rns')
+                        ->join('vigilance_note_shipments as vns', 'rns.return_note_id', '=', 'vns.note_id')
+                        ->join('return_notes as rn', 'rns.return_note_id', '=', 'rn.id')
+                        ->where('vns.vigilance_note_id', $vigilance_note_id)
+                        ->select('rns.return_note_id as note_id', 'rns.shipment_id', 'rn.created_at')
+                );
+        })
+        ->whereBetween('created_at', [$from_date, $to_date])
         ->distinct()
-        ->select('delivery_note_shipments.delivery_note_id', 'delivery_note_shipments.shipment_id')
         ->get();
+        
+
+
         $data = [];
 
         if (!empty($dncc_shipments)) {
             foreach ($dncc_shipments as $dncc_shipment) {
-                if (array_key_exists($dncc_shipment->delivery_note_id, $data)) {
-                    $data[$dncc_shipment->delivery_note_id][] = $dncc_shipment->shipment_id;
+                if (array_key_exists($dncc_shipment->note_id, $data)) {
+                    $data[$dncc_shipment->note_id][] = $dncc_shipment->shipment_id;
                 } else {
-                    $data[$dncc_shipment->delivery_note_id] = [$dncc_shipment->shipment_id];
+                    $data[$dncc_shipment->note_id] = [$dncc_shipment->shipment_id];
                 }
             }
 
@@ -973,13 +1010,27 @@ class VigilanceController extends Controller
         $from_date = $request->input('from_date');
         $to_date = $request->input('to_date');
 
-        $dncc_shipments = DeliveryNoteShipment::Leftjoin('vigilance_note_shipments as vns', 'delivery_note_shipments.shipment_id', '=', 'vns.shipment_id')
-        ->where('vns.vigilance_note_id', $vigilance_note_id)
-        ->where('vns.verification_type', 2)
-        ->whereBetween('delivery_note_shipments.created_at', [$from_date, $to_date])
+        $dncc_shipments = DB::table(function ($query) use ($from_date, $to_date, $vigilance_note_id) {
+            $query->from('delivery_note_shipments as dns')
+                ->leftJoin('vigilance_note_shipments as vns', 'dns.shipment_id', '=', 'vns.shipment_id')
+                ->where('vns.vigilance_note_id', $vigilance_note_id)
+                ->where('vns.verification_type', 2)
+                ->whereBetween('dns.created_at', [$from_date, $to_date])
+                ->select('dns.shipment_id')
+                ->union(
+                    DB::table('return_note_shipments as rns')
+                        ->join('vigilance_note_shipments as vns', 'rns.return_note_id', '=', 'vns.note_id')
+                        ->join('return_notes as rn', 'rns.return_note_id', '=', 'rn.id')
+                        ->where('vns.vigilance_note_id', $vigilance_note_id)
+                        ->where('vns.verification_type', 2)
+                        ->whereBetween('rn.created_at', [$from_date, $to_date])
+                        ->select('rns.shipment_id')
+                );
+        })
         ->distinct()
-        ->pluck('delivery_note_shipments.shipment_id')
+        ->pluck('shipment_id')
         ->toArray();
+        
 
         $data = array();
         if (!empty($dncc_shipments)) {
@@ -995,20 +1046,39 @@ class VigilanceController extends Controller
         $to_date = $request->input('to_date');
         $vigilance_note_id = $request->input('vigilance_note_id');
 
-        $dncc_shipments = DeliveryNoteShipment::join('vigilance_note_shipments as vns', 'delivery_note_shipments.delivery_note_id', '=', 'vns.note_id')
-        ->where('vns.vigilance_note_id', $vigilance_note_id)
-        ->where('vns.verification_type', 1)
-        ->whereBetween('delivery_note_shipments.created_at', [$from_date, $to_date])
-        ->select('delivery_note_shipments.delivery_note_id', 'vns.shipment_id')
+        $dncc_shipments = DB::table(function ($query) use ($from_date, $to_date, $vigilance_note_id) {
+            $query->from('delivery_note_shipments as dns')
+                ->join('vigilance_note_shipments as vns', 'dns.delivery_note_id', '=', 'vns.note_id')
+                ->where('vns.vigilance_note_id', $vigilance_note_id)
+                ->where('vns.verification_type', 1)
+                ->whereBetween('dns.created_at', [$from_date, $to_date])
+                ->select(
+                    'dns.delivery_note_id as note_id',
+                    'vns.shipment_id',
+                    DB::raw("'delivery' as source") // Identify source table
+                )
+                ->union(
+                    DB::table('return_note_shipments as rns')
+                        ->join('vigilance_note_shipments as vns', 'rns.return_note_id', '=', 'vns.note_id')
+                        ->join('return_notes as rn', 'rns.return_note_id', '=', 'rn.id')
+                        ->where('vns.vigilance_note_id', $vigilance_note_id)
+                        ->where('vns.verification_type', 1)
+                        ->whereBetween('rn.created_at', [$from_date, $to_date])
+                        ->select(
+                            'rns.return_note_id as note_id',
+                            'vns.shipment_id',
+                            DB::raw("'return' as source") // Identify source table
+                        )
+                );
+        })
         ->distinct()
         ->get();
-
         $data = [];
 
         if ($dncc_shipments->isNotEmpty()) {
             // Group shipment IDs by delivery_note_id
             foreach ($dncc_shipments as $shipment) {
-                $data[$shipment->delivery_note_id][] = $shipment->shipment_id;
+                $data[$shipment->note_id][] = $shipment->shipment_id;
             }
         
             if (!empty($data)) {
@@ -1052,14 +1122,35 @@ class VigilanceController extends Controller
             ->toArray();
     
         // Fetch unverified shipments using JOIN to avoid fetching unnecessary data separately
-        $unverified_shipments = DeliveryNoteShipment::join('vigilance_note_shipments as vns', 'delivery_note_shipments.delivery_note_id', '=', 'vns.note_id')
-            ->where('vns.vigilance_note_id', $vigilance_note_id)
-            ->whereBetween('delivery_note_shipments.created_at', [$from_date, $to_date])
-            ->whereNotIn('delivery_note_shipments.shipment_id', $verified_shipment_ids)
-            ->select('delivery_note_shipments.delivery_note_id', 'delivery_note_shipments.shipment_id')
-            ->get()
-            ->groupBy('delivery_note_id');
+        $unverified_shipments = DB::table(function ($query) use ($vigilance_note_id) {
+            $query->from('delivery_note_shipments')
+                ->join('vigilance_note_shipments as vns', 'delivery_note_shipments.delivery_note_id', '=', 'vns.note_id')
+                ->where('vns.vigilance_note_id', $vigilance_note_id)
+                ->select(
+                    'delivery_note_shipments.delivery_note_id as note_id',
+                    'delivery_note_shipments.shipment_id',
+                    DB::raw("'delivery' as source"),
+                    'delivery_note_shipments.created_at'
+                )
+                ->union(
+                    DB::table('return_note_shipments')
+                        ->join('return_notes', 'return_note_shipments.return_note_id', '=', 'return_notes.id')
+                        ->join('vigilance_note_shipments as vns', 'return_notes.id', '=', 'vns.note_id')
+                        ->where('vns.vigilance_note_id', $vigilance_note_id)
+                        ->select(
+                            'return_note_shipments.return_note_id as note_id', 
+                            'return_note_shipments.shipment_id',
+                            DB::raw("'return' as source"),
+                            'return_notes.created_at'
+                        )
+                );
+        }, 'union_table') // ✅ Alias for the subquery
+        ->whereBetween('created_at', [$from_date, $to_date])
+        ->whereNotIn('shipment_id', $verified_shipment_ids)
+        ->get()
+        ->groupBy('note_id');
     
+
         // If no unverified shipments found
         if ($unverified_shipments->isEmpty()) {
             return ['status' => 0, 'success' => 'No Shipments Found', 'shipments' => false];
