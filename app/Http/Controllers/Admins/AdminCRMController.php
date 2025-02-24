@@ -435,7 +435,7 @@ class AdminCRMController extends Controller
                             }
                         }
                     }
-                    if($nature_id == 1){
+                    if($nature_id == 1 && !empty($request->case_nature_complainant)  && !empty($request->complainant_phone)){
                         $this->updateComplaintPhone($crm_request_padded_id ?? CrmRequest::max('id'), $request->case_nature_complainant, $request->complainant_phone);
                     }
                     return ['status' => 1, 'success' => $message ?? '', 'flag' => $flag, 'already_existed_shipments' => $present_shipments, 'cannot_change' => $cannot_change];
@@ -561,7 +561,7 @@ class AdminCRMController extends Controller
                                             }
                                         }
                                         $crm_request_padded_id = str_pad($crm_request_padded_id, 6, 0, STR_PAD_LEFT);
-                                        if($nature_id == 1){
+                                        if($nature_id == 1 && !empty($request->case_nature_complainant)  && !empty($request->complainant_phone)){
                                             $this->updateComplaintPhone($crm_request_padded_id ?? CrmRequest::max('id'), $request->case_nature_complainant, $request->complainant_phone);
                                         }
                                         return ['status' => 1, 'success' => $message ?? 'Request ('. $crm_request_padded_id .') successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
@@ -660,7 +660,7 @@ class AdminCRMController extends Controller
                                         }
                                     }
                                     $crm_request_padded_id = str_pad($crm_request_padded_id, 6, 0, STR_PAD_LEFT);
-                                    if($nature_id == 1){
+                                    if($nature_id == 1 && !empty($request->case_nature_complainant)  && !empty($request->complainant_phone)){
                                         $this->updateComplaintPhone($crm_request_padded_id ?? CrmRequest::max('id'), $request->case_nature_complainant, $request->complainant_phone);
                                     }
                                     return ['status' => 1, 'success' => $message ?? 'Request ('. $crm_request_padded_id .') successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
@@ -771,7 +771,7 @@ class AdminCRMController extends Controller
                                         }
                                     }
                                     $crm_request_padded_id = str_pad($crm_request_padded_id, 6, 0, STR_PAD_LEFT);
-                                    if($nature_id == 1){
+                                    if($nature_id == 1 && !empty($request->case_nature_complainant)  && !empty($request->complainant_phone)){
                                         $this->updateComplaintPhone($crm_request_padded_id ?? CrmRequest::max('id'), $request->case_nature_complainant, $request->complainant_phone);
                                     }
                                     return ['status' => 1, 'success' => $message ?? 'Request ('. $crm_request_padded_id .') successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
@@ -871,7 +871,7 @@ class AdminCRMController extends Controller
                                     }
                                 }
                                 $crm_request_padded_id = str_pad($crm_request_padded_id, 6, 0, STR_PAD_LEFT);
-                                if($nature_id == 1){
+                                if($nature_id == 1 && !empty($request->case_nature_complainant)  && !empty($request->complainant_phone)){
                                     $this->updateComplaintPhone($crm_request_padded_id ?? CrmRequest::max('id'), $request->case_nature_complainant, $request->complainant_phone);
                                 }
                                 return ['status' => 1, 'success' => $message ?? 'Request ('. $crm_request_padded_id .') successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
@@ -7336,7 +7336,8 @@ class AdminCRMController extends Controller
 
     public static function updateComplaintPhone($crm_request_padded_id, $caseNatureComplainant, $complainantPhone)
     {
-        $crmRequest = CrmRequest::find( (int) $crm_request_padded_id);
+        $id = (int) $crm_request_padded_id;
+        $crmRequest = CrmRequest::find($id);
         if ($crmRequest) {
             $crmRequest->case_nature_complainant = $caseNatureComplainant;
             $crmRequest->complainant_phone = $complainantPhone;

@@ -4826,8 +4826,8 @@ class APIController extends Controller
                         if ($shipment->exists()) {
                             $shipment = $shipment->first();
                             $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description);
-                            if($nature_id == 1){
-                                AdminCRMController::updateComplaintPhone($crm_request_padded_id ?? CrmRequest::max('id'), $request->case_nature_complainant, $request->complainant_phone);
+                            if($nature_id == 1 && !empty($request->case_nature_complainant)){
+                                AdminCRMController::updateComplaintPhone(CrmRequest::max('id'), $request->case_nature_complainant, $request->complainant_phone);
                             }
                             return response()->json(['status' => 0, 'message' => 'CRM Request has been added', 'id' => $crm_request]);
                         } else {
