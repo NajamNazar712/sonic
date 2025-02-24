@@ -951,8 +951,8 @@ class ShipperFinanceController extends Controller
                 $userId = $shipment->user_id;
                 if ($specShipperCheck && in_array($shipment->user_id, $specShipperCheck)) {
                     if ($done_payment_shipment->type == 0 || $done_payment_shipment->type == 1 && $shipment->shipping_mode_id == 1) {
-                        $charges = DonePaymentShipment::where(['shipment_id' => $done_payment_shipment->shipment_id, 'type' => 3])->first()->charges;
-                        $row[] = (($done_payment_shipment->charges == 0) ? number_format($charges, 2) : '0');
+                        $charges = DonePaymentShipment::where(['shipment_id' => $done_payment_shipment->shipment_id, 'type' => 3])->first();
+                        $row[] = (($done_payment_shipment->charges == 0) ? number_format($charges->charges + $charges->gst, 2) : '0');
                     } else {
                         $row[] = '0';
                     }
