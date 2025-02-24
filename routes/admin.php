@@ -2546,6 +2546,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@shipment_reversal_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@shipment_reversal_list')->name('list');
         });
+        
+        Route::prefix('lost_and_case_closed_summary')->name('lost_and_case_closed_summary_report.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@lost_and_case_closed_summary_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@lost_and_case_closed_summary_list')->name('list');
+        });
     });
 
     //Reports end
@@ -3012,6 +3017,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('add', 'Admins\GlobalSettingsController@add_auto_assign_agent')->name('add');
             Route::get('global_status', 'Admins\GlobalSettingsController@global_status')->name('global_status');
             Route::post('get_sub_segments', 'Admins\GlobalSettingsController@get_sub_segments')->name('get_sub_segments');
+            Route::post('get_origin_areas','Admins\GlobalSettingsController@get_origin_areas')->name('get_origin_areas');
+            Route::post('get_origin_hub','Admins\GlobalSettingsController@get_origin_hub')->name('get_origin_hub');
+            Route::get('get_shipper_key', 'Admins\GlobalSettingsController@get_shipper_key')->name('get_shipper_key');
+            Route::get('get_shipper_non_key', 'Admins\GlobalSettingsController@get_shipper_non_key')->name('get_shipper_non_key');
+
         });
 
         Route::prefix('auto_tagging')->name('auto_tagging.')->group(function () {
@@ -3993,6 +4003,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('add', 'Admins\LeadManagementController@add')->name('add');
         Route::get('edit_service_list', 'Admins\LeadManagementController@edit_service_list')->name('edit_service_list');
         Route::post('/check-lead', 'Admins\LeadManagementController@checkLead')->name('check.lead');
+        Route::get('view_logs', 'Admins\LeadManagementController@view_logs')->name('view_logs');
 
     });
 
