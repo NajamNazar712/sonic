@@ -483,9 +483,7 @@
 
             $('#complainant_phone').inputmask({
                 mask: '9999-9999999',
-                placeholder: '_',
-                showMaskOnHover: false,
-                showMaskOnFocus: false
+                'clearIncomplete': true
             });
 
             // $('#cod_amount').inputmask({

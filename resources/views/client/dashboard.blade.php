@@ -230,7 +230,8 @@
                                     <div class="col-10">
                                         <fieldset class="form-group">
                                             <select name="case_nature_complainant" id="case_nature_complainant"
-                                                    class="form-control select2">
+                                                    class="form-control select2" data-rule-required="true"
+                                                    data-msg-required="Complainant is required">
                                                 <option value="1">Consignee</option>
                                                 <option value="2">Shipper</option>
                                             </select>
@@ -238,7 +239,8 @@
                                     </div>
                                     <div class="col-10">
                                         <fieldset class="form-group">
-                                            <input type="text" class="form-control" placeholder="Enter Phone Number" name="complainant_phone" id="complainant_phone">
+                                            <input type="text" class="form-control" placeholder="Enter Phone Number" name="complainant_phone" id="complainant_phone" data-rule-required="true"
+                                                   data-msg-required="Complainant Phone is required">
                                         </fieldset>
                                     </div>
                                 </div>
@@ -659,9 +661,7 @@
             });
             $('#complainant_phone').inputmask({
                 mask: '9999-9999999',
-                placeholder: '_',
-                showMaskOnHover: false,
-                showMaskOnFocus: false
+                'clearIncomplete': true
             });
             $('#case_nature_complainant').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
