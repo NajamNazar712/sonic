@@ -1888,6 +1888,7 @@
                         data: {
                             'tagged_id': tag,
                             'tagged_hub': tag_hub,
+                            'admin_id': admin,
                             'crm_request_id': $('#crm_request_id').val(),
                             'prev_status': $('#prev_status').val(),
                             'crm_request_tagging_type_id': type,
