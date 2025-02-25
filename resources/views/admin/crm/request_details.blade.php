@@ -1855,24 +1855,25 @@
                 $('#department_tag_div').addClass('d-none');
             });
             $('#tag_adminSubmit').on('click', function () {
-                var type = parseInt($('#tag_type').val());
-                var tag_hub = null;
-                if (type === 1) {
-                    var tag = parseInt($('#tag_department').val());
-                    tag_hub = parseInt($('#tag_hub').val());
-                    if(!tag_hub){
-                        tag_hub = null;
-                    }
-                }
-                else if (type === 2) {
-                    var tag = parseInt($('#tag_admin').val());
-                }
+                var type = parseInt($('#tag_type').val()) || 0;
+                var tag_hub = parseInt($('#admin_tag_hub').val()) || 0;
 
                 var dept = parseInt($('#admin_tag_department').val()) || 0;
                 var admin = parseInt($('#tag_admin').val()) || 0;
-                tag_hub = parseInt($('#admin_tag_hub').val());
 
-                if ((dept || admin) && tag_hub != null) {
+                var tag = 0; 
+
+                if (admin !== 0) {
+                    tag = admin;
+                } else if (dept !== 0) {
+                    tag = dept; 
+                }
+
+                console.log(tag);
+                console.log(tag_hub);
+                
+
+                if ((tag) && tag_hub) {
                     $('#tag_adminSubmit').attr('disabled', true);
                     swal({
                         title: 'Please Wait!',
@@ -1917,11 +1918,12 @@
                         });
                 }
                 else {  
-                   if(dept == null || admin == null){
-                        error = 'Please select user or department'
-                   }else{
-                    error = 'Please select hub'
-                   }
+                    if (!tag) { 
+                        error = 'Please select only one: either Admin or Department';
+                    } else {
+                        error = 'Please select a Hub';
+                    }
+
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
 
