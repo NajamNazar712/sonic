@@ -1768,13 +1768,11 @@
             }).bind('change', function () {
                 var id = parseInt($(this).val());
                 if (id === 1) {
-                    $('#admin_tag_div').addClass('d-none');
                     $('#department_tag_div').removeClass('d-none');
                 } else if (id === 2) {
                     $('#department_tag_div').addClass('d-none');
                     $('#admin_tag_div').removeClass('d-none');
                 } else {
-                    $('#admin_tag_div').addClass('d-none');
                     $('#department_tag_div').addClass('d-none');
                 }
             });
@@ -1851,12 +1849,13 @@
                 $('#tag_type').val('').trigger('change');
                 $('#admin_tag_hub').val('').trigger('change');
                 $('#admin_tag_department').val('').trigger('change');
-                $('#admin_tag_div').addClass('d-none');
+                $('#tag_admin').val('').trigger('change');
                 $('#department_tag_div').addClass('d-none');
             });
             $('#tag_adminSubmit').on('click', function () {
                 var type = parseInt($('#tag_type').val()) || 0;
-                var tag_hub = parseInt($('#admin_tag_hub').val()) || 0;
+                var tag_hub = $('#admin_tag_hub').val();
+                tag_hub = tag_hub ? parseInt(tag_hub) : null;
 
                 var dept = parseInt($('#admin_tag_department').val()) || 0;
                 var admin = parseInt($('#tag_admin').val()) || 0;
@@ -1869,11 +1868,7 @@
                     tag = dept; 
                 }
 
-                console.log(tag);
-                console.log(tag_hub);
-                
-
-                if ((tag) && tag_hub) {
+                if ((tag)) {
                     $('#tag_adminSubmit').attr('disabled', true);
                     swal({
                         title: 'Please Wait!',
@@ -1918,12 +1913,7 @@
                         });
                 }
                 else {  
-                    if (!tag) { 
-                        error = 'Please select only one: either Admin or Department';
-                    } else {
-                        error = 'Please select a Hub';
-                    }
-
+                    error = 'Please select only one: either Admin or Department';
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
 
