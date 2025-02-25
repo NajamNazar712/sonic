@@ -870,12 +870,12 @@
                             @method('POST')
                             @csrf
                             <div class="row justify-content-center">
-                                <div class="col-11">
+                                <div class="col-11 d-none">
                                     <fieldset class="form-group">
                                         <input type="hidden" id="crm_request_id" value="{{$crm_details->id}}">
                                         <input type="hidden" id="prev_status" name="prev_status"
                                                value="{{$crm_details->status_id}}">
-                                        <select name="tag_type" id="tag_type" class="form-control select2">
+                                        <select name="tag_type" id="tag_type" class="form-control select2 >
                                             @foreach($types as $type)
                                                 <option value="{{$type->id}}"> {{$type->name}} </option>
                                             @endforeach
@@ -1778,6 +1778,9 @@
                     $('#department_tag_div').addClass('d-none');
                 }
             });
+
+            $('#admin_tag_div').removeClass('d-none');
+
             $('#tag').on('click', function (e) {
                 e.preventDefault();
                 $('#tagModal').modal('show');
@@ -1864,7 +1867,13 @@
                 else if (type === 2) {
                     var tag = parseInt($('#tag_admin').val());
                 }
-                if (tag) {
+
+                var dept = parseInt($('#tag_department').val()) || 0;
+                var admin = parseInt($('#tag_admin').val()) || 0;
+                tag_hub = parseInt($('#tag_hub').val());
+
+
+                if (dept || admin) {
                     $('#tag_adminSubmit').attr('disabled', true);
                     swal({
                         title: 'Please Wait!',
@@ -1915,7 +1924,7 @@
                         var error = "User Not Selected!";
                     }
                     else {
-                        error = "Type Not Selected!";
+                        error = "Select Either Department Or User Selected!";
                     }
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
