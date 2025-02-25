@@ -1868,12 +1868,15 @@
                     var tag = parseInt($('#tag_admin').val());
                 }
 
-                var dept = parseInt($('#tag_department').val()) || 0;
+                var dept = parseInt($('#admin_tag_department').val()) || 0;
                 var admin = parseInt($('#tag_admin').val()) || 0;
-                tag_hub = parseInt($('#tag_hub').val());
+                tag_hub = parseInt($('#admin_tag_hub').val());
 
+                console.log(tag_hub);
+                console.log(dept);
+                console.log(tag_hub);
 
-                if (dept || admin) {
+                if ((dept || admin) && tag_hub != null) {
                     $('#tag_adminSubmit').attr('disabled', true);
                     swal({
                         title: 'Please Wait!',
@@ -1916,16 +1919,12 @@
                             $('#tag_adminSubmit').attr('disabled', false);
                         });
                 }
-                else {
-                    if (type === 1) {
-                        var error = "Department Not Selected!";
-                    }
-                    else if (type === 2) {
-                        var error = "User Not Selected!";
-                    }
-                    else {
-                        error = "Select Either Department Or User Selected!";
-                    }
+                else {  
+                   if(dept == null || admin == null){
+                        error = 'Please select user or department'
+                   }else{
+                    error = 'Please select hub'
+                   }
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
 
