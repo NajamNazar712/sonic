@@ -1872,10 +1872,6 @@
                 var admin = parseInt($('#tag_admin').val()) || 0;
                 tag_hub = parseInt($('#admin_tag_hub').val());
 
-                console.log(tag_hub);
-                console.log(dept);
-                console.log(tag_hub);
-
                 if ((dept || admin) && tag_hub != null) {
                     $('#tag_adminSubmit').attr('disabled', true);
                     swal({
