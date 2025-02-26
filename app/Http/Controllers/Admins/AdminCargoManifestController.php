@@ -1814,6 +1814,8 @@ class AdminCargoManifestController extends Controller
                                     $details['shipping_mode']['name'] = $shipment->shipping_mode->mode;
                                 }
 
+                                $startDate = Carbon::now()->subMonth()->format('Y-m-d 00:00:00');
+                                $endDate = Carbon::now()->format('Y-m-d 23:59:59');
                                 if ($request->hub_id == 0) {
                                     if ($bag_type == 1) {
                                         $shipments = Shipment::join('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -1823,9 +1825,11 @@ class AdminCargoManifestController extends Controller
                                                     ->on('oc.hub_id', '!=', 'dc.hub_id');
                                             })
                                             ->select(DB::raw('count(shipments.id) as count'))
+                                            ->whereBetween('shipments.created_at', [$startDate, $endDate])
                                             ->where('dc.hub_id', $hub->id)
                                             ->whereIn('shipments.shipper_status_id', [2, 49, 55])
                                             ->where('shipments.shipping_mode_id', $shipping_mode_id);
+
                                     } else {
 
                                         $shipments = Shipment::leftjoin('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -1858,7 +1862,9 @@ class AdminCargoManifestController extends Controller
                                                     });
                                             })
                                             ->select(DB::raw('count(shipments.id) as count'))
+                                            ->whereBetween('shipments.created_at', [$startDate, $endDate])
                                             ->where('shipments.shipping_mode_id', $shipping_mode_id);
+
 
                                     }
 

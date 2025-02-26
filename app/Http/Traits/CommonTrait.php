@@ -546,4 +546,20 @@ trait CommonTrait
 
         return $html;
     }
+    public function riderInformation($riderId)
+    {
+      $rider = Rider::find($riderId);
+      $information = array();
+      $information['id'] = $rider->id;
+      $information['name'] = $rider->name;
+      $information['phone_number'] = $rider->phone;
+      $information['city'] = $rider->city->name;
+      $information['category'] = $rider->rider_category->name;
+      if ($rider->route) {
+        $information['route'] = $rider->route->code . ' (' . $rider->route->start . ' to ' . $rider->route->end . ')';
+      } else {
+        $information['route'] = '';
+      }
+      return $information;
+    }
 }

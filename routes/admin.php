@@ -1735,6 +1735,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('generate_report_to_email', 'Admins\AdminFinanceController@done_payments_generate_report_to_email')->name('generate_report_to_email');
             Route::post('excel_store', 'Admins\AdminFinanceController@done_payments_excel_store')->name('excel_store');
             Route::get('view_status_history', 'Admins\AdminFinanceController@view_status_history')->name('view_status_history');
+            Route::get('mark_settlement', 'Admins\AdminFinanceController@mark_settlement')->name('mark_settlement');
+            Route::get('wallet_error_logs', 'Admins\AdminFinanceController@wallet_error_logs')->name('wallet_error_logs');
+            
         });
 
         Route::prefix('invoices')->name('invoices.')->group(function () {
@@ -1825,6 +1828,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('shipment_ledger')->name('shipment_ledger.')->group(function () {
             Route::get('', 'Admins\AdminFinanceController@service_charges_ledger_index')->name('index');
             Route::get('list', 'Admins\AdminFinanceController@service_charges_ledger_list')->name('list');
+        });
+
+        Route::prefix('wallet_users')->name('wallet_users.')->group(function () {
+            Route::get('', 'Admins\AdminFinanceController@wallet_user_index')->name('index');
+            Route::get('list', 'Admins\AdminFinanceController@walle_user_list')->name('list');
         });
     });
 
@@ -2538,6 +2546,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@shipment_reversal_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@shipment_reversal_list')->name('list');
         });
+        
+        Route::prefix('lost_and_case_closed_summary')->name('lost_and_case_closed_summary_report.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@lost_and_case_closed_summary_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@lost_and_case_closed_summary_list')->name('list');
+        });
     });
 
     //Reports end
@@ -3004,6 +3017,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('add', 'Admins\GlobalSettingsController@add_auto_assign_agent')->name('add');
             Route::get('global_status', 'Admins\GlobalSettingsController@global_status')->name('global_status');
             Route::post('get_sub_segments', 'Admins\GlobalSettingsController@get_sub_segments')->name('get_sub_segments');
+            Route::post('get_origin_areas','Admins\GlobalSettingsController@get_origin_areas')->name('get_origin_areas');
+            Route::post('get_origin_hub','Admins\GlobalSettingsController@get_origin_hub')->name('get_origin_hub');
+            Route::get('get_shipper_key', 'Admins\GlobalSettingsController@get_shipper_key')->name('get_shipper_key');
+            Route::get('get_shipper_non_key', 'Admins\GlobalSettingsController@get_shipper_non_key')->name('get_shipper_non_key');
+
         });
 
         Route::prefix('auto_tagging')->name('auto_tagging.')->group(function () {
@@ -3435,6 +3453,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\GlobalSettingsController@star_shippers_list')->name('list');
             Route::post('add', 'Admins\GlobalSettingsController@star_shippers_add')->name('add');
             Route::post('enable_disable', 'Admins\GlobalSettingsController@star_shippers_enable_disable')->name('enable_disable');
+        });
+
+        Route::prefix('wallet_shippers')->name('wallet_shippers.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@wallet_shippers_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@wallet_shippers_list')->name('list');
+            Route::post('add', 'Admins\GlobalSettingsController@wallet_shippers_add')->name('add');
+            Route::post('enable_disable', 'Admins\GlobalSettingsController@wallet_shippers_enable_disable')->name('enable_disable');
         });
         Route::prefix('alist_shippers')->name('alist_shippers.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@aListShippersIndex')->name('index');
@@ -3978,6 +4003,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('add', 'Admins\LeadManagementController@add')->name('add');
         Route::get('edit_service_list', 'Admins\LeadManagementController@edit_service_list')->name('edit_service_list');
         Route::post('/check-lead', 'Admins\LeadManagementController@checkLead')->name('check.lead');
+        Route::get('view_logs', 'Admins\LeadManagementController@view_logs')->name('view_logs');
 
     });
 

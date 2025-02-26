@@ -1466,7 +1466,7 @@
                 // dom:'ltipr',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
-                        @if(session('account_type') == 1)
+                        @if(session('account_type') == 1 && !Auth::user()->wallet)
                     {
                         text: '<i class="la la-cancel"></i> Add Bank',
                         className: 'btn btn-primary add_bank',
