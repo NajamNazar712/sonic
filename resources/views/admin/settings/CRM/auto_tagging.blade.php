@@ -489,7 +489,7 @@
                     });
 
                     
-                    city_area_id = [data.city_area_id.toString()]; 
+                    city_area_id = data.city_area_id ? [data.city_area_id.toString()] : [];
                     $('#edit_agent_id').val(data.agent_id).change();
                     $('#edit_city_id').val(data.city_id).change();
                     $('#edit_crm_case_nature_id').val(case_nature_ids).change();
