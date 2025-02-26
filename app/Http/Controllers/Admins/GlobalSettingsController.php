@@ -6167,8 +6167,8 @@ class GlobalSettingsController extends Controller
             });
 
         return $datatables
-            ->rawColumns(['case_nature_type', 'case_natue', 'city_area_name', 'action'])
-            ->make(true);
+        ->rawColumns(['case_nature_type', 'case_natue', 'city_area_name', 'action'])
+        ->make(true);
     }
 
     public function hub_areas(Request $request)
@@ -6186,7 +6186,7 @@ class GlobalSettingsController extends Controller
         $city_id = $request->city_id;
         $hub_areas = CityArea::where('city_id', $city_id)->select('id', 'name')->get();
 
-        return response()->json(['hub_areas' => $hub_areas, 'zone' => City::find($city_id)->zone->name]);
+        return $hub_areas;
     }
 
     public function case_nature_types(Request $request)
@@ -6210,7 +6210,7 @@ class GlobalSettingsController extends Controller
     public function crm_auto_tagging_submit(Request $request)
     {
 
-        $crm_agent = CrmAutoTagUser::where('city_id', $request->city_id)->where('city_area_id', $request->city_area_id)->where('crm_case_nature_id', $request->crm_case_nature_id)->where('crm_case_nature_type_id', $request->crm_case_nature_type_id)->where('admin_id', $request->admin_id)->where('origin_id', $request->origin_id)->where('status', 1);
+        $crm_agent = CrmAutoTagUser::where('city_id', $request->city_id)->where('city_area_id', $request->city_area_id)->where('crm_case_nature_id', $request->crm_case_nature_id)->where('crm_case_nature_type_id', $request->crm_case_nature_type_id)->where('admin_id', $request->admin_id)->where('status', 1);
         if (!$crm_agent->exists()) {
             CrmAutoTagUser::create($request->all());
             return redirect()->back()->with('success', 'Agent Added!');
@@ -6229,14 +6229,11 @@ class GlobalSettingsController extends Controller
         $city_area_id = $crm_agent_data->city_area_id;
         $crm_case_nature_id = $crm_agent_data->crm_case_nature_id;
         $crm_case_nature_type_id = $crm_agent_data->crm_case_nature_type_id;
-        $origin_id = $crm_agent_data->origin_id;
-        $user_type = $crm_agent_data->user_type ?? 2;
-
 
         $city_areas = CityArea::where('city_id', $city_id)->select('id', 'name')->get();
         $crm_case_nature_types = CrmRequestCaseNatureType::where('nature_id', $crm_case_nature_id)->select('id', 'type as name')->get();
 
-        return response()->json(['status' => 1, 'agent_id' => $agent_id, 'city_id' => $city_id, 'crm_agent_id' => $crm_agent_id, 'city_area_id' => $city_area_id, 'crm_case_nature_id' => $crm_case_nature_id, 'crm_case_nature_type_id' => $crm_case_nature_type_id, 'city_areas' => $city_areas, 'crm_case_nature_types' => $crm_case_nature_types, 'user_type' => $user_type, 'origin_id' => $origin_id]);
+        return response()->json(['status' => 1, 'agent_id' => $agent_id, 'city_id' => $city_id, 'crm_agent_id' => $crm_agent_id, 'city_area_id' => $city_area_id, 'crm_case_nature_id' => $crm_case_nature_id, 'crm_case_nature_type_id' => $crm_case_nature_type_id, 'city_areas' => $city_areas, 'crm_case_nature_types' => $crm_case_nature_types]);
     }
 
     public function crm_auto_tagging_delete(Request $request)
@@ -6249,7 +6246,7 @@ class GlobalSettingsController extends Controller
     public function crm_auto_tagging_update(Request $request)
     {
 
-        $crm_agent = CrmAutoTagUser::where('city_id', $request->city_id)->where('city_area_id', $request->city_area_id)->where('crm_case_nature_id', $request->crm_case_nature_id)->where('crm_case_nature_type_id', $request->crm_case_nature_type_id)->where('origin_id', $request->origin_id);
+        $crm_agent = CrmAutoTagUser::where('city_id', $request->city_id)->where('city_area_id', $request->city_area_id)->where('crm_case_nature_id', $request->crm_case_nature_id)->where('crm_case_nature_type_id', $request->crm_case_nature_type_id);
         if (!$crm_agent->exists()) {
             $crm_agent_data = CrmAutoTagUser::find($request->crm_agent_id);
 
@@ -6258,8 +6255,6 @@ class GlobalSettingsController extends Controller
             $crm_agent_data->city_area_id = $request->city_area_id;
             $crm_agent_data->crm_case_nature_id = $request->crm_case_nature_id;
             $crm_agent_data->crm_case_nature_type_id = $request->crm_case_nature_type_id;
-            $crm_agent_data->origin_id = $request->origin_id;
-            $crm_agent_data->user_type = $request->user_type;
             $crm_agent_data->save();
             return redirect()->back()->with('success', 'Agent Updated!');
         } else {
@@ -6279,21 +6274,6 @@ class GlobalSettingsController extends Controller
             $crm_agent->save();
             return redirect()->back()->with('success', 'Agent Enabled!');
         }
-    }
-
-    public function crm_auto_tagging_get_dept_wise_agents(Request $request){
-        $userType = intval($request->user_type);
-
-        $deptMapping = [
-            1 => 4,
-            2 => 6
-        ];
-
-        $deptId = $deptMapping[$userType];
-
-        $operation_depart_ids = Employee::where('department_id', $deptId)->pluck('id')->toArray();
-        $agents = Admin::select('id', 'name')->whereIn('employee_id', $operation_depart_ids)->where('status', 1)->get();
-        return response()->json($agents);
     }
 
     public function admin_ticker_store(Request $request)
