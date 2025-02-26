@@ -47,37 +47,19 @@
 
                 <div class="modal-body">
                     <div class="form-group">
-                        <select name="user_type" id="user_type" class="form-control select2" data-rule-required="true" data-msg-required="User type is required">
-                            <option selected disabled> Select User Type </option>
-                            <option value="1"> Finance </option>
-                            <option value="2"> Operation </option>
-                        </select>
-                    </div>
-                    <div class="form-group">
                         <select name="admin_id" id="agent_id" class="form-control select2" data-rule-required="true" data-msg-required="Agent is required">
-
+                            @foreach($agents as $agent)
+                                <option value="{{ $agent->id }}" > {{ $agent->name }} </option>
+                            @endforeach
                         </select>
                     </div>
                     <div class="form-group">
-                        <select name="city_id" id="city_id" class="form-control select2" data-rule-required="true" data-msg-required="Destination City is required">
+                        <select name="city_id" id="city_id" class="form-control select2" data-rule-required="true" data-msg-required="City is required">
                             @foreach($cities as $city)
                                 <option value="{{ $city->id }}" > {{ $city->name }} </option>
                             @endforeach
                         </select>
                     </div>
-
-                    <div class="form-group">
-                        <input type="text" name="zone" class="form-control zone" placeholder="Destination Zone" readonly>
-                    </div>
-
-                    <div class="form-group">
-                        <select name="origin_id" id="origin_id" class="form-control select2">
-                            @foreach($cities as $city)
-                                <option value="{{ $city->id }}" > {{ $city->name }} </option>
-                            @endforeach
-                        </select>
-                    </div>
-
                     <div class="form-group">
                         <select name="city_area_id" id="city_area_id" class="form-control select2" >
                         </select>
@@ -121,34 +103,14 @@
                 <div class="modal-body">
                     <input type="hidden" name="crm_agent_id" id="crm_agent_id">
                     <div class="form-group">
-                        <select name="user_type" id="edit_user_type" class="form-control select2" data-rule-required="true" data-msg-required="User type is required">
-                            <option selected disabled> Select User Type </option>
-                            <option value="1"> Finance </option>
-                            <option value="2"> Operation </option>
-                        </select>
-                    </div>
-                    <div class="form-group">
                         <select name="admin_id" id="edit_agent_id" class="form-control select2" data-rule-required="true" data-msg-required="Agent is required">
                             @foreach($agents as $agent)
                                 <option value="{{ $agent->id }}" > {{ $agent->name }} </option>
                             @endforeach
                         </select>
                     </div>
-
                     <div class="form-group">
-                        <select name="city_id" id="edit_city_id" class="form-control select2" data-rule-required="true" data-msg-required="Destination City is required">
-                            @foreach($cities as $city)
-                                <option value="{{ $city->id }}" > {{ $city->name }} </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <input type="text" name="zone" class="form-control zone" placeholder="Destination Zone" readonly>
-                    </div>
-
-                    <div class="form-group">
-                        <select name="origin_id" id="edit_origin_id" class="form-control select2">
+                        <select name="city_id" id="edit_city_id" class="form-control select2" data-rule-required="true" data-msg-required="City is required">
                             @foreach($cities as $city)
                                 <option value="{{ $city->id }}" > {{ $city->name }} </option>
                             @endforeach
@@ -208,16 +170,7 @@
                 $('#city_area_id').val('').trigger('change.select2');
                 $('#crm_case_nature_id').val('').trigger('change.select2');
                 $('#crm_case_nature_type_id').val('').trigger('change.select2');
-                $('#user_type').val('').trigger('change.select2');
-                $('#origin_id').val('').trigger('change.select2');
-                $('input[name="zone"]').val('');
             });
-
-            $('#EditAgentModal').on('hidden.bs.modal', function () {
-                $('input[name="zone"]').val('');
-                edit_agent_id = null;
-            });
-
             $('#agent_id').prepend('<option selected></option>').select2({
                 width:'100%',
                 placeholder:"Select User",
@@ -226,7 +179,7 @@
             });
             $('#city_id').prepend('<option selected></option>').select2({
                 width:'100%',
-                placeholder:"Select Destination City",
+                placeholder:"Select City",
                 allowClear:true,
                 dropdownParent:$('#crm_agent_assign')
             });
@@ -246,12 +199,6 @@
                 placeholder:"Select Case Nature Type",
                 dropdownParent:$('#crm_agent_assign')
             });
-            $('#user_type').prepend('<option selected></option>').select2({
-                width:'100%',
-                placeholder:"Select User Type",
-                allowClear:true,
-                dropdownParent:$('#crm_agent_assign')
-            });
 
             $('#edit_agent_id').select2({
                 width:'100%',
@@ -261,7 +208,7 @@
             });
             $('#edit_city_id').select2({
                 width:'100%',
-                placeholder:"Select Destination City",
+                placeholder:"Select City",
                 allowClear:true,
                 dropdownParent:$('#crm_agent_edit')
             });
@@ -281,27 +228,8 @@
                 placeholder:"Select Case Nature Type",
                 dropdownParent:$('#crm_agent_edit')
             });
-
-            $('#edit_user_type').prepend('<option selected></option>').select2({
-                width:'100%',
-                placeholder:"Select User Type",
-                allowClear:true,
-                dropdownParent:$('#crm_agent_edit')
-            });
-
-            $('#origin_id').prepend('<option selected></option>').select2({
-                width:'100%',
-                placeholder:"Select Origin City",
-                allowClear:true,
-                dropdownParent:$('#crm_agent_assign')
-            });
-
-            $('#edit_origin_id').prepend('<option selected></option>').select2({
-                width:'100%',
-                placeholder:"Select Origin City",
-                allowClear:true,
-                dropdownParent:$('#crm_agent_edit')
-            });
+            
+            
 
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -414,15 +342,13 @@
                     }
                 }).done(function (result) {
 
-                    if(result.hub_areas && result.hub_areas.length > 0)
+                    if(result && result.length > 0)
                     {
-                        $.each(result.hub_areas, function(index, option) {
+                        $.each(result, function(index, option) {
                             var newOption = new Option(option.name, option.id); 
                             $('#city_area_id').append(newOption).trigger('change');
                         });
-
                     }
-                    $('.zone').val(result.zone);
                 })
                 
             });
@@ -473,8 +399,6 @@
                             $('#edit_city_area_id').append(newOption).trigger('change');
                         });
                     }
-                    $('.zone').val(result.zone);
-
                 })
 
             });
@@ -504,7 +428,6 @@
 
             });
 
-            var edit_agent_id = null;
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.edit', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
                 $.ajax({
@@ -535,11 +458,7 @@
                     $('#edit_crm_case_nature_id').val(data.crm_case_nature_id).change();
                     $('#edit_crm_case_nature_type_id').val(data.crm_case_nature_type_id).change();
                     $('#crm_agent_id').val(data.crm_agent_id);
-
-
-                    $('#edit_user_type').val(data.user_type).change();
-                    $('#edit_origin_id').val(data.origin_id).change();
-                    edit_agent_id = data.agent_id
+                    
                     $('#EditAgentModal').modal('show');
 
                 })
@@ -630,44 +549,6 @@
                 
             });
 
-            $("#user_type, #edit_user_type").change(function () {
-                var userType = $(this).val();
-                var $agentDropdown;
-
-                if ($(this).attr("id") === "user_type") {
-                    $agentDropdown = $("#agent_id");
-                    $agentDropdown.empty().append('<option selected disabled>Loading...</option>');
-                } else {
-                    $agentDropdown = $("#edit_agent_id");
-                }
-
-                if (userType) {
-                    $.ajax({
-                        url: '{!! route("admin.settings.auto_tagging.crm_auto_tagging_get_dept_wise_agents") !!}',
-                        type: "GET",
-                        data: { user_type: userType },
-                        dataType: "json",
-                        success: function (response) {
-
-                            $agentDropdown.empty().append('<option selected disabled>Select Agent</option>');
-
-                            if (response.length > 0) {
-                                $.each(response, function (index, agent) {
-                                    var selected = (typeof edit_agent_id !== "undefined" && edit_agent_id == agent.id) ? 'selected' : '';
-                                    $agentDropdown.append('<option value="' + agent.id + '" ' + selected + '>' + agent.name + '</option>');
-                                });
-                            } else {
-                                $agentDropdown.append('<option disabled>No agents available</option>');
-                            }
-                        },
-                        error: function () {
-                            if ($(this).attr("id") === "user_type") {
-                                $agentDropdown.empty().append('<option disabled>Error loading agents</option>');
-                            }
-                        }
-                    });
-                }
-            });
             
         });
     </script>
