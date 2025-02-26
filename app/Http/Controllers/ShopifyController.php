@@ -169,6 +169,7 @@ class ShopifyController extends Controller
                                     <tr>
                                         <td>Quantity</td>
                                         <td>Item</td>
+                                        <td>SKU</td>
                                         <td>Discount</td>
                                         <td>Price</td>
                                     </tr>
@@ -179,6 +180,7 @@ class ShopifyController extends Controller
                             $html .='<tr>
                                         <td>'. $item['quantity'] .'x</td>
                                         <td>'. $item['name'] .'</td>
+                                         <td>'. $item['sku'] .'</td>
                                         <td>'. $item['discount'] .'</td>
                                         <td>Rs.'. $item['price'] .'</td>
                                     </tr>';
