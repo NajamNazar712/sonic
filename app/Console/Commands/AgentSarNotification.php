@@ -87,145 +87,144 @@ class AgentSarNotification extends Command
             //Combine the results for sending in single email
             $sendEmail = $sendEmails->union($sendEmailofRefusalShipments)->get();
             // If there are shipments that meet the conditions, send Email Notification to shipper for each shipment
-            // if ($sendEmail->isNotEmpty()) {
+            if ($sendEmail->isNotEmpty()) {
 
-            //     foreach ($sendEmail as $shipment) {
-            //         // if shipment status is unresponsive Increment the unresponsive_email_count for each shipment after sending the email
-            //         if($shipment->rv_assign_agent_status_id == 7){
-            //             $shipment->increment('unresponsive_email_count');
-            //             $shipment->unresponsive_email_time = $currentDateTime;
-            //             $shipment->save();
-            //         }
-            //     }
-            //     NotificationsController::send(220, $sendEmail);
-            // }
+                foreach ($sendEmail as $shipment) {
+                    // if shipment status is unresponsive Increment the unresponsive_email_count for each shipment after sending the email
+                    if($shipment->rv_assign_agent_status_id == 7){
+                        $shipment->increment('unresponsive_email_count');
+                        $shipment->unresponsive_email_time = $currentDateTime;
+                        $shipment->save();
+                    }
+                }
+                NotificationsController::send(220, $sendEmail);
+            }
 
             // When there is no response from the shipper within 24 hours of the "Shipper Advise Requested" status being set on the shipment, 
             // the system will automatically update the shipment status to "Return Confirm."
-            // $unresponsive_shipments = RvShipmentAssignAgent::join('shipments', function ($join){
-            //     $join->on('rv_shipment_assign_agents.shipment_id', '=', 'shipments.id')
-            //         ->where('shipments.shipper_status_id','=' , 65);
-            //     })
-            //     ->where('rv_shipment_assign_agents.rv_assign_agent_status_id', 7)
-            //     ->where('rv_shipment_assign_agents.rv_state_id', 2)
-            //     ->where('rv_shipment_assign_agents.unresponsive_count', 3)
-            //     ->where('rv_shipment_assign_agents.unresponsive_email_count', '>', 0)
-            //     ->where('rv_shipment_assign_agents.unresponsive_email_time', '<=', $nowSub48Hours)
-            //     ->select('rv_shipment_assign_agents.*') // Select only columns from rv_shipment_assign_agents
-            //     ->get();
+            $unresponsive_shipments = RvShipmentAssignAgent::join('shipments', function ($join){
+                $join->on('rv_shipment_assign_agents.shipment_id', '=', 'shipments.id')
+                    ->where('shipments.shipper_status_id','=' , 65);
+                })
+                ->where('rv_shipment_assign_agents.rv_assign_agent_status_id', 7)
+                ->where('rv_shipment_assign_agents.rv_state_id', 2)
+                ->where('rv_shipment_assign_agents.unresponsive_count', 3)
+                ->where('rv_shipment_assign_agents.unresponsive_email_count', '>', 0)
+                ->where('rv_shipment_assign_agents.unresponsive_email_time', '<=', $nowSub48Hours)
+                ->select('rv_shipment_assign_agents.*') // Select only columns from rv_shipment_assign_agents
+                ->get();
 
-            // if ($unresponsive_shipments->isNotEmpty()) {
-            //     foreach ($unresponsive_shipments as $shipment) {
+            if ($unresponsive_shipments->isNotEmpty()) {
+                foreach ($unresponsive_shipments as $shipment) {
 
-            //         // $shipment->update(['rv_assign_agent_status_id' => 1, 'rv_assign_agent_sub_status_id' => 4]);
-            //         $shipment->update(['rv_assign_agent_status_id' => 1, 'rv_assign_agent_sub_status_id' => null,'rv_state_id' => 4]);
+                    // $shipment->update(['rv_assign_agent_status_id' => 1, 'rv_assign_agent_sub_status_id' => 4]);
+                    $shipment->update(['rv_assign_agent_status_id' => 1, 'rv_assign_agent_sub_status_id' => null,'rv_state_id' => 4]);
 
-            //         $request = (object) [
-            //             'shipment_id' => $shipment->shipment_id,
-            //             'remarks' => $shipment->remarks,
-            //             'rv_assign_agent_sub_status_id' => Null,
-            //             'consignee_refused_reasons' => Null,
-            //         ];
-            //         $globalAdminId = 346;
-            //         $this->return_confirm($request,$globalAdminId);
+                    $request = (object) [
+                        'shipment_id' => $shipment->shipment_id,
+                        'remarks' => $shipment->remarks,
+                        'rv_assign_agent_sub_status_id' => Null,
+                        'consignee_refused_reasons' => Null,
+                    ];
+                    $globalAdminId = 346;
+                    $this->return_confirm($request,$globalAdminId);
 
-            //         $data = [
-            //             'rv_shipment_assign_agent_id' => $shipment->id,
-            //             'agent_id' => $shipment->agent_id,
-            //             'shipments_journey_id' => $shipment->shipments_journey_id,
-            //             'last_shipments_journey_id' => $shipment->last_shipments_journey_id,
-            //             'shipment_id' => $shipment->shipment_id,
-            //             'rv_assign_agent_status_id' => $shipment->rv_assign_agent_status_id,
-            //             'rv_assign_agent_sub_status_id' => Null,
-            //             'rv_state_id' => $shipment->rv_state_id,
-            //             'updated_type_id' => 1,
-            //             'updated_by_id' =>  Null,
-            //             'is_fake_status' => $shipment->is_fake_status,
-            //             'rv_fake_status_id' => $shipment->rv_fake_status_id,
-            //             'remarks' => $shipment->remarks,
-            //             'call_to_id' => $shipment->call_to_id,
-            //             'assigned_to_type_id' => $shipment->assigned_to_type_id,
-            //             'assigned_by' => $shipment->assigned_by,
-            //         ];
-            //         $this->data_rv_shipment_assign_agent_details($data);
-            //     }
-            // }
+                    $data = [
+                        'rv_shipment_assign_agent_id' => $shipment->id,
+                        'agent_id' => $shipment->agent_id,
+                        'shipments_journey_id' => $shipment->shipments_journey_id,
+                        'last_shipments_journey_id' => $shipment->last_shipments_journey_id,
+                        'shipment_id' => $shipment->shipment_id,
+                        'rv_assign_agent_status_id' => $shipment->rv_assign_agent_status_id,
+                        'rv_assign_agent_sub_status_id' => Null,
+                        'rv_state_id' => $shipment->rv_state_id,
+                        'updated_type_id' => 1,
+                        'updated_by_id' =>  Null,
+                        'is_fake_status' => $shipment->is_fake_status,
+                        'rv_fake_status_id' => $shipment->rv_fake_status_id,
+                        'remarks' => $shipment->remarks,
+                        'call_to_id' => $shipment->call_to_id,
+                        'assigned_to_type_id' => $shipment->assigned_to_type_id,
+                        'assigned_by' => $shipment->assigned_by,
+                    ];
+                    $this->data_rv_shipment_assign_agent_details($data);
+                }
+            }
 
             // When there is no response from the shipper within 24 hours of the "Shipper Advise Requested" status after refusal on call status, 
             // the system will automatically update the shipment status to "Return Confirm."
             
-            // $refusal_call_shipments = RvShipmentAssignAgent::join('shipments', function ($join) {
-            //     $join->on('rv_shipment_assign_agents.shipment_id', '=', 'shipments.id')
-            //         ->where('shipments.shipper_status_id', '=', 65);
-            //     })
-            //     ->where('rv_assign_agent_status_id', 8)
-            //     ->where('rv_state_id', 2)
-            //     ->where('rv_shipment_assign_agents.updated_at', '<=', $nowSub24Hours)
-            //     ->get();
+            $refusal_call_shipments = RvShipmentAssignAgent::join('shipments', function ($join) {
+                $join->on('rv_shipment_assign_agents.shipment_id', '=', 'shipments.id')
+                    ->where('shipments.shipper_status_id', '=', 65);
+                })
+                ->where('rv_assign_agent_status_id', 8)
+                ->where('rv_state_id', 2)
+                ->where('rv_shipment_assign_agents.updated_at', '<=', $nowSub24Hours)
+                ->get();
                 
-            // if ($refusal_call_shipments->isNotEmpty()) {
-            //     foreach ($refusal_call_shipments as $refusal_call_shipment) {
-            //         $refusal_call_shipment->update(['rv_assign_agent_status_id' => 1, 'rv_assign_agent_sub_status_id' => null,'rv_state_id' => 4]);
+            if ($refusal_call_shipments->isNotEmpty()) {
+                foreach ($refusal_call_shipments as $refusal_call_shipment) {
+                    $refusal_call_shipment->update(['rv_assign_agent_status_id' => 1, 'rv_assign_agent_sub_status_id' => null,'rv_state_id' => 4]);
 
-            //         $request = (object) [
-            //             'shipment_id' => $refusal_call_shipment->shipment_id,
-            //             'remarks' => $refusal_call_shipment->remarks,
-            //             'rv_assign_agent_sub_status_id' => Null,
-            //             'consignee_refused_reasons' => Null,
-            //         ];
-            //         $globalAdminId = 346;
-            //         $this->return_confirm($request,$globalAdminId);
+                    $request = (object) [
+                        'shipment_id' => $refusal_call_shipment->shipment_id,
+                        'remarks' => $refusal_call_shipment->remarks,
+                        'rv_assign_agent_sub_status_id' => Null,
+                        'consignee_refused_reasons' => Null,
+                    ];
+                    $globalAdminId = 346;
+                    $this->return_confirm($request,$globalAdminId);
 
-            //         $data = [
-            //             'rv_shipment_assign_agent_id' => $refusal_call_shipment->id,
-            //             'agent_id' => $refusal_call_shipment->agent_id,
-            //             'shipments_journey_id' => $refusal_call_shipment->shipments_journey_id,
-            //             'last_shipments_journey_id' => $refusal_call_shipment->last_shipments_journey_id,
-            //             'shipment_id' => $refusal_call_shipment->shipment_id,
-            //             'rv_assign_agent_status_id' => $refusal_call_shipment->rv_assign_agent_status_id,
-            //             'rv_assign_agent_sub_status_id' => Null,
-            //             'rv_state_id' => $refusal_call_shipment->rv_state_id,
-            //             'updated_type_id' => 1,
-            //             'updated_by_id' =>  Null,
-            //             'is_fake_status' => $refusal_call_shipment->is_fake_status,
-            //             'rv_fake_status_id' => $refusal_call_shipment->rv_fake_status_id,
-            //             'remarks' => $refusal_call_shipment->remarks,
-            //             'call_to_id' => $refusal_call_shipment->call_to_id,
-            //             'assigned_to_type_id' => $refusal_call_shipment->assigned_to_type_id,
-            //             'assigned_by' => $refusal_call_shipment->assigned_by,
-            //         ];
-            //         $this->data_rv_shipment_assign_agent_details($data);
-            //     }
-            // }
+                    $data = [
+                        'rv_shipment_assign_agent_id' => $refusal_call_shipment->id,
+                        'agent_id' => $refusal_call_shipment->agent_id,
+                        'shipments_journey_id' => $refusal_call_shipment->shipments_journey_id,
+                        'last_shipments_journey_id' => $refusal_call_shipment->last_shipments_journey_id,
+                        'shipment_id' => $refusal_call_shipment->shipment_id,
+                        'rv_assign_agent_status_id' => $refusal_call_shipment->rv_assign_agent_status_id,
+                        'rv_assign_agent_sub_status_id' => Null,
+                        'rv_state_id' => $refusal_call_shipment->rv_state_id,
+                        'updated_type_id' => 1,
+                        'updated_by_id' =>  Null,
+                        'is_fake_status' => $refusal_call_shipment->is_fake_status,
+                        'rv_fake_status_id' => $refusal_call_shipment->rv_fake_status_id,
+                        'remarks' => $refusal_call_shipment->remarks,
+                        'call_to_id' => $refusal_call_shipment->call_to_id,
+                        'assigned_to_type_id' => $refusal_call_shipment->assigned_to_type_id,
+                        'assigned_by' => $refusal_call_shipment->assigned_by,
+                    ];
+                    $this->data_rv_shipment_assign_agent_details($data);
+                }
+            }
             $haltShipper = RvShipmentTicket::join('shipments_journey',function($join) use ($date){
                 $join->on('rv_shipment_tickets.shipment_id', '=', 'shipments_journey.shipment_id')
                     ->where('shipments_journey.shipper_status_id', '=', 12)
                     ->where('shipments_journey.verification',1)
-                    ->where('shipments_journey.created_at','>=','2025-02-22'.' 00:00:00')
-                    ->where('shipments_journey.created_at','<=', '2025-02-25'.' 23:14:59');
+                    ->where('shipments_journey.created_at','>=',$date.' 00:00:00')
+                    ->where('rv_shipment_tickets.updated_at','<=',date('Y-m-d').' 23:14:59');
                 })
                 ->where('disabled_shipper',1)
                 ->where('halt_shipper',0)
-                ->where('rv_shipment_tickets.updated_at','>=', '2025-02-22'.' 00:00:00')
-                ->where('rv_shipment_tickets.updated_at','<=', '2025-02-25'.' 23:14:59')
+                ->where('rv_shipment_tickets.updated_at','>=',$date.' 00:00:00')
+                ->where('rv_shipment_tickets.updated_at','<=', date('Y-m-d').' 23:14:59')
                 ->select('rv_shipment_tickets.*', 'shipments_journey.id as journeyId')->get();
-               
                 if($haltShipper->isNotEmpty()){
                     foreach($haltShipper->toArray() as $insertData){
-                    $data = [
-                        'agent_id' => 346, // testing purpose
-                        'shipment_id' => $insertData['shipment_id'],
-                        'shipments_journey_id' => $insertData['journeyId'],
-                        'rv_assign_agent_status_id' => 7,
-                        'rv_assign_agent_sub_status_id' => null,
-                        'rv_assign_agent_sub_status_id' => null,
-                        'assigned_to_type_id' => 0,
-                        'assigned_by' => 0,
-                        'rv_state_id' => 2,
-                        'updated_by_id' => 346
-                    ];
-                    $this->rv_shipment_assign($data);
-                    ShipmentsJourneyController::add($insertData['shipment_id'], 65, 65, $insertData['shipment_status_reason_id'], NULL, $insertData['shipment_user_id'], 346);
+                        $data = [
+                            'agent_id' => 346, // testing purpose
+                            'shipment_id' => $insertData['shipment_id'],
+                            'shipments_journey_id' => $insertData['journeyId'],
+                            'rv_assign_agent_status_id' => 7,
+                            'rv_assign_agent_sub_status_id' => null,
+                            'rv_assign_agent_sub_status_id' => null,
+                            'assigned_to_type_id' => 0,
+                            'assigned_by' => 0,
+                            'rv_state_id' => 2,
+                            'updated_by_id' => 346
+                        ];
+                        $this->rv_shipment_assign($data);
+                        ShipmentsJourneyController::add($insertData['shipment_id'], 65, 65, $insertData['shipment_status_reason_id'], NULL, $insertData['shipment_user_id'], 346);
                     }
                     NotificationsController::send(220, $haltShipper);
                     Shipment::whereIn('id', array_column($haltShipper->toArray(), 'shipment_id'))->update(['shipper_status_id'=>65, 'consignee_status_id'=>65]);
