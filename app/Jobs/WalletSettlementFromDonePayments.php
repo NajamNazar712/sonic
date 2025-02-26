@@ -23,6 +23,8 @@ use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Controllers\CRM\CRMCommentController;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipment;
+use App\ShipmentAdditionalCharges;
+
 
 class WalletSettlementFromDonePayments implements ShouldQueue
 {
