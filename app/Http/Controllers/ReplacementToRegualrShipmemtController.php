@@ -60,22 +60,26 @@ class ReplacementToRegualrShipmemtController extends Controller
            ]);
        }
 
-       Shipment::where('id', $shipment_id)->update([
-           'booking_type_id' => 1,
-           'shipper_status_id' => 13,
-           'consignee_status_id' => 13,
-           'amount' => $shipment_amount,
-       ]);
-       if ($shipment->amount != $shipment_amount) {
-           ChangeShipmentAmountLog::create([
-               'shipment_id' => $shipment_id,
-               'old_amount' => $shipment->amount,
-               'new_amount' => $shipment_amount,
-               'admin_id' => $user_id
+       //if shipment status collected or not collected then change shipper_status_id udpate 13 re-attemp Anas BA Said
+       if(in_array($shipment->shipper_status_id,[56,30])) {
+           Shipment::where('id', $shipment_id)->update([
+               'booking_type_id' => 1,
+               'shipper_status_id' => 13,
+               'consignee_status_id' => 13,
+               'amount' => $shipment_amount,
            ]);
+           if ($shipment->amount != $shipment_amount) {
+               ChangeShipmentAmountLog::create([
+                   'shipment_id' => $shipment_id,
+                   'old_amount' => $shipment->amount,
+                   'new_amount' => $shipment_amount,
+                   'admin_id' => $user_id
+               ]);
+           }
+
+           ShipmentsJourneyController::add($shipment_id, 13, 13,$shipment_reason, NULL, NULL, $user_id);
        }
 
-       ShipmentsJourneyController::add($shipment_id, 13, 13,$shipment_reason, NULL, NULL, $user_id);
 
 
        ShipmentItem::where(['shipment_id' => $shipment->id, 'type' => 1])->delete();

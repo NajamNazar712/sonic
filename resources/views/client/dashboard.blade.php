@@ -2057,7 +2057,8 @@
                             }
                             if (nature_flag) {
                                 $('#AddNewRequest').attr('disabled', true);
-                                swal({
+
+                                    swal({
                                         title: 'Please Wait!',
                                         text: 'Launching Request.',
                                         icon: 'info',
@@ -2065,6 +2066,7 @@
                                         closeOnClickOutside: false,
                                         closeOnEsc: false
                                     });
+
                                 $.ajax({
                                     url: '{!! route('cod.crm.request.add') !!}',
                                     method: 'POST',
@@ -2141,14 +2143,14 @@
                     }
                     else {
                         $('#AddNewRequest').attr('disabled',true);
-                        swal({
-                            title: 'Please Wait!',
-                            text: 'Launching Request.',
-                            icon: 'info',
-                            buttons: false,
-                            closeOnClickOutside: false,
-                            closeOnEsc: false
-                        });
+                        // swal({
+                        //     title: 'Please Wait!',
+                        //     text: 'Launching Request.',
+                        //     icon: 'info',
+                        //     buttons: false,
+                        //     closeOnClickOutside: false,
+                        //     closeOnEsc: false
+                        // });
 
                         /*********
                             // Commented this because in Complain type = 1, the value set in different variable
