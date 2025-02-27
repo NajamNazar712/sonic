@@ -279,8 +279,8 @@ class AdminRetailReportController extends Controller
             $to = Carbon::parse($from)->addDays(9)->endOfDay()->toDateTimeString();
         }
         if($report_type == 3){
-            $from = Carbon::today()->subMonth(1)->firstOfMonth()->addDays(20)->toDateTimeString();
-            $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();
+            $from = Carbon::today()->firstOfMonth()->addDays(20)->toDateTimeString();
+            $to = Carbon::today()->endOfMonth()->toDateTimeString();
         }
 
         $sales = DB::connection('reports')->table('shipments')->join('retail_shipments as rs', 'rs.shipment_id', '=','shipments.id')
