@@ -11,7 +11,6 @@
             <div class="card-body">
                 @include('retail.inc.messages')
 
-
                 <div id="search_form" class="row mb-2 justify-content-center">
                     <div class="col-4">
                         <div class="form-group input-group ml">
@@ -38,11 +37,9 @@
                     </div>
                 </div>
 
-
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
-
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Order ID</th>
@@ -309,7 +306,6 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
-                // ajax: '{{ route('retail.return.confirmation_pending.list') }}',
                 ajax: {
                     url: '{{ route('retail.return.confirmation_pending.list') }}',
                     data: function (d) {

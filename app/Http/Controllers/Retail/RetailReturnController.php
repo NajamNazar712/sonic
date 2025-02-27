@@ -39,23 +39,17 @@ class RetailReturnController extends Controller
     }
 
     public function confirmation_pending_list(Request $request){
-
-        $from = '';
-        $to = '';
-
-        if ($request->search_date_from == null && $request->search_date_to == null) {
+        $from = $request->search_date_from ? Carbon::parse($request->search_date_from)->toDateString() : null;
+        $to = $request->search_date_to ? Carbon::parse($request->search_date_to)->toDateString() : null;
+        
+        if (!$from && !$to) {
             $from = Carbon::now()->toDateString();
             $to = Carbon::now()->subMonths(3)->toDateString();
-        } else {
-            $from = Carbon::parse($request->search_date_from)->toDateString();
-            $to = Carbon::parse($request->search_date_to)->toDateString();
+        } elseif (!$from) {
+            $from = Carbon::now()->toDateString();
+        } elseif (!$to) {
+            $to = Carbon::now()->toDateString();
         }
-        
-
-        dd(
-            $from,
-            $to
-        );
 
         $shipments = Shipment::join('retail_shipments as rs', 'rs.shipment_id', '=', 'shipments.id')
             ->join('users as u', 'shipments.user_id', '=', 'u.id')
@@ -96,7 +90,6 @@ class RetailReturnController extends Controller
                     });
                 }
             }
-
 
         return Datatables::of($shipments)
             ->setRowAttr([
@@ -314,7 +307,19 @@ class RetailReturnController extends Controller
         return view('retail.return.reattempt_history')->with(['shipment_status'=>$shipment_status,'shipping_mode'=>$shipping_mode]);
     }
 
-    public function reattempt_history_list(){
+    public function reattempt_history_list(Request $request){
+        $from = $request->search_date_from ? Carbon::parse($request->search_date_from)->toDateString() : null;
+        $to = $request->search_date_to ? Carbon::parse($request->search_date_to)->toDateString() : null;
+        
+        if (!$from && !$to) {
+            $from = Carbon::now()->toDateString();
+            $to = Carbon::now()->subMonths(3)->toDateString();
+        } elseif (!$from) {
+            $from = Carbon::now()->toDateString();
+        } elseif (!$to) {
+            $to = Carbon::now()->toDateString();
+        }
+
         $shipments_journey = ShipmentsJourney::join('shipments as s', 's.id', '=', 'shipments_journey.shipment_id')
             ->join('retail_shipments as rs', 'rs.shipment_id', '=', 'shipments_journey.shipment_id')
             ->join('users as u', 's.user_id', '=', 'u.id')
@@ -331,6 +336,7 @@ class RetailReturnController extends Controller
             })
             ->select('rs.retail_user_id as retail_user_id','s.tracking_number as tracking_number','s.tracking_number as tracking','u.name as shipper','oc.name as origin','dc.name as destination','s.consignee_name','s.consignee_phone_number_1','s.consignee_phone_number_2','s.consignee_address','s.amount','sm.mode','bt.booking_type as service_type','ss.name as current_status','sj.created_at as current_status_date','shipments_journey.created_at as reattempt_status_date','sj.remarks as current_remarks')
             ->where('shipments_journey.shipper_status_id', 52)
+            ->whereBetween('rs.created_at', [$from, $to])
             ->where('rs.retail_user_id', Auth::id());
 
             if(session('user_type') == 2){
