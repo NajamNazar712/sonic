@@ -23,6 +23,8 @@ use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Controllers\CRM\CRMCommentController;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipment;
+use App\ShipmentAdditionalCharges;
+
 
 class WalletSettlementFromDonePayments implements ShouldQueue
 {
@@ -109,12 +111,18 @@ class WalletSettlementFromDonePayments implements ShouldQueue
                 ];
 
             } elseif($dps->wallet_action_bid == 2) {
+                $type =  FinjaLogSettlementRecord::check_wallet_charges_type($dps->shipment_id);
+                $payable = $dps->payable;
+                if($type) {
+                    $wallet_charges = ShipmentAdditionalCharges::fetch_wallet_charges($dps->shipment_id);
+                    $payable = $dps->payable - $wallet_charges;
+                }
                 $requestPayload = [
                     "client_id" => $dps->user_id,
                     "wallet_id" => $dps->wallet_id,
                     "reference_id" => $dps->id,
                     "shipment_id" =>  $dps->tracking_number,
-                    "amount" => floatval($dps->payable),
+                    "amount" => floatval($payable),
                 ];
                 $request_nature = 'adjustment-request';
                 $response_nature = 'adjustment-response';
