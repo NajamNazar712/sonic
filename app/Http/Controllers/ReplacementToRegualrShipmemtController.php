@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 
 class ReplacementToRegualrShipmemtController extends Controller
 {
-   public static function replaceAutoWithRegularShipment($shipment_id,$shipment_amount,$user_id,$shipment_reason=null)
+   public static function replaceAutoWithRegularShipment($shipment_id,$shipment_amount,$shipment_reason,$launched_by,$user_id)
    {
        $shipment = Shipment::where('id', $shipment_id)->first();
        if($shipment->warehouse == 1){
@@ -79,7 +79,15 @@ class ReplacementToRegualrShipmemtController extends Controller
            if(in_array($shipment->shipper_status_id,[56,30])) {
                $shipment->shipper_status_id = 13;
                $shipment->consignee_status_id = 13;
-               ShipmentsJourneyController::add($shipment_id, 13, 13,$shipment_reason, NULL, NULL, $user_id);
+               ShipmentsJourneyController::add(
+                   $shipment_id,
+                   13,
+                   13,
+                   $shipment_reason,
+                   NULL,
+                   $launched_by == 0 ? NULL : $user_id,
+                   $launched_by == 0 ? $user_id : NULL
+               );
            }
            $shipment->save();
        }

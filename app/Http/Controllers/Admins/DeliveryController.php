@@ -1839,7 +1839,7 @@ class DeliveryController extends Controller
 
             if ($note_data->status == 0) {
                 $note_data_shipments = DeliveryNoteShipment::where('delivery_note_id', $id)->pluck('shipment_id')->toArray();
-                ;
+
                 $delivered_count = 0;
                 $total_count = 0;
                 foreach ($note_data_shipments as $shipment_id) {
@@ -8312,7 +8312,6 @@ class DeliveryController extends Controller
 
     public function replacement_not_collected_regular_re_attempt(Request $request)
     {
-        dd($request->all());
         foreach ($request->shipment_ids as $shipment_id) {
             $shipment = Shipment::where('id', $shipment_id)->first();
             if ($shipment->warehouse == 1) {

@@ -13,6 +13,7 @@ use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Models\CRM\CrmRequestTaggingHistory;
 use App\Http\Models\SaleTierTag;
 use App\Http\Models\ConsigneeAddressArea;
+use App\Http\Models\ShipmentsJourney;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\CrmAutoTagUser;
@@ -358,8 +359,6 @@ class CRMController extends Controller
         if($case_nature_id == 2){
             $shipment = Shipment::find($shipment_id);
 
-      
-
             if($shipment){
                 if($case_nature_type_id == 13){
                     $crm_request->status_id = 4;
@@ -440,17 +439,40 @@ class CRMController extends Controller
                     
                 }
                 // auto change service type
-                else if($case_nature_type_id == 39 && in_array($shipment->shipper_status_id,[53,2,3,4,5,12,65,66,21,56,30])){
-                    $crm_request->status_id = 4;
-                    $crm_request->save();
+                else if($case_nature_type_id == 39 && in_array($shipment->shipper_status_id,[2, 3, 4, 5, 7, 8, 9, 11, 12, 13, 15, 30, 32, 49, 53, 54, 55, 56, 62, 65, 66, 67])){
 
-                    $crm_request_status_history = new CrmRequestStatusHistory();
-                    $crm_request_status_history->crm_request_id = $id;
-                    $crm_request_status_history->status_id = 4;
-                    $crm_request_status_history->save();
+                    $proceed = true;
 
-                    ReplacementToRegualrShipmemtController::replaceAutoWithRegularShipment($shipment->id,$shipment->amount,$launched_by_id);
+                    if (in_array($shipment->shipper_status_id, [7, 8, 9, 12, 15, 30, 56, 65])) {
+                        $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)
+                            ->where('shipper_status_id', $shipment->shipper_status_id)
+                            ->where('verification', 1)
+                            ->first();
 
+                        $proceed = $shipment_journey ? true : false;
+                    }
+
+                    if ($proceed) {
+                        // Update CRM request status
+                        foreach ([2, 4] as $status) {
+                            $crm_request->status_id = $status;
+                            $crm_request->save();
+
+                            $crm_request_status_history = new CrmRequestStatusHistory();
+                            $crm_request_status_history->crm_request_id = $id;
+                            $crm_request_status_history->status_id = $status;
+                            $crm_request_status_history->save();
+                        }
+
+                        // Call the replacement function
+                        ReplacementToRegualrShipmemtController::replaceAutoWithRegularShipment(
+                            $shipment->id,
+                            $shipment->amount,
+                            null,
+                            $launched_by,
+                            $launched_by_id
+                        );
+                    }
                 }
             }
 
