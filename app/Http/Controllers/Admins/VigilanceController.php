@@ -913,11 +913,12 @@ class VigilanceController extends Controller
                             WHERE vns.verification_type = 1
                             
                             UNION
-                            
-                            SELECT vns.id, rn.created_at, vns.vigilance_note_id
-                            FROM vigilance_note_shipments vns
-                            LEFT JOIN return_note_shipments rns ON rns.return_note_id = vns.note_id
+
+                            SELECT rns.shipment_id, rn.created_at, vns.vigilance_note_id
+                            FROM return_note_shipments rns
                             LEFT JOIN return_notes rn ON rns.return_note_id = rn.id
+                            LEFT JOIN vigilance_note_shipments vns ON rn.id = vns.note_id
+
                             WHERE vns.verification_type = 1
                         ) AS verified_shipments
                         WHERE verified_shipments.vigilance_note_id = vigilance_notes.id 
