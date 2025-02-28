@@ -1380,7 +1380,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             });
 
             Route::prefix('create')->name('create.')->group(function () {
+
                 Route::get('', 'Admins\AdminCargoManifestController@create_index')->name('index');
+                Route::post('count_per_hub', 'Admins\AdminCargoManifestController@count_per_hub')->name('count_per_hub');
                 Route::post('shipment_details', 'Admins\AdminCargoManifestController@create_shipment_details')->name('shipment_details');
                 //Route::post('shipment_details', 'Admins\AdminCargoManifestController@create_shipment_details_old')->name('shipment_details'); // old_one
                 Route::post('bag_details', 'Admins\AdminCargoManifestController@create_bag_details')->name('bag_details');
