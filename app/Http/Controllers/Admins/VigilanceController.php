@@ -828,60 +828,59 @@ class VigilanceController extends Controller
             //     return 0;
             // })
 
+
+
             ->addColumn('unverified_shipments_link', function ($row) use ($from, $to) {
-                // Total Shipments: Get distinct shipment IDs first
-                $total_shipments = DB::table(function ($query) use ($row, $from, $to) {
-                        $query->select('dns.shipment_id')
-                            ->from('delivery_note_shipments as dns')
-                            ->leftJoin('vigilance_note_shipments as vns', 'dns.delivery_note_id', '=', 'vns.note_id')
-                            ->where('vns.vigilance_note_id', $row->vigilance_note_id)
-                            ->whereBetween('dns.created_at', [$from, $to])
-                            ->distinct();
+                // Get total shipments (both delivery and return)
+                $total_shipments = DB::table(DB::raw("( 
+                        SELECT DISTINCT dns.shipment_id, dns.created_at 
+                        FROM delivery_note_shipments dns
+                        LEFT JOIN vigilance_note_shipments vns ON dns.delivery_note_id = vns.note_id
+                        WHERE vns.vigilance_note_id = {$row->vigilance_note_id}
+                        AND dns.created_at BETWEEN '{$from}' AND '{$to}'
             
-                        $query->union(
-                            DB::table('return_note_shipments as rns')
-                                ->select('rns.shipment_id')
-                                ->leftJoin('return_notes as rn', 'rns.return_note_id', '=', 'rn.id')
-                                ->leftJoin('vigilance_note_shipments as vns', 'rn.id', '=', 'vns.note_id')
-                                ->where('vns.vigilance_note_id', $row->vigilance_note_id)
-                                ->whereBetween('rn.created_at', [$from, $to])
-                                ->distinct()
-                        );
-                    })
-                    ->count();
+                        UNION
             
-                // Verified Shipments: Get distinct verified IDs first
-                $verified_shipments = DB::table(function ($query) use ($row, $from, $to) {
-                        $query->select('vns.id')
-                            ->from('vigilance_note_shipments as vns')
-                            ->leftJoin('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'vns.note_id')
-                            ->where('vns.vigilance_note_id', $row->vigilance_note_id)
-                            ->where('vns.verification_type', 1)
-                            ->whereBetween('dns.created_at', [$from, $to])
-                            ->distinct();
+                        SELECT DISTINCT rns.shipment_id, rn.created_at
+                        FROM return_note_shipments rns
+                        LEFT JOIN return_notes rn ON rns.return_note_id = rn.id
+                        LEFT JOIN vigilance_note_shipments vns ON rns.return_note_id = vns.note_id
+                        WHERE vns.vigilance_note_id = {$row->vigilance_note_id}
+                        AND rn.created_at BETWEEN '{$from}' AND '{$to}'
+                    ) AS total_shipments"))
+                ->count();
             
-                        $query->union(
-                            DB::table('vigilance_note_shipments as vns')
-                                ->select('vns.id')
-                                ->leftJoin('return_note_shipments as rns', 'rns.return_note_id', '=', 'vns.note_id')
-                                ->leftJoin('return_notes as rn', 'rns.return_note_id', '=', 'rn.id')
-                                ->where('vns.vigilance_note_id', $row->vigilance_note_id)
-                                ->where('vns.verification_type', 1)
-                                ->whereBetween('rn.created_at', [$from, $to])
-                                ->distinct()
-                        );
-                    })
-                    ->count();
+                // Get verified shipments (both delivery and return)
+                $verified_shipments = DB::table(DB::raw("( 
+                        SELECT DISTINCT vns.id
+                        FROM vigilance_note_shipments vns
+                        LEFT JOIN delivery_note_shipments dns ON dns.delivery_note_id = vns.note_id
+                        WHERE vns.vigilance_note_id = {$row->vigilance_note_id}
+                        AND vns.verification_type = 1
+                        AND dns.created_at BETWEEN '{$from}' AND '{$to}'
+            
+                        UNION
+            
+                        SELECT DISTINCT vns.id
+                        FROM vigilance_note_shipments vns
+                        LEFT JOIN return_note_shipments rns ON rns.return_note_id = vns.note_id
+                        LEFT JOIN return_notes rn ON rns.return_note_id = rn.id
+                        WHERE vns.vigilance_note_id = {$row->vigilance_note_id}
+                        AND vns.verification_type = 1
+                        AND rn.created_at BETWEEN '{$from}' AND '{$to}'
+                    ) AS verified_shipments"))
+                ->count();
             
                 $unverified_shipments = $total_shipments - $verified_shipments;
             
                 if ($unverified_shipments != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle" data-note-id="'. $row->vigilance_note_id .'">'
-                            . $unverified_shipments . 
+                        . $unverified_shipments . 
                         '</button>';
                 }
                 return 0;
             })
+            
             
             
 
