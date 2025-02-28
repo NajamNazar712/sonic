@@ -803,32 +803,6 @@ class VigilanceController extends Controller
                     ? '<button class="btn btn-sm btn-outline-info align-middle" noteId="'. $row->vigilance_note_id .'">' . $excess_shipments . '</button>'
                     : 0;
             })            
-            
-            // ->addColumn('unverified_shipments_link', function ($row) use ($from, $to) {
-            //     $total_shipments = DB::table('delivery_note_shipments as dns')
-            //     ->leftJoin('vigilance_note_shipments as vns', 'dns.delivery_note_id', '=', 'vns.note_id')
-            //     ->where('vns.vigilance_note_id', $row->vigilance_note_id)
-            //     ->whereBetween('dns.created_at', [$from, $to])
-            //     ->count(DB::raw('DISTINCT dns.shipment_id'));
-
-            //     $verified_shipments = DB::table('vigilance_note_shipments as vns')
-            //         ->leftJoin('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'vns.note_id')
-            //         ->where('vns.vigilance_note_id', $row->vigilance_note_id)
-            //         ->where('vns.verification_type', 1)
-            //         ->whereBetween('dns.created_at', [$from, $to])
-            //         ->count(DB::raw('DISTINCT vns.id'));
-            
-            //     $unverified_shipments = $total_shipments - $verified_shipments;
-            
-            //     if ($unverified_shipments != 0) {
-            //         return '<button class="btn btn-sm btn-outline-info align-middle" data-note-id="'. $row->vigilance_note_id .'">'
-            //                 . $unverified_shipments . 
-            //             '</button>';
-            //     }
-            //     return 0;
-            // })
-
-
 
             ->addColumn('unverified_shipments_link', function ($row) use ($from, $to) {
                 // Get total shipments (both delivery and return)
