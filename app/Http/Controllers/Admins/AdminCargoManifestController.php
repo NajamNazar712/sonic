@@ -1723,7 +1723,7 @@ class AdminCargoManifestController extends Controller
                                 $details['shipping_mode']['id'] = $shipment->shipping_mode->id;
                                 $details['shipping_mode']['name'] = $shipment->shipping_mode->mode;
                             }
-                            $startDate = Carbon::now()->subMonth()->format('Y-m-d 00:00:00');
+                            $startDate = Carbon::now()->subMonth(2)->format('Y-m-d 00:00:00');
                             $endDate = Carbon::now()->format('Y-m-d 23:59:59');
 
                             if ($request->hub_id == 0) {
