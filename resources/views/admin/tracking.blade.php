@@ -3398,8 +3398,7 @@
 
                         var complaint_id = $('#case_nature_requests').val();
 
-                        if(complaint_id == 12)
-                        {
+                        if(complaint_id == 12) {
                             swal({
                                 title: 'Please Wait!',
                                 text: 'Launching Request.',
@@ -3517,7 +3516,7 @@
                                 }
                             });
                         }
-                        if(complaint_id == 39) {
+                        else if(complaint_id == 39) {
                             swal({
                                 title: 'Are you sure to change service type?',
                                 text: 'Select Yes to change service type!',
@@ -3609,6 +3608,9 @@
                                             $('#AddRequestModal').modal('hide');
                                             $('#AddNewRequest').attr('disabled', false);
                                     });
+                                }
+                                else {
+                                  $('#AddNewRequest').attr('disabled',false);
                                 }
                             });
                         }

@@ -2397,6 +2397,9 @@
                                             $('#AddNewRequest').attr('disabled',false);
                                         });
                                 }
+                                else {
+                                    $('#AddNewRequest').attr('disabled',false);
+                                }
 
                             });
                         }
