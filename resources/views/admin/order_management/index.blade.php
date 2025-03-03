@@ -1500,7 +1500,8 @@
                                 });
                         }
 
-                    } else if (case_nature_id == 2) {
+                    }
+                    else if (case_nature_id == 2) {
                         var nature_flag = true;
                         var case_nature_complaint_id = $('#case_nature_requests').val();
                         var case_nature_channel_id = $('#request_channels').val();
@@ -1540,9 +1541,7 @@
                         if (nature_flag) {
                             $('#AddNewRequest').attr('disabled', true);
                             var complaint_id = $('#case_nature_requests').val();
-                        
-                            if(complaint_id == 12)
-                            {
+                            if(complaint_id == 12) {
                                 swal({
                                     title: 'Please Wait!',
                                     text: 'Launching Request.',
@@ -1699,69 +1698,75 @@
                                             method: 'POST',
                                             data: {
                                                 '_token': '{{ csrf_token() }}',
-                                                'shipment_id': $('#requested_shipment_id').val(),
+                                                'shipment_ids': selected_rows,
                                                 'case_nature_id': case_nature_id,
                                                 'complaint_id': case_nature_complaint_id,
                                                 'channel_id': case_nature_channel_id,
-                                                'description': service_description,
-                                                'alternate_phone': alternate_phone,
-                                                // 'cod_amount': cod_amount,
+                                                'description': service_description
                                             }
                                         }).done(function (data) {
-                                            swal.close();
-                                            if (data.status) {
-                                                if (data.flag) {
-                                                    var html = '';
+                                                swal.close();
+                                                if (data.status) {
+                                                    if (data.flag) {
+                                                        var html = '';
 
-                                                    $.each(data.already_existed_shipments, function(index,
-                                                                                                    tracking_number) {
-                                                        html += tracking_number + '<br/>';
-                                                    });
+                                                        $.each(data.already_existed_shipments, function (index, tracking_number) {
+                                                            html += tracking_number + '<br/>';
+                                                        });
 
-                                                    if (!data.cannot_change) {
-                                                        html +=
-                                                            '<br/>Request/Complaint already lodged for the above Shipment(s)!';
-                                                    } else {
-                                                        html +=
-                                                            '<br/>Request for Change cannot be opened for the above Shipment(s) at the Current Status!';
-                                                    }
+                                                        if (!data.cannot_change) {
+                                                            html += '<br/>Request/Complaint already lodged for the above Shipment(s)!';
+                                                        }
+                                                        else {
+                                                            html += '<br/>Request for Change cannot be opened for the above Shipment(s) at the Current Status!';
+                                                        }
 
-                                                    content = document.createElement('div');
-                                                    content.innerHTML = html;
+                                                        content = document.createElement('div');
+                                                        content.innerHTML = html;
 
-                                                    swal({
-                                                        title: 'Request / Complaint Cannot Be Lodged!',
-                                                        content: content,
-                                                        icon: 'warning',
-                                                        buttons: {
-                                                            cancel: {
-                                                                text: 'Close',
-                                                                value: null,
-                                                                visible: true,
-                                                                closeModal: true,
+                                                        swal({
+                                                            title: 'Request / Complaint Cannot Be Lodged!',
+                                                            content: content,
+                                                            icon: 'warning',
+                                                            buttons: {
+                                                                cancel: {
+                                                                    text: 'Close',
+                                                                    value: null,
+                                                                    visible: true,
+                                                                    closeModal: true,
+                                                                },
                                                             },
-                                                        },
-                                                        closeOnClickOutside: false,
-                                                        closeOnEsc: false,
-                                                        dangerMode: true
-                                                    });
+                                                            closeOnClickOutside: false,
+                                                            closeOnEsc: false,
+                                                            dangerMode: true
+                                                        });
+                                                    } else {
+                                                        toastr.success(data.success, 'Success!', {
+                                                            positionClass: 'toast-bottom-center',
+                                                            containerId: 'toast-bottom-center'
+                                                        });
+                                                    }
+                                                    // toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                                 } else {
-                                                    toastr.success(data.success, 'Success!', {
-                                                        positionClass: 'toast-bottom-center',
-                                                        containerId: 'toast-bottom-center'
+                                                    toastr.error(data.error, 'Error!', {
+                                                        positionClass: 'toast-top-center',
+                                                        containerId: 'toast-top-center'
                                                     });
                                                 }
-                                                // toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                            } else {
-                                                toastr.error(data.error, 'Error!', {
-                                                    positionClass: 'toast-top-center',
-                                                    containerId: 'toast-top-center'
-                                                });
-                                            }
 
-                                            $('#AddRequestModal').modal('hide');
-                                            $('#AddNewRequest').attr('disabled', false);
-                                        });
+                                                table.button('.shipper_recall').disable();
+                                                table.button('.print').disable();
+
+                                                selected_rows = [];
+
+                                                table.rows().deselect();
+
+                                                table.draw('false');
+
+
+                                                $('#AddRequestModal').modal('hide');
+                                                $('#AddNewRequest').attr('disabled', false);
+                                            });
                                     }
                                     else {
                                         $('#AddNewRequest').attr('disabled',false);
@@ -1858,7 +1863,8 @@
                             }
                             
                         }
-                    } else if (case_nature_id == 3) {
+                    }
+                    else if (case_nature_id == 3) {
                         var feedback_flag = true;
                         var feedback_channel = $('#feedback_channel_request').val();
                         var feedback_description = $('#feedback_description_request').val();
@@ -1958,7 +1964,8 @@
                                     $('#AddNewRequest').attr('disabled', false);
                                 });
                         }
-                    } else if (case_nature_id === 4) {
+                    }
+                    else if (case_nature_id === 4) {
                         if (selected_rows.length > 1) {
                             var error = "Cannot select more than one shipment";
                             toastr.error(error, 'Error!', {
