@@ -478,7 +478,7 @@ class AdminRetailReportController extends Controller
             $to = Carbon::parse($from)->addDays(9)->endOfDay()->toDateTimeString();
         }
         if($report_type == 3){
-            $from = Carbon::today()->subMonth(1)->firstOfMonth()->addDays(20)->toDateTimeString();
+            $from = Carbon::today()->subMonth(1)->firstOfMonth()->toDateTimeString();
             $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();
         }
 
@@ -545,7 +545,7 @@ class AdminRetailReportController extends Controller
             $filename = 'retail_sales_report_by_delivery_second_ten_days.xlsx';
         }
         if($report_type == 3){
-            $filename = 'retail_sales_report_by_delivery_last_ten_days.xlsx';
+            $filename = 'retail_sales_report_by_full_month.xlsx';
         }
 
         $details = array();
