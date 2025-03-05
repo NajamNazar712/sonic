@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Http\Models\Admin\Admin;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -11,6 +12,7 @@ use Illuminate\Queue\SerializesModels;
 use App\Http\Controllers\FingaIntegrationController;
 use App\Http\Models\DonePaymentShipment;
 use App\Http\Models\DonePayment;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
@@ -51,7 +53,7 @@ class WalletSettlementFromDonePayments implements ShouldQueue
      */
     public function handle()
     {
-        
+
         $done_payment_shipments = DonePaymentShipment::join('shipments as s','s.id', 'done_payment_shipments.shipment_id')
         ->leftjoin('shipment_additional_charges as sc', 'sc.shipment_id', 's.id')
         ->leftjoin('shipment_services_charges as ssc', 'ssc.shipment_id', 's.id')
@@ -216,7 +218,7 @@ class WalletSettlementFromDonePayments implements ShouldQueue
                                     CrmRequestStatusHistory::create([
                                         'crm_request_id' => $crm_request->id,
                                         'status_id' => 4,
-                                        'agent_id' => Auth::id()
+                                        'agent_id' => 346
                                     ]);
                                     
                                     CrmRequestTagging::where('crm_request_id', $crm_request->id)->delete();
