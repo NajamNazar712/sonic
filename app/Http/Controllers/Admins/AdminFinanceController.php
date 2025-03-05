@@ -21527,12 +21527,10 @@ class AdminFinanceController extends Controller
 
     public static function isWalletLogUpdated($shipment_id)
     {
-       
-        $logRecord = FinjaLogSettlementRecord::where('shipment_id', $shipment_id)->first();
-        if ($logRecord && $logRecord->wallet_log_updated == 1) {
-            return true;
-        }
-        return false;
+
+        return FinjaLogSettlementRecord::where('shipment_id', $shipment_id)
+            ->where('wallet_log_updated', 1)
+            ->exists();
     }
 
     public static function isWalletSettlementUpdated($shipment_id)
