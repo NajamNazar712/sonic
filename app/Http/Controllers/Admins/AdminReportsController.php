@@ -15677,9 +15677,9 @@ class AdminReportsController extends Controller
                         return $shipment->origin;
                     }
                 }elseif(in_array($shipment->shipper_status_id,[18, 34, 23, 55,24, 47, 48,2])){
-                    return (($shipment->intercepttype == 1) ?  $shipment->intercept_city_name :  $shipment->origin);
+                    return $shipment->origin;
                 }elseif(in_array($shipment->shipper_status_id,[54,55, 69,7, 4,8])){
-                    return $shipment->destination;
+                    return (($shipment->intercepttype == 1) ?  $shipment->intercept_city_name : $shipment->destination);
                 }elseif(in_array($shipment->shipper_status_id,[22, 21,75])){
                     if($shipment->return_city != null){
                         return $shipment->return_city;
