@@ -92,7 +92,7 @@ class FinSurgentSonicPaymentSharing extends Command
                             //     'arrival_sms_charges' => floatval($pending_payment_shipment->sms_charges)
                             // ] // removed after new requierment
                         ];
-                        if ($token_time->diffInMinutes(Carbon::now()) >= 5) {
+                        if ($token_time->diffInMinutes(Carbon::now()) >= 4) {
                             $token = FingaIntegrationController::getToken($api);
                             $token_time = Carbon::now(); // Update the token time
                         }

@@ -70,6 +70,7 @@ class WalletSettlementFromDonePayments implements ShouldQueue
         $successfull_record = [];
         $api = config('app.FINGA_URL');
         $token = FingaIntegrationController::getToken($api);
+        $token_time = Carbon::now();
         foreach($done_payment_shipments as $dps) {
             $shipmentId = $dps->shipment_id;
             $shipment = Shipment::find($shipmentId);
@@ -155,7 +156,10 @@ class WalletSettlementFromDonePayments implements ShouldQueue
             }
 
             try {
-
+                if ($token_time->diffInMinutes(Carbon::now()) >= 4) {
+                    $token = FingaIntegrationController::getToken($api);
+                    $token_time = Carbon::now(); // Update the token time
+                }
                 if($token) {
                     $response = Http::withHeaders([
                         'accept' => 'application/json',
