@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\FafCharges;
 use App\FinjaSmsLog;
+use App\Http\Models\PendingPaymentShipment;
+use App\Http\Models\WalletUser;
+use App\Models\FinjaRequestLog;
 use App\ShipmentAdditionalCharges;
 use DB;
 use SnappyPDF;
@@ -1541,14 +1544,20 @@ class APIController extends Controller
             }
 
             try {
-                // Maintaining shipper segment logs on booking when origin and destination are different
-                if ($consignee_city_id != $pickup_city_id) {
-                    ShipperSegmentLogs::create([
-                        'shipment_id' => $shipment_id,
-                        'segment_id' => $user_type->segment_id,
-                        'sub_segment_id' => $user_type->sub_segment_id
-                    ]);
-                }
+                // Maintaining shipper segment logs on booking
+                ShipperSegmentLogs::create([
+                    'shipment_id' => $shipment_id,
+                    'segment_id' => $user_type->segment_id,
+                    'sub_segment_id' => $user_type->sub_segment_id
+                ]);
+
+                // if ($consignee_city_id != $pickup_city_id) {
+                //     ShipperSegmentLogs::create([
+                //         'shipment_id' => $shipment_id,
+                //         'segment_id' => $user_type->segment_id,
+                //         'sub_segment_id' => $user_type->sub_segment_id
+                //     ]);
+                // }
             } catch (\Exception $e) {
                 Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
             }
@@ -1816,14 +1825,20 @@ class APIController extends Controller
             }
 
             try {
-                // Maintaining shipper segment logs on booking when origin and destination are different
-                if ($consignee_city_id != $pickup_city_id) {
-                    ShipperSegmentLogs::create([
-                        'shipment_id' => $shipment_id,
-                        'segment_id' => $user_type->segment_id,
-                        'sub_segment_id' => $user_type->sub_segment_id
-                    ]);
-                }
+                // Maintaining shipper segment logs on booking
+                ShipperSegmentLogs::create([
+                    'shipment_id' => $shipment_id,
+                    'segment_id' => $user_type->segment_id,
+                    'sub_segment_id' => $user_type->sub_segment_id
+                ]);
+
+                // if ($consignee_city_id != $pickup_city_id) {
+                //     ShipperSegmentLogs::create([
+                //         'shipment_id' => $shipment_id,
+                //         'segment_id' => $user_type->segment_id,
+                //         'sub_segment_id' => $user_type->sub_segment_id
+                //     ]);
+                // }
             } catch (\Exception $e) {
                 Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
             }
@@ -2000,6 +2015,18 @@ class APIController extends Controller
 
             $shipment = Shipment::whereIn('user_id', $user_ids)->where('tracking_number', $tracking_number)->first();
 
+            $sub_segment_name = '-';
+            $sub_segment = DB::table('shipper_segment_logs')
+            ->leftJoin('sub_category_segments', 'sub_category_segments.id', 'shipper_segment_logs.sub_segment_id')
+            ->where('shipment_id', $shipment->id)
+            ->select('sub_category_segments.name')
+            ->first();
+
+            if ($sub_segment && $sub_segment->name)
+            {
+                $sub_segment_name = $sub_segment->name;
+            }
+
             $details = array();
 
             $details['tracking_number'] = $tracking_number;
@@ -2085,6 +2112,8 @@ class APIController extends Controller
                     }
                 }
             }
+
+            $details['order_information']['sub_segment'] = $sub_segment_name;
 
             return response()->json(['status' => 0, 'message' => 'Tracking of Shipment #' . $tracking_number, 'details' => $details]);
         }
@@ -3448,14 +3477,20 @@ class APIController extends Controller
             }
 
             try {
-                // Maintaining shipper segment logs on booking when origin and destination are different
-                if ($consignee_city_id != $pickup_city_id) {
-                    ShipperSegmentLogs::create([
-                        'shipment_id' => $shipment_id,
-                        'segment_id' => $user_type->segment_id,
-                        'sub_segment_id' => $user_type->sub_segment_id
-                    ]);
-                }
+                // Maintaining shipper segment logs on booking
+                ShipperSegmentLogs::create([
+                    'shipment_id' => $shipment_id,
+                    'segment_id' => $user_type->segment_id,
+                    'sub_segment_id' => $user_type->sub_segment_id
+                ]);
+
+                // if ($consignee_city_id != $pickup_city_id) {
+                //     ShipperSegmentLogs::create([
+                //         'shipment_id' => $shipment_id,
+                //         'segment_id' => $user_type->segment_id,
+                //         'sub_segment_id' => $user_type->sub_segment_id
+                //     ]);
+                // }
             } catch (\Exception $e) {
                 Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
             }
@@ -3517,7 +3552,7 @@ class APIController extends Controller
 
                     $filename = 'air_waybill' . '.jpg';
 
-                    return $image->setOption('disable-smart-width', true)->setOption('width', 1280)->setOption('enable-local-file-access', true)->download($filename);
+                    return $image->setOption('disable-smart-width', true)->setOption('enable-local-file-access', true)->download($filename);
                 } else {
                     $pdf = SnappyPDF::loadHTML($air_waybill);
 
@@ -9857,14 +9892,20 @@ class APIController extends Controller
             }
 
             try {
-                // Maintaining shipper segment logs on booking when origin and destination are different
-                if ($consignee_city->id != $pickup_city_id) {
-                    ShipperSegmentLogs::create([
-                        'shipment_id' => $shipment_id,
-                        'segment_id' => $user_type->segment_id,
-                        'sub_segment_id' => $user_type->sub_segment_id
-                    ]);
-                }
+                // Maintaining shipper segment logs on booking
+                ShipperSegmentLogs::create([
+                    'shipment_id' => $shipment_id,
+                    'segment_id' => $user_type->segment_id,
+                    'sub_segment_id' => $user_type->sub_segment_id
+                ]);
+
+                // if ($consignee_city->id != $pickup_city_id) {
+                //     ShipperSegmentLogs::create([
+                //         'shipment_id' => $shipment_id,
+                //         'segment_id' => $user_type->segment_id,
+                //         'sub_segment_id' => $user_type->sub_segment_id
+                //     ]);
+                // }
             } catch (\Exception $e) {
                 Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
             }
@@ -10130,11 +10171,75 @@ class APIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Message Received']);
         }
 
-
-
-
-
     }
+
+    public function fintech_charges(Request $request) {
+
+        $rules = [
+            'tracking_number' => ['required', 'exists:shipments,tracking_number'],
+            'wallet_id' => ['required', 'exists:wallet_users,wallet_id'],
+            'charges' => ['required', 'numeric', 'min:0', 'max:100000'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $shipment = Shipment::where('tracking_number', $request->tracking_number)->first();
+            $shipment_id = $shipment->id;
+            if (!DonePaymentShipment::where('shipment_id', $shipment_id)->whereIn('type', [0, 1])->exists()) {
+
+                ShipmentAdditionalCharges::where('shipment_id', $shipment_id)->update([
+                    'wallet_charges' => $request->charges,
+                    'wallet_charges_updated_at' => Carbon::now()
+                ]);
+
+                $pending_payment_shipments = PendingPaymentShipment::where('shipment_id', $shipment->id)->whereIn('type', [0, 1])->latest()->first();
+                $finja_request_log = new FinjaRequestLog();
+                $finja_request_log->requested = json_encode($request->all());
+                $finja_request_log->ip_address = $request->ip();
+                $finja_request_log->save();
+
+                if (!empty($pending_payment_shipments)) {
+                    AdminFinanceController::update_payment($shipment_id, $pending_payment_shipments->type);
+                }
+                return response()->json(['status' => 1, 'message' => 'Charges updated against this shipment.']);
+            }else{
+                return response()->json(['status' => 0, 'message' => 'Payment Already Processed', 'errors' => 'Error']);
+            }
+
+        }
+    }
+    public function fintech_getToken(Request $request) {
+
+        $rules = [
+            'wallet_id' => ['required', 'exists:wallet_users,wallet_id'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $Wallet = WalletUser::with('wallet_user')->where('wallet_id',$request->wallet_id)->first();
+            if(isset($Wallet->wallet_user)) {
+                $user = $Wallet->wallet_user;
+                if (empty($user->api_token)) {
+                    $user->api_token = uniqid(base64_encode(Str::random(60)));
+                    $user->save();
+                }
+                return response()->json(['status' => 1,'wallet_id'=> $request->wallet_id,'token' =>  $user->api_token]);
+            }
+
+            return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => 'USer Not Found']);
+        }
+    }
+
 
 
 }

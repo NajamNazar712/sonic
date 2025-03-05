@@ -1234,9 +1234,11 @@ otherwise it will be rejected</li>
 
             if($shipper->lead_id){
                 $user_documents = UserDocumentAttachment::where('user_id', $shipper_id)->first();
-                $file = $user_documents->e_sign_image;
-                $url = Storage::url('users_attached_documents/' . $shipper_id . '/' . $file);
-                $terms_conditions .= '<img src="' . $url . '" alt="Shipper Signature" />';
+                if($user_documents) {
+                    $file = $user_documents->e_sign_image;
+                    $url = Storage::url('users_attached_documents/' . $shipper_id . '/' . $file);
+                    $terms_conditions .= '<img src="' . $url . '" alt="Shipper Signature" />';
+                }  
             }
             
             $terms_conditions .= '<p class="pt-2"><span class="border-bottom"><strong>Company Stamp</strong></span></p>';

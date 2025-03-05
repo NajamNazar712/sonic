@@ -31,4 +31,11 @@ class SubstituteUser extends Authenticatable
     {
         return $date->format('Y-m-d H:i:s');
     }
+
+
+    public function sub_wallet() {
+        return $this->belongsTo('App\Http\Models\WalletUser','id', 'substitute_user_id');
+    }
+
+
 }

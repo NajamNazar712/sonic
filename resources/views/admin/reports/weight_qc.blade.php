@@ -285,6 +285,11 @@
                 }
             });
 
+            function decodeHtmlEntities(str) {
+                let doc = new DOMParser().parseFromString(str, "text/html");
+                return doc.documentElement.textContent;
+            }
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -331,7 +336,8 @@
 
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
-                                row.push(values.shipper);
+                                // row.push(values.shipper);
+                                row.push(decodeHtmlEntities(values.shipper));
                                 row.push(values.sub_segment);
                                 row.push(values.shipping_mode);
                                 row.push(values.origin);

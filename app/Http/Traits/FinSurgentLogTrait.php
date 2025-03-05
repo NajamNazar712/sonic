@@ -1,0 +1,123 @@
+<?php
+
+namespace App\Http\Traits;
+
+use App\Http\Models\DonePayment;
+use App\Http\Models\PendingPayment;
+use App\Http\Models\DonePaymentShipment;
+use App\Http\Models\DonePaymentCalculation;
+use App\Http\Models\PendingPaymentShipment;
+use App\Http\Models\PendingPaymentCalculation;
+use App\Http\Controllers\FingaIntegrationController;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use App\Http\Models\UserIbftCharge;
+use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentServicesCharges;
+use App\Http\Controllers\AdminFinanceController;
+use App\ShipmentAdditionalCharges;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Http;
+use App\Models\FinjaLogSettlementRecord;
+
+
+trait FinSurgentLogTrait 
+{
+
+
+    static function arrival_shipment_logs($requestPayload, $pending_payment_shipment,$shipment_id = null,$token2 = null) {
+
+        try {
+
+            if(!empty($shipment_id)){
+                $shipmentId = $shipment_id;
+            }else if (is_object($pending_payment_shipment)) {
+                $shipmentId = $pending_payment_shipment->shipment_id;
+            } elseif (is_int($pending_payment_shipment)) {
+                $shipmentId = $pending_payment_shipment;
+            } 
+
+            $api = config('app.FINGA_URL');
+            if(!empty($token2)){
+                $token = $token2;
+            }else{
+                $token = FingaIntegrationController::getToken($api);
+            }
+
+
+            if($token) {
+                $response = Http::withHeaders([
+                    'accept' => 'application/json',
+                    'Authorization' => "Bearer " . $token,
+                
+                ])->post($api.'transactions/log/payment', $requestPayload);
+    
+                FingaIntegrationController::apiLog('log-request', 1, $requestPayload ,$shipmentId);
+    
+                if($response->successful()) { 
+                    
+                    $body = $response->getBody();
+                    $body = json_decode($body);
+    
+                    FingaIntegrationController::apiLog('log-response', 'success', $body ,$shipmentId);
+
+                    FinjaLogSettlementRecord::updateOrCreate(
+                        // Condition to find the record
+                        ['shipment_id' => $shipmentId],
+                        // Data to update or create
+                        [
+                            'shipment_id' => $shipmentId,
+                            'wallet_log_updated' => true,
+                            'wallet_log_updated_at' => Carbon::now(),
+                            'logged_cod_charges' => $requestPayload['amount']
+                        ]
+                    );
+    
+                } else {
+                    $body = $response->getBody();
+                    $body = json_decode($body);
+                    FingaIntegrationController::apiLog('log-response', 'error', $body ,$shipmentId);
+                }
+            }
+
+        } catch (\Throwable $th) {
+            // Log exception details
+            $errorBody = [
+                'error' => $th->getMessage(),
+                'code' => $th->getCode()
+            ];
+            FingaIntegrationController::apiLog('log-response', 'exception', $errorBody, $shipmentId);
+        }
+
+    }
+
+    static function updatePaymentBeforeLog($shipment,$pending_payment_shipment){
+        if(empty($shipment)) {
+            $shipment = Shipment::find($pending_payment_shipment->shipment_id);
+        }
+        $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($pending_payment_shipment->shipment_id);
+        $charges = $shipment->weight_charges + $shipment->fuel_surcharge + $faf_charges;
+        $gst = $pending_payment_shipment->gst;
+        $pending_payment_id = 0;
+        if ($charges != $pending_payment_shipment->charges) {
+            if ($shipment->business_category_id == 1) {
+                $gst = ROUND(($charges * \App\Http\Controllers\Admins\AdminFinanceController::gst($shipment->pickup_address->city->zone_id, $shipment->pickup_address->city_id)), 2, PHP_ROUND_HALF_DOWN);
+            } else {
+                $gst = ROUND(($charges * AdminFinanceController::international_gst()), 2, PHP_ROUND_HALF_DOWN);
+            }
+
+            $payable = $charges + $gst;
+            $pending_payment_id = $pending_payment_shipment->pending_payment_id;
+            if (!empty($payable)) {
+                PendingPaymentShipment::where('id', $pending_payment_shipment->id)->update(['charges' => $charges, 'gst' => $gst, 'payable' => $payable]);
+            }
+        }
+
+        if ($pending_payment_id != 0) {
+            $results = DB::select('CALL update_pending_payment_statistics(?)', [$pending_payment_id]);
+        }
+    }
+
+}
