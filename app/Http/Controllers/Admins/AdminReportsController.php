@@ -15676,7 +15676,7 @@ class AdminReportsController extends Controller
                     if(in_array($shipment->cargo_status_id,[4, 7, 8, 9,6])){ //Shipment In Transit || Shipment Misrouted Forwarded concered hub change reference TO-6939
                         return $shipment->origin;
                     }
-                }elseif(in_array($shipment->shipper_status_id,[18, 34, 23, 55,24, 47, 48,2])){
+                }elseif(in_array($shipment->shipper_status_id,[18, 34, 23,24, 47, 48,2])){
                     return $shipment->origin;
                 }elseif(in_array($shipment->shipper_status_id,[54,55, 69,7, 4,8])){
                     return (($shipment->intercepttype == 1) ?  $shipment->intercept_city_name : $shipment->destination);
