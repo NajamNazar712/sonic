@@ -76,11 +76,26 @@ trait FinSurgentLogTrait
                             'logged_cod_charges' => $requestPayload['amount']
                         ]
                     );
-    
+
                 } else {
                     $body = $response->getBody();
-                    $body = json_decode($body);
-                    FingaIntegrationController::apiLog('log-response', 'error', $body ,$shipmentId);
+                    $body = json_decode($body,true);
+                    if (isset($body['error']) && str_contains($body['error'], 'duplicate key value violates unique constraint')) {
+                        FingaIntegrationController::apiLog('log-response', 'success (duplicate ignored)', $body, $shipmentId);
+
+                        FinjaLogSettlementRecord::updateOrCreate(
+                            ['shipment_id' => $shipmentId],
+                            [
+                                'shipment_id' => $shipmentId,
+                                'wallet_log_updated' => true,
+                                'wallet_log_updated_at' => Carbon::now(),
+                                'logged_cod_charges' => $requestPayload['amount']
+                            ]
+                        );
+
+                    } else {
+                        FingaIntegrationController::apiLog('log-response', 'error', $body, $shipmentId);
+                    }
                 }
             }
 

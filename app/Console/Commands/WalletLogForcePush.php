@@ -64,6 +64,7 @@ class WalletLogForcePush extends Command
 //            ->where('done_payments.id', 1561172)
             ->havingRaw('COALESCE(sac.wallet_log_updated, NULL) IS NULL')
             ->get();
+
         $api = config('app.FINGA_URL');
         $token = FingaIntegrationController::getToken($api);
         $token_time = Carbon::now();
