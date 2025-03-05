@@ -61,7 +61,6 @@ class WalletLogForcePush extends Command
                     ->where('u.substitute_user_id', '0');
             })
             ->where('done_payments.is_wallet_payment', 1)
-            ->where('done_payments.status', 3)
 //            ->where('done_payments.id', 1561172)
             ->havingRaw('COALESCE(sac.wallet_log_updated, NULL) IS NULL')
             ->get();
