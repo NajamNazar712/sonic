@@ -45,7 +45,9 @@ trait FinSurgentLogTrait
             }else{
                 $token = FingaIntegrationController::getToken($api);
             }
-
+            if(empty($token)){
+                $token = FingaIntegrationController::getToken($api);
+            }
 
             if($token) {
                 $response = Http::withHeaders([
