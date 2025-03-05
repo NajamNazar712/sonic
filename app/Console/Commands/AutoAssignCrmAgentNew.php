@@ -147,7 +147,6 @@ class AutoAssignCrmAgentNew extends Command
                                 $shipment_statuses = isset($val->shipment_statuses) ? $val->shipment_statuses->pluck('shipment_status_id')->toArray(): [];
                                 $origin_hubs = isset($val->origin_hubs) ?  $val->origin_hubs->pluck('origin_hub_id')->toArray() : [];
                                 $origin_areas = isset($val->origin_areas) ?  $val->origin_areas->pluck('origin_area_id')->toArray() : [];
-
 //                               if(count($origin_hubs) > 0 || count($hubs) > 0) {
 //                                   $originHubMatch = true;
 //                                   $hubMatch = true;
@@ -208,13 +207,21 @@ class AutoAssignCrmAgentNew extends Command
                                            $return = 0;
                                        }
                                    }
+                                   elseif (!in_array($value->shipper_id,$shipper_keys)){
+                                       $return = 0;
+                                   }
                                }
-                               if(count($shipper_non_keys) > 0){
+
+                                if(count($shipper_non_keys) > 0){
                                    if (!empty($value->shipper_non_key_id)) {
                                        if(!in_array($value->shipper_non_key_id,$shipper_non_keys)){
                                            $return = 0;
                                        }
                                    }
+                                   elseif (!in_array($value->shipper_id,$shipper_non_keys)){
+                                        $return = 0;
+                                   }
+
                                }
                                if(count($shipment_statuses) > 0){
                                    if (!empty($value->shipment_status_id)) {
