@@ -53,8 +53,7 @@ class WalletSettlementFromDonePayments implements ShouldQueue
      */
     public function handle()
     {
-        $user = Admin::find(346); // Replace with actual user ID
-        Auth::login($user); // Log in the user
+
         $done_payment_shipments = DonePaymentShipment::join('shipments as s','s.id', 'done_payment_shipments.shipment_id')
         ->leftjoin('shipment_additional_charges as sc', 'sc.shipment_id', 's.id')
         ->leftjoin('shipment_services_charges as ssc', 'ssc.shipment_id', 's.id')
@@ -219,7 +218,7 @@ class WalletSettlementFromDonePayments implements ShouldQueue
                                     CrmRequestStatusHistory::create([
                                         'crm_request_id' => $crm_request->id,
                                         'status_id' => 4,
-                                        'agent_id' => Auth::id()
+                                        'agent_id' => 346
                                     ]);
                                     
                                     CrmRequestTagging::where('crm_request_id', $crm_request->id)->delete();
