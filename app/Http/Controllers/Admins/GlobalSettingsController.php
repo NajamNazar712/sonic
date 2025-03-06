@@ -173,9 +173,12 @@ use App\Http\Models\InternationalUserRate;
 use App\Models\InternationalZonalMarginColumn;
 use App\Models\WalletShipperSetting;
 use Illuminate\Support\Str;
+use App\Http\Traits\CommonTrait;
 
 class GlobalSettingsController extends Controller
 {
+    use CommonTrait;
+
     public function __construct()
     {
         $this->middleware('auth:admin');
@@ -4668,17 +4671,21 @@ class GlobalSettingsController extends Controller
 
     public function international_rates_upload_index()
     {
+        $zoneColumnsArray = $this->zoneMarginColumnName()['zoneColumnArray'];
         ActivityTrailController::createActivityTrailLog(Auth::id(), 381);
-        return view('admin.settings.international.excel_upload');
+        return view('admin.settings.international.excel_upload',compact('zoneColumnsArray'));
     }
 
     public function international_standard_dhl_rates_list(Request $request)
     {
+        $zoneColumnsArray = $this->zoneMarginColumnName()['zoneColumnArray'];
+
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 382);
         }
-        $rates_list = InternationalStandardDhlRate::select('id', 'range_up', 'range_down', 'zone_1', 'zone_2', 'zone_3', 'zone_4', 'zone_5', 'zone_6', 'zone_7', 'zone_8', 'zone_9', 'zone_10', 'zone_11', 'zone_1b', 'zone_8b');
-
+        $rates_list = InternationalStandardDhlRate::select(
+            array_merge(['id', 'range_up', 'range_down'], $zoneColumnsArray)
+        );
         return Datatables::of($rates_list)->make(true);
     }
 
