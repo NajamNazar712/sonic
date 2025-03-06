@@ -434,7 +434,7 @@ class AdminCRMController extends Controller
                                 }
                             }
                         }
-                        if($nature_id == 1){
+                        if($nature_id == 1 && !empty($request->case_nature_complainant)  && !empty($request->complainant_phone)){
                             $this->updateComplaintPhone($crm_request_padded_id ?? CrmRequest::max('id'), $request->case_nature_complainant, $request->complainant_phone);
                         }
                     }
