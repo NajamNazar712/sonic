@@ -15262,6 +15262,7 @@ class AdminReportsController extends Controller
             // 'adjustment.adjustment_amount as adjusted_amount',
             'scs.name as sub_segment',
             'cargo_status.name as cargo_status',
+            'cargo_status.id as cargo_status_id',
             'cmb.seal_number as seal_number',
             'bs.name as bag_status',
             'sjfa.created_at as first_attempt_date',
