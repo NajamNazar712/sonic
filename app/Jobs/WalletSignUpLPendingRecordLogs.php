@@ -62,7 +62,7 @@ class WalletSignUpLPendingRecordLogs implements ShouldQueue
             })
             ->select(['pending_payment_shipments.*'])
             ->get();
-            $pending_payment_shipments->chunk(50)->each(function ($chunkedShipments) use($api,$token,$token_time,$user_id) {
+            $pending_payment_shipments->chunk(50)->each(function ($chunkedShipments) use($api,$token,$token_time,$user_id,$pending_payment) {
                 foreach ($chunkedShipments as $pending_payment_shipment) {
                     if ($token_time->diffInMinutes(Carbon::now()) >= 4) {
                         $token = FingaIntegrationController::getToken($api);
