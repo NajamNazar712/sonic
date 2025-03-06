@@ -15284,7 +15284,8 @@ class AdminReportsController extends Controller
             'ssj_last_location.entry_method as entry_method',
             'destination_sj.created_at as destination_arrival_date',
             'intercept_approved.name as intercept_city_name',
-            'irb.intercept_type as intercepttype'
+            'irb.intercept_type as intercepttype',
+            'shipmentMisrouted.name as misroutedCityname',
         ];
         $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->leftJoin('sale_person_tags as spt', function($join){
@@ -15364,7 +15365,7 @@ class AdminReportsController extends Controller
                     ->where(
                         'sjr.id',
                         '=',
-                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(20,21,22,23,24,25,47,48,60))')
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(20,21,22,23,24,25,47,48,60,68))')
                     );
             })
             //->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sjr.status_reason_id')
@@ -15474,6 +15475,18 @@ class AdminReportsController extends Controller
                                 )');
             })
             ->leftjoin('cities as intercept_approved', 'intercept_approved.id', '=', 'irb.old_consignee_city_id')
+            ->leftJoin('shipments_journey as sjms', function ($join) use ($connection) {
+                $join->on('sjms.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'sjms.id',
+                        '=',
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id  = 68)')
+                    );
+            })
+            ->leftjoin('cities as shipmentMisrouted', function ($join) {
+                $join->on('shipmentMisrouted.id', '=', 'sjr.city_id')
+                    ->where('sjr.shipper_status_id', '=', 68);
+            })
             ->leftJoin('city_areas as ca_scanning_last_location_name', 'ssjal_last_location.area_id', '=', 'ca_scanning_last_location_name.id')
             ->leftJoin('shipment_scanning_screen_locations as last_screen_location', 'last_screen_location.id', '=', 'ssj_last_location.screen_location_id')
 
@@ -15669,7 +15682,10 @@ class AdminReportsController extends Controller
             //     }
             // })
             ->editColumn('current_hub', function ($shipment) {
-                if(in_array($shipment->shipper_status_id ,[49, 3])){
+                if(in_array($shipment->shipper_status_id ,[68])){
+                    return $shipment->misroutedCityname;
+                }
+                elseif(in_array($shipment->shipper_status_id ,[49, 3])){
                     if(in_array($shipment->cargo_status_id,[3,2,4, 7, 8, 9,6])){ //Shipment In Transit || Shipment Misrouted Forwarded concered hub change reference TO-6939
                         return $shipment->destination;
                     }
