@@ -77,8 +77,9 @@ class WalletSettlementFromDonePayments implements ShouldQueue
             foreach ($chunkedShipments as $dps) {
                 $shipmentId = $dps->shipment_id;
                 $shipment = Shipment::find($shipmentId);
+                $requestPayload = [];
+                $url = "";
                 if ($dps->wallet_action_bid == 1 && $dps->wallet_settlement_updated == 0) {
-
                     //$logCharged = FinjaLogSettlementRecord::where('shipment_id', $shipmentId)->first();
                     $logCharged = !empty($dps->wallet_log_charges_updated) ? $dps->wallet_log_charges_updated : 0;
 
@@ -157,103 +158,102 @@ class WalletSettlementFromDonePayments implements ShouldQueue
                         'wallet_log_charges_updated_at' => Carbon::now(),
                     ];
                 }
+                if(!empty($requestPayload) && !empty($url)) {
+                    try {
+                        if ($token_time->diffInMinutes(Carbon::now()) >= 4) {
+                            $token = FingaIntegrationController::getToken($api);
+                            $token_time = Carbon::now(); // Update the token time
+                        }
+                        if ($token) {
+                            FingaIntegrationController::apiLog($request_nature, 1, $requestPayload, $shipmentId);
+                            $response = Http::withHeaders([
+                                'accept' => 'application/json',
+                                'Authorization' => "Bearer " . $token,
 
-                try {
-                    if ($token_time->diffInMinutes(Carbon::now()) >= 4) {
-                        $token = FingaIntegrationController::getToken($api);
-                        $token_time = Carbon::now(); // Update the token time
-                    }
-                    if ($token) {
-                        $response = Http::withHeaders([
-                            'accept' => 'application/json',
-                            'Authorization' => "Bearer " . $token,
+                            ])->timeout(60)->post($url, $requestPayload);
+                            if ($response->successful()) {
 
-                        ])->post($url, $requestPayload);
+                                $body = $response->getBody();
+                                $body = json_decode($body);
 
-                        FingaIntegrationController::apiLog($request_nature, 1, $requestPayload, $shipmentId);
+                                FingaIntegrationController::apiLog($response_nature, 'success', $body, $shipmentId);
 
-                        if ($response->successful()) {
+                                FinjaLogSettlementRecord::updateOrCreate(
+                                // Condition to find the record
+                                    ['shipment_id' => $shipmentId],
+                                    // Data to update or create
+                                    $data
+                                );
+                                DonePaymentShipment::where('id', $dps->id)->update(['wallet_action_bid' => 3]);
 
-                            $body = $response->getBody();
-                            $body = json_decode($body);
+                                $successfull_record[] = $dps->id;
+                                if ($dps->type == 1) {
+                                    $shipment->payment_status_id = 7;
 
-                            FingaIntegrationController::apiLog($response_nature, 'success', $body, $shipmentId);
+                                    $shipment->save();
 
-                            FinjaLogSettlementRecord::updateOrCreate(
-                            // Condition to find the record
-                                ['shipment_id' => $shipmentId],
-                                // Data to update or create
-                                $data
-                            );
-                            DonePaymentShipment::where('id', $dps->id)->update(['wallet_action_bid' => 3]);
+                                    ShipmentsPaymentJourneyController::add($dps->shipment_id, 7, $this->id, '', $this->payment_id);
+                                } else if ($dps->type == 3) {
+                                    $shipment->payment_status_id = 12;
 
-                            $successfull_record[] = $dps->id;
-                            if ($dps->type == 1) {
-                                $shipment->payment_status_id = 7;
+                                    $shipment->save();
 
-                                $shipment->save();
+                                    ShipmentsPaymentJourneyController::add($dps->shipment_id, 12, $this->id, '', $this->payment_id);
+                                } else {
+                                    $shipment->payment_status_id = 3;
 
-                                ShipmentsPaymentJourneyController::add($dps->shipment_id, 7, $this->id, '', $this->payment_id);
-                            } else if ($dps->type == 3) {
-                                $shipment->payment_status_id = 12;
+                                    $shipment->save();
 
-                                $shipment->save();
+                                    //---------x-----------x-------------
+                                    // Start Auto Close Complaints
+                                    $crm_request = CrmRequest::where('shipment_id', $dps->shipment_id)->where('status_id', 2)->first();
 
-                                ShipmentsPaymentJourneyController::add($dps->shipment_id, 12, $this->id, '', $this->payment_id);
-                            } else {
-                                $shipment->payment_status_id = 3;
+                                    if ($crm_request) {
+                                        $shipperName = User::find(Shipment::where('id', $dps->shipment_id)->select('user_id')->first()->user_id)->name;
 
-                                $shipment->save();
+                                        if ($crm_request->status_id == 2) {//if crm request is in_process
+                                            CrmRequest::where('id', $crm_request->id)->update([
+                                                'status_id' => 4 // Closed status
+                                            ]);
+                                            CrmRequestStatusHistory::create([
+                                                'crm_request_id' => $crm_request->id,
+                                                'status_id' => 4,
+                                                'agent_id' => 346
+                                            ]);
 
-                                //---------x-----------x-------------
-                                // Start Auto Close Complaints
-                                $crm_request = CrmRequest::where('shipment_id', $dps->shipment_id)->where('status_id', 2)->first();
+                                            CrmRequestTagging::where('crm_request_id', $crm_request->id)->delete();
 
-                                if ($crm_request) {
-                                    $shipperName = User::find(Shipment::where('id', $dps->shipment_id)->select('user_id')->first()->user_id)->name;
-
-                                    if ($crm_request->status_id == 2) {//if crm request is in_process
-                                        CrmRequest::where('id', $crm_request->id)->update([
-                                            'status_id' => 4 // Closed status
-                                        ]);
-                                        CrmRequestStatusHistory::create([
-                                            'crm_request_id' => $crm_request->id,
-                                            'status_id' => 4,
-                                            'agent_id' => 346
-                                        ]);
-
-                                        CrmRequestTagging::where('crm_request_id', $crm_request->id)->delete();
-
-                                        $comment = 'Dear ' . $shipperName . ',
+                                            $comment = 'Dear ' . $shipperName . ',
                                             Thank you for reaching us out! 
                                             Your complaint has been resolved, and the payment has been paid. We appreciate your patience and understanding throughout this process. In case of any further query regarding this shipment you may reach us out within 48 hrs.
                                             Regards,
                                             Team CRM
                                             TRAX';
 
-                                        CRMCommentController::add($crm_request->id, 306, 0, 0, $comment, 0, 0);
+                                            CRMCommentController::add($crm_request->id, 306, 0, 0, $comment, 0, 0);
+                                        }
                                     }
+                                    // End Auto Close Complaints
+                                    //---------x-----------x-------------
+
+                                    ShipmentsPaymentJourneyController::add($dps->shipment_id, 3, $this->id, '', $this->payment_id);
                                 }
-                                // End Auto Close Complaints
-                                //---------x-----------x-------------
 
-                                ShipmentsPaymentJourneyController::add($dps->shipment_id, 3, $this->id, '', $this->payment_id);
+                            } else {
+                                $body = $response->getBody();
+                                $body = json_decode($body);
+                                FingaIntegrationController::apiLog($response_nature, 'error', $body, $shipmentId);
                             }
-
-                        } else {
-                            $body = $response->getBody();
-                            $body = json_decode($body);
-                            FingaIntegrationController::apiLog($response_nature, 'error', $body, $shipmentId);
                         }
+
+                    } catch (\Throwable $th) {
+
+                        $errorBody = [
+                            'error' => $th->getMessage(),
+                            'code' => $th->getCode()
+                        ];
+                        FingaIntegrationController::apiLog($response_nature, 'exception', $errorBody, $shipmentId);
                     }
-
-                } catch (\Throwable $th) {
-
-                    $errorBody = [
-                        'error' => $th->getMessage(),
-                        'code' => $th->getCode()
-                    ];
-                    FingaIntegrationController::apiLog($response_nature, 'exception', $errorBody, $shipmentId);
                 }
 
             }
