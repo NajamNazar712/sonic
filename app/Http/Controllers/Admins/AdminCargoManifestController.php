@@ -4165,7 +4165,7 @@ class AdminCargoManifestController extends Controller
                     $details['destination'] = $cargo_bag->destination_hub->name;
                     $details['last_junction'] = $last_junction;
                     $details['actual_weight'] = $bag->actual_weight;
-                    $details['shipping_mode'] = $cargo_bag->shipping_mode->mode;
+                    // $details['shipping_mode'] = $cargo_bag->shipping_mode->mode;
                     $details['without_manifest'] = 0;
 
                     return ['status' => 0, 'success' => 'Bag has been added', 'details' => $details];
