@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Http\Models\Admin\Admin;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -11,6 +12,7 @@ use Illuminate\Queue\SerializesModels;
 use App\Http\Controllers\FingaIntegrationController;
 use App\Http\Models\DonePaymentShipment;
 use App\Http\Models\DonePayment;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
@@ -23,6 +25,8 @@ use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Controllers\CRM\CRMCommentController;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipment;
+use App\ShipmentAdditionalCharges;
+
 
 class WalletSettlementFromDonePayments implements ShouldQueue
 {
@@ -49,7 +53,7 @@ class WalletSettlementFromDonePayments implements ShouldQueue
      */
     public function handle()
     {
-        
+
         $done_payment_shipments = DonePaymentShipment::join('shipments as s','s.id', 'done_payment_shipments.shipment_id')
         ->leftjoin('shipment_additional_charges as sc', 'sc.shipment_id', 's.id')
         ->leftjoin('shipment_services_charges as ssc', 'ssc.shipment_id', 's.id')
@@ -68,6 +72,7 @@ class WalletSettlementFromDonePayments implements ShouldQueue
         $successfull_record = [];
         $api = config('app.FINGA_URL');
         $token = FingaIntegrationController::getToken($api);
+        $token_time = Carbon::now();
         foreach($done_payment_shipments as $dps) {
             $shipmentId = $dps->shipment_id;
             $shipment = Shipment::find($shipmentId);
@@ -109,12 +114,18 @@ class WalletSettlementFromDonePayments implements ShouldQueue
                 ];
 
             } elseif($dps->wallet_action_bid == 2) {
+                $type =  FinjaLogSettlementRecord::check_wallet_charges_type($dps->shipment_id);
+                $payable = $dps->payable;
+                if($type) {
+                    $wallet_charges = ShipmentAdditionalCharges::fetch_wallet_charges($dps->shipment_id);
+                    $payable = $dps->payable - $wallet_charges;
+                }
                 $requestPayload = [
                     "client_id" => $dps->user_id,
                     "wallet_id" => $dps->wallet_id,
                     "reference_id" => $dps->id,
                     "shipment_id" =>  $dps->tracking_number,
-                    "amount" => floatval($dps->payable),
+                    "amount" => floatval($payable),
                 ];
                 $request_nature = 'adjustment-request';
                 $response_nature = 'adjustment-response';
@@ -147,7 +158,10 @@ class WalletSettlementFromDonePayments implements ShouldQueue
             }
 
             try {
-
+                if ($token_time->diffInMinutes(Carbon::now()) >= 4) {
+                    $token = FingaIntegrationController::getToken($api);
+                    $token_time = Carbon::now(); // Update the token time
+                }
                 if($token) {
                     $response = Http::withHeaders([
                         'accept' => 'application/json',
@@ -204,7 +218,7 @@ class WalletSettlementFromDonePayments implements ShouldQueue
                                     CrmRequestStatusHistory::create([
                                         'crm_request_id' => $crm_request->id,
                                         'status_id' => 4,
-                                        'agent_id' => Auth::id()
+                                        'agent_id' => 346
                                     ]);
                                     
                                     CrmRequestTagging::where('crm_request_id', $crm_request->id)->delete();
