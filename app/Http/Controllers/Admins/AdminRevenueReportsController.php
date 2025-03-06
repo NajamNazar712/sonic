@@ -34,8 +34,8 @@ class AdminRevenueReportsController extends Controller
             $to = Carbon::parse($from)->addDays(9)->endOfDay()->toDateTimeString();
         }
         if($report_type == 3){
-            $from = Carbon::today()->subMonth(1)->firstOfMonth()->addDays(20)->toDateTimeString();
-            $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();
+            $from = Carbon::today()->firstOfMonth()->addDays(20)->toDateTimeString();
+            $to = Carbon::today()->endOfMonth()->toDateTimeString();
         }
         $from_id = DB::table('shipments_journey')->select(DB::raw('MIN(id) as id'))->where('created_at', '>=', $from)->first()->id;
 

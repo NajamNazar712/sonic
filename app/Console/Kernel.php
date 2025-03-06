@@ -588,6 +588,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('apollo:fetch-shipments-status')->everyFiveMinutes()->runInBackground();
         $schedule->command('fingsurgent:sonic-payment')->hourly()->runInBackground();
         $schedule->command('status:re-push-wallet')->hourly()->runInBackground();
+        $schedule->command('rerun:wallet_log_re_push')->hourly()->runInBackground();
     }
     /**
      * Register the commands for the application.
