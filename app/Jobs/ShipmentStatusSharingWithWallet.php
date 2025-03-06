@@ -175,7 +175,7 @@ class ShipmentStatusSharingWithWallet implements ShouldQueue
                 ->first();
 
             if(!empty($shipment_log_not_sent)){
-                $requestPayload = [
+                $logPayload = [
                     "client_id" => $shipment_log_not_sent->user_id,
                     "wallet_id" => $shipment_log_not_sent->wallet_id,
                     "reference_id" => (string)Str::uuid(),
@@ -183,7 +183,7 @@ class ShipmentStatusSharingWithWallet implements ShouldQueue
                     "amount" => $shipment_log_not_sent->amount,
                     "order_created_date" => $shipment_log_not_sent->created_at,
                 ];
-                $this->arrival_shipment_logs($requestPayload, null,$shipment_log_not_sent->id,$token2);
+                $this->arrival_shipment_logs($logPayload, null,$shipment_log_not_sent->id,$token2);
             }
 
             $cod_charges = FinjaLogSettlementRecord::where('shipment_id', $shipment_id)

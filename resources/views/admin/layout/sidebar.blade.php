@@ -1955,6 +1955,15 @@
                                 </a>
                             </li>
                         @endif
+
+                        {{-- lost and case closed report --}}
+                        @if (session('role_id') == 1 || in_array(1021, session('permissions')))
+                            <li>
+                                <a class="menu-item" href="{{ route('admin.reports.lost_and_case_closed_summary_report.index') }}">
+                                    Lost/Case Closed Summary Report
+                                </a>
+                            </li>
+                        @endif
                     </ul>
                 </li>
             @endif

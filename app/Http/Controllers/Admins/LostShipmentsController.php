@@ -969,7 +969,27 @@ class LostShipmentsController extends Controller
     }
 
     public function shipment_approve_status(Request $request){
-        
+        // stop approving lost shipments after first approval
+        $lost_shipments = Shipment::whereIn('shipments.id', $request->shipment_ids)
+            ->join('lost_shipment_status_counts', 'shipments.id', '=', 'lost_shipment_status_counts.shipment_id')
+            ->where('shipments.shipper_status_id', 18)
+            ->select([
+                'shipments.id as shipment_id',
+                'lost_shipment_status_counts.cleared as cleared'
+            ])
+            ->get();
+            
+        if ($lost_shipments->isNotEmpty() && $lost_shipments->contains('cleared', 1)) {
+            $clearedShipments = $lost_shipments->filter(function ($shipment) {
+                return $shipment->cleared == 1;
+            })->pluck('shipment_id');
+
+            return response()->json([
+                'status' => 2, 
+                'error' => 'The following shipment IDs are already marked approved: ' . $clearedShipments->join(', ')
+            ]);
+        }
+
         foreach ($request->shipment_ids as $shipment_id) {
             $cargo_manifest_bag_shipments = CargoManifestBagShipments::where('shipment_id', $shipment_id);
             if($cargo_manifest_bag_shipments->exists()){
@@ -983,7 +1003,6 @@ class LostShipmentsController extends Controller
             ShipmentsJourneyController::add($shipment_id, 18, NULL, NULL, NULL, NULL, Auth::id(), NULL, NULL, $request->approve);
             $this->updateLostShipmentApproval($shipment_id, 'approval_count', 1);
         }
-
         return response()->json(['status' => 1, 'success' => 'Shipment Has Been Approved To Lost !!']);
 
     }

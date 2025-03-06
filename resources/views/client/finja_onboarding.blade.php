@@ -23,9 +23,9 @@
                                         <div class="col-md-6">
                                             <div class="form-group row">
                                                 <div class="form-group col-md-9">
-                                                    <label>Name</label>
+                                                    <label>Enter Name (As per CNIC OR Bank Account Title)</label>
                                                     <span class="danger">*</span>
-                                                    <input type="text" id="name" class="form-control border-primary" data-rule-maxlength="100" data-msg-maxlength="Name" data-rule-required="true" data-msg-required="Name is required" value="{{$user->name}}" name="name" required>
+                                                    <input type="text" id="name" class="form-control border-primary" data-rule-maxlength="100" data-msg-maxlength="Name" data-rule-required="true" data-msg-required="Name is required" value="" name="name" required>
                                                 </div>
                                             </div>
                                         </div>
