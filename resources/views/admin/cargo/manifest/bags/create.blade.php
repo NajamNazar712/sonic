@@ -291,6 +291,25 @@
                     form.reset();
 
                     if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
+
+                        $.ajax({
+                            url: '{!! route('admin.cargo_manifest.bags.create.count_per_hub') !!}',
+                            method: 'POST',
+                            data: {
+                                'tracking_number': tracking_number,
+                                'hub_id': hub_id,
+                                'shipping_mode_id': shipping_mode_id,
+                                'bag_type': bag_type,
+                                'action': window.lastAction,
+                                '_token': '{{ csrf_token() }}'
+                            },
+                            success: function(data) {
+                                if (data.status == 0) {
+                                    $('#information .total').html(data.details.total);
+                                }
+                            }
+                        });
+
                         $.ajax({
                             url: '{!! route('admin.cargo_manifest.bags.create.shipment_details') !!}',
                             method: 'POST',
@@ -310,8 +329,7 @@
                             },
                             success: function(data) {
                                 if (data.status == 0) {
-                                    id = data.details.id;
-
+                                    var  id = data.details.id;
                                     var index = $.inArray(id, shipment_ids);
 
                                     if (index === -1) {
@@ -330,7 +348,7 @@
 
                                             $('#information .hub').html(data.details.hub.name);
 
-                                            $('#information .total').html(data.details.total);
+                                            // $('#information .total').html(data.details.total);
                                         }
 
                                         /*if (shipping_mode_id == 0) {
@@ -715,6 +733,23 @@
                     blockPagePermanently();
                     var shipment_id = $('#piece_shipment_id').val();
                     var tracking_number = $(form).find('input.scan_piece_tracking_number').val();
+
+                    $.ajax({
+                        url: '{!! route('admin.cargo_manifest.bags.create.count_per_hub') !!}',
+                        method: 'POST',
+                        data: {
+                            'tracking_number': tracking_number,
+                            'pieces_confirm': 1,
+                            'action': window.lastAction,
+                            '_token': '{{ csrf_token() }}'
+                        },
+                        success: function(data) {
+                            if (data.status == 0) {
+                                $('#information .total').html(data.details.total);
+                            }
+                        }
+                    });
+
                     $.ajax({
                         url: '{!! route('admin.cargo_manifest.bags.create.shipment_details') !!}',
                         method: 'POST',
@@ -725,7 +760,7 @@
                             '_token': '{{ csrf_token() }}'
                         }
                     })
-                        .done(function(data) {
+                    .done(function(data) {
                             if (data.status == 0) {
                                 id = data.details.id;
                                 console.log(data);
@@ -747,7 +782,7 @@
 
                                         $('#information .hub').html(data.details.hub.name);
 
-                                        $('#information .total').html(data.details.total);
+                                        // $('#information .total').html(data.details.total);
                                     }
 
                                     if (shipping_mode_id == 0) {

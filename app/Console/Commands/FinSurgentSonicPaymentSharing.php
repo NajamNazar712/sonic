@@ -56,6 +56,7 @@ class FinSurgentSonicPaymentSharing extends Command
         })->select(['pending_payments.*', 'u.wallet_id', 'u.user_id as user_id'])->get();
         $api = config('app.FINGA_URL');
         $token = FingaIntegrationController::getToken($api);
+        $token_time = Carbon::now();
        
         foreach($pending_payment_wallet_users as $pending_payment) {
             
@@ -91,6 +92,10 @@ class FinSurgentSonicPaymentSharing extends Command
                             //     'arrival_sms_charges' => floatval($pending_payment_shipment->sms_charges)
                             // ] // removed after new requierment
                         ];
+                        if ($token_time->diffInMinutes(Carbon::now()) >= 4) {
+                            $token = FingaIntegrationController::getToken($api);
+                            $token_time = Carbon::now(); // Update the token time
+                        }
                         $this->arrival_shipment_logs($requestPayload, $pending_payment_shipment,null,$token);
                     }
                 }

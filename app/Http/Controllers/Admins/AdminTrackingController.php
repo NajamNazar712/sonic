@@ -1358,6 +1358,17 @@ class AdminTrackingController extends Controller
                         if ($shipment->charges_mode_id) {
                             $details['order_information']['charges_mode'] = $shipment->charges_mode->charges_mode;
                         }
+                        
+                        $details['order_information']['sub_segment'] = '-';
+                        $sub_segment = DB::table('shipper_segment_logs')
+                        ->leftJoin('sub_category_segments', 'sub_category_segments.id', 'shipper_segment_logs.sub_segment_id')
+                        ->where('shipment_id', $shipment->id)
+                        ->select('sub_category_segments.name')
+                        ->first();
+
+                        if ($sub_segment && $sub_segment->name){
+                            $details['order_information']['sub_segment'] = $sub_segment->name;
+                        }
 
                         $details['order_information']['instructions'] = $shipment->special_instructions;
                         $details['order_information']['pieces'] = $shipment->pieces;
