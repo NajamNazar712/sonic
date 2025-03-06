@@ -1911,6 +1911,19 @@
                                 shipment += '<td>' + details.order_information.pieces + '</td>';
                                 shipment += '</tr>';
 
+                                // Sub segment of shipper
+                                shipment += '<tr>';
+                                shipment += '<td></td>';
+                                shipment += '<td></td>';
+                                shipment += '<td></td>';
+                                shipment += '<td></td>';
+                                shipment += '<td></td>';
+                                shipment += '<td></td>';
+                                shipment += '<td><strong>Sub Segment</strong></td>';
+                                shipment += '<td>' + details.order_information.sub_segment + '</td>';
+                                shipment += '</tr>';
+
+
                                 shipment += '<tr>';
                                 shipment += length;
                                 shipment += '<td><strong>Shipping Mode</strong></td>';

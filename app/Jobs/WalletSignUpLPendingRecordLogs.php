@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Http\Controllers\FingaIntegrationController;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -49,7 +50,7 @@ class WalletSignUpLPendingRecordLogs implements ShouldQueue
 
         $api = config('app.FINGA_URL');
         $token = FingaIntegrationController::getToken($api);
-
+        $token_time = Carbon::now();
         foreach ($pending_payment_ids as $pending_payment ){
             
             $pending_payment_shipments = PendingPaymentShipment::leftJoin('finja_log_settlement_records as sac', 'pending_payment_shipments.shipment_id', '=', 'sac.shipment_id')
@@ -62,6 +63,10 @@ class WalletSignUpLPendingRecordLogs implements ShouldQueue
             ->select(['pending_payment_shipments.*'])
             ->get();
             foreach($pending_payment_shipments as $pending_payment_shipment) {
+                if ($token_time->diffInMinutes(Carbon::now()) >= 4) {
+                    $token = FingaIntegrationController::getToken($api);
+                    $token_time = Carbon::now();
+                }
                 $shipment = Shipment::leftjoin('wallet_users as u', function ($join) {
                     $join->on('u.user_id', '=', 'shipments.user_id')
                        ->where('u.substitute_user_id', '0');

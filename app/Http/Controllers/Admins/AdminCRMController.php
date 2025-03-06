@@ -1422,7 +1422,11 @@ class AdminCRMController extends Controller
                 });
         }
         else if(session('department_id') == 7 && in_array(session('role_id'), [43,75,115])){
-            $launched_request = $launched_request->where('crm_requests.agent_id', Auth::id())->orWhere('spt.admin_id', Auth::id());
+            //$launched_request = $launched_request->where('crm_requests.agent_id', Auth::id())->orWhere('spt.admin_id', Auth::id());
+            $launched_request = $launched_request->where(function ($query) {
+                $query->where('crm_requests.agent_id', Auth::id())
+                      ->orWhere('spt.admin_id', Auth::id());
+            });
         }
         else if (session('department_id') == 7){
             if(!in_array(session('id'), session('sale_users_bypass')) && !in_array(session('role_id'), [4,6,44])){
@@ -2160,7 +2164,11 @@ class AdminCRMController extends Controller
             });
         }
         else if(session('department_id') == 7 && in_array(session('role_id'), [43,75,115])){
-            $in_process_request = $in_process_request->where('crm_requests.agent_id', Auth::id())->orWhere('spt.admin_id', Auth::id());
+            //$in_process_request = $in_process_request->where('crm_requests.agent_id', Auth::id())->orWhere('spt.admin_id', Auth::id());
+            $in_process_request = $in_process_request->where(function ($query) {
+                $query->where('crm_requests.agent_id', Auth::id())
+                      ->orWhere('spt.admin_id', Auth::id());
+            });
         }
         else if (in_array(session('role_id'), [67, 43])){
             $in_process_request = $in_process_request->where('at.id', Auth::id());
@@ -2976,7 +2984,12 @@ class AdminCRMController extends Controller
             });
         }
         else if(session('department_id') == 7 && in_array(session('role_id'), [43,75,115])){
-            $resolved_request = $resolved_request->where('crm_requests.agent_id', Auth::id())->orWhere('spt.admin_id', Auth::id());
+            //$resolved_request = $resolved_request->where('crm_requests.agent_id', Auth::id())->orWhere('spt.admin_id', Auth::id());
+            $resolved_request = $resolved_request->where(function ($query) {
+                $query->where('crm_requests.agent_id', Auth::id())
+                      ->orWhere('spt.admin_id', Auth::id());
+            });
+            
         }
         else if (in_array(session('role_id'), [67, 43])){
             $resolved_request = $resolved_request->where('at.id', Auth::id());
@@ -3700,7 +3713,11 @@ class AdminCRMController extends Controller
             });
         }
         else if(session('department_id') == 7 && in_array(session('role_id'), [43,75,115])){
-            $closed_request = $closed_request->where('crm_requests.agent_id', Auth::id())->orWhere('spt.admin_id', Auth::id());
+            // /$closed_request = $closed_request->where('crm_requests.agent_id', Auth::id())->orWhere('spt.admin_id', Auth::id());
+            $closed_request = $closed_request->where(function ($query) {
+                $query->where('crm_requests.agent_id', Auth::id())
+                      ->orWhere('spt.admin_id', Auth::id());
+            });
         }
         else if (session('department_id') == 7){
             if(!in_array(session('id'), session('sale_users_bypass'))){

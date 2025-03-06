@@ -385,7 +385,7 @@ class RetailShipmentBookController extends Controller
         $quantity = str_replace(',', '', $quantity);
         $quantityForShipmentItem = (int)$quantity;
 
-        $shipment_id = $this->book($user_id, 1, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $r_amount, $payment_mode_id, $charges_mode_id , $try_and_buy_charges, $pieces_quantity, $business_category_id, $length, $breadth, $height, $parcelAmoutInShipment);
+        $shipment_id = $this->book($user_id, 1, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $r_amount, $payment_mode_id, $charges_mode_id , $try_and_buy_charges, $pieces_quantity, $business_category_id, $length, $breadth, $height);
 
         if($request->input('business_category') == 2) {
             $international_shipment_booking = new InternationalShipment();
@@ -583,6 +583,10 @@ class RetailShipmentBookController extends Controller
                 RetailDiscountCode::where('code', '=', $request->discount_code)->update(['shipment_id' => $shipment_id]);
             }
         }
+
+        $retail_shipment->parcel_amount = $parcelAmoutInShipment;
+        $retail_shipment->quantity = $quantityForShipmentItem;
+
         $retail_shipment->save();
 
         // retail user history
@@ -652,20 +656,31 @@ class RetailShipmentBookController extends Controller
         $this->previous_names_verify_update($request->shipper_phone_no,$request->shipper_name,$request->shipper_cnic,$request->shipper_address, $shipper_info->id);
 
         try {
-            // Maintaining shipper segment logs on booking when origin and destination are different
-            if ($consignee_city_id != $user_shipping_info->city_id) {
+            // Maintaining shipper segment logs on booking
+            $user_id = Shipment::where('id', $shipment_id)->select('user_id')->first();
+            $user_segments = User::where('id', $user_id->user_id)
+            ->select(['segment_id', 'sub_segment_id'])
+            ->first();
 
-                $user_id = Shipment::where('id', $shipment_id)->select('user_id')->first();
-                $user_segments = User::where('id', $user_id->user_id)
-                ->select(['segment_id', 'sub_segment_id'])
-                ->first();
+            ShipperSegmentLogs::create([
+                'shipment_id' => $shipment_id,
+                'segment_id' => $user_segments->segment_id,
+                'sub_segment_id' => $user_segments->sub_segment_id
+            ]);
 
-                ShipperSegmentLogs::create([
-                    'shipment_id' => $shipment_id,
-                    'segment_id' => $user_segments->segment_id,
-                    'sub_segment_id' => $user_segments->sub_segment_id
-                ]);
-            }
+            // if ($consignee_city_id != $user_shipping_info->city_id) {
+
+            //     $user_id = Shipment::where('id', $shipment_id)->select('user_id')->first();
+            //     $user_segments = User::where('id', $user_id->user_id)
+            //     ->select(['segment_id', 'sub_segment_id'])
+            //     ->first();
+
+            //     ShipperSegmentLogs::create([
+            //         'shipment_id' => $shipment_id,
+            //         'segment_id' => $user_segments->segment_id,
+            //         'sub_segment_id' => $user_segments->sub_segment_id
+            //     ]);
+            // }
         } catch (\Exception $e) {
             Log::error('Error creating shipper segment log from Retail order form' . $shipment_id . ': ' . $e->getMessage());
         }
@@ -958,6 +973,19 @@ class RetailShipmentBookController extends Controller
         foreach($request->ids as $id) {
             $shipment = Shipment::find($id);
 
+            $sub_segment_name = '-';
+            $sub_segment = DB::table('shipper_segment_logs')
+            ->leftJoin('sub_category_segments', 'sub_category_segments.id', 'shipper_segment_logs.sub_segment_id')
+            ->where('shipment_id', $shipment->id)
+            ->select('sub_category_segments.name')
+            ->first();
+
+            if ($sub_segment && $sub_segment->name)
+            {
+                $sub_segment_name = $sub_segment->name;
+            }
+
+
 //            $url = 'storage/retail/shipment_'. $shipment->id.'.jpg';
 //            if(!file_exists($url)){
 //                $this::save_slip($shipment->id);
@@ -997,7 +1025,10 @@ class RetailShipmentBookController extends Controller
                           </tr>
                           <tr>
                             <td colspan="3" class="color primary"><strong>Order ID</strong></td>
-                            <td colspan="8">'.$shipment->order_id.'</td>
+                            <td colspan="2">'.$shipment->order_id.'</td>
+
+                            <td colspan="2" class="color primary"><strong>Sub Segment</strong></td>
+                            <td colspan="4">'. $sub_segment_name .'</td>
 </tr>
                           <tr>
                             <td colspan="1" class="color primary border"><strong>#IBAN</strong></td>
