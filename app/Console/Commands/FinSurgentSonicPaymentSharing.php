@@ -57,20 +57,20 @@ class FinSurgentSonicPaymentSharing extends Command
         $api = config('app.FINGA_URL');
         $token = FingaIntegrationController::getToken($api);
         $token_time = Carbon::now();
-        $pending_payment_wallet_users->chunk(50)->each(function ($chunkedShipments) use($api,$token,$token_time,$date) {
-            foreach ($chunkedShipments as $pending_payment) {
 
-                $pending_payment_shipment_ids = PendingPaymentShipment::leftJoin('finja_log_settlement_records as sac', 'pending_payment_shipments.shipment_id', '=', 'sac.shipment_id')
-                    ->where('pending_payment_shipments.pending_payment_id', $pending_payment->id)
-                    ->where('pending_payment_shipments.type', 3)
-                    ->where(function ($query) {
-                        $query->whereNull('sac.id')
-                            ->orWhere('sac.wallet_log_updated', 0);
-                    })
-                    ->select(['pending_payment_shipments.*'])
-                    ->get();
+        foreach($pending_payment_wallet_users as $pending_payment) {
 
-                foreach ($pending_payment_shipment_ids as $pending_payment_shipment) {
+            $pending_payment_shipment_ids = PendingPaymentShipment::leftJoin('finja_log_settlement_records as sac', 'pending_payment_shipments.shipment_id', '=', 'sac.shipment_id')
+            ->where('pending_payment_shipments.pending_payment_id', $pending_payment->id)
+            ->where('pending_payment_shipments.type', 3)
+            ->where(function ($query) {
+                $query->whereNull('sac.id')
+                    ->orWhere('sac.wallet_log_updated', 0);
+            })
+            ->select(['pending_payment_shipments.*'])
+            ->get();
+            $pending_payment_shipment_ids->chunk(50)->each(function ($chunkedShipments) use($api,$token,$token_time,$date,$pending_payment) {
+                foreach ($chunkedShipments as $pending_payment_shipment) {
                     if ($pending_payment_shipment) {
 
                         $shipment = Shipment::find($pending_payment_shipment->shipment_id);
@@ -96,13 +96,13 @@ class FinSurgentSonicPaymentSharing extends Command
                                 $token = FingaIntegrationController::getToken($api);
                                 $token_time = Carbon::now(); // Update the token time
                             }
-                            $this->arrival_shipment_logs($requestPayload, $pending_payment_shipment, null, $token);
+                            $this->arrival_shipment_logs($requestPayload, $pending_payment_shipment,null,$token);
                         }
                     }
                 }
-            }
-            sleep(60);
-        });
+                sleep(60);
+            });
+        }
         return Command::SUCCESS;
     }
 }
