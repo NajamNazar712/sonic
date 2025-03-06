@@ -31,12 +31,11 @@ class ShipmentAmountChangeObserver
             $log_bid = AdminFinanceController::isWalletLogUpdated($shipment->id);
             if(!$log_bid) {
                 $requestPayload = [
-                    "shipmentId" => $shipment->id,
                     "wallet_id" => $shipment->user->wallet->wallet_id,
                     "client_id" => $shipment->user->id, 
                     "reference_id" => (string) Str::uuid(), 
                     "shipment_id" => $shipment->tracking_number, 
-                    "amount" => $shipment->amount, 
+                    "amount" => floatval($shipment->amount) ,
                     "order_created_date" => $shipment->created_at,
                 ]; 
                 $this->arrival_shipment_logs($requestPayload, null, $shipment->id);

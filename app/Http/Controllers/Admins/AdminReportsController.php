@@ -16071,4 +16071,256 @@ class AdminReportsController extends Controller
 
         return response()->json(['details' => $details]);
     }
+
+    public function lost_and_case_closed_summary_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 814);
+        return view('admin.reports.lost_and_case_closed_summary.index');
+    }
+
+    public function lost_and_case_closed_summary_list(Request $request)
+    {
+        /**
+         * 18 is lost
+         * 51 is case closed
+         */
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 815);
+        }
+        $trackingNumbers = explode(',', $request->tracking_numbers);
+        $searchDateFrom = $request->input('search_date_from');
+        $searchDateTo = $request->input('search_date_to');
+
+        $startDate = $searchDateFrom ? Carbon::createFromFormat('d F, Y', $searchDateFrom)->startOfDay() : now()->subMonths(4)->startOfDay();
+        $endDate = $searchDateTo ? Carbon::createFromFormat('d F, Y', $searchDateTo)->endOfDay() : now()->endOfDay();
+
+        $lost_and_closed_shipments = DB::table('shipments')
+        ->select(
+            'shipments.updated_at AS latest_shipment',
+            'shipments.tracking_number',
+            'lost_shipment_responsibles.*',
+            'admins.name AS admin_name',
+            'riders.name AS rider_name',
+            'admin_employees.trax_id AS admin_trax_id',
+            'rider_employees.trax_id AS rider_trax_id',
+            'city.name AS responsible_city',
+            'requested_admins.name AS requested_admin_name',
+            'request_approved_admins.name AS request_approved_admin',
+            'user_shipment.name AS shipper_name',
+            'shipments.amount AS cod_amount',
+            'shipments.parcel_value AS parcel_value',
+            'admin_status.name AS admin_status',
+            'rider_status.name AS rider_status',
+            'shipment_status.name AS latest_shipment_status',
+            DB::raw('(
+                SELECT GROUP_CONCAT(shipper_status_id)
+                FROM shipments_journey
+                WHERE shipments_journey.shipment_id = shipments.id
+                AND id >= sjl.id
+            ) AS jour'),
+            'case_closed_remarks.remarks AS case_closed_remarks',
+            'sjl.created_at AS requested_date_time',
+            'lost_approved.created_at AS approval_date_time'
+        )
+        ->leftJoin('shipments_journey AS sjl', function($join) {
+            $join->on('sjl.shipment_id', '=', 'shipments.id')
+                ->whereRaw('sjl.id = (
+                    SELECT MAX(id)
+                    FROM shipments_journey
+                    WHERE shipments_journey.shipment_id = shipments.id
+                    AND shipments_journey.shipper_status_id = 18
+                    AND shipments_journey.verification = 0
+                )');
+        })
+        ->leftJoin('admins AS requested_admins', 'sjl.admin_id', '=', 'requested_admins.id')
+        ->leftJoin('shipments_journey AS lost_approved', function($join) {
+            $join->on('lost_approved.shipment_id', '=', 'shipments.id')
+                ->whereRaw('lost_approved.id = (
+                    SELECT MAX(id)
+                    FROM shipments_journey
+                    WHERE shipments_journey.shipment_id = shipments.id
+                    AND shipments_journey.shipper_status_id = 18
+                    AND shipments_journey.verification = 1
+                    AND shipments_journey.id > (
+                        SELECT MAX(id)
+                        FROM shipments_journey
+                        WHERE shipments_journey.shipment_id = shipments.id
+                        AND shipments_journey.shipper_status_id = 18
+                        AND shipments_journey.verification = 0
+                    )
+                )');
+        })
+        ->leftJoin('admins AS request_approved_admins', 'lost_approved.admin_id', '=', 'request_approved_admins.id')
+        ->leftJoin('lost_shipment_responsibles', function($join) {
+            $join->on('lost_shipment_responsibles.shipment_id', '=', 'shipments.id')
+                ->whereRaw('lost_shipment_responsibles.updated_at BETWEEN sjl.updated_at AND DATE_ADD(sjl.updated_at, INTERVAL 50 SECOND)');
+        })
+        ->leftJoin('admins', 'lost_shipment_responsibles.user_id', '=', 'admins.id')
+        ->leftJoin('employees AS employees_admins', function($join) {
+            $join->on('employees_admins.id', '=', 'admins.trax_id')
+                ->where('employees_admins.employee_type_id', 1);
+        })
+        ->leftJoin('riders', 'lost_shipment_responsibles.user_id', '=', 'riders.id')
+        ->leftJoin('employees AS employees_riders', function($join) {
+            $join->on('employees_riders.id', '=', 'riders.trax_id')
+                ->where('employees_riders.employee_type_id', 2);
+        })
+        ->leftJoin('employees AS rider_employees', 'rider_employees.trax_id', '=', 'riders.trax_id')
+        ->leftJoin('employees AS admin_employees', 'admin_employees.trax_id', '=', 'admins.trax_id')
+        ->leftJoin('employee_statuses AS admin_status', 'admin_status.id', '=', 'admin_employees.status_id')
+        ->leftJoin('employee_statuses AS rider_status', 'rider_status.id', '=', 'rider_employees.status_id')
+        ->leftJoin('cities AS city', 'city.id', '=', 'sjl.city_id')
+        ->leftJoin('users AS user_shipment', 'user_shipment.id', '=', 'shipments.user_id')
+
+        ->leftJoin('shipments_journey AS case_closed_remarks', function($join) {
+            $join->on('case_closed_remarks.shipment_id', '=', 'shipments.id')
+                ->where('case_closed_remarks.shipper_status_id', 51)
+                ->whereRaw('case_closed_remarks.id = (
+                    SELECT MAX(sj1.id)
+                    FROM shipments_journey AS sj1
+                    WHERE sj1.shipment_id = shipments.id
+                    AND sj1.shipper_status_id = 51
+                    AND sj1.id > (
+                        SELECT MAX(sj2.id)
+                        FROM shipments_journey AS sj2
+                        WHERE sj2.shipment_id = shipments.id
+                        AND sj2.shipper_status_id = 18
+                    )
+                    AND NOT EXISTS (
+                        SELECT 1
+                        FROM shipments_journey AS sj3
+                        WHERE sj3.shipment_id = shipments.id
+                        AND sj3.id BETWEEN (
+                            SELECT MAX(sj4.id) 
+                            FROM shipments_journey AS sj4 
+                            WHERE sj4.shipment_id = shipments.id 
+                            AND sj4.shipper_status_id = 18
+                        ) AND sj1.id
+                        AND sj3.shipper_status_id NOT IN (18, 51)
+                    )
+                )');
+        })
+
+        ->leftJoin('shipment_status', 'shipment_status.id', '=', 'shipments.shipper_status_id')
+        ->distinct()
+        ->whereIn('shipments.shipper_status_id', [18, 51]);
+        if (!empty($trackingNumbers) && is_array($trackingNumbers) && count(array_filter($trackingNumbers, fn($value) => $value !== "")) > 0) {
+            $lost_and_closed_shipments->whereIn('shipments.tracking_number', $trackingNumbers);
+        } else {
+            $lost_and_closed_shipments->whereBetween('shipments.updated_at', [$startDate, $endDate]);
+        }
+
+        $datatable = Datatables::of($lost_and_closed_shipments)
+        ->editColumn('tracking_number', function ($shipments) {
+            $route = route('admin.tracking.index');
+            return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+        })
+        ->editColumn('request_approved_admin', function ($shipments) {
+            $lost_approved_by = '-';
+            if ($shipments->request_approved_admin != null || $shipments->request_approved_admin != '') {
+                $lost_approved_by = $shipments->request_approved_admin;
+            }
+            return $lost_approved_by;
+        })
+        ->addColumn('defaulter_name', function ($shipments) {
+            return $shipments->admin_name . ' ' . $shipments->rider_name;
+        })
+        ->orderColumn('defaulter_name', function ($query, $direction) {
+            $query->orderBy('admin_name', $direction)->orderBy('rider_name', $direction);
+        })
+        ->addColumn('employee_status', function ($shipments) {
+            $adminEmployeeStatus = $shipments->admin_status ?? '';
+            $riderEmployeeStatus = $shipments->rider_status ?? '';
+            return $adminEmployeeStatus . ' ' . $riderEmployeeStatus;
+        })
+        ->orderColumn('employee_status', function ($query, $direction) {
+            $query->orderBy('admin_status', $direction)->orderBy('rider_status', $direction);
+        })
+        ->addColumn('trax_id', function ($shipments) {
+            return $shipments->admin_trax_id . ' ' . $shipments->rider_trax_id;
+        })
+        ->orderColumn('trax_id', function ($query, $direction) {
+            $query->orderBy('admin_trax_id', $direction)->orderBy('rider_trax_id', $direction);
+        })
+        ->addColumn('case_closed_remarks', function ($shipments) {
+            if ($shipments->case_closed_remarks != "") {
+                return $shipments->case_closed_remarks ?: '-';
+            }
+            return '-';
+        })
+        ->filterColumn('responsible_city', function ($query, $keyword) {
+            $query->where('city.name', 'like', "%$keyword%");
+        })
+        ->filterColumn('latest_shipment_status', function ($query, $keyword) {
+            $query->where('shipment_status.name', 'like', "%$keyword%");
+        })
+        ->filterColumn('requested_admin_name', function ($query, $keyword) {
+            $query->where('requested_admins.name', 'like', "%$keyword%");
+        })
+        ->filterColumn('lost_approved_by', function ($query, $keyword) {
+            $query->where('lost_approved_by.name', 'like', "%$keyword%");
+        })
+        ->filterColumn('cod_amount', function ($query, $keyword) {
+            $query->where('shipments.amount', 'like', "%$keyword%");
+        })
+        ->filterColumn('parcel_value', function ($query, $keyword) {
+            $query->where('shipments.parcel_value', 'like', "%$keyword%");
+        })
+        ->filterColumn('shipper_name', function ($query, $keyword) {
+            $query->where('user_shipment.name', 'like', "%$keyword%");
+        })
+        ->filterColumn('defaulter_name', function ($query, $keyword) {
+            $query->where('admins.name', 'like', "%$keyword%")
+                ->orWhere('riders.name', 'like', "%$keyword%");
+        })
+        ->filterColumn('employee_status', function ($query, $keyword) {
+            $statusMap = [
+                0 => 'All Status',
+                1 => 'Active',
+                2 => 'Inactive',
+                3 => 'Active - No Info',
+            ];
+        
+            // Check if the keyword exists in the mapping array
+            if (isset($statusMap[$keyword])) {
+                $status = $statusMap[$keyword];
+                // If the keyword is 1 or 3 (both are related to 'Active' statuses)
+                if ($keyword == 1 || $keyword == 3) {
+                    // Exact match for Active statuses (1 and 3)
+                    $query->where(function ($query) use ($status) {
+                        $query->where('admin_status.name', $status)
+                            ->orWhere('rider_status.name', $status);
+                    });
+                } elseif ($keyword == 2) {
+                    // For 'Inactive' status (2), we use LIKE for partial matching
+                    $query->where(function ($query) use ($status) {
+                        $query->where('admin_status.name', 'LIKE', "%{$status}%")
+                            ->orWhere('rider_status.name', 'LIKE', "%{$status}%");
+                    });
+                }
+            }
+        })
+        ->filterColumn('trax_id', function ($query, $keyword) {
+            $query->where('admin_employees.trax_id', 'like', "%$keyword%")
+                    ->orWhere('rider_employees.trax_id', 'like', "%$keyword%");
+        })
+        ->filterColumn('latest_shipment', function ($query, $keyword) {
+            if ($keyword) {
+                $query->where('shipments.updated_at', 'LIKE', "%{$keyword}%");
+            }
+        })
+        ->editColumn('approval_date_time', function ($shipments) {
+            return !empty($shipments->approval_date_time) ? $shipments->approval_date_time : '-';
+        })
+        ->editColumn('parcel_value', function ($shipments) {
+            return !empty($shipments->parcel_value) ? $shipments->parcel_value : '-';
+        })
+        ->editColumn('cod_amount', function ($shipments) {
+            return !empty($shipments->cod_amount) ? $shipments->cod_amount : '-';
+        })
+        ;
+        return $datatable
+        ->rawColumns(['tracking_number'])
+        ->make(true);
+    }
 }
