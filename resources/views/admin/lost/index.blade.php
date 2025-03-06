@@ -642,6 +642,10 @@
                                                     });
                                             } else {
                                                 UnblockPagePermanently();
+                                                table.button('.reject').enable();
+                                                table.button('.approve').enable();
+                                                table.button('.re-attempt').enable();
+                                                table.button('.confirm').enable();
                                                 toastr.error(data.error,
                                                     'Error!', {
                                                         positionClass: 'toast-top-center',

@@ -22,9 +22,9 @@
 										<div class="col-3">
 											<fieldset class="form-group">
 												<select name="search_shipper" id="search_shipper" class="form-control select2">
-													@foreach($shippers as $shipper)
-														<option value="{{$shipper->id}}">{{$shipper->name}}</option>
-													@endforeach
+													{{--                                            @foreach ($shippers as $shipper)--}}
+													{{--                                                <option value="{{ $shipper->id }}">{{ $shipper->name }}</option>--}}
+													{{--                                            @endforeach--}}
 												</select>
 											</fieldset>
 										</div>
@@ -468,11 +468,30 @@
 
 	<script>
 		$(document).ready(function() {
-            $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Shipper',
-                width:'100%',
-                allowClear:true
-            });
+			$('#search_shipper').select2({
+				width:'100%',
+				placeholder:"Select Shipper",
+				allowClear:true,
+				minimumInputLength: 2,
+				ajax: {
+					dataType: 'json',
+					url:  '{!! route('admin.accounts.shipper_names.dropdown',['type'=>'active']) !!}',
+					data: function (params) {
+						return {
+							search: params.term,
+						}
+					},
+					processResults: function (data) {
+						return {
+							results: data
+						};
+					},
+					delay: 700,
+				}
+			}).bind('change', function() {
+				table.draw(false);
+			});
+
             $('#search_shipper_status').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Shipper Status',
                 width:'100%',

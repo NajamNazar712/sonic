@@ -5244,6 +5244,12 @@ class AdminFinanceController extends Controller
         $amount = 0;
         $charges = 0;
         $gst = 0;
+        $get_wallet_charges_if_applicable = ShipmentAdditionalCharges::get_wallet_charges_if_applicable($shipment_id);
+        if($get_wallet_charges_if_applicable) {
+            $wallet_charges = ShipmentAdditionalCharges::fetch_wallet_charges($shipment_id);
+        }else{
+            $wallet_charges = 0;
+        }
         if ($shipment->shipment_type == 1) {
             $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
 
@@ -5265,6 +5271,10 @@ class AdminFinanceController extends Controller
                 $pending_payment->arrival_shipment = 0;
 
                 $pending_payment->save();
+            }
+            if($get_wallet_charges_if_applicable) {
+                ShipmentAdditionalCharges::settle_wallet_finova_charges($shipment_id, 2);
+                $payable+=$wallet_charges;
             }
 
             $pending_payment_shipment = new PendingPaymentShipment();
@@ -6123,6 +6133,18 @@ class AdminFinanceController extends Controller
                         $pending_payment->arrival_shipment = 0;
 
                         $pending_payment->save();
+                    }
+
+                    $get_wallet_charges_if_applicable = ShipmentAdditionalCharges::get_wallet_charges_if_applicable($shipment_id);
+                    if($get_wallet_charges_if_applicable) {
+                        $wallet_charges = ShipmentAdditionalCharges::fetch_wallet_charges($shipment_id);
+                    }else{
+                        $wallet_charges = 0;
+                    }
+
+                    if($get_wallet_charges_if_applicable) {
+                        ShipmentAdditionalCharges::settle_wallet_finova_charges($shipment_id, 2);
+                        $payable+=$wallet_charges;
                     }
 
                     $pending_payment_shipment = new PendingPaymentShipment();
@@ -9701,8 +9723,7 @@ class AdminFinanceController extends Controller
 
         $details = array();
 
-        $details[] = ['S. No.', 'Tracking No.', 'Booking Date', 'Type', 'Order ID', 'Vendor', 'Origin', 'Consignee Name', 'Consignee Phone', 'Destination', 'Service Type', 'Weight (kg)', 'Collection Amount (PKR)', 'Weight Charges (PKR)', 'Cash Handling Charges (PKR)', 'OSA Charges (PKR)', 'Adjustments (PKR)', 'Total Charges (PKR)', 'GST', 'WHT','SMS Charges', 'Net Retained Amount (PKR)', 'Net Disbursement Amount (PKR)
-'];
+        $details[] = ['S. No.', 'Tracking No.', 'Booking Date', 'Type', 'Order ID', 'Vendor', 'Origin', 'Consignee Name', 'Consignee Phone', 'Destination', 'Service Type', 'Weight (kg)', 'Collection Amount (PKR)', 'Weight Charges (PKR)','Finoava Wallet Charges (PKR)', 'Cash Handling Charges (PKR)', 'OSA Charges (PKR)', 'Adjustments (PKR)', 'Total Charges (PKR)', 'GST', 'WHT','SMS Charges', 'Net Retained Amount (PKR)', 'Net Disbursement Amount (PKR)'];
 
         $account_type_id = $done_payment->shipper->account_type_id;
 
@@ -9727,6 +9748,7 @@ class AdminFinanceController extends Controller
         $total_payable = 0;
         $total_sms_charges = 0;
  		$total_faf_charges = 0;
+        $total_wallet_charges = 0;
         foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
             $shipment = $done_payment_shipment->shipment;
             $service_charges = ShipmentServicesCharges::where('shipment_id', $shipment->id);
@@ -9740,6 +9762,7 @@ class AdminFinanceController extends Controller
             $arrival_charges_applied = ShipmentAdditionalCharges::check_additional_charges($shipment->id,true,false,false);;
             $shipment_weight = $shipment->actual_weight;
             $weight_charges = $shipment->weight_charges;
+            $wallet_charges = ShipmentAdditionalCharges::show_wallet_charges_by_type($shipment->id,$done_payment_shipment->type);
 
 //            if ($done_payment_shipment->type != 2) {
 //                $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->id);
@@ -9784,6 +9807,7 @@ class AdminFinanceController extends Controller
             $row[] = $shipment_weight;
             $row[] = $done_payment_shipment->amount;
             $row[] = (($done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $weight_charges : 0);
+            $row[] = (($done_payment_shipment->type !=3) ? number_format($wallet_charges) : 0);
             $row[] = (($done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? $shipment->cash_handling_charges : 0);
             $row[] = (($done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->nsa_osa_charges : 0);
             $row[] = (($done_payment_shipment->type == 2) ? $done_payment_shipment->payable : 0);
@@ -9808,7 +9832,8 @@ class AdminFinanceController extends Controller
                             $total_replacement_charges += $shipment->replacement_charges;
                             $total_try_and_buy_charges += $shipment->try_and_buy_charges;
                             $total_reverse_pickup_charges += $service_charges;
-                        } else {
+                        }
+                        if ($done_payment_shipment->type == 1) {
                             $total_return_charges += $shipment->return_charges;
                         }
 
@@ -9841,6 +9866,7 @@ class AdminFinanceController extends Controller
                 $total_charges += $done_payment_shipment->charges;
                 $total_payable += $done_payment_shipment->payable;
                 $total_sms_charges += $done_payment_shipment->sms_charges;
+                $total_wallet_charges += $wallet_charges;
             } else {
                 if ($done_payment_shipment->type == 0) {
                     $total_collection_amount += $done_payment_shipment->amount;
@@ -9854,7 +9880,7 @@ class AdminFinanceController extends Controller
 
         $total_columns = count($details[0]);
 
-        $summary = ['Total Weight Charges' => $total_weight_charges, 'Total Cash Handling Charges' => $total_cash_handling_charges, 'Total Insurance Charges' => $total_insurance_charges, 'Total Replacement Charges' => $total_replacement_charges, 'Total Try & Buy Charges' => $total_try_and_buy_charges, 'Total Reverse Pickup Charges' => $total_reverse_pickup_charges , 'Total Return Charges' => $total_return_charges, 'Total Fuel Surcharge' => $total_fuel_surcharge, 'Total FAF Charges' =>$total_faf_charges, 'Total Intercept Charges' => $total_intercept_charges, 'Total OSA Charges' => $total_nsa_osa_charges, 'Total Charges (w/o GST)' => ($total_charges - $total_packaging_material_charges), 'Total GST' => $total_gst, 'Total WHT (Deductable)' => $total_wht, 'Total SMS Charges' => $total_sms_charges , 'Total Packaging Material Charges' => $total_packaging_material_charges, 'Total Adjustments' => $total_adjustments, 'IBFT Charges' => $done_payment->ibft_charges, 'Overall Charges' => ($total_charges + $total_sms_charges + $total_gst - $total_adjustments + $done_payment->ibft_charges - $total_wht)];
+        $summary = ['Total Weight Charges' => $total_weight_charges,'Total Finova Charges'=>$total_wallet_charges, 'Total Cash Handling Charges' => $total_cash_handling_charges, 'Total Insurance Charges' => $total_insurance_charges, 'Total Replacement Charges' => $total_replacement_charges, 'Total Try & Buy Charges' => $total_try_and_buy_charges, 'Total Reverse Pickup Charges' => $total_reverse_pickup_charges , 'Total Return Charges' => $total_return_charges, 'Total Fuel Surcharge' => $total_fuel_surcharge, 'Total FAF Charges' =>$total_faf_charges, 'Total Intercept Charges' => $total_intercept_charges, 'Total OSA Charges' => $total_nsa_osa_charges, 'Total Charges (w/o GST)' => ($total_charges - $total_packaging_material_charges), 'Total GST' => $total_gst, 'Total WHT (Deductable)' => $total_wht, 'Total SMS Charges' => $total_sms_charges , 'Total Packaging Material Charges' => $total_packaging_material_charges, 'Total Adjustments' => $total_adjustments, 'IBFT Charges' => $done_payment->ibft_charges, 'Overall Charges' => ($total_charges + $total_sms_charges + $total_gst - $total_adjustments + $done_payment->ibft_charges - $total_wht)];
 
         $details[] = [];
 
@@ -21501,12 +21527,10 @@ class AdminFinanceController extends Controller
 
     public static function isWalletLogUpdated($shipment_id)
     {
-       
-        $logRecord = FinjaLogSettlementRecord::where('shipment_id', $shipment_id)->first();
-        if ($logRecord && $logRecord->wallet_log_updated == 1) {
-            return true;
-        }
-        return false;
+
+        return FinjaLogSettlementRecord::where('shipment_id', $shipment_id)
+            ->where('wallet_log_updated', 1)
+            ->exists();
     }
 
     public static function isWalletSettlementUpdated($shipment_id)
@@ -21534,8 +21558,8 @@ class AdminFinanceController extends Controller
 
     public function wallet_error_logs(Request $request) {
 
-        $done_payment_shipments = DonePaymentShipment::join('shipments as s','s.id', 'done_payment_shipments.shipment_id')
-        ->join('finja_log_settlement_records as sac', 'done_payment_shipments.shipment_id', '=', 'sac.shipment_id')
+        $done_payment_shipments = DonePaymentShipment::leftjoin('shipments as s','s.id', 'done_payment_shipments.shipment_id')
+        ->leftjoin('finja_log_settlement_records as sac', 'done_payment_shipments.shipment_id', '=', 'sac.shipment_id')
         ->where('done_payment_shipments.done_payment_id', $request->id)
         ->whereIn('done_payment_shipments.wallet_action_bid', [0,1,2])
         ->select(['done_payment_shipments.shipment_id', 's.tracking_number', 'done_payment_shipments.type'])->get();
