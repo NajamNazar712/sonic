@@ -201,38 +201,38 @@ class AgentSarNotification extends Command
                 $join->on('rv_shipment_tickets.shipment_id', '=', 'shipments_journey.shipment_id')
                     ->where('shipments_journey.shipper_status_id', '=', 12)
                     ->where('shipments_journey.verification',1)
-                    ->where('shipments_journey.created_at','>=',$date.' 23:15:00')
+                    ->where('shipments_journey.created_at','>=',$date.' 00:00:00')
                     ->where('rv_shipment_tickets.updated_at','<=',date('Y-m-d').' 23:14:59');
                 })
                 ->where('disabled_shipper',1)
                 ->where('halt_shipper',0)
-                ->where('rv_shipment_tickets.updated_at','>=',$date.' 23:15:59')
+                ->where('rv_shipment_tickets.updated_at','>=',$date.' 00:00:00')
                 ->where('rv_shipment_tickets.updated_at','<=', date('Y-m-d').' 23:14:59')
                 ->select('rv_shipment_tickets.*', 'shipments_journey.id as journeyId')->get();
                 if($haltShipper->isNotEmpty()){
                     foreach($haltShipper->toArray() as $insertData){
-                    $data = [
-                        'agent_id' => 346, // testing purpose
-                        'shipment_id' => $insertData['shipment_id'],
-                        'shipments_journey_id' => $insertData['journeyId'],
-                        'rv_assign_agent_status_id' => 7,
-                        'rv_assign_agent_sub_status_id' => null,
-                        'rv_assign_agent_sub_status_id' => null,
-                        'assigned_to_type_id' => 0,
-                        'assigned_by' => 0,
-                        'rv_state_id' => 2,
-                        'updated_by_id' => 346
-                    ];
-                    $this->rv_shipment_assign($data);
-                    ShipmentsJourneyController::add($insertData['shipment_id'], 65, 65, $insertData['shipment_status_reason_id'], NULL, $insertData['shipment_user_id'], 346);
+                        $data = [
+                            'agent_id' => 346, // testing purpose
+                            'shipment_id' => $insertData['shipment_id'],
+                            'shipments_journey_id' => $insertData['journeyId'],
+                            'rv_assign_agent_status_id' => 7,
+                            'rv_assign_agent_sub_status_id' => null,
+                            'rv_assign_agent_sub_status_id' => null,
+                            'assigned_to_type_id' => 0,
+                            'assigned_by' => 0,
+                            'rv_state_id' => 2,
+                            'updated_by_id' => 346
+                        ];
+                        $this->rv_shipment_assign($data);
+                        ShipmentsJourneyController::add($insertData['shipment_id'], 65, 65, $insertData['shipment_status_reason_id'], NULL, $insertData['shipment_user_id'], 346);
+                    }
+                    NotificationsController::send(220, $haltShipper);
+                    Shipment::whereIn('id', array_column($haltShipper->toArray(), 'shipment_id'))->update(['shipper_status_id'=>65, 'consignee_status_id'=>65]);
+                    RvShipmentTicket::whereIn('shipment_id', array_column($haltShipper->toArray(), 'shipment_id'))->update(['halt_shipper' => 1, 'deleted_at' => date('Y-m-d h:i:s')]);
+                    RvShipmentAssignAgent::whereIn('shipment_id', array_column($haltShipper->toArray(), 'shipment_id'))
+                    // ->whereDate('created_at',$date)
+                    ->update(['unresponsive_count' => 3, 'unresponsive_email_count'=>1, 'unresponsive_email_time' => date('Y-m-d h:i:s')]);
                 }
-                NotificationsController::send(220, $haltShipper);
-                Shipment::whereIn('id', array_column($haltShipper->toArray(), 'shipment_id'))->update(['shipper_status_id'=>65, 'consignee_status_id'=>65]);
-                RvShipmentTicket::whereIn('shipment_id', array_column($haltShipper->toArray(), 'shipment_id'))->update(['halt_shipper' => 1, 'deleted_at' => date('Y-m-d h:i:s')]);
-                RvShipmentAssignAgent::whereIn('shipment_id', array_column($haltShipper->toArray(), 'shipment_id'))
-                // ->whereDate('created_at',$date)
-                ->update(['unresponsive_count' => 3, 'unresponsive_email_count'=>1, 'unresponsive_email_time' => date('Y-m-d h:i:s')]);
-            }
 //            Log::channel('cronJobLog')->info('s ' .'agent:sarnotification Completedagent:sarnotification Completed');
 
         } catch (\Throwable $th) {

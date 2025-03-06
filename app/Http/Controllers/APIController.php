@@ -3552,7 +3552,7 @@ class APIController extends Controller
 
                     $filename = 'air_waybill' . '.jpg';
 
-                    return $image->setOption('disable-smart-width', true)->setOption('width', 1280)->setOption('enable-local-file-access', true)->download($filename);
+                    return $image->setOption('disable-smart-width', true)->setOption('enable-local-file-access', true)->download($filename);
                 } else {
                     $pdf = SnappyPDF::loadHTML($air_waybill);
 
