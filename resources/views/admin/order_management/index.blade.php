@@ -34,7 +34,7 @@
                                       </span>
                                 </div>
                                 <input type="text" name="booking_from_date"
-                                       class="form-control bg-primary border-primary white rounded-right"
+                                       class="form-control bg-primary border-primary white rounded-right"  data-value="{{ \Carbon\Carbon::today()->subDays(31)->startOfDay() }}"
                                        id="booking_from_date" placeholder="Booking Date From">
                             </div>
                         </div>
@@ -46,7 +46,7 @@
                                         </span>
                                 </div>
                                 <input type="text" name="booking_to_date"
-                                       class="form-control bg-primary border-primary white rounded-right"
+                                       class="form-control bg-primary border-primary white rounded-right" data-value="{{ \Carbon\Carbon::now() }}"
                                        id="booking_to_date" placeholder="Booking Date To">
                             </div>
                         </div>
@@ -250,7 +250,7 @@
                                 <div class="row justify-content-center">
                                     <div class="col-10">
                                         <fieldset class="form-group">
-                                            <select name="case_nature_tclaim" id="case_nature_claim" class="form-control select2">
+                                            <select name="case_nature_tclaim" id="case_nature_claim" class="form-control select2" data-rule-required="true" data-msg-required="Select claim type">
                                                 @foreach($case_nature_type_claims as $claim)
                                                     <option value="{{$claim->id}}">{{$claim->type}}</option>
                                                 @endforeach
@@ -293,7 +293,7 @@
                                     </div>
                                     <div class="col-10">
                                         <fieldset class="form-group">
-                                            <textarea class="form-control" name="description" id="claim_description" rows="5" placeholder="Enter Description Here..."></textarea>
+                                            <textarea class="form-control" name="description" id="claim_description" rows="5" placeholder="Enter Description Here..." data-rule-required="true" data-msg-required="Claim description is required."></textarea>
                                         </fieldset>
                                     </div>
                                 </div>

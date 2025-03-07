@@ -1018,6 +1018,14 @@
                                     $('#account_details').addClass('d-none');
                                 }
                             }
+
+                            else if (data.status == 2){
+                                $('#iban_no').val('');
+                                $('#account_no').val('');
+                                $('#bank').val('').trigger('change');
+                                $('#account_details').removeClass('d-none');
+                            }
+
                             else{
                                 complete_shipper_info = false;
                                 first_shipment = true;
@@ -1284,6 +1292,7 @@
                         }).done(function (data) {
                             if (data.status == 1) {
                                 retail_discount_percentage = data.data.discount_percentage;
+                                $('#retail_discount_percentage').val(retail_discount_percentage);
 
                                 calculateRates(shipping_mode_id,business_category,destination,weight,trax_box,length,breadth, insurance, packaging, height, admin_discount, admin_discount_type, retail_discount_applied, retail_discount_percentage);
 

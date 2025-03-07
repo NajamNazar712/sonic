@@ -253,7 +253,7 @@
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
                     <h4 class="modal-title white">Update Distribution</h4>
-                  
+
                 </div>
                 <div class="modal-body  text-center">
 
@@ -376,10 +376,11 @@
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-        <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('js/refreshTabs.js')}}" type="text/javascript"></script>
 
 
     <script type="text/javascript">
@@ -580,7 +581,7 @@
 
                     $('#statusVerifySubmit').prop('disabled', true);
                     $('#statusUpdateSubmit').prop('disabled', true);
-                
+
                     $.each($('#datatable tr td.statusOnChange select'), function (key, value) {
 
                         $(this).find(':selected').removeAttr('disabled');
@@ -644,10 +645,11 @@
                                 shipment.val(shipments);
                                 $('#statusVerifySubmit').prop('disabled', true);
                                 $('#statusUpdateSubmit').prop('disabled', true);
-                                
+
                                 if (!submitting) {
                                     submitting = true;
 
+                                    triggerRefreshInAllTabs();
                                     verify_form.submit();
                                 }
                             }
@@ -698,7 +700,7 @@
 
                                 if (!submitting) {
                                     submitting = true;
-
+                                    triggerRefreshInAllTabs();
                                     verify_form.submit();
                                 }
                             }
@@ -1219,7 +1221,7 @@
                     }
                 });
                 $('#total_booked_units_per_item').html(total_booked_units_per_item);
-                
+
                 $(".total_unit").each(function() {
 
                     var value = $(this).text();
@@ -1255,7 +1257,7 @@
                     }
                 });
                 $('#total_delivered_skus').html(total_delivered_skus);
-                
+
                 $(".total_return_skus").each(function() {
 
                     var value = $(this).text();

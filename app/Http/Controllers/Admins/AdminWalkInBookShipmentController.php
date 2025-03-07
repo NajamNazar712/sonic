@@ -47,7 +47,7 @@ use App\Http\Models\WarehouseStock;
 use App\Http\Models\Warehouse\Warehouse;
 use Validator;
 use Illuminate\Validation\Rule;
-use Yajra\Datatables\Datatables;
+use Yajra\DataTables\DataTables;
 use App\Http\Controllers\Admins\FTLController;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\FtlRequestAdditionalCost;
@@ -583,7 +583,6 @@ class AdminWalkInBookShipmentController extends Controller
 //    }
 
     public function print_air_waybill(Request $request) {
-
         $user_type = NULL;
         $user_id = NULL;
 
@@ -705,6 +704,18 @@ class AdminWalkInBookShipmentController extends Controller
 
             $shipment = Shipment::where('id',$request->ids)->first();
 
+            $sub_segment_name = '-';
+            $sub_segment = DB::table('shipper_segment_logs')
+            ->leftJoin('sub_category_segments', 'sub_category_segments.id', 'shipper_segment_logs.sub_segment_id')
+            ->where('shipment_id', $shipment->id)
+            ->select('sub_category_segments.name')
+            ->first();
+
+            if ($sub_segment && $sub_segment->name)
+            {
+                $sub_segment_name = $sub_segment->name;
+            }
+
 
             if ($user_id == $shipment->user_id) {
                 $table_start = '
@@ -717,7 +728,7 @@ class AdminWalkInBookShipmentController extends Controller
                               <span><strong>' . $shipment->tracking_number . '</strong></span>
                             </td>
                             <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
-                                <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
+                                <img src="data:image/png;base64,' . DNS2D::getBarcodePNG((string)$shipment->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
                             </td>
 
                             <td class="color primary border twice-left"><strong>Service</strong></td>
@@ -835,7 +846,10 @@ class AdminWalkInBookShipmentController extends Controller
                             </tr>
                             <tr>
                               <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                              <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+                              <td colspan="2" class="border twice-bottom">' . $item->description . '</td>
+
+                            <td class="color secondary border twice-bottom"><strong>Sub Segment</strong></td>
+                            <td colspan="4" class="border twice-bottom">' . $sub_segment_name . '</td>
                             </tr>
                 ';
 
@@ -951,7 +965,10 @@ class AdminWalkInBookShipmentController extends Controller
                                     </tr>
                                     <tr>
                                       <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                                      <td colspan="6" class="border twice-bottom">' . $item->description .'</td>
+                                      <td colspan="2" class="border twice-bottom">' . $item->description .'</td>
+
+                                        <td class="color secondary border twice-bottom"><strong>Sub Segment</strong></td>
+                                        <td colspan="4" class="border twice-bottom">' . $sub_segment_name . '</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -1095,6 +1112,15 @@ class AdminWalkInBookShipmentController extends Controller
             $shipments = $shipments->where('sj.admin_id', Auth::id());
         }
 
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $shipments->where('shipments.tracking_number', $tracking_numbers);
+        }
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $shipments->whereBetween('shipments.created_at', [$from,$to]);
+        }
+
         if (session('department_id') == 8) {
             $shipments = $shipments->where('shipments.shipment_type',2);
         }
@@ -1138,15 +1164,8 @@ class AdminWalkInBookShipmentController extends Controller
                 else {
                     $query->whereRaw('false');
                 }
-            });
-        if ($tracking_numbers = $request->get('tracking_numbers')) {
-            $datatable->where('shipments.tracking_number', $tracking_numbers);
-        }
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $datatable->whereBetween('shipments.created_at', [$from,$to]);
-        }
+            })->rawColumns(['tracking_number']);
+
         return $datatable->make(true);
     }
 
@@ -1785,6 +1804,18 @@ class AdminWalkInBookShipmentController extends Controller
 
             $shipment = Shipment::where('id',$request->ids)->first();
 
+            $sub_segment_name = '-';
+            $sub_segment = DB::table('shipper_segment_logs')
+            ->leftJoin('sub_category_segments', 'sub_category_segments.id', 'shipper_segment_logs.sub_segment_id')
+            ->where('shipment_id', $shipment->id)
+            ->select('sub_category_segments.name')
+            ->first();
+
+            if ($sub_segment && $sub_segment->name)
+            {
+                $sub_segment_name = $sub_segment->name;
+            }
+
             if ($user_id == $shipment->user_id) {
                 $table_start = '
                       <table class="table table-sm table-bordered border twice">
@@ -1796,7 +1827,7 @@ class AdminWalkInBookShipmentController extends Controller
                               <span><strong>' . $shipment->tracking_number . '</strong></span>
                             </td>
                             <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
-                                <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
+                                <img src="data:image/png;base64,' . DNS2D::getBarcodePNG((string)$shipment->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
                             </td>
 
                             <td class="color primary border twice-left"><strong>Service</strong></td>
@@ -1905,6 +1936,9 @@ class AdminWalkInBookShipmentController extends Controller
                             <tr>
                               <td class="color secondary border twice-bottom"><strong>Description</strong></td>
                               <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+
+                            <td class="color secondary border twice-bottom"><strong>Sub Segment</strong></td>
+                            <td colspan="4" class="border twice-bottom">' . $sub_segment_name . '</td>
                             </tr>
                 ';
 
@@ -2019,7 +2053,10 @@ class AdminWalkInBookShipmentController extends Controller
                                     </tr>
                                     <tr>
                                       <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                                      <td colspan="6" class="border twice-bottom">' . $item->description .'</td>
+                                      <td colspan="2" class="border twice-bottom">' . $item->description .'</td>
+
+                                    <td class="color secondary border twice-bottom"><strong>Sub Segment</strong></td>
+                                    <td colspan="4" class="border twice-bottom">' . $sub_segment_name . '</td>
                                     </tr>
                                 </tbody>
                             </table>

@@ -327,7 +327,7 @@
 					{data:'delivered_shipments', name: 'done_payments.delivered_shipments', class: 'align-middle text-center delivered_shipments'},
 					{data:'returned_shipments', name: 'done_payments.returned_shipments', class: 'align-middle text-center returned_shipments'},
 					{data:'adjusted_shipments', name: 'done_payments.adjusted_shipments', class: 'align-middle text-center adjusted_shipments'},
-					{data:'arrival_shipments', name: 'done_payments.arrival_shipments', class: 'align-middle text-center arrival_shipments'},
+					{data:'arrival_shipments', name: 'done_payments.arrival_shipment', class: 'align-middle text-center arrival_shipments'},
 					{data:'count_fintech_shipments', name: 'count_fintech_shipments', class: 'align-middle text-center count_fintech_shipments', orderable: false, searchable: false},
 					{data:'total_amount', name: 'total_amount', class: 'align-middle text-center total_amount', sortable: false},
 					{data:'total_charges', name: 'total_charges', class: 'align-middle text-center total_charges', sortable: false},

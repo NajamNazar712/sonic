@@ -26,10 +26,12 @@
                                 <thead>
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No.</th>
-
                                     <th class="border-primary border-darken-1">Agent</th>
-                                    <th class="border-primary border-darken-1" style="width: 150px">Zone</th>
-                                    <th class="border-primary border-darken-1" style="width: 150px" >Hub</th>
+                                    <th class="border-primary border-darken-1" style="width: 150px">Origin Zone</th>
+                                    <th class="border-primary border-darken-1" style="width: 150px">Origin Hub</th>
+                                    <th class="border-primary border-darken-1" style="width: 150px">Origin Area</th>
+                                    <th class="border-primary border-darken-1" style="width: 150px">Destination Zone</th>
+                                    <th class="border-primary border-darken-1" style="width: 150px" >Destination Hub</th>
                                     <th class="border-primary border-darken-1" style="width: 150px" >Case Nature</th>
                                     <th class="border-primary border-darken-1" style="width: 200px" >Case Nature Type</th>
                                     <th class="border-primary border-darken-1" style="width: 150px" >Bus Segments</th>
@@ -120,6 +122,58 @@
     <script>
         $(document).ready(function() {
 
+            $(document).on('click', '.read-more', function () {
+                $(this).closest('ul').find('.hidden-text').toggle(); // Toggle hidden items
+                $(this).text($(this).text() === 'Read more' ? 'Read less' : 'Read more'); // Toggle link text
+            });
+
+            // // Initially, hide all items except the first 3
+            // $('ul').each(function () {
+            //     var items = $(this).find('li');
+            //     items.each(function (index) {
+            //         if (index >= 3) {
+            //             $(this).addClass('hidden-text').hide(); // Hide items after the first 3
+            //         }
+            //     });
+            //
+            //     // Add "Read More" button if there are more than 3 items
+            //     if (items.length > 3) {
+            //         $(this).append('<li><a href="javascript:void(0)" class="read-more">Read more</a></li>');
+            //     }
+            // });
+            //
+            // // Event listener for the "Read More" and "Show less" buttons
+            // $(document).on('click', '.read-more', function () {
+            //     var ul = $(this).closest('ul');
+            //     var hiddenItems = ul.find('li.hidden-text'); // Targeting hidden items with class "hidden-text"
+            //     var visibleItems = ul.find('li:visible');
+            //
+            //     // If the button text is "Read more", show the next 3 hidden items
+            //     if ($(this).text() === 'Read more') {
+            //         var nextItems = hiddenItems.slice(0, 3); // Show the next 3 hidden items
+            //         nextItems.fadeIn().removeClass('hidden-text'); // Fade them in and remove 'hidden-text' class
+            //
+            //         // If there are no more hidden items left, change the button text to "Show less"
+            //         if (ul.find('li.hidden-text').length === 0) {
+            //             setTimeout(() => {
+            //                 $(this).text('Show less'); // Delay changing button text
+            //             }, 300); // 300ms delay
+            //         }
+            //     }
+            //     // If the button text is "Show less", hide the last 3 visible items
+            //     else if ($(this).text() === 'Show less') {
+            //         var itemsToHide = visibleItems.slice(-3); // Hide the last 3 visible items
+            //         itemsToHide.fadeOut().addClass('hidden-text'); // Fade them out and add 'hidden-text' class
+            //
+            //         // Change the button text back to "Read more" when there are hidden items
+            //         setTimeout(() => {
+            //             if (ul.find('li.hidden-text').length > 0) {
+            //                 $(this).text('Read more'); // Delay changing button text
+            //             }
+            //         }, 300); // 300ms delay
+            //     }
+            // });
+
             $('#AssignAgentModal').on('hidden.bs.modal', function () {
                 // $("agent_id").select2('val', '')
                 $('#agent_id').val('').trigger('change.select2');
@@ -127,6 +181,10 @@
                 // $('#case_nature_id').val('').trigger('change.select2');
             });
 
+            // $(document).on('click', '.read-more', function () {
+            //     $(this).closest('ul').find('.hidden-text').toggle(); // Toggle hidden items
+            //     $(this).text($(this).text() === 'Read more' ? 'Read less' : 'Read more'); // Toggle link text
+            // });
 
             // $('#case_nature_id').prepend('<option selected></option>').select2({
             //     width:'100%',
@@ -257,6 +315,9 @@
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: ' serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'agent_name', name: 'ad.name', class: ' agent_name'},
+                    {data: 'origin_zone', name: 'z.name', class: ' origin_zone', orderable: false, searchable: false},
+                    {data: 'origin_hub', name: 'z.name', class: ' origin_hub', orderable: false, searchable: false,},
+                    {data: 'origin_area', name: 'z.name', class: ' origin_area', orderable: false, searchable: false,},
                     {data: 'zone', name: 'z.name', class: ' zone', orderable: false, searchable: false},
                     {data: 'hub', name: 'z.name', class: ' hub', orderable: false, searchable: false,},
                     {data: 'case_nature', name: 'case_nature', class: ' case_nature', orderable: false, searchable: false,},
@@ -266,8 +327,8 @@
                     {data: 'shipper_key', name: 'shipper_key', class: ' shipper_key', orderable: false, searchable: false,},
                     {data: 'shipper_non_key', name: 'shipper_non_key', class: ' shipper_non_key', orderable: false, searchable: false,},
                     {data: 'shipment_status', name: 'shipment_status', class: ' shipment_status', orderable: false, searchable: false,},
-                    {data: 'status', name: 'crm_agents.status', class: ' status'},
-                    {data: 'created_at', name: 'crm_agent_auto_assigns.created_at', class: ' created_at'},
+                    {data: 'status', name: 'crm_agent_auto_assigns.status', class: ' status'},
+                    {data: 'created', name: 'crm_agent_auto_assigns.created_at', class: ' created_at'},
                     {data: 'action', name: 'action', class: 'text-center  action p-1', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
@@ -292,7 +353,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.case_nature')|| $(header).is('.zone')|| $(header).is('.hub')|| $(header).is('.case_nature_type')|| $(header).is('.business_segment')|| $(header).is('.shipper_key')|| $(header).is('.shipper_non_key')|| $(header).is('.shipment_status') || $(header).is('.sub_business_segment')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.case_nature') || $(header).is('.origin_zone') || $(header).is('.origin_hub') || $(header).is('.origin_area') || $(header).is('.zone')|| $(header).is('.hub')|| $(header).is('.case_nature_type')|| $(header).is('.business_segment')|| $(header).is('.shipper_key')|| $(header).is('.shipper_non_key')|| $(header).is('.shipment_status') || $(header).is('.sub_business_segment')) {
                             $(td).appendTo($(search));
                         }
                         else if($(header).is('.department')){

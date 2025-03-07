@@ -103,7 +103,7 @@ class ShopifyController extends Controller
                       body {
                         background: none !important;
                         color: #09262e !important;
-                        font-size: 0.9rem !important;
+                        font-size: 0.7rem !important;
                       }
 
                       hr {
@@ -115,6 +115,7 @@ class ShopifyController extends Controller
                       }
 
                       table.table-bordered tbody tr td {
+                        width: 12.5% !important;
                         border: 1px solid #09262e !important;
                       }
 
@@ -131,10 +132,10 @@ class ShopifyController extends Controller
                       }
                       
                       p{
-                      font-size: 18px;
+                      font-size: 10px;
                       }
                       table td{
-                        font-size: 20px;
+                        font-size: 12px;
                       }
                     </style>
                   </head>
@@ -154,7 +155,7 @@ class ShopifyController extends Controller
                         </div>
                         <div>
                             <div><h5>'. $invoice->address .'</h5></div>
-                            <div class="border-bottom mt-2 mb-2"></div>
+                            <div class="border-bottom mt-1 mb-1"></div>
                         </div>
                              
                          <div>
@@ -168,6 +169,8 @@ class ShopifyController extends Controller
                                     <tr>
                                         <td>Quantity</td>
                                         <td>Item</td>
+                                        <td>SKU</td>
+                                        <td>Discount</td>
                                         <td>Price</td>
                                     </tr>
                                     
@@ -177,6 +180,8 @@ class ShopifyController extends Controller
                             $html .='<tr>
                                         <td>'. $item['quantity'] .'x</td>
                                         <td>'. $item['name'] .'</td>
+                                         <td>'. $item['sku'] .'</td>
+                                        <td>'. $item['discount'] .'</td>
                                         <td>Rs.'. $item['price'] .'</td>
                                     </tr>';
                         }
@@ -222,6 +227,9 @@ class ShopifyController extends Controller
                              </tr>
                              <tr>
                                  <td>Shipping: </td><td>Rs.'. $order['shipping'] .'</td>
+                             </tr>
+                              <tr>
+                                 <td>Total Discount: </td><td>Rs.'. $order['total_discount'] .'</td>
                              </tr>
                              <tr>
                                  <td><b>Total price:</b></td><td><b>Rs.'. $order['total_price'] .'</b></td>

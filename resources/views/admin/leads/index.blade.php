@@ -775,6 +775,34 @@
     </div>
     {{--    todo bulk status model end--}}
 
+    <div class="modal fade" id="logs_modal" role="dialog" aria-labelledby="logs_modal_title" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="add_remarks_title">Lead Edit Logs</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Trax ID</th>
+                                <th>Admin Name</th>
+                                <th>Changed Fields</th>
+                                <th>Date of change</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Log entries will be injected here by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
 @endsection
 
@@ -1245,7 +1273,7 @@
                     }
                 },
                 rowId: 'leadid',
-                order: [[13, 'desc']],
+                order: [[14, 'desc']],
                 columns: [
                     {data: 'lead_id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
@@ -1277,9 +1305,9 @@
 
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'reason_id', name: 'leads.reason', class: 'align-middle reason_id'},
-                    {data: 'call_status', name: 'leads.call_status', class: 'align-middle call_status'},
+                    {data: 'call_status_name', name: 'leads.call_status', class: 'align-middle call_status_name'},
                     {data: 'updated_by', name: 'ub.name', class: 'align-middle updated_by'},
-                    {data: 'updated_at', name: 'leads.updated_at', class: 'align-middle updated_at'},
+                    {data: 'updated', name: 'leads.updated_at', class: 'align-middle updated'},
                     {data: 'via_channel', name: 'leads.via_channel', class: 'align-middle via_channel'},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
                 ],
@@ -2276,6 +2304,84 @@
                     });
                 }
             });
+
+
+            // View logs
+            $('#datatable tbody').on('click', 'tr button.view_logs', function () {
+                var lead_id = parseInt($(this).parents('tr').attr('id'));
+                if (lead_id) {
+                    $.ajax({
+                        url: "{{ route('admin.leads.view_logs') }}",
+                        method: 'GET',
+                        data: {
+                            'lead_id': lead_id
+                        },
+                        success: function (data) {
+                            if (data.status == 0) {
+                                var logs = data.logs;
+                                var logContent = '';
+                                if (logs.length > 0) {
+                                    // logs.forEach(function (log) {
+                                    //     logContent += '<tr>';
+                                    //     logContent += '<td>' + log.trax_id + '</td>';
+                                    //     logContent += '<td>' + log.admin_name + '</td>';
+                                    //     logContent += '<td>' + log.edited_fields + '</td>';
+                                    //     logContent += '<td>' + log.created_at + '</td>';
+                                    //     logContent += '</tr>';
+                                    // });
+
+                                    logs.forEach(function (log) {
+                                        let editedFieldsFormatted = log.edited_fields
+                                            .split(', ')
+                                            .map(field => {
+                                                // Split the field at "->", keep the "->" and make the part after it bold
+                                                let parts = field.split('->');
+                                                if (parts.length > 1) {
+                                                    return parts[0] + ' <strong>' + '-> ' + parts[1].trim() + '</strong>';
+                                                }
+                                                return field; // Return as is if "->" is not found
+                                            })
+                                            .join('<br>'); // Add line breaks between fields
+
+                                        logContent += '<tr>';
+                                        logContent += '<td>' + log.trax_id + '</td>';
+                                        logContent += '<td>' + log.admin_name + '</td>';
+                                        logContent += '<td>' + editedFieldsFormatted + '</td>';
+                                        logContent += '<td>' + log.created_at + '</td>';
+                                        logContent += '</tr>';
+                                    });
+
+                                    $('#logs_modal table tbody').html(logContent);
+                                    $('#logs_modal').modal('show');
+                                } else {
+                                    toastr.error('No logs found for this lead.', 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+                            } else {
+                                toastr.error(data.message, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+                        },
+                        error: function () {
+                            // Handle errors in the AJAX request
+                            toastr.error('Something went wrong while retrieving logs.', 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    });
+                } else {
+                    toastr.error('Cannot view logs for invalid lead ID!', 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                }
+            });
+
 
 
             $('#add_city').prepend('<option value="" selected="selected"></option>').select2({

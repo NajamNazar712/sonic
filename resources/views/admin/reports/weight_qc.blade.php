@@ -285,6 +285,11 @@
                 }
             });
 
+            function decodeHtmlEntities(str) {
+                let doc = new DOMParser().parseFromString(str, "text/html");
+                return doc.documentElement.textContent;
+            }
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -331,7 +336,8 @@
 
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
-                                row.push(values.shipper);
+                                // row.push(values.shipper);
+                                row.push(decodeHtmlEntities(values.shipper));
                                 row.push(values.sub_segment);
                                 row.push(values.shipping_mode);
                                 row.push(values.origin);
@@ -412,7 +418,7 @@
                     // { data:'booking_date' ,name: 'bkg_date.created_at', class: 'align-middle text-center booking_date'},
                     { data:'arrival_date' ,name: 'arv_date.created_at', class: 'align-middle text-center arrival_date'},
                     { data:'hub_name' ,name: 'hub_name', class: 'align-middle text-center hub_name'},
-                    { data:'area_name' ,name: 'area.area_name', class: 'align-middle text-center area_name'},
+                    { data:'area_name' ,name: 'area.name', class: 'align-middle text-center area_name'},
                     { data:'estimated_weight' ,name: 'shipments.estimated_weight', class: 'align-middle text-center estimated_weight'},
                     { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle text-center actual_weight'},
                     { data:'difference' ,name: 'difference', class: 'align-middle text-center difference', orderable: false, searchable: false},

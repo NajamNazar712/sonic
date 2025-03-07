@@ -346,7 +346,7 @@
                                 row.push(index + 1);
                                 row.push(values.hub);
                                 row.push(values.associated_hubs);
-                                row.push(values.created_at);
+                                row.push(values.created);
                                 row.push(values.created_by);
                                 row.push(values.updated_at);
                                 row.push(values.updated_by);
@@ -409,7 +409,7 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                     {data: 'associated_hubs_button', name: 'associated_hubs', class: 'align-middle text-center associated_hubs',orderable: false, searchable: false},
-                    {data: 'created_at', name: 'warehouses.created_at', class: 'align-middle created_at'},
+                    {data: 'created', name: 'warehouses.created_at', class: 'align-middle created_at'},
                     {data: 'created_by', name: 'ac.name', class: 'align-middle created_by'},
                     {data: 'updated_at', name: 'warehouses.updated_at', class: 'align-middle updated_at'},
                     {data: 'updated_by', name: 'au.name', class: 'align-middle updated_by'},

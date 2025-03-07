@@ -258,7 +258,7 @@
                                 row.push(values.date);
                                 row.push(values.total_amount);
                                 row.push(values.created_by);
-                                row.push(values.created_at);
+                                row.push(values.created);
                                 row.push(values.station_approved_by);
                                 row.push(values.station_approved_at);
                                 // row.push(values.operation_approved_by);
@@ -548,7 +548,7 @@
                     {data: 'date', name: 'date', class: 'align-middle date'},
                     {data: 'total_amount', name: 'petty_cash_statements.total_amount', class: 'align-middle total_amount'},
                     {data: 'created_by', name: 'cb.name', class: 'align-middle created_by'},
-                    {data: 'created_at', name: 'petty_cash_statements.created_at', class: 'align-middle created_at'},
+                    {data: 'created', name: 'petty_cash_statements.created_at', class: 'align-middle created_at'},
                     {data: 'station_approved_by', name: 'sab.name', class: 'align-middle station_approved_by'},
                     {data: 'station_approved_at', name: 'petty_cash_statements.station_approved_at', class: 'align-middle station_approved_at'},
                     // {data: 'operation_approved_by', name: 'oab.name', class: 'align-middle operation_approved_by'},

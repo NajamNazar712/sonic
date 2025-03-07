@@ -238,7 +238,7 @@ class ShipperCRMController extends Controller
 
                     return $dropdown;
 
-            });
+            })->rawColumns(['action','tracking_number_hyperlink','id_padded_link']);
 
         return $datatables->make(true);
     }

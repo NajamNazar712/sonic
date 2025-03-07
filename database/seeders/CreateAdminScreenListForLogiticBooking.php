@@ -1,0 +1,21 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+
+class CreateAdminScreenListForLogiticBooking extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
+        DB::table('admins_screen_list')->insert(array(
+            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Logistic > Logistic Book', 'url' => 'admin.logistic.index', 'permission_id' => 979),
+        ));
+    }
+}

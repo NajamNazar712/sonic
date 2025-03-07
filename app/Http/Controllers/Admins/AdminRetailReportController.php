@@ -103,6 +103,14 @@ class AdminRetailReportController extends Controller
             ->whereBetween('sj.created_at', [$from,$to])
             ->where('shipments.shipment_type', 2);
 
+<<<<<<< HEAD
+=======
+            if (!empty($rncc_numbers)) {
+                $sales->whereIn('rcds.cash_deposit_id', $rncc_numbers);
+            }
+            // $sales->groupBy('pns.retail_pickup_note_id');
+
+>>>>>>> sprint_130
             $from_id = DB::connection('reports')->table('shipments_journey')->where('created_at', '>=', $from)->min('id');
             if (!empty($from_id)) {
 
@@ -233,25 +241,29 @@ class AdminRetailReportController extends Controller
             });
 
         if($tracking = $request->get('search_tracking')){
-            $datatable->where('shipments.tracking_number', '=', $tracking);
+            $sales->where('shipments.tracking_number', '=', $tracking);
         }
         if($center = $request->get('search_retail_center')){
+<<<<<<< HEAD
             $datatable->where('rf.id', '=', $center);
+=======
+            $sales->where('rc.id', '=', $center);
+>>>>>>> sprint_130
         }
         if($franchise = $request->get('search_retail_franchise')){
-            $datatable->where('rf.id', '=', $franchise);
+            $sales->where('rf.id', '=', $franchise);
         }
         if($origin = $request->get('search_origin')){
-            $datatable->where('oc.id', '=', $origin);
+            $sales->where('oc.id', '=', $origin);
         }
         if($destination = $request->get('search_destination')){
-            $datatable->where('dc.id', '=', $destination);
+            $sales->where('dc.id', '=', $destination);
         }
         if($hub = $request->get('search_hub')){
-            $datatable->where('h.id', '=', $hub);
+            $sales->where('h.id', '=', $hub);
         }
         if($status = $request->get('search_status')){
-            $datatable->where('ss.id', '=', $status);
+            $sales->where('ss.id', '=', $status);
         }
         return $datatable->make(true);
     }

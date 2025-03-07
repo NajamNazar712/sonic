@@ -24,7 +24,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
-use Yajra\Datatables\Datatables;
+use Yajra\DataTables\DataTables;
 use function foo\func;
 
 class AdminCnController extends Controller
@@ -171,8 +171,8 @@ class AdminCnController extends Controller
                 } else{
                     return '';
                 }
-            });
-
+            })
+            ->rawColumns(['action']);
 
         return $datatables->make(true);
     }
@@ -299,6 +299,9 @@ class AdminCnController extends Controller
 
     public function  cn_issue_to_rider_list(Request $request)
     {
+        $cn_number_from = (int) $request->get('cn_number_from');
+        $cn_number_to = (int) $request->get('cn_number_to');
+
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 774);
         }
@@ -313,6 +316,36 @@ class AdminCnController extends Controller
         if (session('role_id') != 1)
         {
             $trax_cn_issue_rider = $trax_cn_issue_rider->whereIn('trax_cn_issue_to_riders.area_code',$hub_ids);
+        }
+
+        if ($cn_number_from != null && $cn_number_to == null) {
+            $cn_number_to = $cn_number_from;  // Set the end range to the start range
+        } elseif ($cn_number_from == null && $cn_number_to != null) {
+            $cn_number_from = $cn_number_to;  // Set the start range to the end range
+        }
+        
+        if ($cn_number_from && $cn_number_to) {
+            $trax_cn_issue_rider = $trax_cn_issue_rider->where(function($query) use ($cn_number_from, $cn_number_to) {
+                $query->where(function($query) use ($cn_number_from, $cn_number_to) {
+                    $query->where('cn_from', '<=', $cn_number_to)
+                        ->where('cn_to', '>=', $cn_number_from);
+                });
+            });
+        }
+
+        $employee_ids = $request->get('employee_id');
+        if ($employee_ids) {
+            $employee_ids = explode(',', $employee_ids);
+            $trax_cn_issue_rider = $trax_cn_issue_rider->where(function ($query) use ($employee_ids) {
+                foreach ($employee_ids as $employee_id) {
+                    $employee_id = trim($employee_id);
+                    if (strpos($employee_id, '%') !== false) {
+                        $query->orWhere('rd.trax_id', 'like', $employee_id);
+                    } else {
+                        $query->orWhere('rd.trax_id', '=', $employee_id);
+                    }
+                }
+            });
         }
 
         $datatables = Datatables::of($trax_cn_issue_rider)
@@ -345,8 +378,8 @@ class AdminCnController extends Controller
                 } else{
                     return '';
                 }
-            });
-
+            })
+            ->rawColumns(['action']);
 
         return $datatables->make(true);
     }

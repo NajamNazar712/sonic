@@ -35,6 +35,26 @@
 
                             <div class="tracking" id="tracking">
                             </div>
+                                <div class="modal fade" id="rider_information" role="dialog"
+                                    aria-labelledby="rider_information_title" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h4 class="modal-title" id="rider_information_title">Rider Information</h4>
+
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">×</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary"
+                                                    data-dismiss="modal">Close</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                         </div>
                     </div>
                 </div>
@@ -239,7 +259,7 @@
                                     <div class="col-10">
                                         <fieldset class="form-group">
                                             <select name="case_nature_tclaim" id="case_nature_claim"
-                                                class="form-control select2">
+                                                class="form-control select2" data-rule-required="true" data-msg-required="Select claim type">
                                                 @foreach ($case_nature_type_claims as $claim)
                                                     <option value="{{ $claim->id }}">{{ $claim->type }}</option>
                                                 @endforeach
@@ -381,7 +401,7 @@
                                         @if ($claim->remarks_visibility == 1)
                                             <div class="col-10 d-none" id="case_nature_claim_remarks_div">
                                                 <fieldset class="form-group">
-                                                    <select name="description[]" id="case_nature_claim_remarks" class="form-control select2" multiple="multiple">
+                                                    <select name="description[]" id="case_nature_claim_remarks" class="form-control select2" multiple="multiple" data-rule-required="true" data-msg-required="Claim remarks is required.">
                                                         
                                                     </select>
                                                 </fieldset>
@@ -890,9 +910,15 @@
                                 shipment += '<td><strong>Piece(s)</strong></td>';
                                 shipment += '<td>' + details.order_information.pieces + '</td>';
                                 shipment += '<td><strong>Business Category</strong></td>';
-                                shipment += '<td>' + details.order_information.business_category +
-                                    '</td>';
+                                shipment += '<td>' + details.order_information.business_category + '</td>';
                                 shipment += '</tr>';
+
+                                // Sub segment of shipper
+                                shipment += '<tr>';
+                                shipment += '<td><strong>Sub Segment</strong></td>';
+                                shipment += '<td>' + details.order_information.sub_segment + '</td>';
+                                shipment += '</tr>';
+
                                 shipment += '</tbody>';
                                 shipment += '</table>';
                                 shipment += '</div>';
@@ -1131,7 +1157,49 @@
                 $('#requested_shipments').html(tracking_rows);
                 $('#AddRequestModal').modal('show');
             });
+            $('#tracking').on('click', '.rider_information', function() {
+                id = $(this).attr('data-id');
+                var showRiderResponseBtn = $(this).attr('data-showRiderRespone');
+                var note = $(this).attr('data-note');
 
+                $.ajax({
+                        url: '{!! route('cod.tracking.rider_information') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'id': id
+                        }
+                    })
+                    .done(function(data) {
+                        var details = '<table class="table table-sm table-bordered"><tbody>';
+
+                        details +=
+                            '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Name</strong></td><td class="align-middle text-center">' +
+                            data.name + '</td></tr>';
+                        details +=
+                            '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Phone Number</strong></td><td class="align-middle text-center">' +
+                            data.phone_number + '</td></tr>';
+                        details +=
+                            '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>City</strong></td><td class="align-middle text-center">' +
+                            data.city + '</td></tr>';
+                        details +=
+                            '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Category</strong></td><td class="align-middle text-center">' +
+                            data.category + '</td></tr>';
+                        details +=
+                            '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Route</strong></td><td class="align-middle text-center">' +
+                            data.route + '</td></tr>';
+                        if (showRiderResponseBtn != undefined) {
+                            details += '<tr data-id="' + data.id + '" data-note="' + note +
+                                '"><td class="align-middle text-center"><button type="button" class="btn btn-warning btnRiderResponsiveStatus" data-type="1">Unresponsive</button></td><td class="align-middle text-center"><button type="button" class="btn btn-danger btnRiderResponsiveStatus" data-type="2">Powered Off</button></td></tr>';
+                        }
+
+                        details += '</tbody></table>';
+
+                        $('#rider_information .modal-body').html(details);
+
+                        $('#rider_information').modal('show');
+                    });
+            });
             // $('#case_nature_select').prepend('<option value="" selected="selected"></option>').select2({
             //     width: '100%',
             //     placeholder: "Select Case Nature",
@@ -1451,8 +1519,8 @@
                                 $('#claim_description_div_new').addClass('d-none');
                                 $('#claim_description_div').addClass('d-none');
                             } else {
-                                $('#claim_description_div_new').removeClass('d-none');
-                                $('#claim_description_div').addClass('d-none');
+                                $('#claim_description_div_new').addClass('d-none');
+                                $('#claim_description_div').removeClass('d-none');
                             }
                         },
                         error: function(jqXHR, textStatus, errorThrown) {
@@ -1809,7 +1877,8 @@
 
                         var formData = new FormData($('#add_request_form')[0]);
                         var claim_description = '';
-                        if (!$('#case_nature_claim_remarks_div').hasClass('d-none')) {
+                        if ($('#case_nature_claim_remarks_div').length && !$('#case_nature_claim_remarks_div').hasClass('d-none')) {
+                            
                             var selectedOptions = $('#case_nature_claim_remarks option:selected');
                             var selectedTexts = [];
                             var useTextarea = false;
@@ -1848,6 +1917,14 @@
                         if (!case_nature_claim_id) {
                             nature_flag = false;
                             var error = "Please select Claim type!";
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                        if (!claim_description) {
+                            nature_flag = false;
+                            var error = "Either a claim description or remarks are required!";
                             toastr.error(error, 'Error!', {
                                 positionClass: 'toast-top-center',
                                 containerId: 'toast-top-center'

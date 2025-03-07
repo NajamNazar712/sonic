@@ -250,7 +250,7 @@
                                 row.push(values.payment_name_id);
                                 row.push(values.cod_amount);
                                 row.push(values.trax_pay_id);
-                                row.push(values.created_at);
+                                row.push(values.created);
 
                                 body.push(row);
                             });
@@ -337,7 +337,7 @@
                         class: 'align-middle text-center trax_pay_id'
                     },
                     {
-                        data: 'created_at',
+                        data: 'created',
                         name: 'created_at',
                         class: 'align-middle text-center created_at'
                     },

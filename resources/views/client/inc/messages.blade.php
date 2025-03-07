@@ -22,3 +22,23 @@
         {{session('info')}}
     </div>
 @endif
+
+{{-- Include Toastr --}}
+@section('css_finja')
+    <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/vendors/css/extensions/toastr.css') }}">
+@endsection
+
+<script src="{{ asset('app-assets/vendors/js/extensions/toastr.min.js') }}" type="text/javascript"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Toastr Notifications
+        @if(session('finga_error'))
+            toastr.error("{{ session('finga_error') }}", 'Error!', {
+                positionClass: 'toast-top-center',
+                containerId: 'toast-top-center'
+            });
+        @endif
+
+    });
+</script>

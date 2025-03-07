@@ -41,7 +41,7 @@ class InternationalWholesaleController extends Controller
             ->join('admins as cb', 'cb.id', '=', 'wholesale_users.created_by')
             ->leftjoin('admins as ub', 'ub.id', '=', 'wholesale_users.updated_by')
             ->join('banks_lists as bl', 'bl.id', '=', 'wholesale_users.bank_id')
-            ->select('wholesale_users.id as shipper_id', 'wholesale_users.name as shipper_name', 'wholesale_users.phone', 'wholesale_users.address', 'c.name as city', 'wholesale_users.email', 'bl.name as bank_name', 'wholesale_users.bank_account', 'wholesale_users.ntn', 'cb.name as created_by', 'ub.name as updated_by', 'wholesale_users.margin', 'wholesale_users.created_at', 'wholesale_users.updated_at', 'wholesale_users.is_document', 'wholesale_users.status');
+            ->select('wholesale_users.id as shipper_id', 'wholesale_users.name as shipper_name', 'wholesale_users.phone', 'wholesale_users.address', 'c.name as city', 'wholesale_users.email', 'bl.name as bank_name', 'wholesale_users.bank_account', 'wholesale_users.ntn', 'cb.name as created_by', 'ub.name as updated_by', 'wholesale_users.margin', 'wholesale_users.created_at as created', 'wholesale_users.updated_at as updated', 'wholesale_users.is_document', 'wholesale_users.status');
 
 
         if (session('role_id') != 1) {
@@ -121,10 +121,13 @@ class InternationalWholesaleController extends Controller
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatable = $datatable->whereBetween('wholesale_users.created_at', [$from,$to]);
+            // $datatable = $datatable->whereBetween('wholesale_users.created_at', [$from,$to]);
+            $shippers = $shippers->whereBetween('wholesale_users.created_at', [$from,$to]);
         }
 
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['document', 'action'])
+        ->make(true);
     }
 
     public function accounts_store(Request $request){
@@ -403,7 +406,10 @@ class InternationalWholesaleController extends Controller
                 $query->where('status', 1);
             })],
             'dhl_waybill' => ['required'],
-            'destination' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'iota_code')->where(function($query){
+            // 'destination' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'iota_code')->where(function($query){
+            //     $query->where('status', 1)->where('hub', 1)->where('business_category_id', 2);
+            // })],
+            'destination' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'iata_code')->where(function($query){
                 $query->where('status', 1)->where('hub', 1)->where('business_category_id', 2);
             })],
             'type' => ['required', 'between:0,190'],
@@ -411,7 +417,6 @@ class InternationalWholesaleController extends Controller
             'pieces' => ['required', 'numeric', 'between:0.1,1000'],
             'other_charges' => ['required', 'numeric', 'between:0,1000000']
         ];
-
 
         if($file = $request->file('shipments')) {
             $spreadsheet = IOFactory::createReaderForFile($file);
@@ -477,7 +482,8 @@ class InternationalWholesaleController extends Controller
                         $other_charges = $row['other_charges'];
                         $shipper = WholesaleUser::find($shipper_id);
 
-                        $destination = City::where('iota_code', $iota_code)->first();
+                        // $destination = City::where('iota_code', $iota_code)->first();
+                        $destination = City::where('iata_code', $iota_code)->first();
 
                         $wholesale_shipment = new WholesaleShipment();
                         $wholesale_shipment->dhl_waybill = $tracking;
@@ -587,10 +593,13 @@ class InternationalWholesaleController extends Controller
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatable = $datatable->whereBetween('wholesale_shipments.created_at', [$from,$to]);
+            // $datatable = $datatable->whereBetween('wholesale_shipments.created_at', [$from,$to]);
+            $bookings = $bookings->whereBetween('wholesale_shipments.created_at', [$from,$to]);
         }
 
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['action'])
+        ->make(true);
     }
 
     public function excel_booking_edit_info (Request $request){

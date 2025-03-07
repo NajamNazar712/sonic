@@ -2,6 +2,15 @@
 
 namespace App\Http\Controllers;
 
+<<<<<<< HEAD
+=======
+use App\FafCharges;
+use App\FinjaSmsLog;
+use App\Http\Models\PendingPaymentShipment;
+use App\Http\Models\WalletUser;
+use App\Models\FinjaRequestLog;
+use App\ShipmentAdditionalCharges;
+>>>>>>> sprint_130
 use DB;
 use SnappyPDF;
 use Validator;
@@ -126,6 +135,11 @@ use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransaction;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionDeliveryNote;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransactionRetail;
+<<<<<<< HEAD
+=======
+use Illuminate\Support\Str;
+use App\Http\Models\ShipperSegmentLogs;
+>>>>>>> sprint_130
 
 class APIController extends Controller
 {
@@ -615,7 +629,7 @@ class APIController extends Controller
                 }), 'destination_return_check'],
                 'information_display' => ['required_if:service_type_id,1,2,3', 'nullable', 'boolean'],
                 'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('cities', 'id')->where('business_category_id', 1), 'destination_check'],
-                'consignee_name' => ['required', 'between:1,100'],
+                'consignee_name' => ['required', 'string', 'between:1,100'],
                 'consignee_address' => ['required', 'between:1,255'],
                 'consignee_phone_number_1' => ['required', 'phone_number'],
                 'consignee_phone_number_2' => ['nullable', 'filled', 'phone_number'],
@@ -704,7 +718,7 @@ class APIController extends Controller
                 }), 'destination_return_check'],
                 'information_display' => ['required_if:service_type_id,1,2,3', 'nullable', 'boolean'],
                 'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('cities', 'id')->where('business_category_id', 1), 'destination_check'],
-                'consignee_name' => ['required', 'between:1,100'],
+                'consignee_name' => ['required', 'string', 'between:1,100'],
                 'consignee_address' => ['required', 'between:1,255'],
                 'consignee_phone_number_1' => ['required', 'phone_number'],
                 'consignee_phone_number_2' => ['nullable', 'filled', 'phone_number'],
@@ -1534,6 +1548,24 @@ class APIController extends Controller
                 }
             }
 
+            try {
+                // Maintaining shipper segment logs on booking
+                ShipperSegmentLogs::create([
+                    'shipment_id' => $shipment_id,
+                    'segment_id' => $user_type->segment_id,
+                    'sub_segment_id' => $user_type->sub_segment_id
+                ]);
+
+                // if ($consignee_city_id != $pickup_city_id) {
+                //     ShipperSegmentLogs::create([
+                //         'shipment_id' => $shipment_id,
+                //         'segment_id' => $user_type->segment_id,
+                //         'sub_segment_id' => $user_type->sub_segment_id
+                //     ]);
+                // }
+            } catch (\Exception $e) {
+                Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
+            }
             return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number]);
         }
     }
@@ -1797,6 +1829,25 @@ class APIController extends Controller
                 }
             }
 
+            try {
+                // Maintaining shipper segment logs on booking
+                ShipperSegmentLogs::create([
+                    'shipment_id' => $shipment_id,
+                    'segment_id' => $user_type->segment_id,
+                    'sub_segment_id' => $user_type->sub_segment_id
+                ]);
+
+                // if ($consignee_city_id != $pickup_city_id) {
+                //     ShipperSegmentLogs::create([
+                //         'shipment_id' => $shipment_id,
+                //         'segment_id' => $user_type->segment_id,
+                //         'sub_segment_id' => $user_type->sub_segment_id
+                //     ]);
+                // }
+            } catch (\Exception $e) {
+                Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
+            }
+            
             return response()->json(['status' => 1, 'message' => 'Shipment Booked with Tracking Number: ' . $tracking_number]);
         }
     }
@@ -1853,13 +1904,13 @@ class APIController extends Controller
 
                     $filename = 'air_waybill' . '.jpg';
 
-                    return $image->setOption('disable-smart-width', true)->setOption('width', 1280)->download($filename);
+                    return $image->setOption('disable-smart-width', true)->setOption('width', 1280)->setOption('enable-local-file-access', true)->download($filename);
                 } else {
                     $pdf = SnappyPDF::loadHTML($air_waybill);
 
                     $filename = 'air_waybill' . '.pdf';
 
-                    return $pdf->download($filename);
+                    return $pdf->setOption('enable-local-file-access', true)->download($filename);
                 }
             } else {
                 return response()->json(['status' => 1, 'message' => 'Already Received']);
@@ -1969,6 +2020,18 @@ class APIController extends Controller
 
             $shipment = Shipment::whereIn('user_id', $user_ids)->where('tracking_number', $tracking_number)->first();
 
+            $sub_segment_name = '-';
+            $sub_segment = DB::table('shipper_segment_logs')
+            ->leftJoin('sub_category_segments', 'sub_category_segments.id', 'shipper_segment_logs.sub_segment_id')
+            ->where('shipment_id', $shipment->id)
+            ->select('sub_category_segments.name')
+            ->first();
+
+            if ($sub_segment && $sub_segment->name)
+            {
+                $sub_segment_name = $sub_segment->name;
+            }
+
             $details = array();
 
             $details['tracking_number'] = $tracking_number;
@@ -2054,6 +2117,8 @@ class APIController extends Controller
                     }
                 }
             }
+
+            $details['order_information']['sub_segment'] = $sub_segment_name;
 
             return response()->json(['status' => 0, 'message' => 'Tracking of Shipment #' . $tracking_number, 'details' => $details]);
         }
@@ -2467,13 +2532,13 @@ class APIController extends Controller
 
                 $filename = 'receiving_sheet_' . $receiving_sheet_id . '.jpg';
 
-                return $image->setOption('disable-smart-width', true)->download($filename);
+                return $image->setOption('disable-smart-width', true)->setOption('enable-local-file-access', true)->download($filename);
             } else {
                 $pdf = SnappyPDF::loadHTML($receiving_sheet);
 
                 $filename = 'receiving_sheet_' . $receiving_sheet_id . '.pdf';
 
-                return $pdf->download($filename);
+                return $pdf->setOption('enable-local-file-access', true)->download($filename);
             }
         }
     }
@@ -2524,13 +2589,13 @@ class APIController extends Controller
 
                 $filename = 'receiving_sheet_' . $receiving_sheet_id . '.jpg';
 
-                return $image->setOption('disable-smart-width', true)->download($filename);
+                return $image->setOption('disable-smart-width', true)->setOption('enable-local-file-access', true)->download($filename);
             } else {
                 $pdf = SnappyPDF::loadHTML($receiving_sheet);
 
                 $filename = 'receiving_sheet_' . $receiving_sheet_id . '.pdf';
 
-                return $pdf->download($filename);
+                return $pdf->setOption('enable-local-file-access', true)->download($filename);
             }
         }
     }
@@ -2944,20 +3009,21 @@ class APIController extends Controller
             $request_channel = 2;
             $description = $request->description;
 
-            $shipment_id = Shipment::where('tracking_number', $request->tracking_number)->first()->id;
+            $shipment_id = Shipment::where('tracking_number', $request->tracking_number)->first();
             $launched_by = 4;
             $name = $request->complaint_name;
             $phoneno = $request->complaint_phone;
 
-            if (!CrmRequest::where('shipment_id', $shipment_id)->where('case_nature_id', $case_nature)->exists()) {
+            if (!CrmRequest::where('shipment_id', $shipment_id->id)->where('case_nature_id', $case_nature)->exists()) {
                 $data = new CrmRequest();
                 $data->case_nature_id = $case_nature;
                 $data->case_nature_type_id = $case_nature_type;
                 $data->description = 'Consignee: (' . $name . ') | Phone Number: (' . $phoneno . ') | Complain: ' . $description;
                 $data->channel_id = $request_channel;
                 $data->status_id = 1;
+                $data->shipper_id = $shipment_id->user_id;
                 $data->launched_by = $launched_by;
-                $data->shipment_id = $shipment_id;
+                $data->shipment_id = $shipment_id->id;
 
                 $data->save();
 
@@ -3414,6 +3480,26 @@ class APIController extends Controller
                     return response()->json(['status' => 0, 'message' => 'Please view this video so that you can follow required process. In case process is not followed completely we will not be able to process this shipment!', 'tracking_number' => $tracking_number, 'video' => $video]);
                 }
             }
+
+            try {
+                // Maintaining shipper segment logs on booking
+                ShipperSegmentLogs::create([
+                    'shipment_id' => $shipment_id,
+                    'segment_id' => $user_type->segment_id,
+                    'sub_segment_id' => $user_type->sub_segment_id
+                ]);
+
+                // if ($consignee_city_id != $pickup_city_id) {
+                //     ShipperSegmentLogs::create([
+                //         'shipment_id' => $shipment_id,
+                //         'segment_id' => $user_type->segment_id,
+                //         'sub_segment_id' => $user_type->sub_segment_id
+                //     ]);
+                // }
+            } catch (\Exception $e) {
+                Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
+            }
+
             return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number, 'reference_number' => $reference_number]);
         }
     }
@@ -3471,13 +3557,13 @@ class APIController extends Controller
 
                     $filename = 'air_waybill' . '.jpg';
 
-                    return $image->setOption('disable-smart-width', true)->setOption('width', 1280)->download($filename);
+                    return $image->setOption('disable-smart-width', true)->setOption('enable-local-file-access', true)->download($filename);
                 } else {
                     $pdf = SnappyPDF::loadHTML($air_waybill);
 
                     $filename = 'air_waybill' . '.pdf';
 
-                    return $pdf->download($filename);
+                    return $pdf->setOption('enable-local-file-access', true)->download($filename);
                 }
             } else {
                 return response()->json(['status' => 1, 'message' => 'Already Received']);
@@ -3898,6 +3984,7 @@ class APIController extends Controller
                     $data['total_charges'] = $invoice->total_charges;
                     $data['total_gst'] = $invoice->total_gst;
                     $data['total_invoice_amount'] = $invoice->total_invoice_amount;
+
                     $data['shipments'] = array();
                     $invoice_shipments = $invoice->invoice_shipments;
 
@@ -3927,6 +4014,10 @@ class APIController extends Controller
                             $details[$shipment->tracking_number]['invoice_amount'] = $invoice_shipment->invoice_amount;
                             $details[$shipment->tracking_number]['amount'] = $shipment->amount;
                             $details[$shipment->tracking_number]['actual_weight'] = $shipment->actual_weight;
+                            $details[$shipment->tracking_number]['faf_charges'] = optional(
+                                ShipmentAdditionalCharges::where('shipment_id', $shipment->id)->latest()->first()
+                            )->faf_charges ?? 'No FaF charge applied';
+
                             $data['shipments'][] = $details;
                         }
                         return response()->json(['status' => 0, 'payments' => $data]);
@@ -3935,7 +4026,6 @@ class APIController extends Controller
                     return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => ['Invoice not found!']]);
                 }
             } else {
-
                 $done_payment = DonePayment::where('id', $request->id)->where('user_id', $user_id);
                 if ($done_payment->exists()) {
                     $done_payment = $done_payment->first();
@@ -3975,6 +4065,10 @@ class APIController extends Controller
                             $details[$shipment->tracking_number]['invoice_amount'] = (($done_payment_shipment->type == 2) ? $done_payment_shipment->payable : 0);
                             $details[$shipment->tracking_number]['amount'] = $shipment->amount;
                             $details[$shipment->tracking_number]['actual_weight'] = $shipment->actual_weight;
+                            $details[$shipment->tracking_number]['faf_charges'] = optional(
+                                ShipmentAdditionalCharges::where('shipment_id', $shipment->id)->latest()->first()
+                            )->faf_charges ?? 'No FaF charge applied';
+
                             $data['shipments'][] = $details;
                         }
                         return response()->json(['status' => 0, 'payments' => $data]);
@@ -4056,7 +4150,7 @@ class APIController extends Controller
                                 if ($admin->api_token) {
                                     $information['api_token'] = $admin->api_token;
                                 } else {
-                                    $api_token = uniqid(base64_encode(str_random(60)));
+                                    $api_token = uniqid(base64_encode(Str::random(60)));
 
                                     $admin->api_token = $api_token;
 
@@ -4121,7 +4215,7 @@ class APIController extends Controller
                                 if ($rider->api_token) {
                                     $information['api_token'] = $rider->api_token;
                                 } else {
-                                    $api_token = uniqid(base64_encode(str_random(60)));
+                                    $api_token = uniqid(base64_encode(Str::random(60)));
 
                                     $rider->api_token = $api_token;
 
@@ -4193,7 +4287,7 @@ class APIController extends Controller
                                 if ($retail_user->api_token) {
                                     $information['api_token'] = $retail_user->api_token;
                                 } else {
-                                    $api_token = uniqid(base64_encode(str_random(60)));
+                                    $api_token = uniqid(base64_encode(Str::random(60)));
 
                                     $retail_user->api_token = $api_token;
 
@@ -8406,7 +8500,7 @@ class APIController extends Controller
                                 }
 
                                 if (!$user->api_token) {
-                                    $api_token = uniqid(base64_encode(str_random(60)));
+                                    $api_token = uniqid(base64_encode(Str::random(60)));
                                     $user->api_token = $api_token;
                                     $user->save();
                                 }
@@ -8501,7 +8595,7 @@ class APIController extends Controller
                                     if ($rider->api_token) {
                                         $api_token = $rider->api_token;
                                     } else {
-                                        $api_token = uniqid(base64_encode(str_random(60)));
+                                        $api_token = uniqid(base64_encode(Str::random(60)));
                                         $rider->api_token = $api_token;
                                     }
                                     $rider->save();
@@ -9797,6 +9891,25 @@ class APIController extends Controller
                 }
             }
 
+            try {
+                // Maintaining shipper segment logs on booking
+                ShipperSegmentLogs::create([
+                    'shipment_id' => $shipment_id,
+                    'segment_id' => $user_type->segment_id,
+                    'sub_segment_id' => $user_type->sub_segment_id
+                ]);
+
+                // if ($consignee_city->id != $pickup_city_id) {
+                //     ShipperSegmentLogs::create([
+                //         'shipment_id' => $shipment_id,
+                //         'segment_id' => $user_type->segment_id,
+                //         'sub_segment_id' => $user_type->sub_segment_id
+                //     ]);
+                // }
+            } catch (\Exception $e) {
+                Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
+            }
+
             return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number]);
         }
     }
@@ -9847,4 +9960,289 @@ class APIController extends Controller
         return response()->json(['exists' => $exists]);
     }
     
+<<<<<<< HEAD
+=======
+    
+    public function wp_custom_select_dropdown_data() {
+        $concerned_wp_cities = [
+            "Abbottabad",
+            "Attock",
+            "Bahawalpur",
+            "Faisalabad",
+            "Gujranwala",
+            "Gujrat",
+            "Hyderabad",
+            "Islamabad",
+            "Jhelum",
+            "Jhang",
+            "Kamaliya",
+            "Karachi",
+            "Lahore",
+            "Larkana",
+            "Multan",
+            "Peshawar",
+            "Quetta",
+            "Rahim Yar Khan",
+            "Rawalpindi",
+            "Sahiwal",
+            "Sargodha",
+            "Sialkot",
+            "Sukkur"
+        ];
+
+        $city_ids = City::whereIn('name', $concerned_wp_cities)->pluck('id')->toArray();
+
+        $filtered_leads_tagging = LeadTagging::where('status', '!=', 0)
+            ->whereIn('city_id', $city_ids)
+            ->pluck('city_id')
+            ->unique()
+            ->toArray();
+
+        $filtered_concerned_wp_cities = City::whereIn('id', $filtered_leads_tagging)->get();
+
+        return response()->json(['response' => $filtered_concerned_wp_cities]);
+
+    }
+
+    public function hbl_konnect_retail_note_cash_collection_transactions_2(Request $request)
+    {
+        $valid_ip_addresses = array();
+        $valid_ip_addresses[] = '103.111.84.67';
+        $valid_ip_addresses[] = '103.111.85.67';
+        $valid_ip_addresses[] = '103.111.84.125';
+        $environment = config('app.env');
+
+        if ($environment == 'production') {
+            $whip = new Whip();
+            $ip_address = $whip->getValidIpAddress();
+            if (in_array($ip_address, $valid_ip_addresses)) {
+                $flag = true;
+            } else {
+                $flag = false;
+            }
+        } else {
+            $flag = true;
+        }
+        if ($flag) {
+            $rules = [
+                'retail_note_id' => ['required', 'integer', Rule::exists('retail_cash_deposits', 'id')],
+                'amount' => ['required', 'numeric', 'min:0'],
+                'transaction_id' => ['required', 'integer', 'min:0'],
+            ];
+            $validate = Validator::make($request->all(), $rules, $this->messages);
+
+            $validate->setAttributeNames($this->names);
+
+            if ($validate->fails()) {
+                $errors = array();
+                foreach ($validate->errors()->all() as $index => $error) {
+                    $status_code = 10;
+                    $errors[$index]['error_code'] = 10;
+                    $errors[$index]['error_text'] = 'Invalid Input.';
+                    if ($error == 'retail note id is Required.') {
+                        $status_code = 1;
+                        $errors[$index]['error_code'] = 1;
+                        $errors[$index]['ERROR_TEXT'] = 'retail note id is Required.';
+                        break;
+                    }
+                    if ($error == 'retail note id must be an Integer.') {
+                        $status_code = 2;
+                        $errors[$index]['error_code'] = 2;
+                        $errors[$index]['error_text'] = 'retail note id must be an Integer.';
+                        break;
+                    }
+                    if ($error == 'Given retail note id is of Invalid ID.') {
+                        $status_code = 3;
+                        $errors[$index]['error_code'] = 3;
+                        $errors[$index]['error_text'] = 'Given retail note id is of Invalid ID.';
+                        break;
+                    }
+                    if ($error == 'Collection Amount is Required.') {
+                        $status_code = 4;
+                        $errors[$index]['error_code'] = 4;
+                        $errors[$index]['ERROR_TEXT'] = 'Collection Amount is Required.';
+                        break;
+                    }
+                    if ($error == 'Collection Amount must be a Number.') {
+                        $status_code = 5;
+                        $errors[$index]['error_code'] = 5;
+                        $errors[$index]['error_text'] = 'Collection Amount must be a Number.';
+                        break;
+                    }
+                    if ($error == 'The Collection Amount must be at least 0.') {
+                        $status_code = 6;
+                        $errors[$index]['error_code'] = 6;
+                        $errors[$index]['error_text'] = 'The Collection Amount must be at least 0.';
+                        break;
+                    }
+                    if ($error == 'transaction id is Required.') {
+                        $status_code = 7;
+                        $errors[$index]['error_code'] = 7;
+                        $errors[$index]['ERROR_TEXT'] = 'Transaction id is Required.';
+                        break;
+                    }
+                    if ($error == 'transaction id must be an Integer.') {
+                        $status_code = 8;
+                        $errors[$index]['error_code'] = 8;
+                        $errors[$index]['error_text'] = 'Transaction id must be an Integer.';
+                        break;
+                    }
+                    if ($error == 'The transaction id must be at least 0.') {
+                        $status_code = 9;
+                        $errors[$index]['error_code'] = 9;
+                        $errors[$index]['error_text'] = 'The transaction id must be at least 0.';
+                        break;
+                    }
+                }
+                return response()->json(['status' => $status_code, 'message' => 'Error(s) in Input', 'errors' => $errors]);
+            } else {
+                $transaction_id = $request->transaction_id;
+                $retail_note_id = $request->retail_note_id;
+                $amount = $request->amount;
+                $existing_hbl_konnect_transaction = HblKonnectTransactionRetail::where('transaction_id', $transaction_id);
+                if ($existing_hbl_konnect_transaction->exists()) {
+                    return ['status' => 11, 'message' => 'Transaction Already Exists !'];
+                } else {
+                    $retail_note = RetailCashDeposit::where('id', $retail_note_id);
+                    if ($retail_note->exists()) {
+                        $retail_note = $retail_note->first();
+
+                        if ($retail_note->status != 0) {
+                            return ['status' => 0, 'message' => 'Retail note already updated !'];
+                        }
+                    }
+
+                    $transaction_amount = $amount;
+
+
+                    $cash_amount = $retail_note->total_cash - $transaction_amount;
+                    if ($cash_amount < 0) {
+                        $hbl_konnect_transaction_delivery_note = HblKonnectTransactionRetailNote::where('retail_note_id', $retail_note_id);
+                        if ($hbl_konnect_transaction_delivery_note->exists()) {
+                            $hbl_konnect_transaction_delivery_note = $hbl_konnect_transaction_delivery_note->first();
+
+                            $remaining_amount = $hbl_konnect_transaction_delivery_note->cash_amount;
+
+                            return ['status' => 0, 'message' => 'Net amount should be less then or equal to ' . $remaining_amount];
+                        }
+                    }
+
+
+                    return ['status' => 0, 'message' => 'Payment completed successfully!'];
+                }
+            }
+        } else {
+            return ['status' => 0, 'message' => 'Access Denied!'];
+        }
+    }
+
+    public function fin_sms(Request $request)
+    {
+
+        $rules = [
+            'phone' => ['required'],
+            'text' => ['required', 'min:1','max:160'],
+            'source' => ['required'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $phone = $request->phone;
+            $text = $request->text;
+            $source = $request->source;
+
+            $array =  array(
+                'phone'=>$phone,
+                'text'=>$text,
+                'source'=>$source,
+            );
+
+            NotificationsController::send(234, 0,0,0,$array);
+
+            $finja_sms_log = new FinjaSmsLog();
+            $finja_sms_log->phone = $phone;
+            $finja_sms_log->text = $text;
+            $finja_sms_log->source = $source;
+            $finja_sms_log->save();
+
+            return response()->json(['status' => 1, 'message' => 'Message Received']);
+        }
+
+    }
+
+    public function fintech_charges(Request $request) {
+
+        $rules = [
+            'tracking_number' => ['required', 'exists:shipments,tracking_number'],
+            'wallet_id' => ['required', 'exists:wallet_users,wallet_id'],
+            'charges' => ['required', 'numeric', 'min:0', 'max:100000'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $shipment = Shipment::where('tracking_number', $request->tracking_number)->first();
+            $shipment_id = $shipment->id;
+            if (!DonePaymentShipment::where('shipment_id', $shipment_id)->whereIn('type', [0, 1])->exists()) {
+
+                ShipmentAdditionalCharges::where('shipment_id', $shipment_id)->update([
+                    'wallet_charges' => $request->charges,
+                    'wallet_charges_updated_at' => Carbon::now()
+                ]);
+
+                $pending_payment_shipments = PendingPaymentShipment::where('shipment_id', $shipment->id)->whereIn('type', [0, 1])->latest()->first();
+                $finja_request_log = new FinjaRequestLog();
+                $finja_request_log->requested = json_encode($request->all());
+                $finja_request_log->ip_address = $request->ip();
+                $finja_request_log->save();
+
+                if (!empty($pending_payment_shipments)) {
+                    AdminFinanceController::update_payment($shipment_id, $pending_payment_shipments->type);
+                }
+                return response()->json(['status' => 1, 'message' => 'Charges updated against this shipment.']);
+            }else{
+                return response()->json(['status' => 0, 'message' => 'Payment Already Processed', 'errors' => 'Error']);
+            }
+
+        }
+    }
+    public function fintech_getToken(Request $request) {
+
+        $rules = [
+            'wallet_id' => ['required', 'exists:wallet_users,wallet_id'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $Wallet = WalletUser::with('wallet_user')->where('wallet_id',$request->wallet_id)->first();
+            if(isset($Wallet->wallet_user)) {
+                $user = $Wallet->wallet_user;
+                if (empty($user->api_token)) {
+                    $user->api_token = uniqid(base64_encode(Str::random(60)));
+                    $user->save();
+                }
+                return response()->json(['status' => 1,'wallet_id'=> $request->wallet_id,'token' =>  $user->api_token]);
+            }
+
+            return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => 'USer Not Found']);
+        }
+    }
+
+
+
+>>>>>>> sprint_130
 }
