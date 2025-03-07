@@ -11,8 +11,6 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Auth;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Cache;
-use Carbon\Carbon;
 class FingaIntegrationController extends Controller
 {
 
@@ -20,37 +18,29 @@ class FingaIntegrationController extends Controller
         $this->middleware('auth:web,substitute_users');
         $this->middleware('Permission')->except('wordpress_access_denied', 'wordpressAddressView','wordpressBankView');
     }
-    public static function getToken($api)
-    {
-        // Define cache key for token
-        $cacheKey = 'wallet_api_token';
-
-        // Check if token exists in cache and is still valid
-        if (Cache::has($cacheKey)) {
-            return Cache::get($cacheKey);
+    public static function getToken($api) {
+        if (App::environment('local') || App::environment('staging')) {
+            $password = "4TE7+r]7ddI2";
+        }else{
+            $password = "9l2|_XTI4MiP";
         }
-
-        $password = App::environment(['local', 'staging']) ? "4TE7+r]7ddI2" : "9l2|_XTI4MiP";
-
-        // Make API request for new token
         $response = Http::withHeaders([
             'accept' => 'application/json',
-        ])->post($api . 'login/', [
+
+        ])->post($api.'login/', [
             "username" => "sonic",
             "password" => $password,
         ]);
 
-        // If the request is successful, cache the token for 4 minutes
-        if ($response->successful()) {
-            $body = json_decode($response->body());
+        if($response->successful()) {
 
-            if (isset($body->token)) {
-                Cache::put($cacheKey, $body->token, Carbon::now()->addMinutes(4));
-                return $body->token;
-            }
+            $body = $response->getBody();
+            $body = json_decode($body);
+            $token = $body->token;
+            return $token;
+
         }
 
-        return null; // Return null if request fails
     }
     public function login(Request $request) {
 
