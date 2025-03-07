@@ -46,19 +46,9 @@
                                     <th class="border-primary border-darken-1"></th>
                                     <th class="border-primary border-darken-1">Range Up</th>
                                     <th class="border-primary border-darken-1">Range Down</th>
-                                    <th class="border-primary border-darken-1">Zone 1A </th>
-                                    <th class="border-primary border-darken-1">Zone 1B </th>
-                                    <th class="border-primary border-darken-1">Zone 2 </th>
-                                    <th class="border-primary border-darken-1">Zone 3 </th>
-                                    <th class="border-primary border-darken-1">Zone 4 </th>
-                                    <th class="border-primary border-darken-1">Zone 5 </th>
-                                    <th class="border-primary border-darken-1">Zone 6 </th>
-                                    <th class="border-primary border-darken-1">Zone 7 </th>
-                                    <th class="border-primary border-darken-1">Zone 8A </th>
-                                    <th class="border-primary border-darken-1">Zone 8B </th>
-                                    <th class="border-primary border-darken-1">Zone 9 </th>
-                                    <th class="border-primary border-darken-1">Zone 10 </th>
-                                    <th class="border-primary border-darken-1">Zone 11 </th>
+                                      @foreach ($zoneColumnsArray as $key => $value) 
+                                        <th><?php echo ucfirst(str_replace('_', ' ', $value)) ?></th>
+                                    @endforeach
 
 
                                 </tr>
@@ -82,6 +72,7 @@
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
     <script>
+        var zoneColumns = @json($zoneColumnsArray);
         $(document).ready(function() {
             $('#international_rates_upload_form').validate({
                 errorClass: 'danger',
@@ -109,65 +100,50 @@
             });
         });
 
-        jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
-            if ( this.context.length ) {
-                body = [];
-                var params = table.ajax.params();
-                params.start = 0;
-                params.length = -1;
-                params.excel = true;
-                var jsonResult = $.ajax({
-                    url: '{{ route('admin.settings.international_rates.upload.list') }}',
-                    data: params,
-                    success: function (result) {
-                        head = [];
+         jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
+                    if (this.context.length) {
+                        let body = [];
+                        let head = ['S.No', 'Range Up', 'Range Down']; // Default columns
 
-                        head.push('S.No');
-                        head.push('Range Up');
-                        head.push('Range Down');
-                        head.push('Zone 1A');
-                        head.push('Zone 1B');
-                        head.push('Zone 2');
-                        head.push('Zone 3');
-                        head.push('Zone 4');
-                        head.push('Zone 5');
-                        head.push('Zone 6');
-                        head.push('Zone 7');
-                        head.push('Zone 8');
-                        head.push('Zone 8B');
-                        head.push('Zone 9');
-                        head.push('Zone 10');
-                        head.push('Zone 11');
-                        $.each(result.data, function(index, values) {
-                            row = [];
+                        var params = table.ajax.params();
+                        params.start = 0;
+                        params.length = -1;
 
+                        var jsonResult = $.ajax({
+                            url: '{{ route('admin.settings.international_rates.upload.list') }}',
+                            data: params,
+                            async: false, // ✅ Corrected placement of async
+                            success: function (result) {
+                                if (result.data.length > 0) {
+                                    // Dynamically extract zone columns from the first result row
+                                    let firstRow = result.data[0];
+                                    let zoneColumns = Object.keys(firstRow).filter(key => key.startsWith("zone_"));
 
-                            row.push(index + 1);
-                            row.push(values.range_up);
-                            row.push(values.range_down);
-                            row.push(values.zone_1);
-                            row.push(values.zone_1b);
-                            row.push(values.zone_2);
-                            row.push(values.zone_3);
-                            row.push(values.zone_4);
-                            row.push(values.zone_5);
-                            row.push(values.zone_6);
-                            row.push(values.zone_7);
-                            row.push(values.zone_8);
-                            row.push(values.zone_8b);
-                            row.push(values.zone_9);
-                            row.push(values.zone_10);
-                            row.push(values.zone_11);
+                                    // Add dynamically found zone columns to the header
+                                    head.push(...zoneColumns.map(zone => zone.replace('_', ' ').toUpperCase()));
 
-                            body.push(row);
+                                    // Process data rows
+                                    $.each(result.data, function (index, values) {
+                                        let row = [];
+
+                                        row.push(index + 1); // Serial number
+                                        row.push(values.range_up);
+                                        row.push(values.range_down);
+
+                                        // Add dynamic zone values
+                                        zoneColumns.forEach(zone => {
+                                            row.push(values[zone]);
+                                        });
+
+                                        body.push(row);
+                                    });
+                                }
+                            }
                         });
-                    },
-                    async: false
-                });
 
-                return {body: body, header: head};
-            }
-        } );
+                        return { body: body, header: head };
+                    }
+            });
 
         var table = $('#datatable').DataTable({
             dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -197,20 +173,11 @@
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                 {data: 'range_up', name: 'range_up', class: 'align-middle range_up'},
                 {data: 'range_down', name: 'range_down', class: 'align-middle range_down'},
-                {data: 'zone_1', name: 'zone_1', class: 'align-middle zone_1'},
-                {data: 'zone_1b', name: 'zone_1b', class: 'align-middle zone_1b'},
-                {data: 'zone_2', name: 'zone_2', class: 'align-middle zone_2'},
-                {data: 'zone_3', name: 'zone_3', class: 'align-middle zone_3'},
-                {data: 'zone_4', name: 'zone_4', class: 'align-middle zone_4'},
-                {data: 'zone_5', name: 'zone_5', class: 'align-middle zone_5'},
-                {data: 'zone_6', name: 'zone_6', class: 'align-middle zone_6'},
-                {data: 'zone_7', name: 'zone_7', class: 'align-middle zone_7'},
-                {data: 'zone_8', name: 'zone_8', class: 'align-middle zone_8'},
-                {data: 'zone_8b', name: 'zone_8b', class: 'align-middle zone_8b'},
-                {data: 'zone_9', name: 'zone_9', class: 'align-middle zone_9'},
-                {data: 'zone_10', name: 'zone_10', class: 'align-middle zone_10'},
-                {data: 'zone_11', name: 'zone_11', class: 'align-middle zone_11'},
-            ],
+            ].concat(zoneColumns.map(zone => ({
+                    data: zone,
+                    name: zone,
+                    class: 'align-middle ' + zone
+                }))),
             rowCallback: function(row, data, index) {
 
                 var info = table.page.info();

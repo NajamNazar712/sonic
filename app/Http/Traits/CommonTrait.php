@@ -17,6 +17,7 @@ use App\Http\Models\Rider;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentInformationLog;
 use App\Http\Models\ShipmentsJourney;
+use App\Models\InternationalZonalMarginColumn;
 use Illuminate\Support\Facades\Auth;
 
 trait CommonTrait
@@ -561,5 +562,12 @@ trait CommonTrait
         $information['route'] = '';
       }
       return $information;
+    }
+
+    function zoneMarginColumnName(){
+      $zoneColumn = InternationalZonalMarginColumn::where('type', 1)->first();
+      $zoneColumnsArray = explode(",", $zoneColumn->zone_column);
+      $marginColumnsArray = explode(",", $zoneColumn->margin_column);
+      return ['zoneColumnArray'=> $zoneColumnsArray,'marginColumn'=> $marginColumnsArray];
     }
 }

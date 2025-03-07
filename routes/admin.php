@@ -4105,6 +4105,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('list', 'Admins\InternationalEconomyStandardRatesController@list')->name('list');
                 Route::post('excel', 'Admins\InternationalEconomyStandardRatesController@upload_excel')->name('excel');
             });
+            //International Zonal Margin Column Mappings
+            Route::prefix('zonal-margin-column')->name('zonal_margin_column.')->group(function (){
+                Route::get('', 'Admins\GlobalSettingsController@zonal_margin_column_index')->name('index');
+                Route::post('submit', 'Admins\GlobalSettingsController@ZoneMarginColumnSubmit')->name('submit');
+
+                // Route::post('zone_margin_column', 'Admins\InternationalEconomyStandardRatesController@zonal_margin_column_index')->name('excel');
+
+            });
         });
 
         Route::get('add/standard_rates', 'Admins\Retail\RetailAdminUserManagementController@add_standard_rates')->name('add.rates');
