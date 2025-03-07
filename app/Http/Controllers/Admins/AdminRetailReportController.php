@@ -30,6 +30,8 @@ class AdminRetailReportController extends Controller
 
         $retail_centers = DB::connection('reports')->table('retail_trax_centers')->where('status', 1)->select('id','name')->get();
         $retail_franchises = DB::connection('reports')->table('retail_franchises')->where('status', 1)->select('id','name')->get();
+
+
         $cities = DB::connection('reports')->table('cities')->select('id','name')->get();
         $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
         $statuses = DB::connection('reports')->table('shipment_status')->whereNotIn('id',[1,17])->get();
@@ -38,7 +40,6 @@ class AdminRetailReportController extends Controller
         $business_categories = DB::connection('reports')->table('business_categories')->select('id', 'name')->get();
         return view('admin.reports.retail.sales')->with(['retail_centers' => $retail_centers, 'retail_franchises' => $retail_franchises ,'cities'=>$cities,'hubs'=>$hubs,'statuses'=>$statuses]);
     }
-
     public function sales_list(Request $request){
         if($request->get('excel') && $request->get('excel') == true)
         {
@@ -49,11 +50,6 @@ class AdminRetailReportController extends Controller
         $from = Carbon::parse($from)->setTimeFromTimeString('05:59:59');
         $to = $request->get('search_date_to');
         $to = Carbon::parse($to)->addDay()->setTimeFromTimeString('06:00:00');
-
-        $rncc_numbers = $request->input('search_rncc_no', []);
-        if (!empty($rncc_numbers) && !is_array($rncc_numbers)) {
-            $rncc_numbers = explode(',', $rncc_numbers);
-        }
 
         $sales = DB::connection('reports')->table('shipments')->join('retail_shipments as rs', 'rs.shipment_id', '=','shipments.id')
             ->leftjoin('retail_users as ru','ru.id','=','rs.retail_user_id')
@@ -74,15 +70,11 @@ class AdminRetailReportController extends Controller
             ->leftjoin('zones as dz', 'dz.id', '=', 'dc.zone_id')
             ->leftjoin('cities as h' ,'dc.hub_id', '=' , 'h.id')
             ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
-            // ->leftjoin('retail_pickup_note_shipments as pns',function($join){
-            //     $join->on('pns.shipment_id','=','shipments.id')->where('pns.retail_pickup_note_id','=',
-            //             DB::connection('reports')->raw('(select max(retail_pickup_note_id) from retail_pickup_note_shipments where retail_pickup_note_shipments.shipment_id = shipments.id)'));
-            // })
-            ->leftjoin('retail_cash_deposit_shipments as rcds',function($join){
-                $join->on('rcds.shipment_id','=','shipments.id')->where('rcds.id','=',
-                        DB::connection('reports')->raw('(select max(id) from retail_cash_deposit_shipments where retail_cash_deposit_shipments.shipment_id = shipments.id)'));
+            ->leftjoin('retail_pickup_note_shipments as pns',function($join){
+                $join->on('pns.shipment_id','=','shipments.id')->where('pns.retail_pickup_note_id','=',
+                        DB::connection('reports')->raw('(select max(retail_pickup_note_id) from retail_pickup_note_shipments where retail_pickup_note_shipments.shipment_id = shipments.id)'));
             })
-            // ->leftjoin('delivery_note_station_deposit_notes as dnsdn', 'ds.delivery_note_id', '=', 'dnsdn.delivery_note_id')
+//            ->leftjoin('delivery_note_station_deposit_notes as dnsdn', 'ds.delivery_note_id', '=', 'dnsdn.delivery_note_id')
             ->join('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.id','=',
@@ -106,18 +98,14 @@ class AdminRetailReportController extends Controller
             ->leftjoin('products as p','p.id','=','rs.product_type_id')
             ->leftjoin('retail_references as rref','rref.shipment_id','=','shipments.id')
             ->leftjoin('shipment_items as si','si.shipment_id','=','rs.shipment_id')
-            ->select('p.product_name as category','shipments.id as shipment_id','shipments.tracking_number','shipments.fintech_charges as fintech_charges','shipments.tracking_number as tracking_number_link', 'ru.name as booked_by', 'ru.category as retail_category','ru.id as booked_by_id', 'rsi.shipper_name', 'rf.id as franchise_account_id','rf.name as franchise', 'rc.id as retail_account_id','rc.name as retail_center','ss.name as current_status','rsm.name as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub', 'oz.name as origin_zone', 'dz.name as destination_zone','shipments.amount as collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','rs.weight_charges','rs.cash_handling_charges','rs.fuel_surcharge','rs.total_charges as total_charges', 'rs.gst as gst','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.payable as d_net_payable','dr.created_at as delivered_or_returned', 'dps.retail_done_payment_id as payment_id', 'shipments.shipper_status_id as shipment_status' , 'dr.shipper_status_id as dr_status_id', 'rcds.cash_deposit_id as pncc_id','rtc.name as retail_trax_center_name', 'rref.ref as retail_reference','rf.discount as franchise_discount','rf.insurance as franchise_insurance','rtc.discount as trax_discount','rtc.insurance as trax_insurance','rs.discount as discount_amount','rs.insurance_charges as insurance_charges','rs.packaging_charges as packaging_charges','si.price as product_value','rs.admin_discount as admin_discount','rs.admin_discount_type as admin_discount_type','rs.category as retail_cat','rs.category_id as retail_cat_id')
+            ->select('p.product_name as category','shipments.id as shipment_id','shipments.tracking_number','shipments.fintech_charges as fintech_charges','shipments.tracking_number as tracking_number_link', 'ru.name as booked_by', 'ru.category as retail_category','ru.id as booked_by_id', 'rsi.shipper_name', 'rf.id as franchise_account_id','rf.name as franchise', 'rc.id as retail_account_id','rc.name as retail_center','ss.name as current_status','rsm.name as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub', 'oz.name as origin_zone', 'dz.name as destination_zone','shipments.amount as collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','rs.weight_charges','rs.cash_handling_charges','rs.fuel_surcharge','rs.total_charges as total_charges', 'rs.gst as gst','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.payable as d_net_payable','dr.created_at as delivered_or_returned', 'dps.retail_done_payment_id as payment_id', 'shipments.shipper_status_id as shipment_status' , 'dr.shipper_status_id as dr_status_id', 'pns.retail_pickup_note_id as pncc_id','rtc.name as retail_trax_center_name', 'rref.ref as retail_reference','rf.discount as franchise_discount','rf.insurance as franchise_insurance','rtc.discount as trax_discount','rtc.insurance as trax_insurance','rs.discount as discount_amount','rs.insurance_charges as insurance_charges','rs.packaging_charges as packaging_charges','si.price as product_value','rs.admin_discount as admin_discount','rs.admin_discount_type as admin_discount_type','rs.category as retail_cat','rs.category_id as retail_cat_id')
             ->whereNotIn('shipments.shipper_status_id',[1,17])
             ->whereBetween('sj.created_at', [$from,$to])
             ->where('shipments.shipment_type', 2);
 
-            if (!empty($rncc_numbers)) {
-                $sales->whereIn('rcds.cash_deposit_id', $rncc_numbers);
-            }
-//            $sales->groupBy('pns.retail_pickup_note_id');
-
             $from_id = DB::connection('reports')->table('shipments_journey')->where('created_at', '>=', $from)->min('id');
-             if (!empty($from_id)) {
+            if (!empty($from_id)) {
+
                 $to_id = DB::connection('reports')->table('shipments_journey')->whereBetween('created_at', [$from, $to])->max('id');
 
                 if (!empty($to_id)) {
@@ -159,18 +147,18 @@ class AdminRetailReportController extends Controller
                 return number_format($shipment->collection_amount);
             })
             ->addColumn('franchise_center', function ($shipment) {
-            //    if($shipment->retail_category){
-
-            //        if ($shipment->retail_category == 2) {
-            //            return $shipment->retail_center;
-            //        }
-            //        else {
-            //            return $shipment->franchise;
-            //        }
-            //    }
-            //    else{
-            //        return $shipment->retail_trax_center_name;
-            //    }
+//                if($shipment->retail_category){
+//
+//                    if ($shipment->retail_category == 2) {
+//                        return $shipment->retail_center;
+//                    }
+//                    else {
+//                        return $shipment->franchise;
+//                    }
+//                }
+//                else{
+//                    return $shipment->retail_trax_center_name;
+//                }
                 if($shipment->retail_cat == 1){
                     return 'Franchise';
                 }
@@ -248,7 +236,7 @@ class AdminRetailReportController extends Controller
             $datatable->where('shipments.tracking_number', '=', $tracking);
         }
         if($center = $request->get('search_retail_center')){
-            $datatable->where('rc.id', '=', $center);
+            $datatable->where('rf.id', '=', $center);
         }
         if($franchise = $request->get('search_retail_franchise')){
             $datatable->where('rf.id', '=', $franchise);

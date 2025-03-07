@@ -736,7 +736,7 @@ class AdminNotificationsController extends Controller
         else if ($id == 115){
             $details['receiver'] = ['Shipper Phone Number'];
 
-            $details['fields'] = ['shipper','tracking_number', 'total_charges'];
+            $details['fields'] = ['shipper','tracking_number'];
         }
         else if ($id == 116){
             $details['receiver'] = ['Shipper Phone Number'];

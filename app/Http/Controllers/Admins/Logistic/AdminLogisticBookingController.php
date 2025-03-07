@@ -76,11 +76,6 @@ class AdminLogisticBookingController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 792);
         }
-        if ($request->get('logistic_from_date') && $request->get('logistic_to_date')) {
-            $from = $request->get('logistic_from_date');
-            $to = $request->get('logistic_to_date');
-        }
-
         $hub_ids=session('hubs');
         $city_ids=City::whereIn('hub_id',$hub_ids);
         if($city_ids->exists())
@@ -100,9 +95,6 @@ class AdminLogisticBookingController extends Controller
         if (session('role_id') != 1)
         {
             $logistic_bookings = $logistic_bookings->whereIn('trax_logistic_bookings.origin_id',$city_ids);
-        }
-        if ($request->get('logistic_from_date') && $request->get('logistic_to_date')) {
-            $logistic_bookings = $logistic_bookings->whereBetween('trax_logistic_bookings.created_at', [$from, $to]);
         }
         $datatables = Datatables::of($logistic_bookings)
             ->addColumn('action',function ($logistic_bookings){
@@ -499,22 +491,16 @@ class AdminLogisticBookingController extends Controller
                 $services=TraxService::whereIn('shipping_mode_id',$shipping_modes_ids)->get();
                 $trax_stations=TraxStation::select('id','name')->where('status',1)->get();
                 $pickup_addresses=UserShippingInfo::select('id','pickup_address','poc','phone','email')->where('user_id',$logistic_booking->shipper_id)->get();
-                $booking_img = TraxLogisticBookingImages::where('booking_id',$logistic_booking->id)->first();
+                $booking_img = TraxLogisticBookingImages::where('booking_id',$logistic_booking->id);
 
                 $booking_img_url=null;
-                if ($booking_img)
+                if ($booking_img->exists())
                 {
-                    $booking_img_url =Storage::disk('public')->url('logistic_bookings/'. $booking_img->image_name);
-                    if (Storage::disk('s4')->exists('logistic_bookings/'. $booking_img->image_name)) {
-                        $booking_img_url =  Storage::disk('s4')->url('logistic_bookings/'. $booking_img->image_name);
-                    } 
-                    
+                    $booking_img = $booking_img->first();
+                    $booking_img_url =  Storage::url('logistic_bookings/'. $booking_img->image_name);
                 }
 
-                
-                Log::channel('code_test_log')->error('batch_id = > '.$batch_id.' booking_img_url '.$booking_img->image_name);
-               
-                //return view('admin.logistic.edit_logistic_book', compact('imageUrl'));
+
                 return view('admin.logistic.edit_logistic_book')
                     ->with(['batch_id'=>$batch_id,'booking_img_url'=>$booking_img_url,'logistic_booking'=>$logistic_booking,'item_insurance'=>$item_insurance,'item_references'=>$item_references,'booking_pieces'=>$booking_pieces,'payment_modes'=>$payment_modes,'shipper'=>$shipper,'products'=>$products,'services'=>$services,'trax_stations'=>$trax_stations,'pickup_addresses'=>$pickup_addresses,'special_handlings'=>$special_handlings,'riders'=>$riders]);
             } catch (\Exception $th){
@@ -578,7 +564,7 @@ class AdminLogisticBookingController extends Controller
                 }),
             ],
             'insurance_item_code'=>['max:255'],
-            'shipper_reference'=>['nullable','max:255']
+            'shipper_reference'=>['string','max:255']
         ]);
         if($validate->fails())
         {

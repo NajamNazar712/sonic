@@ -3422,19 +3422,19 @@ class ShipperShipmentBookController extends Controller
                     }
                     
 
-//                    if (!empty(trim($row['order_id']))) {
-//                        if (empty($order_ids)) {
-//                            $order_ids[] = $row['order_id'];
-//                            $order_id_row[$row['order_id']] = $row_id;
-//                        } else {
-//                            if (in_array($row['order_id'], $order_ids, true)) {
-//                                $errors[$row_id]['order_id'] = 'Same Order ID as of Row #' . $order_id_row[$row['order_id']];
-//                            } else {
-//                                $order_ids[] = $row['order_id'];
-//                                $order_id_row[$row['order_id']] = $row_id;
-//                            }
-//                        }
-//                    } order id duplicate check remove by subhan requirement 28-august-2024
+                    if (!empty(trim($row['order_id']))) {
+                        if (empty($order_ids)) {
+                            $order_ids[] = $row['order_id'];
+                            $order_id_row[$row['order_id']] = $row_id;
+                        } else {
+                            if (in_array($row['order_id'], $order_ids, true)) {
+                                $errors[$row_id]['order_id'] = 'Same Order ID as of Row #' . $order_id_row[$row['order_id']];
+                            } else {
+                                $order_ids[] = $row['order_id'];
+                                $order_id_row[$row['order_id']] = $row_id;
+                            }
+                        }
+                    }
 
                     if ($row['service_type_id'] != 5) {
                         $user_shipping_info = UserShippingInfo::find($row['pickup_address_id']);
@@ -5335,19 +5335,19 @@ class ShipperShipmentBookController extends Controller
                             $errors[$row_id]['order_id'] = 'Invalid Order ID';
                         }
                     }
-//                    if (!empty(trim($row['order_id']))) {
-//                        if (empty($order_ids)) {
-//                            $order_ids[] = $row['order_id'];
-//                            $order_id_row[$row['order_id']] = $row_id;
-//                        } else {
-//                            if (in_array($row['order_id'], $order_ids, true)) {
-//                                $errors[$row_id]['order_id'] = 'Same Order ID as of Row #' . $order_id_row[$row['order_id']];
-//                            } else {
-//                                $order_ids[] = $row['order_id'];
-//                                $order_id_row[$row['order_id']] = $row_id;
-//                            }
-//                        }
-//                    } order id duplicate check remove by subhan requirement 28-august-2024
+                    if (!empty(trim($row['order_id']))) {
+                        if (empty($order_ids)) {
+                            $order_ids[] = $row['order_id'];
+                            $order_id_row[$row['order_id']] = $row_id;
+                        } else {
+                            if (in_array($row['order_id'], $order_ids, true)) {
+                                $errors[$row_id]['order_id'] = 'Same Order ID as of Row #' . $order_id_row[$row['order_id']];
+                            } else {
+                                $order_ids[] = $row['order_id'];
+                                $order_id_row[$row['order_id']] = $row_id;
+                            }
+                        }
+                    }
 
                     $service_type_id = 1;
                     if ($service_type_id == 1) {
@@ -6236,19 +6236,19 @@ class ShipperShipmentBookController extends Controller
                             $errors[$row_id]['order_id'] = 'Invalid Order ID';
                         }
                     }
-//                    if (!empty(trim($row['order_id']))) {
-//                        if (empty($order_ids)) {
-//                            $order_ids[] = $row['order_id'];
-//                            $order_id_row[$row['order_id']] = $row_id;
-//                        } else {
-//                            if (in_array($row['order_id'], $order_ids, true)) {
-//                                $errors[$row_id]['order_id'] = 'Same Order ID as of Row #' . $order_id_row[$row['order_id']];
-//                            } else {
-//                                $order_ids[] = $row['order_id'];
-//                                $order_id_row[$row['order_id']] = $row_id;
-//                            }
-//                        }
-//                    } order id duplicate check remove by subhan requirement 28-august-2024
+                    if (!empty(trim($row['order_id']))) {
+                        if (empty($order_ids)) {
+                            $order_ids[] = $row['order_id'];
+                            $order_id_row[$row['order_id']] = $row_id;
+                        } else {
+                            if (in_array($row['order_id'], $order_ids, true)) {
+                                $errors[$row_id]['order_id'] = 'Same Order ID as of Row #' . $order_id_row[$row['order_id']];
+                            } else {
+                                $order_ids[] = $row['order_id'];
+                                $order_id_row[$row['order_id']] = $row_id;
+                            }
+                        }
+                    }
 
 //                        dd($errors[$row_id]['amount']);
                     if ($service_type_check_id != 5) {
@@ -7019,19 +7019,19 @@ class ShipperShipmentBookController extends Controller
                             $errors[$row_id]['order_id'] = 'Invalid Order ID';
                         }
                     }
-//                    if (!empty(trim($row['order_id']))) {
-//                        if (empty($order_ids)) {
-//                            $order_ids[] = $row['order_id'];
-//                            $order_id_row[$row['order_id']] = $row_id;
-//                        } else {
-//                            if (in_array($row['order_id'], $order_ids, true)) {
-//                                $errors[$row_id]['order_id'] = 'Same Order ID as of Row #' . $order_id_row[$row['order_id']];
-//                            } else {
-//                                $order_ids[] = $row['order_id'];
-//                                $order_id_row[$row['order_id']] = $row_id;
-//                            }
-//                        }
-//                    } order id duplicate check remove by subhan requirement 28-august-2024
+                    if (!empty(trim($row['order_id']))) {
+                        if (empty($order_ids)) {
+                            $order_ids[] = $row['order_id'];
+                            $order_id_row[$row['order_id']] = $row_id;
+                        } else {
+                            if (in_array($row['order_id'], $order_ids, true)) {
+                                $errors[$row_id]['order_id'] = 'Same Order ID as of Row #' . $order_id_row[$row['order_id']];
+                            } else {
+                                $order_ids[] = $row['order_id'];
+                                $order_id_row[$row['order_id']] = $row_id;
+                            }
+                        }
+                    }
 
                     if ($service_type_check_id != 5) {
                         if ($row['delivery_type_id'] == 2) {
@@ -7996,19 +7996,19 @@ class ShipperShipmentBookController extends Controller
                         }
                     }
 
-//                    if (!empty(trim($row['order_id']))) {
-//                        if (empty($order_ids)) {
-//                            $order_ids[] = $row['order_id'];
-//                            $order_id_row[$row['order_id']] = $row_id;
-//                        } else {
-//                            if (in_array($row['order_id'], $order_ids, true)) {
-//                                $errors[$row_id]['order_id'] = 'Same Order ID as of Row #' . $order_id_row[$row['order_id']];
-//                            } else {
-//                                $order_ids[] = $row['order_id'];
-//                                $order_id_row[$row['order_id']] = $row_id;
-//                            }
-//                        }
-//                    } order id duplicate check remove by subhan requirement 28-august-2024
+                    if (!empty(trim($row['order_id']))) {
+                        if (empty($order_ids)) {
+                            $order_ids[] = $row['order_id'];
+                            $order_id_row[$row['order_id']] = $row_id;
+                        } else {
+                            if (in_array($row['order_id'], $order_ids, true)) {
+                                $errors[$row_id]['order_id'] = 'Same Order ID as of Row #' . $order_id_row[$row['order_id']];
+                            } else {
+                                $order_ids[] = $row['order_id'];
+                                $order_id_row[$row['order_id']] = $row_id;
+                            }
+                        }
+                    }
 
                     if ($row['service_type_id'] != 5) {
                         $user_shipping_info = UserShippingInfo::find($row['pickup_address_id']);

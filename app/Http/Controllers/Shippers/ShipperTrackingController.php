@@ -78,22 +78,11 @@ class ShipperTrackingController extends Controller
 
     public function shipper_visibility(Request $request)
     {
-        $nature_id = $request->input('id');
-        $shipment_id = $request->input('shipment_id');
-        //dd($shipment_id);
-        $shipment_status = Shipment::where('id', $shipment_id)->pluck('shipper_status_id')->first();
+        $nature_id = $request->input('nature_id');
         $case_nature_types = CrmRequestCaseNatureType::where('nature_id', '=', $nature_id)
             ->where('status_id', 1)
             ->where('shipper_visibility', 1)
-            ->get()->filter(function ($case_nature_types) use ($shipment_status) {
-                $status = json_decode($case_nature_types->shipment_status, true);
-                if (is_null($status)) {
-                    return false;
-                }
-                // Check if the dept_id is in the admin_departments array
-                return in_array($shipment_status, $status);
-            });
-            //dd($case_nature_types);
+            ->get();
         return response()->json([
             'case_nature_types' => $case_nature_types,
         ]);
@@ -394,8 +383,7 @@ class ShipperTrackingController extends Controller
 
                                     $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
 
-                                    if(in_array($journey->shipper_status_id, [8,17,20,52,54,12,66])){
-                                        //12 and 66 status added for remarks (RVR and Requested Call Reattempt).
+                                    if(in_array($journey->shipper_status_id, [8,17,20,52,54])){
                                         $journey_details['status_remarks'] = ($journey->remarks) ? $journey->remarks : '';
                                     }else{
                                         $journey_details['status_remarks'] = '';

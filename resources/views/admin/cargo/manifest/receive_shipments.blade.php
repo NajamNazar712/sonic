@@ -166,7 +166,6 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/quagga/quagga.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('js/detectActions.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/custom.js')}}" type="text/javascript"></script>
 
     <script>
@@ -180,6 +179,7 @@
                 width:'100%',
             }).bind('change', function() {
               $('#shipment_bag_type').val(this.value);
+              console.log( $('#shipment_bag_type').val());
               $('.tracking_number').attr('disabled',false);
               $('#bag_type').attr('disabled',true);
         });
@@ -213,6 +213,7 @@
                     //
                     // $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                     var misroute = data[11]; // misroute veriable
+                    console.log('row',row.childNodes[7].innerText);
                     if(misroute == 1)
                     {
                         // $(row).addClass('alert-danger');
@@ -243,6 +244,7 @@
                     var shipment_bag_type_route = null;
 
                     $('#bag_type_for_receive').val(shipment_bag_type);
+                    console.log($('#bag_type_for_receive'));
 
                     if(shipment_bag_type == 1)
                     {
@@ -264,7 +266,6 @@
                             data: {
                                 'tracking_number': tracking_number,
                                 'bag_type': shipment_bag_type,
-                                'action': window.lastAction,
                                 '_token': '{{ csrf_token() }}'
                             }
                         })
@@ -523,7 +524,6 @@
                             'tracking_number': tracking_number,
                             'pieces_confirm': 1,
                             'bag_type':  $('#shipment_bag_type').val(),
-                            'action': window.lastAction,
                             '_token': '{{ csrf_token() }}'
                         }
                     })

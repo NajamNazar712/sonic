@@ -61,12 +61,11 @@ class AgentSarNotification extends Command
             $nowSub16Hours = Carbon::now()->subHours(16)->toDateTimeString();
             $nowSub24Hours = Carbon::now()->subHours(24)->toDateTimeString();
             $nowSub48Hours = Carbon::now()->subHours(48)->toDateTimeString();
-            $nowSub48Hours = Carbon::parse($nowSub48Hours)->addMinutes(44)->format('Y-m-d H:i:s');
-           
+
             // rv_assign_agent_status_id' 7 (Shipper Advised Request) and Check If State Is 2 (Unassign Assigned)
             $sendEmails = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 7)
                 ->where('rv_state_id', 2)
-                ->where('unresponsive_count', 3)
+                ->where('unresponsive_count', 2)
                 //selects older records, i.e., records that were updated more than 16 hours ago.            
                 ->where('updated_at', '>=', $nowSub16Hours)
                 ->where('unresponsive_email_count', '<', 1);
@@ -100,7 +99,7 @@ class AgentSarNotification extends Command
                 })
                 ->where('rv_shipment_assign_agents.rv_assign_agent_status_id', 7)
                 ->where('rv_shipment_assign_agents.rv_state_id', 2)
-                ->where('rv_shipment_assign_agents.unresponsive_count', 3)
+                ->where('rv_shipment_assign_agents.unresponsive_count', 2)
                 ->where('rv_shipment_assign_agents.unresponsive_email_count', '>', 0)
                 ->where('rv_shipment_assign_agents.unresponsive_email_time', '<=', $nowSub48Hours)
                 ->select('rv_shipment_assign_agents.*') // Select only columns from rv_shipment_assign_agents
@@ -146,13 +145,9 @@ class AgentSarNotification extends Command
             // When there is no response from the shipper within 24 hours of the "Shipper Advise Requested" status after refusal on call status, 
             // the system will automatically update the shipment status to "Return Confirm."
             
-            $refusal_call_shipments = RvShipmentAssignAgent::join('shipments', function ($join) {
-                $join->on('rv_shipment_assign_agents.shipment_id', '=', 'shipments.id')
-                    ->where('shipments.shipper_status_id', '=', 65);
-                })
-                ->where('rv_assign_agent_status_id', 8)
+            $refusal_call_shipments = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 8)
                 ->where('rv_state_id', 2)
-                ->where('rv_shipment_assign_agents.updated_at', '<=', $nowSub24Hours)
+                ->where('updated_at', '<=', $nowSub24Hours)
                 ->get();
                 
             if ($refusal_call_shipments->isNotEmpty()) {

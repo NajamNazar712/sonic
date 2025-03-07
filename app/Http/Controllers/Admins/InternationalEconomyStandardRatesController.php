@@ -29,7 +29,7 @@ class InternationalEconomyStandardRatesController extends Controller
     public function list(Request $request)
     {
 
-        $rates_list = InternationalEconomyStandardRetailRate::select('id', 'range_up', 'range_down', 'zone_1', 'zone_2', 'zone_3', 'zone_4', 'zone_5', 'zone_6', 'zone_7', 'zone_8', 'zone_9', 'zone_10', 'zone_11', 'zone_1b', 'zone_8b');
+        $rates_list = InternationalEconomyStandardRetailRate::select('id', 'range_up', 'range_down', 'zone_1', 'zone_2', 'zone_3', 'zone_4', 'zone_5', 'zone_6', 'zone_7', 'zone_8', 'zone_9', 'zone_10', 'zone_11');
         if ($request->shipping_mode_id == 1) {
             $rates_list = $rates_list->where('shipping_mode_id', 1);
         } else if ($request->shipping_mode_id == 2) {
@@ -48,20 +48,17 @@ class InternationalEconomyStandardRatesController extends Controller
             'range_up' => 'Range Up',
             'range_down' => 'Range Down',
             /*   'shipping_mode_id' => 'Shipping Mode',*/
-            'zone_1' => 'Zone 1A',
-            'zone_1b' => 'Zone 1B',
+            'zone_1' => 'Zone 1',
             'zone_2' => 'Zone 2',
             'zone_3' => 'Zone 3',
             'zone_4' => 'Zone 4',
             'zone_5' => 'Zone 5',
             'zone_6' => 'Zone 6',
             'zone_7' => 'Zone 7',
-            'zone_8' => 'Zone 8A',
-            'zone_8b' => 'Zone 8B',
+            'zone_8' => 'Zone 8',
             'zone_9' => 'Zone 9',
             'zone_10' => 'Zone 10',
             'zone_11' => 'Zone 11',
-
         ];
 
         $messages = [
@@ -84,50 +81,17 @@ class InternationalEconomyStandardRatesController extends Controller
             'zone_9' => ['required', 'numeric', 'between:0,1000000'],
             'zone_10' => ['required', 'numeric', 'between:0,1000000'],
             'zone_11' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_1b' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_8b' => ['required', 'numeric', 'between:0,1000000'],
         ];
 
-        $fields = [
-            0  => 'range_up',
-            1  => 'range_down',
-            2  => 'zone_1',
-            3  => 'zone_1b', // Moved zone_1b next to zone_1
-            4  => 'zone_2',
-            5  => 'zone_3',
-            6  => 'zone_4',
-            7  => 'zone_5',
-            8  => 'zone_6',
-            9  => 'zone_7',
-            10 => 'zone_8',
-            11 => 'zone_8b', // Moved zone_8b next to zone_8
-            12 => 'zone_9',
-            13 => 'zone_10',
-            14 => 'zone_11'
-        ];
+        $fields = [0 => 'range_up', 1 => 'range_down', 2 => 'zone_1', 3 => 'zone_2', 4 => 'zone_3', 5 => 'zone_4', 6 => 'zone_5', 7 => 'zone_6', 8 => 'zone_7', 9 => 'zone_8', 10 => 'zone_9', 11 => 'zone_10', 12 => 'zone_11'];
 
         if ($file = $request->file('document_rates')) {
             $spreadsheet = IOFactory::createReaderForFile($file);
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
-            $header = [
-                'Range Up',
-                'Range Down',
-                'Zone 1A',
-                'Zone 1B', // Moved Zone 1B next to Zone 1
-                'Zone 2',
-                'Zone 3',
-                'Zone 4',
-                'Zone 5',
-                'Zone 6',
-                'Zone 7',
-                'Zone 8A',
-                'Zone 8B', // Moved Zone 8B next to Zone 8
-                'Zone 9',
-                'Zone 10',
-                'Zone 11'
-            ];
+            $header = ['Range Up', 'Range Down', 'Zone 1', 'Zone 2', 'Zone 3', 'Zone 4', 'Zone 5', 'Zone 6', 'Zone 7', 'Zone 8', 'Zone 9', 'Zone 10', 'Zone 11'];
+
             if (isset($spreadsheet)) {
                 $header_correct = true;
 
@@ -219,8 +183,6 @@ class InternationalEconomyStandardRatesController extends Controller
                         $zone_9 = trim($row['zone_9']);
                         $zone_10 = trim($row['zone_10']);
                         $zone_11 = trim($row['zone_11']);
-                        $zone_1b = trim($row['zone_1b']);
-                        $zone_8b = trim($row['zone_8b']);
 
                         $standard_rate = new InternationalEconomyStandardRetailRate();
                         $standard_rate->range_up = $range_up;
@@ -237,8 +199,6 @@ class InternationalEconomyStandardRatesController extends Controller
                         $standard_rate->zone_9 = $zone_9;
                         $standard_rate->zone_10 = $zone_10;
                         $standard_rate->zone_11 = $zone_11;
-                        $standard_rate->zone_1b = $zone_1b;
-                        $standard_rate->zone_8b = $zone_8b;
                         $standard_rate->save();
                         $created++;
 

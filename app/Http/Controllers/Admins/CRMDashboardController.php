@@ -47,76 +47,170 @@ class CRMDashboardController extends Controller
     }
 
     public function crm_dashboard_index(){
-        ActivityTrailController::createActivityTrailLog(Auth::id(),312);
-        //commented removed code is already saved.
-        $two_days_old = Carbon::now()->subDays(2);
-        // Total Tickets, Launch, In Process, Resolved
-        $ticketCounts = CrmRequest::selectRaw('status_id, COUNT(*) as count')
-            ->whereIn('status_id', [1, 2, 3])
-            ->whereIn('case_nature_id', [1, 2, 4])
-            ->groupBy('status_id')
-            ->get()
-            ->keyBy('status_id');
-        $total_tickets = $ticketCounts->sum('count');
-        $total_launch = $ticketCounts->has(1) ? $ticketCounts->get(1)->count : 0;
-        $total_in_process = $ticketCounts->has(2) ? $ticketCounts->get(2)->count : 0;
-        $total_resolved = $ticketCounts->has(3) ? $ticketCounts->get(3)->count : 0;
-        //end
+        // ActivityTrailController::createActivityTrailLog(Auth::id(),312);
+        $case_natures = CrmRequestCaseNature::where('id', '!=', 3)->select('id', 'name')->get();
+        $case_nature_types = CrmRequestCaseNatureType::select('id', 'type')->get();
+        $crm_request_statuses = CrmRequestStatus::whereNotIn('id',[5])->select('id', 'name')->get();
+        $channels = CrmRequestChannel::select('id', 'channel')->get();
+        // $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+        //     ->where('admin_roles.department_id',3)->get();
+        $agents = AdminRole::leftJoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+        ->whereIn('admin_roles.department_id', [3, 7])
+        ->where(function ($query) {
+            // Select all admins from department ID 3
+            $query->where('admin_roles.department_id', 3);
 
-        //Tickets Ratio
-        $case_nature_type_last_2_days = CrmRequest::whereIn('case_nature_id', [1, 2, 4])
-            ->where('created_at', '>=', $two_days_old)
-            ->count();
-        $shipment_arrived_last_2_days = Shipment::whereIn('shipper_status_id', [2, 4, 22, 27, 33])
-            ->where('updated_at', '>=', $two_days_old)
-            ->count();
-        $ticket_ratio = $shipment_arrived_last_2_days > 0
-            ? ($case_nature_type_last_2_days / $shipment_arrived_last_2_days) * 100
-            : 0;
-        //end
+            // Select specific admins from department ID 7 based on role ID
+            $query->orWhere(function ($innerQuery) {
+                $innerQuery->where('admin_roles.department_id', 7)
+                            ->whereIn('a.role_id', [115, 43, 75]);
+            });
+        })
+        ->get();
+        $admins = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id' )
+            ->select('a.id as id', 'a.name as name')
+            ->where('a.status', 1)
+            ->whereNotIn('admin_roles.department_id', [1,3])->get();
+        $types = CrmRequestTaggingTypes::get();
+        $departments = AdminDepartment::whereNotIn('id', [1,3])->get();
+        $hubs = City::where('hub', 1)->get();
+        $zones = Zone::where('status', 1)->get();
+        $closed_reason_statuses  = CrmClosedReasonStatus::all();
+        $statuses = CrmRequestStatus::select('id', 'name')->whereNotIn('id', [6, 7])->get();
+        $shipping_modes = ShippingMode::get(['id', 'mode']);
+        $shipment_status = ShipmentStatus::select('id','name')->get();
+        
 
-        //KPI Achieved (48 hrs. closure)
-        $tickets_closed_last_2_days = CrmRequest::where('status_id', 4)
-            ->where('updated_at', '>=', $two_days_old)
-            ->get();
-        $turnaround_closed_counts = $this->get_turn_around_counts($tickets_closed_last_2_days);
-        $kpi_achieved = $tickets_closed_last_2_days->count() > 0 ? (array_sum($turnaround_closed_counts) / $tickets_closed_last_2_days->count()) * 100 : 0;
-        //end
 
-        //Avg Aging (Ticket Launch-Closure) 48hrs
-        $launch_closed_ticket_histories = CrmRequestStatusHistory::whereIn('status_id', [1, 4])
-            ->where('created_at', '>=', $two_days_old)
-            ->orderByDesc('id')
-            ->get();
-        $launch_closed_ticket = [];
-        foreach ($launch_closed_ticket_histories as $history) {
-            $request_id = $history->crm_request_id;
-            if (!isset($launch_closed_ticket[$request_id])) {
-                $launch_closed_ticket[$request_id] = [];
-            }
-            if (!isset($launch_closed_ticket[$request_id]['created_at']) && $history->status_id == 1) {
-                $launch_closed_ticket[$request_id]['created_at'] = $history->created_at;
-            }
-            if (!isset($launch_closed_ticket[$request_id]['updated_at']) && $history->status_id == 4) {
-                $launch_closed_ticket[$request_id]['updated_at'] = $history->updated_at;
-            }
+        // From Admin Leads 
+        $today = Carbon::now()->endOfDay();
+        $thirtyDays = Carbon::now()->subDays(1)->startOfDay();
+        //dd($today,$thirtyDays);
+        $void_feedback_crm_request_ids = CrmRequestFeedback::whereBetween('created_at',[$thirtyDays,$today])->pluck('crm_request_id')->toArray();
+
+        if(in_array(session('role_id'),[1,32,6,37,51,83,90]))
+        {
+
+            $crm['total'] = CrmRequest::whereBetween('created_at', [$thirtyDays, $today])->whereNotIn('id', $void_feedback_crm_request_ids);
+
+            $crm['launched'] = CrmRequest::
+            whereBetween('created_at', [$thirtyDays, $today])->
+            where('status_id', 1);
+            $crm['in_process'] = CrmRequest::
+            whereBetween('created_at', [$thirtyDays, $today])->
+            where('status_id', 2);
+            $crm['resolved'] = CrmRequest::
+            whereBetween('created_at', [$thirtyDays, $today])->
+            where('status_id', 3);
+            $crm['closed'] = CrmRequest::
+            whereBetween('created_at', [$thirtyDays, $today])->
+            where('status_id', 4);
+            $crm['closed_rate_avg'] = CrmRequest::
+            whereBetween('created_at', [$thirtyDays, $today])->
+            where('status_id', 4);
+            $crm['re_open'] = CrmRequest::
+            whereBetween('created_at', [$thirtyDays, $today])->
+            where('status_id', 5);
+            $crm['valid'] = CrmRequest::
+            whereBetween('created_at', [$thirtyDays, $today])->
+            where('status_id', 6);
+            $crm['in_valid'] = CrmRequest::
+            whereBetween('created_at', [$thirtyDays, $today])->
+            where('status_id', 7);
+           
+        }
+        else
+        {
+            $crm['total'] = CrmRequest::whereBetween('created_at', [$thirtyDays, $today])->whereNotIn('id', $void_feedback_crm_request_ids);
+
+            $crm['launched'] = CrmRequest::
+            whereBetween('created_at', [$thirtyDays, $today])->
+            where('status_id', 1)->where('agent_id',auth()->user()->id);
+            $crm['in_process'] = CrmRequest::
+            whereBetween('created_at', [$thirtyDays, $today])->
+            where('status_id', 2)->where('agent_id',auth()->user()->id);
+            $crm['resolved'] = CrmRequest::
+            whereBetween('created_at', [$thirtyDays, $today])->
+            where('status_id', 3)->where('agent_id',auth()->user()->id);
+            $crm['closed'] = CrmRequest::
+            whereBetween('created_at', [$thirtyDays, $today])->
+            where('status_id', 4)->where('agent_id',auth()->user()->id);
+            $crm['closed_rate_avg'] = CrmRequest::
+            whereBetween('created_at', [$thirtyDays, $today])->
+            where('status_id', 4)->where('agent_id',auth()->user()->id);
+            $crm['re_open'] = CrmRequest::
+            whereBetween('created_at', [$thirtyDays, $today])->
+            where('status_id', 5)->where('agent_id',auth()->user()->id);
+            $crm['valid'] = CrmRequestStatusHistory::
+            whereBetween('created_at', [$thirtyDays, $today])->
+            where('status_id', 6)->where('agent_id',auth()->user()->id);
+            $crm['in_valid'] = CrmRequestStatusHistory::
+            whereBetween('created_at', [$thirtyDays, $today])->
+            where('status_id', 7)->where('agent_id',auth()->user()->id);
         }
 
-        $count_closed_filtered = array_filter($launch_closed_ticket, function ($item) {
-            return isset($item['created_at']) && isset($item['updated_at']);
-        });
-        $turnaround_launched_closed_counts = $this->get_turn_around_counts($count_closed_filtered);
-        $total_duration = ($turnaround_launched_closed_counts[1]) + ($turnaround_launched_closed_counts[2] * 2);
-        $average_aging = count($count_closed_filtered) > 0 ? ($total_duration / count($count_closed_filtered)) : 0;
-        //end
+        $crm['total'] = $crm['total']->count();
+        $crm['launched'] = $crm['launched']->count();
+        $crm['in_process'] = $crm['in_process']->count();
+        $crm['resolved'] = $crm['resolved']->count();
+        $crm['closed'] = $crm['closed']->count();
+        $crm['re_open'] = $crm['re_open']->count();
+        $crm['valid'] = $crm['valid']->count();
+        $crm['in_valid'] = $crm['in_valid']->count();
+        
+        $shipments = Shipment::where('shipper_status_id',2)->
+        whereBetween('created_at', [$thirtyDays, $today])->
+        count();
+        
 
-        // Today’s Closure
-        $tickets_closed_last_1_day = CrmRequest::where('status_id', 4)
-            ->where('updated_at', '>=', Carbon::now()->subDay())
-            ->count();
-        //end
+        $crm['closed_rate'] = $crm['total'] !== 0 ? $crm['closed']/$crm['total'] : 0;
+        $crm['in_process_ratio'] = $shipments !== 0 ? $crm['total']/$shipments : 0;
+        $crm['re_open_rate'] = $crm['closed'] !== 0 ? $crm['re_open']/$crm['closed'] : 0;
+        $crm['launch_in_process_rate'] = $crm['in_process'] !== 0 ? $crm['launched']/$crm['in_process'] : 0;
+        $crm['launch_resolved_rate'] = $crm['resolved'] !== 0 ? $crm['launched']/$crm['resolved'] : 0;
+        $crm['launch_closed_rate'] = $crm['closed'] !== 0 ? $crm['launched']/$crm['closed'] : 0;
 
-        return view('admin.crm.dashboard')->with(['total_tickets' => $total_tickets, 'total_launch' => $total_launch, 'total_in_process' => $total_in_process, 'total_resolved' => $total_resolved, 'kpi_achieved' => $kpi_achieved, 'average_aging' => $average_aging, 'tickets_closed_last_1_day' => $tickets_closed_last_1_day, 'ticket_ratio' => $ticket_ratio]); //'case_natures' => $case_natures, 'case_nature_types' => $case_nature_types,'statuses' => $statuses, 'shipping_modes' => $shipping_modes, 'channels' => $channels, 'agents' => $agents, 'shipment_status' => $shipment_status, 'types' => $types, 'admins' => $admins, 'departments' => $departments, 'hubs' => $hubs, 'zones' => $zones, 'closed_reason_statuses' => $closed_reason_statuses,'dates' => $dates,'cities' => $cities,'crm_request_statuses' => $crm_request_statuses,'crm' => $crm]);
+        // dd($crm['launched'],$crm['in_process'],$crm['closed'],$crm['total']);
+        // dd($crm['launch_in_process_ratio'],
+        // $crm['launch_resolved_rate_percentage'],
+        // $crm['launch_closed_rate_percentage'],
+        // $crm['closed'] !== 0 ? number_format(($crm['launch_closed_rate_percentage']) * 100, 2) : 0);
+        
+        $crm['in_valid_percentage'] = "0";
+        $crm['closed_rate_percentage'] = "0";
+        $crm['in_process_ratio_percentage'] = "0";
+        $crm['re_open_rate_percentage'] = "0";
+        $crm['launch_in_process_rate_percentage'] = "0";
+        $crm['launch_resolved_rate_percentage'] = "0";
+        $crm['launch_closed_rate_percentage'] = "0";
+        
+        if ($crm['total'] > 0) {
+            $crm['in_valid_percentage'] = round(($crm['in_valid'] / $crm['total']) * 100, 2);
+            $crm['closed_rate_percentage'] = $crm['total'] !== 0 ? round(($crm['closed_rate']) * 100, 2)  : 0;
+            $crm['in_process_ratio_percentage'] =  $shipments !== 0 ? round(($crm['in_process_ratio']) * 100, 2) : 0;
+            $crm['re_open_rate_percentage'] =  $crm['closed']!=0 ? round(($crm['re_open_rate']) * 100, 2) : 0;
+
+            $crm['launch_in_process_rate_percentage'] =  $crm['in_process'] !== 0 ? round(($crm['launch_in_process_rate']) * 100, 2) : 0;
+            $crm['launch_resolved_rate_percentage'] =  $crm['resolved'] !== 0 ? round(($crm['launch_resolved_rate']) * 100, 2) : 0;
+            $crm['launch_closed_rate_percentage'] =  $crm['closed'] !== 0 ? round($crm['launch_closed_rate'] * 100, 2) : 0;
+        }
+
+        $crm['launched'] = number_format($crm['launched']);
+        $crm['in_process'] = number_format($crm['in_process']);
+        $crm['resolved'] = number_format($crm['resolved']);
+        $crm['closed'] = number_format($crm['closed']);
+        $crm['re_open'] = number_format($crm['re_open']);
+        $crm['valid'] = number_format($crm['valid']);
+        $crm['in_valid'] = number_format($crm['in_valid']);
+        $crm['closed_rate'] = number_format($crm['closed_rate']);
+        $crm['in_process_ratio'] = number_format($crm['in_process_ratio']);
+
+        $cities = City::where('status', 1)->select('id', 'name')->get();
+
+        $dates['current'] = Carbon::now();
+        $dates['old_date'] = Carbon::now()->subDays(1);
+
+        return view('admin.crm.dashboard')->with(['case_natures' => $case_natures, 'case_nature_types' => $case_nature_types,'statuses' => $statuses, 'shipping_modes' => $shipping_modes, 'channels' => $channels, 'agents' => $agents, 'shipment_status' => $shipment_status, 'types' => $types, 'admins' => $admins, 'departments' => $departments, 'hubs' => $hubs, 'zones' => $zones, 'closed_reason_statuses' => $closed_reason_statuses,'dates' => $dates,'cities' => $cities,'crm_request_statuses' => $crm_request_statuses,'crm' => $crm]);
     }
 
     public function crm_dashboard_list(Request $request){
@@ -1449,28 +1543,6 @@ class CRMDashboardController extends Controller
     static function avg_tat($query,$id)
     {
         return $query->where('crm_requests.status_id', '=', $id);
-    }
-
-    public static function get_turn_around_counts($tickets_closed_last_2_days)
-    {
-        $turnaround_counts = [0 => 0, 1 => 0, 2 => 0];
-        foreach ($tickets_closed_last_2_days as $ticket) {
-            if (isset($ticket['created_at']) && isset($ticket['updated_at'])) {
-                $created_at = Carbon::parse($ticket['created_at']);
-                $updated_at = Carbon::parse($ticket['updated_at']);
-                $turnaround_days = $created_at->diffInDays($updated_at);
-
-                if ($turnaround_days == 0) {
-                    $turnaround_counts[0]++;
-                } elseif ($turnaround_days == 1) {
-                    $turnaround_counts[1]++;
-                } elseif ($turnaround_days == 2) {
-                    $turnaround_counts[2]++;
-                }
-
-            }
-        }
-        return $turnaround_counts;
     }
 
 }
