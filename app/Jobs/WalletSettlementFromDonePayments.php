@@ -261,9 +261,24 @@ class WalletSettlementFromDonePayments implements ShouldQueue
             sleep(60);
         });
 
-        if($total_count > 0 &&  count($successfull_record) == $total_count ) {
 
-            DonePayment::where('id',  $this->payment_id)->update(['status' => 1, 'status_updated_at' => Carbon::now()]);
+        if (!DonePaymentShipment::where('done_payment_id',  $this->payment_id)
+            ->whereIn('wallet_action_bid', [0,1,2])
+            ->exists()) {
+            DonePayment::where('id',  $this->payment_id)
+                ->update([
+                    'status' => 1,
+                    'status_updated_at' => Carbon::now()
+                ]);
+        }else{
+            DonePayment::where('id',  $this->payment_id)
+                ->update([
+                    'status' => 3,
+                    'status_updated_at' => Carbon::now()
+                ]);
         }
+
+
+
     }
 }
