@@ -566,14 +566,9 @@ class RegisterController extends Controller
             $shipper = User::find($newUser->id);
 
             if (isset($data['sale_person'])) {
+                $sale_person = SalePersonTag::where(['admin_id' => $data['sale_person'], 'user_id' => $newUser->id, 'status' => 0])->latest()->first() ?? null;
 
-                $shipper_data = SalePersonTag::where('user_id', $newUser->id)->where('status', 0)->get();
-                if ($shipper_data->count() > 0) {
-                    SalePersonTag::where('user_id', $newUser->id)->where('status', 0)->update(['status' => 1]);
-                }
-
-                $sale_person = SalePersonTag::where(['admin_id' => $data['sale_person'], 'user_id' => $newUser->id, 'status' => 0])->latest()->first();
-                if(empty($sale_person)){
+                if($sale_person == null){
                     $sale_person = new SalePersonTag();
                     $sale_person->admin_id = $data['sale_person'];
                     $sale_person->user_id = $newUser->id;

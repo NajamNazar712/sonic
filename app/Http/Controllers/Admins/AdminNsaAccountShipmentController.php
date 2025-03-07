@@ -236,7 +236,6 @@ class AdminNsaAccountShipmentController extends Controller
                             $settings = $settings->first();
                             $nsa_accounts = array_map('intval', explode(',', $settings->text));
                         }
-
                         if (count($nsa_accounts) > 0) {
                             if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('user_id', $nsa_accounts)->where('shipper_status_id', 1)->exists()) {
                                 $errors['Row #' . $row_id][] = 'Shipment not found with Tracking Number #' . $row['tracking_number'];
@@ -274,7 +273,7 @@ class AdminNsaAccountShipmentController extends Controller
 
                                     $status_id = 2;
 
-                                    if (in_array($nsa_shipment->user_id, [7762, 10354,37791,38106])) {
+                                    if (in_array($nsa_shipment->user_id, [7762, 10354])) {
                                         $admin_id = Auth::id();
                                     }
                                     else {
@@ -294,7 +293,7 @@ class AdminNsaAccountShipmentController extends Controller
                                     $nsa_shipment->shipper_status_id = $status_id;
                                     $nsa_shipment->consignee_status_id = $status_id;
 
-                                    if (in_array($nsa_shipment->user_id, [7762, 10354,37791,38106])) {
+                                    if (in_array($nsa_shipment->user_id, [7762, 10354])) {
                                         $nsa_shipment->actual_weight = $nsa_shipment->estimated_weight;
                                     }
                                     else {
@@ -469,9 +468,7 @@ class AdminNsaAccountShipmentController extends Controller
                                 $admin_id = Auth::id();
                             }
                             else {
-                                // 16704 ----> new rider id for express shippers
-                                // $rider_id = $settings->setting_value;
-                                $rider_id = 16704;
+                                $rider_id = $settings->setting_value;
                                 $admin_id = 50;
                             }
 
@@ -486,6 +483,7 @@ class AdminNsaAccountShipmentController extends Controller
                                 }
                             }
                         }
+
                         $order = false;
                         if ($shipments_count != 0) {
                             $note = DeliveryNote::create([
@@ -613,8 +611,7 @@ class AdminNsaAccountShipmentController extends Controller
         if ($nsa_shipments->exists()) {
             $nsa_shipments = $nsa_shipments->get();
             $settings = GlobalSettings::where('type', 'nsa_accounts')->first();
-            // $rider_id = $settings->setting_value;
-            $rider_id = 16704;
+            $rider_id = $settings->setting_value;
             $valid_shipments = array();
             $shipments_count = 0;
             $total_cod_amount = 0;
@@ -957,8 +954,7 @@ class AdminNsaAccountShipmentController extends Controller
                     if ($nsa_shipments->exists()) {
                         $nsa_shipments = $nsa_shipments->get();
                         $settings = GlobalSettings::where('type', 'nsa_accounts')->first();
-                        // $rider_id = $settings->setting_value;
-                        $rider_id = 16704;
+                        $rider_id = $settings->setting_value;
                         $valid_shipments = array();
                         $shipments_count = 0;
                         $total_cod_amount = 0;

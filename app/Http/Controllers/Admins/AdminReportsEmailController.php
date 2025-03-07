@@ -1551,12 +1551,7 @@ class AdminReportsEmailController extends Controller
                         $shippers[$retail_done_payment->retail_done_payment->shipper->id] = $retail_done_payment->retail_done_payment->shipper->id;
                     }
                     if ($retail_done_payment->retail_done_payment->user_bank_info_id != null) {
-                        if($retail_done_payment->retail_done_payment->shipper->iban != null){
-                            $iban = $retail_done_payment->retail_done_payment->shipper->iban;
-                        }else{
-                            $iban = '-';
-                        }
-
+                        $iban = $retail_done_payment->retail_done_payment->shipper->iban;
                     } else {
                         $iban = '-';
                     }
@@ -1578,6 +1573,7 @@ class AdminReportsEmailController extends Controller
                 $retail_done_payments_array[] = ['' => '', 'Total Shippers' => '', 'Total Amount' => ''];
                 $retail_done_payment_array[] = ['S No.' => '', 'Payment ID' => 'Total', 'Shipper Name' => '', 'IBAN Number' => '', 'Amount' => number_format($total_amount)];
                 $retail_done_payment_array = array_merge($retail_done_payments_array, $retail_done_payment_array);
+    
                 $cell_s = [
                     'font' => ['bold' => true],
                     'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
@@ -1608,14 +1604,14 @@ class AdminReportsEmailController extends Controller
                 header('Content-Disposition: attachment;filename="retail_done_payment_report.xlsx"');
                 header('Cache-Control: max-age=0');
                 $file_name_without_path = "reports/retail_done_payment_report_" . $date_file_name . ".xlsx";
-                $file_name = public_path() . "/reports/retail_done_payment_report_" . $date_file_name . ".xlsx";   
+                $file_name = public_path() . "/reports/retail_done_payment_report_" . $date_file_name . ".xlsx";
                 $writer->save($file_name);
                 
                 NotificationsController::send(141, $date, url('/') . '/' . $file_name_without_path);
 //                Log::channel('cronJobLog')->info('s ' .'report:retail End');
             }
         }catch(\Throwable $th){
-            Log::channel('cronJobLog')->info('s ' .'report:retail Failed'. $th->getMessage());
+            Log::channel('cronJobLog')->info('s ' .'report:retail Failed');
         }
     }
 
