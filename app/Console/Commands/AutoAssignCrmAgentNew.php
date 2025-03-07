@@ -9,6 +9,7 @@ use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestAgentHistory;
 use App\Http\Models\CrmAgent;
 use App\Http\Models\CrmAgentLog;
+use App\Http\Models\SaleTierTag;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
@@ -71,6 +72,7 @@ class AutoAssignCrmAgentNew extends Command
                             ->WhereNull('shipper_non_key.kam');
                     })
                     ->select('crm_requests.id',
+                        'crm_requests.shipper_id',
                         'crm_requests.case_nature_id',
                         'crm_requests.case_nature_type_id',
                         'crm_requests.agent_id',
@@ -93,9 +95,10 @@ class AutoAssignCrmAgentNew extends Command
 
                 if ($crm_requests->exists()) {
                     $crm_requests = $crm_requests->get();
+
                     foreach ($crm_requests as $value) {
 
-                        $crm_agent =  CrmAgentAutoAssign::with('origin_zones.zones','origin_hubs.hubs','origin_areas.city_area','zones.zones','hubs.hubs','case_natures','case_nature_types','business_types','sub_business_types','shipper_keys','shipper_non_keys','shipment_statuses')
+                        $crm_agent =  CrmAgentAutoAssign::with('agent_admin','origin_zones.zones','origin_hubs.hubs','origin_areas.city_area','zones.zones','hubs.hubs','case_natures','case_nature_types','business_types','sub_business_types','shipper_keys','shipper_non_keys','shipment_statuses')
                             ->select([
                                 'crm_agent_auto_assigns.id',
                                 'crm_agent_auto_assigns.agent_id',
@@ -104,12 +107,12 @@ class AutoAssignCrmAgentNew extends Command
                             ])->where('crm_agent_auto_assigns.status', 1)
                             ->where(function ($query) use ($value) {
                                 if (!empty($value->zone_id)) {
-                                    $query->orWhereHas('zones', function ($query) use ($value) {
+                                    $query->WhereHas('zones', function ($query) use ($value) {
                                         $query->where('zone_id', $value->zone_id);
                                     });
                                 }
                                 if (!empty($value->origin_zone_id)) {
-                                    $query->orWhereHas('origin_zones', function ($query) use ($value) {
+                                    $query->WhereHas('origin_zones', function ($query) use ($value) {
                                         $query->where('origin_zone_id', $value->origin_zone_id);
                                     });
                                 }
@@ -120,8 +123,18 @@ class AutoAssignCrmAgentNew extends Command
                                 }
                             });
 
+                            if (SaleTierTag::where('user_id', $value->shipper_id)->exists()) {
+                                $crm_agent = $crm_agent->whereHas('agent_admin', function ($query) {
+                                    $query->whereIn('role_id', [43, 67, 75, 115]);
+                                });
+                            } else {
+                                $crm_agent = $crm_agent->whereHas('agent_admin', function ($query) {
+                                    $query->whereIn('role_id', [28, 37]);
+                                });
+                            }
 
                         if ($crm_agent->exists()) {
+                            $crm_agent->get();
 
                             $modifies_data = $crm_agent->get()->filter(function ($val) use($value)  {
                                 $return  = 1;
@@ -134,7 +147,6 @@ class AutoAssignCrmAgentNew extends Command
                                 $shipment_statuses = isset($val->shipment_statuses) ? $val->shipment_statuses->pluck('shipment_status_id')->toArray(): [];
                                 $origin_hubs = isset($val->origin_hubs) ?  $val->origin_hubs->pluck('origin_hub_id')->toArray() : [];
                                 $origin_areas = isset($val->origin_areas) ?  $val->origin_areas->pluck('origin_area_id')->toArray() : [];
-
 //                               if(count($origin_hubs) > 0 || count($hubs) > 0) {
 //                                   $originHubMatch = true;
 //                                   $hubMatch = true;
@@ -195,13 +207,21 @@ class AutoAssignCrmAgentNew extends Command
                                            $return = 0;
                                        }
                                    }
+                                   elseif (!in_array($value->shipper_id,$shipper_keys)){
+                                       $return = 0;
+                                   }
                                }
-                               if(count($shipper_non_keys) > 0){
+
+                                if(count($shipper_non_keys) > 0){
                                    if (!empty($value->shipper_non_key_id)) {
                                        if(!in_array($value->shipper_non_key_id,$shipper_non_keys)){
                                            $return = 0;
                                        }
                                    }
+                                   elseif (!in_array($value->shipper_id,$shipper_non_keys)){
+                                        $return = 0;
+                                   }
+
                                }
                                if(count($shipment_statuses) > 0){
                                    if (!empty($value->shipment_status_id)) {
