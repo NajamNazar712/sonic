@@ -6,7 +6,9 @@ use App\Http\Models\Shipper\User;
 use App\Http\Models\UserDocumentAttachment;
 use App\Http\Models\WalletUser;
 use App\Models\FingaApiLog;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Auth;
@@ -18,29 +20,37 @@ class FingaIntegrationController extends Controller
         $this->middleware('auth:web,substitute_users');
         $this->middleware('Permission')->except('wordpress_access_denied', 'wordpressAddressView','wordpressBankView');
     }
-    public static function getToken($api) {
-        if (App::environment('local') || App::environment('staging')) {
-            $password = "4TE7+r]7ddI2";
-        }else{
-            $password = "9l2|_XTI4MiP";
+    public static function getToken($api)
+    {
+        // Define cache key for token
+        $cacheKey = 'wallet_api_token';
+
+        // Check if token exists in cache and is still valid
+        if (Cache::has($cacheKey)) {
+            return Cache::get($cacheKey);
         }
+
+        $password = App::environment(['local', 'staging']) ? "4TE7+r]7ddI2" : "9l2|_XTI4MiP";
+
+        // Make API request for new token
         $response = Http::withHeaders([
             'accept' => 'application/json',
-
-        ])->post($api.'login/', [
+        ])->post($api . 'login/', [
             "username" => "sonic",
             "password" => $password,
         ]);
 
-        if($response->successful()) {
+        // If the request is successful, cache the token for 4 minutes
+        if ($response->successful()) {
+            $body = json_decode($response->body());
 
-            $body = $response->getBody();
-            $body = json_decode($body);
-            $token = $body->token;
-            return $token;
-
+            if (isset($body->token)) {
+                Cache::put($cacheKey, $body->token, Carbon::now()->addMinutes(3));
+                return $body->token;
+            }
         }
 
+        return null; // Return null if request fails
     }
     public function login(Request $request) {
 

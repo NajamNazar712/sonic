@@ -55,21 +55,22 @@ class WalletSettlementFromDonePayments implements ShouldQueue
     {
 
         $done_payment_shipments = DonePaymentShipment::join('shipments as s','s.id', 'done_payment_shipments.shipment_id')
-        ->leftjoin('shipment_additional_charges as sc', 'sc.shipment_id', 's.id')
-        ->leftjoin('shipment_services_charges as ssc', 'ssc.shipment_id', 's.id')
-        ->leftjoin('wallet_users as wu', function ($join) {
-            $join->on('wu.user_id', '=', 's.user_id')
-                ->where('wu.substitute_user_id', '0');
-        })
-        ->leftjoin('finja_log_settlement_records as sac', 'done_payment_shipments.shipment_id', '=', 'sac.shipment_id')
-        ->where('done_payment_shipments.done_payment_id', $this->payment_id)
-        ->whereIn('done_payment_shipments.wallet_action_bid', [0,1,2])
-        // ->where(function ($query) {
-        //     $query->where('sac.wallet_settlement_updated', 0);
-        // })
-        ->select(['done_payment_shipments.*', 'wu.user_id as user_id', 'wu.wallet_id as wallet_id', 's.tracking_number', 's.cash_handling_charges', 's.insurance_charges','s.replacement_charges','s.try_and_buy_charges','s.intercept_charges','s.nsa_osa_charges','s.esc_charges','s.return_charges', 'sac.wallet_settlement_updated', 's.weight_charges', 's.fuel_surcharge','sc.faf_charges', 'ssc.reverse_pickup_charges', 'sc.wallet_charges', 'sac.wallet_log_charges_updated'])->get();
+            ->leftjoin('shipment_additional_charges as sc', 'sc.shipment_id', 's.id')
+            ->leftjoin('shipment_services_charges as ssc', 'ssc.shipment_id', 's.id')
+            ->leftjoin('wallet_users as wu', function ($join) {
+                $join->on('wu.user_id', '=', 's.user_id')
+                    ->where('wu.substitute_user_id', '0');
+            })
+            ->leftjoin('finja_log_settlement_records as sac', 'done_payment_shipments.shipment_id', '=', 'sac.shipment_id')
+            ->where('done_payment_shipments.done_payment_id', $this->payment_id)
+            ->whereIn('done_payment_shipments.wallet_action_bid', [0,1,2])
+            // ->where(function ($query) {
+            //     $query->where('sac.wallet_settlement_updated', 0);
+            // })
+            ->select(['done_payment_shipments.*', 'wu.user_id as user_id', 'wu.wallet_id as wallet_id', 's.tracking_number', 's.cash_handling_charges', 's.insurance_charges','s.replacement_charges','s.try_and_buy_charges','s.intercept_charges','s.nsa_osa_charges','s.esc_charges','s.return_charges', 'sac.wallet_settlement_updated', 's.weight_charges', 's.fuel_surcharge','sc.faf_charges', 'ssc.reverse_pickup_charges', 'sc.wallet_charges', 'sac.wallet_log_charges_updated'])->get();
         //dd($done_payment_shipments);
         $successfull_record = [];
+        $total_count = count($done_payment_shipments);
         $api = config('app.FINGA_URL');
         $token = FingaIntegrationController::getToken($api);
         $token_time = Carbon::now();
@@ -260,10 +261,24 @@ class WalletSettlementFromDonePayments implements ShouldQueue
             sleep(60);
         });
 
-        $actual_count = $done_payment_shipments->count();
-        if($actual_count > 0 &&  count($successfull_record) == $actual_count ) {
 
-            DonePayment::where('id',  $this->payment_id)->update(['status' => 1, 'status_updated_at' => Carbon::now()]);
+        if (!DonePaymentShipment::where('done_payment_id',  $this->payment_id)
+            ->whereIn('wallet_action_bid', [0,1,2])
+            ->exists()) {
+            DonePayment::where('id',  $this->payment_id)
+                ->update([
+                    'status' => 1,
+                    'status_updated_at' => Carbon::now()
+                ]);
+        }else{
+            DonePayment::where('id',  $this->payment_id)
+                ->update([
+                    'status' => 3,
+                    'status_updated_at' => Carbon::now()
+                ]);
         }
+
+
+
     }
 }
