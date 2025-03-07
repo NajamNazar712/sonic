@@ -487,15 +487,36 @@ class ProcessShipmentBookingDBPriority implements ShouldQueue
             }
 
             try {
+                // Maintaining shipper segment logs on booking
+                $segment_id = '';
+                $sub_segment_id = '';
+                $user_id = '';
+                if (session('substitute_user_id')) {
+                    $user_id = auth()->user()->user_id;
+                    $user = User::find($user_id);
+                    $segment_id = $user->segment_id;
+                    $sub_segment_id = $user->sub_segment_id;
 
-                if ($pickup_city_id != $consignee_city_id)
-                {
+                    ShipperSegmentLogs::create([
+                        'shipment_id' => $shipment_id,
+                        'segment_id' => $segment_id,
+                        'sub_segment_id' => $sub_segment_id
+                    ]);
+                } else {
                     ShipperSegmentLogs::create([
                         'shipment_id' => $shipment_id,
                         'segment_id' => isset(auth()->user()->segment_id) ? auth()->user()->segment_id : 0,
                         'sub_segment_id' => isset(auth()->user()->sub_segment_id) ? auth()->user()->sub_segment_id : 0
                     ]);
                 }
+                // if ($pickup_city_id != $consignee_city_id)
+                // {
+                //     ShipperSegmentLogs::create([
+                //         'shipment_id' => $shipment_id,
+                //         'segment_id' => isset(auth()->user()->segment_id) ? auth()->user()->segment_id : 0,
+                //         'sub_segment_id' => isset(auth()->user()->sub_segment_id) ? auth()->user()->sub_segment_id : 0
+                //     ]);
+                // }
 
             } catch (\Exception $e) {
                 Log::error('Error creating shipper segment log from Shipper portal excel booking ' . $shipment_id . ': ' . $e->getMessage());

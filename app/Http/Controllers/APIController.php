@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\FafCharges;
 use App\FinjaSmsLog;
+use App\Http\Controllers\Admins\AdminCRMController;
 use App\Http\Models\PendingPaymentShipment;
 use App\Http\Models\WalletUser;
 use App\Models\FinjaRequestLog;
@@ -1544,14 +1545,20 @@ class APIController extends Controller
             }
 
             try {
-                // Maintaining shipper segment logs on booking when origin and destination are different
-                if ($consignee_city_id != $pickup_city_id) {
-                    ShipperSegmentLogs::create([
-                        'shipment_id' => $shipment_id,
-                        'segment_id' => $user_type->segment_id,
-                        'sub_segment_id' => $user_type->sub_segment_id
-                    ]);
-                }
+                // Maintaining shipper segment logs on booking
+                ShipperSegmentLogs::create([
+                    'shipment_id' => $shipment_id,
+                    'segment_id' => $user_type->segment_id,
+                    'sub_segment_id' => $user_type->sub_segment_id
+                ]);
+
+                // if ($consignee_city_id != $pickup_city_id) {
+                //     ShipperSegmentLogs::create([
+                //         'shipment_id' => $shipment_id,
+                //         'segment_id' => $user_type->segment_id,
+                //         'sub_segment_id' => $user_type->sub_segment_id
+                //     ]);
+                // }
             } catch (\Exception $e) {
                 Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
             }
@@ -1819,14 +1826,20 @@ class APIController extends Controller
             }
 
             try {
-                // Maintaining shipper segment logs on booking when origin and destination are different
-                if ($consignee_city_id != $pickup_city_id) {
-                    ShipperSegmentLogs::create([
-                        'shipment_id' => $shipment_id,
-                        'segment_id' => $user_type->segment_id,
-                        'sub_segment_id' => $user_type->sub_segment_id
-                    ]);
-                }
+                // Maintaining shipper segment logs on booking
+                ShipperSegmentLogs::create([
+                    'shipment_id' => $shipment_id,
+                    'segment_id' => $user_type->segment_id,
+                    'sub_segment_id' => $user_type->sub_segment_id
+                ]);
+
+                // if ($consignee_city_id != $pickup_city_id) {
+                //     ShipperSegmentLogs::create([
+                //         'shipment_id' => $shipment_id,
+                //         'segment_id' => $user_type->segment_id,
+                //         'sub_segment_id' => $user_type->sub_segment_id
+                //     ]);
+                // }
             } catch (\Exception $e) {
                 Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
             }
@@ -2003,6 +2016,18 @@ class APIController extends Controller
 
             $shipment = Shipment::whereIn('user_id', $user_ids)->where('tracking_number', $tracking_number)->first();
 
+            $sub_segment_name = '-';
+            $sub_segment = DB::table('shipper_segment_logs')
+            ->leftJoin('sub_category_segments', 'sub_category_segments.id', 'shipper_segment_logs.sub_segment_id')
+            ->where('shipment_id', $shipment->id)
+            ->select('sub_category_segments.name')
+            ->first();
+
+            if ($sub_segment && $sub_segment->name)
+            {
+                $sub_segment_name = $sub_segment->name;
+            }
+
             $details = array();
 
             $details['tracking_number'] = $tracking_number;
@@ -2088,6 +2113,8 @@ class APIController extends Controller
                     }
                 }
             }
+
+            $details['order_information']['sub_segment'] = $sub_segment_name;
 
             return response()->json(['status' => 0, 'message' => 'Tracking of Shipment #' . $tracking_number, 'details' => $details]);
         }
@@ -3451,14 +3478,20 @@ class APIController extends Controller
             }
 
             try {
-                // Maintaining shipper segment logs on booking when origin and destination are different
-                if ($consignee_city_id != $pickup_city_id) {
-                    ShipperSegmentLogs::create([
-                        'shipment_id' => $shipment_id,
-                        'segment_id' => $user_type->segment_id,
-                        'sub_segment_id' => $user_type->sub_segment_id
-                    ]);
-                }
+                // Maintaining shipper segment logs on booking
+                ShipperSegmentLogs::create([
+                    'shipment_id' => $shipment_id,
+                    'segment_id' => $user_type->segment_id,
+                    'sub_segment_id' => $user_type->sub_segment_id
+                ]);
+
+                // if ($consignee_city_id != $pickup_city_id) {
+                //     ShipperSegmentLogs::create([
+                //         'shipment_id' => $shipment_id,
+                //         'segment_id' => $user_type->segment_id,
+                //         'sub_segment_id' => $user_type->sub_segment_id
+                //     ]);
+                // }
             } catch (\Exception $e) {
                 Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
             }
@@ -3520,7 +3553,7 @@ class APIController extends Controller
 
                     $filename = 'air_waybill' . '.jpg';
 
-                    return $image->setOption('disable-smart-width', true)->setOption('width', 1280)->setOption('enable-local-file-access', true)->download($filename);
+                    return $image->setOption('disable-smart-width', true)->setOption('enable-local-file-access', true)->download($filename);
                 } else {
                     $pdf = SnappyPDF::loadHTML($air_waybill);
 
@@ -4825,6 +4858,9 @@ class APIController extends Controller
                         if ($shipment->exists()) {
                             $shipment = $shipment->first();
                             $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description);
+                            if($nature_id == 1 && !empty($request->case_nature_complainant)){
+                                AdminCRMController::updateComplaintPhone(CrmRequest::max('id'), $request->case_nature_complainant, $request->complainant_phone);
+                            }
                             return response()->json(['status' => 0, 'message' => 'CRM Request has been added', 'id' => $crm_request]);
                         } else {
                             return response()->json(['status' => 1, 'message' => 'Tracking Number not found!']);
@@ -9860,14 +9896,20 @@ class APIController extends Controller
             }
 
             try {
-                // Maintaining shipper segment logs on booking when origin and destination are different
-                if ($consignee_city->id != $pickup_city_id) {
-                    ShipperSegmentLogs::create([
-                        'shipment_id' => $shipment_id,
-                        'segment_id' => $user_type->segment_id,
-                        'sub_segment_id' => $user_type->sub_segment_id
-                    ]);
-                }
+                // Maintaining shipper segment logs on booking
+                ShipperSegmentLogs::create([
+                    'shipment_id' => $shipment_id,
+                    'segment_id' => $user_type->segment_id,
+                    'sub_segment_id' => $user_type->sub_segment_id
+                ]);
+
+                // if ($consignee_city->id != $pickup_city_id) {
+                //     ShipperSegmentLogs::create([
+                //         'shipment_id' => $shipment_id,
+                //         'segment_id' => $user_type->segment_id,
+                //         'sub_segment_id' => $user_type->sub_segment_id
+                //     ]);
+                // }
             } catch (\Exception $e) {
                 Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
             }

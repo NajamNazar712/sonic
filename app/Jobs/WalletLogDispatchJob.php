@@ -32,11 +32,16 @@ class WalletLogDispatchJob implements ShouldQueue
      */
     public function handle()
     {
-        foreach ($this->data as $item) {
-            // Process each item
-            $shipmentId = $item['shipmentId'];
-            unset($item['shipmentId']);
-            $this->arrival_shipment_logs($item,  $shipmentId);
+        $chunks = array_chunk($this->data, 50);
+
+        foreach ($chunks as $chunk) {
+            foreach ($chunk as $item) {
+                $shipmentId = $item['shipmentId'];
+                unset($item['shipmentId']);
+                $this->arrival_shipment_logs($item, $shipmentId);
+            }
+            sleep(60);
         }
+
     }
 }

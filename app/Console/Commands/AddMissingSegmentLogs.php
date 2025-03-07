@@ -38,8 +38,14 @@ class AddMissingSegmentLogs extends Command
         ->leftJoin('user_shipping_infos', 'user_shipping_infos.id', '=', 'shipments.pickup_address_id')
         ->leftJoin('shipper_segment_logs', 'shipper_segment_logs.shipment_id', '=', 'shipments.id')
 
-        // get the missing entries
-        ->whereNull('shipper_segment_logs.shipment_id')
+        // Get shipments where shipper_segment_logs is missing OR segment_id & sub_segment_id are 0
+        ->where(function ($query) {
+            $query->whereNull('shipper_segment_logs.shipment_id')
+                ->orWhere(function ($subQuery) {
+                    $subQuery->where('shipper_segment_logs.segment_id', 0)
+                        ->where('shipper_segment_logs.sub_segment_id', 0);
+                });
+        })
 
         // Only select shipments created from 21st December 2024 and onwards
         ->whereDate('shipments.created_at', '>=', '2024-12-21')
@@ -51,7 +57,9 @@ class AddMissingSegmentLogs extends Command
             'user_shipping_infos.city_id',
             'shipments.consignee_city_id',
             'users.segment_id',
-            'users.sub_segment_id'
+            'users.sub_segment_id',
+            'shipper_segment_logs.segment_id as log_segment_id',
+            'shipper_segment_logs.sub_segment_id as log_sub_segment_id'
         )
         ->get();
 
@@ -61,15 +69,29 @@ class AddMissingSegmentLogs extends Command
         });
 
         // Prepare logs to insert
-        $logsToInsert = $filteredShipments->map(function ($shipment) {
-            return [
-                'shipment_id' => $shipment->shipment_id,
-                'segment_id' => $shipment->segment_id,
-                'sub_segment_id' => $shipment->sub_segment_id,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-        })->toArray();
+        $logsToInsert = [];
+        foreach ($filteredShipments as $shipment) {
+            // If shipper_segment_logs is missing, prepare for insertion
+            if (is_null($shipment->log_segment_id) && is_null($shipment->log_sub_segment_id)) {
+                $logsToInsert[] = [
+                    'shipment_id' => $shipment->shipment_id,
+                    'segment_id' => $shipment->segment_id,
+                    'sub_segment_id' => $shipment->sub_segment_id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+            // If shipper_segment_logs exists but has segment_id and sub_segment_id as 0, update it
+            elseif ($shipment->log_segment_id == 0 && $shipment->log_sub_segment_id == 0) {
+                DB::table('shipper_segment_logs')
+                    ->where('shipment_id', $shipment->shipment_id)
+                    ->update([
+                        'segment_id' => $shipment->segment_id,
+                        'sub_segment_id' => $shipment->sub_segment_id,
+                        'updated_at' => now(),
+                    ]);
+            }
+        }
 
         if (!empty($logsToInsert)) {
             DB::table('shipper_segment_logs')->insert($logsToInsert);
