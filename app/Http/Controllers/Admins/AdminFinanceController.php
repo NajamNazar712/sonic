@@ -21599,4 +21599,208 @@ class AdminFinanceController extends Controller
         return response()->json(['data' => $data]);
     }
 
+    static function update_payment_done_payment($shipment_id, $type, $done_payment_id = null)
+    {
+        $shipment = Shipment::find($shipment_id);
+        $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment_id);
+        $check_arrival = ShipmentAdditionalCharges::check_additional_charges($shipment_id, true);
+        $service_charges = ShipmentServicesCharges::where('shipment_id', $shipment_id);
+
+        $get_wallet_charges_if_applicable = ShipmentAdditionalCharges::get_wallet_charges_if_applicable($shipment_id);
+        if($get_wallet_charges_if_applicable) {
+            $wallet_charges = ShipmentAdditionalCharges::fetch_wallet_charges($shipment_id);
+        }else{
+            $wallet_charges = ShipmentAdditionalCharges::show_wallet_charges_by_type($shipment_id,$type);
+        }
+        if ($service_charges->exists()) {
+            $service_charges = $service_charges->first();
+            $service_charges = $service_charges->reverse_pickup_charges;
+        } else {
+            $service_charges = 0;
+        }
+        $setting = CorporateReimbursementSetting::where('user_id', $shipment->user_id);
+        $crs = false;
+        if ($setting->exists()) {
+            $setting = $setting->first();
+            if ($setting->setting_on == 1 && $shipment->user->account_type_id == 2) {
+                $crs = true;
+            }
+        }
+        $amount = $shipment->amount;
+        if ($shipment->shipment_type == 1) {
+            if (!$shipment->packaging_material_request) {
+                if ($type == 0) {
+                    if ($check_arrival) {
+                        $charges = $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->esc_charges + $service_charges;
+                    } else {
+                        $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->esc_charges + $service_charges + $faf_charges;
+                    }
+                    if ($shipment->business_category_id == 1) {
+                        $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id, $shipment->pickup_address->city->id)), 2, PHP_ROUND_HALF_DOWN);
+                    } else {
+                        $gst = ROUND(($charges * self::international_gst()), 2, PHP_ROUND_HALF_DOWN);
+                    }
+
+                    if ($crs) {
+                        $wht = (($charges + $gst) * 3) / 100;
+                    } else {
+                        $wht = 0;
+                    }
+                    $payable = $amount - ($charges + $gst + $wallet_charges - $wht);
+                } else if ($type == 3) {
+                    $charges = $shipment->weight_charges + $shipment->fuel_surcharge + $faf_charges;
+                    if ($shipment->business_category_id == 1) {
+                        $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id, $shipment->pickup_address->city->id)), 2, PHP_ROUND_HALF_DOWN);
+                    } else {
+                        $gst = ROUND(($charges * self::international_gst()), 2, PHP_ROUND_HALF_DOWN);
+                    }
+
+                    if ($crs) {
+                        $wht = (($charges + $gst) * 3) / 100;
+                    } else {
+                        $wht = 0;
+                    }
+                    $payable = 0 - ($charges + $gst - $wht);
+                    $amount = 0;
+                } else {
+                    $amount = 0;
+                    if ($check_arrival) {
+                        $charges = $shipment->insurance_charges + $shipment->return_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges;
+                    } else {
+                        $charges = $shipment->weight_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->intercept_charges + $shipment->nsa_osa_charges+$faf_charges;
+                    }
+                    if ($shipment->business_category_id == 1) {
+                        $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id, $shipment->pickup_address->city->id)), 2, PHP_ROUND_HALF_DOWN);
+                    } else {
+                        $gst = ROUND(($charges * self::international_gst()), 2, PHP_ROUND_HALF_DOWN);
+                    }
+
+                    if ($crs) {
+                        $wht = (($charges + $gst) * 3) / 100;
+                    } else {
+                        $wht = 0;
+                    }
+                    $payable = 0 - ($charges + $gst + $wallet_charges - $wht);
+                }
+            } else {
+                $charges = $shipment->packaging_material_charges;
+                $gst = 0;
+
+                if ($crs) {
+                    $wht = (($charges + $gst) * 3) / 100;
+                } else {
+                    $wht = 0;
+                }
+
+                $payable = $amount - ($charges + $gst - $wht);
+            }
+            $account_type_id = $shipment->user->account_type_id;
+            $current_sms_charges = $shipment->user->sms_charges;
+            $sms_charges_status = $shipment->user->sms_charges_status;
+            $sms_charges = 0;
+            $valid = FALSE;
+
+            if ($account_type_id == 1) {
+                if (DonePaymentShipment::where('shipment_id', $shipment_id)->where('type', $type)->exists()) {
+                    $valid = TRUE;
+                }
+            } else {
+                if (DonePaymentShipment::where('shipment_id', $shipment_id)->where('type', $type)->exists()) {
+                    $valid = TRUE;
+                }
+            }
+            if($shipment->packaging_material_request && $type == 3){
+                $valid = FALSE;
+            }
+
+            if ($valid) {
+                if($get_wallet_charges_if_applicable  && $type != 3) {
+                    ShipmentAdditionalCharges::settle_wallet_finova_charges($shipment_id, $type);
+                }
+                if ($sms_charges_status == 1 && $type != 3) {
+                    $shipment_sms_count = 0;
+                    $shipment_sms = ShipmentSmsLogs::select('notification_id', DB::raw('count(*) as count'))->where('shipment_id', $shipment->id)->where('paid', 0)->groupBy('notification_id')->get();
+
+
+                    foreach ($shipment_sms as $notification) {
+                        $notification_setting = NotificationSetting::where('notification_id', $notification->notification_id)->where('charged_sms_toggle', 1);
+                        if ($notification_setting->exists()) {
+                            $notification_setting = $notification_setting->first();
+                            $charging_frequency = $notification_setting->charging_frequency;
+                            if ($notification->count <= $charging_frequency) {
+                                $shipment_sms_count += $notification->count;
+                            } else {
+                                $shipment_sms_count += $charging_frequency;
+                            }
+                        }
+                    }
+                    $sms_charges = $current_sms_charges * $shipment_sms_count;
+                    $payable = $payable - $sms_charges;
+                    ShipmentSmsLogs::where('shipment_id', $shipment->id)->update(['paid' => 1]);
+                }
+                if ($account_type_id == 1 || ($account_type_id == 2 && !$shipment->packaging_material_request) || $crs) {
+                    $done_payment = DonePayment::find($done_payment_id);
+
+                    if (!empty($done_payment)) {
+                        $done_payment_shipments = DonePaymentShipment::where('done_payment_id', $done_payment->id)->where('shipment_id', $shipment_id)->where('type', $type)->latest()->first();
+                        if (!empty($done_payment_shipments)) {
+                            if ($account_type_id == 1) {
+                                $done_payment_shipments->done_payment_id = $done_payment->id;
+                                $done_payment_shipments->shipment_id = $shipment_id;
+                                $done_payment_shipments->type = $type;
+                                $done_payment_shipments->amount = $amount;
+                                $done_payment_shipments->charges = $charges;
+                                $done_payment_shipments->gst = $gst;
+                                $done_payment_shipments->wht = 0;
+                                $done_payment_shipments->payable = $payable;
+                                $done_payment_shipments->sms_charges = $sms_charges;
+                                $done_payment_shipments->save();
+
+                                $results = DB::select('CALL update_done_payment_statistics(?)', [$done_payment->id]);
+
+
+                            } else {
+                                if (!$shipment->packaging_material_request) {
+
+                                    $done_payment_shipments->done_payment_id = $done_payment->id;
+                                    $done_payment_shipments->shipment_id = $shipment_id;
+                                    $done_payment_shipments->type = $type;
+                                    $done_payment_shipments->amount = $amount;
+                                    if ($crs) {
+                                        $done_payment_shipments->charges = $charges;
+                                        $done_payment_shipments->gst = $gst;
+                                        $done_payment_shipments->wht = $wht;
+                                        $done_payment_shipments->payable = $payable;
+                                        $done_payment_shipments->sms_charges = $sms_charges;
+                                    } else {
+                                        $done_payment_shipments->charges = 0;
+                                        $done_payment_shipments->gst = 0;
+                                        $done_payment_shipments->wht = 0;
+                                        $done_payment_shipments->payable = $amount;
+                                        $done_payment_shipments->sms_charges = 0;
+                                    }
+                                    $done_payment_shipments->save();
+
+                                    $results = DB::select('CALL update_done_payment_statistics(?)', [$done_payment->id]);
+                                } else {
+                                    if ($crs) {
+                                        $done_payment_shipments->done_payment_id = $done_payment->id;
+                                        $done_payment_shipments->shipment_id = $shipment_id;
+                                        $done_payment_shipments->type = $type;
+                                        $done_payment_shipments->amount = $amount;
+                                        $done_payment_shipments->payable = $payable;
+                                        $done_payment_shipments->save();
+
+                                        $results = DB::select('CALL update_done_payment_statistics(?)', [$done_payment->id]);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
+    }
+
 }

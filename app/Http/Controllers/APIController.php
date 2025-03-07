@@ -10196,21 +10196,33 @@ class APIController extends Controller
                     'wallet_charges' => $request->charges,
                     'wallet_charges_updated_at' => Carbon::now()
                 ]);
-
                 $pending_payment_shipments = PendingPaymentShipment::where('shipment_id', $shipment->id)->whereIn('type', [0, 1])->latest()->first();
                 $finja_request_log = new FinjaRequestLog();
                 $finja_request_log->requested = json_encode($request->all());
                 $finja_request_log->ip_address = $request->ip();
                 $finja_request_log->save();
-
                 if (!empty($pending_payment_shipments)) {
                     AdminFinanceController::update_payment($shipment_id, $pending_payment_shipments->type);
                 }
-                return response()->json(['status' => 1, 'message' => 'Charges updated against this shipment.']);
             }else{
-                return response()->json(['status' => 0, 'message' => 'Payment Already Processed', 'errors' => 'Error']);
-            }
 
+                ShipmentAdditionalCharges::where('shipment_id', $shipment_id)->update([
+                    'wallet_charges' => $request->charges,
+                    'wallet_charges_updated_at' => Carbon::now()
+                ]);
+
+                $done_payment_shipments = DonePaymentShipment::where('shipment_id', $shipment->id)->whereIn('type', [0, 1])->latest()->first();
+                $finja_request_log = new FinjaRequestLog();
+                $finja_request_log->requested = json_encode($request->all());
+                $finja_request_log->ip_address = $request->ip();
+                $finja_request_log->save();
+
+                if (!empty($done_payment_shipments)) {
+                    AdminFinanceController::update_payment_done_payment($shipment_id, $done_payment_shipments->type,$done_payment_shipments->done_payment_id);
+                }
+
+            }
+            return response()->json(['status' => 1, 'message' => 'Charges updated against this shipment.']);
         }
     }
     public function fintech_getToken(Request $request) {
