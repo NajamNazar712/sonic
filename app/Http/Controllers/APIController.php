@@ -1576,33 +1576,33 @@ class APIController extends Controller
             return response()->json(['message' => 'Bulk Booking Limit Is Max 100']);
         }
 
-//        $shipmentCountRecord = ShipmentBookedApiCount::where('user_id', $user_id)->latest()->first();
-//        $count = $shipmentCountRecord ? $shipmentCountRecord->shipment_count : 0;
-//        $timeLimit = 0;
-//
-//        if ($shipmentCountRecord) {
-//
-//            $last_created_at = $shipmentCountRecord->created_at;
-//            $minutesDiff = $last_created_at->diffInMinutes(now());
-//
-//            $timeLimits = [
-//                ['min' => 1, 'max' => 50, 'limit' => 5,  'seconds' => 300],
-//                ['min' => 51, 'max' => 75, 'limit' => 10, 'seconds' => 600],
-//                ['min' => 76, 'max' => 100, 'limit' => 15, 'seconds' => 900]
-//            ];
-//
-//            foreach ($timeLimits as $range) {
-//                if ($count >= $range['min'] && $count <= $range['max'] && $minutesDiff < $range['limit']) {
-//                    $timeLimit = $range['seconds'];
-//                    break;
-//                }
-//            }
-//
-//            if ($timeLimit > 0) {
-//                $remainingTime = $timeLimit - $last_created_at->diffInSeconds(now());
-//                return response()->json(['message' => 'Please try again in ' . $remainingTime . ' seconds.'], 429);
-//            }
-//        }
+       $shipmentCountRecord = ShipmentBookedApiCount::where('user_id', $user_id)->latest()->first();
+       $count = $shipmentCountRecord ? $shipmentCountRecord->shipment_count : 0;
+       $timeLimit = 0;
+
+       if ($shipmentCountRecord) {
+
+           $last_created_at = $shipmentCountRecord->created_at;
+           $minutesDiff = $last_created_at->diffInMinutes(now());
+
+           $timeLimits = [
+               ['min' => 1, 'max' => 50, 'limit' => 5,  'seconds' => 300],
+               ['min' => 51, 'max' => 75, 'limit' => 10, 'seconds' => 600],
+               ['min' => 76, 'max' => 100, 'limit' => 15, 'seconds' => 900]
+           ];
+
+           foreach ($timeLimits as $range) {
+               if ($count >= $range['min'] && $count <= $range['max'] && $minutesDiff < $range['limit']) {
+                   $timeLimit = $range['seconds'];
+                   break;
+               }
+           }
+
+           if ($timeLimit > 0) {
+               $remainingTime = $timeLimit - $last_created_at->diffInSeconds(now());
+               return response()->json(['message' => 'Please try again in ' . $remainingTime . ' seconds.'], 429);
+           }
+       }
 
          Validator::extend('phone_number', function ($attribute, $value, $parameters) {
              if ($value) {
@@ -2282,7 +2282,7 @@ class APIController extends Controller
         if ($user_type['account_type_id'] == 1) {
             $rules = [
                 'service_type_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function ($query) {
-                    $query->whereNotIn('id', [4]);
+                    $query->whereNotIn('id', [2, 3, 4]);
                 })],
                 'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('rate_statuses', 'shipping_mode_id')->where(function ($query) use ($user_id) {
                     $query->where('user_id', $user_id)->where('status', 1);
@@ -2375,7 +2375,7 @@ class APIController extends Controller
         } else {
             $rules = [
                 'service_type_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function ($query) {
-                    $query->whereNotIn('id', [4]);
+                    $query->whereNotIn('id', [2, 3, 4]);
                 })],
                 'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
                     $query->where('user_id', $user_id)->where('hidden', 0);

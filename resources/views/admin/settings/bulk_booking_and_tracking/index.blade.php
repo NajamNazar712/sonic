@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Bulk Booking & Tracking')
+@section('title', 'Bulk Booking (Regular) & Tracking')
 
 @section('content')
     <div class="app-content content">
@@ -8,7 +8,7 @@
             <div class="content-header row">
             </div>
             <div class="content-body">
-                <h1 class="mb-1">Bulk Booking & Tracking</h1>
+                <h1 class="mb-1">Bulk Booking (Regular) & Tracking</h1>
 
                 <div class="card">
                     <div class="card-content" aria-expanded="true">
@@ -38,7 +38,7 @@
 
                                         <div class="row mb-2 justify-content-center">
                                             <div class="col-12 form-group">
-                                                <label for="booking_select">Select Bulk Booking Shipper</label>
+                                                <label for="booking_select">Select Bulk Booking (Regular) Shipper</label>
                                                 <select name="booking_select[]" id="booking_select" class="form-control select2" multiple="multiple" >
                                                     <option value="" disabled>Select a shipper</option>
                                                     @foreach($shippers as $shipper)
@@ -87,7 +87,7 @@
             }
 
             initSelect2('#tracking_select', 'Select Bulk Tracking Shipper');
-            initSelect2('#booking_select', 'Select Bulk Booking Shipper');
+            initSelect2('#booking_select', 'Select Bulk Booking (Regular) Shipper');
 
             function toggleSubmitButton() {
                 const isTrackingSelected = $('#tracking_select').val().length > 0;
