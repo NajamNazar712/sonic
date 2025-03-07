@@ -159,7 +159,6 @@ class ShipmentStatusSharingWithWallet implements ShouldQueue
         } elseif($this->type == 2) {
             $requestPayload = $this->data['payload'];
         }
-        $request_id = FingaIntegrationController::apiLog('shipment-status-request', 1, $requestPayload ,$shipment_id);
         try {
 
             $shipment_log_not_sent = Shipment::leftJoin('finja_log_settlement_records as sac', 'shipments.id', '=', 'sac.shipment_id')
@@ -210,6 +209,7 @@ class ShipmentStatusSharingWithWallet implements ShouldQueue
 
             $token = FingaIntegrationController::getToken($api);
             if($token) {
+                $request_id = FingaIntegrationController::apiLog('shipment-status-request', 1, $requestPayload ,$shipment_id);
                 $response = Http::withHeaders([
                     'accept' => 'application/json',
                     'Authorization' => "Bearer " . $token,
