@@ -17,6 +17,7 @@ use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShippingMode;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
@@ -37,7 +38,19 @@ class RetailReturnController extends Controller
         return view('retail.return.confirmation_pending',compact('shipment_status','service_type','shipping_mode'));
     }
 
-    public function confirmation_pending_list(){
+    public function confirmation_pending_list(Request $request){
+        $from = $request->search_date_from ? Carbon::parse($request->search_date_from)->toDateString() : null;
+        $to = $request->search_date_to ? Carbon::parse($request->search_date_to)->toDateString() : null;
+        
+        if (!$from && !$to) {
+            $from = Carbon::now()->toDateString();
+            $to = Carbon::now()->subMonths(3)->toDateString();
+        } elseif (!$from) {
+            $from = Carbon::now()->toDateString();
+        } elseif (!$to) {
+            $to = Carbon::now()->toDateString();
+        }
+
         $shipments = Shipment::join('retail_shipments as rs', 'rs.shipment_id', '=', 'shipments.id')
             ->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -66,6 +79,7 @@ class RetailReturnController extends Controller
             ->select('rs.retail_user_id as retail_user_id','shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking','u.name as shipper','u.phone as shipper_phone1','u.phone2 as shipper_phone2','oc.name as origin','dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1','shipments.consignee_phone_number_2','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','shipments_journey.remarks as remarks','ssr.id as reason_id','ssr.name as reason','shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', 'shipments.shipper_status_id as shipper_status_id', 'shipments_journey.shipper_status_id as journey_shipper_status_id', 'dc.pickup as pickup', 'shipments.intercepted as intercepted','shipments.nsa_osa_estimated_charges', 'consolidations.consolidation_id')
             ->where('shipments.shipper_status_id', DB::raw(12))
             ->where('rs.retail_user_id', Auth::id())
+            ->whereBetween('rs.created_at', [$from, $to])
             ->groupBy('shipments.id');
 
             if(session('user_type') == 2){
@@ -76,7 +90,6 @@ class RetailReturnController extends Controller
                     });
                 }
             }
-
 
         return Datatables::of($shipments)
             ->setRowAttr([
@@ -294,7 +307,19 @@ class RetailReturnController extends Controller
         return view('retail.return.reattempt_history')->with(['shipment_status'=>$shipment_status,'shipping_mode'=>$shipping_mode]);
     }
 
-    public function reattempt_history_list(){
+    public function reattempt_history_list(Request $request){
+        $from = $request->search_date_from ? Carbon::parse($request->search_date_from)->toDateString() : null;
+        $to = $request->search_date_to ? Carbon::parse($request->search_date_to)->toDateString() : null;
+        
+        if (!$from && !$to) {
+            $from = Carbon::now()->toDateString();
+            $to = Carbon::now()->subMonths(3)->toDateString();
+        } elseif (!$from) {
+            $from = Carbon::now()->toDateString();
+        } elseif (!$to) {
+            $to = Carbon::now()->toDateString();
+        }
+
         $shipments_journey = ShipmentsJourney::join('shipments as s', 's.id', '=', 'shipments_journey.shipment_id')
             ->join('retail_shipments as rs', 'rs.shipment_id', '=', 'shipments_journey.shipment_id')
             ->join('users as u', 's.user_id', '=', 'u.id')
@@ -311,6 +336,7 @@ class RetailReturnController extends Controller
             })
             ->select('rs.retail_user_id as retail_user_id','s.tracking_number as tracking_number','s.tracking_number as tracking','u.name as shipper','oc.name as origin','dc.name as destination','s.consignee_name','s.consignee_phone_number_1','s.consignee_phone_number_2','s.consignee_address','s.amount','sm.mode','bt.booking_type as service_type','ss.name as current_status','sj.created_at as current_status_date','shipments_journey.created_at as reattempt_status_date','sj.remarks as current_remarks')
             ->where('shipments_journey.shipper_status_id', 52)
+            ->whereBetween('rs.created_at', [$from, $to])
             ->where('rs.retail_user_id', Auth::id());
 
             if(session('user_type') == 2){
