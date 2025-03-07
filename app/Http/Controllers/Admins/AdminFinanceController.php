@@ -21567,7 +21567,7 @@ class AdminFinanceController extends Controller
         foreach($done_payment_shipments as $dps) {
 
             $record = FingaApiLog::where('shipment_id', $dps->shipment_id)
-            ->where('status', 'error')
+            ->whereIn('status' ,['exception','error'])
             ->where(function ($query) {
                 $query->where('nature', 'settlement-response')
                       ->orWhere('nature', 'adjustment-response')

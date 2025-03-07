@@ -170,7 +170,7 @@ class WalletSettlementFromDonePayments implements ShouldQueue
                                 'accept' => 'application/json',
                                 'Authorization' => "Bearer " . $token,
 
-                            ])->timeout(60)->post($url, $requestPayload);
+                            ])->connectTimeout(60)->timeout(60)->post($url, $requestPayload);
                             if ($response->successful()) {
 
                                 $body = $response->getBody();
