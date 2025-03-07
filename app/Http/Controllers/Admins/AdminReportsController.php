@@ -6608,7 +6608,7 @@ class AdminReportsController extends Controller
         }
         $gst = DB::connection('reports')->table('done_payments')->leftjoin('done_payment_shipments as dps', 'dps.done_payment_id', '=', 'done_payments.id')
             ->leftjoin('users as u', 'done_payments.user_id', '=', 'u.id')
-            ->select('u.id as account_no', 'u.name as user_name', 'u.ntn_no as ntn_number', DB::connection('reports')->raw('SUM(dps.charges) as w_o_gst'), DB::connection('reports')->raw('SUM(dps.gst) as gst'), DB::connection('reports')->raw('SUM(dps.payable) as total_charges'))
+            ->select('u.id as account_no', 'u.name as user_name', 'u.ntn_no as ntn_number', DB::connection('reports')->raw('SUM(dps.charges) as w_o_gst'), DB::connection('reports')->raw('SUM(dps.gst) as gst'), DB::connection('reports')->raw('SUM(dps.payable) as total_charges'), 'u.cnic as cnic')
             ->groupBy('done_payments.user_id');
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
@@ -6617,7 +6617,7 @@ class AdminReportsController extends Controller
         }
         $gst_corporate = DB::connection('reports')->table('invoices')->leftjoin('invoice_shipments as is', 'is.invoice_id', '=', 'invoices.id')
             ->leftjoin('users as u', 'invoices.user_id', '=', 'u.id')
-            ->select('u.id as account_no', 'u.name as user_name', 'u.ntn_no as ntn_number', DB::connection('reports')->raw('SUM(is.charges) as w_o_gst'), DB::connection('reports')->raw('SUM(is.gst) as gst'), DB::connection('reports')->raw('SUM(is.invoice_amount) as total_charges'))
+            ->select('u.id as account_no', 'u.name as user_name', 'u.ntn_no as ntn_number', DB::connection('reports')->raw('SUM(is.charges) as w_o_gst'), DB::connection('reports')->raw('SUM(is.gst) as gst'), DB::connection('reports')->raw('SUM(is.invoice_amount) as total_charges'), 'u.cnic as cnic')
             ->union($gst)
             ->where('u.account_type_id', 2)
             ->groupBy('invoices.user_id');

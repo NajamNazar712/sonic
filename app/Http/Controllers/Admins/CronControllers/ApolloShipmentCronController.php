@@ -42,7 +42,7 @@ class ApolloShipmentCronController extends Controller
 
             $client = new \GuzzleHttp\Client([
 //                'base_uri' => 'https://movere-staging.sonic.pk/api/',
-                'base_uri' => 'https://api-apollo2.sonic.pk/api/',
+                'base_uri' => 'https://api-apollo.sonic.pk/api/',
                 'http_errors' => FALSE,
                 'connect_timeout' => 60,
                 'timeout' => 60

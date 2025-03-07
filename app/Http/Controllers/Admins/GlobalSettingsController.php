@@ -173,6 +173,7 @@ use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyBlacklisted;
 use App\RvShipmentTicket;
 use App\Http\Models\CrmCaseNatureRemark;
 use App\Models\WalletShipperSetting;
+use App\ChangeLogs;
 
 class GlobalSettingsController extends Controller
 {
@@ -9593,8 +9594,8 @@ class GlobalSettingsController extends Controller
             $all_shipper_settings->type = 'rv_disable_shippers_all_shippers';
         }
         $all_shipper_settings->setting_value = ($request->has('all_shipper_toggle')) ? 1 : 0;
-
         $all_shipper_settings->save();
+        $changes = $all_shipper_settings;
 
         if ($request->has('all_shipper_toggle') && $request->has('excluded_users')) {
             $excluded_users = implode(',', $request->excluded_users);
@@ -9609,7 +9610,7 @@ class GlobalSettingsController extends Controller
             $settings->setting_value = 1;
             $settings->text = $excluded_users;
             $settings->save();
-
+            $changes = $settings;
             // Update disabled users in RV shipment tickets (Set disable_shipper to 0 of given shippers)
             $shippers = explode(',', $excluded_users);
             $this->updateDisabledUserInRvShipmentTickets($shippers, 0);
@@ -9629,6 +9630,8 @@ class GlobalSettingsController extends Controller
             $settings->setting_value = 1;
             $settings->text = $only_users;
             $settings->save();
+            $changes = $settings;
+
             GlobalSettings::where('type', 'rv_disable_shippers_all_shippers')->update(['setting_value' => 0, 'text' => NULL]);
             GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers')->update(['setting_value' => 0, 'text' => NULL]);
 
@@ -9647,6 +9650,13 @@ class GlobalSettingsController extends Controller
             $this->updateDisabledUserInRvShipmentTickets(null, 1);
         }
 
+        ChangeLogs::create([
+            'table_name' => $changes->getTable(),
+            'record_id' => $changes->getKey(),
+            'old_data' => json_encode($changes->getOriginal()),
+            'new_data' => json_encode($changes->getChanges()),
+            'updated_by' => Auth::id(),
+        ]);
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
