@@ -3039,6 +3039,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('enable_disable', 'Admins\GlobalSettingsController@crm_auto_tagging_enable_disable')->name('enable_disable');
             Route::post('hub_areas', 'Admins\GlobalSettingsController@hub_areas')->name('hub_areas');
             Route::post('case_nature_types', 'Admins\GlobalSettingsController@case_nature_types')->name('case_nature_types');
+
+            Route::get('crm_auto_tagging_get_dept_wise_agents', 'Admins\GlobalSettingsController@crm_auto_tagging_get_dept_wise_agents')->name('crm_auto_tagging_get_dept_wise_agents');
+
         });
 
         Route::prefix('blacklist')->name('blacklist.')->group(function () {
