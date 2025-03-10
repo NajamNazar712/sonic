@@ -807,7 +807,7 @@ class VigilanceController extends Controller
             })
 
             ->orderColumn('shipments_count_link', function ($query, $order) {
-                return $query->orderByRaw('shipments_count_link', $order);
+                return $query->orderBy('shipments_count_link', $order);
             })
 
             ->addColumn('excess_shipments_link', function($vigilance) {
