@@ -300,13 +300,18 @@ class WalletSettlementFromDonePayments implements ShouldQueue
         $log_bid = AdminFinanceController::isWalletLogUpdated($dps->shipment_id);
         $pending_logs = [];
         if(!$log_bid) {
+            $cod_amount = $shipment->amount;
+            $status_array = [14, 25, 31, 38, 37, 18, 20];
+            if(in_array($shipment->shipper_status_id, $status_array) && $dps->type == 2) {
+                $cod_amount = 0;
+            }
             $pending_logs[$dps->shipment_id] = [
                 "shipmentId" => $shipment->id,
                 "wallet_id" => $shipment->user->wallet->wallet_id,
                 "client_id" => $shipment->user->id,
                 "reference_id" => (string) Str::uuid(),
                 "shipment_id" => $shipment->tracking_number,
-                "amount" => ($dps->type == 2) ? 0 :$shipment->amount ,
+                "amount" => $cod_amount ,
                 "order_created_date" => $shipment->created_at,
             ];
         }
