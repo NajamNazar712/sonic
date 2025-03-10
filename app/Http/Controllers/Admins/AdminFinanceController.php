@@ -21527,12 +21527,10 @@ class AdminFinanceController extends Controller
 
     public static function isWalletLogUpdated($shipment_id)
     {
-       
-        $logRecord = FinjaLogSettlementRecord::where('shipment_id', $shipment_id)->first();
-        if ($logRecord && $logRecord->wallet_log_updated == 1) {
-            return true;
-        }
-        return false;
+
+        return FinjaLogSettlementRecord::where('shipment_id', $shipment_id)
+            ->where('wallet_log_updated', 1)
+            ->exists();
     }
 
     public static function isWalletSettlementUpdated($shipment_id)
@@ -21560,8 +21558,8 @@ class AdminFinanceController extends Controller
 
     public function wallet_error_logs(Request $request) {
 
-        $done_payment_shipments = DonePaymentShipment::join('shipments as s','s.id', 'done_payment_shipments.shipment_id')
-        ->join('finja_log_settlement_records as sac', 'done_payment_shipments.shipment_id', '=', 'sac.shipment_id')
+        $done_payment_shipments = DonePaymentShipment::leftjoin('shipments as s','s.id', 'done_payment_shipments.shipment_id')
+        ->leftjoin('finja_log_settlement_records as sac', 'done_payment_shipments.shipment_id', '=', 'sac.shipment_id')
         ->where('done_payment_shipments.done_payment_id', $request->id)
         ->whereIn('done_payment_shipments.wallet_action_bid', [0,1,2])
         ->select(['done_payment_shipments.shipment_id', 's.tracking_number', 'done_payment_shipments.type'])->get();
@@ -21569,7 +21567,7 @@ class AdminFinanceController extends Controller
         foreach($done_payment_shipments as $dps) {
 
             $record = FingaApiLog::where('shipment_id', $dps->shipment_id)
-            ->where('status', 'error')
+            ->whereIn('status' ,['exception','error'])
             ->where(function ($query) {
                 $query->where('nature', 'settlement-response')
                       ->orWhere('nature', 'adjustment-response')
