@@ -7856,46 +7856,23 @@ class AdminFinanceController extends Controller
                             if ($pending_payment_shipment) {
                                 $shipment = Shipment::with(['user.wallet'])->find($pending_payment_shipment->shipment_id);
                                 if($shipment->user->wallet) {
+                                    $log_bid = $this->isWalletLogUpdated($pending_payment_shipment->shipment_id);
+                                    if(!$log_bid) {
+                                        $pending_logs[$pending_payment_shipment->shipment_id] = [
+                                            "shipmentId" => $shipment->id,
+                                            "wallet_id" => $shipment->user->wallet->wallet_id,
+                                            "client_id" => $shipment->user->id,
+                                            "reference_id" => (string) Str::uuid(),
+                                            "shipment_id" => $shipment->tracking_number,
+                                            "amount" => ($pending_payment_shipment->type == 2) ? 0 :$shipment->amount ,
+                                            "order_created_date" => $shipment->created_at,
+                                        ];
+                                    }
                                     if($pending_payment_shipment->type == 3) {
-                                        $log_bid = $this->isWalletLogUpdated($pending_payment_shipment->shipment_id);
-                                        if(!$log_bid) {
-                                            $pending_logs[$pending_payment_shipment->shipment_id] = [
-                                                "shipmentId" => $shipment->id,
-                                                "wallet_id" => $shipment->user->wallet->wallet_id,
-                                                "client_id" =>  $shipment->user->id, 
-                                                "reference_id" => (string) Str::uuid(), 
-                                                "shipment_id" => $shipment->tracking_number, 
-                                                "amount" => $shipment->amount,
-                                                "order_created_date" => $shipment->created_at,
-                                                // "charges" => [
-                                                //     'weight_charges' =>  floatval($shipment->weight_charges),
-                                                //     'fuel_surcharge' =>  floatval($shipment->fuel_surcharge),
-                                                //     'faf_charges' => $shipment->faf_charges_data ? floatval($shipment->faf_charges_data->faf_charges) : 0,
-                                                //     'arrival_charges_gst' => floatval($pending_payment_shipment->gst),
-                                                //     'arrival_sms_charges' => floatval($pending_payment_shipment->sms_charges)
-                                                // ]
-                                            ]; 
-                                        }
                                         $finja_status = 0;
-
                                     } elseif($pending_payment_shipment->type == 0 || $pending_payment_shipment->type == 1 ) {
-                                        $log_bid = $this->isWalletLogUpdated($pending_payment_shipment->shipment_id);
                                         $settlement_bid = $this->isWalletSettlementUpdated($pending_payment_shipment->shipment_id);
                                         if(!$log_bid) {
-                                            if(!array_key_exists($pending_payment_shipment->shipment_id, $pending_logs)) {
-                                                $pending_logs[$pending_payment_shipment->shipment_id] = [
-                                                    "shipmentId" => $shipment->id,
-                                                    "wallet_id" => $shipment->user->wallet->wallet_id,
-                                                    "client_id" => $shipment->user->id, 
-                                                    "reference_id" => (string) Str::uuid(), 
-                                                    "shipment_id" => $shipment->tracking_number, 
-                                                    "amount" => $shipment->amount, 
-                                                    "order_created_date" => $shipment->created_at,
-                                                    // "charges" => [
-                                                    //     'weight_charges' =>  0
-                                                    // ]
-                                                ];
-                                            }
                                             $finja_status = 1;
                                         } elseif($settlement_bid) {
                                             $finja_status = 2;
@@ -7903,21 +7880,6 @@ class AdminFinanceController extends Controller
                                             $finja_status = 1;
                                         }
                                     } elseif($pending_payment_shipment->type == 2) {
-                                        $log_bid = $this->isWalletLogUpdated($pending_payment_shipment->shipment_id);
-                                        if(!$log_bid) {
-                                            $pending_logs[$pending_payment_shipment->shipment_id] = [
-                                                "shipmentId" => $shipment->id,
-                                                "wallet_id" => $shipment->user->wallet->wallet_id,
-                                                "client_id" => $shipment->user->id, 
-                                                "reference_id" => (string) Str::uuid(), 
-                                                "shipment_id" => $shipment->tracking_number, 
-                                                "amount" => 0, 
-                                                "order_created_date" => $shipment->created_at,
-                                                // "charges" => [
-                                                //     'weight_charges' =>  0
-                                                // ]
-                                            ]; 
-                                        }
                                         $finja_status = 2;
                                     }
                                 }
@@ -21542,7 +21504,7 @@ class AdminFinanceController extends Controller
         }
         return false;
     }
-    
+
 
     public function mark_settlement(Request $request) {
 
