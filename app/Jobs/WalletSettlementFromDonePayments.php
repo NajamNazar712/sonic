@@ -165,10 +165,11 @@ class WalletSettlementFromDonePayments implements ShouldQueue
                 }
                 if(!empty($requestPayload) && !empty($url)) {
                     try {
-                        if ($token_time->diffInMinutes(Carbon::now()) >= 4) {
-                            $token = FingaIntegrationController::getToken($api);
-                            $token_time = Carbon::now(); // Update the token time
-                        }
+                        // if ($token_time->diffInMinutes(Carbon::now()) >= 4) {
+                        //     
+                        //     $token_time = Carbon::now(); // Update the token time
+                        // }
+                        $token = FingaIntegrationController::getToken($api);
                         if ($token && $send_request) {
                             FingaIntegrationController::apiLog($request_nature, 1, $requestPayload, $shipmentId);
                             $response = Http::withHeaders([
@@ -263,7 +264,7 @@ class WalletSettlementFromDonePayments implements ShouldQueue
                 }
 
             }
-            sleep(60);
+            sleep(5);
         });
 
 
