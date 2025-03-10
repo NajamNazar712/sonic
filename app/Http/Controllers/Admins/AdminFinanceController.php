@@ -7680,13 +7680,6 @@ class AdminFinanceController extends Controller
                                                 "shipment_id" => $shipment->tracking_number, 
                                                 "amount" => $shipment->amount, 
                                                 "order_created_date" => $shipment->created_at,
-                                                // "charges" => [
-                                                //     'weight_charges' =>  floatval($shipment->weight_charges),
-                                                //     'fuel_surcharge' =>  floatval($shipment->fuel_surcharge),
-                                                //     'faf_charges' => $shipment->faf_charges_data ? floatval($shipment->faf_charges_data->faf_charges) : 0,
-                                                //     'arrival_charges_gst' => floatval($pending_payment_shipment->gst),
-                                                //     'arrival_sms_charges' => floatval($pending_payment_shipment->sms_charges)
-                                                // ]
                                             ]; 
                                         }
                                         $finja_status = 0;
@@ -7704,9 +7697,6 @@ class AdminFinanceController extends Controller
                                                     "shipment_id" => $shipment->tracking_number, 
                                                     "amount" => $shipment->amount, 
                                                     "order_created_date" => $shipment->created_at,
-                                                    // "charges" => [
-                                                    //     'weight_charges' =>  0
-                                                    // ]
                                                 ];
                                             }
                                             $finja_status = 1;
@@ -7858,13 +7848,19 @@ class AdminFinanceController extends Controller
                                 if($shipment->user->wallet) {
                                     $log_bid = $this->isWalletLogUpdated($pending_payment_shipment->shipment_id);
                                     if(!$log_bid) {
+                                        $status_array = [14, 25, 31, 38, 37, 18, 20];
+                                        if(in_array($shipment->shipper_status_id, $status_array)) {
+                                            $cod_amount = 0;
+                                        } else {
+                                            $cod_amount = $shipment->amount;
+                                        }
                                         $pending_logs[$pending_payment_shipment->shipment_id] = [
                                             "shipmentId" => $shipment->id,
                                             "wallet_id" => $shipment->user->wallet->wallet_id,
                                             "client_id" => $shipment->user->id,
                                             "reference_id" => (string) Str::uuid(),
                                             "shipment_id" => $shipment->tracking_number,
-                                            "amount" => ($pending_payment_shipment->type == 2) ? 0 :$shipment->amount ,
+                                            "amount" => $cod_amount,
                                             "order_created_date" => $shipment->created_at,
                                         ];
                                     }
