@@ -7669,36 +7669,30 @@ class AdminFinanceController extends Controller
 
                                 $shipment = Shipment::with(['user.wallet'])->find($pending_payment_shipment->shipment_id);
                                 if($shipment->user->wallet) {
-                                    if($pending_payment_shipment->type == 3) {
-                                        $log_bid = $this->isWalletLogUpdated($pending_payment_shipment->shipment_id);
-                                        if(!$log_bid) {
+                                    $log_bid = $this->isWalletLogUpdated($pending_payment_shipment->shipment_id);
+                                    if(!$log_bid) {
+                                        $cod_amount = $shipment->amount;
+                                        $status_array = [14, 25, 31, 38, 37, 18, 20];
+                                        if(in_array($shipment->shipper_status_id, $status_array) && $pending_payment_shipment->type == 2) {
+                                            $cod_amount = 0;
+                                        }
+                                        if(!array_key_exists($pending_payment_shipment->shipment_id, $pending_logs)) {
                                             $pending_logs[$pending_payment_shipment->shipment_id] = [
                                                 "shipmentId" => $shipment->id,
                                                 "wallet_id" => $shipment->user->wallet->wallet_id,
-                                                "client_id" => $shipment->user->id, 
-                                                "reference_id" => (string) Str::uuid(), 
-                                                "shipment_id" => $shipment->tracking_number, 
-                                                "amount" => $shipment->amount, 
+                                                "client_id" =>  $shipment->user->id,
+                                                "reference_id" => (string) Str::uuid(),
+                                                "shipment_id" => $shipment->tracking_number,
+                                                "amount" => $cod_amount,
                                                 "order_created_date" => $shipment->created_at,
-                                            ]; 
+                                            ];
                                         }
+                                    }
+                                    if($pending_payment_shipment->type == 3) {
                                         $finja_status = 0;
-
                                     } elseif($pending_payment_shipment->type == 0 || $pending_payment_shipment->type == 1) {
-                                        $log_bid = $this->isWalletLogUpdated($pending_payment_shipment->shipment_id);
                                         $settlement_bid = $this->isWalletSettlementUpdated($pending_payment_shipment->shipment_id);
                                         if(!$log_bid) {
-                                            if(!array_key_exists($pending_payment_shipment->shipment_id, $pending_logs)) {
-                                                $pending_logs[$pending_payment_shipment->shipment_id] = [
-                                                    "shipmentId" => $shipment->id,
-                                                    "wallet_id" => $shipment->user->wallet->wallet_id,
-                                                    "client_id" =>  $shipment->user->id, 
-                                                    "reference_id" => (string) Str::uuid(), 
-                                                    "shipment_id" => $shipment->tracking_number, 
-                                                    "amount" => $shipment->amount, 
-                                                    "order_created_date" => $shipment->created_at,
-                                                ];
-                                            }
                                             $finja_status = 1;
                                         } elseif($settlement_bid) {
                                             $finja_status = 2;
@@ -7706,30 +7700,6 @@ class AdminFinanceController extends Controller
                                             $finja_status = 1;
                                         }
                                     } elseif( $pending_payment_shipment->type == 2) {
-
-                                        $log_bid = $this->isWalletLogUpdated($pending_payment_shipment->shipment_id);
-                                        if(!$log_bid) {
-                                            
-                                            $status_array = [14, 25, 31, 38, 37, 18, 20];
-                                            if(in_array($shipment->shipper_status_id, $status_array)) {
-                                                $cod_amount = 0;
-                                            } else {
-                                                $cod_amount = $shipment->amount;
-                                            }
-                                            
-                                            $pending_logs[$pending_payment_shipment->shipment_id] = [
-                                                "shipmentId" => $shipment->id,
-                                                "wallet_id" => $shipment->user->wallet->wallet_id,
-                                                "client_id" => $shipment->user->id, 
-                                                "reference_id" => (string) Str::uuid(), 
-                                                "shipment_id" => $shipment->tracking_number, 
-                                                "amount" => $cod_amount,
-                                                "order_created_date" => $shipment->created_at,
-                                                // "charges" => [
-                                                //     'weight_charges' =>  0
-                                                // ]
-                                            ]; 
-                                        }
                                         $finja_status = 2;
                                     }
                                 }
@@ -7848,21 +7818,22 @@ class AdminFinanceController extends Controller
                                 if($shipment->user->wallet) {
                                     $log_bid = $this->isWalletLogUpdated($pending_payment_shipment->shipment_id);
                                     if(!$log_bid) {
+                                        $cod_amount = $shipment->amount;
                                         $status_array = [14, 25, 31, 38, 37, 18, 20];
-                                        if(in_array($shipment->shipper_status_id, $status_array)) {
+                                        if(in_array($shipment->shipper_status_id, $status_array) && $pending_payment_shipment->type == 2) {
                                             $cod_amount = 0;
-                                        } else {
-                                            $cod_amount = $shipment->amount;
                                         }
-                                        $pending_logs[$pending_payment_shipment->shipment_id] = [
-                                            "shipmentId" => $shipment->id,
-                                            "wallet_id" => $shipment->user->wallet->wallet_id,
-                                            "client_id" => $shipment->user->id,
-                                            "reference_id" => (string) Str::uuid(),
-                                            "shipment_id" => $shipment->tracking_number,
-                                            "amount" => $cod_amount,
-                                            "order_created_date" => $shipment->created_at,
-                                        ];
+                                        if(!array_key_exists($pending_payment_shipment->shipment_id, $pending_logs)) {
+                                            $pending_logs[$pending_payment_shipment->shipment_id] = [
+                                                "shipmentId" => $shipment->id,
+                                                "wallet_id" => $shipment->user->wallet->wallet_id,
+                                                "client_id" =>  $shipment->user->id,
+                                                "reference_id" => (string) Str::uuid(),
+                                                "shipment_id" => $shipment->tracking_number,
+                                                "amount" => $cod_amount,
+                                                "order_created_date" => $shipment->created_at,
+                                            ];
+                                        }
                                     }
                                     if($pending_payment_shipment->type == 3) {
                                         $finja_status = 0;
