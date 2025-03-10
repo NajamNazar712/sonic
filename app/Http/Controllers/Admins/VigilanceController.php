@@ -705,7 +705,7 @@ class VigilanceController extends Controller
             'vigilance_notes.id as vigilance_note_id',
             'h.id as hub_id',
             'h.name as hub',
-            'r.name as rider',
+            'riders.name as rider',
             'cb.name as created_by',
             'vigilance_notes.created_at',
             'rt.name as rider_type',
@@ -715,11 +715,11 @@ class VigilanceController extends Controller
             DB::raw("COALESCE(COUNT(DISTINCT verify_table.id), 0) as verify_shipments_link"),
             DB::raw("COALESCE(COUNT(DISTINCT excess_table.id), 0) as excess_shipments_link"),
         ])
-        ->leftJoin('riders as r', 'vigilance_notes.rider_id', '=', 'r.id')
-        ->leftJoin('rider_types as rt', 'r.rider_type_id', '=', 'rt.id')
+        ->leftJoin('riders', 'vigilance_notes.rider_id', '=', 'riders.id')
+        ->leftJoin('rider_types as rt', 'riders.rider_type_id', '=', 'rt.id')
         ->leftJoin('admins as cb', 'vigilance_notes.created_by', '=', 'cb.id')
         ->leftJoin('vigilance_note_types as vnt', 'vigilance_notes.vigilance_note_type_id', '=', 'vnt.id')
-        ->leftJoin('cities as rc', 'r.city_id', '=', 'rc.id')
+        ->leftJoin('cities as rc', 'riders.city_id', '=', 'rc.id')
         ->leftJoin('cities as h', 'rc.hub_id', '=', 'h.id')
 
         // Overall shipment count
@@ -807,7 +807,7 @@ class VigilanceController extends Controller
             })
 
             ->orderColumn('shipments_count_link', function ($query, $order) {
-                return $query->orderByRaw('shipments_count_link', $order);
+                return $query->orderBy('shipments_count_link', $order);
             })
 
             ->addColumn('excess_shipments_link', function($vigilance) {
