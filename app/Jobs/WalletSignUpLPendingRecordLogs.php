@@ -49,8 +49,8 @@ class WalletSignUpLPendingRecordLogs implements ShouldQueue
         ->pluck('pending_payments.id');
 
         $api = config('app.FINGA_URL');
-        $token = FingaIntegrationController::getToken($api);
-        $token_time = Carbon::now();
+        // $token = FingaIntegrationController::getToken($api);
+        // $token_time = Carbon::now();
         foreach ($pending_payment_ids as $pending_payment){
             
             $pending_payment_shipments = PendingPaymentShipment::leftJoin('finja_log_settlement_records as sac', 'pending_payment_shipments.shipment_id', '=', 'sac.shipment_id')
@@ -64,10 +64,11 @@ class WalletSignUpLPendingRecordLogs implements ShouldQueue
             ->get();
             $pending_payment_shipments->chunk(50)->each(function ($chunkedShipments) use($api,$token,$token_time,$user_id,$pending_payment) {
                 foreach ($chunkedShipments as $pending_payment_shipment) {
-                    if ($token_time->diffInMinutes(Carbon::now()) >= 4) {
-                        $token = FingaIntegrationController::getToken($api);
-                        $token_time = Carbon::now();
-                    }
+                    // if ($token_time->diffInMinutes(Carbon::now()) >= 4) {
+                    //     $token = FingaIntegrationController::getToken($api);
+                    //     $token_time = Carbon::now();
+                    // }
+                    $token = FingaIntegrationController::getToken($api);
                     $shipment = Shipment::leftjoin('wallet_users as u', function ($join) {
                         $join->on('u.user_id', '=', 'shipments.user_id')
                             ->where('u.substitute_user_id', '0');
