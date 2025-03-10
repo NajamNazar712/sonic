@@ -70,12 +70,11 @@ class WalletSettlementFromDonePayments implements ShouldQueue
             // })
             ->select(['done_payment_shipments.*', 'wu.user_id as user_id', 'wu.wallet_id as wallet_id', 's.tracking_number', 's.cash_handling_charges', 's.insurance_charges','s.replacement_charges','s.try_and_buy_charges','s.intercept_charges','s.nsa_osa_charges','s.esc_charges','s.return_charges', 'sac.wallet_settlement_updated', 's.weight_charges', 's.fuel_surcharge','sc.faf_charges', 'ssc.reverse_pickup_charges', 'sc.wallet_charges', 'sac.wallet_log_charges_updated'])->get();
         //dd($done_payment_shipments);
-        $successfull_record = [];
-        $total_count = count($done_payment_shipments);
+        
         $api = config('app.FINGA_URL');
         $token = FingaIntegrationController::getToken($api);
         $token_time = Carbon::now();
-        $done_payment_shipments->chunk(50)->each(function ($chunkedShipments) use($api,$token,$token_time,$successfull_record) {
+        $done_payment_shipments->chunk(50)->each(function ($chunkedShipments) use($api,$token,$token_time) {
             foreach ($chunkedShipments as $dps) {
                 $pending_logs = [];
                 $shipmentId = $dps->shipment_id;
@@ -85,6 +84,8 @@ class WalletSettlementFromDonePayments implements ShouldQueue
                 if ($dps->wallet_action_bid == 1 && $dps->wallet_settlement_updated == 1) {
                     $dps->wallet_action_bid =  self::run_log_and_settle($dps,$shipment);
                 }
+ 				 $send_request = true;
+                $success = false;
                 if ($dps->wallet_action_bid == 1 && $dps->wallet_settlement_updated == 0) {
                     //$logCharged = FinjaLogSettlementRecord::where('shipment_id', $shipmentId)->first();
                     $logCharged = !empty($dps->wallet_log_charges_updated) ? $dps->wallet_log_charges_updated : 0;
@@ -143,6 +144,9 @@ class WalletSettlementFromDonePayments implements ShouldQueue
                         'wallet_adjustment_updated' => true,
                         'wallet_adjustment_updated_at' => Carbon::now(),
                     ];
+                    if ($payable == 0) {
+                        $send_request = false;
+                    }
                 } elseif ($dps->wallet_action_bid == 0) {
                     $requestPayload = [
                         "client_id" => $dps->user_id,
@@ -171,7 +175,7 @@ class WalletSettlementFromDonePayments implements ShouldQueue
                         //     $token_time = Carbon::now(); // Update the token time
                         // }
                         $token = FingaIntegrationController::getToken($api);
-                        if ($token) {
+                        if ($token && $send_request) {
                             FingaIntegrationController::apiLog($request_nature, 1, $requestPayload, $shipmentId);
                             $response = Http::withHeaders([
                                 'accept' => 'application/json',
@@ -182,9 +186,17 @@ class WalletSettlementFromDonePayments implements ShouldQueue
 
                                 $body = $response->getBody();
                                 $body = json_decode($body);
-
+                                $success = true;
                                 FingaIntegrationController::apiLog($response_nature, 'success', $body, $shipmentId);
 
+                            } else {
+                                $body = $response->getBody();
+                                $body = json_decode($body);
+                                FingaIntegrationController::apiLog($response_nature, 'error', $body, $shipmentId);
+                            }
+                        }
+
+                        if($success || !$send_request){
                                 FinjaLogSettlementRecord::updateOrCreate(
                                 // Condition to find the record
                                     ['shipment_id' => $shipmentId],
@@ -193,7 +205,6 @@ class WalletSettlementFromDonePayments implements ShouldQueue
                                 );
                                 DonePaymentShipment::where('id', $dps->id)->update(['wallet_action_bid' => 3]);
 
-                                $successfull_record[] = $dps->id;
                                 if ($dps->type == 1) {
                                     $shipment->payment_status_id = 7;
 
@@ -245,12 +256,6 @@ class WalletSettlementFromDonePayments implements ShouldQueue
 
                                     ShipmentsPaymentJourneyController::add($dps->shipment_id, 3, $this->id, '', $this->payment_id);
                                 }
-
-                            } else {
-                                $body = $response->getBody();
-                                $body = json_decode($body);
-                                FingaIntegrationController::apiLog($response_nature, 'error', $body, $shipmentId);
-                            }
                         }
 
                     } catch (\Throwable $th) {
