@@ -55,8 +55,8 @@ class FinSurgentSonicPaymentSharing extends Command
 //                ->where('u.created_at', '<=', $date);
         })->select(['pending_payments.*', 'u.wallet_id', 'u.user_id as user_id'])->get();
         $api = config('app.FINGA_URL');
-        //$token = FingaIntegrationController::getToken($api);
-        //$token_time = Carbon::now();
+        $token = FingaIntegrationController::getToken($api);
+        $token_time = Carbon::now();
 
         foreach($pending_payment_wallet_users as $pending_payment) {
 
