@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Models\Admin\Admin;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -75,11 +76,15 @@ class WalletSettlementFromDonePayments implements ShouldQueue
         $token_time = Carbon::now();
         $done_payment_shipments->chunk(50)->each(function ($chunkedShipments) use($api,$token,$token_time) {
             foreach ($chunkedShipments as $dps) {
+                $pending_logs = [];
                 $shipmentId = $dps->shipment_id;
                 $shipment = Shipment::find($shipmentId);
                 $requestPayload = [];
                 $url = "";
-                $send_request = true;
+                if ($dps->wallet_action_bid == 1 && $dps->wallet_settlement_updated == 1) {
+                    $dps->wallet_action_bid =  self::run_log_and_settle($dps,$shipment);
+                }
+ 				 $send_request = true;
                 $success = false;
                 if ($dps->wallet_action_bid == 1 && $dps->wallet_settlement_updated == 0) {
                     //$logCharged = FinjaLogSettlementRecord::where('shipment_id', $shipmentId)->first();
@@ -286,5 +291,41 @@ class WalletSettlementFromDonePayments implements ShouldQueue
 
 
 
+    }
+
+    public static function run_log_and_settle($dps,$shipment){
+
+        $api = config('app.FINGA_URL');
+        $token = FingaIntegrationController::getToken($api);
+        $log_bid = AdminFinanceController::isWalletLogUpdated($dps->shipment_id);
+        $pending_logs = [];
+        if(!$log_bid) {
+            $pending_logs[$dps->shipment_id] = [
+                "shipmentId" => $shipment->id,
+                "wallet_id" => $shipment->user->wallet->wallet_id,
+                "client_id" => $shipment->user->id,
+                "reference_id" => (string) Str::uuid(),
+                "shipment_id" => $shipment->tracking_number,
+                "amount" => ($dps->type == 2) ? 0 :$shipment->amount ,
+                "order_created_date" => $shipment->created_at,
+            ];
+        }
+        if($dps->type == 3) {
+            $finja_status = 0;
+        } elseif($dps->type == 0 || $dps->type == 1 ) {
+            $settlement_bid = AdminFinanceController::isWalletSettlementUpdated($dps->shipment_id);
+            if(!$log_bid) {
+                $finja_status = 1;
+            } elseif($settlement_bid) {
+                $finja_status = 2;
+            } else {
+                $finja_status = 1;
+            }
+        } elseif($dps->type == 2) {
+            $finja_status = 2;
+        }
+
+        WalletLogDispatchJob::dispatch($pending_logs);
+        return $finja_status;
     }
 }
