@@ -4725,23 +4725,10 @@ class GlobalSettingsController extends Controller
         foreach ($zoneColumnsArray as $zone) {
             $rules[$zone] = ['required', 'numeric', 'between:0,1000000'];
         }
-        $fields = [
+        $fields = array_merge([
             0 => 'range_up',
-            1 => 'range_down',
-            2 => 'zone_1',
-            3 => 'zone_1b', // Moved zone_1b next to zone_1
-            4 => 'zone_2',
-            5 => 'zone_3',
-            6 => 'zone_4',
-            7 => 'zone_5',
-            8 => 'zone_6',
-            9 => 'zone_7',
-            10 => 'zone_8',
-            11 => 'zone_8b', // Moved zone_8b next to zone_8
-            12 => 'zone_9',
-            13 => 'zone_10',
-            14 => 'zone_11'
-        ];
+            1 => 'range_down'
+        ], array_values($zoneColumnsArray));
 
 
         if ($file = $request->file('rates')) {
@@ -4820,6 +4807,7 @@ class GlobalSettingsController extends Controller
                         }
                     }
                 }
+              
                 if (empty($errors)) {
                     $updated = 0;
                     $not_updated = 0;
