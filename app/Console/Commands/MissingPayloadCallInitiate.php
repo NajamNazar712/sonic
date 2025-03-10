@@ -56,6 +56,7 @@ class MissingPayloadCallInitiate extends Command
             }else{
                 $timeStart = Carbon::now()->format('Y-m-d');
             }
+            
             $shipments = ApiCallLog::join('shipments as s', 's.id', 'api_call_logs.shipment_id')->whereDate('api_call_logs.created_at','>=', $timeStart)->where('payload', 'null')->where('s.shipper_status_id', 12)->select("call_count_initiate", "shipment_id")->get();
             
             if(!empty($shipments)){
