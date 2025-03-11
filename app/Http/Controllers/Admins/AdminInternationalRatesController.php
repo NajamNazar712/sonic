@@ -949,9 +949,8 @@ class AdminInternationalRatesController extends Controller
                 $history_international_user_rate = new HistoryInternationalUserRate();
                 $history_international_user_rate->user_id = $previous_rate_status->user_id;
                 foreach ($marginzoneColumnsArray['marginColumn'] as $column) {
-                    if (isset($history_international_user_rate->$column)) {
-                        $margins[$column] = $history_international_user_rate->$column;
-                    }
+                    $history_international_user_rate->$column = $previous_rate_status->$column;
+                    
                 }
 
                 $history_international_user_rate->updated_by = $previous_rate_status->updated_by;
@@ -967,9 +966,7 @@ class AdminInternationalRatesController extends Controller
                     $international_user_rates = new InternationalUserRate();
                     $international_user_rates->user_id = $pending_rate_statuses->user_id;
                     foreach ($marginzoneColumnsArray['marginColumn'] as $column) {
-                        if (isset($international_user_rates->$column)) {
-                            $margins[$column] = $international_user_rates->$column;
-                        }
+                        $international_user_rates->$column = $request->$column;
                     }
                     $international_user_rates->updated_by = $pending_rate_statuses->updated_by;
                     $international_user_rates->rates_updated_at = $pending_rate_statuses->rates_updated_at;
@@ -1006,13 +1003,10 @@ class AdminInternationalRatesController extends Controller
             $international_user_info->save();
             if($new_rate_flag == false){
                 PendingInternationalUserRate::where('user_id', $shipper_id)->delete();
-
                 $international_user_rates = new PendingInternationalUserRate();
                 $international_user_rates->user_id = $shipper_id;
                 foreach ($marginzoneColumnsArray['marginColumn'] as $column) {
-                    if (isset($international_user_rates->$column)) {
-                        $margins[$column] = $international_user_rates->$column;
-                    }
+                    $international_user_rates->$column = $request->$column;
                 }
                 $international_user_rates->updated_by = Auth::id();
                 $international_user_rates->rates_updated_at = Carbon::now();
@@ -1023,9 +1017,8 @@ class AdminInternationalRatesController extends Controller
                 if($international_user_rates->exists()){
                     $international_user_rates = $international_user_rates->first();
                     foreach ($marginzoneColumnsArray['marginColumn'] as $column) {
-                        if (isset($international_user_rates->$column)) {
-                            $margins[$column] = $international_user_rates->$column;
-                        }
+                            $international_user_rates->$column = $request->$column;
+                        
                     }
                     $international_user_rates->updated_by = Auth::id();
                     $international_user_rates->rates_updated_at = Carbon::now();
@@ -1035,9 +1028,7 @@ class AdminInternationalRatesController extends Controller
                     $international_user_rates = new InternationalUserRate();
                     $international_user_rates->user_id = $shipper_id;
                     foreach ($marginzoneColumnsArray['marginColumn'] as $column) {
-                        if (isset($international_user_rates->$column)) {
-                            $margins[$column] = $international_user_rates->$column;
-                        }
+                            $international_user_rates->$column = $request->$column;
                     }
                     $international_user_rates->updated_by = Auth::id();
                     $international_user_rates->rates_updated_at = Carbon::now();
