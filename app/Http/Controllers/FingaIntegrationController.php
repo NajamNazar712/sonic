@@ -6,13 +6,13 @@ use App\Http\Models\Shipper\User;
 use App\Http\Models\UserDocumentAttachment;
 use App\Http\Models\WalletUser;
 use App\Models\FingaApiLog;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Auth;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Cache;
-use Carbon\Carbon;
 class FingaIntegrationController extends Controller
 {
 
@@ -45,7 +45,7 @@ class FingaIntegrationController extends Controller
             $body = json_decode($response->body());
 
             if (isset($body->token)) {
-                Cache::put($cacheKey, $body->token, Carbon::now()->addMinutes(4));
+                Cache::put($cacheKey, $body->token, Carbon::now()->addMinutes(3));
                 return $body->token;
             }
         }
