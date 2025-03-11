@@ -1547,6 +1547,25 @@ class APIController extends Controller
                 }
             }
 
+            try {
+                // Maintaining shipper segment logs on booking
+                ShipperSegmentLogs::create([
+                    'shipment_id' => $shipment_id,
+                    'segment_id' => $user_type->segment_id,
+                    'sub_segment_id' => $user_type->sub_segment_id
+                ]);
+
+                // if ($consignee_city_id != $pickup_city_id) {
+                //     ShipperSegmentLogs::create([
+                //         'shipment_id' => $shipment_id,
+                //         'segment_id' => $user_type->segment_id,
+                //         'sub_segment_id' => $user_type->sub_segment_id
+                //     ]);
+                // }
+            } catch (\Exception $e) {
+                Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
+            }
+            
             return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number]);
         }
     }
@@ -3672,138 +3691,120 @@ class APIController extends Controller
 
     public function bulk_shipment_track(Request $request)
     {
-
-
         $user_id = $request->user_id;
-
         $user_ids = MergedSisterAccountMapping::where('head_user_id', $user_id)->pluck('sister_user_id')->toArray();
-
         $user_ids[] = $user_id;
-
-        //check if user allow for bulk tracking
-        $bulk_tracking_shippers_setting = GlobalSettings::where('setting_value', 1)
-            ->where('type', 'bulk_tracking_shippers')
-            ->first();
-        $bulk_tracking_shippers = $bulk_tracking_shippers_setting ?
-            array_map('intval', explode(',', $bulk_tracking_shippers_setting->text))
-            : [];
-
-        if(!in_array($user_id, $bulk_tracking_shippers)){
-            return response()->json(['status' => 1, 'message' => 'You Are Not Allowed For Bulk Tracking']);
-        }
-
+        
+        // Check if user is allowed for bulk tracking
+        // $bulk_tracking_shippers_setting = GlobalSettings::where('setting_value', 1)
+        //     ->where('type', 'bulk_tracking_shippers')
+        //     ->first();
+        
+        // $bulk_tracking_shippers = $bulk_tracking_shippers_setting ?
+        //     array_map('intval', explode(',', $bulk_tracking_shippers_setting->text))
+        //     : [];
+        
+        // if (!in_array($user_id, $bulk_tracking_shippers)) {
+        //     return response()->json(['status' => 1, 'message' => 'You Are Not Allowed For Bulk Tracking']);
+        // }
+        
         // Split tracking numbers into an array
-        $tracking_numbers = explode(',', $request->tracking_numbers);
+        $tracking_numbers = array_filter(explode(',', $request->tracking_numbers));
         $type = $request->type;
         $all_details = [];
-
+        
         // Process each tracking number
-        foreach (array_filter($tracking_numbers) as $tracking_number) {
-
-            $shipment = Shipment::whereIn('user_id', $user_ids)->where('tracking_number', $tracking_number)->first();
-
+        foreach ($tracking_numbers as $tracking_number) {
+            $shipment = Shipment::where('tracking_number', $tracking_number)->first();
+            
+            if (!$shipment) {
+                $all_details[] = [
+                    'tracking_number' => $tracking_number,
+                    'error' => 'Shipment not found'
+                ];
+                continue;
+            }
+            
             $sub_segment_name = '-';
             $sub_segment = DB::table('shipper_segment_logs')
-            ->leftJoin('sub_category_segments', 'sub_category_segments.id', 'shipper_segment_logs.sub_segment_id')
-            ->where('shipment_id', $shipment->id)
-            ->select('sub_category_segments.name')
-            ->first();
-
-            if ($sub_segment && $sub_segment->name)
-            {
+                ->leftJoin('sub_category_segments', 'sub_category_segments.id', 'shipper_segment_logs.sub_segment_id')
+                ->where('shipment_id', $shipment->id)
+                ->select('sub_category_segments.name')
+                ->first();
+            
+            if ($sub_segment && $sub_segment->name) {
                 $sub_segment_name = $sub_segment->name;
             }
-
-            $details = array();
-
-            $details['tracking_number'] = $tracking_number;
-
-            $details['order_id'] = $shipment->order_id;
-
-            $details['order_date'] = $shipment->pickup_date;
-            $details['booking_date'] = $shipment->created_at;
-
-            $shipper = $shipment->user;
-
-            $details['shipper']['name'] = $shipper->name;
-
-            $pickup = $shipment->pickup_address;
-
-            $details['pickup']['origin'] = $pickup->city->name;
-
+            
+            $details = [
+                'tracking_number' => $tracking_number,
+                'order_id' => $shipment->order_id,
+                'order_date' => $shipment->pickup_date,
+                'booking_date' => $shipment->created_at,
+                'shipper' => [
+                    'name' => $shipment->user->name
+                ],
+                'pickup' => [
+                    'origin' => $shipment->pickup_address->city->name
+                ],
+                'consignee' => [
+                    'name' => $shipment->consignee_name,
+                    'phone_number_1' => $shipment->consignee_phone_number_1,
+                    'phone_number_2' => $shipment->consignee_phone_number_2,
+                    'destination' => $shipment->consignee_city->name,
+                    'address' => $shipment->consignee_address,
+                ],
+                'order_information' => [
+                    'items' => [],
+                    'sub_segment' => $sub_segment_name
+                ],
+                'tracking_history' => []
+            ];
+            
             if ($type == 0) {
-                $details['shipper']['account_number'] = $shipper->id;
-                $details['shipper']['phone_number_1'] = $shipper->phone;
-                $details['shipper']['phone_number_2'] = $shipper->phone2;
-                $details['shipper']['email'] = $shipper->email;
-                $details['shipper']['city'] = $shipper->city->name;
-
-                $details['pickup']['person_of_contact'] = $pickup->poc;
-                $details['pickup']['phone_number'] = $pickup->phone;
-                $details['pickup']['email'] = $pickup->email;
-                $details['pickup']['address'] = $pickup->pickup_address;
+                $details['shipper']['account_number'] = $shipment->user->id;
+                $details['shipper']['phone_number_1'] = $shipment->user->phone;
+                $details['shipper']['phone_number_2'] = $shipment->user->phone2;
+                $details['shipper']['email'] = $shipment->user->email;
+                $details['shipper']['city'] = $shipment->user->city->name;
+                
+                $details['pickup']['person_of_contact'] = $shipment->pickup_address->poc;
+                $details['pickup']['phone_number'] = $shipment->pickup_address->phone;
+                $details['pickup']['email'] = $shipment->pickup_address->email;
+                $details['pickup']['address'] = $shipment->pickup_address->pickup_address;
             }
-
-            $details['consignee']['name'] = $shipment->consignee_name;
-            $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
-            $details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
-            $details['consignee']['destination'] = $shipment->consignee_city->name;
-            $details['consignee']['address'] = $shipment->consignee_address;
-
+            
             foreach ($shipment->items as $item) {
-                $item_details = array();
-
-                $item_details['order_id'] = $shipment->order_id;
-                $item_details['product_type'] = $item->product->product_name;
-                $item_details['description'] = $item->description;
-                $item_details['quantity'] = $item->quantity;
-
-                $details['order_information']['items'][] = $item_details;
+                $details['order_information']['items'][] = [
+                    'order_id' => $shipment->order_id,
+                    'product_type' => $item->product->product_name,
+                    'description' => $item->description,
+                    'quantity' => $item->quantity,
+                ];
             }
-
+            
             if ($type == 0) {
-                $details['order_information']['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
+                $details['order_information']['weight'] = $shipment->actual_weight ?: $shipment->estimated_weight;
                 $details['order_information']['shipping_mode'] = $shipment->shipping_mode->mode;
                 $details['order_information']['amount'] = $shipment->amount;
                 $details['order_information']['instructions'] = $shipment->special_instructions;
             }
-
-            if ($type == 0) {
-                foreach ($shipment->shipment_journey as $journey) {
-                    if ($journey->verification) {
-                        $journey_details = array();
-
-                        $journey_details['date_time'] = Carbon::parse($journey->created_at)->format('d/m/Y h:i A');
-                        $journey_details['timestamp'] = Carbon::parse($journey->created_at)->timestamp;
-                        $journey_details['status'] = $journey->shipment_status_shipper->name;
-
-                        $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : null;
-
-                        $details['tracking_history'][] = $journey_details;
-                    }
-                }
-            } else {
-                foreach ($shipment->shipment_journey as $journey) {
-                    if ($journey->consignee_status_id != null) {
-                        if ($journey->verification) {
-                            $journey_details = array();
-
-                            $journey_details['date_time'] = Carbon::parse($journey->created_at)->format('d/m/Y h:i A');
-                            $journey_details['timestamp'] = Carbon::parse($journey->created_at)->timestamp;
-                            $journey_details['status'] = $journey->shipment_status_consignee->name;
-
-                            $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : null;
-
-                            $details['tracking_history'][] = $journey_details;
-                        }
-                    }
+            
+            foreach ($shipment->shipment_journey as $journey) {
+                if (($type == 0 && $journey->verification) || ($type != 0 && $journey->consignee_status_id && $journey->verification)) {
+                    $details['tracking_history'][] = [
+                        'date_time' => Carbon::parse($journey->created_at)->format('d/m/Y h:i A'),
+                        'timestamp' => Carbon::parse($journey->created_at)->timestamp,
+                        'status' => $type == 0 ? $journey->shipment_status_shipper->name : $journey->shipment_status_consignee->name,
+                        'status_reason' => $journey->status_reason_id ? $journey->shipment_status_reason->name : null,
+                    ];
                 }
             }
-
-            $details['order_information']['sub_segment'] = $sub_segment_name;
-
-            return response()->json(['status' => 0, 'message' => 'Tracking of Shipment #' . $tracking_number, 'details' => $details]);
+            
+            $all_details[] = $details;
         }
+        
+        return response()->json(['status' => 0, 'message' => 'Bulk Tracking Results', 'details' => $all_details]);
     }
 
     public function shipment_charges(Request $request)
