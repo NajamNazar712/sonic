@@ -59,8 +59,8 @@ class AdminMonthClosingReportsController extends Controller
                     ->where('mcr.admin','=',
                         DB::raw(0));
             })
-//            ->leftjoin('admins as rp', 'rp.id', '=', 'mcr.responsible_person_id')
-//            ->leftjoin('riders as r', 'r.id', '=', 'mcr.responsible_person_id')
+            // ->leftjoin('admins as rp', 'rp.id', '=', 'mcr.responsible_person_id')
+            // ->leftjoin('riders as r', 'r.id', '=', 'mcr.responsible_person_id')
             ->select('shipments.id as shipment_id','shipments.tracking_number as tracking_number_link','shipments.tracking_number','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as consignee_phone','shipments.amount as cod_amount','u.name as shipper', 'month_closings.id as month_closing_id','month_closings.remarks','mcs.name as closing_status', 'month_closings.status_id as month_closing_status_id', 'cr.id as claim_id', 'cr.id as claim_id_link', 'crn.type as claim_type','ss.name as current_status','mct.name as closing_type','shipments.consignee_address', 'mcr.admin as admin_check','rp.name as responsible_person','r.name as rider_responsible_person')
             ->whereIn('month_closings.status_id', [2,3]);
 
@@ -104,7 +104,9 @@ class AdminMonthClosingReportsController extends Controller
                 $remark = '<input class="form-control form-control-sm" value="'.$shipments->remarks.'" />';
                 return $remark;
             });
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['tracking_number_link', 'claim_id_link', 'shipment_remarks'])
+        ->make(true);
     }
 
     public function month_closing_pivot_index(){
@@ -195,6 +197,8 @@ class AdminMonthClosingReportsController extends Controller
                 $remark = '<input class="form-control form-control-sm" value="'.$shipments->remarks.'" />';
                 return $remark;
             });
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['tracking_number_link', 'claim_id_link', 'shipment_count_btn', 'shipment_remarks'])
+        ->make(true);
     }
 }

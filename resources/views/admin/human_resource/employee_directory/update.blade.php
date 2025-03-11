@@ -281,9 +281,9 @@
                                             <div class="form-group">
                                                 <label>Rider Functional Category<span class="text-danger">*</span></label>
                                                 <select name="rider_functional_category" id="rider_functional_category" data-rule-required="true"  data-msg-required="Rider Functional Category is required" class="select2 form-control " style="width: 100%">
-                                                    @foreach($functional_categories as $functional_category)
-                                                        <option value="{{$functional_category->id}}">{{$functional_category->name}}</option>
-                                                    @endforeach
+{{--                                                    @foreach($functional_categories as $functional_category)--}}
+                                                        <option value="{{$functional_categories->id}}">{{$functional_categories->name}}</option>
+{{--                                                    @endforeach--}}
                                                 </select>
                                             </div>
                                         </div>

@@ -492,7 +492,7 @@
                     {data: 'barcode_key', name: 'barcode_generators.barcode_key', class: 'align-middle barcode_key'},
                     {data: 'barcode', name: 'barcode', class: 'align-middle barcode', orderable: false},
                     {data: 'barcode_name', name: 'bt.barcode_name', class: 'align-middle remarks', orderable: false},
-                    {data: 'created_at', name: 'barcode_generators.created_at', class: 'align-middle created_at'},
+                    {data: 'created', name: 'barcode_generators.created_at', class: 'align-middle created_at'},
                  
                 ],
                 rowCallback: function (row, data, index) {

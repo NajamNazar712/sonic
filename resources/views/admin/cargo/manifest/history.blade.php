@@ -119,7 +119,7 @@
                                     <th class="border-primary border-darken-1">No. of Shipments</th>
                                     <th class="border-primary border-darken-1">Origin</th>
                                     <th class="border-primary border-darken-1">Destination</th>
-                                    <th class="border-primary border-darken-1">Shipping Mode</th>
+                                    
                                     <th class="border-primary border-darken-1">Rush Shipment Count</th>
                                     <th class="border-primary border-darken-1">Rush Shipment Weight</th>
                                     <th class="border-primary border-darken-1">Swift Shipment Count</th>
@@ -323,9 +323,36 @@
                             head.push('Bag Quantity');
                             head.push('Short Received Bags');
                             head.push('No. of Shipments');
+
+                            // new columns start
+                            head.push('COD Shipment Count');
+                            head.push('COD Shipment Weight');
+
+                            head.push('Express Shipment Count');
+                            head.push('Express Shipment Weight');
+
+                            head.push('Retail Shipment Count');
+                            head.push('Retail Shipment Weight');
+
+                            head.push('Logistics Shipment Count');
+                            head.push('Logistics Shipment Weight');
+
+                            head.push('Warehouse Shipment Count');
+                            head.push('Warehouse Shipment Weight');
+
+                            head.push('FOD Shipment Count');
+                            head.push('FOD Shipment Weight');
+
+                            head.push('Hyperlocal Shipment Count');
+                            head.push('Hyperlocal Shipment Weight');
+
+                            head.push('International Shipment Count');
+                            head.push('International Shipment Weight');
+                            // new columns end
+
                             head.push('Origin');
                             head.push('Destination');
-                            head.push('Shipping Mode');
+                            
                             head.push('Rush Shipment Count');
                             head.push('Rush Shipment Weight');
                             head.push('Swift Shipment Count');
@@ -346,15 +373,41 @@
 
                             $.each(result.data, function (index, values) {
                                 row = [];
-
                                 row.push(index + 1);
                                 row.push(values.manifest);
                                 row.push(values.bags_count);
                                 row.push(values.short_received_bags_count);
                                 row.push(values.shipments_count);
+
+                                // new columns start
+                                row.push(values.cod_count || '--');
+                                row.push(values.cod_weight || '--');
+
+                                row.push(values.express_count || '--');
+                                row.push(values.express_weight || '--');
+
+                                row.push(values.retail_count || '--');
+                                row.push(values.retail_weight || '--');
+
+                                row.push(values.logistics_count || '--');
+                                row.push(values.logistics_weight || '--');
+
+                                row.push(values.warehouse_count || '--');
+                                row.push(values.warehouse_weight || '--');
+
+                                row.push(values.fod_count || '--');
+                                row.push(values.fod_weight || '--');
+
+                                row.push(values.hyperlocal_count || '--');
+                                row.push(values.hyperlocal_weight || '--');
+
+                                row.push(values.international_count || '--');
+                                row.push(values.international_weight || '--');
+                                // new columns end
+
                                 row.push(values.origin);
                                 row.push(values.destination);
-                                row.push(values.shipping_mode);
+                               
                                 row.push(values.rush_shipment_count);
                                 row.push(values.rush_shipment_weight);
                                 row.push(values.swift_shipment_count);
@@ -437,7 +490,7 @@
                     {data: 'shipments', name: 'cargo_manifests.shipments', class: 'align-middle text-center shipments'},
                     {data: 'origin', name: 'oh.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dh.name', class: 'align-middle destination'},
-                    {data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode'},
+                    // {data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode'},
                     {data: 'rush_shipment_count', name: 'rush_shipment_count', class: 'align-middle rush_shipment_count'},
                     {data: 'rush_shipment_weight', name: 'rush_shipment_weight', class: 'align-middle rush_shipment_weight'},
                     {data: 'swift_shipment_count', name: 'rush_shipment_count', class: 'align-middle rush_shipment_count'},
@@ -477,11 +530,6 @@
 
                         if ($(header).is('.serial_number') || $(header).is('.rush_shipment_count')|| $(header).is('.rush_shipment_weight') || $(header).is('.swift_shipment_count')|| $(header).is('.swift_shipment_weight') || $(header).is('.saver_shipment_count') || $(header).is('.saver_shipment_weight') || $(header).is('.aging') || $(header).is('.junctions')) {
                             $(td).appendTo($(search));
-                        } else if ($(header).is('.shipping_mode')) {
-                            $(mode_drop_select).appendTo($(search))
-                                .on('change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
                         } else if ($(header).is('.status')) {
                             $(status_select).appendTo($(search))
                                 .on('change', function () {

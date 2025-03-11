@@ -287,7 +287,7 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
-                ajax: '{{ route('admin.delivery.rider_request.update.list',['note'=>$request_note_id]) }}',
+                ajax: '{{ route('admin.delivery.rider_request.update.list',['id'=>$request_note_id]) }}',
                 rowId: 'shId',
                 order: [[1, 'desc']],
                 columns: [

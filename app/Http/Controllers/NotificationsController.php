@@ -350,7 +350,7 @@ class NotificationsController extends Controller
         }
     }
 
-    static public function send($id, $reference_1_id, $reference_2_id = NULL, $reference_3_id = NULL)
+    static public function send($id, $reference_1_id, $reference_2_id = NULL, $reference_3_id = NULL,$array_data = array())
     {
         $notification = Notification::find($id);
 
@@ -2746,9 +2746,9 @@ class NotificationsController extends Controller
                     if ($ceo) {
                         $to[] = $ceo->email;
                     }*/
-                    $to = ['waqas@trax.pk', 'noman.aziz@trax.pk', 'asad.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'nadir.qureshi@trax.pk', 'hammad.saleem@trax.pk', 'hassan.arman@trax.pk', 'm.sohail@trax.pk', 'ghazanfar.ali@trax.pk'];
+                    $to = ['waqas@trax.pk', 'asad.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'nadir.qureshi@trax.pk', 'hammad.saleem@trax.pk', 'hassan.arman@trax.pk', 'm.sohail@trax.pk', 'ghazanfar.ali@trax.pk', 'Tauseef.sarfaraz@trax.pk', 'Mansoor.ahmad@trax.pk'];
 
-                    $bcc = ['faisal.hasan@trax.pk'];
+                    $bcc = ['Sahban.ghani@trax.pk'];
                     self::email($subject, $body, $to, $cc, $bcc);
                 } else if ($id == 27) {
 
@@ -3605,8 +3605,9 @@ class NotificationsController extends Controller
                         }
                     }
                 } else if ($id == 43) {
-                    $pickup_request = V2PickupRequest::find($reference_1_id);
+                    $pickup_request = V2PickupRequest::with(['pickup_address','shipper','pickup_request_shipments.shipment'])->where('id',$reference_1_id)->where('email_sent',0)->first();
                     if ($pickup_request) {
+                        V2PickupRequest::where('id',$reference_1_id)->update(['email_sent',1]);
                         $vendor = $pickup_request->pickup_address->vendor;
                         if ($vendor != null) {
                             $shipper_name = $pickup_request->shipper->name;
@@ -3622,27 +3623,36 @@ class NotificationsController extends Controller
                             }
 
                             $assigned_shipments = $pickup_request->pickup_request_shipments;
-                            $shipment_details = '<table style="width:100%;">';
-                            $shipment_details .= '<thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Tracking Number.</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Item Description</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Destination</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Quantity</th></tr></thead>';
-                            $shipment_details .= '<tbody>';
-                            foreach ($assigned_shipments as $assigned_shipment) {
-                                $shipment = $assigned_shipment->shipment;
-                                $items = ShipmentItem::where('shipment_id', $shipment->id)->first();
-                                $shipment_details .= '<tr>';
-                                $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->tracking_number . '</td>';
-                                $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($items->description) ? $items->description : '') . '</td>';
-                                $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->consignee_city->name . '</td>';
-                                $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $items->quantity . '</td>';
-                                $shipment_details .= '</tr>';
-                            }
-                            $shipment_details .= '</tbody></table>';
 
-                            if (strpos($body, '[shipments_detail]') !== FALSE) {
-                                $body = str_replace('[shipments_detail]', $shipment_details, $body);
-                            }
+                            if(count($assigned_shipments) > 0) {
+                                $shipment_details = '<table style="width:100%;">';
+                                $shipment_details .= '<thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Tracking Number.</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Item Description</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Destination</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Quantity</th></tr></thead>';
+                                $shipment_details .= '<tbody>';
+                                foreach ($assigned_shipments as $assigned_shipment) {
+                                    $shipment = $assigned_shipment->shipment;
+                                    $items = ShipmentItem::where('shipment_id', $shipment->id)->first();
+                                    $shipment_details .= '<tr>';
+                                    $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->tracking_number . '</td>';
+                                    $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($items->description) ? $items->description : '') . '</td>';
+                                    $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->consignee_city->name . '</td>';
+                                    $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $items->quantity . '</td>';
+                                    $shipment_details .= '</tr>';
+                                }
+                                $shipment_details .= '</tbody></table>';
 
-                            $to = $pickup_request->pickup_address->email;
-                            self::email($subject, $body, $to);
+                                if (strpos($body, '[shipments_detail]') !== FALSE) {
+                                    $body = str_replace('[shipments_detail]', $shipment_details, $body);
+                                }
+
+                                if (ShipperNotificationEmail::where('user_id', $pickup_request->shipper_id)->exists()) {
+                                    $to = ShipperNotificationEmail::where('user_id', $pickup_request->shipper_id)->whereNotNull('email')->pluck('email')->toArray();
+                                } else {
+                                    $to = $pickup_request->pickup_address->email;
+                                }
+                                self::email($subject, $body, $to);
+
+
+                            }
                         }
                     } else if ($id == 44) {
                     }
@@ -6010,7 +6020,7 @@ class NotificationsController extends Controller
                         }
 
                         $to = array();
-                        $bcc = array();
+                        $bcc = ['anas.mazhar@trax.pk'];
                         $to[] = 'syed.furqan@trax.pk';
                         $to[] = 'm.sohail@trax.pk';
                         $to[] = 'fawad.ahmed@trax.pk';
@@ -8355,7 +8365,7 @@ class NotificationsController extends Controller
                         }
 
                         $to = array();
-                        $bcc = array();
+                        $bcc = ['anas.mazhar@trax.pk'];
                         $to[] = 'syed.furqan@trax.pk';
                         $to[] = 'm.sohail@trax.pk';
                         $to[] = 'fawad.ahmed@trax.pk';
@@ -10114,9 +10124,9 @@ class NotificationsController extends Controller
                         $body = str_replace('[link]', $link, $body);
                     }
 
-                    $to = ['adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk', 'm.sohail@trax.pk', 'ghazanfar.ali@trax.pk'];
+                    $to = ['adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk','raheel.hassan@trax.pk','hammad.majid@trax.pk', 'm.sohail@trax.pk', 'ghazanfar.ali@trax.pk'];
 
-                    $cc = ["faisal.hasan@trax.pk", "asad.ahsan@trax.pk"];
+                    $cc = ["sahban.ghani@trax.pk", "asad.ahsan@trax.pk"];
 
                     self::email($subject, $body, $to, $cc);
                 } else if ($id == 210) {
@@ -10449,11 +10459,11 @@ class NotificationsController extends Controller
                         $body = str_replace('[link]', $link, $body);
                     }
 
-                    $to = ['tanveer.malik@trax.pk', 'muhammad.jawwad@trax.pk', 'fawad.ahmed@trax.pk', 'waqas@trax.pk',  'huzaifa.aamir@trax.pk', 'hammad.majid@trax.pk', 'ghazanfar.ali@trax.pk'];
+                    $to = ['syed.furqan@trax.pk','fawad.ahmed@trax.pk','hammad.majid@trax.pk'];
+                    $bcc = ["asad.ahsan@trax.pk", "sahban.ghani@trax.pk"];
+                    // $cc = ["faisal.hasan@trax.pk", "asad.ahsan@trax.pk"];
 
-                    $cc = ["faisal.hasan@trax.pk", "asad.ahsan@trax.pk"];
-
-                    self::email($subject, $body, $to, $cc);
+                    self::email($subject, $body, $to, $bcc);
                 } else if ($id == 215) {
 
                     $details = $reference_1_id;
@@ -11010,14 +11020,18 @@ class NotificationsController extends Controller
                     $html .= '</thead>';
                     $html .= '<tbody>';
                     $agent = [];
+                    $activeAdmins = Admin::where('status', 1)->pluck('id')->toArray();
+
                     $index = 0;
                     if ($case_natures->isNotEmpty()) {
                         foreach ($case_natures as $key => $value) {
                             $agent_id = $value["agent_id"];
-                            $agent[$agent_id]['status_id'][] = $value['status_id'];
-                            $agent[$agent_id]['ticket_id'][] = $value['id'];
-                            $agent[$agent_id]['created_at'][] = $value['created_at'];
-                            $agent[$agent_id]['updated_at'][] = $value['updated_at'];
+                            if (in_array($agent_id, $activeAdmins)) {
+                                $agent[$agent_id]['status_id'][] = $value['status_id'];
+                                $agent[$agent_id]['ticket_id'][] = $value['id'];
+                                $agent[$agent_id]['created_at'][] = $value['created_at'];
+                                $agent[$agent_id]['updated_at'][] = $value['updated_at'];
+                            }
                         }
                     }
                     foreach ($agent as $key => $value) {
@@ -11307,6 +11321,102 @@ class NotificationsController extends Controller
 
                     }
 
+                }
+                else if($id == 234) {
+                    $subject = $notification->subject;
+                    
+                    $body = $array_data['text'];
+                    $to = $array_data['phone'];
+                    self::sms($body, $to, NULL,NULL, $id);
+
+                }
+
+                else if ($id == 235) {
+                    $done_payment_report = DonePaymentsReport::get();
+                    if ($done_payment_report) {
+                        $date = Carbon::today()->format('Y-m-d');
+                        $subject = $notification->subject;
+                        $body = $notification->body;
+                        if (strpos($subject, '[date]') !== FALSE) {
+                            $subject = str_replace('[date]', $date, $subject);
+                        }
+
+                        if (strpos($body, '[date]') !== FALSE) {
+                            $body = str_replace('[date]', $date, $body);
+                        }
+
+                        $link = '<a href="' . $reference_2_id . '" target="_blank">Report</a>';
+
+                        if (strpos($subject, '[link]') !== FALSE) {
+                            $subject = str_replace('[link]', $link, $subject);
+                        }
+
+                        if (strpos($body, '[link]') !== FALSE) {
+                            $body = str_replace('[link]', $link, $body);
+                        }
+                        // $summary_html = '<div style="margin-bottom: 100px;"><table style="width:100%;">';
+                        // $summary_html .= '<thead><tr>
+                        //                    <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total Shippers</th>
+                        //                    <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total Amount</th>
+                        //                    </tr></thead><tbody>';
+                        // $shippers = array();
+                        // $html = '<table style="width:100%;">';
+                        // $html .= '<thead><tr>
+                        //                     <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">S No.</th>
+                        //                    <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Payment ID</th>
+                        //                    <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipper Name</th>
+                        //                    <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">IBAN Number</th>
+                        //                    <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Amount</th>
+                        //                    <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">IBFT Charges</th>
+                        //                    </tr></thead><tbody>';
+                        // $total_amount = 0;
+                        // $total_ibft_amount = 0;
+                        // $serial = 1;
+                        // foreach ($done_payment_report as $done_payment) {
+                        //     if (!in_array($done_payment->shipper_id, $shippers)) {
+                        //         $shippers[$done_payment->shipper_id] = $done_payment->shipper_id;
+                        //     }
+                        //     $html .= '<tr>';
+                        //     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
+                        //     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . str_pad($done_payment->payment_id, 6, '0', STR_PAD_LEFT) . '</td>';
+                        //     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $done_payment->shipper_name . '</td>';
+                        //     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $done_payment->iban_number . '</td>';
+                        //     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($done_payment->amount) . '</td>';
+                        //     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($done_payment->ibft_charges ?? 0) . '</td>';
+                        //     $html .= '</tr>';
+                        //     $total_amount = $total_amount + $done_payment->amount;
+                        //     $total_ibft_amount = $total_ibft_amount + $done_payment->ibft_charges;
+                        //     $serial++;
+                        // }
+                        // $html .= '<tr>';
+                        // $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total</td>';
+                        // $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+                        // $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+                        // $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+                        // $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($total_amount) . '</td>';
+                        // $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($total_ibft_amount) . '</td>';
+                        // $html .= '</tr>';
+                        // $html .= '</tbody></table>';
+
+                        // $summary_html .= '<tr>';
+                        // $summary_html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . count($shippers) . '</td>';
+                        // $summary_html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($total_amount) . '</td>';
+                        // $summary_html .= '</tr>';
+                        // $summary_html .= '</tbody></table></div>';
+
+                        // $html = $summary_html . $html;
+
+                        // if (strpos($body, '[preview]') !== FALSE) {
+                        //     $body = str_replace('[preview]', $body);
+                        // }
+
+                        $to = array();
+                        $bcc = array();
+                        $to[] = 'aftab.qidwai@trax.pk';
+                        $to[] = 'anas.mazhar@trax.pk';
+
+                        self::email($subject, $body, $to, NULL, $bcc);
+                    }
                 }
 
             }

@@ -27,13 +27,25 @@
                                         </select>
                                     </fieldset>
                                 </div>
-                                <div class="col-3">
+                                <div class="col-2">
                                     <form id="payment_cycle_filter_form" class="mb-1 justify-content-center"
                                         novalidate="novalidate">
                                         <div class="form-group">
                                             <select name="payment_cycle_filter" class="select2 payment_cycle_filter">
                                                 <option value="1" selected>Filtered</option>
                                                 <option value="2">All</option>
+                                            </select>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="col-2">
+                                    <form id="wallet_filter_form" class="mb-1 justify-content-center"
+                                        novalidate="novalidate">
+                                        <div class="form-group">
+                                            <select name="wallet_filter"
+                                                class="select2 wallet_filter">
+                                                <option value="1">Wallet Users</option>
+                                                <option value="2">Non-Wallet Users</option>
                                             </select>
                                         </div>
                                     </form>
@@ -610,6 +622,15 @@
                 table.draw(false);
             });
 
+            $('#wallet_filter_form select.wallet_filter').prepend(
+                '<option value="" selected></option>').select2({
+                placeholder: 'Filter Wallet Users',
+                width: '100%',
+                allowClear: true
+            }).bind('change', function() {
+                table.draw();
+            });
+
             $('#shipper_status_form select.shipper_status').prepend(
                 '<option value="" selected="selected"></option>').select2({
                 placeholder: 'Shipper Status',
@@ -673,6 +694,7 @@
                         url: '{{ route('admin.finance.make_payments.list') }}',
                         data: params,
                         success: function(result) {
+                            console.log(result)
                             head = [];
 
                             head.push('S.No');
@@ -703,9 +725,9 @@
                             head.push('Payment Cycle');
                             head.push('Payment Cycle Days');
                             head.push('Return Shipments Avg. Aging');
-
                             $.each(result.data, function(index, values) {
                                 row = [];
+                                
 
                                 row.push(index + 1);
                                 row.push(values.shipper);
@@ -942,6 +964,8 @@
                         d.shipper_document_status = $(
                             '#shipper_document_status_form select.shipper_document_status').val();
                         d.star_shipper_filter = $('#star_shippers_filter').val();
+                        d.wallet_filter = $(
+                            '#wallet_filter_form select.wallet_filter').val();
 
                     }
                 },
@@ -1470,7 +1494,7 @@
                         class: 'align-middle status'
                     },
                     {
-                        data: 'created_at',
+                        data: 'created',
                         name: 'pending_payment_shipments.created_at',
                         class: 'align-middle created_at'
                     },

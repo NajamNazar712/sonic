@@ -62,6 +62,7 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
 
         'APIToken' => \App\Http\Middleware\APIToken::class,
+        'FinvoWalletUser' => \App\Http\Middleware\FinvoWalletUserMiddleware::class,
         'Permission' => \App\Http\Middleware\Permission::class,
         'APIThrottle' => \App\Http\Middleware\APIThrottle::class,
 
@@ -72,5 +73,7 @@ class Kernel extends HttpKernel
         'ConsigneeAPIToken' => \App\Http\Middleware\ConsigneeAPIToken::class,
         'ShipperAPIToken' => \App\Http\Middleware\ShipperAPIToken::class,
         'PauseShipperBooking' => \App\Http\Middleware\PauseBookingMiddleware::class,
+        'no.cache' => \App\Http\Middleware\NoCache::class,
+
     ];
 }

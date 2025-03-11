@@ -414,12 +414,15 @@
                             head.push('E-Comm (COD)');
                             head.push('General Logistics (Retail)');
                             head.push('General Logistics - E-Comm (Express)');
+                            head.push('Other Sub-Segments');
+
 
                             head.push('Total Weight');
                             head.push('No. Of Shipments Delivered');
                             head.push('E-Comm (COD)');
                             head.push('General Logistics (Retail)');
                             head.push('General Logistics - E-Comm (Express)');
+                            head.push('Other Sub-Segments');
 
                             head.push('Assigned By');
                             head.push('Assigned Date');
@@ -457,12 +460,14 @@
                                 row.push(values.excel_ecom_cod);
                                 row.push(values.excel_general_retail);
                                 row.push(values.excel_general_ecom_express);
+                                row.push(values.excel_others);
 
                                 row.push(values.total_weight);
                                 row.push(values.delivered_shipments);
                                 row.push(values.delivered_excel_ecom_cod);
                                 row.push(values.delivered_excel_general_retail);
                                 row.push(values.delivered_excel_general_ecom_express);
+                                row.push(values.delivered_excel_others);
 
                                 row.push(values.assignee);
                                 row.push(values.created_at);
@@ -532,7 +537,7 @@
                     { data: 'operation_rider_id', name: 'riders.operation_rider_id', class: 'align-middle operation_rider_id'},
                     { data:'route' ,name: 'route', class: 'align-middle route'},
                     { data:'shipments_count_link' ,name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
-                    { data: 'total_weight', name: 'total_weight', class: 'align-middle total_weight text-center',orderable:false},
+                    { data: 'total_weight', name: 'total_weight', class: 'align-middle total_weight text-center',orderable:false, searchable: false},
                     { data:'delivered_shipments_link' ,name: 'delivery_notes.delivered_shipments', class: 'align-middle delivered_shipments_link text-center'},
                     { data:'assignee' ,name: 'admins.name', class: 'align-middle assignee'},
                     { data:'created_at' ,name: 'created_at', class: 'align-middle created_at'},
@@ -544,7 +549,7 @@
                     { data:'fintech_shipments_charges.link' ,name: 'fintech_shipments_charges.link', class: 'align-middle fintech_shipments_charges.link', orderable: false, searchable: false},
                     { data:'fintech_amount_percent' ,name: 'fintech_amount_percent', class: 'align-middle fintech_amount_percent', orderable: false, searchable: false},
                     { data:'transactions_amount_link' ,name: 'hktdn.transactions_amount', class: 'align-middle transactions_amount'},
-                    { data:'hbl_konnect_amount_percent' ,name: 'hbl_konnect_amount_percent', class: 'align-middle hbl_konnect_amount_percent'},
+                    { data:'hbl_konnect_amount_percent' ,name: 'hbl_konnect_amount_percent', class: 'align-middle hbl_konnect_amount_percent', orderable: false, searchable: false},
                     { data:'cash_amount' ,name: 'hktdn.cash_amount', class: 'align-middle cash_amount', orderable: false, searchable: false},
                     { data:'one_link_payment_count_button' ,name: 'delivery_notes.one_link_payment_count', class: 'align-middle text-center one_link_payment_count'},
                     { data: 'created_via', name: 'delivery_notes.created_via_app', class: 'align-middle created_via'},
@@ -600,7 +605,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.cash_amount') || $(header).is('.fintech_shipments_charges')) {
+                        if ($(header).is('.serial_number') || $(header).is('.cash_amount') || $(header).is('.fintech_shipments_charges') || $(header).is('.fintech_amount_percent') || $(header).is('.hbl_konnect_amount_percent') || $(header).is('.total_weight')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(status_select).appendTo($(search))

@@ -235,7 +235,7 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'status_name', name: 'ss.name', class: 'align-middle status_name'},
                     {data: 'eta', name: 'telenor_shipment_status_estimated_times.eta', class: 'align-middle eta'},
-                    {data:'updated_at', name: 'telenor_shipment_status_estimated_times.updated_at', class: 'align-middle text-center updated_at'},
+                    {data:'updated', name: 'telenor_shipment_status_estimated_times.updated_at', class: 'align-middle text-center updated_at'},
                     {data:'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],

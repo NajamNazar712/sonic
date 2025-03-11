@@ -14,7 +14,7 @@ class DeliveryNoteShipment extends Model
 		'delivery_note_id','shipment_id','status','call_verification','notification','rider_information','ordering','update_type'
 	];
 
-	protected function setKeysForSaveQuery(Builder $query) {
+	protected function setKeysForSaveQuery($query) {
 		$keys = $this->getKeyName();
 
 		if (!is_array($keys)) {

@@ -7,7 +7,24 @@
             <div class="content-wrapper">
                 <div class="content-body">
                     <h1 class="mb-1">
-                        {{--                        {{dd($crm_details['status_id'])}}--}}
+
+                        @php
+                            // Tag
+                            $statusCheckTag = in_array($crm_details['status_id'], [2, 3]);
+                            $roleCheckTag = session('role_id') == 1;
+                            $agentCheckTag = isset($crm_details->agent) && $crm_details->agent['id'] == Auth::id();
+                            $permissionCheckTag = is_array(session('permissions')) && in_array(185, session('permissions'));
+
+                            // Un tag
+                            $statusCheckUnTag = isset($crm_details['status_id']) && $crm_details['status_id'] == 2;
+                            $roleCheckUnTag = session('role_id') == 1;
+                            $agentCheckUnTag = isset($crm_details->agent['id']) && $crm_details->agent['id'] == Auth::id();
+                            $permissionCheckUnTag = is_array(session('permissions')) && in_array(309, session('permissions'));
+
+                            // Valid and invalid form
+                            $validFormCheckAgent = isset($crm_details->agent['id']) && $crm_details->agent['id'] == Auth::id();
+                        @endphp
+
                         Request Details ({{str_pad($crm_details->id, 6, '0', STR_PAD_LEFT)}})
                         @if(($crm_details['status_id'] == 1))
                             (Launched)
@@ -25,14 +42,30 @@
                             (Re-Open)
                         @endif
                         <div class="text-right mb-1">
-                            @if(($crm_details['status_id'] == 2 || $crm_details['status_id'] == 3) && (session('role_id') == 1 || $crm_details->agent['id'] == Auth::id() || in_array(185, session('permissions'))))
-                                <button type="button" class="btn btn-primary width-10-per" id="tag"><span
-                                            class="d-none d-lg-block" style="color: white">Tag</span></button>
+                            {{-- @if(($crm_details['status_id'] == 2 || $crm_details['status_id'] == 3) && (session('role_id') == 1 || $crm_details->agent['id'] == Auth::id() || in_array(185, session('permissions'))))
+                                <button type="button" class="btn btn-primary width-10-per" id="tag">
+                                    <span class="d-none d-lg-block" style="color: white">Tag</span>
+                                </button>
+                            @endif --}}
+
+                            @if($statusCheckTag && ($roleCheckTag || $agentCheckTag || $permissionCheckTag))
+                                <button type="button" class="btn btn-primary width-10-per" id="tag">
+                                    <span class="d-none d-lg-block" style="color: white">Tag</span>
+                                </button>
                             @endif
-                            @if(($crm_details['status_id'] == 2) && (session('role_id') == 1 || $crm_details->agent['id'] == Auth::id() || in_array(309, session('permissions'))))
-                                <button type="button" class="btn btn-primary width-10-per" id="un_tag"><span
-                                            class="d-none d-lg-block" style="color: white">Un Tag</span></button>
+
+                            {{-- @if(($crm_details['status_id'] == 2) && (session('role_id') == 1 || $crm_details->agent['id'] == Auth::id() || in_array(309, session('permissions'))))
+                                <button type="button" class="btn btn-primary width-10-per" id="un_tag">
+                                    <span class="d-none d-lg-block" style="color: white">Un Tag</span>
+                                </button>
+                            @endif --}}
+
+                            @if($statusCheckUnTag && ($roleCheckUnTag || $agentCheckUnTag || $permissionCheckUnTag))
+                                <button type="button" class="btn btn-primary width-10-per" id="un_tag">
+                                    <span class="d-none d-lg-block" style="color: white">Un Tag</span>
+                                </button>
                             @endif
+
                             @if((session('role_id') == 1 || in_array(213, session('permissions'))))
                                 <button type="button" class="btn btn-primary width-10-per" id="edit_request"><span
                                             class="d-none d-lg-block" style="color: white">Edit Request</span></button>
@@ -245,15 +278,12 @@
                                             </tbody>
                                         </table>
                                         <div class="row justify-content-center">
-                                            @if(session('role_id') == 1 || session('role_id') == 6 || $crm_details->agent['id'] == Auth::id() || in_array(184, session('permissions')) || ((($tag_check['crm_request_tagging_type_id'] ?? null) == 1 && ($tag_check['tagged_id'] ?? null) == $tag_permission) || (($tag_check['crm_request_tagging_type_id'] ?? null) == 2 && ($tag_check['tagged_id'] ?? null) == Auth::id()) || $escalation_tagged_check == true || (in_array(session('role_id'), [8, 9 ,10]) && (in_array($crm_details->shipment->pickup_address->city->hub_id, session('hubs')) || in_array($crm_details->shipment->consignee_city->hub_id, session('hubs'))))))
+                                            @if(session('role_id') == 1 || session('role_id') == 6 || $validFormCheckAgent || in_array(184, session('permissions')) || ((($tag_check['crm_request_tagging_type_id'] ?? null) == 1 && ($tag_check['tagged_id'] ?? null) == $tag_permission) || (($tag_check['crm_request_tagging_type_id'] ?? null) == 2 && ($tag_check['tagged_id'] ?? null) == Auth::id()) || $escalation_tagged_check == true || (in_array(session('role_id'), [8, 9 ,10]) && (in_array($crm_details->shipment->pickup_address->city->hub_id, session('hubs')) || in_array($crm_details->shipment->consignee_city->hub_id, session('hubs'))))))
                                                 <div class="text-center">
-                                                    <form id="valid_form" method="post"
-                                                          action="{{route('admin.crm.valid')}}">
+                                                    <form id="valid_form" method="post" action="{{route('admin.crm.valid')}}">
                                                         @csrf
-                                                        <input type="hidden" id="req_id" name="req_id"
-                                                               value="{{$crm_details->id}}">
-                                                        <input type="hidden" id="prev_status" name="prev_status"
-                                                               value="{{$crm_details->status_id}}">
+                                                        <input type="hidden" id="req_id" name="req_id" value="{{$crm_details->id}}">
+                                                        <input type="hidden" id="prev_status" name="prev_status" value="{{$crm_details->status_id}}">
                                                         @if($crm_details['status_id'] != 3)
                                                             @if($crm_details['status_id'] == 1 ||$crm_details['status_id'] == 5)
                                                                 <button id="valid" type="submit"class="btn btn-success mr-1">
@@ -267,12 +297,12 @@
                                                                         <span class="d-none d-lg-block">Resolve</span>
                                                                     </button>
                                                                 @endif --}}
-                                                                @if(session('role_id') == 1 || session('role_id') == 6 || $crm_details->agent['id'] == Auth::id() || in_array(184, session('permissions')))
+                                                                @if(session('role_id') == 1 || session('role_id') == 6 || $validFormCheckAgent || in_array(184, session('permissions')))
                                                                     <button id="valid" type="submit" class="btn btn-success mr-1">
                                                                         <span class="d-none d-lg-block">Resolve</span>
                                                                     </button>
                                                                 @endif
-                                                            @elseif($crm_details['status_id'] == 4 && (in_array(186, session('permissions')) || session('role_id') == 1 || session('role_id') == 6 || $crm_details->agent['id'] == Auth::id()))
+                                                            @elseif($crm_details['status_id'] == 4 && (in_array(186, session('permissions')) || session('role_id') == 1 || session('role_id') == 6 || $validFormCheckAgent))
                                                             <input type="hidden" id="valid_close_reason" name="valid_close_reason"
                                                                    value="0">    
                                                             <button id="valid" type="submit"
@@ -286,7 +316,7 @@
                                                     </form>
                                                 </div>
                                             @endif
-                                            @if(session('role_id') == 1 || session('role_id') == 6 || $crm_details->agent['id'] == Auth::id() || in_array(184, session('permissions')))
+                                            @if(session('role_id') == 1 || session('role_id') == 6 || $validFormCheckAgent || in_array(184, session('permissions')))
                                                 <div class="text-center">
                                                     <form id="invalid_form" method="post"
                                                           action="{{route('admin.crm.invalid')}}">
@@ -684,7 +714,7 @@
                                                             <td>{{$index}}</td>
                                                             <td>{{$status_history->status->name}}</td>
                                                             @if($status_history->agent_id != null)
-                                                                <td>{{$status_history->agent->name}}</td>
+                                                                <td>{{(isset($status_history->agent->name) ? $status_history->agent->name : '-')}}</td>
                                                             @else
                                                                 @if($status_history->status_id == 5)
                                                                     <td>{{$shipper}} (Shipper)</td>
@@ -840,12 +870,12 @@
                             @method('POST')
                             @csrf
                             <div class="row justify-content-center">
-                                <div class="col-11">
+                                <div class="col-11 d-none">
                                     <fieldset class="form-group">
                                         <input type="hidden" id="crm_request_id" value="{{$crm_details->id}}">
                                         <input type="hidden" id="prev_status" name="prev_status"
                                                value="{{$crm_details->status_id}}">
-                                        <select name="tag_type" id="tag_type" class="form-control select2">
+                                        <select name="tag_type" id="tag_type" class="form-control select2 >
                                             @foreach($types as $type)
                                                 <option value="{{$type->id}}"> {{$type->name}} </option>
                                             @endforeach
@@ -1738,16 +1768,17 @@
             }).bind('change', function () {
                 var id = parseInt($(this).val());
                 if (id === 1) {
-                    $('#admin_tag_div').addClass('d-none');
                     $('#department_tag_div').removeClass('d-none');
                 } else if (id === 2) {
                     $('#department_tag_div').addClass('d-none');
                     $('#admin_tag_div').removeClass('d-none');
                 } else {
-                    $('#admin_tag_div').addClass('d-none');
                     $('#department_tag_div').addClass('d-none');
                 }
             });
+
+            $('#admin_tag_div').removeClass('d-none');
+
             $('#tag').on('click', function (e) {
                 e.preventDefault();
                 $('#tagModal').modal('show');
@@ -1818,23 +1849,26 @@
                 $('#tag_type').val('').trigger('change');
                 $('#admin_tag_hub').val('').trigger('change');
                 $('#admin_tag_department').val('').trigger('change');
-                $('#admin_tag_div').addClass('d-none');
+                $('#tag_admin').val('').trigger('change');
                 $('#department_tag_div').addClass('d-none');
             });
             $('#tag_adminSubmit').on('click', function () {
-                var type = parseInt($('#tag_type').val());
-                var tag_hub = null;
-                if (type === 1) {
-                    var tag = parseInt($('#tag_department').val());
-                    tag_hub = parseInt($('#tag_hub').val());
-                    if(!tag_hub){
-                        tag_hub = null;
-                    }
+                var type = parseInt($('#tag_type').val()) || 0;
+                var tag_hub = $('#admin_tag_hub').val();
+                tag_hub = tag_hub ? parseInt(tag_hub) : null;
+
+                var dept = parseInt($('#admin_tag_department').val()) || 0;
+                var admin = parseInt($('#tag_admin').val()) || 0;
+
+                var tag = 0; 
+
+                if (admin !== 0) {
+                    tag = admin;
+                } else if (dept !== 0) {
+                    tag = dept; 
                 }
-                else if (type === 2) {
-                    var tag = parseInt($('#tag_admin').val());
-                }
-                if (tag) {
+
+                if ((tag)) {
                     $('#tag_adminSubmit').attr('disabled', true);
                     swal({
                         title: 'Please Wait!',
@@ -1850,6 +1884,7 @@
                         data: {
                             'tagged_id': tag,
                             'tagged_hub': tag_hub,
+                            'admin_id': admin,
                             'crm_request_id': $('#crm_request_id').val(),
                             'prev_status': $('#prev_status').val(),
                             'crm_request_tagging_type_id': type,
@@ -1877,16 +1912,8 @@
                             $('#tag_adminSubmit').attr('disabled', false);
                         });
                 }
-                else {
-                    if (type === 1) {
-                        var error = "Department Not Selected!";
-                    }
-                    else if (type === 2) {
-                        var error = "User Not Selected!";
-                    }
-                    else {
-                        error = "Type Not Selected!";
-                    }
+                else {  
+                    error = 'Please select only one: either Admin or Department';
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
 

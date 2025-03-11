@@ -210,6 +210,7 @@
                             head.push('E-Comm (COD)');
                             head.push('General Logistics (Retail)');
                             head.push('General Logistics - E-Comm (Express)');
+                            head.push('Other Sub-Segments');
 
                             head.push('No. Of Pending Shipments');
                             head.push('Assigned By');
@@ -229,9 +230,10 @@
                                 row.push(values.excel_ecom_cod);
                                 row.push(values.excel_general_retail);
                                 row.push(values.excel_general_ecom_express);
+                                row.push(values.excel_others);
                                 row.push(values.shipments_unverified_count);
                                 row.push(values.assignee);
-                                row.push(values.created_at);
+                                row.push(values.created);
                                 row.push(values.return_note_status);
 
                                 body.push(row);
@@ -283,7 +285,7 @@
                     // { data:'shipments_count_link' ,name: 'return_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
                     { data:'shipments_unverified_link' ,name: 'shipments_unverified_count', class: 'align-middle shipments_unverified_link text-center',orderable: false, searchable: false},
                     { data:'assignee' ,name: 'admins.name', class: 'align-middle assignee'},
-                    { data:'created_at' ,name: 'return_notes.created_at', class: 'align-middle created_at'},
+                    { data:'created' ,name: 'return_notes.created_at', class: 'align-middle created_at'},
                     { data:'return_note_status' ,name: 'return_notes.status', class: 'align-middle return_note_status'},
                     {data:'action' ,name: 'action', class: 'align-middle action text-center',orderable: false, searchable: false}
                 ],

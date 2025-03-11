@@ -108,6 +108,7 @@ class ShipperPackagingMaterialController extends Controller
 //                    return '';
 //                }
             })
+            ->rawColumns(['tracking_number_link','action'])
             ->make(true);
 
 

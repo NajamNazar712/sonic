@@ -228,7 +228,7 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) { return ''; }},
                     {data: 'shipper', name: 'users.name', class: 'align-middle shipper'},
-                    {data: 'city', name: 'cities.name', class: 'align-middle city'},
+                    {data: 'city', name: 'c.name', class: 'align-middle city'},
                     {data: 'sale_person', name: 'sp.name', class: 'align-middle sale_person'},
                     {data: 'alert_by', name: 'hab.name', class: 'align-middle alert_by'},
                     {data: 'description', name: 'high_alert_shippers.description', class: 'align-middle description'},

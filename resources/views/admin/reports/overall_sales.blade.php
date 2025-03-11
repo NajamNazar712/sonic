@@ -279,6 +279,7 @@
                         <th class="border-primary border-darken-1">Sales Person</th>
                         <th class="border-primary border-darken-1">Referral Name</th>
                         <th class="border-primary border-darken-1">Special Instructions</th>
+                        <th class="border-primary border-darken-1">Cost</th>
                     </tr>
                     </thead>
                 </table>
@@ -619,6 +620,7 @@
                             head.push('Referral Name');
                             head.push('Reason');
                             head.push('Special Instructions');
+                            head.push('Cost');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -683,6 +685,7 @@
                                 row.push(values.ref);
                                 row.push(values.reason);
                                 row.push(values.special_instructions);
+                                row.push(values.cost);
 
                                 body.push(row);
                             });
@@ -807,7 +810,8 @@
                     { data: 'received_or_refused_by' ,name: 'dr.received_or_refused_by', class: 'align-middle received_or_refused_by'},
                     { data: 'sales_person' ,name: 'adsp.name', class: 'align-middle sales_person'},
                     { data: 'ref', name: 'r.name', class: 'align-middle ref'},
-                    { data: 'special_instructions' ,name: 'shipments.special_instructions', class: 'align-middle special_instructions'}
+                    { data: 'special_instructions' ,name: 'shipments.special_instructions', class: 'align-middle special_instructions'},
+                    { data: 'cost' ,name: 'ibs.cost', class: 'align-middle cost'}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

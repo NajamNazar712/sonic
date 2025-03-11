@@ -45,6 +45,7 @@
                         <th class="border-primary border-darken-1">Return Note No.</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Rider Id</th>
                         <th class="border-primary border-darken-1">City Area</th>
                         <th class="border-primary border-darken-1">Rider</th>
@@ -255,6 +256,7 @@
                             head.push('Return Note No.');
                             head.push('Status');
                             head.push('Hub');
+                            head.push('Zone');
                             head.push('Rider Id');
                             head.push('Area');
                             head.push('Rider');
@@ -263,6 +265,7 @@
                             head.push('E-Comm (COD)');
                             head.push('General Logistics (Retail)');
                             head.push('General Logistics - E-Comm (Express)');
+                            head.push('Other Sub-Segments');
 
                             head.push('Created By');
                             head.push('Created Date');
@@ -273,6 +276,7 @@
                             head.push('E-Comm (COD)');
                             head.push('General Logistics (Retail)');
                             head.push('General Logistics - E-Comm (Express)');
+                            head.push('Other Sub-Segments');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -282,6 +286,7 @@
                                 row.push(values.return_note_id_padded);
                                 row.push(values.main_status);
                                 row.push(values.hub);
+                                row.push(values.zone_name);
                                 row.push(values.rider_id);
                                  row.push(values.area);
                                 row.push(values.rider);
@@ -290,6 +295,7 @@
                                 row.push(values.excel_ecom_cod);
                                 row.push(values.excel_general_retail);
                                 row.push(values.excel_general_ecom_express);
+                                row.push(values.excel_others);
 
                                 row.push(values.assigned_by);
                                 row.push(values.created_at);
@@ -300,6 +306,8 @@
                                 row.push(values.delivered_excel_ecom_cod);
                                 row.push(values.delivered_excel_general_retail);
                                 row.push(values.delivered_excel_general_ecom_express);
+                                row.push(values.delivered_excel_others);
+
                                 body.push(row);
                             });
                         },
@@ -344,6 +352,7 @@
                     { data:'return_note' ,name: 'return_notes.id', class: 'align-middle return_note'},
                     { data:'main_status' ,name: 'main_status', class: 'align-middle status',orderable:false},
                     { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
+                    { data:'zone_name' ,name: 'zones.name', class: 'align-middle zone_name'},
                     { data:'rider_id' ,name: 'riders.trax_id', class: 'align-middle rider_id'},
                     { data:'area' ,name: 'ca.name', class:'align-middle area'},
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},

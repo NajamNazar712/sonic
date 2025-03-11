@@ -34,9 +34,12 @@ use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use DB;
 use App\Http\Models\CrmCaseNatureRemark;
+use App\Http\Models\InterceptReBookRequestHistory;
+use App\Http\Traits\CommonTrait;
 
 class ShipperTrackingController extends Controller
 {
+    use CommonTrait;
     public function __construct() {
       $this->middleware('auth:web,substitute_users');
 
@@ -129,13 +132,27 @@ class ShipperTrackingController extends Controller
     	$tracking_numbers = explode(',', $request->tracking_numbers);
 
     	$tracking = array();
-
-    	foreach ($tracking_numbers as $tracking_number) {
+        $globalSetting = GlobalSettings::where(['setting_value' => 1, 'type' => 'specific_shipper_rider_view'])->first();
+        $riderDetailView = $globalSetting ? explode(',', $globalSetting->text) : null;
+        foreach ($tracking_numbers as $tracking_number) {
 //    		$shipment = Shipment::where('tracking_number', $tracking_number);
 
             $shipment = Shipment::where('tracking_number', $tracking_number);
     		if ($shipment->exists()) {
                 $shipment = $shipment->first();
+
+                $sub_segment_name = '-';
+                $sub_segment = DB::table('shipper_segment_logs')
+                ->leftJoin('sub_category_segments', 'sub_category_segments.id', 'shipper_segment_logs.sub_segment_id')
+                ->where('shipment_id', $shipment->id)
+                ->select('sub_category_segments.name')
+                ->first();
+
+                if ($sub_segment && $sub_segment->name)
+                {
+                    $sub_segment_name = $sub_segment->name;
+                }
+
                 $sub_shipment = true;
                 if(session('user_type') == 2){
                     if(session('restriction') == 1){
@@ -219,7 +236,20 @@ class ShipperTrackingController extends Controller
                         $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
                         $details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
                         $details['consignee']['destination'] = $shipment->consignee_city->name;
-                        $details['consignee']['address'] = $shipment->consignee_address;
+
+                        $consignee_address = InterceptReBookRequestHistory::where('shipment_id', $shipment->id)
+                        ->select([
+                            'new_consignee_address',
+                        ])
+                        ->first();
+
+                        if ($consignee_address){
+                            $details['consignee']['address'] = $consignee_address->new_consignee_address;
+                        } else {
+                            $details['consignee']['address'] = $shipment->consignee_address;
+                        }
+                        // $details['consignee']['address'] = $shipment->consignee_address;
+
                         $details['consignee']['email'] = $shipment->consignee_email;
                         $details['consignee']['crm_status'] = 0;
 
@@ -287,7 +317,7 @@ class ShipperTrackingController extends Controller
                         $details['order_information']['booking_type_id'] = $shipment->booking_type_id;
 
                         if ($shipment->booking_type_id != 4) {
-                            $details['order_information']['amount'] = $shipment->amount;
+                            $details['order_information']['amount'] = number_format($shipment->amount);
                         }
                         else {
                             if ($shipment->charges_mode_id == 1) {
@@ -309,6 +339,8 @@ class ShipperTrackingController extends Controller
                         $details['order_information']['instructions'] = $shipment->special_instructions;
                         $details['order_information']['pieces'] = $shipment->pieces;
                         $details['order_information']['business_category'] = $shipment->business_category->name;
+
+                        $details['order_information']['sub_segment'] = $sub_segment_name;
 
                         foreach ($shipment->shipment_journey as $journey) {
                             if($journey->shipper_status_id != '67'){
@@ -380,7 +412,16 @@ class ShipperTrackingController extends Controller
 
                                         }
                                     }
-
+                                    if ($riderDetailView && $journey->reference_2_id && in_array(Auth::id(),$riderDetailView)) {
+                                        if (in_array($journey->shipper_status_id, [5, 23, 28, 34])) {
+                                            $rider = Rider::find($journey->reference_2_id);
+                                            if ($rider) {
+                                                $journey_details['status'] .= ' | <button class="btn btn-sm btn-outline-info align-middle rider_information" data-id="' . $rider->id . '">' . $rider->name . '</button>';
+                                            }
+                                        } else {
+                                            $journey_details['status'] .= ' | ' . str_pad($journey->reference_2_id, 6, '0', STR_PAD_LEFT);
+                                        }
+                                    }
                                     $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
 
                                     if(in_array($journey->shipper_status_id, [8,17,20,52,54])){
@@ -594,6 +635,9 @@ class ShipperTrackingController extends Controller
     	return $tracking;
     }
 
+    public function rider_information(Request $request){
+        return $this->riderInformation($request->id);
+    }
     public function order_index(){
 
         $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->get();

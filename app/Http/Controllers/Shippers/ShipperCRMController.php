@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\Http\Controllers\Admins\AdminCRMController;
 use App\Http\Controllers\CRM\CRMCommentController;
 use App\Http\Controllers\CRM\CRMController;
 use App\Http\Models\Admin\Admin;
@@ -238,7 +239,7 @@ class ShipperCRMController extends Controller
 
                     return $dropdown;
 
-            });
+            })->rawColumns(['action','tracking_number_hyperlink','id_padded_link']);
 
         return $datatables->make(true);
     }
@@ -368,7 +369,6 @@ class ShipperCRMController extends Controller
         if(session('user_type') == 2){
             $launched_by = 2;
         }
-        
         if ($request->has('payment_request')) {
             if($request->payment_request == 1){
                 $payment_id = $request->payment_id;
@@ -625,6 +625,10 @@ class ShipperCRMController extends Controller
                     }
 
                 }
+                if($nature_id == 1){
+                    AdminCRMController::updateComplaintPhone($crm_request_padded_id ?? CrmRequest::max('id'), $request->case_nature_complainant, $request->complainant_phone);
+                }
+
                 return ['status' => 1, 'success' => $message, 'flag' => $flag, 'already_existed_shipments' => $present_shipments, 'cannot_change' => $cannot_change];
 //            return ['status' => 1, 'success' => 'Request(s) successfully added'];
             }
@@ -811,6 +815,9 @@ class ShipperCRMController extends Controller
                             $shipment->save();
                         }
                     }
+                }
+                if($nature_id == 1){
+                    AdminCRMController::updateComplaintPhone($crm_request_padded_id ?? CrmRequest::max('id'), $request->case_nature_complainant, $request->complainant_phone);
                 }
                 return ['status' => 1, 'success' => $message, 'flag' => $flag, 'already_existed_shipments' => $present_shipments, 'cannot_change' => $cannot_change];
             }

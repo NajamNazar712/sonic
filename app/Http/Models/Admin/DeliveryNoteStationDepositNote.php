@@ -13,7 +13,7 @@ class DeliveryNoteStationDepositNote extends Model
 	public $timestamps = FALSE;
     protected $fillable = [ 'station_deposit_note_id','delivery_note_id' ];
 
-	protected function setKeysForSaveQuery(Builder $query) {
+	protected function setKeysForSaveQuery($query) {
 		$keys = $this->getKeyName();
 
 		if (!is_array($keys)) {

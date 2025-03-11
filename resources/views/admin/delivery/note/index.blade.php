@@ -118,6 +118,10 @@
                         <input type="hidden" name="special_rider_name" id="special_rider_name">
                         <input type="hidden" name="special_rider_phone" id="special_rider_phone">
 
+                        {{-- TO-6892 --}}
+                        <input type="hidden" name="holdInCheck" id="holdInCheck">
+                        {{-- ENd TO-6892 --}}
+
 
                         <div class="col-3">
                             <button type="submit" id="deliveryNoteSubmitBtn" class="btn btn-primary btn-block ">Submit &amp; Print</button>
@@ -373,6 +377,7 @@
             var shipment_piece_ids = [];
             var all_shipment_piece_ids = [];
             var ccd_rider = null;
+            var holdInCheck = false; //TO-6892
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
@@ -513,12 +518,12 @@
                             'operation_rider_type': this.value,
                         }
                     }).done(function(data){
-
+                        holdInCheck = data.holdInCheck; //TO-6892
                         if (data.status == 1) {
                             var html = "";
                             $.each(data.riders, function(key,v) {
                                 if(v.trax_id)
-                                    html +=  `<option value="${v.id}" data-id="${v.route_id}">${v.name} - ${v.trax_id} - ${v.hub_name}</option>`
+                                    html += `<option value="${v.id}" data-id="${v.route_id}">${holdInCheck ? v.name : `${v.name} - ${v.trax_id} - ${v.hub_name}`}</option>`; //TO-6892
                                 else
                                     html +=  `<option value="${v.id}" data-id="${v.route_id}">${v.name}</option>`
                             });
@@ -526,6 +531,14 @@
                             $('#rider_name').val('').trigger('change');
                             $('#operation_rider_type_id').val(id);
                             $('#operation_rider_type').attr('disabled',true);
+
+                            {{-- TO-6892 --}}
+                            if (holdInCheck) {
+                                $('#route').addClass('d-none');
+                                $('#route').val('').trigger('change');
+                                $('#route').next('.select2-container').addClass('d-none');
+                            }
+                            {{-- END TO-6892 --}}
 
                         }
                         else {
@@ -584,8 +597,8 @@
 
             });
 
-            $('#route').on('change',function () {
-                if(this.value){
+            $('#route').on('change', function () {
+                if (this.value || holdInCheck) {
                     $('#route_id').val(this.value);
                     $('#route').attr('disabled',true);
                     $('#scan_tracking').attr("disabled", false);
@@ -1087,7 +1100,8 @@
                 if (route !== '' && route !== null) {
 
                     $('#route_error').css('display', 'none');
-                } else {
+                }
+                else if(!holdInCheck) { //TO-6892
                     var error = "Route not selected!";
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     errors = 1;
@@ -1186,6 +1200,7 @@
                                             $('#create_delivery_note_form input#notification_ids').val(notification_ids);
                                             $('#create_delivery_note_form input#rider_info_ids').val(rider_info_ids);
                                             $('#create_delivery_note_form input#selected_rider_id').val(rider);
+                                            $('#create_delivery_note_form input#holdInCheck').val(holdInCheck); //TO-6892
 
                                             $('#create_delivery_note_form input#selected_route_id').val(route);
                                             if (special_rider_flag) {
@@ -1239,6 +1254,8 @@
                                     $('#create_delivery_note_form input#rider_info_ids').val(rider_info_ids);
                                     $('#create_delivery_note_form input#selected_rider_id').val(rider);
                                     $('#create_delivery_note_form input#selected_route_id').val(route);
+                                    $('#create_delivery_note_form input#holdInCheck').val(holdInCheck); //TO-6892
+
                                     if(special_rider_flag){
                                         $('#create_delivery_note_form input#special_rider_name').val(special_rider_name);
                                         $('#create_delivery_note_form input#special_rider_phone').val(special_rider_phone);
@@ -1311,7 +1328,7 @@
                 if (route !== '' && route !== null) {
 
                     $('#route_error').css('display', 'none');
-                } else {
+                }else if(!holdInCheck) { //TO-6892
                     var error = "Route not selected!";
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     errors = 1;

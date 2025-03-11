@@ -22,6 +22,8 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\City;
 use App\Http\Models\ShipmentDetail;
+use App\Http\Models\ShipperSegmentLogs;
+use Illuminate\Support\Facades\Log;
 
 class ProcessShipmentBookingDB implements ShouldQueue
 {
@@ -488,6 +490,41 @@ class ProcessShipmentBookingDB implements ShouldQueue
             if ($now > $cutofftime) {
                 NotificationsController::send(152, $shipment_id);
                 NotificationsController::send(153, $shipment_id);
+            }
+
+            try {
+                // Maintaining shipper segment logs on booking
+                $segment_id = '';
+                $sub_segment_id = '';
+                $user_id = '';
+                if (session('substitute_user_id')) {
+                    $user_id = auth()->user()->user_id;
+                    $user = User::find($user_id);
+                    $segment_id = $user->segment_id;
+                    $sub_segment_id = $user->sub_segment_id;
+
+                    ShipperSegmentLogs::create([
+                        'shipment_id' => $shipment_id,
+                        'segment_id' => $segment_id,
+                        'sub_segment_id' => $sub_segment_id
+                    ]);
+                } else {
+                    ShipperSegmentLogs::create([
+                        'shipment_id' => $shipment_id,
+                        'segment_id' => isset(auth()->user()->segment_id) ? auth()->user()->segment_id : 0,
+                        'sub_segment_id' => isset(auth()->user()->sub_segment_id) ? auth()->user()->sub_segment_id : 0
+                    ]);
+                }
+                // if ($pickup_city_id != $consignee_city_id)
+                // {
+                //     ShipperSegmentLogs::create([
+                //         'shipment_id' => $shipment_id,
+                //         'segment_id' => isset(auth()->user()->segment_id) ? auth()->user()->segment_id : 0,
+                //         'sub_segment_id' => isset(auth()->user()->sub_segment_id) ? auth()->user()->sub_segment_id : 0
+                //     ]);
+                // }
+            } catch (\Exception $e) {
+                Log::error('Error creating shipper segment log from Shipper portal excel booking ' . $shipment_id . ': ' . $e->getMessage());
             }
 
         }

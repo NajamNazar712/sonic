@@ -34,7 +34,7 @@
                                       </span>
                                 </div>
                                 <input type="text" name="booking_from_date"
-                                       class="form-control bg-primary border-primary white rounded-right"
+                                       class="form-control bg-primary border-primary white rounded-right"  data-value="{{ \Carbon\Carbon::today()->subDays(31)->startOfDay() }}"
                                        id="booking_from_date" placeholder="Booking Date From">
                             </div>
                         </div>
@@ -46,7 +46,7 @@
                                         </span>
                                 </div>
                                 <input type="text" name="booking_to_date"
-                                       class="form-control bg-primary border-primary white rounded-right"
+                                       class="form-control bg-primary border-primary white rounded-right" data-value="{{ \Carbon\Carbon::now() }}"
                                        id="booking_to_date" placeholder="Booking Date To">
                             </div>
                         </div>
@@ -92,7 +92,7 @@
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Add Request</h4>
+                    <h4 class="modal-title white">Get Support</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -132,6 +132,24 @@
                                             </select>
                                         </fieldset>
                                     </div>
+
+                                    <div class="col-10">
+                                        <fieldset class="form-group">
+                                            <select name="case_nature_complainant" id="case_nature_complainant"
+                                                    class="form-control select2" data-rule-required="true"
+                                                    data-msg-required="Complainant is required">
+                                                <option value="1">Consignee</option>
+                                                <option value="2">Shipper</option>
+                                            </select>
+                                        </fieldset>
+                                    </div>
+                                    <div class="col-10">
+                                        <fieldset class="form-group">
+                                            <input type="text" class="form-control" placeholder="Enter Phone Number" name="complainant_phone" id="complainant_phone"  data-rule-required="true"
+                                                   data-msg-required="Complainant Phone is required">
+                                        </fieldset>
+                                    </div>
+
                                     <div class="col-6">
                                         <fieldset class="form-group">
                                             <select name="complaint_channel" id="complaint_channels" class="form-control select2">
@@ -250,7 +268,7 @@
                                 <div class="row justify-content-center">
                                     <div class="col-10">
                                         <fieldset class="form-group">
-                                            <select name="case_nature_tclaim" id="case_nature_claim" class="form-control select2">
+                                            <select name="case_nature_tclaim" id="case_nature_claim" class="form-control select2" data-rule-required="true" data-msg-required="Select claim type">
                                                 @foreach($case_nature_type_claims as $claim)
                                                     <option value="{{$claim->id}}">{{$claim->type}}</option>
                                                 @endforeach
@@ -293,7 +311,7 @@
                                     </div>
                                     <div class="col-10">
                                         <fieldset class="form-group">
-                                            <textarea class="form-control" name="description" id="claim_description" rows="5" placeholder="Enter Description Here..."></textarea>
+                                            <textarea class="form-control" name="description" id="claim_description" rows="5" placeholder="Enter Description Here..." data-rule-required="true" data-msg-required="Claim description is required."></textarea>
                                         </fieldset>
                                     </div>
                                 </div>
@@ -462,7 +480,12 @@
                 'mask': '9999-9999999',
                 'clearIncomplete': true
             });
-            
+
+            $('#complainant_phone').inputmask({
+                mask: '9999-9999999',
+                'clearIncomplete': true
+            });
+
             // $('#cod_amount').inputmask({
             //     'alias': 'integer',
             //     'allowMinus': false,
@@ -489,7 +512,7 @@
 				'allowMinus': false,
 				'allowPlus': false
 			});
-            
+
             var old_date_limit = '{{ Carbon\Carbon::now()->subDays(29)->toDateString() }}';
 
 
@@ -674,7 +697,12 @@
                 allowClear:true,
                 dropdownParent:$('#add_request_form')
             });
-
+            $('#case_nature_complainant').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: "Select Complainant",
+                allowClear: true,
+                dropdownParent: $('#add_request_form')
+            });
             function print(selected_rows) {
                 $.ajax({
                     url: '{!! route('admin.orders.shipment_print_status') !!}',
@@ -911,7 +939,7 @@
                     },
                         @endif
                     {
-                        text: '<i class="la la-plus"></i> Add Request',
+                        text: '<i class="la la-plus"></i> Get Support',
                         className: 'btn btn-primary request_add',
                         action: function (e, dt, node, config) {
                             if(selected_rows.length > 0){
@@ -1377,6 +1405,9 @@
                         var case_nature_complaint_id = $('#case_nature_complaints').val();
                         var case_nature_channel_id = $('#complaint_channels').val();
                         var complaint_description = $('#complaint_description').val();
+                        var complainant_phone = $('#complainant_phone').val();
+                        var case_nature_complainant = $('#case_nature_complainant').val();
+
                         if (!case_nature_complaint_id) {
                             nature_flag = false;
                             var error = "Please select Complaint type!";
@@ -1409,6 +1440,22 @@
                                 containerId: 'toast-top-center'
                             });
                         }
+                        if (!complainant_phone) {
+                            nature_flag = false;
+                            var error = "Please enter complainant phone!";
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                        if (!case_nature_complainant) {
+                            nature_flag = false;
+                            var error = "Please select complainant!";
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
                         if (nature_flag) {
                             $('#AddNewRequest').attr('disabled', true);
                             swal({
@@ -1430,6 +1477,8 @@
                                     'channel_id': case_nature_channel_id,
                                     'description': complaint_description,
                                     'alternate_phone': $('#alternate_phone').val(),
+                                    'complainant_phone' : complainant_phone,
+                                    'case_nature_complainant' : case_nature_complainant,
                                     // 'cod_amount': $('#cod_amount').val(),
                                 }
                             })
@@ -1598,9 +1647,11 @@
                                                 'is_zero_cod': is_zero_cod,
                                                 'cod_parcel_value': $('#cod_parcel_value').val(),
                                                 'is_automated_cod_change': 1,
+                                                'complainant_phone' : $('#complainant_phone').val(),
+                                                'case_nature_complainant' : $('#case_nature_complainant').val(),
                                             }
                                         })
-                                        .done(function (data) { 
+                                        .done(function (data) {
                                             if (data.status) {
                                                 if (data.flag) {
                                                     var html = '';
@@ -1688,7 +1739,9 @@
                                         'case_nature_id': case_nature_id,
                                         'complaint_id': case_nature_complaint_id,
                                         'channel_id': case_nature_channel_id,
-                                        'description': service_description
+                                        'description': service_description,
+                                        'complainant_phone' : $('#complainant_phone').val(),
+                                        'case_nature_complainant' : $('#case_nature_complainant').val(),
                                     }
                                 })
                                 .done(function (data) {
@@ -2039,6 +2092,8 @@
                 $('#receiving_sheet_div').addClass('d-none');
                 $('#alternate_phone_input').addClass('d-none');
                 $('#alternate_phone').val('');
+                $('#case_nature_complainant').val('').trigger('change');
+                $('#complainant_phone').val('');
                 // $('#cod_amount_input').addClass('d-none');
                 // $('#cod_amount').val('');
 

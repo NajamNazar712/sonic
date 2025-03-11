@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\DailyVisit;
 use App\Http\Controllers\Admins\AdminCargoManifestController;
+use App\Http\Controllers\Admins\AdminCRMController;
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\Admins\CheckDisputeShipmentsController;
 use App\Http\Controllers\Admins\DeliveryController;
@@ -57,7 +58,7 @@ use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteImage;
 use App\Http\Models\Admin\ReturnNoteShipment;
-use App\http\Models\Admin\ReturnReasonMandatoryShipper;
+use App\Http\Models\Admin\ReturnReasonMandatoryShipper;
 use App\Http\Models\Admin\RiderCategoryByPass;
 use App\Http\Models\Admin\RiderType;
 use App\Http\Models\Admin\SalePersonTarget;
@@ -164,6 +165,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Password;
+use Illuminate\Support\Str;
+
 
 class AdminAPIController extends Controller
 {
@@ -326,7 +329,7 @@ class AdminAPIController extends Controller
                     if ($user->api_token) {
                         $information['api_token'] = $user->api_token;
                     } else {
-                        $api_token = uniqid(base64_encode(str_random(60)));
+                        $api_token = uniqid(base64_encode(Str::random(60)));
 
                         $user->api_token = $api_token;
 
@@ -4868,7 +4871,7 @@ class AdminAPIController extends Controller
 
                     $filename = 'payslip_' . $payslip->id . Carbon::now()->format('Uu') . '-' . $payroll_month . '.pdf';
                     $path = 'payslip_pdf/' . $filename;
-                    $result = $pdf->download($filename);
+                    $result = $pdf->setOption('enable-local-file-access', true)->download($filename);
                     Storage::disk('public')->put($path, $result);
                     $payslip_pdf = new PayslipPdf();
                     $payslip_pdf->payslip_id = $payslip->id;
@@ -6096,7 +6099,7 @@ class AdminAPIController extends Controller
                     if ($user->api_token) {
                         $information['api_token'] = $user->api_token;
                     } else {
-                        $api_token = uniqid(base64_encode(str_random(60)));
+                        $api_token = uniqid(base64_encode(Str::random(60)));
 
                         $user->api_token = $api_token;
 
@@ -8037,7 +8040,7 @@ class AdminAPIController extends Controller
                     if ($user->api_token) {
                         $information['api_token'] = $user->api_token;
                     } else {
-                        $api_token = uniqid(base64_encode(str_random(60)));
+                        $api_token = uniqid(base64_encode(Str::random(60)));
 
                         $user->api_token = $api_token;
 
@@ -10068,7 +10071,7 @@ class AdminAPIController extends Controller
                     }
 
                     if (!$user->api_token) {
-                        $api_token = uniqid(base64_encode(str_random(60)));
+                        $api_token = uniqid(base64_encode(Str::random(60)));
                         $user->api_token = $api_token;
                         $user->save();
                     }
@@ -11615,7 +11618,11 @@ class AdminAPIController extends Controller
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id', 1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id', 1)->get();
         $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id', 1)->get();
-        return response()->json(['status' => 0, 'case_nature' => $case_nature, 'channels' => $channels, 'complaints' => $case_nature_type_complaints, 'service_requests' => $case_nature_type_service_requests, 'claims' => $case_nature_type_claims]);
+        $complainants = [
+            ['id' => 1, 'complainant_type' => 'Consignee'],
+            ['id' => 2, 'complainant_type' => 'Shipper'],
+        ];
+        return response()->json(['status' => 0, 'case_nature' => $case_nature, 'channels' => $channels, 'complaints' => $case_nature_type_complaints, 'service_requests' => $case_nature_type_service_requests, 'claims' => $case_nature_type_claims, 'complainants' => $complainants]);
     }
 
     public function crm_request_submit(Request $request)
@@ -11627,6 +11634,8 @@ class AdminAPIController extends Controller
             'case_nature_type_id' => ['required'],
             'channel_id' => ['required'],
             'description' => ['required'],
+            'case_nature_complainant' => ['required_if:case_nature_id,1'],
+            'complainant_phone' => ['required_if:case_nature_id,1'],
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -11717,6 +11726,9 @@ class AdminAPIController extends Controller
                                 $shipment->save();
                             }
                         }
+                    }
+                    if($nature_id == 1 && !empty($request->case_nature_complainant)  && !empty($request->complainant_phone)){
+                        AdminCRMController::updateComplaintPhone(CrmRequest::max('id'), $request->case_nature_complainant, $request->complainant_phone);
                     }
                     return response()->json(['status' => 0, 'message' => 'Request(s) successfully added']);
                 }

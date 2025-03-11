@@ -127,11 +127,11 @@ class SSRController extends Controller
             }
         }
 
-//        if (!$request->get('search_date_from') && !$request->get('search_date_to')) {
-//            $now = Carbon::now();
-//            $yesterday = Carbon::now()->subDays(3);
-//            $sales = $sales->whereBetween('sj.created_at', [$yesterday,$now]);
-//        }
+        // if (!$request->get('search_date_from') && !$request->get('search_date_to')) {
+        //     $now = Carbon::now();
+        //     $yesterday = Carbon::now()->subDays(3);
+        //     $sales = $sales->whereBetween('sj.created_at', [$yesterday,$now]);
+        // }
 
         if (session('role_id') != 1 && (!in_array(session('id'), session('sale_users_bypass')))) {
             if (session('department_id') == 7) {
@@ -208,36 +208,38 @@ class SSRController extends Controller
             });
 
         if ($tracking = $request->get('search_tracking')) {
-            $datatable->where('shipments.tracking_number', '=', $tracking);
+            $sales->where('shipments.tracking_number', '=', $tracking);
         }
         if ($sales_person = $request->get('search_sales_person')) {
-            $datatable->where('adsp.id', '=', $sales_person);
+            $sales->where('adsp.id', '=', $sales_person);
         }
         if ($search_shipper = $request->get('search_shipper')) {
-            $datatable->where('shipments.user_id', '=', $search_shipper);
+            $sales->where('shipments.user_id', '=', $search_shipper);
         }
         if ($search_shippers = $request->get('search_shippers')) {
-            $datatable->whereIn('shipments.user_id', $search_shippers);
+            $sales->whereIn('shipments.user_id', $search_shippers);
         }
         if ($mode = $request->get('search_shipping_mode')) {
-            $datatable->where('sm.id', '=', $mode);
+            $sales->where('sm.id', '=', $mode);
         }
         if ($origin = $request->get('search_origin')) {
-            $datatable->where('oc.id', '=', $origin);
+            $sales->where('oc.id', '=', $origin);
         }
         if ($destination = $request->get('search_destination')) {
-            $datatable->where('dc.id', '=', $destination);
+            $sales->where('dc.id', '=', $destination);
         }
         if ($hub = $request->get('search_hub')) {
-            $datatable->where('h.id', '=', $hub);
+            $sales->where('h.id', '=', $hub);
         }
         if ($status = $request->get('search_status')) {
-            $datatable->where('ss.id', '=', $status);
+            $sales->where('ss.id', '=', $status);
         }
         if ($search_business_category = $request->get('search_business_category')) {
-            $datatable->where('shipments.business_category_id', '=', $search_business_category);
+            $sales->where('shipments.business_category_id', '=', $search_business_category);
         }
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['tracking_number_link'])
+        ->make(true);
     }
 
 }

@@ -1,9 +1,8 @@
 <?php
 
 namespace App\Http\Models\Shipper;
-use App\Http\Models\CityInfo;
-use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
@@ -17,7 +16,17 @@ class User extends Authenticatable
     protected $fillable = [
         'name', 'email', 'password','address','poc','phone','phone2','cnic','ntn_no','strn_no','url','city_id','status','blacklist', 'api_token','rates_added_by','rates_added_at','rates_approved_at','rates_rejected_at','rates_rejected_by','rates_updated_by','rates_authorized_by','account_activated_by','activated_at','reactivated_at','product_id','rate_status','account_type_id','default_shipping_mode','average_shipments','reference_id','average_shipment_duration_id','other_product_name','brand_name','segment_id','lead_id','territory_id','rcp_tat_option_id','rcp_tat_updated_by','rcp_tat_updated_at','new_rate_type_id','rate_type_id_status','agreement_signed','sub_segment_id','referral_id','payment_cycle_id','payment_cycle_days','on_board_status' ,'sms_charges','sms_charges_status'
     ];
+    
+    // protected $casts = [
+    //     'updated_at' => "datetime:Y-m-d H:i:s",
+    //     'created_at' => "datetime:Y-m-d H:i:s",
+    // ];
 
+    protected function serializeDate(\DateTimeInterface $date)
+    {
+        return $date->format('Y-m-d H:i:s');
+    }
+    
     /**
      * The attributes that should be hidden for arrays.
      *
@@ -96,4 +105,12 @@ class User extends Authenticatable
     {
         return $this->belongsTo('App\Http\Models\Admin\Lead\Lead', 'lead_id', 'id');
     }
+
+    public function wallet() {
+        return $this->hasOne('App\Http\Models\WalletUser','user_id', 'id')->where('substitute_user_id',0);
+    }
+  public function sub_users() {
+        return $this->hasMany('App\Http\Models\Shipper\SubstituteUser','user_id', 'id')->where('status',1);
+    }
+
 }

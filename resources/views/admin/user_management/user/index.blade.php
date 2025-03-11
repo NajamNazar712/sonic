@@ -412,7 +412,7 @@
                                 row.push(values.designation);
                                 row.push(values.role);
                                 row.push(values.default_hub);
-                                row.push(values.updated_at);
+                                row.push(values.updated);
                                 row.push(values.updated_by);
                                 row.push(values.status);
                                 row.push(values.ahat_excel);
@@ -608,8 +608,8 @@
 					{data: 'designation', name: 'ed.id', class: 'align-middle designation'},
 					{data: 'role', name: 'role', class: 'align-middle role'},
 					{data: 'default_hub', name: 'h.name', class: 'align-middle default_hub'},
-					{data: 'created_at', name: 'admins.created_at', class: 'align-middle created_at'},
-					{data: 'updated_at', name: 'admins.updated_at', class: 'align-middle updated_at'},
+					{data: 'created', name: 'admins.created_at', class: 'align-middle created_at'},
+					{data: 'updated', name: 'admins.updated_at', class: 'align-middle updated_at'},
 					{data: 'updated_by', name: 'a.name', class: 'align-middle updated_by'},
 					{data: 'status', name: 'admins.status', class: 'align-middle status'},
 					{data: 'ahat', name: 'ahat', class: 'align-middle ahat', orderable:false },

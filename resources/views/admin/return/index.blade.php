@@ -2085,7 +2085,7 @@
                         {data: 'service_type',name: 'bt.id',class: 'align-middle service_type'},
                         {data: 'status',name: 'status',class: 'align-middle status' },
                         {data: 'reason',name: 'ssr.name',class: 'align-middle reason'},
-                        {data: 'rv_status_date', name: 'rvsj.udpated_at', class: 'align-middle reason'},
+                        {data: 'rv_status_date', name: 'rv_status_date', class: 'align-middle rv_status_date'},
                         {data: 'remarks',name: '',class: 'align-middle text-center remarks'},
                         {data: 'shipment_remarks',name: 'admin_journey.remarks',class: 'align-middle shipment_remarks'},
                         {data: 'shipper_remarks',name: 'shipments_journey.remarks',class: 'align-middle shipper_remarks' },

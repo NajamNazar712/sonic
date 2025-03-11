@@ -403,9 +403,9 @@
                                 row.push(values.cnic);
                                 row.push(values.address);
                                 row.push(values.category);
-                                row.push(values.created_at);
+                                row.push(values.created);
                                 row.push(values.created_by);
-                                row.push(values.updated_at);
+                                row.push(values.updated);
                                 row.push(values.updated_by);
                                 row.push(values.status);
                                 body.push(row);
@@ -462,9 +462,9 @@
                     { data:'cnic' ,name: 'retail_users.cnic', class: 'align-middle text-center cnic'},
                     { data:'address' ,name: 'retail_users.address', class: 'align-middle text-center address'},
                     { data:'category' ,name: 'retail_users.category', class: 'align-middle text-center category'},
-                    { data:'created_at' ,name: 'retail_users.created_at', class: 'align-middle text-center created_at'},
+                    { data:'created' ,name: 'retail_users.created_at', class: 'align-middle text-center created_at'},
                     { data:'created_by' ,name: 'ac.name', class: 'align-middle text-center created_by'},
-                    { data:'updated_at' ,name: 'retail_users.updated_at', class: 'align-middle text-center updated_at'},
+                    { data:'updated' ,name: 'retail_users.updated_at', class: 'align-middle text-center updated_at'},
                     { data:'updated_by' ,name: 'au.name', class: 'align-middle text-center updated_by'},
                     { data:'status' ,name: 'retail_users.status', class: 'align-middle text-center status'},
                     { data:'action' ,name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false},

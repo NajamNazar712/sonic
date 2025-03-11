@@ -9,7 +9,7 @@ use App\Http\Models\Admin\CxTraining;
 use App\Http\Models\Admin\CxTrainingUnit;
 use Auth;
 use Carbon\Carbon;
-use Yajra\Datatables\Facades\Datatables;
+use Yajra\DataTables\DataTables;
 
 
 class QualityAssuranceController extends Controller
@@ -40,7 +40,7 @@ class QualityAssuranceController extends Controller
             ->join('cx_training_units as ctu', 'ctu.id', '=', 'cx_trainings.cx_training_unit_id')
             ->join('admins as rb', 'rb.id', '=', 'cx_trainings.requested_by')
             ->leftjoin('admins as tb', 'tb.id', '=', 'cx_trainings.training_by')
-            ->select(['cx_trainings.id','cx_trainings.joining_date','cx_trainings.updated_at','cx_trainings.status','cx_trainings.requested_date', 'admins.name as agent_name', 'ctu.name as unit', 'tb.name as training_by', 'rb.name as requested_by']);
+            ->select(['cx_trainings.id','cx_trainings.joining_date','cx_trainings.updated_at as updated','cx_trainings.status','cx_trainings.requested_date', 'admins.name as agent_name', 'ctu.name as unit', 'tb.name as training_by', 'rb.name as requested_by']);
 
             if ($request->get('search_date_from') && $request->get('search_date_to')) {
                 $from = $request->get('search_date_from');
@@ -93,7 +93,7 @@ class QualityAssuranceController extends Controller
                 } else {
                     return '';
                 }
-            });
+            })->rawColumns(['action']);
         return $datatables->make(true);
     }
 

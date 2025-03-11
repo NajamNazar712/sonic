@@ -39,6 +39,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PHPExcel_Style_Fill;
 use PHPExcel_Cell;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 
 class VisionSoftAPIController extends Controller
 {
@@ -1297,10 +1298,11 @@ class VisionSoftAPIController extends Controller
         }
 
     }
-    static public function cod_payable_excel(){
-
-        $startDate = Carbon::now()->subDays(1)->format('Y-m-d 00:00:01');
-        $endDate = Carbon::now()->subDays(1)->format('Y-m-d 23:59:59');
+    static public function cod_payable_excel($st, $end){
+        $startDate = $st;
+        $endDate = $end;
+        // $startDate = Carbon::now()->subDays(1)->format('Y-m-d 00:00:01');
+        // $endDate = Carbon::now()->subDays(1)->format('Y-m-d 23:59:59');
 
         $shippers = User::join('shipments as s', 's.user_id', '=', 'users.id')
             ->join('shipments_journey as sj', function($join) use ($startDate,$endDate) {
@@ -1336,7 +1338,7 @@ class VisionSoftAPIController extends Controller
             $sheet->fromArray($shipper_array, NULL, 'A2', true);
             $sheet->getStyle("A2:J2")->applyFromArray($cell_st);
             // $sheet->getStyle('G')->getFont()->getColor()->setARGB('FFFF00');
-            //$sheet->getStyle($tas)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('C7E0B4');
+            //$sheet->getStyle($tas)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('C7E0B4');
 
             // $sheet->getStyle('H')->getFont()->getColor()->setARGB('00FF00');
             $sheet->setTitle('COD Payable');
@@ -1358,10 +1360,10 @@ class VisionSoftAPIController extends Controller
         }
     }
 
-    static public function cod_receivable_excel(){
+    static public function cod_receivable_excel($st,$end){
 
-        $startDate = Carbon::now()->subDays(1)->format('Y-m-d 00:00:01');
-        $endDate = Carbon::now()->subDays(1)->format('Y-m-d 23:59:59');
+        $startDate = $st;
+        $endDate = $end;
 
         $cities = City::join('shipments as s', 's.consignee_city_id', '=', 'cities.id')
             ->join('cities as hc', 'hc.id', '=', 'cities.hub_id')
@@ -1398,7 +1400,7 @@ class VisionSoftAPIController extends Controller
             $sheet->fromArray($shipper_array, NULL, 'A2', true);
             $sheet->getStyle("A2:J2")->applyFromArray($cell_st);
             // $sheet->getStyle('G')->getFont()->getColor()->setARGB('FFFF00');
-            //$sheet->getStyle($tas)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('C7E0B4');
+            //$sheet->getStyle($tas)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('C7E0B4');
 
             // $sheet->getStyle('H')->getFont()->getColor()->setARGB('00FF00');
             $sheet->setTitle('COD Receivable');

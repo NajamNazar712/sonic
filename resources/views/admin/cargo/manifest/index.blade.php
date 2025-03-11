@@ -111,7 +111,7 @@
                                     <th class="border-primary border-darken-1">Origin</th>
                                     <th class="border-primary border-darken-1">Destination</th>
                                     <th class="border-primary border-darken-1">Actual Weight</th>
-                                    <th class="border-primary border-darken-1">Shipping Mode</th>
+                                    <!-- <th class="border-primary border-darken-1">Shipping Mode</th> -->
                                     <th class="border-primary border-darken-1">Manifest Id</th>
                                     <th class="border-primary border-darken-1">Junctions</th>
                                      <th class="border-primary border-darken-1">Vehicle</th>
@@ -315,7 +315,7 @@
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Actual Weight');
-                            head.push('Shipping Mode');
+                            
                             head.push('Manifest Id');
                             head.push('Status');
                             head.push('Status Updated At');
@@ -338,7 +338,7 @@
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.actual_weight);
-                                row.push(values.shipping_mode);
+                                
                                 row.push(values.manifest);
                                 row.push(values.status);
                                 row.push(values.status_updated_at);
@@ -347,7 +347,7 @@
                                 row.push(values.manifest_created_at);
                                 row.push(values.transitted_by);
                                 row.push(values.updated_by);
-                                row.push(values.remarks);
+                                row.push(values.remarks_excel);
 
 
                                 body.push(row);
@@ -405,7 +405,6 @@
                     {data: 'origin', name: 'oh.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dh.name', class: 'align-middle destination'},
                     {data: 'actual_weight', name: 'actual_weight', class: 'align-middle actual_weight'},
-                    {data: 'shipping_mode', name: 'sm.id', class: 'align-middle shipping_mode'},
                     {data: 'manifest_id', name: 'cm.id', class: 'align-middle manifest_id'},
                     {data: 'junctions', name: 'junctions', class: 'align-middle junctions',orderable:false,searchable:false},
                     {data: 'vehicles', name: 'vehicles', class: 'align-middle vehicles',orderable: false},
@@ -418,7 +417,7 @@
                     {data: 'transitted_date', name: 'cargo_manifest_bags.created_at', class: 'align-middle transitted_date'},
                     {data: 'transitted_by', name: 'a.name', class: 'align-middle transitted_by'},
                     {data: 'updated_by', name: 'ah.name', class: 'align-middle updated_by'},
-                    {data: 'remarks', name: 'cargo_manifest_bags.remarks', class: 'align-middle remarks'},
+                    {data: 'remarks', name: 'remarks', class: 'align-middle remarks'},
                     {data: 'action', name: 'action', class: 'align-middle action', searchable: false, orderable: false},
                 ],
                 rowCallback: function(row, data, index) {
@@ -446,11 +445,6 @@
                             $(td).appendTo($(search));
                         }else if($(header).is('.service_type')){
                             $(service_drop_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }else if($(header).is('.shipping_mode')){
-                            $(mode_drop_select).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);

@@ -55,6 +55,7 @@
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Tracking Number</th>
                         <th class="border-primary border-darken-1">Shipper</th>
+                        <th class="border-primary border-darken-1">Substitute User</th>
                         <th class="border-primary border-darken-1">Shipper Cell Number</th>
                         <th class="border-primary border-darken-1">Tagged Sale Person</th>
                         <th class="border-primary border-darken-1">Requested Date/Time</th>
@@ -451,6 +452,7 @@
                             head.push('S.No');
                             head.push('Tracking Number');
                             head.push('Shipper');
+                            head.push('Substitute User');
                             head.push('Shipper Cell Number');
                             head.push('Tagged Sale Person');
                             head.push('Requested Date/Time');
@@ -471,6 +473,9 @@
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
                                 row.push(values.shipper);
+                                // new column start
+                                row.push(values.substitute_user);
+                                // new column end
                                 row.push(values.shipper_phone);
                                 row.push(values.tagged_sale_person);
                                 row.push(values.created_at);
@@ -547,9 +552,14 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_link', name: 'packaging_material_requests.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
+
+                    // new column start
+                    {data: 'substitute_user', name: 'substitute_users.name', class: 'align-middle substitute_user'},
+                    // new column end
+
                     {data: 'shipper_phone',name:'u.phone',class: 'align-middle shipper_phone'},
                     {data: 'tagged_sale_person',name:'a.name',class: 'align-middle tagged_sale_person'},
-                    {data: 'created_at', name: 'packaging_material_requests.created_at', class: 'align-middle created_at'},
+                    {data: 'created', name: 'packaging_material_requests.created_at', class: 'align-middle created_at'},
                     {data: 'city', name: 'ct.name', class: 'align-middle city'},
                     {data: 'total_quantity_button', class: 'align-middle total_quantity_button',orderable: false, searchable: false},
                     {data: 'amount', name: 'packaging_material_requests.amount', class: 'align-middle amount'},

@@ -29,6 +29,8 @@
                                     <th class="border-primary border-darken-1" >GC Area</th>
                                     <th class="border-primary border-darken-1" >Attempt Tat</th>
                                     <th class="border-primary border-darken-1" >Status</th>
+                                    <th class="border-primary border-darken-1" >Created By</th>
+                                    <th class="border-primary border-darken-1" >Created At</th>
                                     <th class="border-primary border-darken-1" >Updated By</th>
                                     <th class="border-primary border-darken-1" >Updated At</th>
                                     <th class="border-primary border-darken-1" >Location</th>
@@ -165,6 +167,8 @@
                             head.push('GC Area');
                             head.push('Attempt Tat');
                             head.push('Status');
+                            head.push('Created By');
+                            head.push('Created At');
                             head.push('Updated By');
                             head.push('Updated At');
                             head.push('Address');
@@ -186,8 +190,10 @@
                                 row.push(values.gc_area);
                                 row.push(values.attempt_tat);
                                 row.push(values.status);
+                                row.push(values.created_by);
+                                row.push(values.created_at);
                                 row.push(values.updated_by);
-                                row.push(values.updated_at);
+                                row.push(values.updated);
                                 row.push(values.address);
                                 row.push(values.booking_enable_status);
 
@@ -219,8 +225,19 @@
                                });
                            }
                        }
+                    },
+                        @if (session('role_id') == 1 || in_array(1016, session('permissions')))
+                            {
+                                text: '<i class="la la-file-excel-o"></i> Bulk Booking City',
+                                className: 'btn btn-primary',
+                                enabled: true,
+                                action: function (e, dt, node, config) {
+                                    $('#addBulkCity').modal('show');
+                                }
+                            },
+                       @endif
 
-                    },{
+               {
                        text: '<i class="la la-map-marker"></i> Add International City',
                        className: 'btn btn-primary',
                        enabled: true,
@@ -372,7 +389,7 @@
                 serverSide: true,
                 ajax: '{{ route('admin.management.city.ajax') }}',
                rowId: 'id',
-                order: [[13, 'desc']],
+                order: [[15, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -387,8 +404,10 @@
                     {data: 'gc_area', name: 'cities.gc_area', class: 'align-middle gc_area'},
                     {data: 'attempt_tat', name: 'cities.attempt_tat', class: 'align-middle attempt_tat'},
                     {data: 'status', name: 'cities.status', class: 'align-middle status'},
+                    {data: 'created_by', name: 'c.name', class: 'align-middle created_by'},
+                    {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
                     {data: 'updated_by', name: 'a.name', class: 'align-middle updated_by'},
-                    {data: 'updated_at', name: 'ch.created_at', class: 'align-middle updated_at'},
+                    {data: 'updated', name: 'ch.created_at', class: 'align-middle updated_at'},
                     {data: 'location', name: 'location', class: 'align-middle location', orderable: false, searchable: false},
                     {data: 'hub_location', name: 'hub_location', class: 'align-middle hub_location', orderable: false, searchable: false},
                     {data: 'osa_list', name: 'osa_list', class: 'align-middle osa_list', orderable: false, searchable: false},

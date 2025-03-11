@@ -189,7 +189,7 @@
                             @csrf
                             <div class="row justify-content-center">
                                 <div class="col-11">
-                                    <fieldset class="form-group">
+                                    <fieldset class="form-group d-none">
                                         <input type="hidden" id="crm_request_ids" value="">
                                         <input type="hidden" id="prev_status" name="prev_status"
                                                value="">
@@ -311,6 +311,10 @@
             width: 300px !important;
         }
 
+        .select-checkbox{
+            border-color: #64a0d2;
+        }
+
         .select2-container--classic .select2-selection--multiple .select2-selection__choice, .select2-container--default .select2-selection--multiple .select2-selection__choice {
             background-color: #64a0d2 !important;
             border-color: #5587b4 !important;
@@ -407,13 +411,14 @@
                                 row.push(values.arrival);                                     // Arrival Date
                                 row.push(values.arrival_today);                                // Arrival to Today (TAT)
                                 row.push(values.status);                                      // Shipment Status
-                                row.push(values.last_status_date);                            // Last Status Date
+                                // row.push(values.last_status_date);                            // Last Status Date
+                                row.push(values.last_date_status);                            // Last Status Date
                                 row.push(values.last_status_today);                            // Last status to Today (TAT)
                                 row.push(values.last_status_updated_by);                      // Last status by
                                 row.push(values.case_nature);                                 // Case Nature
                                 row.push(values.case_nature_type);                            // Case Nature Type
                                 row.push(values.description);                                 // Description
-                                row.push(values.created_at);                                  // Launched Date
+                                row.push(values.created);                                  // Launched Date
                                 row.push(values.current_tat);                                 // Aging (From Launched Date To Today)
                                 row.push(values.responsible_hub);                             // Responsible Hub
                                 row.push(values.sub_hub);                                     // Sub Hub
@@ -473,6 +478,74 @@
                         }
                     },
                     @endif
+
+                    // bulk resolve button
+                    @if (session('role_id') == 1 || in_array(1013, session('permissions')))
+                        {
+                            text: 'Resolve',
+                            className: 'btn btn-primary bulk_resolve',
+                            enabled: false,
+                            action: function (e, dt, node, config) {
+                                swal({
+                                    title: 'Are you sure?',
+                                    text: 'Are you sure you want to mark them as resolved?',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then((result) => {
+                                    if (result) {
+                                        $.ajax({
+                                            url: '{!! route('admin.crm.bulk_resolve') !!}',
+                                            method: 'POST',
+                                            data: {
+                                                'crm_request_ids': selected_rows,
+                                                '_token': '{{ csrf_token() }}'
+                                            }
+                                        })
+                                        .done(function (data) {
+                                            if (data.status === 1 && data.errors && Array.isArray(data.errors)) {
+                                                // Iterate over the data.errors array and extract the error messages
+                                                data.errors.forEach(function(error) {
+                                                    if (Array.isArray(error) && error.length > 0) {
+                                                        // If the error is an array, display the first element as the message
+                                                        toastr.error(error[0], 'Error!', {
+                                                            positionClass: 'toast-top-center',
+                                                            containerId: 'toast-top-center',
+                                                        });
+                                                    } else if (typeof error === 'string') {
+                                                        // If it's a string, display it directly
+                                                        toastr.error(error, 'Error!', {
+                                                            positionClass: 'toast-top-center',
+                                                            containerId: 'toast-top-center',
+                                                        });
+                                                    }
+                                                });
+                                            }
+                                            else {
+                                                window.location.href = '{!! route('admin.crm.resolved.index') !!}';
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        },
+                    @endif
+
                     @if (session('role_id') == 1 || session('role_id') == 6 || in_array(787, session('permissions')))
                     {
                         text: 'In-Valid',
@@ -638,21 +711,17 @@
 
                             table.rows().nodes().each(function(index) {
                                 var row = table.row(index);
-
                                 if ($(row.node().firstChild).hasClass('select-checkbox')) {
                                     row.select();
-
                                     id = parseInt(row.id());
-
                                     var index = $.inArray(id, selected_rows);
-
                                     if (index === -1) {
                                         selected_rows.push(id);
                                     }
-
                                     table.button('.assign').enable();
                                     table.button('.close_request').enable();
                                     table.button('.in_valid').enable();
+                                    table.button('.bulk_resolve').enable();
                                     table.button('.tag').enable();
                                     table.button('.un_tag').enable();
                                     table.button('.bulk_external_comment').enable();
@@ -670,22 +739,18 @@
 
                             table.rows().nodes().each(function(index) {
                                 var row = table.row(index);
-
                                 if ($(row.node().firstChild).hasClass('select-checkbox')) {
                                     row.deselect();
-
                                     id = parseInt(row.id());
-
                                     var index = $.inArray(id, selected_rows);
-
                                     if (index !== -1) {
                                         selected_rows.splice(index, 1);
                                     }
-
                                     if (selected_rows.length == 0) {
                                         table.button('.assign').disable();
                                         table.button('.close_request').disable();
                                         table.button('.in_valid').disable();
+                                        table.button('.bulk_resolve').disable();
                                         table.button('.tag').disable();
                                         table.button('.un_tag').disable();
                                         table.button('.bulk_external_comment').enable();
@@ -738,17 +803,18 @@
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},                                       // Origin
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},                             // Destination
                     {data: 'hub', name: 'dh.name', class: 'align-middle hub'},                                             // Hub
-                    {data: 'zone', name: 'zones', class: 'align-middle zone'},                                             // Zone
+                    {data: 'zone', name: 'z.name', class: 'align-middle zone'},                                             // Zone
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},                               // Arrival Date
                     {data: 'arrival_today', name: 'arrival_today', class: 'align-middle arrival_today', orderable: false, searchable: false}, // Arrival to Today (TAT)
                     {data: 'status', name: 'status', class: 'align-middle shipment_status'},                               // Shipment Status
-                    {data: 'last_status_date', name: 'crm_requests.updated_at', class: 'align-middle last_status_date'},          // Last Status Date
+                    // {data: 'last_status_date', name: 'crm_requests.updated_at', class: 'align-middle last_status_date'},          // Last Status Date
+                    {data: 'last_date_status', name: 'last_updated_sj.created_at', class: 'align-middle last_date_status'},          // Last Status Date from shipments journey
                     {data: 'last_status_today', name: 's.updated_at', class: 'align-middle last_status_today', orderable: false}, // Last status to Today (TAT)
                     {data: 'last_status_updated_by', name: 'last_status_upd_by.name', class: 'align-middle last_status_updated_by'},                // Last status by
                     {data: 'case_nature', name: 'crcn.id', class: 'align-middle case_nature'},                             // Case Nature
                     {data: 'case_nature_type', name: 'case_nature_type', class: 'align-middle case_nature_type'},          // Case Nature Type
                     {data: 'description', name: 'crm_requests.description', class: 'align-middle description'},            // Description
-                    {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'}, // Launched Date
+                    {data: 'created', name: 'crm_requests.created_at', class: 'align-middle created_at'}, // Launched Date
                     {data: 'current_tat', name: 'current_tat', class: 'align-middle current_tat', orderable: false, searchable: false}, // Aging (From Launched Date To Today)
                     {data: 'responsible_hub', name: 'responsible_hub', class: 'align-middle responsible_hub', orderable: false, searchable: false}, // Responsible Hub
                     {data: 'sub_hub', name: 'sub_hub', class: 'align-middle sub_hub', orderable: false, searchable: false}, // Sub Hub
@@ -777,7 +843,6 @@
                 ],
                 rowCallback: function(row, data, index) {
                     $('td:eq(0)', row).addClass('select-checkbox');
-
                     if ($.inArray(data.id, selected_rows) !== -1) {
                         table.row(row).select();
                     }
@@ -1059,6 +1124,7 @@
                             table.button('.assign').disable();
                             table.button('.valid').disable();
                             table.button('.in_valid').disable();
+                            table.button('.bulk_resolve').disable();
                             table.button('.bulk_external_comment').disable();
                             table.button('.bulk_internal_comment').disable();
                             table.button('.tag').disable();
@@ -1111,6 +1177,7 @@
                             table.button('.assign').disable();
                             table.button('.valid').disable();
                             table.button('.in_valid').disable();
+                            table.button('.bulk_resolve').disable();
                             table.button('.bulk_external_comment').disable();
                             table.button('.bulk_internal_comment').disable();
                             table.button('.tag').disable();
@@ -1261,6 +1328,7 @@
                     table.button('.assign').enable();
                     table.button('.close_request').enable();
                     table.button('.in_valid').enable();
+                    table.button('.bulk_resolve').enable();
                     table.button('.tag').enable();
                     table.button('.un_tag').enable();
                     table.button('.bulk_external_comment').enable();
@@ -1270,6 +1338,7 @@
                     table.button('.assign').disable();
                     table.button('.close_request').disable();
                     table.button('.in_valid').disable();
+                    table.button('.bulk_resolve').disable();
                     table.button('.tag').disable();
                     table.button('.un_tag').disable();
                     table.button('.bulk_external_comment').disable();
@@ -1372,13 +1441,11 @@
             }).bind('change', function () {
                 var id = parseInt($(this).val());
                 if (id === 1) {
-                    $('#admin_tag_div').addClass('d-none');
                     $('#department_tag_div').removeClass('d-none');
                 } else if (id === 2) {
                     $('#department_tag_div').addClass('d-none');
                     $('#admin_tag_div').removeClass('d-none');
                 } else {
-                    $('#admin_tag_div').addClass('d-none');
                     $('#department_tag_div').addClass('d-none');
                 }
             });
@@ -1390,23 +1457,28 @@
                 $('#tag_type').val('').trigger('change');
                 $('#admin_tag_hub').val('').trigger('change');
                 $('#admin_tag_department').val('').trigger('change');
-                $('#admin_tag_div').addClass('d-none');
+                $('#tag_admin').val('').trigger('change');
                 $('#department_tag_div').addClass('d-none');
             });
+            $('#admin_tag_div').removeClass('d-none');
+
             $('#tag_adminSubmit').on('click', function () {
-                var type = parseInt($('#tag_type').val());
-                var tag_hub = null;
-                if (type === 1) {
-                    var tag = parseInt($('#tag_department').val());
-                    tag_hub = parseInt($('#tag_hub').val());
-                    if(!tag_hub){
-                        tag_hub = null;
-                    }
+                var type = parseInt($('#tag_type').val()) || 0;
+                var tag_hub = $('#admin_tag_hub').val();
+                tag_hub = tag_hub ? parseInt(tag_hub) : null;
+
+                var dept = parseInt($('#admin_tag_department').val()) || 0;
+                var admin = parseInt($('#tag_admin').val()) || 0;
+
+                var tag = 0; 
+
+                if (admin !== 0) {
+                    tag = admin;
+                } else if (dept !== 0) {
+                    tag = dept; 
                 }
-                else if (type === 2) {
-                    var tag = parseInt($('#tag_admin').val());
-                }
-                if (tag) {
+
+                if ((tag)) {
                     $('#tag_adminSubmit').attr('disabled', true);
                     swal({
                         title: 'Please Wait!',
@@ -1422,6 +1494,7 @@
                         data: {
                             'tagged_id': tag,
                             'tagged_hub': tag_hub,
+                            'admin_id': admin,
                             'crm_request_ids[]': selected_rows,
                             'crm_request_tagging_type_id': type,
                             '_token': '{{ csrf_token() }}'
@@ -1450,16 +1523,8 @@
                             table.draw('false');
                         });
                 }
-                else {
-                    if (type === 1) {
-                        var error = "Department Not Selected!";
-                    }
-                    else if (type === 2) {
-                        var error = "User Not Selected!";
-                    }
-                    else {
-                        error = "Type Not Selected!";
-                    }
+                else {  
+                    error = 'Please select only one: either Admin or Department';
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
 

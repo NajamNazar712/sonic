@@ -37,7 +37,7 @@ use App\Http\Models\HR\EmployeeLeave;
 use App\Http\Models\HR\StaffCategory;
 use App\Http\Models\Admin\EmployeeLog;
 use App\Http\Models\HR\EmployeeGender;
-use App\http\Models\HR\EmployeeNature;
+use App\Http\Models\HR\EmployeeNature;
 use App\Http\Models\HR\EmployeeStatus;
 use App\Http\Models\ReportingLocation;
 use Barryvdh\Snappy\Facades\SnappyPdf;
@@ -434,7 +434,12 @@ class AdminHumanResourseController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(), 57);
         $rider_type = RiderType::all();
         $route = Route::all();
-        $operation_rider_category = OperationRidersCategory::all();
+
+        /* TO-6892 */
+        //$operation_rider_category = OperationRidersCategory::all();
+        $operation_rider_category = OperationRidersCategory::find(1);
+        /* */
+
         $rider_categories = RiderCategory::all();
         $rider_main_categories = RiderMainCategory::all();
         $route_types = RouteType::all();
@@ -756,13 +761,15 @@ class AdminHumanResourseController extends Controller
             if ($request->get('search_date_to')) {
                 $from = $request->get('search_date_from') . ' 00:00:00';
                 $to = $request->get('search_date_to') . ' 23:59:59';
-                $datatable->whereBetween('employees.created_at', [$from, $to]);
+                $employees->whereBetween('employees.created_at', [$from, $to]);
             } else {
                 $from = $request->get('search_date_from');
-                $datatable->whereDate('employees.created_at', $from);
+                $employees->whereDate('employees.created_at', $from);
             }
         }
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['action'])
+        ->make(true);
     }
 
     public function employee_directory_pin(Request $request)
@@ -1394,7 +1401,7 @@ class AdminHumanResourseController extends Controller
         $genders = EmployeeGender::all();
         $rider_types = RiderType::all();
         $main_categories = RiderMainCategory::all();
-        $functional_categories = OperationRidersCategory::all();
+        $functional_categories = OperationRidersCategory::find(1);
         $sub_categories = RiderCategory::all();
         $rider_routes = Route::all();
         $rider_functional_category = $employee->rider->operation_rider_id ?? null;
@@ -1530,28 +1537,28 @@ class AdminHumanResourseController extends Controller
 
 
         if ($employee->employee_type_id == 1) {
-            $admin = Admin::where('trax_id', $employee->trax_id)->where('trax_id', '!=', null);
-            if ($admin->exists()) {
-                $admin = $admin->first();
+                $adminQuery = Admin::where('trax_id', $employee->trax_id)->where('trax_id', '!=', null);
+                if ($adminQuery->exists()) { 
+                    $admin = $adminQuery->first();
 
-//                if ($admin->designation_id != $employee->designation_id) {
-//                    AdminHub::where('admin_id', $admin->id)->delete();
-//
-//                    $hubs = EmployeeDesignationHub::where('designation_id', $employee->designation_id)->get(['hub_id']);
-//                    if (count($hubs) == 0) {
-//                        $admin_hub = new AdminHub();
-//                        $admin_hub->admin_id = $admin->id;
-//                        $admin_hub->hub_id = $employee->city->hub_city->id;
-//                        $admin_hub->save();
-//                    } else {
-//                        foreach ($hubs as $hub) {
-//                            $admin_hub = new AdminHub();
-//                            $admin_hub->admin_id = $admin->id;
-//                            $admin_hub->hub_id = $hub->hub_id;
-//                            $admin_hub->save();
-//                        }
-//                    }
-//                }
+                    // if ($admin->designation_id != $employee->designation_id) {
+                    //     AdminHub::where('admin_id', $admin->id)->delete();
+
+                    //     $hubs = EmployeeDesignationHub::where('designation_id', $employee->designation_id)->get(['hub_id']);
+                    //     if (count($hubs) == 0) {
+                    //         $admin_hub = new AdminHub();
+                    //         $admin_hub->admin_id = $admin->id;
+                    //         $admin_hub->hub_id = $employee->city->hub_city->id;
+                    //         $admin_hub->save();
+                    //     } else {
+                    //         foreach ($hubs as $hub) {
+                    //             $admin_hub = new AdminHub();
+                    //             $admin_hub->admin_id = $admin->id;
+                    //             $admin_hub->hub_id = $hub->hub_id;
+                    //             $admin_hub->save();
+                    //         }
+                    //     }
+                    // }
 
                 }
                 if ($role_flag == true) {
@@ -2815,6 +2822,7 @@ class AdminHumanResourseController extends Controller
                     return '';
                 }
             })
+            ->rawColumns(['map', 'action'])
             ->make(true);
     }
 
@@ -3116,6 +3124,7 @@ class AdminHumanResourseController extends Controller
                     return '';
                 }
             })
+            ->rawColumns(['action'])
             ->make(true);
     }
 
@@ -3167,28 +3176,28 @@ class AdminHumanResourseController extends Controller
         $datatable = Datatables::of($incentives);
 
         if ($city = $request->get('search_city')) {
-            $datatable->where('cities.id', '=', $city);
+            $incentives->where('cities.id', '=', $city);
         }
         if ($hub = $request->get('search_hub')) {
-            $datatable->where('cities.hub_id', '=', $hub);
+            $incentives->where('cities.hub_id', '=', $hub);
         }
 
         if ($zone = $request->get('search_zone')) {
-            $datatable->where('cities.zone_id', '=', $zone);
+            $incentives->where('cities.zone_id', '=', $zone);
         }
 
         if ($employee_id = $request->get('employee_id')) {
-            $datatable->where('riders.trax_id', '=', $employee_id);
+            $incentives->where('riders.trax_id', '=', $employee_id);
         }
 
         if ($employee_name = $request->get('employee_name')) {
-            $datatable->where('riders.name', 'like', "%" . $employee_name . "%");
+            $incentives->where('riders.name', 'like', "%" . $employee_name . "%");
         }
 
         if ($request->get('search_date_from') != null && $request->get('search_date_from') != null) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatable->whereBetween('riders_incentives.date', [$from, $to]);
+            $incentives->whereBetween('riders_incentives.date', [$from, $to]);
         }
 
         return $datatable->make(true);
@@ -3252,6 +3261,7 @@ class AdminHumanResourseController extends Controller
                     return '';
                 }
             })
+            ->rawColumns(['action'])
             ->make(true);
     }
 
@@ -3311,6 +3321,13 @@ class AdminHumanResourseController extends Controller
              $payslips->whereIn('hub_id', session('hubs'));
          }
 
+        if ($request->get('search_payslip_month')) {
+            $month = $request->get('search_payslip_month');
+            $from = Carbon::parse($month)->startOfMonth()->toDateString();
+            $to = Carbon::parse($month)->endOfMonth()->toDateString();
+            $payslips->whereBetween('employee_payslips.payroll_month', [$from, $to]);
+        }
+
         $datatable = Datatables::of($payslips)
             ->editColumn('total_salary', function ($payslip) {
                 if($payslip->total_salary == null){
@@ -3344,12 +3361,7 @@ class AdminHumanResourseController extends Controller
                 return $dropdown;
             });
 
-        if ($request->get('search_payslip_month')) {
-            $month = $request->get('search_payslip_month');
-            $from = Carbon::parse($month)->startOfMonth()->toDateString();
-            $to = Carbon::parse($month)->endOfMonth()->toDateString();
-            $datatable->whereBetween('employee_payslips.payroll_month', [$from, $to]);
-        }
+
         return $datatable->make(true);
 
     }
@@ -4077,7 +4089,7 @@ class AdminHumanResourseController extends Controller
 
             $filename = 'payslip_' . $payslip->id . '.pdf';
 
-            $result = $pdf->download($filename);
+            $result = $pdf->setOption('enable-local-file-access', true)->download($filename);
             $pdf_file = 'data:application/pdf;base64,' . base64_encode($result);
             return array('status' => 1, 'image' => $pdf_file);
     }
@@ -4292,17 +4304,19 @@ class AdminHumanResourseController extends Controller
         });
         
         if ($search_admin = $request->get('search_admin')) {
-            $datatable->where('a.id', $search_admin)->where('a.employee_type_id',1);
+            $employee_leaves->where('a.id', $search_admin)->where('a.employee_type_id',1);
         }
         if ($search_rider = $request->get('search_rider')) {
-            $datatable->where('a.id', $search_rider)->where('a.employee_type_id',2);
+            $employee_leaves->where('a.id', $search_rider)->where('a.employee_type_id',2);
         }
         if ($search_trax_id = $request->get('search_trax_id')) {
-            $datatable->where(function($q) use ($search_trax_id){
+            $employee_leaves->where(function($q) use ($search_trax_id){
                 $q->where('a.trax_id', $search_trax_id);
             });
         }
-       return $datatable->make(true);
+       return $datatable
+       ->rawColumns(['action'])
+       ->make(true);
     }
     public function employee_penalty_duplicate(Request $request)
     {
@@ -4677,18 +4691,20 @@ class AdminHumanResourseController extends Controller
 
             });
         if ($search_admin = $request->get('search_admin')) {
-            $datatable->where('e.id', $search_admin)->where('e.employee_type_id', 1);
+            $employee_leaves->where('e.id', $search_admin)->where('e.employee_type_id', 1);
         }
         if ($search_rider = $request->get('search_rider')) {
-            $datatable->where('e.id', $search_rider)->where('e.employee_type_id', 2);
+            $employee_leaves->where('e.id', $search_rider)->where('e.employee_type_id', 2);
         }
         if ($search_trax_id = $request->get('search_trax_id')) {
-            $datatable->where('e.trax_id', $search_trax_id);
+            $employee_leaves->where('e.trax_id', $search_trax_id);
         }
         if ($search_cnic = $request->get('search_cnic')) {
-            $datatable->where('e.cnic', $search_cnic);
+            $employee_leaves->where('e.cnic', $search_cnic);
         }
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['action'])
+        ->make(true);
     }
 
     public function leave_request(Request $request)
@@ -5558,18 +5574,18 @@ class AdminHumanResourseController extends Controller
                 return $leave_count;
             });
         if ($search_admin = $request->get('search_admin')) {
-            $datatable->where('a.id', $search_admin)->where('a.employee_type_id',1);
+            $employee_leaves->where('a.id', $search_admin)->where('a.employee_type_id',1);
         }
         if ($search_rider = $request->get('search_rider')) {
-            $datatable->where('a.id', $search_rider)->where('a.employee_type_id',2);
+            $employee_leaves->where('a.id', $search_rider)->where('a.employee_type_id',2);
         }
         if ($search_trax_id = $request->get('search_trax_id')) {
-            $datatable->where(function($q) use ($search_trax_id){
+            $employee_leaves->where(function($q) use ($search_trax_id){
                 $q->where('a.trax_id', $search_trax_id);
             });
         }
         if ($search_cnic = $request->get('search_cnic')) {
-            $datatable->where(function($q) use ($search_cnic){
+            $employee_leaves->where(function($q) use ($search_cnic){
                 $q->where('a.cnic', $search_cnic);
             });
         }
@@ -5790,7 +5806,9 @@ class AdminHumanResourseController extends Controller
             });
         
         
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['probation_form', 'action'])
+        ->make(true);
     }
 
     public function employee_confirmation_edit(Request $request){
@@ -6062,7 +6080,9 @@ class AdminHumanResourseController extends Controller
             });
 
 
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['action'])
+        ->make(true);
     }
 
 
@@ -6220,7 +6240,8 @@ class AdminHumanResourseController extends Controller
 
                         if (count($trax_ids) > 0) {
                             if (!Employee::with('city')->where('trax_id', $row['trax_id'])->whereHas('city', function($q) use ($hub_id){ $q->where('hub_id', $hub_id); })->exists()) {
-                                $errors['Row #' . $row_id][] = 'Employee with Trax Id #' . $row['trax_id'] . ' can\'t be assigned area id' . $row['area'] . ' because hub is different';
+                                // $errors['Row #' . $row_id][] = 'Employee with Trax Id #' . $row['trax_id'] . ' can\'t be assigned area id' . $row['area'] . ' because hub is different';
+                                $errors['Row #' . $row_id][] = 'Employee with Trax Id #' . $row['trax_id'] . ' can\'t be assigned area id ' . $row['area_id'] . ' because hub is different';
                             }
                         } else {
                             $errors['Row #' . $row_id][] = 'Invalid Trax ID Entered' . $row['trax_id'];

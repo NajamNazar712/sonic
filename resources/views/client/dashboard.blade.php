@@ -18,10 +18,10 @@
                                     <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
 
                                         <div class="col-3">
-                                           <div class="form-group">
-                                               <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
-                                           </div>
-                                       </div>
+                                            <div class="form-group">
+                                                <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
+                                            </div>
+                                        </div>
 
                                         <div class="col-auto">
                                             <div class="form-group">
@@ -89,7 +89,7 @@
                                         <th class="border-primary border-darken-1">Instructions</th>
                                         <th class="border-primary border-darken-1">Cancellation Remarks</th>
                                         <th class="border-primary border-darken-1">Payment Mode</th>
-{{--                                        <th class="border-primary border-darken-1">Payment Mode</th>--}}
+                                        {{--                                        <th class="border-primary border-darken-1">Payment Mode</th>--}}
                                         <th class="border-primary border-darken-1"></th>
                                     </tr>
                                     </thead>
@@ -179,7 +179,7 @@
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Add Request</h4>
+                    <h4 class="modal-title white">Get Support</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -220,9 +220,27 @@
                                             </select>
                                         </fieldset>
                                     </div>
+
                                     <div class="col-10">
                                         <fieldset class="form-group">
                                             <textarea class="form-control" name="complaint_description" id="complaint_description" rows="5" placeholder="Enter Description Here..." data-rule-required="true" data-msg-required="Description is required"></textarea>
+                                        </fieldset>
+                                    </div>
+
+                                    <div class="col-10">
+                                        <fieldset class="form-group">
+                                            <select name="case_nature_complainant" id="case_nature_complainant"
+                                                    class="form-control select2" data-rule-required="true"
+                                                    data-msg-required="Complainant is required">
+                                                <option value="1">Consignee</option>
+                                                <option value="2">Shipper</option>
+                                            </select>
+                                        </fieldset>
+                                    </div>
+                                    <div class="col-10">
+                                        <fieldset class="form-group">
+                                            <input type="text" class="form-control" placeholder="Enter Phone Number" name="complainant_phone" id="complainant_phone" data-rule-required="true"
+                                                   data-msg-required="Complainant Phone is required">
                                         </fieldset>
                                     </div>
                                 </div>
@@ -251,7 +269,7 @@
                                                     <div class="input-group-prepend">
                                                         <span class="input-group-text">Old COD Amount</span>
                                                     </div>
-        
+
                                                     <input type="text" name="old_amount" id="old_amount" readonly class="form-control rounded-right">
                                                 </fieldset>
                                             </div>
@@ -260,7 +278,7 @@
                                                     <div class="input-group-prepend">
                                                         <span class="input-group-text">New COD Amount</span>
                                                     </div>
-        
+
                                                     <input type="text" name="new_amount" id="new_amount" class="form-control rounded-right new_amount" placeholder="Enter Amount" data-rule-required="true" data-msg-required="New COD Amount is required">
                                                 </fieldset>
                                             </div>
@@ -269,7 +287,7 @@
                                                     <div class="input-group-prepend">
                                                         <span class="input-group-text">Enter Parcel Value</span>
                                                     </div>
-        
+
                                                     <input type="text" name="cod_parcel_value" id="cod_parcel_value" class="form-control rounded-right cod_parcel_value" placeholder="Parcel Value" data-rule-required="true" data-msg-required="Parcel Value is required"  oninput="if(this.value=='0') this.value=''">
                                                 </fieldset>
                                             </div>
@@ -304,7 +322,7 @@
                                 <div class="row justify-content-center">
                                     <div class="col-10">
                                         <fieldset class="form-group">
-                                            <select name="case_nature_tclaim" id="case_nature_claim" class="form-control select2">
+                                            <select name="case_nature_tclaim" id="case_nature_claim" class="form-control select2" data-rule-required="true" data-msg-required="Select claim type">
                                                 @foreach($case_nature_type_claims as $claim)
                                                     <option value="{{$claim->id}}">{{$claim->type}}</option>
                                                 @endforeach
@@ -378,7 +396,7 @@
 
                                     <div class="col-10">
                                         <fieldset class="form-group">
-                                            <textarea class="form-control" name="description" id="claim_description" rows="5" placeholder="Enter Description Here..."></textarea>
+                                            <textarea class="form-control" name="description" id="claim_description" rows="5" placeholder="Enter Description Here..." data-rule-required="true" data-msg-required="Claim description is required."></textarea>
                                         </fieldset>
                                     </div>
                                 </div>
@@ -587,7 +605,7 @@
                 'mask': '9999-9999999',
                 'clearIncomplete': true
             });
-            
+
             $('#claim_product_cost').inputmask({
                 'alias': 'decimal',
                 'allowMinus': false,
@@ -631,17 +649,26 @@
             // });
 
             $('.new_amount').inputmask({
-				'alias': 'integer',
-				'allowMinus': false,
-				'allowPlus': false
-			});
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            });
 
             $('.cod_parcel_value').inputmask({
-				'alias': 'integer',
-				'allowMinus': false,
-				'allowPlus': false
-			});
-
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            });
+            $('#complainant_phone').inputmask({
+                mask: '9999-9999999',
+                'clearIncomplete': true
+            });
+            $('#case_nature_complainant').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: "Select Complainant",
+                allowClear: true,
+                dropdownParent: $('#add_request_form')
+            });
             var booking_from_date = $('#booking_from_date').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -938,7 +965,7 @@
                         }
                     },
                     {
-                        text: '<i class="la la-plus"></i> Add Request',
+                        text: '<i class="la la-plus"></i> Get Support',
                         className: 'btn btn-primary request_add',
                         action: function (e, dt, node, config) {
                             if (selected_rows.length > 0) {
@@ -1120,7 +1147,7 @@
 
                 ],
 
-            rowCallback: function (row, data, index) {
+                rowCallback: function (row, data, index) {
                     var info = table.page.info();
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
 
@@ -1167,10 +1194,10 @@
                                         column.search($(this).val(), false, false, true).draw();
                                     }).wrap(td);
                             } else if ($(header).is('.payment_module')) {
-                                    $(payment_mode).appendTo($(search))
-                                        .on('change', function () {
-                                            column.search($(this).val(), false, false, true).draw();
-                                        }).wrap(td);
+                                $(payment_mode).appendTo($(search))
+                                    .on('change', function () {
+                                        column.search($(this).val(), false, false, true).draw();
+                                    }).wrap(td);
                             }  else if ($(header).is('.business_category')) {
                                 $(business_category).appendTo($(search))
                                     .on('change', function () {
@@ -1355,15 +1382,15 @@
             });
 
             $('#case_nature_requests').on('change',function (e) {
-            
+
                 if($(this).val() == 13){
                     $('#alternate_phone_input').removeClass('d-none');
                     // $('#cod_amount_input').addClass('d-none');
 
                 }
-                // else if($(this).val() == 12){
-                //     $('#cod_amount_input').removeClass('d-none');
-                //     $('#alternate_phone_input').addClass('d-none');
+                    // else if($(this).val() == 12){
+                    //     $('#cod_amount_input').removeClass('d-none');
+                    //     $('#alternate_phone_input').addClass('d-none');
 
                 // }
                 else{
@@ -1391,7 +1418,7 @@
                         });
                         $('#cod_change').removeClass('d-none');
                     }
-                   
+
                 }
                 else{
                     $('#cod_change').addClass('d-none');
@@ -1882,7 +1909,7 @@
             $('#add_request_form').on('submit',function (e) {
                 e.preventDefault();
             });
-            $( "#add_request_form" ).validate({ 
+            $( "#add_request_form" ).validate({
                 errorClass:"danger",
                 errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
@@ -2058,13 +2085,13 @@
                             if (nature_flag) {
                                 $('#AddNewRequest').attr('disabled', true);
                                 swal({
-                                        title: 'Please Wait!',
-                                        text: 'Launching Request.',
-                                        icon: 'info',
-                                        buttons: false,
-                                        closeOnClickOutside: false,
-                                        closeOnEsc: false
-                                    });
+                                    title: 'Please Wait!',
+                                    text: 'Launching Request.',
+                                    icon: 'info',
+                                    buttons: false,
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false
+                                });
                                 $.ajax({
                                     url: '{!! route('cod.crm.request.add') !!}',
                                     method: 'POST',
@@ -2075,7 +2102,7 @@
                                     contentType: false,
                                 })
                                     .done(function (data) {
-                                    swal.close();
+                                        swal.close();
 
                                         if (data.status) {
                                             if (data.flag) {
@@ -2151,13 +2178,13 @@
                         });
 
                         /*********
-                            // Commented this because in Complain type = 1, the value set in different variable
-                            // i.e: $('#case_nature_complaints').val();
-                            // so this should be manage according to case nature except here, which seems like it already handled in first two, 
-                            // if required for three four, then adjust this on top like case nature
-                        *********/
+                         // Commented this because in Complain type = 1, the value set in different variable
+                         // i.e: $('#case_nature_complaints').val();
+                         // so this should be manage according to case nature except here, which seems like it already handled in first two,
+                         // if required for three four, then adjust this on top like case nature
+                         *********/
                         // var complaint_id = $('#case_nature_requests').val();
-                        
+
                         if(complaint_id == 12)
                         {
 
@@ -2193,7 +2220,7 @@
                                         closeOnEsc: false
                                     });
 
-                                    
+
                                     var is_zero_cod = 0;
                                     if($('#new_amount').val() == 0 && $('#new_amount').val() != '')
                                     {
@@ -2214,75 +2241,77 @@
                                             'is_zero_cod': is_zero_cod,
                                             'cod_parcel_value': $('#cod_parcel_value').val(),
                                             'is_automated_cod_change': 1,
+                                            'complainant_phone' : $('#complainant_phone').val(),
+                                            'case_nature_complainant' : $('#case_nature_complainant').val(),
                                         }
                                     })
-                                    .done(function (data) {
-                                        swal.close();
+                                        .done(function (data) {
+                                            swal.close();
 
-                                        if (data.status) {
-                                            if (data.flag) {
-                                                var html = '';
+                                            if (data.status) {
+                                                if (data.flag) {
+                                                    var html = '';
 
-                                                $.each(data.already_existed_shipments, function (index, tracking_number) {
-                                                    html += tracking_number + '<br/>';
-                                                });
+                                                    $.each(data.already_existed_shipments, function (index, tracking_number) {
+                                                        html += tracking_number + '<br/>';
+                                                    });
 
-                                                if (!data.cannot_change) {
-                                                    html += '<br/>Request/Complaint already lodged for the above Shipment(s)!';
-                                                }
-                                                else {
-                                                    html += '<br/>Request for Change cannot be opened for the above Shipment(s) at the Current Status!';
-                                                }
+                                                    if (!data.cannot_change) {
+                                                        html += '<br/>Request/Complaint already lodged for the above Shipment(s)!';
+                                                    }
+                                                    else {
+                                                        html += '<br/>Request for Change cannot be opened for the above Shipment(s) at the Current Status!';
+                                                    }
 
-                                                content = document.createElement('div');
-                                                content.innerHTML = html;
+                                                    content = document.createElement('div');
+                                                    content.innerHTML = html;
 
-                                                swal({
-                                                    title: 'Request / Complaint Cannot Be Lodged!',
-                                                    content: content,
-                                                    icon: 'warning',
-                                                    buttons: {
-                                                        cancel: {
-                                                            text: 'Close',
-                                                            value: null,
-                                                            visible: true,
-                                                            closeModal: true,
+                                                    swal({
+                                                        title: 'Request / Complaint Cannot Be Lodged!',
+                                                        content: content,
+                                                        icon: 'warning',
+                                                        buttons: {
+                                                            cancel: {
+                                                                text: 'Close',
+                                                                value: null,
+                                                                visible: true,
+                                                                closeModal: true,
+                                                            },
                                                         },
-                                                    },
-                                                    closeOnClickOutside: false,
-                                                    closeOnEsc: false,
-                                                    dangerMode: true
-                                                });
+                                                        closeOnClickOutside: false,
+                                                        closeOnEsc: false,
+                                                        dangerMode: true
+                                                    });
+                                                } else {
+                                                    toastr.success(data.success, 'Success!', {
+                                                        positionClass: 'toast-bottom-center',
+                                                        containerId: 'toast-bottom-center'
+                                                    });
+                                                }
+                                                // toastr.success(data.success, 'Success!', {
+                                                //     positionClass: 'toast-bottom-center',
+                                                //     containerId: 'toast-bottom-center'
+                                                // });
                                             } else {
-                                                toastr.success(data.success, 'Success!', {
-                                                    positionClass: 'toast-bottom-center',
-                                                    containerId: 'toast-bottom-center'
+                                                toastr.error(data.error, 'Error!', {
+                                                    positionClass: 'toast-top-center',
+                                                    containerId: 'toast-top-center'
                                                 });
                                             }
-                                            // toastr.success(data.success, 'Success!', {
-                                            //     positionClass: 'toast-bottom-center',
-                                            //     containerId: 'toast-bottom-center'
-                                            // });
-                                        } else {
-                                            toastr.error(data.error, 'Error!', {
-                                                positionClass: 'toast-top-center',
-                                                containerId: 'toast-top-center'
-                                            });
-                                        }
 
-                                        table.button('.print').disable();
-                                        table.button('.cancel').disable();
-                                        table.button('.consolidate').disable();
+                                            table.button('.print').disable();
+                                            table.button('.cancel').disable();
+                                            table.button('.consolidate').disable();
 
-                                        selected_rows = [];
+                                            selected_rows = [];
 
-                                        table.rows().deselect();
+                                            table.rows().deselect();
 
-                                        table.draw('false');
+                                            table.draw('false');
 
-                                        $('#AddRequestModal').modal('hide');
-                                        $('#AddNewRequest').attr('disabled',false);
-                                    });
+                                            $('#AddRequestModal').modal('hide');
+                                            $('#AddNewRequest').attr('disabled',false);
+                                        });
                                 }
                                 else{
                                     $('#AddNewRequest').attr('disabled',false);
@@ -2309,78 +2338,80 @@
                                     'case_nature_id': case_nature_id,
                                     'complaint_id': complaint_id,
                                     'description': description,
+                                    'complainant_phone' : $('#complainant_phone').val(),
+                                    'case_nature_complainant' : $('#case_nature_complainant').val(),
                                 }
                             })
-                            .done(function (data) {
-                                swal.close();
+                                .done(function (data) {
+                                    swal.close();
 
-                                if (data.status) {
-                                    if (data.flag) {
-                                        var html = '';
+                                    if (data.status) {
+                                        if (data.flag) {
+                                            var html = '';
 
-                                        $.each(data.already_existed_shipments, function (index, tracking_number) {
-                                            html += tracking_number + '<br/>';
-                                        });
+                                            $.each(data.already_existed_shipments, function (index, tracking_number) {
+                                                html += tracking_number + '<br/>';
+                                            });
 
-                                        if (!data.cannot_change) {
-                                            html += '<br/>Request/Complaint already lodged for the above Shipment(s)!';
-                                        }
-                                        else {
-                                            html += '<br/>Request for Change cannot be opened for the above Shipment(s) at the Current Status!';
-                                        }
+                                            if (!data.cannot_change) {
+                                                html += '<br/>Request/Complaint already lodged for the above Shipment(s)!';
+                                            }
+                                            else {
+                                                html += '<br/>Request for Change cannot be opened for the above Shipment(s) at the Current Status!';
+                                            }
 
-                                        content = document.createElement('div');
-                                        content.innerHTML = html;
+                                            content = document.createElement('div');
+                                            content.innerHTML = html;
 
-                                        swal({
-                                            title: 'Request / Complaint Cannot Be Lodged!',
-                                            content: content,
-                                            icon: 'warning',
-                                            buttons: {
-                                                cancel: {
-                                                    text: 'Close',
-                                                    value: null,
-                                                    visible: true,
-                                                    closeModal: true,
+                                            swal({
+                                                title: 'Request / Complaint Cannot Be Lodged!',
+                                                content: content,
+                                                icon: 'warning',
+                                                buttons: {
+                                                    cancel: {
+                                                        text: 'Close',
+                                                        value: null,
+                                                        visible: true,
+                                                        closeModal: true,
+                                                    },
                                                 },
-                                            },
-                                            closeOnClickOutside: false,
-                                            closeOnEsc: false,
-                                            dangerMode: true
-                                        });
+                                                closeOnClickOutside: false,
+                                                closeOnEsc: false,
+                                                dangerMode: true
+                                            });
+                                        } else {
+                                            toastr.success(data.success, 'Success!', {
+                                                positionClass: 'toast-bottom-center',
+                                                containerId: 'toast-bottom-center'
+                                            });
+                                        }
+                                        // toastr.success(data.success, 'Success!', {
+                                        //     positionClass: 'toast-bottom-center',
+                                        //     containerId: 'toast-bottom-center'
+                                        // });
                                     } else {
-                                        toastr.success(data.success, 'Success!', {
-                                            positionClass: 'toast-bottom-center',
-                                            containerId: 'toast-bottom-center'
+                                        toastr.error(data.error, 'Error!', {
+                                            positionClass: 'toast-top-center',
+                                            containerId: 'toast-top-center'
                                         });
                                     }
-                                    // toastr.success(data.success, 'Success!', {
-                                    //     positionClass: 'toast-bottom-center',
-                                    //     containerId: 'toast-bottom-center'
-                                    // });
-                                } else {
-                                    toastr.error(data.error, 'Error!', {
-                                        positionClass: 'toast-top-center',
-                                        containerId: 'toast-top-center'
-                                    });
-                                }
 
-                                table.button('.print').disable();
-                                table.button('.cancel').disable();
-                                table.button('.consolidate').disable();
+                                    table.button('.print').disable();
+                                    table.button('.cancel').disable();
+                                    table.button('.consolidate').disable();
 
-                                selected_rows = [];
+                                    selected_rows = [];
 
-                                table.rows().deselect();
+                                    table.rows().deselect();
 
-                                table.draw('false');
+                                    table.draw('false');
 
-                                $('#AddRequestModal').modal('hide');
-                                $('#AddNewRequest').attr('disabled',false);
-                            });
+                                    $('#AddRequestModal').modal('hide');
+                                    $('#AddNewRequest').attr('disabled',false);
+                                });
                         }
 
-                        
+
                     }
                 }
             });
@@ -2407,6 +2438,8 @@
                 $('#receiving_sheet_div').addClass('d-none');
                 $('#alternate_phone_input').addClass('d-none');
                 $('#alternate_phone').val('');
+                $('#case_nature_complainant').val('').trigger('change');
+                $('#complainant_phone').val('');
                 // $('#cod_amount_input').addClass('d-none');
                 // $('#cod_amount').val('');
             });
@@ -2461,14 +2494,14 @@
                 var words = text.trim().split(/\s+/); // Split the text into words
 
                 if (words.length > wordLimit) {
-                    
+
                     words = words.slice(0, wordLimit); // Keep only the first 10 words
                     textarea.val(words.join(' ')); // Update the textarea value
                 }
             });
 
             $('#new_amount').on('keyup', function () {
-            
+
                 var new_amount = $(this).val();
 
                 if(new_amount == 0 && new_amount != '')
@@ -2480,7 +2513,7 @@
                 }
 
             });
-            
+
         });
     </script>
 
