@@ -57,7 +57,7 @@ use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteImage;
 use App\Http\Models\Admin\ReturnNoteShipment;
-use App\http\Models\Admin\ReturnReasonMandatoryShipper;
+use App\Http\Models\Admin\ReturnReasonMandatoryShipper;
 use App\Http\Models\Admin\RiderCategoryByPass;
 use App\Http\Models\Admin\RiderType;
 use App\Http\Models\Admin\SalePersonTarget;
@@ -164,6 +164,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Password;
+use Illuminate\Support\Str;
+
 
 class AdminAPIController extends Controller
 {
@@ -326,7 +328,7 @@ class AdminAPIController extends Controller
                     if ($user->api_token) {
                         $information['api_token'] = $user->api_token;
                     } else {
-                        $api_token = uniqid(base64_encode(str_random(60)));
+                        $api_token = uniqid(base64_encode(Str::random(60)));
 
                         $user->api_token = $api_token;
 
@@ -4868,7 +4870,7 @@ class AdminAPIController extends Controller
 
                     $filename = 'payslip_' . $payslip->id . Carbon::now()->format('Uu') . '-' . $payroll_month . '.pdf';
                     $path = 'payslip_pdf/' . $filename;
-                    $result = $pdf->download($filename);
+                    $result = $pdf->setOption('enable-local-file-access', true)->download($filename);
                     Storage::disk('public')->put($path, $result);
                     $payslip_pdf = new PayslipPdf();
                     $payslip_pdf->payslip_id = $payslip->id;
@@ -6096,7 +6098,7 @@ class AdminAPIController extends Controller
                     if ($user->api_token) {
                         $information['api_token'] = $user->api_token;
                     } else {
-                        $api_token = uniqid(base64_encode(str_random(60)));
+                        $api_token = uniqid(base64_encode(Str::random(60)));
 
                         $user->api_token = $api_token;
 
@@ -8037,7 +8039,7 @@ class AdminAPIController extends Controller
                     if ($user->api_token) {
                         $information['api_token'] = $user->api_token;
                     } else {
-                        $api_token = uniqid(base64_encode(str_random(60)));
+                        $api_token = uniqid(base64_encode(Str::random(60)));
 
                         $user->api_token = $api_token;
 
@@ -10068,7 +10070,7 @@ class AdminAPIController extends Controller
                     }
 
                     if (!$user->api_token) {
-                        $api_token = uniqid(base64_encode(str_random(60)));
+                        $api_token = uniqid(base64_encode(Str::random(60)));
                         $user->api_token = $api_token;
                         $user->save();
                     }

@@ -618,7 +618,7 @@
                         name: 'employee_leaves.employee_type_id',
                         class: 'align-middle employee_type'
                     },
-                    {data: 'cnic', name: 'a.cnic', class: 'align-middle cnic', searchable: false},
+                    {data: 'cnic', name: 'e.cnic', class: 'align-middle cnic', searchable: false},
                     {
                         data: 'availed_leaves',
                         name: 'availed_leaves',

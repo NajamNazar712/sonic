@@ -284,7 +284,7 @@
                     {data: 'rider_name', name: 'r.name', class: 'align-middle rider_name'},
                     {data: 'purpose', name: 'ss.name', class: 'align-middle purpose'},
                     {data: 'otp', name: 'otp', class: 'align-middle otp', orderable: false, searchable: false},
-                    {data: 'created_at', name: 'rider_deliveries.created_at', class: 'align-middle created_at'},
+                    {data: 'created', name: 'rider_deliveries.created_at', class: 'align-middle created_at'},
                     {data: 'date', name: 'shipment_otps.updated_at', class: 'align-middle date'},
 
                 ],

@@ -218,6 +218,7 @@ class RiderLogisticApiController extends Controller
                                         $logistic_booking->total_volumetric_weight = $booking['total_volumetric_weight'];
                                         $logistic_booking->user_type = 2; // 1 - Admin, 2 - Rider, 0 -> shipper
                                         $logistic_booking->created_by = $rider_id;
+                                        $logistic_booking->app_version = $booking['app_version_name'];
                                         $logistic_booking->payment_mode_id=1;
                                         $logistic_booking->save();
 
@@ -512,107 +513,6 @@ class RiderLogisticApiController extends Controller
 
         }
 
-        //    public function logistic_booking_store(Request $request)
-//    {
-//
-//        $bookig_data=$request->booking_data;
-//        $rider_id = $request->rider_id;
-//
-//        try {
-//            DB::beginTransaction();
-//
-//            $currentTimestamp = Carbon::now();
-//
-//            $logisticBookings = [];
-//            $bookingPieces = [];
-//            $itemReferences = [];
-//            $itemInsurances = [];
-//
-//            if (isset($bookig_data))
-//            {
-//                foreach ($bookig_data as $booking) {
-//                    $logisticBookings[] = [
-//                        'shipper_id' => $booking['shipper_id'],
-//                        'cn_number' => $booking['cn_number'],
-//                        'booking_date' => $booking['booking_date'],
-//                        'product_id' => $booking['product_id'],
-//                        'service_id' => $booking['service_id'],
-//                        'destination_id' => $booking['destination_id'],
-//                        'shipper_reference' => $booking['shipper_reference'],
-//                        'consignee_name' => $booking['consignee_name'],
-//                        'total_pieces' => $booking['total_pieces'],
-//                        'consignee_phone_1' => $booking['consignee_phone_1'],
-//                        'total_dense_weight' => $booking['total_dense_weight'],
-//                        'total_volumetric_weight' => $booking['total_volumetric_weight'],
-//                        'user_type' => 2,
-//                        'created_by' => $rider_id,
-//                        'created_at' => $currentTimestamp,
-//                        'updated_at' => $currentTimestamp,
-//                    ];
-//
-//                    if (isset($booking['booking_pieces_data'])) {
-//                        foreach ($booking['booking_pieces_data'] as $pieces_data) {
-//                            $bookingPieces[] = [
-//                                'from_pieces' => $pieces_data['from_pieces'],
-//                                'to_pieces' => $pieces_data['to_pieces'],
-//                                'quantity' => $pieces_data['quantity'],
-//                                'user_type' => 2,
-//                                'created_by' => $rider_id,
-//                                'created_at' => $currentTimestamp,
-//                                'updated_at' => $currentTimestamp,
-//                            ];
-//                        }
-//                    }
-//
-//                    if (isset($booking['item_refernces_data'])) {
-//                        foreach ($booking['item_refernces_data'] as $item_data) {
-//                            foreach ($item_data['item_detail'] as $detail) {
-//                                $itemReferences[] = [
-//                                    'item_code' => $item_data['item_code'],
-//                                    'width' => $detail['width'],
-//                                    'height' => $detail['height'],
-//                                    'length' => $detail['length'],
-//                                    'weight' => $detail['weight'],
-//                                    'no_piece' => $detail['no_piece'],
-//                                    'user_type' => 2,
-//                                    'created_by' => $rider_id,
-//                                    'created_at' => $currentTimestamp,
-//                                    'updated_at' => $currentTimestamp,
-//                                ];
-//                            }
-//                        }
-//                    }
-//
-//                    if (isset($booking['item_insurance_data'])) {
-//                        foreach ($booking['item_insurance_data'] as $item_insurance) {
-//                            $itemInsurances[] = [
-//                                'special_handling_id' => $item_insurance['special_handling_id'],
-//                                'insurance' => $item_insurance['insurance'],
-//                                'item_code' => $item_insurance['item_code'],
-//                                'user_type' => 2,
-//                                'created_by' => $rider_id,
-//                                'created_at' => $currentTimestamp,
-//                                'updated_at' => $currentTimestamp,
-//                            ];
-//                        }
-//                    }
-//                }
-//            }
-//
-//            TraxLogisticBooking::insert($logisticBookings);
-//            TraxBookingPiece::insert($bookingPieces);
-//            TraxItemRefernce::insert($itemReferences);
-//            TraxItemInsurance::insert($itemInsurances);
-//
-//            DB::commit();
-//            return response()->json(['status'=>0,'success'=>'Booking Completed Successfully']);
-//
-//        }catch (\Exception $ex) {
-//            dd($ex->getMessage());
-//            DB::rollback();
-//            return response()->json(['status'=>1,'error'=>'Something went wrong!']);
-//        }
-//    }
 
 
 

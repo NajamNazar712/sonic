@@ -1,0 +1,22 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
+class UpdateModulePermissionForDocumentsTableSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        DB::table('module_permissions')->insert(array(
+            array('id' => 277, 'name' => 'Upload Documents', 'module_id' => 2),
+            array('id' => 278, 'name' => 'Approve/Reject Documents', 'module_id' => 2)
+        ));
+    }
+}

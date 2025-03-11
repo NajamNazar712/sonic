@@ -37,7 +37,7 @@ use Auth;
 use DB;
 
 use Carbon\Carbon;
-use Yajra\Datatables\Datatables;
+use Yajra\DataTables\DataTables;
 
 class AdminShipmentCancelController extends Controller
 {
@@ -257,6 +257,16 @@ class AdminShipmentCancelController extends Controller
             });
         }
 
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $shipments->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+        }
+
+        if ($request->get('search_from') && $request->get('search_to')) {
+            $from = $request->get('search_from');
+            $to = $request->get('search_to');
+            $shipments->whereBetween('shipments.created_at', [$from,$to]);
+        }
+
         $datatables = Datatables::of($shipments)
         ->addColumn('tracking_number_hyperlink', function ($shipment) {
             return '<u><a href=' . route('admin.tracking.index') . '?tracking_number=' . $shipment->tracking_number . ' class="tracking" target="_blank">' . $shipment->tracking_number . '</a></u>';
@@ -353,17 +363,8 @@ class AdminShipmentCancelController extends Controller
                 $query->whereRaw('false');
             }
         })
-        ->orderColumn('phone', 'shipments.consignee_phone_number_1 $1, shipments.consignee_phone_number_2 $1');
-
-        if ($tracking_numbers = $request->get('tracking_numbers')) {
-            $datatables->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
-        }
-
-        if ($request->get('search_from') && $request->get('search_to')) {
-            $from = $request->get('search_from');
-            $to = $request->get('search_to');
-            $datatables->whereBetween('shipments.created_at', [$from,$to]);
-        }
+        ->orderColumn('phone', 'shipments.consignee_phone_number_1 $1, shipments.consignee_phone_number_2 $1')
+        ->rawColumns(['account_number','tracking_number_hyperlink','action']);
 
         return $datatables->make(true);
     }

@@ -345,9 +345,14 @@
                                 <fieldset class="form-group">
                                     <select name="category" id="category" class="form-control select2"
                                             data-rule-required="true" data-msg-required="This field is required">
-                                        @foreach($operation_rider_category as $category)
-                                            <option value="{{$category->id}}">{{$category->name}}</option>
-                                        @endforeach
+                                        {{-- TO - 6892 --}}
+                                        {{--@foreach($operation_rider_category as $category)--}}
+                                           {{--<option value="{{$category->id}}">{{$category->name}}</option>--}}
+                                        {{--@endforeach--}}
+
+                                        <option value="{{$operation_rider_category->id}}">{{$operation_rider_category->name}}</option>
+
+                                        {{--END--}}
                                     </select>
                                 </fieldset>
                             </div>
@@ -1621,7 +1626,7 @@
                     {data: 'trax_id', name: 'employees.trax_id', class: 'align-middle trax_id'},
                     {data: 'old_trax_id', name: 'employees.old_trax_id', class: 'align-middle old_trax_id'},
                     {data: 'employee_name', name: 'employees.name', class: 'align-middle employee_name'},
-                    {data: 'father_name', name: 'employees.father_name', class: 'align-middle father_name'},
+                    {data: 'father_name', name: 'employees.guardian_name', class: 'align-middle father_name'},
                     {data: 'gender', name: 'eg.name', class: 'align-middle gender'},
                     {data: 'employee_hub', name: 'employee_hub', class: 'align-middle employee_hub', orderable: false, searchable: false},
                     {data: 'city', name: 'cities.name', class: 'align-middle city'},
@@ -2123,7 +2128,10 @@
                 $('#area_list').val(area_id).trigger('change');
                 if(check_bit != null)
                 {
+
+
                     $('#category').val(table.row($(elm).parents('tr')).data().operation_id).trigger('change');
+
                     route_id = table.row($(elm).parents('tr')).data().route_id;
                     trax_id = table.row($(elm).parents('tr')).data().trax_id;
                     var ccd = table.row($(elm).parents('tr')).data().ccd;

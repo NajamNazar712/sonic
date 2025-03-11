@@ -146,13 +146,19 @@ class LogisticReportController extends Controller
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)')
                     );
             })
-            ->select('shipments.id as shipment_id','shipments.tracking_number','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link', 'shipments.consignee_name','u.name as shipper','usi.pickup_address as shipper_address','ss.name as current_status','sj.created_at as arrival_date', 'shipments.created_at as booking_date','dc.name as destination','h.name as hub', 'dr.created_at as delivered_or_returned','z.name as zone', 'dc.id as destination_city_id', 'shipments.shipper_status_id as shipment_status', 'shipments.consignee_address', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'si.description','si.quantity','shipments.pieces','shipments.estimated_weight', 'oc.name as origin', 'sjl.updated_at as journey_updated_at', 'sjl.shipment_id as journey_latest_id', 'sjl.updated_at as journey_latest_updated_at', 'sjl.shipper_status_id as latest_shipper_status_id', 'shipments.shipper_status_id as shipper_status_id', 'sjad.created_at as arrived_date')
+            ->leftJoin('shipments_journey as in_transit_journey', function ($join) {
+                $join->on('in_transit_journey.shipment_id', '=', 'shipments.id')
+                        ->where('in_transit_journey.shipper_status_id', 3)
+                        ->where('in_transit_journey.id', '=', DB::connection('reports')->raw(
+                            '(SELECT MIN(id) FROM shipments_journey WHERE shipment_id = shipments.id AND shipper_status_id = 3)'
+                        ));
+            })
+            ->select('shipments.id as shipment_id','shipments.tracking_number','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link', 'shipments.consignee_name','u.name as shipper','usi.pickup_address as shipper_address','ss.name as current_status','sj.created_at as arrival_date', 'shipments.created_at as booking_date','dc.name as destination','h.name as hub', 'dr.created_at as delivered_or_returned','z.name as zone', 'dc.id as destination_city_id', 'shipments.shipper_status_id as shipment_status', 'shipments.consignee_address', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'si.description','si.quantity','shipments.pieces','shipments.estimated_weight', 'oc.name as origin', 'sjl.updated_at as journey_updated_at', 'sjl.shipment_id as journey_latest_id', 'sjl.updated_at as journey_latest_updated_at', 'sjl.shipper_status_id as latest_shipper_status_id', 'shipments.shipper_status_id as shipper_status_id', 'sjad.created_at as arrived_date', 'in_transit_journey.created_at as in_transit_date')
             ->where('shipments.shipper_status_id', '!=', 17)
             ->whereIn('u.id', $special_shippers)
             ->whereBetween('sj.created_at', [$from,$to])
             ->groupBy('shipments.id');
-   
-        
+
         if($from != null && $to != null) {
             $sales = $sales->whereBetween('shipments.created_at', [$from, $to]);
             
@@ -193,7 +199,7 @@ class LogisticReportController extends Controller
             })
             
             ->addColumn('consignee_phone', function ($shipments) {
-                return $shipments->consignee_phone_number_1 . "<br>" . $shipments->consignee_phone_number_2;
+                return $shipments->consignee_phone_number_1 .  " / "  . $shipments->consignee_phone_number_2;
             })
             ->addColumn('consignee_phone_excel', function ($shipments) {
                 return $shipments->consignee_phone_number_1 . "," . $shipments->consignee_phone_number_2;
@@ -215,7 +221,7 @@ class LogisticReportController extends Controller
             ->orderColumn('consignee_phone', 'shipments.consignee_phone_number_1 $1, shipments.consignee_phone_number_2 $1');
 
         if ($tracking = $request->get('search_tracking')) {
-            $datatable->where('shipments.tracking_number', '=', $tracking);
+            $sales->where('shipments.tracking_number', '=', $tracking);
         }
 
         $search_shipper = $request->get('search_shipper');
@@ -230,19 +236,20 @@ class LogisticReportController extends Controller
                 $whereInArray[] = $search_shipper;
             }
 
-            $datatable->whereIn('shipments.user_id', $whereInArray);
+            $sales->whereIn('shipments.user_id', $whereInArray);
         }
         
         if ($destination = $request->get('search_destination')) {
-            $datatable->where('dc.id', '=', $destination);
+            $sales->where('dc.id', '=', $destination);
         }
         if ($hub = $request->get('search_hub')) {
-            $datatable->where('h.id', '=', $hub);
+            $sales->where('h.id', '=', $hub);
         }
         if ($status = $request->get('search_status')) {
-            $datatable->where('ss.id', '=', $status);
+            $sales->where('ss.id', '=', $status);
         }
-        return $datatable->make(true);
-    } 
-
+        return $datatable
+        ->rawColumns(['tracking_number_link'])
+        ->make(true);
+    }
 }

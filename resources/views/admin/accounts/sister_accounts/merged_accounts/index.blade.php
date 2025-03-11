@@ -165,7 +165,7 @@
                                 row.push(index + 1);
                                 row.push(values.name);
                                 row.push(values.accounts);
-                                row.push(values.created_at);
+                                row.push(values.created);
                                 row.push(values.created_by);
                                 row.push(values.updated_at);
                                 row.push(values.updated_by);
@@ -208,7 +208,7 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'name' ,name: 'merged_account_heads.name', class: 'align-middle name'},
                     { data:'accounts_button' ,name: 'accounts_button', class: 'align-middle accounts_button', orderable: false, searchable: false},
-                    { data:'created_at' ,name: 'merged_account_heads.created_at', class: 'align-middle created_at'},
+                    { data:'created' ,name: 'merged_account_heads.created_at', class: 'align-middle created'},
                     { data:'created_by' ,name: 'ac.name', class: 'align-middle created_by'},
                     { data:'updated_at' ,name: 'merged_account_heads.updated_at', class: 'align-middle updated_at'},
                     { data:'updated_by' ,name: 'au.name', class: 'align-middle updated_by'},

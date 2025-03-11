@@ -37,7 +37,7 @@ class BarcodeGeneratorController extends Controller
     public function list(Request $request)
     {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 981);
-            $data = BarcodeGenerator::leftJoin('barcode_types as bt', 'bt.id','barcode_generators.barcode_type_id')->select(['barcode_generators.*','bt.barcode_name'])->orderby('barcode_generators.id', 'desc');
+            $data = BarcodeGenerator::leftJoin('barcode_types as bt', 'bt.id','barcode_generators.barcode_type_id')->select(['barcode_generators.id','bt.barcode_name', 'barcode_generators.barcode_key', 'barcode_generators.barcode_type_id','barcode_generators.created_at as created'])->orderby('barcode_generators.id', 'desc');
 
             if($barcode_type = $request->get('search_barcode_type')) {
                 $data =  $data->where('barcode_generators.barcode_type_id', $barcode_type);
@@ -50,7 +50,9 @@ class BarcodeGeneratorController extends Controller
                 $html = '<img src="data:image/png;base64,' . base64_encode($generator->getBarcode($data->barcode_key, $generator::TYPE_CODE_128, 2, 70)) . '" class="img-fluid mx-auto d-block h-auto">';
                 return $html;
             });
-            return $datatable->make(true);
+            return $datatable
+            ->rawColumns(['barcode'])
+            ->make(true);
     }
 
     /**

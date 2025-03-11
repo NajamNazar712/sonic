@@ -21,7 +21,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Yajra\Datatables\Datatables;
+use Yajra\DataTables\DataTables;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Models\Admin\ShipmentPieceRequestImage;
 
@@ -138,6 +138,12 @@ class AdminShipmentPieceController extends Controller
             $shipments = $shipments->whereIn('oc.hub_id', session('hubs'));
         }
 
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $shipments->whereBetween('shipment_pieces_requests.created_at', [$from,$to]);
+        }
+
         $datatables = Datatables::of($shipments)
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
@@ -232,13 +238,9 @@ class AdminShipmentPieceController extends Controller
                 } else {
                     return '';
                 }
-            });
+            })
+            ->rawColumns(['tracking_number_link', 'image_view','action']);
 
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $shipments->whereBetween('shipment_pieces_requests.created_at', [$from,$to]);
-        }
 
         return $datatables->make(true);
     }
@@ -438,6 +440,11 @@ class AdminShipmentPieceController extends Controller
         if (session('role_id') != 1) {
             $shipments = $shipments->whereIn('oc.hub_id', session('hubs'));
         }
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $shipments->whereBetween('shipment_pieces_requests.created_at', [$from,$to]);
+        }
 
         $datatables = Datatables::of($shipments)
             ->editColumn('tracking_number_link', function ($shipments) {
@@ -494,13 +501,8 @@ class AdminShipmentPieceController extends Controller
                 }else if($data->last_updated_by_user){
                     return $data->updated_by_shipper;
                 }
-            });
-
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $shipments->whereBetween('shipment_pieces_requests.created_at', [$from,$to]);
-        }
+            })
+            ->rawColumns(['tracking_number_link']);
 
         return $datatables->make(true);
     }

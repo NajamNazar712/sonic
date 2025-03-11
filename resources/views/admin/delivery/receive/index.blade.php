@@ -293,6 +293,7 @@
                             head.push('E-Comm (COD)');
                             head.push('General Logistics (Retail)');
                             head.push('General Logistics - E-Comm (Express)');
+                            head.push('Other Sub-Segments');
 
                             head.push('Total Weight');
                             head.push('No. Of Pending Shipments');
@@ -301,6 +302,7 @@
                             head.push('E-Comm (COD)');
                             head.push('General Logistics (Retail)');
                             head.push('General Logistics - E-Comm (Express)');
+                            head.push('Other Sub-Segments');
 
                             head.push('Assigned By');
                             head.push('Assigned Date');
@@ -329,6 +331,7 @@
                                 row.push(values.excel_ecom_cod);
                                 row.push(values.excel_general_retail);
                                 row.push(values.excel_general_ecom_express);
+                                row.push(values.excel_others);
 
                                 row.push(values.total_weight);
                                 row.push(values.shipments_unverified_count);
@@ -337,6 +340,7 @@
                                 row.push(values.delivered_excel_ecom_cod);
                                 row.push(values.delivered_excel_general_retail);
                                 row.push(values.delivered_excel_general_ecom_express);
+                                row.push(values.delivered_excel_others);
 
                                 row.push(values.assignee);
                                 row.push(values.created_at);
@@ -400,7 +404,7 @@
                     {data: 'operation_rider_id', name: 'riders.operation_rider_id', class: 'align-middle operation_rider_id'},
                     {data: 'route', name: 'route', class: 'align-middle route'},
                     {data: 'shipments_count_link', name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
-                    {data: 'total_weight', name: 'total_weight', class: 'align-middle total_weight text-center',orderable:false},
+                    {data: 'total_weight', name: 'total_weight', class: 'align-middle total_weight text-center',orderable:false, searchable: false},
                     {data: 'shipments_unverified_link', name: 'shipments_unverified_count', class: 'align-middle shipments_unverified_link text-center', orderable: false, searchable: false},
                     {data: 'delivered_shipments', name: 'delivery_notes.delivered_shipments', class: 'align-middle delivered_shipments text-center', orderable: false, searchable: false},
                     {data: 'assignee', name: 'admins.name', class: 'align-middle assignee'},
@@ -446,7 +450,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.shipments_unverified_link')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.shipments_unverified_link') || $(header).is('.total_weight')) {
                             $(td).appendTo($(search));
                         } else if ($(header).is('.pending_status')) {
                             $(drop_select).appendTo($(search))
@@ -480,7 +484,7 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
-                    
+
                     this.api().table().columns.adjust();
                 }
             });

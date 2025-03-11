@@ -25,6 +25,13 @@ use Illuminate\Http\Request;
     Route::post('store_device_token', 'APIController@store_device_token')->name('store_device_token');
     Route::post('delete_device_token', 'APIController@delete_device_token')->name('delete_device_token');
     Route::post('rcp_sms_from_consignee', 'APIController@rcp_sms_from_consignee')->name('rcp_sms_from_consignee');
+    Route::post('fintech_getToken','APIController@fintech_getToken')->name('fintech_getToken');
+    Route::middleware('FinvoWalletUser')->group(function () {
+        Route::post('fin_sms', 'APIController@fin_sms')->name('fin_sms');
+        Route::post('fintech_charges','APIController@fintech_charges')->name('fintech_charges');
+    });
+
+
 
     Route::post('employee_attendance_details', 'APIController@employee_checkin')->name('employee_attendance_details');
 
@@ -696,6 +703,8 @@ use Illuminate\Http\Request;
 
             Route::post('retail_note_information', 'APIController@hbl_konnect_retail_note_cash_collection_information')->name('retail_note_information');
             Route::post('retail_note_transaction_information', 'APIController@hbl_konnect_retail_note_cash_collection_transactions')->name('retail_note_transaction_information');
+            Route::post('clone_retail_note_transaction_information2', 'APIController@hbl_konnect_retail_note_cash_collection_transactions_2')->name('retail_note_transaction_information2');
+
         });
         Route::prefix('easypaisa')->name('easypaisa.')->group(function () {
             Route::post('delivery_note_information', 'APIController@hbl_konnect_delivery_note_information')->name('delivery_note_information');

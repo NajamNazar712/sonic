@@ -32,6 +32,8 @@ use App\Http\Models\Shipper\ShipperAirWaybillSettings;
 use App\Http\Controllers\Admins\GlobalSettingsController;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
+use App\Models\WalletShipperSetting;
+
 
 
 class LoginController extends Controller
@@ -433,6 +435,11 @@ class LoginController extends Controller
           
         }
         session(['mms_excel_booking_shippers' => $mms_excel_booking_shippers]);
+
+        $wallet_sign_up_allow = WalletShipperSetting::where('user_id', $shipper_user_id)->where('status', 1);
+        if($wallet_sign_up_allow->exists()){
+            session(['wallet_sign_up_allow' => TRUE]);
+        }
 
         return redirect()->route('cod.welcome');
     }

@@ -117,7 +117,7 @@ class AdminConsolidatedController extends Controller
                 } else {
                     return $days;
                 }
-            });
+            })->rawColumns(['tracking_number_link','default_shipment_tracking_number_link']);
         return $datatables->make(true);
     }
 }

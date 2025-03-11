@@ -40,79 +40,84 @@
 									{{session('info')}}
 								</div>
 							@endif
+							
+							@if (session('role_id') == 1 || in_array(135, session('permissions')))
+								<form id="shipment_weight_excel_form" class="form-horizontal" method="POST" action="{{ route('admin.finance.change_shipment_weight.excel_store') }}" novalidate="novalidate" enctype="multipart/form-data">
+									{{ csrf_field() }}
 
-							<form id="shipment_weight_excel_form" class="form-horizontal" method="POST" action="{{ route('admin.finance.change_shipment_weight.excel_store') }}" novalidate="novalidate" enctype="multipart/form-data">
-								{{ csrf_field() }}
+									<div class="row align-items-center justify-content-center">
+										<div class="col-2">
+											<h3 class="heading" data-toggle="tooltip" data-placement="top" title data-original-title="For update weight only."><strong>For Bulk Shipment (update)</strong></h3>
+										</div>
+										<div class="col-4">
+											<div class="form-group">
+												<input type="file" name="shipments" class="w-100 p-1 border-primary" title="Select File" data-rule-required="true" data-msg-required="File is required" data-rule-extension="xls|xlsx" data-msg-extension="Only file with extension xls or xlsx allowed" data-rule-accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-msg-accept="Only Excel file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+											</div>
+										</div>
 
-								<div class="row align-items-center justify-content-center">
+										<div class="col-1">
+											<div class="form-group">
+												<button type="submit" name="upload" class="btn btn-primary">Upload</button>
+											</div>
+										</div>
+
+										<div class="col-2">
+											<div class="form-group">
+												<a href="{{ asset('file/Change Shipment Weight Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
+											</div>
+										</div>
+									</div>
+								</form>
+							@endif
+
+							@if (session('role_id') == 1 || in_array(1015, session('permissions')))
+								<form id="view_shipment_weight_excel_form" class="form-horizontal" method="POST" action="{{ route('admin.finance.change_shipment_weight.view_excel_store') }}" novalidate="novalidate" enctype="multipart/form-data">
+									{{ csrf_field() }}
+
+									<div class="row align-items-center justify-content-center">
+										<div class="col-2">
+											<h3 class="heading" data-toggle="tooltip" data-placement="bottom" title data-original-title="For view estimated shipment charges only."><strong>For Bulk Shipment (View)</strong></h3>
+										</div>
+										<div class="col-4">
+											<div class="form-group">
+												<input type="file" name="shipments" class="w-100 p-1 border-primary" title="Select File" data-rule-required="true" data-msg-required="File is required" data-rule-extension="xls|xlsx" data-msg-extension="Only file with extension xls or xlsx allowed" data-rule-accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-msg-accept="Only Excel file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+											</div>
+										</div>
+
+										<div class="col-1">
+											<div class="form-group">
+												<button type="submit" name="upload" class="btn btn-primary">Upload</button>
+											</div>
+										</div>
+
+										<div class="col-2">
+											<div class="form-group">
+												<a href="{{ asset('file/Bulk Shipment Weight Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
+											</div>
+										</div>
+									</div>
+								</form>
+							@endif
+
+							@if (session('role_id') == 1 || array_intersect([135, 1015], session('permissions')))
+								<form id="search_form" class="row mb-1 justify-content-center mt-2" novalidate="novalidate">
 									<div class="col-2">
-										<h3 class="heading" data-toggle="tooltip" data-placement="top" title data-original-title="For update weight only."><strong>For Bulk Shipment (update)</strong></h3>
+										<h3 class="heading"><strong>Individual Shipment</strong></h3>
 									</div>
-									<div class="col-4">
-										<div class="form-group">
-											<input type="file" name="shipments" class="w-100 p-1 border-primary" title="Select File" data-rule-required="true" data-msg-required="File is required" data-rule-extension="xls|xlsx" data-msg-extension="Only file with extension xls or xlsx allowed" data-rule-accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-msg-accept="Only Excel file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
-										</div>
+									<div class="col-3 form-group">
+										<input type="text" name="tracking_numbers" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
 									</div>
 
-									<div class="col-1">
-										<div class="form-group">
-											<button type="submit" name="upload" class="btn btn-primary">Upload</button>
-										</div>
+									<div class="col-2 form-group">
+										<button type="submit" name="search" class="btn btn-primary search" value="Search">Search</button>
 									</div>
-
-									<div class="col-2">
-										<div class="form-group">
-											<a href="{{ asset('file/Change Shipment Weight Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
-										</div>
-									</div>
-								</div>
-							</form>
-
-							<form id="view_shipment_weight_excel_form" class="form-horizontal" method="POST" action="{{ route('admin.finance.change_shipment_weight.view_excel_store') }}" novalidate="novalidate" enctype="multipart/form-data">
-								{{ csrf_field() }}
-
-								<div class="row align-items-center justify-content-center">
-									<div class="col-2">
-										<h3 class="heading" data-toggle="tooltip" data-placement="bottom" title data-original-title="For view estimated shipment charges only."><strong>For Bulk Shipment (view)</strong></h3>
-									</div>
-									<div class="col-4">
-										<div class="form-group">
-											<input type="file" name="shipments" class="w-100 p-1 border-primary" title="Select File" data-rule-required="true" data-msg-required="File is required" data-rule-extension="xls|xlsx" data-msg-extension="Only file with extension xls or xlsx allowed" data-rule-accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-msg-accept="Only Excel file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
-										</div>
-									</div>
-
-									<div class="col-1">
-										<div class="form-group">
-											<button type="submit" name="upload" class="btn btn-primary">Upload</button>
-										</div>
-									</div>
-
-									<div class="col-2">
-										<div class="form-group">
-											<a href="{{ asset('file/Bulk Shipment Weight Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
-										</div>
-									</div>
-								</div>
-							</form>
-
-
-							<form id="search_form" class="row mb-1 justify-content-center mt-2" novalidate="novalidate">
-								<div class="col-2">
-									<h3 class="heading"><strong>Individual Shipment</strong></h3>
-								</div>
-								<div class="col-3 form-group">
-									<input type="text" name="tracking_numbers" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
-								</div>
-
-								<div class="col-2 form-group">
-									<button type="submit" name="search" class="btn btn-primary search" value="Search">Search</button>
-								</div>
-							</form>
+								</form>
+							@endif
 
 							<div class="shipment mt-2" id="shipment">
 							</div>
 
-							@if (session('role_id') == 1 || in_array(135, session('permissions')))
+							@if (session('role_id') == 1 || array_intersect([135, 1015], session('permissions')))
 								<div class="row justify-content-center">
 									<div class="col-6">
 										<form id="change_weight_form" class="form mb-1 justify-content-center mt-2 d-none" method="POST" action="{{ route('admin.finance.change_shipment_weight.store') }}" novalidate="novalidate">
@@ -149,10 +154,11 @@
 												</div>
 
 											</div>
-
-											<div class="form-group text-center">
-												<button type="submit" name="change" class="btn btn-primary change" value="Change">Change</button>
-											</div>
+											@if (session('role_id') == 1 || in_array(135, session('permissions')))
+												<div class="form-group text-center">
+													<button type="submit" name="change" class="btn btn-primary change" value="Change">Change</button>
+												</div>
+											@endif
 										</form>
 									</div>
 								</div>
@@ -207,7 +213,7 @@
 
 					$('#shipment').html('');
 
-					@if (session('role_id') == 1 || in_array(135, session('permissions')))
+					@if (session('role_id') == 1 || array_intersect([135, 1015], session('permissions')))
 						$('#change_weight_form').addClass('d-none');
 
 						$('#change_weight_form input.tracking_number').val('');
@@ -320,7 +326,7 @@
 							if(details.booking_type_id == 2){
 								$('#replacement_div').removeClass('d-none');
 							}
-							@if (session('role_id') == 1 || in_array(135, session('permissions')))
+							@if (session('role_id') == 1 || array_intersect([135, 1015], session('permissions')))
 								$('#change_weight_form').removeClass('d-none');
 
 								$('#change_weight_form input.shipment_id').val(details.id);
@@ -344,7 +350,7 @@
 				}
 			});
 
-			@if (session('role_id') == 1 || in_array(135, session('permissions')))
+			@if (session('role_id') == 1 || array_intersect([135, 1015], session('permissions')))
 				$('#change_weight_form input.weight').inputmask({
 					'alias': 'decimal',
 					'allowMinus': false,

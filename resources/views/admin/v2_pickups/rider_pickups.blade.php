@@ -298,7 +298,7 @@
 								row.push(values.city);
 								row.push(values.city_area_name);
 								row.push(values.pickup_type);
-								row.push(values.created_at);
+								row.push(values.created);
 								row.push(values.start_location_latitude);
 								row.push(values.start_location_longitude);
 								row.push(values.actual_location_latitude);
@@ -364,7 +364,7 @@
 				{data: 'city', name: 'c.name', class: 'align-middle city'},
 				{data: 'city_area_name', name: 'cas.name', class: 'align-middle city_area_name'},
 				{data: 'pickup_type', name: 'v2_rider_pickups.pickup_type', class: 'align-middle pickup_type'},
-				{data: 'created_at', name: 'v2_rider_pickups.created_at', class: 'align-middle created_at'},
+				{data: 'created', name: 'v2_rider_pickups.created_at', class: 'align-middle created_at'},
 				{data: 'start_location_latitude', name: 'v2_rider_pickups.start_location_latitude', class: 'align-middle start_location_latitude'},
 				{data: 'start_location_longitude', name: 'v2_rider_pickups.start_location_longitude', class: 'align-middle start_location_longitude'},
 				{data: 'actual_location_latitude', name: 'v2_rider_pickups.actual_location_latitude', class: 'align-middle actual_location_latitude'},

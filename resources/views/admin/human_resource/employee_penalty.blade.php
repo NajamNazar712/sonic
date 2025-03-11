@@ -348,7 +348,7 @@
                     {data: 'department', name: 'ad.name', class: 'align-middle department'},
                     {data: 'employee_type', name: 'a.employee_type_id', class: 'align-middle employee_type'},
                     // {data: 'leave_availed', name: 'leave_availed', class: 'align-middle leave_availed'},
-                    {data: 'status', name: 'ls.name', class: 'align-middle status'},
+                    {data: 'status', name: 'ps.name', class: 'align-middle status'},
                     {data: 'no_of_late', name: 'no_of_late', class: 'align-middle no_late'},
                     {data: 'requested_date', name: 'employee_penalties.created_at', class: 'align-middle requested_date'},
                     {data: 'updated_by', name: 'lm.name', class: 'align-middle updated_by'},

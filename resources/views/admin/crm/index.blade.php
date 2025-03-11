@@ -229,12 +229,12 @@
                         class: 'align-middle department'
                     },
                     {
-                        data: 'created_at',
+                        data: 'created',
                         name: 'admin_roles.created_at',
                         class: 'align-middle created_at'
                     },
                     {
-                        data: 'updated_at',
+                        data: 'updated',
                         name: 'admin_roles.updated_at',
                         class: 'align-middle updated_at'
                     },

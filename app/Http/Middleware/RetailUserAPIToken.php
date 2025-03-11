@@ -24,8 +24,8 @@ class RetailUserAPIToken
                 $retail_user = $retail_user->first();
 
                 if ($retail_user->status) {
-                    $request->request->add(['retail_user_id' => $retail_user->id]);
-                    $request->request->add(['category' => $retail_user->category]);
+                    $request->merge(['retail_user_id' => $retail_user->id]);
+                    $request->merge(['category' => $retail_user->category]);
 
                     return $next($request);
                 }
