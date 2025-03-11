@@ -60868,15 +60868,13 @@ class WalletStatusActivity extends Command
         ];
         foreach($array as $value){
             if(trim($value['name']) != trim($value['name2'])) {
-//                $shipment = Shipment::where('tracking_number', $value['tracking_number'])->first();
-//                $data = [
-//                    'tracking_number' => $shipment->tracking_number,
-//                    'status' => $shipment->shipper_status_id,
-//                    'shipment_id' => $shipment->id
-//                ];
-//                ShipmentStatusSharingWithWallet::dispatch($data, 1);
-            }else{
-                echo $value['tracking_number'];
+                $shipment = Shipment::where('tracking_number', $value['tracking_number'])->first();
+                $data = [
+                    'tracking_number' => $shipment->tracking_number,
+                    'status' => $shipment->shipper_status_id,
+                    'shipment_id' => $shipment->id
+                ];
+                ShipmentStatusSharingWithWallet::dispatch($data, 1);
             }
         }
 
