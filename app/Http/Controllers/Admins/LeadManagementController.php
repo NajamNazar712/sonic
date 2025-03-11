@@ -32,6 +32,7 @@ use App\Models\Admin\Lead\LeadCallStatusLog;
 use App\Http\Models\ServiceList;
 use App\Http\Models\Shipper\User;
 use Illuminate\Support\Str;
+use App\Http\Models\Admin\Lead\EditLeadLogs;
 
 class LeadManagementController extends Controller
 {
@@ -181,8 +182,13 @@ class LeadManagementController extends Controller
             ->leftjoin('admins as ub', 'ub.id', '=', 'leads.updated_by')
             ->leftjoin('service_list as sl', 'sl.id', '=', 'leads.service_id')
             ->leftjoin('lead_reasons as lsr', 'lsr.id', '=', 'leads.reason')
-            ->select('leads.id as lead_id', 'leads.id as leadid', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'rp.trax_id as rider_id', 'c.name as city', 't.name as territory', 'at.name as area', 'leads.sale_person_updated_at', 'lr.name as lead_reference', 'leads.updated_at', 'sl.name as service', 'leads.brand as brand', 'leads.company as company', 'lsr.name as reason_id', 'leads.sale_person_updated_at as sale_person_tagged_time', 'leads.call_status as call_status','leads.expected_shipments as expected_shipments', 'u.brand_name as brand_name','leads.via_channel as via_channel')
+<<<<<<< HEAD
+            ->select('leads.id as lead_id', 'leads.id as leadid', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'rp.trax_id as rider_id', 'c.name as city', 't.name as territory', 'at.name as area', 'leads.sale_person_updated_at', 'lr.name as lead_reference', 'leads.updated_at', 'sl.name as service', 'leads.brand as brand', 'leads.company as company', 'lsr.name as reason_id', 'leads.sale_person_updated_at as sale_person_tagged_time', 'leads.call_status as call_status','leads.expected_shipments as expected_shipments', 'u.brand_name as brand_name','leads.via_channel')
             ->OrderByDesc('leads.requested_date');
+=======
+            ->select('leads.id as lead_id', 'leads.id as leadid', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'rp.trax_id as rider_id', 'c.name as city', 't.name as territory', 'at.name as area', 'leads.sale_person_updated_at', 'lr.name as lead_reference', 'leads.updated_at as updated', 'sl.name as service', 'leads.brand as brand', 'leads.company as company', 'lsr.name as reason_id', 'leads.sale_person_updated_at as sale_person_tagged_time', 'leads.call_status as call_status_name','leads.expected_shipments as expected_shipments', 'u.brand_name as brand_name','leads.via_channel as via_channel');
+            // ->OrderByDesc('leads.requested_date');
+>>>>>>> sprint_130
         if (session('role_id') != 1) {
             $leads = $leads->whereIn('c.hub_id', session('hubs'));
         }
@@ -198,7 +204,6 @@ class LeadManagementController extends Controller
         if ($sale_person = $request->get('search_sale_person')) {
             $leads->where('leads.sale_person_id', '=', $sale_person);
         }
-
         if ($statistics = $request->get('search_statistics')) {
             if ($statistics == 1) {
                 $search_statuses = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
@@ -275,7 +280,7 @@ class LeadManagementController extends Controller
                 return "<u><a href='{$route}\' class='leads' target='_blank'>" . str_pad($lead->lead_id, 3, '0', STR_PAD_LEFT) . "</a></u>";
                 //return $lead->lead_id;
             })
-            ->editColumn('via_channel', function ($lead) {
+            ->addColumn('request_resource', function ($lead) {
                 return isset($lead->via_channel) ?  $lead->via_channel : '-';
             })
             ->addColumn('action', function ($lead) {
@@ -305,12 +310,28 @@ class LeadManagementController extends Controller
                     if ((session('role_id') == 1 || (in_array(696, session('permissions')) && (!in_array($lead->status_id, [9, 12]))))) {
                         $dropdown .= '<button type="button"  class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
                     }
-                } 
+                }
+                
+                if($lead->via_channel == 'Sonic' || !isset($lead->via_channel)){
+                    if ((session('role_id') == 1 )) {
+                        $dropdown .= '
+                        <button type="button" class="dropdown-item view_logs">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col-2">
+                                    <i class="ft-edit"></i>
+                                </div>
+                                <div class="col-9 offset-1">
+                                    View Logs
+                                </div>
+                            </div>
+                        </button>';
+                    }
+                }
 
 
 
                 return $dropdown;
-            })->make(true);
+            })->rawColumns(['lead_id_link','action'])->make(true);
     }
 
     public function pam_index()
@@ -388,6 +409,7 @@ class LeadManagementController extends Controller
             ->addColumn('item_count_button', function ($lead) {
                 return "<button class='btn btn-sm btn-outline-info align-middle show_lead_items'>" . $lead->item_count . "</button>";
             })
+            ->rawColumns(['item_count_button','images_link_btn','video_link_btn','action'])
             ->make(true);
     }
 
@@ -923,7 +945,6 @@ class LeadManagementController extends Controller
     }
 
     public function edit(Request $request){
-
         $lead_id = $request->edit_lead_id;
         if ($lead_id) {
             $lead = Lead::find($lead_id);
@@ -938,6 +959,43 @@ class LeadManagementController extends Controller
                 $lead->reference_id = $request->edit_reference_id;
                 $lead->status_id = 15;
                 $lead->service_id = $request->service_id;
+
+                try{
+                    // maintain logs when editing leads
+                    $changedFields = [];
+                    $fieldNames = [
+                        'city_id' => 'City',
+                        'territory_id' => 'Territory',
+                        'territory_area_id' => 'Territory Area',
+                        'phone_number' => 'Phone Number',
+                        'email_address' => 'Email Address',
+                        'brand' => 'Brand',
+                        'company' => 'Company',
+                        'service_id' => 'Service',
+                        'edit_reference_id' => 'Reference ID',
+                    ];
+
+                    // foreach ($fieldNames as $field => $fieldName) {
+                    //     if ($lead->isDirty($field)) {;
+                    //         $changedFields[] = $fieldName;
+                    //     }
+                    // }
+                    foreach ($fieldNames as $field => $fieldName) {
+                        if ($lead->isDirty($field)) {
+                            $changedFields[] = $fieldName . ': ' . $lead->getOriginal($field) . ' -> ' . $lead->$field;
+                        }
+                    }
+
+                    EditLeadLogs::create([
+                        'lead_id' => $lead->id,
+                        'trax_id' => Auth::user()->trax_id,
+                        'admin_name' => Auth::user()->name,
+                        'edited_fields' => implode(', ', $changedFields)
+                    ]);
+                } catch(\Exception $e){
+                    Log::error('Error creating log entry: ' . $e->getMessage());
+                }
+
                 $lead->save();
 
                 LeadTaggingController::auto_tagging($lead->id, Auth::id());
@@ -1087,5 +1145,20 @@ class LeadManagementController extends Controller
             'email_address_exists' => $emailAddressExists,
             'company_exists' => $companyExists,
         ]);
+    }
+
+    public function view_logs(Request $request){
+        $logs = EditLeadLogs::where('lead_id', $request->lead_id)->orderBy('created_at', 'desc')->get();
+        if ($logs->isNotEmpty()) {
+            return response()->json([
+                'status' => 0,
+                'logs' => $logs
+            ]);
+        } else {
+            return response()->json([
+                'status' => 1,
+                'message' => 'No logs found for this lead.'
+            ]);
+        }
     }
 }

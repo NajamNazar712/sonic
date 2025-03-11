@@ -35,7 +35,7 @@ class AdminTerritoryController extends Controller
         $territory = Territory::leftjoin('cities as c', 'c.id', '=', 'territories.city_id')
             ->leftjoin('admins as a', 'a.id', '=', 'territories.created_by')
             ->leftjoin('admins as ad', 'ad.id', '=', 'territories.updated_by')
-            ->select(['c.name as city', 'territories.id as id', 'territories.name as name', 'territories.created_at as created_at', 'territories.updated_at as updated_at', 'a.name as created_by', 'ad.name as updated_by', 'territories.territory_status as status']);
+            ->select(['c.name as city', 'territories.id as id', 'territories.name as name', 'territories.created_at as created', 'territories.updated_at as updated', 'a.name as created_by', 'ad.name as updated_by', 'territories.territory_status as status']);
 
         $datatable = Datatables::of($territory)
             ->editColumn('status', function ($data) {
@@ -86,7 +86,7 @@ class AdminTerritoryController extends Controller
                 ';
 
                 return $dropdown;
-            });
+            })->rawColumns(['action']);
 
         return $datatable->make(true);
     }
@@ -177,7 +177,7 @@ class AdminTerritoryController extends Controller
         $areas = AreaTerritory::join('territories as t', 't.id', '=', 'area_territories.territory_id')
             ->leftjoin('admins as a', 'a.id', '=', 'area_territories.created_by')
             ->leftjoin('admins as ad', 'ad.id', '=', 'area_territories.updated_by')
-            ->select(['area_territories.id as id', 't.name as territory', 'area_territories.name as area', 'area_territories.created_at as created_at', 'a.name as created_by', 'ad.name as updated_by', 'area_territories.updated_at as updated_at', 'area_territories.area_territory_status as area_status'])
+            ->select(['area_territories.id as id', 't.name as territory', 'area_territories.name as area', 'area_territories.created_at as created', 'a.name as created_by', 'ad.name as updated_by', 'area_territories.updated_at as updated', 'area_territories.area_territory_status as area_status'])
             ->where('t.territory_status', '=', '1');
 
         $datatable = Datatables::of($areas)
@@ -230,7 +230,7 @@ class AdminTerritoryController extends Controller
                 else {
                     $query->whereRaw('FALSE');
                 }
-            });
+            })->rawColumns(['action']);
         return $datatable->make(true);
 
     }

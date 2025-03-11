@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Http\Controllers\Admins\VisionSoftAPIController;
 use App\Http\Controllers\NotificationsController;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class VisionSoftApiExcel extends Command
@@ -39,18 +40,29 @@ class VisionSoftApiExcel extends Command
      */
     public function handle()
     {
-        $cod_payment_excel = VisionSoftAPIController::cod_payable_excel();
-        $cod_receivable_excel = VisionSoftAPIController::cod_receivable_excel();
-        $links = "";
+        $startDate = Carbon::now()->subDay();
+        $endDate = Carbon::now()->subDay();
 
-        if(!empty($cod_receivable_excel)) {
-            $links .= "<strong>COD Receivables: </strong> <br>" . "<a download='$cod_receivable_excel' href='$cod_receivable_excel' >$cod_receivable_excel</a>" . "<br>";
+        for ($start = $startDate->copy(); $start->lte($endDate); $start->addDay()) {
+            $startOfDay = $start->copy()->startOfDay()->format('Y-m-d 00:00:01');
+            $endOfDay = $start->copy()->endOfDay()->format('Y-m-d 23:59:59');
+
+            $cod_payment_excel = VisionSoftAPIController::cod_payable_excel($startOfDay, $endOfDay);
+            $cod_receivable_excel = VisionSoftAPIController::cod_receivable_excel($startOfDay, $endOfDay);
+
+            $links = "";
+            if (!empty($cod_receivable_excel)) {
+                $links .= "<strong>COD Receivables: </strong> <br>" .
+                    "<a download='$cod_receivable_excel' href='$cod_receivable_excel' >$cod_receivable_excel</a><br>";
+            }
+            if (!empty($cod_payment_excel)) {
+                $links .= "<strong>COD Payable: </strong> <br>" .
+                    "<a download='$cod_payment_excel' href='$cod_payment_excel' >$cod_payment_excel</a><br>";
+            }
+            if (!empty($cod_payment_excel) || !empty($cod_receivable_excel)) {
+                NotificationsController::send(213, $links);
+            }
         }
-        if(!empty($cod_payment_excel)) {
-            $links .= "<strong>COD Payable: </strong> <br>" . "<a download='$cod_payment_excel' href='$cod_payment_excel' >$cod_payment_excel</a>" . "<br>";
-        }
-        if(!empty($cod_payment_excel) || !empty($cod_receivable_excel)) {
-            NotificationsController::send(213, $links);
-        }
+
     }
 }

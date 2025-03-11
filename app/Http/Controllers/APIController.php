@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\ProcessShipmentApiBulkBooking;
+<<<<<<< HEAD
+=======
+use App\FafCharges;
+use App\FinjaSmsLog;
+use App\Http\Models\PendingPaymentShipment;
+use App\Http\Models\WalletUser;
+use App\Models\FinjaRequestLog;
 use App\ShipmentAdditionalCharges;
-use App\ShipmentBookedApiCount;
+>>>>>>> sprint_130
 use DB;
-use Illuminate\Cache\RateLimiter;
 use SnappyPDF;
 use Validator;
 use SnappyImage;
@@ -130,6 +135,11 @@ use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransaction;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionDeliveryNote;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransactionRetail;
+<<<<<<< HEAD
+=======
+use Illuminate\Support\Str;
+use App\Http\Models\ShipperSegmentLogs;
+>>>>>>> sprint_130
 
 class APIController extends Controller
 {
@@ -488,7 +498,6 @@ class APIController extends Controller
         }
     }
 
-
     public function shipment_book(Request $request)
     {
         /********************************NOTE********************************/
@@ -620,7 +629,7 @@ class APIController extends Controller
                 }), 'destination_return_check'],
                 'information_display' => ['required_if:service_type_id,1,2,3', 'nullable', 'boolean'],
                 'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('cities', 'id')->where('business_category_id', 1), 'destination_check'],
-                'consignee_name' => ['required', 'between:1,100'],
+                'consignee_name' => ['required', 'string', 'between:1,100'],
                 'consignee_address' => ['required', 'between:1,255'],
                 'consignee_phone_number_1' => ['required', 'phone_number'],
                 'consignee_phone_number_2' => ['nullable', 'filled', 'phone_number'],
@@ -709,7 +718,7 @@ class APIController extends Controller
                 }), 'destination_return_check'],
                 'information_display' => ['required_if:service_type_id,1,2,3', 'nullable', 'boolean'],
                 'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('cities', 'id')->where('business_category_id', 1), 'destination_check'],
-                'consignee_name' => ['required', 'between:1,100'],
+                'consignee_name' => ['required', 'string', 'between:1,100'],
                 'consignee_address' => ['required', 'between:1,255'],
                 'consignee_phone_number_1' => ['required', 'phone_number'],
                 'consignee_phone_number_2' => ['nullable', 'filled', 'phone_number'],
@@ -805,7 +814,7 @@ class APIController extends Controller
         //         $query->where('user_id', $user_id);
         //     })];
         // }
-
+        
         $shipment_pre_book = ShipmentPrebook::where('user_id', $user_id)->get();
         if ($shipment_pre_book->isNotEmpty()) {
             $rules['order_id'] = ['required', 'integer', 'between:0,1000000000000', Rule::unique('shipments', 'order_id')->where(function ($query) use ($user_id) {
@@ -893,7 +902,7 @@ class APIController extends Controller
             //         }
             //     }
             // }
-
+            
             if ($shipment_pre_book->isNotEmpty()) {
                 $shipment_pre_book = $shipment_pre_book->pluck('prefix')->toArray();
                 $order_id = $request->input('order_id');
@@ -915,7 +924,7 @@ class APIController extends Controller
                 if (!$prefix_matched) {
                     return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
                 }
-            }
+            } 
             else {
                 $shipment_pre_book = null;
             }
@@ -1539,1482 +1548,26 @@ class APIController extends Controller
                 }
             }
 
+            try {
+                // Maintaining shipper segment logs on booking
+                ShipperSegmentLogs::create([
+                    'shipment_id' => $shipment_id,
+                    'segment_id' => $user_type->segment_id,
+                    'sub_segment_id' => $user_type->sub_segment_id
+                ]);
+
+                // if ($consignee_city_id != $pickup_city_id) {
+                //     ShipperSegmentLogs::create([
+                //         'shipment_id' => $shipment_id,
+                //         'segment_id' => $user_type->segment_id,
+                //         'sub_segment_id' => $user_type->sub_segment_id
+                //     ]);
+                // }
+            } catch (\Exception $e) {
+                Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
+            }
             return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number]);
         }
-    }
-
-    public function shipment_bulk_book(Request $request)
-    {
-        /********************************NOTE********************************/
-        /*This API is also using from Trax App Booking Form and Shopify, Please Concern with Mobile Team also Before Adding any required Parameter*/
-        $user_id = $request->user_id;
-        $flag = null;
-        $user_type = User::where('id', $user_id)->first();
-
-        //check if user allow for bulk booking
-        $bulk_booking_shippers_setting = GlobalSettings::where('setting_value', 1)
-            ->where('type', 'bulk_booking_shippers')
-            ->first();
-        $bulk_booking_shippers = $bulk_booking_shippers_setting ?
-            array_map('intval', explode(',', $bulk_booking_shippers_setting->text))
-            : [];
-
-
-        $amounts = array_column($request->input('data'), 'amount');
-        
-        if(in_array(0, $amounts) && !PendingPayment::check_negative_payable($user_id,$user_type['account_type_id'])){
-            return response()->json(['status' => 1, 'message' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."]);
-        }
-
-        if(!in_array($user_id, $bulk_booking_shippers)){
-            return response()->json(['status' => 1, 'message' => 'You Are Not Allowed For Bulk Booking']);
-        }
-
-        if(count($request->data) > 150){
-            return response()->json(['message' => 'Bulk Booking Limit Is Max 150']);
-        }
-
-        $shipmentCountRecord = ShipmentBookedApiCount::where('user_id', $user_id)->latest()->first();
-        $count = $shipmentCountRecord ? $shipmentCountRecord->shipment_count : 0;
-        $timeLimit = 0;
-
-        if ($shipmentCountRecord) {
-
-            $last_created_at = $shipmentCountRecord->created_at;
-            $minutesDiff = $last_created_at->diffInMinutes(now());
-
-            $timeLimits = [
-                ['min' => 1, 'max' => 50, 'limit' => 5,  'seconds' => 300],
-                ['min' => 51, 'max' => 100, 'limit' => 10, 'seconds' => 600],
-                ['min' => 101, 'max' => 150, 'limit' => 15, 'seconds' => 900]
-            ];
-
-            foreach ($timeLimits as $range) {
-                if ($count >= $range['min'] && $count <= $range['max'] && $minutesDiff < $range['limit']) {
-                    $timeLimit = $range['seconds'];
-                    break;
-                }
-            }
-
-            if ($timeLimit > 0) {
-                $remainingTime = $timeLimit - $last_created_at->diffInSeconds(now());
-                return response()->json(['message' => 'Please try again in ' . $remainingTime . ' seconds.'], 429);
-            }
-        }
-
-        // Validator::extend('phone_number', function ($attribute, $value, $parameters) {
-        //     if ($value) {
-        //         $value = $this->phone_number($value);
-
-        //         if (preg_match('/^((\+92)|(92)|(0092))-{0,1}\d{3}-{0,1}\d{7}$|^\d{3}-{1}\d{7}$|^\d{11}$|^\d{4}-\d{7}$|^\d{3}-\d{7}$|^\d{10}$/', $value)) {
-        //             return true;
-        //         } else {
-        //             return false;
-        //         }
-        //     }
-        // });
-
-        if (preg_match('/^(92|03)\d+/', $request->consignee_phone_number_1)) {
-            Validator::extend('phone_number', function ($attribute, $value, $parameters) {
-                if ($value) {
-                    $value = $this->phone_number($value);
-
-                    if (preg_match('/^((\+92)|(92)|(0092))-{0,1}\d{10}$|^03\d{9}$/', $value)) {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                }
-            });
-        } else {
-
-            Validator::extend('phone_number', function ($attribute, $value, $parameters) {
-                if ($value) {
-                    $value = $this->phone_number($value);
-
-                    if (preg_match('/^\d+$/', $value)) {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                }
-            });
-        }
-
-        Validator::extend('origin_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
-            $data = $validator->getData();
-            if (isset($data['shipping_mode_id']) && isset($data['service_type_id'])) {
-                $shipping_mode_id = $data['shipping_mode_id'];
-                $service_type_id = $data['service_type_id'];
-            } else {
-                return false;
-            }
-
-            if ($value) {
-                if ($service_type_id == 5) {
-                    return true;
-                }
-                $result = ShipperShipmentBookController::check_origin($value, $shipping_mode_id, $user_id);
-                if ($result) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-        });
-
-        Validator::extend('destination_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
-            $data = $validator->getData();
-            if (isset($data['shipping_mode_id']) && isset($data['service_type_id'])) {
-                $shipping_mode_id = $data['shipping_mode_id'];
-                $service_type_id = $data['service_type_id'];
-            } else {
-                return false;
-            }
-            if ($value) {
-                if ($service_type_id == 5) {
-                    return true;
-                }
-                $result = ShipperShipmentBookController::check_destination($value, $shipping_mode_id, $user_id, 2);
-                if ($result) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-        });
-
-        Validator::extend('destination_return_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
-            $data = $validator->getData();
-            if (isset($data['shipping_mode_id']) && isset($data['service_type_id'])) {
-                $shipping_mode_id = $data['shipping_mode_id'];
-                $service_type_id = $data['service_type_id'];
-            } else {
-                return false;
-            }
-            if ($value) {
-                if ($service_type_id == 5) {
-                    return true;
-                }
-                $result = ShipperShipmentBookController::check_return_destination($value, $shipping_mode_id, $user_id);
-                if ($result) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-        });
-
-
-        // Parcel Value Check
-        Validator::extend('parcel_value_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
-            $data = $validator->getData();
-            $amount = $data['amount'] ?? null;
-            $parcel_value = $data['parcel_value'] ?? null;
-            $flag = false;
-
-            if ($amount == 0 || $amount === null) {
-                if ($amount == 0) {
-                    if (!empty($parcel_value)) {
-                        $flag = true;
-                    } else {
-                        $settings = GlobalSettings::where('type', 'parcel_value_bypass_users')->first();
-                        if ($settings && !empty($settings->text)) {
-                            $parcel_value_bypass_accounts = array_map('intval', explode(',', $settings->text));
-                            if (in_array($user_id, $parcel_value_bypass_accounts)) {
-                                $flag = true;
-                            } else {
-                                $flag = false;
-                            }
-                        } else {
-                            $flag = ($parcel_value > 0);
-                        }
-                    }
-                }
-            } else {
-                $flag = true;
-            }
-
-            if (!$flag) {
-                $validator->addReplacer('parcel_value_check', function ($message, $attribute, $rule, $parameters) {
-                    return 'Parcel value is required when collection amount is zero, and should be greater than 0';
-                });
-            }
-
-            return $flag;
-        });
-
-        // Valid Order ID with Prefix Check
-        Validator::extend('valid_order_id_with_prefix', function ($attribute, $value, $parameters, $validator) use ($user_id) {
-            $shipment_pre_book = ShipmentPrebook::where('user_id', $user_id)->get();
-            $prefix_matched = false;
-
-            if ($shipment_pre_book->isNotEmpty()) {
-                $shipment_pre_book = $shipment_pre_book->pluck('prefix')->toArray();
-                foreach ($shipment_pre_book as $prefix) {
-                    $length = strlen($prefix);
-                    $check_order_id = substr($value, 0, $length);
-                    if ($prefix == $check_order_id) {
-                        $prefix_matched = true;
-                        $remaining_order_id = substr($value, $length);
-                        if (empty($remaining_order_id)) {
-                            return false;
-                        }
-                        break;
-                    }
-                }
-            }
-
-            if (!$prefix_matched) {
-                $validator->addReplacer('valid_order_id_with_prefix', function ($message, $attribute, $rule, $parameters) {
-                    return 'Invalid Order ID';
-                });
-                return false;
-            }
-
-            return true;
-        });
-
-        // User Shipping Info Status Check
-        Validator::extend('user_shipping_info_status_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
-            $user_shipping_info = UserShippingInfo::where('user_id', $user_id)->first();
-
-            if (isset($user_shipping_info->status) && !$user_shipping_info->status) {
-                $validator->addReplacer('user_shipping_info_status_check', function ($message, $attribute, $rule, $parameters) {
-                    return 'Pickup Address is disabled';
-                });
-                return false;
-            }
-
-            return true;
-        });
-
-        // User Shipping Info Status City Check
-        Validator::extend('user_shipping_info_status_city_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
-            $user_shipping_info = UserShippingInfo::where('user_id', $user_id)->first();
-
-            if (isset($user_shipping_info->city->status) && !$user_shipping_info->city->status) {
-                $validator->addReplacer('user_shipping_info_status_city_check', function ($message, $attribute, $rule, $parameters) {
-                    return 'Pickup Address City is disabled';
-                });
-                return false;
-            }
-
-            return true;
-        });
-
-        // User Shipping Info Status Zone Check
-        Validator::extend('user_shipping_info_status_zone_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
-            $user_shipping_info = UserShippingInfo::where('user_id', $user_id)->first();
-
-            if (isset($user_shipping_info->city->zone_id) && !$user_shipping_info->city->zone_id) {
-                $validator->addReplacer('user_shipping_info_status_zone_check', function ($message, $attribute, $rule, $parameters) {
-                    return 'Pickup Address City zone is disabled';
-                });
-                return false;
-            }
-
-            return true;
-        });
-
-        // User Shipping Info City Pickup Check
-        Validator::extend('user_shipping_info_city_pickup_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
-            $user_shipping_info = UserShippingInfo::where('user_id', $user_id)->first();
-
-            if (isset($user_shipping_info->city->pickup) && !$user_shipping_info->city->pickup) {
-                $validator->addReplacer('user_shipping_info_city_pickup_check', function ($message, $attribute, $rule, $parameters) {
-                    return 'Pickup is not allowed for City';
-                });
-                return false;
-            }
-
-            return true;
-        });
-
-        // Default Return Address Check
-        Validator::extend('default_return_address', function ($attribute, $value, $parameters, $validator) use ($user_id) {
-            $data = $validator->getData();
-
-            if (!empty($data['return_address_id'])) {
-                return true;
-            }
-
-            $return_address = UserShippingInfo::where('user_id', $user_id)
-                ->where('status', 1)
-                ->where('default_return_address', 1);
-
-            if ($return_address->exists()) {
-                return true;
-            }
-
-            $validator->errors()->add($attribute, 'Default return address is not set!');
-            return false;
-        });
-
-
-
-        // Omni Account Check
-        Validator::extend('omni_account', function ($attribute, $value, $parameters, $validator) use ($user_id) {
-            $settings = GlobalSettings::where('type', 'omni_users')->first();
-
-            if ($settings && $settings->text !== null) {
-                $omni_accounts = array_map('intval', explode(',', $settings->text));
-                if (!in_array($user_id, $omni_accounts)) {
-                    $validator->addReplacer('omni_account', function ($message, $attribute, $rule, $parameters) {
-                        return 'Not an omni account';
-                    });
-                    return false;
-                }
-            }
-
-            return true;
-        });
-
-        // Return User Shipping Info Status Check
-        Validator::extend('return_user_shipping_info_status_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
-            $user_shipping_info = UserShippingInfo::where('user_id', $user_id)->first();
-
-            if (isset($user_shipping_info->status) && !$user_shipping_info->status) {
-                $validator->addReplacer('return_user_shipping_info_status_check', function ($message, $attribute, $rule, $parameters) {
-                    return 'Return Address is disabled';
-                });
-                return false;
-            }
-
-            return true;
-        });
-
-        // Return User Shipping Info Status City Check
-        Validator::extend('return_user_shipping_info_status_city_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
-            $user_shipping_info = UserShippingInfo::where('user_id', $user_id)->first();
-
-            if (isset($user_shipping_info->city->status) && !$user_shipping_info->city->status) {
-                $validator->addReplacer('return_user_shipping_info_status_city_check', function ($message, $attribute, $rule, $parameters) {
-                    return 'Return Address City is disabled';
-                });
-                return false;
-            }
-
-            return true;
-        });
-
-        // Return User Shipping Info Status Zone Check
-        Validator::extend('return_user_shipping_info_status_zone_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
-            $user_shipping_info = UserShippingInfo::where('user_id', $user_id)->first();
-
-            if (isset($user_shipping_info->city->zone_id) && !$user_shipping_info->city->zone_id) {
-                $validator->addReplacer('return_user_shipping_info_status_zone_check', function ($message, $attribute, $rule, $parameters) {
-                    return 'Return Address City zone is disabled';
-                });
-                return false;
-            }
-
-            return true;
-        });
-
-        // Return Consignee ID Check
-        Validator::extend('consignee_id_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
-            // Check if the $value (which is consignee_city_id) is 1244 and the user_id is not in the allowed list
-            if ($value == 1244 && !in_array($user_id, [5982, 3324, 10104, 14110, 16292])) {
-                // Add a validation error message to the validator
-                $validator->addReplacer('consignee_id_check', function ($message, $attribute, $rule, $parameters) use ($value) {
-                    return 'User is not allowed to book from city ID ' . $value;
-                });
-                return false; // Validation fails
-            }
-            return true; // Validation passes
-        });
-
-        // Return Consignee Status Check
-        Validator::extend('consignee_city_status_check', function ($attribute, $value, $parameters, $validator){
-            // Check if consignee_city status is deactivated
-            $consignee_city = City::find($value);
-            if (isset($consignee_city->status) && !$consignee_city->status) {
-                // Add a custom error message
-                $validator->addReplacer('consignee_city_status_check', function ($message, $attribute, $rule, $parameters) use ($value) {
-                    return 'Consignee City ID #' . $value . ' is deactivated';
-                });
-                return false; // Validation fails
-            }
-            return true; // Validation passes
-        });
-
-        // Consignee City Zone Check
-        Validator::extend('consignee_city_zone_check', function ($attribute, $value, $parameters, $validator) {
-            $consignee_city = City::find($value);
-            if (isset($consignee_city->zone_id) && !$consignee_city->zone_id) {
-                $validator->addReplacer('consignee_city_zone_check', function ($message, $attribute, $rule, $parameters) use ($value) {
-                    return 'Consignee City ID #' . $value . ' is deactivated';
-                });
-                return false;
-            }
-            return true;
-        });
-
-        // Consignee City Booking Enable Check
-        Validator::extend('consignee_city_booking_enable_check', function ($attribute, $value, $parameters, $validator) {
-            $consignee_city = City::find($value);
-            if (isset($consignee_city->booking_enable_status) && !$consignee_city->booking_enable_status) {
-                $validator->addReplacer('consignee_city_booking_enable_check', function ($message, $attribute, $rule, $parameters) {
-                    return 'Delivery is not available for this City.';
-                });
-                return false;
-            }
-            return true;
-        });
-
-        // Same Day Delivery Check
-        Validator::extend('same_day_delivery_check', function ($attribute, $value, $parameters, $validator) {
-            $data = $validator->getData();
-
-            $pickup_address_id = $data['pickup_address_id'] ?? null;
-            $shipping_mode_id = $data['shipping_mode_id'] ?? null;
-
-            if (!$pickup_address_id) {
-                $validator->errors()->add('pickup_address_id', 'Pickup address ID is missing.');
-                return false;
-            }
-
-            $user_shipping_info = UserShippingInfo::find($pickup_address_id);
-
-            if (!$user_shipping_info) {
-                $validator->errors()->add('pickup_address_id', 'Pickup address not found.');
-                return false;
-            }
-
-            if ($value != $user_shipping_info->city_id && $shipping_mode_id == 4) {
-                $validator->addReplacer('same_day_delivery_check', function ($message, $attribute, $rule, $parameters) {
-                    return 'Same Day Delivery is not available for Different City Shipment';
-                });
-                return false;
-            }
-
-            return true;
-        });
-
-
-        // COD Cap Check based on Zone Class
-        Validator::extend('cod_cap_zone_check', function ($attribute, $value, $parameters, $validator) {
-            $data = $validator->getData();
-            $pickup_address_id = $data['pickup_address_id'];
-            $user_shipping_info = UserShippingInfo::find($pickup_address_id);
-            if (isset($user_shipping_info->city) && $user_shipping_info->city->id != $data['consignee_city_id']) {
-                $city_zone = City::find($data['consignee_city_id']);
-
-                if(isset($city_zone->zone_id)){
-                    $zone = ZoneClassCity::where(['city_id' => $data['consignee_city_id'], 'zone_id' => $city_zone->zone_id]);
-                }
-
-                $class_a = GlobalSettings::where('type', 'cod_cap_for_zone_class_0')->first();
-                $class_b = GlobalSettings::where('type', 'cod_cap_for_zone_class_1')->first();
-                $class_c = GlobalSettings::where('type', 'cod_cap_for_zone_class_2')->first();
-                $class_d = GlobalSettings::where('type', 'cod_cap_for_zone_class_3')->first();
-
-                if (isset($zone) && $zone->exists()) {
-                    $zone = $zone->first();
-                    if ($zone['class'] == 0) {
-                        $check_zone = $class_a['setting_value'];
-                    } elseif ($zone['class'] == 1) {
-                        $check_zone = $class_b['setting_value'];
-                    } elseif ($zone['class'] == 2) {
-                        $check_zone = $class_c['setting_value'];
-                    } else {
-                        $check_zone = $class_d['setting_value'];
-                    }
-
-                    if ((int) $data['amount'] > $check_zone) {
-                        $validator->addReplacer('cod_cap_zone_check', function ($message, $attribute, $rule, $parameters) use ($check_zone) {
-                            return 'Amount must be smaller than or equal to ' . $check_zone;
-                        });
-                        return false;
-                    }
-                } else {
-                    $validator->addReplacer('cod_cap_zone_check', function ($message, $attribute, $rule, $parameters) {
-                        return "Zone class doesn't exist";
-                    });
-                    return false;
-                }
-            }
-
-            return true;
-        });
-
-        // City Delivery Availability Check
-        Validator::extend('city_delivery_check', function ($attribute, $value, $parameters, $validator){
-
-            $data = $validator->getData();
-            $city_id = $data['consignee_city_id'];
-            $service_type_id = $data['service_type_id'];
-            $shipping_mode_id = $data['shipping_mode_id'];
-
-            if (!CityDelivery::where('city_id', $city_id)
-                ->where('booking_type_id', $service_type_id)
-                ->where('shipping_mode_id', $shipping_mode_id)
-                ->exists()) {
-
-                $validator->addReplacer('city_delivery_check', function ($message, $attribute, $rule, $parameters) use ($city_id, $service_type_id, $shipping_mode_id) {
-                    return 'Delivery is not allowed for City ID #' . $city_id . ' with Service Type ID #' . $service_type_id . ' and Shipping Mode ID #' . $shipping_mode_id;
-                });
-                return false;
-            }
-
-            return true;
-        });
-
-        // Pickup City Status Check
-        Validator::extend('pickup_city_status_check', function ($attribute, $value, $parameters, $validator) {
-            $pickup_consignee_city = City::find($value);
-            if (isset($pickup_consignee_city->status) && !$pickup_consignee_city->status) {
-                $validator->addReplacer('pickup_city_status_check', function ($message, $attribute, $rule, $parameters) use ($pickup_consignee_city) {
-                    return 'Pickup Address\'s City ID #' . $pickup_consignee_city->id . ' is deactivated';
-                });
-                return false;
-            }
-            return true;
-        });
-
-        // Pickup City Zone ID Check
-        Validator::extend('pickup_city_zone_check', function ($attribute, $value, $parameters, $validator){
-            $pickup_consignee_city = City::find($value);
-            if (isset($pickup_consignee_city->zone_id) && !$pickup_consignee_city->zone_id) {
-                $validator->addReplacer('pickup_city_zone_check', function ($message, $attribute, $rule, $parameters) use ($pickup_consignee_city) {
-                    return 'Pickup Address\'s City ID #' . $pickup_consignee_city->id . ' is deactivated';
-                });
-                return false;
-            }
-            return true;
-        });
-
-        // Pickup Availability Check
-        Validator::extend('pickup_city_availability_check', function ($attribute, $value, $parameters, $validator) use($user_id) {
-            $pickup_consignee_city = City::find($value);
-            if (!in_array($user_id, [7762, 4758]) && isset($pickup_consignee_city->pickup) && !$pickup_consignee_city->pickup) {
-                $validator->addReplacer('pickup_city_availability_check', function ($message, $attribute, $rule, $parameters) use ($pickup_consignee_city) {
-                    return 'Pickup is not allowed for City ID #' . $pickup_consignee_city->id;
-                });
-                return false;
-            }
-            return true;
-        });
-
-        //Delivery Status Zone Check
-        Validator::extend('delivery_status_zone_check', function ($attribute, $value, $parameters, $validator) {
-            $data = $validator->getData();
-            $pickup_address_id_for_delivery = $data['pickup_address_id'] ?? null;
-
-            if (!$pickup_address_id_for_delivery) {
-                $validator->errors()->add('pickup_address_id', 'Pickup address ID is missing.');
-                return false;
-            }
-
-            $pickup_address_for_delivery = UserShippingInfo::find($pickup_address_id_for_delivery);
-            if (!$pickup_address_for_delivery) {
-                $validator->errors()->add('pickup_address_id', 'Pickup address not found.');
-                return false;
-            }
-
-            $delivery_city = City::find($pickup_address_for_delivery->city_id);
-            if (!$delivery_city || !$delivery_city->zone || !$delivery_city->status) {
-                $validator->errors()->add('delivery_city', 'Consignee City ID #' . ($data['consignee_city_id'] ?? 'unknown') . ' is deactivated.');
-                return false;
-            }
-
-            return true;
-        });
-
-        // Normal Consignee ID Check
-        Validator::extend('normal_consignee_id_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
-            $data = $validator->getData();
-
-            // Get the pickup address for delivery
-            $pickup_address_id_for_delivery = $data['pickup_address_id'] ?? null;
-            $pickup_address_for_delivery = UserShippingInfo::find($pickup_address_id_for_delivery);
-
-            if (!$pickup_address_for_delivery) {
-                $validator->errors()->add($attribute, 'Pickup address not found.');
-                return false;
-            }
-
-            // Get the delivery city
-            $delivery_city = City::find($pickup_address_for_delivery->city_id);
-
-            if (!$delivery_city) {
-                $validator->errors()->add($attribute, 'Delivery city not found.');
-                return false;
-            }
-
-            if (!in_array($user_id, [7762, 4758]) && !CityDelivery::where('city_id', $delivery_city->id)
-                    ->where('booking_type_id', $data['service_type_id'] ?? null)
-                    ->where('shipping_mode_id', $data['shipping_mode_id'] ?? null)
-                    ->exists()) {
-
-                $validator->errors()->add($attribute, 'Delivery is not allowed for City ID #' . $value .
-                    ' with Service Type ID #' . ($data['service_type_id'] ?? 'N/A') .
-                    ' and Shipping Mode ID #' . ($data['shipping_mode_id'] ?? 'N/A'));
-                return false;
-            }
-
-            return true;
-        });
-
-
-
-
-
-//        //Corporate Delivery Check
-//        Validator::extend('corporate_delivery_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
-//            $data = $validator->getData();
-//            if ($data['account_type_id'] == 2) {
-//                if ($data['delivery_type_id'] == 2) {
-//                    $allowed_delivery_type = CorporateDeliveryTypeStatus::where('user_id', $user_id);
-//
-//                    if ($allowed_delivery_type->exists()) {
-//                        $allowed_delivery_type = $allowed_delivery_type
-//                            ->where('shipping_mode_id', $data['shipping_mode_id'])
-//                            ->where('delivery_type_id', $data['delivery_type_id']);
-//                        if (!$allowed_delivery_type->exists()) {
-//                            $validator->errors()->add('delivery_type', 'Selected Delivery Type is disabled');
-//                            return false;
-//                        }
-//                    } else {
-//                        $validator->errors()->add('delivery_type', 'Selected Delivery Type is disabled');
-//                        return false;
-//                    }
-//                }
-//            }
-//
-//            return true;
-//        });
-
-
-        if ($user_type['account_type_id'] == 1) {
-            $rules = [
-                'service_type_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function ($query) {
-                    $query->whereNotIn('id', [4]);
-                })],
-                'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('rate_statuses', 'shipping_mode_id')->where(function ($query) use ($user_id) {
-                    $query->where('user_id', $user_id)->where('status', 1);
-                })],
-                'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
-                    $query->where('user_id', $user_id)->where('hidden', 0);
-                }), 'origin_check', 'omni_account', 'return_user_shipping_info_status_check', 'return_user_shipping_info_status_city_check', 'return_user_shipping_info_status_zone_check'],
-                'return_address_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
-                    $query->where('user_id', $user_id)->where('hidden', 0);
-                }), 'destination_return_check', 'default_return_address', 'omni_account', 'return_user_shipping_info_status_check', 'return_user_shipping_info_status_city_check', 'return_user_shipping_info_status_zone_check'],
-                'information_display' => ['required_if:service_type_id,1,2,3', 'nullable', 'boolean'],
-                'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('cities', 'id')->where('business_category_id', 1), 'destination_check', 'consignee_id_check', 'consignee_city_status_check', 'consignee_city_zone_check', 'consignee_city_booking_enable_check', 'cod_cap_zone_check', 'city_delivery_check', 'pickup_city_status_check', 'pickup_city_zone_check', 'pickup_city_availability_check', 'delivery_status_zone_check','normal_consignee_id_check'],
-                'consignee_name' => ['required', 'between:1,100'],
-                'consignee_address' => ['required', 'between:1,255'],
-                'consignee_phone_number_1' => ['required', 'phone_number'],
-                'consignee_phone_number_2' => ['nullable', 'filled', 'phone_number'],
-                'consignee_email_address' => ['nullable', 'filled', 'email'],
-                'self_collection' => ['nullable', 'boolean'],
-                'order_date' => ['nullable', 'date_format:Y-m-d'],
-                'package_type' => ['nullable', 'boolean'],
-                'special_instructions' => ['nullable', 'filled', 'between:0,190'],
-                'estimated_weight' => ['required', 'numeric', 'between:0.1,100000'],
-
-                'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id', 'same_day_delivery_check'],
-                'amount' => ['required_if:service_type_id,1,2', 'nullable', 'numeric','between:0,999999.00', 'parcel_value_check'],
-                // 'parcel_value' => ['nullable','numeric','digits_between:1,1000000'],
-                'parcel_value' => ['nullable', 'numeric', 'between:0,1000000.00'],
-                // 'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
-                //     $query->whereNotIn('id', [3]);
-                // })],
-                'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function ($query) {
-                    $query->whereIn('id', [4]);
-                })],
-
-                'item_product_type_id' => ['required_if:service_type_id,1,2,5', 'integer', 'digits_between:1,10', 'exists:products,id'],
-                'item_description' => ['required_if:service_type_id,1,2,5', 'between:0,1000'],
-                'item_quantity' => ['required_if:service_type_id,1,2,5', 'integer', 'digits_between:1,10', 'between:1,10000'],
-                'item_insurance' => ['required_if:service_type_id,1,2,5', 'boolean'],
-                'product_value' => ['required_if:item_insurance,1', 'integer', 'digits_between:1,20', 'between:1,100000'],
-
-                //'pieces_quantity' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10'],
-
-                'replacement_item_product_type_id' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
-                'replacement_item_description' => ['required_if:service_type_id,2', 'between:0,1000'],
-                'replacement_item_quantity' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'between:1,10000'],
-
-                'try_and_buy_fees' => ['required_if:service_type_id,3', 'nullable', 'numeric', 'min:0'],
-                'items' => ['required_if:service_type_id,3', 'array', 'min:1', 'max:5'],
-                'items.*.item_product_type_id' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,10', 'exists:products,id'],
-                'items.*.item_description' => ['required_if:service_type_id,3', 'between:0,1000'],
-                'items.*.item_quantity' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,10', 'between:1,10000'],
-                'items.*.item_insurance' => ['required_if:service_type_id,3', 'boolean'],
-                'items.*.product_value' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,20', 'between:1,100000'],
-
-                'shipper_reference_number_1' => ['nullable', 'between:0,190'],
-                'shipper_reference_number_2' => ['nullable', 'between:0,190'],
-                'shipper_reference_number_3' => ['nullable', 'between:0,190'],
-                'shipper_reference_number_4' => ['nullable', 'between:0,190'],
-                'shipper_reference_number_5' => ['nullable', 'between:0,190'],
-                'open_shipment' => ['nullable', 'boolean'],
-                'substitute_user_email' => ['nullable', 'filled', 'email'],
-
-                'pieces_quantity' => [
-                    'nullable',
-                    'integer',
-                    function ($attribute, $value, $fail) use ($request) {
-                        if ($request->input('shipping_mode_id') == 2 && ($value < 1 || $value > 500)) {
-                            $fail('The pieces quantity must be between 1 and 500 when shipping mode is Saver Plus.');
-                        } elseif ($request->input('shipping_mode_id') != 2 && ($value < 1 || $value > 10)) {
-                            $fail('Pieces quantity must be between 1 and 10 if shipping mode are Rush,Swift or Sameday.');
-                        }
-                    },
-                ],
-
-            ];
-            $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
-            if ($ccd_booking->exists()) {
-                $ccd_booking = $ccd_booking->first();
-                $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
-                if (in_array($user_id, $ccd_account_tags)) {
-                    $rules['payment_mode_id'] = ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
-                        $query->whereNotIn('id', [3]);
-                    })];
-                } else {
-                    $rules['payment_mode_id'] = ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
-                        $query->whereNotIn('id', [2, 3]);
-                    })];
-                }
-            }
-        } else {
-            $rules = [
-                'service_type_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function ($query) {
-                    $query->whereNotIn('id', [4]);
-                })],
-                'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
-                    $query->where('user_id', $user_id)->where('hidden', 0);
-                }), 'origin_check', 'user_shipping_info_status_check', 'user_shipping_info_status_city_check', 'user_shipping_info_status_zone_check', 'user_shipping_info_city_pickup_check'],
-                'return_address_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
-                    $query->where('user_id', $user_id)->where('hidden', 0);
-                }), 'destination_return_check', 'default_return_address', 'omni_account', 'return_user_shipping_info_status_check', 'return_user_shipping_info_status_city_check', 'return_user_shipping_info_status_zone_check'],
-                'information_display' => ['required_if:service_type_id,1,2,3', 'nullable', 'boolean'],
-                'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('cities', 'id')->where('business_category_id', 1), 'destination_check', 'consignee_id_check', 'consignee_city_status_check', 'consignee_city_zone_check', 'consignee_city_booking_enable_check', 'cod_cap_zone_check', 'city_delivery_check', 'pickup_city_status_check', 'pickup_city_zone_check', 'pickup_city_availability_check', 'delivery_status_zone_check','normal_consignee_id_check'],
-                'consignee_name' => ['required', 'between:1,100'],
-                'consignee_address' => ['required', 'between:1,255'],
-                'consignee_phone_number_1' => ['required', 'phone_number'],
-                'consignee_phone_number_2' => ['nullable', 'filled', 'phone_number'],
-                'consignee_email_address' => ['nullable', 'filled', 'email'],
-                'order_date' => ['nullable', 'date_format:Y-m-d'],
-                'package_type' => ['nullable', 'boolean'],
-                'special_instructions' => ['nullable', 'filled', 'between:0,190'],
-                'estimated_weight' => ['required', 'numeric', 'between:0.1,100000'],
-
-                'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id', 'same_day_delivery_check'],
-                'amount' => ['required_if:service_type_id,1,2,3', 'nullable', 'numeric', 'between:0,1000000', 'parcel_value_check'],
-                // 'parcel_value' => ['nullable','numeric','digits_between:1,1000000'],
-                'parcel_value' => ['nullable', 'numeric', 'between:0,1000000.00'],
-                // 'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
-                //     $query->whereNotIn('id', [3]);
-                // })],
-                'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function ($query) {
-                    $query->whereIn('id', [3]);
-                })],
-
-                'item_product_type_id' => ['required_if:service_type_id,1,2,5', 'integer', 'digits_between:1,10', 'exists:products,id'],
-                'item_description' => ['required_if:service_type_id,1,2,5', 'between:0,500'],
-                'item_quantity' => ['required_if:service_type_id,1,2,5', 'integer', 'digits_between:1,10', 'between:1,10000'],
-                'item_insurance' => ['required_if:service_type_id,1,2,5', 'boolean'],
-                'product_value' => ['required_if:item_insurance,1', 'integer', 'digits_between:1,20', 'between:1,100000'],
-
-                'replacement_item_product_type_id' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
-                'replacement_item_description' => ['required_if:service_type_id,2', 'between:0,1000'],
-                'replacement_item_quantity' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'between:1,1000'],
-                'replacement_item_image' => ['nullable', 'mimes:png,jpeg,jpg'],
-
-                'items' => ['required_if:service_type_id,3', 'array'],
-                'items.*.item_product_type_id' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,10', 'exists:products,id'],
-                'items.*.item_description' => ['required_if:service_type_id,3', 'between:0,1000'],
-                'items.*.item_quantity' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,10', 'between:1,10000'],
-                'items.*.item_insurance' => ['required_if:service_type_id,3', 'boolean'],
-                'items.*.product_value' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,20', 'between:1,100000'],
-                //'pieces_quantity' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10'],
-
-                'shipper_reference_number_1' => ['nullable', 'between:0,190'],
-                'shipper_reference_number_2' => ['nullable', 'between:0,190'],
-                'shipper_reference_number_3' => ['nullable', 'between:0,190'],
-                'shipper_reference_number_4' => ['nullable', 'between:0,190'],
-                'shipper_reference_number_5' => ['nullable', 'between:0,190'],
-                'open_shipment' => ['nullable', 'boolean'],
-                'substitute_user_email' => ['nullable', 'filled', 'email'],
-
-                'ftl_collection_type' => ['required_if:service_type_id,6', 'integer', 'digits_between:1,10'],
-                'approve_freight_request' => ['required_if:service_type_id,6', 'integer', 'digits_between:1,10'],
-                'pieces_quantity' => [
-                    'nullable',
-                    'integer',
-                    function ($attribute, $value, $fail) use ($request) {
-                        if ($request->input('shipping_mode_id') == 2 && ($value < 1 || $value > 500)) {
-                            $fail('The pieces quantity must be between 1 and 500 when shipping mode is Saver Plus.');
-                        } elseif ($request->input('shipping_mode_id') != 2 && ($value < 1 || $value > 10)) {
-                            $fail('Pieces quantity must be between 1 and 10 if shipping mode are Rush,Swift or Sameday.');
-                        }
-                    },
-                ],
-
-                'delivery_type_id' => [
-                    'required_if:delivery_type_id,2',
-                    function ($attribute, $value, $fail) use ($user_id) {
-                        if ($value == 2) {
-                            $user = User::where('user_id', $user_id)->where('account_type_id', 2)->first();
-
-                            if ($user) {
-                                if (!CorporateDeliveryTypeStatus::where('user_id', $user_id)
-                                    ->where('shipping_mode_id', request('shipping_mode_id'))
-                                    ->where('delivery_type_id', $value)
-                                    ->exists()) {
-                                    $fail('The selected delivery type is disabled for this user.');
-                                }
-                            }
-                        }
-                    },
-                ],
-
-            ];
-
-            $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
-            if ($ccd_booking->exists()) {
-                $ccd_booking = $ccd_booking->first();
-                $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
-                if (in_array($user_id, $ccd_account_tags)) {
-                    $rules['payment_mode_id'] = ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
-                        $query->whereNotIn('id', [3]);
-                    })];
-                } else {
-                    $rules['payment_mode_id'] = ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
-                        $query->whereNotIn('id', [2, 3]);
-                    })];
-                }
-            }
-
-            if ($user_type['corporate_rate_type_id'] == 3) {
-                $rules['shipping_mode_id'] = ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('corporate_default_rate_statuses', 'shipping_mode_id')->where(function ($query) use ($user_id) {
-                    $query->where('user_id', $user_id)->where('status', 1);
-                })];
-            } else {
-                $rules['delivery_type_id'] = ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:delivery_types,id'];
-                $rules['shipping_mode_id'] = ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('corporate_rate_statuses', 'shipping_mode_id')->where(function ($query) use ($user_id) {
-                    $query->where('user_id', $user_id)->where('status', 1);
-                })];
-            }
-        }
-
-        // $shipment_pre_book = ShipmentPrebook::where('user_id', $user_id);
-        // if ($shipment_pre_book->exists()) {
-        //     $rules['order_id'] = ['required', 'integer', 'between:0,1000000000000', Rule::unique('shipments', 'order_id')->where(function ($query) use ($user_id) {
-        //         $query->where('user_id', $user_id);
-        //     })];
-        // }
-
-        $shipment_pre_book = ShipmentPrebook::where('user_id', $user_id)->get();
-        if ($shipment_pre_book->isNotEmpty()) {
-            $rules['order_id'] = ['required', 'integer', 'valid_order_id_with_prefix','between:0,1000000000000', Rule::unique('shipments', 'order_id')->where(function ($query) use ($user_id) {
-                $query->where('user_id', $user_id);
-            })];
-        }
-        else {
-            if ($user_type['restrict_order_id'] == 1) {
-                $rules['order_id'] = ['nullable', 'between:0,100', Rule::unique('shipments', 'order_id')->where(function ($query) use ($user_id) {
-                    $query->where('user_id', $user_id);
-                })];
-            } else {
-                $rules['order_id'] = ['nullable', 'filled', 'between:0,100'];
-            }
-        }
-        $errors = [];
-
-
-        foreach ($request->data as $key2 => $row) {
-            $key_inc = $key2 + 1;
-            $validate = Validator::make($row, $rules, $this->messages);
-            if ($validate->fails()) {
-                foreach ($validate->errors()->toArray() as $key => $error_array) {
-                    foreach ($error_array as $error) {
-                        if (!isset($errors["tracking_number-$key_inc"][$key])) {
-                            $errors["tracking_number-$key_inc"][$key] = $error;
-                        }
-                    }
-                }
-            }
-        }
-        if(!empty($errors)){
-            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $errors]);
-        }
-
-        if(empty($errors))
-        $array_piece_quantity_count = 0;
-
-        foreach ($request->data as $key2 => $row) {
-//                if ($request->input('amount') == 0 || $request->input('amount') === null) {
-//                    $amount = $request->input('amount');
-//                    $parcel_value = $request->input('parcel_value');
-//                    if ($amount == 0) {
-//                        if ($request->has('parcel_value') && $request->input('parcel_value') != null) {
-//                            $flag = true;
-//                        } else {
-//                            $settings = GlobalSettings::where('type', 'parcel_value_bypass_users');
-//                            if ($settings->exists()) {
-//                                $settings = $settings->first();
-//                                if ($settings->text != NULL) {
-//                                    $parcel_value_bypass_accounts = array_map('intval', explode(',', $settings->text));
-//                                    if (in_array($user_id, $parcel_value_bypass_accounts)) {
-//                                        $flag = true;
-//                                    } else {
-//                                        $flag = false;
-//                                    }
-//                                } else {
-//                                    $flag = false;
-//                                }
-//                            } else {
-//                                if ($parcel_value <= 0 || $parcel_value == null) {
-//                                    $flag = false;
-//                                } else {
-//                                    $flag = true;
-//                                }
-//                            }
-//                        }
-//                    } else {
-//                        $flag = true;
-//                    }
-//                } else {
-//                    $flag = true;
-//                }
-//                if (!$flag) {
-//                    return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => 'Parcel value is required when collection amount is zero, and should be greater then 0']);
-//                }
-
-
-            $consignee_phone_number_1 = $this->phone_number($row['consignee_phone_number_1']);
-
-            if (!empty($row['consignee_phone_number_2'])) {
-                $consignee_phone_number_2 = $this->phone_number($row['consignee_phone_number_2']);
-            }
-
-            if (!empty($row['open_shipment'])) {
-                $open_shipment = $row['open_shipment'];
-            } else {
-                $open_shipment = 0;
-            }
-            $return_address_id = NULL;
-            $service_type_id = $row['service_type_id'];
-            // if ($shipment_pre_book->exists()) {
-            //     $shipment_pre_book = $shipment_pre_book->first();
-            //     $length = strlen($shipment_pre_book->prefix);
-            //     $check_order_id = str_split($request->input('order_id'), $length);
-            //     if ($shipment_pre_book->prefix != $check_order_id[0]) {
-            //         return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
-            //     } else {
-            //         if (!array_key_exists(1, $check_order_id)) {
-            //             return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
-            //         }
-            //     }
-            // }
-
-
-            if ($shipment_pre_book && $shipment_pre_book->isNotEmpty()) {
-//                    $shipment_pre_book = $shipment_pre_book->pluck('prefix')->toArray();
-//                    $order_id = $request->input('order_id');
-//                    $prefix_matched = false;
-//
-//                    foreach ($shipment_pre_book as $prefix) {
-//                        $length = strlen($prefix);
-//                        $check_order_id = substr($order_id, 0, $length);
-//                        if ($prefix == $check_order_id) {
-//                            $prefix_matched = true;
-//                            $remaining_order_id = substr($order_id, $length);
-//                            if (empty($remaining_order_id)) {
-//                                return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
-//                            }
-//                            break;
-//                        }
-//                    }
-//                    // If none of the prefixes matched
-//                    if (!$prefix_matched) {
-//                        return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
-//                    }
-            } else {
-                $shipment_pre_book = null;
-            }
-
-            if ($service_type_id != 5) {
-                $user_shipping_info = UserShippingInfo::find($row['pickup_address_id']);
-//
-//                    if (!$user_shipping_info->status) {
-//                        return response()->json(['status' => 1, 'message' => 'Pickup Address ID #' . $request->input('pickup_address_id') . ' is disabled']);
-//                    }
-//
-//                    if (!$user_shipping_info->city->status) {
-//                        return response()->json(['status' => 1, 'message' => 'Pickup Address\'s City ID #' . $user_shipping_info->city_id . ' is deactivated']);
-//                    }
-//                    if (!$user_shipping_info->city->zone_id) {
-//                        return response()->json(['status' => 1, 'message' => 'Pickup Address\'s City ID #' . $user_shipping_info->city_id . ' is deactivated']);
-//                    }
-//
-//                    if (!$user_shipping_info->city->pickup) {
-//                        return response()->json(['status' => 1, 'message' => 'Pickup is not allowed for City ID #' . $user_shipping_info->city_id]);
-//                    }
-
-                if ($service_type_id == 1) {
-//                        if ($service_type_id == 1) {
-//                            if ($request->has('return_address_id')) {
-//
-//                                $settings = GlobalSettings::where('type', 'omni_users');
-//                                if ($settings->exists()) {
-//                                    $settings = $settings->first();
-//                                    if ($settings->text != NULL) {
-//                                        $omni_accounts = array_map('intval', explode(',', $settings->text));
-//                                        if (!in_array($user_id, $omni_accounts)) {
-//                                            return response()->json(['status' => 1, 'message' => $user_type['name'] . 'is not an omni account']);
-//                                        }
-//                                    }
-//                                }
-//
-//                                if ($request->input('return_address_id') != null) {
-//                                    $return_address_id = $request->input('return_address_id');
-//                                } else {
-//                                    $return_address = UserShippingInfo::where('user_id', $user_id)->where('status', 1)->where('default_return_address', 1);
-//                                    if ($return_address->exists()) {
-//                                        $return_address_id = $return_address->first()->id;
-//                                    } else {
-//                                        return response()->json(['status' => 1, 'message' => 'Default return address is not set!']);
-//                                    }
-//                                }
-//
-//                                $user_shipping_info_return = UserShippingInfo::find($return_address_id);
-//
-//                                if (!$user_shipping_info_return->status) {
-//                                    return response()->json(['status' => 1, 'message' => 'Return Address ID #' . $request->input('return_address_id') . ' is disabled']);
-//                                }
-//
-//                                if (!$user_shipping_info_return->city->status) {
-//                                    return response()->json(['status' => 1, 'message' => 'Return Address\'s City ID #' . $user_shipping_info_return->city_id . ' is deactivated']);
-//                                }
-//                                if (!$user_shipping_info_return->city->zone_id) {
-//                                    return response()->json(['status' => 1, 'message' => 'Return Address\'s City ID #' . $user_shipping_info_return->city_id . ' is deactivated']);
-//                                }
-//                            }
-//                        }
-
-//                        if (!empty($row['return_address_id'])) {
-//                            $return_address_id = $row['return_address_id'];
-//                        }
-                }
-                //check
-
-//                    $consignee_city = City::find($row['consignee_city_id']);
-//
-//                    if (($request->input('consignee_city_id') == 1244 && $user_id != 5982 && $user_id != 3324 && $user_id != 10104 && $user_id != 14110 && $user_id != 16292)) {
-//                        return response()->json(['status' => 1, 'message' => 'User is not allowed to book from ' . $request->input('consignee_city_id')]);
-//                    }
-//
-//                    if (!$consignee_city->status) {
-//                        return response()->json(['status' => 1, 'message' => 'Consignee City ID #' . $request->input('consignee_city_id') . ' is deactivated']);
-//                    }
-//
-//                    if (!$consignee_city->zone_id) {
-//                        return response()->json(['status' => 1, 'message' => 'Consignee City ID #' . $request->input('consignee_city_id') . ' is deactivated']);
-//                    }
-//                    if (!$consignee_city->booking_enable_status) {
-//                        return response()->json(['status' => 1, 'message' => 'Delivery is not available for this City.']);
-//                    }
-
-                $pickup_city_id = $user_shipping_info->city_id;
-//
-//                    if ($request->input('consignee_city_id') != $pickup_city_id && $request->input('shipping_mode_id') == 4) {
-//                        return response()->json(['status' => 1, 'message' => 'Same Day Delivery is not available for Different City Shipment']);
-//                    }
-
-//                    if ($user_shipping_info->city->id != $consignee_city->id) {
-//                        $city_zone = City::where('id', $consignee_city->id)->first();
-//                        $zone = ZoneClassCity::where(['city_id' => $consignee_city->id, 'zone_id' => $city_zone['zone_id']]);
-//                        $class_a = GlobalSettings::where('type', 'cod_cap_for_zone_class_0')->first();
-//                        $class_b = GlobalSettings::where('type', 'cod_cap_for_zone_class_1')->first();
-//                        $class_c = GlobalSettings::where('type', 'cod_cap_for_zone_class_2')->first();
-//                        $class_d = GlobalSettings::where('type', 'cod_cap_for_zone_class_3')->first();
-//                        if ($zone->exists()) {
-//                            $zone = $zone->first();
-//
-//                            if ($zone['class'] == 0) {
-//                                $check_zone = $class_a['setting_value'];
-//                            } elseif ($zone['class'] == 1) {
-//                                $check_zone = $class_b['setting_value'];
-//                            } elseif ($zone['class'] == 2) {
-//                                $check_zone = $class_c['setting_value'];
-//                            } else {
-//                                $check_zone = $class_d['setting_value'];
-//                            }
-//                            if ((int) $request->input('amount') > $check_zone) {
-//                                return response()->json(['status' => 1, 'message' => 'Amount must be smaller then or equal to ' . $check_zone]);
-//                            }
-//                        } else {
-//                            return response()->json(['status' => 1, 'message' => "Zone class does'nt exists"]);
-//                        }
-//                    }
-
-//                    if (!CityDelivery::where('city_id', $request->input('consignee_city_id'))->where('booking_type_id', $request->input('service_type_id'))->where('shipping_mode_id', $request->input('shipping_mode_id'))->exists()) {
-//                        return response()->json(['status' => 1, 'message' => 'Delivery is not allowed for City ID #' . $request->input('consignee_city_id') . ' with Service Type ID #' . $request->input('service_type_id') . ' and Shipping Mode ID #' . $request->input('shipping_mode_id')]);
-//                    }
-            } else {
-                //                dd('s1');
-//                    $pickup_consignee_city = City::find($row['consignee_city_id']);
-//                    if (!$pickup_consignee_city->status) {
-//                        return response()->json(['status' => 1, 'message' => 'Pickup Address\'s City ID #' . $pickup_consignee_city->city_id . ' is deactivated']);
-//                    }
-//
-//                    if (!$pickup_consignee_city->zone_id) {
-//                        return response()->json(['status' => 1, 'message' => 'Pickup Address\'s City ID #' . $pickup_consignee_city->city_id . ' is deactivated']);
-//                    }
-//
-//                    if (!in_array($user_id, [7762, 4758])) {
-//                        if (!$pickup_consignee_city->pickup) {
-//                            return response()->json(['status' => 1, 'message' => 'Pickup is not allowed for City ID #' . $pickup_consignee_city->city_id]);
-//                        }
-//                    }
-
-//                    $pickup_address_id_for_delivery = $row['pickup_address_id'];
-//                    $pickup_address_for_delivery = UserShippingInfo::find($pickup_address_id_for_delivery);
-//                    $delivery_city = City::find($pickup_address_for_delivery->city_id);
-//
-//                    if (!$delivery_city->status) {
-//                        return response()->json(['status' => 1, 'message' => 'Consignee City ID #' . $request->input('consignee_city_id') . ' is deactivated']);
-//                    }
-//
-//                    if (!$delivery_city->zone_id) {
-//                        return response()->json(['status' => 1, 'message' => 'Consignee City ID #' . $request->input('consignee_city_id') . ' is deactivated']);
-//                    }
-
-//                    $pickup_city_id = $pickup_consignee_city->id;
-
-//                    if ($request->input('consignee_city_id') != $pickup_city_id && $request->input('shipping_mode_id') == 4) {
-//                        return response()->json(['status' => 1, 'message' => 'Same Day Delivery is not available for Different City Shipment']);
-//                    }
-
-//                    if (!in_array($user_id, [7762, 4758])) {
-//                        if (!CityDelivery::where('city_id', $delivery_city->id)->where('booking_type_id', $request->input('service_type_id'))->where('shipping_mode_id', $request->input('shipping_mode_id'))->exists()) {
-//                            return response()->json(['status' => 1, 'message' => 'Delivery is not allowed for City ID #' . $delivery_city->id . ' with Service Type ID #' . $request->input('service_type_id') . ' and Shipping Mode ID #' . $request->input('shipping_mode_id')]);
-//                        }
-//                    }
-            }
-
-//                if ($user_type['account_type_id'] == 2) {
-//                    if ($row['delivery_type_id'] == 2) {
-//                        $allowed_delivery_type = CorporateDeliveryTypeStatus::where('user_id', $user_id);
-//                        if ($allowed_delivery_type->exists()) {
-//                            $allowed_delivery_type = $allowed_delivery_type->where('shipping_mode_id', $row['shipping_mode_id'])->where('delivery_type_id', $row['delivery_type_id']);
-//                            if (!$allowed_delivery_type->exists()) {
-//                                return response()->json(['status' => 1, 'message' => 'Selected Delivery Type is disabled']);
-//                            }
-//                        } else {
-//                            return response()->json(['status' => 1, 'message' => 'Selected Delivery Type is disabled']);
-//                        }
-//                    }
-//                }
-            if ($service_type_id == 5) {
-
-                if (!empty($row['consignee_email_address'])) {
-                    $user_email_id = $row['consignee_email_address'];
-                } else {
-                    $user = User::find($user_id);
-                    $user_email_id = $user->email;
-                }
-                $pickup_city_id = $row['consignee_city_id'];
-                //done in insert
-                $pickup_address_id = ShipperShipmentBookController::add_pickup_address($user_id, $row['consignee_address'], $row['consignee_name'], null, substr_replace($consignee_phone_number_1, '-', 4, 0), $user_email_id, $pickup_city_id, 0, true);
-
-                $pickup_delivery_address_id = $row['pickup_address_id'];
-                $pickup_delivery_address = UserShippingInfo::find($pickup_delivery_address_id);
-
-                $consignee_city_id = $pickup_delivery_address->city_id;
-                $consignee_name = $pickup_delivery_address->poc;
-                $consignee_address = $pickup_delivery_address->pickup_address;
-                $consignee_phone_number_1 = $pickup_delivery_address->phone;
-                $consignee_phone_number_2 = null;
-                $consignee_email_address = $pickup_delivery_address->email;
-                $information_display = true;
-                if ($user_type['account_type_id'] == 1) {
-                    $charges_mode_id = 4;
-                } else {
-                    $charges_mode_id = 3;
-                }
-                $payment_mode_id = 1;
-                $self_collection = false;
-                $delivery_type_id = 1;
-            } else {
-                $pickup_address_id = $row['pickup_address_id'];
-                $consignee_city_id = $row['consignee_city_id'];
-
-                if ($user_type['account_type_id'] == 2) {
-                    $delivery_type_id = $row['delivery_type_id'];
-                    $consignee_city_name = City::where('id', $consignee_city_id)->first();
-                    if ($delivery_type_id == 2) {
-                        $consignee_address = 'TRAX Office ' . $consignee_city_name['name'];
-                    } else {
-                        $consignee_address = $row['consignee_address'];
-                    }
-                } else {
-                    $consignee_address = $row['consignee_address'];
-                }
-
-                $consignee_name = $row['consignee_name'];
-                $consignee_phone_number_1 = substr_replace($consignee_phone_number_1, '-', 4, 0);
-
-                if (!empty($row['consignee_phone_number_2'])) {
-                    $consignee_phone_number_2 = substr_replace($consignee_phone_number_2, '-', 4, 0);
-                } else {
-                    $consignee_phone_number_2 = null;
-                }
-
-                if (!empty($row['consignee_email_address'])) {
-                    $consignee_email_address = $row['consignee_email_address'];
-                } else {
-                    $consignee_email_address = null;
-                }
-
-                $information_display = TRUE;
-
-                $settings = GlobalSettings::where('type', 'airway_bill_address_visibility_setting');
-                if ($settings->exists()) {
-                    $settings = $settings->first();
-                    if ($settings->text != NULL) {
-                        $airway_bill_address_visibility_accounts = array_map('intval', explode(',', $settings->text));
-                        if (in_array(session('user_id'), $airway_bill_address_visibility_accounts)) {
-                            $information_display = FALSE;
-                        }
-                    }
-                }
-
-                if (!empty($row['charges_mode_id'])) {
-                    $charges_mode_id = $row['charges_mode_id'];
-                } else {
-                    if ($user_type['account_type_id'] == 1) {
-                        $charges_mode_id = 4;
-                    } else {
-                        $charges_mode_id = 3;
-                    }
-                }
-
-                $payment_mode_id = $row['payment_mode_id'];
-                $self_collection = false;
-                if ($service_type_id == 1 && !empty($row['self_collection'])) {
-                    if ($row['self_collection'] != null) {
-                        if ($row['self_collection'] == 1) {
-                            $self_collection = true;
-                        }
-                    }
-                }
-            }
-
-            if (!empty($row['order_id'])) {
-                $order_id = $row['order_id'];
-            } else {
-                $order_id = null;
-            }
-
-            if (isset($row['package_type']) && $row['package_type'] == 1) {
-                $package_type = true;
-            } else {
-                $package_type = false;
-            }
-
-            if (!empty($row['special_instructions'])) {
-                $special_instructions = $row['special_instructions'];
-            } else {
-                $special_instructions = null;
-            }
-
-            $estimated_weight = $row['estimated_weight'];
-            $shipping_mode_id = $row['shipping_mode_id'];
-
-            if ($shipping_mode_id == 4) {
-                $same_day_timing_id = $row['same_day_timing_id'];
-            } else {
-                $same_day_timing_id = null;
-            }
-
-            if ($service_type_id == 3) {
-                $try_and_buy_charges = $row['try_and_buy_fees'];
-                $amount = 0;
-                $parcel_value = 0;
-            } elseif ($service_type_id == 5) {
-                $try_and_buy_charges = null;
-                $amount = 0;
-                $parcel_value = 0;
-            } else {
-                $try_and_buy_charges = null;
-                $amount = $row['amount'];
-                $parcel_value = $row['parcel_value'];
-            }
-            $pieces_quantity = 1;
-            if ($service_type_id == 1 && !empty($row['pieces_quantity'])) {
-                if ($row['pieces_quantity'] != null) {
-                    $pieces_quantity = $row['pieces_quantity'];
-                } else {
-                    $pieces_quantity = 1;
-                }
-            }
-
-            if ($service_type_id == 3 && $payment_mode_id == 4) {
-                $payment_mode_id = 1;
-            }
-
-            if ($payment_mode_id == 4) {
-                $amount = 0;
-                $parcel_value = 0;
-            }
-
-
-            $business_category_id = 1;
-            if ($user_type['account_type_id'] == 1) {
-                $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces_quantity, $self_collection, $business_category_id, $open_shipment, $return_address_id, $parcel_value);
-            } else {
-
-                if ($user_type['corporate_rate_type_id'] == 3) {
-                    $delivery_type_id = 1;
-                }
-                $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment, $return_address_id, $parcel_value);
-            }
-
-            if ($shipment_pre_book) {
-                $tracking_number[] = ShipperShipmentBookController::generate_prefix_tracking_number($shipment_id, $order_id);
-            } else {
-                $tracking_number[] = ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
-            }
-
-            if (!isset($row['shipment_id'])) {
-                $row['shipment_id'] = $shipment_id;
-            }
-
-            if (!isset($row['pickup_city_id'])) {
-                $row['pickup_city_id'] = $pickup_city_id;
-            }
-
-            if (!isset($row['tracking_number'])) {
-                $row['tracking_number'] = $tracking_number;
-            }
-
-            $data[] = $row;
-
-            $check = NonServiceArea::pluck('name')->toArray();
-            $msg_string = null;
-            $str_arr = null;
-            $str_arr = preg_split("/[ ,]+/", $consignee_address);
-            foreach ($check as $nsa) {
-                foreach ($str_arr as $arr_value) {
-                    if (strtolower($nsa) == strtolower($arr_value)) {
-                        $con_nsa = $arr_value;
-                        if ($msg_string != null) {
-                            $msg_string = $msg_string . ', ' . $arr_value;
-                        } else {
-                            $msg_string = $arr_value;
-                        }
-                    }
-                }
-            }
-
-            $check_bdmk = BookingDestinationMappingKeyword::join('booking_destination_mappings as bdm', 'bdm.id', '=', 'booking_destination_mapping_keywords.mapping_id')
-                ->where('bdm.status', 1)
-                ->select(['booking_destination_mapping_keywords.keyword'])
-                ->pluck('keyword')
-                ->toArray();
-            $bdmk_error = "";
-
-            $consignee_city = City::find($consignee_city_id);
-
-            $bdmk_result = $this->check_bdmk($consignee_city->id, $consignee_address, $check_bdmk, $consignee_city->name);
-            if (isset($bdmk_result['invalid_cities'])) {
-                $bdmk_error = $bdmk_result['invalid_cities'];
-            }
-
-
-            if ($user_type['logo_status'] == 1) {
-                $shipment = Shipment::find($shipment_id);
-                $shipment->shipment_invoice_status = 1;
-                $shipment->save();
-            }
-            $blacklist_message = null;
-            $consignee_information = ConsigneeInformation::where('phone', $consignee_phone_number_1);
-            if ($consignee_information->exists()) {
-                $consignee_information = $consignee_information->first();
-                $blacklist = BlacklistedConsignee::where('consignee_information_id', $consignee_information->id);
-                if ($blacklist->exists()) {
-                    $blacklist = $blacklist->first();
-                    $blacklist_setting_id = $blacklist->blacklist_setting_id;
-                    $blacklist_setting = BlacklistSetting::find($blacklist_setting_id);
-                    if ($blacklist_setting) {
-                        $blacklist_message = $blacklist_setting->message;
-                    }
-                }
-            }
-
-            if ($service_type_id == 6) {
-                $ftl_request_id = $row['approve_freight_request'];
-                FtlRequest::where('id', $ftl_request_id)->update(['shipment_id' => $shipment_id, 'status_id' => 5, 'collection_type' => $row['ftl_collection_type']]);
-                FTLController::FTLRequestStatusHistory($ftl_request_id, 5, $user_id);
-            }
-
-            $return_array = array(
-                'status' => 0,
-                'message' => 'Shipment has been Booked!',
-                'tracking_number' => $tracking_number,
-                'messages' => []
-            );
-
-            // Check for possible address anomaly
-            if ($msg_string != null && $blacklist_message == null) {
-                NotificationsController::send(32, $shipment_id, $msg_string);
-                $msg_string = "A Possible Address Anomaly: " . $msg_string . " Detected!";
-                $return_array['messages'][] = $msg_string . ' In case of, Out Of Service Area: Additional charges may apply and Non Service Area: Shipment may be returned. For assistance, Call: 021-38772222.';
-            }
-            if ($msg_string == null && $blacklist_message != null) {
-                $return_array['messages'][] = $blacklist_message;
-            }
-            if ($msg_string != null && $blacklist_message != null) {
-                NotificationsController::send(32, $shipment_id, $msg_string);
-                $msg_string = "A Possible Address Anomaly: " . $msg_string . " Detected!";
-                $return_array['messages'][] = $msg_string . ' In case of, Out Of Service Area: Additional charges may apply and Non Service Area: Shipment may be returned. For assistance, Call: 021-38772222.';
-                $return_array['messages'][] = $blacklist_message;
-            }
-
-            // Handle BDMK errors
-            if ($bdmk_error != null) {
-                $return_array['messages'][] = $bdmk_error;
-            }
-            if ($blacklist_message != null) {
-                $return_array['messages'][] = $blacklist_message;
-            }
-
-            // Check if there are any messages to return
-            if (!empty($return_array['messages'])) {
-                return response()->json($return_array);
-            }
-
-
-            $array_piece_quantity_count = ($row['pieces_quantity'] > 1) ? $array_piece_quantity_count + 1 : $array_piece_quantity_count;
-            // Handle pieces quantity message
-            if (!empty($row['pieces_quantity'])) {
-                if ($array_piece_quantity_count > 0) {
-                    $video = array(
-                        "url" => "https://www.youtube.com/watch?v=Uy0KAIx3xHQ",
-                        "message" => "Please view this video so that you can follow required process. In case process is not followed completely we will not be able to process this shipment! ملٹیپل پیسز شپمینٹ بک یا پیک کرنے کا طریقہ اس وڈیو میں ضرور دیکھیں اگر شپمینٹ بتاۓ ہؤۓ طریقہ  کے تہت  ہینڈاؤرنہیں ہوئ تو ہم اس شپمینٹ کو پروسیس نہیں کریں گے"
-                    );
-                    $return_array['messages'][] = $video;
-                }
-            }
-
-        }
-
-        $shipment_booked_api_count = new ShipmentBookedApiCount();
-        $shipment_booked_api_count->shipment_count = !empty($return_array["tracking_number"]) ? count($return_array["tracking_number"]) : 0;
-        $shipment_booked_api_count->user_id = $user_id;
-        $shipment_booked_api_count->save();
-
-        //send to job
-        dispatch(new ProcessShipmentApiBulkBooking($data, $user_id));
-
-        return response()->json($return_array);
     }
     public function shipment_book_international(Request $request)
     {
@@ -3276,6 +1829,25 @@ class APIController extends Controller
                 }
             }
 
+            try {
+                // Maintaining shipper segment logs on booking
+                ShipperSegmentLogs::create([
+                    'shipment_id' => $shipment_id,
+                    'segment_id' => $user_type->segment_id,
+                    'sub_segment_id' => $user_type->sub_segment_id
+                ]);
+
+                // if ($consignee_city_id != $pickup_city_id) {
+                //     ShipperSegmentLogs::create([
+                //         'shipment_id' => $shipment_id,
+                //         'segment_id' => $user_type->segment_id,
+                //         'sub_segment_id' => $user_type->sub_segment_id
+                //     ]);
+                // }
+            } catch (\Exception $e) {
+                Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
+            }
+            
             return response()->json(['status' => 1, 'message' => 'Shipment Booked with Tracking Number: ' . $tracking_number]);
         }
     }
@@ -3332,13 +1904,13 @@ class APIController extends Controller
 
                     $filename = 'air_waybill' . '.jpg';
 
-                    return $image->setOption('disable-smart-width', true)->setOption('width', 1280)->download($filename);
+                    return $image->setOption('disable-smart-width', true)->setOption('width', 1280)->setOption('enable-local-file-access', true)->download($filename);
                 } else {
                     $pdf = SnappyPDF::loadHTML($air_waybill);
 
                     $filename = 'air_waybill' . '.pdf';
 
-                    return $pdf->download($filename);
+                    return $pdf->setOption('enable-local-file-access', true)->download($filename);
                 }
             } else {
                 return response()->json(['status' => 1, 'message' => 'Already Received']);
@@ -3448,6 +2020,18 @@ class APIController extends Controller
 
             $shipment = Shipment::whereIn('user_id', $user_ids)->where('tracking_number', $tracking_number)->first();
 
+            $sub_segment_name = '-';
+            $sub_segment = DB::table('shipper_segment_logs')
+            ->leftJoin('sub_category_segments', 'sub_category_segments.id', 'shipper_segment_logs.sub_segment_id')
+            ->where('shipment_id', $shipment->id)
+            ->select('sub_category_segments.name')
+            ->first();
+
+            if ($sub_segment && $sub_segment->name)
+            {
+                $sub_segment_name = $sub_segment->name;
+            }
+
             $details = array();
 
             $details['tracking_number'] = $tracking_number;
@@ -3534,116 +2118,10 @@ class APIController extends Controller
                 }
             }
 
+            $details['order_information']['sub_segment'] = $sub_segment_name;
+
             return response()->json(['status' => 0, 'message' => 'Tracking of Shipment #' . $tracking_number, 'details' => $details]);
         }
-    }
-
-    public function bulk_shipment_track(Request $request)
-    {
-
-
-        $user_id = $request->user_id;
-        $user_ids = MergedSisterAccountMapping::where('head_user_id', $user_id)->pluck('sister_user_id')->toArray();
-        $user_ids[] = $user_id;
-
-        //check if user allow for bulk tracking
-        $bulk_tracking_shippers_setting = GlobalSettings::where('setting_value', 1)
-            ->where('type', 'bulk_tracking_shippers')
-            ->first();
-        $bulk_tracking_shippers = $bulk_tracking_shippers_setting ?
-            array_map('intval', explode(',', $bulk_tracking_shippers_setting->text))
-            : [];
-
-        if(!in_array($user_id, $bulk_tracking_shippers)){
-            return response()->json(['status' => 1, 'message' => 'You Are Not Allowed For Bulk Tracking']);
-        }
-
-        // Split tracking numbers into an array
-        $tracking_numbers = explode(',', $request->tracking_numbers);
-        $type = $request->type;
-        $all_details = [];
-
-        // Process each tracking number
-        foreach (array_filter($tracking_numbers) as $tracking_number) {
-
-            $shipment = Shipment::whereIn('user_id', $user_ids)->where('tracking_number', $tracking_number)->first();
-
-            if (!$shipment) {
-                $all_details[] = [
-                    'tracking_number' => $tracking_number,
-                    'status' => 1,
-                    'message' => 'Shipment not found',
-                ];
-                continue;
-            }
-
-            $details = [];
-            $details['tracking_number'] = $tracking_number;
-            $details['order_id'] = $shipment->order_id;
-            $details['order_date'] = $shipment->pickup_date;
-            $details['booking_date'] = $shipment->created_at;
-
-            $shipper = $shipment->user;
-            $details['shipper']['name'] = $shipper->name;
-            $pickup = $shipment->pickup_address;
-            $details['pickup']['origin'] = $pickup->city->name;
-
-            if ($type == 0) {
-                $details['shipper']['account_number'] = $shipper->id;
-                $details['shipper']['phone_number_1'] = $shipper->phone;
-                $details['shipper']['phone_number_2'] = $shipper->phone2;
-                $details['shipper']['email'] = $shipper->email;
-                $details['shipper']['city'] = $shipper->city->name;
-                $details['pickup']['person_of_contact'] = $pickup->poc;
-                $details['pickup']['phone_number'] = $pickup->phone;
-                $details['pickup']['email'] = $pickup->email;
-                $details['pickup']['address'] = $pickup->pickup_address;
-            }
-
-            $details['consignee']['name'] = $shipment->consignee_name;
-            $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
-            $details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
-            $details['consignee']['destination'] = $shipment->consignee_city->name;
-            $details['consignee']['address'] = $shipment->consignee_address;
-
-            foreach ($shipment->items as $item) {
-                $item_details = [];
-                $item_details['order_id'] = $shipment->order_id;
-                $item_details['product_type'] = $item->product->product_name;
-                $item_details['description'] = $item->description;
-                $item_details['quantity'] = $item->quantity;
-                $details['order_information']['items'][] = $item_details;
-            }
-
-            if ($type == 0) {
-                $details['order_information']['weight'] = $shipment->actual_weight ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
-                $details['order_information']['shipping_mode'] = $shipment->shipping_mode->mode;
-                $details['order_information']['amount'] = $shipment->amount;
-                $details['order_information']['instructions'] = $shipment->special_instructions;
-            }
-
-            $details['tracking_history'] = [];
-
-            foreach ($shipment->shipment_journey as $journey) {
-                if (($type == 0 && $journey->verification) || ($type != 0 && $journey->consignee_status_id != null && $journey->verification)) {
-                    $journey_details = [];
-                    $journey_details['date_time'] = Carbon::parse($journey->created_at)->format('d/m/Y h:i A');
-                    $journey_details['timestamp'] = Carbon::parse($journey->created_at)->timestamp;
-                    $journey_details['status'] = $type == 0 ? $journey->shipment_status_shipper->name : $journey->shipment_status_consignee->name;
-                    $journey_details['status_reason'] = $journey->status_reason_id ? $journey->shipment_status_reason->name : null;
-                    $details['tracking_history'][] = $journey_details;
-                }
-            }
-
-            $all_details[] = [
-                'tracking_number' => $tracking_number,
-                'status' => 0,
-                'message' => 'Tracking of Shipment #' . $tracking_number,
-                'details' => $details,
-            ];
-        }
-
-        return response()->json(['status' => 0, 'message' => 'Bulk Tracking Results', 'results' => $all_details]);
     }
 
     public function shipment_charges(Request $request)
@@ -4054,13 +2532,13 @@ class APIController extends Controller
 
                 $filename = 'receiving_sheet_' . $receiving_sheet_id . '.jpg';
 
-                return $image->setOption('disable-smart-width', true)->download($filename);
+                return $image->setOption('disable-smart-width', true)->setOption('enable-local-file-access', true)->download($filename);
             } else {
                 $pdf = SnappyPDF::loadHTML($receiving_sheet);
 
                 $filename = 'receiving_sheet_' . $receiving_sheet_id . '.pdf';
 
-                return $pdf->download($filename);
+                return $pdf->setOption('enable-local-file-access', true)->download($filename);
             }
         }
     }
@@ -4111,13 +2589,13 @@ class APIController extends Controller
 
                 $filename = 'receiving_sheet_' . $receiving_sheet_id . '.jpg';
 
-                return $image->setOption('disable-smart-width', true)->download($filename);
+                return $image->setOption('disable-smart-width', true)->setOption('enable-local-file-access', true)->download($filename);
             } else {
                 $pdf = SnappyPDF::loadHTML($receiving_sheet);
 
                 $filename = 'receiving_sheet_' . $receiving_sheet_id . '.pdf';
 
-                return $pdf->download($filename);
+                return $pdf->setOption('enable-local-file-access', true)->download($filename);
             }
         }
     }
@@ -4531,20 +3009,21 @@ class APIController extends Controller
             $request_channel = 2;
             $description = $request->description;
 
-            $shipment_id = Shipment::where('tracking_number', $request->tracking_number)->first()->id;
+            $shipment_id = Shipment::where('tracking_number', $request->tracking_number)->first();
             $launched_by = 4;
             $name = $request->complaint_name;
             $phoneno = $request->complaint_phone;
 
-            if (!CrmRequest::where('shipment_id', $shipment_id)->where('case_nature_id', $case_nature)->exists()) {
+            if (!CrmRequest::where('shipment_id', $shipment_id->id)->where('case_nature_id', $case_nature)->exists()) {
                 $data = new CrmRequest();
                 $data->case_nature_id = $case_nature;
                 $data->case_nature_type_id = $case_nature_type;
                 $data->description = 'Consignee: (' . $name . ') | Phone Number: (' . $phoneno . ') | Complain: ' . $description;
                 $data->channel_id = $request_channel;
                 $data->status_id = 1;
+                $data->shipper_id = $shipment_id->user_id;
                 $data->launched_by = $launched_by;
-                $data->shipment_id = $shipment_id;
+                $data->shipment_id = $shipment_id->id;
 
                 $data->save();
 
@@ -4734,13 +3213,13 @@ class APIController extends Controller
             //         }
             //     }
             // }
-
+            
             $shipment_pre_book = ShipmentPrebook::where('user_id', $user_id)->get();
             if (!$shipment_pre_book->isEmpty()) {
                 $prefixes = $shipment_pre_book->pluck('prefix')->toArray();
                 $order_id = $request->input('order_id');
                 $is_valid_order_id = false;
-
+        
                 foreach ($prefixes as $prefix) {
                     $length = strlen($prefix);
                     $check_order_id_prefix = substr($order_id, 0, $length);
@@ -4749,7 +3228,7 @@ class APIController extends Controller
                         break;
                     }
                 }
-
+        
                 if (!$is_valid_order_id) {
                     return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
                 }
@@ -5001,6 +3480,26 @@ class APIController extends Controller
                     return response()->json(['status' => 0, 'message' => 'Please view this video so that you can follow required process. In case process is not followed completely we will not be able to process this shipment!', 'tracking_number' => $tracking_number, 'video' => $video]);
                 }
             }
+
+            try {
+                // Maintaining shipper segment logs on booking
+                ShipperSegmentLogs::create([
+                    'shipment_id' => $shipment_id,
+                    'segment_id' => $user_type->segment_id,
+                    'sub_segment_id' => $user_type->sub_segment_id
+                ]);
+
+                // if ($consignee_city_id != $pickup_city_id) {
+                //     ShipperSegmentLogs::create([
+                //         'shipment_id' => $shipment_id,
+                //         'segment_id' => $user_type->segment_id,
+                //         'sub_segment_id' => $user_type->sub_segment_id
+                //     ]);
+                // }
+            } catch (\Exception $e) {
+                Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
+            }
+
             return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number, 'reference_number' => $reference_number]);
         }
     }
@@ -5058,13 +3557,13 @@ class APIController extends Controller
 
                     $filename = 'air_waybill' . '.jpg';
 
-                    return $image->setOption('disable-smart-width', true)->setOption('width', 1280)->download($filename);
+                    return $image->setOption('disable-smart-width', true)->setOption('enable-local-file-access', true)->download($filename);
                 } else {
                     $pdf = SnappyPDF::loadHTML($air_waybill);
 
                     $filename = 'air_waybill' . '.pdf';
 
-                    return $pdf->download($filename);
+                    return $pdf->setOption('enable-local-file-access', true)->download($filename);
                 }
             } else {
                 return response()->json(['status' => 1, 'message' => 'Already Received']);
@@ -5437,10 +3936,7 @@ class APIController extends Controller
                             $details['payment_type'] = 'Delivered';
                         } else if ($done_payment_shipment->type == 1) {
                             $details['payment_type'] = 'Returned';
-                        }else if ($done_payment_shipment->type == 3) {
-                            $details['payment_type'] = 'Arrival';
-                        }
-                        else {
+                        } else {
                             $details['payment_type'] = 'Adjusted';
                         }
                         $details['payment_id'] = $done_payment_shipment->done_payment->id;
@@ -5488,29 +3984,26 @@ class APIController extends Controller
                     $data['total_charges'] = $invoice->total_charges;
                     $data['total_gst'] = $invoice->total_gst;
                     $data['total_invoice_amount'] = $invoice->total_invoice_amount;
+
                     $data['shipments'] = array();
                     $invoice_shipments = $invoice->invoice_shipments;
 
                     if (!$invoice_shipments->isEmpty()) {
                         foreach ($invoice_shipments as $invoice_shipment) {
                             $shipment = $invoice_shipment->shipment;
-                            $arrival_charges_applied = ShipmentAdditionalCharges::check_additional_charges($shipment->id,true,false,false);;
                             $details = array();
                             if ($invoice_shipment->type == 0) {
                                 $details[$shipment->tracking_number]['payment_type'] = 'Delivered';
                             } else if ($invoice_shipment->type == 1) {
                                 $details[$shipment->tracking_number]['payment_type'] = 'Returned';
-                            } else if ($invoice_shipment->type == 3) {
-                                $details[$shipment->tracking_number]['payment_type'] = 'Arrival';
-                            }
-                            else {
+                            } else {
                                 $details[$shipment->tracking_number]['payment_type'] = 'Adjusted';
                             }
-                            $details[$shipment->tracking_number]['weight_charges'] = (($account_type_id == 2 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? $shipment->weight_charges : 0);
+                            $details[$shipment->tracking_number]['weight_charges'] = (($account_type_id == 2 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->weight_charges : 0);
                             $details[$shipment->tracking_number]['cash_handling_charges'] = (($account_type_id == 2 && $invoice_shipment->type == 0 && $invoice_shipment->charges != 0) ? $shipment->cash_handling_charges : 0);
                             $details[$shipment->tracking_number]['insurance_charges'] = (($account_type_id == 2 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->insurance_charges : 0);
                             $details[$shipment->tracking_number]['return_charges'] = (($account_type_id == 2 && $invoice_shipment->type == 1 && $invoice_shipment->charges != 0) ? $shipment->return_charges : 0);
-                            $details[$shipment->tracking_number]['fuel_surcharge'] = (($account_type_id == 2 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? $shipment->fuel_surcharge : 0);
+                            $details[$shipment->tracking_number]['fuel_surcharge'] = (($account_type_id == 2 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->fuel_surcharge : 0);
                             $details[$shipment->tracking_number]['replacement_charges'] = (($account_type_id == 2 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->replacement_charges : 0);
                             $details[$shipment->tracking_number]['try_and_buy_charges'] = (($account_type_id == 2 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->try_and_buy_charges : 0);
                             $details[$shipment->tracking_number]['intercept_charges'] = (($account_type_id == 2 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->intercept_charges : 0);
@@ -5521,6 +4014,10 @@ class APIController extends Controller
                             $details[$shipment->tracking_number]['invoice_amount'] = $invoice_shipment->invoice_amount;
                             $details[$shipment->tracking_number]['amount'] = $shipment->amount;
                             $details[$shipment->tracking_number]['actual_weight'] = $shipment->actual_weight;
+                            $details[$shipment->tracking_number]['faf_charges'] = optional(
+                                ShipmentAdditionalCharges::where('shipment_id', $shipment->id)->latest()->first()
+                            )->faf_charges ?? 'No FaF charge applied';
+
                             $data['shipments'][] = $details;
                         }
                         return response()->json(['status' => 0, 'payments' => $data]);
@@ -5529,7 +4026,6 @@ class APIController extends Controller
                     return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => ['Invoice not found!']]);
                 }
             } else {
-
                 $done_payment = DonePayment::where('id', $request->id)->where('user_id', $user_id);
                 if ($done_payment->exists()) {
                     $done_payment = $done_payment->first();
@@ -5546,23 +4042,19 @@ class APIController extends Controller
                     if (!$done_payment_shipments->isEmpty()) {
                         foreach ($done_payment_shipments as $done_payment_shipment) {
                             $shipment = $done_payment_shipment->shipment;
-                            $arrival_charges_applied = ShipmentAdditionalCharges::check_additional_charges($shipment->id,true,false,false);;
                             $details = array();
                             if ($done_payment_shipment->type == 0) {
                                 $details[$shipment->tracking_number]['payment_type'] = 'Delivered';
                             } else if ($done_payment_shipment->type == 1) {
                                 $details[$shipment->tracking_number]['payment_type'] = 'Returned';
-                            } else if ($done_payment_shipment->type == 3) {
-                                $details[$shipment->tracking_number]['payment_type'] = 'Arrival';
-                            }
-                            else {
+                            } else {
                                 $details[$shipment->tracking_number]['payment_type'] = 'Adjusted';
                             }
-                            $details[$shipment->tracking_number]['weight_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0 && ($done_payment_shipment->type == 3 || (!$arrival_charges_applied))) ? $shipment->weight_charges : 0);
+                            $details[$shipment->tracking_number]['weight_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->weight_charges : 0);
                             $details[$shipment->tracking_number]['cash_handling_charges'] = (($account_type_id == 1 && $done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? $shipment->cash_handling_charges : 0);
                             $details[$shipment->tracking_number]['insurance_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->insurance_charges : 0);
                             $details[$shipment->tracking_number]['return_charges'] = (($account_type_id == 1 && $done_payment_shipment->type == 1 && $done_payment_shipment->charges != 0) ? $shipment->return_charges : 0);
-                            $details[$shipment->tracking_number]['fuel_surcharge'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0 && ($done_payment_shipment->type == 3 || (!$arrival_charges_applied))) ? $shipment->fuel_surcharge : 0);
+                            $details[$shipment->tracking_number]['fuel_surcharge'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->fuel_surcharge : 0);
                             $details[$shipment->tracking_number]['replacement_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->replacement_charges : 0);
                             $details[$shipment->tracking_number]['try_and_buy_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->try_and_buy_charges : 0);
                             $details[$shipment->tracking_number]['intercept_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->intercept_charges : 0);
@@ -5573,6 +4065,10 @@ class APIController extends Controller
                             $details[$shipment->tracking_number]['invoice_amount'] = (($done_payment_shipment->type == 2) ? $done_payment_shipment->payable : 0);
                             $details[$shipment->tracking_number]['amount'] = $shipment->amount;
                             $details[$shipment->tracking_number]['actual_weight'] = $shipment->actual_weight;
+                            $details[$shipment->tracking_number]['faf_charges'] = optional(
+                                ShipmentAdditionalCharges::where('shipment_id', $shipment->id)->latest()->first()
+                            )->faf_charges ?? 'No FaF charge applied';
+
                             $data['shipments'][] = $details;
                         }
                         return response()->json(['status' => 0, 'payments' => $data]);
@@ -5654,7 +4150,7 @@ class APIController extends Controller
                                 if ($admin->api_token) {
                                     $information['api_token'] = $admin->api_token;
                                 } else {
-                                    $api_token = uniqid(base64_encode(str_random(60)));
+                                    $api_token = uniqid(base64_encode(Str::random(60)));
 
                                     $admin->api_token = $api_token;
 
@@ -5719,7 +4215,7 @@ class APIController extends Controller
                                 if ($rider->api_token) {
                                     $information['api_token'] = $rider->api_token;
                                 } else {
-                                    $api_token = uniqid(base64_encode(str_random(60)));
+                                    $api_token = uniqid(base64_encode(Str::random(60)));
 
                                     $rider->api_token = $api_token;
 
@@ -5791,7 +4287,7 @@ class APIController extends Controller
                                 if ($retail_user->api_token) {
                                     $information['api_token'] = $retail_user->api_token;
                                 } else {
-                                    $api_token = uniqid(base64_encode(str_random(60)));
+                                    $api_token = uniqid(base64_encode(Str::random(60)));
 
                                     $retail_user->api_token = $api_token;
 
@@ -6545,11 +5041,11 @@ class APIController extends Controller
                         if ($rcp_assigned_shipment->exists()) {
                             $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
                             $rcp_assigned_shipment->shipment_status = 4; //return confirm status
-                            $rcp_assigned_shipment->assigned_status = 2; //unassign agent
+                            $rcp_assigned_shipment->assigned_status = 2; //unassign agent 
                             $rcp_assigned_shipment->user_id = $user_id;
                             $rcp_assigned_shipment->save();
 
-                            //updating already_updated & pending of agent if shipment is updated by shipper
+                            //updating already_updated & pending of agent if shipment is updated by shipper 
                             $rcp_assigned_agent = RcpAssignedAgent::where('id', $rcp_assigned_shipment->rcp_assigned_agent_id)->first();
                             $already_updated = $rcp_assigned_agent->increment('already_updated');
                             $rcp_assigned_agent->decrement('pending_shipments');
@@ -6603,12 +5099,12 @@ class APIController extends Controller
                             //Reattempt Request
                             $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment->id)->where('assigned_status', 1)->where('shipment_status', 0)->latest()->first();
                             if ($rcp_assigned_shipment) {
-                                $rcp_assigned_shipment->shipment_status = 10; //reattempt request
-                                $rcp_assigned_shipment->assigned_status = 2; //unassign agent
+                                $rcp_assigned_shipment->shipment_status = 10; //reattempt request 
+                                $rcp_assigned_shipment->assigned_status = 2; //unassign agent 
                                 $rcp_assigned_shipment->user_id = $user_id;
                                 $rcp_assigned_shipment->save();
 
-                                //updating already_updated & pending of agent if shipment is updated by shipper
+                                //updating already_updated & pending of agent if shipment is updated by shipper 
                                 $rcp_assigned_agent = RcpAssignedAgent::where('id', $rcp_assigned_shipment->rcp_assigned_agent_id)->first();
                                 $already_updated = $rcp_assigned_agent->increment('already_updated');
                                 $rcp_assigned_agent->decrement('pending_shipments');
@@ -6632,7 +5128,7 @@ class APIController extends Controller
                                 'state_id' => 3,//Open rv state id 3 is Open
                                 'type_id'=> 3, // set the user_type_id 3 against to the shipper default function set is 1.
                             ];
-
+                           
                             $this->rv_shipment_assign_agent_by_admin($rv_shipment_assign_agent_data);
 
                             //if Shipper Status Id = 66 (Shipment - Re-Attempt Call Requested) Then fetch Those Shipments in Get Ticket
@@ -6642,7 +5138,7 @@ class APIController extends Controller
                                 'status_reason_id' => $last_reason_id,
                                 'shipment_user_id' => $shipment->user_id,
                                 'call_count' => 2
-                            ];
+                            ];  
                             dispatch(new ProcessRvShipmentTicket($rvData));
 
                             if ($journey) {
@@ -6732,11 +5228,11 @@ class APIController extends Controller
 
                                                 $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
                                                 $rcp_assigned_shipment->shipment_status = 8; //intercept approved
-                                                $rcp_assigned_shipment->assigned_status = 2; //unassign agent
+                                                $rcp_assigned_shipment->assigned_status = 2; //unassign agent 
                                                 $rcp_assigned_shipment->user_id = $user_id;
                                                 $rcp_assigned_shipment->save();
 
-                                                //updating already_updated & pending of agent if shipment is updated by shipper
+                                                //updating already_updated & pending of agent if shipment is updated by shipper 
                                                 $rcp_assigned_agent = RcpAssignedAgent::where('id', $rcp_assigned_shipment->rcp_assigned_agent_id)->first();
                                                 $already_updated = $rcp_assigned_agent->increment('already_updated');
                                                 $rcp_assigned_agent->decrement('pending_shipments');
@@ -6781,8 +5277,8 @@ class APIController extends Controller
                                     return response()->json(['status' => 1, 'message' => 'Shipment is already updated with Status : ' . $shipment->status_shipper->name . ' against Tracking Number: ' . $shipment->tracking_number]);
                                 }
                             }
-                        }
-
+                        } 
+                        
                         else {
                             //different consignee
                             $rules = [
@@ -6855,17 +5351,17 @@ class APIController extends Controller
                                             if ($rcp_assigned_shipment->exists()) {
                                                 $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
                                                 $rcp_assigned_shipment->shipment_status = 7; //intercept request
-                                                $rcp_assigned_shipment->assigned_status = 2; //unassign agent
+                                                $rcp_assigned_shipment->assigned_status = 2; //unassign agent 
                                                 $rcp_assigned_shipment->user_id = $user_id;
                                                 $rcp_assigned_shipment->save();
 
-                                                //updating already_updated & pending of agent if shipment is updated by shipper
+                                                //updating already_updated & pending of agent if shipment is updated by shipper 
                                                 $rcp_assigned_agent = RcpAssignedAgent::where('id', $rcp_assigned_shipment->rcp_assigned_agent_id)->first();
                                                 $already_updated = $rcp_assigned_agent->increment('already_updated');
                                                 $rcp_assigned_agent->decrement('pending_shipments');
                                                 $rcp_assigned_agent->save();
 
-                                                //creating log
+                                                //creating log 
                                                 $return_assign_log = new RcpAssignedShipmentLog();
                                                 $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
                                                 $return_assign_log->shipment_id = $rcp_assigned_shipment->shipment_id;
@@ -7646,7 +6142,7 @@ class APIController extends Controller
                                     $return_data['due_date'] = Carbon::parse($shipment_data->created_at)->format('Ymd');
 
                                     // creating amount -- will always set + prefix if amount is not negative otherwise - if negative
-                                    // total length is 14
+                                    // total length is 14 
                                     // 1 for + or - prefix
                                     // 11 digit for amount
                                     // 2 last digit for decimal values
@@ -7657,9 +6153,9 @@ class APIController extends Controller
 
                                     $standard_fintech_charges = standard_fintech_charges::where('id', '1')->first();
                                     $charges =  $standard_fintech_charges->standard_fintech_charges;   //stdadard charges
-                                    $fed     =  $standard_fintech_charges->standard_fed_charges;      // Fed Tax
+                                    $fed     =  $standard_fintech_charges->standard_fed_charges;      // Fed Tax            
 
-                                    //Calculate
+                                    //Calculate 
                                     $calculate_standard_charges = round(($shipment_data->amount / 100) * $charges);
                                     $calculate_fed_charges      = round(($calculate_standard_charges / 100) * $fed);
                                     $total_cod  = $calculate_standard_charges + $shipment_data->amount + $calculate_fed_charges;
@@ -7699,7 +6195,7 @@ class APIController extends Controller
                             }
                         } else {
 
-                            // if shipment is not exist in DB
+                            // if shipment is not exist in DB 
                             $return_data['response_Code'] = "01";
                             $return_data['reserved'] = "consumer number does not exist";
                         }
@@ -7850,7 +6346,7 @@ class APIController extends Controller
                                 }
                             }
                         } else {
-                            // if shipment is not exist in DB
+                            // if shipment is not exist in DB 
                             $return_data['response_Code'] = "01";
                             $return_data['reserved'] = "consumer number does not exist";
                         }
@@ -8393,7 +6889,7 @@ class APIController extends Controller
     //BOTSIFY WhatsApp API
 
 
-    public static function check_bdmk($city_id, $consignee_address, $check_bdmk, $city_name)
+    function check_bdmk($city_id, $consignee_address, $check_bdmk, $city_name)
     {
 
         if (isset($city_id)) {
@@ -9308,7 +7804,7 @@ class APIController extends Controller
         $userFintechCharges       = UserFintectCharges::where('user_id', $user_id)->where('status', '1'); // user fintech charges
         $standard_fintech_charges = new standard_fintech_charges();
         $standard                 = $standard_fintech_charges->first();
-        $fed_percentage           = $standard->standard_fed_charges;  //Standard FED Pecentage
+        $fed_percentage           = $standard->standard_fed_charges;  //Standard FED Pecentage 
         // (Applicable on both users charges or standard charges)
         if ($userFintechCharges->exists()) {
             $fintect_charges_percentage = $userFintechCharges->first()->fintech_charges; //fintech charges from user
@@ -9340,7 +7836,7 @@ class APIController extends Controller
             $total_company_charges = $select_range->charges; // company charges
         }
 
-        // Calculate FED
+        // Calculate FED 
         if ($select_range->fed_tax_is_percentage == 1) {
             $company_fed        = ($select_range->fed_tax) / 100; // company Fed
             $total_company_fed  = number_format($company_fed * $total_company_charges, 2);
@@ -9358,7 +7854,7 @@ class APIController extends Controller
         } else {
             $additional_charges = 0;
         }
-        // total company charges Fintech Charges
+        // total company charges Fintech Charges   
         $total_company_fintech_charges = $total_company_charges + $total_company_fed + $additional_charges;
 
         function calculatepercentage($total_amount, $charges, $fed)
@@ -9375,16 +7871,16 @@ class APIController extends Controller
         $revenue = $total_fintech_calculated[0] - $total_company_fintech_charges;
         // return response()->json([
         // 'cod'             => $cod_amount,
-        // 'conpany charges' => $total_company_charges,
-        // 'company fed'     => $total_company_fed,
+        // 'conpany charges' => $total_company_charges, 
+        // 'company fed'     => $total_company_fed,        
         // 'company addi'    => $additional_charges,
         // 'total company'   => $total_company_fintech_charges,
         // 'fintech %'       => $fintect_charges_percentage,
         // 'Fed %'           => $fed_percentage,
         // 'total fintech'   => $total_fintech_calculated[0],
-        // 'revenue'         => $revenue
+        // 'revenue'         => $revenue   
         //  ]);
-        //total amount received
+        //total amount received   
         $total_amount_received = $cod_amount + $total_fintech_calculated[0];
         $fintech_details = new FintechPaymentDetails();
         $fintech_details->trax_pay_id            = $trax_pay_id;
@@ -9460,12 +7956,12 @@ class APIController extends Controller
                 return response()->json(['status' => $status_code, 'message' => 'Error(s) in Input', 'errors' => $errors]);
             } else {
                 $retail_note_cash_collection_id = $request->retail_note_cash_collection_id;
-                $retail_note = RetailCashDeposit::where('id', $retail_note_cash_collection_id);
+                $retail_note = RetailCashDeposit::where('id', $retail_note_cash_collection_id);              
                 if ($retail_note->exists()) {
-                    $retail_note = $retail_note->first();
-                    $min_date = Carbon::parse('01-07-2022 00:00:00')->toDateTimeString();
+                    $retail_note = $retail_note->first();          
+                    $min_date = Carbon::parse('01-07-2022 00:00:00')->toDateTimeString();              
                     if ($retail_note->created_at >= $min_date) {
-                        $hbl_konnect_transaction_delivery_note = HblKonnectTransactionRetailNote::where('retail_note_id', $retail_note->id);
+                        $hbl_konnect_transaction_delivery_note = HblKonnectTransactionRetailNote::where('retail_note_id', $retail_note->id);                    
                         $transactions_amount = 0;
                         if ($hbl_konnect_transaction_delivery_note->exists()) {
                             $hbl_konnect_transaction_delivery_note = $hbl_konnect_transaction_delivery_note->first();
@@ -10004,7 +8500,7 @@ class APIController extends Controller
                                 }
 
                                 if (!$user->api_token) {
-                                    $api_token = uniqid(base64_encode(str_random(60)));
+                                    $api_token = uniqid(base64_encode(Str::random(60)));
                                     $user->api_token = $api_token;
                                     $user->save();
                                 }
@@ -10099,7 +8595,7 @@ class APIController extends Controller
                                     if ($rider->api_token) {
                                         $api_token = $rider->api_token;
                                     } else {
-                                        $api_token = uniqid(base64_encode(str_random(60)));
+                                        $api_token = uniqid(base64_encode(Str::random(60)));
                                         $rider->api_token = $api_token;
                                     }
                                     $rider->save();
@@ -11395,6 +9891,25 @@ class APIController extends Controller
                 }
             }
 
+            try {
+                // Maintaining shipper segment logs on booking
+                ShipperSegmentLogs::create([
+                    'shipment_id' => $shipment_id,
+                    'segment_id' => $user_type->segment_id,
+                    'sub_segment_id' => $user_type->sub_segment_id
+                ]);
+
+                // if ($consignee_city->id != $pickup_city_id) {
+                //     ShipperSegmentLogs::create([
+                //         'shipment_id' => $shipment_id,
+                //         'segment_id' => $user_type->segment_id,
+                //         'sub_segment_id' => $user_type->sub_segment_id
+                //     ]);
+                // }
+            } catch (\Exception $e) {
+                Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
+            }
+
             return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number]);
         }
     }
@@ -11420,29 +9935,314 @@ class APIController extends Controller
 
 
     public function trax_pk_validation($company_name = null, $email_address = null, $phone_number = null) {
-
+    
         if ($company_name != 'none') {
             $exists = User::where('name', $company_name)->exists();
             if(!$exists){
-                $exists = Lead::where('company', $company_name)->exists();
+                $exists = Lead::where('company', $company_name)->exists();   
             }
         }
-
+    
         if ($email_address != 'none') {
             $exists = User::where('email', $email_address)->exists();
             if(!$exists){
                 $exists = Lead::where('email_address', $email_address)->exists();
             }
         }
-
+    
         if ($phone_number != 'none') {
             $exists = User::where('phone', $phone_number)->exists();
             if(!$exists){
                 $exists = Lead::where('phone_number', $phone_number)->exists();
             }
         }
-
+    
         return response()->json(['exists' => $exists]);
     }
+    
+<<<<<<< HEAD
+=======
+    
+    public function wp_custom_select_dropdown_data() {
+        $concerned_wp_cities = [
+            "Abbottabad",
+            "Attock",
+            "Bahawalpur",
+            "Faisalabad",
+            "Gujranwala",
+            "Gujrat",
+            "Hyderabad",
+            "Islamabad",
+            "Jhelum",
+            "Jhang",
+            "Kamaliya",
+            "Karachi",
+            "Lahore",
+            "Larkana",
+            "Multan",
+            "Peshawar",
+            "Quetta",
+            "Rahim Yar Khan",
+            "Rawalpindi",
+            "Sahiwal",
+            "Sargodha",
+            "Sialkot",
+            "Sukkur"
+        ];
 
+        $city_ids = City::whereIn('name', $concerned_wp_cities)->pluck('id')->toArray();
+
+        $filtered_leads_tagging = LeadTagging::where('status', '!=', 0)
+            ->whereIn('city_id', $city_ids)
+            ->pluck('city_id')
+            ->unique()
+            ->toArray();
+
+        $filtered_concerned_wp_cities = City::whereIn('id', $filtered_leads_tagging)->get();
+
+        return response()->json(['response' => $filtered_concerned_wp_cities]);
+
+    }
+
+    public function hbl_konnect_retail_note_cash_collection_transactions_2(Request $request)
+    {
+        $valid_ip_addresses = array();
+        $valid_ip_addresses[] = '103.111.84.67';
+        $valid_ip_addresses[] = '103.111.85.67';
+        $valid_ip_addresses[] = '103.111.84.125';
+        $environment = config('app.env');
+
+        if ($environment == 'production') {
+            $whip = new Whip();
+            $ip_address = $whip->getValidIpAddress();
+            if (in_array($ip_address, $valid_ip_addresses)) {
+                $flag = true;
+            } else {
+                $flag = false;
+            }
+        } else {
+            $flag = true;
+        }
+        if ($flag) {
+            $rules = [
+                'retail_note_id' => ['required', 'integer', Rule::exists('retail_cash_deposits', 'id')],
+                'amount' => ['required', 'numeric', 'min:0'],
+                'transaction_id' => ['required', 'integer', 'min:0'],
+            ];
+            $validate = Validator::make($request->all(), $rules, $this->messages);
+
+            $validate->setAttributeNames($this->names);
+
+            if ($validate->fails()) {
+                $errors = array();
+                foreach ($validate->errors()->all() as $index => $error) {
+                    $status_code = 10;
+                    $errors[$index]['error_code'] = 10;
+                    $errors[$index]['error_text'] = 'Invalid Input.';
+                    if ($error == 'retail note id is Required.') {
+                        $status_code = 1;
+                        $errors[$index]['error_code'] = 1;
+                        $errors[$index]['ERROR_TEXT'] = 'retail note id is Required.';
+                        break;
+                    }
+                    if ($error == 'retail note id must be an Integer.') {
+                        $status_code = 2;
+                        $errors[$index]['error_code'] = 2;
+                        $errors[$index]['error_text'] = 'retail note id must be an Integer.';
+                        break;
+                    }
+                    if ($error == 'Given retail note id is of Invalid ID.') {
+                        $status_code = 3;
+                        $errors[$index]['error_code'] = 3;
+                        $errors[$index]['error_text'] = 'Given retail note id is of Invalid ID.';
+                        break;
+                    }
+                    if ($error == 'Collection Amount is Required.') {
+                        $status_code = 4;
+                        $errors[$index]['error_code'] = 4;
+                        $errors[$index]['ERROR_TEXT'] = 'Collection Amount is Required.';
+                        break;
+                    }
+                    if ($error == 'Collection Amount must be a Number.') {
+                        $status_code = 5;
+                        $errors[$index]['error_code'] = 5;
+                        $errors[$index]['error_text'] = 'Collection Amount must be a Number.';
+                        break;
+                    }
+                    if ($error == 'The Collection Amount must be at least 0.') {
+                        $status_code = 6;
+                        $errors[$index]['error_code'] = 6;
+                        $errors[$index]['error_text'] = 'The Collection Amount must be at least 0.';
+                        break;
+                    }
+                    if ($error == 'transaction id is Required.') {
+                        $status_code = 7;
+                        $errors[$index]['error_code'] = 7;
+                        $errors[$index]['ERROR_TEXT'] = 'Transaction id is Required.';
+                        break;
+                    }
+                    if ($error == 'transaction id must be an Integer.') {
+                        $status_code = 8;
+                        $errors[$index]['error_code'] = 8;
+                        $errors[$index]['error_text'] = 'Transaction id must be an Integer.';
+                        break;
+                    }
+                    if ($error == 'The transaction id must be at least 0.') {
+                        $status_code = 9;
+                        $errors[$index]['error_code'] = 9;
+                        $errors[$index]['error_text'] = 'The transaction id must be at least 0.';
+                        break;
+                    }
+                }
+                return response()->json(['status' => $status_code, 'message' => 'Error(s) in Input', 'errors' => $errors]);
+            } else {
+                $transaction_id = $request->transaction_id;
+                $retail_note_id = $request->retail_note_id;
+                $amount = $request->amount;
+                $existing_hbl_konnect_transaction = HblKonnectTransactionRetail::where('transaction_id', $transaction_id);
+                if ($existing_hbl_konnect_transaction->exists()) {
+                    return ['status' => 11, 'message' => 'Transaction Already Exists !'];
+                } else {
+                    $retail_note = RetailCashDeposit::where('id', $retail_note_id);
+                    if ($retail_note->exists()) {
+                        $retail_note = $retail_note->first();
+
+                        if ($retail_note->status != 0) {
+                            return ['status' => 0, 'message' => 'Retail note already updated !'];
+                        }
+                    }
+
+                    $transaction_amount = $amount;
+
+
+                    $cash_amount = $retail_note->total_cash - $transaction_amount;
+                    if ($cash_amount < 0) {
+                        $hbl_konnect_transaction_delivery_note = HblKonnectTransactionRetailNote::where('retail_note_id', $retail_note_id);
+                        if ($hbl_konnect_transaction_delivery_note->exists()) {
+                            $hbl_konnect_transaction_delivery_note = $hbl_konnect_transaction_delivery_note->first();
+
+                            $remaining_amount = $hbl_konnect_transaction_delivery_note->cash_amount;
+
+                            return ['status' => 0, 'message' => 'Net amount should be less then or equal to ' . $remaining_amount];
+                        }
+                    }
+
+
+                    return ['status' => 0, 'message' => 'Payment completed successfully!'];
+                }
+            }
+        } else {
+            return ['status' => 0, 'message' => 'Access Denied!'];
+        }
+    }
+
+    public function fin_sms(Request $request)
+    {
+
+        $rules = [
+            'phone' => ['required'],
+            'text' => ['required', 'min:1','max:160'],
+            'source' => ['required'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $phone = $request->phone;
+            $text = $request->text;
+            $source = $request->source;
+
+            $array =  array(
+                'phone'=>$phone,
+                'text'=>$text,
+                'source'=>$source,
+            );
+
+            NotificationsController::send(234, 0,0,0,$array);
+
+            $finja_sms_log = new FinjaSmsLog();
+            $finja_sms_log->phone = $phone;
+            $finja_sms_log->text = $text;
+            $finja_sms_log->source = $source;
+            $finja_sms_log->save();
+
+            return response()->json(['status' => 1, 'message' => 'Message Received']);
+        }
+
+    }
+
+    public function fintech_charges(Request $request) {
+
+        $rules = [
+            'tracking_number' => ['required', 'exists:shipments,tracking_number'],
+            'wallet_id' => ['required', 'exists:wallet_users,wallet_id'],
+            'charges' => ['required', 'numeric', 'min:0', 'max:100000'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $shipment = Shipment::where('tracking_number', $request->tracking_number)->first();
+            $shipment_id = $shipment->id;
+            if (!DonePaymentShipment::where('shipment_id', $shipment_id)->whereIn('type', [0, 1])->exists()) {
+
+                ShipmentAdditionalCharges::where('shipment_id', $shipment_id)->update([
+                    'wallet_charges' => $request->charges,
+                    'wallet_charges_updated_at' => Carbon::now()
+                ]);
+
+                $pending_payment_shipments = PendingPaymentShipment::where('shipment_id', $shipment->id)->whereIn('type', [0, 1])->latest()->first();
+                $finja_request_log = new FinjaRequestLog();
+                $finja_request_log->requested = json_encode($request->all());
+                $finja_request_log->ip_address = $request->ip();
+                $finja_request_log->save();
+
+                if (!empty($pending_payment_shipments)) {
+                    AdminFinanceController::update_payment($shipment_id, $pending_payment_shipments->type);
+                }
+                return response()->json(['status' => 1, 'message' => 'Charges updated against this shipment.']);
+            }else{
+                return response()->json(['status' => 0, 'message' => 'Payment Already Processed', 'errors' => 'Error']);
+            }
+
+        }
+    }
+    public function fintech_getToken(Request $request) {
+
+        $rules = [
+            'wallet_id' => ['required', 'exists:wallet_users,wallet_id'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $Wallet = WalletUser::with('wallet_user')->where('wallet_id',$request->wallet_id)->first();
+            if(isset($Wallet->wallet_user)) {
+                $user = $Wallet->wallet_user;
+                if (empty($user->api_token)) {
+                    $user->api_token = uniqid(base64_encode(Str::random(60)));
+                    $user->save();
+                }
+                return response()->json(['status' => 1,'wallet_id'=> $request->wallet_id,'token' =>  $user->api_token]);
+            }
+
+            return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => 'USer Not Found']);
+        }
+    }
+
+
+
+>>>>>>> sprint_130
 }

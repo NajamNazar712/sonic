@@ -29,6 +29,7 @@ use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\CRM\CrmRequestTagging;
 use Vectorface\Whip\Whip;
 use Auth;
+use App\Jobs\ShipmentStatusSharingWithWallet;
 
 class ShipmentsJourneyController extends Controller
 {
@@ -60,7 +61,7 @@ class ShipmentsJourneyController extends Controller
           $shipment_journey->city_id = $city_id;
       }
       else if($rider_id != null){
-          $city_id = Rider::find($rider_id)->city_id;
+        $city_id = Rider::find($rider_id)->city_id;
           $shipment_journey->city_id = $city_id;
       }
       else{
@@ -153,6 +154,23 @@ class ShipmentsJourneyController extends Controller
         }
 
       $shipment_journey->save();
+
+        if(in_array($shipper_status_id, [5,8,13,14,18,20,36,37,30])) {
+            
+            $shipment = Shipment::join('wallet_users as u', function ($join) {
+                $join->on('u.user_id', '=', 'shipments.user_id')
+                   ->where('u.substitute_user_id', '0');
+            })->where('shipments.id', $shipment_id)->first();
+            if($shipment) {
+                $data = [
+                    'tracking_number' => $shipment->tracking_number,
+                    'status' => $shipper_status_id,
+                    'shipment_id' => $shipment_id
+                ];
+                ShipmentStatusSharingWithWallet::dispatch($data, 1);
+                //self::share_status_with_wallet($shipment->tracking_number, $shipper_status_id, $shipment_id);
+            }
+        }
 
         if($remarks_id != null){
             $shipment_journey_id = $shipment_journey->id;

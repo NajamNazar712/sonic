@@ -22,13 +22,21 @@
 										<div class="col-3">
 											<fieldset class="form-group">
 												<select name="search_shipper" id="search_shipper" class="form-control select2">
-													@foreach($shippers as $shipper)
-														<option value="{{$shipper->id}}">{{$shipper->name}}</option>
-													@endforeach
+													{{--                                            @foreach ($shippers as $shipper)--}}
+													{{--                                                <option value="{{ $shipper->id }}">{{ $shipper->name }}</option>--}}
+													{{--                                            @endforeach--}}
 												</select>
 											</fieldset>
 										</div>
-										<div class="col-3">
+										<div class="col-2">
+											<fieldset class="form-group">
+												<select name="wallet_filter" id="wallet_filter" class="form-control select2">
+													<option value="1">Wallet Users</option>
+													<option value="2">Non-Wallet Users</option>
+												</select>
+											</fieldset>
+										</div>
+										<div class="col-2">
 											<fieldset class="form-group">
 												<select name="search_shipper_status" id="search_shipper_status" class="form-control select2">
 													@foreach($shipper_status as $id => $status)
@@ -37,7 +45,7 @@
 												</select>
 											</fieldset>
 										</div>
-										<div class="col-3 text-center">
+										<div class="col-2 text-center">
 											<form id="tracking_number_search_form"
 												  class="form" novalidate="novalidate">
 												<div class="form-group">
@@ -155,7 +163,9 @@
 										<th class="border-primary border-darken-1">S. No.</th>
 										<th class="border-primary border-darken-1">Payment ID</th>
 										<th class="border-primary border-darken-1">Account ID</th>
+										<th class="border-primary border-darken-1">Wallet Error Logs</th>
 										<th class="border-primary border-darken-1">Shipper</th>
+										<th class="border-primary border-darken-1">Sale Person</th>
 										<th class="border-primary border-darken-1">City</th>
 										<th class="border-primary border-darken-1">Phone No(s).</th>
 										<th class="border-primary border-darken-1">Address</th>
@@ -163,6 +173,7 @@
 										<th class="border-primary border-darken-1">Delivered Shipments</th>
 										<th class="border-primary border-darken-1">Returned Shipments</th>
 										<th class="border-primary border-darken-1">Adjusted Shipments</th>
+										<th class="border-primary border-darken-1">Arrival Shipments</th>
 										<th class="border-primary border-darken-1">Fintech Charges</th>
 										<th class="border-primary border-darken-1">Total Amount</th>
 										<th class="border-primary border-darken-1">Total Charges</th>
@@ -187,6 +198,10 @@
 									</tr>
 								</thead>
 							</table>
+
+							<div class="modal fade" id="wallet_error_logs" data-backdrop="static" role="dialog" aria-labelledby="wallet_error_logs" aria-hidden="true">
+								
+							</div>
 
 							<div class="modal fade" id="delivered_shipments" role="dialog" aria-labelledby="delivered_shipments_title" aria-hidden="true">
 								<div class="modal-dialog modal-sm" role="document">
@@ -268,6 +283,24 @@
 									<div class="modal-content">
 										<div class="modal-header">
 											<h4 class="modal-title" id="adjusted_shipments_title">Adjusted Shipment(s)</h4>
+
+											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+												<span aria-hidden="true">×</span>
+											</button>
+										</div>
+										<div class="modal-body text-center">
+										</div>
+										<div class="modal-footer">
+											<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="modal fade" id="arrival_shipment" role="dialog" aria-labelledby="arrival_shipment_title" aria-hidden="true">
+								<div class="modal-dialog modal-sm" role="document">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h4 class="modal-title" id="arrival_shipment_title">Arrival Shipment(s)</h4>
 
 											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 												<span aria-hidden="true">×</span>
@@ -435,16 +468,43 @@
 
 	<script>
 		$(document).ready(function() {
-            $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Shipper',
-                width:'100%',
-                allowClear:true
-            });
+			$('#search_shipper').select2({
+				width:'100%',
+				placeholder:"Select Shipper",
+				allowClear:true,
+				minimumInputLength: 2,
+				ajax: {
+					dataType: 'json',
+					url:  '{!! route('admin.accounts.shipper_names.dropdown',['type'=>'active']) !!}',
+					data: function (params) {
+						return {
+							search: params.term,
+						}
+					},
+					processResults: function (data) {
+						return {
+							results: data
+						};
+					},
+					delay: 700,
+				}
+			}).bind('change', function() {
+				table.draw(false);
+			});
+
             $('#search_shipper_status').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Shipper Status',
                 width:'100%',
                 allowClear:true
             });
+
+			$('#wallet_filter').prepend(
+                '<option value="" selected></option>').select2({
+                placeholder: 'Filter Wallet Users',
+                width: '100%',
+                allowClear: true
+            });
+
 			$('#update_details .company_bank').prepend('<option value="" selected="selected"></option>').select2({
 				width: '100%',
 				placeholder: 'Company Bank*'
@@ -535,6 +595,7 @@
                             head.push('Payment ID');
                             head.push('Account ID');
                             head.push('Shipper');
+							head.push('Sale Person');
                             head.push('City');
                             head.push('Phone No(s).');
                             head.push('Address');
@@ -542,6 +603,8 @@
                             head.push('Delivered Shipments');
                             head.push('Returned Shipments');
                             head.push('Adjusted Shipments');
+							head.push('Fintech Charges');
+                            head.push('Arrival Shipments');
                             head.push('Total Amount');
                             head.push('Total Charges');
                             head.push('Total GST');
@@ -570,6 +633,7 @@
                                 row.push(values.id_padded);
                                 row.push(values.user_id_padded);
                                 row.push(values.shipper);
+								row.push(values.sale_person_name);
                                 row.push(values.city);
                                 row.push(values.phone_numbers);
                                 row.push(values.address);
@@ -577,6 +641,8 @@
                                 row.push(values.delivered_shipments_count);
                                 row.push(values.returned_shipments_count);
                                 row.push(values.adjusted_shipments_count);
+								row.push(values.done_fintech_charges);
+                                row.push(values.arrival_shipment_shipments_count);
                                 row.push(values.total_amount);
                                 row.push(values.total_charges);
                                 row.push(values.total_gst);
@@ -809,6 +875,7 @@
 						d.tracking_numbers = $('#tracking_number_search_form .tracking_numbers').val();
 						d.search_payment_ids = $('#done_payment_id_form .done_payment_ids').val();
 						d.star_shipper_filter = $('#star_shippers_filter').val();
+						d.wallet_filter = $('#wallet_filter').val();
 					}
 				},
 				rowId: 'id',
@@ -818,7 +885,9 @@
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data:'payment_id', name: 'done_payments.id', class: 'align-middle text-center payment_id'},
 					{data:'user_id_padded', name: 'done_payments.user_id', class: 'align-middle text-center user_id_padded'},
+					{data:'wallet_error_logs', name: 'wallet_error_logs', class: 'align-middle text-center wallet_error_logs'},
 					{data:'shipper', name: 'u.name', class: 'align-middle text-center shipper'},
+					{data:'sale_person_name', name: 'sale_admin.name', class: 'align-middle text-center sale_person_name'},
 					{data:'city', name: 'c.name', class: 'align-middle text-center city'},
 					{data:'phone_numbers', name: 'phone_numbers', class: 'align-middle text-center phone_numbers'},
 					{data:'address', name: 'u.address', class: 'align-middle text-center address'},
@@ -826,15 +895,14 @@
 					{data:'delivered_shipments', name: 'done_payments.delivered_shipments', class: 'align-middle text-center delivered_shipments'},
 					{data:'returned_shipments', name: 'done_payments.returned_shipments', class: 'align-middle text-center returned_shipments'},
 					{data:'adjusted_shipments', name: 'done_payments.adjusted_shipments', class: 'align-middle text-center adjusted_shipments'},
-					
+					{data:'arrival_shipment', name: 'done_payments.arrival_shipment', class: 'align-middle text-center arrival_shipment'},
 					{data:'done_fintech_charges', name: 'done_fintech_charges', class: 'align-middle text-center done_fintech_charges', orderable: false},
 					
 					{data:'total_amount', name: 'dpc.amount', class: 'align-middle text-center total_amount', orderable: false},
 					{data:'total_charges', name: 'dpc.charges', class: 'align-middle text-center total_charges', orderable: false},
 					{data:'total_gst', name: 'dpc.gst', class: 'align-middle text-center total_gst', orderable: false},
 					{data:'total_wht', name: 'dpc.wht', class: 'align-middle text-center total_wht', orderable: false},
-					{data:'total_sms_charges', name:'dpc.sms_charges', class: 'align-middle text-center total_sms_charges', orderable: false
-                    },
+					{data:'total_sms_charges', name:'dpc.sms_charges', class: 'align-middle text-center total_sms_charges', orderable: false},
 					{data:'packaging_charges', name: 'dpc.packaging_charges', class: 'align-middle text-center packaging_charges', orderable: false},
 					{data:'total_deductable', name: 'total_deductable', class: 'align-middle text-center total_deductable', orderable: false},
 					{data:'ibft_charges', name: 'done_payments.ibft_charges', class: 'align-middle text-center ibft_charges', orderable: false},
@@ -856,7 +924,7 @@
 
 					$('td:eq(1)', row).html(index + 1 + info.page * info.length);
 
-					if (data.status != 'Paid') {
+					if (data.status != 'Paid' && data.is_wallet_payment == 0) {
 						$('td:eq(0)', row).addClass('select-checkbox');
 
 						if ($.inArray(data.id, selected_rows) !== -1) {
@@ -892,7 +960,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.total_amount') || $(header).is('.total_charges') || $(header).is('.total_gst') || $(header).is('.total_deductable') || $(header).is('.total_payable') || $(header).is('.return_shipments_average_aging') || $(header).is('.action') || $(header).is('.packaging_charges') || $(header).is('.adjustment_charges') || $(header).is('.total_wht') || $(header).is('.total_sms_charges')) {
+						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.total_amount') || $(header).is('.total_charges') || $(header).is('.total_gst') || $(header).is('.total_deductable') || $(header).is('.total_payable') || $(header).is('.return_shipments_average_aging') || $(header).is('.action') || $(header).is('.packaging_charges') || $(header).is('.adjustment_charges') || $(header).is('.total_wht') || $(header).is('.total_sms_charges') || $(header).is('.wallet_error_logs') ) {
 							$(td).appendTo($(search));
 						}else if($(header).is('.bank')){
                             $(bank_select).appendTo($(search))
@@ -1100,6 +1168,91 @@
 				});
 			});
 
+			$('#datatable tbody').on('click', 'tr td.wallet_error_logs button', function() {
+				var id = parseInt($(this).parents('tr').attr('id'));
+				$.ajax({
+					url:  '{{ route('admin.finance.done_payments.wallet_error_logs') }}',
+					type: 'GET', 
+					data: { id: id }, 
+					success: function(response) {
+						var modalContent =  
+							'<div class="modal-dialog modal-xl" role="document">' +
+							'<div class="modal-content">' +
+							'<div class="modal-header bg-primary white">' +
+							'<h4 class="modal-title white">Wallet Error Logs</h4>' +
+							'<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
+							'<span aria-hidden="true">&times;</span>' +
+							'</button>' +
+							'</div>' +
+							'<div class="modal-body text-center">' +
+							'<table class="table table-bordered datatable">' +
+							'<thead>' +
+							'<tr role="row" class="bg-primary white">' +
+							'<input type="hidden" id="wallet_payment_id" value = '+ id +'>'+
+							'<th class="border-primary border-darken-1">S. No.</th>' +
+							'<th class="border-primary border-darken-1">Tracking Number</th>' +
+							'<th class="border-primary border-darken-1">Type</th>' +
+							'<th class="border-primary border-darken-1">Error</th>' +
+							'<th class="border-primary border-darken-1">Created At</th>' +
+							
+
+							'</tr>' +
+							'</thead>' +
+							'<tbody>'; 
+
+							$.each(response.data, function(index, item) {
+								var data = item;
+									modalContent += '<tr>';
+									modalContent += '<td>' + (index + 1) + '</td>'; 
+									modalContent += '<td>' + data.tracking_number + '</td>'; 
+									modalContent += '<td>' + data.type + '</td>'; 
+									modalContent += '<td>' + data.error + '</td>'; 
+									modalContent += '<td>' + data.created_at + '</td>'; 
+									modalContent += '</tr>';                            
+							});
+
+						modalContent += '</tbody>' + // End of tbody
+							'</table>' +
+							'<button type="button" class="btn btn-primary" id="re-try" ' +
+    						(response.data && response.data.length > 0 ? '' : 'disabled') + '>Re-Try</button>' +
+							'</div>' +
+							'</div>' +
+							'</div>' +
+							
+						$('#wallet_error_logs').html('');
+						$('#wallet_error_logs').append(modalContent);
+						$('#wallet_error_logs').modal('show');
+
+
+					},
+					error: function(xhr, status, error) {
+						// Handle errors if any
+					}
+            	});
+			});
+
+			$(document).on('click', '#re-try', function(){
+				
+				var id = $('#wallet_payment_id').val();
+				console.log(id)
+				$.ajax({
+						url: '{!! route('admin.finance.done_payments.mark_settlement') !!}',
+						method: 'GET',
+						data: {
+							'id': id
+						}
+					})
+					.done(function(data) {
+						
+						if (data.status == 1) {
+							$('#wallet_error_logs').modal('hide');
+							toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+						}
+					});
+
+			});
+			
+
 			$('#datatable tbody').on('click', 'tr td.adjusted_shipments button', function() {
 				var id = parseInt($(this).parents('tr').attr('id'));
 
@@ -1127,6 +1280,33 @@
 					}
 				});
 			});
+			$('#datatable tbody').on('click', 'tr td.arrival_shipment button', function() {
+				var id = parseInt($(this).parents('tr').attr('id'));
+
+				$('#arrival_shipment .modal-body').html('');
+
+				$.ajax({
+					url: '{!! route('admin.finance.done_payments.arrival_shipment') !!}',
+					method: 'POST',
+					data: {
+						'_token': '{{ csrf_token() }}',
+						'id': id
+					}
+				})
+				.done(function(data) {
+					if (data) {
+						var tracking_numbers = '';
+
+						$.each(data, function(index, tracking_number) {
+                            tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+						});
+
+						$('#arrival_shipment .modal-body').html(tracking_numbers);
+
+						$('#arrival_shipment').modal('show');
+					}
+				});
+			});
 
 			$('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 				var id = parseInt($(this).parents('tr').attr('id'));
@@ -1138,6 +1318,35 @@
 						data: {
 							'_token': '{{ csrf_token() }}',
 							'id': id
+						}
+					})
+					.done(function(data) {
+						var tab = window.open('', '_blank');
+
+						if(!tab) {
+							swal({
+								title: 'Popup Blocker Enabled!',
+								text: 'Please add this site to your exception list.',
+								icon: 'error',
+								closeOnClickOutside: false,
+								closeOnEsc: false
+							});
+						}
+						else {
+							tab.document.write(data);
+							tab.document.close();
+							tab.focus();
+						}
+					});
+				}
+				else if ($(this).hasClass('view_details_archive')) {
+					$.ajax({
+						url: '{!! route('admin.finance.done_payments.details_print') !!}',
+						method: 'POST',
+						data: {
+							'_token': '{{ csrf_token() }}',
+							'id': id,
+							'old':1,
 						}
 					})
 					.done(function(data) {
@@ -1235,7 +1444,53 @@
                     $('#payment_id').val(id);
 					var html_rows = '<div class="col-4"><span class="mr-1"><i class="la la-angle-right align-bottom"></i><b> '+ selected_id +'</b></span></div>';
                     $('#requested_payment_id').html(html_rows);
+
+				} else if ($(this).hasClass('wallet_settlement')) {
+
+					swal({
+                        title: "Processing...",
+                        text: "Please wait while we process your request.",
+                        content: (() => {
+                            // Create a container for the spinner
+                            let content = document.createElement("div");
+                            content.innerHTML = `
+                            <div style="display: flex; justify-content: center; align-items: center;">
+                                <div class="spinner" style="width: 30px; height: 30px; border: 4px solid rgba(0,0,0,0.2); border-top: 4px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                            </div>
+                        `;
+                            return content;
+                        })(),
+                        buttons: false, // Disable buttons
+                        closeOnClickOutside: false, // Disable outside click
+                        closeOnEsc: false // Disable escape key
+                    });
+
+                    const style = document.createElement("style");
+                    style.textContent = `
+                    @keyframes spin {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
+                    }`;
+                    document.head.appendChild(style);
+
+					$.ajax({
+						url: '{!! route('admin.finance.done_payments.mark_settlement') !!}',
+						method: 'GET',
+						data: {
+							'id': id
+						}
+					})
+					.done(function(data) {
+						
+						swal.close();
+						if (data.status == 1) {
+							toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+						}
+
+						table.draw('false');
+					});
 				}
+				
 			});
 
 			$('#update_details').on('show.bs.modal', function (e) {

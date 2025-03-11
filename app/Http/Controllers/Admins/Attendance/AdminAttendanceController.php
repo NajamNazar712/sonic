@@ -20,7 +20,7 @@ use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
-use Yajra\Datatables\Datatables;
+use Yajra\DataTables\Facades\DataTables;
 
 class AdminAttendanceController extends Controller
 {
@@ -295,23 +295,23 @@ class AdminAttendanceController extends Controller
             });
 
         if ($search_admin = $request->get('search_admin')) {
-            $datatable->where('a.id', $search_admin)->where('employee_type',1);
+            $attendances->where('a.id', $search_admin)->where('employee_type',1);
         }
         if ($search_rider = $request->get('search_rider')) {
-            $datatable->where('a.id', $search_rider)->where('employee_type',2);
+            $attendances->where('a.id', $search_rider)->where('employee_type',2);
         }
         if ($search_city = $request->get('search_city')) {
-            $datatable->where(function($q) use ($search_city){
+            $attendances->where(function($q) use ($search_city){
                 $q->where([['c.id', $search_city],['employee_type',1]])
                     ->orWhere([['c.id', $search_city],['employee_type',2]]);
             });
         }
         if ($search_department = $request->get('search_department')) {
             if($search_department != 6) {
-                $datatable->where('ad.id', $search_department)->where('employee_type',1);
+                $attendances->where('ad.id', $search_department)->where('employee_type',1);
             }
             else{
-                $datatable->where(function($query) use($search_department){
+                $attendances->where(function($query) use($search_department){
                     $query->where('employee_type',2)
                         ->orWhere('ad.id', $search_department);
                 });
@@ -319,13 +319,13 @@ class AdminAttendanceController extends Controller
         }
 
         if ($search_trax_id = $request->get('search_trax_id')) {
-            $datatable->where(function($q) use ($search_trax_id){
+            $attendances->where(function($q) use ($search_trax_id){
                 $q->where('a.trax_id', $search_trax_id);
             });
         }
 
         if ($search_cnic = $request->get('search_cnic')) {
-            $datatable->where(function($q) use ($search_cnic){
+            $attendances->where(function($q) use ($search_cnic){
                 $q->where('a.cnic', $search_cnic);
             });
         }
@@ -333,10 +333,12 @@ class AdminAttendanceController extends Controller
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatable->whereBetween('employee_attendances.attendance_date', [$from, $to]);
+            $attendances->whereBetween('employee_attendances.attendance_date', [$from, $to]);
         }
 
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['clock_in_location', 'clock_out_location'])
+        ->make(true);
     }
 
     public function admin_attendance_horizontal_table(Request $request,$array = false)
@@ -482,17 +484,17 @@ class AdminAttendanceController extends Controller
             }
 
         if ($search_admin = $request->get('search_admin')) {
-            $datatable->where('a.id', $search_admin)->where('employee_type',1);
+            $attendances->where('a.id', $search_admin)->where('employee_type',1);
         }
         if ($search_rider = $request->get('search_rider')) {
-            $datatable->where('a.id', $search_rider)->where('employee_type',2);
+            $attendances->where('a.id', $search_rider)->where('employee_type',2);
         }
         if ($search_department = $request->get('search_department')) {
             if($search_department != 6) {
-                $datatable->where('ad.id', $search_department)->where('employee_type',1);
+                $attendances->where('ad.id', $search_department)->where('employee_type',1);
             }
             else{
-                $datatable->where(function($query) use($search_department){
+                $attendances->where(function($query) use($search_department){
                     $query->where('employee_type',2)
                         ->orWhere('ad.id', $search_department);
                 });
@@ -500,12 +502,14 @@ class AdminAttendanceController extends Controller
         }
 
         if ($search_trax_id = $request->get('search_trax_id')) {
-            $datatable->where(function($q) use ($search_trax_id){
+            $attendances->where(function($q) use ($search_trax_id){
                 $q->where('a.trax_id', $search_trax_id);
             });
         }
 
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns($periods['display'])
+        ->make(true);
     }
 
     public function mark_attendance_index()
@@ -723,7 +727,7 @@ class AdminAttendanceController extends Controller
                 } else {
                     return 'Clock-Out';
                 }
-            });
+            })->rawColumns(['latitude']);
         return $datatable->make(true);
     }
 
@@ -1220,7 +1224,7 @@ class AdminAttendanceController extends Controller
 
         $pdf = SnappyPDF::loadHTML($html);
         $filename = 'Attendance' . $trax_id . '.pdf';
-        return $pdf->download($filename);
+        return $pdf->setOption('enable-local-file-access', true)->download($filename);
     }
 
 

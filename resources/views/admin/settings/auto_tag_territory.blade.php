@@ -26,6 +26,7 @@
                                     <th class="border-primary border-darken-1">Territory</th>
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Other territories</th>
+                                    <th class="border-primary border-darken-1">Created</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -504,7 +505,7 @@
                 },
                 ajax: '{{ route('admin.settings.auto_tag_territories.list') }}',
                 rowId: 'id',
-                order: [[3, 'desc']],
+                order: [[6, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'agent_name', name: 'ad.name', class: 'align-middle agent_name'},
@@ -512,6 +513,7 @@
                     {data: 'territory_name', name: 't.name', class: 'align-middle territory_name'},
                     {data: 'status', name: 'auto_tag_territories.status', class: 'align-middle status'},
                     {data: 'territory_names', name: 'territory_names', class: 'align-middle territory_names'},
+                    {data: 'created', name: 'auto_tag_territories.created_at', class: 'align-middle  created_at'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {

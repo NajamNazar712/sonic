@@ -88,6 +88,7 @@
                                 <th class="border-primary border-darken-1">Account Head</th>
                                 <th class="border-primary border-darken-1">Account Title</th>
                                 <th class="border-primary border-darken-1">Details of Expense</th>
+                                <th class="border-primary border-darken-1">Cost Centre</th>
                                 <th class="border-primary border-darken-1"> Amount </th>
                                 <th class="border-primary border-darken-1"> Employee Id </th>
                                 <th class="border-primary border-darken-1"> Name </th>
@@ -390,6 +391,7 @@
             {name: 'account_head', class: 'align-middle account_head custom-col-width form-group'},
             {name: 'account_title', class: 'align-middle account_title custom-col-width form-group'},
             {name: 'details_of_expense', class: 'align-middle details_of_expense doe-col-width form-group'},
+            {name: 'cost_centre', class: 'align-middle cost_centre custom-col-width form-group'},
             {name: 'amount', class: 'align-middle expense_amount custom-col-width form-group'},
             {name: 'employee_id', class: 'align-middle employee_id custom-col-width form-group'},
             {name: 'name', class: 'align-middle name custom-col-width form-group'},
@@ -472,6 +474,8 @@
         var delivered_shipment_input = '<input class="form-control form-control-sm delivered_shipment_input" readonly name="delivered_shipment_count['+rows_count+']" placeholder="Total Delivered Shipments">';
 
         var expense_detail_input = '<textarea class="form-control form-control-sm" rows="5" name="expense['+rows_count+']" maxlength="300" placeholder="Expense Details" data-rule-required="true" data-msg-required="Expense Detail is required"></textarea>';
+
+        var cost_centres_select = '<select class="form-control form-control-sm select2 cost_centre_select" name="cost_centre['+rows_count+']" data-rule-required="true" data-msg-required="Cost Centre is required"></select>';
         var employee_select = '<select class="form-control form-control-sm select2 employee_select" name="employee['+rows_count+']"></select>';
         var employee_name_input = '<input class="form-control form-control-sm employee_name" readonly name="employee_name['+rows_count+']" placeholder="Employee Name">';
         var employee_designation_input = '<input class="form-control form-control-sm employee_designation" readonly name="employee_designation['+rows_count+']" placeholder="Employee Designation">';
@@ -500,7 +504,13 @@
             return obj;
         });
 
-        table.row.add([0, city_select, heads_select,titles_select,expense_detail_input,amount_input,employee_select,employee_name_input,employee_designation_input,reference_input,remarks_input,dncc_select,delivered_shipment_input,upload_image,remove]).node().id = rows_count;
+        var cost_centres = $.map({!! $cost_centres !!}, function (obj) {
+            obj.id = obj.id;
+            obj.text = obj.name;
+            return obj;
+        });
+
+        table.row.add([0, city_select, heads_select,titles_select,expense_detail_input,cost_centres_select,amount_input,employee_select,employee_name_input,employee_designation_input,reference_input,remarks_input,dncc_select,delivered_shipment_input,upload_image,remove]).node().id = rows_count;
         table.draw(true);
         $('select[name="head['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
             data:heads,
@@ -538,6 +548,13 @@
             placeholder:'Select Employee Id',
             dropdownCssClass: 'form-control-sm p-0',
             allowClear:true,
+        });
+
+        $('select[name="cost_centre['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
+            data: cost_centres,
+            placeholder:'Select Cost Centre',
+            allowClear:true,
+            dropdownCssClass: 'form-control-sm p-0'
         });
 
 

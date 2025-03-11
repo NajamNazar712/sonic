@@ -32,6 +32,26 @@
                             <div class="tracking" id="tracking">
                             </div>
 
+                            <div class="modal fade" id="rider_information" role="dialog"
+                                aria-labelledby="rider_information_title" aria-hidden="true">
+                                <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h4 class="modal-title" id="rider_information_title">Rider Information</h4>
+
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">×</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary"
+                                                data-dismiss="modal">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -593,6 +613,10 @@
                                     shipment += '<td><strong>Quantity</strong></td>';
                                     // shipment += '<td>' + item.quantity + '</td>';
                                     shipment += '<td>' + details.order_information.quantity + '</td>';
+
+                                    shipment += '<td><strong>Sub Segment</strong></td>';
+                                    shipment += '<td>' + details.order_information.sub_segment + '</td>';
+
                                     shipment += '</tr>';
                                 });
 
@@ -622,15 +646,16 @@
                                 }
 
                                 shipment += '<tr>';
-                                shipment += '<td><strong>Parcel Value</strong></td>';
-                                shipment += '<td>' + details.order_information.parcel_value + '</td>';
-
                                 shipment += '</tr>';
                                 shipment += '<tr>';
                                 shipment += '<td><strong>Piece(s)</strong></td>';
                                 shipment += '<td>'+ details.order_information.pieces +'</td>';
                                 shipment += '<td><strong>Business Category</strong></td>';
                                 shipment += '<td>'+ details.order_information.business_category +'</td>';
+
+                                shipment += '<td><strong>Parcel Value</strong></td>';
+                                shipment += '<td>' + details.order_information.parcel_value + '</td>';
+
                                 shipment += '</tr>';
                                 shipment += '</tbody>';
                                 shipment += '</table>';
@@ -646,28 +671,42 @@
                                 shipment += '<tr role="row">';
                                 shipment += '<th><strong>Date / Time</strong></th>';
                                 shipment += '<th><strong>Status</strong></th>';
+                                shipment += '<th><strong>Details</strong></th>';
                                 shipment += '<th><strong>Reason</strong></th>';
                                 shipment += '<th><strong>Remarks</strong></th>';
-                                // shipment += '<th><strong>User</strong></th>';
+                                shipment += '<th><strong>User</strong></th>';
                                 shipment += '<th><strong>City</strong></th>';
+                                shipment += '<th><strong>Location</strong></th>';
                                 shipment += '<th><strong>Received/Refused By</strong></th>';
-                                // shipment += '<th><strong>IP Address</strong></th>';
-                                // shipment += '<th><strong>Rider</strong></th>';
+                                shipment += '<th><strong>IP Address</strong></th>';
+                                shipment += '<th><strong>Rider</strong></th>';
                                 shipment += '</tr>';
                                 shipment += '</thead>';
                                 shipment += '<tbody>';
 
                                 $.each(details.tracking_history, function (index, history) {
+                                    var googleMapsUrl = '';
+                                    if (history.area_log && history.area_log.latitude && history.area_log.longitude) {
+                                        googleMapsUrl = 'https://www.google.com/maps?q=' + history.area_log.latitude + ',' + history.area_log.longitude;
+                                    }
                                     shipment += '<tr>';
                                     shipment += '<td>' + history.date_time + '</td>';
                                     shipment += '<td>' + history.status + '</td>';
+                                    shipment += '<td>' + 
+                                    (history.image_audio_location !== undefined ? history.image_audio_location : '-') + '|' + 
+                                    (history.responsible && history.responsible.length > 0 ? 
+                                        '<button class="btn btn-sm btn-outline-info align-middle responsible_person_shipment" data-shipment-id="' + id + '" data-journey_updated_at="' + history.responsible[0].journey_updated_at + '">' + 'Responsibles (' + history.responsible.length + ') </button>' :
+                                        '-'
+                                    ) +
+                                    '</td>';
                                     shipment += '<td>' + ((history.status_reason) ? history.status_reason : '') + '</td>';
                                     shipment += '<td>' + history.remarks + '</td>';
-                                    // shipment += '<td>' + history.user + '</td>';
+                                    shipment += '<td>' + history.user + '</td>';
                                     shipment += '<td>' + history.city + '</td>';
+                                    shipment += '<td>' + (history.area_log ? history.area_log.location_status + ' | (' + history.area_log.area + ') | <a href="' + googleMapsUrl + '" target="_blank"><i class="la la-map-marker"></i></a>' : '') + '</td>';
                                     shipment += '<td>' + history.received_or_refused_by + '</td>';
-                                    // shipment += '<td>' + history.ip + '</td>';
-                                    // shipment += '<td>' + history.rider + '</td>';
+                                    shipment += '<td>' + history.ip + '</td>';
+                                    shipment += '<td>' + history.rider + '</td>';
                                     shipment += '</tr>';
                                 });
 
@@ -777,15 +816,21 @@
                                     shipment += '<tr role="row">';
                                     shipment += '<th><strong>Handover Id</strong></th>';
                                     shipment += '<th><strong>Status</strong></th>';
+                                    shipment += '<th><strong>Location</strong></th>';
                                     shipment += '<th><strong>Date / Time</strong></th>';
                                     shipment += '</tr>';
                                     shipment += '</thead>';
                                     shipment += '<tbody>';
 
                                     $.each(details.handover_history, function (index, history) {
+                                        var googleMapsUrl = '';
+                                        if (history.area_log && history.area_log.latitude && history.area_log.longitude) {
+                                            googleMapsUrl = 'https://www.google.com/maps?q=' + history.area_log.latitude + ',' + history.area_log.longitude;
+                                        }
                                         shipment += '<tr>';
                                         shipment += '<td>' + history.handover_id + '</td>';
                                         shipment += '<td>' + history.status + '</td>';
+                                        shipment += '<td>' + (history.area_log ? history.area_log.location_status + ' | (' + history.area_log.area + ') | <a href="' + googleMapsUrl + '" target="_blank"><i class="la la-map-marker"></i></a>' : '') + '</td>';
                                         shipment += '<td>' + history.created_at + '</td>';
                                         shipment += '</tr>';
                                     });
@@ -796,7 +841,72 @@
                                     shipment += '</div>';
                                     shipment += '</div>';
                                 }
+                                let manifest_data = (details.manifest_history) ? details
+                                    .manifest_history : [];
+                                let manifest_bag_latest = (manifest_data.manifest_bag_latest) ?
+                                    manifest_data.manifest_bag_latest : [];
+                                let cargo_manifest_bag = (manifest_data.bag) ? manifest_data.bag : [];
+                                let cargo_manifest = (manifest_bag_latest.cargo_manifest) ?
+                                    manifest_bag_latest.cargo_manifest : [];
+                                let cargo_manifest_fleet = (cargo_manifest.fleet) ? cargo_manifest
+                                    .fleet : [];
+                                let cargo_manifest_fleet_driver = (cargo_manifest_fleet.driver) ?
+                                    cargo_manifest_fleet.driver : [];
 
+                                if (manifest_data) {
+                                    let manifest_data_created_at = (manifest_data.created_at) ?
+                                        manifest_data.created_at : '-'
+
+                                    let vehicle_number = (cargo_manifest.vehicle_number) ?
+                                        cargo_manifest.vehicle_number : '-';
+                                    let driver_name = (cargo_manifest.driver_name) ? cargo_manifest
+                                        .driver_name : '-';
+
+
+                                    vehicle_number = (cargo_manifest_fleet.reg_number) ?
+                                        cargo_manifest_fleet.reg_number : vehicle_number;
+                                    driver_name = (cargo_manifest_fleet_driver.name) ?
+                                        cargo_manifest_fleet_driver.name : driver_name;
+
+
+                                    let cargo_manifest_id = (cargo_manifest.id) ? cargo_manifest.id :
+                                        '-'
+                                    let cargo_manifest_bag_id = (manifest_data.cargo_manifest_bag_id) ?
+                                        manifest_data.cargo_manifest_bag_id : '-'
+                                    let cargo_manifest_bag_seal = (cargo_manifest_bag.seal_number) ?
+                                        cargo_manifest_bag.seal_number : '-'
+
+
+                                    shipment += '<div class="col-12 mt-2">';
+                                    shipment += '<h4><u>Manifest History</u></h4>';
+                                    shipment += '<div class="border table-responsive">';
+                                    shipment +=
+                                        '<table class="table table-sm table-borderless datatable minifest_history">';
+                                    shipment += '<thead>';
+                                    shipment += '<tr role="row">';
+                                    shipment += '<th><strong>Date / Time</strong></th>';
+                                    shipment += '<th><strong>Manifest No#</strong></th>';
+                                    shipment += '<th><strong>Bag Seal#</strong></th>';
+                                    shipment += '<th><strong>Vehicle</strong></th>';
+                                    shipment += '</tr>';
+                                    shipment += '</thead>';
+                                    shipment += '<tbody>';
+
+
+                                    shipment += '<tr>';
+                                    shipment += '<td>' + manifest_data_created_at + '</td>';
+                                    shipment += '<td>' + cargo_manifest_id + '</td>';
+                                    shipment += '<td>' + cargo_manifest_bag_seal + '</td>';
+                                    shipment += `<td> ${vehicle_number} <br> ${driver_name} </td>`
+                                    shipment += '</tr>';
+
+
+                                    shipment += '</tbody>';
+                                    shipment += '</table>';
+
+                                    shipment += '</div>';
+                                    shipment += '</div>';
+                                }
                                 if ('amount_history' in details) {
                                     shipment += '<div class="col-12 mt-2">';
                                     shipment += '<h4><u>Amount History</u></h4>';
@@ -883,10 +993,14 @@
                                         $count = $count + 1;
                                         shipment += '<tr>';
                                         shipment += '<td>' + $count + '</td>';
-                                        if (crm_request.status_id === 1 || crm_request.status_id === 5) {
-                                            shipment += '<td>' + crm_request.status + ' (' + crm_request.id + ')</td>';
-                                        }
-                                        else {
+                                        if (crm_request.status_id === 1 || crm_request
+                                            .status_id === 5) {
+                                            shipment += '<td>' + crm_request.status +
+                                                '(<a class="btn btn-sm btn-outline-info align-middle" href="' +
+                                                complain_route + crm_request.id +
+                                                '" target="_blank">(' + crm_request.id +
+                                                ')</a>)</td>';
+                                        } else {
                                             shipment += '<td>' + crm_request.status + '</td>';
                                         }
                                         shipment += '<td>' + crm_request.created_at + '</td>';
@@ -1046,7 +1160,77 @@
             });
 
         });
+        $('#tracking').on('click', '.delivery_note_print', function() {
+            id = $(this).attr('data-id');
+            $.ajax({
+                    url: '{!! route('retail.tracking.print') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                .done(function(data) {
+                    var tab = window.open('', '_blank');
 
+                    if (!tab) {
+                        swal({
+                            title: 'Popup Blocker Enabled!',
+                            text: 'Please add this site to your exception list.',
+                            icon: 'error',
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+                    } else {
+                        tab.document.write(data);
+                        tab.document.close();
+                        tab.focus();
+                    }
+                });
+        });
+        $('#tracking').on('click', '.rider_information', function() {
+                id = $(this).attr('data-id');
+                var showRiderResponseBtn = $(this).attr('data-showRiderRespone');
+                var note = $(this).attr('data-note');
+
+                $.ajax({
+                        url: '{!! route('retail.tracking.rider_information') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'id': id
+                        }
+                    })
+                    .done(function(data) {
+                        var details = '<table class="table table-sm table-bordered"><tbody>';
+
+                        details +=
+                            '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Name</strong></td><td class="align-middle text-center">' +
+                            data.name + '</td></tr>';
+                        details +=
+                            '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Phone Number</strong></td><td class="align-middle text-center">' +
+                            data.phone_number + '</td></tr>';
+                        details +=
+                            '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>City</strong></td><td class="align-middle text-center">' +
+                            data.city + '</td></tr>';
+                        details +=
+                            '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Category</strong></td><td class="align-middle text-center">' +
+                            data.category + '</td></tr>';
+                        details +=
+                            '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Route</strong></td><td class="align-middle text-center">' +
+                            data.route + '</td></tr>';
+                        if (showRiderResponseBtn != undefined) {
+                            details += '<tr data-id="' + data.id + '" data-note="' + note +
+                                '"><td class="align-middle text-center"><button type="button" class="btn btn-warning btnRiderResponsiveStatus" data-type="1">Unresponsive</button></td><td class="align-middle text-center"><button type="button" class="btn btn-danger btnRiderResponsiveStatus" data-type="2">Powered Off</button></td></tr>';
+                        }
+
+                        details += '</tbody></table>';
+
+                        $('#rider_information .modal-body').html(details);
+
+                        $('#rider_information').modal('show');
+                    });
+            });
         $('#tracking').on('click', '.payment_print', function () {
             id = $(this).attr('data-id');
             console.log(id);

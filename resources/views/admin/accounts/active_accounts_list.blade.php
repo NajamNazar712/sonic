@@ -38,6 +38,9 @@
                                 <div class="col-4">
                                     <fieldset class="form-group">
                                         <select name="search_shipper[]" id="search_shipper" class="form-control select2" multiple>
+                                            @foreach($shippers as $shipper)
+                                                <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                                            @endforeach
                                         </select>
                                     </fieldset>
                                 </div>
@@ -344,7 +347,7 @@
                        {{-- @method('post')--}}
                       {{--  {{ csrf_field() }}--}}
                         <input type="text" hidden id="user_id" name="user_id">
-                        <div class="col-12">
+                        <div class="col-12 d-flex">
 
                                 <select name="old_rate_date"  id="old_rate_date" class="form-control select2">
 
@@ -1059,23 +1062,7 @@ function checkboxStatus() {
             width:'100%',
             placeholder:"Select Shipper",
             allowClear:true,
-            multiple: true,
-            minimumInputLength: 2,
-            ajax: {
-                dataType: 'json',
-                url:  '{!! route('admin.accounts.shipper_names.dropdown',['type'=>'active']) !!}',
-                    data: function (params) {
-                        return {
-                            search: params.term,
-                        }
-                    },
-                    processResults: function (data) {
-                        return {
-                            results: data
-                        };
-                    },
-                delay: 700,
-            }
+            multiple: true
          });
 
          $('#block_disable_reason').prepend('<option value="" selected></option>').select2({
@@ -1169,7 +1156,15 @@ function checkboxStatus() {
                             row.push(values.lead_id);
                             row.push(values.id);
                             row.push(values.account_type);
-                            row.push(values.name);
+                            // row.push(values.name);
+
+                            // Decode HTML entities for comapany name
+                            row.push((() => {
+                                const tempElement = document.createElement('textarea');
+                                tempElement.innerHTML = values.name;
+                                return tempElement.value;
+                            })());
+
                             row.push(values.poc);
                             //row.push(values.address);
                             row.push(values.zone);
@@ -1770,7 +1765,7 @@ function checkboxStatus() {
             serverSide: true,
            deferLoading: 0,
             rowId: 'id',
-            order: [[27, 'desc']],
+            order: [[17, 'desc']],
             ajax: {
                url: '{{ route('admin.accounts.active.ajax') }}',
                 method: 'post',
@@ -2500,6 +2495,7 @@ function checkboxStatus() {
         $('#old_rate_date').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select Date',
             width:'100%',
+            templateResult: formatState
             //allowClear:true
         });
         $('#corporate_rate_type').prepend('<option value="" selected="selected"></option>').select2({
@@ -2532,11 +2528,26 @@ function checkboxStatus() {
                     }
                 }).done(function(data){
                     if (data.status == 1) {
-                        $.each(data.details,function(key,value){
-                            var newOption = new Option(value, value, false, false);
-                            $('#old_rate_date').append(newOption).trigger('change');
+                        $.each(data.details, function(key, value) {
+                            let weightSign = value.weight === 'green' ? '↑' : (value.weight === 'red' ? '↓' : (value.weight === 'yellow' ? '←→' : 'Rates Updated Only'));
+                            let weightColor = value.weight === 'green' ? 'green' : (value.weight === 'red' ? 'red' : (value.weight === 'yellow' ? 'yellow' : 'Rates Updated Only'));
+
+                            let fuelSign = value.fuel === 'green' ? '↑' : (value.fuel === 'red' ? '↓' : (value.fuel === 'yellow' ? '←→' : 'Fuel Added Only'));
+                            let fuelColor = value.fuel === 'green' ? 'green' : (value.fuel === 'red' ? 'red' : (value.fuel === 'yellow' ? 'yellow' : 'Fuel Added Only'));
+
+
+                            $('#old_rate_date').append(
+                                $('<option></option>')
+                                    .attr('value', key)
+                                    .attr('data-wsign', weightSign)
+                                    .attr('data-wcolor', weightColor)
+                                    .attr('data-fsign', fuelSign)
+                                    .attr('data-fcolor', fuelColor)
+                                    .text(key)
+                            );
                         });
                         $('#RateHistoryModal').modal('show');
+
 
                         $('#RateHistoryModal #old_rate_date').bind('change', function () {
                             var date = $(this).val();
@@ -3840,7 +3851,66 @@ var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
                 $('#ratesAdditionForm').submit()
             }
         });
-</script>
+
+        function formatState(state) {
+            if (!state.id) {
+                return state.text;
+            }
+
+            let weightColor = $(state.element).data('wcolor');
+            let weightSign = $(state.element).data('wsign');
+
+            let fuelColor = $(state.element).data('fcolor');
+            let fuelSign = $(state.element).data('fsign');
+
+            let $weightColorSquare = $('<span></span>').css({
+                'width': '15px',
+                'height': '15px',
+                'background-color': weightColor,
+                'border': '1px solid #2c3e50',
+                'display': 'inline-block',
+                'margin-right': '5px'
+            });
+
+            let $weightSign = $('<span></span>').text(weightSign).css({
+                'margin-right': '5px'
+            });
+
+            let $fuelColorSquare = $('<span></span>').css({
+                'width': '15px',
+                'height': '15px',
+                'background-color': fuelColor,
+                'border': '1px solid #2c3e50',
+                'display': 'inline-block',
+                'margin-right': '5px'
+            });
+
+            let $fuelSign = $('<span></span>').text(fuelSign).css({
+                'margin-right': '5px'
+            });
+
+            let $result = $('<span></span>').css({
+                'display': 'flex',
+                'justify-content': 'space-between',
+                'align-items': 'center',
+                'width': '100%'
+            });
+
+            let $left = $('<span></span>').text(state.text);
+            let $right = $('<span></span>').css({
+                'display': 'flex',
+                'align-items': 'center'
+            });
+
+            $right.append('W: ').append($weightSign).append($weightColorSquare);
+            $right.append(' F: ').append($fuelSign).append($fuelColorSquare);
+
+            $result.append($left).append($right);
+
+            return $result;
+        }
+
+    </script>
 
 @endsection
 

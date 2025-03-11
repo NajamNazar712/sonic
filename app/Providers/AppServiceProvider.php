@@ -17,6 +17,15 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\AdminsScreenList;
 use App\Http\Models\Admin\Settings\GeneralSetting;
 use App\Http\Models\Admin\NotificationReturnedDeliveredToShipper;
+<<<<<<< HEAD
+=======
+use App\Observers\GenericObserver;
+use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\AdminRole;
+use App\Observers\ShipmentAmountChangeObserver;
+use App\Http\Models\Shipment;
+
+>>>>>>> sprint_130
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -28,6 +37,12 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         Schema::defaultStringLength(191);
+<<<<<<< HEAD
+=======
+        Admin::observe(GenericObserver::class);
+        AdminRole::observe(GenericObserver::class);
+        Shipment::observe(ShipmentAmountChangeObserver::class);
+>>>>>>> sprint_130
 
         view()->composer('*', function ($view) {
             $search_sonic = NULL;

@@ -576,7 +576,7 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) { return ''; }},
                     {data: 'rider_name', name: 'r.name', class: 'align-middle rider_name'},
                     {data: 'trax_id', name: 'r.trax_id', class: 'align-middle trax_id'},
-                    {data: 'hub', name: 'c.name', class: 'align-middle hub'},
+                    {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                     {data: 'date', name: 'rider_fuel_allocations.date', class: 'align-middle date'},
                     {data: 'delivery_notes_button', name: 'delivery_notes', class: 'align-middle delivery_notes', orderable: false, searchable: false},
                     {data: 'dncc_amount', name: 'rider_fuel_allocations.dncc_amount', class: 'align-middle dncc_amount'},

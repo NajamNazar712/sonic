@@ -738,7 +738,18 @@
                                             <a class="menu-item" href="{{ route('admin.settings.agents_list.index') }}">RVR Caller Agents List</a>
                                         </li>
                                     @endif
-
+                                    
+                                    @if (session('role_id') == 1 || in_array(1005, session('permissions')) || in_array(1006, session('permissions')) || in_array(1007, session('permissions')))
+                                        <li>
+                                            <a class="menu-item" href="{{ route('admin.settings.alist_shippers.index') }}">Specified Shipper</a>
+                                        </li>
+                                    @endif
+                                    
+                                    @if (session('role_id') == 1 || in_array(1011, session('permissions')))
+                                        <li>
+                                            <a class="menu-item" href="{{ route('admin.reports.bot_rvr_log.index') }}">Bot RVR Log Call</a>
+                                        </li>
+                                    @endif
 
                                 </ul>
                             </li>
@@ -854,7 +865,7 @@
 
             @if (session('role_id') == 1 ||
                     count(array_intersect(
-                            [42, 52, 54, 59, 61, 136, 167, 232, 120, 145, 146, 147, 232, 238, 243, 454, 455, 509, 625, 807, 827, 984],
+                            [42, 52, 54, 59, 61, 136, 167, 232, 120, 145, 146, 147, 232, 238, 243, 454, 455, 509, 625, 807, 827, 984,1017],
                             session('permissions'))) !== 0)
 
                 <li class="nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i
@@ -1018,9 +1029,17 @@
                             <li><a class="menu-item" href="{{ route('admin.finance.tracking_number_wise_dncc_info.index') }}">Tracking number wise DNCC info</a></li>
                         @endif
 
+                        @if (session('role_id') == 1 || in_array(1012, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.finance.dncc_wise_tracking_number_info.index') }}">DNCC wise tracking number info</a></li>
+                        @endif
+
                         {{-- Ledger --}}
-                        @if (session('role_id') == 1 /* || in_array(984, session('permissions')) */)
+                        @if (session('role_id') == 1  || in_array(1017, session('permissions')) )
                             <li><a class="menu-item" href="{{ route('admin.finance.shipment_ledger.index') }}">Service Ledger</a></li>
+                        @endif
+
+                        @if (session('role_id') == 1  || in_array(1022, session('permissions')) )
+                            <li><a class="menu-item" href="{{ route('admin.finance.wallet_users.index') }}">Wallet</a></li>
                         @endif
                     </ul>
 
@@ -1871,7 +1890,7 @@
                         @endif
 
                         @if (session('role_id') == 1 || in_array(901, session('permissions')))
-                        <li><a class="menu-item" href="{{ route('admin.reports.ordinary_discrepancy_report.index') }}">Ordinary Discrepancy Report</a></li>
+                        <li><a class="menu-item" href="{{ route('admin.reports.operation_disorder_report.index') }}">Operation Disorder Report</a></li>
                         @endif
 
                         @if (session('role_id') == 1 || in_array(899, session('permissions')))
@@ -1919,6 +1938,29 @@
                             <li>
                                 <a class="menu-item" href="{{ route('admin.reports.shipment_reversal_report.index') }}">
                                     Shipment Reversal Report
+                                </a>
+                            </li>
+                        @endif
+                        @if (session('role_id') == 1 || in_array(1008, session('permissions')))
+                            <li>
+                                <a class="menu-item" href="{{ route('admin.reports.rvr_reattempt.index') }}">
+                                    Reattempt Analysis Report
+                                </a>
+                            </li>
+                        @endif
+                        @if (session('role_id') == 1)
+                            <li>
+                                <a class="menu-item" href="{{ route('admin.reports.bot_rvr.index') }}">
+                                    Bot Report
+                                </a>
+                            </li>
+                        @endif
+
+                        {{-- lost and case closed report --}}
+                        @if (session('role_id') == 1 || in_array(1021, session('permissions')))
+                            <li>
+                                <a class="menu-item" href="{{ route('admin.reports.lost_and_case_closed_summary_report.index') }}">
+                                    Lost/Case Closed Summary Report
                                 </a>
                             </li>
                         @endif
@@ -2139,13 +2181,19 @@
                                             </a>
                                         </li>
                                         @endif
+<<<<<<< HEAD
 
                                         @if (session('role_id') == 1 || in_array(1009, session('permissions')))
                                             <li><a class="menu-item"
                                                    href="{{ route('admin.settings.shippers.bulk_booking_and_tracking.index') }}">
-                                                    Bulk Booking & Bulk Tracking API setting
+                                                    Bulk Booking (Regular) & Bulk Tracking API setting
                                                 </a>
                                             </li>
+=======
+                                        @if (session('role_id') == 1 || in_array(1023, session('permissions')))
+                                        <li><a class="menu-item"
+                                                   href="{{ route('admin.settings.wallet_shippers.index') }}">Wallet Shippers</a></li>
+>>>>>>> sprint_130
                                         @endif
                                 </ul>
 
@@ -2762,6 +2810,10 @@
                                                                 href="{{ route('admin.user_management.fuel_management.index') }}">Fuel
                                                                 Management</a></li>
                                                     @endif
+                                                    @if (session('role_id') == 1)
+                                                        <li><a class="menu-item"
+                                                                href="{{ route('admin.user_management.index') }}">User/Role Management Logs</a></li>
+                                                    @endif
                                                 </ul>
                                             </li>
                                         @endif
@@ -3102,12 +3154,12 @@
                                 class="la la-hand-o-right"></i>Shipment Handover</span></a>
                     <ul class="menu-content">
                         @if (session('role_id') == 1 || in_array(339, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('admin.handover.create.index') }}">Create</a>
-                            </li>
+                            {{-- <li><a class="menu-item" href="{{ route('admin.handover.create.index') }}">Create (Old)</a></li> --}}
+                            <li><a class="menu-item" href="{{ route('admin.handover.create.new_index') }}">Create Handover Bag</a></li>
                         @endif
                         @if (session('role_id') == 1 || in_array(341, session('permissions')))
-                            <li><a class="menu-item"
-                                    href="{{ route('admin.handover.receive.index') }}">Receive</a></li>
+                            {{-- <li><a class="menu-item" href="{{ route('admin.handover.receive.index') }}">Receive (Old)</a></li> --}}
+                            <li><a class="menu-item" href="{{ route('admin.handover.receive.new_index') }}">Receive Handover Bag</a></li>
                         @endif
                         @if (session('role_id') == 1 || in_array(342, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.handover.list.index') }}">List</a></li>

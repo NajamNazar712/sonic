@@ -81,7 +81,7 @@
                     {data: 'category_name', name: 'blacklist_settings.name', class: 'align-middle category_name'},
                     {data: 'added_at', name: 'blacklist_settings.created_at', class: 'align-middle added_at'},
                     {data: 'added_by', name: 'a.name', class: 'align-middle added_by'},
-                    {data: 'updated_at', name: 'blacklist_settings.updated_at', class: 'align-middle updated_at'},
+                    {data: 'updated', name: 'blacklist_settings.updated_at', class: 'align-middle updated_at'},
                     {data: 'updated_by', name: 'u.name', class: 'align-middle updated_by'},
                     {data: 'category_status', name: 'blacklist_settings.status', class: 'align-middle status'},
 

@@ -256,7 +256,7 @@
                                 row.push(values.admin);
                                 row.push(values.city);
                                 row.push(values.zone);
-                                row.push(values.created_at);
+                                row.push(values.created);
                                 row.push(values.company_name);
                                 row.push(values.customer_name);
                                 row.push(values.customer_address);
@@ -311,7 +311,7 @@
                     { data:'admin' ,name: 'a.name', class: 'align-middle admin'},
                     { data:'city' ,name: 'c.name', class: 'align-middle city'},
                     { data:'zone' ,name: 'z.name', class: 'align-middle zone'},
-                    { data:'created_at' ,name: 'daily_visits.created_at', class: 'align-middle created_at'},
+                    { data:'created' ,name: 'daily_visits.created_at', class: 'align-middle created_at'},
                     { data:'company_name' ,name: 'daily_visits.company_name', class: 'align-middle company_name'},
                     { data:'customer_name' ,name: 'daily_visits.customer_name', class: 'align-middle customer_name'},
                     { data:'customer_address' ,name: 'daily_visits.customer_address', class: 'align-middle customer_address'},

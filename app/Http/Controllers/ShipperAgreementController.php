@@ -6,10 +6,6 @@ use App\Http\Models\City;
 use App\Http\Models\Zone;
 use Illuminate\Http\Request;
 use App\Http\Models\RateStatus;
-use App\CorporateDefaultShipmentReturnDiscountCharges;
-use App\CorporateDefaultZeroCodDiscountCharges;
-use App\CorporateShipmentReturnDiscountCharges;
-use App\CorporateZeroCodDiscountCharges;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\BookingType;
 use App\Http\Models\ReturnCharge;
@@ -60,9 +56,6 @@ use App\Http\Models\Admin\CorporateDefaultDiscountWeightCharge;
 use App\Http\Models\Rates\Corporate\CorporateRateDestinationHub;
 use App\Http\Models\Rates\Corporate\CorporateDefaultRateOriginHub;
 use App\Http\Models\Rates\Corporate\CorporateDefaultRateDestinationHub;
-use App\ShipmentReturnDiscountCharges;
-use App\ZeroCodDiscountCharges;
-
 
 class ShipperAgreementController extends Controller
 {
@@ -912,7 +905,6 @@ otherwise it will be rejected</li>
                           </table></div></div>';
                     }
 
-
                     $return_charges_details = '';
                     if($shipper->account_type_id == 1){
                         $return_charges = ReturnCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->first();
@@ -965,45 +957,6 @@ otherwise it will be rejected</li>
                         }
                     }
 
-                    $zero_cod_chagres_details = '';
-                    if($shipper->account_type_id == 1){
-                        $zero_cod_charges = ZeroCodDiscountCharges::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->first();
-                    }else{
-                        if($corporate_rate_type == 3){
-                            $zero_cod_charges = CorporateDefaultZeroCodDiscountCharges::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->first();
-                        }
-                        else{
-                            $zero_cod_charges = CorporateZeroCodDiscountCharges::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->first();
-                        }
-                    }
-
-                    if($zero_cod_charges){
-                        $zero_cod_chagres_details = '<div class="row"><div class="col-5"> <table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Zero Cod Discount </strong></thead></table></div></div>';
-                        $zero_cod_chagres_details .= '<div class="row mb-0"><div class="col-5"><table class="table table-sm table-bordered mb-0">
-                            <tbody><tr><td class="color primary" ><strong>Zero Cod Discount</strong></td><td>' . $zero_cod_charges->cod_discount_per . '%</td></tr></tr></tbody>
-                          </table></div></div>';
-                    }
-
-
-                    $return_discount_chagres_details = '';
-                    if($shipper->account_type_id == 1){
-                        $return_discount_chagres = ShipmentReturnDiscountCharges::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->first();
-                    }else{
-                        if($corporate_rate_type == 3){
-                            $return_discount_chagres = CorporateDefaultShipmentReturnDiscountCharges::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->first();
-                        }
-                        else{
-                            $return_discount_chagres = CorporateShipmentReturnDiscountCharges::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->first();
-                        }
-                    }
-
-                    if($return_discount_chagres){
-                        $return_discount_chagres_details = '<div class="row"><div class="col-5"> <table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Return Discount Charges </strong></thead></table></div></div>';
-                        $return_discount_chagres_details .= '<div class="row mb-0"><div class="col-5"><table class="table table-sm table-bordered mb-0">
-                            <tbody><tr><td class="color primary" ><strong>Return Discount Charges</strong></td><td>' . $return_discount_chagres->return_discount_per . '%</td></tr></tr></tbody>
-                          </table></div></div>';
-                    }
-
                     $discount_weight_charges_details = '';
                     if($shipper->account_type_id == 1){
                         $discount_weight_charges = DiscountWeightCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->get()->groupBy('destination_id');
@@ -1034,9 +987,7 @@ otherwise it will be rejected</li>
                     $rate_details .= $cash_handling_details;
                     $rate_details .= $insurance_charges_details;
                     $rate_details .= $fuel_surcharge_charges_details;
-                    $rate_details .= $zero_cod_chagres_details;
                     $rate_details .= $return_charges_details;
-                    $rate_details .= $return_discount_chagres_details;
                     $rate_details .= $discount_weight_charges_details;
                     $rate_details .= '<div class="new-page"></div>';
                 }
@@ -1230,9 +1181,11 @@ otherwise it will be rejected</li>
 
             if($shipper->lead_id){
                 $user_documents = UserDocumentAttachment::where('user_id', $shipper_id)->first();
-                $file = $user_documents->e_sign_image;
-                $url = Storage::url('users_attached_documents/' . $shipper_id . '/' . $file);
-                $terms_conditions .= '<img src="' . $url . '" alt="Shipper Signature" />';
+                if($user_documents) {
+                    $file = $user_documents->e_sign_image;
+                    $url = Storage::url('users_attached_documents/' . $shipper_id . '/' . $file);
+                    $terms_conditions .= '<img src="' . $url . '" alt="Shipper Signature" />';
+                }  
             }
             
             $terms_conditions .= '<p class="pt-2"><span class="border-bottom"><strong>Company Stamp</strong></span></p>';
@@ -1311,7 +1264,7 @@ otherwise it will be rejected</li>
                     $pdf = SnappyPDF::loadHTML($html);
 
                     $filename = 'Customer Registration Form' . '.pdf';
-                    return $pdf->download($filename);
+                    return $pdf->setOption('enable-local-file-access', true)->download($filename);
                 }
             }else{
                 return redirect(route('cod.404'));

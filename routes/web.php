@@ -32,6 +32,7 @@ Route::prefix('survey_form')->name('survey.')->group(function () {
 Route::get('payment_details/{id}/{id1}', 'TrackingController@payment_details')->name('payment_details');
 
 Route::get('trax_pk_validation/{company_name}/{email_address}/{phone_number}', 'APIController@trax_pk_validation')->name('trax_pk_validation');
+Route::get('wp_custom_select_dropdown_data', 'APIController@wp_custom_select_dropdown_data')->name('wp_custom_select_dropdown_data');
 
 
 Auth::routes();
@@ -267,6 +268,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::post('case_nature_claim_remarks', 'Shippers\ShipperTrackingController@case_nature_claim_remarks')->name('case_nature_claim_remarks');
 
         Route::post('shipper_visibility', 'Shippers\ShipperTrackingController@shipper_visibility')->name('shipper_visibility');
+        Route::post('rider_information', 'Shippers\ShipperTrackingController@rider_information')->name('rider_information');
     });
     Route::prefix('order')->name('order.')->group(function () {
         Route::get('{order_id?}', 'Shippers\ShipperTrackingController@order_index')->name('index');
@@ -475,6 +477,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::post('add_shipper_id', 'Shippers\ShipperDashboardController@storeShipperId')->name('add.shipper_id');
     Route::get('/profile', 'Shippers\ShipperDashboardController@userProfile')->name('edit.profile');
     Route::post('updateprofile', 'Shippers\ShipperDashboardController@updateProfile')->name('update.profile');
+    Route::post('SignInWalletUser', 'Shippers\ShipperDashboardController@SignInWalletUser')->name('SignInWalletUser');
+    Route::post('updateprofilewalletbulk', 'Shippers\ShipperDashboardController@updateprofilewalletbulk')->name('update.bulk.profile_wallet');
     Route::post('update/profile/password', 'Shippers\ShipperDashboardController@update_profile_password')->name('update.profile.password');
     Route::get('getpickups', 'Shippers\ShipperDashboardController@getPickups')->name('get.pickups');
     Route::get('getbanks', 'Shippers\ShipperDashboardController@getBanks')->name('get.banks');
@@ -627,6 +631,14 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::post('nps_survey_check', 'Shippers\NpsSurveyShipperController@nps_survey_check')->name('nps_survey_check');
         Route::post('ratting_submit', 'Shippers\NpsSurveyShipperController@ratting_submit')->name('ratting_submit');
         Route::post('nps_skip', 'Shippers\NpsSurveyShipperController@nps_skip')->name('nps_skip');
+    });
+
+    Route::prefix('wallet')->name('wallet.')->group(function () {
+        Route::get('login', 'FingaIntegrationController@login')->name('login');
+        Route::get('finja_dashboard', 'FingaIntegrationController@finja_dashboard')->name('finja_dashboard');
+        Route::get('on_boarding', 'FingaIntegrationController@on_boarding')->name('on_boarding');
+        Route::get('signup', 'FingaIntegrationController@signup')->name('signup');
+        Route::get('wallet_user', 'FingaIntegrationController@wallet_user')->name('users');
     });
 });
 

@@ -347,7 +347,7 @@
                                 row.push(values.manifest_created_at);
                                 row.push(values.transitted_by);
                                 row.push(values.updated_by);
-                                row.push(values.remarks);
+                                row.push(values.remarks_excel);
 
 
                                 body.push(row);
@@ -418,7 +418,7 @@
                     {data: 'transitted_date', name: 'cargo_manifest_bags.created_at', class: 'align-middle transitted_date'},
                     {data: 'transitted_by', name: 'a.name', class: 'align-middle transitted_by'},
                     {data: 'updated_by', name: 'ah.name', class: 'align-middle updated_by'},
-                    {data: 'remarks', name: 'cargo_manifest_bags.remarks', class: 'align-middle remarks'},
+                    {data: 'remarks', name: 'remarks', class: 'align-middle remarks'},
                     {data: 'action', name: 'action', class: 'align-middle action', searchable: false, orderable: false},
                 ],
                 rowCallback: function(row, data, index) {

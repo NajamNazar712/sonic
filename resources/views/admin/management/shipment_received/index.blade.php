@@ -113,7 +113,7 @@
                                 row.push(values.receiverName);
                                 row.push(values.receiverCnic);
                                 row.push(values.relationship);
-                                row.push(values.created_at);
+                                row.push(values.created);
                                 row.push(values.created_by);
                                 body.push(row);
                             });
@@ -154,7 +154,7 @@
                     {data: 'receiverName', name: 'shipment_receiver_details.receiver_name', class: 'align-middle receiverName'},
                     {data: 'receiverCnic', name: 'shipment_receiver_details.receiver_cnic', class: 'align-middle receiverCnic'},
                     {data: 'relationship', name: 'shipment_receiver_details.receiver_relationship', class: 'align-middle relationship'},
-                    {data: 'created_at', name: 'shipment_receiver_details.created_at', class: 'align-middle text-center created_at'},
+                    {data: 'created', name: 'shipment_receiver_details.created_at', class: 'align-middle text-center created_at'},
                     {data: 'created_by', name: 'admins.name', class: 'align-middle text-center created_by'}
                 ],
                 rowCallback: function (row, data, index) {

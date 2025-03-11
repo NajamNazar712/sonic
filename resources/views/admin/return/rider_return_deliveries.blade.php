@@ -419,6 +419,8 @@
                             footer.push('-');
                             footer.push('-');
                             footer.push('-');
+
+                            footer.push('-');
                             footer.push('-');
                             footer.push('-');
                             footer.push(total_shipments_count);

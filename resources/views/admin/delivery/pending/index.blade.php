@@ -73,6 +73,7 @@
                         <th class="border-primary border-darken-1">Status</th>
                         
                         <th class="border-primary border-darken-1">Last Location Screen Name</th>
+                        <th class="border-primary border-darken-1">Entry Method</th>
                         <th class="border-primary border-darken-1">Sub Hub</th>
                         <th class="border-primary border-darken-1">Last Location Updated At</th>
 
@@ -260,6 +261,7 @@
                         head.push('Status');
 
                         head.push('Last Location Screen Name');
+                        head.push('Entry Method');
                         head.push('Sub Hub');
                         head.push('Last Location Updated At');
 
@@ -296,6 +298,7 @@
                             row.push(values.status);
 
                             row.push(values.last_location_screen_location_name ? values.last_location_screen_location_name : '');
+                            row.push(values.entry_method);
                             row.push(values.ca_scanning_last_location_name);
                             row.push(values.last_location_updated_at ? values.last_location_updated_at : '');
 
@@ -373,6 +376,7 @@
                 
 
                 {data: 'last_location_screen_location_name', name: 'last_screen_location.name', as:'last_location_screen_location_name', class: 'align-middle last_location_screen_location_name'},
+                {data: 'entry_method', name: 'ssj_last_location.entry_method', as:'entry_method', class: 'align-middle entry_method'},
                 {data: 'ca_scanning_last_location_name', name: 'ca_scanning_last_location_name.name', as:'ca_scanning_last_location_name', class: 'align-middle ca_scanning_last_location_name'},
                 {data: 'last_location_updated_at', name: 'ssjal_last_location.updated_at', as:'last_location_updated_at', class: 'align-middle last_location_updated_at'},
 

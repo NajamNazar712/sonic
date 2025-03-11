@@ -163,8 +163,8 @@ class BusinessProjectionRetentionController extends Controller
             ->join('cities', 'cities.id', '=', 'business_projection_accounts.city_id')
             ->join('admins as sp', 'sp.id', '=', 'business_projection_accounts.sale_person_id')
             ->leftjoin('business_projection_reasons as bpr', 'bpr.id', '=', 'business_projection_accounts.business_projection_reason_id')
-            ->select('business_projection_accounts.id', 'u.id as account_id','u.name as shipper', 'cities.name as city', 'u.poc', 'u.phone', 'u.address', 'u.email', 'u.status', 'sp.name as sales_person', 'bpr.name as reason', 'business_projection_accounts.remarks', 'business_projection_accounts.average_shipment','business_projection_accounts.projected_shipment','business_projection_accounts.last_day_number','business_projection_accounts.achieved')
-            ->whereDate('date', Carbon::yesterday());
+            ->select('business_projection_accounts.id', 'u.id as account_id','u.name as shipper', 'cities.name as city', 'u.poc', 'u.phone', 'u.address', 'u.email', 'u.status', 'sp.name as sales_person', 'bpr.name as reason', 'business_projection_accounts.remarks', 'business_projection_accounts.average_shipment','business_projection_accounts.projected_shipment','business_projection_accounts.last_day_number','business_projection_accounts.achieved');
+            //->whereDate('date', Carbon::yesterday());
         if(session('department_id') == 7){
             if(!in_array(session('id'), session('sale_users_bypass'))){
                 $business = $business->whereIn('u.id', session('tagged_shippers'));
@@ -205,6 +205,7 @@ class BusinessProjectionRetentionController extends Controller
                 return $dropdown;
 
             })
+            ->rawColumns(['action'])
             ->make(true);
     }
 

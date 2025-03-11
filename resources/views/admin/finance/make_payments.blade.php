@@ -21,19 +21,31 @@
                                 <div class="col-2">
                                     <fieldset class="form-group">
                                         <select name="search_shipper" id="search_shipper" class="form-control select2">
-                                            @foreach ($shippers as $shipper)
-                                                <option value="{{ $shipper->id }}">{{ $shipper->name }}</option>
-                                            @endforeach
+{{--                                            @foreach ($shippers as $shipper)--}}
+{{--                                                <option value="{{ $shipper->id }}">{{ $shipper->name }}</option>--}}
+{{--                                            @endforeach--}}
                                         </select>
                                     </fieldset>
                                 </div>
-                                <div class="col-3">
+                                <div class="col-2">
                                     <form id="payment_cycle_filter_form" class="mb-1 justify-content-center"
                                         novalidate="novalidate">
                                         <div class="form-group">
                                             <select name="payment_cycle_filter" class="select2 payment_cycle_filter">
                                                 <option value="1" selected>Filtered</option>
                                                 <option value="2">All</option>
+                                            </select>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="col-2">
+                                    <form id="wallet_filter_form" class="mb-1 justify-content-center"
+                                        novalidate="novalidate">
+                                        <div class="form-group">
+                                            <select name="wallet_filter"
+                                                class="select2 wallet_filter">
+                                                <option value="1">Wallet Users</option>
+                                                <option value="2">Non-Wallet Users</option>
                                             </select>
                                         </div>
                                     </form>
@@ -575,13 +587,31 @@
             var initial_total_hold = 0;
             var initial_ibft_charges = 0;
 
-            $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder: 'Shipper',
-                width: '100%',
-                allowClear: true
+            $('#search_shipper').select2({
+                width:'100%',
+                placeholder:"Select Shipper",
+                allowClear:true,
+                minimumInputLength: 2,
+                ajax: {
+                    dataType: 'json',
+                    url:  '{!! route('admin.accounts.shipper_names.dropdown',['type'=>'active']) !!}',
+                    data: function (params) {
+                        return {
+                            search: params.term,
+                        }
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+                    },
+                    delay: 700,
+                }
             }).bind('change', function() {
                 table.draw(false);
             });;
+
+
             $('#positive_negative_filter_form select.positive_negative_filter').prepend(
                 '<option value="" selected></option>').select2({
                 placeholder: 'Select Positive/Negative Filter',
@@ -590,6 +620,15 @@
             }).bind('change', function() {
                 stats_calculate();
                 table.draw(false);
+            });
+
+            $('#wallet_filter_form select.wallet_filter').prepend(
+                '<option value="" selected></option>').select2({
+                placeholder: 'Filter Wallet Users',
+                width: '100%',
+                allowClear: true
+            }).bind('change', function() {
+                table.draw();
             });
 
             $('#shipper_status_form select.shipper_status').prepend(
@@ -655,6 +694,7 @@
                         url: '{{ route('admin.finance.make_payments.list') }}',
                         data: params,
                         success: function(result) {
+                            console.log(result)
                             head = [];
 
                             head.push('S.No');
@@ -685,9 +725,9 @@
                             head.push('Payment Cycle');
                             head.push('Payment Cycle Days');
                             head.push('Return Shipments Avg. Aging');
-
                             $.each(result.data, function(index, values) {
                                 row = [];
+                                
 
                                 row.push(index + 1);
                                 row.push(values.shipper);
@@ -737,57 +777,11 @@
 
                     buttons: [
                         // Modal
-                        // {
-                        //     text: 'Make Payment(s)',
-                        //     className: 'btn btn-primary make_payment',
-                        //     enabled: false,
-                        //     action: function(e, dt, node, config) {
-                        //         $('#make_payments #make_payments_form .total_amount').val(0);
-                        //         $('#make_payments #make_payments_form .total_charges').val(0);
-                        //         $('#make_payments #make_payments_form .total_gst').val(0);
-                        //         $('#make_payments #make_payments_form .total_deductable').val(0);
-                        //         $('#make_payments #make_payments_form .total_payable').val(0);
-                        //         $('#make_payments #make_payments_form .total_hold').val(0);
-                        //         $('#make_payments #make_payments_form .wht').val(0);
-
-
-                        //         $('#make_payments #make_payments_form button.make').prop('disabled', true);
-                        //         $('#make_payments #make_payments_form button.make_invoice').prop('disabled', true);
-                        //         $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
-
-                        //         $('#make_payments #make_payments_form .pending_payment_shipment_ids').val('');
-
-                        //         // Define an array to store IDs of selected rows with empty values
-                        //             table.rows({ selected: true }).every(function(index, element) {
-                        //             var rowData = this.data();
-                        //             var emptyRow = true;
-
-                        //             // selected_rows_shipments = [];
-                        //             // Check if all values in the row are empty
-                        //             for (var i = 0; i < rowData.length; i++) {
-                        //                 if (rowData[i] !== null && rowData[i] !== "") {
-                        //                     emptyRow = false;
-                        //                     break;
-                        //                 }
-                        //             }
-                        //             // If the row is selected and all values are empty, add its ID to the array
-                        //             if (emptyRow) {
-                        //                 selected_shippers_id.push(parseInt(rowData.user_id));
-                        //             }
-                        //         });
-                        //         make_payments_table.clear().draw();
-
-                        //         $('#make_payments').modal('show');
-                        //     }
-                        // },
-
-                        // New tab
                         {
                             text: 'Make Payment(s)',
                             className: 'btn btn-primary make_payment',
                             enabled: false,
                             action: function(e, dt, node, config) {
-                                // Reset all form fields and buttons
                                 $('#make_payments #make_payments_form .total_amount').val(0);
                                 $('#make_payments #make_payments_form .total_charges').val(0);
                                 $('#make_payments #make_payments_form .total_gst').val(0);
@@ -796,22 +790,68 @@
                                 $('#make_payments #make_payments_form .total_hold').val(0);
                                 $('#make_payments #make_payments_form .wht').val(0);
 
+
                                 $('#make_payments #make_payments_form button.make').prop('disabled', true);
                                 $('#make_payments #make_payments_form button.make_invoice').prop('disabled', true);
                                 $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
 
                                 $('#make_payments #make_payments_form .pending_payment_shipment_ids').val('');
 
-                                var selected_shippers_id = [];
-                                table.rows({ selected: true }).every(function(index, element) {
+                                // Define an array to store IDs of selected rows with empty values
+                                    table.rows({ selected: true }).every(function(index, element) {
                                     var rowData = this.data();
-                                    if (selected_shippers_id.indexOf(parseInt(rowData.user_id)) === -1) {
+                                    var emptyRow = true;
+
+                                    // selected_rows_shipments = [];
+                                    // Check if all values in the row are empty
+                                    for (var i = 0; i < rowData.length; i++) {
+                                        if (rowData[i] !== null && rowData[i] !== "") {
+                                            emptyRow = false;
+                                            break;
+                                        }
+                                    }
+                                    // If the row is selected and all values are empty, add its ID to the array
+                                    if (emptyRow) {
                                         selected_shippers_id.push(parseInt(rowData.user_id));
                                     }
                                 });
-                                openNewTabWithData(selected_rows,selected_shippers_id);
+                                make_payments_table.clear().draw();
+
+                                $('#make_payments').modal('show');
                             }
                         },
+
+                        // New tab
+                        // {
+                        //     text: 'Make Payment(s)',
+                        //     className: 'btn btn-primary make_payment',
+                        //     enabled: false,
+                        //     action: function(e, dt, node, config) {
+                        //         // Reset all form fields and buttons
+                        //         $('#make_payments #make_payments_form .total_amount').val(0);
+                        //         $('#make_payments #make_payments_form .total_charges').val(0);
+                        //         $('#make_payments #make_payments_form .total_gst').val(0);
+                        //         $('#make_payments #make_payments_form .total_deductable').val(0);
+                        //         $('#make_payments #make_payments_form .total_payable').val(0);
+                        //         $('#make_payments #make_payments_form .total_hold').val(0);
+                        //         $('#make_payments #make_payments_form .wht').val(0);
+                        //
+                        //         $('#make_payments #make_payments_form button.make').prop('disabled', true);
+                        //         $('#make_payments #make_payments_form button.make_invoice').prop('disabled', true);
+                        //         $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
+                        //
+                        //         $('#make_payments #make_payments_form .pending_payment_shipment_ids').val('');
+                        //
+                        //         var selected_shippers_id = [];
+                        //         table.rows({ selected: true }).every(function(index, element) {
+                        //             var rowData = this.data();
+                        //             if (selected_shippers_id.indexOf(parseInt(rowData.user_id)) === -1) {
+                        //                 selected_shippers_id.push(parseInt(rowData.user_id));
+                        //             }
+                        //         });
+                        //         openNewTabWithData(selected_rows,selected_shippers_id);
+                        //     }
+                        // },
 
                         {
                             extend: 'excel',
@@ -924,6 +964,8 @@
                         d.shipper_document_status = $(
                             '#shipper_document_status_form select.shipper_document_status').val();
                         d.star_shipper_filter = $('#star_shippers_filter').val();
+                        d.wallet_filter = $(
+                            '#wallet_filter_form select.wallet_filter').val();
 
                     }
                 },
@@ -1452,7 +1494,7 @@
                         class: 'align-middle status'
                     },
                     {
-                        data: 'created_at',
+                        data: 'created',
                         name: 'pending_payment_shipments.created_at',
                         class: 'align-middle created_at'
                     },

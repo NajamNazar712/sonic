@@ -54,35 +54,39 @@
                                     <th class="border-primary border-darken-1">Destination</th>
                                     <th class="border-primary border-darken-1">Hub</th>
                                     <th class="border-primary border-darken-1">Zone</th>
-                                    <th class="border-primary border-darken-1">Responsible Hub</th>
-                                    <th class="border-primary border-darken-1">Responsible Zone</th>
-                                    <th class="border-primary border-darken-1">Shipment Status</th>
                                     <th class="border-primary border-darken-1">Arrival Date</th>
+                                    <th class="border-primary border-darken-1">Arrival to Today (TAT)</th>
+                                    <th class="border-primary border-darken-1">Shipment Status</th>
+                                    <th class="border-primary border-darken-1">Last Status Date</th>
+                                    <th class="border-primary border-darken-1">Last status to Today (TAT)</th>
+                                    <th class="border-primary border-darken-1">Last status by</th>
                                     <th class="border-primary border-darken-1">Case Nature</th>
                                     <th class="border-primary border-darken-1">Case Nature Type</th>
                                     <th class="border-primary border-darken-1">Description</th>
-                                    <th class="border-primary border-darken-1">Channel</th>
+                                    <th class="border-primary border-darken-1">Launched Date</th>
+                                    <th class="border-primary border-darken-1">Aging (From Launched Date To Today)</th>
+                                    <th class="border-primary border-darken-1">Responsible Hub</th>
+                                    <th class="border-primary border-darken-1">Sub Hub</th>
+                                    <th class="border-primary border-darken-1">Responsible Zone</th>
                                     <th class="border-primary border-darken-1">Agent</th>
+                                    <th class="border-primary border-darken-1">Agent Assigned By</th>
+                                    <th class="border-primary border-darken-1">Parcel Value</th>
+                                    <th class="border-primary border-darken-1">COD Value</th>
+                                    <th class="border-primary border-darken-1">Segment</th>
+                                    <th class="border-primary border-darken-1">Weight</th>
+                                    <th class="border-primary border-darken-1">Salesperson</th>
+                                    <th class="border-primary border-darken-1">Key account category</th>
+                                    <th class="border-primary border-darken-1">KAE</th>
                                     <th class="border-primary border-darken-1">Launched By</th>
                                     <th class="border-primary border-darken-1">Launched By Type</th>
-                                    <th class="border-primary border-darken-1">Tagged (Admin/Department)</th>
+                                    <th class="border-primary border-darken-1">Auto Tagged to Operation</th>
                                     <th class="border-primary border-darken-1">Manual Tagged To</th>
-                                    <th class="border-primary border-darken-1">Tagged At</th>
-                                    <th class="border-primary border-darken-1">Auto Tagged To KAE</th>
-                                    <th class="border-primary border-darken-1">Auto Tagged To Operation</th>
-                                  {{--  <th class="border-primary border-darken-1">Special Request</th>--}}
-                                    <th class="border-primary border-darken-1">Launched Date</th>
-                                    <th class="border-primary border-darken-1">Complaint Re-Open Date</th>
-                                    <th class="border-primary border-darken-1">Agent Assigned Date</th>
-                                    <th class="border-primary border-darken-1">Agent Assigned By</th>
-                                    <th class="border-primary border-darken-1">Address</th>
-                                    <th class="border-primary border-darken-1">Address Latitude</th>
-                                    <th class="border-primary border-darken-1">Address Longitude</th>
-                                    <th class="border-primary border-darken-1">Valid Date</th>
-                                    <th class="border-primary border-darken-1">Launched To Today (TAT)</th>
+                                    <th class="border-primary border-darken-1">Tagged (Admin/Department)</th>
                                     <th class="border-primary border-darken-1">Last Comment By</th>
                                     <th class="border-primary border-darken-1">Last Comment</th>
                                     <th class="border-primary border-darken-1">Last Comment Date</th>
+                                    <th class="border-primary border-darken-1">Last Rider</th>
+                                    <th class="border-primary border-darken-1">Last Reason</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -307,6 +311,10 @@
             width: 300px !important;
         }
 
+        .select-checkbox{
+            border-color: #64a0d2;
+        }
+
         .select2-container--classic .select2-selection--multiple .select2-selection__choice, .select2-container--default .select2-selection--multiple .select2-selection__choice {
             background-color: #64a0d2 !important;
             border-color: #5587b4 !important;
@@ -355,76 +363,85 @@
                             head.push('Destination');
                             head.push('Hub');
                             head.push('Zone');
-                            head.push('Responsible Hub');
-                            head.push('Responsible Zone');
-                            head.push('Shipment Status');
                             head.push('Arrival Date');
+                            head.push('Arrival to Today (TAT)'); // Newly added based on your list
+                            head.push('Shipment Status');
+                            head.push('Last Status Date');       // Newly added based on your list
+                            head.push('Last status to Today (TAT)'); // Newly added based on your list
+                            head.push('Last status by');         // Newly added based on your list
                             head.push('Case Nature');
                             head.push('Case Nature Type');
                             head.push('Description');
-                            head.push('Channel');
+                            head.push('Launched Date');
+                            head.push('Aging (From Launched Date To Today)'); // Newly added based on your list
+                            head.push('Responsible Hub');
+                            head.push('Sub Hub');                // Newly added based on your list
+                            head.push('Responsible Zone');
                             head.push('Agent');
+                            head.push('Agent Assigned By');
+                            head.push('Parcel Value');           // Newly added based on your list
+                            head.push('COD Value');              // Newly added based on your list
+                            head.push('Segment');                // Newly added based on your list
+                            head.push('Weight');                 // Newly added based on your list
+                            head.push('Salesperson');            // Newly added based on your list
+                            head.push('Key account category');   // Newly added based on your list
+                            head.push('KAE');
                             head.push('Launched By');
                             head.push('Launched By Type');
-                            head.push('Tagged (Admin/Department)');
+                            head.push('Auto Tagged to Operation');
                             head.push('Manual Tagged To');
-                            head.push('Tagged At');
-                            head.push('Auto Tagged To KAE');
-                            head.push('Auto Tagged To Operation');
-                            
-                            head.push('Launched Date');
-                            head.push('Complaint Re-Open Date');
-                            head.push('Agent Assigned Date');
-                            head.push('Agent Assigned By');
-                            head.push('Address');
-                            head.push('Address Latitude');
-                            head.push('Address Longitude');
-                            head.push('Valid Date');
-                            head.push('Launched To Today (TAT)');
+                            head.push('Tagged (Admin/Department)');
                             head.push('Last Comment By');
                             head.push('Last Comment');
                             head.push('Last Comment Date');
+                            head.push('Last Rider');
+                            head.push('Last Reason');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
 
                                 row.push(index + 1);
                                 row.push(values.id_padded);
-                                row.push(values.tracking_number);
-                                row.push(values.shipper_name);
-                                row.push(values.origin);
-                                row.push(values.destination);
-                                row.push(values.hub);
-                                row.push(values.zone);
-                                row.push(values.responsible_hub);
-                                row.push(values.responsible_zone);
-                                row.push(values.status);
-                                row.push(values.arrival);
-                                row.push(values.case_nature);
-                                row.push(values.case_nature_type);
-                                row.push(values.description);
-                                row.push(values.channel);
-                                row.push(values.agent);
-                                row.push(values.launched_by_name);
-                                row.push(values.added_by);
-                                row.push(values.tagged);
-                                row.push(values.tagged_to_manual);
-                                row.push(values.tagged_date);
-                                row.push(values.tagged_to_kae);
-                                row.push(values.tagged_to_operation);
-                                
-                                row.push(values.created_at);
-                                row.push(values.reopen_date);
-                                row.push(values.agent_assigned_date);
-                                row.push(values.agent_assigned_by);
-                                row.push(values.address);
-                                row.push(values.address_latitude);
-                                row.push(values.address_longitude);
-                                row.push(values.valid_date);
-                                row.push(values.current_tat);
-                                row.push(values.last_comment_name);
-                                row.push(values.last_comment.replace(/<br>/gi, '\n'));
-                                row.push(values.last_comment_date);
+                                row.push(values.tracking_number);                     // Tracking No.
+                                row.push(values.shipper_name);                                 // Shipper Name
+                                row.push(values.origin);                                      // Origin
+                                row.push(values.destination);                                 // Destination
+                                row.push(values.hub);                                         // Hub
+                                row.push(values.zone);                                        // Zone
+                                row.push(values.arrival);                                     // Arrival Date
+                                row.push(values.arrival_today);                                // Arrival to Today (TAT)
+                                row.push(values.status);                                      // Shipment Status
+                                // row.push(values.last_status_date);                            // Last Status Date
+                                row.push(values.last_date_status);                            // Last Status Date
+                                row.push(values.last_status_today);                            // Last status to Today (TAT)
+                                row.push(values.last_status_updated_by);                      // Last status by
+                                row.push(values.case_nature);                                 // Case Nature
+                                row.push(values.case_nature_type);                            // Case Nature Type
+                                row.push(values.description);                                 // Description
+                                row.push(values.created);                                  // Launched Date
+                                row.push(values.current_tat);                                 // Aging (From Launched Date To Today)
+                                row.push(values.responsible_hub);                             // Responsible Hub
+                                row.push(values.sub_hub);                                     // Sub Hub
+                                row.push(values.responsible_zone);                            // Responsible Zone
+                                row.push(values.agent);                                       // Agent
+                                row.push(values.agent_assigned_by);                           // Agent Assigned By
+                                row.push(values.parcel_value);                                // Parcel Value
+                                row.push(values.cod_value);                                   // COD Value
+                                row.push(values.segment);                                    // Segment
+                                row.push(values.actual_weight);                               // Weight
+                                row.push(values.sale_person);                                 // Salesperson
+                                row.push(values.shipper_category);                            // Key account category
+                                row.push(values.kae);                                        // KAE
+                                row.push(values.launched_by_name);                            // Launched By
+                                row.push(values.tagged);                                   // Launched By Type
+                                row.push(values.tagged_to_operation);                         // Tagged To Operation
+                                row.push(values.tagged_to_manual);                            // Manual Tagged To
+                                row.push(values.added_by);                           // Tagged (Admin/Department)
+                                row.push(values.last_comment_name);                           // Last Comment By
+                                row.push(values.last_comment.replace(/<br>/gi, '\n'));       // Last Comment
+                                row.push(values.last_comment_date);                           // Last Comment Date
+                                row.push(values.last_updated_rider);                                  // Last Rider
+                                row.push(values.last_rider_reason);                                 // Last Reason
 
                                 body.push(row);
                             });
@@ -461,6 +478,74 @@
                         }
                     },
                     @endif
+
+                    // bulk resolve button
+                    @if (session('role_id') == 1 || in_array(1013, session('permissions')))
+                        {
+                            text: 'Resolve',
+                            className: 'btn btn-primary bulk_resolve',
+                            enabled: false,
+                            action: function (e, dt, node, config) {
+                                swal({
+                                    title: 'Are you sure?',
+                                    text: 'Are you sure you want to mark them as resolved?',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then((result) => {
+                                    if (result) {
+                                        $.ajax({
+                                            url: '{!! route('admin.crm.bulk_resolve') !!}',
+                                            method: 'POST',
+                                            data: {
+                                                'crm_request_ids': selected_rows,
+                                                '_token': '{{ csrf_token() }}'
+                                            }
+                                        })
+                                        .done(function (data) {
+                                            if (data.status === 1 && data.errors && Array.isArray(data.errors)) {
+                                                // Iterate over the data.errors array and extract the error messages
+                                                data.errors.forEach(function(error) {
+                                                    if (Array.isArray(error) && error.length > 0) {
+                                                        // If the error is an array, display the first element as the message
+                                                        toastr.error(error[0], 'Error!', {
+                                                            positionClass: 'toast-top-center',
+                                                            containerId: 'toast-top-center',
+                                                        });
+                                                    } else if (typeof error === 'string') {
+                                                        // If it's a string, display it directly
+                                                        toastr.error(error, 'Error!', {
+                                                            positionClass: 'toast-top-center',
+                                                            containerId: 'toast-top-center',
+                                                        });
+                                                    }
+                                                });
+                                            }
+                                            else {
+                                                window.location.href = '{!! route('admin.crm.resolved.index') !!}';
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        },
+                    @endif
+
                     @if (session('role_id') == 1 || session('role_id') == 6 || in_array(787, session('permissions')))
                     {
                         text: 'In-Valid',
@@ -626,21 +711,17 @@
 
                             table.rows().nodes().each(function(index) {
                                 var row = table.row(index);
-
                                 if ($(row.node().firstChild).hasClass('select-checkbox')) {
                                     row.select();
-
                                     id = parseInt(row.id());
-
                                     var index = $.inArray(id, selected_rows);
-
                                     if (index === -1) {
                                         selected_rows.push(id);
                                     }
-
                                     table.button('.assign').enable();
                                     table.button('.close_request').enable();
                                     table.button('.in_valid').enable();
+                                    table.button('.bulk_resolve').enable();
                                     table.button('.tag').enable();
                                     table.button('.un_tag').enable();
                                     table.button('.bulk_external_comment').enable();
@@ -658,22 +739,18 @@
 
                             table.rows().nodes().each(function(index) {
                                 var row = table.row(index);
-
                                 if ($(row.node().firstChild).hasClass('select-checkbox')) {
                                     row.deselect();
-
                                     id = parseInt(row.id());
-
                                     var index = $.inArray(id, selected_rows);
-
                                     if (index !== -1) {
                                         selected_rows.splice(index, 1);
                                     }
-
                                     if (selected_rows.length == 0) {
                                         table.button('.assign').disable();
                                         table.button('.close_request').disable();
                                         table.button('.in_valid').disable();
+                                        table.button('.bulk_resolve').disable();
                                         table.button('.tag').disable();
                                         table.button('.un_tag').disable();
                                         table.button('.bulk_external_comment').enable();
@@ -721,47 +798,51 @@
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id_padded_link', name: 'crm_requests.id', class: 'align-middle id_padded_link'},
-                    {data: 'tracking_number_hyperlink', name: 's.tracking_number', class: 'align-middle tracking_number'},
-                    {data: 'shipper_name', name: 'user.name', class: 'align-middle shipper_name'},
-                    {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
-                    {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
-                    {data: 'hub', name: 'dh.name', class: 'align-middle hub'},
-                    {data: 'zone', name: 'zones', class: 'align-middle zone'},
-                    {data: 'responsible_hub', name: 'responsible_hub', class: 'align-middle responsible_hub' ,orderable: false, searchable: false,},
-                    {data: 'responsible_zone', name: 'responsible_zone', class: 'align-middle responsible_zone',orderable: false, searchable: false,},
-                    {data: 'status', name: 'status', class: 'align-middle shipment_status'},
-                    {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
-                    {data: 'case_nature', name: 'crcn.id', class: 'align-middle case_nature'},
-                    {data: 'case_nature_type', name: 'case_nature_type', class: 'align-middle case_nature_type'},
-                    {data: 'description', name: 'crm_requests.description', class: 'align-middle description'},
-                    {data: 'channel', name: 'crc.id', class: 'align-middle channel'},
-                    {data: 'agent', name: 'ad.name', class: 'align-middle agent'},
-                    {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'},
-                    {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
+                    {data: 'tracking_number_hyperlink', name: 's.tracking_number', class: 'align-middle tracking_number'}, // Tracking No.
+                    {data: 'shipper_name', name: 'user.name', class: 'align-middle shipper_name'},                         // Shipper Name
+                    {data: 'origin', name: 'oc.name', class: 'align-middle origin'},                                       // Origin
+                    {data: 'destination', name: 'dc.name', class: 'align-middle destination'},                             // Destination
+                    {data: 'hub', name: 'dh.name', class: 'align-middle hub'},                                             // Hub
+                    {data: 'zone', name: 'z.name', class: 'align-middle zone'},                                             // Zone
+                    {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},                               // Arrival Date
+                    {data: 'arrival_today', name: 'arrival_today', class: 'align-middle arrival_today', orderable: false, searchable: false}, // Arrival to Today (TAT)
+                    {data: 'status', name: 'status', class: 'align-middle shipment_status'},                               // Shipment Status
+                    // {data: 'last_status_date', name: 'crm_requests.updated_at', class: 'align-middle last_status_date'},          // Last Status Date
+                    {data: 'last_date_status', name: 'last_updated_sj.created_at', class: 'align-middle last_date_status'},          // Last Status Date from shipments journey
+                    {data: 'last_status_today', name: 's.updated_at', class: 'align-middle last_status_today', orderable: false}, // Last status to Today (TAT)
+                    {data: 'last_status_updated_by', name: 'last_status_upd_by.name', class: 'align-middle last_status_updated_by'},                // Last status by
+                    {data: 'case_nature', name: 'crcn.id', class: 'align-middle case_nature'},                             // Case Nature
+                    {data: 'case_nature_type', name: 'case_nature_type', class: 'align-middle case_nature_type'},          // Case Nature Type
+                    {data: 'description', name: 'crm_requests.description', class: 'align-middle description'},            // Description
+                    {data: 'created', name: 'crm_requests.created_at', class: 'align-middle created_at'}, // Launched Date
+                    {data: 'current_tat', name: 'current_tat', class: 'align-middle current_tat', orderable: false, searchable: false}, // Aging (From Launched Date To Today)
+                    {data: 'responsible_hub', name: 'responsible_hub', class: 'align-middle responsible_hub', orderable: false, searchable: false}, // Responsible Hub
+                    {data: 'sub_hub', name: 'sub_hub', class: 'align-middle sub_hub', orderable: false, searchable: false}, // Sub Hub
+                    {data: 'responsible_zone', name: 'responsible_zone', class: 'align-middle responsible_zone', orderable: false, searchable: false}, // Responsible Zone
+                    {data: 'agent', name: 'ad.name', class: 'align-middle agent'},                                         // Agent
+                    {data: 'agent_assigned_by', name: 'resby.name', class: 'align-middle agent_assigned_by'},              // Agent Assigned By
+                    {data: 'parcel_value', name: 's.parcel_value', class: 'align-middle parcel_value'},                      // Parcel Value
+                    {data: 'cod_value', name: 's.amount', class: 'align-middle cod_value'},                              // COD Value
+                    {data: 'segment', name: 'seg.name', class: 'align-middle segment'}, // Segment
+                    {data: 'actual_weight', name: 's.actual_weight', class: 'align-middle actual_weight'}, // Weight
+                    {data: 'sale_person', name: 'ad1.name', class: 'align-middle sale_person'}, // Salesperson
+                    {data: 'shipper_category', name: 'shipper_category', class: 'align-middle shipper_category'}, // Key account category
+                    {data: 'kae', name: 'ad2.name', class: 'align-middle kae'}, // KAE
+                    {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'},                      // Launched By
                     {data: 'tagged', name: 'crt.crm_request_tagging_type_id', class: 'align-middle tagged'},
-                    {data: 'tagged_to_manual', name: 'tagged_to_manual', class: 'align-middle tagged_to_manual'},
-                  /*  {data: 'special_request', name: 'sar.admin_id', class: 'align-middle special_request'},*/
-                    {data: 'tagged_date', name: 'crth.created_at', class: 'align-middle tagged_date'},
-                    {data: 'tagged_to_kae', name: 'tagged_to_kae', class: 'align-middle tagged_to_kae'},
-                    {data: 'tagged_to_operation', name: 'tagged_to_operation', class: 'align-middle tagged_to_operation'},
-                    {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
-                    {data: 'reopen_date', name: 'crsh.created_at', class: 'align-middle reopen_date'},
-                    {data: 'agent_assigned_date', name: 'resa.created_at', class: 'align-middle agent_assigned_date'},
-                    {data: 'agent_assigned_by', name: 'resby.name', class: 'align-middle agent_assigned_by'},
-                    {data: 'address', name: 'crm_requests.address', class: 'align-middle address'},
-                    {data: 'address_latitude', name: 'crm_requests.address_latitude', class: 'align-middle address_latitude'},
-                    {data: 'address_longitude', name: 'crm_requests.address_longitude', class: 'align-middle address_longitude'},
-                    {data: 'valid_date', name: 'res.created_at', class: 'align-middle valid_date'},
-                    {data: 'current_tat', name: 'current_tat', class: 'align-middle current_tat', orderable: false, searchable: false},
-                    {data: 'last_comment_name', name: 'last_comment_name', class: 'align-middle last_comment_name'},
-                    {data: 'last_comment', name: 'ccs.comment', class: 'align-middle last_comment'},
-                    {data: 'last_comment_date', name: 'ccs.created_at', class: 'align-middle last_comment_date'},
+                    {data: 'tagged_to_operation', name: 'tagged_to_operation', class: 'align-middle tagged_to_operation'}, //Tagged To Operation
+                    {data: 'tagged_to_manual', name: 'tagged_to_manual', class: 'align-middle tagged_to_manual'}, // Manual Tagged To
+                    {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'}, // Launched By Type
+                    {data: 'last_comment_name', name: 'last_comment_name', class: 'align-middle last_comment_name'},       // Last Comment By
+                    {data: 'last_comment', name: 'ccs.comment', class: 'align-middle last_comment'},                       // Last Comment
+                    {data: 'last_comment_date', name: 'ccs.created_at', class: 'align-middle last_comment_date'},          // Last Comment Date
+                    {data: 'last_updated_rider', name: 'last_rider_status_upd_by.name', class: 'align-middle last_updated_rider'},                           // Last Rider
+                    {data: 'last_rider_reason', name: 'ssr.name', class: 'align-middle last_rider_reason'}, // Last Reason
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
                 rowCallback: function(row, data, index) {
                     $('td:eq(0)', row).addClass('select-checkbox');
-
                     if ($.inArray(data.id, selected_rows) !== -1) {
                         table.row(row).select();
                     }
@@ -792,11 +873,17 @@
                         '<option value="2">Admin</option>' +
                         '</select>';
 
+                    var kac = '<select name="key_account" id="key_account" class="select2 form-control">' +
+                        '<option value="0">Non-Key Account</option>' +
+                        '<option value="1">Key Account</option>' +
+                        '</select>';
+
+
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select') || $(header).is('.current_tat') || $(header).is('.responsible_hub')|| $(header).is('.responsible_zone') ) {
+                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select') || $(header).is('.current_tat') || $(header).is('.responsible_hub')|| $(header).is('.responsible_zone') || $(header).is('.last_status_today') || $(header).is('.arrival_today')) {
                             $(td).appendTo($(search));
                         }
                         else if ($(header).is('.case_nature')) {
@@ -837,6 +924,12 @@
                         }
                         else if ($(header).is('.tagged')) {
                             $(tagging_type).appendTo($(search))
+                                .on('change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                }).wrap(td);
+                        }
+                        else if ($(header).is('.shipper_category')) {
+                            $(kac).appendTo($(search))
                                 .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 }).wrap(td);
@@ -945,6 +1038,15 @@
                         dropdownCssClass: 'form-control-sm p-0'
                     });
 
+                    $('#key_account').prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Type",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
+
+
                     var data5 = $.map({!! $zones !!}, function (obj) {
                         obj.id = obj.id;
                         obj.text = obj.name;
@@ -1022,6 +1124,7 @@
                             table.button('.assign').disable();
                             table.button('.valid').disable();
                             table.button('.in_valid').disable();
+                            table.button('.bulk_resolve').disable();
                             table.button('.bulk_external_comment').disable();
                             table.button('.bulk_internal_comment').disable();
                             table.button('.tag').disable();
@@ -1074,6 +1177,7 @@
                             table.button('.assign').disable();
                             table.button('.valid').disable();
                             table.button('.in_valid').disable();
+                            table.button('.bulk_resolve').disable();
                             table.button('.bulk_external_comment').disable();
                             table.button('.bulk_internal_comment').disable();
                             table.button('.tag').disable();
@@ -1224,6 +1328,7 @@
                     table.button('.assign').enable();
                     table.button('.close_request').enable();
                     table.button('.in_valid').enable();
+                    table.button('.bulk_resolve').enable();
                     table.button('.tag').enable();
                     table.button('.un_tag').enable();
                     table.button('.bulk_external_comment').enable();
@@ -1233,6 +1338,7 @@
                     table.button('.assign').disable();
                     table.button('.close_request').disable();
                     table.button('.in_valid').disable();
+                    table.button('.bulk_resolve').disable();
                     table.button('.tag').disable();
                     table.button('.un_tag').disable();
                     table.button('.bulk_external_comment').disable();

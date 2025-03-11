@@ -114,15 +114,14 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                        
                         <input type="hidden" name="shipment_id" id="pod_shipment" >
                         <div class="form-group">
                             <label for="pod_file">
-                                POD File: 
+                                POD File:
                             </label><br>
                             <input class="form-control form-control-sm" type="file" name="pod_file" id="pod_file" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
                         </div>
-                    
+
 
                 </div>
                 <div class="modal-footer">
@@ -493,7 +492,7 @@
                             </fieldset>--}}
                             <fieldset class="d-none">
                                 <textarea name="other_description" class="form-control" id="cr_other_description" cols="30" rows="10"></textarea>
-                            </fieldset> 
+                            </fieldset>
                         </div>
 
                     </div>
@@ -601,6 +600,7 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
+    <script src="{{asset('js/refreshTabs.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -682,7 +682,7 @@
                 placeholder:'Select Reason',
                 width:'100%',
                 allowClear:true,
-                dropdownParent: $('#consignee_refused_modal') 
+                dropdownParent: $('#consignee_refused_modal')
             });
             $('#select_all_reason').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Reason',
@@ -731,7 +731,7 @@
                                         selected_rows.push(id);
                                     }
 
-                                    
+
                                     $('#submit_selected_status').attr('disabled', false);
                                 }
                             });
@@ -759,7 +759,6 @@
 
                                 }
                             });
-                            
                             $('#submit_selected_status').attr('disabled', true);
                         }
                     },
@@ -954,7 +953,6 @@
                     table.button('.delivered').disable();
                     $('#submit_selected_status').attr('disabled', true);
                 }
-                
             });
 
 
@@ -998,7 +996,6 @@
                 //do something
                 $(this).attr('data-rule-required', 'true');
                 $(this).attr('data-msg-required', 'CNIC is required');
-                console.log('got yea');
             }
 
             $('body').on('click', 'input.open_box', function(){
@@ -1349,14 +1346,13 @@
                             }
                             shipment.val(shipments);
                             open_box_input.val(open_box_ids);
-                            
-                            
+
+
                             blockPagePermanently();
+                            triggerRefreshInAllTabs();
                             this_form.submit();
                         }
                     });
-
-
                 }
             });
 
@@ -1996,8 +1992,10 @@
                                                         dangerMode: true
                                                     }).then(function (confirm) {
                                                         if (confirm) {
+                                                            triggerRefreshInAllTabs()
                                                             location.reload();
                                                         } else {
+                                                            triggerRefreshInAllTabs()
                                                             location.reload();
                                                         }
                                                     });
@@ -2008,6 +2006,7 @@
                                                      positionClass: 'toast-bottom-center',
                                                      containerId: 'toast-bottom-center'
                                                  });
+                                                triggerRefreshInAllTabs()
                                                  location.reload();
                                             }
 
@@ -2080,8 +2079,10 @@
                                                     dangerMode: true
                                                 }).then(function (confirm) {
                                                     if (confirm) {
+                                                        triggerRefreshInAllTabs()
                                                         location.reload();
                                                     } else {
+                                                        triggerRefreshInAllTabs()
                                                         location.reload();
                                                     }
                                                 });
@@ -2093,6 +2094,7 @@
                                                 positionClass: 'toast-top-center',
                                                 containerId: 'toast-top-center'
                                             });
+                                            triggerRefreshInAllTabs()
                                             location.reload();
                                         }
                                     });

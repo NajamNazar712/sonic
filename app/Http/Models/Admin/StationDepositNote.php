@@ -9,7 +9,17 @@ class StationDepositNote extends Model
     protected $fillable = [
       'hub_id','dncc_count','sdn_delivered_shipments','sdn_amount','sdn_expense','sdn_net_amount','deposited_by','banks_list_id','sdn_type'
     ];
+    
     protected $table = 'station_deposit_notes';
+    // protected $casts = [
+    //     'created_at' => "datetime:Y-m-d H:i:s",
+    // ];
+    
+    protected function serializeDate(\DateTimeInterface $date)
+    {
+        return $date->format('Y-m-d H:i:s');
+    }
+    
     public function hub(){
             return $this->belongsTo('App\Http\Models\City', 'hub_id', 'id');
     }

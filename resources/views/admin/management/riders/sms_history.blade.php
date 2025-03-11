@@ -99,7 +99,7 @@
                                 row.push(values.body);
                                 row.push(values.send_by);
                                 row.push(values.riders);
-                                row.push(values.created_at);
+                                row.push(values.created);
                                 body.push(row);
                             });
                         },
@@ -136,7 +136,7 @@
                     {data: 'body', name: 'sms_histories.body', class: 'align-middle msg_body'},
                     {data: 'send_by', name: 'admins.name', class: 'align-middle send_by'},
                     {data: 'riders_count', name: 'riders_count', class: 'align-middle riders_count', orderable: false, searchable: false},
-                    {data: 'created_at', name: 'sms_histories.created_at', class: 'align-middle created_at'},
+                    {data: 'created', name: 'sms_histories.created_at', class: 'align-middle created_at'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

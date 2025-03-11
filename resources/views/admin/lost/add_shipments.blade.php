@@ -61,6 +61,7 @@
                             <th class="border-primary border-darken-1">Destination</th>
                             <th class="border-primary border-darken-1">Hub</th>
                             <th class="border-primary border-darken-1">Amount</th>
+                            <th class="border-primary border-darken-1">Parcel Value</th>
                             <th class="border-primary border-darken-1">Remarks</th>
                             <th class="border-primary border-darken-1">Shipping Mode</th>
                             <th class="border-primary border-darken-1">Service Type</th>
@@ -152,6 +153,7 @@ label.error {
                     {name: 'destination', class: 'align-middle destination form-group', orderable: false},
                     {name: 'hub', class: 'align-middle hub form-group', orderable: false},
                     {name: 'amount', class: 'align-middle amount', orderable: false},
+                    {name: 'parcel_value', class: 'align-middle parcel_value', orderable: false},
                     {name: 'remarks', class: 'align-middle remarks', orderable: false},
                     {name: 'mode', class: 'align-middle mode', orderable: false},
                     {name: 'service_type', class: 'align-middle service_type', orderable: false},
@@ -210,7 +212,20 @@ label.error {
                                         var rowNo = table.rows().count();
 
                                         var action = '<a href="javascript:void(0);" class="btn btn-icon btn-danger removerow" data-shipment_id="' + data.details.id + '"><i class="la la-close"></i></a>';
-                                        table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper_name, data.details.origin, data.details.destination, data.details.hub, data.details.amount, data.details.remarks,data.details.mode,data.details.service_type, data.details.action_button ,action]).node().id = data.details.id;
+                                        table.row.add([
+                                            rowNo + 1, data.details.tracking_number, 
+                                            data.details.shipper_name, 
+                                            data.details.origin, 
+                                            data.details.destination, 
+                                            data.details.hub, 
+                                            data.details.amount, 
+                                            data.details.parcel_value,
+                                            data.details.remarks,
+                                            data.details.mode,
+                                            data.details.service_type, 
+                                            data.details.action_button,
+                                            action
+                                        ]).node().id = data.details.id;
                                         table.draw(false);
                                         scan_sound(1);
                                         table.order([0, 'desc']).draw();
@@ -289,6 +304,7 @@ label.error {
                                     // $.each(shipmentData, function(id, shipment2){
                                         var index = $.inArray(id, shipment_ids);
                                         shipment = shipmentData[id];
+                                        
                                         if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(shipment.tracking_number)) === -1) {
                                             var rowNo = table.rows().count();
        
@@ -301,12 +317,15 @@ label.error {
                                            shipment.destination,
                                            shipment.hub,
                                            shipment.amount,
+                                           shipment.parcel_value,
                                            shipment.remarks,
                                            shipment.mode,
                                            shipment.service_type, 
                                            shipment.action_button,
                                            action
                                        ]).node().id = id;
+                                       console.log(shipment);
+                                       
        
                                         table.draw(false);
                                         scan_sound(1);
@@ -482,12 +501,16 @@ label.error {
             shipment_id = $(this).attr('data-id');
             var modalId = 'addLostResponsibleModal_' + shipment_id;
             var modalButton = 'addLostResponsibleModalBtn_' + shipment_id;
+            var closeModalButton = 'addLostResponsibleCloseModalBtn';
+
             var modalContent = '<div class="modal fade text-left addLostResponsible" id="' + modalId + '" data-backdrop="static" tabindex="-1" role="dialog">' +
                 '<div class="modal-dialog modal-xl" role="document">' +
                 '<div class="modal-content">' +
                 '<div class="modal-header bg-primary white">' +
                 '<h4 class="modal-title white">Add Lost Responsible for Shipment ID: ' + shipment_id + '</h4>' +
-               
+                '<button type="button" class="close" aria-label="Close" id = "' + closeModalButton + '">' +
+                '<span aria-hidden="true">&times;</span>' +
+                '</button>' +
                 '</div>' +
                 '<div class="modal-body text-center">' +
                 '<form id="addLostResponsibleForm_' + shipment_id + '" class="form" method="post" enctype="multipart/form-data">' +
@@ -508,9 +531,9 @@ label.error {
                 '</form>' +
                 '<div class="row justify-content-center mt-3">'+
                         '<div class="col-">'+
-                            '<button class="btn btn-info btn-block" class="close close_btn" id="' + modalButton + '" data-dismiss="modal" aria-label="Close">Save</button>'+
+                            '<button class="btn btn-info btn-block" class="close close_btn" id="' + modalButton + '" data-dismiss="modal" aria-label="Close" disabled>Save</button>'+
                         '</div>'+
-                    '</div>'+
+                '</div>'+
               
                 '</div>' +
                 '</div>' +
@@ -529,7 +552,8 @@ label.error {
                             className: 'btn btn-primary mb-1 add_row',
                             text: '<i class="la la-plus"></i> Add Row',
                             action: function (e) {
-                                add_row(shipment_id);
+                                add_row(shipment_id);                                
+                                
                                 if(flag_new || addLostResponsible.length === 0){
                                     addLostResponsible.button(0).disable();
                                 }else{
@@ -597,6 +621,7 @@ label.error {
                         });
                     }
 
+                    console.log(trax_index)
                     if (trax_index == -1 || trax_index === undefined || change.length === 0 ) {
                         $('.remove_row.' + rows_count).attr('data-trax_id', inputValue);
                         $.ajax({
@@ -610,6 +635,7 @@ label.error {
                                 if(response.status == 1){
                                     flag_new = true;
                                     addLostResponsible.button(0).enable();
+
                                     $('.user-name[data-shipment_id="' + shipment_id + '"][data-row="' + rows_count + '"]').val(response.details.name)
                                     $('.user-type[data-shipment_id="' + shipment_id + '"][data-row="' + rows_count + '"]').val(response.details.type)
                                     $('.user-status[data-shipment_id="' + shipment_id + '"][data-row="' + rows_count + '"]').val(response.details.status)
@@ -625,6 +651,10 @@ label.error {
                                         change[shipment_id].push({
                                             value: inputValue,
                                         });
+                                    }
+
+                                    if(change[shipment_id].length > 0){
+                                        $('#addLostResponsibleModalBtn_' + shipment_id).prop('disabled', false);
                                     }
 
                                     $('#update_lost_form input#trax_id').val(JSON.stringify(change));
@@ -652,6 +682,8 @@ label.error {
             var rid = parseInt($(this).parents('tr').attr('id'));
             var shipment_id_remove = $(this).attr('data-shipment_id');
             var trax_id = $(this).attr('data-trax_id');
+
+            var saveBtnId = 'addLostResponsibleModalBtn_' + shipment_id_remove
             
             rows_count_1 = rows_count_1;
 
@@ -665,9 +697,11 @@ label.error {
                 });
 
                 if (change[shipment_id_remove].length === 0) {
+                    $('#' + saveBtnId).prop('disabled', true);
                     change[shipment_id_remove] = [];
                     delete change[shipment_id_remove];
                 }
+
             }
 
             var indexToRemove = new_array[shipment_id_remove].findIndex(function(item) {
@@ -682,8 +716,13 @@ label.error {
                 new_array[shipment_id_remove] = [];
             }
 
-            var truee = new_array[shipment_id].length === change[shipment_id].length;
-            var falsee = new_array[shipment_id].length !== change[shipment_id].length;
+            
+            if (new_array[shipment_id] && change[shipment_id]) {
+                var truee = new_array[shipment_id].length === change[shipment_id].length;
+                var falsee = new_array[shipment_id].length !== change[shipment_id].length;
+            } else {
+                console.error("One or both of the arrays are undefined for shipment_id:", shipment_id);
+            }
 
             if(addLostResponsible.row().length >= 0 && change[shipment_id_remove] !== undefined){
                 if(truee === true){
@@ -700,8 +739,7 @@ label.error {
 
         });  
 
-        $(document).on('hide.bs.modal','.addLostResponsible', function (e) {
-             
+        $(document).on('hide.bs.modal','.addLostResponsible', function (e) {        
             if (!new_array[shipment_id]) {
                 new_array[shipment_id] = [];
             }   
@@ -726,16 +764,62 @@ label.error {
                     return;
                 }else if (falsee !== false){
                     e.preventDefault();
-                  
                     toastr.error('Please Fill The Field !!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
-            }else{
+            }else{                
                 e.preventDefault();
                 toastr.error('Please Fill The Field !!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
             }
 
             
         });
+
+        $(document).on('click', '.addLostResponsible #addLostResponsibleCloseModalBtn', function (e) {            
+            if (change[shipment_id] && change[shipment_id].length != 0 && change[shipment_id].length === new_array[shipment_id].length){
+                
+                swal({
+                    title: 'Are you sure?',
+                    text: 'Are you sure you want to cancel? Your changes will not be saved. Or click Save to keep your work.',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: "Cancel",
+                            value: null,
+                            visible: true,
+                            className: "",
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: "OK",
+                            value: true,
+                            visible: true,
+                            className: "",
+                            closeModal: true
+                        }
+                    }
+                }).then((willProceed) => {
+                    if (willProceed) {
+                        $('.addLostResponsible').modal('hide')
+                        var existing_table = $('#addLostResponsibleTable_' + shipment_id).DataTable();
+
+                        if (existing_table) {
+                            existing_table.clear().draw();
+                            existing_table.destroy();
+                            delete change[shipment_id];
+                            delete new_array[shipment_id];
+                        }
+                        $('#addLostResponsibleModalBtn_' + shipment_id).prop('disabled', true);
+
+                        return;
+                    }
+                      
+                });
+            }else{
+                $('.addLostResponsible').modal('hide')
+
+            }
+        });
+
     });
     </script>
 @endsection

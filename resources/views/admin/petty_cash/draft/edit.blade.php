@@ -85,6 +85,7 @@
                             <th class="border-primary border-darken-1">Account Head</th>
                             <th class="border-primary border-darken-1">Account Title</th>
                             <th class="border-primary border-darken-1">Details of Expense</th>
+                            <th class="border-primary border-darken-1">Cost Centre</th>
                             <th class="border-primary border-darken-1">Amount </th>
                             <th class="border-primary border-darken-1">Employee Id </th>
                             <th class="border-primary border-darken-1">Name </th>
@@ -330,6 +331,7 @@
                     {name: 'account_head', class: 'align-middle account_head custom-col-width form-group'},
                     {name: 'account_title', class: 'align-middle account_title custom-col-width form-group'},
                     {name: 'details_of_expense', class: 'align-middle details_of_expense doe-col-width form-group'},
+                    {name: 'cost_centre', class: 'align-middle cost_centre custom-col-width form-group'},
                     {name: 'amount', class: 'align-middle expense_amount custom-col-width form-group'},
                     {name: 'employee_id', class: 'align-middle employee_id custom-col-width form-group'},
                     {name: 'name', class: 'align-middle name custom-col-width form-group'},
@@ -416,6 +418,8 @@
                 var city_select = '<select class="form-control form-control-sm select2 city_select" name="city['+rows_count+']" data-rule-required="true" data-msg-required="City is required"></select>';
                 var expense_detail_input = '<textarea class="form-control form-control-sm" rows="5" maxlength="300" name="expense['+rows_count+']" placeholder="Expense Details" data-rule-required="true" data-msg-required="Expense Detail is required"></textarea>';
 
+                var cost_centres_select = '<select class="form-control form-control-sm select2 cost_centre_select" name="cost_centre['+rows_count+']" data-rule-required="true" data-msg-required="Cost Centre is required"></select>';
+
                 var dncc_select = '<select class="form-control form-control-sm select2 dncc_select" name="dncc['+rows_count+']"></select>';
                 var delivered_shipment_input = '<input class="form-control form-control-sm delivered_shipment_input" readonly name="delivered_shipment_count['+rows_count+']" placeholder="Total Delivered Shipments">';
 
@@ -445,7 +449,13 @@
                     obj.text = obj.trax_id;
                     return obj;
                 });
-                table.row.add([0, city_select,heads_select,titles_select,expense_detail_input,amount_input,employee_select,employee_name_input,employee_designation_input,reference_input,remarks_input,dncc_select,delivered_shipment_input,upload_image,remove]).node().id = rows_count;
+
+                var cost_centres = $.map({!! $cost_centres !!}, function (obj) {
+                    obj.id = obj.id;
+                    obj.text = obj.name;
+                    return obj;
+                });
+                table.row.add([0, city_select,heads_select,titles_select,expense_detail_input,cost_centres_select,amount_input,employee_select,employee_name_input,employee_designation_input,reference_input,remarks_input,dncc_select,delivered_shipment_input,upload_image,remove]).node().id = rows_count;
                 table.draw(true);
                 $('select[name="head['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
                     data:heads,
@@ -482,6 +492,13 @@
                     let index = $(this).attr('name');
                     index = index.substring(5, index.length-1);
                     $('input[name="delivered_shipment_count['+index+']"]').val(count);
+                });
+
+                $('select[name="cost_centre['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
+                    data: cost_centres,
+                    placeholder:'Select Cost Centre',
+                    allowClear:true,
+                    dropdownCssClass: 'form-control-sm p-0'
                 });
 
                 $('.reference_row').inputmask({
@@ -841,6 +858,7 @@
 
                 @foreach($petty_statement_draft->petty_cash_statement_draft_details as $key => $data)
                         var head = '{{$data->account_head_id}}';
+                        var cost = '{{$data->cost_centre_id}}';
                         var title = '{{$data->account_title_id}}';
                         var city = '{{$data->city_id}}';
                         var employee_id = '{{$data->employee_id}}';
@@ -855,12 +873,12 @@
                         var reference_document = $.trim('{{$data->reference_document}}');
                         var reference_document_2 = $.trim('{{$data->reference_document_2}}');
 
-                    load_row(head, title,city, expense,employee_id,employee_name,employee_designation,dncc,delivered_shipments, amount, reference_no, remarks, reference_document,reference_document_2);
+                    load_row(head, title,city, expense,cost,employee_id,employee_name,employee_designation,dncc,delivered_shipments, amount, reference_no, remarks, reference_document,reference_document_2);
                 @endforeach
             }
             load_data();
 
-            function load_row(head, title,city, expense,employee_id,employee_name,employee_designation,dncc,delivered_shipments, amount, reference, remarks, reference_document,reference_document_2) {
+            function load_row(head, title,city, expense,cost,employee_id,employee_name,employee_designation,dncc,delivered_shipments, amount, reference, remarks, reference_document,reference_document_2) {
                 var image_url = '{{asset('/storage/petty_cash_statement_details_draft')}}';
                 rows_count++;
                 selected_rows.push(rows_count);
@@ -872,6 +890,7 @@
                 var delivered_shipment_input = '<input class="form-control form-control-sm delivered_shipment_input" readonly name="delivered_shipment_count['+rows_count+']" placeholder="Total Delivered Shipments">';
 
                 var expense_detail_input = '<textarea class="form-control form-control-sm" rows="5" maxlength="300" name="expense['+rows_count+']" placeholder="Expense Details" data-rule-required="true" data-msg-required="Expense Detail is required">'+ expense +'</textarea>';
+                var cost_centres_select = '<select class="form-control form-control-sm select2 cost_centre_select" name="cost_centre['+rows_count+']" data-rule-required="true" data-msg-required="Cost Centre is required"></select>';
                 var employee_select = '<select class="form-control form-control-sm select2 employee_select" name="employee['+rows_count+']"></select>';
                 var employee_name_input = '<input class="form-control form-control-sm employee_name" readonly name="employee_name['+rows_count+']" placeholder="Employee Name" value="'+employee_name+'">';
                 var employee_designation_input = '<input class="form-control form-control-sm employee_designation" readonly name="employee_designation['+rows_count+']" placeholder="Employee Designation" value="'+employee_designation+'" >';
@@ -922,7 +941,13 @@
                     obj.text = obj.trax_id;
                     return obj;
                 });
-                table.row.add([0, city_select,heads_select,titles_select,expense_detail_input,amount_input,employee_select,employee_name_input,employee_designation_input,reference_input,remarks_input,dncc_select,delivered_shipment_input,upload_image,remove]).node().id = rows_count;
+                var cost_centres = $.map({!! $cost_centres !!}, function (obj) {
+                    obj.id = obj.id;
+                    obj.text = obj.name;
+                    return obj;
+                });
+
+                table.row.add([0, city_select,heads_select,titles_select,expense_detail_input,cost_centres_select,amount_input,employee_select,employee_name_input,employee_designation_input,reference_input,remarks_input,dncc_select,delivered_shipment_input,upload_image,remove]).node().id = rows_count;
                 table.draw(true);
                 $('select[name="head['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
                     data:heads,
@@ -969,6 +994,17 @@
                     $('input[name="delivered_shipment_count['+index+']"]').val(count);
                 });
                 $('select[name="dncc[' + rows_count + ']"]').val(dncc).trigger('change');
+
+                
+                $('select[name="cost_centre['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
+                    data: cost_centres,
+                    placeholder:'Select Cost Centre',
+                    allowClear:true,
+                    dropdownCssClass: 'form-control-sm p-0'
+                });
+                $('select[name="cost_centre['+rows_count+']"]').val(cost).trigger('change');
+
+                
 
                 $('.reference_row').inputmask({
                     'alias': 'integer',

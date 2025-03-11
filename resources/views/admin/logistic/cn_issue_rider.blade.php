@@ -16,6 +16,37 @@
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
+
+                            <form id="track_form" class="mb-1" novalidate="novalidate">
+                                <div class="row justify-content-center">
+                                    <div class="col-3">
+                                        <div class="form-group">
+                                            <input type="text" name="employee_id" id="employee_id" class="dt_search form-control employee_id"
+                                                placeholder="Employee ID(s)" data-tags-input-name="employee_id">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-3">
+                                        <div class="form-group">
+                                            <input type="text" name="cn_number_from" id="cn_number_from" class="dt_search form-control cn_number_from"
+                                                placeholder="CN Number(s)" data-tags-input-name="cn_number_from">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-3">
+                                        <div class="form-group">
+                                            <input type="text" name="cn_number_to" id="cn_number_to" class="dt_search form-control cn_number_to"
+                                                placeholder="CN Number(s)" data-tags-input-name="cn_number_to">
+                                        </div>
+                                    </div>
+
+
+                                    <div class="form-group ml-1">
+                                        <button type="submit" class="btn btn-primary">Search</button>
+                                    </div>
+                                </div>
+                            </form>
+
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;width:100% !important;">
                                 <thead>
                                 <tr role="row" class="bg-primary white">
@@ -29,7 +60,6 @@
                                     <th class="border-primary border-darken-1">Quantity</th>
                                     <th class="border-primary border-darken-1">Issue Date</th>
                                     <th class="border-primary border-darken-1">Action</th>
-
                                 </tr>
                                 </thead>
                             </table>
@@ -245,6 +275,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <link rel="stylesheet" type="text/css"
           href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <style>
@@ -427,6 +458,7 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
 
     <script>
 
@@ -514,7 +546,11 @@
                 serverSide: true,
                 ajax: {
                     url: '{{ route('admin.logistic.cn.issue_to_rider.list') }}',
-
+                    data: function(d) {
+                        d.employee_id = $('#employee_id').val();
+                        d.cn_number_from = $('#cn_number_from').val();
+                        d.cn_number_to = $('#cn_number_to').val();
+                    }
                 },
                 rowId: 'id',
                 order: [[2, 'desc']],
@@ -641,6 +677,99 @@
 
 
             });
+
+            //Selectize
+            var select = $('#employee_id').selectize({
+                placeholder: 'Employee ID(s)',
+                delimiter: ',',
+                createOnBlur: true,
+                persist: false,
+                plugins: ['remove_button'],
+                onDropdownOpen: function(dropdown) {
+                    dropdown.remove();
+                },
+                create: function(input) {
+                    if (input.length >= 1) {
+                        return {
+                            value: input,
+                            text: input
+                        };
+                    } else {
+                        return false;
+                    }
+                },
+            });
+
+            // var select = $('#cn_number_from').selectize({
+            //     placeholder: 'CN Number From',
+            //     delimiter: ',',
+            //     createOnBlur: true,
+            //     persist: false,
+            //     plugins: ['remove_button'],
+            //     onDropdownOpen: function(dropdown) {
+            //         dropdown.remove();
+            //     },
+            //     onType: function(str) {
+            //         var regex = /^[0-9,]+$/;
+            //         if (!regex.test(str)) {
+            //             select[0].selectize.setTextboxValue('');
+            //         }
+            //     },
+            //     create: function(input) {
+            //         if (input.length >= 1 && Math.floor(input) == input && $.isNumeric(input)) {
+            //             return {
+            //                 value: input,
+            //                 text: input
+            //             }
+            //         } else {
+            //             return false;
+            //         }
+            //     },
+            // });
+
+            // var select = $('#cn_number_to').selectize({
+            //     placeholder: 'CN Number To',
+            //     delimiter: ',',
+            //     createOnBlur: true,
+            //     persist: false,
+            //     plugins: ['remove_button'],
+            //     onDropdownOpen: function(dropdown) {
+            //         dropdown.remove();
+            //     },
+            //     onType: function(str) {
+            //         var regex = /^[0-9,]+$/;
+            //         if (!regex.test(str)) {
+            //             select[0].selectize.setTextboxValue('');
+            //         }
+            //     },
+            //     create: function(input) {
+            //         if (input.length >= 1 && Math.floor(input) == input && $.isNumeric(input)) {
+            //             return {
+            //                 value: input,
+            //                 text: input
+            //             }
+            //         } else {
+            //             return false;
+            //         }
+            //     },
+            // });
+
+            // $('#track_form').on('submit', function (e) {
+            //     e.preventDefault();
+            //     var cn_number_from = $('#track_form .cn_number_from').val();
+            //     var cn_number_to = $('#track_form .cn_number_to').val();
+            //     var employee_id = $('#track_form .employee_id').val();
+            //     if (cn_number_from || employee_id || cn_number_to) {
+            //         table.draw();
+            //     }
+            // });
+
+            $('#track_form').on('submit', function (e) {
+                e.preventDefault();
+                table.draw();
+            });
+
+
         });
 
 

@@ -202,7 +202,7 @@
                                 row.push(values.status);
                                 row.push(values.joining_date);
                                 row.push(values.resign_date);
-                                row.push(values.created_at);
+                                row.push(values.created);
                                 row.push(values.created_by);
                                 body.push(row);
                             });
@@ -276,8 +276,8 @@
                     {data: 'hod', name: 'ah.name', class: 'align-middle hod'},
                     {data: 'status', name: 'fs.name', class: 'align-middle status'},
                     {data: 'joining_date', name: 'joining_date', class: 'align-middle joining_date'},
-                    {data: 'resign_date', name: 'resign_date', class: 'align-middle resign_date'},
-                    {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
+                    {data: 'resign_date', name: 'fnf.resign_date', class: 'align-middle resign_date'},
+                    {data: 'created', name: 'fnf.created_at', class: 'align-middle created_at'},
                     {data: 'created_by', name: 'h.name', class: 'align-middle created_by'},
                     {data: 'actions', name: 'actions', class: 'align-middle actions'},
 

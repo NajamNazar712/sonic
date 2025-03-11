@@ -2,47 +2,10 @@
 
 namespace App\Http\Controllers\Shippers;
 
-use Illuminate\Support\Facades\Log;
-use Auth;
-use Carbon\Carbon;
 use App\DailyVisit;
-use GuzzleHttp\Client;
-use App\RouteLocations;
-use App\Http\Models\City;
-use App\Http\Models\Rider;
-use App\Http\Models\Route;
-use App\Http\Models\Product;
-use App\Http\Models\Segment;
-use App\LeadProgressSetting;
-use Illuminate\Http\Request;
-use App\Http\Models\Shipment;
-use App\Http\Models\BanksList;
-use App\Http\Models\Reference;
-use App\Http\Models\RateRemark;
-use App\Http\Models\RateStatus;
-use App\Http\Models\AccountType;
-use App\Http\Models\Admin\Admin;
-use App\Http\Models\BookingType;
-use App\Http\Models\DisputeType;
-use App\Http\Models\DonePayment;
-use App\Http\Models\PaymentMode;
-use Yajra\Datatables\Datatables;
-use App\Http\Models\PaymentCycle;
-use App\Http\Models\ReturnCharge;
-use App\Http\Models\Shipper\User;
-use App\Http\Models\WeightCharge;
-use App\Http\Models\Consolidation;
-use App\Http\Models\FuelSurcharge;
-use App\Http\Models\RiderDelivery;
-use Illuminate\Support\Facades\DB;
-use App\Http\Models\Admin\AdminHub;
-use App\Http\Models\Admin\PODImage;
-use App\Http\Models\DiscountCharge;
-use App\Http\Models\InvoicingCycle;
-use App\Http\Models\ShipmentStatus;
-use App\Http\Models\ShipperContact;
-use Illuminate\Support\Facades\App;
+use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Controllers\Controller;
+<<<<<<< HEAD
 use App\Http\Models\Admin\Lead\Lead;
 use App\Http\Models\InsuranceCharge;
 use App\Http\Models\PackagingCharge;
@@ -99,49 +62,144 @@ use App\Http\Models\Commission\SalesCommission;
 use App\Http\Models\CorporateBookingTypeCharge;
 use App\Http\Models\CorporateDefaultRateStatus;
 use App\Http\Models\PackagingMaterialTypeSizes;
+use App\Http\Models\ShipperVerificationPinCode;
 use App\Http\Models\WMS\WmsPerSquareFootCharge;
 use App\Http\Models\Admin\StandardFuelSurcharge;
+
 use App\Http\Models\CorporateCashHandlingCharge;
 use App\Http\Models\Shipper\UserOtpVerification;
+=======
+use App\Http\Controllers\FingaIntegrationController;
+>>>>>>> sprint_130
 use App\Http\Controllers\NotificationsController;
-use App\Http\Models\CorporateDefaultReturnCharge;
-use App\Http\Models\CorporateDefaultWeightCharge;
-use App\Http\Models\CorporateMinChargeableWeight;
-use App\Http\Models\CRM\CrmRequestCaseNatureType;
-use App\Http\Models\Admin\StandardInsuranceCharge;
-use App\Http\Models\CorporateDefaultFuelSurcharge;
-use App\Http\Models\CorporateReturnChargeZoneWise;
-use App\Http\Models\CorporateWeightChargeZoneWise;
-use App\Http\Models\CorporateDefaultDiscountCharge;
-use Illuminate\Support\Facades\Auth as FacadesAuth;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\ShipperAgreementController;
-use App\Http\Models\Admin\StandardBookingTypeCharge;
-use App\Http\Models\CorporateDefaultInsuranceCharge;
-use App\Http\Models\Admin\Retail\OtherRetailShipment;
-use App\Http\Models\Admin\StandardCashHandlingCharge;
-use App\Http\Models\V2Pickup\V2PickupRequestShipment;
-use App\Http\Models\Admin\Retail\OtherParcelReceiving;
-use App\Http\Controllers\Admins\AdminPickupsController;
-use App\Http\Models\Admin\UserShippingInfoStoreAddress;
-use App\Http\Models\CorporateDefaultCashHandlingCharge;
-use App\Http\Models\Sister_account\MergedSisterAccount;
-use App\Http\Models\Admin\ReattemptPercentageForShipper;
-use App\Http\Models\Rates\MinimumChargeableWeightSetting;
-use App\Http\Controllers\ShipmentsPickupJourneyController;
-use App\Http\Models\Rates\Corporate\CorporateRateOriginHub;
-use App\Http\Models\Admin\Retail\OtherParcelReceivingShipment;
-use App\Http\Models\Sister_account\MergedSisterAccountMapping;
+use App\Http\Models\AccountType;
+use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\CorporateDefaultDiscountWeightCharge;
+<<<<<<< HEAD
 use App\Http\Models\Rates\Corporate\CorporateRateDestinationHub;
 use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
-use App\Http\Models\Admin\ShipperVerificationPinCode as AdminShipperVerificationPinCode;
-use App\Http\Models\Notification;
 use App\Http\Models\Rates\Corporate\CorporateDefaultRateOriginHub;
+=======
+use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\Lead\Lead;
+use App\Http\Models\Admin\Lead\LeadZone;
+use App\Http\Models\Admin\Retail\OtherParcelReceiving;
+use App\Http\Models\Admin\Retail\OtherParcelReceivingShipment;
+use App\Http\Models\Admin\Retail\OtherRetailShipment;
+use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\Admin\ShipperVerificationPinCode as AdminShipperVerificationPinCode;
+use App\Http\Models\Admin\StandardBookingTypeCharge;
+use App\Http\Models\Admin\StandardCashHandlingCharge;
+use App\Http\Models\Admin\StandardFuelSurcharge;
+use App\Http\Models\Admin\StandardInsuranceCharge;
+use App\Http\Models\Admin\StandardReturnCharge;
+use App\Http\Models\Admin\StandardWeightCharge;
+use App\Http\Models\Admin\UserShippingInfoStoreAddress;
+use App\Http\Models\AverageShipmentCycle;
+use App\Http\Models\BanksList;
+use App\Http\Models\BookingType;
+use App\Http\Models\BookingTypeCharges;
+use App\Http\Models\BusinessCategory;
+use App\Http\Models\CashHandlingCharge;
+use App\Http\Models\City;
+use App\Http\Models\Commission\SalesCommission;
+use App\Http\Models\Commission\SalesTier;
+use App\Http\Models\Consolidation;
+use App\Http\Models\ConsolidationShipments;
+use App\Http\Models\CorporateBookingTypeCharge;
+use App\Http\Models\CorporateCashHandlingCharge;
+use App\Http\Models\CorporateDefaultCashHandlingCharge;
+use App\Http\Models\CorporateDefaultDiscountCharge;
+use App\Http\Models\CorporateDefaultFuelSurcharge;
+use App\Http\Models\CorporateDefaultInsuranceCharge;
+use App\Http\Models\CorporateDefaultRateStatus;
+use App\Http\Models\CorporateDefaultReturnCharge;
+use App\Http\Models\CorporateDefaultWeightCharge;
+use App\Http\Models\CorporateDiscountCharge;
+use App\Http\Models\CorporateFuelSurcharge;
+use App\Http\Models\CorporateInsuranceCharge;
+use App\Http\Models\CorporateMinChargeableWeight;
+use App\Http\Models\CorporateRateStatus;
+use App\Http\Models\CorporateReturnCharge;
+use App\Http\Models\CorporateReturnChargeZoneWise;
+use App\Http\Models\CorporateWeightCharge;
+use App\Http\Models\CorporateWeightChargeZoneWise;
+use App\Http\Models\CRM\CrmRequestCaseNature;
+use App\Http\Models\CRM\CrmRequestCaseNatureType;
+use App\Http\Models\DiscountCharge;
+use App\Http\Models\DiscountWeightCharge;
+use App\Http\Models\DisputeType;
+use App\Http\Models\FuelSurcharge;
+use App\Http\Models\InsuranceCharge;
+use App\Http\Models\InvoicingCycle;
+use App\Http\Models\Notification;
+use App\Http\Models\PackagingCharge;
+use App\Http\Models\PackagingMaterialRequest;
+use App\Http\Models\PackagingMaterialTypes;
+use App\Http\Models\PackagingMaterialTypeSizes;
+use App\Http\Models\PaymentCycle;
+use App\Http\Models\PaymentMode;
+use App\Http\Models\Product;
+use App\Http\Models\RateRemark;
+>>>>>>> sprint_130
 use App\Http\Models\Rates\Corporate\CorporateDefaultRateDestinationHub;
+use App\Http\Models\Rates\Corporate\CorporateDefaultRateOriginHub;
+use App\Http\Models\Rates\Corporate\CorporateRateDestinationHub;
+use App\Http\Models\Rates\Corporate\CorporateRateOriginHub;
+use App\Http\Models\Rates\MinimumChargeableWeightSetting;
+use App\Http\Models\Rates\RateDestinationHub;
+use App\Http\Models\Rates\RateOriginHub;
+use App\Http\Models\RateStatus;
+use App\Http\Models\Reference;
+use App\Http\Models\ReturnCharge;
+use App\Http\Models\Rider;
+use App\Http\Models\Route;
+use App\Http\Models\Segment;
+use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentPaymentStatus;
+use App\Http\Models\ShipmentStatus;
+use App\Http\Models\Shipper\User;
+use App\Http\Models\Shipper\UserBankInfo;
+use App\Http\Models\Shipper\UserOtpVerification;
+use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Models\ShipperContact;
+use App\Http\Models\ShipperNotificationEmail;
+use App\Http\Models\Sister_account\MergedSisterAccount;
+use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
-
-
+use App\Http\Models\SubCategorySegment;
+use App\Http\Models\UserDefaultBankDuration;
+use App\Http\Models\UserDocumentAttachment;
+use App\Http\Models\WalletUser;
+use App\Http\Models\WeightCharge;
+use App\Http\Models\WMS\WmsCurrentStock;
+use App\Http\Models\WMS\WmsLabellingCharge;
+use App\Http\Models\WMS\WmsPackingCharge;
+use App\Http\Models\WMS\WmsPendingPicking;
+use App\Http\Models\WMS\WmsPerProductCharge;
+use App\Http\Models\WMS\WmsPerSquareFootCharge;
+use App\Http\Models\WMS\WmsShipmentProduct;
+use App\Http\Models\WMS\WmsStorageType;
+use App\Http\Models\WMS\WmsStorageTypeCharge;
+use App\Http\Models\WMS\WmsUserInformation;
+use App\LeadProgressSetting;
+use App\RouteLocations;
+use Auth;
+use Barryvdh\Snappy\Facades\SnappyPdf;
+use Carbon\Carbon;
+use GuzzleHttp\Client;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
+use Yajra\Datatables\Datatables;
+use App\Jobs\WalletSignUpLPendingRecordLogs;
+use Validator;
 //use Illuminate\Support\Facades\Auth;
 
 class ShipperDashboardController extends Controller
@@ -694,7 +752,7 @@ class ShipperDashboardController extends Controller
         //  else {
         //      $connection = 'mysql';
         //  }
-        if ($request->get('booking_from_date') && $request->get('booking_to_date')) {
+        if ($request->get('booking_from_date') && $request->get('booking_from_date')) {
             $from = $request->get('booking_from_date');
             $to = $request->get('booking_to_date');
             $from_back = Carbon::parse($from)->subMonth()->format('Y-m-d H:i:s');
@@ -746,7 +804,7 @@ class ShipperDashboardController extends Controller
                 });
             }
         }
-        if ($request->get('booking_from_date') && $request->get('booking_to_date')) {
+        if ($request->get('booking_from_date') && $request->get('booking_from_date')) {
             $shipments = $shipments->whereBetween('shipments.created_at', [$from, $to]);
         }
 
@@ -887,7 +945,7 @@ class ShipperDashboardController extends Controller
                 }
             });
 
-            return $datatable->make(true);
+            return $datatable->rawColumns(['tracking_number','action'])->make(true);
     }
     public function order_cancel(Request $request){
         $shipment_id = $request->shipment_id;
@@ -1182,9 +1240,8 @@ class ShipperDashboardController extends Controller
         $pickup_city_list = City::where('pickup',1)->where('status',1)->get();
         $reference = Reference::where('id', $user->reference_id)->first();
         $average_shipment_duration = AverageShipmentCycle::where('id', $user->average_shipment_duration_id)->first();
-        $isIbanNotificationEnabled = Notification::select('status')->find(91)->status ?? false;
 
-        return view('client.profile.index')->with(['user'=>$user,'product_name'=>$product,'banks'=>$banks,'pickup_city_list'=>$pickup_city_list, 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'cities_list' => $city_list, 'days'=>$payment_cycle_days, 'isIbanNotificationEnabled' => $isIbanNotificationEnabled]);
+        return view('client.profile.index')->with(['user'=>$user,'product_name'=>$product,'banks'=>$banks,'pickup_city_list'=>$pickup_city_list, 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'cities_list' => $city_list, 'days'=>$payment_cycle_days]);
     }
 
     public function storeShipperId(Request $request)
@@ -1235,7 +1292,7 @@ class ShipperDashboardController extends Controller
             NotificationsController::send(91,$user_id,$pin);
 
             // Get the profile_otp from SMS model
-            $profile_otp = AdminShipperVerificationPinCode::where('otp', $pin)->first(); //Model Updated
+            $profile_otp = ShipperVerificationPinCode::where('otp', $pin)->first();
             if ($profile_otp) {
                 $data['code'] = $pin;
                 return json_encode($data);
@@ -1249,10 +1306,6 @@ class ShipperDashboardController extends Controller
 
         $user_id    = session('user_id');
         if($user_id){
-            if(UserBankInfo::where('user_id',$user_id)->exists())
-            {
-                UserBankInfo::where('user_id', $user_id)->update(['default_bank' => 0]);
-            }
             $user_bank = new UserBankInfo();
             $user_bank->user_id = $user_id;
             $user_bank->bank_name = $request->bank_select;
@@ -1261,7 +1314,6 @@ class ShipperDashboardController extends Controller
             $user_bank->account_title = $request->account_title;
             $user_bank->iban = strtoupper($request->iban_no);
             $user_bank->city_id = $request->bank_city;
-            $user_bank->default_bank = 1; // always make the new bank info as default
             $user_bank->save();
             
             return redirect()->back()->with(['success' => 'Bank successfully added!']);
@@ -1271,33 +1323,48 @@ class ShipperDashboardController extends Controller
     }
 
     public function getBanks(Request $request){
-        $banks = UserBankInfo::join('cities as c','user_bank_infos.city_id','=','c.id')
+        $banks = UserBankInfo::leftJoin('cities as c','user_bank_infos.city_id','=','c.id')
         ->leftJoin('banks_lists as bl','bl.id','=','user_bank_infos.bank_name')
-        ->select(['user_bank_infos.id as bank_row_id','user_bank_infos.bank_branch','user_bank_infos.account_no','user_bank_infos.account_title','user_bank_infos.iban','c.name as city','bl.name as bank_name','user_bank_infos.default_bank'])
-        ->where('user_id', session('user_id'));
+        ->leftjoin('wallet_users as wu', function ($join) {
+            $join->on('wu.user_id', '=', 'user_bank_infos.user_id')
+               ->where('wu.substitute_user_id', '0');
+        })
+        ->select(['user_bank_infos.id as bank_row_id','user_bank_infos.bank_branch','user_bank_infos.account_no','user_bank_infos.account_title','user_bank_infos.iban','c.name as city','bl.name as bank_name','user_bank_infos.default_bank', 'wu.user_id as wallet_user'])
+        ->where('user_bank_infos.user_id', session('user_id'));
 
         return Datatables::of($banks)
         ->addColumn('action', function ($bank) {
 
-            $dropdown = '
+            if(!$bank->wallet_user) {
+                $dropdown = '
                 <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">
-            ';
-            $default_button = '<button type="button" class="dropdown-item default"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Make Default</div></button>';
+                ';
+                $default_button = '<button type="button" class="dropdown-item default"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Make Default</div></button>';
 
-            if ($bank->default_bank) {
-                $dropdown = 'Default Address';
+                if ($bank->default_bank) {
+                    $dropdown = 'Default Address';
 
-            }else{
-                $dropdown .= $default_button;
-            }
-            
+                }else{
+                    $dropdown .= $default_button;
+                }
+                
 
-            $dropdown .= '
+                $dropdown .= '
+                        </div>
                     </div>
-                </div>
-            ';
+                ';
+
+                
+            } else {
+                if ($bank->default_bank) {
+                    $dropdown = 'Default Address';
+
+                }else{
+                    $dropdown = '';
+                }
+            }
 
             return $dropdown;
         })->make(true);
@@ -1615,6 +1682,18 @@ class ShipperDashboardController extends Controller
             ->select('shipments.tracking_number as tracking_number','shipments.tracking_number as tracking_id', 'shipments.order_id as order_number', 'dps.done_payment_id as payment_id', 'bl.name as bank_name', 'dps.created_at as payment_date', 'dps.payable as cod', 'dps.type as type','ubi.iban as account_detail')
             ->where('shipments.user_id', session('user_id'))->orderBy('dps.created_at','desc');
 
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $shipments->whereBetween('dps.created_at', [$from,$to]);
+        }
+        if ($request->get('cod_payable_from') && $request->get('cod_payable_to')) {
+            $from = $request->get('cod_payable_from');
+            $to = $request->get('cod_payable_to');
+            $shipments->whereBetween('dps.payable', [$from,$to]);
+        }
+
         $datatable=Datatables::of($shipments)
             ->editColumn('tracking_number', function ($shipments) {
                 $route = route('cod.tracking.index');
@@ -1651,18 +1730,8 @@ class ShipperDashboardController extends Controller
             else{
                 return 'Adjusted';
             }
-            });
+            })->rawColumns(['tracking_number']);
 
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $datatable->whereBetween('dps.created_at', [$from,$to]);
-        }
-        if ($request->get('cod_payable_from') && $request->get('cod_payable_to')) {
-            $from = $request->get('cod_payable_from');
-            $to = $request->get('cod_payable_to');
-            $datatable->whereBetween('dps.payable', [$from,$to]);
-        }
 
         return $datatable->make(true);
 
@@ -2172,18 +2241,35 @@ class ShipperDashboardController extends Controller
 
     public function shipper_phone_unique(Request $request) {
         if ($request->filled('phone')) {
-            $user = User::where('phone', $request->input('phone'));
 
-            if ($request->has('id')) {
-                $user = $user->where('id', '!=', $request->input('id'));
-            }
+            if($request->has('type')) {
+                $user = WalletUser::where('phone', $request->input('phone'));
 
-            if (!$user->exists()) {
-                return 'true';
+                if ($request->has('id')) {
+                    $user = $user->where('user_id', '!=', $request->input('id'));
+                }
+
+                if (!$user->exists()) {
+                    return 'true';
+                }
+                else {
+                    return 'false';
+                }
+            } else {
+                $user = User::where('phone', $request->input('phone'));
+
+                if ($request->has('id')) {
+                    $user = $user->where('id', '!=', $request->input('id'));
+                }
+
+                if (!$user->exists()) {
+                    return 'true';
+                }
+                else {
+                    return 'false';
+                }
             }
-            else {
-                return 'false';
-            }
+            
         }
         else {
             return 'true';
@@ -2237,6 +2323,22 @@ class ShipperDashboardController extends Controller
             }
         }
 
+        if ($tracking_number = $request->get('tracking_number')) {
+            $shipments->where('shipments.tracking_number', $tracking_number);
+        }
+
+        if ($phone_number = $request->get('phone_number')) {
+            $shipments->where('shipments.consignee_phone_number_1', $phone_number);
+        }
+
+        if ($order_id = $request->get('order_id')) {
+            $shipments->where('shipments.order_id',$order_id);
+        }
+
+        if (!$request->get('tracking_number') && !$request->get('phone_number') && !$request->get('order_id')) {
+            $shipments->whereRaw('FALSE');
+        }
+
         $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number', function ($shipments) {
                 $route = route('cod.tracking.index');
@@ -2255,23 +2357,9 @@ class ShipperDashboardController extends Controller
                 return number_format($shipment->amount);
             });
 
-        if ($tracking_number = $request->get('tracking_number')) {
-            $datatable->where('shipments.tracking_number', $tracking_number);
-        }
 
-        if ($phone_number = $request->get('phone_number')) {
-            $datatable->where('shipments.consignee_phone_number_1', $phone_number);
-        }
 
-        if ($order_id = $request->get('order_id')) {
-            $datatable->where('shipments.order_id',$order_id);
-        }
-
-        if (!$request->get('tracking_number') && !$request->get('phone_number') && !$request->get('order_id')) {
-            $datatable->whereRaw('FALSE');
-        }
-
-        return $datatable->make(true);
+        return $datatable->rawColumns(['tracking_number'])->make(true);
     }
 
     public function agreement_status(Request $request){
@@ -2498,6 +2586,9 @@ class ShipperDashboardController extends Controller
         // $cities = PickupType::find(1)->cities()->orderBy('city_name')->get();
         $invoicing_cycle = InvoicingCycle::all();
 
+        // in case when the if condition fails so to avoid undefined variable errors
+        $riders_permanent = collect();
+        $weight = collect();
 
         if (!RateStatus::where('user_id', $user->id)->exists()) {
             $weight = StandardWeightCharge::all()->groupBy('shipping_mode_id');
@@ -2623,5 +2714,182 @@ class ShipperDashboardController extends Controller
         if($user->status == 1){
             session(['status' => 2]);
         }
+    }
+
+    public function SignInWalletUser(Request $request)
+    {
+
+        if (session('user_type') == 1) {
+            $login_request = $request->input('login_request',null);
+            if($login_request){
+                $api = config('app.FINGA_URL');
+                $token = FingaIntegrationController::getToken($api);
+                $url = FingaIntegrationController::getLoginUrl($api, $token, $request->phone, $request->cnic, $request->email);
+                $dashboardUrl = route('cod.wallet.finja_dashboard', ['url' => $url]);
+                return response()->json(['status' => 1, 'redirect_url' => $dashboardUrl]);
+
+            }
+        }
+    }
+
+    public function updateprofilewalletbulk(Request $request)
+    {
+        if (session('user_type') == 1) {
+
+            $names = [
+                'name' => 'Name ',
+                'phone' => 'Phone',
+                'cnic' => 'CNIC',
+                'email' => 'Email',
+            ];
+
+            $messages = [
+                'required' => ':attribute is Required.',
+                'required_if' => ':attribute is Required when :other is :value.',
+                'filled' => ':attribute is Optional but cannot be Empty if Present.',
+                'integer' => ':attribute must be an Integer.',
+                'numeric' => ':attribute must be a Number.',
+                'boolean' => ':attribute must be 0 or 1.',
+                'digits_between' => ':attribute must be between :min and :max Digits.',
+                'email' => ':attribute must be a Valid Email Address.',
+                'exists' => 'Given :attribute is of Invalid ID.',
+                'unique' => ':attribute is already Present.',
+                'date_format' => ':attribute must be of valid Format, required Format is: YYYY-MM-DD.',
+                'in' => ':attribute must be No or Yes.',
+                'check_duplicate' => 'Phone Or Email Already Exists',
+                'check_cnic' => 'Cnic Already Exists',
+                'phone' => 'Phone starts with 03 or 923 followed by 9 digits',
+                'name' => 'Only alphabetic characters and spaces',
+            ];
+
+            $rules = [
+                'name' => ['required', 'max:255', 'regex:/^[a-zA-Z\s]+$/'],
+                'email' => ['required', 'max:255', 'email', 'check_duplicate'],
+                'phone' => ['required', 'max:255', 'regex:/^(03|923)[0-9]{2,3}-?[0-9]{7}$/'],
+                'cnic' => ['required', 'max:255','check_cnic']
+            ];
+
+
+            Validator::extend('check_duplicate', function ($attribute, $value, $parameters, $validator)  {
+                $data = $validator->getData();
+                $phone = $data['phone'];
+                $email = $data['email'];
+
+                $user = WalletUser::where('email', $email)->orWhere('phone', $phone);
+                if($user->exists()) {
+                    return FALSE;
+                } else{
+                    return true;
+                }
+            });
+
+            Validator::extend('check_cnic', function ($attribute, $value, $parameters, $validator)  {
+                $data = $validator->getData();
+                $cnic = $data['cnic'];;
+
+                $user = WalletUser::where('cnic', $cnic);
+                if($user->exists()) {
+                    return FALSE;
+                } else{
+                    return true;
+                }
+            });
+            $errors = array();
+            $data = array();
+
+            $bank = 0;
+            foreach ($request->users as $key => $row) {
+                $row_id = $row['id'];
+                $validate = Validator::make($row, $rules, $messages);
+
+                $validate->setAttributeNames($names);
+
+                if ($validate->fails()) {
+                    foreach ($validate->errors()->toArray() as $key => $error_array) {
+                        foreach ($error_array as $error) {
+                            if (!isset($errors[$row_id][$key])) {
+                                $errors[$row_id][$key] = $error;
+                            }
+                        }
+                    }
+
+
+                } else {
+                    $data[$key] = [
+                        'name' => $row['name'],
+                        'cnic' => $row['cnic'],
+                        'phone' => $row['phone'],
+                        'email' => $row['email'],
+                        'user_id' => session('user_id'),
+                        'status' => 1,
+                        'substitute_user_id' => isset($row['substitute_user_id']) ? $row['substitute_user_id'] : 0
+                    ];
+                }
+            }
+            if(!empty($errors)){
+                return response()->json(['status' => 0, 'error' => $errors]);
+            }else{
+
+                $api = config('app.FINGA_URL');
+                $token = FingaIntegrationController::getToken($api);
+                $login_data = collect($data)->first();
+                $url = FingaIntegrationController::getLoginUrl($api, $token, $login_data['phone'], $login_data['cnic'], $login_data['email']);
+                $finja = FingaIntegrationController::signUp($data);
+
+                if (isset($finja['error'])) {
+                    $finjaArray = json_decode(json_encode($finja), true);
+
+                    $errorMessages = collect($finjaArray['error']['users']);
+
+                    foreach ($errorMessages as $error_val){
+                        $key = array_key_first(array_filter($data, function ($row) use ($error_val) {
+                            return $row['phone'] === $error_val['mobile_no'];
+                        }));
+
+                        $data[$key]['message'] = $error_val['message'];
+
+                    }
+                    return response()->json(['status' => 0, 'error_2' => $data]);
+                } else {
+
+                    $final['url'] = $url;
+                    //$url = route('cod.wallet.finja_dashboard', ['url' => $finja['url']]);
+                    foreach ($data as $key=>$value) {
+                        $data[$key]['wallet_id'] = $finja['wallet_id'];
+                        $data[$key]['created_at'] = Carbon::now();
+                        $data[$key]['updated_at'] = Carbon::now();
+                    }
+                    WalletUser::wallet_create($data);
+                    
+                    $hasSubstituteZero = array_filter($data, function ($item) {
+                        return isset($item['substitute_user_id']) && $item['substitute_user_id'] == 0;
+                    });
+                    if (!empty($hasSubstituteZero)) {
+                        if(UserBankInfo::where('user_id',session('user_id'))->exists())
+                        {
+                            UserBankInfo::where('user_id', session('user_id'))->update(['default_bank' => 0]);
+                        }
+                        $user_city_id = User::where('id', session('user_id'))->value('city_id');
+                        $user_bank = new UserBankInfo();
+                        $user_bank->user_id = session('user_id');
+                        $user_bank->bank_name = 48;
+                        $user_bank->bank_branch = 'N/A';
+                        $user_bank->account_no = '923322149092';
+                        $user_bank->account_title = 'N/A';
+                        $user_bank->iban = 'PK06TMFB0000000087042403';
+                        $user_bank->city_id =  $user_city_id;
+                        $user_bank->default_bank = 1; // always make the new bank info as default
+                        $user_bank->save();
+
+                    }
+                    WalletSignUpLPendingRecordLogs::dispatch(session('user_id'));
+                    return response()->json(['status' => 1, 'output' => $final]);
+
+                }
+            }
+
+        }
+
+        return response()->json(['status' => 1, 'success'=>'Profile Information Successfully Updated"']);
     }
 }

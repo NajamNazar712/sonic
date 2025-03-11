@@ -61,7 +61,13 @@ use App\Http\Models\RetailUserProductPercentage;
 use App\Http\Models\TotalSumFranchiseCommission;
 use App\Http\Models\TotalSumRetailTraxCenter;
 use App\Http\Models\RetailFranchiseCharge;
+<<<<<<< HEAD
+=======
 use App\RetailDiscountCode;
+use Illuminate\Support\Facades\Log;
+use App\Http\Models\ShipperSegmentLogs;
+use App\Http\Models\Shipper\User;
+>>>>>>> sprint_130
 
 class RetailShipmentBookController extends Controller
 {
@@ -242,14 +248,6 @@ class RetailShipmentBookController extends Controller
         $information_display = TRUE;
 
         $discount =  Auth::user()->store->discount;
-
-        if($request->has('discount_code'))
-        {
-            if ($request->filled('retail_discount_percentage') && $request->retail_discount_percentage > 0) {
-                $discount = $request->retail_discount_percentage;
-            }
-        }
-
         $insurance = Auth::user()->store->insurance;
         $consignee_name = $request->input('consignee_name');
         $consignee_address = $request->input('consignee_address');
@@ -372,6 +370,15 @@ class RetailShipmentBookController extends Controller
         $pieces_quantity = $request->input('pieces');
         $business_category_id = $request->input('business_category');
 
+        $parcelAmount = $request->input('parcel_amount');
+        $parcelAmount = trim($parcelAmount);
+        $parcelAmount = str_replace(',', '', $parcelAmount);
+        $parcelAmoutInShipment = (float)$parcelAmount;
+
+        $quantity = $request->input('quantity');
+        $quantity = trim($quantity);
+        $quantity = str_replace(',', '', $quantity);
+        $quantityForShipmentItem = (int)$quantity;
 
         $shipment_id = $this->book($user_id, 1, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $r_amount, $payment_mode_id, $charges_mode_id , $try_and_buy_charges, $pieces_quantity, $business_category_id, $length, $breadth, $height);
 
@@ -388,7 +395,8 @@ class RetailShipmentBookController extends Controller
 
         $item_description = NULL;
 
-        $item_quantity = 1;
+        // $item_quantity = 1;
+        $item_quantity = $quantityForShipmentItem;
 
         if ($request->input('insurance_offered') == 1) {
             $price = str_replace(',', '', $request->input('insurance_amount'));
@@ -557,6 +565,8 @@ class RetailShipmentBookController extends Controller
                 $retail_shipment->admin_discount_type = 1;
             }
         }
+<<<<<<< HEAD
+=======
 
         if($request->has('discount_code') && $request->discount_code != null)
         {
@@ -565,12 +575,16 @@ class RetailShipmentBookController extends Controller
             if($request->has('retail_discount_amount') && $isCodeValid->status == 1)
             {
                 $retail_shipment->retail_discount_amount = $request->retail_discount_amount;
-                $retail_shipment->discount = $request->retail_discount_amount;
-                $retail_shipment->total_charges = $retail_shipment->total_charges - $request->retail_discount_amount;
+//                $retail_shipment->discount = $request->retail_discount_amount;
+//                $retail_shipment->total_charges = $retail_shipment->total_charges - $request->retail_discount_amount;
                 RetailDiscountCode::where('code', '=', $request->discount_code)->update(['shipment_id' => $shipment_id]);
             }
         }
 
+        $retail_shipment->parcel_amount = $parcelAmoutInShipment;
+        $retail_shipment->quantity = $quantityForShipmentItem;
+
+>>>>>>> sprint_130
         $retail_shipment->save();
 
         // retail user history
@@ -639,6 +653,36 @@ class RetailShipmentBookController extends Controller
 
         $this->previous_names_verify_update($request->shipper_phone_no,$request->shipper_name,$request->shipper_cnic,$request->shipper_address, $shipper_info->id);
 
+        try {
+            // Maintaining shipper segment logs on booking
+            $user_id = Shipment::where('id', $shipment_id)->select('user_id')->first();
+            $user_segments = User::where('id', $user_id->user_id)
+            ->select(['segment_id', 'sub_segment_id'])
+            ->first();
+
+            ShipperSegmentLogs::create([
+                'shipment_id' => $shipment_id,
+                'segment_id' => $user_segments->segment_id,
+                'sub_segment_id' => $user_segments->sub_segment_id
+            ]);
+
+            // if ($consignee_city_id != $user_shipping_info->city_id) {
+
+            //     $user_id = Shipment::where('id', $shipment_id)->select('user_id')->first();
+            //     $user_segments = User::where('id', $user_id->user_id)
+            //     ->select(['segment_id', 'sub_segment_id'])
+            //     ->first();
+
+            //     ShipperSegmentLogs::create([
+            //         'shipment_id' => $shipment_id,
+            //         'segment_id' => $user_segments->segment_id,
+            //         'sub_segment_id' => $user_segments->sub_segment_id
+            //     ]);
+            // }
+        } catch (\Exception $e) {
+            Log::error('Error creating shipper segment log from Retail order form' . $shipment_id . ': ' . $e->getMessage());
+        }
+
         if($request->book_button == 0){
             return response()->json(['status' => 1, 'success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'shipment_id' => $shipment_id]);
         }
@@ -651,15 +695,6 @@ class RetailShipmentBookController extends Controller
 
         $pickup_city_id = Auth::user()->store->pickup_address->city_id;
         $discount =  Auth::user()->store->discount;
-
-        if($request->has('retail_discount_applied') && $request->retail_discount_applied == 1)
-        {
-            if ($request->filled('retail_discount_percentage') && $request->retail_discount_percentage > 0) {
-                $discount = $request->retail_discount_percentage;
-            }
-        }
-
-
         $insurance =  Auth::user()->store->insurance;
 
         if($request->weight != null){
@@ -692,7 +727,6 @@ class RetailShipmentBookController extends Controller
                 }
             }
         }
-
 
         if ($details['total_charges'] <= 0)
         {
@@ -927,6 +961,19 @@ class RetailShipmentBookController extends Controller
         foreach($request->ids as $id) {
             $shipment = Shipment::find($id);
 
+            $sub_segment_name = '-';
+            $sub_segment = DB::table('shipper_segment_logs')
+            ->leftJoin('sub_category_segments', 'sub_category_segments.id', 'shipper_segment_logs.sub_segment_id')
+            ->where('shipment_id', $shipment->id)
+            ->select('sub_category_segments.name')
+            ->first();
+
+            if ($sub_segment && $sub_segment->name)
+            {
+                $sub_segment_name = $sub_segment->name;
+            }
+
+
 //            $url = 'storage/retail/shipment_'. $shipment->id.'.jpg';
 //            if(!file_exists($url)){
 //                $this::save_slip($shipment->id);
@@ -966,7 +1013,10 @@ class RetailShipmentBookController extends Controller
                           </tr>
                           <tr>
                             <td colspan="3" class="color primary"><strong>Order ID</strong></td>
-                            <td colspan="8">'.$shipment->order_id.'</td>
+                            <td colspan="2">'.$shipment->order_id.'</td>
+
+                            <td colspan="2" class="color primary"><strong>Sub Segment</strong></td>
+                            <td colspan="4">'. $sub_segment_name .'</td>
 </tr>
                           <tr>
                             <td colspan="1" class="color primary border"><strong>#IBAN</strong></td>
@@ -1160,7 +1210,7 @@ class RetailShipmentBookController extends Controller
                               <span><strong>' . $shipment_item->id . '</strong></span>
                             </td>
                             <td rowspan="7" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
-                                <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment_item->id, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
+                                <img src="data:image/png;base64,' . DNS2D::getBarcodePNG((string)$shipment_item->id, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
                             </td>
                             <tr>
                                 <td class="color secondary border twice-top twice-left"><strong>Type</strong></td>
@@ -1184,7 +1234,7 @@ class RetailShipmentBookController extends Controller
                               <span><strong>' . $shipment->tracking_number . '</strong></span>
                             </td>
                             <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
-                                <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
+                                <img src="data:image/png;base64,' . DNS2D::getBarcodePNG((string)$shipment->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
                             </td>
                           </tr>
                         </tbody>
@@ -1215,7 +1265,7 @@ class RetailShipmentBookController extends Controller
                               <span><strong>' . $shipment->tracking_number . '</strong></span>
                             </td>
                             <td rowspan="7" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
-                                <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE', 12, 12) . '" class="d-block mx-auto">
+                                <img src="data:image/png;base64,' . DNS2D::getBarcodePNG((string)$shipment->tracking_number, 'QRCODE', 12, 12) . '" class="d-block mx-auto">
                             </td>
                     ';
 
@@ -1526,7 +1576,7 @@ class RetailShipmentBookController extends Controller
                                   <span><strong>' . $piece->tracking_number . '</strong></span>
                                 </td>
                                 <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
-                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($piece->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
+                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG((string)$piece->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
                                 </td>
                                 <td rowspan="1" class="color primary border twice-left"><strong>Origin</strong></td>
                                 <td rowspan="1" class="border">' . $shipment->pickup_address->city->name . '</td>
@@ -1538,7 +1588,7 @@ class RetailShipmentBookController extends Controller
                                 <span><strong>' . $shipment->tracking_number . '</strong></span>
                             </td>
                             <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
-                                <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
+                                <img src="data:image/png;base64,' . DNS2D::getBarcodePNG((string)$shipment->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
                             </td>
                             <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right"><span class="piece_number"><strong>' . $piece->numbering. '/' .$shipment->pieces . '</strong></span>
                             </td>
@@ -1884,7 +1934,9 @@ class RetailShipmentBookController extends Controller
 
                 return $dropdown;
             });
-        return  $datatable->make(true);
+        return  $datatable
+        ->rawColumns(['tracking_number_link', 'slip_image', 'action'])
+        ->make(true);
     }
 
     public function tracking_slip_upload(Request $request){
@@ -1928,10 +1980,12 @@ class RetailShipmentBookController extends Controller
 
         if ($request->get('search_date')) {
             $date = $request->get('search_date');
-            $datatable->whereDate('retail_shipments.created_at', $date);
+            $shipments->whereDate('retail_shipments.created_at', $date);
         }
 
-        return  $datatable->make(true);
+        return $datatable
+        ->rawColumns(['tracking_number_link'])
+        ->make(true);
     }
 
     public function excel_index() {
@@ -1986,6 +2040,10 @@ class RetailShipmentBookController extends Controller
             'account_number' => 'Account Number',
             'bank_id' => 'Bank ID',
             'special_instruction' => 'Special Instruction',
+            'admin_discount' => 'Admin Discount',
+            'admin_discount_type' => 'Admin Discount Type',
+            'parcel_amount' => 'Parcel Value',
+            'quantity' => 'Quantity',
         ];
 
         $messages = [
@@ -2039,7 +2097,10 @@ class RetailShipmentBookController extends Controller
             'account_number' => ['nullable', 'numeric'],
             'bank_id' => ['nullable', 'integer', 'between:1,100', Rule::exists('banks_lists', 'id')],
             'special_instruction' => ['nullable', 'between:1,190'],
-            
+            'admin_discount_type' => ['nullable'],
+            'admin_discount' => ['nullable', 'between:1,100'],
+            'parcel_amount' => ['required'],
+            'quantity' => ['required'],
         ];
 
         if($file = $request->file('shipments')) {
@@ -2049,8 +2110,48 @@ class RetailShipmentBookController extends Controller
         }
 
         if (isset($spreadsheet)) {
-                $fields = [0 => 'product_id', 1 => 'business_category_id', 2 => 'shipping_mode_id', 3 => 'destination', 4 => 'volumetric_weight', 5 => 'weight', 6 => 'length', 7 => 'breadth', 8 => 'height', 9 => 'pieces', 10 => 'payment_mode_id', 11 => 'charges_mode_id', 12 => 'shipper_cell_number', 13 => 'shipper_name', 14 => 'shipper_cnic', 15 => 'shipper_address', 16 => 'consignee_cell_number', 17 => 'consignee_name', 18 => 'consignee_cnic', 19 => 'consignee_address', 20 => 'order_id', 21 =>'insurance_offered',22 => 'insurance_value', 23 =>'packaging_charges',24 => 'trax_box_id', 25 => 'iban_number', 26 => 'account_number', 27 => 'bank_id', 28 => 'special_instruction'];
-            if (count($spreadsheet[0]) != 29){
+                // $fields = [0 => 'product_id', 1 => 'business_category_id', 2 => 'shipping_mode_id', 3 => 'destination', 4 => 'volumetric_weight', 5 => 'weight', 6 => 'length', 7 => 'breadth', 8 => 'height', 9 => 'pieces', 10 => 'payment_mode_id', 11 => 'charges_mode_id', 12 => 'shipper_cell_number', 13 => 'shipper_name', 14 => 'shipper_cnic', 15 => 'shipper_address', 16 => 'consignee_cell_number', 17 => 'consignee_name', 18 => 'consignee_cnic', 19 => 'consignee_address', 20 => 'order_id', 21 =>'insurance_offered',22 => 'insurance_value', 23 =>'packaging_charges',24 => 'trax_box_id', 25 => 'iban_number', 26 => 'account_number', 27 => 'bank_id', 28 => 'special_instruction'];
+
+                $fields = [
+                    0 => 'product_id',
+                    1 => 'business_category_id',
+                    2 => 'shipping_mode_id',
+                    3 => 'destination',
+                    4 => 'volumetric_weight',
+                    5 => 'weight',
+                    6 => 'length',
+                    7 => 'breadth',
+                    8 => 'height',
+                    9 => 'pieces',
+                    10 => 'payment_mode_id',
+                    11 => 'charges_mode_id',
+                    12 => 'shipper_cell_number',
+                    13 => 'shipper_name',
+                    14 => 'shipper_cnic',
+                    15 => 'shipper_address',
+                    16 => 'consignee_cell_number',
+                    17 => 'consignee_name',
+                    18 => 'consignee_cnic',
+                    19 => 'consignee_address',
+                    20 => 'order_id',
+                    21 => 'insurance_offered',
+                    22 => 'insurance_value',
+                    23 => 'packaging_charges',
+                    24 => 'trax_box_id',
+                    25 => 'iban_number',
+                    26 => 'account_number',
+                    27 => 'bank_id',
+                    28 => 'special_instruction',
+                    29 => 'admin_discount',
+                    30 => 'admin_discount_type',
+                    31 => 'parcel_amount',
+                    32 => 'quantity'
+                ];
+
+            // if (count($spreadsheet[0]) != 29){
+            //     return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+            // }
+            if (count($spreadsheet[0]) != count($fields)){
                 return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
             }
             unset($spreadsheet[0]);
@@ -2305,35 +2406,7 @@ class RetailShipmentBookController extends Controller
       }
       return response()->json(['status'=>'true']);
 
-    }
-
-    public function is_discount_available_to_apply($discountCode = null)
-    {
-
-        $data = RetailDiscountCode::where('code', $discountCode)->first();
-
-        if (!$data) {
-            return response()->json([
-                'status' => 0,
-                'message' => 'Discount code is not valid',
-                'data' => null,
-            ]);
-        }
-
-        if ($data->shipment_id) {
-            return response()->json([
-                'status' => 0,
-                'message' => 'Discount code is already used',
-                'data' => $data,
-            ]);
-        }
-
-        return response()->json([
-            'status' => 1,
-            'message' => 'Discount code is valid',
-            'data' => $data,
-        ]);
-    }
+  }
 
     static function previous_names_verify_update($phone_number,$shipper_name,$shipper_cnic,$shipper_address, $id)
     {
@@ -2446,8 +2519,7 @@ class RetailShipmentBookController extends Controller
         $paid_status = $request->paid_status;
 
         $retail_user_commission = RetailUserCommission::where('franchise_id', $user->id)->first();
-        $retail_franchise_code = RetailFranchise::pluck('code');
-        $franchise_commission = RetailFranchiseCommission::whereIn('franchise_code', $retail_franchise_code)->first(); 
+        $franchise_commission = RetailFranchiseCommission::where('franchise_code', $user->store->code)->first(); 
 
         if ($retail_user_commission && $user->id == $retail_user_commission->franchise_id){
             $query = RetailUserCommission::where('month', $month)
@@ -2465,7 +2537,7 @@ class RetailShipmentBookController extends Controller
                 'data' => $results,
             ]);
         }
-        elseif ($franchise_commission->franchise_code == $user->store->code)
+        else
         {
             $query = RetailFranchiseCommission::where('month', $month)
             ->where('franchise_code', $user->store->code)
@@ -2884,7 +2956,7 @@ class RetailShipmentBookController extends Controller
 
             // Deduction GST tax row
             $html .= '<tr>';
-            $html .= '<td class="text-center" colspan="6"><strong>GST ' . $data->commission_gst_deduction_percent . '%</strong></td>';
+            $html .= '<td class="text-center" colspan="6"><strong>Deduction ' . $data->commission_gst_deduction_percent . '</strong></td>';
             $html .= '<td><strong>' . number_format(round($deduction_amount)) . '</strong></td>';
             $html .= '</tr>';
 
