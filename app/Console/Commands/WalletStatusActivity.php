@@ -60869,12 +60869,15 @@ class WalletStatusActivity extends Command
         foreach($array as $value){
             if(trim($value['name']) != trim($value['name2'])) {
                 $shipment = Shipment::where('tracking_number', $value['tracking_number'])->first();
-                $data = [
-                    'tracking_number' => $shipment->tracking_number,
-                    'status' => $shipment->shipper_status_id,
-                    'shipment_id' => $shipment->id
-                ];
-                ShipmentStatusSharingWithWallet::dispatch($data, 1);
+                if (in_array($shipment->shipper_status_id, [5, 8, 13, 14, 18, 20, 36, 37, 30, 21, 22, 23, 24, 25, 44, 47, 48, 57, 60, 75, 76, 77])) { // exclude shipment of adjustment to send current status because it may send change cod amount also
+
+                    $data = [
+                        'tracking_number' => $shipment->tracking_number,
+                        'status' => $shipment->shipper_status_id,
+                        'shipment_id' => $shipment->id
+                    ];
+                    ShipmentStatusSharingWithWallet::dispatch($data, 1);
+                }
             }
         }
 
