@@ -3259,7 +3259,7 @@ class AdminCargoManifestController extends Controller
 
                 $master_cargo->origin_hub_id = Auth::user()->default_hub_id;
                 $master_cargo->destination_hub_id = $hub_id;
-                $master_cargo->shipping_mode_id = $request->input('shipping_mode');
+                $master_cargo->shipping_mode_id = 0;
                 $master_cargo->transport_mode_id = 2;
 
                 $master_cargo->bags = $bags;
@@ -3547,10 +3547,7 @@ class AdminCargoManifestController extends Controller
                               <td class="color secondary"><strong>Transit Date</strong></td>
                               <td>' . $cargo->created_at . '</td>
                             </tr>
-                            <tr>
-                              <td class="color secondary"><strong>Shipping Mode</strong></td>
-                              <td>' . $cargo->shipping_mode->mode . '</td>
-                            </tr>
+                            
                             <tr>
                               <td class="color secondary"><strong>Transport Mode</strong></td>
                               <td>' . $cargo->transport_mode->name . '</td>
@@ -4268,7 +4265,7 @@ class AdminCargoManifestController extends Controller
                     $details['destination'] = $cargo_bag->destination_hub->name;
                     $details['last_junction'] = $last_junction;
                     $details['actual_weight'] = $bag->actual_weight;
-                    $details['shipping_mode'] = $cargo_bag->shipping_mode->mode;
+                    // $details['shipping_mode'] = $cargo_bag->shipping_mode->mode;
                     $details['without_manifest'] = 0;
 
                     return ['status' => 0, 'success' => 'Bag has been added', 'details' => $details];

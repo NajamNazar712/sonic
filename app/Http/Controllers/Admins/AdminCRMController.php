@@ -434,7 +434,11 @@ class AdminCRMController extends Controller
                                 }
                             }
                         }
+                        if($nature_id == 1 && !empty($request->case_nature_complainant)  && !empty($request->complainant_phone)){
+                            $this->updateComplaintPhone($crm_request_padded_id ?? CrmRequest::max('id'), $request->case_nature_complainant, $request->complainant_phone);
+                        }
                     }
+
                     return ['status' => 1, 'success' => $message ?? '', 'flag' => $flag, 'already_existed_shipments' => $present_shipments, 'cannot_change' => $cannot_change];
                 }else{
                     return ['status' => 0, 'error' => 'No shipments selected!'];
@@ -558,6 +562,9 @@ class AdminCRMController extends Controller
                                             }
                                         }
                                         $crm_request_padded_id = str_pad($crm_request_padded_id, 6, 0, STR_PAD_LEFT);
+                                        if($nature_id == 1 && !empty($request->case_nature_complainant)  && !empty($request->complainant_phone)){
+                                            $this->updateComplaintPhone($crm_request_padded_id ?? CrmRequest::max('id'), $request->case_nature_complainant, $request->complainant_phone);
+                                        }
                                         return ['status' => 1, 'success' => $message ?? 'Request ('. $crm_request_padded_id .') successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
                                     }
                                 }
@@ -654,6 +661,9 @@ class AdminCRMController extends Controller
                                         }
                                     }
                                     $crm_request_padded_id = str_pad($crm_request_padded_id, 6, 0, STR_PAD_LEFT);
+                                    if($nature_id == 1 && !empty($request->case_nature_complainant)  && !empty($request->complainant_phone)){
+                                        $this->updateComplaintPhone($crm_request_padded_id ?? CrmRequest::max('id'), $request->case_nature_complainant, $request->complainant_phone);
+                                    }
                                     return ['status' => 1, 'success' => $message ?? 'Request ('. $crm_request_padded_id .') successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
                                 }
                             }else{
@@ -762,6 +772,9 @@ class AdminCRMController extends Controller
                                         }
                                     }
                                     $crm_request_padded_id = str_pad($crm_request_padded_id, 6, 0, STR_PAD_LEFT);
+                                    if($nature_id == 1 && !empty($request->case_nature_complainant)  && !empty($request->complainant_phone)){
+                                        $this->updateComplaintPhone($crm_request_padded_id ?? CrmRequest::max('id'), $request->case_nature_complainant, $request->complainant_phone);
+                                    }
                                     return ['status' => 1, 'success' => $message ?? 'Request ('. $crm_request_padded_id .') successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
                                 }
                             }
@@ -859,6 +872,9 @@ class AdminCRMController extends Controller
                                     }
                                 }
                                 $crm_request_padded_id = str_pad($crm_request_padded_id, 6, 0, STR_PAD_LEFT);
+                                if($nature_id == 1 && !empty($request->case_nature_complainant)  && !empty($request->complainant_phone)){
+                                    $this->updateComplaintPhone($crm_request_padded_id ?? CrmRequest::max('id'), $request->case_nature_complainant, $request->complainant_phone);
+                                }
                                 return ['status' => 1, 'success' => $message ?? 'Request ('. $crm_request_padded_id .') successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
                             }
                         }
@@ -4607,12 +4623,20 @@ class AdminCRMController extends Controller
         if($request->tagged_hub != null){
             $tagged_hub = $request->tagged_hub;
         }
-        if($request->crm_request_tagging_type_id == 1){
+		
+		if($request->admin_id){
+			$crm_request_tagging_type_id = 2;
+		}else{
+			$crm_request_tagging_type_id = 1;
+		}
+
+        if($crm_request_tagging_type_id == 1){
             $name = AdminDepartment::where('id', $request->tagged_id)->first();
         }
-        else if($request->crm_request_tagging_type_id == 2){
+        else if($crm_request_tagging_type_id == 2){
             $name = Admin::where('id', $request->tagged_id)->first();
         }
+        
         $tagged_crm_request = CrmRequestTagging::where('crm_request_id', $request->crm_request_id)->whereNotIn('crm_request_tagging_type_id', [4,5])->first();
         if(!empty($tagged_crm_request)){
             if($tagged_crm_request['tagged_id'] != $request->tagged_id) {
@@ -4621,14 +4645,14 @@ class AdminCRMController extends Controller
 
                 CrmRequestTagging::create([
                     'crm_request_id' => $request->crm_request_id,
-                    'crm_request_tagging_type_id' => $request->crm_request_tagging_type_id,
+                    'crm_request_tagging_type_id' => $crm_request_tagging_type_id,
                     'tagged_id' => $request->tagged_id,
                     'hub_id' => $tagged_hub
                 ]);
 
                 CrmRequestTaggingHistory::create([
                     'crm_request_id' => $request->crm_request_id,
-                    'crm_request_tagging_type_id' => $request->crm_request_tagging_type_id,
+                    'crm_request_tagging_type_id' => $crm_request_tagging_type_id,
                     'tagged_id' => $request->tagged_id,
                     'agent_id' => Auth::id(),
                     'hub_id' => $tagged_hub
@@ -4653,14 +4677,14 @@ class AdminCRMController extends Controller
         else{
             CrmRequestTagging::create([
                 'crm_request_id' => $request->crm_request_id,
-                'crm_request_tagging_type_id' => $request->crm_request_tagging_type_id,
+                'crm_request_tagging_type_id' => $crm_request_tagging_type_id,
                 'tagged_id' => $request->tagged_id,
                 'hub_id' => $tagged_hub
             ]);
 
             CrmRequestTaggingHistory::create([
                 'crm_request_id' => $request->crm_request_id,
-                'crm_request_tagging_type_id' => $request->crm_request_tagging_type_id,
+                'crm_request_tagging_type_id' => $crm_request_tagging_type_id,
                 'tagged_id' => $request->tagged_id,
                 'agent_id' => Auth::id(),
                 'hub_id' => $tagged_hub
@@ -4688,12 +4712,18 @@ class AdminCRMController extends Controller
             if($request->tagged_hub != null){
                 $tagged_hub = $request->tagged_hub;
             }
+            if($request->admin_id){
+                $crm_request_tagging_type_id = 2;
+            }else{
+                $crm_request_tagging_type_id = 1;
+            }
             foreach($request->crm_request_ids as $crm_request_id){
                 $crm_request = CrmRequest::where('id', $crm_request_id)->first();
-                if($request->crm_request_tagging_type_id == 1){
+				
+                if($crm_request_tagging_type_id == 1){
                     $name = AdminDepartment::where('id', $request->tagged_id)->first();
                 }
-                else if($request->crm_request_tagging_type_id == 2){
+                else if($crm_request_tagging_type_id == 2){
                     $name = Admin::where('id', $request->tagged_id)->first();
                 }
                 $tagged_crm_request = CrmRequestTagging::where('crm_request_id', $crm_request_id)->whereNotIn('crm_request_tagging_type_id', [4,5])->first();
@@ -4704,19 +4734,19 @@ class AdminCRMController extends Controller
 
                         CrmRequestTagging::create([
                             'crm_request_id' => $crm_request_id,
-                            'crm_request_tagging_type_id' => $request->crm_request_tagging_type_id,
+                            'crm_request_tagging_type_id' => $crm_request_tagging_type_id,
                             'tagged_id' => $request->tagged_id,
                             'hub_id' => $tagged_hub
                         ]);
                         // CrmRequestTagging::where('crm_request_id', $crm_request_id)->update([
-                        //     'crm_request_tagging_type_id' => $request->crm_request_tagging_type_id,
+                        //     'crm_request_tagging_type_id' => $crm_request_tagging_type_id,
                         //     'tagged_id' => $request->tagged_id,
                         //     'hub_id' => $tagged_hub
                         // ]);
 
                         CrmRequestTaggingHistory::create([
                             'crm_request_id' => $crm_request_id,
-                            'crm_request_tagging_type_id' => $request->crm_request_tagging_type_id,
+                            'crm_request_tagging_type_id' => $crm_request_tagging_type_id,
                             'tagged_id' => $request->tagged_id,
                             'agent_id' => Auth::id(),
                             'hub_id' => $tagged_hub
@@ -4728,14 +4758,14 @@ class AdminCRMController extends Controller
                 else{
                     CrmRequestTagging::create([
                         'crm_request_id' => $crm_request_id,
-                        'crm_request_tagging_type_id' => $request->crm_request_tagging_type_id,
+                        'crm_request_tagging_type_id' => $crm_request_tagging_type_id,
                         'tagged_id' => $request->tagged_id,
                         'hub_id' => $tagged_hub
                     ]);
 
                     CrmRequestTaggingHistory::create([
                         'crm_request_id' => $crm_request_id,
-                        'crm_request_tagging_type_id' => $request->crm_request_tagging_type_id,
+                        'crm_request_tagging_type_id' => $crm_request_tagging_type_id,
                         'tagged_id' => $request->tagged_id,
                         'agent_id' => Auth::id(),
                         'hub_id' => $tagged_hub
@@ -7404,5 +7434,15 @@ class AdminCRMController extends Controller
                         TRAX-Customer Experience';
         CRMCommentController::add($crm_request->id, 306, 0, 0, $comment, 0, 0);
     }
-    
+
+    public static function updateComplaintPhone($crm_request_padded_id, $caseNatureComplainant, $complainantPhone)
+    {
+        $id = (int) $crm_request_padded_id;
+        $crmRequest = CrmRequest::find($id);
+        if ($crmRequest) {
+            $crmRequest->case_nature_complainant = $caseNatureComplainant;
+            $crmRequest->complainant_phone = $complainantPhone;
+            $crmRequest->save();
+        }
+    }
 }

@@ -73,6 +73,7 @@ use App\Http\Models\ShipmentServicesCharges;
 
 class ShipmentChargesController extends Controller
 {
+
     static public function calculate_weight($account_type_id, $user_id, $shipping_mode_id, $same_day_timing_id, $walk_in_delivery_type_id, $weight, $origin_city_id, $origin_city_zone_id, $destination_city_id, $booking_type_id, $amount) {
         if ($user_id == 7762 && $shipping_mode_id == 1) {
             if ($origin_city_id == $destination_city_id) {
@@ -835,6 +836,7 @@ class ShipmentChargesController extends Controller
                     $international_zone = InternationalDhlZone::where('zone_id', $zone_id)->first();
                     if ($international_zone) {
                         $international_zone_id = $international_zone->zone_name;
+
                         switch ($international_zone_id) {
                             case 1:
                                 $margin = $international_rate->margin_1;
@@ -1002,6 +1004,7 @@ class ShipmentChargesController extends Controller
                     $international_zone = InternationalDhlZone::where('zone_id', $zone_id)->first();
                     if ($international_zone) {
                         $international_zone_id = $international_zone->zone_name;
+                        
                         switch ($international_zone_id) {
                             case 1:
                                 $margin = $international_rate->margin_1;
@@ -1035,12 +1038,6 @@ class ShipmentChargesController extends Controller
                                 break;
                             case 11:
                                 $margin = $international_rate->margin_11;
-                                break;
-                            case "1b":
-                                $margin = $international_rate->margin_1b;
-                                break;
-                            case "8b":
-                                $margin = $international_rate->margin_8b;
                                 break;
                             default:
                                 $margin = 0;

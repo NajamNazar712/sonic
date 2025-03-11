@@ -64,17 +64,13 @@ class AgentSarNotification extends Command
             $nowSub16Hours = Carbon::now()->subHours(16)->toDateTimeString();
             $nowSub24Hours = Carbon::now()->subHours(24)->toDateTimeString();
             $nowSub48Hours = Carbon::now()->subHours(48)->toDateTimeString();
-<<<<<<< HEAD
-
-=======
-            $date = Carbon::now()->subDay(1)->format('Y-m-d');
+            $date = Carbon::now()->subDay(3)->format('Y-m-d');
             // $dateTime = Carbon::createFromFormat('Y-m-d H:i:s', '2025-01-29 23:15:00');
             // $nowSub48Hours = $dateTime->subHours(48)->toDateTimeString();
             // $nowSub24Hours = $dateTime->subHours(24)->toDateTimeString();
 
             $nowSub48Hours = Carbon::parse($nowSub48Hours)->addMinutes(44)->format('Y-m-d H:i:s');
             
->>>>>>> sprint_130
             // rv_assign_agent_status_id' 7 (Shipper Advised Request) and Check If State Is 2 (Unassign Assigned)
             $sendEmails = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 7)
                 ->where('rv_state_id', 2)
@@ -202,12 +198,12 @@ class AgentSarNotification extends Command
                     ->where('shipments_journey.shipper_status_id', '=', 12)
                     ->where('shipments_journey.verification',1)
                     ->where('shipments_journey.created_at','>=',$date.' 00:00:00')
-                    ->where('rv_shipment_tickets.updated_at','<=',date('Y-m-d').' 23:14:59');
+                    ->where('shipments_journey.updated_at','<=',date('Y-m-d').' 23:59:59');
                 })
                 ->where('disabled_shipper',1)
                 ->where('halt_shipper',0)
                 ->where('rv_shipment_tickets.updated_at','>=',$date.' 00:00:00')
-                ->where('rv_shipment_tickets.updated_at','<=', date('Y-m-d').' 23:14:59')
+                ->where('rv_shipment_tickets.updated_at','<=', date('Y-m-d').' 23:59:59')
                 ->select('rv_shipment_tickets.*', 'shipments_journey.id as journeyId')->get();
                 if($haltShipper->isNotEmpty()){
                     foreach($haltShipper->toArray() as $insertData){

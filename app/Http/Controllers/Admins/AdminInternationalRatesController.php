@@ -49,9 +49,12 @@ use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Yajra\Datatables\Datatables;
 use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Traits\CommonTrait;
 
 class AdminInternationalRatesController extends Controller
 {
+    use CommonTrait;
+    
     public function __construct() {
         $this->middleware('auth:admin');
 
@@ -704,6 +707,7 @@ class AdminInternationalRatesController extends Controller
 	public function view_rates_index($id){
         $shipper_id = $id;
         if($shipper_id){
+                $zoneColumnsArray = $this->zoneMarginColumnName()['zoneColumnArray'];
                 $shipper = User::find($shipper_id);
                 if(!$shipper){
                     return redirect()->back()->with('error', 'No User Found!');
@@ -760,7 +764,7 @@ class AdminInternationalRatesController extends Controller
                     }
                 }
 
-                return view('admin.international.rates_view')->with(['shipper' => $shipper, 'exchange_charges' => $exchange_rate_charges, 'fuel_surcharge' => $fuel_charges, 'margin' => $margin, 'gst' => $gst, 'user_information' => $user_information]);
+                return view('admin.international.rates_view')->with(['shipper' => $shipper, 'exchange_charges' => $exchange_rate_charges, 'fuel_surcharge' => $fuel_charges, 'margin' => $margin, 'gst' => $gst, 'user_information' => $user_information, 'zoneColumnsArray' => $zoneColumnsArray]);
 
         }
         return redirect()->back()->with('error', 'No data found!');
@@ -782,7 +786,9 @@ class AdminInternationalRatesController extends Controller
     }
 
     public function update_rates_index($id){
+
         if($id){
+            $marginzoneColumnsArray = $this->zoneMarginColumnName();
             $user = User::find($id);
             if($user){
                 $user_information = NULL;
@@ -818,46 +824,34 @@ class AdminInternationalRatesController extends Controller
                 else{
                     return redirect()->back()->with(['error' => 'Rate settings not set!']);
                 }
-                $margin = array('margin_1' => 0,'margin_2' => 0,'margin_3' => 0,'margin_4' => 0,'margin_5' => 0,'margin_6' => 0,'margin_7' => 0,'margin_8' => 0,'margin_9' => 0,'margin_10' => 0,'margin_11' => 0);
+                $margin = array_fill_keys($marginzoneColumnsArray['marginColumn'], 0);
                 
                 if($user_information){
                     if($user_information->status == 1 || $user_information->status == 4 || $user_information->status == 5){
                         $international_user_rate = InternationalUserRate::where('user_id', $id);
                         if($international_user_rate->exists()){
                             $international_user_rate = $international_user_rate->first();
-                            $margin['margin_1'] = $international_user_rate->margin_1;
-                            $margin['margin_2'] = $international_user_rate->margin_2;
-                            $margin['margin_3'] = $international_user_rate->margin_3;
-                            $margin['margin_4'] = $international_user_rate->margin_4;
-                            $margin['margin_5'] = $international_user_rate->margin_5;
-                            $margin['margin_6'] = $international_user_rate->margin_6;
-                            $margin['margin_7'] = $international_user_rate->margin_7;
-                            $margin['margin_8'] = $international_user_rate->margin_8;
-                            $margin['margin_9'] = $international_user_rate->margin_9;
-                            $margin['margin_10'] = $international_user_rate->margin_10;
-                            $margin['margin_11'] = $international_user_rate->margin_11;
+                            foreach ($marginzoneColumnsArray['marginColumn'] as $column) {
+                                if (isset($international_user_rate->$column)) {
+                                    $margins[$column] = $international_user_rate->$column;
+                                }
+                            }
                         }
                     }
                     else{
                         $international_user_rate = PendingInternationalUserRate::where('user_id', $id);
                         if($international_user_rate->exists()){
                             $international_user_rate = $international_user_rate->first();
-                            $margin['margin_1'] = $international_user_rate->margin_1;
-                            $margin['margin_2'] = $international_user_rate->margin_2;
-                            $margin['margin_3'] = $international_user_rate->margin_3;
-                            $margin['margin_4'] = $international_user_rate->margin_4;
-                            $margin['margin_5'] = $international_user_rate->margin_5;
-                            $margin['margin_6'] = $international_user_rate->margin_6;
-                            $margin['margin_7'] = $international_user_rate->margin_7;
-                            $margin['margin_8'] = $international_user_rate->margin_8;
-                            $margin['margin_9'] = $international_user_rate->margin_9;
-                            $margin['margin_10'] = $international_user_rate->margin_10;
-                            $margin['margin_11'] = $international_user_rate->margin_11;
+                            foreach ($marginzoneColumnsArray['marginColumn'] as $column) {
+                                if (isset($international_user_rate->$column)) {
+                                    $margins[$column] = $international_user_rate->$column;
+                                }
+                            }
                         }
                     }
                 }
 
-                return view('admin.international.rates_update')->with(['shipper' => $user, 'exchange_charges' => $exchange_rate_charges, 'fuel_surcharge' => $fuel_charges, 'margin' => $margin, 'gst' => $gst, 'user_information' => $user_information]);
+                return view('admin.international.rates_update')->with(['shipper' => $user, 'exchange_charges' => $exchange_rate_charges, 'fuel_surcharge' => $fuel_charges, 'margin' => $margin, 'marginZoneColumn'=> $marginzoneColumnsArray, 'gst' => $gst, 'user_information' => $user_information]);
             }
             return redirect()->back()->with('error', 'No User Found!');
         }
@@ -867,18 +861,9 @@ class AdminInternationalRatesController extends Controller
 
     public function standard_rates_list(Request $request, $id){
 
-        $margin_1 = 0;
-        $margin_2 = 0;
-        $margin_3 = 0;
-        $margin_4 = 0;
-        $margin_5 = 0;
-        $margin_6 = 0;
-        $margin_7 = 0;
-        $margin_8 = 0;
-        $margin_9 = 0;
-        $margin_10 = 0;
-        $margin_11 = 0;
-
+        $marginzoneColumnsArray = $this->zoneMarginColumnName(); // Dynamic zone columns
+        $margin = array_fill_keys($marginzoneColumnsArray['marginColumn'], 0);
+       
         $intl_user_information = InternationalUsersInformation::where('user_id', $id);
         if($intl_user_information->exists()){
             $user_information = $intl_user_information->first();
@@ -886,134 +871,51 @@ class AdminInternationalRatesController extends Controller
                 $international_user_rate = InternationalUserRate::where('user_id', $id);
                 if($international_user_rate->exists()){
                     $international_user_rate = $international_user_rate->first();
-                    $margin_1 = $international_user_rate->margin_1;
-                    $margin_2 = $international_user_rate->margin_2;
-                    $margin_3 = $international_user_rate->margin_3;
-                    $margin_4 = $international_user_rate->margin_4;
-                    $margin_5 = $international_user_rate->margin_5;
-                    $margin_6 = $international_user_rate->margin_6;
-                    $margin_7 = $international_user_rate->margin_7;
-                    $margin_8 = $international_user_rate->margin_8;
-                    $margin_9 = $international_user_rate->margin_9;
-                    $margin_10 = $international_user_rate->margin_10;
-                    $margin_11 = $international_user_rate->margin_11;
+                    foreach ($marginzoneColumnsArray['marginColumn'] as $column) {
+                        if (isset($international_user_rate->$column)) {
+                            $margins[$column] = $international_user_rate->$column;
+                        }
+                    }
                 }
             }
             else{
                 $international_user_rate = PendingInternationalUserRate::where('user_id', $id);
                 if($international_user_rate->exists()){
                     $international_user_rate = $international_user_rate->first();
-                    $margin_1 = $international_user_rate->margin_1;
-                    $margin_2 = $international_user_rate->margin_2;
-                    $margin_3 = $international_user_rate->margin_3;
-                    $margin_4 = $international_user_rate->margin_4;
-                    $margin_5 = $international_user_rate->margin_5;
-                    $margin_6 = $international_user_rate->margin_6;
-                    $margin_7 = $international_user_rate->margin_7;
-                    $margin_8 = $international_user_rate->margin_8;
-                    $margin_9 = $international_user_rate->margin_9;
-                    $margin_10 = $international_user_rate->margin_10;
-                    $margin_11 = $international_user_rate->margin_11;
+                    foreach ($marginzoneColumnsArray['marginColumn'] as $column) {
+                        if (isset($international_user_rate->$column)) {
+                            $margins[$column] = $international_user_rate->$column;
+                        }
+                    }
                 }
             }
         }
 
-        $rates_list = InternationalStandardDhlRate::select('id','range_up', 'range_down', 'zone_1', 'zone_2', 'zone_3', 'zone_4', 'zone_5', 'zone_6', 'zone_7', 'zone_8', 'zone_9', 'zone_10', 'zone_11');
+        $rates_list = InternationalStandardDhlRate::select(
+            array_merge(['id', 'range_up', 'range_down'], $marginzoneColumnsArray['zoneColumnArray'])
+        );
 
         return Datatables::of($rates_list)
-            ->editColumn('zone_1', function ($rate) use ($margin_1){
-                if($margin_1 > 0){
-                    return round($zone = ((100 + $margin_1) / 100) * $rate->zone_1, 2);
-                }
-                else{
-                    return $rate->zone_1;
-                }
-            })
-            ->editColumn('zone_2', function ($rate) use ($margin_2){
-                if($margin_2 > 0){
-                    return round($zone = ((100 + $margin_2) / 100) * $rate->zone_2, 2);
-                }
-                else{
-                    return $rate->zone_2;
-                }
-            })
-            ->editColumn('zone_3', function ($rate) use ($margin_3){
-                if($margin_3 > 0){
-                    return round($zone = ((100 + $margin_3) / 100) * $rate->zone_3, 2);
-                }
-                else{
-                    return $rate->zone_3;
-                }
-            })
-            ->editColumn('zone_4', function ($rate) use ($margin_4){
-                if($margin_4 > 0){
-                    return round($zone = ((100 + $margin_4) / 100) * $rate->zone_4, 2);
-                }
-                else{
-                    return $rate->zone_4;
-                }
-            })
-            ->editColumn('zone_5', function ($rate) use ($margin_5){
-                if($margin_5 > 0){
-                    return round($zone = ((100 + $margin_5 ) / 100) * $rate->zone_5, 2);
-                }
-                else{
-                    return $rate->zone_5;
-                }
-            })
-            ->editColumn('zone_6', function ($rate) use ($margin_6){
-                if($margin_6 > 0){
-                    return round($zone = ((100 + $margin_6) / 100) * $rate->zone_6, 2);
-                }
-                else{
-                    return $rate->zone_6;
-                }
-            })
-            ->editColumn('zone_7', function ($rate) use ($margin_7){
-                if($margin_7 > 0){
-                    return round($zone = ((100 + $margin_7) / 100) * $rate->zone_7, 2);
-                }
-                else{
-                    return $rate->zone_7;
-                }
-            })
-            ->editColumn('zone_8', function ($rate) use ($margin_8){
-                if($margin_8 > 0){
-                    return round($zone = ((100 + $margin_8) / 100) * $rate->zone_8, 2);
-                }
-                else{
-                    return $rate->zone_8;
-                }
-            })
-            ->editColumn('zone_9', function ($rate) use ($margin_9){
-                if($margin_9 > 0){
-                    return round($zone = ((100 + $margin_9) / 100) * $rate->zone_9, 2);
-                }
-                else{
-                    return $rate->zone_9;
-                }
-            })
-            ->editColumn('zone_10', function ($rate) use ($margin_10){
-                if($margin_10 > 0){
-                    return round($zone = ((100 + $margin_10) / 100) * $rate->zone_10, 2);
-                }
-                else{
-                    return $rate->zone_10;
-                }
-            })
-            ->editColumn('zone_11', function ($rate) use ($margin_11){
-                if($margin_11 > 0){
-                    return round($zone = ((100 + $margin_11) / 100) * $rate->zone_11, 2);
-                }
-                else{
-                    return $rate->zone_11;
-                }
-            })
+        ->addColumn('adjusted_rates', function ($rate) use ($margin, $marginzoneColumnsArray) {
+            $adjustedData = [];
 
+            foreach ($marginzoneColumnsArray['zoneColumnArray'] as $zone) {
+                // Convert "zone_1" to "margin_1"
+                $marginKey = str_replace('zone_', 'margin_', $zone);
+
+                // Ensure the margin key exists before accessing
+                $adjustedData[$zone] = (isset($margin[$marginKey]) && $margin[$marginKey] > 0)
+                    ? round(((100 + $margin[$marginKey]) / 100) * $rate->$zone, 2)
+                    : $rate->$zone;
+            }
+
+            return $adjustedData;
+        })
             ->make(true);
     }
 
     public function update_rates_submit(Request $request){
+        $marginzoneColumnsArray = $this->zoneMarginColumnName(); // Dynamic zone columns
 
         $shipper_id = $request->shipper_id;
         if(!$shipper_id){
@@ -1046,17 +948,11 @@ class AdminInternationalRatesController extends Controller
             if($previous_rate_status = InternationalUserRate::where('user_id', $shipper_id)->first()){
                 $history_international_user_rate = new HistoryInternationalUserRate();
                 $history_international_user_rate->user_id = $previous_rate_status->user_id;
-                $history_international_user_rate->margin_1 = $previous_rate_status->margin_1;
-                $history_international_user_rate->margin_2 = $previous_rate_status->margin_2;
-                $history_international_user_rate->margin_3 = $previous_rate_status->margin_3;
-                $history_international_user_rate->margin_4 = $previous_rate_status->margin_4;
-                $history_international_user_rate->margin_5 = $previous_rate_status->margin_5;
-                $history_international_user_rate->margin_6 = $previous_rate_status->margin_6;
-                $history_international_user_rate->margin_7 = $previous_rate_status->margin_7;
-                $history_international_user_rate->margin_8 = $previous_rate_status->margin_8;
-                $history_international_user_rate->margin_9 = $previous_rate_status->margin_9;
-                $history_international_user_rate->margin_10 = $previous_rate_status->margin_10;
-                $history_international_user_rate->margin_11 = $previous_rate_status->margin_11;
+                foreach ($marginzoneColumnsArray['marginColumn'] as $column) {
+                    if (isset($history_international_user_rate->$column)) {
+                        $margins[$column] = $history_international_user_rate->$column;
+                    }
+                }
 
                 $history_international_user_rate->updated_by = $previous_rate_status->updated_by;
                 $history_international_user_rate->rates_updated_at = $previous_rate_status->rates_updated_at;
@@ -1070,17 +966,11 @@ class AdminInternationalRatesController extends Controller
             if($pending_rate_statuses = PendingInternationalUserRate::where('user_id', $shipper_id)->first()){
                     $international_user_rates = new InternationalUserRate();
                     $international_user_rates->user_id = $pending_rate_statuses->user_id;
-                    $international_user_rates->margin_1 = $request->margin_1;
-                    $international_user_rates->margin_2 = $request->margin_2;
-                    $international_user_rates->margin_3 = $request->margin_3;
-                    $international_user_rates->margin_4 = $request->margin_4;
-                    $international_user_rates->margin_5 = $request->margin_5;
-                    $international_user_rates->margin_6 = $request->margin_6;
-                    $international_user_rates->margin_7 = $request->margin_7;
-                    $international_user_rates->margin_8 = $request->margin_8;
-                    $international_user_rates->margin_9 = $request->margin_9;
-                    $international_user_rates->margin_10 = $request->margin_10;
-                    $international_user_rates->margin_11 = $request->margin_11;
+                    foreach ($marginzoneColumnsArray['marginColumn'] as $column) {
+                        if (isset($international_user_rates->$column)) {
+                            $margins[$column] = $international_user_rates->$column;
+                        }
+                    }
                     $international_user_rates->updated_by = $pending_rate_statuses->updated_by;
                     $international_user_rates->rates_updated_at = $pending_rate_statuses->rates_updated_at;
                     $international_user_rates->save();
@@ -1119,17 +1009,11 @@ class AdminInternationalRatesController extends Controller
 
                 $international_user_rates = new PendingInternationalUserRate();
                 $international_user_rates->user_id = $shipper_id;
-                $international_user_rates->margin_1 = $request->margin_1;
-                $international_user_rates->margin_2 = $request->margin_2;
-                $international_user_rates->margin_3 = $request->margin_3;
-                $international_user_rates->margin_4 = $request->margin_4;
-                $international_user_rates->margin_5 = $request->margin_5;
-                $international_user_rates->margin_6 = $request->margin_6;
-                $international_user_rates->margin_7 = $request->margin_7;
-                $international_user_rates->margin_8 = $request->margin_8;
-                $international_user_rates->margin_9 = $request->margin_9;
-                $international_user_rates->margin_10 = $request->margin_10;
-                $international_user_rates->margin_11 = $request->margin_11;
+                foreach ($marginzoneColumnsArray['marginColumn'] as $column) {
+                    if (isset($international_user_rates->$column)) {
+                        $margins[$column] = $international_user_rates->$column;
+                    }
+                }
                 $international_user_rates->updated_by = Auth::id();
                 $international_user_rates->rates_updated_at = Carbon::now();
                 $international_user_rates->save();
@@ -1138,17 +1022,11 @@ class AdminInternationalRatesController extends Controller
                 $international_user_rates = InternationalUserRate::where('user_id', $shipper_id);
                 if($international_user_rates->exists()){
                     $international_user_rates = $international_user_rates->first();
-                    $international_user_rates->margin_1 = $request->margin_1;
-                    $international_user_rates->margin_2 = $request->margin_2;
-                    $international_user_rates->margin_3 = $request->margin_3;
-                    $international_user_rates->margin_4 = $request->margin_4;
-                    $international_user_rates->margin_5 = $request->margin_5;
-                    $international_user_rates->margin_6 = $request->margin_6;
-                    $international_user_rates->margin_7 = $request->margin_7;
-                    $international_user_rates->margin_8 = $request->margin_8;
-                    $international_user_rates->margin_9 = $request->margin_9;
-                    $international_user_rates->margin_10 = $request->margin_10;
-                    $international_user_rates->margin_11 = $request->margin_11;
+                    foreach ($marginzoneColumnsArray['marginColumn'] as $column) {
+                        if (isset($international_user_rates->$column)) {
+                            $margins[$column] = $international_user_rates->$column;
+                        }
+                    }
                     $international_user_rates->updated_by = Auth::id();
                     $international_user_rates->rates_updated_at = Carbon::now();
 
@@ -1156,17 +1034,11 @@ class AdminInternationalRatesController extends Controller
                 else{
                     $international_user_rates = new InternationalUserRate();
                     $international_user_rates->user_id = $shipper_id;
-                    $international_user_rates->margin_1 = $request->margin_1;
-                    $international_user_rates->margin_2 = $request->margin_2;
-                    $international_user_rates->margin_3 = $request->margin_3;
-                    $international_user_rates->margin_4 = $request->margin_4;
-                    $international_user_rates->margin_5 = $request->margin_5;
-                    $international_user_rates->margin_6 = $request->margin_6;
-                    $international_user_rates->margin_7 = $request->margin_7;
-                    $international_user_rates->margin_8 = $request->margin_8;
-                    $international_user_rates->margin_9 = $request->margin_9;
-                    $international_user_rates->margin_10 = $request->margin_10;
-                    $international_user_rates->margin_11 = $request->margin_11;
+                    foreach ($marginzoneColumnsArray['marginColumn'] as $column) {
+                        if (isset($international_user_rates->$column)) {
+                            $margins[$column] = $international_user_rates->$column;
+                        }
+                    }
                     $international_user_rates->updated_by = Auth::id();
                     $international_user_rates->rates_updated_at = Carbon::now();
                 }
@@ -1180,6 +1052,7 @@ class AdminInternationalRatesController extends Controller
 
     public function addEconomyRatesView($id,$view = null)
     {
+        
         // Checking For Permission
         if($view != null && $view == "view" && session('role_id') != 1 && !in_array(530, session('permissions')))
         {
@@ -1208,6 +1081,7 @@ class AdminInternationalRatesController extends Controller
 
 
         $zones = Zone::where('business_category_id',2)->get();
+        
         $data = array();
 
         // Getting Data For View Screen
@@ -1466,18 +1340,22 @@ class AdminInternationalRatesController extends Controller
     }
 
     public function retail_international_rates_upload_index(){
-        return view('admin.retail.international_rates.excel_upload');
+        $zoneColumnsArray = $this->zoneMarginColumnName()['zoneColumnArray'];
+        return view('admin.retail.international_rates.excel_upload',compact('zoneColumnsArray'));
     }
 
     public function retail_international_rates_list(Request $request)
     {
+        $zoneColumnsArray = $this->zoneMarginColumnName()['zoneColumnArray'];
 
         if($request->get('excel') && $request->get('excel') == true)
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(),382);
         }
 
-        $rates_list = InternationalStandardRetailRates::select('id', 'range_up', 'range_down', 'zone_1', 'zone_2', 'zone_3', 'zone_4', 'zone_5', 'zone_6', 'zone_7', 'zone_8', 'zone_9', 'zone_10', 'zone_11');
+        $rates_list = InternationalStandardRetailRates::select(
+            array_merge(['id', 'range_up', 'range_down'], $zoneColumnsArray)
+        );
         if ($request->shipping_mode_id == 1){
             $rates_list = $rates_list->where('shipping_mode_id',1);
         }
@@ -1494,469 +1372,21 @@ class AdminInternationalRatesController extends Controller
 
     public function retail_international_rates_upload_excel(Request $request)
     {
-        $names = [
-            'range_up' => 'Range Up',
-            'range_down' => 'Range Down',
-            /*   'shipping_mode_id' => 'Shipping Mode',*/
-            'zone_1' => 'Zone 1',
-            'zone_2' => 'Zone 2',
-            'zone_3' => 'Zone 3',
-            'zone_4' => 'Zone 4',
-            'zone_5' => 'Zone 5',
-            'zone_6' => 'Zone 6',
-            'zone_7' => 'Zone 7',
-            'zone_8' => 'Zone 8',
-            'zone_9' => 'Zone 9',
-            'zone_10' => 'Zone 10',
-            'zone_11' => 'Zone 11',
-        ];
-
-        $messages = [
-            'required' => ':attribute is Required.',
-            'integer' => ':attribute must be an Integer.',
-            //'exists' => 'Given :attribute is Invalid.',
-        ];
-        $rules = [
-            'range_up' => ['required', 'numeric', 'between:0.01,300' /*Rule::exists('international_standard_retail_rates', 'range_up')*/],
-            'range_down' => ['required', 'numeric', 'between:0.01,300'/*, Rule::exists('international_standard_retail_rates', 'range_down')*/],
-            /* 'shipping_mode_id' => ['required', 'numeric', 'between:1,3'],*/
-            'zone_1' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_2' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_3' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_4' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_5' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_6' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_7' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_8' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_9' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_10' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_11' => ['required', 'numeric', 'between:0,1000000'],
-        ];
-
-        $fields = [0 => 'range_up', 1 => 'range_down', 2 => 'zone_1', 3 => 'zone_2', 4 => 'zone_3', 5 => 'zone_4', 6 => 'zone_5', 7 => 'zone_6', 8 => 'zone_7', 9 => 'zone_8', 10 => 'zone_9', 11 => 'zone_10', 12 => 'zone_11'];
-
+        
         if ($file = $request->file('document_rates')) {
-            $spreadsheet = IOFactory::createReaderForFile($file);
-            $spreadsheet->setReadDataOnly(true);
-            $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
-
-            $header = ['Range Up', 'Range Down', 'Zone 1', 'Zone 2', 'Zone 3', 'Zone 4', 'Zone 5', 'Zone 6', 'Zone 7', 'Zone 8', 'Zone 9', 'Zone 10', 'Zone 11'];
-
-            if (isset($spreadsheet)) {
-                $header_correct = true;
-
-                foreach ($spreadsheet[0] as $index => $header_value) {
-                    if ($index == 13) {
-                    } elseif (!isset($header[$index]) || $header_value != $header[$index]) {
-                        $header_correct = false;
-                        break;
-                    }
-                }
-
-                if (!$header_correct) {
-                    return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
-                } else {
-                    unset($spreadsheet[0]);
-                }
-            }
-
-            if (!empty($spreadsheet) || !isset($spreadsheet)) {
-                $rows = array();
-                foreach ($spreadsheet as $spreadsheet_row) {
-                    $row = array();
-
-                    foreach ($spreadsheet_row as $key => $value) {
-                        $row[$fields[$key]] = $value;
-                    }
-
-                    $rows[] = $row;
-                }
-
-                unset($spreadsheet);
-                $errors = array();
-                $rate_range_ids = array();
-                $rate_range_id_row = array();
-                foreach ($rows as $key => $row) {
-
-                    $row_id = $key + 2;
-
-                    $validate = Validator::make($row, $rules, $messages);
-
-                    $validate->setAttributeNames($names);
-
-                    if ($validate->fails()) {
-                        $errors['Row #' . $row_id] = $validate->errors()->all();
-                    }
-
-                    if (empty($errors['Row #' . $row_id])) {
-
-                        /*            if ($row['shipping_mode_id'] == 1) {*/
-                        if ((!empty(trim($row['range_up']))) && (!empty(trim($row['range_down'])))) {
-                            if (empty($rate_range_ids)) {
-                                $rate_range_ids[] = $row['range_up'];
-                                $rate_range_id_row[$row['range_up']] = $row_id;
-                            } else {
-                                if (in_array($row['range_up'], $rate_range_ids)) {
-                                    $errors['Row #' . $row_id][] = 'Same Range as of Row #' . $rate_range_id_row[$row['range_up']];
-                                } else {
-                                    $rate_range_ids[] = $row['range_up'];
-                                    $rate_range_id_row[$row['range_up']] = $row_id;
-                                }
-                            }
-                        }
-
-                        /* }
-                         else{
-                             return redirect()->back()->with(['error' => 'Non-document and box type are not allowed in document type']);
-                         }*/
-                    }
-                }
-                if (empty($errors)) {
-
-                    $updated = 0;
-                    $created = 0;
-                    $not_updated = 0;
-                    $shipping_mode_id = 1;
-                    InternationalStandardRetailRates::where('shipping_mode_id', $shipping_mode_id)->delete();
-                    foreach ($rows as $key => $row) {
-                        $row_id = $key + 2;
-                        $range_up = trim($row['range_up']);
-                        $range_down = trim($row['range_down']);
-                        $zone_1 = trim($row['zone_1']);
-                        $zone_2 = trim($row['zone_2']);
-                        $zone_3 = trim($row['zone_3']);
-                        $zone_4 = trim($row['zone_4']);
-                        $zone_5 = trim($row['zone_5']);
-                        $zone_6 = trim($row['zone_6']);
-                        $zone_7 = trim($row['zone_7']);
-                        $zone_8 = trim($row['zone_8']);
-                        $zone_9 = trim($row['zone_9']);
-                        $zone_10 = trim($row['zone_10']);
-                        $zone_11 = trim($row['zone_11']);
-
-                        $standard_rate = new InternationalStandardRetailRates();
-                        $standard_rate->range_up = $range_up;
-                        $standard_rate->range_down = $range_down;
-                        $standard_rate->shipping_mode_id = $shipping_mode_id;
-                        $standard_rate->zone_1 = $zone_1;
-                        $standard_rate->zone_2 = $zone_2;
-                        $standard_rate->zone_3 = $zone_3;
-                        $standard_rate->zone_4 = $zone_4;
-                        $standard_rate->zone_5 = $zone_5;
-                        $standard_rate->zone_6 = $zone_6;
-                        $standard_rate->zone_7 = $zone_7;
-                        $standard_rate->zone_8 = $zone_8;
-                        $standard_rate->zone_9 = $zone_9;
-                        $standard_rate->zone_10 = $zone_10;
-                        $standard_rate->zone_11 = $zone_11;
-                        $standard_rate->save();
-                        $created++;
-
-
-                    }
-                    $error_msg = '';
-                    if ($not_updated > 1) {
-                        $error_msg = 'Total ' . $not_updated . ' rows could not updated!';
-                    } else if ($created > 1) {
-                        $updated = $created;
-                    }
-
-                    return redirect()->back()->with(['success' => 'Total ' . $updated . ' rows updated', 'error' => $error_msg]);
-                } else {
-                    $errors = array_map(function ($row, $errors) {
-                        return $row . ':' . PHP_EOL . implode(' | ', $errors);
-                    }, array_keys($errors), $errors);
-
-                    return redirect()->back()->withErrors($errors);
-                }
-
-            } else {
-                return redirect()->back()->with('error', 'No Rates in File');
-            }
-
+            $filename = $file;
+            $shipping_mode_id = 1;
         }
-
         if ($file = $request->file('non_document_rates')) {
-            $spreadsheet = IOFactory::createReaderForFile($file);
-            $spreadsheet->setReadDataOnly(true);
-            $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
-
-            $header = ['Range Up', 'Range Down', 'Zone 1', 'Zone 2', 'Zone 3', 'Zone 4', 'Zone 5', 'Zone 6', 'Zone 7', 'Zone 8', 'Zone 9', 'Zone 10', 'Zone 11'];
-
-            if (isset($spreadsheet)) {
-                $header_correct = true;
-
-                foreach ($spreadsheet[0] as $index => $header_value) {
-                    if ($index == 13) {
-                    } elseif (!isset($header[$index]) || $header_value != $header[$index]) {
-                        $header_correct = false;
-                        break;
-                    }
-                }
-
-                if (!$header_correct) {
-                    return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
-                } else {
-                    unset($spreadsheet[0]);
-                }
-            }
-
-            if (!empty($spreadsheet) || !isset($spreadsheet)) {
-                $rows = array();
-                foreach ($spreadsheet as $spreadsheet_row) {
-                    $row = array();
-
-                    foreach ($spreadsheet_row as $key => $value) {
-                        $row[$fields[$key]] = $value;
-                    }
-
-                    $rows[] = $row;
-                }
-
-                unset($spreadsheet);
-                $errors = array();
-                $rate_range_ids = array();
-                $rate_range_id_row = array();
-                foreach ($rows as $key => $row) {
-
-                    $row_id = $key + 2;
-
-                    $validate = Validator::make($row, $rules, $messages);
-
-                    $validate->setAttributeNames($names);
-
-                    if ($validate->fails()) {
-                        $errors['Row #' . $row_id] = $validate->errors()->all();
-                    }
-
-                    if (empty($errors['Row #' . $row_id])) {
-
-                        /*            if ($row['shipping_mode_id'] == 1) {*/
-                        if ((!empty(trim($row['range_up']))) && (!empty(trim($row['range_down'])))) {
-                            if (empty($rate_range_ids)) {
-                                $rate_range_ids[] = $row['range_up'];
-                                $rate_range_id_row[$row['range_up']] = $row_id;
-                            } else {
-                                if (in_array($row['range_up'], $rate_range_ids)) {
-                                    $errors['Row #' . $row_id][] = 'Same Range as of Row #' . $rate_range_id_row[$row['range_up']];
-                                } else {
-                                    $rate_range_ids[] = $row['range_up'];
-                                    $rate_range_id_row[$row['range_up']] = $row_id;
-                                }
-                            }
-                        }
-
-                        /* }
-                         else{
-                             return redirect()->back()->with(['error' => 'Non-document and box type are not allowed in document type']);
-                         }*/
-                    }
-                }
-                if (empty($errors)) {
-
-                    $updated = 0;
-                    $created = 0;
-                    $not_updated = 0;
-                    $shipping_mode_id = 2;
-                    InternationalStandardRetailRates::where('shipping_mode_id', $shipping_mode_id)->delete();
-                    foreach ($rows as $key => $row) {
-                        $row_id = $key + 2;
-                        $range_up = trim($row['range_up']);
-                        $range_down = trim($row['range_down']);
-                        $zone_1 = trim($row['zone_1']);
-                        $zone_2 = trim($row['zone_2']);
-                        $zone_3 = trim($row['zone_3']);
-                        $zone_4 = trim($row['zone_4']);
-                        $zone_5 = trim($row['zone_5']);
-                        $zone_6 = trim($row['zone_6']);
-                        $zone_7 = trim($row['zone_7']);
-                        $zone_8 = trim($row['zone_8']);
-                        $zone_9 = trim($row['zone_9']);
-                        $zone_10 = trim($row['zone_10']);
-                        $zone_11 = trim($row['zone_11']);
-
-                        $standard_rate = new InternationalStandardRetailRates();
-                        $standard_rate->range_up = $range_up;
-                        $standard_rate->range_down = $range_down;
-                        $standard_rate->shipping_mode_id = $shipping_mode_id;
-                        $standard_rate->zone_1 = $zone_1;
-                        $standard_rate->zone_2 = $zone_2;
-                        $standard_rate->zone_3 = $zone_3;
-                        $standard_rate->zone_4 = $zone_4;
-                        $standard_rate->zone_5 = $zone_5;
-                        $standard_rate->zone_6 = $zone_6;
-                        $standard_rate->zone_7 = $zone_7;
-                        $standard_rate->zone_8 = $zone_8;
-                        $standard_rate->zone_9 = $zone_9;
-                        $standard_rate->zone_10 = $zone_10;
-                        $standard_rate->zone_11 = $zone_11;
-                        $standard_rate->save();
-                        $created++;
-
-                    }
-                    $error_msg = '';
-                    if ($not_updated > 1) {
-                        $error_msg = 'Total ' . $not_updated . ' rows could not updated!';
-                    } else if ($created > 1) {
-                        $updated = $created;
-                    }
-
-                    return redirect()->back()->with(['success' => 'Total ' . $updated . ' rows updated', 'error' => $error_msg]);
-                } else {
-                    $errors = array_map(function ($row, $errors) {
-                        return $row . ':' . PHP_EOL . implode(' | ', $errors);
-                    }, array_keys($errors), $errors);
-
-                    return redirect()->back()->withErrors($errors);
-                }
-
-            } else {
-                return redirect()->back()->with('error', 'No Rates in File');
-            }
-
+            $filename = $file;
+            $shipping_mode_id = 2;
         }
-
         if ($file = $request->file('box_rates')) {
-            $spreadsheet = IOFactory::createReaderForFile($file);
-            $spreadsheet->setReadDataOnly(true);
-            $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
-
-            $header = ['Range Up', 'Range Down', 'Zone 1', 'Zone 2', 'Zone 3', 'Zone 4', 'Zone 5', 'Zone 6', 'Zone 7', 'Zone 8', 'Zone 9', 'Zone 10', 'Zone 11'];
-
-            if (isset($spreadsheet)) {
-                $header_correct = true;
-
-                foreach ($spreadsheet[0] as $index => $header_value) {
-                    if ($index == 13) {
-                    } elseif (!isset($header[$index]) || $header_value != $header[$index]) {
-                        $header_correct = false;
-                        break;
-                    }
-                }
-
-                if (!$header_correct) {
-                    return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
-                } else {
-                    unset($spreadsheet[0]);
-                }
-            }
-
-            if (!empty($spreadsheet) || !isset($spreadsheet)) {
-                $rows = array();
-                foreach ($spreadsheet as $spreadsheet_row) {
-                    $row = array();
-
-                    foreach ($spreadsheet_row as $key => $value) {
-                        $row[$fields[$key]] = $value;
-                    }
-
-                    $rows[] = $row;
-                }
-
-                unset($spreadsheet);
-                $errors = array();
-                $rate_range_ids = array();
-                $rate_range_id_row = array();
-                foreach ($rows as $key => $row) {
-
-                    $row_id = $key + 2;
-
-                    $validate = Validator::make($row, $rules, $messages);
-
-                    $validate->setAttributeNames($names);
-
-                    if ($validate->fails()) {
-                        $errors['Row #' . $row_id] = $validate->errors()->all();
-                    }
-
-                    if (empty($errors['Row #' . $row_id])) {
-
-                        /*            if ($row['shipping_mode_id'] == 1) {*/
-                        if ((!empty(trim($row['range_up']))) && (!empty(trim($row['range_down'])))) {
-                            if (empty($rate_range_ids)) {
-                                $rate_range_ids[] = $row['range_up'];
-                                $rate_range_id_row[$row['range_up']] = $row_id;
-                            } else {
-                                if (in_array($row['range_up'], $rate_range_ids)) {
-                                    $errors['Row #' . $row_id][] = 'Same Range as of Row #' . $rate_range_id_row[$row['range_up']];
-                                } else {
-                                    $rate_range_ids[] = $row['range_up'];
-                                    $rate_range_id_row[$row['range_up']] = $row_id;
-                                }
-                            }
-                        }
-
-                        /* }
-                         else{
-                             return redirect()->back()->with(['error' => 'Non-document and box type are not allowed in document type']);
-                         }*/
-                    }
-                }
-                if (empty($errors)) {
-
-                    $updated = 0;
-                    $created = 0;
-                    $not_updated = 0;
-
-                    $shipping_mode_id = 3;
-                    InternationalStandardRetailRates::where('shipping_mode_id', $shipping_mode_id)->delete();
-
-                    foreach ($rows as $key => $row) {
-                        $row_id = $key + 2;
-                        $range_up = trim($row['range_up']);
-                        $range_down = trim($row['range_down']);
-                        $zone_1 = trim($row['zone_1']);
-                        $zone_2 = trim($row['zone_2']);
-                        $zone_3 = trim($row['zone_3']);
-                        $zone_4 = trim($row['zone_4']);
-                        $zone_5 = trim($row['zone_5']);
-                        $zone_6 = trim($row['zone_6']);
-                        $zone_7 = trim($row['zone_7']);
-                        $zone_8 = trim($row['zone_8']);
-                        $zone_9 = trim($row['zone_9']);
-                        $zone_10 = trim($row['zone_10']);
-                        $zone_11 = trim($row['zone_11']);
-
-                        $standard_rate = new InternationalStandardRetailRates();
-                        $standard_rate->range_up = $range_up;
-                        $standard_rate->range_down = $range_down;
-                        $standard_rate->shipping_mode_id = $shipping_mode_id;
-                        $standard_rate->zone_1 = $zone_1;
-                        $standard_rate->zone_2 = $zone_2;
-                        $standard_rate->zone_3 = $zone_3;
-                        $standard_rate->zone_4 = $zone_4;
-                        $standard_rate->zone_5 = $zone_5;
-                        $standard_rate->zone_6 = $zone_6;
-                        $standard_rate->zone_7 = $zone_7;
-                        $standard_rate->zone_8 = $zone_8;
-                        $standard_rate->zone_9 = $zone_9;
-                        $standard_rate->zone_10 = $zone_10;
-                        $standard_rate->zone_11 = $zone_11;
-                        $standard_rate->save();
-                        $created++;
-
-                    }
-                    $error_msg = '';
-                    if ($not_updated > 1) {
-                        $error_msg = 'Total ' . $not_updated . ' rows could not updated!';
-                    } else if ($created > 1) {
-                        $updated = $created;
-                    }
-
-                    return redirect()->back()->with(['success' => 'Total ' . $updated . ' rows updated', 'error' => $error_msg]);
-                } else {
-                    $errors = array_map(function ($row, $errors) {
-                        return $row . ':' . PHP_EOL . implode(' | ', $errors);
-                    }, array_keys($errors), $errors);
-
-                    return redirect()->back()->withErrors($errors);
-                }
-
-            } else {
-                return redirect()->back()->with('error', 'No Rates in File');
-            }
-
+            $filename = $file;
+            $shipping_mode_id = 3;
         }
+        $excelUpload = $this->excelStandRateUpload($filename, $shipping_mode_id);
+        return $excelUpload;
     }
 
     public function extra_service_charges_index(){
@@ -2038,6 +1468,154 @@ class AdminInternationalRatesController extends Controller
         }
         else{
             return redirect()->back()->with('error', 'Tracking Number and Amount are required!');
+        }
+    }
+
+    public function excelStandRateUpload($filename, $shipping_mode_id){
+      
+        $zoneColumnsArray = $this->zoneMarginColumnName()['zoneColumnArray'];
+        $names = array_merge([
+            'range_up' => 'Range Up',
+            'range_down' => 'Range Down',
+        ], array_combine(
+            $zoneColumnsArray,
+            array_map(fn($zone) => ucwords(str_replace('_', ' ', $zone)), $zoneColumnsArray)
+        ));
+
+        $messages = [
+            'required' => ':attribute is Required.',
+            'integer' => ':attribute must be an Integer.',
+            //'exists' => 'Given :attribute is Invalid.',
+        ];
+        foreach ($zoneColumnsArray as $zone) {
+            $rules[$zone] = ['required', 'numeric', 'between:0,1000000'];
+        }
+        $fields = array_merge([
+            0 => 'range_up',
+            1 => 'range_down'
+        ], array_values($zoneColumnsArray));
+        
+        $fields = array_values(array_keys($names));
+        
+        $header = array_merge([
+            'Range Up',
+            'Range Down'
+        ], array_map(function ($zone) {
+            return ucwords(str_replace('_', ' ', $zone));
+        }, $zoneColumnsArray));
+        $spreadsheet = IOFactory::createReaderForFile($filename);
+        $spreadsheet->setReadDataOnly(true);
+        $spreadsheet = $spreadsheet->load($filename)->getActiveSheet()->toArray();
+
+        if (isset($spreadsheet)) {
+            $header_correct = true;
+
+            foreach ($spreadsheet[0] as $index => $header_value) {
+                if ($index == count($header)) {
+                } elseif (!isset($header[$index]) || $header_value != $header[$index]) {
+                    $header_correct = false;
+                    break;
+                }
+            }
+            if (!$header_correct) {
+                return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+            } else {
+                unset($spreadsheet[0]);
+            }
+        }
+
+        if (!empty($spreadsheet) || !isset($spreadsheet)) {
+            $rows = array();
+            foreach ($spreadsheet as $spreadsheet_row) {
+                $row = array();
+
+                foreach ($spreadsheet_row as $key => $value) {
+                    $row[$fields[$key]] = $value;
+                }
+
+                $rows[] = $row;
+            }
+
+            unset($spreadsheet);
+            $errors = array();
+            $rate_range_ids = array();
+            $rate_range_id_row = array();
+            foreach ($rows as $key => $row) {
+               
+                $row_id = $key + 2;
+
+                $validate = Validator::make($row, $rules, $messages);
+
+                $validate->setAttributeNames($names);
+
+                if ($validate->fails()) {
+                    $errors['Row #' . $row_id] = $validate->errors()->all();
+                }
+
+                if (empty($errors['Row #' . $row_id])) {
+
+                    /*            if ($row['shipping_mode_id'] == 1) {*/
+                    if ((!empty(trim($row['range_up']))) && (!empty(trim($row['range_down'])))) {
+                        if (empty($rate_range_ids)) {
+                            $rate_range_ids[] = $row['range_up'];
+                            $rate_range_id_row[$row['range_up']] = $row_id;
+                        } else {
+                            if (in_array($row['range_up'], $rate_range_ids)) {
+                                $errors['Row #' . $row_id][] = 'Same Range as of Row #' . $rate_range_id_row[$row['range_up']];
+                            } else {
+                                $rate_range_ids[] = $row['range_up'];
+                                $rate_range_id_row[$row['range_up']] = $row_id;
+                            }
+                        }
+                    }
+
+                    /* }
+                         else{
+                             return redirect()->back()->with(['error' => 'Non-document and box type are not allowed in document type']);
+                         }*/
+                }
+            }
+            if (empty($errors)) {
+
+                $updated = 0;
+                $created = 0;
+                $not_updated = 0;
+
+                InternationalStandardRetailRates::where('shipping_mode_id', $shipping_mode_id)->delete();
+                foreach ($rows as $key => $row) {
+                    $row_id = $key + 2;
+                    $range_up = trim($row['range_up']);
+                    $range_down = trim($row['range_down']);
+                   
+                    $standard_rate = new InternationalStandardRetailRates();
+                    $standard_rate->range_up = $range_up;
+                    $standard_rate->range_down = $range_down;
+                    $standard_rate->shipping_mode_id = $shipping_mode_id;
+                    foreach ($zoneColumnsArray as $zoneColumn) {
+                        if (isset($row[$zoneColumn])) {
+                            $standard_rate->$zoneColumn = trim($row[$zoneColumn]);
+                        }
+                    }
+                    $standard_rate->save();
+                    $created++;
+                }
+                $error_msg = '';
+                if ($not_updated > 1) {
+                    $error_msg = 'Total ' . $not_updated . ' rows could not updated!';
+                } else if ($created > 1) {
+                    $updated = $created;
+                }
+
+                return redirect()->back()->with(['success' => 'Total ' . $updated . ' rows updated', 'error' => $error_msg]);
+            } else {
+                $errors = array_map(function ($row, $errors) {
+                    return $row . ':' . PHP_EOL . implode(' | ', $errors);
+                }, array_keys($errors), $errors);
+
+                return redirect()->back()->withErrors($errors);
+            }
+        } else {
+            return redirect()->back()->with('error', 'No Rates in File');
         }
     }
 

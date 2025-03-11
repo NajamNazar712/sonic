@@ -11020,14 +11020,18 @@ class NotificationsController extends Controller
                     $html .= '</thead>';
                     $html .= '<tbody>';
                     $agent = [];
+                    $activeAdmins = Admin::where('status', 1)->pluck('id')->toArray();
+
                     $index = 0;
                     if ($case_natures->isNotEmpty()) {
                         foreach ($case_natures as $key => $value) {
                             $agent_id = $value["agent_id"];
-                            $agent[$agent_id]['status_id'][] = $value['status_id'];
-                            $agent[$agent_id]['ticket_id'][] = $value['id'];
-                            $agent[$agent_id]['created_at'][] = $value['created_at'];
-                            $agent[$agent_id]['updated_at'][] = $value['updated_at'];
+                            if (in_array($agent_id, $activeAdmins)) {
+                                $agent[$agent_id]['status_id'][] = $value['status_id'];
+                                $agent[$agent_id]['ticket_id'][] = $value['id'];
+                                $agent[$agent_id]['created_at'][] = $value['created_at'];
+                                $agent[$agent_id]['updated_at'][] = $value['updated_at'];
+                            }
                         }
                     }
                     foreach ($agent as $key => $value) {
