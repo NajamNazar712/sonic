@@ -141,6 +141,7 @@ class APIController extends Controller
 
     use RvTrait;
     private $names = [
+        'wallet_id' => 'Wallet ID',
         'person_of_contact' => 'Person of Contact',
         'vendor' => 'Vendor',
         'phone_number' => 'Phone Number',
@@ -10225,6 +10226,72 @@ class APIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Charges updated against this shipment.']);
         }
     }
+
+    public function fintech_charges_bulk(Request $request)
+    {
+        $rules = [
+            'wallet_id' => ['required', 'exists:wallet_users,wallet_id'],
+            'shipments' => ['required', 'array', 'min:1'],
+            'shipments.*.tracking_number' => ['required', 'exists:shipments,tracking_number'],
+            'shipments.*.charges' => ['required', 'numeric', 'min:0', 'max:100000'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+
+        $updated_shipments = [];
+        $errors = [];
+
+        foreach ($request->shipments as $shipmentData) {
+            $tracking_number = $shipmentData['tracking_number'];
+            $charges = $shipmentData['charges'];
+
+            $shipment = Shipment::where('tracking_number', $tracking_number)->first();
+            $shipment_id = $shipment->id;
+
+            if (!DonePaymentShipment::where('shipment_id', $shipment_id)->whereIn('type', [0, 1])->exists()) {
+                ShipmentAdditionalCharges::where('shipment_id', $shipment_id)->update([
+                    'wallet_charges' => $charges,
+                    'wallet_charges_updated_at' => Carbon::now()
+                ]);
+                $updated_shipments[] = $tracking_number;
+                
+                $pending_payment_shipments = PendingPaymentShipment::where('shipment_id', $shipment->id)->whereIn('type', [0, 1])->latest()->first();
+                if ($pending_payment_shipments) {
+                    AdminFinanceController::update_payment($shipment_id, $pending_payment_shipments->type);
+                }
+            } else {
+                ShipmentAdditionalCharges::where('shipment_id', $shipment_id)->update([
+                    'wallet_charges' => $charges,
+                    'wallet_charges_updated_at' => Carbon::now()
+                ]);
+                $updated_shipments[] = $tracking_number;
+
+                $done_payment_shipments = DonePaymentShipment::where('shipment_id', $shipment->id)->whereIn('type', [0, 1])->latest()->first();
+                if ($done_payment_shipments) {
+                    AdminFinanceController::update_payment_done_payment($shipment_id, $done_payment_shipments->type, $done_payment_shipments->done_payment_id);
+                }
+            }
+
+            // Log the request
+            $finja_request_log = new FinjaRequestLog();
+            $finja_request_log->requested = json_encode($shipmentData);
+            $finja_request_log->ip_address = $request->ip();
+            $finja_request_log->save();
+
+        }
+
+        return response()->json([
+            'status' => 1,
+            'message' => 'Charges updated for shipments.',
+            'data' => $updated_shipments,
+        ]);
+    }
+
     public function fintech_getToken(Request $request) {
 
         $rules = [
