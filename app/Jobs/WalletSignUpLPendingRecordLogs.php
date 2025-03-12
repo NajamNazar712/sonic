@@ -148,7 +148,7 @@ class WalletSignUpLPendingRecordLogs implements ShouldQueue
                         ShipmentStatusSharingWithWallet::dispatch($data, 1, $token);
                     }
                 }
-                sleep(5);
+                sleep(20);
             });
         }
     }

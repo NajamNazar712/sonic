@@ -101,7 +101,7 @@ class FinSurgentSonicPaymentSharing extends Command
                         }
                     }
                 }
-                sleep(5);
+                sleep(20);
             });
         }
         return Command::SUCCESS;
