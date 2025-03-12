@@ -10273,35 +10273,38 @@ class APIController extends Controller
             $charges = $shipmentData['charges'];
             $shipment = Shipment::where('tracking_number', $tracking_number)->first();
             $shipment_id = $shipment->id;
-            if (!DonePaymentShipment::where('shipment_id', $shipment_id)->whereIn('type', [0, 1])->exists()) {
+            $pending_payment_shipments = PendingPaymentShipment::where('shipment_id', $shipment->id)->whereIn('type', [0, 1])->latest()->first();
+
+            if (!empty($pending_payment_shipments)) {
+
                 ShipmentAdditionalCharges::where('shipment_id', $shipment_id)->update([
-                    'wallet_charges' => $charges,
+                    'wallet_charges' => $request->charges,
                     'wallet_charges_updated_at' => Carbon::now()
                 ]);
-                //$updated_shipments[] = $tracking_number;
-                $pending_payment_shipments = PendingPaymentShipment::where('shipment_id', $shipment->id)->whereIn('type', [0, 1])->latest()->first();
+
                 $finja_request_log = new FinjaRequestLog();
                 $finja_request_log->requested = json_encode($request->all());
                 $finja_request_log->ip_address = $request->ip();
                 $finja_request_log->save();
-                
                 if (!empty($pending_payment_shipments)) {
                     AdminFinanceController::update_payment($shipment_id, $pending_payment_shipments->type);
                 }
             } else {
-                $check_process = DonePaymentShipment::where('shipment_id', $shipment_id)
+                    $check_process = DonePaymentShipment::where('shipment_id', $shipment_id)
                     ->whereIn('type', [0, 1])
                     ->latest()
                     ->whereHas('done_payment', function ($query) {
                         $query->where('status', 0);
+                        $query->where('is_wallet_payment', 1);
                     })
                     ->exists();
+
                     if ($check_process) {
                         ShipmentAdditionalCharges::where('shipment_id', $shipment_id)->update([
                             'wallet_charges' => $request->charges,
                             'wallet_charges_updated_at' => Carbon::now()
                         ]);
-                        //$updated_shipments[] = $tracking_number;
+    
                         $done_payment_shipments = DonePaymentShipment::where('shipment_id', $shipment->id)->whereIn('type', [0, 1])->latest()->first();
                         $finja_request_log = new FinjaRequestLog();
                         $finja_request_log->requested = json_encode($request->all());
@@ -10312,8 +10315,7 @@ class APIController extends Controller
                             AdminFinanceController::update_payment_done_payment($shipment_id, $done_payment_shipments->type, $done_payment_shipments->done_payment_id);
                         }
                     }else{
-                        $errors[] = $tracking_number;
-                        //return response()->json(['status' => 0, 'message' => 'Payment Can not be process now']);
+                        $errors[] =  $tracking_number;
                     }
             }
         }
