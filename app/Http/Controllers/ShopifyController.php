@@ -115,7 +115,6 @@ class ShopifyController extends Controller
                       }
 
                       table.table-bordered tbody tr td {
-                        width: 12.5% !important;
                         border: 1px solid #09262e !important;
                       }
 
@@ -151,7 +150,7 @@ class ShopifyController extends Controller
                             <div class="col-6 text-right"><h3>Invoices for #' . $order['order'] . '</h3></div>
                         </div>
                         <div>
-                            <div><h2>'. $user.'</h2></div>
+                            <div><h4>'. $user.'</h4></div>
                         </div>
                         <div>
                             <div><h5>'. $invoice->address .'</h5></div>
@@ -159,7 +158,7 @@ class ShopifyController extends Controller
                         </div>
                              
                          <div>
-                            <h1>Item Details</h1>
+                            <h4>Item Details</h4>
                          </div>
                              
                              
@@ -213,7 +212,7 @@ class ShopifyController extends Controller
                         </div>
                              
                          <div class="mb-1">
-                            <h1>Payment Details</h1>
+                            <h4>Payment Details</h4>
                          </div>
                              
                          <div>
@@ -243,16 +242,6 @@ class ShopifyController extends Controller
                              </tbody>
                          </table>
                          </div> 
-                         <div class="mb-1">
-                            <h1>Shipping Details</h1>
-                         </div>   
-                         <div>
-                             <div class="border p-2">
-                                <h3 class="">'. $consignee_name .'</h3>
-                                <p>'. $consignee_address .'</p>
-                                <p class="mb-0">Phone: '. $consignee_phone .'</p>
-                            </div>
-                        </div>
                             
                         <div class="mb-2 mt-2">
                             <p>'.  $invoice->message .'</p>

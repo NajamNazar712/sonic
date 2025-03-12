@@ -65,17 +65,15 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <select name="crm_case_nature_id" id="crm_case_nature_id" class="form-control select2" data-rule-required="true" data-msg-required="Case Nature is required">
+                        <select name="crm_case_nature_id[]" id="crm_case_nature_id" class="form-control select2" data-rule-required="true" data-msg-required="Case Nature is required" multiple>
                             @foreach($case_natures as $case_nature)
                                 <option value="{{ $case_nature->id }}" > {{ $case_nature->name }} </option>
                             @endforeach
                         </select>
                     </div>
                     <div class="form-group">
-                        <select name="crm_case_nature_type_id" id="crm_case_nature_type_id" class="form-control select2">
-                            @foreach($cities as $city)
-                                <option value="{{ $city->id }}" > {{ $city->name }} </option>
-                            @endforeach
+                        <select name="crm_case_nature_type_id[]" id="crm_case_nature_type_id" class="form-control select2" data-rule-required="true" data-msg-required="Case Nature Type is required" multiple>
+                          
                         </select>
                     </div>
                 </div>
@@ -97,7 +95,7 @@
                 <div class="modal-header">
                     <h4 class="modal-title" id="">Edit User</h4>
                 </div>
-                <form method="post" id="crm_agent_edit" action="{{route('admin.settings.auto_tagging.update')}}">
+                <form method="post" id="crm_agent_edit"  action="{{route('admin.settings.auto_tagging.submit')}}">
                     @csrf
 
                 <div class="modal-body">
@@ -121,14 +119,14 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <select name="crm_case_nature_id" id="edit_crm_case_nature_id" class="form-control select2"  data-rule-required="true" data-msg-required="Case Nature is required">
+                        <select name="crm_case_nature_id[]" id="edit_crm_case_nature_id" class="form-control select2"  data-rule-required="true" data-msg-required="Case Nature is required" multiple>
                             @foreach($case_natures as $case_nature)
                                 <option value="{{ $case_nature->id }}" > {{ $case_nature->name }} </option>
                             @endforeach
                         </select>
                     </div>
                     <div class="form-group">
-                        <select name="crm_case_nature_type_id" id="edit_crm_case_nature_type_id" class="form-control select2">
+                        <select name="crm_case_nature_type_id[]" id="edit_crm_case_nature_type_id" class="form-control select2" data-rule-required="true" data-msg-required="Case Nature Type is required" multiple>
                         </select>
                     </div>
                     
@@ -147,9 +145,12 @@
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-
-
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">s
+    <style>
+        .select2-search__field{
+            width: 465px !important;
+        }
+    </style>
 @endsection
 
 @section('js')
@@ -171,6 +172,13 @@
                 $('#crm_case_nature_id').val('').trigger('change.select2');
                 $('#crm_case_nature_type_id').val('').trigger('change.select2');
             });
+
+            $('#EditAgentModal').on('hidden.bs.modal', function () {
+                $('#edit_crm_case_nature_id').val([]).trigger('change.select2');
+                $('#edit_crm_case_nature_type_id').val([]).trigger('change.select2');
+                $('#edit_city_area_id').val([]).trigger('change.select2');
+            });
+
             $('#agent_id').prepend('<option selected></option>').select2({
                 width:'100%',
                 placeholder:"Select User",
@@ -188,15 +196,16 @@
                 placeholder:"Select Hub Area",
                 dropdownParent:$('#crm_agent_assign')
             });
-            $('#crm_case_nature_id').prepend('<option selected></option>').select2({
+            $('#crm_case_nature_id').select2({
                 width:'100%',
                 placeholder:"Select Case Nature",
                 allowClear:true,
                 dropdownParent:$('#crm_agent_assign')
             });
-            $('#crm_case_nature_type_id').prepend('<option selected></option>').select2({
+            $('#crm_case_nature_type_id').select2({
                 width:'100%',
                 placeholder:"Select Case Nature Type",
+                allowClear:true,
                 dropdownParent:$('#crm_agent_assign')
             });
 
@@ -226,10 +235,10 @@
             $('#edit_crm_case_nature_type_id').select2({
                 width:'100%',
                 placeholder:"Select Case Nature Type",
+                allowClear:true,
                 dropdownParent:$('#crm_agent_edit')
             });
-            
-            
+
 
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -356,7 +365,6 @@
             $('#crm_case_nature_id').on('change', function() {
 
                 var crm_case_nature_id = $('#crm_case_nature_id').val();
-                $('#crm_case_nature_type_id').empty().trigger('change');
 
                 $.ajax({
                     url:'{!! route("admin.settings.auto_tagging.case_nature_types") !!}',
@@ -369,6 +377,7 @@
 
                     if(result && result.length > 0)
                     {
+                        $('#crm_case_nature_type_id').empty().trigger('change');
                         $.each(result, function(index, option) {
                             var newOption = new Option(option.name, option.id); 
                             $('#crm_case_nature_type_id').append(newOption).trigger('change');
@@ -383,6 +392,8 @@
                 var edit_city_id = $('#edit_city_id').val();
                 $('#edit_city_area_id').empty().trigger('change');
 
+                console.log(city_area_id);
+                
                 $.ajax({
                     url:'{!! route("admin.settings.auto_tagging.hub_areas") !!}',
                     method: 'POST',
@@ -395,9 +406,12 @@
                     if(result && result.length > 0)
                     {
                         $.each(result, function(index, option) {
-                            var newOption = new Option(option.name, option.id); 
-                            $('#edit_city_area_id').append(newOption).trigger('change');
+                            var newOption = new Option(option.name, option.id, false, city_area_id.includes(option.id.toString()));
+
+                            $('#edit_city_area_id').append(newOption);
                         });
+
+                        $('#edit_city_area_id').trigger('change');
                     }
                 })
 
@@ -420,16 +434,35 @@
                     if(result && result.length > 0)
                     {
                         $.each(result, function(index, option) {
-                            var newOption = new Option(option.name, option.id); 
-                            $('#edit_crm_case_nature_type_id').append(newOption).trigger('change');
+                            var newOption = new Option(option.name, option.id);
+
+                            if (case_nature_types.includes(option.id.toString())) {
+                                newOption.selected = true;
+                            }
+                            
+                            $('#edit_crm_case_nature_type_id').append(newOption);
                         });
                     }
                 })
-
             });
 
+            var case_nature_types = null;
+            var city_area_id = [];
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.edit', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
+                case_nature_types = $(this).data('case_nature_type_ids');
+    
+                if (typeof case_nature_types === 'string') {
+                    case_nature_types = case_nature_types.replace(/\\"/g, '"');  
+                    case_nature_types = JSON.parse(case_nature_types);  
+                }
+
+                var case_nature_ids = $(this).data('case_nature_ids');
+                if (typeof case_nature_ids === 'string') {
+                    case_nature_ids = case_nature_ids.replace(/\\"/g, '"');     
+                    case_nature_ids = JSON.parse(case_nature_ids);  
+                }
+
                 $.ajax({
                     url:'{!! route("admin.settings.auto_tagging.data") !!}',
                     method: 'POST',
@@ -447,16 +480,19 @@
                         $('#edit_city_area_id').append(newOption).trigger('change');
                     });
 
-                    $.each(data.crm_case_nature_types, function(index, option) {
-                        var newOption = new Option(option.name, option.id); 
-                        $('#edit_crm_case_nature_type_id').append(newOption).trigger('change');
+                    case_nature_ids = case_nature_ids.map(function(item) {
+                        return String(item).trim(); 
                     });
 
+                    case_nature_types = case_nature_types.map(function(item) {
+                        return String(item).trim(); 
+                    });
+
+                    
+                    city_area_id = data.city_area_id ? [data.city_area_id.toString()] : [];
                     $('#edit_agent_id').val(data.agent_id).change();
                     $('#edit_city_id').val(data.city_id).change();
-                    $('#edit_city_area_id').val(data.city_area_id).change();
-                    $('#edit_crm_case_nature_id').val(data.crm_case_nature_id).change();
-                    $('#edit_crm_case_nature_type_id').val(data.crm_case_nature_type_id).change();
+                    $('#edit_crm_case_nature_id').val(case_nature_ids).change();
                     $('#crm_agent_id').val(data.crm_agent_id);
                     
                     $('#EditAgentModal').modal('show');

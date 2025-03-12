@@ -49,6 +49,7 @@
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Account No.</th>
                         <th class="border-primary border-darken-1">Client Name</th>
+                        <th class="border-primary border-darken-1">CNIC</th>
                         <th class="border-primary border-darken-1">NTN Number</th>
                         <th class="border-primary border-darken-1">Charges w/o GST</th>
                         <th class="border-primary border-darken-1">GST</th>
@@ -171,6 +172,7 @@
                             head.push('S. No');
                             head.push('Account No.');
                             head.push('Client Name');
+                            head.push('CNIC');
                             head.push('NTN Number');
                             head.push('Charges w/o GST');
                             head.push('GST');
@@ -182,6 +184,7 @@
                                 row.push(index + 1);
                                 row.push(values.account_no);
                                 row.push(values.user_name);
+                                row.push(values.cnic);
                                 row.push(values.ntn_number);
                                 row.push(values.w_o_gst);
                                 row.push(values.gst);
@@ -230,6 +233,7 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'account_no', name: 'u.id', class: 'align-middle account_no', orderable: false, searchable: false},
                     {data: 'user_name', name: 'u.name', class: 'align-middle user_name', orderable: false, searchable: false},
+                    {data: 'cnic', name: 'u.cnic', class: 'align-middle cnic', orderable: false, searchable: false},
                     {data: 'ntn_number', name: 'u.ntn_no', class: 'align-middle ntn_number', orderable: false, searchable: false},
                     {data: 'w_o_gst', name: 'w_o_gst', class: 'align-middle text-center w_o_gst', orderable: false, searchable: false},
                     {data: 'gst', name: 'gst', class: 'align-middle gst', orderable: false, searchable: false},

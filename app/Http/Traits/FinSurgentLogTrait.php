@@ -16,7 +16,7 @@ use App\Http\Models\UserIbftCharge;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentServicesCharges;
-use App\Http\Controllers\AdminFinanceController;
+use App\Http\Controllers\Admins\AdminFinanceController;
 use App\ShipmentAdditionalCharges;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
@@ -50,14 +50,13 @@ trait FinSurgentLogTrait
             }
 
             if($token) {
+                FingaIntegrationController::apiLog('log-request', 1, $requestPayload ,$shipmentId);
                 $response = Http::withHeaders([
                     'accept' => 'application/json',
                     'Authorization' => "Bearer " . $token,
                 
                 ])->post($api.'transactions/log/payment', $requestPayload);
-    
-                FingaIntegrationController::apiLog('log-request', 1, $requestPayload ,$shipmentId);
-    
+
                 if($response->successful()) { 
                     
                     $body = $response->getBody();
@@ -120,7 +119,7 @@ trait FinSurgentLogTrait
         $pending_payment_id = 0;
         if ($charges != $pending_payment_shipment->charges) {
             if ($shipment->business_category_id == 1) {
-                $gst = ROUND(($charges * \App\Http\Controllers\Admins\AdminFinanceController::gst($shipment->pickup_address->city->zone_id, $shipment->pickup_address->city_id)), 2, PHP_ROUND_HALF_DOWN);
+                $gst = ROUND(($charges * AdminFinanceController::gst($shipment->pickup_address->city->zone_id, $shipment->pickup_address->city_id)), 2, PHP_ROUND_HALF_DOWN);
             } else {
                 $gst = ROUND(($charges * AdminFinanceController::international_gst()), 2, PHP_ROUND_HALF_DOWN);
             }

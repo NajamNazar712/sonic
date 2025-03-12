@@ -42,4 +42,9 @@ class CrmAgentAutoAssign extends Model
     public function shipment_statuses() {
         return $this->hasMany('App\Http\Models\Admin\CrmAgentAutoAssignShipStatus', 'agent_id', 'agent_id');
     }
+
+    public function agent_admin()
+    {
+        return $this->belongsTo('App\Http\Models\Admin\Admin','agent_id','id');
+    }
 }
