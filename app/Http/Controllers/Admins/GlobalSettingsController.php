@@ -6433,7 +6433,6 @@ class GlobalSettingsController extends Controller
         $existingRecords = CrmAutoTagUser::where('city_id', $request->city_id)
             ->where('city_area_id', $request->city_area_id)
             ->where('admin_id', $request->admin_id)
-            ->where('status', 1)
             ->whereIn('crm_case_nature_type_id', $crm_case_nature_type_ids)
             ->pluck('crm_case_nature_type_id')
             ->toArray();
@@ -6441,7 +6440,6 @@ class GlobalSettingsController extends Controller
         $existingUsers = CrmAutoTagUser::where('city_id', $request->city_id)
             ->where('city_area_id', $request->city_area_id)
             ->where('admin_id', $request->admin_id)
-            ->where('status', 1)
             ->with('admin')
             ->get(['crm_case_nature_type_id', 'admin_id']);
     
@@ -6469,25 +6467,19 @@ class GlobalSettingsController extends Controller
             CrmAutoTagUser::insert($newEntries);
         }
     
-        $entriesToDelete = CrmAutoTagUser::where('city_id', $request->city_id)
+        if(empty($existingRecords) && empty($existingUsers)){
+            CrmAutoTagUser::where('city_id', $request->city_id)
             ->where('city_area_id', $request->city_area_id)
             ->where('admin_id', $request->admin_id)
             ->whereNotIn('crm_case_nature_type_id', $crm_case_nature_type_ids)
             ->delete();
-    
-        if (!empty($newEntries) && !empty($existingUserNames)) {
-            return redirect()->back()->with('error', 
-                "New agents have been added successfully! However, the following users were already tagged before: $existingUserNames"
-            );
-        } elseif (!empty($newEntries)) {
+        }else{
             return redirect()->back()->with('success', 'Agent(s) added successfully!');
-        } elseif ($entriesToDelete > 0) {
-            return redirect()->back()->with('success', 'Agent(s) removed successfully!');
-        } else {
-            return redirect()->back()->with('error', 
-                "All selected users are already tagged. Existing tagged users: $existingUserNames"
-            );
+
         }
+      
+        return redirect()->back()->with('success', 'Agent(s) added successfully!');
+
     }
     
     public function crm_auto_tagging_data(Request $request)
