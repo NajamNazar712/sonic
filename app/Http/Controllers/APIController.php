@@ -10206,10 +10206,11 @@ class APIController extends Controller
                 }
             }else{
                 $check_process = DonePaymentShipment::where('shipment_id', $shipment_id)
+                    ->whereIn('type', [0, 1])
+                    ->latest()
                     ->whereHas('done_payment', function ($query) {
                         $query->where('status', 0);
                     })
-                    ->whereIn('type', [0, 1])
                     ->exists();
 
                 if ($check_process) {
@@ -10299,10 +10300,11 @@ class APIController extends Controller
                 }
             } else {
                 $check_process = DonePaymentShipment::where('shipment_id', $shipment_id)
+                    ->whereIn('type', [0, 1])
+                    ->latest()
                     ->whereHas('done_payment', function ($query) {
                         $query->where('status', 0);
                     })
-                    ->whereIn('type', [0, 1])
                     ->exists();
                     if ($check_process) {
                         ShipmentAdditionalCharges::where('shipment_id', $shipment_id)->update([
