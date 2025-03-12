@@ -70,7 +70,7 @@ class AutoDeliveryNoteVerify extends Command
                         $excluded_hubs = array_map('intval', explode(',', $excluded_hubs_setting->text));
                     }
     
-                    $delivery_notes = DeliveryNote::whereDate('created_at', '>=', '2025-01-21')->whereDate('created_at', '<=', '2025-02-21')->where(['status' => 1, 'pending_status' => 1])->whereNotIn('hub_id', $excluded_hubs);
+                    $delivery_notes = DeliveryNote::whereDate('created_at', '>=', $date)->where(['status' => 0, 'pending_status' => 1])->whereNotIn('hub_id', $excluded_hubs);
                     if ($delivery_notes->exists()) {
                         $deliveryNoteShipmentsId = DeliveryNoteShipment::whereIn('delivery_note_id', $delivery_notes->pluck('id'))
                             ->distinct()
@@ -84,7 +84,7 @@ class AutoDeliveryNoteVerify extends Command
                             $shipmentChunk = array_slice($deliveryNoteShipmentsId, $offset, $chunkSize);
                             // Fetch all relevant shipments in one go 
                             $shipments = Shipment::whereIn('id', $shipmentChunk)
-                                ->whereIn('shipper_status_id', [14,12])
+                                ->whereNotIn('shipper_status_id', [30, 36, 37, 56])
                                 ->where('booking_type_id', '!=', 6)
                                 ->select('id', 'shipper_status_id', 'booking_type_id', 'packaging_material_request', 'packaging_material_charges', 'shipment_type')
                                 ->get(); 
@@ -99,7 +99,7 @@ class AutoDeliveryNoteVerify extends Command
                                 
                             foreach ($shipments as $shipment) {
                                 $journey =  $shipment->latest_shipment_journey;
-                                // ShipmentsJourneyController::add($journey->shipment_id, $journey->shipper_status_id, $journey->consignee_status_id, $journey->status_reason_id, $journey->remarks, $journey->user_id, 346, $journey->reference_1_id, $journey->reference_2_id, 1, $journey->received_or_refused_by, $journey->rider_id, $journey->cnic, $journey->relation);
+                                ShipmentsJourneyController::add($journey->shipment_id, $journey->shipper_status_id, $journey->consignee_status_id, $journey->status_reason_id, $journey->remarks, $journey->user_id, 346, $journey->reference_1_id, $journey->reference_2_id, 1, $journey->received_or_refused_by, $journey->rider_id, $journey->cnic, $journey->relation);
     
                                 if ($shipment->shipper_status_id == 14) {
                                    
@@ -134,7 +134,7 @@ class AutoDeliveryNoteVerify extends Command
                                             AdminFinanceController::done_payment($shipment->id, 1);
                                         }
                                     }
-                                    // ShipmentsJourneyController::add($shipment->id, 20, 20, $journey->status_reason_id, $journey->remarks, NULL, $globalAdminId, null, null, 1, null, null, null, null, null);
+                                    ShipmentsJourneyController::add($shipment->id, 20, 20, $journey->status_reason_id, $journey->remarks, NULL, $globalAdminId, null, null, 1, null, null, null, null, null);
                                     $shipment->save();
     
                                     //Remove Shipment from RV Shipment Ticket
@@ -144,7 +144,7 @@ class AutoDeliveryNoteVerify extends Command
                             }
                         }
                         $current_time = Carbon::now();
-                        // DeliveryNote::whereIn('id', $delivery_notes->pluck('id'))->update(['verified_by' => 346, 'status' => 1, 'last_updated_at' => $current_time, 'status_verified_at' => $current_time]);
+                        DeliveryNote::whereIn('id', $delivery_notes->pluck('id'))->update(['verified_by' => 346, 'status' => 1, 'last_updated_at' => $current_time, 'status_verified_at' => $current_time]);
                         
                     }
                     // if($delivery_notes->exists()){
