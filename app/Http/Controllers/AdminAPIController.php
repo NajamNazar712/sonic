@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\DailyVisit;
 use App\Http\Controllers\Admins\AdminCargoManifestController;
+use App\Http\Controllers\Admins\AdminCRMController;
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\Admins\CheckDisputeShipmentsController;
 use App\Http\Controllers\Admins\DeliveryController;
@@ -11617,7 +11618,11 @@ class AdminAPIController extends Controller
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id', 1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id', 1)->get();
         $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id', 1)->get();
-        return response()->json(['status' => 0, 'case_nature' => $case_nature, 'channels' => $channels, 'complaints' => $case_nature_type_complaints, 'service_requests' => $case_nature_type_service_requests, 'claims' => $case_nature_type_claims]);
+        $complainants = [
+            ['id' => 1, 'complainant_type' => 'Consignee'],
+            ['id' => 2, 'complainant_type' => 'Shipper'],
+        ];
+        return response()->json(['status' => 0, 'case_nature' => $case_nature, 'channels' => $channels, 'complaints' => $case_nature_type_complaints, 'service_requests' => $case_nature_type_service_requests, 'claims' => $case_nature_type_claims, 'complainants' => $complainants]);
     }
 
     public function crm_request_submit(Request $request)
@@ -11629,6 +11634,8 @@ class AdminAPIController extends Controller
             'case_nature_type_id' => ['required'],
             'channel_id' => ['required'],
             'description' => ['required'],
+            'case_nature_complainant' => ['required_if:case_nature_id,1'],
+            'complainant_phone' => ['required_if:case_nature_id,1'],
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -11719,6 +11726,9 @@ class AdminAPIController extends Controller
                                 $shipment->save();
                             }
                         }
+                    }
+                    if($nature_id == 1 && !empty($request->case_nature_complainant)  && !empty($request->complainant_phone)){
+                        AdminCRMController::updateComplaintPhone(CrmRequest::max('id'), $request->case_nature_complainant, $request->complainant_phone);
                     }
                     return response()->json(['status' => 0, 'message' => 'Request(s) successfully added']);
                 }

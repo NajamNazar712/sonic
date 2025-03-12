@@ -8,11 +8,12 @@ use App\Http\Controllers\Controller;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Models\InternationalEconomyStandardRetailRate;
+use App\Http\Traits\CommonTrait;
 use Illuminate\Support\Facades\Auth;
 
 class InternationalEconomyStandardRatesController extends Controller
 {
-
+    use CommonTrait;
     public function __construct()
     {
         $this->middleware('auth:admin');
@@ -22,14 +23,19 @@ class InternationalEconomyStandardRatesController extends Controller
     public function index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 800);
-
-        return view('admin.retail.international_economy_rates.index');
+        $zoneColumnsArray = $this->zoneMarginColumnName()['zoneColumnArray'];
+        
+        return view('admin.retail.international_economy_rates.index', compact('zoneColumnsArray'));
     }
 
     public function list(Request $request)
     {
+        $zoneColumnsArray = $this->zoneMarginColumnName()['zoneColumnArray'];
 
-        $rates_list = InternationalEconomyStandardRetailRate::select('id', 'range_up', 'range_down', 'zone_1', 'zone_2', 'zone_3', 'zone_4', 'zone_5', 'zone_6', 'zone_7', 'zone_8', 'zone_9', 'zone_10', 'zone_11', 'zone_1b', 'zone_8b');
+        $rates_list = InternationalEconomyStandardRetailRate::select(
+            array_merge(['id', 'range_up', 'range_down'], $zoneColumnsArray)
+        );
+
         if ($request->shipping_mode_id == 1) {
             $rates_list = $rates_list->where('shipping_mode_id', 1);
         } else if ($request->shipping_mode_id == 2) {
@@ -44,25 +50,15 @@ class InternationalEconomyStandardRatesController extends Controller
 
     public function upload_excel(Request $request)
     {
-        $names = [
+        $zoneColumnsArray = $this->zoneMarginColumnName()['zoneColumnArray'];
+        
+        $names = array_merge([
             'range_up' => 'Range Up',
             'range_down' => 'Range Down',
-            /*   'shipping_mode_id' => 'Shipping Mode',*/
-            'zone_1' => 'Zone 1A',
-            'zone_1b' => 'Zone 1B',
-            'zone_2' => 'Zone 2',
-            'zone_3' => 'Zone 3',
-            'zone_4' => 'Zone 4',
-            'zone_5' => 'Zone 5',
-            'zone_6' => 'Zone 6',
-            'zone_7' => 'Zone 7',
-            'zone_8' => 'Zone 8A',
-            'zone_8b' => 'Zone 8B',
-            'zone_9' => 'Zone 9',
-            'zone_10' => 'Zone 10',
-            'zone_11' => 'Zone 11',
-
-        ];
+        ], array_combine(
+            $zoneColumnsArray,
+            array_map(fn($zone) => ucwords(str_replace('_', ' ', $zone)), $zoneColumnsArray)
+        ));
 
         $messages = [
             'required' => ':attribute is Required.',
@@ -72,73 +68,42 @@ class InternationalEconomyStandardRatesController extends Controller
         $rules = [
             'range_up' => ['required', 'numeric', 'between:0.01,300' /*Rule::exists('international_standard_retail_rates', 'range_up')*/],
             'range_down' => ['required', 'numeric', 'between:0.01,300'/*, Rule::exists('international_standard_retail_rates', 'range_down')*/],
-            /* 'shipping_mode_id' => ['required', 'numeric', 'between:1,3'],*/
-            'zone_1' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_2' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_3' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_4' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_5' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_6' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_7' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_8' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_9' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_10' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_11' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_1b' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_8b' => ['required', 'numeric', 'between:0,1000000'],
         ];
-
-        $fields = [
-            0  => 'range_up',
-            1  => 'range_down',
-            2  => 'zone_1',
-            3  => 'zone_1b', // Moved zone_1b next to zone_1
-            4  => 'zone_2',
-            5  => 'zone_3',
-            6  => 'zone_4',
-            7  => 'zone_5',
-            8  => 'zone_6',
-            9  => 'zone_7',
-            10 => 'zone_8',
-            11 => 'zone_8b', // Moved zone_8b next to zone_8
-            12 => 'zone_9',
-            13 => 'zone_10',
-            14 => 'zone_11'
-        ];
-
+         
+            // Add zone rules dynamically
+        foreach ($zoneColumnsArray as $zone) {
+            $rules[$zone] = ['required', 'numeric', 'between:0,1000000'];
+        }
+        $fields = array_merge([
+            0 => 'range_up',
+            1 => 'range_down'
+        ], array_values($zoneColumnsArray));
+        
+        $fields = array_values(array_keys($names));
         if ($file = $request->file('document_rates')) {
             $spreadsheet = IOFactory::createReaderForFile($file);
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
-            $header = [
+            $header = array_merge([
                 'Range Up',
-                'Range Down',
-                'Zone 1A',
-                'Zone 1B', // Moved Zone 1B next to Zone 1
-                'Zone 2',
-                'Zone 3',
-                'Zone 4',
-                'Zone 5',
-                'Zone 6',
-                'Zone 7',
-                'Zone 8A',
-                'Zone 8B', // Moved Zone 8B next to Zone 8
-                'Zone 9',
-                'Zone 10',
-                'Zone 11'
-            ];
+                'Range Down'
+            ], array_map(function ($zone) {
+                return ucwords(str_replace('_', ' ', $zone)); 
+            }, $zoneColumnsArray));
+            
             if (isset($spreadsheet)) {
                 $header_correct = true;
-
+                
                 foreach ($spreadsheet[0] as $index => $header_value) {
-                    if ($index == 13) {
+                    
+                    if ($index == count($header)) {
                     } elseif (!isset($header[$index]) || $header_value != $header[$index]) {
                         $header_correct = false;
                         break;
                     }
                 }
-
+                
                 if (!$header_correct) {
                     return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
                 } else {
@@ -208,41 +173,22 @@ class InternationalEconomyStandardRatesController extends Controller
                         $row_id = $key + 2;
                         $range_up = trim($row['range_up']);
                         $range_down = trim($row['range_down']);
-                        $zone_1 = trim($row['zone_1']);
-                        $zone_2 = trim($row['zone_2']);
-                        $zone_3 = trim($row['zone_3']);
-                        $zone_4 = trim($row['zone_4']);
-                        $zone_5 = trim($row['zone_5']);
-                        $zone_6 = trim($row['zone_6']);
-                        $zone_7 = trim($row['zone_7']);
-                        $zone_8 = trim($row['zone_8']);
-                        $zone_9 = trim($row['zone_9']);
-                        $zone_10 = trim($row['zone_10']);
-                        $zone_11 = trim($row['zone_11']);
-                        $zone_1b = trim($row['zone_1b']);
-                        $zone_8b = trim($row['zone_8b']);
 
+                        // Create new record
                         $standard_rate = new InternationalEconomyStandardRetailRate();
                         $standard_rate->range_up = $range_up;
                         $standard_rate->range_down = $range_down;
                         $standard_rate->shipping_mode_id = $shipping_mode_id;
-                        $standard_rate->zone_1 = $zone_1;
-                        $standard_rate->zone_2 = $zone_2;
-                        $standard_rate->zone_3 = $zone_3;
-                        $standard_rate->zone_4 = $zone_4;
-                        $standard_rate->zone_5 = $zone_5;
-                        $standard_rate->zone_6 = $zone_6;
-                        $standard_rate->zone_7 = $zone_7;
-                        $standard_rate->zone_8 = $zone_8;
-                        $standard_rate->zone_9 = $zone_9;
-                        $standard_rate->zone_10 = $zone_10;
-                        $standard_rate->zone_11 = $zone_11;
-                        $standard_rate->zone_1b = $zone_1b;
-                        $standard_rate->zone_8b = $zone_8b;
+
+                        // Dynamically assign zone values
+                        foreach ($zoneColumnsArray as $zoneColumn) {
+                            if (isset($row[$zoneColumn])) {
+                                $standard_rate->$zoneColumn = trim($row[$zoneColumn]);
+                            }
+                        }
+
                         $standard_rate->save();
                         $created++;
-
-
                     }
                     $error_msg = '';
                     if ($not_updated > 1) {

@@ -87,7 +87,7 @@
                                 shipment += '<div class="mt-4 border-primary">';
                                 shipment += '<div class="d-flex align-items-center bg-primary">';
                                 shipment += '<div class="m-1 font-medium-3 white">' + details.tracking_number + '</div>';
-                                shipment += '<button class="btn btn-secondary ml-auto mr-0 mr-sm-1 add_request" id=' + id + ' data-tracking=' + details.tracking_number + '>Add Request</button>';
+                                shipment += '<button class="btn btn-secondary ml-auto mr-0 mr-sm-1 add_request" id=' + id + ' data-tracking=' + details.tracking_number + '>Get Request</button>';
                                 shipment += '</div>';
 
                                 shipment += '<div class="p-1">';
@@ -420,7 +420,7 @@ data-open="click" data-menu="vertical-overlay-menu" data-col="2-columns">
       <div class="modal-dialog modal-lg" role="document">
           <div class="modal-content">
               <div class="modal-header bg-primary white">
-                  <h4 class="modal-title white">Add Request</h4>
+                  <h4 class="modal-title white">Get Request</h4>
                   <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                       <span aria-hidden="true">&times;</span>
                   </button>
