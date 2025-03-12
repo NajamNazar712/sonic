@@ -37,6 +37,18 @@
                     </fieldset>
                 </div>
             </div>
+
+            <div class="row">
+                <div class="col-12" style ="display:{{(($isHub == 0) ? 'none' : 'block')}}" id="province_selection">
+                    <fieldset class="form-group">
+                        <select name="province_id" id="province" class="form-control select2" data-rule-required="true" data-msg-required="Zone is required">
+                            @foreach($provinces as $province)
+                                <option value="{{ $province->id }}" @if ($province->id == $city->province_id) selected="selected" @endif>{{ $province->name }}</option>
+                            @endforeach
+                        </select>
+                    </fieldset>
+                </div>
+            </div>
         </div>
         <div class="col-6">
             <div class="row mb-2">
@@ -352,6 +364,11 @@
             width:'100%'
         });
 
+        $('#province').select2({
+            placeholder: 'Zone',
+            width:'100%'
+        });
+
         $('#closest_hub_list1').prepend('<option value="" selected></option>').select2({
             placeholder: 'Select Closest Hub',
             dropdownParent: $("#editCity"),
@@ -427,6 +444,7 @@
                                 $('#dynamic_hub_fields').toggle('slow');
 
                                 $('#zone_selection').toggle('slow');
+                                $('#province_selection').toggle('slow');
                             }
                         }
                     });
@@ -440,6 +458,7 @@
                         $('#dynamic_hub_fields').toggle('slow');
 
                         $('#zone_selection').toggle('slow');
+                        $('#province_selection').toggle('slow');
                     }
                 }
             }else if(rtype == 'hub'){
@@ -452,6 +471,7 @@
                     $('#dynamic_hub_fields').toggle('slow');
 
                     $('#zone_selection').toggle('slow');
+                    $('#province_selection').toggle('slow');
                 }
 
             }
