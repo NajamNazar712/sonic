@@ -6443,10 +6443,6 @@ class GlobalSettingsController extends Controller
             ->with('admin')
             ->get(['crm_case_nature_type_id', 'admin_id']);
     
-        $existingUserNames = $existingUsers->map(function ($record) {
-            return $record->admin->name ?? "Unknown"; 
-        })->unique()->implode(', '); 
-    
         $newEntries = [];
         foreach ($parent_nature_ids as $type_id => $parent_id) {
             if (!in_array($type_id, $existingRecords)) { 
