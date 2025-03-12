@@ -10190,21 +10190,19 @@ class APIController extends Controller
         } else {
             $shipment = Shipment::where('tracking_number', $request->tracking_number)->first();
             $shipment_id = $shipment->id;
+
+            ShipmentAdditionalCharges::where('shipment_id', $shipment_id)->update([
+                'wallet_charges' => $request->charges,
+                'wallet_charges_updated_at' => Carbon::now()
+            ]);
+            $finja_request_log = new FinjaRequestLog();
+            $finja_request_log->requested = json_encode($request->all());
+            $finja_request_log->ip_address = $request->ip();
+            $finja_request_log->save();
+
             $pending_payment_shipments = PendingPaymentShipment::where('shipment_id', $shipment->id)->whereIn('type', [0, 1])->latest()->first();
             if (!empty($pending_payment_shipments)) {
-
-                ShipmentAdditionalCharges::where('shipment_id', $shipment_id)->update([
-                    'wallet_charges' => $request->charges,
-                    'wallet_charges_updated_at' => Carbon::now()
-                ]);
-
-                $finja_request_log = new FinjaRequestLog();
-                $finja_request_log->requested = json_encode($request->all());
-                $finja_request_log->ip_address = $request->ip();
-                $finja_request_log->save();
-                if (!empty($pending_payment_shipments)) {
-                    AdminFinanceController::update_payment($shipment_id, $pending_payment_shipments->type);
-                }
+                AdminFinanceController::update_payment($shipment_id, $pending_payment_shipments->type);
             }else{
                 $check_process = DonePaymentShipment::where('shipment_id', $shipment_id)
                     ->whereIn('type', [0, 1])
@@ -10216,17 +10214,7 @@ class APIController extends Controller
                     ->exists();
 
                 if ($check_process) {
-                    ShipmentAdditionalCharges::where('shipment_id', $shipment_id)->update([
-                        'wallet_charges' => $request->charges,
-                        'wallet_charges_updated_at' => Carbon::now()
-                    ]);
-
                     $done_payment_shipments = DonePaymentShipment::where('shipment_id', $shipment->id)->whereIn('type', [0, 1])->latest()->first();
-                    $finja_request_log = new FinjaRequestLog();
-                    $finja_request_log->requested = json_encode($request->all());
-                    $finja_request_log->ip_address = $request->ip();
-                    $finja_request_log->save();
-
                     if (!empty($done_payment_shipments)) {
                         AdminFinanceController::update_payment_done_payment($shipment_id, $done_payment_shipments->type, $done_payment_shipments->done_payment_id);
                     }
