@@ -10205,7 +10205,7 @@ class APIController extends Controller
                     AdminFinanceController::update_payment($shipment_id, $pending_payment_shipments->type);
                 }
             }else{
-                $check_process = !DonePaymentShipment::where('shipment_id', $shipment_id)
+                $check_process = DonePaymentShipment::where('shipment_id', $shipment_id)
                     ->whereHas('done_payment', function ($query) {
                         $query->where('status', 0);
                     })
