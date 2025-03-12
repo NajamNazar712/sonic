@@ -10190,13 +10190,14 @@ class APIController extends Controller
         } else {
             $shipment = Shipment::where('tracking_number', $request->tracking_number)->first();
             $shipment_id = $shipment->id;
-            if (!DonePaymentShipment::where('shipment_id', $shipment_id)->whereIn('type', [0, 1])->exists()) {
+            $pending_payment_shipments = PendingPaymentShipment::where('shipment_id', $shipment->id)->whereIn('type', [0, 1])->latest()->first();
+            if (!empty($pending_payment_shipments)) {
 
                 ShipmentAdditionalCharges::where('shipment_id', $shipment_id)->update([
                     'wallet_charges' => $request->charges,
                     'wallet_charges_updated_at' => Carbon::now()
                 ]);
-                $pending_payment_shipments = PendingPaymentShipment::where('shipment_id', $shipment->id)->whereIn('type', [0, 1])->latest()->first();
+
                 $finja_request_log = new FinjaRequestLog();
                 $finja_request_log->requested = json_encode($request->all());
                 $finja_request_log->ip_address = $request->ip();
@@ -10210,6 +10211,7 @@ class APIController extends Controller
                     ->latest()
                     ->whereHas('done_payment', function ($query) {
                         $query->where('status', 0);
+                        $query->where('is_wallet_payment', 1);
                     })
                     ->exists();
 
