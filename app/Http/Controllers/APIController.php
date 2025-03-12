@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\FafCharges;
 use App\FinjaSmsLog;
+use App\Http\Controllers\Admins\AdminCRMController;
 use App\Http\Models\PendingPaymentShipment;
 use App\Http\Models\WalletUser;
 use App\Models\FinjaRequestLog;
@@ -4857,6 +4858,9 @@ class APIController extends Controller
                         if ($shipment->exists()) {
                             $shipment = $shipment->first();
                             $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description);
+                            if($nature_id == 1 && !empty($request->case_nature_complainant)){
+                                AdminCRMController::updateComplaintPhone(CrmRequest::max('id'), $request->case_nature_complainant, $request->complainant_phone);
+                            }
                             return response()->json(['status' => 0, 'message' => 'CRM Request has been added', 'id' => $crm_request]);
                         } else {
                             return response()->json(['status' => 1, 'message' => 'Tracking Number not found!']);

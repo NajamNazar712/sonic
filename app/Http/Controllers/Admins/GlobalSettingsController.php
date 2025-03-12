@@ -172,10 +172,17 @@ use App\Http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
 use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyBlacklisted;
 use App\RvShipmentTicket;
 use App\Http\Models\CrmCaseNatureRemark;
+use App\Http\Models\InternationalUserRate;
+use App\Models\InternationalZonalMarginColumn;
 use App\Models\WalletShipperSetting;
+use Illuminate\Support\Str;
+use App\Http\Traits\CommonTrait;
+use App\ChangeLogs;
 
 class GlobalSettingsController extends Controller
 {
+    use CommonTrait;
+
     public function __construct()
     {
         $this->middleware('auth:admin');
@@ -4667,40 +4674,34 @@ class GlobalSettingsController extends Controller
 
     public function international_rates_upload_index()
     {
+        $zoneColumnsArray = $this->zoneMarginColumnName()['zoneColumnArray'];
         ActivityTrailController::createActivityTrailLog(Auth::id(), 381);
-        return view('admin.settings.international.excel_upload');
+        return view('admin.settings.international.excel_upload',compact('zoneColumnsArray'));
     }
 
     public function international_standard_dhl_rates_list(Request $request)
     {
+        $zoneColumnsArray = $this->zoneMarginColumnName()['zoneColumnArray'];
+
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 382);
         }
-        $rates_list = InternationalStandardDhlRate::select('id', 'range_up', 'range_down', 'zone_1', 'zone_2', 'zone_3', 'zone_4', 'zone_5', 'zone_6', 'zone_7', 'zone_8', 'zone_9', 'zone_10', 'zone_11', 'zone_1b', 'zone_8b');
-
+        $rates_list = InternationalStandardDhlRate::select(
+            array_merge(['id', 'range_up', 'range_down'], $zoneColumnsArray)
+        );
         return Datatables::of($rates_list)->make(true);
     }
 
     public function international_rates_upload_excel(Request $request)
     {
-
-        $names = [
+        $zoneColumnsArray = $this->zoneMarginColumnName()['zoneColumnArray'];
+        $names = array_merge([
             'range_up' => 'Range Up',
             'range_down' => 'Range Down',
-            'zone_1' => 'Zone 1A',
-            'zone_1b' => 'Zone 1B',
-            'zone_2' => 'Zone 2',
-            'zone_3' => 'Zone 3',
-            'zone_4' => 'Zone 4',
-            'zone_5' => 'Zone 5',
-            'zone_6' => 'Zone 6',
-            'zone_7' => 'Zone 7',
-            'zone_8' => 'Zone 8A',
-            'zone_8b' => 'Zone 8B',
-            'zone_9' => 'Zone 9',
-            'zone_10' => 'Zone 10',
-            'zone_11' => 'Zone 11',
-        ];
+        ], array_combine(
+            $zoneColumnsArray,
+            array_map(fn($zone) => ucwords(str_replace('_', ' ', $zone)), $zoneColumnsArray)
+        ));
 
         $messages = [
             'required' => ':attribute is Required.',
@@ -4708,41 +4709,26 @@ class GlobalSettingsController extends Controller
             'exists' => 'Given :attribute is Invalid.',
         ];
         $rules = [
-            'range_up' => ['required', 'numeric', 'between:0.01,300', Rule::exists('international_standard_dhl_rates', 'range_up')],
-            'range_down' => ['required', 'numeric', 'between:0.01,300', Rule::exists('international_standard_dhl_rates', 'range_down')],
-            'zone_1' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_1b' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_2' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_3' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_4' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_5' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_6' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_7' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_8' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_8b' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_9' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_10' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_11' => ['required', 'numeric', 'between:0,1000000'],
-
+            'range_up' => [
+                'required',
+                'numeric',
+                'between:0.01,300',
+                Rule::exists('international_standard_dhl_rates', 'range_up')
+            ],
+            'range_down' => [
+                'required',
+                'numeric',
+                'between:0.01,300',
+                Rule::exists('international_standard_dhl_rates', 'range_down')
+            ]
         ];
-
-        $fields = [
+        foreach ($zoneColumnsArray as $zone) {
+            $rules[$zone] = ['required', 'numeric', 'between:0,1000000'];
+        }
+        $fields = array_merge([
             0 => 'range_up',
-            1 => 'range_down',
-            2 => 'zone_1',
-            3 => 'zone_1b', // Moved zone_1b next to zone_1
-            4 => 'zone_2',
-            5 => 'zone_3',
-            6 => 'zone_4',
-            7 => 'zone_5',
-            8 => 'zone_6',
-            9 => 'zone_7',
-            10 => 'zone_8',
-            11 => 'zone_8b', // Moved zone_8b next to zone_8
-            12 => 'zone_9',
-            13 => 'zone_10',
-            14 => 'zone_11'
-        ];
+            1 => 'range_down'
+        ], array_values($zoneColumnsArray));
 
 
         if ($file = $request->file('rates')) {
@@ -4750,29 +4736,18 @@ class GlobalSettingsController extends Controller
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
-            $header = [
+            $header = array_merge([
                 'Range Up',
-                'Range Down',
-                'Zone 1A',
-                'Zone 1B', // Moved Zone 1B next to Zone 1
-                'Zone 2',
-                'Zone 3',
-                'Zone 4',
-                'Zone 5',
-                'Zone 6',
-                'Zone 7',
-                'Zone 8A',
-                'Zone 8B', // Moved Zone 8B next to Zone 8
-                'Zone 9',
-                'Zone 10',
-                'Zone 11'
-            ];
+                'Range Down'
+            ], array_map(function ($zone) {
+                return ucwords(str_replace('_', ' ', $zone));
+            }, $zoneColumnsArray));
 
             if (isset($spreadsheet)) {
                 $header_correct = true;
 
                 foreach ($spreadsheet[0] as $index => $header_value) {
-                    if ($index == 12) {
+                    if ($index == count($header)) {
                     } elseif (!isset($header[$index]) || $header_value != $header[$index]) {
                         $header_correct = false;
                         break;
@@ -4832,6 +4807,7 @@ class GlobalSettingsController extends Controller
                         }
                     }
                 }
+              
                 if (empty($errors)) {
                     $updated = 0;
                     $not_updated = 0;
@@ -4839,36 +4815,16 @@ class GlobalSettingsController extends Controller
                         $row_id = $key + 2;
                         $range_up = trim($row['range_up']);
                         $range_down = trim($row['range_down']);
-                        $zone_1 = trim($row['zone_1']);
-                        $zone_2 = trim($row['zone_2']);
-                        $zone_3 = trim($row['zone_3']);
-                        $zone_4 = trim($row['zone_4']);
-                        $zone_5 = trim($row['zone_5']);
-                        $zone_6 = trim($row['zone_6']);
-                        $zone_7 = trim($row['zone_7']);
-                        $zone_8 = trim($row['zone_8']);
-                        $zone_9 = trim($row['zone_9']);
-                        $zone_10 = trim($row['zone_10']);
-                        $zone_11 = trim($row['zone_11']);
-                        $zone_1b = trim($row['zone_1b']);
-                        $zone_8b = trim($row['zone_8b']);
-
+                       
                         $standard_rate = InternationalStandardDhlRate::where('range_up', $range_up)->where('range_down', $range_down);
                         if ($standard_rate->exists()) {
                             $standard_rate = $standard_rate->first();
-                            $standard_rate->zone_1 = ($zone_1 != null) ? $zone_1 : 0;
-                            $standard_rate->zone_2 = ($zone_2 != null) ? $zone_2 : 0;
-                            $standard_rate->zone_3 = ($zone_3 != null) ? $zone_3 : 0;
-                            $standard_rate->zone_4 = ($zone_4 != null) ? $zone_4 : 0;
-                            $standard_rate->zone_5 = ($zone_5 != null) ? $zone_5 : 0;
-                            $standard_rate->zone_6 = ($zone_6 != null) ? $zone_6 : 0;
-                            $standard_rate->zone_7 = ($zone_7 != null) ? $zone_7 : 0;
-                            $standard_rate->zone_8 = ($zone_8 != null) ? $zone_8 : 0;
-                            $standard_rate->zone_9 = ($zone_9 != null) ? $zone_9 : 0;
-                            $standard_rate->zone_10 = ($zone_10 != null) ? $zone_10 : 0;
-                            $standard_rate->zone_11 = ($zone_11 != null) ? $zone_11 : 0;
-                            $standard_rate->zone_1b = ($zone_1b != null) ? $zone_1b : 0;
-                            $standard_rate->zone_8b = ($zone_8b != null) ? $zone_8b : 0;
+                            foreach ($zoneColumnsArray as $zoneColumn) {
+                                if (isset($row[$zoneColumn])) {
+                                    $standard_rate->$zoneColumn = trim($row[$zoneColumn] != null ? $row[$zoneColumn] : 0);
+                                }
+                            }
+                            
                             $standard_rate->save();
                             $updated++;
                         } else {
@@ -9659,8 +9615,8 @@ class GlobalSettingsController extends Controller
             $all_shipper_settings->type = 'rv_disable_shippers_all_shippers';
         }
         $all_shipper_settings->setting_value = ($request->has('all_shipper_toggle')) ? 1 : 0;
-
         $all_shipper_settings->save();
+        $changes = $all_shipper_settings;
 
         if ($request->has('all_shipper_toggle') && $request->has('excluded_users')) {
             $excluded_users = implode(',', $request->excluded_users);
@@ -9675,7 +9631,7 @@ class GlobalSettingsController extends Controller
             $settings->setting_value = 1;
             $settings->text = $excluded_users;
             $settings->save();
-
+            $changes = $settings;
             // Update disabled users in RV shipment tickets (Set disable_shipper to 0 of given shippers)
             $shippers = explode(',', $excluded_users);
             $this->updateDisabledUserInRvShipmentTickets($shippers, 0);
@@ -9695,6 +9651,8 @@ class GlobalSettingsController extends Controller
             $settings->setting_value = 1;
             $settings->text = $only_users;
             $settings->save();
+            $changes = $settings;
+
             GlobalSettings::where('type', 'rv_disable_shippers_all_shippers')->update(['setting_value' => 0, 'text' => NULL]);
             GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers')->update(['setting_value' => 0, 'text' => NULL]);
 
@@ -9713,6 +9671,13 @@ class GlobalSettingsController extends Controller
             $this->updateDisabledUserInRvShipmentTickets(null, 1);
         }
 
+        ChangeLogs::create([
+            'table_name' => $changes->getTable(),
+            'record_id' => $changes->getKey(),
+            'old_data' => json_encode($changes->getOriginal()),
+            'new_data' => json_encode($changes->getChanges()),
+            'updated_by' => Auth::id(),
+        ]);
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
@@ -10603,5 +10568,39 @@ class GlobalSettingsController extends Controller
             $wallet_shipper->save();
             return redirect()->back()->with('success', 'Shipper Enabled !');
         }
+    }
+
+    public function zonal_margin_column_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 681);
+       
+        $zoneColumn = collect(InternationalStandardDhlRate::first())
+            ->keys()
+            ->filter(function ($key) {
+                return Str::startsWith($key, 'zone_');
+            })
+            ->values();
+        $marginColumn = collect(InternationalUserRate::first())
+            ->keys()
+            ->filter(function ($key) {
+                return Str::startsWith($key, 'margin_');
+            })
+            ->values();
+        $ZoneMarginColumn = InternationalZonalMarginColumn::where('type',1)->first();
+       
+        return view('admin.settings.international.zonal_margin_column_mapping')->with(['zoneColumn' => $zoneColumn, 'marginColumn' => $marginColumn , 'selectedMarginColumns' => ($ZoneMarginColumn->margin_column ??  null), 'selectedZoneColumn'=> ($ZoneMarginColumn->zone_column??  null)]);
+    }
+
+    public function ZoneMarginColumnSubmit(Request $request)
+    {
+        InternationalZonalMarginColumn::updateOrCreate(
+            ['type' => 1],
+            [
+            'type' => 1,
+            'margin_column'=> implode(',', $request->margin_column),
+            'zone_column'=> implode(',', $request->zone_column),
+            ]
+        );
+        return redirect()->back()->with('success', 'Zone & Margin Column Added!');
     }
 }
