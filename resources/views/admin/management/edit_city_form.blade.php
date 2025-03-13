@@ -41,7 +41,7 @@
             <div class="row">
                 <div class="col-12" style ="display:{{(($isHub == 0) ? 'none' : 'block')}}" id="province_selection">
                     <fieldset class="form-group">
-                        <select name="province_id" id="province" class="form-control select2" data-rule-required="true" data-msg-required="Zone is required">
+                        <select name="province_id" id="province" class="form-control select2">
                             @foreach($provinces as $province)
                                 <option value="{{ $province->id }}" @if ($province->id == $city->province_id) selected="selected" @endif>{{ $province->name }}</option>
                             @endforeach
@@ -359,12 +359,13 @@
             dropdownParent: $("#editCity")
         });
 
-        $('#zone').select2({
-            placeholder: 'Zone',
+        $('#province').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder: 'Province',
+            dropdownParent: $("#editCity"),
             width:'100%'
         });
 
-        $('#province').select2({
+        $('#zone').select2({
             placeholder: 'Zone',
             width:'100%'
         });
