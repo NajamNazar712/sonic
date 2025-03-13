@@ -10213,14 +10213,14 @@ class APIController extends Controller
                     })
                     ->exists();
 
-                if ($check_process) {
+//                if ($check_process) {
                     $done_payment_shipments = DonePaymentShipment::where('shipment_id', $shipment->id)->whereIn('type', [0, 1])->latest()->first();
                     if (!empty($done_payment_shipments)) {
                         AdminFinanceController::update_payment_done_payment($shipment_id, $done_payment_shipments->type, $done_payment_shipments->done_payment_id);
                     }
-                }else{
-                    return response()->json(['status' => 0, 'message' => 'Payment Can not be process now']);
-                }
+//                }else{
+//                    return response()->json(['status' => 0, 'message' => 'Payment Can not be process now']);
+//                }
 
             }
             return response()->json(['status' => 1, 'message' => 'Charges updated against this shipment.']);
