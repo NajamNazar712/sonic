@@ -36,6 +36,8 @@ use Illuminate\Http\Request;
     Route::post('employee_attendance_details', 'APIController@employee_checkin')->name('employee_attendance_details');
 
     Route::middleware('APIToken')->group(function () {
+
+
         Route::post('verify', 'APIController@verify')->name('verify');
 
         Route::get('pickup_addresses', 'APIController@pickup_addresses')->name('pickup_addresses');
@@ -140,6 +142,8 @@ use Illuminate\Http\Request;
         Route::any('signup', 'Rider\RiderAPIController@rider_signup')->name('signup');
         Route::get('cities', 'Rider\RiderAPIController@cities')->name('cities');
         Route::get('check_pin', 'Rider\RiderAPIController@check_pin')->name('check_pin');
+
+        Route::post('one-link/generateDQRCMerchant', 'OneLinkController@generateDQRCMerchant')->name('generateDQRCMerchant');
 
         //Current
         Route::post('login_v5', 'Rider\RiderAPIController@login_v4')->name('login_v5');
