@@ -55,6 +55,9 @@ class SSRController extends Controller
         $from = str_replace('00:00:00', $arrival_from, $from);
         $to = str_replace('00:00:00', $arrival_to, $to);
 
+        $date_from_delivered_return = $request->get('search_date_from_delivered_return');
+        $date_to_delivered_return = $request->get('search_date_to_delivered_return');
+
         $sales = DB::connection($connection)->table('shipments')->join('users as u','u.id','=','shipments.user_id')
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
             ->leftJoin('booking_types as bt','bt.id','=','shipments.booking_type_id')
@@ -83,8 +86,12 @@ class SSRController extends Controller
             })
             ->leftJoin('shipments_journey as dr', function ($join) use ($connection) {
                 $join->on('dr.shipment_id', '=', 'shipments.id')
-                    ->where('dr.id','=',
-                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,25,30,36,37) and shipments_journey.verification = 1)'));
+                    // ->whereIn('dr.shipper_status_id', [14, 25, 30, 36, 37])
+                    ->where(
+                        'dr.id',
+                        '=',
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,25,30,36,37) and shipments_journey.verification = 1)')
+                    );
             })
 
             ->leftjoin('sale_person_tags as spt', function ($join) {
@@ -108,10 +115,17 @@ class SSRController extends Controller
             ->join('business_categories as bc', 'bc.id', '=', 'shipments.business_category_id')
             ->leftjoin('cities as sc', 'u.city_id', '=', 'sc.id')
             ->leftjoin('zones as sz', 'sz.id', '=', 'sc.zone_id')
-            ->select('shipments.id as shipment_id','shipments.tracking_number','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','sj.created_at as arrival_date','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.fuel_surcharge','shipments.packaging_material_charges','pps.gst as p_gst','pps.charges as p_total_charges','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable','sm.id as shipping_mode_id','shipments.chargeable_weight','z.name as zone', 'oc.id as origin_city_id', 'oc.name as origin_city_name', 'dc.id as destination_city_id', 'dc.name as destination_city_name', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst','shipments.packaging_charges', 'dr.shipper_status_id as dr_status_id','sz.name as shipper_zone')
+            ->select('shipments.id as shipment_id','shipments.tracking_number','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','sj.created_at as arrival_date','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.fuel_surcharge','shipments.packaging_material_charges','pps.gst as p_gst','pps.charges as p_total_charges','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable','sm.id as shipping_mode_id','shipments.chargeable_weight','z.name as zone', 'oc.id as origin_city_id', 'oc.name as origin_city_name', 'dc.id as destination_city_id', 'dc.name as destination_city_name', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst','shipments.packaging_charges', 'dr.shipper_status_id as dr_status_id','sz.name as shipper_zone', 'dr.created_at as delivered_or_returned')
             ->whereNotIn('shipments.shipper_status_id',[1,17])
-            ->whereNotIn('u.id', [8761, 9358])
-            ->whereBetween('sj.created_at', [$from,$to]);
+            ->whereNotIn('u.id', [8761, 9358]);
+
+        if ($date_from_delivered_return != null && $date_to_delivered_return != null){
+            $date_from_delivered_return = Carbon::parse($request->get('search_date_from_delivered_return'))->startOfDay();
+            $date_to_delivered_return = Carbon::parse($request->get('search_date_to_delivered_return'))->endOfDay();
+            $sales->whereBetween('dr.created_at', [$date_from_delivered_return, $date_to_delivered_return]);
+        } else {
+            $sales->whereBetween('sj.created_at', [$from,$to]);
+        }
 
         $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
         if ($from_id->exists()) {
@@ -205,6 +219,13 @@ class SSRController extends Controller
                     $total = $sale->d_total_charges;
                 }
                 return number_format((float)$total, 2);
+            })
+            ->editColumn('delivered_or_returned', function ($sale) {
+                if (in_array($sale->shipment_status, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46, 25])) {
+                    return $sale->delivered_or_returned;
+                } else {
+                    return '-';
+                }
             });
 
         if ($tracking = $request->get('search_tracking')) {
