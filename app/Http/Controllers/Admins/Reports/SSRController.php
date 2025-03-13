@@ -129,15 +129,15 @@ class SSRController extends Controller
                     ", [$date_from_delivered_return, $date_to_delivered_return]);
             });
         } else {
-            $sales->leftJoin('shipments_journey as dr', function ($join) use ($connection) {
-                $join->on('dr.shipment_id', '=', 'shipments.id')
-                    // ->whereIn('dr.shipper_status_id', [14, 25, 30, 36, 37])
-                    ->where(
-                        'dr.id',
-                        '=',
-                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,25,30,36,37) and shipments_journey.verification = 1)')
-                    );
-            });
+            // $sales->leftJoin('shipments_journey as dr', function ($join) use ($connection) {
+            //     $join->on('dr.shipment_id', '=', 'shipments.id')
+            //         // ->whereIn('dr.shipper_status_id', [14, 25, 30, 36, 37])
+            //         ->where(
+            //             'dr.id',
+            //             '=',
+            //             DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,25,30,36,37) and shipments_journey.verification = 1)')
+            //         );
+            // });
             $sales->whereBetween('sj.created_at', [$from,$to]);
         }
 
