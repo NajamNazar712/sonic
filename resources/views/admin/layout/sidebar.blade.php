@@ -2904,6 +2904,15 @@
                                                 href="{{ route('admin.settings.last_mile_cron.index') }}">Last Mile
                                                 Status Cron Time</a></li>
                                     @endif
+
+                                    {{-- New email setting screen --}}
+                                    @if (session('role_id') == 1 || in_array(565, session('permissions')))
+                                        <li>
+                                            <a class="menu-item" href="{{ route('admin.settings.last_mile_cron.index') }}">
+                                                Email Delivery Time.
+                                            </a>
+                                        </li>
+                                    @endif
                                 </ul>
                             </li>
                         @endif

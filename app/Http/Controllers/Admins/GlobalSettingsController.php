@@ -10591,4 +10591,8 @@ class GlobalSettingsController extends Controller
         );
         return redirect()->back()->with('success', 'Zone & Margin Column Added!');
     }
+
+    public function email_delivery_time_index() {
+        
+    }
 }
