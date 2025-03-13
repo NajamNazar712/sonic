@@ -41,7 +41,7 @@
             <div class="row">
                 <div class="col-12" style ="display:{{(($isHub == 0) ? 'none' : 'block')}}" id="province_selection">
                     <fieldset class="form-group">
-                        <select name="province_id" id="province" class="form-control select2">
+                        <select name="province_id" id="province" class="form-control select2" data-rule-required="true" data-msg-required="Province is required">
                             @foreach($provinces as $province)
                                 <option value="{{ $province->id }}" @if ($province->id == $city->province_id) selected="selected" @endif>{{ $province->name }}</option>
                             @endforeach

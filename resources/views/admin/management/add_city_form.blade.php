@@ -41,7 +41,7 @@
             <div class="row">
                 <div class="col-12" id="province_selection" style="display: none" >
                     <fieldset class="form-group">
-                        <select name="province_id" id="province" class="form-control select2">
+                        <select name="province_id" id="province" class="form-control select2" data-rule-required="true" data-msg-required="Province is required">
                             @foreach($provinces as $province)
                                 <option value="{{ $province->id }}">{{ $province->name }}</option>
                             @endforeach
