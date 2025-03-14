@@ -144,8 +144,6 @@ class SSRController extends Controller
                 DB::raw('SUM(is.gst) as is_gst'),
                 DB::raw('SUM(pis.gst) as pis_gst'),
                 DB::raw('SUM(is.sms_charges) as is_sms_charges'),
-
-                DB::raw('SUM(ss_charge.reverse_pickup_charges) as reverse_pickup_charges'),
                 'sm.id as shipping_mode_id',
                 'z.name as zone',
                 'oc.id as origin_city_id',
