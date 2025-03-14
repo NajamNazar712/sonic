@@ -1593,41 +1593,41 @@ class APIController extends Controller
             return response()->json(['status' => 1, 'message' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."]);
         }
 
-//        if(!in_array($user_id, $bulk_booking_shippers)){
-//            return response()->json(['status' => 1, 'message' => 'You Are Not Allowed For Bulk Booking']);
-//        }
+       if(!in_array($user_id, $bulk_booking_shippers)){
+           return response()->json(['status' => 1, 'message' => 'You Are Not Allowed For Bulk Booking']);
+       }
 
         if(count($request->data) > 100){
             return response()->json(['message' => 'Bulk Booking Limit Is Max 100']);
         }
 
-//        $shipmentCountRecord = ShipmentBookedApiCount::where('user_id', $user_id)->latest()->first();
-//        $count = $shipmentCountRecord ? $shipmentCountRecord->shipment_count : 0;
-//        $timeLimit = 0;
-//
-//        if ($shipmentCountRecord) {
-//
-//            $last_created_at = $shipmentCountRecord->created_at;
-//            $minutesDiff = $last_created_at->diffInMinutes(now());
-//
-//            $timeLimits = [
-//                ['min' => 1, 'max' => 50, 'limit' => 5,  'seconds' => 300],
-//                ['min' => 51, 'max' => 75, 'limit' => 10, 'seconds' => 600],
-//                ['min' => 76, 'max' => 100, 'limit' => 15, 'seconds' => 900]
-//            ];
-//
-//            foreach ($timeLimits as $range) {
-//                if ($count >= $range['min'] && $count <= $range['max'] && $minutesDiff < $range['limit']) {
-//                    $timeLimit = $range['seconds'];
-//                    break;
-//                }
-//            }
-//
-//            if ($timeLimit > 0) {
-//                $remainingTime = $timeLimit - $last_created_at->diffInSeconds(now());
-//                return response()->json(['message' => 'Please try again in ' . $remainingTime . ' seconds.'], 429);
-//            }
-//        }
+       $shipmentCountRecord = ShipmentBookedApiCount::where('user_id', $user_id)->latest()->first();
+       $count = $shipmentCountRecord ? $shipmentCountRecord->shipment_count : 0;
+       $timeLimit = 0;
+
+       if ($shipmentCountRecord) {
+
+           $last_created_at = $shipmentCountRecord->created_at;
+           $minutesDiff = $last_created_at->diffInMinutes(now());
+
+           $timeLimits = [
+               ['min' => 1, 'max' => 50, 'limit' => 5,  'seconds' => 300],
+               ['min' => 51, 'max' => 75, 'limit' => 10, 'seconds' => 600],
+               ['min' => 76, 'max' => 100, 'limit' => 15, 'seconds' => 900]
+           ];
+
+           foreach ($timeLimits as $range) {
+               if ($count >= $range['min'] && $count <= $range['max'] && $minutesDiff < $range['limit']) {
+                   $timeLimit = $range['seconds'];
+                   break;
+               }
+           }
+
+           if ($timeLimit > 0) {
+               $remainingTime = $timeLimit - $last_created_at->diffInSeconds(now());
+               return response()->json(['message' => 'Please try again in ' . $remainingTime . ' seconds.'], 429);
+           }
+       }
 
          Validator::extend('phone_number', function ($attribute, $value, $parameters) {
              if ($value) {
@@ -3696,17 +3696,17 @@ class APIController extends Controller
         $user_ids[] = $user_id;
         
         // Check if user is allowed for bulk tracking
-        // $bulk_tracking_shippers_setting = GlobalSettings::where('setting_value', 1)
-        //     ->where('type', 'bulk_tracking_shippers')
-        //     ->first();
+        $bulk_tracking_shippers_setting = GlobalSettings::where('setting_value', 1)
+            ->where('type', 'bulk_tracking_shippers')
+            ->first();
         
-        // $bulk_tracking_shippers = $bulk_tracking_shippers_setting ?
-        //     array_map('intval', explode(',', $bulk_tracking_shippers_setting->text))
-        //     : [];
+        $bulk_tracking_shippers = $bulk_tracking_shippers_setting ?
+            array_map('intval', explode(',', $bulk_tracking_shippers_setting->text))
+            : [];
         
-        // if (!in_array($user_id, $bulk_tracking_shippers)) {
-        //     return response()->json(['status' => 1, 'message' => 'You Are Not Allowed For Bulk Tracking']);
-        // }
+        if (!in_array($user_id, $bulk_tracking_shippers)) {
+            return response()->json(['status' => 1, 'message' => 'You Are Not Allowed For Bulk Tracking']);
+        }
         
         // Split tracking numbers into an array
         $tracking_numbers = array_filter(explode(',', $request->tracking_numbers));
