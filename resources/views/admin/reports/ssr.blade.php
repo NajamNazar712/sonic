@@ -21,18 +21,18 @@
                     <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_shipper" id="search_shipper" class="form-control select2">
-                                @foreach($shippers as $shipper)
+                                {{-- @foreach($shippers as $shipper)
                                     <option value="{{$shipper->id}}">{{$shipper->name}}</option>
-                                @endforeach
+                                @endforeach --}}
                             </select>
                         </fieldset>
                     </div>
                     <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_shippers[]" id="search_shippers" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
-                                @foreach($shippers as $shipper)
+                                {{-- @foreach($shippers as $shipper)
                                     <option value="{{$shipper->id}}">{{$shipper->name}}</option>
-                                @endforeach
+                                @endforeach --}}
                             </select>
                         </fieldset>
                     </div>
@@ -297,11 +297,58 @@
                 placeholder: 'Select Business Category',
                 allowClear:true
             });
-           $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Shipper',
+        //    $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
+        //         placeholder:'Select Shipper',
+        //         width:'100%',
+        //         allowClear:true
+        //     });
+
+            $('#search_shipper').select2({
                 width:'100%',
-                allowClear:true
+                placeholder:"Select Shipper",
+                allowClear:true,
+                multiple: false,
+                minimumInputLength: 2,
+                ajax: {
+                    dataType: 'json',
+                    url:  '{!! route('admin.accounts.shipper_names.dropdown',['type'=>'active']) !!}',
+                        data: function (params) {
+                            return {
+                                search: params.term,
+                            }
+                        },
+                        processResults: function (data) {
+                            return {
+                                results: data
+                            };
+                        },
+                    delay: 700,
+                }
             });
+
+            $('#search_shippers').select2({
+                width:'100%',
+                placeholder:"Select Multiple Shippers",
+                allowClear:true,
+                multiple: true,
+                minimumInputLength: 2,
+                ajax: {
+                    dataType: 'json',
+                    url:  '{!! route('admin.accounts.shipper_names.dropdown',['type'=>'active']) !!}',
+                        data: function (params) {
+                            return {
+                                search: params.term,
+                            }
+                        },
+                        processResults: function (data) {
+                            return {
+                                results: data
+                            };
+                        },
+                    delay: 700,
+                }
+            });
+
             $('#search_origin').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Origin City',
                 width:'100%',
@@ -322,11 +369,11 @@
                 width:'100%',
                 allowClear:true
             });
-            $('#search_shippers').select2({
-                width:'100%',
-                placeholder:"Select Multiple Shippers",
-                allowClear:true,
-            });
+            // $('#search_shippers').select2({
+            //     width:'100%',
+            //     placeholder:"Select Multiple Shippers",
+            //     allowClear:true,
+            // });
             $('.arrival_time_from').pickatime({
                 clear: '',
                 format: 'h:i A',
