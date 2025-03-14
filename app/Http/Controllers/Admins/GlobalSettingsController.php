@@ -6376,63 +6376,38 @@ class GlobalSettingsController extends Controller
 
         return $case_nature_types;
     }
-
     public function crm_auto_tagging_submit(Request $request)
     {
         $crm_case_nature_type_ids = is_array($request->crm_case_nature_type_id) 
             ? $request->crm_case_nature_type_id 
             : [$request->crm_case_nature_type_id];
     
-        $parent_nature_ids = CrmRequestCaseNatureType::whereIn('id', $crm_case_nature_type_ids)
-            ->pluck('nature_id', 'id'); 
-    
-        $existingRecords = CrmAutoTagUser::where('city_id', $request->city_id)
+        $exists = CrmAutoTagUser::where('city_id', $request->city_id)
             ->where('city_area_id', $request->city_area_id)
-            ->where('admin_id', $request->admin_id)
             ->whereIn('crm_case_nature_type_id', $crm_case_nature_type_ids)
-            ->pluck('crm_case_nature_type_id')
-            ->toArray();
-    
-        $existingUsers = CrmAutoTagUser::where('city_id', $request->city_id)
-            ->where('city_area_id', $request->city_area_id)
             ->where('admin_id', $request->admin_id)
-            ->with('admin')
-            ->get(['crm_case_nature_type_id', 'admin_id']);
+            ->where('status', 1)
+            ->exists(); 
     
-        $newEntries = [];
-        foreach ($parent_nature_ids as $type_id => $parent_id) {
-            if (!in_array($type_id, $existingRecords)) { 
-                $newEntries[] = [
-                    'city_id' => $request->city_id,
-                    'city_area_id' => $request->city_area_id,
-                    'crm_case_nature_id' => $parent_id,
-                    'crm_case_nature_type_id' => $type_id,
-                    'admin_id' => $request->admin_id,
-                    'status' => 1,
-                    'created_at' => now(),
-                    'updated_at' => now()
-                ];
-            }
+        if ($exists) {
+            return redirect()->back()->with('error', 'Selected user on this location already exists. Please edit the tagged user.');
         }
     
-        if (!empty($newEntries)) {
-            CrmAutoTagUser::insert($newEntries);
+        foreach ($crm_case_nature_type_ids as $type_id) {
+            $parent = CrmRequestCaseNatureType::find($type_id);
+            CrmAutoTagUser::create([
+                'city_id' => $request->city_id,
+                'city_area_id' => $request->city_area_id,
+                'crm_case_nature_id' => $parent->nature_id,
+                'crm_case_nature_type_id' => $type_id,
+                'admin_id' => $request->admin_id,
+                'status' => 1,
+            ]);
         }
     
-        if(empty($existingRecords) && empty($existingUsers)){
-            CrmAutoTagUser::where('city_id', $request->city_id)
-            ->where('city_area_id', $request->city_area_id)
-            ->where('admin_id', $request->admin_id)
-            ->whereNotIn('crm_case_nature_type_id', $crm_case_nature_type_ids)
-            ->delete();
-        }else{
-            return redirect()->back()->with('success', 'Agent(s) added successfully!');
-
-        }
-      
         return redirect()->back()->with('success', 'Agent(s) added successfully!');
-
     }
+    
     
     public function crm_auto_tagging_data(Request $request)
     {
@@ -6457,25 +6432,89 @@ class GlobalSettingsController extends Controller
     }
 
 
+
     public function crm_auto_tagging_update(Request $request)
     {
-
-        $crm_agent = CrmAutoTagUser::where('city_id', $request->city_id)->where('city_area_id', $request->city_area_id)->where('crm_case_nature_id', $request->crm_case_nature_id)->where('crm_case_nature_type_id', $request->crm_case_nature_type_id);
-        if (!$crm_agent->exists()) {
-            $crm_agent_data = CrmAutoTagUser::find($request->crm_agent_id);
-
-            $crm_agent_data->admin_id = $request->admin_id;
-            $crm_agent_data->city_id = $request->city_id;
-            $crm_agent_data->city_area_id = $request->city_area_id;
-            $crm_agent_data->crm_case_nature_id = $request->crm_case_nature_id;
-            $crm_agent_data->crm_case_nature_type_id = $request->crm_case_nature_type_id;
-            $crm_agent_data->save();
-            return redirect()->back()->with('success', 'Agent Updated!');
-        } else {
-            return redirect()->back()->with('error', 'User on this Location already exist, Please edit the Tagged user');
+        try {
+            $adminId = $request->admin_id;
+            $currentAdminId = $request->current_admin_id;
+            $cityId = $request->city_id;
+            $currentCityId = $request->current_city_id;
+            $cityAreaId = $request->city_area_id;
+            $currentCityAreaId = $request->current_city_area_id;
+            $crm_case_nature_type_ids = array_unique($request->crm_case_nature_type_id);
+    
+            DB::beginTransaction();
+            try {
+                $existingEntry = CrmAutoTagUser::where('admin_id', $adminId)
+                    ->where('city_id', $cityId)
+                    ->where('city_area_id', $cityAreaId)
+                    ->exists();
+    
+                if ($existingEntry && ($currentAdminId != $adminId || $currentCityId != $cityId || $currentCityAreaId != $cityAreaId)) {
+                    return redirect()->back()->with('error', 'Selected city, area, or admin already have agents. Please update existing agents.');
+                }
+    
+                $existingRecords = CrmAutoTagUser::where('admin_id', $currentAdminId)
+                    ->where('city_id', $currentCityId)
+                    ->where('city_area_id', $currentCityAreaId)
+                    ->get();
+    
+                $existingRecordsMap = $existingRecords->pluck('id', 'crm_case_nature_type_id')->toArray();
+                $entriesToInsert = [];
+                $entriesToUpdate = [];
+                $entriesToDelete = array_diff(array_keys($existingRecordsMap), $crm_case_nature_type_ids);
+    
+                foreach ($crm_case_nature_type_ids as $caseNatureTypeId) {
+                    if (isset($existingRecordsMap[$caseNatureTypeId])) {
+                        $entriesToUpdate[] = $existingRecordsMap[$caseNatureTypeId]; 
+                    } else {
+                        $parent = CrmRequestCaseNatureType::find($caseNatureTypeId);
+                        if ($parent) {
+                            $entriesToInsert[] = [
+                                'admin_id' => $adminId,
+                                'city_id' => $cityId,
+                                'city_area_id' => $cityAreaId,
+                                'crm_case_nature_id' => $parent->nature_id,
+                                'crm_case_nature_type_id' => $caseNatureTypeId,
+                                'status' => 1,
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ];
+                        }
+                    }
+                }
+    
+                if (!empty($entriesToUpdate)) {
+                    CrmAutoTagUser::whereIn('id', $entriesToUpdate)->update([
+                        'admin_id' => $adminId,
+                        'city_id' => $cityId,
+                        'city_area_id' => $cityAreaId,
+                        'updated_at' => now(),
+                    ]);
+                }
+    
+                if (!empty($entriesToInsert)) {
+                    CrmAutoTagUser::insert($entriesToInsert);
+                }
+    
+                $entriesToDelete = array_diff(array_keys($existingRecordsMap), $crm_case_nature_type_ids);
+                if (!empty($entriesToDelete)) {
+                    CrmAutoTagUser::whereIn('id', $entriesToDelete)->delete();
+                }
+    
+                DB::commit();
+    
+                return redirect()->back()->with('success', 'CRM Auto Tagging updated successfully.');
+            } catch (\Exception $e) {
+                DB::rollBack();
+                return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
+            }
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Validation Error: ' . $e->getMessage());
         }
     }
-
+    
     public function crm_auto_tagging_enable_disable(Request $request)
     {
         $crm_agent = CrmAutoTagUser::find($request->id);
