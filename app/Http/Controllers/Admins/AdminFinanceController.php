@@ -21516,7 +21516,7 @@ class AdminFinanceController extends Controller
                     $type = 'Returned';
                 } elseif($dps->type == 2) {
                     $type = 'Adjustment';
-                } elseif($dps->type == 2) {
+                } elseif($dps->type == 3) {
                     $type = 'Arrival';
                 }
 
