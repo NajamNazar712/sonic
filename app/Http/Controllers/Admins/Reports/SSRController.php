@@ -204,6 +204,37 @@ class SSRController extends Controller
             }
         }
 
+        if ($tracking = $request->get('search_tracking')) {
+            $sales->where('shipments.tracking_number', '=', $tracking);
+        }
+        if ($sales_person = $request->get('search_sales_person')) {
+            $sales->where('adsp.id', '=', $sales_person);
+        }
+        if ($search_shipper = $request->get('search_shipper')) {
+            $sales->where('shipments.user_id', '=', $search_shipper);
+        }
+        if ($search_shippers = $request->get('search_shippers')) {
+            $sales->whereIn('shipments.user_id', $search_shippers);
+        }
+        if ($mode = $request->get('search_shipping_mode')) {
+            $sales->where('sm.id', '=', $mode);
+        }
+        if ($origin = $request->get('search_origin')) {
+            $sales->where('oc.id', '=', $origin);
+        }
+        if ($destination = $request->get('search_destination')) {
+            $sales->where('dc.id', '=', $destination);
+        }
+        if ($hub = $request->get('search_hub')) {
+            $sales->where('h.id', '=', $hub);
+        }
+        if ($status = $request->get('search_status')) {
+            $sales->where('ss.id', '=', $status);
+        }
+        if ($search_business_category = $request->get('search_business_category')) {
+            $sales->where('shipments.business_category_id', '=', $search_business_category);
+        }
+
         $datatable = Datatables::of($sales)
             ->addColumn('attempts', function ($shipment) {
                 $out_for_delivery = DB::connection('reports')->table('shipments_journey')->where('shipment_id', $shipment->shipment_id)->where('shipper_status_id', 5)->count();
@@ -277,36 +308,6 @@ class SSRController extends Controller
                 }
             });
 
-        if ($tracking = $request->get('search_tracking')) {
-            $sales->where('shipments.tracking_number', '=', $tracking);
-        }
-        if ($sales_person = $request->get('search_sales_person')) {
-            $sales->where('adsp.id', '=', $sales_person);
-        }
-        if ($search_shipper = $request->get('search_shipper')) {
-            $sales->where('shipments.user_id', '=', $search_shipper);
-        }
-        if ($search_shippers = $request->get('search_shippers')) {
-            $sales->whereIn('shipments.user_id', $search_shippers);
-        }
-        if ($mode = $request->get('search_shipping_mode')) {
-            $sales->where('sm.id', '=', $mode);
-        }
-        if ($origin = $request->get('search_origin')) {
-            $sales->where('oc.id', '=', $origin);
-        }
-        if ($destination = $request->get('search_destination')) {
-            $sales->where('dc.id', '=', $destination);
-        }
-        if ($hub = $request->get('search_hub')) {
-            $sales->where('h.id', '=', $hub);
-        }
-        if ($status = $request->get('search_status')) {
-            $sales->where('ss.id', '=', $status);
-        }
-        if ($search_business_category = $request->get('search_business_category')) {
-            $sales->where('shipments.business_category_id', '=', $search_business_category);
-        }
         return $datatable
         ->rawColumns(['tracking_number_link'])
         ->make(true);
