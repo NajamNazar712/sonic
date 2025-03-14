@@ -428,7 +428,7 @@
             });
             var from_date = $('#search_date_from').pickadate({
                 firstDay: 1,
-                clear: '',
+                clear: 'Clear',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
@@ -446,7 +446,7 @@
 
             var to_date = $('#search_date_to').pickadate({
                 firstDay: 1,
-                clear: '',
+                clear: 'Clear',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
@@ -465,7 +465,7 @@
 
             var from_date = $('#search_date_from_delivered_return').pickadate({
                 firstDay: 1,
-                clear: '',
+                clear: 'Clear',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
@@ -479,7 +479,7 @@
 
             var to_date = $('#search_date_to_delivered_return').pickadate({
                 firstDay: 1,
-                clear: '',
+                clear: 'Clear',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
