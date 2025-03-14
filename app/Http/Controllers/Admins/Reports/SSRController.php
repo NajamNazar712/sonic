@@ -39,7 +39,7 @@ class SSRController extends Controller
     }
     public function ssr_list(Request $request)
     {
-        $connection = 'reports';
+        $connection = 'reports_2';
 
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 582);
