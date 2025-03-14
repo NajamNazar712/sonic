@@ -29,7 +29,6 @@ use Illuminate\Http\Request;
     Route::middleware('FinvoWalletUser')->group(function () {
         Route::post('fin_sms', 'APIController@fin_sms')->name('fin_sms');
         Route::post('fintech_charges','APIController@fintech_charges')->name('fintech_charges');
-        Route::post('fintech_charges/bulk','APIController@fintech_charges_bulk')->name('fintech_charges_bulk');
     });
 
 
