@@ -1295,7 +1295,7 @@ class AdminReportsEmailController extends Controller
     }
 
 	static public function done_payment($date){
-        $done_payments = DonePaymentCalculation::whereDate('created_at', $date);
+        $done_payments = DonePaymentCalculation::where('created_at', '>=',$date);
         DonePaymentsReport::truncate();
         if($done_payments->exists()){
             $total_amount = 0;
