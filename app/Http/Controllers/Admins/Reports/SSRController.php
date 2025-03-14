@@ -55,6 +55,8 @@ class SSRController extends Controller
         $from = str_replace('00:00:00', $arrival_from, $from);
         $to = str_replace('00:00:00', $arrival_to, $to);
 
+        $from_new = Carbon::parse($from)->subMonths(3)->toDateTimeString();
+
         $date_from_delivered_return = $request->get('search_date_from_delivered_return');
         $date_to_delivered_return = $request->get('search_date_to_delivered_return');
 
@@ -162,6 +164,7 @@ class SSRController extends Controller
                 'dr.created_at as delivered_or_returned'
             )
             ->whereNotIn('shipments.shipper_status_id',[1,17])
+            ->wherebetween('shipments.created_at',[$from_new,$to])
             ->whereNotIn('u.id', [8761, 9358])
             ->groupBy('shipments.id');
             // ->whereBetween('sj.created_at', [$from,$to])
