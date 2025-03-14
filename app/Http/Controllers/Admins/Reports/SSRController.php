@@ -83,14 +83,22 @@ class SSRController extends Controller
             ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
             ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
             ->join('business_categories as bc', 'bc.id', '=', 'shipments.business_category_id')
+            ->join('cities as sc', 'u.city_id', '=', 'sc.id')
+            ->join('zones as sz', 'sz.id', '=', 'sc.zone_id')
             ->leftJoin('shipments_journey as sj', function ($join) use ($connection) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.id','=',
                         DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
+            ->leftJoin('shipments_journey as dr', function ($join) use ($connection) {
+                $join->on('dr.shipment_id', '=', 'shipments.id')
+                    ->where('dr.id','=',
+                        DB::connection($connection)->raw('(
+                         select max(id) from shipments_journey sj2 where sj2.shipment_id = shipments.id and sj2.shipper_status_id NOT IN (14, 25, 30, 36, 37)
+                         AND sj2.verification = 1
+                        )'));
+            })
             ->leftjoin('riders as r', 'r.id', '=', 'sj.rider_id')
-            ->leftjoin('cities as sc', 'u.city_id', '=', 'sc.id')
-            ->leftjoin('zones as sz', 'sz.id', '=', 'sc.zone_id')
             ->leftJoin('pending_payment_shipments as pps', function ($join) use ($connection) {
                 $join->on('pps.shipment_id', '=', 'shipments.id')
                     ->where('pps.type', '!=',2 );
@@ -98,12 +106,6 @@ class SSRController extends Controller
             ->leftJoin('done_payment_shipments as dps', function ($join) use ($connection) {
                 $join->on('dps.shipment_id', '=', 'shipments.id')
                     ->where('dps.type', '!=',2 );
-            })
-            ->leftJoin('shipments_journey as dr', function ($join) use ($connection) {
-                $join->on('dr.shipment_id', '=', 'shipments.id')
-                    ->whereIn('dr.shipper_status_id', [14, 25, 30, 36, 37])
-                    ->where('dr.verification', 1)
-                    ->whereRaw('dr.id = (SELECT MAX(id) FROM shipments_journey sj2 WHERE sj2.shipment_id = shipments.id)');
             })
             ->leftjoin('sale_person_tags as spt', function ($join) {
                 $join->on('spt.user_id', '=', 'shipments.user_id')
@@ -114,12 +116,11 @@ class SSRController extends Controller
                 $join->on('pis.shipment_id', '=', 'shipments.id')
                     ->where('pis.type', '!=',2 );
             })
-            ->leftJoin('invoice_shipments as is', function ($join) use ($connection) {
-                $join->on('is.shipment_id', '=', 'shipments.id')
-                    ->where('is.type', '!=',2 );
+            ->leftJoin('invoice_shipments as iss', function ($join) use ($connection) {
+                $join->on('iss.shipment_id', '=', 'shipments.id')
+                    ->where('iss.type', '!=',2 );
             })
-            ->leftjoin('invoices' ,'is.invoice_id', '=' , 'invoices.id')
-            ->leftjoin('international_shipments as ibs', 'ibs.shipment_id', '=', 'shipments.id')
+            ->leftjoin('invoices' ,'iss.invoice_id', '=' , 'invoices.id')
 
             ->select(
                 'shipments.id as shipment_id',
@@ -141,9 +142,8 @@ class SSRController extends Controller
                 DB::raw('SUM(dps.gst) as d_gst'),
                 DB::raw('SUM(dps.charges) as d_total_charges'),
                 DB::raw('SUM(dps.payable) as d_net_payable'),
-                DB::raw('SUM(is.gst) as is_gst'),
+                DB::raw('SUM(iss.gst) as is_gst'),
                 DB::raw('SUM(pis.gst) as pis_gst'),
-                DB::raw('SUM(is.sms_charges) as is_sms_charges'),
                 'sm.id as shipping_mode_id',
                 'z.name as zone',
                 'oc.id as origin_city_id',
