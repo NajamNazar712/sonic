@@ -55,7 +55,7 @@ class SSRController extends Controller
         $from = str_replace('00:00:00', $arrival_from, $from);
         $to = str_replace('00:00:00', $arrival_to, $to);
 
-        $from_new = Carbon::parse($from)->subYear(1)->toDateTimeString();
+        $from_new = Carbon::parse($from)->subMonths(6)->toDateTimeString();
 
         $date_from_delivered_return = $request->get('search_date_from_delivered_return');
         $date_to_delivered_return = $request->get('search_date_to_delivered_return');
