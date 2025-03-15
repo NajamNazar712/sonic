@@ -6392,17 +6392,29 @@ class GlobalSettingsController extends Controller
         if ($exists) {
             return redirect()->back()->with('error', 'Selected user on this location already exists. Please edit the tagged user.');
         }
-    
+
+        $parents = CrmRequestCaseNatureType::whereIn('id', $crm_case_nature_type_ids)
+            ->pluck('nature_id', 'id');
+
+        $insertData = [];
+
         foreach ($crm_case_nature_type_ids as $type_id) {
-            $parent = CrmRequestCaseNatureType::find($type_id);
-            CrmAutoTagUser::create([
-                'city_id' => $request->city_id,
-                'city_area_id' => $request->city_area_id,
-                'crm_case_nature_id' => $parent->nature_id,
-                'crm_case_nature_type_id' => $type_id,
-                'admin_id' => $request->admin_id,
-                'status' => 1,
-            ]);
+            if (isset($parents[$type_id])) {
+                $insertData[] = [
+                    'city_id' => $request->city_id,
+                    'city_area_id' => $request->city_area_id,
+                    'crm_case_nature_id' => $parents[$type_id],
+                    'crm_case_nature_type_id' => $type_id,
+                    'admin_id' => $request->admin_id,
+                    'status' => 1,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+        }
+
+        if (!empty($insertData)) {
+            CrmAutoTagUser::insert($insertData);
         }
     
         return redirect()->back()->with('success', 'Agent(s) added successfully!');
