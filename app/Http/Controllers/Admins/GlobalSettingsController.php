@@ -6467,9 +6467,9 @@ class GlobalSettingsController extends Controller
                     return redirect()->back()->with('error', 'Selected city, area, or admin already have agents. Please update existing agents.');
                 }
     
-                $existingRecords = CrmAutoTagUser::where('admin_id', $adminId)
-                    ->where('city_id', $cityId)
-                    ->where('city_area_id', $cityAreaId)
+                $existingRecords = CrmAutoTagUser::where('admin_id', $currentAdminId)
+                    ->where('city_id', $currentCityId)
+                    ->where('city_area_id', $currentCityAreaId)
                     ->get();
     
                 $existingRecordsMap = $existingRecords->pluck('id', 'crm_case_nature_type_id')->toArray();
@@ -6512,7 +6512,9 @@ class GlobalSettingsController extends Controller
     
                 $entriesToDelete = array_diff(array_keys($existingRecordsMap), $crm_case_nature_type_ids);
                 if (!empty($entriesToDelete)) {
-                    CrmAutoTagUser::whereIn('crm_case_nature_type_id', $entriesToDelete)->delete();
+                    CrmAutoTagUser::where('admin_id', $currentAdminId)
+                    ->where('city_id', $currentCityId)
+                    ->where('city_area_id', $currentCityAreaId)->whereIn('crm_case_nature_type_id', $entriesToDelete)->delete();
                 }
     
                 DB::commit();
