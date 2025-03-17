@@ -113,13 +113,13 @@ class FingaIntegrationController extends Controller
 
 
             $response = Http::withHeaders(['accept' => 'application/json','Authorization' => "Bearer " . $token,])->post($api . 'wallet/onboard-users/', $requestPayload);
-            FingaApiLog::create(['nature' => 'request','status' => 1,'details' => json_encode($requestPayload, JSON_PRETTY_PRINT)]);
+            FingaApiLog::create(['nature_id' => 1,'status' => 1,'details' => json_encode($requestPayload, JSON_PRETTY_PRINT)]);
 
             if ($response->successful()) {
                 $body = $response->getBody();
                 $body = json_decode($body);
 
-                self::apiLog('on-boarding-response', 'success', $body, null);
+                self::apiLog(2, 'success', $body, null);
 
 
                 // Ensure the error structure is an array
@@ -163,7 +163,7 @@ class FingaIntegrationController extends Controller
                     }
                 }
 
-                self::apiLog('on-boarding-response', 'error', $body, null);
+                self::apiLog(2, 'error', $body, null);
                 $result['error'] = $errorData;
             }
             return $result;
@@ -203,7 +203,7 @@ class FingaIntegrationController extends Controller
     public static function apiLog($nature, $status, $details, $shipment_id,$request_id = null) {
 
         $newLog = FingaApiLog::create([
-            'nature' => $nature,
+            'natur_id' => $nature,
             'status' => $status,
             'details' => $details ? json_encode($details, JSON_PRETTY_PRINT) : null, // Save as JSON
             'shipment_id' => $shipment_id,

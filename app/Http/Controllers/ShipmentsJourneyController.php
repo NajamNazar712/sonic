@@ -30,6 +30,7 @@ use App\Http\Models\CRM\CrmRequestTagging;
 use Vectorface\Whip\Whip;
 use Auth;
 use App\Jobs\ShipmentStatusSharingWithWallet;
+use App\Models\StatusSharingWithWallet;
 
 class ShipmentsJourneyController extends Controller
 {
@@ -162,13 +163,14 @@ class ShipmentsJourneyController extends Controller
                    ->where('u.substitute_user_id', '0');
             })->where('shipments.id', $shipment_id)->first();
             if($shipment) {
-                $data = [
-                    'tracking_number' => $shipment->tracking_number,
-                    'status' => $shipper_status_id,
-                    'shipment_id' => $shipment_id
-                ];
-                ShipmentStatusSharingWithWallet::dispatch($data, 1);
-                //self::share_status_with_wallet($shipment->tracking_number, $shipper_status_id, $shipment_id);
+                //$data = StatusHelper::get_status_info($shipper_status_id);
+                StatusSharingWithWallet::create([
+                    'shipment_id' => $shipment_id,
+                    'is_send' => 0,
+                    'status_id' => $shipper_status_id,
+                    'tracking_number' => $shipment->tracking_number
+                ]);
+                //ShipmentStatusSharingWithWallet::dispatch($data, 1);
             }
         }
 

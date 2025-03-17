@@ -50,7 +50,7 @@ trait FinSurgentLogTrait
             }
 
             if($token) {
-                FingaIntegrationController::apiLog('log-request', 1, $requestPayload ,$shipmentId);
+                FingaIntegrationController::apiLog(3, 1, $requestPayload ,$shipmentId);
                 $response = Http::withHeaders([
                     'accept' => 'application/json',
                     'Authorization' => "Bearer " . $token,
@@ -62,7 +62,7 @@ trait FinSurgentLogTrait
                     $body = $response->getBody();
                     $body = json_decode($body);
     
-                    FingaIntegrationController::apiLog('log-response', 'success', $body ,$shipmentId);
+                    FingaIntegrationController::apiLog(4, 'success', $body ,$shipmentId);
 
                     FinjaLogSettlementRecord::updateOrCreate(
                         // Condition to find the record
@@ -80,7 +80,7 @@ trait FinSurgentLogTrait
                     $body = $response->getBody();
                     $body = json_decode($body,true);
                     if (isset($body['error']) && str_contains($body['error'], 'duplicate key value violates unique constraint')) {
-                        FingaIntegrationController::apiLog('log-response', 'success (duplicate ignored)', $body, $shipmentId);
+                        FingaIntegrationController::apiLog(4, 'success (duplicate ignored)', $body, $shipmentId);
 
                         FinjaLogSettlementRecord::updateOrCreate(
                             ['shipment_id' => $shipmentId],
@@ -93,7 +93,7 @@ trait FinSurgentLogTrait
                         );
 
                     } else {
-                        FingaIntegrationController::apiLog('log-response', 'error', $body, $shipmentId);
+                        FingaIntegrationController::apiLog(4, 'error', $body, $shipmentId);
                     }
                 }
             }
@@ -104,7 +104,7 @@ trait FinSurgentLogTrait
                 'error' => $th->getMessage(),
                 'code' => $th->getCode()
             ];
-            FingaIntegrationController::apiLog('log-response', 'exception', $errorBody, $shipmentId);
+            FingaIntegrationController::apiLog(4, 'exception', $errorBody, $shipmentId);
         }
 
     }

@@ -2,8 +2,6 @@
 
 namespace App\Jobs;
 
-use App\Http\Models\PendingPaymentShipment;
-use App\Http\Traits\FinSurgentLogTrait;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -11,36 +9,33 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use App\Http\Controllers\FingaIntegrationController;
-use App\Http\Models\Shipment;
-use App\Http\Models\ShipmentServicesCharges;
-use App\ShipmentAdditionalCharges;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
+use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentServicesCharges;
+use App\Jobs\CODAmountChangeSendToWallet;
 use App\Models\FinjaLogSettlementRecord;
 use Illuminate\Support\Str;
-use App\Jobs\CODAmountChangeSendToWallet;
+use App\Http\Traits\FinSurgentLogTrait;
+use App\Models\StatusSharingWithWallet;
 
-class ShipmentStatusSharingWithWallet implements ShouldQueue
+
+class BulkStatusSharingWithWalletJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
     use FinSurgentLogTrait;
 
     protected $data;
-    protected $type;
-    protected $token;
-
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(array $data, $type,$token=null)
+    
+    public function __construct(array $data)
     {
-        $this->queue = 'shipment_status_sharing_with_wallet';
+        //$this->queue = 'shipment_status_sharing_with_wallet_bulk';
         $this->data = $data;
-        $this->type = $type;
-        $this->token = $token;
-
     }
 
     /**
@@ -50,7 +45,6 @@ class ShipmentStatusSharingWithWallet implements ShouldQueue
      */
     public function handle()
     {
-
 
         $status_mapping = [
             5 => [
@@ -144,24 +138,14 @@ class ShipmentStatusSharingWithWallet implements ShouldQueue
                 'name' => 'Return - Without Manifest',
             ],
         ];
-        $shipment_id = $this->data['shipment_id'];
-        $token2 = $this->token;
-        if($this->type == 1) {
-            $status =  $this->data['status'];
-            $tracking_number = $this->data['tracking_number'];
-            $status_code = $status_mapping[$status]['code'];
-            $status_name = $status_mapping[$status]['name'];
-            $requestPayload = [
-                'shipment_id' => $tracking_number,
-                'status_code' => $status_code,
-                'status_name' =>  $status_name
-            ];
-        } elseif($this->type == 2) {
-            $requestPayload = $this->data['payload'];
-        }
-        try {
+       
+        try{
 
-            $shipment_log_not_sent = Shipment::leftJoin('finja_log_settlement_records as sac', 'shipments.id', '=', 'sac.shipment_id')
+            $payload = []; 
+            foreach ($this->data as $d) {
+                $shipment_id = $d['shipment_id'];
+
+                $shipment_log_not_sent = Shipment::leftJoin('finja_log_settlement_records as sac', 'shipments.id', '=', 'sac.shipment_id')
                 ->join('wallet_users as u', function ($join) {
                     $join->on('u.user_id', '=', 'shipments.user_id')
                     ->where('u.substitute_user_id', '0');
@@ -173,60 +157,84 @@ class ShipmentStatusSharingWithWallet implements ShouldQueue
                 ->select(['shipments.*', 'u.wallet_id'])
                 ->first();
 
-            if(!empty($shipment_log_not_sent)){
-                $logPayload = [
-                    "client_id" => $shipment_log_not_sent->user_id,
-                    "wallet_id" => $shipment_log_not_sent->wallet_id,
-                    "reference_id" => (string)Str::uuid(),
-                    "shipment_id" => $shipment_log_not_sent->tracking_number,
-                    "amount" => $shipment_log_not_sent->amount,
-                    "order_created_date" => $shipment_log_not_sent->created_at,
+                if(!empty($shipment_log_not_sent)){
+                    $logPayload = [
+                        "client_id" => $shipment_log_not_sent->user_id,
+                        "wallet_id" => $shipment_log_not_sent->wallet_id,
+                        "reference_id" => (string)Str::uuid(),
+                        "shipment_id" => $shipment_log_not_sent->tracking_number,
+                        "amount" => $shipment_log_not_sent->amount,
+                        "order_created_date" => $shipment_log_not_sent->created_at,
+                    ];
+                    $this->arrival_shipment_logs($logPayload, null,$shipment_log_not_sent->id,null);
+                }
+
+                $cod_charges = FinjaLogSettlementRecord::where('shipment_id', $shipment_id)
+                ->first();
+                $shipment = Shipment::find($shipment_id);
+                if($cod_charges && $cod_charges->logged_cod_charges !=  $shipment->amount) {
+
+                    $data = [
+                        'shipment_id' => $shipment_id,
+                        'tracking_number' => $shipment->tracking_number,
+                        'client_id' =>  $shipment->user_id,
+                        'wallet_id' => $shipment->user->wallet->wallet_id,
+                        'amount' => $shipment->amount
+                    ];
+                    CODAmountChangeSendToWallet::dispatch($data);
+                }
+
+
+                $status = $d['status_id'];
+                $tracking_number = $d['tracking_number'];
+                
+                $status_code = $status_mapping[$status]['code'];
+                $status_name = $status_mapping[$status]['name'];
+            
+                $payload[] = [
+                    'unique_id' => $d['id'],
+                    'shipment_id' => $tracking_number,
+                    'status_code' => $status_code,
+                    'status_name' =>  $status_name
                 ];
-                $this->arrival_shipment_logs($logPayload, null,$shipment_log_not_sent->id,$token2);
+            
             }
-
-            $cod_charges = FinjaLogSettlementRecord::where('shipment_id', $shipment_id)
-            ->first();
-            $shipment = Shipment::find($shipment_id);
-            if($cod_charges && $cod_charges->logged_cod_charges !=  $shipment->amount) {
-
-                $data = [
-                    'shipment_id' => $shipment_id,
-                    'tracking_number' => $shipment->tracking_number,
-                    'client_id' =>  $shipment->user_id,
-                    'wallet_id' => $shipment->user->wallet->wallet_id,
-                    'amount' => $shipment->amount
-                ];
-                CODAmountChangeSendToWallet::dispatch($data);
-            }
-
+            
             $api = config('app.FINGA_URL');
-            // if(!empty($token2)){
-            //     $token = $token2;
-            // }else{
-            //     $token = FingaIntegrationController::getToken($api);
-            // }
-
             $token = FingaIntegrationController::getToken($api);
             if($token) {
-                $request_id = FingaIntegrationController::apiLog(11, 1, $requestPayload ,$shipment_id);
+                $request_id = FingaIntegrationController::apiLog(15, 1, $payload ,null);
                 $response = Http::withHeaders([
                     'accept' => 'application/json',
                     'Authorization' => "Bearer " . $token,
                 
-                ])->post($api.'shipments/update/', $requestPayload);
+                ])->post($api.'shipments/update/bulk', $payload);
 
                 if($response->successful()) { 
                     
                     $body = $response->getBody();
-                    $body = json_decode($body);
-    
-                    FingaIntegrationController::apiLog(12, 'success', $body ,$shipment_id,$request_id);
+                    $body = json_decode($body, true);
+                    foreach ($body as $b) {
+                        $uniqueId = $b['unique_id'];
+                        $status = $b['status'];
+                
+                        // Find the related record in the database
+                        $record = StatusSharingWithWallet::find($uniqueId);
+                
+                        if ($record) {
+                            // Update is_send based on the status
+                            $record->update([
+                                'is_send' => $status == 'success' ? 1 : 0
+                            ]);
+                        }
+
+                    }
+                    FingaIntegrationController::apiLog(16, 'success',  $body ,null,$request_id);
     
                 } else {
                     $body = $response->getBody();
                     $body = json_decode($body);
-                    FingaIntegrationController::apiLog(12, 'error', $body ,$shipment_id,$request_id);
+                    FingaIntegrationController::apiLog(16, 'error', $body ,null,$request_id);
                 }
             }
 
@@ -236,7 +244,8 @@ class ShipmentStatusSharingWithWallet implements ShouldQueue
                 'error' => $th->getMessage(),
                 'code' => $th->getCode()
             ];
-            FingaIntegrationController::apiLog(12, 'exception', $errorBody, $shipment_id,$request_id);
+            FingaIntegrationController::apiLog(16, 'exception', $errorBody, null,$request_id);
         }
+       
     }
 }

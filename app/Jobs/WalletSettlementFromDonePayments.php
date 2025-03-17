@@ -113,8 +113,8 @@ class WalletSettlementFromDonePayments implements ShouldQueue
                             'sms_charges' => floatval($dps->sms_charges),
                         ]
                     ];
-                    $request_nature = 'settlement-request';
-                    $response_nature = 'settlement-response';
+                    $request_nature = 7;
+                    $response_nature = 8;
                     $url = $api . 'transactions/log/settlement';
                     $data = [
                         'shipment_id' => $dps->shipment_id,
@@ -136,8 +136,8 @@ class WalletSettlementFromDonePayments implements ShouldQueue
                         "shipment_id" => $dps->tracking_number,
                         "amount" => floatval($payable),
                     ];
-                    $request_nature = 'adjustment-request';
-                    $response_nature = 'adjustment-response';
+                    $request_nature = 9;
+                    $response_nature = 10;
                     $url = $api . 'transactions/log/adjustment';
                     $data = [
                         'shipment_id' => $dps->shipment_id,
@@ -159,8 +159,8 @@ class WalletSettlementFromDonePayments implements ShouldQueue
                             'arrival_charges_gst' => floatval($dps->gst),
                         ]
                     ];
-                    $request_nature = 'log-charge-request';
-                    $response_nature = 'log-charge-response';
+                    $request_nature = 5;
+                    $response_nature = 6;
                     $url = $api . 'transactions/log/charge';
                     $data = [
                         'shipment_id' => $dps->shipment_id,
