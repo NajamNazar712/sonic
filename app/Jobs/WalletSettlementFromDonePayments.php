@@ -191,12 +191,13 @@ class WalletSettlementFromDonePayments implements ShouldQueue
 
                             } else {
                                 $body = $response->getBody();
-                                $body2 = json_decode($response->getBody(),true);
-                                $body = json_decode($body);
-                                if (isset($body2['error']) && $body2['error'] == "Original transaction not found." && $dps->wallet_log_updated == 1) {
+                                $body = json_decode($body,true);
+                                if (isset($body['error']) && str_contains($body['error'], 'Original transaction not found.') && $dps->wallet_log_updated == 1) {
                                     $success = true;
+                                    FingaIntegrationController::apiLog($response_nature, 'success (duplicate ignored)', $body, $shipmentId);
+                                }else{
+                                    FingaIntegrationController::apiLog($response_nature, 'error', $body, $shipmentId);
                                 }
-                                FingaIntegrationController::apiLog($response_nature, 'error', $body, $shipmentId);
                             }
                         }
 
