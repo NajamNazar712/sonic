@@ -3564,7 +3564,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::prefix('email_delivery_time')->name('email_delivery_time.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@email_delivery_time_index')->name('index');
-            Route::post('', 'Admins\GlobalSettingsController@email_delivery_time_store')->name('store');
+            Route::post('', 'Admins\GlobalSettingsController@email_delivery_time_update')->name('update');
         });
 
     });

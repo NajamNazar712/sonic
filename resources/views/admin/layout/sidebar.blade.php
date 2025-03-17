@@ -2906,9 +2906,9 @@
                                     @endif
 
                                     {{-- New email setting screen --}}
-                                    @if (session('role_id') == 1 || in_array(565, session('permissions')))
+                                    @if (session('role_id') == 1 || in_array(1031, session('permissions')))
                                         <li>
-                                            <a class="menu-item" href="{{ route('admin.settings.last_mile_cron.index') }}">
+                                            <a class="menu-item" href="{{ route('admin.settings.email_delivery_time.index') }}">
                                                 Email Delivery Time.
                                             </a>
                                         </li>

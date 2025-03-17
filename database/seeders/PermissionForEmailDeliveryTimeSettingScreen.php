@@ -24,7 +24,7 @@ class PermissionForEmailDeliveryTimeSettingScreen extends Seeder
 
         // if new screen or excel
         DB::table('activity_trail_actions')->insert([
-            ['id' => 824, 'screen_name' => 'Lost/Case Closed Summary Report', 'action' => 'View', 'created_at' => $timestamp, 'updated_at' => $timestamp]
+            ['id' => 824, 'screen_name' => 'Email Delivery Time', 'action' => 'View', 'created_at' => $timestamp, 'updated_at' => $timestamp]
         ]);
 
         // if new screen
@@ -32,8 +32,8 @@ class PermissionForEmailDeliveryTimeSettingScreen extends Seeder
             [
                 'created_at' => $timestamp,
                 'updated_at' => $timestamp,
-                'name' => 'Setting > reports > Email Delivery Time',
-                'url' => 'admin.reports.lost_and_case_closed_summary_report.index',
+                'name' => 'Setting > Reports > Email Delivery Time',
+                'url' => 'admin.settings.email_delivery_time.index',
                 'permission_id' => 1031
             ],
         ]);

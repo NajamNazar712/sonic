@@ -10593,6 +10593,33 @@ class GlobalSettingsController extends Controller
     }
 
     public function email_delivery_time_index() {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 824);
+
+        $settings = GlobalSettings::whereIn('type', ['pending_deliveries_report_time', 'quality_of_service_report_time'])->pluck('text', 'type');
+
+        $pending_deliveries_report_time = $settings['pending_deliveries_report_time'] ?? null;
+        $quality_of_service_report_time = $settings['quality_of_service_report_time'] ?? null;
         
+        return view('admin.settings.email_setting.index', compact('pending_deliveries_report_time', 'quality_of_service_report_time'));
+        
+    }
+
+    public function email_delivery_time_update(Request $request) {
+
+        $settings = [
+            'pending_deliveries_report_time' => $request->pending_deliveries_report_time,
+            'quality_of_service_report_time' => $request->quality_of_service_report_time,
+        ];
+
+        foreach ($settings as $type => $text) {
+        if (!empty($text)) {
+            GlobalSettings::updateOrCreate(
+                ['type' => $type], 
+                ['text' => $text]
+            );
+        }
+    }
+
+        return redirect()->back()->with('success', 'Settings Updated!');
     }
 }
