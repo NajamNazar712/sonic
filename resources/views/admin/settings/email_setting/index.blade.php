@@ -44,7 +44,7 @@
                                                     </div>
                                                     <div class="col-md-6 d-flex align-items-center">
                                                         <label class="mr-2 font-small-3"><b>Email Delivery: </b></label>
-                                                        <input type="checkbox" name="pending_deliveries_report_toggle" id="pending_deliveries_report_toggle" class="switchery pending_deliveries_report_toggle" data-size="sm" data-switchery="true">
+                                                        <input type="checkbox" name="pending_deliveries_report_toggle" id="pending_deliveries_report_toggle" class="switchery pending_deliveries_report_toggle" data-size="sm" data-switchery="true" {{ $pending_deliveries_report_toggle == 1 ? 'checked' : '' }}>
                                                     </div>
                                                 </div>
                                             </div>
@@ -74,7 +74,7 @@
                                                     </div>
                                                     <div class="col-md-6 d-flex align-items-center">
                                                         <label class="mr-2 font-small-3"><b>Email Delivery: </b></label>
-                                                        <input type="checkbox" name="quality_of_service_toggle" id="quality_of_service_toggle" class="switchery quality_of_service_toggle" data-size="sm" data-switchery="true">
+                                                        <input type="checkbox" name="quality_of_service_toggle" id="quality_of_service_toggle" class="switchery quality_of_service_toggle" data-size="sm" data-switchery="true"{{ $quality_of_service_report_toggle == 1 ? 'checked' : '' }}>
                                                     </div>
                                                 </div>
                                             </div>
