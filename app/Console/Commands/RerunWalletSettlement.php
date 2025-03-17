@@ -42,6 +42,7 @@ class RerunWalletSettlement extends Command
             ->groupBy('done_payment_shipments.done_payment_id')
             ->select('done_payments.*')
             ->get();
+
         $donePayments->chunk(5)->each(function ($chunkedShipments)  {
             foreach ($chunkedShipments as $value){
                 WalletSettlementFromDonePayments::dispatch($value->id,  346);
