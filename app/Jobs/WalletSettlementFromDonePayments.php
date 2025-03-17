@@ -74,7 +74,7 @@ class WalletSettlementFromDonePayments implements ShouldQueue
         $api = config('app.FINGA_URL');
         $token = FingaIntegrationController::getToken($api);
         $token_time = Carbon::now();
-        $done_payment_shipments->chunk(50)->each(function ($chunkedShipments) use($api,$token,$token_time) {
+        $done_payment_shipments->chunk(30)->each(function ($chunkedShipments) use($api,$token,$token_time) {
             foreach ($chunkedShipments as $dps) {
                 $pending_logs = [];
                 $shipmentId = $dps->shipment_id;
