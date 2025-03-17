@@ -269,7 +269,7 @@ class WalletSettlementFromDonePayments implements ShouldQueue
                 }
 
             }
-            sleep(20);
+            sleep(15);
         });
 
 
