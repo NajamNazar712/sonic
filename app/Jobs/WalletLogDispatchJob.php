@@ -40,7 +40,7 @@ class WalletLogDispatchJob implements ShouldQueue
                 unset($item['shipmentId']);
                 $this->arrival_shipment_logs($item, $shipmentId);
             }
-            sleep(60);
+            sleep(20);
         }
 
     }

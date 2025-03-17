@@ -66,14 +66,15 @@ class WalletLogForcePush extends Command
             ->get();
 
         $api = config('app.FINGA_URL');
-        $token = FingaIntegrationController::getToken($api);
-        $token_time = Carbon::now();
+        //$token = FingaIntegrationController::getToken($api);
+        //$token_time = Carbon::now();
         foreach ($donePayments as $done_payment_shipment) {
 
-            if ($token_time->diffInMinutes(Carbon::now()) >= 4) {
-                $token = FingaIntegrationController::getToken($api);
-                $token_time = Carbon::now(); // Update the token time
-            }
+            // if ($token_time->diffInMinutes(Carbon::now()) >= 4) {
+            //     $token = FingaIntegrationController::getToken($api);
+            //     $token_time = Carbon::now(); // Update the token time
+            // }
+            $token = FingaIntegrationController::getToken($api);
             if ($done_payment_shipment->type == 3) {
                 $log_bid = AdminFinanceController::isWalletLogUpdated($done_payment_shipment->shipment_id);
                 if (!$log_bid) {
