@@ -92,15 +92,16 @@ class FinSurgentSonicPaymentSharing extends Command
                                 //     'arrival_sms_charges' => floatval($pending_payment_shipment->sms_charges)
                                 // ] // removed after new requierment
                             ];
-                            if ($token_time->diffInMinutes(Carbon::now()) >= 4) {
-                                $token = FingaIntegrationController::getToken($api);
-                                $token_time = Carbon::now(); // Update the token time
-                            }
+                            // if ($token_time->diffInMinutes(Carbon::now()) >= 4) {
+                            //     $token = FingaIntegrationController::getToken($api);
+                            //     $token_time = Carbon::now(); // Update the token time
+                            // }
+                            $token = FingaIntegrationController::getToken($api);
                             $this->arrival_shipment_logs($requestPayload, $pending_payment_shipment,null,$token);
                         }
                     }
                 }
-                sleep(60);
+                sleep(20);
             });
         }
         return Command::SUCCESS;

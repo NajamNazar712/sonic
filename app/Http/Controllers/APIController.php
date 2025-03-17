@@ -10194,27 +10194,40 @@ class APIController extends Controller
         } else {
             $shipment = Shipment::where('tracking_number', $request->tracking_number)->first();
             $shipment_id = $shipment->id;
-            if (!DonePaymentShipment::where('shipment_id', $shipment_id)->whereIn('type', [0, 1])->exists()) {
 
-                ShipmentAdditionalCharges::where('shipment_id', $shipment_id)->update([
-                    'wallet_charges' => $request->charges,
-                    'wallet_charges_updated_at' => Carbon::now()
-                ]);
+            ShipmentAdditionalCharges::where('shipment_id', $shipment_id)->update([
+                'wallet_charges' => $request->charges,
+                'wallet_charges_updated_at' => Carbon::now()
+            ]);
+            $finja_request_log = new FinjaRequestLog();
+            $finja_request_log->requested = json_encode($request->all());
+            $finja_request_log->ip_address = $request->ip();
+            $finja_request_log->save();
 
-                $pending_payment_shipments = PendingPaymentShipment::where('shipment_id', $shipment->id)->whereIn('type', [0, 1])->latest()->first();
-                $finja_request_log = new FinjaRequestLog();
-                $finja_request_log->requested = json_encode($request->all());
-                $finja_request_log->ip_address = $request->ip();
-                $finja_request_log->save();
-
-                if (!empty($pending_payment_shipments)) {
-                    AdminFinanceController::update_payment($shipment_id, $pending_payment_shipments->type);
-                }
-                return response()->json(['status' => 1, 'message' => 'Charges updated against this shipment.']);
+            $pending_payment_shipments = PendingPaymentShipment::where('shipment_id', $shipment->id)->whereIn('type', [0, 1])->latest()->first();
+            if (!empty($pending_payment_shipments)) {
+                AdminFinanceController::update_payment($shipment_id, $pending_payment_shipments->type);
             }else{
-                return response()->json(['status' => 0, 'message' => 'Payment Already Processed', 'errors' => 'Error']);
-            }
+                $check_process = DonePaymentShipment::where('shipment_id', $shipment_id)
+                    ->whereIn('type', [0, 1])
+                    ->latest()
+                    ->whereHas('done_payment', function ($query) {
+                        $query->where('status', 0);
+                        $query->where('is_wallet_payment', 1);
+                    })
+                    ->exists();
 
+                if ($check_process) {
+                    $done_payment_shipments = DonePaymentShipment::where('shipment_id', $shipment->id)->whereIn('type', [0, 1])->latest()->first();
+                    if (!empty($done_payment_shipments)) {
+                        AdminFinanceController::update_payment_done_payment($shipment_id, $done_payment_shipments->type, $done_payment_shipments->done_payment_id);
+                    }
+                }else{
+                    return response()->json(['status' => 0, 'message' => 'Payment Can not be process now']);
+                }
+
+            }
+            return response()->json(['status' => 1, 'message' => 'Charges updated against this shipment.']);
         }
     }
     public function fintech_getToken(Request $request) {
@@ -10243,7 +10256,5 @@ class APIController extends Controller
             return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => 'USer Not Found']);
         }
     }
-
-
 
 }
