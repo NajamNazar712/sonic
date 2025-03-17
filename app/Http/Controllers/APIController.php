@@ -2307,14 +2307,14 @@ class APIController extends Controller
         if ($user_type['account_type_id'] == 1) {
             $rules = [
                 'service_type_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function ($query) {
-                    $query->whereNotIn('id', [4]);
+                    $query->whereNotIn('id', [2 ,3, 4]);
                 })],
                 'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('rate_statuses', 'shipping_mode_id')->where(function ($query) use ($user_id) {
                     $query->where('user_id', $user_id)->where('status', 1);
                 })],
-                'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
+               'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
                     $query->where('user_id', $user_id)->where('hidden', 0);
-                }), 'origin_check', 'omni_account', 'return_user_shipping_info_status_check', 'return_user_shipping_info_status_city_check', 'return_user_shipping_info_status_zone_check'],
+                }), 'origin_check', 'user_shipping_info_status_check', 'user_shipping_info_status_city_check', 'user_shipping_info_status_zone_check', 'user_shipping_info_city_pickup_check'],
                 'return_address_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
                     $query->where('user_id', $user_id)->where('hidden', 0);
                 }), 'destination_return_check', 'default_return_address', 'omni_account', 'return_user_shipping_info_status_check', 'return_user_shipping_info_status_city_check', 'return_user_shipping_info_status_zone_check'],
@@ -2400,7 +2400,7 @@ class APIController extends Controller
         } else {
             $rules = [
                 'service_type_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function ($query) {
-                    $query->whereNotIn('id', [4]);
+                    $query->whereNotIn('id', [2 ,3, 4]);
                 })],
                 'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
                     $query->where('user_id', $user_id)->where('hidden', 0);
