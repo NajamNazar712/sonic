@@ -6467,9 +6467,9 @@ class GlobalSettingsController extends Controller
                     return redirect()->back()->with('error', 'Selected city, area, or admin already have agents. Please update existing agents.');
                 }
     
-                $existingRecords = CrmAutoTagUser::where('admin_id', $currentAdminId)
-                    ->where('city_id', $currentCityId)
-                    ->where('city_area_id', $currentCityAreaId)
+                $existingRecords = CrmAutoTagUser::where('admin_id', $adminId)
+                    ->where('city_id', $cityId)
+                    ->where('city_area_id', $cityAreaId)
                     ->get();
     
                 $existingRecordsMap = $existingRecords->pluck('id', 'crm_case_nature_type_id')->toArray();
