@@ -3155,10 +3155,10 @@ class APIController extends Controller
 
         }
 
-//        $shipment_booked_api_count = new ShipmentBookedApiCount();
-//        $shipment_booked_api_count->shipment_count = !empty($return_array["tracking_number"]) ? count($return_array["tracking_number"]) : 0;
-//        $shipment_booked_api_count->user_id = $user_id;
-//        $shipment_booked_api_count->save();
+       $shipment_booked_api_count = new ShipmentBookedApiCount();
+       $shipment_booked_api_count->shipment_count = !empty($return_array["tracking_number"]) ? count($return_array["tracking_number"]) : 0;
+       $shipment_booked_api_count->user_id = $user_id;
+       $shipment_booked_api_count->save();
 
         //send to job
         dispatch(new ProcessShipmentApiBulkBooking($data, $user_id));
