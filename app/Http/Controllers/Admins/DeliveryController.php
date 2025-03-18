@@ -757,7 +757,7 @@ class DeliveryController extends Controller
                             ->first();
                         
                         if ($shipment->shipper_status_id == 13 && optional($latestAgentAssignment)->rv_assign_agent_status_id == 2) {
-                            return ['status' => 1, 'error' => 'Shipment is in Reattempt State'];
+                            return ['status' => 1, 'error' => 'Shipment status is re-attempt for Hold-in-operation category'];
                         }
                     }
                     
