@@ -9663,10 +9663,10 @@ class GlobalSettingsController extends Controller
     private function updateDisabledUserInRvShipmentTickets($shipperUserIds = null, $isDisabled = null)
     {
         if (!empty($shipperUserIds)) {
-            RvShipmentTicket::whereIn('shipment_user_id', $shipperUserIds)->update(['disabled_shipper' => $isDisabled]);
-            RvShipmentTicket::whereNotIn('shipment_user_id', $shipperUserIds)->update(['disabled_shipper' => !$isDisabled]);
+            RvShipmentTicket::whereIn('shipment_user_id', $shipperUserIds)->where('halt_shipper', 0)->update(['disabled_shipper' => $isDisabled]);
+            RvShipmentTicket::whereNotIn('shipment_user_id', $shipperUserIds)->where('halt_shipper', 0)->update(['disabled_shipper' => !$isDisabled]);
         } else {
-            RvShipmentTicket::where('disabled_shipper', $isDisabled ? 0 : 1)->update(['disabled_shipper' => $isDisabled]);
+            RvShipmentTicket::where('disabled_shipper', $isDisabled ? 0 : 1)->where('halt_shipper',0)->update(['disabled_shipper' => $isDisabled]);
         }
     }
 
