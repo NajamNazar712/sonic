@@ -20,12 +20,12 @@ class OneLinkService
         $this->clientId     = env('ONE_LINK_CLIENT_ID_SANDBOX_M');
         $this->clientSecret = env('ONE_LINK_SECRET_SANDBOX_M');
         $this->scope        = env('ONE_LINK_SCOPE', '1LinkApi');
-        $this->token = $this->getAccessToken();
+        $this->token        = $this->getAccessToken();
     }
 
-    private function logRequest($endpoint, $requestData = null, $responseData = null, $status = 'pending')
+    public function logRequest($endpoint, $requestData = null, $responseData = null, $status = 'pending')
     {
-       DB::table('one_link_api_logs')->insert([
+        DB::table('one_link_api_logs')->insert([
             'endpoint'      => $endpoint,
             'request_data'  => json_encode($requestData),
             'response_data' => json_encode($responseData),
@@ -35,7 +35,7 @@ class OneLinkService
         ]);
     }
 
-    private function logError($message)
+    public function logError($message)
     {
         DB::table('one_link_api_logs')->insert([
             'endpoint'      => 'N/A',
@@ -74,12 +74,27 @@ class OneLinkService
 
     public function generateDQRCMerchant(array $data)
     {
+        return $this->sendRequest('/1Link/generateDQRCMerchant', 'generateDQRCMerchant', $data);
+    }
+
+    public function notifyMerchant(array $info)
+    {
+        return $this->sendRequest('/notifyMerchant', 'notifyMerchant', ['info' => $info]);
+    }
+
+    public function paymentNotification(array $info)
+    {
+        return $this->sendRequest('/1Link/paymentNotification', 'paymentNotification', ['info' => $info]);
+    }
+
+    protected function sendRequest($endpoint, $logLabel, array $data)
+    {
         if (!$this->token) {
             $this->logError('Missing Access Token.');
             return ['error' => 'Failed to retrieve access token'];
         }
 
-        $url = $this->baseUrl . '/1Link/generateDQRCMerchant';
+        $url = $this->baseUrl . $endpoint;
 
         try {
             $response = Http::withToken($this->token)
@@ -91,11 +106,11 @@ class OneLinkService
                 ->post($url, $data);
 
             if ($response->successful()) {
-                $this->logRequest('generateDQRCMerchant', $data, $response->json(), 'success');
+                $this->logRequest($logLabel, $data, $response->json(), 'success');
                 return $response->json();
             }
 
-            $this->logRequest('generateDQRCMerchant', $data, $response->body(), 'error');
+            $this->logRequest($logLabel, $data, $response->body(), 'error');
             return ['error' => 'Failed to process request', 'details' => $response->body()];
         } catch (\Exception $e) {
             $this->logError($e->getMessage());
@@ -103,4 +118,3 @@ class OneLinkService
         }
     }
 }
-

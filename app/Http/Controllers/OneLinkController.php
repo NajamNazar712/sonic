@@ -19,32 +19,12 @@ class OneLinkController extends Controller
         $this->oneLinkService = $oneLinkService;
     }
 
-    private function logRequest($endpoint, $requestData = null, $responseData = null, $status = 'pending')
+    public function generateDQRCMerchant($rider_id, $shipment_id, $cod_amount, $latitude, $longitude)
     {
-        DB::table('one_link_api_logs')->insert([
-            'endpoint'      => $endpoint,
-            'request_data'  => json_encode($requestData),
-            'response_data' => json_encode($responseData),
-            'status'        => $status,
-            'created_at'    => now(),
-            'updated_at'    => now(),
-        ]);
-    }
+        if (!$rider_id || !$shipment_id || !$cod_amount || !$latitude || !$longitude) {
+            return response()->json(['error' => 'Missing required parameters'], 400);
+        }
 
-    private function logError($message)
-    {
-        DB::table('one_link_api_logs')->insert([
-            'endpoint'      => 'N/A',
-            'request_data'  => null,
-            'response_data' => $message,
-            'status'        => 'error',
-            'created_at'    => now(),
-            'updated_at'    => now(),
-        ]);
-    }
-
-    public function generateDQRCMerchant($rider_id = null, $shipment_id = null, $cod_amount = null, $latitude = null, $longitude = null)
-    {
         $data = [
             "merchantDetails" => [
                 "dbaName" => "Sonic",
@@ -55,7 +35,7 @@ class OneLinkController extends Controller
                 "merchantID" => "854710236963454",
                 "postalAddress" => [
                     "townName" => "KARACHI",
-                    "subDept" => $rider_id ?? "96010001",
+                    "subDept" => (string) $rider_id,
                     "addressLine" => "Plot 105, Sector 7-A, Mehran Town, Korangi, Karachi"
                 ],
                 "contactDetails" => [
@@ -64,7 +44,7 @@ class OneLinkController extends Controller
                     "email" => "info@trax.pk",
                     "dept" => "Head office",
                     "website" => "www.trax.pk",
-                    "merchantChannelId" => "400" 
+                    "merchantChannelId" => "400"
                 ],
                 "geoLocation" => [
                     "lat" => $latitude,
@@ -85,22 +65,23 @@ class OneLinkController extends Controller
                 "transactionType" => "014"
             ],
             "info" => [
-                "stan" => Str::upper(Str::random(6)), 
-                "rrn" => str_pad($shipment_id, 12, '0', STR_PAD_LEFT),
+                "stan" => strtoupper(Str::random(6)),
+                "rrn" => str_pad((string) $shipment_id, 12, '0', STR_PAD_LEFT),
             ]
         ];
-    
-        $endpoint = 'generateDQRCMerchant';
-    
+
         try {
             $response = $this->oneLinkService->generateDQRCMerchant($data);
-    
             $status = isset($response['error']) ? 'error' : 'success';
-            $this->logRequest($endpoint, $data, $response, $status);
-    
-            return response()->json($response);
+
+            $this->oneLinkService->logRequest('generateDQRCMerchant', $data, $response, $status);
+
+            return response()->json([
+                'success' => $status === 'success',
+                'data' => $response
+            ]);
         } catch (\Exception $e) {
-            $this->logError($e->getMessage());
+            $this->oneLinkService->logError($e->getMessage());
             return response()->json(['error' => 'Exception occurred', 'details' => $e->getMessage()], 500);
         }
     }
@@ -114,22 +95,49 @@ class OneLinkController extends Controller
             'latitude'         => 'required|numeric|between:-90,90',
             'longitude'        => 'required|numeric|between:-180,180',
         ]);
-    
+
         if ($validator->fails()) {
             return response()->json(['error' => 'Validation failed', 'details' => $validator->errors()], 422);
         }
-    
-        $delivered_shipment = RiderDelivery::where('delivery_note_id', $request->delivery_note_id)
-            ->where('delivered_status', 1)
-            ->where('shipment_id', $request->shipment_id)
-            ->exists();
-    
+
+        $delivered_shipment = RiderDelivery::where([
+            'delivery_note_id' => $request->delivery_note_id,
+            'shipment_id'      => $request->shipment_id,
+            'delivered_status' => 1
+        ])->exists();
+
         if ($delivered_shipment) {
-            return $this->generateDQRCMerchant($request->rider_id, $request->shipment_id, $request->delivery_note_id, $request->latitude, $request->longitude);
+            return $this->generateDQRCMerchant(
+                $request->rider_id,
+                $request->shipment_id,
+                $request->delivery_note_id,
+                $request->latitude,
+                $request->longitude
+            );
         }
-    
-        return response()->json(['message' => 'No matching delivered shipments found'], 404);
+
+        return response()->json(['error' => 'No matching delivered shipments found'], 404);
     }
-    
-    
+
+    public function notifyMerchant(Request $request)
+    {
+        $requestData = $request->validate([
+            'info' => 'required|array',
+        ]);
+
+        $response = $this->oneLinkService->notifyMerchant($requestData['info']);
+
+        return response()->json($response);
+    }
+
+    public function paymentNotification(Request $request)
+    {
+        $requestData = $request->validate([
+            'info' => 'required|array',
+        ]);
+
+        $response = $this->oneLinkService->paymentNotification($requestData['info']);
+
+        return response()->json($response);
+    }
 }
