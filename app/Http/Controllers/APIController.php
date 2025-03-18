@@ -1602,6 +1602,7 @@ class APIController extends Controller
         }
 
        $shipmentCountRecord = ShipmentBookedApiCount::where('user_id', $user_id)->latest()->first();
+
        $count = $shipmentCountRecord ? $shipmentCountRecord->shipment_count : 0;
        $timeLimit = 0;
 
@@ -1611,9 +1612,9 @@ class APIController extends Controller
            $minutesDiff = $last_created_at->diffInMinutes(now());
 
            $timeLimits = [
-               ['min' => 1, 'max' => 50, 'limit' => 5,  'seconds' => 300],
-               ['min' => 51, 'max' => 75, 'limit' => 10, 'seconds' => 600],
-               ['min' => 76, 'max' => 100, 'limit' => 15, 'seconds' => 900]
+               ['min' => 1, 'max' => 50, 'limit' => 2.5,  'seconds' => 150],
+               ['min' => 51, 'max' => 75, 'limit' => 3.5, 'seconds' => 210],
+               ['min' => 76, 'max' => 100, 'limit' => 4, 'seconds' => 240]
            ];
 
            foreach ($timeLimits as $range) {
@@ -3156,7 +3157,7 @@ class APIController extends Controller
         }
 
        $shipment_booked_api_count = new ShipmentBookedApiCount();
-       $shipment_booked_api_count->shipment_count = !empty($return_array["tracking_number"]) ? count($return_array["tracking_number"]) : 0;
+       $shipment_booked_api_count->shipment_count = count($request->data) ?? 0;
        $shipment_booked_api_count->user_id = $user_id;
        $shipment_booked_api_count->save();
 
