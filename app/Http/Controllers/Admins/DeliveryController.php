@@ -2230,6 +2230,11 @@ class DeliveryController extends Controller
         $password = $request->password;
         $invalid_reason_shipments = array();
 
+        $delivery_note = DeliveryNote::find($request->delivery_note_id);
+        if($selected_status == 14 && $delivery_note->rider->operation_rider_id == 2 && $delivery_note->rider->id != '12879'){
+            return response()->json(['status' => 0, 'error' => 'Delivered Status Only Allowed For Hold For Self Collection']);
+        }
+
         $delivery_password = DeliveryNote::where('id', $delivery_note_id)->where('password', $password);
         if (!$delivery_password->exists()) {
             return response()->json(['status' => 0, 'error' => 'Wrong Password']);
@@ -2513,6 +2518,7 @@ class DeliveryController extends Controller
             return redirect()->back()->with('error', 'Wrong Password!');
         }
         if ($delivery_note_id != '') {
+
 
             $restrict_statuses = array(5, 7, 8, 9, 12, 14, 15, 18, 30, 36, 37, 56);
             foreach ($shipments as $index => $shipment) {
