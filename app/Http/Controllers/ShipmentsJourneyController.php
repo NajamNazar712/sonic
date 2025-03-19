@@ -163,12 +163,10 @@ class ShipmentsJourneyController extends Controller
                    ->where('u.substitute_user_id', '0');
             })->where('shipments.id', $shipment_id)->first();
             if($shipment) {
-                //$data = StatusHelper::get_status_info($shipper_status_id);
                 StatusSharingWithWallet::create([
                     'shipment_id' => $shipment_id,
                     'is_send' => 0,
                     'status_id' => $shipper_status_id,
-                    'tracking_number' => $shipment->tracking_number
                 ]);
                 //ShipmentStatusSharingWithWallet::dispatch($data, 1);
             }

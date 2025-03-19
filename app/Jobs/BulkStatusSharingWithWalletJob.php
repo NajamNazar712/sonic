@@ -186,14 +186,13 @@ class BulkStatusSharingWithWalletJob implements ShouldQueue
 
 
                 $status = $d['status_id'];
-                $tracking_number = $d['tracking_number'];
                 
                 $status_code = $status_mapping[$status]['code'];
                 $status_name = $status_mapping[$status]['name'];
             
                 $payload[] = [
                     'unique_id' => $d['id'],
-                    'shipment_id' => $tracking_number,
+                    'shipment_id' => $shipment->tracking_number,
                     'status_code' => $status_code,
                     'status_name' =>  $status_name
                 ];
@@ -244,7 +243,7 @@ class BulkStatusSharingWithWalletJob implements ShouldQueue
                 'error' => $th->getMessage(),
                 'code' => $th->getCode()
             ];
-            FingaIntegrationController::apiLog(16, 'exception', $errorBody, null,$request_id);
+            FingaIntegrationController::apiLog(16, 'exception', $errorBody, null,null);
         }
        
     }
