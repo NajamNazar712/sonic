@@ -6512,7 +6512,9 @@ class GlobalSettingsController extends Controller
     
                 $entriesToDelete = array_diff(array_keys($existingRecordsMap), $crm_case_nature_type_ids);
                 if (!empty($entriesToDelete)) {
-                    CrmAutoTagUser::whereIn('crm_case_nature_type_id', $entriesToDelete)->delete();
+                    CrmAutoTagUser::where('admin_id', $currentAdminId)
+                    ->where('city_id', $currentCityId)
+                    ->where('city_area_id', $currentCityAreaId)->whereIn('crm_case_nature_type_id', $entriesToDelete)->delete();
                 }
     
                 DB::commit();
