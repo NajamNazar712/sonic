@@ -213,23 +213,31 @@ class BulkStatusSharingWithWalletJob implements ShouldQueue
                     
                     $body = $response->getBody();
                     $body = json_decode($body, true);
-                    foreach ($body as $b) {
-                        $uniqueId = $b['unique_id'];
-                        $status = $b['status'];
-                
-                        // Find the related record in the database
-                        $record = StatusSharingWithWallet::find($uniqueId);
-                
-                        if ($record) {
-                            // Update is_send based on the status
-                            $record->update([
-                                'is_send' => $status == 'success' ? 1 : 0
-                            ]);
-                        }
 
+                    FingaIntegrationController::apiLog(16, 'success', $body ,null, $request_id);
+
+                    foreach ($body as $b) {
+                        
+                        if(isset($b['shipment_id'])) {
+                            $tracking_number = $b['shipment_id'];
+                            $shipment = Shipment::where('tracking_number', $tracking_number)->first();
+                            $shipmentId = $shipment->id;
+
+                            if($b['status'] == 'success' || ($b['status'] == 'error' && str_contains($b['message'], 'Shipment status already updated.') ) ) {
+                                
+                                $record = StatusSharingWithWallet::where('shipment_id', $shipmentId)
+                                    ->orderBy('id', 'asc') // Ensure the first inserted record is fetched
+                                    ->first();
+
+                                if ($record) {
+                                    // Update is_send based on the status
+                                    $record->update([
+                                        'is_send' => $status == 'success' ? 1 : 0
+                                    ]);
+                                }
+                            }
+                        }
                     }
-                    FingaIntegrationController::apiLog(16, 'success',  $body ,null,$request_id);
-    
                 } else {
                     $body = $response->getBody();
                     $body = json_decode($body);
