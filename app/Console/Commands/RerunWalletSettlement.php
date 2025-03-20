@@ -29,7 +29,7 @@ class RerunWalletSettlement extends Command
      */
     public function handle()
     {
-        $startTime = Carbon::now()->subDay(2)->format('Y-m-d H:i:s');
+        $startTime = Carbon::now()->subDay(10)->format('Y-m-d H:i:s');
         $endTime = Carbon::now()->subHours(6)->format('Y-m-d H:i:s');
         $donePayments = DB::table('done_payment_shipments')
             ->leftJoin('done_payments', 'done_payments.id', '=', 'done_payment_shipments.done_payment_id')

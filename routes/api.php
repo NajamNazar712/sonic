@@ -26,6 +26,9 @@ use Illuminate\Http\Request;
     Route::post('delete_device_token', 'APIController@delete_device_token')->name('delete_device_token');
     Route::post('rcp_sms_from_consignee', 'APIController@rcp_sms_from_consignee')->name('rcp_sms_from_consignee');
     Route::post('fintech_getToken','APIController@fintech_getToken')->name('fintech_getToken');
+    Route::middleware('FinvoWalletAuth')->group(function () {
+        Route::post('v2/fintech_getToken','APIController@fintech_getToken')->name('fintech_getToken');
+    });
     Route::middleware('FinvoWalletUser')->group(function () {
         Route::post('fin_sms', 'APIController@fin_sms')->name('fin_sms');
         Route::post('fintech_charges','APIController@fintech_charges')->name('fintech_charges');
@@ -91,7 +94,7 @@ use Illuminate\Http\Request;
         Route::post('charges_calculate', 'APIController@charges_calculate')->name('charges_calculate');
         Route::post('consolidate', 'APIController@shipment_consolidate')->name('consolidate');
         Route::prefix('return')->name('return.')->group(function () {
-            Route::get('pending', 'APIController@return_confirmation_pending')->name('pending');
+            Route::get('pending', 'APIController@return_confirmation_pending')->name('pending2');
             Route::post('pending', 'APIController@return_confirmation_pending_update')->name('pending');
         });
 
