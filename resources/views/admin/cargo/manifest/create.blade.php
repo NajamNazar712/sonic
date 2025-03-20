@@ -86,29 +86,19 @@
                                             </div>
                                             <div class="modal-body">
                                                 <div class="row">
-                                                    <div class="col-2">
+                                                    <div class="col-3">
                                                         <div class="form-group">
                                                             <label>Total Weight</label>
                                                             <input type="text" name="total_weight" placeholder="Total Weight*" readonly class="form-control" id="total_weight">
                                                         </div>
                                                     </div>
-                                                    <div class="col-2">
+                                                    <div class="col-3">
                                                         <div class="form-group">
                                                             <label>Total Pieces</label>
                                                             <input type="text" name="pieces" placeholder="Total Pieces*" readonly class="form-control" id="pieces">
                                                         </div>
                                                     </div>
-                                                    <div class="col-4">
-                                                        <div class="form-group">
-                                                            <label>Shipment Mode</label>
-                                                            <select name="shipping_mode" class="select2" id="shipping_mode" data-rule-required="true" data-msg-required="Shipping Mode is required">
-                                                                @foreach($shipping_modes as $mode)
-                                                                    <option value="{{$mode->id}}"> {{$mode->mode}} </option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-4">
+                                                    <div class="col-6">
                                                         <div class="form-group">
                                                             <label>Route Name</label>
                                                             <input type="text" name="route_name" placeholder="Route Name*" class="form-control" data-rule-required="true" id="route_name" data-msg-required="Route Name is Required" data-rule-minlength="3" data-msg-minlength="Route Name must be atleast 3 character long">
@@ -513,12 +503,6 @@
                                 'clearIncomplete': true
                             });
 
-                            $('#cargo_details form #shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
-                                width: '100%',
-                                placeholder: 'Select Shipping Mode*'
-                            }).bind('change', function () {
-                                $(this).valid();
-                            });
                             cargo_table.rows().remove();
                             $.each(data.details.details,function (hub,value){
                                 vehicle_seal_number_input = "<input type='hidden' value='"+value['bag_ids']+"' name='bag_ids["+hub+"]' ><div class='form-group'><input type='text' name='vehicle_seal["+hub+"]' class='vehicle_seal form-control' id='vehicle_seal_"+hub+"' data-rule-required='true' data-msg-required='Vehicle Seal is required' placeholder='Enter Vehicle Seal No.*' ></div>";
