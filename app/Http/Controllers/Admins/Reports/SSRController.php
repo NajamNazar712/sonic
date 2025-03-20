@@ -96,7 +96,7 @@ class SSRController extends Controller
                 $join->on('dr.shipment_id', '=', 'shipments.id')
                     ->where('dr.id','=',
                         DB::connection($connection)->raw('(
-                         select max(id) from shipments_journey sj2 where sj2.shipment_id = shipments.id and sj2.shipper_status_id NOT IN (14, 25, 30, 36, 37)
+                         select max(id) from shipments_journey sj2 where sj2.shipment_id = shipments.id and sj2.shipper_status_id IN (14, 25, 30, 36, 37)
                          AND sj2.verification = 1
                         )'));
             })
