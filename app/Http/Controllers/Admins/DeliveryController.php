@@ -10467,4 +10467,19 @@ class DeliveryController extends Controller
         $shipment_ids = DeliveryNoteShipment::whereIn('delivery_note_id', $dn_ids)->where('status', '>', 1)->whereNotIn('status', [8, 10, 11])->select('shipment_id')->get();
         return Shipment::whereIn('id', $shipment_ids)->whereIn('shipper_status_id', $dncc_status)->pluck('id');
     }
+
+    public function replacement_weight_check(Request $request)
+    {
+        $estimated_weight_array = $request->input('weight');  
+        $shipment_id = key($estimated_weight_array);      
+        $estimated_weight = $estimated_weight_array[$shipment_id]; 
+        $shipment = Shipment::find($shipment_id);
+    
+        if ($estimated_weight > $shipment->actual_weight) {
+            return response('false');  
+        }
+    
+        return response('true');
+    }
+    
 }
