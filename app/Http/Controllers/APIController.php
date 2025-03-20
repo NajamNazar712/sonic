@@ -10208,7 +10208,7 @@ class APIController extends Controller
                     ->whereIn('type', [0, 1])
                     ->latest()
                     ->whereHas('done_payment', function ($query) {
-                        $query->where('status', 0);
+                        $query->whereIn('status', [0,3]);
                         $query->where('is_wallet_payment', 1);
                     })
                     ->exists();
@@ -10290,7 +10290,7 @@ class APIController extends Controller
                     ->whereIn('type', [0, 1])
                     ->latest()
                     ->whereHas('done_payment', function ($query) {
-                        $query->where('status', 0);
+                        $query->whereIn('status', [0,3]);
                         $query->where('is_wallet_payment', 1);
                     })
                     ->exists();
