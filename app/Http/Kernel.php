@@ -63,6 +63,7 @@ class Kernel extends HttpKernel
 
         'APIToken' => \App\Http\Middleware\APIToken::class,
         'FinvoWalletUser' => \App\Http\Middleware\FinvoWalletUserMiddleware::class,
+        'FinvoWalletAuth' => \App\Http\Middleware\FinvoWalletUserAuthMiddleware::class,
         'Permission' => \App\Http\Middleware\Permission::class,
         'APIThrottle' => \App\Http\Middleware\APIThrottle::class,
 
