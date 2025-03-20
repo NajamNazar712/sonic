@@ -55,6 +55,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
+use App\Http\Models\Admin\ReturnNote;
 
 class AdminReportsEmailController extends Controller
 {
@@ -2141,8 +2142,8 @@ class AdminReportsEmailController extends Controller
                 $sheet->getStyle("A" . $serial . ":R" . $serial)->applyFromArray($cell_st);
                 $sheet->setTitle('Pending Deliveries Report');
                 $sheet->mergeCells('A2:R2');
-//                $sheet->mergeCells('A3:C3');
-//                $sheet->mergeCells('A' . $serial . ':B' . $serial);
+                // $sheet->mergeCells('A3:C3');
+                // $sheet->mergeCells('A' . $serial . ':B' . $serial);
                 $writer = new Xlsx($spreadsheet);
                 header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
                 header('Content-Disposition: attachment;filename=daily_pending_deliveries_report_.xlsx"');
@@ -2225,8 +2226,8 @@ class AdminReportsEmailController extends Controller
                 $sheet->getStyle("A" . $serial . ":N" . $serial)->applyFromArray($cell_st);
                 $sheet->setTitle('Receive Deliveries Report');
                 $sheet->mergeCells('A2:N2');
-//                $sheet->mergeCells('A3:C3');
-//                $sheet->mergeCells('A' . $serial . ':B' . $serial);
+                // $sheet->mergeCells('A3:C3');
+                // $sheet->mergeCells('A' . $serial . ':B' . $serial);
                 $writer = new Xlsx($spreadsheet);
                 header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
                 header('Content-Disposition: attachment;filename=daily_receive_deliveries_report_.xlsx"');
@@ -3419,5 +3420,665 @@ class AdminReportsEmailController extends Controller
                 return url('/') . '/' . $file_name_without_path;
             }
     }
-}
+
+    static public function deliveries_receive() {
+        $pending_deliveries = DeliveryNote::join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
+            ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
+            ->leftjoin('city_areas as cas', 'cas.id', '=', 'riders.area_id')
+            ->join('rider_types', 'rider_types.id', '=', 'riders.rider_type_id')
+            ->leftjoin('routes', 'delivery_notes.route_id', '=', 'routes.id')
+            ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
+            ->leftjoin('zones as z', 'oc.zone_id', '=', 'z.id')
+            ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_notes.updated_by')
+            ->leftjoin('delivery_note_shipments', 'delivery_note_shipments.delivery_note_id', 'delivery_notes.id')
+            ->leftjoin('shipments', 'delivery_note_shipments.shipment_id', '=', 'shipments.id') // Join with shipments table
+            ->select(
+                'delivery_notes.id as delivery_note',
+                'delivery_notes.id as delivery_note_id',
+                'oc.name as hub',
+                'riders.name as rider',
+                'routes.code as route',
+                'routes.start',
+                'routes.end',
+                'admins.name as assignee',
+                'delivery_notes.created_at',
+                'delivery_notes.total_cod_amount as amount',
+                'delivery_notes.shipments_count',
+                'delivery_notes.shipments_count as shipments_count_link',
+                'delivery_notes.pending_status',
+                'delivery_notes.last_updated_at',
+                'ad.name as updated_by',
+                'delivery_notes.special_rider',
+                'delivery_notes.special_rider_name',
+                'delivery_notes.special_rider_phone',
+                'delivery_notes.delivered_shipments as delivered_shipments',
+                DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 0) AS shipments_unverified_count'),
+                'oc.business_category_id as business_category',
+                'z.name as zone_name',
+                'riders.operation_rider_id',
+                'riders.rider_type_id',
+                'rider_types.name as rt',
+                'delivery_notes.created_via_app as created_via',
+                'riders.trax_id as rider_trax_id',
+                'cas.name as city_area_name',
+                DB::raw('SUM(shipments.actual_weight) as total_weight') // Calculate total weight
+
+            )
+            ->where('delivery_notes.status', 0)
+            ->groupBy('delivery_notes.id')
+        ->get();
+
+        $receive_deliveries_report_array = [];
+
+        // Report Title
+        $receive_deliveries_report_array[] = ['Receive Deliveries Report'];
         
+        // Header Row
+        $headers = [
+            'S. No.', 
+            'Delivery Note No.', 
+            'Hub', 
+            'Zone', 
+            'Business Category', 
+            'Rider ID', 
+            'Rider', 
+            'Area',
+            'Rider Type', 
+            'Rider Category', 
+            'Route', 
+            'No. Of Shipments', 
+            'Total Weight', 
+            'No. Of Pending Shipments',
+            'No. Of Delivered Shipments', 
+            'Assigned By', 
+            'Assigned Date', 
+            'Total Collection', 
+            'Status', 
+            'Last Updated (Date)',
+            'Last Updated By', 
+            'Created Via'
+        ];
+        
+        // Add headers to the report array
+        $receive_deliveries_report_array[] = $headers;
+        
+        if (count($pending_deliveries) > 0) {
+            $serial = 0;
+            $receive_deliveries_report_array = [['S. No.', 'Delivery Note No.', 'Hub', 'Zone', 'Business Category', 'Rider ID', 'Rider', 'Area', 'Rider Type', 'Rider Category', 'Route', 'No. Of Shipments', 'Total Weight', 'No. Of Pending Shipments', 'No. Of Delivered Shipments', 'Assigned By', 'Assigned Date', 'Total Collection', 'Status', 'Last Updated (Date)', 'Last Updated By', 'Created Via']];
+        
+            foreach ($pending_deliveries as $pending_delivery) {
+                $serial++;
+                $receive_deliveries_report_array[] = [
+                    $serial,
+                    $pending_delivery->delivery_note_id,
+                    $pending_delivery->hub,
+                    $pending_delivery->zone_name,
+                    $pending_delivery->business_category == 1 ? 'Domestic' : 'International',
+                    $pending_delivery->rider_trax_id,
+                    $pending_delivery->rider,
+                    $pending_delivery->city_area_name,
+                    $pending_delivery->rt,
+                    $pending_delivery->operation_rider_id == 1 ? 'Field In Operations' : 'Hold In Operations',
+                    $pending_delivery->start . ' to ' . $pending_delivery->end,
+                    $pending_delivery->shipments_count,
+                    $pending_delivery->total_weight,
+                    $pending_delivery->shipments_unverified_count,
+                    $pending_delivery->delivered_shipments,
+                    $pending_delivery->assignee,
+                    $pending_delivery->created_at,
+                    $pending_delivery->total_cod_amount,
+                    $pending_delivery->pending_status == 0 ? 'Pending for Update' : 'Pending for Verification',
+                    $pending_delivery->last_updated_at,
+                    $pending_delivery->updated_by,
+                    $pending_delivery->created_via == 0 ? 'Sonic' : 'App'
+                ];
+            }
+        
+            // Create Spreadsheet
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+        
+            // Set default column width
+            $sheet->getDefaultColumnDimension()->setWidth(20);
+        
+            // Populate data in Excel
+            $sheet->fromArray($receive_deliveries_report_array, NULL, 'A2', true);
+        
+            // Total Columns
+            $lastColumn = 'V'; // Adjust based on actual column count
+        
+            // Apply styling to the header row
+            $headerStyle = [
+                'font' => ['bold' => true],
+                'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+                'borders' => ['bottom' => ['style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+            ];
+            $sheet->getStyle("A2:{$lastColumn}2")->applyFromArray($headerStyle);
+        
+            // Set the title in the first row
+            $sheet->setCellValue('A1', 'Receive Deliveries Report');
+        
+            // Merge cells for title
+            $sheet->mergeCells("A1:{$lastColumn}1");
+        
+            // Apply styling: Bold, Centered, and Larger Font
+            $titleStyle = [
+                'font' => [
+                    'bold' => true,
+                    'size' => 16, // Larger Font
+                ],
+                'alignment' => [
+                    'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                    'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                ],
+            ];
+            $sheet->getStyle('A1')->applyFromArray($titleStyle);
+        
+            // Save and Output
+            $writer = new Xlsx($spreadsheet);
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment; filename="new_daily_receive_deliveries_report_.xlsx"');
+            header('Cache-Control: max-age=0');
+        
+            $date_file_name = Carbon::today()->format('Y_m_d');
+            $file_name_without_path = "reports/new_daily_receive_deliveries_report_" . $date_file_name . ".xlsx";
+            $file_name = public_path($file_name_without_path);
+            $writer->save($file_name);
+        
+            return url($file_name_without_path);
+        }
+        
+    }
+
+    static public function return_deliveries_receive($day) {
+        $return_deliveries = ReturnNote::join('cities AS oc', 'return_notes.hub_id', '=', 'oc.id')
+        ->join('riders', 'return_notes.rider_id', '=', 'riders.id')
+        ->leftjoin('city_areas as ca', 'ca.id', '=', 'riders.area_id')
+        ->join('admins', 'admins.id', '=', 'return_notes.admin_id')
+        ->select([
+            'return_notes.id as return_note', 
+            'return_notes.id', 
+            'return_notes.id as return_note_id', 
+            'oc.name as hub', 
+            'riders.name as rider',
+            'admins.name as assignee', 
+            'return_notes.created_at', 
+            'return_notes.shipments_count', 
+            'return_notes.shipments_count as shipments_count_link',
+            'return_notes.status', 
+            'riders.trax_id as rider_trax_id', 
+            DB::raw('(SELECT COUNT(shipment_id) FROM return_note_shipments WHERE return_note_id = return_notes.id AND status = 0) AS shipments_unverified_count'), 
+            DB::raw('(SELECT COUNT(id) FROM shipments_journey where shipper_status_id in (25, 31, 38) and reference_1_id = return_notes.id and verification = 1 ) as delivered_to_shipper_count'), 
+            'ca.name as area', 
+            'return_notes.created_at as created'
+        ])
+        ->whereIn('return_notes.status', [0, 3])
+        ->whereBetween('delivery_notes.created_at', [
+            Carbon::parse($day)->startOfDay()->format('Y-m-d H:i:s'),
+            Carbon::parse($day)->endOfDay()->format('Y-m-d H:i:s')
+        ])
+        ->get();
+
+        $return_deliveries_report_array = [];
+
+        // Report Title
+        $return_deliveries_report_array[] = ['Receive Return Deliveries Report'];
+        
+        // Header Row
+        $headers = [
+            'S. No.', 
+            'Return Note No.', 
+            'Hub', 
+            'Rider ID', 
+            'Area',
+            'Rider', 
+            'No. Of Shipments', 
+            'No. Of Pending Shipments',
+            'Assigned By', 
+            'Assigned Date',  
+            'Status',
+        ];
+        
+        // Add headers to the report array
+        $return_deliveries_report_array[] = $headers; 
+        
+        if (count($return_deliveries) > 0) {
+            $serial = 0;
+            
+            foreach ($return_deliveries as $pending_delivery) {
+                $serial++;
+                $rider_trax_id = str_replace('Trax', '', $pending_delivery->rider_trax_id);
+                $return_deliveries_report_array[] = [
+                    $serial,
+                    $pending_delivery->return_note,
+                    $pending_delivery->hub,
+                    $rider_trax_id,
+                    $pending_delivery->area,
+                    $pending_delivery->rider,
+                    $pending_delivery->shipments_count,
+                    $pending_delivery->shipments_unverified_count,
+                    $pending_delivery->assignee,
+                    $pending_delivery->created_at,
+                    $pending_delivery->status == 0 ? 'Created' : 'Updated',
+                ];
+            }
+        
+            // Apply Excel formatting
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+        
+            // Set default column width
+            $sheet->getDefaultColumnDimension()->setWidth(20);
+        
+            // Populate data in Excel
+            $sheet->fromArray($return_deliveries_report_array, NULL, 'A1', true);
+        
+            // Define last column dynamically
+            $lastColumn = 'K'; // Adjust based on actual column count
+        
+            // Apply styling to the header row
+            $headerStyle = [
+                'font' => ['bold' => true],
+                'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+                'borders' => ['bottom' => ['style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+            ];
+            $sheet->getStyle("A2:{$lastColumn}2")->applyFromArray($headerStyle);
+        
+            // Set the title in the first row
+            $sheet->setCellValue('A1', 'Receive Return Deliveries Report');
+        
+            // Merge cells for title
+            $sheet->mergeCells("A1:{$lastColumn}1");
+        
+            // Apply styling to the title
+            $titleStyle = [
+                'font' => [
+                    'bold' => true,
+                    'size' => 16, // Larger Font
+                ],
+                'alignment' => [
+                    'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                    'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                ],
+            ];
+            $sheet->getStyle('A1')->applyFromArray($titleStyle);
+        
+            // Save and Output
+            $writer = new Xlsx($spreadsheet);
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment; filename="new_daily_return_receive_deliveries_report_.xlsx"');
+            header('Cache-Control: max-age=0');
+        
+            $date_file_name = Carbon::today()->format('Y_m_d');
+            $file_name_without_path = "reports/new_daily_return_receive_deliveries_report_" . $date_file_name . ".xlsx";
+            $file_name = public_path($file_name_without_path);
+            $writer->save($file_name);
+        
+            return url($file_name_without_path);
+        }
+        
+        
+    }
+
+    static public function delivery_note_history($day) {
+        $connection = 'reports_2';
+        $deliveries = DB::connection($connection)->table('delivery_notes')
+            ->leftjoin('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
+            ->leftjoin('riders', 'delivery_notes.rider_id', '=', 'riders.id')
+            ->leftjoin('routes', 'delivery_notes.route_id', '=', 'routes.id')
+            ->leftjoin('admins as ccb', 'delivery_notes.cash_collected_by', '=', 'ccb.id')
+            ->leftjoin('admins', 'admins.id', '=', 'delivery_notes.admin_id')
+            ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
+            ->leftjoin('rider_delivery_note_statuses as rdns', 'rdns.delivery_note_id', '=', 'delivery_notes.id')
+            ->leftjoin('rider_deliveries as rd', 'rd.delivery_note_id', '=', 'delivery_notes.id')
+            ->leftjoin('rider_types as rt', 'rt.id', '=', 'riders.rider_type_id')
+            ->leftjoin('cities as c', 'c.id', '=', 'riders.city_id')
+            ->leftJoin('city_areas as ca', function ($join) {
+                $join->on('ca.id', '=', DB::raw("
+                    CASE 
+                        WHEN (riders.operation_rider_id = 2 AND riders.status = 1) THEN admins.area_id
+                        ELSE riders.area_id
+                    END
+                "));
+            })
+            ->leftJoin('zones as zn', function ($join) {
+                $join->on('zn.id', '=', DB::raw("CASE 
+                    WHEN (riders.operation_rider_id = 2 and riders.status = 1) THEN oc.zone_id
+                    ELSE c.zone_id 
+                END"));
+            })
+            ->leftjoin('hbl_konnect_transaction_delivery_notes as hktdn', 'hktdn.delivery_note_id', '=', 'delivery_notes.id')
+            ->leftjoin('one_link_out_for_delivery_shipment_payments as one_link_cash', 'delivery_notes.id', '=', 'one_link_cash.delivery_note_id')
+            ->leftjoin('delivery_note_shipments', 'delivery_note_shipments.delivery_note_id', 'delivery_notes.id')
+            ->leftjoin('shipments', 'delivery_note_shipments.shipment_id', '=', 'shipments.id')
+            ->select([
+                'delivery_notes.id as delivery_note', 
+                'delivery_notes.id as delivery_note_id', 
+                'oc.id as hub_id', 
+                'oc.name as hub',
+                'riders.trax_id as rider_trax_id',
+                'riders.name as rider', 
+                'routes.code as route', 
+                'routes.start', 
+                'routes.end', 
+                'admins.name as assignee',
+                'ub.name as updated_by',
+                'delivery_notes.updated_at as updated_at',
+                'delivery_notes.delivered_shipments', 
+                'delivery_notes.delivered_shipments as delivered_shipments_link', 
+                'delivery_notes.created_at', 
+                'delivery_notes.received_cod_amount as amount',
+                'delivery_notes.shipments_count', 
+                'delivery_notes.shipments_count as shipments_count_link', 
+                'delivery_notes.status', 
+                'delivery_notes.pending_status',
+                'delivery_notes.cash_collection_status', 
+                'delivery_notes.dncc_status', 
+                'delivery_notes.last_updated_at',
+                'delivery_notes.cash_collected_by',
+                'ccb.name as cash_collected', 
+                'delivery_notes.cash_collected_at', 
+                'delivery_notes.special_rider', 
+                'delivery_notes.special_rider_name', 
+                'delivery_notes.special_rider_phone',
+                'rdns.status as updated_via_app', 
+                'rd.id as rider_delivery_id', 
+                'rd.delivered_status as delivered_status', 
+                'rd.picture_path as picture_path', 
+                'rt.name as rider_type',
+                'zn.name as zone_name', 
+                'hktdn.transactions_amount as transactions_amount', 
+                'hktdn.cash_amount as cash_amount', 
+                'delivery_notes.one_link_payment_count',
+                'delivery_notes.created_via_app as created_via', 
+                'riders.operation_rider_id', 
+                'ca.name as area',
+                'one_link_cash.transaction_amount as one_link_amount',
+                DB::raw('SUM(shipments.actual_weight) as total_weight')
+            ])
+            ->whereIn('riders.operation_rider_id', [1,2])
+            ->whereBetween('delivery_notes.created_at', [
+                Carbon::parse($day)->startOfDay()->format('Y-m-d H:i:s'),
+                Carbon::parse($day)->endOfDay()->format('Y-m-d H:i:s')
+            ])
+            ->groupBy('delivery_notes.id')
+        ->get();
+
+        $delivery_note_history_report_array = [];
+
+        // Report Title
+        $delivery_note_history_report_array[] = ['Delivery Note History Report'];
+        
+        // Header Row
+        $headers = [
+            'S. No.', 
+            'Delivery Note No.', 
+            'Status', 
+            'Hub', 
+            'Zone',
+            'Rider ID', 
+            'Rider', 
+            'Area',
+            'Rider Type', 
+            'Rider Category',  
+            'Route',
+            'No. Of Shipments',
+            'Total Weight',
+            'No. Of Shipments Delivered',
+            'Assigned By',
+            'Assigned Date',
+        ];
+        
+        // Add headers to the report array
+        $delivery_note_history_report_array[] = $headers; 
+
+        if (count($deliveries) >= 0) {
+            $serial = 0;
+            
+            foreach ($deliveries as $delivery) {
+                $serial++;
+                $rider_trax_id = str_replace('Trax', '', $delivery->rider_trax_id);
+
+                $statusLabels = [
+                    0 => 'Pending for Update',
+                    1 => 'Pending for Verification',
+                    2 => 'Cash Collected',
+                    3 => 'Completed',
+                    4 => 'Verified',
+                    5 => 'Canceled',
+                ];
+                $status = isset($statusLabels[$delivery->status]) ? $statusLabels[$delivery->status] : '-';
+
+                $delivery_note_history_report_array[] = [
+                    $serial,
+                    $delivery->delivery_note,
+                    $status,
+                    $delivery->hub,
+                    $delivery->zone_name,
+                    $rider_trax_id,
+                    $delivery->rider,
+                    $delivery->area,
+                    $delivery->operation_rider_id == 1 ? 'Field In Operations' : 'Hold In Operations',
+                    $delivery->route,
+                    $delivery->shipments_count,
+                    $delivery->total_weight,
+                    $delivery->delivered_shipments,
+                    $delivery->assignee,
+                    $delivery->created_at,
+                ];
+            }
+        
+            // Apply Excel formatting
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+        
+            // Set default column width
+            $sheet->getDefaultColumnDimension()->setWidth(20);
+        
+            // Populate data in Excel
+            $sheet->fromArray($delivery_note_history_report_array, NULL, 'A1', true);
+        
+            // Define last column dynamically
+            $lastColumn = 'P'; // Adjust based on actual column count
+        
+            // Apply styling to the header row
+            $headerStyle = [
+                'font' => ['bold' => true],
+                'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+                'borders' => ['bottom' => ['style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+            ];
+            $sheet->getStyle("A2:{$lastColumn}2")->applyFromArray($headerStyle);
+        
+            // Set the title in the first row
+            $sheet->setCellValue('A1', 'Delivery Note History Report');
+        
+            // Merge cells for title
+            $sheet->mergeCells("A1:{$lastColumn}1");
+        
+            // Apply styling to the title
+            $titleStyle = [
+                'font' => [
+                    'bold' => true,
+                    'size' => 16, // Larger Font
+                ],
+                'alignment' => [
+                    'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                    'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                ],
+            ];
+            $sheet->getStyle('A1')->applyFromArray($titleStyle);
+        
+            // Save and Output
+            $writer = new Xlsx($spreadsheet);
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment; filename="new_daily_delivery_note_history_report_.xlsx"');
+            header('Cache-Control: max-age=0');
+        
+            $date_file_name = Carbon::today()->format('Y_m_d');
+            $file_name_without_path = "reports/new_daily_delivery_note_history_report_" . $date_file_name . ".xlsx";
+            $file_name = public_path($file_name_without_path);
+            $writer->save($file_name);
+            return url($file_name_without_path);
+        }
+    }
+
+    static public function weight_qc_report($day) {
+        $connection = 'reports_2';
+        $shipments = DB::connection($connection)->table('shipments')->leftJoin('shipments_weight_types as sw', function ($join) {
+            $join->on('shipments.id', '=', 'sw.shipment_id')
+                    ->whereRaw('sw.id = (SELECT MIN(id) FROM shipments_weight_types WHERE shipment_id = shipments.id)');
+        })
+        ->leftJoin('weight_types as wt', 'sw.weight_type', '=', 'wt.id')->join('users as u', 'shipments.user_id', '=', 'u.id')
+        ->leftJoin('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
+        ->leftJoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+        ->leftJoin('cities AS oc', 'usi.city_id', '=', 'oc.id')
+        ->leftJoin('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+        ->leftJoin('sub_category_segments as scs', 'u.sub_segment_id', '=', 'scs.id')
+        ->leftJoin('shipments_journey as arv_date', 'arv_date.shipment_id', '=', 'shipments.id')
+        ->leftJoin('admins as user', 'user.id', '=', 'arv_date.admin_id')
+        ->leftJoin('cities as hub', 'hub.id', '=', 'user.default_hub_id')
+        ->leftJoin('city_areas as area', 'area.id', '=', 'user.area_id')
+        ->select([
+                'shipments.id as shId', 
+                'shipments.tracking_number', 
+                'u.name as shipper', 
+                'oc.name as origin', 
+                'dc.name as destination', 
+                'shipments.created_at as booking_date', 
+                'arv_date.created_at as arrival_date',
+                'sm.mode as shipping_mode', 
+                'shipments.estimated_weight', 
+                'shipments.actual_weight', 
+                'shipments.length', 
+                'shipments.breadth', 
+                'shipments.height', 
+                'scs.name as sub_segment', 
+                'sw.weight_type', 
+                'wt.name as weight_type_name',
+                'shipments.chargeable_weight', 
+                'hub.name as hub_name',
+                'area.name as area_name'
+            ])
+        ->where('arv_date.shipper_status_id', '=', 2)
+        ->whereNotNull('shipments.actual_weight')
+        ->whereBetween('arv_date.created_at', [
+            // Carbon::parse($day)->startOfDay()->format('Y-m-d H:i:s'),
+            // Carbon::parse($day)->endOfDay()->format('Y-m-d H:i:s')
+
+            Carbon::parse('03 January, 2025')->startOfDay()->format('Y-m-d H:i:s'),
+            Carbon::parse('03 January, 2025')->endOfDay()->format('Y-m-d H:i:s')
+        ])
+        ->get();
+
+        $weight_qc_report = [];
+
+        // Report Title
+        $weight_qc_report[] = ['Delivery Note History Report'];
+        
+        // Header Row
+        $headers = [
+            'S. No.', 
+            'Tracking Number',
+            'Shipper Name',
+            'Sub Segment',
+            'Shipping Mode',
+            'Origin',
+            'Destination',
+            'Arrival Date',
+            'User Hub',
+            'User Area',
+            'Weight Input by Shipper',
+            'Arrival Weight',
+            'Weight Diffrence (Arrival Weight vs Shipper Weight)',
+            'Weighted As',
+            'Weight Recorded As'
+        ];
+        
+        // Add headers to the report array
+        $weight_qc_report[] = $headers; 
+
+        if (count($shipments) >= 0) {
+            $serial = 0;
+            
+            foreach ($shipments as $shipment) {
+                $serial++;
+
+                $weight_difference = $shipment->actual_weight - $shipment->estimated_weight;
+                $shipment->length;
+
+                $weight_qc_report[] = [
+                    $serial,
+                    $shipment->tracking_number,
+                    $shipment->shipper,
+                    $shipment->sub_segment,
+                    $shipment->shipping_mode,
+                    $shipment->origin,
+                    $shipment->destination,
+                    $shipment->arrival_date,
+                    $shipment->hub_name,
+                    $shipment->area_name,
+                    $shipment->estimated_weight,
+                    $shipment->actual_weight,
+                    $weight_difference,
+                    $shipment->length != null ? 'Volumetric' : 'Dense',
+                    $shipment->weight_type_name
+                ];
+            }
+
+            // Apply Excel formatting
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+        
+            // Set default column width
+            $sheet->getDefaultColumnDimension()->setWidth(20);
+
+            // Set B column (tracking number) format to text
+            $sheet->getStyle('B')->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT);
+        
+            // Populate data in Excel
+            $sheet->fromArray($weight_qc_report, NULL, 'A1', true);
+        
+            // Define last column dynamically
+            $lastColumn = 'O'; // Adjust based on actual column count
+        
+            // Apply styling to the header row
+            $headerStyle = [
+                'font' => ['bold' => true],
+                'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+                'borders' => ['bottom' => ['style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+            ];
+            $sheet->getStyle("A2:{$lastColumn}2")->applyFromArray($headerStyle);
+        
+            // Set the title in the first row
+            $sheet->setCellValue('A1', 'Delivery Note History Report');
+        
+            // Merge cells for title
+            $sheet->mergeCells("A1:{$lastColumn}1");
+        
+            // Apply styling to the title
+            $titleStyle = [
+                'font' => [
+                    'bold' => true,
+                    'size' => 16, // Larger Font
+                ],
+                'alignment' => [
+                    'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                    'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                ],
+            ];
+            $sheet->getStyle('A1')->applyFromArray($titleStyle);
+        
+            // Save and Output
+            $writer = new Xlsx($spreadsheet);
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment; filename="new_daily_weight_qc_report_.xlsx"');
+            header('Cache-Control: max-age=0');
+        
+            $date_file_name = Carbon::today()->format('Y_m_d');
+            $file_name_without_path = "reports/new_daily_weight_qc_report_" . $date_file_name . ".xlsx";
+            $file_name = public_path($file_name_without_path);
+            $writer->save($file_name);
+            return url($file_name_without_path);
+        }
+    }
+}

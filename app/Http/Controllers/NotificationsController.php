@@ -354,7 +354,6 @@ class NotificationsController extends Controller
     static public function send($id, $reference_1_id, $reference_2_id = NULL, $reference_3_id = NULL,$array_data = array())
     {
         $notification = Notification::find($id);
-
         if ($notification) {
             // if ($notification->status)
             if ($notification->status || ($id == 81 && $notification->status == 0)) {
@@ -11425,6 +11424,35 @@ class NotificationsController extends Controller
                     }
                 }
 
+                else if ($id == 236 || $id == 237 || $id == 238 || $id == 239 || $id == 240) {
+                    $date = Carbon::today()->format('Y-m-d');
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+                    if (strpos($subject, '[date]') !== FALSE) {
+                        $subject = str_replace('[date]', $date, $subject);
+                    }
+
+                    if (strpos($body, '[date]') !== FALSE) {
+                        $body = str_replace('[date]', $date, $body);
+                    }
+
+                    $link = '<a href="' . $reference_1_id . '" target="_blank">Report</a>';
+
+                    if (strpos($subject, '[link]') !== FALSE) {
+                        $subject = str_replace('[link]', $link, $subject);
+                    }
+
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+
+                    $to = array();
+                    $bcc = array();
+                    $to[] = 'shahbaz.abbasi@trax.pk';
+                    $to[] = 'mansoor.ahmad@trax.pk';
+
+                    self::email($subject, $body, $to, NULL, $bcc);
+                }
             }
         }
     }

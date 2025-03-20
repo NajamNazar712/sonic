@@ -172,6 +172,11 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\FinSurgentSonicPaymentSharing',
         '\App\Console\Commands\FailedStatusRePushToWallet',
 
+        'App\Console\Commands\ReceiveDeliveriesReportNew',
+        'App\Console\Commands\ReceiveReturnDeliveries',
+        'App\Console\Commands\DailyDeliveryNoteHistory',
+        'App\Console\Commands\DailyWeightQCReport',
+
     ];
 
     /**
@@ -589,6 +594,11 @@ class Kernel extends ConsoleKernel
         $schedule->command('fingsurgent:sonic-payment')->hourly()->runInBackground();
         $schedule->command('status:re-push-wallet')->hourly()->runInBackground();
         $schedule->command('rerun:wallet_log_re_push')->hourly()->runInBackground();
+
+        $schedule->command('email:daily_received_deliveries_report')->dailyAt('09:00')->runInBackground();
+        $schedule->command('email:daily_return_received_deliveries_report')->dailyAt('09:00')->runInBackground();
+        $schedule->command('email:daily_delivery_note_history')->dailyAt('09:00')->runInBackground();
+        $schedule->command('email:daily_weight_qc_report')->dailyAt('09:00')->runInBackground();
     }
     /**
      * Register the commands for the application.

@@ -50,11 +50,50 @@
                                             </div>
                                         </div>
 
-
                                         <div class="mb-4">
                                             <div class="bg-blue">
                                                 <h3 class="form-section white">
                                                     <b>ID:</b> 226 | <b>Name:</b> Receive Quality of Service Report Email
+                                                </h3>
+                                            </div>
+                                            <div class="col-12 mb-2 d-flex">
+                                                Email delivery based on today date:
+                                            </div>
+                                            <div class="col-12 form-group">
+                                                <div class="row d-flex align-items-center">
+                                                    <div class="col-4">
+                                                        <div class="input-group">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                                    Time 1:
+                                                                </span>
+                                                            </div>
+                                                            <input type="text" name="quality_of_service_report_time" class="form-control bg-primary border-primary white rounded-right pickatime quality_of_service_report_time" value="{{ $quality_of_service_report_time ?? '09:00 AM' }}" id="quality_of_service_report_time" placeholder="Time">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-4">
+                                                        <div class="input-group">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                                    Time 2:
+                                                                </span>
+                                                            </div>
+                                                            <input type="text" name="quality_of_service_report_other_time" class="form-control bg-primary border-primary white rounded-right pickatime quality_of_service_report_other_time" value="{{ $quality_of_service_report_other_time ?? '02:00 PM' }}" id="quality_of_service_report_other_time" placeholder="Time">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-4 d-flex align-items-center">
+                                                        <label class="mr-2 font-small-3"><b>Email Delivery: </b></label>
+                                                        <input type="checkbox" name="quality_of_service_toggle" id="quality_of_service_toggle" class="switchery quality_of_service_toggle" data-size="sm" data-switchery="true"{{ $quality_of_service_report_toggle == 1 ? 'checked' : '' }}>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+
+                                        <div class="mb-4">
+                                            <div class="bg-blue">
+                                                <h3 class="form-section white">
+                                                    <b>ID:</b> 236 | <b>Name:</b> Receive Deliveries Report Email
                                                 </h3>
                                             </div>
                                             <div class="col-12 mb-2 d-flex">
@@ -69,12 +108,128 @@
                                                                     Time:
                                                                 </span>
                                                             </div>
-                                                            <input type="text" name="quality_of_service_report_time" class="form-control bg-primary border-primary white rounded-right pickatime quality_of_service_report_time" value="{{ $quality_of_service_report_time ?? '09:00 AM' }}" id="quality_of_service_report_time" placeholder="Time">
+                                                            <input type="text" name="receive_deliveries_report_time" class="form-control bg-primary border-primary white rounded-right pickatime receive_deliveries_report_time" value="{{ $receive_deliveries_report_time ?? '09:00 AM' }}" id="receive_deliveries_report_time" placeholder="Time">
                                                         </div>
                                                     </div>
                                                     <div class="col-md-6 d-flex align-items-center">
                                                         <label class="mr-2 font-small-3"><b>Email Delivery: </b></label>
-                                                        <input type="checkbox" name="quality_of_service_toggle" id="quality_of_service_toggle" class="switchery quality_of_service_toggle" data-size="sm" data-switchery="true"{{ $quality_of_service_report_toggle == 1 ? 'checked' : '' }}>
+                                                        <input type="checkbox" name="receive_delivieries_toggle" id="receive_delivieries_toggle" class="switchery receive_delivieries_toggle" data-size="sm" data-switchery="true"{{ $receive_return_deliveries_report_toggle == 1 ? 'checked' : '' }}>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-4">
+                                            <div class="bg-blue">
+                                                <h3 class="form-section white">
+                                                    <b>ID:</b> 237 | <b>Name:</b> Receive Return Deliveries Report Email
+                                                </h3>
+                                            </div>
+                                            <div class="col-12 mb-2 d-flex">
+                                                Email delivery based on today date:
+                                            </div>
+                                            <div class="col-12 form-group">
+                                                <div class="row d-flex align-items-center">
+                                                    <div class="col-md-6">
+                                                        <div class="input-group">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                                    Time:
+                                                                </span>
+                                                            </div>
+                                                            <input type="text" name="receive_return_deliveries_report_time" class="form-control bg-primary border-primary white rounded-right pickatime receive_return_deliveries_report_time" value="{{ $receive_return_deliveries_report_time ?? '09:00 AM' }}" id="receive_return_deliveries_report_time" placeholder="Time">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6 d-flex align-items-center">
+                                                        <label class="mr-2 font-small-3"><b>Email Delivery: </b></label>
+                                                        <input type="checkbox" name="receive_return_deliveries_toggle" id="receive_return_deliveries_toggle" class="switchery receive_return_deliveries_toggle" data-size="sm" data-switchery="true"{{ $receive_return_deliveries_report_toggle == 1 ? 'checked' : '' }}>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-4">
+                                            <div class="bg-blue">
+                                                <h3 class="form-section white">
+                                                    <b>ID:</b> 238 | <b>Name:</b> Delivery Note History Email
+                                                </h3>
+                                            </div>
+                                            <div class="col-12 mb-2 d-flex">
+                                                Email delivery based on today date:
+                                            </div>
+                                            <div class="col-12 form-group">
+                                                <div class="row d-flex align-items-center">
+                                                    <div class="col-md-6">
+                                                        <div class="input-group">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                                    Time:
+                                                                </span>
+                                                            </div>
+                                                            <input type="text" name="delivery_note_history_report_time" class="form-control bg-primary border-primary white rounded-right pickatime delivery_note_history_report_time" value="{{ $delivery_note_history_report_time ?? '09:00 AM' }}" id="delivery_note_history_report_time" placeholder="Time">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6 d-flex align-items-center">
+                                                        <label class="mr-2 font-small-3"><b>Email Delivery: </b></label>
+                                                        <input type="checkbox" name="delivery_note_history_toggle" id="delivery_note_history_toggle" class="switchery delivery_note_history_toggle" data-size="sm" data-switchery="true"{{ $delivery_note_history_report_toggle == 1 ? 'checked' : '' }}>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-4">
+                                            <div class="bg-blue">
+                                                <h3 class="form-section white">
+                                                    <b>ID:</b> 239 | <b>Name:</b> Weight QC Report Email
+                                                </h3>
+                                            </div>
+                                            <div class="col-12 mb-2 d-flex">
+                                                Email delivery based on today date:
+                                            </div>
+                                            <div class="col-12 form-group">
+                                                <div class="row d-flex align-items-center">
+                                                    <div class="col-md-6">
+                                                        <div class="input-group">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                                    Time:
+                                                                </span>
+                                                            </div>
+                                                            <input type="text" name="weight_qc_report_time" class="form-control bg-primary border-primary white rounded-right pickatime weight_qc_report_time" value="{{ $weight_qc_report_time ?? '09:00 AM' }}" id="weight_qc_report_time" placeholder="Time">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6 d-flex align-items-center">
+                                                        <label class="mr-2 font-small-3"><b>Email Delivery: </b></label>
+                                                        <input type="checkbox" name="weight_qc_toggle" id="weight_qc_toggle" class="switchery weight_qc_toggle" data-size="sm" data-switchery="true"{{ $weight_qc_report_toggle == 1 ? 'checked' : '' }}>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-4">
+                                            <div class="bg-blue">
+                                                <h3 class="form-section white">
+                                                    <b>ID:</b> 240 | <b>Name:</b> Overall Sales Report Email
+                                                </h3>
+                                            </div>
+                                            <div class="col-12 mb-2 d-flex">
+                                                Email delivery based on today date:
+                                            </div>
+                                            <div class="col-12 form-group">
+                                                <div class="row d-flex align-items-center">
+                                                    <div class="col-md-6">
+                                                        <div class="input-group">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                                    Time:
+                                                                </span>
+                                                            </div>
+                                                            <input type="text" name="overall_sales_report_time" class="form-control bg-primary border-primary white rounded-right pickatime overall_sales_report_time" value="{{ $overall_sales_report_time ?? '09:00 AM' }}" id="overall_sales_report_time" placeholder="Time">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6 d-flex align-items-center">
+                                                        <label class="mr-2 font-small-3"><b>Email Delivery: </b></label>
+                                                        <input type="checkbox" name="overall_sales_toggle" id="overall_sales_toggle" class="switchery overall_sales_toggle" data-size="sm" data-switchery="true"{{ $overall_sales_report_toggle == 1 ? 'checked' : '' }}>
                                                     </div>
                                                 </div>
                                             </div>
@@ -102,7 +257,7 @@
 
     <style>
         #main_card {
-            height: 650px;
+            height: 1600px;
         }
     </style>
 @endsection
@@ -139,6 +294,73 @@
                         }
                     }
                 });
+
+                $('.quality_of_service_report_other_time').pickatime({
+                    clear: 'Clear',
+                    format: 'h:i A',
+                    interval: 15,
+                    onSet: function(context) {
+                        if (context.select) {
+                            $('#arrival_time_to').pickatime('picker').set('min', $('#quality_of_service_report_other_time').pickatime('picker').get('select'));
+                        }
+                    }
+                });
+
+                $('.receive_deliveries_report_time').pickatime({
+                    clear: 'Clear',
+                    format: 'h:i A',
+                    interval: 15,
+                    onSet: function(context) {
+                        if (context.select) {
+                            $('#arrival_time_to').pickatime('picker').set('min', $('#receive_deliveries_report_time').pickatime('picker').get('select'));
+                        }
+                    }
+                });
+
+                $('.receive_return_deliveries_report_time').pickatime({
+                    clear: 'Clear',
+                    format: 'h:i A',
+                    interval: 15,
+                    onSet: function(context) {
+                        if (context.select) {
+                            $('#arrival_time_to').pickatime('picker').set('min', $('#receive_return_deliveries_report_time').pickatime('picker').get('select'));
+                        }
+                    }
+                });
+
+                $('.delivery_note_history_report_time').pickatime({
+                    clear: 'Clear',
+                    format: 'h:i A',
+                    interval: 15,
+                    onSet: function(context) {
+                        if (context.select) {
+                            $('#arrival_time_to').pickatime('picker').set('min', $('#delivery_note_history_report_time').pickatime('picker').get('select'));
+                        }
+                    }
+                });
+
+                $('.weight_qc_report_time').pickatime({
+                    clear: 'Clear',
+                    format: 'h:i A',
+                    interval: 15,
+                    onSet: function(context) {
+                        if (context.select) {
+                            $('#arrival_time_to').pickatime('picker').set('min', $('#weight_qc_report_time').pickatime('picker').get('select'));
+                        }
+                    }
+                });
+
+                $('.overall_sales_report_time').pickatime({
+                    clear: 'Clear',
+                    format: 'h:i A',
+                    interval: 15,
+                    onSet: function(context) {
+                        if (context.select) {
+                            $('#arrival_time_to').pickatime('picker').set('min', $('#overall_sales_report_time').pickatime('picker').get('select'));
+                        }
+                    }
+                });
+
             });
         
     </script>
