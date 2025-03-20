@@ -176,6 +176,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\ReceiveReturnDeliveries',
         'App\Console\Commands\DailyDeliveryNoteHistory',
         'App\Console\Commands\DailyWeightQCReport',
+        'App\Console\Commands\DailyOverAllSalesReport',
 
     ];
 
@@ -599,6 +600,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:daily_return_received_deliveries_report')->dailyAt('09:00')->runInBackground();
         $schedule->command('email:daily_delivery_note_history')->dailyAt('09:00')->runInBackground();
         $schedule->command('email:daily_weight_qc_report')->dailyAt('09:00')->runInBackground();
+        $schedule->command('email:daily_overall_sales_report')->dailyAt('09:00')->runInBackground();
     }
     /**
      * Register the commands for the application.

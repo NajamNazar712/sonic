@@ -3962,6 +3962,209 @@ class AdminReportsEmailController extends Controller
         ->where('arv_date.shipper_status_id', '=', 2)
         ->whereNotNull('shipments.actual_weight')
         ->whereBetween('arv_date.created_at', [
+            Carbon::parse($day)->startOfDay()->format('Y-m-d H:i:s'),
+            Carbon::parse($day)->endOfDay()->format('Y-m-d H:i:s')
+        ])
+        ->get();
+
+        $weight_qc_report = [];
+
+        // Report Title
+        $weight_qc_report[] = ['Delivery Note History Report'];
+        
+        // Header Row
+        $headers = [
+            'S. No.', 
+            'Tracking Number',
+            'Account No.',
+            'Shipper',
+            'Sub Segment',
+            'Vendor',
+            'Order ID',
+            'First Attempt Date',
+            'Item Quantity',
+            'Pieces',
+            'Status',
+            'Reason',
+            'Remark',
+            'Total Attempt',
+            'Payment Status',
+            'Invoice No.',
+            'Payment ID',
+            'Processed Date',
+            'Paid Date',
+            'Service Type',
+            'Arrival Date',
+            'Rider',
+            'Origin',
+            'Origin Hub',
+            'Destination',
+            'Destination Hub',
+            'Return City',
+            'Origin Zone',
+            'Class',
+            'Attempts',
+            'Shipping Mode',
+            'Category',
+            'Description',
+            'International Tracking No.',
+            'Collection Amount',
+            'Actual Weight',
+            'Chargable Weight',
+            'Cash Handling Charges',
+            'Insurance Charges',
+            'Packaging Charges',
+            'FAF Charges',
+            'Fuel Surcharge',
+            'Return Charges',
+            'Replacement Charges',
+            'Try & Buy Charges',
+            'Reverse Pickup Charges',
+            'NSA/OSA Charges',
+            'GST',
+            'SMS Charges',
+            'Intercept Charges',
+            'Fintech Charges',
+            'Total Charges',
+            'Estimated Charges',
+            'Packaging Charges',
+            'Net Payable',
+            'Delivered/Returned Date',
+            'Received/Refused By',
+            'Sales Person',
+            'Referral Name',
+            'Special Instructions',
+            'Cost',
+        ];
+        
+        // Add headers to the report array
+        $weight_qc_report[] = $headers; 
+
+        if (count($shipments) >= 0) {
+            $serial = 0;
+            
+            foreach ($shipments as $shipment) {
+                $serial++;
+
+                $weight_difference = $shipment->actual_weight - $shipment->estimated_weight;
+                $shipment->length;
+
+                $weight_qc_report[] = [
+                    $serial,
+                    $shipment->tracking_number,
+                    $shipment->shipper,
+                    $shipment->sub_segment,
+                    $shipment->shipping_mode,
+                    $shipment->origin,
+                    $shipment->destination,
+                    $shipment->arrival_date,
+                    $shipment->hub_name,
+                    $shipment->area_name,
+                    $shipment->estimated_weight,
+                    $shipment->actual_weight,
+                    $weight_difference,
+                    $shipment->length != null ? 'Volumetric' : 'Dense',
+                    $shipment->weight_type_name
+                ];
+            }
+
+            // Apply Excel formatting
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+        
+            // Set default column width
+            $sheet->getDefaultColumnDimension()->setWidth(20);
+
+            // Set B column (tracking number) format to text
+            $sheet->getStyle('B')->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT);
+        
+            // Populate data in Excel
+            $sheet->fromArray($weight_qc_report, NULL, 'A1', true);
+        
+            // Define last column dynamically
+            $lastColumn = 'O'; // Adjust based on actual column count
+        
+            // Apply styling to the header row
+            $headerStyle = [
+                'font' => ['bold' => true],
+                'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+                'borders' => ['bottom' => ['style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+            ];
+            $sheet->getStyle("A2:{$lastColumn}2")->applyFromArray($headerStyle);
+        
+            // Set the title in the first row
+            $sheet->setCellValue('A1', 'Delivery Note History Report');
+        
+            // Merge cells for title
+            $sheet->mergeCells("A1:{$lastColumn}1");
+        
+            // Apply styling to the title
+            $titleStyle = [
+                'font' => [
+                    'bold' => true,
+                    'size' => 16, // Larger Font
+                ],
+                'alignment' => [
+                    'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                    'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                ],
+            ];
+            $sheet->getStyle('A1')->applyFromArray($titleStyle);
+        
+            // Save and Output
+            $writer = new Xlsx($spreadsheet);
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment; filename="new_daily_weight_qc_report_.xlsx"');
+            header('Cache-Control: max-age=0');
+        
+            $date_file_name = Carbon::today()->format('Y_m_d');
+            $file_name_without_path = "reports/new_daily_weight_qc_report_" . $date_file_name . ".xlsx";
+            $file_name = public_path($file_name_without_path);
+            $writer->save($file_name);
+            return url($file_name_without_path);
+        }
+    }
+
+    static public function overall_sales_report($day) {
+        $connection = 'reports';
+        $shipments = DB::connection($connection)->table('shipments')->leftJoin('shipments_weight_types as sw', function ($join) {
+            $join->on('shipments.id', '=', 'sw.shipment_id')
+                    ->whereRaw('sw.id = (SELECT MIN(id) FROM shipments_weight_types WHERE shipment_id = shipments.id)');
+        })
+        ->leftJoin('weight_types as wt', 'sw.weight_type', '=', 'wt.id')->join('users as u', 'shipments.user_id', '=', 'u.id')
+        ->leftJoin('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
+        ->leftJoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+        ->leftJoin('cities AS oc', 'usi.city_id', '=', 'oc.id')
+        ->leftJoin('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+        ->leftJoin('sub_category_segments as scs', 'u.sub_segment_id', '=', 'scs.id')
+        ->leftJoin('shipments_journey as arv_date', 'arv_date.shipment_id', '=', 'shipments.id')
+        ->leftJoin('admins as user', 'user.id', '=', 'arv_date.admin_id')
+        ->leftJoin('cities as hub', 'hub.id', '=', 'user.default_hub_id')
+        ->leftJoin('city_areas as area', 'area.id', '=', 'user.area_id')
+        ->select([
+                'shipments.id as shId', 
+                'shipments.tracking_number', 
+                'u.name as shipper', 
+                'oc.name as origin', 
+                'dc.name as destination', 
+                'shipments.created_at as booking_date', 
+                'arv_date.created_at as arrival_date',
+                'sm.mode as shipping_mode', 
+                'shipments.estimated_weight', 
+                'shipments.actual_weight', 
+                'shipments.length', 
+                'shipments.breadth', 
+                'shipments.height', 
+                'scs.name as sub_segment', 
+                'sw.weight_type', 
+                'wt.name as weight_type_name',
+                'shipments.chargeable_weight', 
+                'hub.name as hub_name',
+                'area.name as area_name'
+            ])
+        ->where('arv_date.shipper_status_id', '=', 2)
+        ->whereNotNull('shipments.actual_weight')
+        ->whereBetween('arv_date.created_at', [
             // Carbon::parse($day)->startOfDay()->format('Y-m-d H:i:s'),
             // Carbon::parse($day)->endOfDay()->format('Y-m-d H:i:s')
 

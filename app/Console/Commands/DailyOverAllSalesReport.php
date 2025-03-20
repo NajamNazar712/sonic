@@ -14,7 +14,7 @@ class DailyOverAllSalesReport extends Command
      *
      * @var string
      */
-    protected $signature = 'command:name';
+    protected $signature = 'email:daily_overall_sales_report';
 
     /**
      * The console command description.
@@ -30,6 +30,8 @@ class DailyOverAllSalesReport extends Command
      */
     public function handle()
     {
-        return Command::SUCCESS;
+        $day = Carbon::yesterday()->toDateString();
+        $response = AdminReportsEmailController::weight_qc_report($day);
+        NotificationsController::send(240, $response);
     }
 }
