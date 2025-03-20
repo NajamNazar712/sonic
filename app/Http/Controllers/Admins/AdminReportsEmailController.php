@@ -3411,12 +3411,8 @@ class AdminReportsEmailController extends Controller
             
             // Populate data in Excel (Starting from Row 3)
             $dataRows = array_values(array_diff_key($sales_array, ['header' => ''])); // Ensure only data rows
+
             $sheet->fromArray($dataRows, NULL, 'A3', true);
-            
-
-
-
-            
             
             $writer = new Xlsx($spreadsheet);
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
