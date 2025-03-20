@@ -10208,7 +10208,7 @@ class APIController extends Controller
                     ->whereIn('type', [0, 1])
                     ->latest()
                     ->whereHas('done_payment', function ($query) {
-                        $query->where('status', 0);
+                        $query->whereIn('status', [0,3]);
                         $query->where('is_wallet_payment', 1);
                     })
                     ->exists();
@@ -10256,7 +10256,7 @@ class APIController extends Controller
     public function fintech_charges_bulk(Request $request)
     {
         $rules = [
-            'wallet_id' => ['required', 'exists:wallet_users,wallet_id'],
+//            'wallet_id' => ['required', 'exists:wallet_users,wallet_id'],
             'shipments' => ['required', 'array', 'min:1'],
             'shipments.*.tracking_number' => ['required', 'exists:shipments,tracking_number'],
             'shipments.*.charges' => ['required', 'numeric', 'min:0', 'max:100000'],
@@ -10290,7 +10290,7 @@ class APIController extends Controller
                     ->whereIn('type', [0, 1])
                     ->latest()
                     ->whereHas('done_payment', function ($query) {
-                        $query->where('status', 0);
+                        $query->whereIn('status', [0,3]);
                         $query->where('is_wallet_payment', 1);
                     })
                     ->exists();
