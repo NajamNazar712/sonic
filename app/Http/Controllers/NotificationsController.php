@@ -11092,17 +11092,23 @@ class NotificationsController extends Controller
                     $html .= '</table>';
                     $body = str_replace('[preview]', $html, $notification->body);
                     self::email($subject, $body, $to, $cc);
-                } else if ($id == 226) {
-                    $file = $reference_1_id;
-                    $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
-                    if (strpos($body, '[link]') !== FALSE) {
-                        $body = str_replace('[link]', $link, $body);
-                        $body .= '<br/><br/><strong>Note: This link will expire after 7 days.</strong>';
-                    }
-                    $to = ['tauseef.sarfaraz@trax.pk', 'mansoor.ahmad@trax.pk', 'shahbaz.abbasi@trax.pk'];
+                } 
+                // else if ($id == 226) {
+                //     $file = $reference_1_id;
+                //     $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
+                //     if (strpos($body, '[link]') !== FALSE) {
+                //         $body = str_replace('[link]', $link, $body);
+                //         $body .= '<br/><br/><strong>Note: This link will expire after 7 days.</strong>';
+                //     }
+                //     $to = [
+                //             'tauseef.sarfaraz@trax.pk', 
+                //             'mansoor.ahmad@trax.pk', 
+                //             // 'shahbaz.abbasi@trax.pk'
+                //         ];
 
-                    self::email($subject, $body, $to);
-                } else if ($id == 227) {
+                //     self::email($subject, $body, $to);
+                // } 
+                else if ($id == 227) {
                     $file = $reference_1_id;
                     $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
                     if (strpos($body, '[link]') !== FALSE) {
@@ -11424,7 +11430,7 @@ class NotificationsController extends Controller
                     }
                 }
 
-                else if ($id == 236 || $id == 237 || $id == 238 || $id == 239 || $id == 240) {
+                else if ($id == 226 || $id == 236 || $id == 237 || $id == 238 || $id == 239 || $id == 240) {
                     $date = Carbon::today()->format('Y-m-d');
                     $subject = $notification->subject;
                     $body = $notification->body;

@@ -31,7 +31,7 @@ class DailyOverAllSalesReport extends Command
     public function handle()
     {
         $day = Carbon::yesterday()->toDateString();
-        $response = AdminReportsEmailController::weight_qc_report($day);
+        $response = AdminReportsEmailController::overall_sales_report($day);
         NotificationsController::send(240, $response);
     }
 }
