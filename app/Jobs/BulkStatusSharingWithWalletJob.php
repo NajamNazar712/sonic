@@ -191,7 +191,6 @@ class BulkStatusSharingWithWalletJob implements ShouldQueue
                 $status_name = $status_mapping[$status]['name'];
             
                 $payload[] = [
-                    'unique_id' => $d['id'],
                     'shipment_id' => $shipment->tracking_number,
                     'status_code' => $status_code,
                     'status_name' =>  $status_name
@@ -223,16 +222,16 @@ class BulkStatusSharingWithWalletJob implements ShouldQueue
                             $shipment = Shipment::where('tracking_number', $tracking_number)->first();
                             $shipmentId = $shipment->id;
 
-                            if($b['status'] == 'success' || ($b['status'] == 'error' && str_contains($b['message'], 'Shipment status already updated.') ) ) {
+                            if($b['status'] == 'success' || ( $b['status'] == 'error' && str_contains($b['message'], 'Shipment status already updated.') ) ) {
                                 
                                 $record = StatusSharingWithWallet::where('shipment_id', $shipmentId)
-                                    ->orderBy('id', 'asc') // Ensure the first inserted record is fetched
+                                    ->where('is_send', 0)
+                                    ->orderBy('id', 'asc')
                                     ->first();
 
                                 if ($record) {
-                                    // Update is_send based on the status
                                     $record->update([
-                                        'is_send' => $status == 'success' ? 1 : 0
+                                        'is_send' => 1
                                     ]);
                                 }
                             }
