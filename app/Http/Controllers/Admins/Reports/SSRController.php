@@ -58,19 +58,13 @@ class SSRController extends Controller
         $from_new = Carbon::parse($from)->subMonths(6)->toDateTimeString();
 
         $date_from_delivered_return = $request->get('search_date_from_delivered_return');
+        $date_from_delivered_return = Carbon::parse($date_from_delivered_return)->toDateTimeString();
+
         $date_to_delivered_return = $request->get('search_date_to_delivered_return');
+        $date_to_delivered_return = Carbon::parse($date_to_delivered_return)->toDateTimeString();
 
-        // Only parse if the date is not null
-        $date_from_delivered_return = $date_from_delivered_return ? Carbon::parse($date_from_delivered_return)->toDateTimeString() : null;
-        $date_to_delivered_return = $date_to_delivered_return ? Carbon::parse($date_to_delivered_return)->toDateTimeString() : null;
-
-        // Replace '00:00:00' with actual arrival time if the date exists
-        if ($date_from_delivered_return && strpos($date_from_delivered_return, '00:00:00') !== false) {
-            $date_from_delivered_return = str_replace('00:00:00', $arrival_from, $date_from_delivered_return);
-        }
-        if ($date_to_delivered_return && strpos($date_to_delivered_return, '00:00:00') !== false) {
-            $date_to_delivered_return = str_replace('00:00:00', $arrival_to, $date_to_delivered_return);
-        }
+        $date_from_delivered_return = str_replace('00:00:00', $arrival_from, $date_from_delivered_return);
+        $date_to_delivered_return = str_replace('00:00:00', $arrival_to, $date_to_delivered_return);
 
         $sales = DB::connection($connection)->table('shipments')
             ->join('users as u','u.id','=','shipments.user_id')
@@ -92,14 +86,21 @@ class SSRController extends Controller
                     ->where('sj.id','=',
                         DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
+            // ->leftJoin('shipments_journey as dr', function ($join) use ($connection) {
+            //     $join->on('dr.shipment_id', '=', 'shipments.id')
+            //         ->where('dr.id','=',
+            //             DB::connection($connection)->raw('(
+            //              select max(id) from shipments_journey sj2 where sj2.shipment_id = shipments.id and sj2.shipper_status_id IN (14, 25, 30, 36, 37)
+            //              AND sj2.verification = 1
+            //             )'));
+            // })
+
             ->leftJoin('shipments_journey as dr', function ($join) use ($connection) {
                 $join->on('dr.shipment_id', '=', 'shipments.id')
                     ->where('dr.id','=',
-                        DB::connection($connection)->raw('(
-                         select max(id) from shipments_journey sj2 where sj2.shipment_id = shipments.id and sj2.shipper_status_id IN (14, 25, 30, 36, 37)
-                         AND sj2.verification = 1
-                        )'));
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,25,30,36,37) and shipments_journey.verification = 1)'));
             })
+
             ->leftjoin('riders as r', 'r.id', '=', 'sj.rider_id')
             ->leftJoin('pending_payment_shipments as pps', function ($join) use ($connection) {
                 $join->on('pps.shipment_id', '=', 'shipments.id')
@@ -170,25 +171,40 @@ class SSRController extends Controller
             // ->whereBetween('sj.created_at', [$from,$to])
             ;
 
-        if ($date_from_delivered_return && $date_to_delivered_return) {
-            $sales->whereBetween('dr.created_at', [$date_from_delivered_return, $date_to_delivered_return]);
-        } else {
-            $sales->whereBetween('sj.created_at', [$from, $to]);
-        }
+            if ($request->get('search_date_from_delivered_return') != null && $request->get('search_date_to_delivered_return') != null) {
+                $sales->whereBetween('dr.created_at', [$date_from_delivered_return, $date_to_delivered_return]);
+            } else {
+                $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
+                if ($from_id->exists()) {
+                    $from_id = $from_id->first()->id;
 
-        $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
-        if ($from_id->exists()) {
-            $from_id = $from_id->first()->id;
+                    $to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
 
-            $to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
+                    if ($to_id->exists()) {
+                        $to_id = $to_id->first()->id;
 
-            if ($to_id->exists()) {
-                $to_id = $to_id->first()->id;
-
-                $sales->where('sj.id', '>=', $from_id)
-                    ->where('sj.id', '<=', $to_id);
+                        $sales->where('sj.id', '>=', $from_id)
+                            ->where('sj.id', '<=', $to_id)
+                            ->whereBetween('sj.created_at', [$from, $to]);
+                    }
+                }
             }
-        }
+    
+
+        // $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
+        
+        // if ($from_id->exists()) {
+        //     $from_id = $from_id->first()->id;
+
+        //     $to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
+
+        //     if ($to_id->exists()) {
+        //         $to_id = $to_id->first()->id;
+
+        //         $sales->where('sj.id', '>=', $from_id)
+        //             ->where('sj.id', '<=', $to_id);
+        //     }
+        // }
 
         // if (!$request->get('search_date_from') && !$request->get('search_date_to')) {
         //     $now = Carbon::now();
