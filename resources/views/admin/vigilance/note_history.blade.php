@@ -61,9 +61,10 @@
                         <th class="border-primary border-darken-1">Rider</th>
                         <th class="border-primary border-darken-1">Rider Type</th>
                         <th class="border-primary border-darken-1">Hub</th>
-                        <th class="border-primary border-darken-1">No. Of Shipment(s)</th>
+                        <th class="border-primary border-darken-1">Overall Shipment(s)</th>
                         <th class="border-primary border-darken-1">Excess Shipment(s)</th>
                         <th class="border-primary border-darken-1">Verify Shipment(s)</th>
+                        <th class="border-primary border-darken-1">Unverified Shipment(s)</th>
                         <th class="border-primary border-darken-1">Created By</th>
                         <th class="border-primary border-darken-1">Created Date</th>
                     </tr>
@@ -233,6 +234,12 @@
                 }
             });
 
+            function cleanHTMLData(htmlString) {
+                let tempDiv = document.createElement("div");
+                tempDiv.innerHTML = htmlString;
+                return tempDiv.textContent || tempDiv.innerText || "";
+            }
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -252,15 +259,15 @@
                             head.push('Rider');
                             head.push('Rider Type');
                             head.push('Hub');
-                            head.push('No. Of Shipments');
+                            head.push('Overall Shipments');
                             head.push('Excess Shipments');
                             head.push('Verify Shipments');
+                            head.push('Unverified Shipments');
                             head.push('Created By');
                             head.push('Created Date');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
-
 
                                 row.push(index + 1);
                                 row.push(values.vigilance_note_id_padded);
@@ -268,9 +275,10 @@
                                 row.push(values.rider);
                                 row.push(values.rider_type);
                                 row.push(values.hub);
-                                row.push(values.total_shipments_count);
-                                row.push(values.excess_shipments_count);
-                                row.push(values.verify_shipments_count);
+                                row.push(cleanHTMLData(values.shipments_count_link));
+                                row.push(cleanHTMLData(values.excess_shipments_link));
+                                row.push(cleanHTMLData(values.verify_shipments_link));
+                                row.push(cleanHTMLData(values.unverified_shipments_link));
                                 row.push(values.created_by);
                                 row.push(values.created_at);
 
@@ -313,7 +321,7 @@
                     }
                 },
                 rowId: 'vigilance_note_id',
-                order: [[10, 'desc']],
+                order: [[11, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'vigilance_note_id_padded' ,name: 'vigilance_notes.id', class: 'align-middle text-center vigilance_note'},
@@ -321,9 +329,10 @@
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
                     { data:'rider_type' ,name: 'rt.name', class: 'align-middle rider_type'},
                     { data:'hub' ,name: 'h.name', class: 'align-middle hub'},
-                    { data:'shipments_count_link' ,name: 'vigilance_notes.total_shipments_count', class: 'align-middle shipments_count_link text-center'},
-                    { data:'excess_shipments_link' ,name: 'vigilance_notes.excess_shipments_count', class: 'align-middle excess_shipments_link text-center'},
-                    { data:'verify_shipments_link' ,name: 'vigilance_notes.verify_shipments_count', class: 'align-middle verify_shipments_link text-center'},
+                    { data:'shipments_count_link' ,name: 'shipments_count_link', class: 'align-middle shipments_count_link text-center'},
+                    { data:'excess_shipments_link' ,name: 'excess_shipments_link', class: 'align-middle excess_shipments_link text-center'},
+                    { data:'verify_shipments_link' ,name: 'verify_shipments_link', class: 'align-middle verify_shipments_link text-center'},
+                    { data:'unverified_shipments_link' ,name: 'unverified_shipments_link', class: 'align-middle unverified_shipments_link text-center'},
                     { data:'created_by' ,name: 'cb.name', class: 'align-middle created_by'},
                     { data:'created_at' ,name: 'created_at', class: 'align-middle created_at'},
                 ],
@@ -378,6 +387,8 @@
 
             $('#datatable tbody').on('click','tr td.shipments_count_link button',function () {
                 var id = parseInt($(this).attr('noteId'));
+                var from_date = $('input[name="search_date_from_formatted"]').val();
+                var to_date = $('input[name="search_date_to_formatted"]').val();
                 $('#shipments_modal .modal-body').html('');
                 $('#shipments_modal').modal('show');
 
@@ -386,7 +397,9 @@
                     method: 'POST',
                     data: {
                         '_token': '{{ csrf_token() }}',
-                        'vigilance_note_id': id
+                        'vigilance_note_id': id,
+                        'from_date' : from_date,
+                        'to_date' : to_date,
                     }
                 })
                     .done(function(data) {
@@ -414,6 +427,8 @@
             });
             $('#datatable tbody').on('click','tr td.excess_shipments_link button',function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
+                var from_date = $('input[name="search_date_from_formatted"]').val();
+                var to_date = $('input[name="search_date_to_formatted"]').val();
                 $('#excess_shipments_modal .modal-body').html('');
                 $('#excess_shipments_modal').modal('show');
 
@@ -422,7 +437,9 @@
                     method: 'POST',
                     data: {
                         '_token': '{{ csrf_token() }}',
-                        'vigilance_note_id': id
+                        'vigilance_note_id': id,
+                        'from_date': from_date,
+                        'to_date': to_date,
                     }
                 })
                     .done(function(data) {
@@ -442,6 +459,8 @@
 
             $('#datatable tbody').on('click','tr td.verify_shipments_link button',function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
+                var from_date = $('input[name="search_date_from_formatted"]').val();
+                var to_date = $('input[name="search_date_to_formatted"]').val();
                 $('#verify_shipments_modal .modal-body').html('');
                 $('#verify_shipments_modal').modal('show');
 
@@ -450,7 +469,9 @@
                     method: 'POST',
                     data: {
                         '_token': '{{ csrf_token() }}',
-                        'vigilance_note_id': id
+                        'vigilance_note_id': id,
+                        'from_date': from_date,
+                        'to_date': to_date,
                     }
                 })
                     .done(function(data) {
@@ -470,6 +491,43 @@
                     });
 
             });
+
+            // Unverified shipments
+            $('#datatable tbody').on('click','tr td.unverified_shipments_link button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                var from_date = $('input[name="search_date_from_formatted"]').val();
+                var to_date = $('input[name="search_date_to_formatted"]').val();
+                $('#verify_shipments_modal .modal-body').html('');
+                $('#verify_shipments_modal').modal('show');
+
+                $.ajax({
+                    url: '{!! route('admin.vigilance.note.history.vigilance_note_unverified_shipments') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'vigilance_note_id': id,
+                        'from_date': from_date,
+                        'to_date': to_date,
+                    }
+                })
+                    .done(function(data) {
+                        if (data) {
+                            var html = '';
+
+                            if (data.shipments) {
+                                $.each(data.shipments, function(index, note_ids) {
+                                    html += '<h4 class="pt-1">Note ID: '+ index +'</h4>';
+                                    $.each(note_ids, function (i, tracking_number){
+                                        html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                                    });
+                                });
+                            }
+                            $('#verify_shipments_modal .modal-body').html(html);
+                        }
+                    });
+
+            });
+
 
         });
     </script>
