@@ -31,6 +31,7 @@ class FinvoWalletUserAuthMiddleware
             list($username, $password) = explode(":", $decodedCredentials, 2);
             $wallet_id = $request->wallet_id;
             if ($username && $password) {
+                
                 $user = User::where('email', $username)->has('wallet')->first();
                 if (!empty($user)) {
                     if($user->wallet->wallet_id == $wallet_id) {
