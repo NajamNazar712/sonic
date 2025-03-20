@@ -1452,7 +1452,7 @@
                                         var inp = "<div class='form-group mb-0'>" +
                                         "<input class='form-control decimal' name='weight[" + value.id + "]' placeholder='Enter Weight' " +
                                         "data-rule-required='true' data-msg-required='Weight is required!' " +
-                                        "data-rule-remote='/admin/delivery/receive/replacement_weight_check' data-msg-remote='Estimated weight cannot exceed actual weight.'>" +
+                                        "data-rule-remote='/admin/delivery/receive/replacement_weight_check' data-msg-remote='Incorrect weight.'>" +
                                         "</div>";
                                         repl.row.add([rowNo + 1, value.tracking_number, value.booking_type_id, inp]).node().id = value.id;
                                         repl.draw(false);
