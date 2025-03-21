@@ -56,6 +56,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use App\Http\Models\Admin\ReturnNote;
+use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
+use App\Http\Models\Rider;
 
 class AdminReportsEmailController extends Controller
 {
@@ -4632,6 +4634,357 @@ class AdminReportsEmailController extends Controller
             $file_name = public_path($file_name_without_path);
             $writer->save($file_name);
             return url($file_name_without_path);
+        }
+    }
+
+    static public function daily_pending_deliveries () 
+    {
+        $status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59);
+        $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->leftJoin('sub_category_segments as scs', 'scs.id' , 'u.sub_segment_id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->join('cities as h', 'dc.hub_id', '=', 'h.id')
+            ->leftJoin('zones as z', 'z.id', '=', 'dc.zone_id')
+            ->leftJoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
+            ->leftJoin('consignee_address_areas as caa', 'caa.shipment_id', '=', 'shipments.id')
+            ->leftJoin('city_areas as ca', 'ca.id', '=', 'caa.city_area_id')
+            ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
+            ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
+            ->join('shipments_journey', function ($join) {
+                $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'shipments_journey.id',
+                        '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)')
+                    );
+            })
+            ->leftjoin('shipments_journey as ras', function ($join) {
+                $join->on('ras.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'ras.id',
+                        '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 13)')
+                    );
+            })
+            ->leftjoin('admins as agent', 'agent.id', '=', 'ras.admin_id')
+            ->join('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'sj.id',
+                        '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)')
+                    );
+            })
+            ->leftJoin('shipments_journey as sjd', function ($join) {
+                $join->on('sjd.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'sjd.id',
+                        '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 4)')
+                    );
+            })
+            ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
+            ->leftjoin('intercept_re_book_request_histories as irrh', 'irrh.shipment_id', '=', 'shipments.id')
+            ->leftjoin('crm_requests as crm', function ($join) {
+                $join->on('crm.shipment_id', '=', 'shipments.id')
+                    ->whereIn('crm.status_id', [DB::raw(2), DB::raw(3), DB::raw(5)])
+                    ->where('crm.case_nature_id', DB::raw(1));
+            })
+            ->leftjoin('shipment_items as si', function ($join) {
+                $join->on('si.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'si.id',
+                        '=',
+                        DB::raw('(select max(id) from shipment_items where shipment_items.shipment_id = shipments.id)')
+                    );
+            })
+            ->leftjoin('products as prod', 'prod.id', '=', 'si.product_type_id')
+            ->leftjoin('star_shippers as sts', 'sts.user_id', '=', 'u.id')
+
+            ->leftjoin('delivery_note_shipments as dns', function ($join) {
+                $join->on('dns.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'dns.delivery_note_id',
+                        '=',
+                        DB::raw('(select max(delivery_note_id) from delivery_note_shipments WHERE shipment_id = shipments.id)')
+                    );
+            })
+            ->leftJoin('delivery_notes as dn', 'dn.id', '=', 'dns.delivery_note_id')
+            ->leftjoin('riders as r', 'r.id', '=', 'dn.rider_id')
+        
+            ->leftJoin('shipments_journey as sjl', function ($join) {
+                $join->on('sjl.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'sjl.id',
+                        '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id IN (2,3,4,5,11,23,53))')
+                    );
+            })
+
+            ->leftJoin('shipments_journey as journey', function ($join) {
+                $join->on('journey.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'journey.id',
+                        '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)')
+                    );
+            })
+            ->leftJoin('shipment_scanning_journeys as ssj_last_location', function ($join) {
+                $join->on('ssj_last_location.shipment_id', '=', 'journey.shipment_id')
+                    ->whereRaw('ssj_last_location.id = (
+                                    select max(id) 
+                                    from shipment_scanning_journeys 
+                                    where shipment_scanning_journeys.shipment_id = journey.shipment_id
+                                    and shipment_scanning_journeys.screen_location_id not in (9, 18)
+                    )');
+            })        
+            ->when(DB::raw('ssj_last_location.user_type = 1'), function ($join) {
+                $join->leftJoin('admins as adm', function ($join) {
+                    $join->on('adm.id', '=', 'ssj_last_location.admin_id')
+                        ->where('adm.role_id', '<>', 1);
+                });
+            })
+            ->leftJoin('shipment_scanning_journey_area_logs as ssjal_last_location', function($join){
+                $join->on('ssjal_last_location.shipment_scanning_journey_id', '=', 'ssj_last_location.id')
+                    ->where('ssjal_last_location.hub_id', '=', DB::raw('journey.city_id'))
+                    ->where('ssjal_last_location.shipment_id', '=', DB::raw('journey.shipment_id'));
+            })                 
+            ->leftJoin('city_areas as ca_scanning_last_location_name', 'ssjal_last_location.area_id', '=', 'ca_scanning_last_location_name.id')
+            ->leftJoin('shipment_scanning_screen_locations as last_screen_location', 'last_screen_location.id', '=', 'ssj_last_location.screen_location_id')
+            ->select(
+                'agent.name as agent',
+                'shipments.id as shId',
+                'shipments.tracking_number as tracking_number_link',
+                'shipments.tracking_number',
+                'u.name as shipper',
+                'oc.name as origin',
+                'dc.name as destination',
+                'dc.id as destination_city_id',
+                'h.name as hub',
+                'shipments.consignee_name',
+                'shipments.consignee_phone_number_1',
+                'shipments.consignee_phone_number_2',
+                'shipments.consignee_address',
+                'shipments.amount',
+                'sm.mode as shipping_mode',
+                'bt.booking_type as service_type',
+                'ss.name as status',
+                'ssr.name as reason',
+                'shipments_journey.remarks as remarks',
+                'shipments_journey.created_at as status_date',
+                'shipments_journey.created_at as current_status_date',
+                'sjd.created_at as destination_arrival',
+                'sj.created_at as arrival',
+                'shipments.booking_type_id',
+                'usi.poc',
+                'crm.id as complaint',
+                'shipments.actual_weight as weight',
+                'si.description as shipment_description',
+                'prod.product_name as product_type',
+                'sts.status as star_status',
+                'ca.name as area',
+                'r.name as last_rider',
+                'z.name as d_zone',
+                'r.trax_id as rider_trax_id',
+                'shipments.shipper_status_id as shipper_status_id',
+                'sjl.shipment_id as journey_latest_id',
+                'sjl.updated_at as journey_latest_updated_at',
+                'sjl.shipper_status_id as latest_shipper_status_id',
+                'scs.name as sub_segment_name',
+                'ssjal_last_location.updated_at as last_location_updated_at',
+                'ca_scanning_last_location_name.name as ca_scanning_last_location_name',
+                'ssj_last_location.user_type as scanned_by_user_type',
+                'ssj_last_location.admin_id as scanned_by_id',
+                'last_screen_location.name as last_location_screen_location_name',
+                'ssj_last_location.entry_method as entry_method'
+            )
+
+            ->whereRaw('IF (shipments.shipper_status_id IN (2, 49), (oc.hub_id = dc.hub_id), TRUE)')
+            ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
+            ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
+            ->whereIn('shipments.shipper_status_id', $status)
+            ->whereNotNull('shipments.tracking_number')
+            ->groupBy('shipments.id')
+        ->get();
+
+    
+
+
+        $pending_deliveries_report_array = [];
+
+       // Report Title
+        $report_title = 'Pending Deliveries Report';
+        $pending_deliveries_report_array[] = [$report_title];
+
+        // Header Row
+        $headers = [
+            'S. No.', 'Tracking No.', 'Shipper', 'Sub-Segment', 'Origin', 'Destination',
+            'Hub', 'Area', 'Consignee Name', 'Consignee Phone', 'Reattempt By', 'Address',
+            'Sub Stations', 'Weight', 'Collection Amount', 'Product Type', 'Product Description',
+            'Shipping Mode', 'Service Type', 'Status', 'Last Location Screen Name',
+            'Entry Method', 'Sub Hub', 'Last Location Updated At', 'Reason', 'Remarks',
+            'Origin Arrival Date', 'Destination Zone', 'Destination Arrival Date',
+            'Last Rider', 'Last Rider Trax ID', 'Status Date'
+        ];
+
+        // Add headers to the report array
+        $pending_deliveries_report_array[] = $headers;
+
+        if(count($shipments) > 0) {
+            $serial = 0;
+            foreach ($shipments as $shipment) {
+                $serial++;
+                $sub_station = '-';
+                $check = DeliveryLocationMappingKeyword::pluck('keyword')->map(fn($k) => strtolower($k))->toArray();
+                $words = preg_split("/[ ,]+/", strtolower($shipment->consignee_address));
+                
+                $msg_string = collect($words)->first(fn($word) => in_array($word, $check));
+                
+                $delivery_area = '-';
+                
+                if ($msg_string) {
+                    $found = DeliveryLocationMappingKeyword::join('delivery_location_mappings as dlm', 'delivery_location_mapping_keywords.mapping_id', '=', 'dlm.id')
+                        ->where('delivery_location_mapping_keywords.keyword', $msg_string)
+                        ->where('dlm.city_id', $shipment->destination_city_id)
+                        ->select('dlm.area_name')
+                        ->first();
+                
+                    $delivery_area = $found->area_name ?? '-';
+                }
+                $sub_station = $delivery_area; 
+                
+                $sub_hub = '-';
+                if ($shipment->scanned_by_user_type == 5) {
+                    $rider = Rider::find($shipment->scanned_by_id);
+                    $sub_hub = $rider->area->name ?? '-';
+                } elseif (isset($shipment->ca_scanning_last_location_name)) {
+                    $sub_hub = $shipment->ca_scanning_last_location_name;
+                }
+                $pending_deliveries_report_array[] = [
+                    $serial,
+                    $shipment->tracking_number,
+                    $shipment->shipper,
+                    $shipment->sub_segment_name,
+                    $shipment->origin,
+                    $shipment->destination,
+                    $shipment->hub,
+                    $shipment->area,
+                    $shipment->consignee_name,
+                    $shipment->consignee_phone_number_1,
+                    $shipment->agent,
+                    $shipment->consignee_address,
+                    $sub_station,
+                    $shipment->weight,
+                    $shipment->amount,
+                    $shipment->product_type,
+                    $shipment->shipment_description,
+                    $shipment->shipping_mode,
+                    $shipment->service_type,
+                    $shipment->status,
+                    $shipment->last_location_screen_location_name,
+                    $shipment->entry_method == 1 ? 'Scanned' : 'Manual',
+                    $sub_hub,
+                    $shipment->last_location_updated_at,
+                    $shipment->reason,
+                    $shipment->remarks,
+                    $shipment->arrival,
+                    $shipment->d_zone,
+                    $shipment->destination_arrival ?? '-',
+                    $shipment->last_rider,
+                    $shipment->rider_trax_id,
+                    $shipment->status_date,
+                ];
+            }
+
+            // Create Spreadsheet
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+        
+            // Set default column width
+            $sheet->getDefaultColumnDimension()->setWidth(20);
+
+            // Set default column width
+            $sheet->getDefaultColumnDimension()->setWidth(20);
+        
+            // Populate data in Excel
+            $sheet->fromArray($pending_deliveries_report_array, NULL, 'A1', true);
+        
+            // Total Columns
+            $lastColumn = 'AF'; // Adjust based on actual column count
+        
+            // Apply styling to the header row
+            $headerStyle = [
+                'font' => ['bold' => true],
+                'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+                'borders' => ['bottom' => ['style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+            ];
+            $sheet->getStyle("A2:{$lastColumn}2")->applyFromArray($headerStyle);
+        
+            // Set the title in the first row
+            $sheet->setCellValue('A1', $report_title);
+        
+            // Merge cells for title
+            $sheet->mergeCells("A1:{$lastColumn}1");
+        
+            // Apply styling: Bold, Centered, and Larger Font
+            $titleStyle = [
+                'font' => [
+                    'bold' => true,
+                    'size' => 16, // Larger Font
+                ],
+                'alignment' => [
+                    'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                    'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                ],
+            ];
+            $sheet->getStyle('A1')->applyFromArray($titleStyle);
+        
+            // Populate data in Excel
+            $sheet->fromArray($pending_deliveries_report_array, NULL, 'A1', true);
+        
+            // Total Columns
+            $lastColumn = 'V'; // Adjust based on actual column count
+        
+            // Apply styling to the header row
+            $headerStyle = [
+                'font' => ['bold' => true],
+                'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+                'borders' => ['bottom' => ['style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+            ];
+            $sheet->getStyle("A2:{$lastColumn}2")->applyFromArray($headerStyle);
+        
+            // Set the title in the first row
+            $sheet->setCellValue('A1', 'Receive Deliveries Report');
+        
+            // Merge cells for title
+            $sheet->mergeCells("A1:{$lastColumn}1");
+        
+            // Apply styling: Bold, Centered, and Larger Font
+            $titleStyle = [
+                'font' => [
+                    'bold' => true,
+                    'size' => 16, // Larger Font
+                ],
+                'alignment' => [
+                    'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                    'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                ],
+            ];
+            $sheet->getStyle('A1')->applyFromArray($titleStyle);
+
+            // Save and Output
+            $writer = new Xlsx($spreadsheet);
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename=daily_pending_deliveries_report_.xlsx"');
+            header('Cache-Control: max-age=0');
+            $date_file_name = Carbon::today()->format('Y_m_d');
+            $file_name_without_path = "reports/daily_new_pending_deliveries_report_" . $date_file_name . ".xlsx";
+            $file_name = public_path() . "/reports/daily_new_pending_deliveries_report_" . $date_file_name . ".xlsx";
+            $writer->save($file_name);
+            return url('/') . '/' . $file_name_without_path;
+
         }
     }
 }

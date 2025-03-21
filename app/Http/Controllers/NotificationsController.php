@@ -6993,18 +6993,20 @@ class NotificationsController extends Controller
                     }
 
                     self::email($subject, $body, $to);
-                } else if ($id == 110) {
-                    $date = $reference_1_id;
-                    $file = $reference_2_id;
-                    $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
-                    if (strpos($body, '[link]') !== FALSE) {
-                        $body = str_replace('[link]', $link, $body);
-                    }
-                    $cc = ['shahbaz.abbasi@trax.pk'];
-                    $to = array();
+                } 
+                // else if ($id == 110) {
+                //     $date = $reference_1_id;
+                //     $file = $reference_2_id;
+                //     $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
+                //     if (strpos($body, '[link]') !== FALSE) {
+                //         $body = str_replace('[link]', $link, $body);
+                //     }
+                //     $cc = ['shahbaz.abbasi@trax.pk'];
+                //     $to = array();
 
-                    self::email($subject, $body, $to, $cc);
-                } else if ($id == 111) {
+                //     self::email($subject, $body, $to, $cc);
+                // } 
+                else if ($id == 111) {
                     $date = $reference_1_id;
                     $file = $reference_2_id;
                     $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
@@ -11430,7 +11432,7 @@ class NotificationsController extends Controller
                     }
                 }
 
-                else if ($id == 226 || $id == 236 || $id == 237 || $id == 238 || $id == 239 || $id == 240) {
+                else if ($id == 110 || $id == 226 || $id == 236 || $id == 237 || $id == 238 || $id == 239 || $id == 240) {
                     $date = Carbon::today()->format('Y-m-d');
                     $subject = $notification->subject;
                     $body = $notification->body;

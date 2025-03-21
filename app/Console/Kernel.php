@@ -80,8 +80,7 @@ class Kernel extends ConsoleKernel
         //'App\Console\Commands\TelenorCallResponse',
         'App\Console\Commands\OnHoldShipmentEmail',
         'App\Console\Commands\OverlandAgingReport',
-        'App\Console\Commands\PendingDeliveriesReport',
-        'App\Console\Commands\ReceiveDeliveriesReport',
+
         'App\Console\Commands\WebsiteLead',
         'App\Console\Commands\UserOTPGenerate',
         'App\Console\Commands\UserOTPVerifiy',
@@ -178,6 +177,8 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\DailyWeightQCReport',
         'App\Console\Commands\DailyOverAllSalesReport',
         'App\Console\Commands\QsrEmail',
+        'App\Console\Commands\PendingDeliveriesReport',
+        'App\Console\Commands\ReceiveDeliveriesReport',
 
     ];
 
@@ -456,8 +457,8 @@ class Kernel extends ConsoleKernel
 //        $schedule->command('telenor:callresponse')->twiceDaily(15, 18)->runInBackground();
         $schedule->command('email:overlandagingreport')->dailyAt('12:00')->runInBackground();
 
-        $schedule->command('email:pendingdeliveryreport')->dailyAt('01:00')->runInBackground();
-        $schedule->command('email:receivedeliveryreport')->dailyAt('01:00')->runInBackground();
+        // $schedule->command('email:pendingdeliveryreport')->dailyAt('01:00')->runInBackground();
+        // $schedule->command('email:receivedeliveryreport')->dailyAt('01:00')->runInBackground();
 
         $schedule->command('website:leads')->everyFiveMinutes()->runInBackground();
 //        $schedule->command('website:pamleads')->hourly()->runInBackground();
@@ -597,14 +598,53 @@ class Kernel extends ConsoleKernel
         $schedule->command('status:re-push-wallet')->hourly()->runInBackground();
         $schedule->command('rerun:wallet_log_re_push')->hourly()->runInBackground();
 
-        $schedule->command('email:daily_received_deliveries_report')->dailyAt('09:00')->runInBackground();
-        $schedule->command('email:daily_return_received_deliveries_report')->dailyAt('09:00')->runInBackground();
-        $schedule->command('email:daily_delivery_note_history')->dailyAt('09:00')->runInBackground();
-        $schedule->command('email:daily_weight_qc_report')->dailyAt('09:00')->runInBackground();
-        $schedule->command('email:daily_overall_sales_report')->dailyAt('09:00')->runInBackground();
+        // fetch settings
+        $columns = [
+            'pending_deliveries_report_time',
+            'receive_deliveries_report_time',
+            'receive_return_deliveries_report_time',
+            'delivery_note_history_report_time',
+            'weight_qc_report_time',
+            'overall_sales_report_time',
+            'quality_of_service_report_time',
+            'quality_of_service_report_other_time'
+        ];
+        $settings = DB::table('global_settings')
+        ->whereIn('text', $columns)
+        ->pluck('setting_value', 'text');
 
-        $schedule->command('email:qsrreport')->dailyAt('09:00')->runInBackground();
-        $schedule->command('email:qsrreport')->dailyAt('14:00')->runInBackground();
+        // Default times
+        $default_time = '09:00';
+        $second_default_time = '14:00';
+        $pending_default_time = '11:30';
+
+        $commands = [
+            'email:daily_received_deliveries_report' => $settings['receive_deliveries_report_time'] ?? $default_time,
+            'email:daily_return_received_deliveries_report' => $settings['receive_return_deliveries_report_time'] ?? $default_time,
+            'email:daily_delivery_note_history' => $settings['delivery_note_history_report_time'] ?? $default_time,
+            'email:daily_weight_qc_report' => $settings['weight_qc_report_time'] ?? $default_time,
+            'email:daily_overall_sales_report' => $settings['overall_sales_report_time'] ?? $default_time,
+            'email:qsrreport' => $settings['quality_of_service_report_time'] ?? $default_time,
+            'email:qsrreport' => $settings['quality_of_service_report_other_time'] ?? $second_default_time,
+            'email:pendingdeliveryreport' => $settings['pending_deliveries_report_time'] ?? $pending_default_time,
+        ];
+
+        foreach ($commands as $command => $time) {
+            if ($time != '0' && !empty($time)) { // Ignore if set to '0' or empty
+                $schedule->command($command)->dailyAt($time)->runInBackground();
+            }
+        }
+
+        // $schedule->command('email:daily_received_deliveries_report')->dailyAt('09:00')->runInBackground();
+        // $schedule->command('email:daily_return_received_deliveries_report')->dailyAt('09:00')->runInBackground();
+        // $schedule->command('email:daily_delivery_note_history')->dailyAt('09:00')->runInBackground();
+        // $schedule->command('email:daily_weight_qc_report')->dailyAt('09:00')->runInBackground();
+        // $schedule->command('email:daily_overall_sales_report')->dailyAt('09:00')->runInBackground();
+        // $schedule->command('email:qsrreport')->dailyAt('09:00')->runInBackground();
+        // $schedule->command('email:qsrreport')->dailyAt('14:00')->runInBackground();
+        // $schedule->command('email:pendingdeliveryreport')->dailyAt('11:30')->runInBackground();
+
+        // $schedule->command('email:receivedeliveryreport')->dailyAt('09:00')->runInBackground();
     }
     /**
      * Register the commands for the application.
