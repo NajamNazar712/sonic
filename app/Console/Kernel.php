@@ -172,6 +172,8 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\FinSurgentSonicPaymentSharing',
         '\App\Console\Commands\FailedStatusRePushToWallet',
         '\App\Console\Commands\RerunWalletSettlement',
+        '\App\Console\Commands\BulkStatusSharingWithWallet'
+        
 
     ];
 
@@ -591,6 +593,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('status:re-push-wallet')->hourly()->runInBackground();
         $schedule->command('rerun:wallet_log_re_push')->hourly()->runInBackground();
         $schedule->command('rerun_wallet_settlement')->hourly()->runInBackground();
+        $schedule->command('bulk:status-sharing-wallet')->everyMinute()->withoutOverlapping()->runInBackground();
+        
     }
     /**
      * Register the commands for the application.
