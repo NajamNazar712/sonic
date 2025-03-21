@@ -7230,7 +7230,8 @@ class AdminReportsController extends Controller
                 if (in_array($rowArray['tagging_type'], [2, 4, 5])) {
                     $rowArray['tagged_to'] = Admin::find($rowArray['tagged_id'])->name ?? '-';
                 } elseif ($rowArray['tagging_type'] == 1) {
-                    $rowArray['tagged_to'] = AdminDepartment::find($rowArray['tagged_id'])->name;
+                    $department = AdminDepartment::find($rowArray['tagged_id']);
+                    $rowArray['tagged_to'] = $department ? $department->name : '-';
                 } else {
                     $rowArray['tagged_to'] = '-';
                 }
