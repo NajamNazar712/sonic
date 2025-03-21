@@ -2548,10 +2548,10 @@ class AdminCRMController extends Controller
                 if($crm_tagging){
                     if($crm_tagging->crm_request_tagging_type_id == 1){
 
-                        $tagged_name = AdminDepartment::find($crm_tagging->tagged_id)->name;
+                        $tagged_name = AdminDepartment::find($crm_tagging->tagged_id)->name ?? '-';
                         return $tagged_name;
                     }elseif($crm_tagging->crm_request_tagging_type_id == 2){
-                        $tagged_name = Admin::find($crm_tagging->tagged_id)->name;
+                        $tagged_name = Admin::find($crm_tagging->tagged_id)->name ?? '-';
                         return $tagged_name;
 
                     }else{
