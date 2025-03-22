@@ -749,6 +749,18 @@ class DeliveryController extends Controller
                 $rider_name = '';
                 if ($shipment->exists()) {
                     $shipment = $shipment->first();
+                    
+
+                    if ($request->operation_rider_type_id == 2) { 
+                        $latestAgentAssignment = RvShipmentAssignAgent::where('shipment_id', $shipment->id)
+                            ->latest()
+                            ->first();
+                        
+                        if ($shipment->shipper_status_id == 13 && $latestAgentAssignment->rv_assign_agent_status_id == 2 && $latestAgentAssignment->agent_id == 4620) {
+                            return ['status' => 1, 'error' => 'Shipment status is re-attempt for Hold-in-operation category'];
+                        }
+                    }
+                    
                     /******** COMMENT FOR PRODUCTION AS PER REVERT TICKET(6263)-  CAN BE REOPEN AGAIN (FROM ZOHAIB TARIQ) ********/
                     // $shipment_status_id = $shipment->shipper_status_id ?? NULL;
                     // $rider = Rider::where('id', $request->rider_id);
@@ -10455,4 +10467,19 @@ class DeliveryController extends Controller
         $shipment_ids = DeliveryNoteShipment::whereIn('delivery_note_id', $dn_ids)->where('status', '>', 1)->whereNotIn('status', [8, 10, 11])->select('shipment_id')->get();
         return Shipment::whereIn('id', $shipment_ids)->whereIn('shipper_status_id', $dncc_status)->pluck('id');
     }
+
+    public function replacement_weight_check(Request $request)
+    {
+        $estimated_weight_array = $request->input('weight');  
+        $shipment_id = key($estimated_weight_array);      
+        $estimated_weight = $estimated_weight_array[$shipment_id]; 
+        $shipment = Shipment::find($shipment_id);
+    
+        if ($estimated_weight > $shipment->actual_weight) {
+            return response('false');  
+        }
+    
+        return response('true');
+    }
+    
 }
