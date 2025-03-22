@@ -15,6 +15,8 @@ class WalletApiNatures extends Seeder
      */
     public function run()
     {
+        DB::table('wallet_api_natures')->truncate();
+
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
         DB::table('wallet_api_natures')->insert([
             ['id' => 1 , 'name' => 'on-boarding-request' ,'created_at' => $timestamp, 'updated_at' =>$timestamp ],
@@ -35,7 +37,14 @@ class WalletApiNatures extends Seeder
             ['id' => 15 , 'name' => 'bulk-shipment-status-request' ,'created_at' => $timestamp, 'updated_at' =>$timestamp ],
             ['id' => 16 , 'name' => 'bulk-shipment-status-response' ,'created_at' => $timestamp, 'updated_at' =>$timestamp ],
 
+            ['id' => 17 , 'name' => 'bulk-log-request' ,'created_at' => $timestamp, 'updated_at' =>$timestamp ],
+            ['id' => 18 , 'name' => 'bulk-log-response' ,'created_at' => $timestamp, 'updated_at' =>$timestamp ],
 
+            ['id' => 19 , 'name' => 'bulk-log-charge-request' ,'created_at' => $timestamp, 'updated_at' =>$timestamp ],
+            ['id' => 20 , 'name' => 'bulk-log-charge-response' ,'created_at' => $timestamp, 'updated_at' =>$timestamp ],
+
+            ['id' => 21 , 'name' => 'bulk-settlement-request' ,'created_at' => $timestamp, 'updated_at' =>$timestamp ],
+            ['id' => 22 , 'name' => 'bulk-settlement-response' ,'created_at' => $timestamp, 'updated_at' =>$timestamp ],
         ]);
     }
 }
