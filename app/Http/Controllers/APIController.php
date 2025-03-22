@@ -10309,8 +10309,10 @@ class APIController extends Controller
                     }
                 }else{
                     //return response()->json(['status' => 0, 'message' => 'Payment Can not be process now']);
-                    $errors[$key]= $tracking_number;
-                    $errors[$key]['Payment Can not be process now']= $tracking_number;
+                    $errors[$key] = [
+                        'tracking_number' => $tracking_number,
+                        'error' => 'Payment cannot be processed now'
+                    ];
                 }
 
             }
