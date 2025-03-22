@@ -26,6 +26,9 @@ use Illuminate\Http\Request;
     Route::post('delete_device_token', 'APIController@delete_device_token')->name('delete_device_token');
     Route::post('rcp_sms_from_consignee', 'APIController@rcp_sms_from_consignee')->name('rcp_sms_from_consignee');
     Route::post('fintech_getToken','APIController@fintech_getToken')->name('fintech_getToken');
+    Route::middleware('FinvoWalletAuth')->group(function () {
+        Route::post('v2/fintech_getToken','APIController@fintech_getToken')->name('v2.fintech_getToken');
+    });
     Route::middleware('FinvoWalletUser')->group(function () {
         Route::post('fin_sms', 'APIController@fin_sms')->name('fin_sms');
         Route::post('fintech_charges','APIController@fintech_charges')->name('fintech_charges');
