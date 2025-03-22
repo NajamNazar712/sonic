@@ -10260,7 +10260,7 @@ class APIController extends Controller
     public function fintech_charges_bulk(Request $request)
     {
         $rules = [
-//            'wallet_id' => ['required', 'exists:wallet_users,wallet_id'],
+            'wallet_id' => ['required', 'exists:wallet_users,wallet_id'],
             'shipments' => ['required', 'array', 'min:1'],
             'shipments.*.tracking_number' => ['required', 'exists:shipments,tracking_number'],
             'shipments.*.charges' => ['required', 'numeric', 'min:0', 'max:100000'],
@@ -10271,6 +10271,7 @@ class APIController extends Controller
             return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         }
         $errors = [];
+        $success = [];
         foreach ($request->shipments as $shipmentData) {
             $tracking_number = $shipmentData['tracking_number'];
             $charges = $shipmentData['charges'];
@@ -10289,6 +10290,7 @@ class APIController extends Controller
             $pending_payment_shipments = PendingPaymentShipment::where('shipment_id', $shipment->id)->whereIn('type', [0, 1])->latest()->first();
             if (!empty($pending_payment_shipments)) {
                 AdminFinanceController::update_payment($shipment_id, $pending_payment_shipments->type);
+                $success[] = $tracking_number;
             }else{
                 $check_process = DonePaymentShipment::where('shipment_id', $shipment_id)
                     ->whereIn('type', [0, 1])
@@ -10303,6 +10305,7 @@ class APIController extends Controller
                     $done_payment_shipments = DonePaymentShipment::where('shipment_id', $shipment->id)->whereIn('type', [0, 1])->latest()->first();
                     if (!empty($done_payment_shipments)) {
                         AdminFinanceController::update_payment_done_payment($shipment_id, $done_payment_shipments->type, $done_payment_shipments->done_payment_id);
+                        $success[] = $tracking_number;
                     }
                 }else{
                     //return response()->json(['status' => 0, 'message' => 'Payment Can not be process now']);
@@ -10311,11 +10314,15 @@ class APIController extends Controller
 
             }
         }
-        return response()->json([
-            'status' => 1,
-            'message' => 'Payment Can not be process now',
-            'data' => $errors,
-        ]);
+        if(count($errors) > 0) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Payment Can not be process now',
+                'data' => $errors,
+            ]);
+        }else{
+            return response()->json(['status' => 1, 'message' => 'Charges updated against this shipment.','data' => $success,]);
+        }
     }
 
 }
