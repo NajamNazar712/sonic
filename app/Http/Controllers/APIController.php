@@ -10272,7 +10272,7 @@ class APIController extends Controller
         }
         $errors = [];
         $success = [];
-        foreach ($request->shipments as $shipmentData) {
+        foreach ($request->shipments as $key=> $shipmentData) {
             $tracking_number = $shipmentData['tracking_number'];
             $charges = $shipmentData['charges'];
             $shipment = Shipment::where('tracking_number', $tracking_number)->first();
@@ -10309,20 +10309,26 @@ class APIController extends Controller
                     }
                 }else{
                     //return response()->json(['status' => 0, 'message' => 'Payment Can not be process now']);
-                    $errors[]= $tracking_number;
+                    $errors[$key]= $tracking_number;
+                    $errors[$key]['Payment Can not be process now']= $tracking_number;
                 }
 
             }
         }
-        if(count($errors) > 0) {
+        if (!empty($errors)) {
             return response()->json([
                 'status' => 0,
-                'message' => 'Payment Can not be process now',
-                'data' => $errors,
+                'message' => 'Some charges could not be updated due to errors.',
+                'error' => $errors,
+                'success' => $success,
             ]);
-        }else{
-            return response()->json(['status' => 1, 'message' => 'Charges updated against this shipment.','data' => $success,]);
         }
+
+        return response()->json([
+            'status' => 1,
+            'message' => 'All charges updated successfully.',
+            'success' => $success
+        ]);
     }
 
 }
