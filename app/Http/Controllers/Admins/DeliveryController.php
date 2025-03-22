@@ -749,6 +749,18 @@ class DeliveryController extends Controller
                 $rider_name = '';
                 if ($shipment->exists()) {
                     $shipment = $shipment->first();
+                    
+
+                    if ($request->operation_rider_type_id == 2) { 
+                        $latestAgentAssignment = RvShipmentAssignAgent::where('shipment_id', $shipment->id)
+                            ->latest()
+                            ->first();
+                        
+                        if ($shipment->shipper_status_id == 13 && $latestAgentAssignment->rv_assign_agent_status_id == 2 && $latestAgentAssignment->agent_id == 4620) {
+                            return ['status' => 1, 'error' => 'Shipment status is re-attempt for Hold-in-operation category'];
+                        }
+                    }
+                    
                     /******** COMMENT FOR PRODUCTION AS PER REVERT TICKET(6263)-  CAN BE REOPEN AGAIN (FROM ZOHAIB TARIQ) ********/
                     // $shipment_status_id = $shipment->shipper_status_id ?? NULL;
                     // $rider = Rider::where('id', $request->rider_id);
