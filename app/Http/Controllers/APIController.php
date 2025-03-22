@@ -10181,7 +10181,7 @@ class APIController extends Controller
 
         $rules = [
             'tracking_number' => ['required', 'exists:shipments,tracking_number'],
-            'wallet_id' => ['required', 'exists:wallet_users,wallet_id'],
+//            'wallet_id' => ['required', 'exists:wallet_users,wallet_id'],
             'charges' => ['required', 'numeric', 'min:0', 'max:100000'],
         ];
 
@@ -10276,7 +10276,7 @@ class APIController extends Controller
             $charges = $shipmentData['charges'];
             $shipment = Shipment::where('tracking_number', $tracking_number)->first();
             $shipment_id = $shipment->id;
-            
+
             ShipmentAdditionalCharges::where('shipment_id', $shipment_id)->update([
                 'wallet_charges' => $request->charges,
                 'wallet_charges_updated_at' => Carbon::now()
