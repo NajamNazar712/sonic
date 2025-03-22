@@ -216,6 +216,9 @@
                         <th class="border-primary border-darken-1">Closed Date</th>
                         <th class="border-primary border-darken-1">Resolved Date</th>
                         <th class="border-primary border-darken-1">Case Closed Remarks</th>
+                        <th class="border-primary border-darken-1">Complainant</th>
+                        <th class="border-primary border-darken-1">Complainant Contact Number</th>
+
                     </tr>
                     </thead>
                 </table>
@@ -639,7 +642,9 @@
 
                     {data: 'closed_date', name: 'crshc.created_at', class: 'align-middle closed_date', text: 'Closed Date', value: 'closed_date', download: true},
                     {data: 'resolved_date', name: 'crshr.created_at', class: 'align-middle resolved_date', text: 'Resolved Date', value: 'resolved_date', download: true},
-                    {data: 'case_closed_remark', name: 'sjcc.remarks', class: 'align-middle case_closed_remark', text: 'Case Closed Remark', value: 'case_closed_remark', download: true}
+                    {data: 'case_closed_remark', name: 'sjcc.remarks', class: 'align-middle case_closed_remark', text: 'Case Closed Remark', value: 'case_closed_remark', download: true},
+                    {data: 'case_nature_complainant', name: 'crm_requests.case_nature_complainant', class: 'align-middle case_nature_complainant', text: 'Complainant', value: 'case_nature_complainant', download: true},
+                    {data: 'complainant_phone', name: 'crm_requests.complainant_phone', class: 'align-middle complainant_phone', text: 'Complainant Contact Number', value: 'complainant_phone', download: true}
 
                 ],
                 rowCallback: function(row, data, index) {
