@@ -10265,71 +10265,92 @@ class APIController extends Controller
             'shipments.*.tracking_number' => ['required', 'exists:shipments,tracking_number'],
             'shipments.*.charges' => ['required', 'numeric', 'min:0', 'max:100000'],
         ];
-        $validate = Validator::make($request->all(), $rules, $this->messages);
-        $validate->setAttributeNames($this->names);
-        if ($validate->fails()) {
-            return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-        }
-        $errors = [];
-        $success = [];
-        foreach ($request->shipments as $key=> $shipmentData) {
-            $tracking_number = $shipmentData['tracking_number'];
-            $charges = $shipmentData['charges'];
-            $shipment = Shipment::where('tracking_number', $tracking_number)->first();
-            $shipment_id = $shipment->id;
 
-            ShipmentAdditionalCharges::where('shipment_id', $shipment_id)->update([
-                'wallet_charges' => $request->charges,
-                'wallet_charges_updated_at' => Carbon::now()
-            ]);
-            $finja_request_log = new FinjaRequestLog();
-            $finja_request_log->requested = json_encode($request->all());
-            $finja_request_log->ip_address = $request->ip();
-            $finja_request_log->save();
-
-            $pending_payment_shipments = PendingPaymentShipment::where('shipment_id', $shipment->id)->whereIn('type', [0, 1])->latest()->first();
-            if (!empty($pending_payment_shipments)) {
-                AdminFinanceController::update_payment($shipment_id, $pending_payment_shipments->type);
-                $success[] = $tracking_number;
-            }else{
-                $check_process = DonePaymentShipment::where('shipment_id', $shipment_id)
-                    ->whereIn('type', [0, 1])
-                    ->latest()
-                    ->whereHas('done_payment', function ($query) {
-                        $query->whereIn('status', [0,3]);
-                        $query->where('is_wallet_payment', 1);
-                    })
-                    ->exists();
-
-                if ($check_process) {
-                    $done_payment_shipments = DonePaymentShipment::where('shipment_id', $shipment->id)->whereIn('type', [0, 1])->latest()->first();
-                    if (!empty($done_payment_shipments)) {
-                        AdminFinanceController::update_payment_done_payment($shipment_id, $done_payment_shipments->type, $done_payment_shipments->done_payment_id);
-                        $success[] = $tracking_number;
-                    }
-                }else{
-                    //return response()->json(['status' => 0, 'message' => 'Payment Can not be process now']);
-                    $errors[$key] = [
-                        'tracking_number' => $tracking_number,
-                        'error' => 'Payment cannot be processed now'
-                    ];
-                }
-
-            }
-        }
-        if (!empty($errors)) {
+        $validator = Validator::make($request->all(), $rules, $this->messages);
+        $validator->setAttributeNames($this->names);
+        if ($validator->fails()) {
             return response()->json([
                 'status' => 0,
-                'message' => 'Some charges could not be updated due to errors.',
-                'error' => $errors,
-                'success' => $success,
+                'message' => 'Error(s) in Input',
+                'errors' => $validator->errors()
             ]);
+        }
+
+        $errors = [];
+        $success = [];
+        $shipmentsData = collect($request->shipments);
+
+        $trackingNumbers = $shipmentsData->pluck('tracking_number');
+        $shipments = Shipment::whereIn('tracking_number', $trackingNumbers)->get()->keyBy('tracking_number');
+
+        foreach ($shipmentsData as $key => $shipmentData) {
+            $tracking_number = $shipmentData['tracking_number'];
+            $charges = $shipmentData['charges'];
+
+            if (!isset($shipments[$tracking_number])) {
+                $errors[$key] = [
+                    'tracking_number' => $tracking_number,
+                    'error' => 'Shipment not found'
+                ];
+                continue;
+            }
+
+            $shipment = $shipments[$tracking_number];
+            $shipment_id = $shipment->id;
+
+            FinjaRequestLog::insert([
+                'requested' => json_encode($request->all()),
+                'ip_address' => $request->ip(),
+            ]);
+
+            ShipmentAdditionalCharges::where('shipment_id', $shipment_id)
+                ->update(['wallet_charges' => $charges, 'wallet_charges_updated_at' => now()]);
+
+            $pending_payment = PendingPaymentShipment::where('shipment_id', $shipment_id)
+                ->whereIn('type', [0, 1])
+                ->latest()
+                ->first();
+
+            if ($pending_payment) {
+                AdminFinanceController::update_payment($shipment_id, $pending_payment->type);
+                $success[] = $tracking_number;
+                continue;
+            }
+
+            $done_payment_query = DonePaymentShipment::where('shipment_id', $shipment_id)
+                ->whereIn('type', [0, 1])
+                ->latest();
+
+            $check_pending_process = (clone $done_payment_query)->whereHas('done_payment', function ($query) {
+                $query->whereIn('status', [0, 3])->where('is_wallet_payment', 1);
+            })->exists();
+
+            if ($check_pending_process) {
+                $done_payment = (clone $done_payment_query)->first();
+                AdminFinanceController::update_payment_done_payment($shipment_id, $done_payment->type, $done_payment->done_payment_id);
+                $success[] = $tracking_number;
+                continue;
+            }
+
+            $check_paid_late = (clone $done_payment_query)->whereHas('done_payment', function ($query) {
+                $query->where('status', 1)->where('is_wallet_payment', 1);
+            })->exists();
+
+            if ($check_paid_late) {
+                $errors[$key] = [
+                    'tracking_number' => $tracking_number,
+                    'error' => 'Payment cannot be processed now'
+                ];
+            } else {
+                $success[] = $tracking_number;
+            }
         }
 
         return response()->json([
-            'status' => 1,
-            'message' => 'All charges updated successfully.',
-            'success' => $success
+            'status' => empty($errors) ? 1 : 0,
+            'message' => empty($errors) ? 'All charges updated successfully.' : 'Some charges could not be updated due to errors.',
+            'success' => $success,
+            'errors' => $errors,
         ]);
     }
 
