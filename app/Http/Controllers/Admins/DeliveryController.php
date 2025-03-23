@@ -10472,14 +10472,16 @@ class DeliveryController extends Controller
     {
         $estimated_weight_array = $request->input('weight');  
         $shipment_id = key($estimated_weight_array);      
-        $estimated_weight = $estimated_weight_array[$shipment_id]; 
+        $estimated_weight = (float) $estimated_weight_array[$shipment_id]; 
+    
         $shipment = Shipment::find($shipment_id);
     
-        if ($estimated_weight > $shipment->actual_weight) {
+        $actual_weight = (float) $shipment->actual_weight;
+    
+        if ($estimated_weight > $actual_weight) {
             return response('false');  
         }
     
         return response('true');
-    }
-    
+    }    
 }
