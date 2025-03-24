@@ -30,7 +30,14 @@ class BulkStatusSharingWithWallet extends Command
     public function handle()
     {
 
-        $data = StatusSharingWithWallet::where('is_send', 0)->groupBy('shipment_id')->get();
+        $data = StatusSharingWithWallet::
+              join('shipments','shipments.id','status_sharing_with_wallets.shipment_id')
+              ->join('wallet_users','wallet_users.user_id','shipments.user_id')
+                ->leftjoin('finja_log_settlement_records','shipments.id','finja_log_settlement_records.shipment_id')
+            ->where('status_sharing_with_wallets.is_send', 0)
+            ->groupBy('status_sharing_with_wallets.shipment_id')
+            ->select(['shipments.*','status_sharing_with_wallets.shipment_id','status_sharing_with_wallets.status_id','finja_log_settlement_records.logged_cod_charges','wallet_users.wallet_id'])
+            ->get();
         $data->chunk(100)->each(function ($chunkedData){
             BulkStatusSharingWithWalletJob::dispatch($chunkedData->toArray());
         });
