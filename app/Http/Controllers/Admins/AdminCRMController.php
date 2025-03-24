@@ -1004,10 +1004,10 @@ class AdminCRMController extends Controller
                     $tag_check = Auth::user()->role_id;
                     $tag = AdminRole::where('id', $tag_check)->first();
                     $tag_permission = $tag->department_id;
-                    $tagged_name = AdminDepartment::find($tagged['tagged_id'])->name;
+                    $tagged_name = AdminDepartment::find($tagged['tagged_id'])->name ?? '-';
                 }
                 else if($tagged['crm_request_tagging_type_id'] == 2){
-                    $tagged_name = Admin::find($tagged['tagged_id'])->name;
+                    $tagged_name = Admin::find($tagged['tagged_id'])->name ?? '-';
                 }
             }
 

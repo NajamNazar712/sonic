@@ -755,14 +755,14 @@
                                                         <tr class="border-bottom-success border-custom-color">
                                                             <td>{{$index}}</td>
                                                             @if($tagging_history->crm_request_tagging_type_id == 1)
-                                                                <td>{{$tagging_history->department->name}}</td>
-                                                                <td>{{$tagging_history->tagging->name}}</td>
+                                                                <td>{{$tagging_history->department->name ?? '-'}}</td>
+                                                                <td>{{$tagging_history->tagging->name ?? '-'}}</td>
                                                             @elseif($tagging_history->crm_request_tagging_type_id == 2)
-                                                                <td>{{$tagging_history->user->name}}</td>
-                                                                <td>{{$tagging_history->tagging->name}}</td>
+                                                                <td>{{$tagging_history->user->name ?? '-'}}</td>
+                                                                <td>{{$tagging_history->tagging->name ?? '-'}}</td>
                                                             @elseif($tagging_history->crm_request_tagging_type_id == 4 || $tagging_history->crm_request_tagging_type_id == 5)
                                                                 @if ($tagging_history->user)
-                                                                    <td>{{$tagging_history->user->name}}</td>
+                                                                    <td>{{$tagging_history->user->name ?? '-'}}</td>
                                                                 @endif
                                                                 <td>Auto Tag</td>
                                                             @else
