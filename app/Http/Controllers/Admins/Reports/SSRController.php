@@ -170,10 +170,8 @@ class SSRController extends Controller
                 $delivered_to_id = $delivered_to_id->first()->id;
                 $sales->where('dr.id', '>=', $delivered_from_id)
                     ->where('dr.id', '<=', $delivered_to_id)
-                    ->whereBetween('dr.created_at', [
-                            $date_from_delivered_return, 
-                            $date_to_delivered_return
-                        ]);
+                    // ->whereBetween('dr.created_at', [$date_from_delivered_return, $date_to_delivered_return]);
+                    ->whereBetween('shipments.created_at', [$date_from_delivered_return, $date_to_delivered_return]);
             }
             // $sales->whereBetween('dr.created_at', [$date_from_delivered_return, $date_to_delivered_return]);
         } else {
@@ -184,7 +182,8 @@ class SSRController extends Controller
                 $to_id = $to_id->first()->id;
                 $sales->where('sj.id', '>=', $from_id)
                     ->where('sj.id', '<=', $to_id)
-                    ->whereBetween('sj.created_at', [$from,$to]);
+                    // ->whereBetween('sj.created_at', [$from,$to]);
+                    ->whereBetween('shipments.created_at', [$from,$to]);
             }
         }
 
