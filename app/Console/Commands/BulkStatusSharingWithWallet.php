@@ -37,6 +37,7 @@ class BulkStatusSharingWithWallet extends Command
             ->where('status_sharing_with_wallets.is_send', 0)
             ->groupBy('status_sharing_with_wallets.shipment_id')
             ->select(['shipments.*','status_sharing_with_wallets.shipment_id','status_sharing_with_wallets.status_id','finja_log_settlement_records.logged_cod_charges','wallet_users.wallet_id'])
+            ->where('shipments.id',49912349)
             ->get();
         $data->chunk(100)->each(function ($chunkedData){
             BulkStatusSharingWithWalletJob::dispatch($chunkedData->toArray());
