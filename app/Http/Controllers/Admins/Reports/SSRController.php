@@ -68,15 +68,15 @@ class SSRController extends Controller
 
         $sales = DB::connection($connection)->table('shipments')->join('users as u','u.id','=','shipments.user_id')
         ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
-        ->leftJoin('booking_types as bt','bt.id','=','shipments.booking_type_id')
+        ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
         ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
         ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-        ->leftjoin('user_shipping_infos AS rsi', 'shipments.return_address_id', '=', 'rsi.id')
-        ->leftjoin('cities AS rc', 'rsi.city_id', '=', 'rc.id')
-        ->leftjoin('zones as z', 'z.id', '=', 'oc.zone_id')
+        ->join('user_shipping_infos AS rsi', 'shipments.return_address_id', '=', 'rsi.id')
+        ->join('cities AS rc', 'rsi.city_id', '=', 'rc.id')
+        ->join('zones as z', 'z.id', '=', 'oc.zone_id')
         ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
         ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
-        ->leftJoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
+        ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
         ->leftJoin('shipments_journey as sj', function ($join) use ($connection) {
             $join->on('sj.shipment_id', '=', 'shipments.id')
                 ->where('sj.id','=',
@@ -117,8 +117,8 @@ class SSRController extends Controller
         ->leftjoin('international_shipments as ibs', 'ibs.shipment_id', '=', 'shipments.id')
         ->leftjoin('riders as r', 'r.id', '=', 'sj.rider_id')
         ->join('business_categories as bc', 'bc.id', '=', 'shipments.business_category_id')
-        ->leftjoin('cities as sc', 'u.city_id', '=', 'sc.id')
-        ->leftjoin('zones as sz', 'sz.id', '=', 'sc.zone_id')
+        ->join('cities as sc', 'u.city_id', '=', 'sc.id')
+        ->join('zones as sz', 'sz.id', '=', 'sc.zone_id')
         ->select(
             'shipments.id as shipment_id',
             'shipments.tracking_number',
@@ -170,8 +170,8 @@ class SSRController extends Controller
                 $delivered_to_id = $delivered_to_id->first()->id;
                 $sales->where('dr.id', '>=', $delivered_from_id)
                     ->where('dr.id', '<=', $delivered_to_id)
-                    // ->whereBetween('dr.created_at', [$date_from_delivered_return, $date_to_delivered_return]);
-                    ->whereBetween('shipments.created_at', [$date_from_delivered_return, $date_to_delivered_return]);
+                    ->whereBetween('dr.created_at', [$date_from_delivered_return, $date_to_delivered_return]);
+                    // ->whereBetween('shipments.created_at', [$date_from_delivered_return, $date_to_delivered_return]);
             }
             // $sales->whereBetween('dr.created_at', [$date_from_delivered_return, $date_to_delivered_return]);
         } else {
@@ -182,8 +182,8 @@ class SSRController extends Controller
                 $to_id = $to_id->first()->id;
                 $sales->where('sj.id', '>=', $from_id)
                     ->where('sj.id', '<=', $to_id)
-                    // ->whereBetween('sj.created_at', [$from,$to]);
-                    ->whereBetween('shipments.created_at', [$from,$to]);
+                    ->whereBetween('sj.created_at', [$from,$to]);
+                    // ->whereBetween('shipments.created_at', [$from,$to]);
             }
         }
 
