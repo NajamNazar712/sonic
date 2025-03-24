@@ -180,7 +180,7 @@ class BulkStatusSharingWithWalletJob implements ShouldQueue
                 }
 
 
-                if ($cod_charges != $amount) {
+                if ($cod_charges != null && $cod_charges != $amount) {
                     $data = [
                         'shipment_id' => $shipment_id,
                         'tracking_number' => $tracking_number,
