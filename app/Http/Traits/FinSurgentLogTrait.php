@@ -50,7 +50,7 @@ trait FinSurgentLogTrait
             }
 
             if($token) {
-                FingaIntegrationController::apiLog('log-request', 1, $requestPayload ,$shipmentId);
+                FingaIntegrationController::apiLog(3, 1, $requestPayload ,$shipmentId);
                 $response = Http::withHeaders([
                     'accept' => 'application/json',
                     'Authorization' => "Bearer " . $token,
@@ -62,7 +62,7 @@ trait FinSurgentLogTrait
                     $body = $response->getBody();
                     $body = json_decode($body);
     
-                    FingaIntegrationController::apiLog('log-response', 'success', $body ,$shipmentId);
+                    FingaIntegrationController::apiLog(4, 'success', $body ,$shipmentId);
 
                     FinjaLogSettlementRecord::updateOrCreate(
                         // Condition to find the record
@@ -80,7 +80,7 @@ trait FinSurgentLogTrait
                     $body = $response->getBody();
                     $body = json_decode($body,true);
                     if (isset($body['error']) && str_contains($body['error'], 'duplicate key value violates unique constraint')) {
-                        FingaIntegrationController::apiLog('log-response', 'success (duplicate ignored)', $body, $shipmentId);
+                        FingaIntegrationController::apiLog(4, 'success (duplicate ignored)', $body, $shipmentId);
 
                         FinjaLogSettlementRecord::updateOrCreate(
                             ['shipment_id' => $shipmentId],
@@ -93,7 +93,7 @@ trait FinSurgentLogTrait
                         );
 
                     } else {
-                        FingaIntegrationController::apiLog('log-response', 'error', $body, $shipmentId);
+                        FingaIntegrationController::apiLog(4, 'error', $body, $shipmentId);
                     }
                 }
             }
@@ -104,7 +104,7 @@ trait FinSurgentLogTrait
                 'error' => $th->getMessage(),
                 'code' => $th->getCode()
             ];
-            FingaIntegrationController::apiLog('log-response', 'exception', $errorBody, $shipmentId);
+            FingaIntegrationController::apiLog(4, 'exception', $errorBody, $shipmentId);
         }
 
     }
@@ -134,6 +134,73 @@ trait FinSurgentLogTrait
         if ($pending_payment_id != 0) {
             $results = DB::select('CALL update_pending_payment_statistics(?)', [$pending_payment_id]);
         }
+    }
+
+
+    static function arrival_shipment_logs_bulk($requestPayload) {
+
+        $batch_id = (string)Str::uuid();
+        try {
+
+            $api = config('app.FINGA_URL');
+            $token = FingaIntegrationController::getToken($api);
+            
+            if($token) {
+                foreach ($requestPayload as $key => $payload) {
+                    FingaIntegrationController::apiLog(17, 1, $payload, $key, null , $batch_id);
+                }
+                $response = Http::withHeaders([
+                    'accept' => 'application/json',
+                    'Authorization' => "Bearer " . $token,
+                
+                ])->post($api.'transactions/log/payment/bulk', $requestPayload);
+
+                if($response->successful()) {
+                    
+                    $body = $response->getBody();
+                    $body = json_decode($body , true);
+
+                    foreach ($body as $b) {
+                        if(isset($b['shipment_id'])) {
+                            $tracking_number = $b['shipment_id'];
+                            $shipment = Shipment::where('tracking_number', $tracking_number)->first();
+                            $shipmentId = $shipment->id;
+
+                            if($b['status'] == 'success' || ($b['status'] == 'error' && str_contains($b['message'], 'Transaction logged already.') ) ) {
+                                FingaIntegrationController::apiLog(18, $b['status'], $b ,$shipmentId, null,$batch_id);
+                                FinjaLogSettlementRecord::updateOrCreate(
+                                    // Condition to find the record
+                                    ['shipment_id' => $shipmentId],
+                                    // Data to update or create
+                                    [
+                                        'shipment_id' => $shipmentId,
+                                        'wallet_log_updated' => true,
+                                        'wallet_log_updated_at' => Carbon::now(),
+                                        'logged_cod_charges' => $requestPayload[$shipmentId]['amount'] ?? $shipment->amount
+                                    ]
+                                );
+                            } else {
+                                FingaIntegrationController::apiLog(18, 'error', $b ,$shipmentId, null,$batch_id);
+                            }
+                        }
+                    }
+                } else {
+
+                    $body = $response->getBody();
+                    $body = json_decode($body);
+                    FingaIntegrationController::apiLog(18, 'error', $body ,null,null, $batch_id);
+                }
+            }
+
+        } catch (\Throwable $th) {
+            // Log exception details
+            $errorBody = [
+                'error' => $th->getMessage(),
+                'code' => $th->getCode()
+            ];
+            FingaIntegrationController::apiLog(18, 'exception', $errorBody, null, null, $batch_id);
+        }
+
     }
 
 }
