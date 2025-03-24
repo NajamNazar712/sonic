@@ -56,7 +56,7 @@ class CODAmountChangeSendToWallet implements ShouldQueue
                 
                 ])->post($api.'transactions/log/change', $requestPayload);
     
-                FingaIntegrationController::apiLog('amount-change-request', 1, $requestPayload ,$this->data['shipment_id']);
+                FingaIntegrationController::apiLog(13, 1, $requestPayload ,$this->data['shipment_id']);
     
                 if($response->successful()) { 
                     
@@ -67,12 +67,12 @@ class CODAmountChangeSendToWallet implements ShouldQueue
                     ->update([
                         'logged_cod_charges' => $this->data['amount']
                     ]);
-                    FingaIntegrationController::apiLog('amount-change-response', 'success', $body ,$this->data['shipment_id']);
+                    FingaIntegrationController::apiLog(14, 'success', $body ,$this->data['shipment_id']);
     
                 } else {
                     $body = $response->getBody();
                     $body = json_decode($body);
-                    FingaIntegrationController::apiLog('amount-change-response', 'error', $body ,$this->data['shipment_id']);
+                    FingaIntegrationController::apiLog(14, 'error', $body ,$this->data['shipment_id']);
                 }
             }
         }  catch (\Throwable $th) {
@@ -81,7 +81,7 @@ class CODAmountChangeSendToWallet implements ShouldQueue
                 'error' => $th->getMessage(),
                 'code' => $th->getCode()
             ];
-            FingaIntegrationController::apiLog('amount-change-response', 'exception', $errorBody, $this->data['shipment_id']);
+            FingaIntegrationController::apiLog(14, 'exception', $errorBody, $this->data['shipment_id']);
         }
         
     }
