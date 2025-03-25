@@ -91,7 +91,7 @@ class SSRController extends Controller
                         DB::connection($connection)->raw('(select max(id) from done_payment_shipments where done_payment_shipments.shipment_id = shipments.id and done_payment_shipments.type != 2)')
                     );
             })
-            ->leftJoin('shipments_journey as dr', function ($join) use ($connection) {
+            ->Join('shipments_journey as dr', function ($join) use ($connection) {
                 $join->on('dr.shipment_id', '=', 'shipments.id')
                     ->where(
                         'dr.id',
