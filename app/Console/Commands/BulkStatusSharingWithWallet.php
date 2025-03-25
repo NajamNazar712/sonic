@@ -42,7 +42,7 @@ class BulkStatusSharingWithWallet extends Command
                 'fls.logged_cod_charges',
                 'wu.wallet_id'
             ])->get();
-        $data->chunk(100)->each(function ($chunkedData){
+        $data->chunk(10)->each(function ($chunkedData){
             BulkStatusSharingWithWalletJob::dispatch($chunkedData->toArray());
         });
 
