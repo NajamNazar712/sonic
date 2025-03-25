@@ -10394,4 +10394,70 @@ class APIController extends Controller
         ]);
     }
 
+    public function fintech_account_type(Request $request)
+    {
+        $rules = [
+            'wallet_users' => ['required', 'array', 'min:1'],
+            'wallet_users.*.wallet_id' => ['required', 'exists:wallet_users,wallet_id'],
+            'wallet_users.*.finova_account_type' => ['required', 'numeric'],
+        ];
+
+        $validator = Validator::make($request->all(), $rules, $this->messages);
+        $validator->setAttributeNames($this->names);
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Error(s) in Input',
+                'errors' => $validator->errors()
+            ]);
+        }
+
+        $errors = [];
+        $success = [];
+        $globalSetting = GlobalSettings::where(['setting_value' => 1, 'type' => 'wallet_account_type'])->exists();
+
+        if($globalSetting) {
+            $walletDataRequest = collect($request->wallet_users);
+
+            $wallet_ids = $walletDataRequest->pluck('wallet_id');
+            $wallet = WalletUser::whereIn('wallet_id', $wallet_ids)->where('substitute_user_id', 0)->get()->keyBy('wallet_id');
+            foreach ($walletDataRequest as $key => $walletDataRow) {
+                $wallet_id = $walletDataRow['wallet_id'];
+                $finova_account_type = $walletDataRow['finova_account_type'];
+                if (!isset($wallet[$wallet_id])) {
+                    $errors[$key] = [
+                        'wallet_id' => $wallet_id,
+                        'error' => 'Wallet not found'
+                    ];
+                    continue;
+                }
+                $wallet_primary_id = $wallet[$wallet_id]->id;
+
+                FinjaRequestLog::insert([
+                    'requested' => json_encode($request->all()),
+                    'ip_address' => $request->ip(),
+                ]);
+
+                WalletUser::where('id', $wallet_primary_id)
+                    ->update(['finova_account_type' => $finova_account_type]);
+
+                $success[] = $wallet_id;
+            }
+
+            return response()->json([
+                'status' => empty($errors) ? 1 : 0,
+                'message' => empty($errors) ? 'All Wallet Accounts updated successfully.' : 'Some Accounts could not be updated due to errors.',
+                'success' => $success,
+                'errors' => $errors,
+            ]);
+        }else{
+            return response()->json([
+                'status' => 0,
+                'message' =>  'The Api is currently Inactive',
+                'success' => [],
+                'errors' => [],
+            ]);
+        }
+    }
+
 }
