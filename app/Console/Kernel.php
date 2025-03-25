@@ -593,7 +593,7 @@ class Kernel extends ConsoleKernel
 //        $schedule->command('status:re-push-wallet')->hourly()->runInBackground(); // wallet no need now after bulk status work
         $schedule->command('rerun:wallet_log_re_push')->hourly()->runInBackground(); // wallet
         $schedule->command('rerun_wallet_settlement')->hourly()->runInBackground(); //wallet
-        $schedule->command('bulk:status-sharing-wallet')->everyFiveMinutes()->runInBackground();
+        $schedule->command('bulk:status-sharing-wallet')->withoutOverlapping()->everyFiveMinutes()->runInBackground();
         
     }
     /**
