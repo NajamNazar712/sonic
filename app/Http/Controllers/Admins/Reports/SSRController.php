@@ -92,7 +92,7 @@ class SSRController extends Controller
                     );
             })
             ->leftJoin('shipments_journey as dr', function ($join) use ($connection) {
-                $join->on('dr.shipment_id', '=', 'shipments.id')
+                $join->on('dr.shipment_idw', '=', 'shipments.id')
                     ->where(
                         'dr.id',
                         '=',
