@@ -48,10 +48,10 @@ class SSRController extends Controller
         $arrival_from = Carbon::parse($request->arrival_time_from)->format('H:i:s');
         $arrival_to = Carbon::parse($request->arrival_time_to)->format('H:i:s');
 
-        $from = $request->get('search_date_from');
+        $from = $request->get('search_date_from') ?? $request->get('search_date_from_delivered_return');
         $from = Carbon::parse($from)->toDateTimeString();
         $to = $request->get('search_date_to');
-        $to = Carbon::parse($to)->toDateTimeString();
+        $to = Carbon::parse($to)->toDateTimeString()  ?? $request->get('search_date_from_delivered_return');
 
         $from = str_replace('00:00:00', $arrival_from, $from);
         $to = str_replace('00:00:00', $arrival_to, $to);
