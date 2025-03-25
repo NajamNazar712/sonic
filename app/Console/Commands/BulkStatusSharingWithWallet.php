@@ -34,7 +34,6 @@ class BulkStatusSharingWithWallet extends Command
             ->join('wallet_users as wu', 'wu.user_id', 's.user_id')
             ->leftJoin('finja_log_settlement_records as fls', 's.id', 'fls.shipment_id')
             ->where('status_sharing_with_wallets.is_send', 0)
-            ->where('s.id',49836630)
             ->groupBy('status_sharing_with_wallets.shipment_id')
             ->select([
                 's.*',
@@ -42,8 +41,7 @@ class BulkStatusSharingWithWallet extends Command
                 'status_sharing_with_wallets.status_id',
                 'fls.logged_cod_charges',
                 'wu.wallet_id'
-            ])
-            ->get();
+            ])->get();
         $data->chunk(100)->each(function ($chunkedData){
             BulkStatusSharingWithWalletJob::dispatchNow($chunkedData->toArray());
         });
