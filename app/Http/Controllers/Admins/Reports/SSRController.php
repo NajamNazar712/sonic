@@ -141,7 +141,7 @@ class SSRController extends Controller
             if ($to_id->exists()) {
                 $to_id = $to_id->first()->id;
 
-                $sales->where('sj.id', '>=', $from_id)
+                $sales->where('sj.ids', '>=', $from_id)
                     ->where('sj.id', '<=', $to_id);
             }
         }
