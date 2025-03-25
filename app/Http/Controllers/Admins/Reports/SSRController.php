@@ -91,13 +91,22 @@ class SSRController extends Controller
                         DB::connection($connection)->raw('(select max(id) from done_payment_shipments where done_payment_shipments.shipment_id = shipments.id and done_payment_shipments.type != 2)')
                     );
             })
-            ->leftjoin('shipments_journey as dr', function ($join) use ($connection) {
-                $join->on('dr.shipment_id', '=', 'shipments.id')
-                    ->where(
-                        'dr.id',
-                        '=',
-                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,25,30,36,37) and shipments_journey.verification = 1)')
-                    );
+            // ->leftjoin('shipments_journey as dr', function ($join) use ($connection) {
+            //     $join->on('dr.shipment_id', '=', 'shipments.id')
+            //         ->where(
+            //             'dr.id',
+            //             '=',
+            //             DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,25,30,36,37) and shipments_journey.verification = 1)')
+            //         );
+            // })
+
+            ->leftJoin(DB::raw('(SELECT MAX(id) as id, shipment_id 
+                        FROM shipments_journey 
+                        WHERE shipper_status_id IN (14,25,30,36,37) 
+                        AND verification = 1 
+                        GROUP BY shipment_id) as dr'), 
+            function ($join) {
+                $join->on('dr.shipment_id', '=', 'shipments.id');
             })
 
             ->leftjoin('sale_person_tags as spt', function ($join) {
