@@ -176,7 +176,7 @@ class BulkStatusSharingWithWalletJob implements ShouldQueue
                         "amount" => $shipment_log_not_sent[$shipment_id]['amount'],
                         "order_created_date" => $shipment_log_not_sent[$shipment_id]['created_at'],
                     ];
-                    $this->arrival_shipment_logs($logPayload, null,$shipment_log_not_sent[$shipment_id]['id'],null);
+                    $this->arrival_shipment_logs($logPayload, null,$shipment_log_not_sent[$shipment_id]['id']);
                 }
 
 
