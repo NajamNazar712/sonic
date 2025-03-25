@@ -44,7 +44,7 @@ class BulkStatusSharingWithWallet extends Command
             ])
             ->get();
         $data->chunk(100)->each(function ($chunkedData){
-            BulkStatusSharingWithWalletJob::dispatch($chunkedData->toArray());
+            BulkStatusSharingWithWalletJob::dispatchNow($chunkedData->toArray());
         });
 
     }   
