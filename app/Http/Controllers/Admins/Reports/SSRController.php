@@ -132,19 +132,58 @@ class SSRController extends Controller
             ->whereNotIn('u.id', [8761, 9358])
             ->whereBetween('sj.created_at', [$from, $to]);
 
-        $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
-        if ($from_id->exists()) {
-            $from_id = $from_id->first()->id;
-
-            $to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
-
-            if ($to_id->exists()) {
-                $to_id = $to_id->first()->id;
-
-                $sales->where('sj.id', '>=', $from_id)
-                    ->where('sj.id', '<=', $to_id);
+            if ($request->get('search_date_from_delivered_return') != null && $request->get('search_date_to_delivered_return') != null){
+                // $delivered_from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $date_from_delivered_return);
+                // $delivered_from_id = $delivered_from_id->first()->id;
+                // $delivered_to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $date_from_delivered_return)->where('created_at', '<=', $date_to_delivered_return);
+                // if ($delivered_to_id->exists()) {
+                //     $delivered_to_id = $delivered_to_id->first()->id;
+                //     $sales->where('dr.id', '>=', $delivered_from_id)
+                //         ->where('dr.id', '<=', $delivered_to_id)
+                //         ->whereBetween('dr.created_at', [$date_from_delivered_return, $date_to_delivered_return]);
+                //         // ->whereBetween('shipments.created_at', [$date_from_delivered_return, $date_to_delivered_return]);
+                // }
+                // // $sales->whereBetween('dr.created_at', [$date_from_delivered_return, $date_to_delivered_return]);
+    
+    
+                $delivered_ids = DB::connection($connection)
+                ->table('shipments_journey')
+                ->selectRaw('MIN(id) as min_id, MAX(id) as max_id')
+                ->whereIn('shipments_journey.shipper_status_id', [3, 14, 25, 30, 36, 37])
+                ->whereBetween('created_at', [$from, $to])
+                ->first();
+    
+                if ($delivered_ids && $delivered_ids->min_id && $delivered_ids->max_id) {
+                    $sales->whereBetween('dr.id', [$delivered_ids->min_id, $delivered_ids->max_id])
+                        ->whereBetween('dr.created_at', [$from, $to]);
+                }
+    
+    
+            } else {
+                $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
+                $from_id = $from_id->first()->id;
+                $to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
+                if ($to_id->exists()) {
+                    $to_id = $to_id->first()->id;
+                    $sales->where('sj.id', '>=', $from_id)
+                    ->where('sj.id', '<=', $to_id)
+                    ->whereBetween('sj.created_at', [$from,$to]);
+                }
             }
-        }
+
+        // $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
+        // if ($from_id->exists()) {
+        //     $from_id = $from_id->first()->id;
+
+        //     $to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
+
+        //     if ($to_id->exists()) {
+        //         $to_id = $to_id->first()->id;
+
+        //         $sales->where('sj.id', '>=', $from_id)
+        //             ->where('sj.id', '<=', $to_id);
+        //     }
+        // }
 
         // if (!$request->get('search_date_from') && !$request->get('search_date_to')) {
         //     $now = Carbon::now();
