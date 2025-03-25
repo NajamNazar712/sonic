@@ -34,6 +34,7 @@ class BulkStatusSharingWithWallet extends Command
             ->join('wallet_users as wu', 'wu.user_id', 's.user_id')
             ->leftJoin('finja_log_settlement_records as fls', 's.id', 'fls.shipment_id')
             ->where('status_sharing_with_wallets.is_send', 0)
+            ->where('s.id',49836630)
             ->groupBy('status_sharing_with_wallets.shipment_id')
             ->select([
                 's.*',
