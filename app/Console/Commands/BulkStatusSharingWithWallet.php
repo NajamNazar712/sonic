@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Controllers\FingaIntegrationController;
 use Illuminate\Console\Command;
 use App\Models\StatusSharingWithWallet;
 use App\Jobs\BulkStatusSharingWithWalletJob;
@@ -29,7 +30,8 @@ class BulkStatusSharingWithWallet extends Command
      */
     public function handle()
     {
-
+//        $api = config('app.FINGA_URL');
+//        $token = FingaIntegrationController::getToken($api);
         $data = StatusSharingWithWallet::join('shipments as s', 's.id', 'status_sharing_with_wallets.shipment_id')
             ->join('wallet_users as wu', 'wu.user_id', 's.user_id')
             ->leftJoin('finja_log_settlement_records as fls', 's.id', 'fls.shipment_id')

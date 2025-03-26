@@ -79,7 +79,7 @@ trait FinSurgentLogTrait
                 } else {
                     $body = $response->getBody();
                     $body = json_decode($body,true);
-                    if (isset($body['error']) && str_contains($body['error'], 'duplicate key value violates unique constraint')) {
+                    if (isset($body['error']) && (str_contains($body['error'], 'duplicate key value violates unique constraint') || str_contains($body['error'], 'Transaction logged already.')) {
                         FingaIntegrationController::apiLog(4, 'success (duplicate ignored)', $body, $shipmentId);
 
                         FinjaLogSettlementRecord::updateOrCreate(
