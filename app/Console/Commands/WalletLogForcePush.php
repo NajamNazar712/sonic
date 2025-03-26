@@ -66,8 +66,6 @@ class WalletLogForcePush extends Command
             ->get();
 
         $api = config('app.FINGA_URL');
-        //$token = FingaIntegrationController::getToken($api);
-        //$token_time = Carbon::now();
         foreach ($donePayments as $done_payment_shipment) {
 
             // if ($token_time->diffInMinutes(Carbon::now()) >= 4) {
