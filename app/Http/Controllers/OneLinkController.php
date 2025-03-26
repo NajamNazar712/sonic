@@ -30,7 +30,7 @@ class OneLinkController extends Controller
                 "dbaName" => "Sonic",
                 "merchantName" => "Trax Online (Pvt.) Ltd.",
                 "iban" => "PK94AIIN0000102514490014",
-                "bankBic" => "EGIB",
+                "bankBic" => "AIIN",
                 "merchantCategoryCode" => "4215",
                 "merchantID" => "854710236963454",
                 "postalAddress" => [
@@ -44,11 +44,11 @@ class OneLinkController extends Controller
                     "email" => "info@trax.pk",
                     "dept" => "Head office",
                     "website" => "www.trax.pk",
-                    "merchantChannelId" => "400"
+                    "merchantChannelId" => "400" 
                 ],
                 "geoLocation" => [
-                    "lat" => $latitude,
-                    "long" => $longitude
+                    "lat" => (string) $latitude, 
+                    "longt" => (string) $longitude 
                 ]
             ],
             "payerDetails" => [
@@ -61,14 +61,15 @@ class OneLinkController extends Controller
             "paymentDetails" => [
                 "executionDateTime" => now()->toIso8601String(),
                 "expiryDateTime" => now()->addMinutes(40)->toIso8601String(),
-                "instructedAmount" => $cod_amount,
-                "transactionType" => "014"
+                "instructedAmount" => $cod_amount, 
+                "transactionType" => "064" 
             ],
             "info" => [
-                "stan" => strtoupper(Str::random(6)),
-                "rrn" => str_pad((string) $shipment_id, 12, '0', STR_PAD_LEFT),
+                "stan" => strtoupper(Str::random(6)), 
+                "rrn" => str_pad((string) $shipment_id, 12, '0', STR_PAD_LEFT) 
             ]
         ];
+        
 
         try {
             $response = $this->oneLinkService->generateDQRCMerchant($data);
@@ -91,6 +92,7 @@ class OneLinkController extends Controller
         $validator = Validator::make($request->all(), [
             'delivery_note_id' => 'required|integer|exists:rider_deliveries,delivery_note_id',
             'shipment_id'      => 'required|integer|exists:rider_deliveries,shipment_id',
+            'cod_amount'        => 'required|numeric',
             'rider_id'         => 'required|integer|exists:riders,id',
             'latitude'         => 'required|numeric|between:-90,90',
             'longitude'        => 'required|numeric|between:-180,180',
@@ -110,7 +112,7 @@ class OneLinkController extends Controller
             return $this->generateDQRCMerchant(
                 $request->rider_id,
                 $request->shipment_id,
-                $request->delivery_note_id,
+                $request->cod_amount,
                 $request->latitude,
                 $request->longitude
             );

@@ -143,7 +143,7 @@ use Illuminate\Http\Request;
         Route::get('cities', 'Rider\RiderAPIController@cities')->name('cities');
         Route::get('check_pin', 'Rider\RiderAPIController@check_pin')->name('check_pin');
 
-        Route::post('one-link/generateDQRCMerchant', 'OneLinkController@generateDQRCMerchant')->name('generateDQRCMerchant');
+        Route::post('verifyDeliveredShipmentDQRCMerchant', 'OneLinkController@verifyDeliveredShipmentDQRCMerchant')->name('verifyDeliveredShipmentDQRCMerchant');
 
         //Current
         Route::post('login_v5', 'Rider\RiderAPIController@login_v4')->name('login_v5');
