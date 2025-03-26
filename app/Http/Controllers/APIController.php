@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\FafCharges;
 use App\FinjaSmsLog;
 use App\Http\Controllers\Admins\AdminCRMController;
+use App\Http\Models\NotificationSetting;
 use App\Http\Models\PendingPaymentShipment;
+use App\Http\Models\ShipmentSmsLogs;
 use App\Http\Models\WalletUser;
 use App\Models\FinjaRequestLog;
 use App\ShipmentAdditionalCharges;
@@ -2140,6 +2142,34 @@ class APIController extends Controller
             $tracking_number = $request->tracking_number;
 
             $shipment = Shipment::where('tracking_number', $tracking_number)->first();
+
+            $current_sms_charges = $shipment->user->sms_charges;
+            $sms_charges_status = $shipment->user->sms_charges_status;
+            $sms_charges = 0;
+
+            $wallet_user = optional($shipment->user->wallet)->exists();
+            $shipment_sms_count = 0;
+            $shipment_sms = ShipmentSmsLogs::select('notification_id', \Illuminate\Support\Facades\DB::raw('count(*) as count'))->where('shipment_id' , $shipment->id)->where('paid', 0)->groupBy('notification_id')->get();
+            foreach($shipment_sms as $notification) {
+                $notification_setting = NotificationSetting::where('notification_id', $notification->notification_id)->where('charged_sms_toggle',1);
+                if ($notification_setting->exists()) {
+                    $notification_setting = $notification_setting->first();
+                    $charging_frequency = $notification_setting->charging_frequency;
+                    if($notification->count <= $charging_frequency ) {
+                        $shipment_sms_count += $notification->count;
+                    } else {
+                        $shipment_sms_count += $charging_frequency;
+                    }
+                }
+            }
+            $sms_charges = $current_sms_charges * $shipment_sms_count;
+
+            if(!empty($sms_charges)){
+                $charges['sms_charges'] = $sms_charges;
+            }
+            if($wallet_user){
+                $charges['wallet_charges'] = ShipmentAdditionalCharges::fetch_wallet_charges($shipment->id);
+            }
 
             $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->latest()->first();
 
