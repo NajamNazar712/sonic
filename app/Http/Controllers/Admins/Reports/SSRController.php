@@ -57,11 +57,21 @@ class SSRController extends Controller
         $to = str_replace('00:00:00', $arrival_to, $to);
 
         $dr_from = $request->search_date_from_delivered_return;
+<<<<<<< Updated upstream
         $dr_to = $request->search_date_to_delivered_return;
+=======
+        $dr_from = Carbon::parse($dr_from)->toDateTimeString();
+        $dr_to = $request->search_date_to_delivered_return;
+        $dr_to = Carbon::parse($dr_to)->toDateTimeString();
+>>>>>>> Stashed changes
 
         $dr_from = str_replace('00:00:00', $arrival_from, $dr_from);
         $dr_to = str_replace('00:00:00', $arrival_to, $dr_to);
 
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
         $sales = DB::connection($connection)->table('shipments')->join('users as u', 'u.id', '=', 'shipments.user_id')
             ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
             ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
@@ -144,6 +154,7 @@ class SSRController extends Controller
             // ->whereBetween('sj.created_at', [$from, $to])
             ;
 
+<<<<<<< Updated upstream
             $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
             if ($from_id->exists()) {
                 $from_id = $from_id->first()->id;
@@ -170,6 +181,53 @@ class SSRController extends Controller
             } else if($request->search_date_from_delivered_return && $request->search_date_to_delivered_return){
                 $sales->whereBetween('dr.created_at', [$dr_from, $dr_to]);
             }
+=======
+        // $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
+        // if ($from_id->exists()) {
+        //     $from_id = $from_id->first()->id;
+
+        //     $to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
+
+        //     if ($to_id->exists()) {
+        //         $to_id = $to_id->first()->id;
+
+        //         $sales->where('sj.id', '>=', $from_id)
+        //             ->where('sj.id', '<=', $to_id);
+        //     }
+        // }
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
+            if ($from_id->exists()) {
+                $from_id = $from_id->first()->id;
+    
+                $to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
+    
+                if ($to_id->exists()) {
+                    $to_id = $to_id->first()->id;
+    
+                    $sales->where('sj.id', '>=', $from_id)
+                        ->where('sj.id', '<=', $to_id);
+                }
+            }
+            $sales->whereBetween('sj.created_at', [$from, $to]);
+        } elseif($request->search_date_from_delivered_return && $request->search_date_to_delivered_return) {
+            $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $dr_from);
+            if ($from_id->exists()) {
+                $from_id = $from_id->first()->id;
+        
+                $to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $dr_from)->where('created_at', '<=', $dr_to);
+        
+                if ($to_id->exists()) {
+                    $to_id = $to_id->first()->id;
+        
+                    $sales->where('dr.id', '>=', $from_id)
+                        ->where('dr.id', '<=', $to_id);
+                }
+            }
+            $sales->whereBetween('dr.created_at', [$dr_from, $dr_to]);
+        }
+>>>>>>> Stashed changes
 
         // if (!$request->get('search_date_from') && !$request->get('search_date_to')) {
         //     $now = Carbon::now();
