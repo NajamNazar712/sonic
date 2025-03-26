@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\Http;
 use App\Models\FinjaLogSettlementRecord;
 
 
-trait FinSurgentLogTrait 
+trait FinSurgentLogTrait
 {
 
 
@@ -37,7 +37,7 @@ trait FinSurgentLogTrait
                 $shipmentId = $pending_payment_shipment->shipment_id;
             } elseif (is_int($pending_payment_shipment)) {
                 $shipmentId = $pending_payment_shipment;
-            } 
+            }
 
             $api = config('app.FINGA_URL');
             if(!empty($token2)){
@@ -54,14 +54,14 @@ trait FinSurgentLogTrait
                 $response = Http::withHeaders([
                     'accept' => 'application/json',
                     'Authorization' => "Bearer " . $token,
-                
+
                 ])->post($api.'transactions/log/payment', $requestPayload);
 
-                if($response->successful()) { 
-                    
+                if($response->successful()) {
+
                     $body = $response->getBody();
                     $body = json_decode($body);
-    
+
                     FingaIntegrationController::apiLog(4, 'success', $body ,$shipmentId);
 
                     FinjaLogSettlementRecord::updateOrCreate(
@@ -79,7 +79,7 @@ trait FinSurgentLogTrait
                 } else {
                     $body = $response->getBody();
                     $body = json_decode($body,true);
-                    if (isset($body['error']) && (str_contains($body['error'], 'duplicate key value violates unique constraint') || str_contains($body['error'], 'Transaction logged already.')) {
+                    if (isset($body['error']) && (str_contains($body['error'], 'duplicate key value violates unique constraint') ||  str_contains($body['message'], 'Transaction logged already.')) ) {
                         FingaIntegrationController::apiLog(4, 'success (duplicate ignored)', $body, $shipmentId);
 
                         FinjaLogSettlementRecord::updateOrCreate(
@@ -144,7 +144,7 @@ trait FinSurgentLogTrait
 
             $api = config('app.FINGA_URL');
             $token = FingaIntegrationController::getToken($api);
-            
+
             if($token) {
                 foreach ($requestPayload as $key => $payload) {
                     FingaIntegrationController::apiLog(17, 1, $payload, $key, null , $batch_id);
@@ -152,11 +152,11 @@ trait FinSurgentLogTrait
                 $response = Http::withHeaders([
                     'accept' => 'application/json',
                     'Authorization' => "Bearer " . $token,
-                
+
                 ])->post($api.'transactions/log/payment/bulk', $requestPayload);
 
                 if($response->successful()) {
-                    
+
                     $body = $response->getBody();
                     $body = json_decode($body , true);
 
