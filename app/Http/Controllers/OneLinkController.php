@@ -199,7 +199,6 @@ class OneLinkController extends Controller
                     "rrn" => $rrn,
                     "stan" => $stan,
                     "messageId" => null,
-                    "rtpId" => null,
                     "merchantID" => null,
                     "subDept" => null
                 ]
