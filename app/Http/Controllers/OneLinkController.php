@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Models\Admin\DeliveryNote;
-use App\Http\Models\Admin\DeliveryNoteShipment;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Http\Models\Shipment;
 use App\Models\OneLinkApiLog;
 use App\Services\OneLinkService;
 use App\Http\Models\RiderDelivery;
 use App\Models\OneLinkTransaction;
 use Illuminate\Support\Facades\DB;
+use App\Http\Models\Admin\DeliveryNote;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Models\Admin\DeliveryNoteShipment;
 
 class OneLinkController extends Controller
 {
@@ -127,8 +128,6 @@ class OneLinkController extends Controller
         return response()->json(['error' => 'No matching delivered shipments found'], 404);
     }
 
-
-
     protected function validateRequest(Request $request, array $rules, string $logType)
     {
         $validator = Validator::make($request->all(), $rules);
@@ -152,18 +151,16 @@ class OneLinkController extends Controller
         if ($validationResponse) {
             return $validationResponse;
         }
-
-        //Maybe need of $messageId
+    
         $data = $request->all();
-        $rrn = $data['info']['rrn'];
-        $stan = $data['info']['stan'];
-        // $messageId = $data['messageInfo']['originalMessageId'] ?? $data['messageInfo']['messageId'];
-
+        $rrn = (int) $data['info']['rrn'];
+        $stan = (int) $data['info']['stan'];
+        $subDept = (int) ($data['messageInfo']['subDept'] ?? null);
+    
         $existingLog = OneLinkApiLog::whereRaw("JSON_UNQUOTE(JSON_EXTRACT(response_data, '$.info.rrn')) = ?", [$rrn])
             ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(response_data, '$.info.stan')) = ?", [$stan])
-            // ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(response_data, '$.info.messageId')) = ?", [$messageId])
             ->first();
-
+    
         if ($existingLog) {
             DB::transaction(function () use ($data, $rrn, $stan, $natureId) {
                 OneLinkTransaction::create(array_merge([
@@ -186,13 +183,13 @@ class OneLinkController extends Controller
                     'original_rtp_id' => $data['messageInfo']['originalRtpId'],
                     'original_instructed_amount' => $data['messageInfo']['originalInstructedAmount'] ?? null,
                     'net_amount' => $data['messageInfo']['netAmount'] ?? null,
-                    'iban' => $data['senderInfo']['iban'],
-                    'account_title' => $data['senderInfo']['accountTitle'],
+                    'iban' => $data['senderInfo']['iban'] ?? null,
+                    'account_title' => $data['senderInfo']['accountTitle'] ?? null,
                     'longitude' => $data['senderInfo']['longitude'] ?? null,
                     'latitude' => $data['senderInfo']['latitude'] ?? null,
                 ]));
             });
-
+    
             $response = [
                 "responseCode" => "00",
                 "responseDesc" => "Processed OK",
@@ -201,10 +198,23 @@ class OneLinkController extends Controller
                     "stan" => $stan,
                     "messageId" => $data['messageInfo']['messageId'] ?? $data['messageInfo']['originalMessageId'],
                     "merchantID" => $data['messageInfo']['merchantID'],
-                    "subDept" => $data['messageInfo']['subDept'] ?? null
+                    "subDept" => $subDept
                 ]
             ];
+    
             $status = 200;
+    
+            if ($natureId == 2) {
+                $shipment = Shipment::find($rrn);
+                if ($shipment) {
+                    $shipment->update(['received_amount' => $data['messageInfo']['originalInstructedAmount'] ?? 0]);
+                }
+    
+                $delivery_note = DeliveryNote::find($subDept);
+                if ($delivery_note) {
+                    $delivery_note->increment('one_link_payment_count');
+                }
+            }
         } else {
             $response = [
                 "responseCode" => "01",
@@ -219,11 +229,11 @@ class OneLinkController extends Controller
             ];
             $status = 404;
         }
-
+    
         $this->oneLinkService->logRequest($logType, $data, $response, $status);
         return response()->json($response, $status);
     }
-
+    
     public function notifyMerchant(Request $request)
     {
         $rules = [
