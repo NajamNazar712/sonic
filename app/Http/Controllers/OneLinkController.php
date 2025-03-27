@@ -22,9 +22,9 @@ class OneLinkController extends Controller
         $this->oneLinkService = $oneLinkService;
     }
 
-    public function generateDQRCMerchant($rider_id, $shipment_id, $cod_amount, $latitude, $longitude)
+    public function generateDQRCMerchant($delivery_note_id, $shipment_id, $cod_amount, $latitude, $longitude)
     {
-        if (!$rider_id || !$shipment_id || !$cod_amount || !$latitude || !$longitude) {
+        if (!$delivery_note_id || !$shipment_id || !$cod_amount || !$latitude || !$longitude) {
             return response()->json(['error' => 'Missing required parameters'], 400);
         }
 
@@ -38,7 +38,7 @@ class OneLinkController extends Controller
                 "merchantID" => "854710236963454",
                 "postalAddress" => [
                     "townName" => "KARACHI",
-                    "subDept" => (string) $rider_id,
+                    "subDept" => (string) $delivery_note_id,
                     "addressLine" => "Plot 105, Sector 7-A, Mehran Town, Korangi, Karachi"
                 ],
                 "contactDetails" => [
@@ -79,6 +79,7 @@ class OneLinkController extends Controller
             $status = isset($response['error']) ? 'error' : 'success';
             return response()->json([
                 'success' => $status === 'success',
+                'status' => isset($response['responseCode']) && $response['responseCode'] == '00' ? 0 : 1,
                 'data' => $response
             ]);
         } catch (\Exception $e) {
@@ -108,7 +109,7 @@ class OneLinkController extends Controller
 
         if ($delivered_shipment) {
             return $this->generateDQRCMerchant(
-                $request->rider_id,
+                $request->delivery_note_id,
                 $request->shipment_id,
                 $request->cod_amount,
                 $request->latitude,
