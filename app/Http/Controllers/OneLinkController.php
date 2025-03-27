@@ -59,8 +59,8 @@ class OneLinkController extends Controller
                 ]
             ],
             "paymentDetails" => [
-                "executionDateTime" => now()->toIso8601String(),
-                "expiryDateTime" => now()->addMinutes(40)->toIso8601String(),
+                "executionDateTime" => now()->format('Y-m-d\TH:i:s'),
+                "expiryDateTime" => now()->addMinutes(40)->format('Y-m-d\TH:i:s'),
                 "instructedAmount" => $cod_amount, 
                 "transactionType" => "064" 
             ],
