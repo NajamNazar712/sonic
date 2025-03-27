@@ -90,7 +90,7 @@ class OneLinkController extends Controller
     public function verifyDeliveredShipmentDQRCMerchant(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'delivery_note_id' => 'required|integer|exists:delivery_notes,id', 
+            'delivery_note_id' => 'required|integer|exists:delivery_notes,id',
             'shipment_id'      => 'required|integer|exists:delivery_note_shipments,shipment_id',
             'cod_amount'       => 'required|numeric',
             'latitude'         => 'required|numeric|between:-90,90',
@@ -104,14 +104,14 @@ class OneLinkController extends Controller
         $delivery_note = DeliveryNote::where('id', $request->delivery_note_id)
             ->where('status', 0)
             ->where('pending_status', 0)
-            ->first(); 
+            ->first();
 
         $delivery_note_shipments = false;
 
         if ($delivery_note) {
             $delivery_note_shipments = $delivery_note->delivery_note_shipments
                 ->where('shipment_id', $request->shipment_id)
-                ->isNotEmpty();
+                ->count() > 0;
         }
 
         if ($delivery_note && $delivery_note_shipments) {
@@ -126,6 +126,7 @@ class OneLinkController extends Controller
 
         return response()->json(['error' => 'No matching delivered shipments found'], 404);
     }
+
 
 
     protected function validateRequest(Request $request, array $rules, string $logType)
@@ -267,5 +268,4 @@ class OneLinkController extends Controller
         ];
         return $this->processTransaction($request, 'paymentNotification', $rules, 2);
     }
-
 }
