@@ -3544,7 +3544,8 @@ class AdminReportsController extends Controller
                 $to_id = $to_id->first()->id;
                 // $sales->where('sj.id', '>=', $from_id)
                 //     ->where('sj.id', '<=', $to_id);
-                $sales->whereBetween('sj.id', [$from_id, $to_id]);
+                $sales->whereBetween('sj.id', [$from_id, $to_id])
+                    ->whereBetween('sj.created_at', [$from, $to]);
             }
         }
 
