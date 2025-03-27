@@ -142,12 +142,15 @@ class OneLinkController extends Controller
             return $validationResponse;
         }
 
+        //Maybe need of $messageId
         $data = $request->all();
         $rrn = $data['info']['rrn'];
         $stan = $data['info']['stan'];
+        // $messageId = $data['messageInfo']['originalMessageId'] ?? $data['messageInfo']['messageId'];
 
         $existingLog = OneLinkApiLog::whereRaw("JSON_UNQUOTE(JSON_EXTRACT(response_data, '$.info.rrn')) = ?", [$rrn])
             ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(response_data, '$.info.stan')) = ?", [$stan])
+            // ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(response_data, '$.info.messageId')) = ?", [$messageId])
             ->first();
 
         if ($existingLog) {
