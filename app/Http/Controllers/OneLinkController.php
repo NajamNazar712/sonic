@@ -90,7 +90,7 @@ class OneLinkController extends Controller
     public function verifyDeliveredShipmentDQRCMerchant(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'delivery_note_id' => 'required|integer|exists:delivery_notes,id', // Corrected table name
+            'delivery_note_id' => 'required|integer|exists:delivery_notes,id', 
             'shipment_id'      => 'required|integer|exists:delivery_note_shipments,shipment_id',
             'cod_amount'       => 'required|numeric',
             'latitude'         => 'required|numeric|between:-90,90',
