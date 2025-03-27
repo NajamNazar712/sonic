@@ -4956,7 +4956,7 @@ class AdminReportsEmailController extends Controller
             $sheet->getStyle("A2:{$lastColumn}2")->applyFromArray($headerStyle);
         
             // Set the title in the first row
-            $sheet->setCellValue('A1', 'Receive Deliveries Report');
+            $sheet->setCellValue('A1', 'Pending Deliveries Report');
         
             // Merge cells for title
             $sheet->mergeCells("A1:{$lastColumn}1");
