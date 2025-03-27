@@ -4,10 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Models\OneLinkApiLog;
 use App\Services\OneLinkService;
 use App\Http\Models\RiderDelivery;
+use App\Models\OneLinkTransaction;
 use Illuminate\Support\Facades\DB;
-use App\Http\Models\Admin\DeliveryNote;
 use Illuminate\Support\Facades\Validator;
 
 class OneLinkController extends Controller
@@ -44,11 +45,11 @@ class OneLinkController extends Controller
                     "email" => "info@trax.pk",
                     "dept" => "Head office",
                     "website" => "www.trax.pk",
-                    "merchantChannelId" => "400" 
+                    "merchantChannelId" => "400"
                 ],
                 "geoLocation" => [
-                    "lat" => (string) $latitude, 
-                    "longt" => (string) $longitude 
+                    "lat" => (string) $latitude,
+                    "longt" => (string) $longitude
                 ]
             ],
             "payerDetails" => [
@@ -61,28 +62,24 @@ class OneLinkController extends Controller
             "paymentDetails" => [
                 "executionDateTime" => now()->format('Y-m-d\TH:i:s'),
                 "expiryDateTime" => now()->addMinutes(40)->format('Y-m-d\TH:i:s'),
-                "instructedAmount" => $cod_amount, 
-                "transactionType" => "064" 
+                "instructedAmount" => $cod_amount,
+                "transactionType" => "064"
             ],
             "info" => [
-                "stan" => strtoupper(Str::random(6)), 
-                "rrn" => str_pad((string) $shipment_id, 12, '0', STR_PAD_LEFT) 
+                "stan" => strtoupper(Str::random(6)),
+                "rrn" => str_pad((string) $shipment_id, 12, '0', STR_PAD_LEFT)
             ]
         ];
-        
+
 
         try {
             $response = $this->oneLinkService->generateDQRCMerchant($data);
             $status = isset($response['error']) ? 'error' : 'success';
-
-            $this->oneLinkService->logRequest('generateDQRCMerchant', $data, $response, $status);
-
             return response()->json([
                 'success' => $status === 'success',
                 'data' => $response
             ]);
         } catch (\Exception $e) {
-            $this->oneLinkService->logError($e->getMessage());
             return response()->json(['error' => 'Exception occurred', 'details' => $e->getMessage()], 500);
         }
     }
@@ -121,25 +118,142 @@ class OneLinkController extends Controller
         return response()->json(['error' => 'No matching delivered shipments found'], 404);
     }
 
+    protected function validateRequest(Request $request, array $rules, string $logType)
+    {
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            $response = [
+                'responseCode' => '01',
+                'responseDesc' => 'Validation Failed',
+                'errors' => $validator->errors()
+            ];
+            $status = 422;
+            $this->oneLinkService->logRequest($logType, $request->all(), $response, $status);
+            return response()->json($response, $status);
+        }
+        return null;
+    }
+
+    protected function processTransaction(Request $request, string $logType, array $rules, int $natureId)
+    {
+        $validationResponse = $this->validateRequest($request, $rules, $logType);
+        if ($validationResponse) {
+            return $validationResponse;
+        }
+
+        $data = $request->all();
+        $rrn = $data['info']['rrn'];
+        $stan = $data['info']['stan'];
+
+        $existingLog = OneLinkApiLog::whereRaw("JSON_UNQUOTE(JSON_EXTRACT(response_data, '$.info.rrn')) = ?", [$rrn])
+            ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(response_data, '$.info.stan')) = ?", [$stan])
+            ->first();
+
+        if ($existingLog) {
+            DB::transaction(function () use ($data, $rrn, $stan, $natureId) {
+                OneLinkTransaction::create(array_merge([
+                    'rrn' => $rrn,
+                    'stan' => $stan,
+                    'date_time' => $data['info']['dateTime'],
+                    'merchant_id' => $data['messageInfo']['merchantID'],
+                    'sub_dept' => $data['messageInfo']['subDept'] ?? null,
+                    'status' => $data['messageInfo']['status'],
+                    'nature_id' => $natureId
+                ], $natureId === 1 ? [
+                    'message_id' => $data['messageInfo']['originalMessageId'],
+                    'original_rrn' => $data['messageInfo']['originalRRN'],
+                    'original_stan' => $data['messageInfo']['originalStan'],
+                    'original_rtp_id' => $data['messageInfo']['originalRtpId']
+                ] : [
+                    'message_id' => $data['messageInfo']['messageId'],
+                    'original_rrn' => $data['messageInfo']['originalRRN'],
+                    'original_stan' => $data['messageInfo']['originalStan'],
+                    'original_rtp_id' => $data['messageInfo']['originalRtpId'],
+                    'original_instructed_amount' => $data['messageInfo']['originalInstructedAmount'] ?? null,
+                    'net_amount' => $data['messageInfo']['netAmount'] ?? null,
+                    'iban' => $data['senderInfo']['iban'],
+                    'account_title' => $data['senderInfo']['accountTitle'],
+                    'longitude' => $data['senderInfo']['longitude'] ?? null,
+                    'latitude' => $data['senderInfo']['latitude'] ?? null,
+                ]));
+            });
+
+            $response = [
+                "responseCode" => "00",
+                "responseDesc" => "Processed OK",
+                "info" => [
+                    "rrn" => $rrn,
+                    "stan" => $stan,
+                    "messageId" => $data['messageInfo']['messageId'] ?? $data['messageInfo']['originalMessageId'],
+                    "merchantID" => $data['messageInfo']['merchantID'],
+                    "subDept" => $data['messageInfo']['subDept'] ?? null
+                ]
+            ];
+            $status = 200;
+        } else {
+            $response = [
+                "responseCode" => "01",
+                "responseDesc" => "NOT FOUND",
+                "info" => [
+                    "rrn" => $rrn,
+                    "stan" => $stan,
+                    "messageId" => null,
+                    "rtpId" => null,
+                    "merchantID" => null,
+                    "subDept" => null
+                ]
+            ];
+            $status = 404;
+        }
+
+        $this->oneLinkService->logRequest($logType, $data, $response, $status);
+        return response()->json($response, $status);
+    }
+
     public function notifyMerchant(Request $request)
     {
-        $requestData = $request->validate([
+        $rules = [
             'info' => 'required|array',
-        ]);
-
-        $response = $this->oneLinkService->notifyMerchant($requestData['info']);
-
-        return response()->json($response);
+            'messageInfo' => 'required|array',
+            'info.rrn' => 'required|string',
+            'info.stan' => 'required|string',
+            'info.dateTime' => 'required|string',
+            'messageInfo.originalRRN' => 'required|string',
+            'messageInfo.originalStan' => 'required|string',
+            'messageInfo.originalMessageId' => 'required|string',
+            'messageInfo.originalRtpId' => 'required|string',
+            'messageInfo.merchantID' => 'required|string',
+            'messageInfo.subDept' => 'required|string',
+            'messageInfo.status' => 'required|string',
+        ];
+        return $this->processTransaction($request, 'notifyMerchant', $rules, 1);
     }
 
     public function paymentNotification(Request $request)
     {
-        $requestData = $request->validate([
+        $rules = [
             'info' => 'required|array',
-        ]);
-
-        $response = $this->oneLinkService->paymentNotification($requestData['info']);
-
-        return response()->json($response);
+            'messageInfo' => 'required|array',
+            'senderInfo' => 'required|array',
+            'info.rrn' => 'required|string',
+            'info.stan' => 'required|string',
+            'info.dateTime' => 'required|string',
+            'messageInfo.messageId' => 'required|string',
+            'messageInfo.originalRRN' => 'required|string',
+            'messageInfo.originalStan' => 'required|string',
+            'messageInfo.originalRtpId' => 'required|string',
+            'messageInfo.merchantID' => 'required|string',
+            'messageInfo.subDept' => 'required|string',
+            'messageInfo.status' => 'required|string',
+            'messageInfo.originalInstructedAmount' => 'nullable|numeric',
+            'messageInfo.netAmount' => 'nullable|numeric',
+            'senderInfo.iban' => 'required|string',
+            'senderInfo.accountTitle' => 'required|string',
+            'senderInfo.longitude' => 'nullable|string',
+            'senderInfo.latitude' => 'nullable|string',
+        ];
+        return $this->processTransaction($request, 'paymentNotification', $rules, 2);
     }
+
 }

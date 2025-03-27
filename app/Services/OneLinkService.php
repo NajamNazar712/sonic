@@ -77,16 +77,6 @@ class OneLinkService
         return $this->sendRequest('/1Link/generateDQRCMerchant', 'generateDQRCMerchant', $data);
     }
 
-    public function notifyMerchant(array $info)
-    {
-        return $this->sendRequest('/notifyMerchant', 'notifyMerchant', ['info' => $info]);
-    }
-
-    public function paymentNotification(array $info)
-    {
-        return $this->sendRequest('/1Link/paymentNotification', 'paymentNotification', ['info' => $info]);
-    }
-
     protected function sendRequest($endpoint, $logLabel, array $data)
     {
         if (!$this->token) {
