@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Models\Admin\DeliveryNote;
+use App\Http\Models\Admin\DeliveryNoteShipment;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\OneLinkApiLog;
@@ -87,10 +89,9 @@ class OneLinkController extends Controller
     public function verifyDeliveredShipmentDQRCMerchant(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'delivery_note_id' => 'required|integer|exists:rider_deliveries,delivery_note_id',
-            'shipment_id'      => 'required|integer|exists:rider_deliveries,shipment_id',
+            'delivery_note_id' => 'required|integer|exists:delivery_note_shipments,delivery_note_id',
+            'shipment_id'      => 'required|integer|exists:delivery_note_shipments,shipment_id',
             'cod_amount'        => 'required|numeric',
-            'rider_id'         => 'required|integer',
             'latitude'         => 'required|numeric|between:-90,90',
             'longitude'        => 'required|numeric|between:-180,180',
         ]);
@@ -99,10 +100,10 @@ class OneLinkController extends Controller
             return response()->json(['error' => 'Validation failed', 'details' => $validator->errors()], 422);
         }
 
-        $delivered_shipment = RiderDelivery::where([
+        $delivered_shipment = DeliveryNoteShipment::where([
             'delivery_note_id' => $request->delivery_note_id,
             'shipment_id'      => $request->shipment_id,
-            'delivered_status' => 1
+            'status' => 0
         ])->exists();
 
         if ($delivered_shipment) {
