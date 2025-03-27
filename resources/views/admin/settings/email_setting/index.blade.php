@@ -18,7 +18,7 @@
 
                             <div class="row justify-content-center">
                                 <div class="col-6">
-                                    <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.email_delivery_time.update') }}" novalidate="novalidate">
+                                    <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.reports.email_delivery_time.update') }}" novalidate="novalidate">
                                         {{ csrf_field() }}
 
                                         <div class="mb-4">

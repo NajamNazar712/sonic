@@ -3562,7 +3562,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@faf_charges_store')->name('store');
         });
 
-        Route::prefix('email_delivery_time')->name('email_delivery_time.')->group(function () {
+        Route::prefix('reports/email_delivery_time')->name('reports.email_delivery_time.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@email_delivery_time_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@email_delivery_time_update')->name('update');
         });
