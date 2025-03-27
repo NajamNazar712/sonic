@@ -113,7 +113,7 @@
                                                     </div>
                                                     <div class="col-md-6 d-flex align-items-center">
                                                         <label class="mr-2 font-small-3"><b>Email Delivery: </b></label>
-                                                        <input type="checkbox" name="receive_delivieries_toggle" id="receive_delivieries_toggle" class="switchery receive_delivieries_toggle" data-size="sm" data-switchery="true"{{ $receive_return_deliveries_report_toggle == 1 ? 'checked' : '' }}>
+                                                        <input type="checkbox" name="receive_delivieries_toggle" id="receive_delivieries_toggle" class="switchery receive_delivieries_toggle" data-size="sm" data-switchery="true"{{ $receive_deliveries_toggle == 1 ? 'checked' : '' }}>
                                                     </div>
                                                 </div>
                                             </div>

@@ -3805,7 +3805,7 @@ class AdminReportsEmailController extends Controller
             'return_notes.created_at as created'
         ])
         ->whereIn('return_notes.status', [0, 3])
-        ->whereBetween('delivery_notes.created_at', [
+        ->whereBetween('return_notes.created_at', [
             Carbon::parse($day)->startOfDay()->format('Y-m-d H:i:s'),
             Carbon::parse($day)->endOfDay()->format('Y-m-d H:i:s')
         ])

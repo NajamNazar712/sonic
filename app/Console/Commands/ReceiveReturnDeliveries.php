@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Http\Controllers\Admins\AdminReportsEmailController;
 use App\Http\Controllers\NotificationsController;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class ReceiveReturnDeliveries extends Command
@@ -29,7 +30,8 @@ class ReceiveReturnDeliveries extends Command
      */
     public function handle()
     {
-        $response = AdminReportsEmailController::return_deliveries_receive();
+        $day = Carbon::yesterday()->toDateString();
+        $response = AdminReportsEmailController::return_deliveries_receive($day);
         NotificationsController::send(237, $response);
     }
 }
