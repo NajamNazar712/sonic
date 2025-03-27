@@ -90,7 +90,7 @@ class OneLinkController extends Controller
             'delivery_note_id' => 'required|integer|exists:rider_deliveries,delivery_note_id',
             'shipment_id'      => 'required|integer|exists:rider_deliveries,shipment_id',
             'cod_amount'        => 'required|numeric',
-            'rider_id'         => 'required|integer|exists:riders,id',
+            'rider_id'         => 'required|integer',
             'latitude'         => 'required|numeric|between:-90,90',
             'longitude'        => 'required|numeric|between:-180,180',
         ]);
