@@ -18,8 +18,8 @@ return new class extends Migration {
             $table->string('merchant_id')->nullable();
             $table->string('sub_dept')->nullable();
             $table->string('status')->nullable();
-            $table->decimal('original_instructed_amount', 10, 2)->nullable();
-            $table->decimal('net_amount', 10, 2)->nullable();
+            $table->string('original_instructed_amount', 10, 2)->nullable();
+            $table->string('net_amount', 10, 2)->nullable();
             $table->string('iban')->nullable();
             $table->string('account_title')->nullable();
             $table->string('longitude')->nullable();
