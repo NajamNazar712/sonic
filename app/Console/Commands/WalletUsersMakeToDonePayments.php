@@ -23,7 +23,7 @@ class WalletUsersMakeToDonePayments extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Sending payments from make to done of wallet users';
 
     /**
      * Execute the console command.
