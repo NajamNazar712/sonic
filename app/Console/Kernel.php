@@ -598,20 +598,32 @@ class Kernel extends ConsoleKernel
         $schedule->command('status:re-push-wallet')->hourly()->runInBackground();
         $schedule->command('rerun:wallet_log_re_push')->hourly()->runInBackground();
 
+        // $schedule->command('email:daily_received_deliveries_report')->dailyAt('09:00')->runInBackground();
+        // $schedule->command('email:daily_return_received_deliveries_report')->dailyAt('09:00')->runInBackground();
+        // $schedule->command('email:daily_delivery_note_history')->dailyAt('09:00')->runInBackground();
+        // $schedule->command('email:daily_weight_qc_report')->dailyAt('09:00')->runInBackground();
+        // $schedule->command('email:daily_overall_sales_report')->dailyAt('09:00')->runInBackground();
+        // $schedule->command('email:qsrreport')->dailyAt('09:00')->runInBackground();
+        // $schedule->command('email:qsrreport')->dailyAt('14:00')->runInBackground();
+        // $schedule->command('email:pendingdeliveryreport')->dailyAt('11:30')->runInBackground();
+
+        // $schedule->command('email:receivedeliveryreport')->dailyAt('09:00')->runInBackground();
+
+
         // Fetch settings in a single query
         $settings = DB::table('global_settings')
-            ->whereIn('text', [
-                'pending_deliveries_report_time',
-                'receive_deliveries_report_time',
-                'receive_return_deliveries_report_time',
-                'delivery_note_history_report_time',
-                'weight_qc_report_time',
-                'overall_sales_report_time',
-                'quality_of_service_report_time',
-                'quality_of_service_report_other_time'
-            ])
-            ->pluck('setting_value', 'text')
-            ->toArray(); // Convert to an array for easier access
+        ->whereIn('text', [
+            'pending_deliveries_report_time',
+            'receive_deliveries_report_time',
+            'receive_return_deliveries_report_time',
+            'delivery_note_history_report_time',
+            'weight_qc_report_time',
+            'overall_sales_report_time',
+            'quality_of_service_report_time',
+            'quality_of_service_report_other_time'
+        ])
+        ->pluck('setting_value', 'text')
+        ->toArray(); // Convert to an array for easier access
 
         // Command list mapped to their corresponding settings
         $commands = [
@@ -631,19 +643,7 @@ class Kernel extends ConsoleKernel
                 $schedule->command($command)->dailyAt($settings[$settingKey])->runInBackground();
             }
         }
- }
-        }
 
-        // $schedule->command('email:daily_received_deliveries_report')->dailyAt('09:00')->runInBackground();
-        // $schedule->command('email:daily_return_received_deliveries_report')->dailyAt('09:00')->runInBackground();
-        // $schedule->command('email:daily_delivery_note_history')->dailyAt('09:00')->runInBackground();
-        // $schedule->command('email:daily_weight_qc_report')->dailyAt('09:00')->runInBackground();
-        // $schedule->command('email:daily_overall_sales_report')->dailyAt('09:00')->runInBackground();
-        // $schedule->command('email:qsrreport')->dailyAt('09:00')->runInBackground();
-        // $schedule->command('email:qsrreport')->dailyAt('14:00')->runInBackground();
-        // $schedule->command('email:pendingdeliveryreport')->dailyAt('11:30')->runInBackground();
-
-        // $schedule->command('email:receivedeliveryreport')->dailyAt('09:00')->runInBackground();
     }
     /**
      * Register the commands for the application.
