@@ -172,31 +172,39 @@ class OneLinkController extends Controller
     
         if ($existingTransaction) {
             DB::transaction(function () use ($existingTransaction, $data, $natureId) {
-                $existingTransaction->update(array_merge([
-                    'date_time' => $data['info']['dateTime'] ?? $existingTransaction->date_time,
-                    'merchant_id' => $data['messageInfo']['merchantID'] ?? $existingTransaction->merchant_id,
-                    'sub_dept' => $data['messageInfo']['subDept'] ?? $existingTransaction->sub_dept,
-                    'status' => $data['messageInfo']['status'] ?? $existingTransaction->status,
+                $updateData = [
+                    'date_time' => $data['info']['dateTime'],
+                    'merchant_id' => $data['messageInfo']['merchantID'],
+                    'sub_dept' => $data['messageInfo']['subDept'],
+                    'status' => $data['messageInfo']['status'],
                     'nature_id' => $natureId
-                ], $natureId === 1 ? [
-                    'message_id' => $data['messageInfo']['originalMessageId'] ?? $existingTransaction->message_id,
-                    'original_rrn' => $data['messageInfo']['originalRRN'] ?? $existingTransaction->original_rrn,
-                    'original_stan' => $data['messageInfo']['originalStan'] ?? $existingTransaction->original_stan,
-                    'original_rtp_id' => $data['messageInfo']['originalRtpId'] ?? $existingTransaction->original_rtp_id
-                ] : [
-                    'message_id' => $data['messageInfo']['messageId'] ?? $existingTransaction->message_id,
-                    'original_rrn' => $data['messageInfo']['originalRRN'] ?? $existingTransaction->original_rrn,
-                    'original_stan' => $data['messageInfo']['originalStan'] ?? $existingTransaction->original_stan,
-                    'original_rtp_id' => $data['messageInfo']['originalRtpId'] ?? $existingTransaction->original_rtp_id,
-                    'original_instructed_amount' => $data['messageInfo']['originalInstructedAmount'] ?? $existingTransaction->original_instructed_amount,
-                    'net_amount' => $data['messageInfo']['netAmount'] ?? $existingTransaction->net_amount,
-                    'iban' => $data['senderInfo']['iban'] ?? $existingTransaction->iban,
-                    'account_title' => $data['senderInfo']['accountTitle'] ?? $existingTransaction->account_title,
-                    'longitude' => $data['senderInfo']['longitude'] ?? $existingTransaction->longitude,
-                    'latitude' => $data['senderInfo']['latitude'] ?? $existingTransaction->latitude,
-                ]));
-            });
-    
+                ];
+            
+                if ($natureId === 1) {
+                    $updateData += [
+                        'message_id' => $data['messageInfo']['originalMessageId'],
+                        'original_rrn' => $data['messageInfo']['originalRRN'],
+                        'original_stan' => $data['messageInfo']['originalStan'],
+                        'original_rtp_id' => $data['messageInfo']['originalRtpId']
+                    ];
+                } else {
+                    $updateData += [
+                        'message_id' => $data['messageInfo']['messageId'],
+                        'original_rrn' => $data['messageInfo']['originalRRN'],
+                        'original_stan' => $data['messageInfo']['originalStan'],
+                        'original_rtp_id' => $data['messageInfo']['originalRtpId'],
+                        'original_instructed_amount' => $data['messageInfo']['originalInstructedAmount'],
+                        'net_amount' => $data['messageInfo']['netAmount'],
+                        'iban' => $data['senderInfo']['iban'],
+                        'account_title' => $data['senderInfo']['accountTitle'],
+                        'longitude' => $data['senderInfo']['longitude'],
+                        'latitude' => $data['senderInfo']['latitude'],
+                    ];
+                }
+            
+                $existingTransaction->update($updateData);
+            });            
+            
             $response = [
                 "responseCode" => "00",
                 "responseDesc" => "Processed OK",
