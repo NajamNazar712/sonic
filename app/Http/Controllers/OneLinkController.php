@@ -80,8 +80,8 @@ class OneLinkController extends Controller
 
             if (isset($response['responseCode']) && $response['responseCode'] == '00') {
                 OneLinkTransaction::create([
-                    'rrn' => $response['info']['rrn'] ?? null,
-                    'stan' => $response['info']['stan'] ?? null,
+                    'rrn' => $response['info']['rrn'],
+                    'stan' => $response['info']['stan'],
                     'status' => 'pending',
                 ]);
             }
@@ -177,7 +177,7 @@ class OneLinkController extends Controller
                 DB::transaction(function () use ($existingTransaction, $data, $natureId, $rrn, $subDept) {
                     $updateData = [
                         'date_time' => $data['info']['dateTime'] ?? now(),
-                        'merchant_id' => $data['messageInfo']['merchantID'] ?? null,
+                        'merchant_id' => $data['messageInfo']['merchantID'],
                         'sub_dept' => $subDept,
                         'status' => $data['messageInfo']['status'] ?? 'pending',
                         'nature_id' => $natureId
@@ -185,23 +185,23 @@ class OneLinkController extends Controller
 
                     if ($natureId === 1) {
                         $updateData = array_merge($updateData, [
-                            'message_id' => $data['messageInfo']['originalMessageId'] ?? null,
-                            'original_rrn' => $data['messageInfo']['originalRRN'] ?? null,
-                            'original_stan' => $data['messageInfo']['originalStan'] ?? null,
-                            'original_rtp_id' => $data['messageInfo']['originalRtpId'] ?? null
+                            'message_id' => $data['messageInfo']['originalMessageId'],
+                            'original_rrn' => $data['messageInfo']['originalRRN'],
+                            'original_stan' => $data['messageInfo']['originalStan'],
+                            'original_rtp_id' => $data['messageInfo']['originalRtpId']
                         ]);
                     } else {
                         $updateData = array_merge($updateData, [
-                            'message_id' => $data['messageInfo']['messageId'] ?? null,
-                            'original_rrn' => $data['messageInfo']['originalRRN'] ?? null,
-                            'original_stan' => $data['messageInfo']['originalStan'] ?? null,
-                            'original_rtp_id' => $data['messageInfo']['originalRtpId'] ?? null,
+                            'message_id' => $data['messageInfo']['messageId'],
+                            'original_rrn' => $data['messageInfo']['originalRRN'],
+                            'original_stan' => $data['messageInfo']['originalStan'],
+                            'original_rtp_id' => $data['messageInfo']['originalRtpId'],
                             'original_instructed_amount' => $data['messageInfo']['originalInstructedAmount'] ?? 0,
                             'net_amount' => $data['messageInfo']['netAmount'] ?? 0,
-                            'iban' => $data['senderInfo']['iban'] ?? null,
-                            'account_title' => $data['senderInfo']['accountTitle'] ?? null,
-                            'longitude' => $data['senderInfo']['longitude'] ?? null,
-                            'latitude' => $data['senderInfo']['latitude'] ?? null,
+                            'iban' => $data['senderInfo']['iban'],
+                            'account_title' => $data['senderInfo']['accountTitle'],
+                            'longitude' => $data['senderInfo']['longitude'],
+                            'latitude' => $data['senderInfo']['latitude'],
                         ]);
                     }
 
@@ -229,7 +229,7 @@ class OneLinkController extends Controller
                         "rrn" => $rrn,
                         "stan" => $stan,
                         "messageId" => $data['messageInfo']['messageId'] ?? $data['messageInfo']['originalMessageId'],
-                        "merchantID" => $data['messageInfo']['merchantID'] ?? null,
+                        "merchantID" => $data['messageInfo']['merchantID'],
                         "subDept" => $subDept
                     ]
                 ];
