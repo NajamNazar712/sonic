@@ -598,7 +598,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('status:re-push-wallet')->hourly()->runInBackground();
         $schedule->command('rerun:wallet_log_re_push')->hourly()->runInBackground();
 
-        // fetch settings
+        // Fetch settings
         $columns = [
             'pending_deliveries_report_time',
             'receive_deliveries_report_time',
@@ -609,30 +609,37 @@ class Kernel extends ConsoleKernel
             'quality_of_service_report_time',
             'quality_of_service_report_other_time'
         ];
+
         $settings = DB::table('global_settings')
-        ->whereIn('text', $columns)
-        ->pluck('setting_value', 'text');
+            ->whereIn('text', $columns)
+            ->pluck('setting_value', 'text');
 
-        // Default times
-        $default_time = '09:00';
-        $second_default_time = '14:00';
-        $pending_default_time = '11:30';
+        // Fetch enabled settings
+        $enabledSettings = DB::table('global_settings')
+            ->whereIn('text', $columns)
+            ->where('setting_value', '1') // Only fetch settings where value is '1'
+            ->pluck('setting_value', 'text');
 
+        // Command list with corresponding setting keys
         $commands = [
-            'email:daily_received_deliveries_report' => $settings['receive_deliveries_report_time'] ?? $default_time,
-            'email:daily_return_received_deliveries_report' => $settings['receive_return_deliveries_report_time'] ?? $default_time,
-            'email:daily_delivery_note_history' => $settings['delivery_note_history_report_time'] ?? $default_time,
-            'email:daily_weight_qc_report' => $settings['weight_qc_report_time'] ?? $default_time,
-            'email:daily_overall_sales_report' => $settings['overall_sales_report_time'] ?? $default_time,
-            'email:qsrreport' => $settings['quality_of_service_report_time'] ?? $default_time,
-            'email:qsrreport' => $settings['quality_of_service_report_other_time'] ?? $second_default_time,
-            'email:pendingdeliveryreport' => $settings['pending_deliveries_report_time'] ?? $pending_default_time,
+            'email:daily_received_deliveries_report' => 'receive_deliveries_report_time',
+            'email:daily_return_received_deliveries_report' => 'receive_return_deliveries_report_time',
+            'email:daily_delivery_note_history' => 'delivery_note_history_report_time',
+            'email:daily_weight_qc_report' => 'weight_qc_report_time',
+            'email:daily_overall_sales_report' => 'overall_sales_report_time',
+            'email:qsrreport' => 'quality_of_service_report_time',
+            'email:qsrreport_other' => 'quality_of_service_report_other_time',
+            'email:pendingdeliveryreport' => 'pending_deliveries_report_time',
         ];
 
-        foreach ($commands as $command => $time) {
-            if ($time != '0' && !empty($time)) { // Ignore if set to '0' or empty
+        foreach ($commands as $command => $settingKey) {
+            // Run the command only if setting_value is 1
+            if (isset($enabledSettings[$settingKey])) {
+                $time = $settings[$settingKey] ?? '09:00'; // Use stored time or default if missing
                 $schedule->command($command)->dailyAt($time)->runInBackground();
             }
+        }
+ }
         }
 
         // $schedule->command('email:daily_received_deliveries_report')->dailyAt('09:00')->runInBackground();
