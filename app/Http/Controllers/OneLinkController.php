@@ -74,10 +74,18 @@ class OneLinkController extends Controller
             ]
         ];
 
-
         try {
             $response = $this->oneLinkService->generateDQRCMerchant($data);
             $status = isset($response['error']) ? 'error' : 'success';
+            
+            if (isset($response['responseCode']) && $response['responseCode'] == '00') {
+                OneLinkTransaction::create([
+                    'rrn' => $response['rrn'] ?? null,
+                    'stan' => $response['stan'] ?? null,
+                    'status' => 'pending',
+                ]);
+            }
+        
             return response()->json([
                 'success' => $status === 'success',
                 'status' => isset($response['responseCode']) && $response['responseCode'] == '00' ? 0 : 1,
@@ -155,38 +163,37 @@ class OneLinkController extends Controller
         $data = $request->all();
         $rrn = (int) $data['info']['rrn'];
         $stan = (int) $data['info']['stan'];
-        $subDept = (int) ($data['messageInfo']['subDept'] ?? null);
+        $subDept = (int) $data['messageInfo']['subDept'];
     
-        $existingLog = OneLinkApiLog::whereRaw("JSON_UNQUOTE(JSON_EXTRACT(response_data, '$.info.rrn')) = ?", [$rrn])
-            ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(response_data, '$.info.stan')) = ?", [$stan])
-            ->first();
+        $existingTransaction = OneLinkTransaction::where([
+            'rrn' => $rrn,
+            'stan' => $stan
+        ])->first();
     
-        if ($existingLog) {
-            DB::transaction(function () use ($data, $rrn, $stan, $natureId) {
-                OneLinkTransaction::create(array_merge([
-                    'rrn' => $rrn,
-                    'stan' => $stan,
-                    'date_time' => $data['info']['dateTime'],
-                    'merchant_id' => $data['messageInfo']['merchantID'],
-                    'sub_dept' => $data['messageInfo']['subDept'] ?? null,
-                    'status' => $data['messageInfo']['status'],
+        if ($existingTransaction) {
+            DB::transaction(function () use ($existingTransaction, $data, $natureId) {
+                $existingTransaction->update(array_merge([
+                    'date_time' => $data['info']['dateTime'] ?? $existingTransaction->date_time,
+                    'merchant_id' => $data['messageInfo']['merchantID'] ?? $existingTransaction->merchant_id,
+                    'sub_dept' => $data['messageInfo']['subDept'] ?? $existingTransaction->sub_dept,
+                    'status' => $data['messageInfo']['status'] ?? $existingTransaction->status,
                     'nature_id' => $natureId
                 ], $natureId === 1 ? [
-                    'message_id' => $data['messageInfo']['originalMessageId'],
-                    'original_rrn' => $data['messageInfo']['originalRRN'],
-                    'original_stan' => $data['messageInfo']['originalStan'],
-                    'original_rtp_id' => $data['messageInfo']['originalRtpId']
+                    'message_id' => $data['messageInfo']['originalMessageId'] ?? $existingTransaction->message_id,
+                    'original_rrn' => $data['messageInfo']['originalRRN'] ?? $existingTransaction->original_rrn,
+                    'original_stan' => $data['messageInfo']['originalStan'] ?? $existingTransaction->original_stan,
+                    'original_rtp_id' => $data['messageInfo']['originalRtpId'] ?? $existingTransaction->original_rtp_id
                 ] : [
-                    'message_id' => $data['messageInfo']['messageId'],
-                    'original_rrn' => $data['messageInfo']['originalRRN'],
-                    'original_stan' => $data['messageInfo']['originalStan'],
-                    'original_rtp_id' => $data['messageInfo']['originalRtpId'],
-                    'original_instructed_amount' => $data['messageInfo']['originalInstructedAmount'] ?? null,
-                    'net_amount' => $data['messageInfo']['netAmount'] ?? null,
-                    'iban' => $data['senderInfo']['iban'] ?? null,
-                    'account_title' => $data['senderInfo']['accountTitle'] ?? null,
-                    'longitude' => $data['senderInfo']['longitude'] ?? null,
-                    'latitude' => $data['senderInfo']['latitude'] ?? null,
+                    'message_id' => $data['messageInfo']['messageId'] ?? $existingTransaction->message_id,
+                    'original_rrn' => $data['messageInfo']['originalRRN'] ?? $existingTransaction->original_rrn,
+                    'original_stan' => $data['messageInfo']['originalStan'] ?? $existingTransaction->original_stan,
+                    'original_rtp_id' => $data['messageInfo']['originalRtpId'] ?? $existingTransaction->original_rtp_id,
+                    'original_instructed_amount' => $data['messageInfo']['originalInstructedAmount'] ?? $existingTransaction->original_instructed_amount,
+                    'net_amount' => $data['messageInfo']['netAmount'] ?? $existingTransaction->net_amount,
+                    'iban' => $data['senderInfo']['iban'] ?? $existingTransaction->iban,
+                    'account_title' => $data['senderInfo']['accountTitle'] ?? $existingTransaction->account_title,
+                    'longitude' => $data['senderInfo']['longitude'] ?? $existingTransaction->longitude,
+                    'latitude' => $data['senderInfo']['latitude'] ?? $existingTransaction->latitude,
                 ]));
             });
     
