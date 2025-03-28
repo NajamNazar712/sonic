@@ -598,29 +598,22 @@ class Kernel extends ConsoleKernel
         $schedule->command('status:re-push-wallet')->hourly()->runInBackground();
         $schedule->command('rerun:wallet_log_re_push')->hourly()->runInBackground();
 
-        // Fetch settings
-        $columns = [
-            'pending_deliveries_report_time',
-            'receive_deliveries_report_time',
-            'receive_return_deliveries_report_time',
-            'delivery_note_history_report_time',
-            'weight_qc_report_time',
-            'overall_sales_report_time',
-            'quality_of_service_report_time',
-            'quality_of_service_report_other_time'
-        ];
-
+        // Fetch settings in a single query
         $settings = DB::table('global_settings')
-            ->whereIn('text', $columns)
-            ->pluck('setting_value', 'text');
+            ->whereIn('text', [
+                'pending_deliveries_report_time',
+                'receive_deliveries_report_time',
+                'receive_return_deliveries_report_time',
+                'delivery_note_history_report_time',
+                'weight_qc_report_time',
+                'overall_sales_report_time',
+                'quality_of_service_report_time',
+                'quality_of_service_report_other_time'
+            ])
+            ->pluck('setting_value', 'text')
+            ->toArray(); // Convert to an array for easier access
 
-        // Fetch enabled settings
-        $enabledSettings = DB::table('global_settings')
-            ->whereIn('text', $columns)
-            ->where('setting_value', '1') // Only fetch settings where value is '1'
-            ->pluck('setting_value', 'text');
-
-        // Command list with corresponding setting keys
+        // Command list mapped to their corresponding settings
         $commands = [
             'email:daily_received_deliveries_report' => 'receive_deliveries_report_time',
             'email:daily_return_received_deliveries_report' => 'receive_return_deliveries_report_time',
@@ -633,10 +626,9 @@ class Kernel extends ConsoleKernel
         ];
 
         foreach ($commands as $command => $settingKey) {
-            // Run the command only if setting_value is 1
-            if (isset($enabledSettings[$settingKey])) {
-                $time = $settings[$settingKey] ?? '09:00'; // Use stored time or default if missing
-                $schedule->command($command)->dailyAt($time)->runInBackground();
+            // Ensure the setting exists and is enabled (1), and retrieve the time
+            if (!empty($settings[$settingKey]) && $settings[$settingKey] != '0') {
+                $schedule->command($command)->dailyAt($settings[$settingKey])->runInBackground();
             }
         }
  }
