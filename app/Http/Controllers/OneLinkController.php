@@ -77,7 +77,7 @@ class OneLinkController extends Controller
         try {
             $response = $this->oneLinkService->generateDQRCMerchant($data);
             $status = isset($response['error']) ? 'error' : 'success';
-            
+
             if (isset($response['responseCode']) && $response['responseCode'] == '00') {
                 OneLinkTransaction::create([
                     'rrn' => $response['info']['rrn'] ?? null,
@@ -85,7 +85,7 @@ class OneLinkController extends Controller
                     'status' => 'pending',
                 ]);
             }
-        
+
             return response()->json([
                 'success' => $status === 'success',
                 'status' => isset($response['responseCode']) && $response['responseCode'] == '00' ? 0 : 1,
@@ -156,79 +156,90 @@ class OneLinkController extends Controller
     protected function processTransaction(Request $request, string $logType, array $rules, int $natureId)
     {
         $validationResponse = $this->validateRequest($request, $rules, $logType);
+
         if ($validationResponse) {
             return $validationResponse;
         }
-    
+
         $data = $request->all();
+
         $rrn = (int) $data['info']['rrn'];
         $stan = (int) $data['info']['stan'];
         $subDept = (int) $data['messageInfo']['subDept'];
-    
+
         $existingTransaction = OneLinkTransaction::where([
             'rrn' => $rrn,
             'stan' => $stan
         ])->first();
-    
+
         if ($existingTransaction) {
-            DB::transaction(function () use ($existingTransaction, $data, $natureId) {
-                $updateData = [
-                    'date_time' => $data['info']['dateTime'],
-                    'merchant_id' => $data['messageInfo']['merchantID'],
-                    'sub_dept' => $data['messageInfo']['subDept'],
-                    'status' => $data['messageInfo']['status'],
-                    'nature_id' => $natureId
+            try {
+                DB::transaction(function () use ($existingTransaction, $data, $natureId, $rrn, $subDept) {
+                    $updateData = [
+                        'date_time' => $data['info']['dateTime'] ?? now(),
+                        'merchant_id' => $data['messageInfo']['merchantID'] ?? null,
+                        'sub_dept' => $subDept,
+                        'status' => $data['messageInfo']['status'] ?? 'pending',
+                        'nature_id' => $natureId
+                    ];
+
+                    if ($natureId === 1) {
+                        $updateData = array_merge($updateData, [
+                            'message_id' => $data['messageInfo']['originalMessageId'] ?? null,
+                            'original_rrn' => $data['messageInfo']['originalRRN'] ?? null,
+                            'original_stan' => $data['messageInfo']['originalStan'] ?? null,
+                            'original_rtp_id' => $data['messageInfo']['originalRtpId'] ?? null
+                        ]);
+                    } else {
+                        $updateData = array_merge($updateData, [
+                            'message_id' => $data['messageInfo']['messageId'] ?? null,
+                            'original_rrn' => $data['messageInfo']['originalRRN'] ?? null,
+                            'original_stan' => $data['messageInfo']['originalStan'] ?? null,
+                            'original_rtp_id' => $data['messageInfo']['originalRtpId'] ?? null,
+                            'original_instructed_amount' => $data['messageInfo']['originalInstructedAmount'] ?? 0,
+                            'net_amount' => $data['messageInfo']['netAmount'] ?? 0,
+                            'iban' => $data['senderInfo']['iban'] ?? null,
+                            'account_title' => $data['senderInfo']['accountTitle'] ?? null,
+                            'longitude' => $data['senderInfo']['longitude'] ?? null,
+                            'latitude' => $data['senderInfo']['latitude'] ?? null,
+                        ]);
+                    }
+
+                    $existingTransaction->update($updateData);
+
+                    if ($natureId == 2) {
+                        $shipment = Shipment::find($rrn);
+                        if ($shipment) {
+                            $shipment->update([
+                                'received_amount' => $data['messageInfo']['originalInstructedAmount'] ?? 0
+                            ]);
+                        }
+
+                        $delivery_note = DeliveryNote::find($subDept);
+                        if ($delivery_note) {
+                            $delivery_note->increment('one_link_payment_count');
+                        }
+                    }
+                });
+
+                $response = [
+                    "responseCode" => "00",
+                    "responseDesc" => "Processed OK",
+                    "info" => [
+                        "rrn" => $rrn,
+                        "stan" => $stan,
+                        "messageId" => $data['messageInfo']['messageId'] ?? $data['messageInfo']['originalMessageId'],
+                        "merchantID" => $data['messageInfo']['merchantID'] ?? null,
+                        "subDept" => $subDept
+                    ]
                 ];
-            
-                if ($natureId === 1) {
-                    $updateData += [
-                        'message_id' => $data['messageInfo']['originalMessageId'],
-                        'original_rrn' => $data['messageInfo']['originalRRN'],
-                        'original_stan' => $data['messageInfo']['originalStan'],
-                        'original_rtp_id' => $data['messageInfo']['originalRtpId']
-                    ];
-                } else {
-                    $updateData += [
-                        'message_id' => $data['messageInfo']['messageId'],
-                        'original_rrn' => $data['messageInfo']['originalRRN'],
-                        'original_stan' => $data['messageInfo']['originalStan'],
-                        'original_rtp_id' => $data['messageInfo']['originalRtpId'],
-                        'original_instructed_amount' => $data['messageInfo']['originalInstructedAmount'],
-                        'net_amount' => $data['messageInfo']['netAmount'],
-                        'iban' => $data['senderInfo']['iban'],
-                        'account_title' => $data['senderInfo']['accountTitle'],
-                        'longitude' => $data['senderInfo']['longitude'],
-                        'latitude' => $data['senderInfo']['latitude'],
-                    ];
-                }
-            
-                $existingTransaction->update($updateData);
-            });            
-            
-            $response = [
-                "responseCode" => "00",
-                "responseDesc" => "Processed OK",
-                "info" => [
-                    "rrn" => $rrn,
-                    "stan" => $stan,
-                    "messageId" => $data['messageInfo']['messageId'] ?? $data['messageInfo']['originalMessageId'],
-                    "merchantID" => $data['messageInfo']['merchantID'],
-                    "subDept" => $subDept
-                ]
-            ];
-    
-            $status = 200;
-    
-            if ($natureId == 2) {
-                $shipment = Shipment::find($rrn);
-                if ($shipment) {
-                    $shipment->update(['received_amount' => $data['messageInfo']['originalInstructedAmount'] ?? 0]);
-                }
-    
-                $delivery_note = DeliveryNote::find($subDept);
-                if ($delivery_note) {
-                    $delivery_note->increment('one_link_payment_count');
-                }
+                $status = 200;
+            } catch (\Exception $e) {
+                $response = [
+                    "responseCode" => "99",
+                    "responseDesc" => "Processing Error"
+                ];
+                $status = 500;
             }
         } else {
             $response = [
@@ -244,11 +255,12 @@ class OneLinkController extends Controller
             ];
             $status = 404;
         }
-    
+
         $this->oneLinkService->logRequest($logType, $data, $response, $status);
         return response()->json($response, $status);
     }
-    
+
+
     public function notifyMerchant(Request $request)
     {
         $rules = [
@@ -265,7 +277,7 @@ class OneLinkController extends Controller
             'messageInfo.subDept' => 'required|string',
             'messageInfo.status' => 'required|string',
         ];
-        
+
         return $this->processTransaction($request, 'notifyMerchant', $rules, 1);
     }
 
