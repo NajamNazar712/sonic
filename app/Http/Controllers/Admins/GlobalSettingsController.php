@@ -9768,9 +9768,10 @@ class GlobalSettingsController extends Controller
         $origins = City::select('id','name')->where('status',1)->get();
         return view('admin.settings.CRM.add_auto_assign')->with(['origins'=>$origins,'agents' => $agents, 'zones' => $zones, 'case_natures' => $case_natures, 'segments' => $segments, 'shipment_status' => $shipment_status]);
     }
-    public function get_shipper_key() {
-        $shipper_keys = SaleTierTag::join('users as u', 'u.id', 'sale_tier_tags.user_id')->WhereNotNull('kam')->select('u.id', 'u.name')->get();
-        if($shipper_keys){
+    public function get_shipper_key($agent_id) {
+        $shipper_keys = SaleTierTag::join('users as u', 'u.id', 'sale_tier_tags.user_id')->WhereNotNull('kam')
+            ->where('kam',$agent_id)->select('u.id', 'u.name')->get();
+        if($shipper_keys->isNotEmpty()){
             return response()->json(['status' => 1, 'shipper_keys' => $shipper_keys]);
         }else {
             return response()->json(['status' => 0, 'error' => 'No data Found']);
