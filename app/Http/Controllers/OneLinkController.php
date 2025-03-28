@@ -78,6 +78,7 @@ class OneLinkController extends Controller
             $response = $this->oneLinkService->generateDQRCMerchant($data);
             $status = isset($response['error']) ? 'error' : 'success';
             
+            dd($response);
             if (isset($response['responseCode']) && $response['responseCode'] == '00') {
                 OneLinkTransaction::create([
                     'rrn' => $response['rrn'] ?? null,
@@ -257,6 +258,7 @@ class OneLinkController extends Controller
             'messageInfo.subDept' => 'required|string',
             'messageInfo.status' => 'required|string',
         ];
+        
         return $this->processTransaction($request, 'notifyMerchant', $rules, 1);
     }
 
