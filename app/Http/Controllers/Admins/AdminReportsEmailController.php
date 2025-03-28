@@ -3658,6 +3658,7 @@ class AdminReportsEmailController extends Controller
             )
             ->where('delivery_notes.status', 0)
             ->groupBy('delivery_notes.id')
+            ->orderBy('delivery_notes.created_at', 'desc')
         ->get();
 
         $receive_deliveries_report_array = [];
