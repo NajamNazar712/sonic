@@ -40,10 +40,10 @@ class ShipperAccountController extends Controller
 
 
 
-        $users = User::where('status', 3)->whereNull('reactivated_at')->pluck('id')->toArray();;
+        $users = User::where('status', 3)->where('id','!=',46611)->whereNull('reactivated_at')->pluck('id')->toArray();;
 
         if (count($users) > 0) {
-            $shipments = Shipment::where('created_at', '>', $date)->where('user_id','!=',46611)->groupBy('user_id')->pluck('user_id')->toArray();
+            $shipments = Shipment::where('created_at', '>', $date)->groupBy('user_id')->pluck('user_id')->toArray();
 
             $result = array_diff($users, $shipments);
             if (count($result) > 0) {
