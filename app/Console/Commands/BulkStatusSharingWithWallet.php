@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Controllers\FingaIntegrationController;
 use Illuminate\Console\Command;
 use App\Models\StatusSharingWithWallet;
 use App\Jobs\BulkStatusSharingWithWalletJob;
@@ -29,16 +30,21 @@ class BulkStatusSharingWithWallet extends Command
      */
     public function handle()
     {
-
-        $data = StatusSharingWithWallet::
-              join('shipments','shipments.id','status_sharing_with_wallets.shipment_id')
-              ->join('wallet_users','wallet_users.user_id','shipments.user_id')
-                ->leftjoin('finja_log_settlement_records','shipments.id','finja_log_settlement_records.shipment_id')
+//        $api = config('app.FINGA_URL');
+//        $token = FingaIntegrationController::getToken($api);
+        $data = StatusSharingWithWallet::join('shipments as s', 's.id', 'status_sharing_with_wallets.shipment_id')
+            ->join('wallet_users as wu', 'wu.user_id', 's.user_id')
+            ->leftJoin('finja_log_settlement_records as fls', 's.id', 'fls.shipment_id')
             ->where('status_sharing_with_wallets.is_send', 0)
             ->groupBy('status_sharing_with_wallets.shipment_id')
-            ->select(['shipments.*','status_sharing_with_wallets.shipment_id','status_sharing_with_wallets.status_id','finja_log_settlement_records.logged_cod_charges','wallet_users.wallet_id'])
-            ->get();
-        $data->chunk(100)->each(function ($chunkedData){
+            ->select([
+                's.*',
+                'status_sharing_with_wallets.shipment_id',
+                'status_sharing_with_wallets.status_id',
+                'fls.logged_cod_charges',
+                'wu.wallet_id'
+            ])->get();
+        $data->chunk(10)->each(function ($chunkedData){
             BulkStatusSharingWithWalletJob::dispatch($chunkedData->toArray());
         });
 

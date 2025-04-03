@@ -145,7 +145,6 @@ class BulkStatusSharingWithWalletJob implements ShouldQueue
             $payload = [];
 
             $shipment_ids = array_column($this->data, 'shipment_id');
-
             $shipment_log_not_sent = Shipment::leftJoin('finja_log_settlement_records as sac', 'shipments.id', '=', 'sac.shipment_id')
                 ->join('wallet_users as u', function ($join) {
                     $join->on('u.user_id', '=', 'shipments.user_id')
@@ -154,12 +153,12 @@ class BulkStatusSharingWithWalletJob implements ShouldQueue
                 ->where(function ($query) {
                     $query->whereNull('sac.id')
                         ->orWhere('sac.wallet_log_updated', 0);
-                })->where('shipments.id', $shipment_ids)
+                })
+                ->whereIn('shipments.id', $shipment_ids)
                 ->select(['shipments.*', 'u.wallet_id'])
                 ->get()
                 ->keyBy('id')
                 ->toArray();
-
 
             foreach ($this->data as $d) {
                 $shipment_id = $d['shipment_id'];
@@ -176,7 +175,7 @@ class BulkStatusSharingWithWalletJob implements ShouldQueue
                         "amount" => $shipment_log_not_sent[$shipment_id]['amount'],
                         "order_created_date" => $shipment_log_not_sent[$shipment_id]['created_at'],
                     ];
-                    $this->arrival_shipment_logs($logPayload, null,$shipment_log_not_sent[$shipment_id]['id'],null);
+                    $this->arrival_shipment_logs($logPayload, null,$shipment_log_not_sent[$shipment_id]['id']);
                 }
 
 
