@@ -6,6 +6,7 @@ use App\Http\Controllers\Admins\AdminReportsEmailController;
 use App\Http\Controllers\NotificationsController;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class PendingDeliveriesReport extends Command
 {
@@ -40,12 +41,17 @@ class PendingDeliveriesReport extends Command
      */
     public function handle()
     {
+        $setting = DB::table('global_settings')
+        ->where('type', 'pending_deliveries_report_time')
+        ->value('setting_value');
 
-        $date = Carbon::yesterday()->format('Y-m-d');
-        // $response = AdminReportsEmailController::pending_deliveries($date);
-        $response = AdminReportsEmailController::daily_pending_deliveries();
-
-        // NotificationsController::send(110, $date, $response);
-        NotificationsController::send(110, $response);
+        if ($setting == 1) {
+            $date = Carbon::yesterday()->format('Y-m-d');
+            // $response = AdminReportsEmailController::pending_deliveries($date);
+            $response = AdminReportsEmailController::daily_pending_deliveries();
+    
+            // NotificationsController::send(110, $date, $response);
+            NotificationsController::send(110, $response);
+        }
     }
 }

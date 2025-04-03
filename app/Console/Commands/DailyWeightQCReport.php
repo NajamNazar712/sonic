@@ -6,6 +6,7 @@ use App\Http\Controllers\Admins\AdminReportsEmailController;
 use App\Http\Controllers\NotificationsController;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class DailyWeightQCReport extends Command
 {
@@ -30,8 +31,14 @@ class DailyWeightQCReport extends Command
      */
     public function handle()
     {
-        $day = Carbon::yesterday()->toDateString();
-        $response = AdminReportsEmailController::weight_qc_report($day);
-        NotificationsController::send(239, $response);
+        $setting = DB::table('global_settings')
+        ->where('type', 'weight_qc_report_time')
+        ->value('setting_value');
+
+        if ($setting == 1){
+            $day = Carbon::yesterday()->toDateString();
+            $response = AdminReportsEmailController::weight_qc_report($day);
+            NotificationsController::send(239, $response);
+        }
     }
 }

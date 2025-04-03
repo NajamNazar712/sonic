@@ -6,6 +6,7 @@ use App\Http\Controllers\Admins\AdminReportsEmailController;
 use App\Http\Controllers\NotificationsController;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class DailyDeliveryNoteHistory extends Command
 {
@@ -30,8 +31,14 @@ class DailyDeliveryNoteHistory extends Command
      */
     public function handle()
     {
-        $day = Carbon::yesterday()->toDateString();
-        $response = AdminReportsEmailController::delivery_note_history($day);
-        NotificationsController::send(238, $response);
+        $setting = DB::table('global_settings')
+        ->where('type', 'delivery_note_history_report_time')
+        ->value('setting_value');
+
+        if ($setting == 1) {
+            $day = Carbon::yesterday()->toDateString();
+            $response = AdminReportsEmailController::delivery_note_history($day);
+            NotificationsController::send(238, $response);
+        }
     }
 }

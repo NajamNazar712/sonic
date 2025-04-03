@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Http\Controllers\Admins\AdminReportsEmailController;
 use App\Http\Controllers\NotificationsController;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class ReceiveDeliveriesReportNew extends Command
 {
@@ -29,7 +30,13 @@ class ReceiveDeliveriesReportNew extends Command
      */
     public function handle()
     {
-        $response = AdminReportsEmailController::deliveries_receive();
-        NotificationsController::send(236, $response);
+        $setting = DB::table('global_settings')
+        ->where('type', 'receive_deliveries_report_time')
+        ->value('setting_value');
+
+        if ($setting == 1) {
+            $response = AdminReportsEmailController::deliveries_receive();
+            NotificationsController::send(236, $response);
+        }
     }
 }

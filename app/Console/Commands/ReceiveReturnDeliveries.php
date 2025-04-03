@@ -6,6 +6,7 @@ use App\Http\Controllers\Admins\AdminReportsEmailController;
 use App\Http\Controllers\NotificationsController;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class ReceiveReturnDeliveries extends Command
 {
@@ -30,8 +31,15 @@ class ReceiveReturnDeliveries extends Command
      */
     public function handle()
     {
-        $day = Carbon::yesterday()->toDateString();
-        $response = AdminReportsEmailController::return_deliveries_receive($day);
-        NotificationsController::send(237, $response);
+
+        $setting = DB::table('global_settings')
+        ->where('type', 'receive_return_deliveries_report_time')
+        ->value('setting_value');
+
+        if ($setting == 1) {
+            $day = Carbon::yesterday()->toDateString();
+            $response = AdminReportsEmailController::return_deliveries_receive($day);
+            NotificationsController::send(237, $response);
+        }
     }
 }

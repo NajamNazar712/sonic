@@ -609,10 +609,8 @@ class Kernel extends ConsoleKernel
 
         // $schedule->command('email:receivedeliveryreport')->dailyAt('09:00')->runInBackground();
 
-
-        // Fetch settings in a single query
         $settings = DB::table('global_settings')
-        ->whereIn('text', [
+        ->whereIn('type', [
             'pending_deliveries_report_time',
             'receive_deliveries_report_time',
             'receive_return_deliveries_report_time',
@@ -622,10 +620,9 @@ class Kernel extends ConsoleKernel
             'quality_of_service_report_time',
             'quality_of_service_report_other_time'
         ])
-        ->pluck('setting_value', 'text')
-        ->toArray(); // Convert to an array for easier access
+        ->get()
+        ->keyBy('type');
 
-        // Command list mapped to their corresponding settings
         $commands = [
             'email:daily_received_deliveries_report' => 'receive_deliveries_report_time',
             'email:daily_return_received_deliveries_report' => 'receive_return_deliveries_report_time',
@@ -638,9 +635,9 @@ class Kernel extends ConsoleKernel
         ];
 
         foreach ($commands as $command => $settingKey) {
-            // Ensure the setting exists and is enabled (1), and retrieve the time
-            if (!empty($settings[$settingKey]) && $settings[$settingKey] != '0') {
-                $schedule->command($command)->dailyAt($settings[$settingKey])->runInBackground();
+            if (isset($settings[$settingKey]) && $settings[$settingKey]->setting_value == 1) {
+                $time = Carbon::createFromFormat('h:i A', $settings[$settingKey]->text)->format('H:i');
+                $schedule->command($command)->dailyAt($time)->runInBackground();
             }
         }
 
