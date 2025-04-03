@@ -48,10 +48,10 @@ class SSRController extends Controller
         $arrival_from = Carbon::parse($request->arrival_time_from)->format('H:i:s');
         $arrival_to = Carbon::parse($request->arrival_time_to)->format('H:i:s');
 
-        $from = $request->get('search_date_from');
+        $from = $request->get('search_date_from') ?? $request->get('search_date_from_delivered_return');
         $from = Carbon::parse($from)->toDateTimeString();
         $to = $request->get('search_date_to');
-        $to = Carbon::parse($to)->toDateTimeString();
+        $to = Carbon::parse($to)->toDateTimeString() ?? $request->get('search_date_to_delivered_return');
 
         $from = str_replace('00:00:00', $arrival_from, $from);
         $to = str_replace('00:00:00', $arrival_to, $to);
@@ -67,6 +67,14 @@ class SSRController extends Controller
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->join('cities as h', 'dc.hub_id', '=', 'h.id')
             ->leftJoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
+            ->Join('shipments_journey as sjs', function ($join) use ($connection) {
+                $join->on('sjs.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'sjs.id',
+                        '=',
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id IN (14,25,30,36,37,2) and verification = 0)')
+                    );
+            })
             ->leftJoin('shipments_journey as sj', function ($join) use ($connection) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where(
@@ -100,7 +108,7 @@ class SSRController extends Controller
                     ->where(
                         'dr.id',
                         '=',
-                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,25,30,36,37) and shipments_journey.verification = 1)')
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In (14,25,30,36,37) and shipments_journey.verification = 1)')
                     );
             })
 
@@ -134,7 +142,7 @@ class SSRController extends Controller
             ->select('shipments.id as shipment_id', 'shipments.tracking_number', 'shipments.tracking_number as tracking_number_link', 'u.id as account_no', 'u.name as shipper', 'sj.created_at as arrival_date', 'shipments.actual_weight', 'shipments.weight_charges', 'shipments.cash_handling_charges', 'shipments.insurance_charges', 'shipments.fuel_surcharge', 'shipments.packaging_material_charges', 'pps.gst as p_gst', 'pps.charges as p_total_charges', 'dps.amount as d_collection_amount', 'dps.gst as d_gst', 'dps.charges as d_total_charges', 'dps.payable as d_net_payable', 'sm.id as shipping_mode_id', 'shipments.chargeable_weight', 'z.name as zone', 'oc.id as origin_city_id', 'oc.name as origin_city_name', 'dc.id as destination_city_id', 'dc.name as destination_city_name', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst', 'shipments.packaging_charges', 'dr.shipper_status_id as dr_status_id', 'sz.name as shipper_zone', 'dr.created_at as delivered_or_returned')
             ->whereNotIn('shipments.shipper_status_id', [1, 17])
             ->whereNotIn('u.id', [8761, 9358])
-            ->whereBetween('sj.created_at', [$from, $to]);
+            ->whereBetween('sjss.created_at', [$from, $to]);
 
         $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
         if ($from_id->exists()) {
