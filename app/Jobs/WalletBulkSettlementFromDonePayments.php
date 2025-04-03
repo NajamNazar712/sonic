@@ -85,7 +85,6 @@ class WalletBulkSettlementFromDonePayments implements ShouldQueue
                 $shipmentId = $dps->shipment_id;
                 $shipment = Shipment::find($shipmentId);
                 if ($dps->wallet_action_bid == 1 && $dps->wallet_settlement_updated == 1) {
-                    
                     $dps->wallet_action_bid =  self::run_log_and_settle($dps,$shipment);
                 }
  				
@@ -285,18 +284,18 @@ class WalletBulkSettlementFromDonePayments implements ShouldQueue
                 $walletLogUpdates = [];
                 $shipmentIds = [];
                 $settlement = []; 
-                foreach ($settlementPayload as $key => $payload) {
+                foreach ($settlementPayload as $shipment_id => $payload) {
 
-                    $walletLogUpdates[$key] = $payload['wallet_log_updated'];
-                    //$shipmentIds[$payload['shipment_id']] = $key;
+                    $walletLogUpdates[$shipment_id] = $payload['wallet_log_updated'];
+                    //$shipmentIds[$payload['shipment_id']] = $shipment_id;
                     $shipmentIds[$payload['shipment_id']] = [
-                        'shipment_id' => $key,
+                        'shipment_id' => $shipment_id,
                         'dps_id' => $payload['dps_id'],
                         'dps_type' => $payload['dps_type']
                     ];
-                    unset($settlementPayload[$key]['wallet_log_updated'],$settlementPayload[$key]['dps_id'],$settlementPayload[$key]['dps_type']);
+                    unset($settlementPayload[$shipment_id]['wallet_log_updated'],$settlementPayload[$shipment_id]['dps_id'],$settlementPayload[$shipment_id]['dps_type']);
 
-                    FingaIntegrationController::apiLog(21, 1, $payload, $key, null, $batch_id);
+                    FingaIntegrationController::apiLog(21, 1, $payload, $shipment_id, null, $batch_id);
                 }
                 $response = Http::withHeaders([
                     'accept' => 'application/json',
@@ -361,16 +360,16 @@ class WalletBulkSettlementFromDonePayments implements ShouldQueue
             if ($token) {
                 $shipmentIds = [];
                 $logCharge = []; 
-                foreach ($logChargePayload as $key => $payload) {
-                    $shipmentIds[$payload['shipment_id']] = $key;
+                foreach ($logChargePayload as $shipment_id => $payload) {
+//                    $shipmentIds[$payload['shipment_id']] = $shipment_id;
 
                     $shipmentIds[$payload['shipment_id']] = [
-                        'shipment_id' => $key,
+                        'shipment_id' => $shipment_id,
                         'dps_id' => $payload['dps_id'],
                         'dps_type' => $payload['dps_type']
                     ];
-                    unset($logChargePayload[$key]['dps_id'],$logChargePayload[$key]['dps_type']);
-                    FingaIntegrationController::apiLog(19, 1, $payload, $key, null, $batch_id);
+                    unset($logChargePayload[$shipment_id]['dps_id'],$logChargePayload[$shipment_id]['dps_type']);
+                    FingaIntegrationController::apiLog(19, 1, $payload, $shipment_id, null, $batch_id);
                 }
                 $response = Http::withHeaders([
                     'accept' => 'application/json',
@@ -407,7 +406,7 @@ class WalletBulkSettlementFromDonePayments implements ShouldQueue
                 } else {
                     $body = $response->getBody();
                     $body = json_decode($body,true);
-                    FingaIntegrationController::apiLog(20, 'error', $body , $shipmentId, null, $batch_id);
+                    FingaIntegrationController::apiLog(20, 'error', $body , null, null, $batch_id);
                     
                 }
 
