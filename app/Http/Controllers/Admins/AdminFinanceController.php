@@ -143,7 +143,7 @@ use App\Http\Models\WalletUser;
 use App\Http\Controllers\FingaIntegrationController;
 use Illuminate\Support\Facades\Http;
 use App\Jobs\CODAmountChangeSendToWallet;
-
+use App\Jobs\WalletBulkSettlementFromDonePayments;
 
 class AdminFinanceController extends Controller
 {
@@ -21481,7 +21481,7 @@ class AdminFinanceController extends Controller
         $done_payment = DonePayment::where('id',  $request->id)->update(['status' => 3, 'status_updated_at' => Carbon::now()]);
 
         if($done_payment) {
-            WalletSettlementFromDonePayments::dispatch($request->id,  Auth::id());
+            WalletBulkSettlementFromDonePayments::dispatch($request->id,  Auth::id());
         }
 
         return response()->json(['status'=> 1 , 'success' => 'Wallet Settlement Request sent.!']);
