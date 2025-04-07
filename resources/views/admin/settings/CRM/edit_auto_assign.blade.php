@@ -240,6 +240,11 @@
                         $('#shipper_key_id').find('option').filter(function() {
                             return $.trim($(this).text()) === '';
                         }).remove();
+                    }else {
+                        toastr.error('No shipper against this KAM', 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
                     }
                 })
             }
@@ -596,9 +601,26 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
-                    $('#agent_id').prop('disabled', false);
-                    form.submit();
+                    let role_id = $('#agent_id').find(':selected').data('role_id') || 0; // Ensure role_id is a number
+                    if ([43, 67, 75, 115].includes(role_id)){
+                        let shipper_ids = $('#shipper_key_id').val();
+                        if(shipper_ids!=''){
+                            form.submit();
+                        }else {
+                            toastr.error('No shipper against this KAM', 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                            return false;
+                        }
+                    } else {
+                        form.submit();
+                    }
                 }
+                // submitHandler: function(form) {
+                //     $('#agent_id').prop('disabled', false);
+                //     form.submit();
+                // }
             });
 
             $("#crm_agent_assign .checkAll").on('click',function (){
