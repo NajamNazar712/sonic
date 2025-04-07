@@ -607,7 +607,7 @@
                         if(shipper_ids!=''){
                             form.submit();
                         }else {
-                            toastr.error('No shipper against this KAM', 'Error!', {
+                            toastr.error('Select At least one shipper', 'Error!', {
                                 positionClass: 'toast-top-center',
                                 containerId: 'toast-top-center'
                             });
