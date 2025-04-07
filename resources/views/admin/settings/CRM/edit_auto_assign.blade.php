@@ -222,10 +222,11 @@
     <script>
         $(document).ready(function() {
 
-            function getShipperKey() {
-
+            function getShipperKey(agent_id) {
+                let url = "{{ route('admin.settings.auto_assigning.get_shipper_key', ['agent_id' => '__AGENT_ID__']) }}";
+                url = url.replace('__AGENT_ID__', agent_id);
                 $.ajax({
-                    url:'{!! route("admin.settings.auto_assigning.get_shipper_key") !!}',
+                    url:url,
                     method: 'GET'
                 }).done(function (data) {
                     if(data.status == 1){
@@ -450,11 +451,12 @@
                 $('#shipper_non_key_id').empty();
 
                 var role_id = $(this).find(':selected').data('role_id');
+                var agent_id = $(this).val();
                 if(role_id==28 || role_id==37){
                     getShipperNonKey()
 
                 } else if (role_id==43 || role_id==67 || role_id==75 || role_id==115) {
-                    getShipperKey();
+                    getShipperKey(agent_id);
                 }
 
             });
