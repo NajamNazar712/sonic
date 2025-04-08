@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Models\Admin\ShipperInterceptExclude;
+use App\Jobs\HandleShipmentIntercept;
 use Illuminate\Support\Facades\DB;
 
 class ShipperInterceptReBookController extends Controller
@@ -73,7 +74,7 @@ class ShipperInterceptReBookController extends Controller
                 $consignee_cities = $consignee_cities->orderBy('c.name')
                     ->groupBy('c.name')
                     ->get();
-//        $consignee_cities = City::where('status', 1)->where('pickup',1)->whereNotNull('zone_id')->orderBy('name')->get();
+                // $consignee_cities = City::where('status', 1)->where('pickup',1)->whereNotNull('zone_id')->orderBy('name')->get();
                 return view('client.intercept.index')->with(['shipment' => $shipment, 'consignee_cities' => $consignee_cities, 'intercept_type' => $intercept_type]);
             }
             return redirect()->back()->with('error', 'Shipment not found!');
@@ -96,9 +97,7 @@ class ShipperInterceptReBookController extends Controller
         $shipment = Shipment::find($request->shipment_id);
         $user_id = session('user_id');
         $intercept_type = $request->consignee;
-        
         $shipment_status = $shipment->status_shipper->name;
-
         
         // if ($shipment['shipper_status_id'] == 12) {
             if ($shipment['shipper_status_id'] == 65 || $shipment['shipper_status_id'] == 12) {
@@ -126,6 +125,20 @@ class ShipperInterceptReBookController extends Controller
                     $s_amount = str_replace(",", "", "$request->amount");
                     $amount = (int)$s_amount;
 
+                    // HandleShipmentIntercept::dispatch(
+                    //     $amount,
+                    //     $request->shipment_id,
+                    //     $user_id,
+                    //     $intercept_type,
+                    //     $request->consignee_city,
+                    //     $request->consignee_name,
+                    //     $request->consignee_address,
+                    //     $request->consignee_phone_number_1,
+                    //     $request->consignee_phone_number_2,
+                    //     $request->consignee_email,
+                    //     $request
+                    // );
+
                     //Different Consignee
                     if ($intercept_type == 1){
                         $city_area_id = ShipperShipmentBookController::consignee_address_area_intercept($request->consignee_city,$request->consignee_address);
@@ -149,7 +162,18 @@ class ShipperInterceptReBookController extends Controller
                         $shipment->intercepted = 1;
                         $shipment->save();
 
-                        ShipmentsJourneyController::add($request->shipment_id, 54, 54, NULL, NULL, $user_id, NULL);
+                        // do not change the order
+                        $shipment_journey_data = [
+                            $request->shipment_id, 
+                            54, 
+                            54, 
+                            NULL, 
+                            NULL, 
+                            $user_id, 
+                            NULL
+                        ];
+                        HandleShipmentIntercept::dispatch($shipment_journey_data);
+                        // ShipmentsJourneyController::add($request->shipment_id, 54, 54, NULL, NULL, $user_id, NULL);
 
                         //Updating New RcpAssigned Tables
                         // $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id)->where('assigned_status', 1)->where('shipment_status', 0);
@@ -307,7 +331,6 @@ class ShipperInterceptReBookController extends Controller
                         }
                         
                     }
-
 
                     return redirect()->route('cod.return.pending.index')->with('success', 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment['tracking_number']);
                 }
