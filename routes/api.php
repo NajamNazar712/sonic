@@ -146,7 +146,7 @@ use Illuminate\Http\Request;
         Route::prefix('oneLink')->name('oneLink.')->group(function () {
             Route::post('verifyDeliveredShipmentDQRCMerchant', 'OneLinkController@verifyDeliveredShipmentDQRCMerchant')->name('verifyDeliveredShipmentDQRCMerchant');
             Route::post('notifyMerchant', 'OneLinkController@notifyMerchant')->name('notifyMerchant');
-            Route::post('paymentNotification', 'OneLinkController@paymentNotification')->name('paymentNotification');
+            Route::post('1Link/paymentNotification', 'OneLinkController@paymentNotification')->name('paymentNotification');
         });
 
         //Current
