@@ -125,20 +125,6 @@ class ShipperInterceptReBookController extends Controller
                     $s_amount = str_replace(",", "", "$request->amount");
                     $amount = (int)$s_amount;
 
-                    // HandleShipmentIntercept::dispatch(
-                    //     $amount,
-                    //     $request->shipment_id,
-                    //     $user_id,
-                    //     $intercept_type,
-                    //     $request->consignee_city,
-                    //     $request->consignee_name,
-                    //     $request->consignee_address,
-                    //     $request->consignee_phone_number_1,
-                    //     $request->consignee_phone_number_2,
-                    //     $request->consignee_email,
-                    //     $request
-                    // );
-
                     //Different Consignee
                     if ($intercept_type == 1){
                         $city_area_id = ShipperShipmentBookController::consignee_address_area_intercept($request->consignee_city,$request->consignee_address);
