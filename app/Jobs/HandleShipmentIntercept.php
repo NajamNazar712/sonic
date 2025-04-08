@@ -43,8 +43,8 @@ class HandleShipmentIntercept implements ShouldQueue
     {
         ShipmentsJourneyController::add(
             $this->shipmentJourneyData[0], // shipment_id
-            $this->shipmentJourneyData[1], // param2 (54)
-            $this->shipmentJourneyData[2], // param3 (54)
+            $this->shipmentJourneyData[1], // param2 (54 or 55)
+            $this->shipmentJourneyData[2], // param3 (54 or 55)
             $this->shipmentJourneyData[3], // param4 (NULL)
             $this->shipmentJourneyData[4], // param5 (NULL)
             $this->shipmentJourneyData[5], // user_id

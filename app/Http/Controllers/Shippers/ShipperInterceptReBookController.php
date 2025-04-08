@@ -257,7 +257,18 @@ class ShipperInterceptReBookController extends Controller
                         $shipment->intercepted = 1;
                         $shipment->save();
 
-                        ShipmentsJourneyController::add($request->shipment_id, 55, 55, NULL, NULL, $user_id, NULL);
+                        // do not change the order
+                        $shipment_journey_data = [
+                            $request->shipment_id, 
+                            55, 
+                            55, 
+                            NULL, 
+                            NULL, 
+                            $user_id, 
+                            NULL
+                        ];
+                        HandleShipmentIntercept::dispatch($shipment_journey_data);
+                        // ShipmentsJourneyController::add($request->shipment_id, 55, 55, NULL, NULL, $user_id, NULL);
 
                         //Updating New RcpAssigned Tables 
                         // $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id)->where('assigned_status', 1)->where('shipment_status', 0);
