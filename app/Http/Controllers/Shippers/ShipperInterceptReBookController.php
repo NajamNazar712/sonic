@@ -172,7 +172,7 @@ class ShipperInterceptReBookController extends Controller
                             $user_id, 
                             NULL
                         ];
-                        HandleShipmentIntercept::dispatch($shipment_journey_data);
+                        HandleShipmentIntercept::dispatchNow($shipment_journey_data);
                         // ShipmentsJourneyController::add($request->shipment_id, 54, 54, NULL, NULL, $user_id, NULL);
 
                         //Updating New RcpAssigned Tables
@@ -267,7 +267,7 @@ class ShipperInterceptReBookController extends Controller
                             $user_id, 
                             NULL
                         ];
-                        HandleShipmentIntercept::dispatch($shipment_journey_data);
+                        HandleShipmentIntercept::dispatchNow($shipment_journey_data);
                         // ShipmentsJourneyController::add($request->shipment_id, 55, 55, NULL, NULL, $user_id, NULL);
 
                         //Updating New RcpAssigned Tables 
