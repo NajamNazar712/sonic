@@ -717,7 +717,7 @@ class AdminNotificationsController extends Controller
 
             $details['fields'] = ['date','preview'];
         }
-        else if ($id == 110 || $id == 111)
+        else if (/* $id == 110 || */ $id == 111)
         {
             $details['receiver'] = ['uzair.anees@trax.pk','shahbaz.abbasi@trax.pk'];
 
@@ -1275,6 +1275,12 @@ class AdminNotificationsController extends Controller
             $details['receiver'] = [''];
 
             $details['fields'] = [''];
+        }
+
+        else if ($id == 110 || $id == 226 || $id == 236 || $id == 237 || $id == 238 || $id == 239 || $id == 240)
+        {
+            $details['receiver'] = ['shahbaz.abbasi@trax.pk', 'mansoor.ahmad@trax.pk'];
+            $details['fields'] = ['link'];
         }
 
         return $details;
