@@ -157,7 +157,7 @@ trait FinSurgentLogTrait
                     'accept' => 'application/json',
                     'Authorization' => "Bearer " . $token,
 
-                ])->post($api . 'transactions/log/payment/bulk', $requestPayload);
+                ])->connectTimeout(120)->timeout(120)->post($api . 'transactions/log/payment/bulk', $requestPayload);
 
                 if ($response->successful()) {
 
