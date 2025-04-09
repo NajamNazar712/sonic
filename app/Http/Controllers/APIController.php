@@ -2312,11 +2312,15 @@ class APIController extends Controller
             $shipment = Shipment::where('tracking_number', $tracking_number)->first();
 
             $shipment_payment_journey = $shipment->shipment_payment_journey;
-
             if (!$shipment_payment_journey->isEmpty()) {
                 $current_payment_status = $shipment_payment_journey->first()->status->name;
-
-                return response()->json(['status' => 0, 'message' => 'Payment Status of Shipment #' . $tracking_number, 'current_payment_status' => $current_payment_status]);
+                $wallet_charges = ShipmentAdditionalCharges::fetch_wallet_charges($shipment->id);
+                return response()->json([
+                    'status' => 0, 
+                    'message' => 'Payment Status of Shipment #' . $tracking_number, 
+                    'current_payment_status' => $current_payment_status,
+                    'wallet_charges' => $wallet_charges
+                ]);
             } else {
                 return response()->json(['status' => 1, 'message' => 'No Payment Status']);
             }
