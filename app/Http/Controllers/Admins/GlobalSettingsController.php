@@ -10644,4 +10644,92 @@ class GlobalSettingsController extends Controller
         );
         return redirect()->back()->with('success', 'Zone & Margin Column Added!');
     }
+
+    public function email_delivery_time_index() {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 824);
+    
+        $settings = GlobalSettings::whereIn('type', [
+            'pending_deliveries_report_time', 
+            'quality_of_service_report_time',
+            'quality_of_service_report_other_time',
+            'receive_deliveries_report_time',
+            'receive_return_deliveries_report_time',
+            'delivery_note_history_report_time',
+            'weight_qc_report_time',
+            'overall_sales_report_time'
+        ])->get()->keyBy('type');
+    
+        $pending_deliveries_report_time = $settings['pending_deliveries_report_time']->text ?? null;
+        $quality_of_service_report_time = $settings['quality_of_service_report_time']->text ?? null;
+        $quality_of_service_report_other_time = $settings['quality_of_service_report_other_time']->text ?? null;
+        $receive_deliveries_report_time = $settings['receive_deliveries_report_time']->text ?? null;
+        $receive_return_deliveries_report_time = $settings['receive_return_deliveries_report_time']->text ?? null;
+        $delivery_note_history_report_time = $settings['delivery_note_history_report_time']->text ?? null;
+        $weight_qc_report_time = $settings['weight_qc_report_time']->text ?? null;
+        $overall_sales_report_time = $settings['overall_sales_report_time']->text ?? null;
+    
+        $pending_deliveries_report_toggle = $settings['pending_deliveries_report_time']->setting_value ?? 0;
+        $quality_of_service_report_toggle = $settings['quality_of_service_report_time']->setting_value ?? 0;
+        $receive_deliveries_toggle = $settings['receive_deliveries_report_time']->setting_value ?? 0;
+        $receive_return_deliveries_report_toggle = $settings['receive_return_deliveries_report_time']->setting_value ?? 0;
+        $delivery_note_history_report_toggle = $settings['delivery_note_history_report_time']->setting_value ?? 0;
+        $weight_qc_report_toggle = $settings['weight_qc_report_time']->setting_value ?? 0;
+        $overall_sales_report_toggle = $settings['overall_sales_report_time']->setting_value ?? 0;
+    
+        return view('admin.settings.email_setting.index', compact(
+            'pending_deliveries_report_time', 
+            'quality_of_service_report_time', 
+            'quality_of_service_report_other_time',
+            'receive_deliveries_report_time',
+            'receive_return_deliveries_report_time',
+            'delivery_note_history_report_time',
+            'weight_qc_report_time',
+            'overall_sales_report_time',
+            'pending_deliveries_report_toggle', 
+            'quality_of_service_report_toggle',
+            'receive_deliveries_toggle',
+            'receive_return_deliveries_report_toggle',
+            'delivery_note_history_report_toggle',
+            'weight_qc_report_toggle',
+            'overall_sales_report_toggle'
+        ));
+    }
+
+    public function email_delivery_time_update(Request $request) {
+        $settings = [
+            'pending_deliveries_report_time' => $request->pending_deliveries_report_time,
+            'quality_of_service_report_time' => $request->quality_of_service_report_time,
+            'quality_of_service_report_other_time' => $request->quality_of_service_report_other_time,
+            'receive_deliveries_report_time' => $request->receive_deliveries_report_time,
+            'receive_return_deliveries_report_time' => $request->receive_return_deliveries_report_time,
+            'delivery_note_history_report_time' => $request->delivery_note_history_report_time,
+            'weight_qc_report_time' => $request->weight_qc_report_time,
+            'overall_sales_report_time' => $request->overall_sales_report_time,
+        ];
+    
+        $toggles = [
+            'pending_deliveries_report_time' => $request->pending_deliveries_report_toggle == 'on' ? 1 : 0,
+            'quality_of_service_report_time' => $request->quality_of_service_toggle == 'on' ? 1 : 0, // Used for both times
+            'quality_of_service_report_other_time' => $request->quality_of_service_toggle == 'on' ? 1 : 0, // Ensure same toggle
+            'receive_deliveries_report_time' => $request->receive_delivieries_toggle == 'on' ? 1 : 0,
+            'receive_return_deliveries_report_time' => $request->receive_return_deliveries_toggle == 'on' ? 1 : 0,
+            'delivery_note_history_report_time' => $request->delivery_note_history_toggle == 'on' ? 1 : 0,
+            'weight_qc_report_time' => $request->weight_qc_toggle == 'on' ? 1 : 0,
+            'overall_sales_report_time' => $request->overall_sales_toggle == 'on' ? 1 : 0,
+        ];
+    
+        foreach ($settings as $type => $text) {
+            if (!empty($text)) {
+                GlobalSettings::updateOrCreate(
+                    ['type' => $type], 
+                    ['text' => $text, 'setting_value' => $toggles[$type]]
+                );
+            } else {
+                GlobalSettings::where('type', $type)->update(['setting_value' => $toggles[$type]]);
+            }
+        }
+    
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+    
 }

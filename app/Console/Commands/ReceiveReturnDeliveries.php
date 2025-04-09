@@ -8,47 +8,38 @@ use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
-class ReceiveDeliveriesReport extends Command
+class ReceiveReturnDeliveries extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'email:receivedeliveryreport';
+    protected $signature = 'email:daily_return_received_deliveries_report';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Receive Delivery Report Link';
-
-    /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
+    protected $description = 'Daily Report for Return Received Deliveries';
 
     /**
      * Execute the console command.
      *
-     * @return mixed
+     * @return int
      */
     public function handle()
     {
+
         $setting = DB::table('global_settings')
-        ->where('type', 'receive_deliveries_report_time')
+        ->where('type', 'receive_return_deliveries_report_time')
         ->value('setting_value');
 
         if ($setting == 1) {
-            $date = Carbon::yesterday()->format('Y-m-d');
-            $response = AdminReportsEmailController::receive_deliveries($date);
-            NotificationsController::send(111, $date, $response);
+            $day = Carbon::yesterday()->toDateString();
+            $response = AdminReportsEmailController::return_deliveries_receive($day);
+            NotificationsController::send(237, $response);
         }
     }
 }
