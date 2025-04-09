@@ -132,6 +132,7 @@
                             <th class="border-primary border-darken-1">Weight Input by Shipper</th>
                             <th class="border-primary border-darken-1">Arrival Weight</th>
                             <th class="border-primary border-darken-1">Weight Diffrence (Arrival Weight vs Shipper Weight)</th>
+                            <th class="border-primary border-darken-1">Replacement Weight</th>
                             <!-- <th class="border-primary border-darken-1">Weight Input by Shipper (Roundup to shipper/ rates range)</th>
                             <th class="border-primary border-darken-1">Arrival Weight (As per shipper/ rate range roundup)</th>
                             <th class="border-primary border-darken-1">Weight Diffrence (Shipper Rate Range vs Arrival Rate Range)</th>
@@ -318,6 +319,8 @@
                             head.push('Weight Input by Shipper');
                             head.push('Arrival Weight');
                             head.push('Weight Diffrence (Arrival Weight vs Shipper Weight)');
+                            head.push('Replacement Weight');
+
                             // head.push('Weight Input by Shipper (Roundup to shipper/ rates range)');
                             // head.push('Arrival Weight (As per shipper/ rate range roundup)');
                             // head.push('Weight Diffrence (Shipper Rate Range vs Arrival Rate Range');
@@ -349,6 +352,7 @@
                                 row.push(values.estimated_weight);
                                 row.push(values.actual_weight);
                                 row.push(values.difference);
+                                row.push(values.replacement_weight);
                                 // row.push(values.range_down_shipper_weight);
                                 // row.push(values.range_down_arrival_weight)
                                 // row.push(values.range_difference);
@@ -422,6 +426,7 @@
                     { data:'estimated_weight' ,name: 'shipments.estimated_weight', class: 'align-middle text-center estimated_weight'},
                     { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle text-center actual_weight'},
                     { data:'difference' ,name: 'difference', class: 'align-middle text-center difference', orderable: false, searchable: false},
+                    { data:'replacement_weight' ,name: 'replacement_weight', class: 'align-middle text-center replacement_weight', orderable: false, searchable: false},
                     // { data:'range_down_shipper_weight' ,name: 'sw.range_down_shipper_weight', class: 'align-middle text-center range_down_shipper_weight'},
                     // { data:'range_down_arrival_weight' ,name: 'sw.range_down_arrival_weight', class: 'align-middle text-center range_down_arrival_weight'},
                     // { data:'range_difference' ,name: 'range_difference', class: 'align-middle text-center range_difference', orderable: false, searchable: false},

@@ -805,6 +805,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/upload_pod', 'Admins\DeliveryController@upload_pod')->name('upload_pod');
 
             Route::post('fake_status_shipments', 'Admins\DeliveryController@fake_status_shipments')->name('fake_status_shipments');
+
+
+            Route::get('/replacement_weight_check', 'Admins\DeliveryController@replacement_weight_check')->name('replacement_weight_check');
+
+
         });
         Route::prefix('completed')->name('completed.')->group(function () {
             Route::get('', 'Admins\DeliveryController@completed_deliveries_index')->name('index');

@@ -170,6 +170,18 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\ApolloShipmentFetchStatus',
         '\App\Console\Commands\FinSurgentSonicPaymentSharing',
         '\App\Console\Commands\FailedStatusRePushToWallet',
+        '\App\Console\Commands\RerunWalletSettlement',
+        '\App\Console\Commands\BulkStatusSharingWithWallet',
+        
+
+        'App\Console\Commands\ReceiveDeliveriesReportNew',
+        'App\Console\Commands\ReceiveReturnDeliveries',
+        'App\Console\Commands\DailyDeliveryNoteHistory',
+        'App\Console\Commands\DailyWeightQCReport',
+        'App\Console\Commands\DailyOverAllSalesReport',
+        'App\Console\Commands\QsrEmail',
+        'App\Console\Commands\PendingDeliveriesReport',
+        'App\Console\Commands\ReceiveDeliveriesReport',
 
         'App\Console\Commands\ReceiveDeliveriesReportNew',
         'App\Console\Commands\ReceiveReturnDeliveries',
@@ -594,9 +606,12 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('update:shipper_segment_logs')->everyFiveMinutes()->runInBackground();
         $schedule->command('apollo:fetch-shipments-status')->everyFiveMinutes()->runInBackground();
-        $schedule->command('fingsurgent:sonic-payment')->hourly()->runInBackground();
-        $schedule->command('status:re-push-wallet')->hourly()->runInBackground();
-        $schedule->command('rerun:wallet_log_re_push')->hourly()->runInBackground();
+        $schedule->command('fingsurgent:sonic-payment')->hourly()->runInBackground(); //wallet
+//        $schedule->command('status:re-push-wallet')->hourly()->runInBackground(); // wallet no need now after bulk status work
+        $schedule->command('rerun:wallet_log_re_push')->hourly()->runInBackground(); // wallet
+        $schedule->command('rerun_wallet_settlement')->everySixHours()->runInBackground(); //wallet
+        $schedule->command('bulk:status-sharing-wallet')->withoutOverlapping()->everyFiveMinutes()->runInBackground();
+        
 
         // $schedule->command('email:daily_received_deliveries_report')->dailyAt('09:00')->runInBackground();
         // $schedule->command('email:daily_return_received_deliveries_report')->dailyAt('09:00')->runInBackground();
