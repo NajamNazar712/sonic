@@ -1004,10 +1004,10 @@ class AdminCRMController extends Controller
                     $tag_check = Auth::user()->role_id;
                     $tag = AdminRole::where('id', $tag_check)->first();
                     $tag_permission = $tag->department_id;
-                    $tagged_name = AdminDepartment::find($tagged['tagged_id'])->name;
+                    $tagged_name = AdminDepartment::find($tagged['tagged_id'])->name ?? '-';
                 }
                 else if($tagged['crm_request_tagging_type_id'] == 2){
-                    $tagged_name = Admin::find($tagged['tagged_id'])->name;
+                    $tagged_name = Admin::find($tagged['tagged_id'])->name ?? '-';
                 }
             }
 
@@ -2548,10 +2548,10 @@ class AdminCRMController extends Controller
                 if($crm_tagging){
                     if($crm_tagging->crm_request_tagging_type_id == 1){
 
-                        $tagged_name = AdminDepartment::find($crm_tagging->tagged_id)->name;
+                        $tagged_name = AdminDepartment::find($crm_tagging->tagged_id)->name ?? '-';
                         return $tagged_name;
                     }elseif($crm_tagging->crm_request_tagging_type_id == 2){
-                        $tagged_name = Admin::find($crm_tagging->tagged_id)->name;
+                        $tagged_name = Admin::find($crm_tagging->tagged_id)->name ?? '-';
                         return $tagged_name;
 
                     }else{
@@ -3250,10 +3250,10 @@ class AdminCRMController extends Controller
                 if($crm_tagging){
                     if($crm_tagging->crm_request_tagging_type_id == 1){
 
-                        $tagged_name = AdminDepartment::find($crm_tagging->tagged_id)->name;
+                        $tagged_name = AdminDepartment::find($crm_tagging->tagged_id)->name ?? '';
                         return $tagged_name;
                     }elseif($crm_tagging->crm_request_tagging_type_id == 2){
-                        $tagged_name = Admin::find($crm_tagging->tagged_id)->name;
+                        $tagged_name = Admin::find($crm_tagging->tagged_id)->name  ?? '';
                         return $tagged_name;
 
                     }else{
@@ -3282,7 +3282,7 @@ class AdminCRMController extends Controller
                 if($crm_tagging){
                     $admin = Admin::find($crm_tagging->tagged_id);
                     if($admin){
-                        return $admin->name;
+                        return $admin->name  ?? '';
                     }else{
                         return '-';
                     }
@@ -3306,7 +3306,7 @@ class AdminCRMController extends Controller
                 if($crm_tagging){
                     $admin = Admin::find($crm_tagging->tagged_id);
                     if($admin){
-                        return $admin->name;
+                        return $admin->name  ?? '';
                     }else{
                         return '-';
                     }

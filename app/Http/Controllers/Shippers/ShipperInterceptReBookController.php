@@ -27,6 +27,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Models\Admin\ShipperInterceptExclude;
+use App\Jobs\HandleShipmentIntercept;
+use Illuminate\Support\Facades\DB;
 
 class ShipperInterceptReBookController extends Controller
 {
@@ -72,7 +74,7 @@ class ShipperInterceptReBookController extends Controller
                 $consignee_cities = $consignee_cities->orderBy('c.name')
                     ->groupBy('c.name')
                     ->get();
-//        $consignee_cities = City::where('status', 1)->where('pickup',1)->whereNotNull('zone_id')->orderBy('name')->get();
+                // $consignee_cities = City::where('status', 1)->where('pickup',1)->whereNotNull('zone_id')->orderBy('name')->get();
                 return view('client.intercept.index')->with(['shipment' => $shipment, 'consignee_cities' => $consignee_cities, 'intercept_type' => $intercept_type]);
             }
             return redirect()->back()->with('error', 'Shipment not found!');
@@ -95,15 +97,16 @@ class ShipperInterceptReBookController extends Controller
         $shipment = Shipment::find($request->shipment_id);
         $user_id = session('user_id');
         $intercept_type = $request->consignee;
-        
         $shipment_status = $shipment->status_shipper->name;
-
         
         // if ($shipment['shipper_status_id'] == 12) {
             if ($shipment['shipper_status_id'] == 65 || $shipment['shipper_status_id'] == 12) {
             if ($shipment['consignee_city_id'] != $request->consignee_city || $shipment['consignee_name'] != $request->consignee_name || $shipment['consignee_address'] != $request->consignee_address || $shipment['consignee_phone_number_1'] != $request->consignee_phone_number_1 || $shipment['consignee_phone_number_2'] != $request->consignee_phone_number_2 || $shipment['consignee_email'] != $request->consignee_email || $shipment['amount'] != $amount) {
 
-                $shipper_intercept_type = ShipperInterceptExclude::where('user_id', $shipment->user_id)->first();
+                // $shipper_intercept_type = ShipperInterceptExclude::where('user_id', $shipment->user_id)->first();
+                $shipper_intercept_type = DB::table('shipper_intercept_excludes')
+                ->where('user_id', $shipment->user_id)
+                ->first();
                 if ($shipper_intercept_type){
                     // different_consignee == 0 means allow different
                     if ($shipper_intercept_type->different_consignee == 1 && $request->consignee == 1){
@@ -145,13 +148,30 @@ class ShipperInterceptReBookController extends Controller
                         $shipment->intercepted = 1;
                         $shipment->save();
 
-                        ShipmentsJourneyController::add($request->shipment_id, 54, 54, NULL, NULL, $user_id, NULL);
+                        // do not change the order
+                        $shipment_journey_data = [
+                            $request->shipment_id, 
+                            54, 
+                            54, 
+                            NULL, 
+                            NULL, 
+                            $user_id, 
+                            NULL
+                        ];
+                        HandleShipmentIntercept::dispatchNow($shipment_journey_data);
+                        // ShipmentsJourneyController::add($request->shipment_id, 54, 54, NULL, NULL, $user_id, NULL);
 
                         //Updating New RcpAssigned Tables
-                        $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id)->where('assigned_status', 1)->where('shipment_status', 0);
-                        if ($rcp_assigned_shipment->exists()) {
+                        // $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id)->where('assigned_status', 1)->where('shipment_status', 0);
+                        $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id)
+                        ->where('assigned_status', 1)
+                        ->where('shipment_status', 0)
+                        ->latest()
+                        ->first();
+                        // if ($rcp_assigned_shipment->exists()) {
+                        if ($rcp_assigned_shipment) {
                             
-                            $rcp_assigned_shipment = $rcp_assigned_shipment ->latest()->first();
+                            // $rcp_assigned_shipment = $rcp_assigned_shipment ->latest()->first();
                             $rcp_assigned_shipment->shipment_status = 7; //intercept request
                             $rcp_assigned_shipment->assigned_status = 2; //unassign agent 
                             $rcp_assigned_shipment->user_id = Auth::id();
@@ -164,12 +184,21 @@ class ShipperInterceptReBookController extends Controller
                             $rcp_assigned_agent->save();
 
                             //creating log 
-                            $return_assign_log = new RcpAssignedShipmentLog();
-                            $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
-                            $return_assign_log->shipment_id = $rcp_assigned_shipment->shipment_id;
-                            $return_assign_log->status = 7; //intercept request
-                            $return_assign_log->user_id = Auth::id();
-                            $return_assign_log->save();
+                            // $return_assign_log = new RcpAssignedShipmentLog();
+                            // $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
+                            // $return_assign_log->shipment_id = $rcp_assigned_shipment->shipment_id;
+                            // $return_assign_log->status = 7; //intercept request
+                            // $return_assign_log->user_id = Auth::id();
+                            // $return_assign_log->save();
+
+                            DB::table('rcp_assigned_shipment_logs')->insert([
+                                'rcp_assigned_shipment_id' => $rcp_assigned_shipment->id,
+                                'shipment_id' => $rcp_assigned_shipment->shipment_id,
+                                'status' => 7, // intercept request
+                                'user_id' => Auth::id(),
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ]);
                                 
                         }
 
@@ -214,13 +243,30 @@ class ShipperInterceptReBookController extends Controller
                         $shipment->intercepted = 1;
                         $shipment->save();
 
-                        ShipmentsJourneyController::add($request->shipment_id, 55, 55, NULL, NULL, $user_id, NULL);
+                        // do not change the order
+                        $shipment_journey_data = [
+                            $request->shipment_id, 
+                            55, 
+                            55, 
+                            NULL, 
+                            NULL, 
+                            $user_id, 
+                            NULL
+                        ];
+                        HandleShipmentIntercept::dispatchNow($shipment_journey_data);
+                        // ShipmentsJourneyController::add($request->shipment_id, 55, 55, NULL, NULL, $user_id, NULL);
 
                         //Updating New RcpAssigned Tables 
-                        $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id)->where('assigned_status', 1)->where('shipment_status', 0);
-                        if ($rcp_assigned_shipment->exists()) {
+                        // $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id)->where('assigned_status', 1)->where('shipment_status', 0);
+                        $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id)
+                        ->where('assigned_status', 1)
+                        ->where('shipment_status', 0)
+                        ->latest()
+                        ->first();
+                        // if ($rcp_assigned_shipment->exists()) {
+                        if ($rcp_assigned_shipment) {
                             
-                            $rcp_assigned_shipment = $rcp_assigned_shipment ->latest()->first();
+                            // $rcp_assigned_shipment = $rcp_assigned_shipment ->latest()->first();
                             $rcp_assigned_shipment->shipment_status = 8; //intercept approved
                             $rcp_assigned_shipment->assigned_status = 2; //unassign agent 
                             $rcp_assigned_shipment->user_id = Auth::id();
@@ -240,13 +286,21 @@ class ShipperInterceptReBookController extends Controller
                             $return_assign_log->user_id = Auth::id();
                             $return_assign_log->save();
 
-                            $return_assign_log = new RcpAssignedShipmentLog();
-                            $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
-                            $return_assign_log->shipment_id = $rcp_assigned_shipment->shipment_id;
-                            $return_assign_log->status = 8; //intercept approved
-                            $return_assign_log->user_id = Auth::id();
-                            $return_assign_log->save();
+                            // $return_assign_log = new RcpAssignedShipmentLog();
+                            // $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
+                            // $return_assign_log->shipment_id = $rcp_assigned_shipment->shipment_id;
+                            // $return_assign_log->status = 8; //intercept approved
+                            // $return_assign_log->user_id = Auth::id();
+                            // $return_assign_log->save();
                                 
+                            DB::table('rcp_assigned_shipment_logs')->insert([
+                                'rcp_assigned_shipment_id' => $rcp_assigned_shipment->id,
+                                'shipment_id' => $rcp_assigned_shipment->shipment_id,
+                                'status' => 8, // intercept request
+                                'user_id' => Auth::id(),
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ]);
                         }
 
                             $request->merge(['shipment_id' => $request->shipment_id]);
@@ -274,7 +328,6 @@ class ShipperInterceptReBookController extends Controller
                         }
                         
                     }
-
 
                     return redirect()->route('cod.return.pending.index')->with('success', 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment['tracking_number']);
                 }

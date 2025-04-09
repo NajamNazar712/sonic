@@ -354,7 +354,7 @@
 								<div class="modal-dialog modal-lg" role="document">
 									<div class="modal-content">
 										<div class="modal-header bg-primary white">
-											<h4 class="modal-title white">Add Request</h4>
+											<h4 class="modal-title white">Get Support</h4>
 											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 												<span aria-hidden="true">&times;</span>
 											</button>

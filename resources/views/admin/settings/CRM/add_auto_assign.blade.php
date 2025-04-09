@@ -204,7 +204,7 @@
                         $('#shipper_key_id').removeAttr('disabled');
                         let options = "";
                         $.each(data.shipper_keys, function(index, field) {
-                            options+=`<option value='${field.id}' >${field.name}<option>`;
+                            options+=`<option value='${field.id}' >${field.name}</option>`;
                         });
                         $('#shipper_key_id').append(options);
 
@@ -224,7 +224,7 @@
                         $('#shipper_non_key_id').removeAttr('disabled');
                         let options = "";
                         $.each(data.shipper_non_keys, function(index, field) {
-                            options+=`<option value='${field.id}' >${field.name}<option>`;
+                            options+=`<option value='${field.id}' >${field.name}</option>`;
                         });
                         $('#shipper_non_key_id').append(options);
 
@@ -270,7 +270,7 @@
                             $('#origin_id').removeAttr('disabled');
                             let options = "";
                             $.each(data.origin_hubs, function(index, field) {
-                                options+=`<option value='${field.id}' >${field.name}<option>`;
+                                options+=`<option value='${field.id}' >${field.name}</option>`;
                             });
                             $('#origin_id').append(options);
 
@@ -309,7 +309,7 @@
                             $('#origin_area_id').removeAttr('disabled');
                             let options = "";
                             $.each(data.origin_areas, function(index, field) {
-                                options+=`<option value='${field.id}' >${field.name}<option>`;
+                                options+=`<option value='${field.id}' >${field.name}</option>`;
                             });
                             $('#origin_area_id').append(options);
 
@@ -374,7 +374,7 @@
                         $('#case_nature_type_id').removeAttr('disabled');
                         let options = "";
                         $.each(data.case_nature_type, function(index, field) {
-                            options+=`<option value='${field.id}' >${field.type}<option>`;
+                            options+=`<option value='${field.id}' >${field.type}</option>`;
                         });
                         $('#case_nature_type_id').append(options);
 
@@ -426,7 +426,7 @@
                         $('#hub_id').removeAttr('disabled');
                         let options = "";
                         $.each(data.hubs, function(index, field) {
-                            options+=`<option value='${field.id}' >${field.name}<option>`;
+                            options+=`<option value='${field.id}' >${field.name}</option>`;
                         });
                         $('#hub_id').append(options);
 
@@ -476,7 +476,7 @@
                         $('#sub_business_segment_id').removeAttr('disabled');
                         let options = "";
                         $.each(data.sub_segment, function(index, field) {
-                            options+=`<option value='${field.id}' >${field.name}<option>`;
+                            options+=`<option value='${field.id}' >${field.name}</option>`;
                         });
                         $('#sub_business_segment_id').append(options);
                         $('#sub_business_segment_id').find('option').filter(function() {
