@@ -2164,6 +2164,8 @@ class APIController extends Controller
             }
             $sms_charges = $current_sms_charges * $shipment_sms_count;
 
+            $charges = array();
+
             if(!empty($sms_charges)){
                 $charges['sms_charges'] = $sms_charges;
             }
@@ -2178,8 +2180,6 @@ class APIController extends Controller
             } else {
                 $current_status_id = $shipment->shipper_status_id;
             }
-
-            $charges = array();
 
             if ($shipment->packaging_material_request) {
                 $charges['packaging_material_charges'] = $shipment->packaging_material_charges;
@@ -2359,7 +2359,13 @@ class APIController extends Controller
                     $current_status_id = $shipment->shipper_status_id;
                 }
 
+                $wallet_user = optional($shipment->user->wallet)->exists();
+
                 $charges = array();
+
+                if($wallet_user){
+                    $charges['wallet_charges'] = ShipmentAdditionalCharges::fetch_wallet_charges($shipment->id);
+                }
 
                 if ($shipment->packaging_material_request) {
                     $charges['packaging_material_charges'] = $shipment->packaging_material_charges;
