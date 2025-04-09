@@ -62,12 +62,10 @@ use App\Http\Models\Rates\Corporate\CorporateDefaultRateOriginHub;
 use App\Http\Models\Rates\Corporate\CorporateDefaultRateDestinationHub;
 use App\ShipmentReturnDiscountCharges;
 use App\ZeroCodDiscountCharges;
-use App\Http\Traits\CommonTrait;
-
+use App\Models\InternationalZonalMarginColumn;
 
 class ShipperAgreementController extends Controller
 {
-    use CommonTrait;
     
     public function __construct()
     {
@@ -1081,7 +1079,7 @@ otherwise it will be rejected</li>
                 }
 
                 if($international_rate_status){
-                $marginzoneColumnsArray = $this->zoneMarginColumnName();
+                $marginzoneColumnsArray = self::zoneMarginColumnNames();
                     $intl_box = '';
 
                     $intl_box .= '<div class="row"><div class="col-12 border"> <table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead class="color secondary text-center">
@@ -1129,24 +1127,48 @@ otherwise it will be rejected</li>
                     $intl_weight_charges_details = '';
                     if(count($intl_weight_charges) > 0){
                         $intl_weight_charges_details .= '<div class="row"><div class="col-12"> <table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Weight Charges </strong></thead></table></div></div>';
-                            foreach ($marginzoneColumnsArray['zoneColumnsArray'] as $zone) {
-                                $intl_weight_charges_details .= "<th>" . ucfirst(str_replace('_', ' ', $zone)) . "</th>";
-                            }
-                            $intl_weight_charges_details .= '</tr></thead><tbody>';
-                            
+
+                    $intl_weight_charges_details .= '<table class="table table-sm table-bordered mb-0"><thead><tr><th>Range Up</th><th>Range Down</th>';
+
+                    foreach ($marginzoneColumnsArray['zoneColumnArray'] as $zone) {
+                        $intl_weight_charges_details .= "<th>" . ucfirst(str_replace('_', ' ', $zone)) . "</th>";
+                    }
+
+                    $intl_weight_charges_details .= '</tr></thead><tbody>';
+                   
+                        $intl_weight_charges_details .= '</tr></thead><tbody>';
+                        foreach ($intl_weight_charges as $weight_charge) {
+                            $intl_weight_charges_details .= '<tr>';
+                            $intl_weight_charges_details .= '<td>' . $weight_charge->range_up . '</td>';
+                            $intl_weight_charges_details .= '<td>' . $weight_charge->range_down . '</td>';
                             foreach ($marginzoneColumnsArray['zoneColumnArray'] as $index => $zone) {
-                                $marginKey = $marginzoneColumnsArray['marginColumn'][$index] ?? null;
-                                $zone_charge = self::international_charges_calculate(
-                                    $weight_charge->$zone,
-                                    $fuel_surcharge_flat,
-                                    $exchange_rate_charges,
-                                    $margin[$marginKey] ?? 0,
-                                    $gst_flat
-                                );
-                                $intl_weight_charges_details .= "<td>{$zone_charge}</td>";
+                                    $marginKey = $marginzoneColumnsArray['marginColumn'][$index] ?? null;
+                                    $zone_charge = self::international_charges_calculate(
+                                        $weight_charge->$zone,
+                                        $fuel_surcharge_flat,
+                                        $exchange_rate_charges,
+                                        $margin[$marginKey] ?? 0,
+                                        $gst_flat
+                                    );
+                                $intl_weight_charges_details .= '<td>' . $zone_charge . '</td>';
                             }
-                            $intl_weight_charges_details .= '</tr>';
-                            $intl_weight_charges_details .= '<tr><td>' . $weight_charge->range_up . '</td><td>' . $weight_charge->range_down . '</td><td>' . $zone_1_charges . '</td><td>' . $zone_2_charges . '</td><td>' . $zone_3_charges . '</td><td>' . $zone_4_charges . '</td><td>' . $zone_5_charges . '</td><td>' . $zone_6_charges . '</td><td>' . $zone_7_charges . '</td><td>' . $zone_8_charges . '</td><td>' . $zone_9_charges . '</td><td>' . $zone_10_charges . '</td><td>' . $zone_11_charges . '</td><td>' . $zone_1b_charges . '</td><td>' . $zone_8b_charges . '</td></tr>';
+                        $intl_weight_charges_details .= '</tr>';
+                        }
+                        // foreach ($intl_weight_charges as $weight_charge) {
+                        //     foreach ($marginzoneColumnsArray['zoneColumnArray'] as $index => $zone) {
+                        //         $marginKey = $marginzoneColumnsArray['marginColumn'][$index] ?? null;
+                        //         $zone_charge = self::international_charges_calculate(
+                        //             $weight_charge->$zone,
+                        //             $fuel_surcharge_flat,
+                        //             $exchange_rate_charges,
+                        //             $margin[$marginKey] ?? 0,
+                        //             $gst_flat
+                        //         );
+                        //         $intl_weight_charges_details .= "<td>{$zone_charge}</td>";
+                        //         $intl_weight_charges_details .= '</tr>';
+                        //         $intl_weight_charges_details .= '<tr><td>' . $weight_charge->range_up . '</td><td>' . $weight_charge->range_down . '</td><td>' . $weight_charge->$zone . '</td></tr>';
+                        //     }
+                        // }
                         }
                         $intl_weight_charges_details .= '</tbody></table>';
                         $intl_box .= $intl_weight_charges_details;
@@ -1295,6 +1317,14 @@ otherwise it will be rejected</li>
 
             }
         }
+    }
+
+    static public function  zoneMarginColumnNames()
+    {
+        $zoneColumn = InternationalZonalMarginColumn::where('type', 1)->first();
+        $zoneColumnsArray = explode(",", $zoneColumn->zone_column);
+        $marginColumnsArray = explode(",", $zoneColumn->margin_column);
+        return ['zoneColumnArray' => $zoneColumnsArray, 'marginColumn' => $marginColumnsArray];
     }
     /*public function old_crf_download(Request $request, $token, $id){
         $names = [
