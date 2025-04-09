@@ -196,6 +196,7 @@
                         <th class="border-primary border-darken-1">FAF Charges</th>
                         <th class="border-primary border-darken-1">Net Payable</th>
                         <th class="border-primary border-darken-1">Delivered/Returned Date</th>
+                        <th class="border-primary border-darken-1">Province</th>
                     </tr>
                     </thead>
                 </table>
@@ -457,6 +458,7 @@
                             head.push('FAF Charges');
                             head.push('Net Payable');
                             head.push('Delivered / Returned Date');
+                            head.push('Province');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -505,6 +507,7 @@
                                 row.push(values.faf_charges);
                                 row.push(values.p_net_payable);
                                 row.push(values.delivered_or_returned);
+                                row.push(values.province_name);
 
                                 body.push(row);
                             });
@@ -605,7 +608,8 @@
                     { data:'estimated_charges' ,name: 'estimated_charges', class: 'align-middle estimated_charges',sortable:false},
                     { data: 'faf_charges' ,name: 'faf_charges', class: 'align-middle faf_charges'},
                     { data: 'p_net_payable' ,name: 'pps.payable', class: 'align-middle net_payable'},
-                    { data: 'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle delivered_or_returned'}
+                    { data: 'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle delivered_or_returned'},   
+                    { data: 'province_name' ,name: 'provinces.name', class: 'align-middle province_name'}
                 ],
                 rowCallback: function(row, data, index) {
                     
