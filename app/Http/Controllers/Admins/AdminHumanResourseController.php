@@ -768,7 +768,7 @@ class AdminHumanResourseController extends Controller
             }
         }
         return $datatable
-        ->rawColumns(['action'])
+        ->rawColumns(['action', 'employee_designation', 'department_name', 'sub_department_name'])
         ->make(true);
     }
 
