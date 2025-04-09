@@ -3028,7 +3028,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('get_sub_segments', 'Admins\GlobalSettingsController@get_sub_segments')->name('get_sub_segments');
             Route::post('get_origin_areas','Admins\GlobalSettingsController@get_origin_areas')->name('get_origin_areas');
             Route::post('get_origin_hub','Admins\GlobalSettingsController@get_origin_hub')->name('get_origin_hub');
-            Route::get('get_shipper_key', 'Admins\GlobalSettingsController@get_shipper_key')->name('get_shipper_key');
+            Route::get('get_shipper_key/{agent_id}', 'Admins\GlobalSettingsController@get_shipper_key')->name('get_shipper_key');
             Route::get('get_shipper_non_key', 'Admins\GlobalSettingsController@get_shipper_non_key')->name('get_shipper_non_key');
 
         });
