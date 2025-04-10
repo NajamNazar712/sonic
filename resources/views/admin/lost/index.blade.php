@@ -153,7 +153,8 @@
                         <th class="border-primary border-darken-1"></th>
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
-                        <th class="border-primary border-darken-1">Responsible Person (s)</th>
+                        <th class="border-primary border-darken-1">Old Responsible Person(s)</th>
+                        <th class="border-primary border-darken-1">New Responsible Person(s)</th>
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
@@ -365,6 +366,7 @@
                         head.push('Phone');
                         head.push('Address');
                         head.push('Collection Amount');
+                        head.push('Parcel Value');
                         head.push('Shipping Mode');
                         head.push('Service Type');
                         head.push('Remarks');
@@ -377,7 +379,7 @@
 
                         $.each(result.data, function(index, values) {
                             row = [];
-
+                            var parcel_value = (values.parcel_value == null || values.parcel_value == "") ? 0 : values.parcel_value;
 
                             row.push(index + 1);
                             row.push(values.tracking_number);
@@ -395,6 +397,7 @@
                             row.push(values.phone);
                             row.push(values.consignee_address);
                             row.push(values.amount);
+                            row.push(parcel_value);
                             row.push(values.shipping_mode);
                             row.push(values.service_type);
                             row.push(values.remarks);
@@ -639,6 +642,10 @@
                                                     });
                                             } else {
                                                 UnblockPagePermanently();
+                                                table.button('.reject').enable();
+                                                table.button('.approve').enable();
+                                                table.button('.re-attempt').enable();
+                                                table.button('.confirm').enable();
                                                 toastr.error(data.error,
                                                     'Error!', {
                                                         positionClass: 'toast-top-center',
@@ -782,7 +789,8 @@
                 {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                 {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
-                {data: 'responsible_person_shipment', name: 'lsr.shipment_id', class: 'align-middle responsible_person_shipment_new'},
+                {data: 'old_responsible_person', name: 'old_responsible_person', class: 'align-middle old_responisble_person'},
+                {data: 'responsible_person_shipment', name: 'responsible_person_shipment', class: 'align-middle responsible_person_shipment_new'},
                 {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                 {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                 {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
@@ -1235,7 +1243,7 @@
 
             // Make an AJAX request
             $.ajax({
-                url:  '{{ route('admin.delivery.lost.lost_responsible_list') }}',
+                url:  '{{ route('admin.delivery.lost.lost_shipment_responsible_list') }}',
                 type: 'GET', 
                 data: { shipment_id: shipment_id }, 
                 success: function(response) {
@@ -1243,7 +1251,7 @@
                         '<div class="modal-dialog modal-xl" role="document">' +
                         '<div class="modal-content">' +
                         '<div class="modal-header bg-primary white">' +
-                        '<h4 class="modal-title white">Add Lost Responsible for Shipment ID: ' + shipment_id + '</h4>' +
+                        '<h4 class="modal-title white">New Lost Responsible for Shipment ID: ' + shipment_id + '</h4>' +
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
                         '<span aria-hidden="true">&times;</span>' +
                         '</button>' +
@@ -1279,7 +1287,67 @@
 
                     modalContent += '</tbody>' + // End of tbody
                         '</table>' +
-                       
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                    $('.addLostResponsibleModal').html('');
+                    $('.addLostResponsibleModal').append(modalContent);
+                    $('.addLostResponsibleModal').modal('show');
+                },
+                error: function(xhr, status, error) {
+                    // Handle errors if any
+                }
+            });
+        });
+
+        // for old responisbles
+        $('#datatable tbody').on('click', '.old_responsible_person', function() {
+            var shipment_id = $(this).attr('data-shipment-id');
+            $.ajax({
+                url:  '{{ route('admin.delivery.lost.old_lost_shipment_responsible_list') }}',
+                type: 'GET', 
+                data: { shipment_id: shipment_id }, 
+                success: function(response) {
+                    var modalContent =  
+                        '<div class="modal-dialog modal-xl" role="document">' +
+                        '<div class="modal-content">' +
+                        '<div class="modal-header bg-primary white">' +
+                        '<h4 class="modal-title white">Old Lost Responsible for Shipment ID: ' + shipment_id + '</h4>' +
+                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
+                        '<span aria-hidden="true">&times;</span>' +
+                        '</button>' +
+                        '</div>' +
+                        '<div class="modal-body text-center">' +
+                        '<input type="hidden" name="_token" value="{{ csrf_token() }}">' +
+                        '<table class="table table-bordered datatable" id="addLostResponsibleTable">' +
+                        '<thead>' +
+                        '<tr role="row" class="bg-primary white">' +
+                        '<th class="border-primary border-darken-1">S. No.</th>' +
+                        '<th class="border-primary border-darken-1">Employee ID</th>' +
+                        '<th class="border-primary border-darken-1">Employee Name</th>' +
+                        '<th class="border-primary border-darken-1">Employee Type</th>' +
+                        '<th class="border-primary border-darken-1">Employee Status</th>' +
+                        '<th class="border-primary border-darken-1">Marked At</th>' +
+
+                        '</tr>' +
+                        '</thead>' +
+                        '<tbody>'; 
+
+                        $.each(response.details, function(index, item) {
+                            var employee = item;
+                                modalContent += '<tr>';
+                                modalContent += '<td>' + (index + 1) + '</td>'; 
+                                modalContent += '<td>' + (employee.trax_id ? employee.trax_id : '') + '</td>'; 
+                                modalContent += '<td>' + employee.name + '</td>'; 
+                                modalContent += '<td>' + employee.type + '</td>'; 
+                                modalContent += '<td>' + employee.status + '</td>';
+                                modalContent += '<td>' + employee.marked_at + '</td>'; 
+                                modalContent += '</tr>';                            
+                        });
+
+
+                    modalContent += '</tbody>' + // End of tbody
+                        '</table>' +
                         '</div>' +
                         '</div>' +
                         '</div>' +

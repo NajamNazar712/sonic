@@ -77,6 +77,7 @@ use App\Http\Models\ShipmentServicesCharges;
 
 class ShipmentChargesController extends Controller
 {
+
     static public function calculate_weight($account_type_id, $user_id, $shipping_mode_id, $same_day_timing_id, $walk_in_delivery_type_id, $weight, $origin_city_id, $origin_city_zone_id, $destination_city_id, $booking_type_id, $amount) {
         if ($user_id == 7762 && $shipping_mode_id == 1) {
             if ($origin_city_id == $destination_city_id) {
@@ -856,6 +857,7 @@ class ShipmentChargesController extends Controller
                     $international_zone = InternationalDhlZone::where('zone_id', $zone_id)->first();
                     if ($international_zone) {
                         $international_zone_id = $international_zone->zone_name;
+
                         switch ($international_zone_id) {
                             case 1:
                                 $margin = $international_rate->margin_1;
@@ -889,12 +891,6 @@ class ShipmentChargesController extends Controller
                                 break;
                             case 11:
                                 $margin = $international_rate->margin_11;
-                                break;
-                            case "1b":
-                                $margin = $international_rate->margin_1b;
-                                break;
-                            case "8b":
-                                $margin = $international_rate->margin_8b;
                                 break;
                             default:
                                 $margin = 0;
@@ -962,6 +958,203 @@ class ShipmentChargesController extends Controller
         }
     }
 
+
+    static public function weight_view($id, $weight) {
+        $shipment = Shipment::find($id);
+        $dataToReturn = [];
+    
+        if($shipment->business_category_id == 1){
+            $result = self::calculate_weight(
+                $shipment->user->account_type_id,
+                $shipment->user_id, 
+                $shipment->shipping_mode_id,
+                $shipment->same_day_timing_id,
+                $shipment->walk_in_delivery_type_id,
+                $weight,
+                $shipment->pickup_address->city_id,
+                $shipment->pickup_address->city->zone_id,
+                $shipment->consignee_city_id,
+                $shipment->booking_type_id,
+                $shipment->amount
+            );
+            //calculation with shipper weight ..for weight qc report purpose
+            $shipper_weight_charges = false;
+            if($shipment->actual_weight != $shipment->estimated_weight ) {
+                $result_shipper_weight = self::calculate_weight(
+                    $shipment->user->account_type_id, 
+                    $shipment->user_id, 
+                    $shipment->shipping_mode_id, 
+                    $shipment->same_day_timing_id, 
+                    $shipment->walk_in_delivery_type_id, 
+                    $weight, 
+                    $shipment->pickup_address->city_id, 
+                    $shipment->pickup_address->city->zone_id, 
+                    $shipment->consignee_city_id, 
+                    $shipment->booking_type_id, 
+                    $shipment->amount
+                );
+                if($result_shipper_weight) {
+                    $shipper_weight_charges = true;
+                }
+            }
+            
+        }
+        else{
+            $dhl_check = true;
+    
+            $zone_id = $shipment->consignee_city->zone_id;
+            $international_economy_rate = InternationalEconomyRate::where('user_id',$shipment->user_id)
+                ->where('zone_id',$zone_id)
+                ->where('range_up', '<=', $shipment->actual_weight )
+                ->where('range_down', '>=', $shipment->actual_weight );
+            if($international_economy_rate->exists())
+            {
+                $international_economy_rate = $international_economy_rate->first();
+                $result = self::calculate_international_economic_weight($shipment->actual_weight ,$international_economy_rate);
+                $dhl_check = false;
+                if($result){
+                    self::international_credit_usage($shipment->user_id, $result['weight_charges']);
+                }
+            }
+            if($dhl_check) {
+                $international_rate = InternationalUserRate::where('user_id', $shipment->user_id);
+                if ($international_rate->exists()) {
+                    $international_rate = $international_rate->first();
+                    $zone_id = $shipment->consignee_city->zone_id;
+                    $margin = 0;
+                    $international_zone = InternationalDhlZone::where('zone_id', $zone_id)->first();
+                    if ($international_zone) {
+                        $international_zone_id = $international_zone->zone_name;
+                        
+                        switch ($international_zone_id) {
+                            case 1:
+                                $margin = $international_rate->margin_1;
+                                break;
+                            case 2:
+                                $margin = $international_rate->margin_2;
+                                break;
+                            case 3:
+                                $margin = $international_rate->margin_3;
+                                break;
+                            case 4:
+                                $margin = $international_rate->margin_4;
+                                break;
+                            case 5:
+                                $margin = $international_rate->margin_5;
+                                break;
+                            case 6:
+                                $margin = $international_rate->margin_6;
+                                break;
+                            case 7:
+                                $margin = $international_rate->margin_7;
+                                break;
+                            case 8:
+                                $margin = $international_rate->margin_8;
+                                break;
+                            case 9:
+                                $margin = $international_rate->margin_9;
+                                break;
+                            case 10:
+                                $margin = $international_rate->margin_10;
+                                break;
+                            case 11:
+                                $margin = $international_rate->margin_11;
+                                break;
+                            default:
+                                $margin = 0;
+                                break;
+                        }
+                        $result = self::calculate_international_weight($margin, $shipment->actual_weight , $international_zone->zone_name);
+                        if($result){
+                            self::international_credit_usage($shipment->user_id, $result['weight_charges']);
+                        }
+                    } else {
+                        $result = false;
+                    }
+                } else {
+                    $result = false;
+                }
+            }
+        }
+    
+        if ($result) {
+            if($shipment->booking_type_id == 6){
+                $other_amount = FtlRequestAdditionalCost::where('ftl_request_id',$shipment->ftl->id)->sum('amount');
+                $calc_total = ((($shipment->ftl->freight_charges/$shipment->ftl->weight)*$shipment->actual_weight ));
+                $dataToReturn['weight_charges'] = $calc_total;
+                $dataToReturn['chargeable_weight'] = $result['chargeable_weight'];
+                // $shipment->weight_charges = $calc_total;
+                // $shipment->chargeable_weight = $result['chargeable_weight'];
+            }
+            else{
+                $dataToReturn['weight_charges'] = $result['weight_charges'];
+                $dataToReturn['chargeable_weight'] = $result['chargeable_weight'];
+                // $shipment->weight_charges = $result['weight_charges'];
+                // $shipment->chargeable_weight = $result['chargeable_weight'];
+            }
+            // $shipment->save();
+            if($result && $shipment->business_category_id == 1) {
+                $shipment_weight = ShipmentsWeightType::where('shipment_id', $shipment->id);
+                if($shipment_weight->exists()){
+                    $shipments_weight_type = $shipment_weight->first();
+                }else{
+                    $shipments_weight_type = new ShipmentsWeightType;
+                    $shipments_weight_type->shipment_id = $shipment->id;
+                }
+                $shipments_weight_type->range_down_arrival_weight = $result['range_down'] ? $result['range_down'] : $result['chargeable_weight'];
+                $shipments_weight_type->range_down_shipper_weight =  $shipper_weight_charges ? ($result_shipper_weight['range_down'] ? $result_shipper_weight['range_down'] : $result_shipper_weight['chargeable_weight'] ) : ($result['range_down'] ? $result['range_down'] : $result['chargeable_weight']);
+                $shipments_weight_type->shipper_weight_charges = $shipper_weight_charges ? $result_shipper_weight['weight_charges'] : $result['weight_charges'];
+                // $shipments_weight_type->save();
+                $dataToReturn['range_down_arrival_weight'] = $shipments_weight_type->range_down_arrival_weight;
+    
+                if($shipments_weight_type->range_down_shipper_weight == $shipment->estimated_weight) {
+                    $shipments_weight_type->shipper_range_weight_charges = $shipments_weight_type->shipper_weight_charges;
+                }else{
+                    $shiper_range_charges = self::calculate_weight(
+                        $shipment->user->account_type_id, 
+                        $shipment->user_id, 
+                        $shipment->shipping_mode_id, 
+                        $shipment->same_day_timing_id, 
+                        $shipment->walk_in_delivery_type_id, 
+                        $shipments_weight_type->range_down_shipper_weight, 
+                        $shipment->pickup_address->city_id, 
+                        $shipment->pickup_address->city->zone_id, 
+                        $shipment->consignee_city_id, 
+                        $shipment->booking_type_id, 
+                        $shipment->amount
+                    );
+                    $shipments_weight_type->shipper_range_weight_charges = $shiper_range_charges['weight_charges'];
+                }
+                // $shipments_weight_type->save();
+                $dataToReturn['range_down_shipper_weight'] = $shipments_weight_type->range_down_shipper_weight;
+    
+                if($shipments_weight_type->range_down_arrival_weight == $shipment->actual_weight ) {
+                    $shipments_weight_type->arrival_range_weight_charges = $shipment->weight_charges;
+                } else if($shipments_weight_type->range_down_arrival_weight == $shipments_weight_type->range_down_shipper_weight) {
+                    $shipments_weight_type->arrival_range_weight_charges = $shipments_weight_type->shipper_range_weight_charges;
+                }else{
+                    $arrival_range_charges = self::calculate_weight(
+                        $shipment->user->account_type_id, 
+                        $shipment->user_id, 
+                        $shipment->shipping_mode_id, 
+                        $shipment->same_day_timing_id, 
+                        $shipment->walk_in_delivery_type_id, 
+                        $shipments_weight_type->range_down_arrival_weight, 
+                        $shipment->pickup_address->city_id, 
+                        $shipment->pickup_address->city->zone_id, 
+                        $shipment->consignee_city_id, 
+                        $shipment->booking_type_id, 
+                        $shipment->amount
+                    );
+                    $shipments_weight_type->arrival_range_weight_charges = $arrival_range_charges['weight_charges'];
+                }
+                // $shipments_weight_type->save();
+                $dataToReturn['shipper_range_weight_charges'] = $shipments_weight_type->shipper_range_weight_charges;
+            }
+        }
+        return $dataToReturn;
+    }
+    
     static public function calculate_cash_handling($account_type_id, $user_id, $shipping_mode_id, $amount) {
         $rate_type_id = User::find($user_id)->corporate_rate_type_id;
         if ($account_type_id == 1) {
@@ -1526,7 +1719,6 @@ class ShipmentChargesController extends Controller
     }
 
     static public function calculate_fuel_surcharge($account_type_id, $user_id, $shipping_mode_id, $weight_charges) {
-
         $rate_type_id = User::find($user_id)->corporate_rate_type_id;
         if ($account_type_id == 1) {
             $rate_status = RateStatus::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('fuel_charges', 1)->where('status', 1);
@@ -1559,7 +1751,48 @@ class ShipmentChargesController extends Controller
                 $result = array();
 
                 $result['fuel_surcharge'] = ROUND((($fuel_charge->fuel_surcharge / 100) * $weight_charges), 2, PHP_ROUND_HALF_DOWN);
+                return $result;
+            }
+        }
+        else {
+            return FALSE;
+        }
+    }
 
+    // for viewing feature
+    static public function calculate_fuel_surcharge_view($account_type_id, $user_id, $shipping_mode_id, $weight_charges) {
+        $rate_type_id = User::find($user_id)->corporate_rate_type_id;
+        if ($account_type_id == 1) {
+            $rate_status = RateStatus::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('fuel_charges', 1)->where('status', 1);
+        }
+        else {
+            if($rate_type_id == 3){
+                $rate_status = CorporateDefaultRateStatus::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('fuel_charges', 1)->where('status', 1);
+            }
+            else{
+                $rate_status = CorporateRateStatus::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('fuel_charges', 1)->where('status', 1);
+            }
+        }
+
+        if ($rate_status->exists()) {
+            if ($account_type_id == 1) {
+                $fuel_charge = FuelSurcharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id);
+            }
+            else {
+                if($rate_type_id == 3){
+                    $fuel_charge = CorporateDefaultFuelSurcharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id);
+                }
+                else{
+                    $fuel_charge = CorporateFuelSurcharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id);
+                }
+            }
+
+            if ($fuel_charge->exists()) {
+                $fuel_charge = $fuel_charge->first();
+
+                $result = array();
+
+                $result['fuel_surcharge'] = ROUND((($fuel_charge->fuel_surcharge / 100) * $weight_charges), 2, PHP_ROUND_HALF_DOWN);
                 return $result;
             }
         }
@@ -1578,6 +1811,20 @@ class ShipmentChargesController extends Controller
 
             $shipment->save();
         }
+    }
+
+    // for view feature
+    static public function fuel_surcharge_view($id, $weight) {
+        $shipment = Shipment::find($id);
+        $dataToReturn = [];
+        $result = self::calculate_fuel_surcharge_view($shipment->user->account_type_id, $shipment->user_id, $shipment->shipping_mode_id, $weight);
+
+        if ($result) {
+            $dataToReturn['fuel_surcharge'] = $result['fuel_surcharge'];
+            // $shipment->fuel_surcharge = $result['fuel_surcharge'];
+            // $shipment->save();
+        }
+        return $dataToReturn;
     }
 
     static public function replacement($id,$shipment = array()) {
@@ -2812,6 +3059,36 @@ class ShipmentChargesController extends Controller
         }
     }
 
+    static public function faf_charges_view($id, $weight) {
+        try {
+            $shipment = Shipment::find($id);
+            $dataToReturn = [];
+            if ($shipment) {
+                $result = self::calculate_faf_charges_view(
+                    $shipment->user->account_type_id,
+                    $shipment->user_id,
+                    $shipment->shipping_mode_id,
+                    $weight
+                );
+
+                if ($result) {
+                    $shipment_Additional_charges = ShipmentAdditionalCharges::where('shipment_id', $shipment->id)->first();
+                    if (!$shipment_Additional_charges) {
+                        $shipment_Additional_charges = new ShipmentAdditionalCharges();
+                    }
+                    $shipment_Additional_charges->shipment_id = $shipment->id;
+                    $shipment_Additional_charges->faf_charges = $result['faf_charges'];
+                    // $shipment_Additional_charges->save();
+                    // $dataToReturn['shipment_id'] = $shipment->id;
+                    $dataToReturn['faf_charges'] = $result['faf_charges'];
+                }
+                return $dataToReturn;
+            }
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Handle the error (e.g., log it, or simply suppress it to allow code to continue)
+        }
+    }
+
     static public function calculate_faf_charges($account_type_id, $user_id, $shipping_mode_id, $weight_charges) {
         $faf_charges_status = 0;
         $faf_charges = FafCharges::where('user_id',$user_id);
@@ -2820,6 +3097,30 @@ class ShipmentChargesController extends Controller
             $faf_charges_status = $faf_charges->status;
         }
 
+        if ($faf_charges_status) {
+            $today = date('Y-m-d');
+            $fuel_charge_global = FafChargesGlobal::where('date_range_start','<=',$today)->where('date_range_end','>=',$today);
+            if ($fuel_charge_global->exists()) {
+                $fuel_charge_global = $fuel_charge_global->first();
+
+                $result = array();
+                $result['faf_charges'] = ROUND((($fuel_charge_global->faf_charges / 100) * $weight_charges), 2, PHP_ROUND_HALF_DOWN);
+                return $result;
+            }
+        }
+        else {
+            return FALSE;
+        }
+    }
+
+    // calculate faf_charges for shipment not in db
+    static public function calculate_faf_charges_view($account_type_id, $user_id, $shipping_mode_id, $weight_charges) {
+        $faf_charges_status = 0;
+        $faf_charges = FafCharges::where('user_id',$user_id);
+        if($faf_charges->exists()){
+            $faf_charges= $faf_charges->first();
+            $faf_charges_status = $faf_charges->status;
+        }
         if ($faf_charges_status) {
             $today = date('Y-m-d');
             $fuel_charge_global = FafChargesGlobal::where('date_range_start','<=',$today)->where('date_range_end','>=',$today);

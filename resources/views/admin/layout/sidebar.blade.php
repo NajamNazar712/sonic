@@ -1039,6 +1039,10 @@
                         @if (session('role_id') == 1  || in_array(1017, session('permissions')) )
                             <li><a class="menu-item" href="{{ route('admin.finance.shipment_ledger.index') }}">Service Ledger</a></li>
                         @endif
+
+                        @if (session('role_id') == 1  || in_array(1022, session('permissions')) )
+                            <li><a class="menu-item" href="{{ route('admin.finance.wallet_users.index') }}">Wallet</a></li>
+                        @endif
                     </ul>
 
                 </li>
@@ -1953,6 +1957,15 @@
                                 </a>
                             </li>
                         @endif
+
+                        {{-- lost and case closed report --}}
+                        @if (session('role_id') == 1 || in_array(1021, session('permissions')))
+                            <li>
+                                <a class="menu-item" href="{{ route('admin.reports.lost_and_case_closed_summary_report.index') }}">
+                                    Lost/Case Closed Summary Report
+                                </a>
+                            </li>
+                        @endif
                     </ul>
                 </li>
             @endif
@@ -2169,6 +2182,10 @@
                                                 Lead Progress Setting 
                                             </a>
                                         </li>
+                                        @endif
+                                        @if (session('role_id') == 1 || in_array(1023, session('permissions')))
+                                        <li><a class="menu-item"
+                                                   href="{{ route('admin.settings.wallet_shippers.index') }}">Wallet Shippers</a></li>
                                         @endif
                                 </ul>
 

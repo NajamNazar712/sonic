@@ -103,7 +103,7 @@ class ShopifyController extends Controller
                       body {
                         background: none !important;
                         color: #09262e !important;
-                        font-size: 0.9rem !important;
+                        font-size: 0.7rem !important;
                       }
 
                       hr {
@@ -131,10 +131,10 @@ class ShopifyController extends Controller
                       }
                       
                       p{
-                      font-size: 18px;
+                      font-size: 10px;
                       }
                       table td{
-                        font-size: 20px;
+                        font-size: 12px;
                       }
                     </style>
                   </head>
@@ -150,15 +150,15 @@ class ShopifyController extends Controller
                             <div class="col-6 text-right"><h3>Invoices for #' . $order['order'] . '</h3></div>
                         </div>
                         <div>
-                            <div><h2>'. $user.'</h2></div>
+                            <div><h4>'. $user.'</h4></div>
                         </div>
                         <div>
                             <div><h5>'. $invoice->address .'</h5></div>
-                            <div class="border-bottom mt-2 mb-2"></div>
+                            <div class="border-bottom mt-1 mb-1"></div>
                         </div>
                              
                          <div>
-                            <h1>Item Details</h1>
+                            <h4>Item Details</h4>
                          </div>
                              
                              
@@ -168,6 +168,8 @@ class ShopifyController extends Controller
                                     <tr>
                                         <td>Quantity</td>
                                         <td>Item</td>
+                                        <td>SKU</td>
+                                        <td>Discount</td>
                                         <td>Price</td>
                                     </tr>
                                     
@@ -177,6 +179,8 @@ class ShopifyController extends Controller
                             $html .='<tr>
                                         <td>'. $item['quantity'] .'x</td>
                                         <td>'. $item['name'] .'</td>
+                                         <td>'. $item['sku'] .'</td>
+                                        <td>'. $item['discount'] .'</td>
                                         <td>Rs.'. $item['price'] .'</td>
                                     </tr>';
                         }
@@ -208,7 +212,7 @@ class ShopifyController extends Controller
                         </div>
                              
                          <div class="mb-1">
-                            <h1>Payment Details</h1>
+                            <h4>Payment Details</h4>
                          </div>
                              
                          <div>
@@ -223,6 +227,9 @@ class ShopifyController extends Controller
                              <tr>
                                  <td>Shipping: </td><td>Rs.'. $order['shipping'] .'</td>
                              </tr>
+                              <tr>
+                                 <td>Total Discount: </td><td>Rs.'. $order['total_discount'] .'</td>
+                             </tr>
                              <tr>
                                  <td><b>Total price:</b></td><td><b>Rs.'. $order['total_price'] .'</b></td>
                              </tr>
@@ -235,16 +242,6 @@ class ShopifyController extends Controller
                              </tbody>
                          </table>
                          </div> 
-                         <div class="mb-1">
-                            <h1>Shipping Details</h1>
-                         </div>   
-                         <div>
-                             <div class="border p-2">
-                                <h3 class="">'. $consignee_name .'</h3>
-                                <p>'. $consignee_address .'</p>
-                                <p class="mb-0">Phone: '. $consignee_phone .'</p>
-                            </div>
-                        </div>
                             
                         <div class="mb-2 mt-2">
                             <p>'.  $invoice->message .'</p>

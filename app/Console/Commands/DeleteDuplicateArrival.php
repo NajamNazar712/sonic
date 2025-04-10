@@ -46,6 +46,32 @@ class DeleteDuplicateArrival extends Command
         $endDate = Carbon::now()->format('Y-m-d 23:59:59');
         $type = 3;
 
+
+        $duplicates_pending_invoice = DB::table('pending_invoice_shipments')
+            ->selectRaw('MIN(pending_invoice_shipments.id) AS min_id, shipments.user_id')
+            ->join('shipments', 'shipments.id', '=', 'pending_invoice_shipments.shipment_id')
+            ->join('users', 'users.id', '=', 'shipments.user_id')
+            ->whereBetween('pending_invoice_shipments.created_at', [$startDate, $endDate])
+            ->where('pending_invoice_shipments.type', $type)
+            ->groupBy(
+                'pending_invoice_shipments.shipment_id',
+                'pending_invoice_shipments.invoice_amount',
+                'pending_invoice_shipments.charges',
+                'pending_invoice_shipments.type'
+            )
+            ->havingRaw('COUNT(pending_invoice_shipments.shipment_id) > 1')
+            ->havingRaw('COUNT(pending_invoice_shipments.invoice_amount) > 1')
+            ->havingRaw('COUNT(pending_invoice_shipments.charges) > 1')
+            ->havingRaw('COUNT(pending_invoice_shipments.type) > 1')
+            ->pluck('user_id', 'min_id')
+            ->toArray();
+
+        if (count($duplicates_pending_invoice) > 0) {
+            $duplicate_value_invoice = array_keys($duplicates_pending_invoice);
+            $user_ids_2 = array_values($duplicates_pending_invoice);
+            DB::table('pending_invoice_shipments')->whereIn('id', $duplicate_value_invoice)->delete();
+        }
+
         $duplicates = DB::table('pending_payment_shipments')
             ->selectRaw('MIN(pending_payment_shipments.id) AS min_id,pending_payments.user_id')
             ->whereBetween('pending_payment_shipments.created_at', [$startDate, $endDate])
@@ -185,6 +211,9 @@ class DeleteDuplicateArrival extends Command
                 ->where('id', $pendingPaymentId)
                 ->update($data);
         }
+
+
+
 
 
     }

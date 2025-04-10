@@ -20,6 +20,9 @@ use App\Http\Models\Admin\NotificationReturnedDeliveredToShipper;
 use App\Observers\GenericObserver;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminRole;
+use App\Observers\ShipmentAmountChangeObserver;
+use App\Http\Models\Shipment;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -33,7 +36,7 @@ class AppServiceProvider extends ServiceProvider
         Schema::defaultStringLength(191);
         Admin::observe(GenericObserver::class);
         AdminRole::observe(GenericObserver::class);
-
+        Shipment::observe(ShipmentAmountChangeObserver::class);
 
         view()->composer('*', function ($view) {
             $search_sonic = NULL;

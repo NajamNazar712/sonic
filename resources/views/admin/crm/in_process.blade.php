@@ -189,7 +189,7 @@
                             @csrf
                             <div class="row justify-content-center">
                                 <div class="col-11">
-                                    <fieldset class="form-group">
+                                    <fieldset class="form-group d-none">
                                         <input type="hidden" id="crm_request_ids" value="">
                                         <input type="hidden" id="prev_status" name="prev_status"
                                                value="">
@@ -411,7 +411,8 @@
                                 row.push(values.arrival);                                     // Arrival Date
                                 row.push(values.arrival_today);                                // Arrival to Today (TAT)
                                 row.push(values.status);                                      // Shipment Status
-                                row.push(values.last_status_date);                            // Last Status Date
+                                // row.push(values.last_status_date);                            // Last Status Date
+                                row.push(values.last_date_status);                            // Last Status Date
                                 row.push(values.last_status_today);                            // Last status to Today (TAT)
                                 row.push(values.last_status_updated_by);                      // Last status by
                                 row.push(values.case_nature);                                 // Case Nature
@@ -806,7 +807,8 @@
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},                               // Arrival Date
                     {data: 'arrival_today', name: 'arrival_today', class: 'align-middle arrival_today', orderable: false, searchable: false}, // Arrival to Today (TAT)
                     {data: 'status', name: 'status', class: 'align-middle shipment_status'},                               // Shipment Status
-                    {data: 'last_status_date', name: 'crm_requests.updated_at', class: 'align-middle last_status_date'},          // Last Status Date
+                    // {data: 'last_status_date', name: 'crm_requests.updated_at', class: 'align-middle last_status_date'},          // Last Status Date
+                    {data: 'last_date_status', name: 'last_updated_sj.created_at', class: 'align-middle last_date_status'},          // Last Status Date from shipments journey
                     {data: 'last_status_today', name: 's.updated_at', class: 'align-middle last_status_today', orderable: false}, // Last status to Today (TAT)
                     {data: 'last_status_updated_by', name: 'last_status_upd_by.name', class: 'align-middle last_status_updated_by'},                // Last status by
                     {data: 'case_nature', name: 'crcn.id', class: 'align-middle case_nature'},                             // Case Nature
@@ -1439,13 +1441,11 @@
             }).bind('change', function () {
                 var id = parseInt($(this).val());
                 if (id === 1) {
-                    $('#admin_tag_div').addClass('d-none');
                     $('#department_tag_div').removeClass('d-none');
                 } else if (id === 2) {
                     $('#department_tag_div').addClass('d-none');
                     $('#admin_tag_div').removeClass('d-none');
                 } else {
-                    $('#admin_tag_div').addClass('d-none');
                     $('#department_tag_div').addClass('d-none');
                 }
             });
@@ -1457,23 +1457,28 @@
                 $('#tag_type').val('').trigger('change');
                 $('#admin_tag_hub').val('').trigger('change');
                 $('#admin_tag_department').val('').trigger('change');
-                $('#admin_tag_div').addClass('d-none');
+                $('#tag_admin').val('').trigger('change');
                 $('#department_tag_div').addClass('d-none');
             });
+            $('#admin_tag_div').removeClass('d-none');
+
             $('#tag_adminSubmit').on('click', function () {
-                var type = parseInt($('#tag_type').val());
-                var tag_hub = null;
-                if (type === 1) {
-                    var tag = parseInt($('#tag_department').val());
-                    tag_hub = parseInt($('#tag_hub').val());
-                    if(!tag_hub){
-                        tag_hub = null;
-                    }
+                var type = parseInt($('#tag_type').val()) || 0;
+                var tag_hub = $('#admin_tag_hub').val();
+                tag_hub = tag_hub ? parseInt(tag_hub) : null;
+
+                var dept = parseInt($('#admin_tag_department').val()) || 0;
+                var admin = parseInt($('#tag_admin').val()) || 0;
+
+                var tag = 0; 
+
+                if (admin !== 0) {
+                    tag = admin;
+                } else if (dept !== 0) {
+                    tag = dept; 
                 }
-                else if (type === 2) {
-                    var tag = parseInt($('#tag_admin').val());
-                }
-                if (tag) {
+
+                if ((tag)) {
                     $('#tag_adminSubmit').attr('disabled', true);
                     swal({
                         title: 'Please Wait!',
@@ -1489,6 +1494,7 @@
                         data: {
                             'tagged_id': tag,
                             'tagged_hub': tag_hub,
+                            'admin_id': admin,
                             'crm_request_ids[]': selected_rows,
                             'crm_request_tagging_type_id': type,
                             '_token': '{{ csrf_token() }}'
@@ -1517,16 +1523,8 @@
                             table.draw('false');
                         });
                 }
-                else {
-                    if (type === 1) {
-                        var error = "Department Not Selected!";
-                    }
-                    else if (type === 2) {
-                        var error = "User Not Selected!";
-                    }
-                    else {
-                        error = "Type Not Selected!";
-                    }
+                else {  
+                    error = 'Please select only one: either Admin or Department';
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
 

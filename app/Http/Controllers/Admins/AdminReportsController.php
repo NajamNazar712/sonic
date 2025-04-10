@@ -3544,7 +3544,8 @@ class AdminReportsController extends Controller
                 $to_id = $to_id->first()->id;
                 // $sales->where('sj.id', '>=', $from_id)
                 //     ->where('sj.id', '<=', $to_id);
-                $sales->whereBetween('sj.id', [$from_id, $to_id]);
+                $sales->whereBetween('sj.id', [$from_id, $to_id])
+                    ->whereBetween('sj.created_at', [$from, $to]);
             }
         }
 
@@ -6608,7 +6609,7 @@ class AdminReportsController extends Controller
         }
         $gst = DB::connection('reports')->table('done_payments')->leftjoin('done_payment_shipments as dps', 'dps.done_payment_id', '=', 'done_payments.id')
             ->leftjoin('users as u', 'done_payments.user_id', '=', 'u.id')
-            ->select('u.id as account_no', 'u.name as user_name', 'u.ntn_no as ntn_number', DB::connection('reports')->raw('SUM(dps.charges) as w_o_gst'), DB::connection('reports')->raw('SUM(dps.gst) as gst'), DB::connection('reports')->raw('SUM(dps.payable) as total_charges'))
+            ->select('u.id as account_no', 'u.name as user_name', 'u.ntn_no as ntn_number', DB::connection('reports')->raw('SUM(dps.charges) as w_o_gst'), DB::connection('reports')->raw('SUM(dps.gst) as gst'), DB::connection('reports')->raw('SUM(dps.payable) as total_charges'), 'u.cnic as cnic')
             ->groupBy('done_payments.user_id');
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
@@ -6617,7 +6618,7 @@ class AdminReportsController extends Controller
         }
         $gst_corporate = DB::connection('reports')->table('invoices')->leftjoin('invoice_shipments as is', 'is.invoice_id', '=', 'invoices.id')
             ->leftjoin('users as u', 'invoices.user_id', '=', 'u.id')
-            ->select('u.id as account_no', 'u.name as user_name', 'u.ntn_no as ntn_number', DB::connection('reports')->raw('SUM(is.charges) as w_o_gst'), DB::connection('reports')->raw('SUM(is.gst) as gst'), DB::connection('reports')->raw('SUM(is.invoice_amount) as total_charges'))
+            ->select('u.id as account_no', 'u.name as user_name', 'u.ntn_no as ntn_number', DB::connection('reports')->raw('SUM(is.charges) as w_o_gst'), DB::connection('reports')->raw('SUM(is.gst) as gst'), DB::connection('reports')->raw('SUM(is.invoice_amount) as total_charges'), 'u.cnic as cnic')
             ->union($gst)
             ->where('u.account_type_id', 2)
             ->groupBy('invoices.user_id');
@@ -6681,316 +6682,612 @@ class AdminReportsController extends Controller
 
     public function crm_list(Request $request)
     {
-        if ($request->get('excel') && $request->get('excel') == true) {
-            ActivityTrailController::createActivityTrailLog(Auth::id(), 174);
-        }
+        try {
 
-        $select = [
-            'crm_requests.id as request_number',
-            's.tracking_number as tracking_number',
-            'crsh.created_at as reopen_date',
-            'crcn.id as case_nature_id',
-            'crcn.name as case_nature',
-            'crcnt.type as case_nature_type',
-            'crm_requests.description as description',
-            'u.name as shipper_name',
-            'oc.name as origin',
-            'och.name as origin_hub',
-            'ocz.name as origin_zone',
-            'dc.name as destination',
-            'h.name as hub',
-            'crc.channel as channel',
-            'a.name as agent',
-            'al.name as name',
-            'us.name as shipper',
-            'su.name as sub_shipper',
-            'crm_requests.launched_by as launched_by_type',
-            'crm_requests.created_at as launched_date',
-            'crah.created_at as assigned_date',
-            'crshv.created_at as valid_date',
-            'crshiv.created_at as invalid_date',
-            'crshr.created_at as resolved_date',
-            'crshc.created_at as closed_date',
-            'crm_requests.status_id as current_status_id',
-            'crs.name as request_status',
-            'sj.updated_at as arrival_date',
-            'ss.name as status',
-            'crt.crm_request_tagging_type_id as tagging_type',
-            'crth.created_at as tagged_at',
-            's.amount as cod_amount',
-            'adjustment.adjustment_amount as adjusted_amount',
-            'change_shipment_weight_logs.new_charges as weight_charges',
-            'ccs.comment as last_comment',
-            'ccs.created_at as last_comment_date',
-            'ccs.comment_by as last_comment_by',
-            'accs.name as last_comment_admin',
-            'ad.name as admin_department',
-            'sjcc.remarks as case_closed_remark',
-            'crr.name as rating',
-            'crr.code as rating_code',
-            'mc.id as month_closing_id',
-            'crt.tagged_id',
-            'crt.hub_id',
-            'crm_requests.shipment_id',
-            'z.name as zone',
-            'ss.id as shipment_status_id',
-            'ss.created_at as last_status_date',
-            'ca.name as sub_hub',
-            's.parcel_value as parcel_value',
-            'seg.name as segment',
-            'si.description as shipment_description',
-            'prod.product_name as product_name',
-            'si.quantity as shipment_quantity',
-            's.pieces as pieces',
-            's.actual_weight as actual_weight',
-            'ad2.name as kae'
-        ];
+            if ($request->get('excel') && $request->get('excel') == true) {
+                ActivityTrailController::createActivityTrailLog(Auth::id(), 174);
+            }
 
-        $crm = DB::connection('reports')->table('crm_requests')->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
-            ->leftjoin('shipment_status as ss', 'ss.id', '=', 's.shipper_status_id')
-            ->leftjoin('crm_request_statuses as crs', 'crs.id', '=', 'crm_requests.status_id')
-            ->leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_requests.case_nature_id')
-            ->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'crm_requests.case_nature_type_id')
-            ->leftjoin('users as u', 'u.id', '=', 's.user_id')
-            ->leftjoin('user_shipping_infos AS usi', 'usi.id', '=', 's.pickup_address_id')
-            ->leftJoin('booking_types as bt', 'bt.id', '=', 's.booking_type_id')
+            $select = [
+                'crm_requests.id as request_number',
+                's.tracking_number as tracking_number',
+                'crsh.created_at as reopen_date',
+                'crcn.id as case_nature_id',
+                'crcn.name as case_nature',
+                'crcnt.type as case_nature_type',
+                'crm_requests.description as description',
+                'u.name as shipper_name',
+                'oc.name as origin',
+                'och.name as origin_hub',
+                'ocz.name as origin_zone',
+                'dc.name as destination',
+                'h.name as hub',
+                'crc.channel as channel',
+                'a.name as agent',
+                'al.name as name',
+                'us.name as shipper',
+                'su.name as sub_shipper',
+                'crm_requests.launched_by as launched_by_type',
+                'crm_requests.created_at as launched_date',
+                'crah.created_at as assigned_date',
+                'crshv.created_at as valid_date',
+                'crshiv.created_at as invalid_date',
+                'crshr.created_at as resolved_date',
+                'crshc.created_at as closed_date',
+                'crm_requests.status_id as current_status_id',
+                'crs.name as request_status',
+                'sj.updated_at as arrival_date',
+                'ss.name as status',
+                'crt.crm_request_tagging_type_id as tagging_type',
+                'crth.created_at as tagged_at',
+                's.amount as cod_amount',
+                'adjustment.adjustment_amount as adjusted_amount',
+                'change_shipment_weight_logs.new_charges as weight_charges',
+                'ccs.comment as last_comment',
+                'ccs.created_at as last_comment_date',
+                'ccs.comment_by as last_comment_by',
+                'accs.name as last_comment_admin',
+                'ad.name as admin_department',
+                'sjcc.remarks as case_closed_remark',
+                'crr.name as rating',
+                'crr.code as rating_code',
+                'mc.id as month_closing_id',
+                'crt.tagged_id',
+                'crt.hub_id',
+                'crm_requests.shipment_id',
+                'z.name as zone',
+                'ss.id as shipment_status_id',
+                'ss.created_at as last_status_date',
+                'ca.name as sub_hub',
+                's.parcel_value as parcel_value',
+                'seg.name as segment',
+                'si.description as shipment_description',
+                'prod.product_name as product_name',
+                'si.quantity as shipment_quantity',
+                's.pieces as pieces',
+                's.actual_weight as actual_weight',
+                'ad2.name as kae',
+                'crm_requests.complainant_phone as complainant_phone',
+                DB::raw("
+                    CASE 
+                        WHEN crm_requests.case_nature_complainant = 1 THEN 'Consignee' 
+                        WHEN crm_requests.case_nature_complainant IS NULL THEN '-' 
+                        ELSE 'Shipper' 
+                    END as case_nature_complainant
+                ")
 
-            ->leftjoin('cities as oc', 'oc.id', '=', 'usi.city_id')
-            ->leftjoin('cities as och', 'och.id', '=', 'oc.hub_id')
-            ->leftjoin('zones as ocz', 'ocz.id', '=', 'oc.zone_id')
-            ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
-            ->leftjoin('cities as h', 'h.id', '=', 'dc.hub_id')
-            ->leftjoin('zones as z', 'z.id', '=', 'dc.zone_id')
+            ];
 
-            ->leftjoin('crm_request_channels as crc', 'crc.id', '=', 'crm_requests.channel_id')
-            ->leftjoin('admins as a', 'a.id', '=', 'crm_requests.agent_id')
-            ->leftJoin('admins as al', function ($join) {
-                $join->on('al.id', '=', 'crm_requests.launched_by_id')
-                    ->where('crm_requests.launched_by', '=', DB::raw(0));
-            })
-            ->leftjoin('admin_roles as ar', 'ar.id', '=', 'al.role_id')
-            ->leftjoin('admin_departments as ad', 'ad.id', '=', 'ar.department_id')
-            ->leftJoin('users as us', function ($join) {
-                $join->on('us.id', '=', 'crm_requests.launched_by_id')
-                    ->where('crm_requests.launched_by', '=', DB::raw(1));
-            })
-            ->leftJoin('substitute_users as su', function ($join) {
-                $join->on('su.id', '=', 'crm_requests.launched_by_id')
-                    ->where('crm_requests.launched_by', '=', DB::raw(2));
-            })
-            ->leftjoin('crm_request_agent_histories as crah', function ($join) {
-                $join->on('crah.crm_request_id', '=', 'crm_requests.id')
-                    ->where('crah.id', '=', DB::connection('reports')->raw('(select max(id) from crm_request_agent_histories where crm_request_id = crm_requests.id and agent_id = crm_requests.agent_id)'));
-            })
-            ->leftjoin('crm_request_status_histories as crshv', function ($join) {
-                $join->on('crshv.crm_request_id', '=', 'crm_requests.id')
-                    ->where('crshv.id', '=', DB::connection('reports')->raw('(select min(id) from crm_request_status_histories where crm_request_id = crm_requests.id and status_id = 6)'));
-            })
-            ->leftjoin('crm_request_status_histories as crshiv', function ($join) {
-                $join->on('crshiv.crm_request_id', '=', 'crm_requests.id')
-                    ->where('crshiv.id', '=', DB::connection('reports')->raw('(select min(id) from crm_request_status_histories where crm_request_id = crm_requests.id and status_id = 7)'));
-            })
-            ->leftjoin('crm_request_status_histories as crshr', function ($join) {
-                $join->on('crshr.crm_request_id', '=', 'crm_requests.id')
-                    ->where('crshr.id', '=', DB::connection('reports')->raw('(select max(id) from crm_request_status_histories where crm_request_id = crm_requests.id and status_id = 3)'));
-            })
-            ->leftjoin('crm_request_status_histories as crshc', function ($join) {
-                $join->on('crshc.crm_request_id', '=', 'crm_requests.id')
-                    ->where('crshc.id', '=', DB::connection('reports')->raw('(select max(id) from crm_request_status_histories where crm_request_id = crm_requests.id and status_id = 4)'));
-            })
-            ->leftJoin('shipments_journey as sj', function ($join) {
-                $join->on('sj.shipment_id', '=', 'crm_requests.shipment_id')
-                    ->where(
-                        'sj.id',
-                        '=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = crm_requests.shipment_id and shipments_journey.shipper_status_id = 2)')
-                    );
-            })
-            ->leftJoin('crm_request_taggings as crt', function ($join) {
-                $join->on('crt.crm_request_id', '=', 'crm_requests.id')
-                    ->where(
-                        'crt.id',
-                        '=',
-                        DB::raw('(select max(id) from crm_request_taggings where crm_request_taggings.crm_request_id = crm_requests.id)')
-                    );
-            })
-            ->leftjoin('crm_request_tagging_histories as crth', function ($join) {
-                $join->on('crth.crm_request_id', '=', 'crm_requests.id')
-                    ->where(
-                        'crth.id',
-                        '=',
-                        DB::raw('(select max(id) from crm_request_tagging_histories where crm_request_tagging_histories.crm_request_id = crm_requests.id)')
-                    );
-            })
-            ->leftjoin('crm_request_status_histories as crsh', function ($join) {
-                $join->on('crsh.crm_request_id', '=', 'crm_requests.id')
-                    ->where('crsh.created_at', '=', DB::raw('(select max(created_at) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 5)'));
-            })
-            ->leftjoin('adjustment_logs as adjustment', function ($join) {
-                $join->on('adjustment.shipment_id', '=', 'crm_requests.shipment_id')
-                    ->where('adjustment.created_at', '=', DB::raw('(select max(created_at) from adjustment_logs where adjustment_logs.shipment_id = crm_requests.shipment_id and adjustment_logs.adjustment_type_id IN (4,6,7,8,9,10,11) )'));
-            })
-            ->leftjoin('change_shipment_weight_logs', function ($join) {
-                $join->on('change_shipment_weight_logs.shipment_id', '=', 'crm_requests.shipment_id')
-                    ->where('change_shipment_weight_logs.created_at', '=', DB::raw('(select max(created_at) from change_shipment_weight_logs where change_shipment_weight_logs.shipment_id= crm_requests.shipment_id)'));
-            })
-            ->leftjoin('crm_comments as ccs', function ($join) {
-                $join->on('ccs.crm_request_id', '=', 'crm_requests.id')
-                    ->where('ccs.id', '=', DB::raw('(select max(id) from crm_comments where crm_comments.crm_request_id = crm_requests.id AND crm_comments.comment_type = 1)'));
-            })
-            ->leftjoin('admins as accs', 'accs.id', '=', 'ccs.comment_by_id')
-            ->leftjoin('crm_comments as ccse', function ($join) {
-                $join->on('ccse.crm_request_id', '=', 'crm_requests.id')
-                    ->where('ccse.id', '=', DB::raw('(select max(id) from crm_comments where crm_comments.crm_request_id = crm_requests.id AND crm_comments.comment_type = 0)'));
-            })
-            ->leftJoin('shipments_journey as sjcc', function ($join) {
-                $join->on('sjcc.shipment_id', '=', 'crm_requests.shipment_id')
-                    ->where(
-                        'sjcc.id',
-                        '=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = crm_requests.shipment_id and shipments_journey.shipper_status_id = 51)')
-                    );
-            })
-            ->leftjoin('crm_request_feedbacks as crf', 'crf.crm_request_id', '=', 'crm_requests.id')
-            ->leftjoin('crm_request_ratings as crr', 'crr.id', '=', 'crf.rating_id')
+            $crm = DB::connection('reports')->table('crm_requests')->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+                ->leftjoin('shipment_status as ss', 'ss.id', '=', 's.shipper_status_id')
+                ->leftjoin('crm_request_statuses as crs', 'crs.id', '=', 'crm_requests.status_id')
+                ->leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_requests.case_nature_id')
+                ->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'crm_requests.case_nature_type_id')
+                ->leftjoin('users as u', 'u.id', '=', 's.user_id')
+                ->leftjoin('user_shipping_infos AS usi', 'usi.id', '=', 's.pickup_address_id')
+                ->leftJoin('booking_types as bt', 'bt.id', '=', 's.booking_type_id')
 
-            ->leftjoin('month_closings as mc', 'mc.shipment_id', '=', 's.id')
+                ->leftjoin('cities as oc', 'oc.id', '=', 'usi.city_id')
+                ->leftjoin('cities as och', 'och.id', '=', 'oc.hub_id')
+                ->leftjoin('zones as ocz', 'ocz.id', '=', 'oc.zone_id')
+                ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
+                ->leftjoin('cities as h', 'h.id', '=', 'dc.hub_id')
+                ->leftjoin('zones as z', 'z.id', '=', 'dc.zone_id')
+
+                ->leftjoin('crm_request_channels as crc', 'crc.id', '=', 'crm_requests.channel_id')
+                ->leftjoin('admins as a', 'a.id', '=', 'crm_requests.agent_id')
+                ->leftJoin('admins as al', function ($join) {
+                    $join->on('al.id', '=', 'crm_requests.launched_by_id')
+                        ->where('crm_requests.launched_by', '=', DB::raw(0));
+                })
+                ->leftjoin('admin_roles as ar', 'ar.id', '=', 'al.role_id')
+                ->leftjoin('admin_departments as ad', 'ad.id', '=', 'ar.department_id')
+                ->leftJoin('users as us', function ($join) {
+                    $join->on('us.id', '=', 'crm_requests.launched_by_id')
+                        ->where('crm_requests.launched_by', '=', DB::raw(1));
+                })
+                ->leftJoin('substitute_users as su', function ($join) {
+                    $join->on('su.id', '=', 'crm_requests.launched_by_id')
+                        ->where('crm_requests.launched_by', '=', DB::raw(2));
+                })
+                ->leftjoin('crm_request_agent_histories as crah', function ($join) {
+                    $join->on('crah.crm_request_id', '=', 'crm_requests.id')
+                        ->where('crah.id', '=', DB::connection('reports')->raw('(select max(id) from crm_request_agent_histories where crm_request_id = crm_requests.id and agent_id = crm_requests.agent_id)'));
+                })
+                ->leftjoin('crm_request_status_histories as crshv', function ($join) {
+                    $join->on('crshv.crm_request_id', '=', 'crm_requests.id')
+                        ->where('crshv.id', '=', DB::connection('reports')->raw('(select min(id) from crm_request_status_histories where crm_request_id = crm_requests.id and status_id = 6)'));
+                })
+                ->leftjoin('crm_request_status_histories as crshiv', function ($join) {
+                    $join->on('crshiv.crm_request_id', '=', 'crm_requests.id')
+                        ->where('crshiv.id', '=', DB::connection('reports')->raw('(select min(id) from crm_request_status_histories where crm_request_id = crm_requests.id and status_id = 7)'));
+                })
+                ->leftjoin('crm_request_status_histories as crshr', function ($join) {
+                    $join->on('crshr.crm_request_id', '=', 'crm_requests.id')
+                        ->where('crshr.id', '=', DB::connection('reports')->raw('(select max(id) from crm_request_status_histories where crm_request_id = crm_requests.id and status_id = 3)'));
+                })
+                ->leftjoin('crm_request_status_histories as crshc', function ($join) {
+                    $join->on('crshc.crm_request_id', '=', 'crm_requests.id')
+                        ->where('crshc.id', '=', DB::connection('reports')->raw('(select max(id) from crm_request_status_histories where crm_request_id = crm_requests.id and status_id = 4)'));
+                })
+                ->leftJoin('shipments_journey as sj', function ($join) {
+                    $join->on('sj.shipment_id', '=', 'crm_requests.shipment_id')
+                        ->where(
+                            'sj.id',
+                            '=',
+                            DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = crm_requests.shipment_id and shipments_journey.shipper_status_id = 2)')
+                        );
+                })
+                ->leftJoin('crm_request_taggings as crt', function ($join) {
+                    $join->on('crt.crm_request_id', '=', 'crm_requests.id')
+                        ->where(
+                            'crt.id',
+                            '=',
+                            DB::raw('(select max(id) from crm_request_taggings where crm_request_taggings.crm_request_id = crm_requests.id)')
+                        );
+                })
+                ->leftjoin('crm_request_tagging_histories as crth', function ($join) {
+                    $join->on('crth.crm_request_id', '=', 'crm_requests.id')
+                        ->where(
+                            'crth.id',
+                            '=',
+                            DB::raw('(select max(id) from crm_request_tagging_histories where crm_request_tagging_histories.crm_request_id = crm_requests.id)')
+                        );
+                })
+                ->leftjoin('crm_request_status_histories as crsh', function ($join) {
+                    $join->on('crsh.crm_request_id', '=', 'crm_requests.id')
+                        ->where('crsh.created_at', '=', DB::raw('(select max(created_at) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 5)'));
+                })
+                ->leftjoin('adjustment_logs as adjustment', function ($join) {
+                    $join->on('adjustment.shipment_id', '=', 'crm_requests.shipment_id')
+                        ->where('adjustment.created_at', '=', DB::raw('(select max(created_at) from adjustment_logs where adjustment_logs.shipment_id = crm_requests.shipment_id and adjustment_logs.adjustment_type_id IN (4,6,7,8,9,10,11) )'));
+                })
+                ->leftjoin('change_shipment_weight_logs', function ($join) {
+                    $join->on('change_shipment_weight_logs.shipment_id', '=', 'crm_requests.shipment_id')
+                        ->where('change_shipment_weight_logs.created_at', '=', DB::raw('(select max(created_at) from change_shipment_weight_logs where change_shipment_weight_logs.shipment_id= crm_requests.shipment_id)'));
+                })
+                ->leftjoin('crm_comments as ccs', function ($join) {
+                    $join->on('ccs.crm_request_id', '=', 'crm_requests.id')
+                        ->where('ccs.id', '=', DB::raw('(select max(id) from crm_comments where crm_comments.crm_request_id = crm_requests.id AND crm_comments.comment_type = 1)'));
+                })
+                ->leftjoin('admins as accs', 'accs.id', '=', 'ccs.comment_by_id')
+                ->leftjoin('crm_comments as ccse', function ($join) {
+                    $join->on('ccse.crm_request_id', '=', 'crm_requests.id')
+                        ->where('ccse.id', '=', DB::raw('(select max(id) from crm_comments where crm_comments.crm_request_id = crm_requests.id AND crm_comments.comment_type = 0)'));
+                })
+                ->leftJoin('shipments_journey as sjcc', function ($join) {
+                    $join->on('sjcc.shipment_id', '=', 'crm_requests.shipment_id')
+                        ->where(
+                            'sjcc.id',
+                            '=',
+                            DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = crm_requests.shipment_id and shipments_journey.shipper_status_id = 51)')
+                        );
+                })
+                ->leftjoin('crm_request_feedbacks as crf', 'crf.crm_request_id', '=', 'crm_requests.id')
+                ->leftjoin('crm_request_ratings as crr', 'crr.id', '=', 'crf.rating_id')
+
+                ->leftjoin('month_closings as mc', 'mc.shipment_id', '=', 's.id')
 
 
-            //(feature/TO-6880-additional-columns-and-modificat)
-            ->leftJoin('consignee_address_areas as caa', 'caa.shipment_id', '=', 's.id')
-            ->leftJoin('city_areas as ca', 'ca.id', '=', 'caa.city_area_id')
-            ->leftjoin('segments as seg','u.segment_id','seg.id')
-            ->leftjoin('shipment_items as si','si.shipment_id','s.id')
-            ->leftjoin('products as prod', 'prod.id', '=', 'si.product_type_id')
-            ->leftjoin('sale_tier_tags as stt','stt.user_id', '=','s.user_id')
-            ->leftjoin('admins as ad2','ad2.id','=','stt.kam')
-            ->leftjoin('crm_request_taggings as crt1', 'crt1.crm_request_id', '=', 'crm_requests.id')
-            ->leftjoin('admin_departments as adp', 'adp.id', '=', 'crt1.tagged_id')
-            //END
+                //(feature/TO-6880-additional-columns-and-modificat)
+                ->leftJoin('consignee_address_areas as caa', 'caa.shipment_id', '=', 's.id')
+                ->leftJoin('city_areas as ca', 'ca.id', '=', 'caa.city_area_id')
+                ->leftjoin('segments as seg','u.segment_id','seg.id')
+                ->leftjoin('shipment_items as si','si.shipment_id','s.id')
+                ->leftjoin('products as prod', 'prod.id', '=', 'si.product_type_id')
+                ->leftjoin('sale_tier_tags as stt','stt.user_id', '=','s.user_id')
+                ->leftjoin('admins as ad2','ad2.id','=','stt.kam')
+                ->leftjoin('crm_request_taggings as crt1', 'crt1.crm_request_id', '=', 'crm_requests.id')
+                ->leftjoin('admin_departments as adp', 'adp.id', '=', 'crt1.tagged_id')
+                //END
 
-            ->select( $select)
-            ->groupBy('crm_requests.id');
+                ->select( $select)
+                ->groupBy('crm_requests.id');
 
-        if (session('department_id') == 8) {
-            $crm = $crm->where('s.shipment_type', 2);
-        }
+            if (session('department_id') == 8) {
+                $crm = $crm->where('s.shipment_type', 2);
+            }
 
-        $current_date = Carbon::now();
-        $datatable = Datatables::of($crm)
-            ->addColumn('tagged_to', function ($crm_request) {
-                if (in_array($crm_request->tagging_type, [2, 4, 5])) {
-                    return Admin::find($crm_request->tagged_id)->name ?? '-';
-                } else if ($crm_request->tagging_type == 1) {
-                    return AdminDepartment::find($crm_request->tagged_id)->name;
-                } else {
-                    return '-';
-                }
-            })
-            ->editColumn('tracking_number_link', function ($crm_request) {
-                $route = route('admin.tracking.index');
-                return "<u><a href='{$route}?tracking_number=$crm_request->tracking_number' class='tracking' target='_blank'>$crm_request->tracking_number</a></u>";
-            })
-            ->editColumn('valid_invalid_status', function ($crm_request) {
-                if ($crm_request->valid_date != null) {
-                    return 'Valid';
-                } else if ($crm_request->invalid_date != null) {
-                    return 'Invalid';
-                } else {
-                    return '-';
-                }
-            })
-            ->editColumn('valid_invalid_date', function ($crm_request) {
-                if ($crm_request->valid_date != null) {
-                    return $crm_request->valid_date;
-                } else if ($crm_request->invalid_date != null) {
-                    return $crm_request->invalid_date;
-                } else {
-                    return '-';
-                }
-            })
-            ->editColumn('request_number', function ($crm_request) {
-                return str_pad($crm_request->request_number, 6, '0', STR_PAD_LEFT);
-            })
-            ->addColumn('id_padded_link', function ($crm_request) {
-                return '<u><a href=' . route('admin.crm.request.details', ['id' => $crm_request->request_number]) . ' target="_blank">' . str_pad($crm_request->request_number, 6, '0', STR_PAD_LEFT) . '</a></u>';
-            })
-            ->addColumn('launched_by_name', function ($requests) {
-                $name = '';
-                if ($requests->launched_by_type == 0) {
-                    $name = $requests->name;
-                } else if ($requests->launched_by_type == 1) {
-                    $name = $requests->shipper;
-                } else {
-                    $name = $requests->sub_shipper;
-                }
-                return $name;
-            })
-            ->editColumn('admin_department', function ($requests) {
-                $name = '';
-                if ($requests->launched_by_type == 0) {
-                    $name = $requests->admin_department;
-                } else {
-                    $name = '-';
-                }
-                return $name;
-            })
-            ->editColumn('launched_by_type', function ($requests) {
-                if ($requests->launched_by_type == 0) {
-                    return 'Admin';
-                } else if ($requests->launched_by_type == 1) {
-                    return 'Shipper';
-                } else {
-                    return 'Shipper Substitute User';
-                }
-            })
-            ->editColumn('closed_date', function ($requests) {
-                if ($requests->current_status_id == 4) {
-                    return $requests->closed_date;
-                } else {
-                    return '-';
-                }
-            })
-            ->addColumn('launched_to_today', function ($requests) {
-
-                if ($requests->launched_date) {
-                    Carbon::setWeekendDays([
-                        Carbon::SUNDAY,
-                    ]);
-
-                    $launched_date = Carbon::parse($requests->launched_date);
-                    $today = Carbon::now();
-                    $days = $launched_date->diffInDays($today);
-                    if ($days <= 0) {
-                        return '-';
+            $current_date = Carbon::now();
+            $datatable = Datatables::of($crm)
+                ->addColumn('tagged_to', function ($crm_request) {
+                    if (in_array($crm_request->tagging_type, [2, 4, 5])) {
+                        return Admin::find($crm_request->tagged_id)->name ?? '-';
+                    } else if ($crm_request->tagging_type == 1) {
+                        return AdminDepartment::find($crm_request->tagged_id)->name;
                     } else {
-                        return $days;
+                        return '-';
                     }
+                })
+                ->editColumn('tracking_number_link', function ($crm_request) {
+                    $route = route('admin.tracking.index');
+                    return "<u><a href='{$route}?tracking_number=$crm_request->tracking_number' class='tracking' target='_blank'>$crm_request->tracking_number</a></u>";
+                })
+                ->editColumn('valid_invalid_status', function ($crm_request) {
+                    if ($crm_request->valid_date != null) {
+                        return 'Valid';
+                    } else if ($crm_request->invalid_date != null) {
+                        return 'Invalid';
+                    } else {
+                        return '-';
+                    }
+                })
+                ->editColumn('valid_invalid_date', function ($crm_request) {
+                    if ($crm_request->valid_date != null) {
+                        return $crm_request->valid_date;
+                    } else if ($crm_request->invalid_date != null) {
+                        return $crm_request->invalid_date;
+                    } else {
+                        return '-';
+                    }
+                })
+                ->editColumn('request_number', function ($crm_request) {
+                    return str_pad($crm_request->request_number, 6, '0', STR_PAD_LEFT);
+                })
+                ->addColumn('id_padded_link', function ($crm_request) {
+                    return '<u><a href=' . route('admin.crm.request.details', ['id' => $crm_request->request_number]) . ' target="_blank">' . str_pad($crm_request->request_number, 6, '0', STR_PAD_LEFT) . '</a></u>';
+                })
+                ->addColumn('launched_by_name', function ($requests) {
+                    $name = '';
+                    if ($requests->launched_by_type == 0) {
+                        $name = $requests->name;
+                    } else if ($requests->launched_by_type == 1) {
+                        $name = $requests->shipper;
+                    } else {
+                        $name = $requests->sub_shipper;
+                    }
+                    return $name;
+                })
+                ->editColumn('admin_department', function ($requests) {
+                    $name = '';
+                    if ($requests->launched_by_type == 0) {
+                        $name = $requests->admin_department;
+                    } else {
+                        $name = '-';
+                    }
+                    return $name;
+                })
+                ->editColumn('launched_by_type', function ($requests) {
+                    if ($requests->launched_by_type == 0) {
+                        return 'Admin';
+                    } else if ($requests->launched_by_type == 1) {
+                        return 'Shipper';
+                    } else {
+                        return 'Shipper Substitute User';
+                    }
+                })
+                ->editColumn('closed_date', function ($requests) {
+                    if ($requests->current_status_id == 4) {
+                        return $requests->closed_date;
+                    } else {
+                        return '-';
+                    }
+                })
+                ->addColumn('launched_to_today', function ($requests) {
+
+                    if ($requests->launched_date) {
+                        Carbon::setWeekendDays([
+                            Carbon::SUNDAY,
+                        ]);
+
+                        $launched_date = Carbon::parse($requests->launched_date);
+                        $today = Carbon::now();
+                        $days = $launched_date->diffInDays($today);
+                        if ($days <= 0) {
+                            return '-';
+                        } else {
+                            return $days;
+                        }
+                    } else {
+                        return '-';
+                    }
+                })
+                ->editColumn('case_closed_remark', function ($requests) {
+                    if ($requests->case_closed_remark)
+                        return $requests->case_closed_remark;
+                    else
+                        return '-';
+                })
+                ->editColumn('resolved_date', function ($requests) {
+                    if ($requests->current_status_id == 3 || $requests->current_status_id == 4) {
+                        return $requests->resolved_date;
+                    } else {
+                        return '-';
+                    }
+                })
+                ->addColumn('responsible_hub', function ($requests) {
+                    $responsible_hub = "";
+                    $status = $requests->shipment_status_id;
+                    $shipment_id = $requests->shipment_id;
+                    $origin_hub = $requests->origin_hub;
+                    $destination_hub = $requests->hub;
+                    $shipment_journey = ShipmentsJourney::whereIn('shipper_status_id', [11, 12, 20, 21, 22])
+                        ->where('shipment_id', $shipment_id);
+                    if ($shipment_journey->exists()) {
+                        $shipment_journey = $shipment_journey->pluck('shipper_status_id')->toArray();
+                        if (in_array(11, $shipment_journey) && in_array(12, $shipment_journey)) {
+                            $temp = $destination_hub;
+                            $destination_hub = $origin_hub;
+                            $origin_hub = $temp;
+                        }
+                    }
+                    if ($status == 1 || $status == 2 || $status == 17 || $status == 22) {
+                        $responsible_hub = $origin_hub;
+                    } elseif ($status == 3 || $status == 21) {
+                        $manifest_bag = CargoManifestBagShipments::leftjoin('cargo_manifest_bags as cmb', 'cmb.id', '=', 'cargo_manifest_bag_shipments.cargo_manifest_bag_id')
+                            ->leftjoin('cities as c', 'c.id', '=', 'cmb.origin_hub_id')
+                            ->leftjoin('cities as cd', 'cd.id', '=', 'cmb.destination_hub_id')
+                            ->leftjoin('cities as chi', 'chi.id', '=', 'cmb.current_hub_id')
+                            ->where('cargo_manifest_bag_shipments.shipment_id', $shipment_id)
+                            ->select(['cargo_manifest_bag_shipments.id', 'cmb.status_id', 'c.name as origin_hub', 'cd.name as destination_hub', 'chi.name as curren_hub_origin'])
+                            ->orderby('cargo_manifest_bag_shipments.id', 'desc');
+                        if ($manifest_bag->exists()) {
+                            $manifest_bag = $manifest_bag->first();
+                            if ($manifest_bag->status_id == 0) { //bag created
+                                $responsible_hub = $manifest_bag->origin_hub;
+                            } elseif ($manifest_bag->status_id == 1) { //bag created
+                                $responsible_hub = $manifest_bag->origin_hub;
+                            } elseif ($manifest_bag->status_id == 3) { // bag Received at junction
+                                $responsible_hub = $manifest_bag->curren_hub_origin;
+                            } elseif ($manifest_bag->status_id == 2 || $manifest_bag->status_id == 4 || $manifest_bag->status_id == 5 || $manifest_bag->status_id == 7) {
+                                $responsible_hub = $manifest_bag->destination_hub;
+                            } elseif ($manifest_bag->status_id == 9) {
+                                $responsible_hub = $manifest_bag->curren_hub_origin;
+                            }
+                        }
+                    } elseif ($status == 4 || $status == 12 || $status == 20 || $status == 24 || $status == 11 || $status == 8) {
+                        $responsible_hub = $destination_hub;
+                    } else {
+                        $responsible_hub = "-";
+                    }
+                    return $responsible_hub;
+                })
+                ->editColumn('last_status_date', function ($request) {
+
+                    $shipment = Shipment::where('tracking_number', $request->tracking_number)->first();
+                    $last_shipment = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
+
+                    if (!isset($last_shipment)) {
+                        return '---';
+                    } else {
+                        return Carbon::parse($last_shipment->created_at);
+                    }
+                })
+                ->addColumn('responsible_zone', function ($requests) {
+                    $responsible_zone = "";
+                    $status = $requests->shipment_status_id;
+                    $shipment_id = $requests->shipment_id;
+
+                    $origin_zone = $requests->origin_zone;
+                    $destination_zone = $requests->zone;
+                    $shipment_journey = ShipmentsJourney::whereIn('shipper_status_id', [11, 12, 20, 21, 22])
+                        ->where('shipment_id', $shipment_id);
+                    if ($shipment_journey->exists()) {
+                        $shipment_journey = $shipment_journey->pluck('shipper_status_id')->toArray();
+                        if (in_array(11, $shipment_journey) && in_array(12, $shipment_journey)) {
+                            $temp = $destination_zone;
+                            $destination_zone = $origin_zone;
+                            $origin_zone = $temp;
+                        }
+                    }
+
+                    if ($status == 1 || $status == 2 || $status == 17 || $status == 22) {
+                        $responsible_zone = $origin_zone;
+                    } elseif ($status == 3 || $status == 21) {
+                        $manifest_bag = CargoManifestBagShipments::leftjoin('cargo_manifest_bags as cmb', 'cmb.id', '=', 'cargo_manifest_bag_shipments.cargo_manifest_bag_id')
+                            ->leftjoin('cities as c', 'c.id', '=', 'cmb.origin_hub_id')
+                            ->leftjoin('zones as cz', 'cz.id', '=', 'c.zone_id')
+                            ->leftjoin('cities as cd', 'cd.id', '=', 'cmb.destination_hub_id')
+                            ->leftjoin('zones as cdz', 'cdz.id', '=', 'cd.zone_id')
+                            ->leftjoin('cities as chi', 'chi.id', '=', 'cmb.current_hub_id')
+                            ->leftjoin('zones as chiz', 'chiz.id', '=', 'chi.zone_id')
+                            ->where('cargo_manifest_bag_shipments.shipment_id', $shipment_id)
+                            ->select(['cargo_manifest_bag_shipments.id', 'cmb.status_id', 'cz.name as origin_zone', 'cdz.name as destination_zone', 'chiz.name as curren_zone_origin'])
+                            ->orderby('cargo_manifest_bag_shipments.id', 'desc');
+                        if ($manifest_bag->exists()) {
+                            $manifest_bag = $manifest_bag->first();
+                            if ($manifest_bag->status_id == 0) { //bag created
+                                $responsible_zone = $manifest_bag->origin_zone;
+                            } elseif ($manifest_bag->status_id == 1) { //bag created
+                                $responsible_zone = $manifest_bag->origin_zone;
+                            } elseif ($manifest_bag->status_id == 3) { // bag Received at junction
+                                $responsible_zone = $manifest_bag->curren_zone_origin;
+                            } elseif ($manifest_bag->status_id == 2 || $manifest_bag->status_id == 4 || $manifest_bag->status_id == 5 || $manifest_bag->status_id == 7) {
+                                $responsible_zone = $manifest_bag->destination_zone;
+                            } elseif ($manifest_bag->status_id == 9) {
+                                $responsible_zone = $manifest_bag->curren_zone_origin;
+                            }
+                        }
+                    } elseif ($status == 4 || $status == 12 || $status == 20 || $status == 24 || $status == 11 || $status == 8) {
+                        $responsible_zone = $destination_zone;
+                    } else {
+                        $responsible_zone = '-';
+                    }
+                    return $responsible_zone;
+                })
+                ->editColumn('arrival_today', function ($requests)use($current_date) {
+                    return ($requests->arrival_date && $current_date) ? with((new Carbon($requests->arrival_date, 'UTC'))->diffInWeekendDays($current_date) - (new Carbon($requests->arrival_date, 'UTC'))->diffInDaysFiltered(function (Carbon $date) {
+                            $date->isSunday();
+                        }, $current_date)) : '-';
+                })
+                ->addColumn('shipper_category', function($requests){
+                    if($requests->kae != null){
+                        return 'Key Account';
+                    }else{
+                        return 'Non-Key Account';
+                    }
+                })
+                ->addColumn('tagged_manual_auto', function($requests) {
+                    $crm_tagging = CrmRequestTagging::where('crm_request_id', $requests->request_number)
+                        ->where('crm_request_tagging_type_id', 2)
+                        ->first();
+
+                    if($crm_tagging){
+                        return (
+                            $crm_tagging->tagged_id == '346') ? 'Auto' : 'Manual';
+                    }else{
+                        return '-';
+                    }
+                })
+                ->orderColumn('launched_by_name', DB::connection('reports')->raw('IF (crm_requests.launched_by = 0, a.name, IF (crm_requests.launched_by = 1, us.name, IF (crm_requests.launched_by = 2, su.name, "")))') . ' $1');
+            if ($tracking = $request->get('search_tracking_no')) {
+                $tracking_numbers = explode(',', $tracking);
+                $crm->whereIn('s.tracking_number', $tracking_numbers);
+            }
+            if ($rnumber = $request->get('search_request_number')) {
+                $rnumber = explode(',', $rnumber);
+                $crm->whereIn('crm_requests.id', $rnumber);
+            }
+            if ($shipper = $request->get('search_shipper')) {
+
+                $crm->whereIn('u.id', $shipper);
+            }
+            //        if($origin = $request->get('search_origin')){
+            //            $datatable->where('oc.id', '=', $origin);
+            //        }
+            if ($destination = $request->get('search_destination')) {
+                $crm->where('dc.id', '=', $destination);
+            }
+            if ($hub = $request->get('search_hub')) {
+                $crm->where('h.id', '=', $hub);
+            }
+            if ($zone = $request->get('search_zone')) {
+                $crm->where('z.id', '=', $zone);
+            }
+            if ($case_nature = $request->get('search_case_nature')) {
+                $crm->where('crcn.id', '=', $case_nature);
+            }
+            if ($case_nature_type = $request->get('search_case_nature_type')) {
+                $crm->where('crcnt.id', '=', $case_nature_type);
+            }
+
+            if ($mode = $request->get('search_shipping_mode')) {
+                $crm->where('s.booking_type_id', '=', $mode);
+            }
+            if ($agent = $request->get('search_agent')) {
+                $crm->where('a.id', '=', $agent);
+            }
+            if ($status = $request->get('search_status')) {
+                $crm->whereIn('crs.id', $status);
+            }
+            if ($request->get('search_from') && $request->get('search_to')) {
+                $from = $request->get('search_from');
+                $to = $request->get('search_to');
+                $crm->whereBetween('crm_requests.created_at', [$from, $to]);
+            }
+
+            if ($service_type_select = $request->get('service_type_select')) {
+                $crm->where('bt.id', '=', $service_type_select);
+            }
+
+
+            if ($request->get('excel') && $request->get('excel') == true) {
+                $fieldsToRetrieve = $request->input('selectedValue', []);
+                $headers = $request->input('selectedTexts',[]);
+
+                $this->fetchCsvCrm($headers,$fieldsToRetrieve,$crm,$select);
+                ActivityTrailController::createActivityTrailLog(Auth::id(), 174);
+            }else{
+                return $datatable
+                    ->rawColumns(['tracking_number_link', 'id_padded_link', ''])
+                    ->make(true);
+            }
+
+        } catch (\Throwable $th) {
+            Log::channel('code_test_log')->error(
+                "CRM Report Error: " . $th->getMessage(),
+                [
+                    'trace' => json_encode($th->getTraceAsString()),
+                    'line'  => $th->getLine()
+                ]
+            );
+        }
+    }
+
+    public function fetchCsvCrm($headers ,$fieldsToRetrieve, $crm,$select)
+    {
+        try {
+
+            $headers = array_filter($headers, function($value) {
+                return $value !== 'Select All';
+            });
+            $fieldsToRetrieve = array_filter($fieldsToRetrieve, function($value) {
+                return $value !== 'selectAll';
+            });
+
+            $final_Array = array();
+            $specificValues = $crm->select($select)->get()->toarray();
+
+
+            header('Content-Type: text/csv; charset=utf-8');
+            header('Content-Disposition: attachment; filename=data.csv');
+            $output = fopen("php://output", "w");
+            fputcsv($output, $headers);
+            $current_date = Carbon::now();
+
+            foreach ($specificValues as $key => $row) {
+                $rowArray = (array) $row;
+                // Handle tagging_type conditions
+                if (in_array($rowArray['tagging_type'], [2, 4, 5])) {
+                    $rowArray['tagged_to'] = Admin::find($rowArray['tagged_id'])->name ?? '-';
+                } elseif ($rowArray['tagging_type'] == 1) {
+                    $department = AdminDepartment::find($rowArray['tagged_id']);
+                    $rowArray['tagged_to'] = $department ? $department->name : '-';
                 } else {
-                    return '-';
+                    $rowArray['tagged_to'] = '-';
                 }
-            })
-            ->editColumn('case_closed_remark', function ($requests) {
-                if ($requests->case_closed_remark)
-                    return $requests->case_closed_remark;
-                else
-                    return '-';
-            })
-            ->editColumn('resolved_date', function ($requests) {
-                if ($requests->current_status_id == 3 || $requests->current_status_id == 4) {
-                    return $requests->resolved_date;
+
+                // Tracking number link
+                $rowArray['tracking_number_link'] =  $rowArray['tracking_number'] ;
+
+                // Valid/Invalid status and date
+                if ($rowArray['valid_date'] != null) {
+                    $rowArray['valid_invalid_status'] = 'Valid';
+                    $rowArray['valid_invalid_date'] = $rowArray['valid_date'];
+                } elseif ($rowArray['invalid_date'] != null) {
+                    $rowArray['valid_invalid_status'] = 'Invalid';
+                    $rowArray['valid_invalid_date'] = $rowArray['invalid_date'];
                 } else {
-                    return '-';
+                    $rowArray['valid_invalid_status'] = '-';
+                    $rowArray['valid_invalid_date'] = '-';
                 }
-            })
-            ->addColumn('responsible_hub', function ($requests) {
+
+                // Request number padded
+                $rowArray['request_number_padded'] = str_pad($rowArray['request_number'], 6, '0', STR_PAD_LEFT);
+                $rowArray['id_padded_link'] = $rowArray['request_number_padded'];
+
+                // Launched by name
+                $rowArray['launched_by_name'] = $rowArray['launched_by_type'] == 0 ? $rowArray['name'] : ($rowArray['launched_by_type'] == 1 ? $rowArray['shipper'] : $rowArray['sub_shipper']);
+
+                // Admin department
+                $rowArray['admin_department'] = $rowArray['launched_by_type'] == 0 ? $rowArray['admin_department'] : '-';
+
+                // Closed date
+                $rowArray['closed_date'] = $rowArray['current_status_id'] == 4 ? $rowArray['closed_date'] : '-';
+
+                // Launched to today
+                if ($rowArray['launched_date']) {
+                    Carbon::setWeekendDays([Carbon::SUNDAY]);
+                    $launched_date = Carbon::parse($rowArray['launched_date']);
+                    $days = $launched_date->diffInDays($current_date);
+                    $rowArray['launched_to_today'] = $days <= 0 ? '-' : $days;
+                } else {
+                    $rowArray['launched_to_today'] = '-';
+                }
+
+                // Resolved date
+                $rowArray['resolved_date'] = in_array($rowArray['current_status_id'], [3, 4]) ? $rowArray['resolved_date'] : '-';
+
+                // Responsible hub
+                $status = $rowArray['shipment_status_id'];
+                $shipment_id = $rowArray['shipment_id'];
+                $origin_hub = $rowArray['origin_hub'];
+                $destination_hub = $rowArray['hub'];
                 $responsible_hub = "";
-                $status = $requests->shipment_status_id;
-                $shipment_id = $requests->shipment_id;
-                $origin_hub = $requests->origin_hub;
-                $destination_hub = $requests->hub;
+
                 $shipment_journey = ShipmentsJourney::whereIn('shipper_status_id', [11, 12, 20, 21, 22])
                     ->where('shipment_id', $shipment_id);
+
                 if ($shipment_journey->exists()) {
                     $shipment_journey = $shipment_journey->pluck('shipper_status_id')->toArray();
                     if (in_array(11, $shipment_journey) && in_array(12, $shipment_journey)) {
@@ -6999,9 +7296,10 @@ class AdminReportsController extends Controller
                         $origin_hub = $temp;
                     }
                 }
-                if ($status == 1 || $status == 2 || $status == 17 || $status == 22) {
+
+                if (in_array($status, [1, 2, 17, 22])) {
                     $responsible_hub = $origin_hub;
-                } elseif ($status == 3 || $status == 21) {
+                } elseif (in_array($status, [3, 21])) {
                     $manifest_bag = CargoManifestBagShipments::leftjoin('cargo_manifest_bags as cmb', 'cmb.id', '=', 'cargo_manifest_bag_shipments.cargo_manifest_bag_id')
                         ->leftjoin('cities as c', 'c.id', '=', 'cmb.origin_hub_id')
                         ->leftjoin('cities as cd', 'cd.id', '=', 'cmb.destination_hub_id')
@@ -7009,47 +7307,40 @@ class AdminReportsController extends Controller
                         ->where('cargo_manifest_bag_shipments.shipment_id', $shipment_id)
                         ->select(['cargo_manifest_bag_shipments.id', 'cmb.status_id', 'c.name as origin_hub', 'cd.name as destination_hub', 'chi.name as curren_hub_origin'])
                         ->orderby('cargo_manifest_bag_shipments.id', 'desc');
+
                     if ($manifest_bag->exists()) {
                         $manifest_bag = $manifest_bag->first();
-                        if ($manifest_bag->status_id == 0) { //bag created
+                        if (in_array($manifest_bag->status_id, [0, 1])) { // Bag created
                             $responsible_hub = $manifest_bag->origin_hub;
-                        } elseif ($manifest_bag->status_id == 1) { //bag created
-                            $responsible_hub = $manifest_bag->origin_hub;
-                        } elseif ($manifest_bag->status_id == 3) { // bag Received at junction
+                        } elseif ($manifest_bag->status_id == 3) { // Bag received at junction
                             $responsible_hub = $manifest_bag->curren_hub_origin;
-                        } elseif ($manifest_bag->status_id == 2 || $manifest_bag->status_id == 4 || $manifest_bag->status_id == 5 || $manifest_bag->status_id == 7) {
+                        } elseif (in_array($manifest_bag->status_id, [2, 4, 5, 7])) {
                             $responsible_hub = $manifest_bag->destination_hub;
                         } elseif ($manifest_bag->status_id == 9) {
                             $responsible_hub = $manifest_bag->curren_hub_origin;
                         }
                     }
-                } elseif ($status == 4 || $status == 12 || $status == 20 || $status == 24 || $status == 11 || $status == 8) {
+                } elseif (in_array($status, [4, 12, 20, 24, 11, 8])) {
                     $responsible_hub = $destination_hub;
                 } else {
                     $responsible_hub = "-";
                 }
-                return $responsible_hub;
-            })
-            ->editColumn('last_status_date', function ($request) {
+                $rowArray['responsible_hub'] = $responsible_hub;
 
-                $shipment = Shipment::where('tracking_number', $request->tracking_number)->first();
+                // Last status date
+                $shipment = Shipment::where('tracking_number', $rowArray['tracking_number'])->first();
                 $last_shipment = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
+                $rowArray['last_status_date'] = isset($last_shipment) ? Carbon::parse($last_shipment->created_at) : '---';
 
-                if (!isset($last_shipment)) {
-                    return '---';
-                } else {
-                    return Carbon::parse($last_shipment->created_at);
-                }
-            })
-            ->addColumn('responsible_zone', function ($requests) {
+                // Responsible zone
                 $responsible_zone = "";
-                $status = $requests->shipment_status_id;
-                $shipment_id = $requests->shipment_id;
+                $shipment_id = $rowArray['shipment_id'];
+                $origin_zone = $rowArray['origin_zone'];
+                $destination_zone = $rowArray['zone'];
 
-                $origin_zone = $requests->origin_zone;
-                $destination_zone = $requests->zone;
                 $shipment_journey = ShipmentsJourney::whereIn('shipper_status_id', [11, 12, 20, 21, 22])
                     ->where('shipment_id', $shipment_id);
+
                 if ($shipment_journey->exists()) {
                     $shipment_journey = $shipment_journey->pluck('shipper_status_id')->toArray();
                     if (in_array(11, $shipment_journey) && in_array(12, $shipment_journey)) {
@@ -7059,9 +7350,9 @@ class AdminReportsController extends Controller
                     }
                 }
 
-                if ($status == 1 || $status == 2 || $status == 17 || $status == 22) {
+                if (in_array($status, [1, 2, 17, 22])) {
                     $responsible_zone = $origin_zone;
-                } elseif ($status == 3 || $status == 21) {
+                } elseif (in_array($status, [3, 21])) {
                     $manifest_bag = CargoManifestBagShipments::leftjoin('cargo_manifest_bags as cmb', 'cmb.id', '=', 'cargo_manifest_bag_shipments.cargo_manifest_bag_id')
                         ->leftjoin('cities as c', 'c.id', '=', 'cmb.origin_hub_id')
                         ->leftjoin('zones as cz', 'cz.id', '=', 'c.zone_id')
@@ -7072,349 +7363,92 @@ class AdminReportsController extends Controller
                         ->where('cargo_manifest_bag_shipments.shipment_id', $shipment_id)
                         ->select(['cargo_manifest_bag_shipments.id', 'cmb.status_id', 'cz.name as origin_zone', 'cdz.name as destination_zone', 'chiz.name as curren_zone_origin'])
                         ->orderby('cargo_manifest_bag_shipments.id', 'desc');
+
                     if ($manifest_bag->exists()) {
                         $manifest_bag = $manifest_bag->first();
-                        if ($manifest_bag->status_id == 0) { //bag created
+                        if (in_array($manifest_bag->status_id, [0, 1])) { // Bag created
                             $responsible_zone = $manifest_bag->origin_zone;
-                        } elseif ($manifest_bag->status_id == 1) { //bag created
-                            $responsible_zone = $manifest_bag->origin_zone;
-                        } elseif ($manifest_bag->status_id == 3) { // bag Received at junction
+                        } elseif ($manifest_bag->status_id == 3) { // Bag received at junction
                             $responsible_zone = $manifest_bag->curren_zone_origin;
-                        } elseif ($manifest_bag->status_id == 2 || $manifest_bag->status_id == 4 || $manifest_bag->status_id == 5 || $manifest_bag->status_id == 7) {
+                        } elseif (in_array($manifest_bag->status_id, [2, 4, 5, 7])) {
                             $responsible_zone = $manifest_bag->destination_zone;
                         } elseif ($manifest_bag->status_id == 9) {
                             $responsible_zone = $manifest_bag->curren_zone_origin;
                         }
                     }
-                } elseif ($status == 4 || $status == 12 || $status == 20 || $status == 24 || $status == 11 || $status == 8) {
+                } elseif (in_array($status, [4, 12, 20, 24, 11, 8])) {
                     $responsible_zone = $destination_zone;
                 } else {
                     $responsible_zone = '-';
                 }
-                return $responsible_zone;
-            })
-            ->editColumn('arrival_today', function ($requests)use($current_date) {
-                return ($requests->arrival_date && $current_date) ? with((new Carbon($requests->arrival_date, 'UTC'))->diffInWeekendDays($current_date) - (new Carbon($requests->arrival_date, 'UTC'))->diffInDaysFiltered(function (Carbon $date) {
-                        $date->isSunday();
-                    }, $current_date)) : '-';
-            })
-            ->addColumn('shipper_category', function($requests){
-                if($requests->kae != null){
-                    return 'Key Account';
-                }else{
-                    return 'Non-Key Account';
+                $rowArray['responsible_zone'] = $responsible_zone;
+
+                // Arrival today calculation
+                if ($rowArray['arrival_date']) {
+                    Carbon::setWeekendDays([Carbon::SUNDAY]);
+                    $arrival_date = Carbon::parse($rowArray['arrival_date'], 'UTC');
+
+                    $sundays = $arrival_date->diffInDaysFiltered(function (Carbon $date) {
+                        return $date->isSunday();
+                    }, $current_date);
+
+                    $rowArray['arrival_today'] = ($sundays);
+                } else {
+                    $rowArray['arrival_today'] = '-';
                 }
-            })
-            ->addColumn('tagged_manual_auto', function($requests) {
-                $crm_tagging = CrmRequestTagging::where('crm_request_id', $requests->request_number)
+
+                // Shipper category
+                $rowArray['shipper_category'] = $rowArray['kae'] != null ? 'Key Account' : 'Non-Key Account';
+
+                // Tagged manual/auto
+                $crm_tagging = CrmRequestTagging::where('crm_request_id', $rowArray['request_number'])
                     ->where('crm_request_tagging_type_id', 2)
                     ->first();
 
-                if($crm_tagging){
-                    return (
-                        $crm_tagging->tagged_id == '346') ? 'Auto' : 'Manual';
-                }else{
-                    return '-';
+                if ($crm_tagging) {
+                    $rowArray['tagged_manual_auto'] = ($crm_tagging->tagged_id == '346')
+                        ? 'Auto'
+                        : 'Manual';
+                }else {
+                    $rowArray['tagged_manual_auto'] = '-';
                 }
-            })
-            ->orderColumn('launched_by_name', DB::connection('reports')->raw('IF (crm_requests.launched_by = 0, a.name, IF (crm_requests.launched_by = 1, us.name, IF (crm_requests.launched_by = 2, su.name, "")))') . ' $1');
-        if ($tracking = $request->get('search_tracking_no')) {
-            $tracking_numbers = explode(',', $tracking);
-            $crm->whereIn('s.tracking_number', $tracking_numbers);
-        }
-        if ($rnumber = $request->get('search_request_number')) {
-            $rnumber = explode(',', $rnumber);
-            $crm->whereIn('crm_requests.id', $rnumber);
-        }
-        if ($shipper = $request->get('search_shipper')) {
 
-            $crm->whereIn('u.id', $shipper);
-        }
-        //        if($origin = $request->get('search_origin')){
-        //            $datatable->where('oc.id', '=', $origin);
-        //        }
-        if ($destination = $request->get('search_destination')) {
-            $crm->where('dc.id', '=', $destination);
-        }
-        if ($hub = $request->get('search_hub')) {
-            $crm->where('h.id', '=', $hub);
-        }
-        if ($zone = $request->get('search_zone')) {
-            $crm->where('z.id', '=', $zone);
-        }
-        if ($case_nature = $request->get('search_case_nature')) {
-            $crm->where('crcn.id', '=', $case_nature);
-        }
-        if ($case_nature_type = $request->get('search_case_nature_type')) {
-            $crm->where('crcnt.id', '=', $case_nature_type);
-        }
-
-        if ($mode = $request->get('search_shipping_mode')) {
-            $crm->where('s.booking_type_id', '=', $mode);
-        }
-        if ($agent = $request->get('search_agent')) {
-            $crm->where('a.id', '=', $agent);
-        }
-        if ($status = $request->get('search_status')) {
-            $crm->whereIn('crs.id', $status);
-        }
-        if ($request->get('search_from') && $request->get('search_to')) {
-            $from = $request->get('search_from');
-            $to = $request->get('search_to');
-            $crm->whereBetween('crm_requests.created_at', [$from, $to]);
-        }
-
-        if ($service_type_select = $request->get('service_type_select')) {
-            $crm->where('bt.id', '=', $service_type_select);
-        }
-
-
-        if ($request->get('excel') && $request->get('excel') == true) {
-            $fieldsToRetrieve = $request->input('selectedValue', []);
-            $headers = $request->input('selectedTexts',[]);
-
-            $this->fetchCsvCrm($headers,$fieldsToRetrieve,$crm,$select);
-            ActivityTrailController::createActivityTrailLog(Auth::id(), 174);
-        }else{
-            return $datatable
-            ->rawColumns(['tracking_number_link', 'id_padded_link', ''])
-            ->make(true);
-        }
-    }
-
-    public function fetchCsvCrm($headers ,$fieldsToRetrieve, $crm,$select)
-    {
-        $headers = array_filter($headers, function($value) {
-            return $value !== 'Select All';
-        });
-        $fieldsToRetrieve = array_filter($fieldsToRetrieve, function($value) {
-            return $value !== 'selectAll';
-        });
-
-        $final_Array = array();
-        $specificValues = $crm->select($select)->get()->toarray();
-
-
-        header('Content-Type: text/csv; charset=utf-8');
-        header('Content-Disposition: attachment; filename=data.csv');
-        $output = fopen("php://output", "w");
-        fputcsv($output, $headers);
-        $current_date = Carbon::now();
-
-        foreach ($specificValues as $key => $row) {
-            $rowArray = (array) $row;
-            // Handle tagging_type conditions
-            if (in_array($rowArray['tagging_type'], [2, 4, 5])) {
-                $rowArray['tagged_to'] = Admin::find($rowArray['tagged_id'])->name ?? '-';
-            } elseif ($rowArray['tagging_type'] == 1) {
-                $rowArray['tagged_to'] = AdminDepartment::find($rowArray['tagged_id'])->name;
-            } else {
-                $rowArray['tagged_to'] = '-';
-            }
-
-            // Tracking number link
-            $rowArray['tracking_number_link'] =  $rowArray['tracking_number'] ;
-
-            // Valid/Invalid status and date
-            if ($rowArray['valid_date'] != null) {
-                $rowArray['valid_invalid_status'] = 'Valid';
-                $rowArray['valid_invalid_date'] = $rowArray['valid_date'];
-            } elseif ($rowArray['invalid_date'] != null) {
-                $rowArray['valid_invalid_status'] = 'Invalid';
-                $rowArray['valid_invalid_date'] = $rowArray['invalid_date'];
-            } else {
-                $rowArray['valid_invalid_status'] = '-';
-                $rowArray['valid_invalid_date'] = '-';
-            }
-
-            // Request number padded
-            $rowArray['request_number_padded'] = str_pad($rowArray['request_number'], 6, '0', STR_PAD_LEFT);
-            $rowArray['id_padded_link'] = $rowArray['request_number_padded'];
-
-            // Launched by name
-            $rowArray['launched_by_name'] = $rowArray['launched_by_type'] == 0 ? $rowArray['name'] : ($rowArray['launched_by_type'] == 1 ? $rowArray['shipper'] : $rowArray['sub_shipper']);
-
-            // Admin department
-            $rowArray['admin_department'] = $rowArray['launched_by_type'] == 0 ? $rowArray['admin_department'] : '-';
-
-            // Closed date
-            $rowArray['closed_date'] = $rowArray['current_status_id'] == 4 ? $rowArray['closed_date'] : '-';
-
-            // Launched to today
-            if ($rowArray['launched_date']) {
-                Carbon::setWeekendDays([Carbon::SUNDAY]);
-                $launched_date = Carbon::parse($rowArray['launched_date']);
-                $days = $launched_date->diffInDays($current_date);
-                $rowArray['launched_to_today'] = $days <= 0 ? '-' : $days;
-            } else {
-                $rowArray['launched_to_today'] = '-';
-            }
-
-            // Resolved date
-            $rowArray['resolved_date'] = in_array($rowArray['current_status_id'], [3, 4]) ? $rowArray['resolved_date'] : '-';
-
-            // Responsible hub
-            $status = $rowArray['shipment_status_id'];
-            $shipment_id = $rowArray['shipment_id'];
-            $origin_hub = $rowArray['origin_hub'];
-            $destination_hub = $rowArray['hub'];
-            $responsible_hub = "";
-
-            $shipment_journey = ShipmentsJourney::whereIn('shipper_status_id', [11, 12, 20, 21, 22])
-                ->where('shipment_id', $shipment_id);
-
-            if ($shipment_journey->exists()) {
-                $shipment_journey = $shipment_journey->pluck('shipper_status_id')->toArray();
-                if (in_array(11, $shipment_journey) && in_array(12, $shipment_journey)) {
-                    $temp = $destination_hub;
-                    $destination_hub = $origin_hub;
-                    $origin_hub = $temp;
+                switch ($rowArray['launched_by_type']) {
+                    case 0:
+                        $rowArray['launched_by_type'] = 'Admin';
+                        break;
+                    case 1:
+                        $rowArray['launched_by_type'] = 'Shipper';
+                        break;
+                    default:
+                        $rowArray['launched_by_type'] = 'Shipper Substitute User';
+                        break;
                 }
-            }
 
-            if (in_array($status, [1, 2, 17, 22])) {
-                $responsible_hub = $origin_hub;
-            } elseif (in_array($status, [3, 21])) {
-                $manifest_bag = CargoManifestBagShipments::leftjoin('cargo_manifest_bags as cmb', 'cmb.id', '=', 'cargo_manifest_bag_shipments.cargo_manifest_bag_id')
-                    ->leftjoin('cities as c', 'c.id', '=', 'cmb.origin_hub_id')
-                    ->leftjoin('cities as cd', 'cd.id', '=', 'cmb.destination_hub_id')
-                    ->leftjoin('cities as chi', 'chi.id', '=', 'cmb.current_hub_id')
-                    ->where('cargo_manifest_bag_shipments.shipment_id', $shipment_id)
-                    ->select(['cargo_manifest_bag_shipments.id', 'cmb.status_id', 'c.name as origin_hub', 'cd.name as destination_hub', 'chi.name as curren_hub_origin'])
-                    ->orderby('cargo_manifest_bag_shipments.id', 'desc');
 
-                if ($manifest_bag->exists()) {
-                    $manifest_bag = $manifest_bag->first();
-                    if (in_array($manifest_bag->status_id, [0, 1])) { // Bag created
-                        $responsible_hub = $manifest_bag->origin_hub;
-                    } elseif ($manifest_bag->status_id == 3) { // Bag received at junction
-                        $responsible_hub = $manifest_bag->curren_hub_origin;
-                    } elseif (in_array($manifest_bag->status_id, [2, 4, 5, 7])) {
-                        $responsible_hub = $manifest_bag->destination_hub;
-                    } elseif ($manifest_bag->status_id == 9) {
-                        $responsible_hub = $manifest_bag->curren_hub_origin;
+                $filteredArray = [];
+
+                // Iterate over $fieldsToRetrieve to maintain sequence
+                foreach ($fieldsToRetrieve as $field) {
+                    // Check if the field exists in the row array
+                    if (array_key_exists($field, $rowArray)) {
+                        // Add the field to the filtered array
+                        $filteredArray[$field] = $rowArray[$field];
                     }
                 }
-            } elseif (in_array($status, [4, 12, 20, 24, 11, 8])) {
-                $responsible_hub = $destination_hub;
-            } else {
-                $responsible_hub = "-";
+                $final_Array[] = $rowArray;
+                fputcsv($output, $filteredArray);
             }
-            $rowArray['responsible_hub'] = $responsible_hub;
-
-            // Last status date
-            $shipment = Shipment::where('tracking_number', $rowArray['tracking_number'])->first();
-            $last_shipment = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
-            $rowArray['last_status_date'] = isset($last_shipment) ? Carbon::parse($last_shipment->created_at) : '---';
-
-            // Responsible zone
-            $responsible_zone = "";
-            $shipment_id = $rowArray['shipment_id'];
-            $origin_zone = $rowArray['origin_zone'];
-            $destination_zone = $rowArray['zone'];
-
-            $shipment_journey = ShipmentsJourney::whereIn('shipper_status_id', [11, 12, 20, 21, 22])
-                ->where('shipment_id', $shipment_id);
-
-            if ($shipment_journey->exists()) {
-                $shipment_journey = $shipment_journey->pluck('shipper_status_id')->toArray();
-                if (in_array(11, $shipment_journey) && in_array(12, $shipment_journey)) {
-                    $temp = $destination_zone;
-                    $destination_zone = $origin_zone;
-                    $origin_zone = $temp;
-                }
-            }
-
-            if (in_array($status, [1, 2, 17, 22])) {
-                $responsible_zone = $origin_zone;
-            } elseif (in_array($status, [3, 21])) {
-                $manifest_bag = CargoManifestBagShipments::leftjoin('cargo_manifest_bags as cmb', 'cmb.id', '=', 'cargo_manifest_bag_shipments.cargo_manifest_bag_id')
-                    ->leftjoin('cities as c', 'c.id', '=', 'cmb.origin_hub_id')
-                    ->leftjoin('zones as cz', 'cz.id', '=', 'c.zone_id')
-                    ->leftjoin('cities as cd', 'cd.id', '=', 'cmb.destination_hub_id')
-                    ->leftjoin('zones as cdz', 'cdz.id', '=', 'cd.zone_id')
-                    ->leftjoin('cities as chi', 'chi.id', '=', 'cmb.current_hub_id')
-                    ->leftjoin('zones as chiz', 'chiz.id', '=', 'chi.zone_id')
-                    ->where('cargo_manifest_bag_shipments.shipment_id', $shipment_id)
-                    ->select(['cargo_manifest_bag_shipments.id', 'cmb.status_id', 'cz.name as origin_zone', 'cdz.name as destination_zone', 'chiz.name as curren_zone_origin'])
-                    ->orderby('cargo_manifest_bag_shipments.id', 'desc');
-
-                if ($manifest_bag->exists()) {
-                    $manifest_bag = $manifest_bag->first();
-                    if (in_array($manifest_bag->status_id, [0, 1])) { // Bag created
-                        $responsible_zone = $manifest_bag->origin_zone;
-                    } elseif ($manifest_bag->status_id == 3) { // Bag received at junction
-                        $responsible_zone = $manifest_bag->curren_zone_origin;
-                    } elseif (in_array($manifest_bag->status_id, [2, 4, 5, 7])) {
-                        $responsible_zone = $manifest_bag->destination_zone;
-                    } elseif ($manifest_bag->status_id == 9) {
-                        $responsible_zone = $manifest_bag->curren_zone_origin;
-                    }
-                }
-            } elseif (in_array($status, [4, 12, 20, 24, 11, 8])) {
-                $responsible_zone = $destination_zone;
-            } else {
-                $responsible_zone = '-';
-            }
-            $rowArray['responsible_zone'] = $responsible_zone;
-
-            // Arrival today calculation
-            if ($rowArray['arrival_date']) {
-                Carbon::setWeekendDays([Carbon::SUNDAY]);
-                $arrival_date = Carbon::parse($rowArray['arrival_date'], 'UTC');
-
-                $sundays = $arrival_date->diffInDaysFiltered(function (Carbon $date) {
-                    return $date->isSunday();
-                }, $current_date);
-
-                $rowArray['arrival_today'] = ($sundays);
-            } else {
-                $rowArray['arrival_today'] = '-';
-            }
-
-            // Shipper category
-            $rowArray['shipper_category'] = $rowArray['kae'] != null ? 'Key Account' : 'Non-Key Account';
-
-            // Tagged manual/auto
-            $crm_tagging = CrmRequestTagging::where('crm_request_id', $rowArray['request_number'])
-                ->where('crm_request_tagging_type_id', 2)
-                ->first();
-
-            if ($crm_tagging) {
-                $rowArray['tagged_manual_auto'] = ($crm_tagging->tagged_id == '346')
-                    ? 'Auto'
-                    : 'Manual';
-            }else {
-                $rowArray['tagged_manual_auto'] = '-';
-            }
-
-            switch ($rowArray['launched_by_type']) {
-                case 0:
-                    $rowArray['launched_by_type'] = 'Admin';
-                    break;
-                case 1:
-                    $rowArray['launched_by_type'] = 'Shipper';
-                    break;
-                default:
-                    $rowArray['launched_by_type'] = 'Shipper Substitute User';
-                    break;
-            }
-
-
-            $filteredArray = [];
-
-            // Iterate over $fieldsToRetrieve to maintain sequence
-            foreach ($fieldsToRetrieve as $field) {
-                // Check if the field exists in the row array
-                if (array_key_exists($field, $rowArray)) {
-                    // Add the field to the filtered array
-                    $filteredArray[$field] = $rowArray[$field];
-                }
-            }
-            $final_Array[] = $rowArray;
-            fputcsv($output, $filteredArray);
+            fclose($output);
+        } catch (\Throwable $th) {
+            Log::channel('code_test_log')->error(
+                "CRM Report Error: " . $th->getMessage(),
+                [
+                    'trace' => json_encode($th->getTraceAsString()),
+                    'line'  => $th->getLine()
+                ]
+            );
         }
-        fclose($output);
     }
 
     public function summary_index(Request $request)
@@ -10598,7 +10632,7 @@ class AdminReportsController extends Controller
             ->leftJoin('admins as user', 'user.id', '=', 'arv_date.admin_id')
             ->leftJoin('cities as hub', 'hub.id', '=', 'user.default_hub_id')
             ->leftJoin('city_areas as area', 'area.id', '=', 'user.area_id')
-            ->select(['shipments.id as shId', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'shipments.created_at as booking_date', 'arv_date.created_at as arrival_date', 'sm.mode as shipping_mode', 'shipments.estimated_weight', 'shipments.actual_weight', 'shipments.length', 'shipments.breadth', 'shipments.height', 'scs.name as sub_segment', 'sw.weight_type', 'wt.name as weight_type_name','shipments.chargeable_weight', 'hub.name as hub_name','area.name as area_name'
+            ->select(['shipments.id as shId', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'shipments.created_at as booking_date', 'arv_date.created_at as arrival_date', 'sm.mode as shipping_mode', 'shipments.estimated_weight', 'shipments.actual_weight', 'shipments.length', 'shipments.breadth', 'shipments.height', 'scs.name as sub_segment', 'sw.weight_type', 'wt.name as weight_type_name','shipments.chargeable_weight', 'hub.name as hub_name','area.name as area_name', 'shipments.replacement_weight'
             // 'sw.range_down_arrival_weight','sw.range_down_shipper_weight' ,'sw.shipper_weight_charges','shipments.weight_charges as arrival_weight_charges', 'sw.arrival_range_weight_charges','sw.shipper_range_weight_charges'
             ])
             ->where('arv_date.shipper_status_id', '=', 2)
@@ -15223,7 +15257,7 @@ class AdminReportsController extends Controller
         $connection = 'reports';
         $select =    [
             'z.name  as zone',
-            'p.product_name as product_type',
+            // 'p.product_name as product_type',
             'si.description as description',
             'ssr.name as reason',
             'sjr.remarks as remarks',
@@ -15254,12 +15288,12 @@ class AdminReportsController extends Controller
             'cmbh.id as current_hub_id',
             'shipments.shipper_status_id as shipper_status_id',
             'cr.missing_product_price as missing_product_price',
-            'cr.id as crm_request_id',
+            // 'cr.id as crm_request_id',
             'cr.damage_product_price as damage_product_price',
-            'crs.name as crm_request_status',
-            'crcn.name as crm_request_case_nature',
-            'crcnt.type as crm_request_case_nature_type',
-            'adjustment.adjustment_amount as adjusted_amount',
+            // 'crs.name as crm_request_status',
+            // 'crcn.name as crm_request_case_nature',
+            // 'crcnt.type as crm_request_case_nature_type',
+            // 'adjustment.adjustment_amount as adjusted_amount',
             'scs.name as sub_segment',
             'cargo_status.name as cargo_status',
             'cmb.seal_number as seal_number',
@@ -15280,7 +15314,8 @@ class AdminReportsController extends Controller
             'ssj_last_location.user_type as scanned_by_user_type',
             'ssj_last_location.admin_id as scanned_by_id',
             'last_screen_location.name as last_location_screen_location_name',
-            'ssj_last_location.entry_method as entry_method'
+            'ssj_last_location.entry_method as entry_method',
+            'destination_sj.created_at as destination_arrival_date'
         ];
         $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->leftJoin('sale_person_tags as spt', function($join){
@@ -15383,13 +15418,13 @@ class AdminReportsController extends Controller
                         DB::connection('reports')->raw('(select max(id) from crm_requests where crm_requests.shipment_id = shipments.id)')
                     );
             })
-            ->leftjoin('crm_request_statuses as crs', 'crs.id', '=', 'cr.status_id')
-            ->leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'cr.case_nature_id')
-            ->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'cr.case_nature_type_id')
-            ->leftjoin('adjustment_logs as adjustment', function ($join) {
-                $join->on('adjustment.shipment_id', '=', 'cr.shipment_id')
-                    ->where('adjustment.created_at', '=', DB::raw('(select max(created_at) from adjustment_logs where adjustment_logs.shipment_id = cr.shipment_id and adjustment_logs.adjustment_type_id IN (4,6,7,8,9,10,11) )'));
-            })
+            // ->leftjoin('crm_request_statuses as crs', 'crs.id', '=', 'cr.status_id')
+            // ->leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'cr.case_nature_id')
+            // ->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'cr.case_nature_type_id')
+            // ->leftjoin('adjustment_logs as adjustment', function ($join) {
+            //     $join->on('adjustment.shipment_id', '=', 'cr.shipment_id')
+            //         ->where('adjustment.created_at', '=', DB::raw('(select max(created_at) from adjustment_logs where adjustment_logs.shipment_id = cr.shipment_id and adjustment_logs.adjustment_type_id IN (4,6,7,8,9,10,11) )'));
+            // })
             ->leftjoin('cargo_manifest_bag_statuses as cargo_status', 'cargo_status.id', '=', 'cmb.status_id')
             ->leftjoin('bag_statuses as bs', 'bs.id', '=', 'cmb.status_id')
             ->leftJoin('shipments_journey as sjfa', function ($join) use ($connection) {
@@ -15463,15 +15498,43 @@ class AdminReportsController extends Controller
             ->leftJoin('city_areas as ca_scanning_last_location_name', 'ssjal_last_location.area_id', '=', 'ca_scanning_last_location_name.id')
             ->leftJoin('shipment_scanning_screen_locations as last_screen_location', 'last_screen_location.id', '=', 'ssj_last_location.screen_location_id')
 
-
             // ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'ssj.id')
             // ->leftJoin('shipment_scanning_journey_area_logs as ssjal_hss', 'ssjal_hss.shipment_scanning_journey_id', '=', 'ssj_hss.id')
             // ->leftJoin('city_areas as ca_scanning', 'ssjal.area_id', '=', 'ca_scanning.id')
+
+            // ->leftJoin('shipments_journey as destination_sj', function ($join) {
+            //     $join->on('destination_sj.shipment_id', '=', 'shipments.id')
+            //         ->where(
+            //             'destination_sj.id',
+            //             '=',
+            //             DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 4)')
+            //         );
+            // })
+            
+            ->leftJoin('shipments_journey as destination_sj', function ($join) {
+                $join->on('destination_sj.shipment_id', '=', 'shipments.id')
+                        ->where(function ($query) {
+                            // First check if status 4 (Arrived at Destination)
+                            $query->where('destination_sj.shipper_status_id', '=', 4)
+                                ->orWhere(function ($query) {
+                                        // If not, check status 2 (Arrived at Origin)
+                                        $query->where('destination_sj.shipper_status_id', '=', 2)
+                                            ->whereNotExists(function ($query) {
+                                                // Check if a status 4 record exists for this shipment_id
+                                                $query->select(DB::raw(1))
+                                                    ->from('shipments_journey')
+                                                    ->whereRaw('shipments_journey.shipment_id = shipments.id')
+                                                    ->where('shipments_journey.shipper_status_id', 4);
+                                            });
+                                    });
+                        })
+                ->where('destination_sj.id', '=', DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id in (4, 2))'));
+            })
+
             ->select($select)
             ->groupBy('shipments.id');
 
         $type = $request->get('search_types');
-
         if ($type && $type == 2) {
             $shipments = $shipments->whereNotIn('shipments.shipper_status_id', [1, 14, 17, 25, 31, 36, 38]);
         } else {
@@ -15578,6 +15641,19 @@ class AdminReportsController extends Controller
         }
         $shipments = $shipments->whereNotNull('shipments.tracking_number');
         $datatable = Datatables::of($shipments)
+
+            ->editColumn('destination_arrival_date', function ($shipment) {
+                if ($shipment->origin != $shipment->destination){
+                    if ($shipment->destination_arrival_date == null || $shipment->destination_arrival_date == ''){
+                        return '-';
+                    } else {
+                        return $shipment->destination_arrival_date;
+                    }
+                } else {
+                    return $shipment->arrival;
+                }
+            })
+
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
@@ -15652,41 +15728,41 @@ class AdminReportsController extends Controller
                     return $days;
                 }
             })
-            ->addColumn('crm_id_padded', function ($requests) {
-                if ($requests->crm_request_id) {
-                    return str_pad($requests->crm_request_id, 6, '0', STR_PAD_LEFT);
-                } else {
-                    return '-';
-                }
-            })
-            ->addColumn('crm_id_padded_link', function ($requests) {
-                if ($requests->crm_request_id) {
-                    return '<u><a href=' . route('admin.crm.request.details', ['id' => $requests->crm_request_id]) . '  target="_blank">' . str_pad($requests->crm_request_id, 6, '0', STR_PAD_LEFT) . '</a></u>';
-                } else {
-                    return '-';
-                }
-            })
-            ->editColumn('crm_request_status', function ($requests) {
-                if ($requests->crm_request_status) {
-                    return $requests->crm_request_status;
-                } else {
-                    return '-';
-                }
-            })
-            ->editColumn('crm_request_case_nature', function ($requests) {
-                if ($requests->crm_request_case_nature) {
-                    return $requests->crm_request_case_nature;
-                } else {
-                    return '-';
-                }
-            })
-            ->editColumn('crm_request_case_nature_type', function ($requests) {
-                if ($requests->crm_request_case_nature_type) {
-                    return $requests->crm_request_case_nature_type;
-                } else {
-                    return '-';
-                }
-            })
+            // ->addColumn('crm_id_padded', function ($requests) {
+            //     if ($requests->crm_request_id) {
+            //         return str_pad($requests->crm_request_id, 6, '0', STR_PAD_LEFT);
+            //     } else {
+            //         return '-';
+            //     }
+            // })
+            // ->addColumn('crm_id_padded_link', function ($requests) {
+            //     if ($requests->crm_request_id) {
+            //         return '<u><a href=' . route('admin.crm.request.details', ['id' => $requests->crm_request_id]) . '  target="_blank">' . str_pad($requests->crm_request_id, 6, '0', STR_PAD_LEFT) . '</a></u>';
+            //     } else {
+            //         return '-';
+            //     }
+            // })
+            // ->editColumn('crm_request_status', function ($requests) {
+            //     if ($requests->crm_request_status) {
+            //         return $requests->crm_request_status;
+            //     } else {
+            //         return '-';
+            //     }
+            // })
+            // ->editColumn('crm_request_case_nature', function ($requests) {
+            //     if ($requests->crm_request_case_nature) {
+            //         return $requests->crm_request_case_nature;
+            //     } else {
+            //         return '-';
+            //     }
+            // })
+            // ->editColumn('crm_request_case_nature_type', function ($requests) {
+            //     if ($requests->crm_request_case_nature_type) {
+            //         return $requests->crm_request_case_nature_type;
+            //     } else {
+            //         return '-';
+            //     }
+            // })
             ->editColumn('kam', function ($shipments) {
                 if($shipments->stt_kam_id == null) {
                     return $shipments->scu_kam_name;
@@ -15726,7 +15802,10 @@ class AdminReportsController extends Controller
                 }
 
                 return '-';
-            })->rawColumns(['crm_id_padded_link','tracking_number_link']);
+            })->rawColumns([
+                'crm_id_padded_link',
+                'tracking_number_link'
+            ]);
 
       
 
@@ -16025,5 +16104,257 @@ class AdminReportsController extends Controller
         //return $details;
 
         return response()->json(['details' => $details]);
+    }
+
+    public function lost_and_case_closed_summary_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 814);
+        return view('admin.reports.lost_and_case_closed_summary.index');
+    }
+
+    public function lost_and_case_closed_summary_list(Request $request)
+    {
+        /**
+         * 18 is lost
+         * 51 is case closed
+         */
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 815);
+        }
+        $trackingNumbers = explode(',', $request->tracking_numbers);
+        $searchDateFrom = $request->input('search_date_from');
+        $searchDateTo = $request->input('search_date_to');
+
+        $startDate = $searchDateFrom ? Carbon::createFromFormat('d F, Y', $searchDateFrom)->startOfDay() : now()->subMonths(4)->startOfDay();
+        $endDate = $searchDateTo ? Carbon::createFromFormat('d F, Y', $searchDateTo)->endOfDay() : now()->endOfDay();
+
+        $lost_and_closed_shipments = DB::table('shipments')
+        ->select(
+            'shipments.updated_at AS latest_shipment',
+            'shipments.tracking_number',
+            'lost_shipment_responsibles.*',
+            'admins.name AS admin_name',
+            'riders.name AS rider_name',
+            'admin_employees.trax_id AS admin_trax_id',
+            'rider_employees.trax_id AS rider_trax_id',
+            'city.name AS responsible_city',
+            'requested_admins.name AS requested_admin_name',
+            'request_approved_admins.name AS request_approved_admin',
+            'user_shipment.name AS shipper_name',
+            'shipments.amount AS cod_amount',
+            'shipments.parcel_value AS parcel_value',
+            'admin_status.name AS admin_status',
+            'rider_status.name AS rider_status',
+            'shipment_status.name AS latest_shipment_status',
+            DB::raw('(
+                SELECT GROUP_CONCAT(shipper_status_id)
+                FROM shipments_journey
+                WHERE shipments_journey.shipment_id = shipments.id
+                AND id >= sjl.id
+            ) AS jour'),
+            'case_closed_remarks.remarks AS case_closed_remarks',
+            'sjl.created_at AS requested_date_time',
+            'lost_approved.created_at AS approval_date_time'
+        )
+        ->leftJoin('shipments_journey AS sjl', function($join) {
+            $join->on('sjl.shipment_id', '=', 'shipments.id')
+                ->whereRaw('sjl.id = (
+                    SELECT MAX(id)
+                    FROM shipments_journey
+                    WHERE shipments_journey.shipment_id = shipments.id
+                    AND shipments_journey.shipper_status_id = 18
+                    AND shipments_journey.verification = 0
+                )');
+        })
+        ->leftJoin('admins AS requested_admins', 'sjl.admin_id', '=', 'requested_admins.id')
+        ->leftJoin('shipments_journey AS lost_approved', function($join) {
+            $join->on('lost_approved.shipment_id', '=', 'shipments.id')
+                ->whereRaw('lost_approved.id = (
+                    SELECT MAX(id)
+                    FROM shipments_journey
+                    WHERE shipments_journey.shipment_id = shipments.id
+                    AND shipments_journey.shipper_status_id = 18
+                    AND shipments_journey.verification = 1
+                    AND shipments_journey.id > (
+                        SELECT MAX(id)
+                        FROM shipments_journey
+                        WHERE shipments_journey.shipment_id = shipments.id
+                        AND shipments_journey.shipper_status_id = 18
+                        AND shipments_journey.verification = 0
+                    )
+                )');
+        })
+        ->leftJoin('admins AS request_approved_admins', 'lost_approved.admin_id', '=', 'request_approved_admins.id')
+        ->leftJoin('lost_shipment_responsibles', function($join) {
+            $join->on('lost_shipment_responsibles.shipment_id', '=', 'shipments.id')
+                ->whereRaw('lost_shipment_responsibles.updated_at BETWEEN sjl.updated_at AND DATE_ADD(sjl.updated_at, INTERVAL 50 SECOND)');
+        })
+        ->leftJoin('admins', 'lost_shipment_responsibles.user_id', '=', 'admins.id')
+        ->leftJoin('employees AS employees_admins', function($join) {
+            $join->on('employees_admins.id', '=', 'admins.trax_id')
+                ->where('employees_admins.employee_type_id', 1);
+        })
+        ->leftJoin('riders', 'lost_shipment_responsibles.user_id', '=', 'riders.id')
+        ->leftJoin('employees AS employees_riders', function($join) {
+            $join->on('employees_riders.id', '=', 'riders.trax_id')
+                ->where('employees_riders.employee_type_id', 2);
+        })
+        ->leftJoin('employees AS rider_employees', 'rider_employees.trax_id', '=', 'riders.trax_id')
+        ->leftJoin('employees AS admin_employees', 'admin_employees.trax_id', '=', 'admins.trax_id')
+        ->leftJoin('employee_statuses AS admin_status', 'admin_status.id', '=', 'admin_employees.status_id')
+        ->leftJoin('employee_statuses AS rider_status', 'rider_status.id', '=', 'rider_employees.status_id')
+        ->leftJoin('cities AS city', 'city.id', '=', 'sjl.city_id')
+        ->leftJoin('users AS user_shipment', 'user_shipment.id', '=', 'shipments.user_id')
+
+        ->leftJoin('shipments_journey AS case_closed_remarks', function($join) {
+            $join->on('case_closed_remarks.shipment_id', '=', 'shipments.id')
+                ->where('case_closed_remarks.shipper_status_id', 51)
+                ->whereRaw('case_closed_remarks.id = (
+                    SELECT MAX(sj1.id)
+                    FROM shipments_journey AS sj1
+                    WHERE sj1.shipment_id = shipments.id
+                    AND sj1.shipper_status_id = 51
+                    AND sj1.id > (
+                        SELECT MAX(sj2.id)
+                        FROM shipments_journey AS sj2
+                        WHERE sj2.shipment_id = shipments.id
+                        AND sj2.shipper_status_id = 18
+                    )
+                    AND NOT EXISTS (
+                        SELECT 1
+                        FROM shipments_journey AS sj3
+                        WHERE sj3.shipment_id = shipments.id
+                        AND sj3.id BETWEEN (
+                            SELECT MAX(sj4.id) 
+                            FROM shipments_journey AS sj4 
+                            WHERE sj4.shipment_id = shipments.id 
+                            AND sj4.shipper_status_id = 18
+                        ) AND sj1.id
+                        AND sj3.shipper_status_id NOT IN (18, 51)
+                    )
+                )');
+        })
+
+        ->leftJoin('shipment_status', 'shipment_status.id', '=', 'shipments.shipper_status_id')
+        ->distinct()
+        ->whereIn('shipments.shipper_status_id', [18, 51]);
+        if (!empty($trackingNumbers) && is_array($trackingNumbers) && count(array_filter($trackingNumbers, fn($value) => $value !== "")) > 0) {
+            $lost_and_closed_shipments->whereIn('shipments.tracking_number', $trackingNumbers);
+        } else {
+            $lost_and_closed_shipments->whereBetween('shipments.updated_at', [$startDate, $endDate]);
+        }
+
+        $datatable = Datatables::of($lost_and_closed_shipments)
+        ->editColumn('tracking_number', function ($shipments) {
+            $route = route('admin.tracking.index');
+            return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+        })
+        ->editColumn('request_approved_admin', function ($shipments) {
+            $lost_approved_by = '-';
+            if ($shipments->request_approved_admin != null || $shipments->request_approved_admin != '') {
+                $lost_approved_by = $shipments->request_approved_admin;
+            }
+            return $lost_approved_by;
+        })
+        ->addColumn('defaulter_name', function ($shipments) {
+            return $shipments->admin_name . ' ' . $shipments->rider_name;
+        })
+        ->orderColumn('defaulter_name', function ($query, $direction) {
+            $query->orderBy('admin_name', $direction)->orderBy('rider_name', $direction);
+        })
+        ->addColumn('employee_status', function ($shipments) {
+            $adminEmployeeStatus = $shipments->admin_status ?? '';
+            $riderEmployeeStatus = $shipments->rider_status ?? '';
+            return $adminEmployeeStatus . ' ' . $riderEmployeeStatus;
+        })
+        ->orderColumn('employee_status', function ($query, $direction) {
+            $query->orderBy('admin_status', $direction)->orderBy('rider_status', $direction);
+        })
+        ->addColumn('trax_id', function ($shipments) {
+            return $shipments->admin_trax_id . ' ' . $shipments->rider_trax_id;
+        })
+        ->orderColumn('trax_id', function ($query, $direction) {
+            $query->orderBy('admin_trax_id', $direction)->orderBy('rider_trax_id', $direction);
+        })
+        ->addColumn('case_closed_remarks', function ($shipments) {
+            if ($shipments->case_closed_remarks != "") {
+                return $shipments->case_closed_remarks ?: '-';
+            }
+            return '-';
+        })
+        ->filterColumn('responsible_city', function ($query, $keyword) {
+            $query->where('city.name', 'like', "%$keyword%");
+        })
+        ->filterColumn('latest_shipment_status', function ($query, $keyword) {
+            $query->where('shipment_status.name', 'like', "%$keyword%");
+        })
+        ->filterColumn('requested_admin_name', function ($query, $keyword) {
+            $query->where('requested_admins.name', 'like', "%$keyword%");
+        })
+        ->filterColumn('lost_approved_by', function ($query, $keyword) {
+            $query->where('lost_approved_by.name', 'like', "%$keyword%");
+        })
+        ->filterColumn('cod_amount', function ($query, $keyword) {
+            $query->where('shipments.amount', 'like', "%$keyword%");
+        })
+        ->filterColumn('parcel_value', function ($query, $keyword) {
+            $query->where('shipments.parcel_value', 'like', "%$keyword%");
+        })
+        ->filterColumn('shipper_name', function ($query, $keyword) {
+            $query->where('user_shipment.name', 'like', "%$keyword%");
+        })
+        ->filterColumn('defaulter_name', function ($query, $keyword) {
+            $query->where('admins.name', 'like', "%$keyword%")
+                ->orWhere('riders.name', 'like', "%$keyword%");
+        })
+        ->filterColumn('employee_status', function ($query, $keyword) {
+            $statusMap = [
+                0 => 'All Status',
+                1 => 'Active',
+                2 => 'Inactive',
+                3 => 'Active - No Info',
+            ];
+        
+            // Check if the keyword exists in the mapping array
+            if (isset($statusMap[$keyword])) {
+                $status = $statusMap[$keyword];
+                // If the keyword is 1 or 3 (both are related to 'Active' statuses)
+                if ($keyword == 1 || $keyword == 3) {
+                    // Exact match for Active statuses (1 and 3)
+                    $query->where(function ($query) use ($status) {
+                        $query->where('admin_status.name', $status)
+                            ->orWhere('rider_status.name', $status);
+                    });
+                } elseif ($keyword == 2) {
+                    // For 'Inactive' status (2), we use LIKE for partial matching
+                    $query->where(function ($query) use ($status) {
+                        $query->where('admin_status.name', 'LIKE', "%{$status}%")
+                            ->orWhere('rider_status.name', 'LIKE', "%{$status}%");
+                    });
+                }
+            }
+        })
+        ->filterColumn('trax_id', function ($query, $keyword) {
+            $query->where('admin_employees.trax_id', 'like', "%$keyword%")
+                    ->orWhere('rider_employees.trax_id', 'like', "%$keyword%");
+        })
+        ->filterColumn('latest_shipment', function ($query, $keyword) {
+            if ($keyword) {
+                $query->where('shipments.updated_at', 'LIKE', "%{$keyword}%");
+            }
+        })
+        ->editColumn('approval_date_time', function ($shipments) {
+            return !empty($shipments->approval_date_time) ? $shipments->approval_date_time : '-';
+        })
+        ->editColumn('parcel_value', function ($shipments) {
+            return !empty($shipments->parcel_value) ? $shipments->parcel_value : '-';
+        })
+        ->editColumn('cod_amount', function ($shipments) {
+            return !empty($shipments->cod_amount) ? $shipments->cod_amount : '-';
+        })
+        ;
+        return $datatable
+        ->rawColumns(['tracking_number'])
+        ->make(true);
     }
 }

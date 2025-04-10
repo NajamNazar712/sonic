@@ -48,4 +48,10 @@ class CrmRequest extends Model
     public function closed_reason() {
         return $this->hasOne('App\Http\Models\CRM\CrmClosedReason');
     }
+
+    // Format dates as 'YYYY-MM-DD HH:mm:ss'
+    protected function serializeDate(\DateTimeInterface $date)
+    {
+        return $date->format('Y-m-d H:i:s');
+    }
 }

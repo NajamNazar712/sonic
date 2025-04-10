@@ -4,6 +4,12 @@ namespace App\Http\Controllers;
 
 use App\FafCharges;
 use App\FinjaSmsLog;
+use App\Http\Controllers\Admins\AdminCRMController;
+use App\Http\Models\NotificationSetting;
+use App\Http\Models\PendingPaymentShipment;
+use App\Http\Models\ShipmentSmsLogs;
+use App\Http\Models\WalletUser;
+use App\Models\FinjaRequestLog;
 use App\ShipmentAdditionalCharges;
 use DB;
 use SnappyPDF;
@@ -1541,14 +1547,20 @@ class APIController extends Controller
             }
 
             try {
-                // Maintaining shipper segment logs on booking when origin and destination are different
-                if ($consignee_city_id != $pickup_city_id) {
-                    ShipperSegmentLogs::create([
-                        'shipment_id' => $shipment_id,
-                        'segment_id' => $user_type->segment_id,
-                        'sub_segment_id' => $user_type->sub_segment_id
-                    ]);
-                }
+                // Maintaining shipper segment logs on booking
+                ShipperSegmentLogs::create([
+                    'shipment_id' => $shipment_id,
+                    'segment_id' => $user_type->segment_id,
+                    'sub_segment_id' => $user_type->sub_segment_id
+                ]);
+
+                // if ($consignee_city_id != $pickup_city_id) {
+                //     ShipperSegmentLogs::create([
+                //         'shipment_id' => $shipment_id,
+                //         'segment_id' => $user_type->segment_id,
+                //         'sub_segment_id' => $user_type->sub_segment_id
+                //     ]);
+                // }
             } catch (\Exception $e) {
                 Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
             }
@@ -1818,14 +1830,20 @@ class APIController extends Controller
             }
 
             try {
-                // Maintaining shipper segment logs on booking when origin and destination are different
-                if ($consignee_city_id != $pickup_city_id) {
-                    ShipperSegmentLogs::create([
-                        'shipment_id' => $shipment_id,
-                        'segment_id' => $user_type->segment_id,
-                        'sub_segment_id' => $user_type->sub_segment_id
-                    ]);
-                }
+                // Maintaining shipper segment logs on booking
+                ShipperSegmentLogs::create([
+                    'shipment_id' => $shipment_id,
+                    'segment_id' => $user_type->segment_id,
+                    'sub_segment_id' => $user_type->sub_segment_id
+                ]);
+
+                // if ($consignee_city_id != $pickup_city_id) {
+                //     ShipperSegmentLogs::create([
+                //         'shipment_id' => $shipment_id,
+                //         'segment_id' => $user_type->segment_id,
+                //         'sub_segment_id' => $user_type->sub_segment_id
+                //     ]);
+                // }
             } catch (\Exception $e) {
                 Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
             }
@@ -2002,6 +2020,18 @@ class APIController extends Controller
 
             $shipment = Shipment::whereIn('user_id', $user_ids)->where('tracking_number', $tracking_number)->first();
 
+            $sub_segment_name = '-';
+            $sub_segment = DB::table('shipper_segment_logs')
+            ->leftJoin('sub_category_segments', 'sub_category_segments.id', 'shipper_segment_logs.sub_segment_id')
+            ->where('shipment_id', $shipment->id)
+            ->select('sub_category_segments.name')
+            ->first();
+
+            if ($sub_segment && $sub_segment->name)
+            {
+                $sub_segment_name = $sub_segment->name;
+            }
+
             $details = array();
 
             $details['tracking_number'] = $tracking_number;
@@ -2088,6 +2118,8 @@ class APIController extends Controller
                 }
             }
 
+            $details['order_information']['sub_segment'] = $sub_segment_name;
+
             return response()->json(['status' => 0, 'message' => 'Tracking of Shipment #' . $tracking_number, 'details' => $details]);
         }
     }
@@ -2112,6 +2144,34 @@ class APIController extends Controller
             $tracking_number = $request->tracking_number;
 
             $shipment = Shipment::where('tracking_number', $tracking_number)->first();
+
+            $current_sms_charges = $shipment->user->sms_charges;
+            $sms_charges_status = $shipment->user->sms_charges_status;
+            $sms_charges = 0;
+
+            $wallet_user = optional($shipment->user->wallet)->exists();
+            $shipment_sms_count = 0;
+            $shipment_sms = ShipmentSmsLogs::select('notification_id', \Illuminate\Support\Facades\DB::raw('count(*) as count'))->where('shipment_id' , $shipment->id)->where('paid', 0)->groupBy('notification_id')->get();
+            foreach($shipment_sms as $notification) {
+                $notification_setting = NotificationSetting::where('notification_id', $notification->notification_id)->where('charged_sms_toggle',1);
+                if ($notification_setting->exists()) {
+                    $notification_setting = $notification_setting->first();
+                    $charging_frequency = $notification_setting->charging_frequency;
+                    if($notification->count <= $charging_frequency ) {
+                        $shipment_sms_count += $notification->count;
+                    } else {
+                        $shipment_sms_count += $charging_frequency;
+                    }
+                }
+            }
+            $sms_charges = $current_sms_charges * $shipment_sms_count;
+
+            if(!empty($sms_charges)){
+                $charges['sms_charges'] = $sms_charges;
+            }
+            if($wallet_user){
+                $charges['wallet_charges'] = ShipmentAdditionalCharges::fetch_wallet_charges($shipment->id);
+            }
 
             $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->latest()->first();
 
@@ -3450,14 +3510,20 @@ class APIController extends Controller
             }
 
             try {
-                // Maintaining shipper segment logs on booking when origin and destination are different
-                if ($consignee_city_id != $pickup_city_id) {
-                    ShipperSegmentLogs::create([
-                        'shipment_id' => $shipment_id,
-                        'segment_id' => $user_type->segment_id,
-                        'sub_segment_id' => $user_type->sub_segment_id
-                    ]);
-                }
+                // Maintaining shipper segment logs on booking
+                ShipperSegmentLogs::create([
+                    'shipment_id' => $shipment_id,
+                    'segment_id' => $user_type->segment_id,
+                    'sub_segment_id' => $user_type->sub_segment_id
+                ]);
+
+                // if ($consignee_city_id != $pickup_city_id) {
+                //     ShipperSegmentLogs::create([
+                //         'shipment_id' => $shipment_id,
+                //         'segment_id' => $user_type->segment_id,
+                //         'sub_segment_id' => $user_type->sub_segment_id
+                //     ]);
+                // }
             } catch (\Exception $e) {
                 Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
             }
@@ -3519,7 +3585,7 @@ class APIController extends Controller
 
                     $filename = 'air_waybill' . '.jpg';
 
-                    return $image->setOption('disable-smart-width', true)->setOption('width', 1280)->setOption('enable-local-file-access', true)->download($filename);
+                    return $image->setOption('disable-smart-width', true)->setOption('enable-local-file-access', true)->download($filename);
                 } else {
                     $pdf = SnappyPDF::loadHTML($air_waybill);
 
@@ -4824,6 +4890,9 @@ class APIController extends Controller
                         if ($shipment->exists()) {
                             $shipment = $shipment->first();
                             $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description);
+                            if($nature_id == 1 && !empty($request->case_nature_complainant)){
+                                AdminCRMController::updateComplaintPhone(CrmRequest::max('id'), $request->case_nature_complainant, $request->complainant_phone);
+                            }
                             return response()->json(['status' => 0, 'message' => 'CRM Request has been added', 'id' => $crm_request]);
                         } else {
                             return response()->json(['status' => 1, 'message' => 'Tracking Number not found!']);
@@ -9859,14 +9928,20 @@ class APIController extends Controller
             }
 
             try {
-                // Maintaining shipper segment logs on booking when origin and destination are different
-                if ($consignee_city->id != $pickup_city_id) {
-                    ShipperSegmentLogs::create([
-                        'shipment_id' => $shipment_id,
-                        'segment_id' => $user_type->segment_id,
-                        'sub_segment_id' => $user_type->sub_segment_id
-                    ]);
-                }
+                // Maintaining shipper segment logs on booking
+                ShipperSegmentLogs::create([
+                    'shipment_id' => $shipment_id,
+                    'segment_id' => $user_type->segment_id,
+                    'sub_segment_id' => $user_type->sub_segment_id
+                ]);
+
+                // if ($consignee_city->id != $pickup_city_id) {
+                //     ShipperSegmentLogs::create([
+                //         'shipment_id' => $shipment_id,
+                //         'segment_id' => $user_type->segment_id,
+                //         'sub_segment_id' => $user_type->sub_segment_id
+                //     ]);
+                // }
             } catch (\Exception $e) {
                 Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
             }
@@ -10132,11 +10207,289 @@ class APIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Message Received']);
         }
 
-
-
-
-
     }
 
+    public function fintech_charges(Request $request) {
+        $rules = [
+            'tracking_number' => ['required', 'exists:shipments,tracking_number'],
+            'charges' => ['required', 'numeric', 'min:0', 'max:100000'],
+        ];
+
+        $validator = Validator::make($request->all(), $rules, $this->messages);
+        $validator->setAttributeNames($this->names);
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Error(s) in Input',
+                'errors' => $validator->errors()
+            ]);
+        }
+
+        $errors = [];
+        $success = [];
+        $shipmentsData = collect($request->all())->toArray();
+
+        // Ensure tracking numbers are always in an array format
+        $trackingNumbers = is_array($shipmentsData['tracking_number'])
+            ? $shipmentsData['tracking_number']
+            : [$shipmentsData['tracking_number']];
+
+        $shipments = Shipment::whereIn('tracking_number', $trackingNumbers)->get()->keyBy('tracking_number');
+
+        foreach ($trackingNumbers as $tracking_number) {
+            if (!isset($shipments[$tracking_number])) {
+                $errors[] = [
+                    'tracking_number' => $tracking_number,
+                    'error' => 'Shipment not found'
+                ];
+                continue;
+            }
+
+            $shipment = $shipments[$tracking_number];
+            $shipment_id = $shipment->id;
+
+            FinjaRequestLog::insert([
+                'requested' => json_encode($request->all()),
+                'ip_address' => $request->ip(),
+            ]);
+
+            ShipmentAdditionalCharges::where('shipment_id', $shipment_id)
+                ->update(['wallet_charges' => $request->charges, 'wallet_charges_updated_at' => now()]);
+
+            $pending_payment = PendingPaymentShipment::where('shipment_id', $shipment_id)
+                ->whereIn('type', [0, 1])
+                ->latest()
+                ->first();
+
+            if ($pending_payment) {
+                AdminFinanceController::update_payment($shipment_id, $pending_payment->type);
+                $success[] = $tracking_number;
+            }
+
+            $done_payment_query = DonePaymentShipment::where('shipment_id', $shipment_id)
+                ->whereIn('type', [0, 1])
+                ->latest();
+
+            $check_pending_process = (clone $done_payment_query)->whereHas('done_payment', function ($query) {
+                $query->whereIn('status', [0, 3])->where('is_wallet_payment', 1);
+            })->exists();
+
+            if ($check_pending_process) {
+                $done_payment = (clone $done_payment_query)->first();
+                AdminFinanceController::update_payment_done_payment($shipment_id, $done_payment->type, $done_payment->done_payment_id);
+                $success[] = $tracking_number;
+            }
+
+            $check_paid_late = (clone $done_payment_query)->whereHas('done_payment', function ($query) {
+                $query->where('status', 1)->where('is_wallet_payment', 1);
+            })->exists();
+
+            if ($check_paid_late) {
+                $errors[] = [
+                    'tracking_number' => $tracking_number,
+                    'error' => 'Payment cannot be processed now'
+                ];
+            } else {
+                $success[] = $tracking_number;
+            }
+        }
+
+        return response()->json([
+            'status' => empty($errors) ? 1 : 0,
+            'message' => empty($errors) ? 'All charges updated successfully.' : 'Some charges could not be updated due to errors.',
+            'success' => $success,
+            'errors' => $errors,
+        ]);
+    }
+
+    public function fintech_getToken(Request $request) {
+
+        $rules = [
+            'wallet_id' => ['required', 'exists:wallet_users,wallet_id'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $Wallet = WalletUser::with('wallet_user')->where('wallet_id',$request->wallet_id)->first();
+            if(isset($Wallet->wallet_user)) {
+                $user = $Wallet->wallet_user;
+                if (empty($user->api_token)) {
+                    $user->api_token = uniqid(base64_encode(Str::random(60)));
+                    $user->save();
+                }
+                return response()->json(['status' => 1,'wallet_id'=> $request->wallet_id,'token' =>  $user->api_token]);
+            }
+
+            return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => 'USer Not Found']);
+        }
+    }
+
+    public function fintech_charges_bulk(Request $request)
+    {
+        $rules = [
+            'wallet_id' => ['required', 'exists:wallet_users,wallet_id'],
+            'shipments' => ['required', 'array', 'min:1'],
+            'shipments.*.tracking_number' => ['required', 'exists:shipments,tracking_number'],
+            'shipments.*.charges' => ['required', 'numeric', 'min:0', 'max:100000'],
+        ];
+
+        $validator = Validator::make($request->all(), $rules, $this->messages);
+        $validator->setAttributeNames($this->names);
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Error(s) in Input',
+                'errors' => $validator->errors()
+            ]);
+        }
+
+        $errors = [];
+        $success = [];
+        $shipmentsData = collect($request->shipments);
+
+        $trackingNumbers = $shipmentsData->pluck('tracking_number');
+        $shipments = Shipment::whereIn('tracking_number', $trackingNumbers)->get()->keyBy('tracking_number');
+
+        foreach ($shipmentsData as $key => $shipmentData) {
+            $tracking_number = $shipmentData['tracking_number'];
+            $charges = $shipmentData['charges'];
+
+            if (!isset($shipments[$tracking_number])) {
+                $errors[$key] = [
+                    'tracking_number' => $tracking_number,
+                    'error' => 'Shipment not found'
+                ];
+                continue;
+            }
+
+            $shipment = $shipments[$tracking_number];
+            $shipment_id = $shipment->id;
+
+            FinjaRequestLog::insert([
+                'requested' => json_encode($request->all()),
+                'ip_address' => $request->ip(),
+            ]);
+
+            ShipmentAdditionalCharges::where('shipment_id', $shipment_id)
+                ->update(['wallet_charges' => $charges, 'wallet_charges_updated_at' => now()]);
+
+            $pending_payment = PendingPaymentShipment::where('shipment_id', $shipment_id)
+                ->whereIn('type', [0, 1])
+                ->latest()
+                ->first();
+
+            if ($pending_payment) {
+                AdminFinanceController::update_payment($shipment_id, $pending_payment->type);
+                $success[] = $tracking_number;
+                continue;
+            }
+
+            $done_payment_query = DonePaymentShipment::where('shipment_id', $shipment_id)
+                ->whereIn('type', [0, 1])
+                ->latest();
+
+            $check_pending_process = (clone $done_payment_query)->whereHas('done_payment', function ($query) {
+                $query->whereIn('status', [0, 3])->where('is_wallet_payment', 1);
+            })->exists();
+
+            if ($check_pending_process) {
+                $done_payment = (clone $done_payment_query)->first();
+                AdminFinanceController::update_payment_done_payment($shipment_id, $done_payment->type, $done_payment->done_payment_id);
+                $success[] = $tracking_number;
+                continue;
+            }
+
+            $check_paid_late = (clone $done_payment_query)->whereHas('done_payment', function ($query) {
+                $query->where('status', 1)->where('is_wallet_payment', 1);
+            })->exists();
+
+            if ($check_paid_late) {
+                $errors[$key] = [
+                    'tracking_number' => $tracking_number,
+                    'error' => 'Payment cannot be processed now'
+                ];
+            } else {
+                $success[] = $tracking_number;
+            }
+        }
+
+        return response()->json([
+            'status' => empty($errors) ? 1 : 0,
+            'message' => empty($errors) ? 'All charges updated successfully.' : 'Some charges could not be updated due to errors.',
+            'success' => $success,
+            'errors' => $errors,
+        ]);
+    }
+
+    public function fintech_account_type(Request $request)
+    {
+        $rules = [
+            'wallet_users' => ['required', 'array', 'min:1'],
+            'wallet_users.*.wallet_id' => ['required', 'exists:wallet_users,wallet_id'],
+            'wallet_users.*.finova_account_type' => ['required', 'numeric'],
+        ];
+
+        $validator = Validator::make($request->all(), $rules, $this->messages);
+        $validator->setAttributeNames($this->names);
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Error(s) in Input',
+                'errors' => $validator->errors()
+            ]);
+        }
+
+        $errors = [];
+        $success = [];
+        $globalSetting = GlobalSettings::where(['setting_value' => 1, 'type' => 'wallet_account_type'])->exists();
+
+        if($globalSetting) {
+            $walletDataRequest = collect($request->wallet_users);
+
+            $wallet_ids = $walletDataRequest->pluck('wallet_id');
+            $wallet = WalletUser::whereIn('wallet_id', $wallet_ids)->where('substitute_user_id', 0)->get()->keyBy('wallet_id');
+            foreach ($walletDataRequest as $key => $walletDataRow) {
+                $wallet_id = $walletDataRow['wallet_id'];
+                $finova_account_type = $walletDataRow['finova_account_type'];
+                if (!isset($wallet[$wallet_id])) {
+                    $errors[$key] = [
+                        'wallet_id' => $wallet_id,
+                        'error' => 'Wallet not found'
+                    ];
+                    continue;
+                }
+                $wallet_primary_id = $wallet[$wallet_id]->id;
+
+                FinjaRequestLog::insert([
+                    'requested' => json_encode($request->all()),
+                    'ip_address' => $request->ip(),
+                ]);
+
+                WalletUser::where('id', $wallet_primary_id)
+                    ->update(['finova_account_type' => $finova_account_type]);
+
+                $success[] = $wallet_id;
+            }
+
+            return response()->json([
+                'status' => empty($errors) ? 1 : 0,
+                'message' => empty($errors) ? 'All Wallet Accounts updated successfully.' : 'Some Accounts could not be updated due to errors.',
+                'success' => $success,
+                'errors' => $errors,
+            ]);
+        }else{
+            return response()->json([
+                'status' => 0,
+                'message' =>  'The Api is currently Inactive',
+                'success' => [],
+                'errors' => [],
+            ]);
+        }
+    }
 
 }

@@ -100,17 +100,17 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\RiderWisePickupEmail',
         'App\Console\Commands\InactiveRiderReport',
         'App\Console\Commands\EmailsOfReturnConfirmToKams',
-		'App\Console\Commands\RetailDonePaymentReport',
+        'App\Console\Commands\RetailDonePaymentReport',
         'App\Console\Commands\DonePaymentReport',
         'App\Console\Commands\PasswordUpdateForAdminUser',
         'App\Console\Commands\NotPickedShipmentsJourney',
         'App\Console\Commands\LastMileStatusReport',
-		'App\Console\Commands\ShipperPaymentCalculation',
+        'App\Console\Commands\ShipperPaymentCalculation',
         'App\Console\Commands\ReturnSheetReceive',
         'App\Console\Commands\RiderDeactivateAutomatically',
         'App\Console\Commands\RevenueReportMonthlyEmail',
         'App\Console\Commands\RevenueReportMonthlyByDeliveryDate',
-		'App\Console\Commands\SaleIncentiveReport',
+        'App\Console\Commands\SaleIncentiveReport',
         'App\Console\Commands\AutoAssignCrmAgent',
         'App\Console\Commands\PendingPaymentCalculationJob',
 
@@ -122,9 +122,9 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\ReattemptRatioCalculate',
         'App\Console\Commands\ShortOfBusinessShippers',
         'App\Console\Commands\BirthdayMessage',
-		'App\Console\Commands\AutoComplaintHighAging',
-		'App\Console\Commands\LeaveCountUpdate',
-		'App\Console\Commands\EmployeeConfirmationDays',
+        'App\Console\Commands\AutoComplaintHighAging',
+        'App\Console\Commands\LeaveCountUpdate',
+        'App\Console\Commands\EmployeeConfirmationDays',
         'App\Console\Commands\MonthAverageDestinationReportEmail',
         'App\Console\Commands\ReversionDeliveredShipments',
         'App\Console\Commands\RevenueReportCutOffDays',
@@ -139,12 +139,12 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\RetailSalesReportByDeliveryCutOffDays',
         'App\Console\Commands\RetailSalesReportByDeliveryRemainingDays',
         'App\Console\Commands\DailyAutoCommentForCRMClaims',
-		'App\Console\Commands\WeeklyAttendanceSummaryLineManager',
-		'App\Console\Commands\LateEmployeePenalty',
-		'App\Console\Commands\AttendanceAdjustmentShiftWise',
-		'App\Console\Commands\RiderFuelAllocationDeliveryNoteCalculation',
+        'App\Console\Commands\WeeklyAttendanceSummaryLineManager',
+        'App\Console\Commands\LateEmployeePenalty',
+        'App\Console\Commands\AttendanceAdjustmentShiftWise',
+        'App\Console\Commands\RiderFuelAllocationDeliveryNoteCalculation',
         'App\Console\Commands\VisionSoftApiExcel',
-		'App\Console\Commands\CreateInvoiceOriginWise',
+        'App\Console\Commands\CreateInvoiceOriginWise',
         'App\Console\Commands\InvalidEmailVisit',
         'App\Console\Commands\NotificationReturnedDeliveredToShipper',
         // 'App\Console\Commands\AgentUnassignedTicket ',
@@ -169,8 +169,13 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\UpdateArrivalChargesIssue',
         \App\Console\Commands\AddMissingSegmentLogs::class,
         '\App\Console\Commands\ApolloShipmentFetchStatus',
+        '\App\Console\Commands\FinSurgentSonicPaymentSharing',
+        '\App\Console\Commands\FailedStatusRePushToWallet',
+        '\App\Console\Commands\RerunWalletSettlement',
+        '\App\Console\Commands\BulkStatusSharingWithWallet'
+        
 
-        ];
+    ];
 
     /**
      * Define the application's command schedule.
@@ -192,7 +197,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('saleperson:numbers')->dailyAt('06:00')->runInBackground();
         $schedule->command('month:average')->dailyAt('06:00')->runInBackground();
         $schedule->command('hubwise:split')->dailyAt('06:00')->runInBackground();
-        // $schedule->command('lastmile:countupdate')->dailyAt('06:30')->runInBackground();
+        $schedule->command('lastmile:countupdate')->dailyAt('06:30')->runInBackground();
         $schedule->command('count:pendingpaymentshipments')->dailyAt('06:00')->runInBackground();
         $schedule->command('crm:closed_reason')->dailyAt('23:50')->runInBackground();
         $schedule->command('crm:progress_report')->dailyAt('23:57')->runInBackground();
@@ -222,14 +227,14 @@ class Kernel extends ConsoleKernel
                 // run 1 hour before from the shift ends, to get save from the next day switch as well
                 $dailyAt = Carbon::parse($shift->end_time)->subHour(1)->format('H:i:s');
                 $schedule->command('employee:attendanceadjustment', [$shift->id, 'web'])
-                ->dailyAt($dailyAt)
-                ->runInBackground();
+                    ->dailyAt($dailyAt)
+                    ->runInBackground();
 
                 // run after 30 mins from the shift starts, to notify employee to mark attendance if forgets
                 $dailyAt = Carbon::parse($shift->start_time)->addMinutes(30)->format('H:i:s');
                 $schedule->command('employee:attendanceadjustment', [$shift->id, 'app'])
-                ->dailyAt($dailyAt)
-                ->runInBackground();
+                    ->dailyAt($dailyAt)
+                    ->runInBackground();
             }
         }
         //rv agent cron jobs start
@@ -518,10 +523,10 @@ class Kernel extends ConsoleKernel
             $schedule->command('report:lastmilestatus')->cron($hourly)->withoutOverlapping()->runInBackground();
         }
 
-		//$incentive_date = SalesIncentiveDate::first();
-		//        if($incentive_date){
-		//            $schedule->command('report:SalesIncentive')->monthlyOn($incentive_date->cron_day, '03:00')->runInBackground();
-		//        }
+        //$incentive_date = SalesIncentiveDate::first();
+        //        if($incentive_date){
+        //            $schedule->command('report:SalesIncentive')->monthlyOn($incentive_date->cron_day, '03:00')->runInBackground();
+        //        }
 //        $schedule->command('crm:autoassign')->dailyAt('17:00')->runInBackground();
         $schedule->command('crm:autoassign_new')->dailyAt('17:00')->runInBackground();
 
@@ -557,12 +562,12 @@ class Kernel extends ConsoleKernel
         }
 
 
-		$schedule->command('invoice:revenueoriginwise')->weeklyOn(7, '1:00')->runInBackground();
+        $schedule->command('invoice:revenueoriginwise')->weeklyOn(7, '1:00')->runInBackground();
 
-		$schedule->command('sms:returned_delivered_sms')->dailyAt('11:00')->runInBackground();
+        $schedule->command('sms:returned_delivered_sms')->dailyAt('11:00')->runInBackground();
 //		$schedule->command('email:qsrreport')->dailyAt('10:01')->runInBackground(); //ye filhal bnd ki hai due to r2 shutdown issue
-		$schedule->command('email:pendingdeliveriesreport')->dailyAt('09:01')->runInBackground();
-		$schedule->command('clean:7DaysOlderQrsPDReportStorage')->dailyAt('06:00')->runInBackground();
+        $schedule->command('email:pendingdeliveriesreport')->dailyAt('09:01')->runInBackground();
+        $schedule->command('clean:7DaysOlderQrsPDReportStorage')->dailyAt('06:00')->runInBackground();
 
         // Commission calculation schedule
         $schedule->command('commission:calculate_commission')->monthlyOn(1, '00:00')->runInBackground();
@@ -584,6 +589,12 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('update:shipper_segment_logs')->everyFiveMinutes()->runInBackground();
         $schedule->command('apollo:fetch-shipments-status')->everyFiveMinutes()->runInBackground();
+        $schedule->command('fingsurgent:sonic-payment')->hourly()->runInBackground(); //wallet
+//        $schedule->command('status:re-push-wallet')->hourly()->runInBackground(); // wallet no need now after bulk status work
+        $schedule->command('rerun:wallet_log_re_push')->hourly()->runInBackground(); // wallet
+        $schedule->command('rerun_wallet_settlement')->everySixHours()->runInBackground(); //wallet
+        $schedule->command('bulk:status-sharing-wallet')->withoutOverlapping()->everyFiveMinutes()->runInBackground();
+        
     }
     /**
      * Register the commands for the application.

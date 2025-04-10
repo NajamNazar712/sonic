@@ -583,7 +583,6 @@ class AdminWalkInBookShipmentController extends Controller
 //    }
 
     public function print_air_waybill(Request $request) {
-
         $user_type = NULL;
         $user_id = NULL;
 
@@ -704,6 +703,18 @@ class AdminWalkInBookShipmentController extends Controller
             $user_id = $check_id['setting_value'];
 
             $shipment = Shipment::where('id',$request->ids)->first();
+
+            $sub_segment_name = '-';
+            $sub_segment = DB::table('shipper_segment_logs')
+            ->leftJoin('sub_category_segments', 'sub_category_segments.id', 'shipper_segment_logs.sub_segment_id')
+            ->where('shipment_id', $shipment->id)
+            ->select('sub_category_segments.name')
+            ->first();
+
+            if ($sub_segment && $sub_segment->name)
+            {
+                $sub_segment_name = $sub_segment->name;
+            }
 
 
             if ($user_id == $shipment->user_id) {
@@ -835,7 +846,10 @@ class AdminWalkInBookShipmentController extends Controller
                             </tr>
                             <tr>
                               <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                              <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+                              <td colspan="2" class="border twice-bottom">' . $item->description . '</td>
+
+                            <td class="color secondary border twice-bottom"><strong>Sub Segment</strong></td>
+                            <td colspan="4" class="border twice-bottom">' . $sub_segment_name . '</td>
                             </tr>
                 ';
 
@@ -951,7 +965,10 @@ class AdminWalkInBookShipmentController extends Controller
                                     </tr>
                                     <tr>
                                       <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                                      <td colspan="6" class="border twice-bottom">' . $item->description .'</td>
+                                      <td colspan="2" class="border twice-bottom">' . $item->description .'</td>
+
+                                        <td class="color secondary border twice-bottom"><strong>Sub Segment</strong></td>
+                                        <td colspan="4" class="border twice-bottom">' . $sub_segment_name . '</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -1787,6 +1804,18 @@ class AdminWalkInBookShipmentController extends Controller
 
             $shipment = Shipment::where('id',$request->ids)->first();
 
+            $sub_segment_name = '-';
+            $sub_segment = DB::table('shipper_segment_logs')
+            ->leftJoin('sub_category_segments', 'sub_category_segments.id', 'shipper_segment_logs.sub_segment_id')
+            ->where('shipment_id', $shipment->id)
+            ->select('sub_category_segments.name')
+            ->first();
+
+            if ($sub_segment && $sub_segment->name)
+            {
+                $sub_segment_name = $sub_segment->name;
+            }
+
             if ($user_id == $shipment->user_id) {
                 $table_start = '
                       <table class="table table-sm table-bordered border twice">
@@ -1907,6 +1936,9 @@ class AdminWalkInBookShipmentController extends Controller
                             <tr>
                               <td class="color secondary border twice-bottom"><strong>Description</strong></td>
                               <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+
+                            <td class="color secondary border twice-bottom"><strong>Sub Segment</strong></td>
+                            <td colspan="4" class="border twice-bottom">' . $sub_segment_name . '</td>
                             </tr>
                 ';
 
@@ -2021,7 +2053,10 @@ class AdminWalkInBookShipmentController extends Controller
                                     </tr>
                                     <tr>
                                       <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                                      <td colspan="6" class="border twice-bottom">' . $item->description .'</td>
+                                      <td colspan="2" class="border twice-bottom">' . $item->description .'</td>
+
+                                    <td class="color secondary border twice-bottom"><strong>Sub Segment</strong></td>
+                                    <td colspan="4" class="border twice-bottom">' . $sub_segment_name . '</td>
                                     </tr>
                                 </tbody>
                             </table>

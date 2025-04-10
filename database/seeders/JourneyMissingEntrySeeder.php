@@ -28,7 +28,7 @@ class JourneyMissingEntrySeeder extends Seeder
     {
         //Only use for the marked as delivered....
         $shipmentId = [
-            20220238047014
+            22320237839358
         ];
         if ($shipmentId) {
             $shipmentId = Shipment::whereIn('tracking_number', $shipmentId)->get();
@@ -37,12 +37,12 @@ class JourneyMissingEntrySeeder extends Seeder
             foreach ($shipmentId as $shipment) {
                 
                 
-                // if ($shipment->shipper_status_id === 5) {
+                if ($shipment->shipper_status_id === 5) {
                     // $shipment->created_at = $shipment->updated_at;
                     $shipment->shipper_status_id = 14;
                     $shipment->consignee_status_id = 14;
                     $shipment->save();
-                // }
+                }
                 $deliveryNoteId = DeliveryNoteShipment::where('shipment_id', $shipment->id)->latest()->first();
 
                 if (in_array($shipment->shipper_status_id, [13, 14])) {

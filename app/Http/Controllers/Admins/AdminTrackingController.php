@@ -973,7 +973,7 @@ class AdminTrackingController extends Controller
                 $dropdown = '<div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                         <div class="dropdown-menu dropdown-menu-sm">
-                            <button type="button" class="dropdown-item request_add"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Request</div></button>';
+                            <button type="button" class="dropdown-item request_add"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Get Support</div></button>';
                 if (session('role_id') == 1 || in_array(247, session('permissions'))) {
                     if ($shipments->origin_id == $shipments->destination_id) {
                         $shipment_statuses_same_city = [2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 49, 52, 54, 55];
@@ -1376,6 +1376,17 @@ class AdminTrackingController extends Controller
 
                         if ($shipment->charges_mode_id) {
                             $details['order_information']['charges_mode'] = $shipment->charges_mode->charges_mode;
+                        }
+                        
+                        $details['order_information']['sub_segment'] = '-';
+                        $sub_segment = DB::table('shipper_segment_logs')
+                        ->leftJoin('sub_category_segments', 'sub_category_segments.id', 'shipper_segment_logs.sub_segment_id')
+                        ->where('shipment_id', $shipment->id)
+                        ->select('sub_category_segments.name')
+                        ->first();
+
+                        if ($sub_segment && $sub_segment->name){
+                            $details['order_information']['sub_segment'] = $sub_segment->name;
                         }
 
                         $details['order_information']['instructions'] = $shipment->special_instructions;
@@ -2482,6 +2493,8 @@ class AdminTrackingController extends Controller
                             ShipmentPosition::where('tracked_by', Auth::id())->delete();
 
                             foreach ($shipments as $shipment){
+                                // due to undefined variable
+                                $shipment_journey_status_by ='-';
                                 $shipment_detail = array();
                                 $last_shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->shipment_id)->orderBy('id', 'desc')->first();
                                 if($last_shipment_journey){

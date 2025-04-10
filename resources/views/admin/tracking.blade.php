@@ -86,7 +86,7 @@
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Add Request</h4>
+                    <h4 class="modal-title white">Get Support</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -138,6 +138,21 @@
                                             </select>
                                         </fieldset>
                                     </div>
+
+                                        <div class="col-6">
+                                            <fieldset class="form-group">
+                                                <select name="case_nature_complainant" id="case_nature_complainant"
+                                                        class="form-control select2">
+                                                    <option value="1">Consignee</option>
+                                                    <option value="2">Shipper</option>
+                                                </select>
+                                            </fieldset>
+                                        </div>
+                                        <div class="col-6">
+                                            <fieldset class="form-group">
+                                                <input type="text" class="form-control" placeholder="Enter Phone Number" name="complainant_phone" id="complainant_phone">
+                                            </fieldset>
+                                        </div>
                                     {{-- <div class="col-6">
                                         <fieldset class="form-group">
                                             <textarea class="form-control" name="complaint_description" id="complaint_description" rows="5"
@@ -767,6 +782,12 @@
 				'allowPlus': false
             });
 
+            $('#complainant_phone').inputmask({
+                mask: '9999-9999999',
+                'clearIncomplete': true
+            });
+
+
             $('#tracking').on('click', '.call_status', function () {
             var id = $(this).attr('id');
             var tracking = $(this).attr('data-tracking');
@@ -1385,6 +1406,12 @@
                 allowClear: true,
                 dropdownParent: $('#add_request_form')
             });
+            $('#case_nature_complainant').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: "Select Complainant",
+                allowClear: true,
+                dropdownParent: $('#add_request_form')
+            });
             $('#complaint_channels').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: "Select Channel",
@@ -1556,7 +1583,7 @@
                                 shipment +=
                                     '<button class="btn btn-secondary ml-auto mr-1 mr-sm-1 add_request" id=' +
                                     id + ' data-tracking=' + details.tracking_number +
-                                    '>Add Request</button>';
+                                    '>Get Support</button>';
 
                                 shipment +=
                                         '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 view_odr" id=' +
@@ -1911,6 +1938,19 @@
                                 shipment += '<td>' + details.order_information.pieces + '</td>';
                                 shipment += '</tr>';
 
+                                // Sub segment of shipper
+                                shipment += '<tr>';
+                                shipment += '<td></td>';
+                                shipment += '<td></td>';
+                                shipment += '<td></td>';
+                                shipment += '<td></td>';
+                                shipment += '<td></td>';
+                                shipment += '<td></td>';
+                                shipment += '<td><strong>Sub Segment</strong></td>';
+                                shipment += '<td>' + details.order_information.sub_segment + '</td>';
+                                shipment += '</tr>';
+
+
                                 shipment += '<tr>';
                                 shipment += length;
                                 shipment += '<td><strong>Shipping Mode</strong></td>';
@@ -1948,9 +1988,34 @@
                                 shipment += '</div>';
                                 shipment += '</div>';
 
-
                                 shipment += '<div class="col-12 mt-2">';
+                                shipment += '<div class="d-flex justify-content-between">';
                                 shipment += '<h4><u>Tracking History</u></h4>';
+
+                                // scanning history button
+                                // @if (session('role_id') == 1 || in_array(1020, session('permissions'))) {
+                                //     shipment += '<div class="position-relative" style="top: -3px;">';
+                                //     shipment += '<form id="scanHistoryForm" action="{{ route('admin.scanning_history.details_new') }}" method="GET" target="_blank">';
+                                //     shipment += '@csrf';
+                                //     shipment += '<input type="hidden" name="tracking_number" value="' + details.tracking_number + '" />';
+                                //     shipment += '<input type="hidden" name="search_type" value="1" />';
+                                //     shipment += '</form>';
+                                //     shipment += '<a href="#" onclick="document.getElementById(\'scanHistoryForm\').submit(); return false;" class="btn btn-secondary">Scan history</a>';
+                                //     shipment += '</div>';
+                                // }
+                                // @endif
+
+                                shipment += '<div class="position-relative" style="top: -3px;">';
+                                shipment += '<form id="scanHistoryForm" action="{{ route('admin.scanning_history.details_new') }}" method="GET" target="_blank">';
+                                shipment += '@csrf';
+                                shipment += '<input type="hidden" name="tracking_number" value="' + details.tracking_number + '" />';
+                                shipment += '<input type="hidden" name="search_type" value="1" />';
+                                shipment += '</form>';
+                                shipment += '<a href="#" onclick="document.getElementById(\'scanHistoryForm\').submit(); return false;" class="btn btn-secondary">Scan history</a>';
+                                shipment += '</div>';
+
+                                shipment += '</div>';
+
                                 shipment += '<div class="border table-responsive">';
                                 shipment += '<table class="table table-sm table-borderless datatable tracking_history">';
                                 shipment += '<thead>';
@@ -3129,7 +3194,6 @@
             }
             else{
                 $('#cod_change').addClass('d-none');
-
             }
         });
 
@@ -3149,6 +3213,9 @@
                     var nature_flag = true;
                     var case_nature_complaint_id = $('#case_nature_complaints').val();
                     var case_nature_channel_id = $('#complaint_channels').val();
+                    var complainant_phone = $('#complainant_phone').val();
+                    var case_nature_complainant = $('#case_nature_complainant').val();
+
                     // var complaint_description = $('#complaint_description').val();
 
                     var complaint_description = "";
@@ -3204,6 +3271,22 @@
                             containerId: 'toast-top-center'
                         });
                     }
+                    if (!complainant_phone) {
+                        nature_flag = false;
+                        var error = "Please enter complainant phone!";
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                    if (!case_nature_complainant) {
+                        nature_flag = false;
+                        var error = "Please select complainant!";
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
                     if (nature_flag) {
                         $('#AddNewRequest').attr('disabled', true);
                         swal({
@@ -3223,7 +3306,10 @@
                                     'case_nature_id': case_nature_id,
                                     'complaint_id': case_nature_complaint_id,
                                     'channel_id': case_nature_channel_id,
-                                    'description': complaint_description
+                                    'description': complaint_description,
+                                    'complainant_phone' : $('#complainant_phone').val(),
+                                    'case_nature_complainant' : $('#case_nature_complainant').val(),
+
                                 }
                             })
                             .done(function(data) {
@@ -3427,6 +3513,8 @@
                                             'channel_id': case_nature_channel_id,
                                             'description': service_description,
                                             'alternate_phone': alternate_phone,
+                                            'complainant_phone' : $('#complainant_phone').val(),
+                                            'case_nature_complainant' : $('#case_nature_complainant').val(),
                                             'cod_new_amount': $('#new_amount').val(),
                                             'cod_remarks': $('#cod_remarks').val(),
                                             'is_zero_cod': is_zero_cod,
@@ -3513,6 +3601,8 @@
                                     'complaint_id': case_nature_complaint_id,
                                     'channel_id': case_nature_channel_id,
                                     'description': service_description,
+                                    'complainant_phone' : $('#complainant_phone').val(),
+                                    'case_nature_complainant' : $('#case_nature_complainant').val(),
                                     'alternate_phone': alternate_phone,
                                     // 'cod_amount': cod_amount,
                                 }
@@ -3972,6 +4062,9 @@
             $('#receiving_sheet_div').addClass('d-none');
             $('#alternate_phone_input').addClass('d-none');
             $('#alternate_phone').val('');
+            $('#case_nature_complainant').val('').trigger('change');
+            $('#complainant_phone').val('');
+
             // $('#cod_amount_input').addClass('d-none');
             // $('#cod_amount').val('');
 

@@ -334,10 +334,10 @@
 
                                 row.push(index + 1);
                                 row.push(values.entry_date);
-                                row.push(values.account_head);
-                                row.push(values.account_title);
+                                row.push(decodeHtmlEntities(values.account_head));
+                                row.push(decodeHtmlEntities(values.account_title));
                                 row.push(values.entry_city);
-                                row.push(values.expense_details);
+                                row.push(decodeHtmlEntities(values.expense_details));
                                 row.push(values.cost_centre);
                                 row.push(values.amount);
                                 row.push(values.station_amount);
@@ -605,6 +605,11 @@
                 // console.log(sdn);
                 printSDN(sdn);
             });
+
+            function decodeHtmlEntities(str) {
+                let doc = new DOMParser().parseFromString(str, "text/html");
+                return doc.documentElement.textContent;
+            }
         });
     </script>
 @endsection
