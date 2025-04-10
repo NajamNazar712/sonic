@@ -10432,6 +10432,7 @@ class APIController extends Controller
             'wallet_users.*.finova_account_type' => ['required', 'numeric'],
         ];
 
+
         $validator = Validator::make($request->all(), $rules, $this->messages);
         $validator->setAttributeNames($this->names);
         if ($validator->fails()) {
@@ -10445,7 +10446,11 @@ class APIController extends Controller
         $errors = [];
         $success = [];
         $globalSetting = GlobalSettings::where(['setting_value' => 1, 'type' => 'wallet_account_type'])->exists();
-
+        FinjaRequestLog::insert([
+            'requested' => json_encode($request->all()),
+            'ip_address' => $request->ip(),
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
         if($globalSetting) {
             $walletDataRequest = collect($request->wallet_users);
 
@@ -10462,11 +10467,6 @@ class APIController extends Controller
                     continue;
                 }
                 $wallet_primary_id = $wallet[$wallet_id]->id;
-
-                FinjaRequestLog::insert([
-                    'requested' => json_encode($request->all()),
-                    'ip_address' => $request->ip(),
-                ]);
 
                 WalletUser::where('id', $wallet_primary_id)
                     ->update(['finova_account_type' => $finova_account_type]);
