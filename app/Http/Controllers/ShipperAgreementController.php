@@ -1158,8 +1158,7 @@ otherwise it will be rejected</li>
 
                     $html .= '<div class="new-page"></div>';
                 }
-            }
-
+      
 
         $html .=$claim_policy;
         $html .= '</div>';
