@@ -4434,10 +4434,10 @@ class AdminFinanceController extends Controller
     public function change_shipment_amount_store(Request $request)
     {
         $shipment_id = $request->input('shipment_id');
-        $amount = str_replace(',', '', $request->input('amount'));
-
+        $amount = str_replace(',', '', $request->input('amount') ?? 0);
+        
         $shipment = Shipment::find($shipment_id);
-
+        
         $change_shipment_amount = new ChangeShipmentAmountLog();
 
         $change_shipment_amount->shipment_id = $shipment->id;
