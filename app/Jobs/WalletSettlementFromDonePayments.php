@@ -68,7 +68,7 @@ class WalletSettlementFromDonePayments implements ShouldQueue
             // ->where(function ($query) {
             //     $query->where('sac.wallet_settlement_updated', 0);
             // })
-            ->select(['done_payment_shipments.*', 'wu.user_id as user_id', 'wu.wallet_id as wallet_id', 's.tracking_number', 's.cash_handling_charges', 's.insurance_charges','s.replacement_charges','s.try_and_buy_charges','s.intercept_charges','s.nsa_osa_charges','s.esc_charges','s.return_charges', 'sac.wallet_settlement_updated', 's.weight_charges', 's.fuel_surcharge','sc.faf_charges', 'ssc.reverse_pickup_charges', 'sc.wallet_charges', 'sac.wallet_log_charges_updated','sac.wallet_log_updated'])->get();
+            ->select(['done_payment_shipments.*', 'wu.user_id as user_id', 'wu.wallet_id as wallet_id', 's.tracking_number', 's.cash_handling_charges', 's.insurance_charges','s.replacement_charges','s.try_and_buy_charges','s.intercept_charges','s.nsa_osa_charges','s.esc_charges','s.return_charges', 'sac.wallet_settlement_updated', 's.weight_charges', 's.fuel_surcharge','sc.faf_charges', 'ssc.reverse_pickup_charges', 'sc.wallet_charges', 'sac.wallet_log_charges_updated','sac.wallet_log_updated','s.packaging_material_charges'])->get();
         //dd($done_payment_shipments);
         
         $api = config('app.FINGA_URL');
@@ -111,6 +111,7 @@ class WalletSettlementFromDonePayments implements ShouldQueue
                             'return_charges' => floatval($dps->return_charges),
                             'gst_charges' => floatval($dps->gst),
                             'sms_charges' => floatval($dps->sms_charges),
+                            'packaging_material_charges' => floatval($dps->packaging_material_charges),
                         ]
                     ];
                     $request_nature = 7;
