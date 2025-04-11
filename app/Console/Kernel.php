@@ -594,7 +594,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('rerun:wallet_log_re_push')->hourly()->runInBackground(); // wallet
         $schedule->command('rerun_wallet_settlement')->everySixHours()->runInBackground(); //wallet
         $schedule->command('bulk:status-sharing-wallet')->withoutOverlapping()->everyFiveMinutes()->runInBackground();
-        $schedule->command('wallet-users:make-to-done')->dailyAt('17:00')->runInBackground();
+//        $schedule->command('wallet-users:make-to-done')->dailyAt('17:00')->runInBackground();
         
     }
     /**
