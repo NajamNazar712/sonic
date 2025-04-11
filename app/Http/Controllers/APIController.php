@@ -10457,13 +10457,12 @@ class APIController extends Controller
 
         $wallet_ids = collect($walletUsers)->pluck('wallet_id')->toArray();
 
-        // Fetch all valid wallet users in one query
         $walletUserMap = WalletUser::whereIn('wallet_id', $wallet_ids)
             ->where('substitute_user_id', 0)
             ->pluck('wallet_id','wallet_id')->toArray();
         foreach ($walletUsers as $index => $walletData) {
             $validator = Validator::make($walletData, [
-                'wallet_id' => ['required', 'numeric'],
+                'wallet_id' => ['required', 'numeric', 'exists:wallet_users,wallet_id'],
                 'finova_account_type' => ['required', 'numeric'],
             ]);
 
@@ -10474,13 +10473,6 @@ class APIController extends Controller
 
             $wallet_id = $walletData['wallet_id'];
             $finova_account_type = $walletData['finova_account_type'];
-
-            if (!isset($walletUserMap[$wallet_id])) {
-                $errors[$index] = [
-                    'wallet_id' => 'Invalid wallet_id or user is a substitute user.',
-                ];
-                continue;
-            }
 
             WalletUser::where('wallet_id', $wallet_id)
                 ->update(['finova_account_type' => $finova_account_type]);
