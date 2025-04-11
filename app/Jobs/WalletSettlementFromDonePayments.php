@@ -89,7 +89,7 @@ class WalletSettlementFromDonePayments implements ShouldQueue
                 if ($dps->wallet_action_bid == 1 && $dps->wallet_settlement_updated == 0) {
                     // $logCharged = !empty($dps->wallet_log_charges_updated) ? $dps->wallet_log_charges_updated : 0;
                     $logCharged = FinjaLogSettlementRecord::where('shipment_id', $shipmentId)->first();
-                    $logCharged = $logCharged ? $logCharged->wallet_log_charges_updated : 0;
+                    $logCharged2 = !empty($logCharged) ? $logCharged->wallet_log_charges_updated : 0;
                     $requestPayload = [
                         "client_id" => $dps->user_id,
                         "wallet_id" => $dps->wallet_id,
@@ -97,9 +97,9 @@ class WalletSettlementFromDonePayments implements ShouldQueue
                         "shipment_id" => $dps->tracking_number,
                         "amount" => $dps->type == 0 ? $dps->amount : 0,
                         "charges" => [
-                            'faf_charges' => $logCharged == 0 ? floatval($dps->faf_charges) : 0,
-                            'weight_charges' => $logCharged == 0 ? floatval($dps->weight_charges) : 0,
-                            'fuel_surcharge' => $logCharged == 0 ? floatval($dps->fuel_surcharge) : 0,
+                            'faf_charges' => $logCharged2 == 0 ? floatval($dps->faf_charges) : 0,
+                            'weight_charges' => $logCharged2 == 0 ? floatval($dps->weight_charges) : 0,
+                            'fuel_surcharge' => $logCharged2 == 0 ? floatval($dps->fuel_surcharge) : 0,
                             'cash_handling_charges' => $dps->type == 0 ? floatval($dps->cash_handling_charges) : 0,
                             'insurance_charges' => floatval($dps->insurance_charges),
                             'replacement_charges' => floatval($dps->replacement_charges),
