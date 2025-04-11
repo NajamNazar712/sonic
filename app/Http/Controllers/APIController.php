@@ -10460,9 +10460,7 @@ class APIController extends Controller
         // Fetch all valid wallet users in one query
         $walletUserMap = WalletUser::whereIn('wallet_id', $wallet_ids)
             ->where('substitute_user_id', 0)
-            ->get()
-            ->keyBy('wallet_id');
-
+            ->pluck('wallet_id','wallet_id')->toArray();
         foreach ($walletUsers as $index => $walletData) {
             $validator = Validator::make($walletData, [
                 'wallet_id' => ['required', 'numeric'],
@@ -10484,11 +10482,7 @@ class APIController extends Controller
                 continue;
             }
 
-            $wallet_primary_id = $walletUserMap[$wallet_id]->id;
-
-
-
-            WalletUser::where('id', $wallet_primary_id)
+            WalletUser::where('wallet_id', $wallet_id)
                 ->update(['finova_account_type' => $finova_account_type]);
 
             $success[] = $wallet_id;
