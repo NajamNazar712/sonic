@@ -960,7 +960,7 @@ class AdminNotificationsController extends Controller
             $details['fields'] = ['Shipper','person_of_contact','Shipper name'];
         }
         else if ($id == 150){
-            $details['receiver'] = ['Sales Person','CC-m.sohail@trax.pk','CC-tauseef.sarfaraz@trax.pk','CC-Shahrukh.raheem@trax.pk','CC-Mohsin.khan@trax.pk','CC-ops.excellence@trax.pk'];
+            $details['receiver'] = ['Sales Person','CC-m.sohail@trax.pk','CC-tauseef.sarfaraz@trax.pk','CC-cs.dept@trax.pk','CC-Mohsin.khan@trax.pk','CC-ops.excellence@trax.pk'];
 
             $details['fields'] = ['preview'];
         }
