@@ -93,33 +93,48 @@ class WalletBulkSettlementFromDonePayments implements ShouldQueue
                     // $logCharged = !empty($dps->wallet_log_charges_updated) ? $dps->wallet_log_charges_updated : 0;
                     $logCharged = FinjaLogSettlementRecord::where('shipment_id', $shipmentId)->first();
                     $logCharged2 = !empty($logCharged) ? $logCharged->wallet_log_charges_updated : 0;
-                    $settlementPayload[$shipmentId] = [
-                        "client_id" => $dps->user_id,
-                        "wallet_id" => $dps->wallet_id,
-                        "reference_id" => $dps->id,
-                        "shipment_id" => $dps->tracking_number,
-                        "amount" => $dps->type == 0 ? $dps->amount : 0,
-                        "charges" => [
+                    $charges = [];
+                    if ($dps->type == 0) {
+                        $charges = [
                             'faf_charges' => $logCharged2 == 0 ? floatval($dps->faf_charges) : 0,
                             'weight_charges' => $logCharged2 == 0 ? floatval($dps->weight_charges) : 0,
                             'fuel_surcharge' => $logCharged2 == 0 ? floatval($dps->fuel_surcharge) : 0,
-                            'cash_handling_charges' => $dps->type == 0 ? floatval($dps->cash_handling_charges) : 0,
+                            'cash_handling_charges' => floatval($dps->cash_handling_charges),
                             'insurance_charges' => floatval($dps->insurance_charges),
                             'replacement_charges' => floatval($dps->replacement_charges),
                             'try_and_buy_charges' => floatval($dps->try_and_buy_charges),
                             'intercept_charges' => floatval($dps->intercept_charges),
                             'non_service_area_charges' => floatval($dps->nsa_osa_charges),
                             'esc_charges' => floatval($dps->esc_charges),
-                            'reverse_pickup_charges' => floatval($dps->reverse_pickup_charges),
-                            'return_charges' => floatval($dps->return_charges),
                             'gst_charges' => floatval($dps->gst),
                             'sms_charges' => floatval($dps->sms_charges),
                             'packaging_material_charges' => floatval($dps->packaging_material_charges),
-                        ],
+                        ];
+                    } elseif ($dps->type == 1) {
+                        $charges = [
+                            'faf_charges' => $logCharged2 == 0 ? floatval($dps->faf_charges) : 0,
+                            'weight_charges' => $logCharged2 == 0 ? floatval($dps->weight_charges) : 0,
+                            'fuel_surcharge' => $logCharged2 == 0 ? floatval($dps->fuel_surcharge) : 0,
+                            'insurance_charges' => floatval($dps->insurance_charges),
+                            'return_charges' => floatval($dps->return_charges),
+                            'intercept_charges' => floatval($dps->intercept_charges),
+                            'non_service_area_charges' => floatval($dps->nsa_osa_charges),
+                            'gst_charges' => floatval($dps->gst),
+                            'sms_charges' => floatval($dps->sms_charges),
+                            'packaging_material_charges' => floatval($dps->packaging_material_charges),
+                        ];
+                    }
+
+                    $settlementPayload[$shipmentId] = [
+                        "client_id" => $dps->user_id,
+                        "wallet_id" => $dps->wallet_id,
+                        "reference_id" => $dps->id,
+                        "shipment_id" => $dps->tracking_number,
+                        "amount" => $dps->type == 0 ? $dps->amount : 0,
+                        "charges" => $charges,
                         'wallet_log_updated' => $dps->wallet_log_updated,
                         'dps_id' => $dps->id,
                         'dps_type' => $dps->type
-                        
                     ];
     
                 } elseif ($dps->wallet_action_bid == 2) {
