@@ -10461,8 +10461,16 @@ class APIController extends Controller
             ->where('substitute_user_id', 0)
             ->pluck('wallet_id','wallet_id')->toArray();
         foreach ($walletUsers as $index => $walletData) {
+            $wallet_id = $walletData['wallet_id'];
             $validator = Validator::make($walletData, [
-                'wallet_id' => ['required', 'numeric', 'exists:wallet_users,wallet_id'],
+                'wallet_id' => ['required', 'numeric','wallet_id' => [
+                    'required',
+                    'numeric',
+                    Rule::exists('wallet_users', 'wallet_id')->where(function ($query) {
+                        $query->where('substitute_user_id', 0);
+                    }),
+                ],
+                ],
                 'finova_account_type' => ['required', 'numeric'],
             ]);
 
@@ -10471,7 +10479,7 @@ class APIController extends Controller
                 continue;
             }
 
-            $wallet_id = $walletData['wallet_id'];
+
             $finova_account_type = $walletData['finova_account_type'];
 
             WalletUser::where('wallet_id', $wallet_id)
