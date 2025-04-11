@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\FafCharges;
 use App\FinjaSmsLog;
 use App\Http\Controllers\Admins\AdminCRMController;
+use App\Http\Models\NotificationSetting;
 use App\Http\Models\PendingPaymentShipment;
+use App\Http\Models\ShipmentSmsLogs;
 use App\Http\Models\WalletUser;
 use App\Models\FinjaRequestLog;
 use App\ShipmentAdditionalCharges;
@@ -2141,6 +2143,36 @@ class APIController extends Controller
 
             $shipment = Shipment::where('tracking_number', $tracking_number)->first();
 
+            $current_sms_charges = $shipment->user->sms_charges;
+            $sms_charges_status = $shipment->user->sms_charges_status;
+            $sms_charges = 0;
+
+            $wallet_user = optional($shipment->user->wallet)->exists();
+            $shipment_sms_count = 0;
+            $shipment_sms = ShipmentSmsLogs::select('notification_id', \Illuminate\Support\Facades\DB::raw('count(*) as count'))->where('shipment_id' , $shipment->id)->where('paid', 0)->groupBy('notification_id')->get();
+            foreach($shipment_sms as $notification) {
+                $notification_setting = NotificationSetting::where('notification_id', $notification->notification_id)->where('charged_sms_toggle',1);
+                if ($notification_setting->exists()) {
+                    $notification_setting = $notification_setting->first();
+                    $charging_frequency = $notification_setting->charging_frequency;
+                    if($notification->count <= $charging_frequency ) {
+                        $shipment_sms_count += $notification->count;
+                    } else {
+                        $shipment_sms_count += $charging_frequency;
+                    }
+                }
+            }
+            $sms_charges = $current_sms_charges * $shipment_sms_count;
+
+            $charges = array();
+
+            if(!empty($sms_charges)){
+                $charges['sms_charges'] = $sms_charges;
+            }
+            if($wallet_user){
+                $charges['wallet_charges'] = ShipmentAdditionalCharges::fetch_wallet_charges($shipment->id);
+            }
+
             $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->latest()->first();
 
             if ($shipment_journey) {
@@ -2148,8 +2180,6 @@ class APIController extends Controller
             } else {
                 $current_status_id = $shipment->shipper_status_id;
             }
-
-            $charges = array();
 
             if ($shipment->packaging_material_request) {
                 $charges['packaging_material_charges'] = $shipment->packaging_material_charges;
@@ -2282,11 +2312,15 @@ class APIController extends Controller
             $shipment = Shipment::where('tracking_number', $tracking_number)->first();
 
             $shipment_payment_journey = $shipment->shipment_payment_journey;
-
             if (!$shipment_payment_journey->isEmpty()) {
                 $current_payment_status = $shipment_payment_journey->first()->status->name;
-
-                return response()->json(['status' => 0, 'message' => 'Payment Status of Shipment #' . $tracking_number, 'current_payment_status' => $current_payment_status]);
+                $wallet_charges = ShipmentAdditionalCharges::fetch_wallet_charges($shipment->id);
+                return response()->json([
+                    'status' => 0, 
+                    'message' => 'Payment Status of Shipment #' . $tracking_number, 
+                    'current_payment_status' => $current_payment_status,
+                    'wallet_charges' => $wallet_charges
+                ]);
             } else {
                 return response()->json(['status' => 1, 'message' => 'No Payment Status']);
             }
@@ -2325,7 +2359,13 @@ class APIController extends Controller
                     $current_status_id = $shipment->shipper_status_id;
                 }
 
+                $wallet_user = optional($shipment->user->wallet)->exists();
+
                 $charges = array();
+
+                if($wallet_user){
+                    $charges['wallet_charges'] = ShipmentAdditionalCharges::fetch_wallet_charges($shipment->id);
+                }
 
                 if ($shipment->packaging_material_request) {
                     $charges['packaging_material_charges'] = $shipment->packaging_material_charges;
@@ -10178,58 +10218,98 @@ class APIController extends Controller
     }
 
     public function fintech_charges(Request $request) {
-
         $rules = [
             'tracking_number' => ['required', 'exists:shipments,tracking_number'],
-            'wallet_id' => ['required', 'exists:wallet_users,wallet_id'],
             'charges' => ['required', 'numeric', 'min:0', 'max:100000'],
         ];
 
-        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validator = Validator::make($request->all(), $rules, $this->messages);
+        $validator->setAttributeNames($this->names);
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Error(s) in Input',
+                'errors' => $validator->errors()
+            ]);
+        }
 
-        $validate->setAttributeNames($this->names);
+        $errors = [];
+        $success = [];
+        $shipmentsData = collect($request->all())->toArray();
 
-        if ($validate->fails()) {
-            return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-        } else {
-            $shipment = Shipment::where('tracking_number', $request->tracking_number)->first();
+        // Ensure tracking numbers are always in an array format
+        $trackingNumbers = is_array($shipmentsData['tracking_number'])
+            ? $shipmentsData['tracking_number']
+            : [$shipmentsData['tracking_number']];
+
+        $shipments = Shipment::whereIn('tracking_number', $trackingNumbers)->get()->keyBy('tracking_number');
+
+        foreach ($trackingNumbers as $tracking_number) {
+            if (!isset($shipments[$tracking_number])) {
+                $errors[] = [
+                    'tracking_number' => $tracking_number,
+                    'error' => 'Shipment not found'
+                ];
+                continue;
+            }
+
+            $shipment = $shipments[$tracking_number];
             $shipment_id = $shipment->id;
 
-            ShipmentAdditionalCharges::where('shipment_id', $shipment_id)->update([
-                'wallet_charges' => $request->charges,
-                'wallet_charges_updated_at' => Carbon::now()
+            FinjaRequestLog::insert([
+                'requested' => json_encode($request->all()),
+                'ip_address' => $request->ip(),
             ]);
-            $finja_request_log = new FinjaRequestLog();
-            $finja_request_log->requested = json_encode($request->all());
-            $finja_request_log->ip_address = $request->ip();
-            $finja_request_log->save();
 
-            $pending_payment_shipments = PendingPaymentShipment::where('shipment_id', $shipment->id)->whereIn('type', [0, 1])->latest()->first();
-            if (!empty($pending_payment_shipments)) {
-                AdminFinanceController::update_payment($shipment_id, $pending_payment_shipments->type);
-            }else{
-                $check_process = DonePaymentShipment::where('shipment_id', $shipment_id)
-                    ->whereIn('type', [0, 1])
-                    ->latest()
-                    ->whereHas('done_payment', function ($query) {
-                        $query->where('status', 0);
-                        $query->where('is_wallet_payment', 1);
-                    })
-                    ->exists();
+            ShipmentAdditionalCharges::where('shipment_id', $shipment_id)
+                ->update(['wallet_charges' => $request->charges, 'wallet_charges_updated_at' => now()]);
 
-                if ($check_process) {
-                    $done_payment_shipments = DonePaymentShipment::where('shipment_id', $shipment->id)->whereIn('type', [0, 1])->latest()->first();
-                    if (!empty($done_payment_shipments)) {
-                        AdminFinanceController::update_payment_done_payment($shipment_id, $done_payment_shipments->type, $done_payment_shipments->done_payment_id);
-                    }
-                }else{
-                    return response()->json(['status' => 0, 'message' => 'Payment Can not be process now']);
-                }
+            $pending_payment = PendingPaymentShipment::where('shipment_id', $shipment_id)
+                ->whereIn('type', [0, 1])
+                ->latest()
+                ->first();
 
+            if ($pending_payment) {
+                AdminFinanceController::update_payment($shipment_id, $pending_payment->type);
+                $success[] = $tracking_number;
             }
-            return response()->json(['status' => 1, 'message' => 'Charges updated against this shipment.']);
+
+            $done_payment_query = DonePaymentShipment::where('shipment_id', $shipment_id)
+                ->whereIn('type', [0, 1])
+                ->latest();
+
+            $check_pending_process = (clone $done_payment_query)->whereHas('done_payment', function ($query) {
+                $query->whereIn('status', [0, 3])->where('is_wallet_payment', 1);
+            })->exists();
+
+            if ($check_pending_process) {
+                $done_payment = (clone $done_payment_query)->first();
+                AdminFinanceController::update_payment_done_payment($shipment_id, $done_payment->type, $done_payment->done_payment_id);
+                $success[] = $tracking_number;
+            }
+
+            $check_paid_late = (clone $done_payment_query)->whereHas('done_payment', function ($query) {
+                $query->where('status', 1)->where('is_wallet_payment', 1);
+            })->exists();
+
+            if ($check_paid_late) {
+                $errors[] = [
+                    'tracking_number' => $tracking_number,
+                    'error' => 'Payment cannot be processed now'
+                ];
+            } else {
+                $success[] = $tracking_number;
+            }
         }
+
+        return response()->json([
+            'status' => empty($errors) ? 1 : 0,
+            'message' => empty($errors) ? 'All charges updated successfully.' : 'Some charges could not be updated due to errors.',
+            'success' => $success,
+            'errors' => $errors,
+        ]);
     }
+
     public function fintech_getToken(Request $request) {
 
         $rules = [
@@ -10254,6 +10334,169 @@ class APIController extends Controller
             }
 
             return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => 'USer Not Found']);
+        }
+    }
+
+    public function fintech_charges_bulk(Request $request)
+    {
+        $rules = [
+            'wallet_id' => ['required', 'exists:wallet_users,wallet_id'],
+            'shipments' => ['required', 'array', 'min:1'],
+            'shipments.*.tracking_number' => ['required', 'exists:shipments,tracking_number'],
+            'shipments.*.charges' => ['required', 'numeric', 'min:0', 'max:100000'],
+        ];
+
+        $validator = Validator::make($request->all(), $rules, $this->messages);
+        $validator->setAttributeNames($this->names);
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Error(s) in Input',
+                'errors' => $validator->errors()
+            ]);
+        }
+
+        $errors = [];
+        $success = [];
+        $shipmentsData = collect($request->shipments);
+
+        $trackingNumbers = $shipmentsData->pluck('tracking_number');
+        $shipments = Shipment::whereIn('tracking_number', $trackingNumbers)->get()->keyBy('tracking_number');
+
+        foreach ($shipmentsData as $key => $shipmentData) {
+            $tracking_number = $shipmentData['tracking_number'];
+            $charges = $shipmentData['charges'];
+
+            if (!isset($shipments[$tracking_number])) {
+                $errors[$key] = [
+                    'tracking_number' => $tracking_number,
+                    'error' => 'Shipment not found'
+                ];
+                continue;
+            }
+
+            $shipment = $shipments[$tracking_number];
+            $shipment_id = $shipment->id;
+
+            FinjaRequestLog::insert([
+                'requested' => json_encode($request->all()),
+                'ip_address' => $request->ip(),
+            ]);
+
+            ShipmentAdditionalCharges::where('shipment_id', $shipment_id)
+                ->update(['wallet_charges' => $charges, 'wallet_charges_updated_at' => now()]);
+
+            $pending_payment = PendingPaymentShipment::where('shipment_id', $shipment_id)
+                ->whereIn('type', [0, 1])
+                ->latest()
+                ->first();
+
+            if ($pending_payment) {
+                AdminFinanceController::update_payment($shipment_id, $pending_payment->type);
+                $success[] = $tracking_number;
+                continue;
+            }
+
+            $done_payment_query = DonePaymentShipment::where('shipment_id', $shipment_id)
+                ->whereIn('type', [0, 1])
+                ->latest();
+
+            $check_pending_process = (clone $done_payment_query)->whereHas('done_payment', function ($query) {
+                $query->whereIn('status', [0, 3])->where('is_wallet_payment', 1);
+            })->exists();
+
+            if ($check_pending_process) {
+                $done_payment = (clone $done_payment_query)->first();
+                AdminFinanceController::update_payment_done_payment($shipment_id, $done_payment->type, $done_payment->done_payment_id);
+                $success[] = $tracking_number;
+                continue;
+            }
+
+            $check_paid_late = (clone $done_payment_query)->whereHas('done_payment', function ($query) {
+                $query->where('status', 1)->where('is_wallet_payment', 1);
+            })->exists();
+
+            if ($check_paid_late) {
+                $errors[$key] = [
+                    'tracking_number' => $tracking_number,
+                    'error' => 'Payment cannot be processed now'
+                ];
+            } else {
+                $success[] = $tracking_number;
+            }
+        }
+
+        return response()->json([
+            'status' => empty($errors) ? 1 : 0,
+            'message' => empty($errors) ? 'All charges updated successfully.' : 'Some charges could not be updated due to errors.',
+            'success' => $success,
+            'errors' => $errors,
+        ]);
+    }
+
+    public function fintech_account_type(Request $request)
+    {
+        $rules = [
+            'wallet_users' => ['required', 'array', 'min:1'],
+            'wallet_users.*.wallet_id' => ['required', 'exists:wallet_users,wallet_id'],
+            'wallet_users.*.finova_account_type' => ['required', 'numeric'],
+        ];
+
+        $validator = Validator::make($request->all(), $rules, $this->messages);
+        $validator->setAttributeNames($this->names);
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Error(s) in Input',
+                'errors' => $validator->errors()
+            ]);
+        }
+
+        $errors = [];
+        $success = [];
+        $globalSetting = GlobalSettings::where(['setting_value' => 1, 'type' => 'wallet_account_type'])->exists();
+
+        if($globalSetting) {
+            $walletDataRequest = collect($request->wallet_users);
+
+            $wallet_ids = $walletDataRequest->pluck('wallet_id');
+            $wallet = WalletUser::whereIn('wallet_id', $wallet_ids)->where('substitute_user_id', 0)->get()->keyBy('wallet_id');
+            foreach ($walletDataRequest as $key => $walletDataRow) {
+                $wallet_id = $walletDataRow['wallet_id'];
+                $finova_account_type = $walletDataRow['finova_account_type'];
+                if (!isset($wallet[$wallet_id])) {
+                    $errors[$key] = [
+                        'wallet_id' => $wallet_id,
+                        'error' => 'Wallet not found'
+                    ];
+                    continue;
+                }
+                $wallet_primary_id = $wallet[$wallet_id]->id;
+
+                FinjaRequestLog::insert([
+                    'requested' => json_encode($request->all()),
+                    'ip_address' => $request->ip(),
+                ]);
+
+                WalletUser::where('id', $wallet_primary_id)
+                    ->update(['finova_account_type' => $finova_account_type]);
+
+                $success[] = $wallet_id;
+            }
+
+            return response()->json([
+                'status' => empty($errors) ? 1 : 0,
+                'message' => empty($errors) ? 'All Wallet Accounts updated successfully.' : 'Some Accounts could not be updated due to errors.',
+                'success' => $success,
+                'errors' => $errors,
+            ]);
+        }else{
+            return response()->json([
+                'status' => 0,
+                'message' =>  'The Api is currently Inactive',
+                'success' => [],
+                'errors' => [],
+            ]);
         }
     }
 

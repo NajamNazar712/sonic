@@ -143,7 +143,7 @@ use App\Http\Models\WalletUser;
 use App\Http\Controllers\FingaIntegrationController;
 use Illuminate\Support\Facades\Http;
 use App\Jobs\CODAmountChangeSendToWallet;
-
+use App\Jobs\WalletBulkSettlementFromDonePayments;
 
 class AdminFinanceController extends Controller
 {
@@ -14810,15 +14810,15 @@ class AdminFinanceController extends Controller
                 $shipment =  $invoice_shipment->shipment_archieve;
             }
             $arrival_charges_applied = ShipmentAdditionalCharges::check_additional_charges($shipment->id,true,false,false);;
-            $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
-
-            if ($shipment_journey->exists()) {
-                $date = $shipment_journey->first()->created_at;
-            } else {
-                $date = $shipment->created_at;
-            }
-
-            $date = Carbon::parse($date)->format('Y-m-d');
+//            $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
+//
+//            if ($shipment_journey->exists()) {
+//                $date = $shipment_journey->first()->created_at;
+//            } else {
+//                $date = $shipment->created_at;
+//            }
+//
+//            $date = Carbon::parse($date)->format('Y-m-d');
             $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment->id);
             $row = array();
 
@@ -21481,7 +21481,7 @@ class AdminFinanceController extends Controller
         $done_payment = DonePayment::where('id',  $request->id)->update(['status' => 3, 'status_updated_at' => Carbon::now()]);
 
         if($done_payment) {
-            WalletSettlementFromDonePayments::dispatch($request->id,  Auth::id());
+            WalletBulkSettlementFromDonePayments::dispatch($request->id,  Auth::id());
         }
 
         return response()->json(['status'=> 1 , 'success' => 'Wallet Settlement Request sent.!']);
@@ -21516,7 +21516,7 @@ class AdminFinanceController extends Controller
                     $type = 'Returned';
                 } elseif($dps->type == 2) {
                     $type = 'Adjustment';
-                } elseif($dps->type == 2) {
+                } elseif($dps->type == 3) {
                     $type = 'Arrival';
                 }
 

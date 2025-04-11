@@ -37,6 +37,19 @@
                     </fieldset>
                 </div>
             </div>
+
+            <div class="row">
+                <div class="col-12" id="province_selection" style="display: none" >
+                    <fieldset class="form-group">
+                        <select name="province_id" id="province" class="form-control select2" data-rule-required="true" data-msg-required="Province is required">
+                            @foreach($provinces as $province)
+                                <option value="{{ $province->id }}">{{ $province->name }}</option>
+                            @endforeach
+                        </select>
+                    </fieldset>
+                </div>
+            </div>
+
         </div>
         <div class="col-6">
             <div class="row mb-2">
@@ -337,6 +350,12 @@
             width:'100%'
         });
 
+        $('#province').prepend('<option value="" selected></option>').select2({
+            placeholder: 'Province',
+            dropdownParent: $("#addCity"),
+            width:'100%'
+        });
+
         $("input[type='radio'][name='city-radio']").on('ifChecked', function(event){
             var rtype = $(this).attr('rel');
             if(rtype == 'city'){
@@ -348,6 +367,7 @@
                     $('#dynamic_hub_fields').toggle('slow');
 
                     $('#zone_selection').toggle('slow');
+                    $('#province_selection').toggle('slow');
                 }
             }else if(rtype == 'hub'){
                 $('#city_type').val('hub');
@@ -359,6 +379,7 @@
                     $('#dynamic_hub_fields').toggle('slow');
 
                     $('#zone_selection').toggle('slow');
+                    $('#province_selection').toggle('slow');
                 }
 
             }
