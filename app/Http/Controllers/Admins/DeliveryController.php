@@ -756,7 +756,7 @@ class DeliveryController extends Controller
                             ->latest()
                             ->first();
                         
-                        if ($shipment->shipper_status_id == 13 && $latestAgentAssignment->rv_assign_agent_status_id == 2 && $latestAgentAssignment->agent_id == 4620) {
+                        if ($latestAgentAssignment->rv_assign_agent_status_id == 2 && $latestAgentAssignment->agent_id == 4620) {
                             return ['status' => 1, 'error' => 'Shipment status is re-attempt for Hold-in-operation category'];
                         }
                     }
