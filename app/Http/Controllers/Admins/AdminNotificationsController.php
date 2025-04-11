@@ -1224,7 +1224,7 @@ class AdminNotificationsController extends Controller
         }
         else if($id == 221)
         {
-            $details['receiver'] = ['mohsin.khan@trax.pk','CC-(shahrukh.raheem@trax.pk)'];
+            $details['receiver'] = ['muhammad.zain@trax.pk', 'mohsin.khan@trax.pk', 'muhammad.anas@trax.pk', 'CC-(tauseef.sarfaraz@trax.pk)'];
 
             $details['fields'] = ['preview'];
         }
@@ -1236,7 +1236,7 @@ class AdminNotificationsController extends Controller
         }
         else if($id == 223)
         {
-            $details['receiver'] = ['mohsin.khan@trax.pk','CC-(shahrukh.raheem@trax.pk)'];
+            $details['receiver'] = ['muhammad.zain@trax.pk', 'mohsin.khan@trax.pk', 'muhammad.anas@trax.pk', 'CC-(tauseef.sarfaraz@trax.pk)'];
 
             $details['fields'] = ['preview'];
         }

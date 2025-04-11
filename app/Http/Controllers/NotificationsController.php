@@ -10707,8 +10707,9 @@ class NotificationsController extends Controller
                     self::email($subject, $body, $to);
                 } else if ($id == 221) {
                     $responses = $reference_1_id;
-                    $to = 'mohsin.khan@trax.pk';
-                    $cc = 'shahrukh.raheem@trax.pk';
+
+                    $to = array("mohsin.khan@trax.pk", "muhammad.zain@trax.pk", "muhammad.anas@trax.pk");
+                    $cc = 'tauseef.sarfaraz@trax.pk';
 
                     $date = Carbon::now()->toFormattedDateString();
 
@@ -10812,8 +10813,8 @@ class NotificationsController extends Controller
                 } else if ($id == 223) {
                     //Crm Progress Report
                     $now = Carbon::now();
-                    $to = 'mohsin.khan@trax.pk';
-                    $cc = 'shahrukh.raheem@trax.pk';
+                    $to = array("mohsin.khan@trax.pk", "muhammad.zain@trax.pk", "muhammad.anas@trax.pk");
+                    $cc = 'tauseef.sarfaraz@trax.pk';
                     $crm_complaints_2_days_closure = [];
                     $crm_services_2_days_closure = [];
                     $crm_claims_10_days_closure = [];
