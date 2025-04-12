@@ -68,7 +68,7 @@ class WalletSettlementFromDonePayments implements ShouldQueue
             // ->where(function ($query) {
             //     $query->where('sac.wallet_settlement_updated', 0);
             // })
-            ->select(['done_payment_shipments.*', 'wu.user_id as user_id', 'wu.wallet_id as wallet_id', 's.tracking_number', 's.cash_handling_charges', 's.insurance_charges','s.replacement_charges','s.try_and_buy_charges','s.intercept_charges','s.nsa_osa_charges','s.esc_charges','s.return_charges', 'sac.wallet_settlement_updated', 's.weight_charges', 's.fuel_surcharge','sc.faf_charges', 'ssc.reverse_pickup_charges', 'sc.wallet_charges', 'sac.wallet_log_charges_updated','sac.wallet_log_updated'])->get();
+            ->select(['done_payment_shipments.*', 'wu.user_id as user_id', 'wu.wallet_id as wallet_id', 's.tracking_number', 's.cash_handling_charges', 's.insurance_charges','s.replacement_charges','s.try_and_buy_charges','s.intercept_charges','s.nsa_osa_charges','s.esc_charges','s.return_charges', 'sac.wallet_settlement_updated', 's.weight_charges', 's.fuel_surcharge','sc.faf_charges', 'ssc.reverse_pickup_charges', 'sc.wallet_charges', 'sac.wallet_log_charges_updated','sac.wallet_log_updated','s.packaging_material_charges'])->get();
         //dd($done_payment_shipments);
         
         $api = config('app.FINGA_URL');
@@ -87,8 +87,41 @@ class WalletSettlementFromDonePayments implements ShouldQueue
  				 $send_request = true;
                 $success = false;
                 if ($dps->wallet_action_bid == 1 && $dps->wallet_settlement_updated == 0) {
-                    //$logCharged = FinjaLogSettlementRecord::where('shipment_id', $shipmentId)->first();
-                    $logCharged = !empty($dps->wallet_log_charges_updated) ? $dps->wallet_log_charges_updated : 0;
+                    // $logCharged = !empty($dps->wallet_log_charges_updated) ? $dps->wallet_log_charges_updated : 0;
+                    $logCharged = FinjaLogSettlementRecord::where('shipment_id', $shipmentId)->first();
+                    $logCharged2 = !empty($logCharged) ? $logCharged->wallet_log_charges_updated : 0;
+                    $charges = [];
+
+                    if ($dps->type == 0) {
+                        $charges = [
+                            'faf_charges' => $logCharged2 == 0 ? floatval($dps->faf_charges) : 0,
+                            'weight_charges' => $logCharged2 == 0 ? floatval($dps->weight_charges) : 0,
+                            'fuel_surcharge' => $logCharged2 == 0 ? floatval($dps->fuel_surcharge) : 0,
+                            'cash_handling_charges' => floatval($dps->cash_handling_charges),
+                            'insurance_charges' => floatval($dps->insurance_charges),
+                            'replacement_charges' => floatval($dps->replacement_charges),
+                            'try_and_buy_charges' => floatval($dps->try_and_buy_charges),
+                            'intercept_charges' => floatval($dps->intercept_charges),
+                            'non_service_area_charges' => floatval($dps->nsa_osa_charges),
+                            'esc_charges' => floatval($dps->esc_charges),
+                            'gst_charges' => floatval($dps->gst),
+                            'sms_charges' => floatval($dps->sms_charges),
+                            'packaging_material_charges' => floatval($dps->packaging_material_charges),
+                        ];
+                    } elseif ($dps->type == 1) {
+                        $charges = [
+                            'faf_charges' => $logCharged2 == 0 ? floatval($dps->faf_charges) : 0,
+                            'weight_charges' => $logCharged2 == 0 ? floatval($dps->weight_charges) : 0,
+                            'fuel_surcharge' => $logCharged2 == 0 ? floatval($dps->fuel_surcharge) : 0,
+                            'insurance_charges' => floatval($dps->insurance_charges),
+                            'return_charges' => floatval($dps->return_charges),
+                            'intercept_charges' => floatval($dps->intercept_charges),
+                            'non_service_area_charges' => floatval($dps->nsa_osa_charges),
+                            'gst_charges' => floatval($dps->gst),
+                            'sms_charges' => floatval($dps->sms_charges),
+                            'packaging_material_charges' => floatval($dps->packaging_material_charges),
+                        ];
+                    }
 
                     $requestPayload = [
                         "client_id" => $dps->user_id,
@@ -96,23 +129,9 @@ class WalletSettlementFromDonePayments implements ShouldQueue
                         "reference_id" => $dps->id,
                         "shipment_id" => $dps->tracking_number,
                         "amount" => $dps->type == 0 ? $dps->amount : 0,
-                        "charges" => [
-                            'faf_charges' => $logCharged == 1 ? floatval($dps->faf_charges) : 0,
-                            'weight_charges' => $logCharged == 1 ? floatval($dps->weight_charges) : 0,
-                            'fuel_surcharge' => $logCharged == 1 ? floatval($dps->fuel_surcharge) : 0,
-                            'cash_handling_charges' => $dps->type == 0 ? floatval($dps->cash_handling_charges) : 0,
-                            'insurance_charges' => floatval($dps->insurance_charges),
-                            'replacement_charges' => floatval($dps->replacement_charges),
-                            'try_and_buy_charges' => floatval($dps->try_and_buy_charges),
-                            'intercept_charges' => floatval($dps->intercept_charges),
-                            'non_service_area_charges' => floatval($dps->nsa_osa_charges),
-                            'esc_charges' => floatval($dps->esc_charges),
-                            'reverse_pickup_charges' => floatval($dps->reverse_pickup_charges),
-                            'return_charges' => floatval($dps->return_charges),
-                            'gst_charges' => floatval($dps->gst),
-                            'sms_charges' => floatval($dps->sms_charges),
-                        ]
+                        "charges" => $charges,
                     ];
+
                     $request_nature = 7;
                     $response_nature = 8;
                     $url = $api . 'transactions/log/settlement';
