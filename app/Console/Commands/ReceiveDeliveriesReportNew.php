@@ -4,40 +4,29 @@ namespace App\Console\Commands;
 
 use App\Http\Controllers\Admins\AdminReportsEmailController;
 use App\Http\Controllers\NotificationsController;
-use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
-class ReceiveDeliveriesReport extends Command
+class ReceiveDeliveriesReportNew extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'email:receivedeliveryreport';
+    protected $signature = 'email:daily_received_deliveries_report';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Receive Delivery Report Link';
-
-    /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
+    protected $description = 'Daily Report for Received Deliveries';
 
     /**
      * Execute the console command.
      *
-     * @return mixed
+     * @return int
      */
     public function handle()
     {
@@ -46,9 +35,8 @@ class ReceiveDeliveriesReport extends Command
         ->value('setting_value');
 
         if ($setting == 1) {
-            $date = Carbon::yesterday()->format('Y-m-d');
-            $response = AdminReportsEmailController::receive_deliveries($date);
-            NotificationsController::send(111, $date, $response);
+            $response = AdminReportsEmailController::deliveries_receive();
+            NotificationsController::send(236, $response);
         }
     }
 }
