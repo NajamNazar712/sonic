@@ -128,6 +128,8 @@ use App\Http\Traits\CommonTrait;
 use App\Jobs\ProcessRvShipmentTicket;
 use App\RvShipmentTicket;
 use GuzzleHttp\Client;
+use App\HTTP\Models\Admin\NonCodShipmentLogs;
+
 class DeliveryController extends Controller
 {
 
@@ -10253,6 +10255,9 @@ class DeliveryController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 609);
         }
 
+        $tracking_numbers = explode(',', $request->tracking_number);
+        $user = Auth::user();
+
         $otp = ShipmentOtp::join('shipments as s', 'shipment_otps.shipment_id', '=', 's.id')
             ->leftjoin('riders as r', 'r.id', '=', 'shipment_otps.rider_id')
             ->join('cities as dc', 'dc.id', '=', 's.consignee_city_id')
@@ -10262,14 +10267,29 @@ class DeliveryController extends Controller
             ->where('s.amount', 0)
             ->whereNotNull('shipment_otps.dbf_otp')
             ->where('dn.pending_status', 0)
+            ->whereIn('s.tracking_number', $tracking_numbers)
             ->select('shipment_otps.*', 'r.name as rider_name', 's.tracking_number as tracking_number', 'dc.hub_id', 'ca.name as area');
 
         if (session('role_id') != 1) {
             $otp = $otp->whereIn('dc.hub_id', session('hubs'));
         }
 
-        $datatable = Datatables::of($otp)
+        // Make logs for who scanned cn numbers
+        foreach ($tracking_numbers as $tracking_number) {
+            $shipment = Shipment::where('tracking_number', $tracking_number)->first();
+            if ($shipment) {
+                $shipment_otp = ShipmentOtp::where('shipment_id', $shipment->id)->first();
+                NonCodShipmentLogs::create([
+                    'tracking_number' => trim($tracking_number),
+                    'trax_id' => $user->trax_id,
+                    'employee_name' => $user->name,
+                    'employee_designation' => $user->designation ?? '-',
+                    'shipment_otp' => $shipment_otp->dbf_otp ?? null,
+                ]);
+            }
+        }
 
+        $datatable = Datatables::of($otp)
             ->addColumn('otp', function ($shipments) {
                 if ($shipments->dbf_otp) {
                     return $shipments->dbf_otp;
@@ -10277,16 +10297,13 @@ class DeliveryController extends Controller
                     return " - ";
                 }
             })
-
             ->addColumn('tracking_number', function ($shipments) {
                 return $shipments->tracking_number;
             })
-
             ->addColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
-
             ->addColumn('rider_name', function ($shipments) {
                 if ($shipments->rider_name) {
                     return $shipments->rider_name;
@@ -10483,5 +10500,65 @@ class DeliveryController extends Controller
         }
     
         return response('true');
-    }    
+    }
+    
+    public function shipment_otp_scanning_history_index()
+    {
+        if (in_array(session('role_id'), [1, 155])) {
+            return view('admin.otp.non_cod_shipment_scan_history');
+        } else {
+            return view('access_denied');
+        }
+    }
+
+    public function shipment_otp_scanning_history_list(Request $request)
+    {
+        $logs = NonCodShipmentLogs::get();
+        $datatables = Datatables::of($logs)
+            ->addColumn('tracking_number', function ($shipments) {
+                return $shipments->tracking_number;
+            })
+            ->addColumn('tracking_number_link', function ($shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->addColumn('shipment_otp', function ($shipments) {
+                if ($shipments->shipment_otp) {
+                    return $shipments->shipment_otp;
+                } else {
+                    return " - ";
+                }
+            })
+            ->addColumn('employee_name', function ($shipments) {
+                if ($shipments->employee_name) {
+                    return $shipments->employee_name;
+                } else {
+                    return " - ";
+                }
+            })
+            ->addColumn('employee_designation', function ($shipments) {
+                if ($shipments->employee_designation) {
+                    return $shipments->employee_designation;
+                } else {
+                    return " - ";
+                }
+            })
+            ->addColumn('trax_id', function ($shipments) {
+                if ($shipments->trax_id) {
+                    return $shipments->trax_id;
+                } else {
+                    return " - ";
+                }
+            })
+            ->addColumn('generated_at', function ($shipments) {
+                if ($shipments->updated_at) {
+                    return Carbon::parse($shipments->updated_at)->format("Y-m-d H:i:s");
+                } else {
+                    return " - ";
+                }
+            })
+            ->rawColumns(['tracking_number_link'])
+        ->make(true);
+        return $datatables;
+    }
 }
