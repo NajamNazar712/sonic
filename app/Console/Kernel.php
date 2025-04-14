@@ -171,6 +171,9 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\ApolloShipmentFetchStatus',
         '\App\Console\Commands\FinSurgentSonicPaymentSharing',
         '\App\Console\Commands\FailedStatusRePushToWallet',
+        '\App\Console\Commands\RerunWalletSettlement',
+        '\App\Console\Commands\BulkStatusSharingWithWallet',
+        '\App\Console\Commands\WalletUsersMakeToDonePayments'
 
     ];
 
@@ -586,8 +589,13 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('update:shipper_segment_logs')->everyFiveMinutes()->runInBackground();
         $schedule->command('apollo:fetch-shipments-status')->everyFiveMinutes()->runInBackground();
-        $schedule->command('fingsurgent:sonic-payment')->hourly()->runInBackground();
-        $schedule->command('status:re-push-wallet')->hourly()->runInBackground();
+        $schedule->command('fingsurgent:sonic-payment')->hourly()->runInBackground(); //wallet
+//        $schedule->command('status:re-push-wallet')->hourly()->runInBackground(); // wallet no need now after bulk status work
+        $schedule->command('rerun:wallet_log_re_push')->hourly()->runInBackground(); // wallet
+        $schedule->command('rerun_wallet_settlement')->everySixHours()->runInBackground(); //wallet
+        $schedule->command('bulk:status-sharing-wallet')->withoutOverlapping()->everyFiveMinutes()->runInBackground();
+//        $schedule->command('wallet-users:make-to-done')->dailyAt('17:00')->runInBackground();
+        
     }
     /**
      * Register the commands for the application.

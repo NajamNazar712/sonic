@@ -232,7 +232,7 @@
                         $('#shipper_key_id').removeAttr('disabled');
                         let options = "";
                         $.each(data.shipper_keys, function(index, field) {
-                            options+=`<option value='${field.id}' >${field.name}<option>`;
+                            options+=`<option value='${field.id}' >${field.name}</option>`;
                         });
                         $('#shipper_key_id').append(options);
 
@@ -252,7 +252,7 @@
                         $('#shipper_non_key_id').removeAttr('disabled');
                         let options = "";
                         $.each(data.shipper_non_keys, function(index, field) {
-                            options+=`<option value='${field.id}' >${field.name}<option>`;
+                            options+=`<option value='${field.id}' >${field.name}</option>`;
                         });
                         $('#shipper_non_key_id').append(options);
 
@@ -302,7 +302,7 @@
                         let options = "";
                         $.each(data.hubs, function(index, field) {
                             let selected = (hb.includes(field.id)) ? 'selected' : '';
-                            options+=`<option value='${field.id}' ${selected} >${field.name}<option>`;
+                            options+=`<option value='${field.id}' ${selected} >${field.name}</option>`;
                         });
                         $('#hub_id').append(options).trigger('change');
                         hb = [];
@@ -333,7 +333,7 @@
                         let options = "";
                         $.each(data.origin_hubs, function(index, field) {
                             let selected = (ohb.includes(field.id)) ? 'selected' : '';
-                            options+=`<option value='${field.id}' ${selected} >${field.name}<option>`;
+                            options+=`<option value='${field.id}' ${selected} >${field.name}</option>`;
                         });
                         $('#origin_id').append(options).trigger('change');
                         ohb = [];
@@ -361,7 +361,7 @@
                         let options = "";
                         $.each(data.origin_areas, function(index, field) {
                             let selected = (ora.includes(field.id)) ? 'selected' : '';
-                            options+=`<option value='${field.id}' ${selected} >${field.name}<option>`;
+                            options+=`<option value='${field.id}' ${selected} >${field.name}</option>`;
                         });
                         $('#origin_area_id').append(options).trigger('change');
                         ora = [];
@@ -389,7 +389,7 @@
                         
                         $.each(data.case_nature_type, function(index, field) {
                             let selected = (cnt.includes(field.id)) ? 'selected' : '';
-                            options+=`<option value='${field.id}' ${selected}>${field.type}<option>`;
+                            options+=`<option value='${field.id}' ${selected}>${field.type}</option>`;
                         });
                         $('#case_nature_type_id').append(options);
                         cnt = [];
@@ -417,7 +417,7 @@
                         let options = "";
                         $.each(data.sub_segment, function(index, field) {
                             let selected = (sbs.includes(field.id)) ? 'selected' : '';
-                            options+=`<option value='${field.id}' ${selected}>${field.name}<option>`;
+                            options+=`<option value='${field.id}' ${selected}>${field.name}</option>`;
                         });
                         $('#sub_business_segment_id').append(options);
 

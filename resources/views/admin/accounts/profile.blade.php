@@ -220,7 +220,7 @@
                                 </tr>
                                 <tr>
                                     <td><b>Payment Cycle</b></td>
-                                    <td>{{$user->payment_cycle->name}}</td>
+                                    <td>{{ optional($user->payment_cycle)->name }}</td>
                                 </tr>
 
 

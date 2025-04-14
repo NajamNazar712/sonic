@@ -6,7 +6,9 @@ use App\Http\Models\Shipper\User;
 use App\Http\Models\UserDocumentAttachment;
 use App\Http\Models\WalletUser;
 use App\Models\FingaApiLog;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Auth;
@@ -18,29 +20,37 @@ class FingaIntegrationController extends Controller
         $this->middleware('auth:web,substitute_users');
         $this->middleware('Permission')->except('wordpress_access_denied', 'wordpressAddressView','wordpressBankView');
     }
-    public static function getToken($api) {
-        if (App::environment('local') || App::environment('staging')) {
-            $password = "4TE7+r]7ddI2";
-        }else{
-            $password = "9l2|_XTI4MiP";
+    public static function getToken($api)
+    {
+        // Define cache key for token
+        $cacheKey = 'wallet_api_token';
+
+        // Check if token exists in cache and is still valid
+        if (Cache::has($cacheKey)) {
+            return Cache::get($cacheKey);
         }
+
+        $password = App::environment(['local', 'staging']) ? "4TE7+r]7ddI2" : "9l2|_XTI4MiP";
+
+        // Make API request for new token
         $response = Http::withHeaders([
             'accept' => 'application/json',
-            
-        ])->post($api.'login/', [
+        ])->post($api . 'login/', [
             "username" => "sonic",
             "password" => $password,
         ]);
 
-        if($response->successful()) { 
-           
-            $body = $response->getBody();
-            $body = json_decode($body);
-            $token = $body->token;
-            return $token;
-            
+        // If the request is successful, cache the token for 4 minutes
+        if ($response->successful()) {
+            $body = json_decode($response->body());
+
+            if (isset($body->token)) {
+                Cache::put($cacheKey, $body->token, Carbon::now()->addMinutes(3));
+                return $body->token;
+            }
         }
 
+        return null; // Return null if request fails
     }
     public function login(Request $request) {
 
@@ -103,13 +113,13 @@ class FingaIntegrationController extends Controller
 
 
             $response = Http::withHeaders(['accept' => 'application/json','Authorization' => "Bearer " . $token,])->post($api . 'wallet/onboard-users/', $requestPayload);
-            FingaApiLog::create(['nature' => 'request','status' => 1,'details' => json_encode($requestPayload, JSON_PRETTY_PRINT)]);
+            FingaApiLog::create(['nature_id' => 1,'status' => 1,'details' => json_encode($requestPayload, JSON_PRETTY_PRINT)]);
 
             if ($response->successful()) {
                 $body = $response->getBody();
                 $body = json_decode($body);
 
-                self::apiLog('on-boarding-response', 'success', $body, null);
+                self::apiLog(2, 'success', $body, null);
 
 
                 // Ensure the error structure is an array
@@ -153,7 +163,7 @@ class FingaIntegrationController extends Controller
                     }
                 }
 
-                self::apiLog('on-boarding-response', 'error', $body, null);
+                self::apiLog(2, 'error', $body, null);
                 $result['error'] = $errorData;
             }
             return $result;
@@ -190,14 +200,15 @@ class FingaIntegrationController extends Controller
 
     }
 
-    public static function apiLog($nature, $status, $details, $shipment_id,$request_id = null) {
+    public static function apiLog($nature, $status, $details, $shipment_id,$request_id = null, $batch_id = null) {
 
         $newLog = FingaApiLog::create([
-            'nature' => $nature,
+            'nature_id' => $nature,
             'status' => $status,
             'details' => $details ? json_encode($details, JSON_PRETTY_PRINT) : null, // Save as JSON
             'shipment_id' => $shipment_id,
-            'request_id'=>$request_id
+            'request_id'=>$request_id,
+            'batch_id' => $batch_id
         ]);
         return $newLog->id;
 
