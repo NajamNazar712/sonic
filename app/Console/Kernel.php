@@ -183,15 +183,6 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\PendingDeliveriesReport',
         'App\Console\Commands\ReceiveDeliveriesReport',
 
-        'App\Console\Commands\ReceiveDeliveriesReportNew',
-        'App\Console\Commands\ReceiveReturnDeliveries',
-        'App\Console\Commands\DailyDeliveryNoteHistory',
-        'App\Console\Commands\DailyWeightQCReport',
-        'App\Console\Commands\DailyOverAllSalesReport',
-        'App\Console\Commands\QsrEmail',
-        'App\Console\Commands\PendingDeliveriesReport',
-        'App\Console\Commands\ReceiveDeliveriesReport',
-
     ];
 
     /**
@@ -639,11 +630,11 @@ class Kernel extends ConsoleKernel
         ->keyBy('type');
 
         $commands = [
-            'email:daily_received_deliveries_report' => 'receive_deliveries_report_time',
-            'email:daily_return_received_deliveries_report' => 'receive_return_deliveries_report_time',
-            'email:daily_delivery_note_history' => 'delivery_note_history_report_time',
-            'email:daily_weight_qc_report' => 'weight_qc_report_time',
-            'email:daily_overall_sales_report' => 'overall_sales_report_time',
+            // 'email:daily_received_deliveries_report' => 'receive_deliveries_report_time',
+            // 'email:daily_return_received_deliveries_report' => 'receive_return_deliveries_report_time',
+            // 'email:daily_delivery_note_history' => 'delivery_note_history_report_time',
+            // 'email:daily_weight_qc_report' => 'weight_qc_report_time',
+            // 'email:daily_overall_sales_report' => 'overall_sales_report_time',
             'email:qsrreport' => 'quality_of_service_report_time',
             'email:qsrreport_other' => 'quality_of_service_report_other_time',
             'email:pendingdeliveryreport' => 'pending_deliveries_report_time',
