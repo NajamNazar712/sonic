@@ -2254,8 +2254,17 @@ class DeliveryController extends Controller
         }
 
         $delivery_note = DeliveryNote::find($request->delivery_note_id);
-        if($selected_status == 14 && $delivery_note->rider->operation_rider_id == 2 && $delivery_note->rider->id != '12879'){
-            return response()->json(['status' => 5, 'error' => 'Delivered Status Only Allowed For Hold For Self Collection']);
+        if (
+            $selected_status == 14 &&
+            isset($delivery_note->rider) &&
+            isset($delivery_note->rider->operation_rider_id) &&
+            $delivery_note->rider->operation_rider_id == 2 &&
+            $delivery_note->rider->id != '12879'
+        ) {
+            return response()->json([
+                'status' => 5,
+                'error' => 'Delivered Status Only Allowed For Hold For Self Collection'
+            ]);
         }
 
         $selected_reason = $request->selected_reason;
