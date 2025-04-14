@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\PendingPaymentShipment;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -79,7 +80,7 @@ class WalletBulkSettlementFromDonePayments implements ShouldQueue
             $id = $this->id;
             $payment_id = $this->payment_id;
             foreach ($chunkedShipments as $dps) {
-                
+                $LogChargeStatus = false;
                 $send_request = true;
                 $success = false;
                 $shipmentId = $dps->shipment_id;
@@ -93,12 +94,20 @@ class WalletBulkSettlementFromDonePayments implements ShouldQueue
                     // $logCharged = !empty($dps->wallet_log_charges_updated) ? $dps->wallet_log_charges_updated : 0;
                     $logCharged = FinjaLogSettlementRecord::where('shipment_id', $shipmentId)->first();
                     $logCharged2 = !empty($logCharged) ? $logCharged->wallet_log_charges_updated : 0;
+
+                    $check_arrival_paid_done = DonePaymentShipment::where('shipment_id',$shipmentId)->where('type',3)->exists();
+                    $check_arrival_paid_pending = PendingPaymentShipment::where('shipment_id',$shipmentId)->where('type',3)->exists();
+                    if($logCharged2 == 0 && (!$check_arrival_paid_done || !$check_arrival_paid_pending )){
+                        $LogChargeStatus =true;
+                    }
+
+
                     $charges = [];
                     if ($dps->type == 0) {
                         $charges = [
-                            'faf_charges' => $logCharged2 == 0 ? floatval($dps->faf_charges) : 0,
-                            'weight_charges' => $logCharged2 == 0 ? floatval($dps->weight_charges) : 0,
-                            'fuel_surcharge' => $logCharged2 == 0 ? floatval($dps->fuel_surcharge) : 0,
+                            'faf_charges' => $LogChargeStatus ? floatval($dps->faf_charges) : 0,
+                            'weight_charges' => $LogChargeStatus ? floatval($dps->weight_charges) : 0,
+                            'fuel_surcharge' => $LogChargeStatus ? floatval($dps->fuel_surcharge) : 0,
                             'cash_handling_charges' => floatval($dps->cash_handling_charges),
                             'insurance_charges' => floatval($dps->insurance_charges),
                             'replacement_charges' => floatval($dps->replacement_charges),
@@ -112,9 +121,9 @@ class WalletBulkSettlementFromDonePayments implements ShouldQueue
                         ];
                     } elseif ($dps->type == 1) {
                         $charges = [
-                            'faf_charges' => $logCharged2 == 0 ? floatval($dps->faf_charges) : 0,
-                            'weight_charges' => $logCharged2 == 0 ? floatval($dps->weight_charges) : 0,
-                            'fuel_surcharge' => $logCharged2 == 0 ? floatval($dps->fuel_surcharge) : 0,
+                            'faf_charges' => $LogChargeStatus ? floatval($dps->faf_charges) : 0,
+                            'weight_charges' => $LogChargeStatus ? floatval($dps->weight_charges) : 0,
+                            'fuel_surcharge' => $LogChargeStatus ? floatval($dps->fuel_surcharge) : 0,
                             'insurance_charges' => floatval($dps->insurance_charges),
                             'return_charges' => floatval($dps->return_charges),
                             'intercept_charges' => floatval($dps->intercept_charges),
