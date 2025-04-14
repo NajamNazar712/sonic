@@ -9770,7 +9770,7 @@ class GlobalSettingsController extends Controller
     }
     public function get_shipper_key($agent_id) {
         $shipper_keys = SaleTierTag::join('users as u', 'u.id', 'sale_tier_tags.user_id')
-            ->where('u.stauts',3)
+            ->where('u.status',3)
             ->WhereNotNull('kam')
             ->where('kam',$agent_id)->select('u.id', 'u.name')->get();
         if($shipper_keys->isNotEmpty()){
