@@ -2243,9 +2243,18 @@ class DeliveryController extends Controller
         $invalid_reason_shipments = array();
 
         $delivery_note = DeliveryNote::find($request->delivery_note_id);
-        if($selected_status == 14 && $delivery_note->rider->operation_rider_id == 2 && $delivery_note->rider->id != '12879'){
-            return response()->json(['status' => 0, 'error' => 'Delivered Status Only Allowed For Hold For Self Collection']);
+        if (
+            $selected_status == 14 &&
+            isset($delivery_note->rider) &&
+            $delivery_note->rider->operation_rider_id == 2 &&
+            $delivery_note->rider->id != '12879'
+        ) {
+            return response()->json([
+                'status' => 0,
+                'error' => 'Delivered Status Only Allowed For Hold For Self Collection'
+            ]);
         }
+        
 
         $delivery_password = DeliveryNote::where('id', $delivery_note_id)->where('password', $password);
         if (!$delivery_password->exists()) {
