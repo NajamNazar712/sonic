@@ -679,7 +679,7 @@ use Illuminate\Http\Request;
                 Route::post('submit', 'APIController@shipment_book')->name('submit');
             });
 
-            Route::get('/profile', 'ShipperAppController@profile')->name('profile');
+            Route::get('profile', 'ShipperAppController@profile')->name('profile');
 
 
         });
