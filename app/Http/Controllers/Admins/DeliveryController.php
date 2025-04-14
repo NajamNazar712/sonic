@@ -2246,11 +2246,12 @@ class DeliveryController extends Controller
         if (
             $selected_status == 14 &&
             isset($delivery_note->rider) &&
+            isset($delivery_note->rider->operation_rider_id) &&
             $delivery_note->rider->operation_rider_id == 2 &&
             $delivery_note->rider->id != '12879'
         ) {
             return response()->json([
-                'status' => 0,
+                'status' => 5,
                 'error' => 'Delivered Status Only Allowed For Hold For Self Collection'
             ]);
         }
