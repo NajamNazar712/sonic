@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 use App\Http\Models\WalletUser;
 use App\Http\Models\PendingPaymentShipment;
@@ -43,9 +44,11 @@ class WalletUsersMakeToDonePayments extends Command
         foreach($wallet_user_ids as $wallet_user_id) {
 
             $pending_payment = PendingPayment::with('pending_payment_shipments')
-            ->where('user_id', $wallet_user_id) 
-            ->first(); 
-            
+                ->where('user_id', $wallet_user_id)
+                ->where('updated_at', '<', Carbon::today()->format('Y-m-d H:i:s'))
+                ->first();
+
+
             if($pending_payment && $pending_payment->pending_payment_shipments->sum('payable') > 0) {
 
                 $pending_payment_shipment_ids = $pending_payment->pending_payment_shipments->pluck('id')->toArray();
