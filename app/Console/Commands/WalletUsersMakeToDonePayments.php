@@ -38,6 +38,7 @@ class WalletUsersMakeToDonePayments extends Command
             'substitute_user_id' => 0
         ])
         ->where('finova_account_type', '>', 0)
+        ->where('user_id','!=', 46611) //Remove Test Shipper
         ->pluck('user_id')
         ->toArray();
 
