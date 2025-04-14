@@ -2253,7 +2253,7 @@ class DeliveryController extends Controller
             return response()->json(['status' => 0, 'error' => 'Delivery note already updated']);
         }
 
-        $delivery_note = DeliveryNote::find($request->delivery_note_id);
+        $delivery_note = DeliveryNote::find($delivery_note_id);
         if (
             $selected_status == 14 &&
             isset($delivery_note->rider) &&
