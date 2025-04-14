@@ -805,7 +805,7 @@
                 </form>
 
                 <div class="form-group text-right">
-                    <a href="{{ asset('file/Trax Bulk City Add.xlsx') }}" class="btn btn-primary btn-md"><i class="la la-download"></i> Trax Bulk City Add Template Download</a>
+                    <a href="{{ asset('file/Trax Bulk City Add New.xlsx') }}" class="btn btn-primary btn-md"><i class="la la-download"></i> Trax Bulk City Add Template Download</a>
                 </div>
             </div>
         </div>
