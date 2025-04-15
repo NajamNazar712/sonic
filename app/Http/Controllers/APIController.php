@@ -10426,68 +10426,76 @@ class APIController extends Controller
 
     public function fintech_account_type(Request $request)
     {
-        $rules = [
-            'wallet_users' => ['required', 'array', 'min:1'],
-            'wallet_users.*.wallet_id' => ['required', 'exists:wallet_users,wallet_id'],
-            'wallet_users.*.finova_account_type' => ['required', 'numeric'],
-        ];
+        $walletUsers = $request->input('wallet_users');
+        $errors = [];
+        $success = [];
 
-        $validator = Validator::make($request->all(), $rules, $this->messages);
-        $validator->setAttributeNames($this->names);
-        if ($validator->fails()) {
+        FinjaRequestLog::insert([
+            'requested' => json_encode($request->all()),
+            'ip_address' => $request->ip(),
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        if (empty($walletUsers) || !is_array($walletUsers)) {
             return response()->json([
                 'status' => 0,
-                'message' => 'Error(s) in Input',
-                'errors' => $validator->errors()
+                'message' => 'wallet_users must be a non-empty array',
+                'errors' => ['wallet_users' => ['The wallet_users field is required and must be a non-empty array.']],
             ]);
         }
 
-        $errors = [];
-        $success = [];
         $globalSetting = GlobalSettings::where(['setting_value' => 1, 'type' => 'wallet_account_type'])->exists();
 
-        if($globalSetting) {
-            $walletDataRequest = collect($request->wallet_users);
-
-            $wallet_ids = $walletDataRequest->pluck('wallet_id');
-            $wallet = WalletUser::whereIn('wallet_id', $wallet_ids)->where('substitute_user_id', 0)->get()->keyBy('wallet_id');
-            foreach ($walletDataRequest as $key => $walletDataRow) {
-                $wallet_id = $walletDataRow['wallet_id'];
-                $finova_account_type = $walletDataRow['finova_account_type'];
-                if (!isset($wallet[$wallet_id])) {
-                    $errors[$key] = [
-                        'wallet_id' => $wallet_id,
-                        'error' => 'Wallet not found'
-                    ];
-                    continue;
-                }
-                $wallet_primary_id = $wallet[$wallet_id]->id;
-
-                FinjaRequestLog::insert([
-                    'requested' => json_encode($request->all()),
-                    'ip_address' => $request->ip(),
-                ]);
-
-                WalletUser::where('id', $wallet_primary_id)
-                    ->update(['finova_account_type' => $finova_account_type]);
-
-                $success[] = $wallet_id;
-            }
-
-            return response()->json([
-                'status' => empty($errors) ? 1 : 0,
-                'message' => empty($errors) ? 'All Wallet Accounts updated successfully.' : 'Some Accounts could not be updated due to errors.',
-                'success' => $success,
-                'errors' => $errors,
-            ]);
-        }else{
+        if (!$globalSetting) {
             return response()->json([
                 'status' => 0,
-                'message' =>  'The Api is currently Inactive',
+                'message' => 'The API is currently inactive',
                 'success' => [],
                 'errors' => [],
             ]);
         }
+
+        $wallet_ids = collect($walletUsers)->pluck('wallet_id')->toArray();
+
+        $walletUserMap = WalletUser::whereIn('wallet_id', $wallet_ids)
+            ->where('substitute_user_id', 0)
+            ->pluck('wallet_id','wallet_id')->toArray();
+        foreach ($walletUsers as $index => $walletData) {
+            $wallet_id = $walletData['wallet_id'];
+            $validator = Validator::make($walletData, [
+                'wallet_id' => ['required', 'numeric','wallet_id' => [
+                    'required',
+                    'numeric',
+                    Rule::exists('wallet_users', 'wallet_id')->where(function ($query) {
+                        $query->where('substitute_user_id', 0);
+                    }),
+                ],
+                ],
+                'finova_account_type' => ['required', 'numeric'],
+            ]);
+
+            if ($validator->fails()) {
+                $errors[$index] = $validator->errors()->toArray();
+                continue;
+            }
+
+
+            $finova_account_type = $walletData['finova_account_type'];
+
+            WalletUser::where('wallet_id', $wallet_id)
+                ->update(['finova_account_type' => $finova_account_type]);
+
+            $success[] = $wallet_id;
+        }
+
+        return response()->json([
+            'status' => empty($errors) ? 1 : 0,
+            'message' => empty($errors)
+                ? 'All Wallet Accounts updated successfully.'
+                : 'Some Accounts could not be updated due to errors.',
+            'success' => $success,
+            'errors' => $errors,
+        ]);
     }
 
 }

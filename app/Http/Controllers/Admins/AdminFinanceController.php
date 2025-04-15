@@ -4435,14 +4435,14 @@ class AdminFinanceController extends Controller
     {
         $shipment_id = $request->input('shipment_id');
         $amount = str_replace(',', '', $request->input('amount'));
-
+        
         $shipment = Shipment::find($shipment_id);
-
+        
         $change_shipment_amount = new ChangeShipmentAmountLog();
 
         $change_shipment_amount->shipment_id = $shipment->id;
         $change_shipment_amount->old_amount = $shipment->amount;
-        $change_shipment_amount->new_amount = $amount;
+        $change_shipment_amount->new_amount = $amount ?? 0;
         $change_shipment_amount->admin_id = Auth::id();
         $change_shipment_amount->remarks = $request->remarks;
         $change_shipment_amount->save();
@@ -8776,74 +8776,83 @@ class AdminFinanceController extends Controller
         foreach ($request->ids as $done_payment_id) {
             $done_payment = DonePayment::find($done_payment_id);
 
-            if ($done_payment->status != 1) {
-                $done_payment->status = 1;
+            if($done_payment->is_wallet_payment == 1) {
+
+                $done_payment->status = 3;
                 $done_payment->status_updated_at = Carbon::now();
-                $done_payment->status_updated_by = Auth::id();
-
                 $done_payment->save();
-
-                $payment_clear = new VisionSoftCodPaymentClear();
-                $payment_clear->payment_id = $done_payment_id;
-                $payment_clear->status = 1;
-                $payment_clear->save();
-
-                foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
-                    $shipment = $done_payment_shipment->shipment;
-
-                    if ($done_payment_shipment->type == 1) {
-                        $shipment->payment_status_id = 7;
-
-                        $shipment->save();
-
-                        ShipmentsPaymentJourneyController::add($shipment->id, 7, Auth::id(), '', $done_payment->id);
-                    } else if ($done_payment_shipment->type == 3) {
-                        $shipment->payment_status_id = 12;
-
-                        $shipment->save();
-
-                        ShipmentsPaymentJourneyController::add($shipment->id, 12, Auth::id(), '', $done_payment->id);
-                    } else {
-                        $shipment->payment_status_id = 3;
-
-                        $shipment->save();
-
-                        //---------x-----------x-------------
-                        // Start Auto Close Complaints
-                        $crm_request = CrmRequest::where('shipment_id', $shipment->id)->where('status_id', 2)->first();
-                        
-                        if ($crm_request) { 
-                            $shipperName = User::find(Shipment::where('id', $shipment->id)->select('user_id')->first()->user_id)->name;
+                WalletBulkSettlementFromDonePayments::dispatch($done_payment_id,  Auth::id());
+                
+            } else {
+                if ($done_payment->status != 1) {
+                    $done_payment->status = 1;
+                    $done_payment->status_updated_at = Carbon::now();
+                    $done_payment->status_updated_by = Auth::id();
+    
+                    $done_payment->save();
+    
+                    $payment_clear = new VisionSoftCodPaymentClear();
+                    $payment_clear->payment_id = $done_payment_id;
+                    $payment_clear->status = 1;
+                    $payment_clear->save();
+    
+                    foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
+                        $shipment = $done_payment_shipment->shipment;
+    
+                        if ($done_payment_shipment->type == 1) {
+                            $shipment->payment_status_id = 7;
+    
+                            $shipment->save();
+    
+                            ShipmentsPaymentJourneyController::add($shipment->id, 7, Auth::id(), '', $done_payment->id);
+                        } else if ($done_payment_shipment->type == 3) {
+                            $shipment->payment_status_id = 12;
+    
+                            $shipment->save();
+    
+                            ShipmentsPaymentJourneyController::add($shipment->id, 12, Auth::id(), '', $done_payment->id);
+                        } else {
+                            $shipment->payment_status_id = 3;
+    
+                            $shipment->save();
+    
+                            //---------x-----------x-------------
+                            // Start Auto Close Complaints
+                            $crm_request = CrmRequest::where('shipment_id', $shipment->id)->where('status_id', 2)->first();
                             
-                            if ($crm_request->status_id == 2) {//if crm request is in_process
-                                CrmRequest::where('id', $crm_request->id)->update([
-                                    'status_id' => 4 // Closed status
-                                ]);
-                                CrmRequestStatusHistory::create([
-                                    'crm_request_id' => $crm_request->id,
-                                    'status_id' => 4,
-                                    'agent_id' => Auth::id()
-                                ]);
+                            if ($crm_request) { 
+                                $shipperName = User::find(Shipment::where('id', $shipment->id)->select('user_id')->first()->user_id)->name;
                                 
-                                CrmRequestTagging::where('crm_request_id', $crm_request->id)->delete();
-
-                                $comment = 'Dear '.$shipperName.',
-                                        Thank you for reaching us out! 
-                                        Your complaint has been resolved, and the payment has been paid. We appreciate your patience and understanding throughout this process. In case of any further query regarding this shipment you may reach us out within 48 hrs.
-                                        Regards,
-                                        Team CRM
-                                        TRAX';
-                                
-                                CRMCommentController::add($crm_request->id, 306, 0, 0, $comment, 0, 0);
+                                if ($crm_request->status_id == 2) {//if crm request is in_process
+                                    CrmRequest::where('id', $crm_request->id)->update([
+                                        'status_id' => 4 // Closed status
+                                    ]);
+                                    CrmRequestStatusHistory::create([
+                                        'crm_request_id' => $crm_request->id,
+                                        'status_id' => 4,
+                                        'agent_id' => Auth::id()
+                                    ]);
+                                    
+                                    CrmRequestTagging::where('crm_request_id', $crm_request->id)->delete();
+    
+                                    $comment = 'Dear '.$shipperName.',
+                                            Thank you for reaching us out! 
+                                            Your complaint has been resolved, and the payment has been paid. We appreciate your patience and understanding throughout this process. In case of any further query regarding this shipment you may reach us out within 48 hrs.
+                                            Regards,
+                                            Team CRM
+                                            TRAX';
+                                    
+                                    CRMCommentController::add($crm_request->id, 306, 0, 0, $comment, 0, 0);
+                                }
                             }
+                            // End Auto Close Complaints
+                            //---------x-----------x-------------
+    
+                            ShipmentsPaymentJourneyController::add($shipment->id, 3, Auth::id(), '', $done_payment->id);
                         }
-                        // End Auto Close Complaints
-                        //---------x-----------x-------------
-
-                        ShipmentsPaymentJourneyController::add($shipment->id, 3, Auth::id(), '', $done_payment->id);
                     }
                 }
-            }
+            }  
         }
 
         return ['status' => 0, 'success' => 'Payment(s) marked Paid'];
@@ -8853,46 +8862,48 @@ class AdminFinanceController extends Controller
     {
         foreach ($request->ids as $done_payment_id) {
             $done_payment = DonePayment::find($done_payment_id);
-
-            if ($done_payment->status != 2) {
-                $done_payment->status = 2;
-                $done_payment->status_updated_at = Carbon::now();
-                $done_payment->status_updated_by = Auth::id();
-
-                $done_payment->save();
-
-                $payment_clear = new VisionSoftCodPaymentClear();
-                $payment_clear->payment_id = $done_payment_id;
-                $payment_clear->status = 2;
-                $payment_clear->save();
-
-                foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
-                    $shipment = $done_payment_shipment->shipment;
-
-                    if ($done_payment_shipment->type == 1) {
-                        $shipment->payment_status_id = 6;
-
-                        $shipment->save();
-
-                        ShipmentsPaymentJourneyController::add($shipment->id, 6, Auth::id(), '', $done_payment->id);
-                    } else if ($done_payment_shipment->type == 3) {
-                        $shipment->payment_status_id = 11; //Arrival charges reverted
-
-                        $shipment->save();
-
-                        ShipmentsPaymentJourneyController::add($shipment->id, 11, Auth::id(), '', $done_payment->id);
-                    } else {
-                        $shipment->payment_status_id = 2;
-
-                        $shipment->save();
-
-                        ShipmentsPaymentJourneyController::add($shipment->id, 2, Auth::id(), '', $done_payment->id);
-                        //NotificationsController::send(92,$done_payment->id ,$shipment->id);
+            if($done_payment->is_wallet_payment == 0) {
+                if ($done_payment->status != 2) {
+                    $done_payment->status = 2;
+                    $done_payment->status_updated_at = Carbon::now();
+                    $done_payment->status_updated_by = Auth::id();
+    
+                    $done_payment->save();
+    
+                    $payment_clear = new VisionSoftCodPaymentClear();
+                    $payment_clear->payment_id = $done_payment_id;
+                    $payment_clear->status = 2;
+                    $payment_clear->save();
+    
+                    foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
+                        $shipment = $done_payment_shipment->shipment;
+    
+                        if ($done_payment_shipment->type == 1) {
+                            $shipment->payment_status_id = 6;
+    
+                            $shipment->save();
+    
+                            ShipmentsPaymentJourneyController::add($shipment->id, 6, Auth::id(), '', $done_payment->id);
+                        } else if ($done_payment_shipment->type == 3) {
+                            $shipment->payment_status_id = 11; //Arrival charges reverted
+    
+                            $shipment->save();
+    
+                            ShipmentsPaymentJourneyController::add($shipment->id, 11, Auth::id(), '', $done_payment->id);
+                        } else {
+                            $shipment->payment_status_id = 2;
+    
+                            $shipment->save();
+    
+                            ShipmentsPaymentJourneyController::add($shipment->id, 2, Auth::id(), '', $done_payment->id);
+                            //NotificationsController::send(92,$done_payment->id ,$shipment->id);
+                        }
                     }
+    
                 }
-
+                NotificationsController::send(92, $done_payment->id);
             }
-            NotificationsController::send(92, $done_payment->id);
+            
         }
 
         return ['status' => 0, 'success' => 'Payment(s) marked Reverted'];
