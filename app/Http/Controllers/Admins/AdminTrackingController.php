@@ -1343,6 +1343,7 @@ class AdminTrackingController extends Controller
 
                         // $details['order_information']['parcel_value'] = number_format($shipment->parcel_value);
 
+                        /* branch: Hotfix-Parcel-Value */
                         $details['order_information']['parcel_value'] = '';
                         if ($retail_shipment){
                             $details['order_information']['parcel_value'] = $retail_shipment->parcel_amount ?? '-';
