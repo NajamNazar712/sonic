@@ -638,17 +638,19 @@ class Kernel extends ConsoleKernel
             'email:daily_delivery_note_history' => ['delivery_note_history_report_time'],
             'email:daily_weight_qc_report' => ['weight_qc_report_time'],
             'email:daily_overall_sales_report' => ['overall_sales_report_time'],
+            'email:pending_deliveries_report' => ['pending_deliveries_report_time'],
             'email:quality_of_service_report' => [
                 'quality_of_service_report_time',
                 'quality_of_service_report_other_time',
             ],
-            'email:pending_deliveries_report' => ['pending_deliveries_report_time'],
         ];
 
         foreach ($commands as $command => $settingKeys) {
             foreach ((array) $settingKeys as $settingKey) {
+
                 if (isset($settings[$settingKey]) && $settings[$settingKey]->setting_value == 1) {
-                    $time = Carbon::createFromFormat('h:i A', $settings[$settingKey]->text)->format('H:i');
+                    $timeRaw = trim($settings[$settingKey]->text ?? '');
+                    $time = Carbon::createFromFormat('h:i A', $timeRaw)->format('H:i');
                     $schedule->command($command)->dailyAt($time)->runInBackground();
                 }
             }
