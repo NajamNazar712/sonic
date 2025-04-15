@@ -51,7 +51,7 @@ class UpdateShipmentAdditionalCharges extends Command
 
         $array_merge = array_unique(array_merge($total_array,$total_array2));
 
-        if(count($total_array) > 0){
+        if(count($array_merge) > 0){
             ShipmentAdditionalCharges::additional_charges_apply($total_array);
         }
 
