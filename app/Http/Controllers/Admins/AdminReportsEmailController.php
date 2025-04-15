@@ -3020,10 +3020,9 @@ class AdminReportsEmailController extends Controller
         return $link;
     }
 
-    static public function qsr_daily_report($to)
+    static public function qsr_daily_report()
     {
         $serial = 0;
-
         $connection = 'reports';
         $select = [
             'z.name  as zone',

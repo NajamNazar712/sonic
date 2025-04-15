@@ -11432,7 +11432,7 @@ class NotificationsController extends Controller
                     }
                 }
 
-                else if ($id == 110 || $id == 226 || $id == 236 || $id == 237 || $id == 238 || $id == 239 || $id == 240) {
+                else if (/* $id == 110 || $id == 226 || */ $id == 236 || $id == 237 || $id == 238 || $id == 239 || $id == 240 || $id == 241 || $id == 242) {
                     $date = Carbon::today()->format('Y-m-d');
                     $subject = $notification->subject;
                     $body = $notification->body;
