@@ -58,6 +58,7 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
 use App\Http\Models\Rider;
+use App\Http\Models\Admin\TraxPayTransaction;
 
 class AdminReportsEmailController extends Controller
 {
@@ -3782,7 +3783,7 @@ class AdminReportsEmailController extends Controller
         
     }
 
-    static public function return_deliveries_receive($day) {
+    static public function return_deliveries_receive() {
         $return_deliveries = ReturnNote::join('cities AS oc', 'return_notes.hub_id', '=', 'oc.id')
         ->join('riders', 'return_notes.rider_id', '=', 'riders.id')
         ->leftjoin('city_areas as ca', 'ca.id', '=', 'riders.area_id')
@@ -3948,8 +3949,8 @@ class AdminReportsEmailController extends Controller
                 'riders.trax_id as rider_trax_id',
                 'riders.name as rider', 
                 'routes.code as route', 
-                'routes.start', 
-                'routes.end', 
+                'routes.start as route_start', 
+                'routes.end as route_end', 
                 'admins.name as assignee',
                 'ub.name as updated_by',
                 'delivery_notes.updated_at as updated_at',
@@ -3967,9 +3968,9 @@ class AdminReportsEmailController extends Controller
                 'delivery_notes.cash_collected_by',
                 'ccb.name as cash_collected', 
                 'delivery_notes.cash_collected_at', 
-                'delivery_notes.special_rider', 
-                'delivery_notes.special_rider_name', 
-                'delivery_notes.special_rider_phone',
+                'delivery_notes.special_rider as dn_special_rider', 
+                'delivery_notes.special_rider_name as dn_special_rider_name', 
+                'delivery_notes.special_rider_phone as dn_special_rider_phone',
                 'rdns.status as updated_via_app', 
                 'rd.id as rider_delivery_id', 
                 'rd.delivered_status as delivered_status', 
@@ -4016,6 +4017,19 @@ class AdminReportsEmailController extends Controller
             'No. Of Shipments Delivered',
             'Assigned By',
             'Assigned Date',
+            'Updated By',
+            'Updated Date',
+            'Cash Collection By',
+            'Cash Collection Date',
+            'DNCC Amount',
+            'Fintech Amount %',
+            'HBL Konnect Amount',
+            'HBL Konnect Amount %',
+            'Cash Amount',
+            'One Link Count',
+            'Created Via',
+            'Updated Via App',
+            'Last Updated At',
         ];
         
         // Add headers to the report array
@@ -4050,6 +4064,45 @@ class AdminReportsEmailController extends Controller
                     $status = '-';
                 }
 
+                $dncc_amount = $delivery->amount;
+                $fintech_amount_percent = '-';
+
+                $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $delivery->delivery_note)
+                ->pluck('shipment_id')
+                ->toArray();
+
+                $amount = TraxPayTransaction::join('fintech_payment_details as fpd', 'fpd.trax_pay_id', '=', 'trax_pay_transactions.id')
+                ->whereIn('trax_pay_transactions.shipment_id', $delivery_note_shipment)
+                ->sum('fpd.cod_amount');
+
+                if($amount > 0 && $dncc_amount > 0 )
+                {
+                    $fintech_amount_percent = $amount / $dncc_amount *100;
+                }
+
+                $hbl_konnect_amount_percentage = '-';
+                if ($delivery->transactions_amount > 0 && $dncc_amount) {
+                    $hbl_konnect_amount_percentage = $delivery->transactions_amount / $dncc_amount *100;
+                }
+
+                $rider = '-';
+                if ($delivery->dn_special_rider) {
+                    $rider = $delivery->rider . ' (' . $delivery->dn_special_rider_name . ')';
+                } else {
+                    $rider = $delivery->rider;
+                }
+
+                $route = $delivery->route . ' (' . $delivery->route_start . ' to ' . $delivery->route_end . ')';
+
+                $updated_via_app = '-';
+                if ($delivery->updated_via_app == 1) {
+                    $updated_via_app = 'Partial';
+                } else if ($delivery->updated_via_app == 2 ) {
+                    $updated_via_app = 'Yes';
+                } else if ($delivery->updated_via_app == 0) {
+                    $updated_via_app = 'No';
+                }
+
                 $delivery_note_history_report_array[] = [
                     $serial,
                     $delivery->delivery_note,
@@ -4057,15 +4110,31 @@ class AdminReportsEmailController extends Controller
                     $delivery->hub,
                     $delivery->zone_name,
                     $rider_trax_id,
-                    $delivery->rider,
+                    $rider,
                     $delivery->area,
+                    $delivery->rider_type,
                     $delivery->operation_rider_id == 1 ? 'Field In Operations' : 'Hold In Operations',
-                    $delivery->route,
+                    $route,
                     $delivery->shipments_count,
                     $delivery->total_weight,
                     $delivery->delivered_shipments,
                     $delivery->assignee,
                     $delivery->created_at,
+                    
+                    $delivery->updated_by,
+                    $delivery->updated_at,
+                    $delivery->cash_collected,
+                    $delivery->cash_collected_at,
+                    $delivery->amount,
+                    $amount,
+                    $fintech_amount_percent,
+                    $delivery->transactions_amount,
+                    $hbl_konnect_amount_percentage,
+                    $delivery->cash_amount,
+                    $delivery->one_link_payment_count,
+                    $delivery->created_via == 0 ? 'Sonic' : 'App',
+                    $updated_via_app,
+                    $delivery->last_updated_at,
                 ];
             }
         
@@ -4163,11 +4232,8 @@ class AdminReportsEmailController extends Controller
         ->where('arv_date.shipper_status_id', '=', 2)
         ->whereNotNull('shipments.actual_weight')
         ->whereBetween('arv_date.created_at', [
-            // Carbon::parse($day)->startOfDay()->format('Y-m-d H:i:s'),
-            // Carbon::parse($day)->endOfDay()->format('Y-m-d H:i:s')
-
-            Carbon::parse('03 January, 2025')->startOfDay()->format('Y-m-d H:i:s'),
-            Carbon::parse('03 January, 2025')->endOfDay()->format('Y-m-d H:i:s')
+            Carbon::parse($day)->startOfDay()->format('Y-m-d H:i:s'),
+            Carbon::parse($day)->endOfDay()->format('Y-m-d H:i:s')
         ])
         ->get();
 
@@ -4251,7 +4317,7 @@ class AdminReportsEmailController extends Controller
             $sheet->getStyle("A2:{$lastColumn}2")->applyFromArray($headerStyle);
         
             // Set the title in the first row
-            $sheet->setCellValue('A1', 'Delivery Note History Report');
+            $sheet->setCellValue('A1', 'Weight QC Report');
         
             // Merge cells for title
             $sheet->mergeCells("A1:{$lastColumn}1");

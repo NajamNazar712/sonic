@@ -37,8 +37,7 @@ class ReceiveReturnDeliveries extends Command
         ->value('setting_value');
 
         if ($setting == 1) {
-            $day = Carbon::yesterday()->toDateString();
-            $response = AdminReportsEmailController::return_deliveries_receive($day);
+            $response = AdminReportsEmailController::return_deliveries_receive();
             NotificationsController::send(237, $response);
         }
     }
