@@ -36,6 +36,7 @@
                                         <th>Is Hub</th>
                                         <th>Select Hub</th>
                                         <th>Select Zone</th>
+                                        <th>Select Province</th>
                                         <th>Add Attempt TAT</th>
                                         <th>Location latitude</th>
                                         <th>Location longitude</th>
@@ -173,6 +174,29 @@
                                                     <span class="text-danger">{{ $errors[$index]["zone_id"] }}</span>
                                                 @endif
                                             </td>
+
+                                            <td>
+                                                {!! Form::select(
+                                                    $index . '[province_id]',
+                                                    $provinces,
+                                                    $ro['province_id'] ?? '',
+                                                    [
+                                                        'class' => 'form-control province_id select2' . 
+                                                            (isset($errors[$index]['province_id']) ? ' is-invalid' : ''),
+                                                        'style' => 'width:80px',
+                                                        'placeholder' => '',
+                                                        'disabled' => (
+                                                            $ro['is_city'] == 1 || 
+                                                            (isset($errors[$index]['is_hub']) && isset($errors[$index]['is_city']))
+                                                        ) ? 'disabled' : null,
+                                                    ]
+                                                ) !!}
+                                            
+                                                @if ($ro['is_hub'] == 1 && isset($errors[$index]['province_id']))
+                                                    <span class="text-danger">{{ $errors[$index]['province_id'] }}</span>
+                                                @endif
+                                            </td>
+                                            
 
 
                                             <td>
@@ -613,6 +637,10 @@
                 $('.zone_id').select2({
                     width: '100%',
                     placeholder: 'Select Zone'
+                });
+                $('.province_id').select2({
+                    width: '100%',
+                    placeholder: 'Select Province'
                 });
                 $('.closest_hub').select2({
                     width: '100%',

@@ -135,6 +135,7 @@
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Pickup Address</th>
                         <th class="border-primary border-darken-1">Vendor</th>
+                        <th class="border-primary border-darken-1">Brand Name</th>
                         <th class="border-primary border-darken-1">Order ID</th>
                         <th class="border-primary border-darken-1">Order Date</th>
                         <th class="border-primary border-darken-1">Item Quantity</th>
@@ -435,6 +436,7 @@
                             head.push('Shipper');
                             head.push('Pickup Address');
                             head.push('Vendor');
+                            head.push('Brand Name');
                             head.push('Order ID');
                             head.push('Order Date');
                             head.push('Item Quantity');
@@ -492,6 +494,7 @@
                                 row.push(values.shipper);
                                 row.push(values.pickup_address);
                                 row.push(values.vendor);
+                                row.push(values.pickup_brand_name);
                                 row.push(values.order_id);
                                 row.push(values.order_date);
                                 row.push(values.item_quantity);
@@ -596,6 +599,7 @@
                     { data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},
                     { data:'pickup_address' ,name: 'usi.pickup_address', class: 'align-middle pickup_address'},
                     { data:'vendor' ,name: 'usi.vendor', class: 'align-middle vendor'},
+                    { data:'pickup_brand_name' ,name: 'usi.pickup_brand_name', class: 'align-middle pickup_brand_name'},
                     { data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},
                     { data:'order_date' ,name: 'sod.order_date', class: 'align-middle order_date'},
                     { data:'item_quantity' ,name: 'item_quantity', class: 'align-middle item_quantity'},
