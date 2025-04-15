@@ -173,24 +173,18 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\RerunWalletSettlement',
         '\App\Console\Commands\BulkStatusSharingWithWallet',
         
-
         'App\Console\Commands\ReceiveDeliveriesReportNew',
         'App\Console\Commands\ReceiveReturnDeliveries',
         'App\Console\Commands\DailyDeliveryNoteHistory',
         'App\Console\Commands\DailyWeightQCReport',
         'App\Console\Commands\DailyOverAllSalesReport',
-        'App\Console\Commands\QsrEmail',
-        'App\Console\Commands\PendingDeliveriesReport',
         'App\Console\Commands\ReceiveDeliveriesReport',
 
-        'App\Console\Commands\ReceiveDeliveriesReportNew',
-        'App\Console\Commands\ReceiveReturnDeliveries',
-        'App\Console\Commands\DailyDeliveryNoteHistory',
-        'App\Console\Commands\DailyWeightQCReport',
-        'App\Console\Commands\DailyOverAllSalesReport',
-        'App\Console\Commands\QsrEmail',
-        'App\Console\Commands\PendingDeliveriesReport',
-        'App\Console\Commands\ReceiveDeliveriesReport',
+        'App\Console\Commands\QualityOfServiceReport',
+        'App\Console\Commands\PendingDeliveriesReportNew',
+
+        // 'App\Console\Commands\QsrEmail',
+        // 'App\Console\Commands\PendingDeliveriesReport',
 
     ];
 
@@ -639,20 +633,24 @@ class Kernel extends ConsoleKernel
         ->keyBy('type');
 
         $commands = [
-            'email:daily_received_deliveries_report' => 'receive_deliveries_report_time',
-            'email:daily_return_received_deliveries_report' => 'receive_return_deliveries_report_time',
-            'email:daily_delivery_note_history' => 'delivery_note_history_report_time',
-            'email:daily_weight_qc_report' => 'weight_qc_report_time',
-            'email:daily_overall_sales_report' => 'overall_sales_report_time',
-            'email:qsrreport' => 'quality_of_service_report_time',
-            'email:qsrreport_other' => 'quality_of_service_report_other_time',
-            'email:pendingdeliveryreport' => 'pending_deliveries_report_time',
+            'email:daily_received_deliveries_report' => ['receive_deliveries_report_time'],
+            'email:daily_return_received_deliveries_report' => ['receive_return_deliveries_report_time'],
+            'email:daily_delivery_note_history' => ['delivery_note_history_report_time'],
+            'email:daily_weight_qc_report' => ['weight_qc_report_time'],
+            'email:daily_overall_sales_report' => ['overall_sales_report_time'],
+            'email:quality_of_service_report' => [
+                'quality_of_service_report_time',
+                'quality_of_service_report_other_time',
+            ],
+            'email:pending_deliveries_report' => ['pending_deliveries_report_time'],
         ];
 
-        foreach ($commands as $command => $settingKey) {
-            if (isset($settings[$settingKey]) && $settings[$settingKey]->setting_value == 1) {
-                $time = Carbon::createFromFormat('h:i A', $settings[$settingKey]->text)->format('H:i');
-                $schedule->command($command)->dailyAt($time)->runInBackground();
+        foreach ($commands as $command => $settingKeys) {
+            foreach ((array) $settingKeys as $settingKey) {
+                if (isset($settings[$settingKey]) && $settings[$settingKey]->setting_value == 1) {
+                    $time = Carbon::createFromFormat('h:i A', $settings[$settingKey]->text)->format('H:i');
+                    $schedule->command($command)->dailyAt($time)->runInBackground();
+                }
             }
         }
 

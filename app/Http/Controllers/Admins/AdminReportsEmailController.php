@@ -3020,10 +3020,9 @@ class AdminReportsEmailController extends Controller
         return $link;
     }
 
-    static public function qsr_daily_report($to)
+    static public function qsr_daily_report()
     {
         $serial = 0;
-
         $connection = 'reports';
         $select = [
             'z.name  as zone',
@@ -3806,10 +3805,7 @@ class AdminReportsEmailController extends Controller
             'return_notes.created_at as created'
         ])
         ->whereIn('return_notes.status', [0, 3])
-        ->whereBetween('return_notes.created_at', [
-            Carbon::parse($day)->startOfDay()->format('Y-m-d H:i:s'),
-            Carbon::parse($day)->endOfDay()->format('Y-m-d H:i:s')
-        ])
+        ->orderBy('return_notes.id', 'desc')
         ->get();
 
         $return_deliveries_report_array = [];
@@ -4032,15 +4028,27 @@ class AdminReportsEmailController extends Controller
                 $serial++;
                 $rider_trax_id = str_replace('Trax', '', $delivery->rider_trax_id);
 
-                $statusLabels = [
-                    0 => 'Pending for Update',
-                    1 => 'Pending for Verification',
-                    2 => 'Cash Collected',
-                    3 => 'Completed',
-                    4 => 'Verified',
-                    5 => 'Canceled',
-                ];
-                $status = isset($statusLabels[$delivery->status]) ? $statusLabels[$delivery->status] : '-';
+                if ($delivery->status == 0) {
+                    if ($delivery->pending_status == 0) {
+                        $status = 'Pending for Update';
+                    } elseif ($delivery->pending_status == 1) {
+                        $status = 'Pending for Verification';
+                    } else {
+                        $status = '-';
+                    }
+                } elseif ($delivery->status == 1) {
+                    if ($delivery->dncc_status == 1) {
+                        $status = 'Completed';
+                    } elseif ($delivery->cash_collection_status == 1) {
+                        $status = 'Cash Collected';
+                    } else {
+                        $status = 'Verified';
+                    }
+                } elseif ($delivery->status == 4) {
+                    $status = 'Canceled';
+                } else {
+                    $status = '-';
+                }
 
                 $delivery_note_history_report_array[] = [
                     $serial,
@@ -4166,7 +4174,7 @@ class AdminReportsEmailController extends Controller
         $weight_qc_report = [];
 
         // Report Title
-        $weight_qc_report[] = ['Delivery Note History Report'];
+        $weight_qc_report[] = ['Weight QC Report'];
         
         // Header Row
         $headers = [
@@ -4394,9 +4402,10 @@ class AdminReportsEmailController extends Controller
             ->whereNotIn('shipments.shipper_status_id', [1, 17])
             ->whereNotIn('u.id', [8761, 9358])
             ->whereBetween('sj.created_at', [
-                Carbon::parse('03 January, 2025')->startOfDay()->format('Y-m-d H:i:s'),
-                Carbon::parse('03 January, 2025')->endOfDay()->format('Y-m-d H:i:s')
+                Carbon::parse($day)->startOfDay()->format('Y-m-d H:i:s'),
+                Carbon::parse($day)->endOfDay()->format('Y-m-d H:i:s')
             ])
+            ->orderBy('sj.created_at', 'desc')
             ->groupBy('shipments.id')
         ->get();
 
