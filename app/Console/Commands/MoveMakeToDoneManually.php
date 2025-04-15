@@ -2,12 +2,14 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\ShipmentsPaymentJourneyController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\DonePaymentShipment;
 use App\Http\Models\PendingPaymentShipment;
 use App\Http\Models\Shipment;
 use App\Jobs\WalletLogDispatchJob;
+use App\Models\FinjaLogSettlementRecord;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -110,10 +112,10 @@ class MoveMakeToDoneManually extends Command
                     }
                 }
 
-                self::add_done_payment_charges($done_payment_id, $pending_payment_shipment->amount, $pending_payment_shipment->charges, $pending_payment_shipment->gst, $pending_payment_shipment->payable, $packaging_material_charges, $adjustment_amount, null, $pending_payment_shipment->wht, ($done_payment->ibft_charges ?? 0), $done_payment_shipment->sms_charges);
+                AdminFinanceController::add_done_payment_charges($done_payment_id, $pending_payment_shipment->amount, $pending_payment_shipment->charges, $pending_payment_shipment->gst, $pending_payment_shipment->payable, $packaging_material_charges, $adjustment_amount, null, $pending_payment_shipment->wht, ($done_payment->ibft_charges ?? 0), $done_payment_shipment->sms_charges);
                 $pending_payment_shipment->delete();
 
-                self::adjustment_logs_done(1, $pending_payment_shipment_id, $done_payment_shipment->id);
+                AdminFinanceController::adjustment_logs_done(1, $pending_payment_shipment_id, $done_payment_shipment->id);
 
                 if ($done_payment_shipment->type == 0) {
                     $shipment = Shipment::find($pending_payment_shipment->shipment_id);
@@ -146,5 +148,21 @@ class MoveMakeToDoneManually extends Command
             WalletLogDispatchJob::dispatch($pending_logs);
         }
         Auth::logout();
+    }
+    public static function isWalletLogUpdated($shipment_id)
+    {
+
+        return FinjaLogSettlementRecord::where('shipment_id', $shipment_id)
+            ->where('wallet_log_updated', 1)
+            ->exists();
+    }
+    public static function isWalletSettlementUpdated($shipment_id)
+    {
+
+        $logRecord = FinjaLogSettlementRecord::where('shipment_id', $shipment_id)->first();
+        if ($logRecord && $logRecord->wallet_settlement_updated == 1) {
+            return true;
+        }
+        return false;
     }
 }
