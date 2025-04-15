@@ -15296,6 +15296,7 @@ class AdminReportsController extends Controller
             // 'adjustment.adjustment_amount as adjusted_amount',
             'scs.name as sub_segment',
             'cargo_status.name as cargo_status',
+            'cargo_status.id as cargo_status_id',
             'cmb.seal_number as seal_number',
             'bs.name as bag_status',
             'sjfa.created_at as first_attempt_date',
@@ -15315,7 +15316,10 @@ class AdminReportsController extends Controller
             'ssj_last_location.admin_id as scanned_by_id',
             'last_screen_location.name as last_location_screen_location_name',
             'ssj_last_location.entry_method as entry_method',
-            'destination_sj.created_at as destination_arrival_date'
+            'destination_sj.created_at as destination_arrival_date',
+            'intercept_approved.name as intercept_city_name',
+            'irb.intercept_type as intercepttype',
+            'shipmentMisrouted.name as misroutedCityname',
         ];
         $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->leftJoin('sale_person_tags as spt', function($join){
@@ -15395,7 +15399,7 @@ class AdminReportsController extends Controller
                     ->where(
                         'sjr.id',
                         '=',
-                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(20,21,22,23,24,25,47,48,60))')
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(20,21,22,23,24,25,47,48,60,68))')
                     );
             })
             //->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sjr.status_reason_id')
@@ -15494,6 +15498,28 @@ class AdminReportsController extends Controller
                 $join->on('ssjal_last_location.shipment_scanning_journey_id', '=', 'ssj_last_location.id')
                      ->where('ssjal_last_location.hub_id', '=', DB::raw('journey.city_id'))
                      ->where('ssjal_last_location.shipment_id', '=', DB::raw('journey.shipment_id'));
+            })
+            ->leftJoin('intercept_re_book_request_histories as irb', function ($join) {
+                $join->on('irb.shipment_id', '=', 'shipments.id')
+                    ->whereRaw('irb.id = (
+                                    select max(id) 
+                                    from intercept_re_book_request_histories 
+                                    where intercept_re_book_request_histories.shipment_id = shipments.id
+                                    and intercept_re_book_request_histories.intercept_type = 1
+                                )');
+            })
+            ->leftjoin('cities as intercept_approved', 'intercept_approved.id', '=', 'irb.old_consignee_city_id')
+            ->leftJoin('shipments_journey as sjms', function ($join) use ($connection) {
+                $join->on('sjms.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'sjms.id',
+                        '=',
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id  = 68)')
+                    );
+            })
+            ->leftjoin('cities as shipmentMisrouted', function ($join) {
+                $join->on('shipmentMisrouted.id', '=', 'sjr.city_id')
+                    ->where('sjr.shipper_status_id', '=', 68);
             })
             ->leftJoin('city_areas as ca_scanning_last_location_name', 'ssjal_last_location.area_id', '=', 'ca_scanning_last_location_name.id')
             ->leftJoin('shipment_scanning_screen_locations as last_screen_location', 'last_screen_location.id', '=', 'ssj_last_location.screen_location_id')
@@ -15690,6 +15716,26 @@ class AdminReportsController extends Controller
             //     }
             // })
             ->editColumn('current_hub', function ($shipment) {
+                if(in_array($shipment->shipper_status_id ,[68])){
+                    return $shipment->misroutedCityname;
+                }
+                elseif(in_array($shipment->shipper_status_id ,[49, 3])){
+                    if(in_array($shipment->cargo_status_id,[3,2,4, 7, 8, 9,6])){ //Shipment In Transit || Shipment Misrouted Forwarded concered hub change reference TO-6939
+                        return $shipment->destination;
+                    }
+                }elseif(in_array($shipment->shipper_status_id ,[26, 73,32, 70, 76])){
+                    if(in_array($shipment->cargo_status_id,[4, 7, 8, 9,6])){ //Shipment In Transit || Shipment Misrouted Forwarded concered hub change reference TO-6939
+                        return $shipment->origin;
+                    }
+                }elseif(in_array($shipment->shipper_status_id,[18, 34, 23,24, 47, 48,2])){
+                    return $shipment->origin;
+                }elseif(in_array($shipment->shipper_status_id,[54,55, 69,7, 4,8])){
+                    return (($shipment->intercepttype == 1) ?  $shipment->intercept_city_name : $shipment->destination);
+                }elseif(in_array($shipment->shipper_status_id,[22, 21,75])){
+                    if($shipment->return_city != null){
+                        return $shipment->return_city;
+                    }
+                }
                 if ($shipment->current_hub_id != null) {
                     return $shipment->current_hub_name;
                 } else {
