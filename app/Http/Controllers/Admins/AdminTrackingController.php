@@ -1341,14 +1341,14 @@ class AdminTrackingController extends Controller
                             }
                         }
 
-                        $details['order_information']['parcel_value'] = number_format($shipment->parcel_value);
+                        // $details['order_information']['parcel_value'] = number_format($shipment->parcel_value);
 
-                        // $details['order_information']['parcel_value'] = '';
-                        // if ($retail_shipment){
-                        //     $details['order_information']['parcel_value'] = $retail_shipement_parcel_amount;
-                        // } else {
-                        //     $details['order_information']['parcel_value'] = number_format($shipment->parcel_value);
-                        // }
+                        $details['order_information']['parcel_value'] = '';
+                        if ($retail_shipment){
+                            $details['order_information']['parcel_value'] = $retail_shipment->parcel_amount ?? '-';
+                        } else {
+                            $details['order_information']['parcel_value'] = number_format($shipment->parcel_value);
+                        }
 
 
                         $details['order_information']['account_type_id'] = $shipment->user->account_type_id;
