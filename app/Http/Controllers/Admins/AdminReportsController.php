@@ -14818,28 +14818,6 @@ class AdminReportsController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 742);
         }
-        // $sack_bag_utilization = CargoManifestBag::JOIN('cities AS c','c.id','=','cargo_manifest_bags.destination_hub_id')    
-        // ->select('c.id AS destination_id','c.name AS destination_city', DB::raw('COUNT(DISTINCT cargo_manifest_bags.sack_bag_no) AS stock_sack_bag'))
-        // ->whereNotNull('cargo_manifest_bags.sack_bag_no')
-        // ->where('cargo_manifest_bags.sack_bag_no', '!=', 'N/A')
-        // ->where('cargo_manifest_bags.destination_hub_id','=',$destination)
-        // ->groupBy('cargo_manifest_bags.destination_hub_id');
-
-        //old qurey
-        // $sack_bag_utilization = CargoManifestBag::join('cities as c', function ($join) {
-        //     $join->on('c.id', '=', 'cargo_manifest_bags.destination_hub_id')
-        //          ->where('c.status', '=', 1);
-        // })
-        // ->where('cargo_manifest_bags.is_sack_bag', '=', 1)
-        // ->where('cargo_manifest_bags.destination_hub_id', '=', $destination_id)
-        // ->groupBy('cargo_manifest_bags.destination_hub_id')
-        // ->select([
-        //     'c.id as destination_id',
-        //     'c.name as destination_name',
-        //     DB::raw('COUNT(DISTINCT cargo_manifest_bags.sack_bag_id) as stock_sack_bag'),
-        //     // DB::raw('COUNT(cargo_manifest_bags.sack_bag_id) - COUNT(DISTINCT cargo_manifest_bags.sack_bag_id) as re_used_sack_bag'),
-        // ])
-        // ->get();
 
         $sack_bag_utilization = IssueSackBagOrigin::join('cities as dc', 'dc.id', '=', 'issue_sack_bag_origins.sack_destination_id')
             ->join('cities as oc', 'oc.id', '=', 'issue_sack_bag_origins.origin')
@@ -14854,34 +14832,6 @@ class AdminReportsController extends Controller
 
 
         $datatable = Datatables::of($sack_bag_utilization);
-        // ->addColumn('stock_sack_bag_btn', function ($sack_bag_utilization) {
-        //     if ($sack_bag_utilization->stock_sack_bag > 0) {
-        //         return '<button class="btn btn-sm btn-outline-info align-middle stock_sack_bag_btn">'.$sack_bag_utilization->stock_sack_bag.'</button>';
-        //     } else {
-        //         return 0;
-        //     }
-        // });
-        // ->addColumn('sack_bag_count_btn', function ($sack_bag_utilization) {
-        //     if ($sack_bag_utilization->sack_bag_count > 0) {
-        //         return '<button class="btn btn-sm btn-outline-info align-middle sack_bag_count_btn">' . $sack_bag_utilization->sack_bag_count . '</button>';
-        //     } else {
-        //         return 0;
-        //     }
-        // });
-        // ->addColumn('re_used_sack_bag_btn', function ($sack_bag_utilization) {
-        //     if ($sack_bag_utilization->re_used_sack_bag > 0) {
-        //         return '<button class="btn btn-sm btn-outline-info align-middle re_used_sack_bag_btn">'.$sack_bag_utilization->re_used_sack_bag.'</button>';
-        //     } else {
-        //         return 0;
-        //     }
-        // });
-
-        // if ($request->get('search_from') && $request->get('search_to')) {
-        //     $from = $request->get('search_from');
-        //     $to = $request->get('search_to');
-        //     $datatable->whereBetween('cargo_manifest_bags.created_at', [$from, $to]);
-        // }
-
         return $datatable->make(true);
     }
 
