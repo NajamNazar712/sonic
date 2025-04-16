@@ -5202,7 +5202,7 @@ class AdminReportsEmailController extends Controller
             ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
             ->whereIn('shipments.shipper_status_id', $status)
             ->whereNotNull('shipments.tracking_number')
-            ->orderBy('ssr.name', 'desc')
+            ->orderBy('shipments_journey.remarks', 'desc')
             ->groupBy('shipments.id')
         ->get();
 
