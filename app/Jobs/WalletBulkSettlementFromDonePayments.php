@@ -80,7 +80,7 @@ class WalletBulkSettlementFromDonePayments implements ShouldQueue
             $id = $this->id;
             $payment_id = $this->payment_id;
             foreach ($chunkedShipments as $dps) {
-                $LogChargeStatus = false;
+                $LogChargeStatus = true;
                 $send_request = true;
                 $success = false;
                 $shipmentId = $dps->shipment_id;
@@ -97,8 +97,8 @@ class WalletBulkSettlementFromDonePayments implements ShouldQueue
 
                     $check_arrival_paid_done = DonePaymentShipment::where('shipment_id',$shipmentId)->where('type',3)->exists();
                     $check_arrival_paid_pending = PendingPaymentShipment::where('shipment_id',$shipmentId)->where('type',3)->exists();
-                    if($logCharged2 == 0 && (!$check_arrival_paid_done || !$check_arrival_paid_pending )){
-                        $LogChargeStatus =true;
+                    if($logCharged2 == 0 && ($check_arrival_paid_done || $check_arrival_paid_pending )){
+                        $LogChargeStatus =false;
                     }
 
 
