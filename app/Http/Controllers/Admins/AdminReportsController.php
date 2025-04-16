@@ -15922,16 +15922,31 @@ class AdminReportsController extends Controller
                 }
                 
                 $rowArray['shipper'] = ($rowArray['booking_type_id'] == 4) ? ($rowArray['shipper'] . ' (' . $rowArray['poc'] . ')') : $rowArray['shipper'];
-                
-                if (!empty($rowArray['current_hub_id'])) {
-                    $rowArray['current_hub_name'] = $rowArray['current_hub_name'];
-                } else {
-                    if (in_array($rowArray['shipper_status_id'], [1, 2, 61])) {
-                        $rowArray['current_hub_name'] = $rowArray['origin'];
-                    } else {
-                        $rowArray['current_hub_name'] = $rowArray['hub'];
+
+            if (!empty($rowArray['current_hub_id'])) {
+                $rowArray['current_hub_name'] = $rowArray['current_hub_name'];
+            } else {
+                if (in_array($rowArray['current_hub_id'], [68])) {
+                        $rowArray['current_hub_name'] = $rowArray['misroutedCityname'];
+                } elseif (in_array($rowArray['current_hub_id'], [49, 3])) {
+                    if (in_array($shipment->cargo_status_id, [3, 2, 4, 7, 8, 9, 6])) { //Shipment In Transit || Shipment Misrouted Forwarded concered hub change reference TO-6939
+                            $rowArray['current_hub_name'] = $rowArray['destination'];
+                    }
+                } elseif (in_array($rowArray['current_hub_id'], [26, 73, 32, 70, 76])) {
+                    if (in_array($shipment['cargo_status_id'], [4, 7, 8, 9, 6])) { //Shipment In Transit || Shipment Misrouted Forwarded concered hub change reference TO-6939
+                            $rowArray['current_hub_name'] = $rowArray['origin'];
+                    }
+                } elseif (in_array($rowArray['current_hub_id'], [18, 34, 23, 24, 47, 48, 2])) {
+                    $rowArray['current_hub_name'] = $rowArray['origin'];
+                } elseif (in_array($rowArray['current_hub_id'], [54, 55, 69, 7, 4, 8])) {
+                            $rowArray['current_hub_name'] = (($shipment['intercepttype'] == 1) ?  $shipment['intercept_city_name'] : $shipment['destination']);
+
+                } elseif (in_array($rowArray['current_hub_id'], [22, 21, 75])) {
+                    if ($shipment['return_city'] != null) {
+                        $rowArray['current_hub_name'] = $rowArray['return_city'];
                     }
                 }
+            }
             
                 $days = Carbon::now()->diffInDays($rowArray['arrival']);
                 $rowArray['aging'] = ($days == 0) ? "-" : $days;
