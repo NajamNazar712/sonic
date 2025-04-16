@@ -647,7 +647,6 @@ class Kernel extends ConsoleKernel
 
         foreach ($commands as $command => $settingKeys) {
             foreach ((array) $settingKeys as $settingKey) {
-
                 if (isset($settings[$settingKey]) && $settings[$settingKey]->setting_value == 1) {
                     $timeRaw = trim($settings[$settingKey]->text ?? '');
                     $time = Carbon::createFromFormat('h:i A', $timeRaw)->format('H:i');
