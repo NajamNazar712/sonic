@@ -1320,7 +1320,10 @@ class AdminReportsEmailController extends Controller
             }
             $serial = 0;
             foreach ($done_payments as $done_payment) {
-                if (!in_array($done_payment->done_payment->shipper->id, $shipper_ids)) {
+                if(!isset($done_payment->done_payment->shipper->id)){
+                    continue;
+                }
+                if (!in_array($done_payment->done_payment->shipper?->id, $shipper_ids)   ) {
                     if (!in_array($done_payment->done_payment->shipper->id, $shippers)) {
                         $shippers[$done_payment->done_payment->shipper->id] = $done_payment->done_payment->shipper->id;
                     }
