@@ -92,5 +92,35 @@ class EmailsFromSetting extends Seeder
                     'status' => 1
                 )
         ));
+
+        DB::table('notifications')->where('id', 241)->delete();
+        DB::table('notifications')->insert(array(
+            array(
+                    'id' => 241, 
+                    'created_at' => $timestamp, 
+                    'updated_at' => $timestamp, 
+                    'name' => 'Pending Deliveries Report Email', 
+                    'type_id' => 1, 
+                    'subject' => 'Daily Pending Deliveries Report', 
+                    'body' => 'Dear Concern, '. PHP_EOL .'Please downlaod the report from the following link: [link]' ,
+                    'updated_by' => 3, 
+                    'status' => 1
+                )
+        ));
+
+        DB::table('notifications')->where('id', 242)->delete();
+        DB::table('notifications')->insert(array(
+            array(
+                    'id' => 242, 
+                    'created_at' => $timestamp, 
+                    'updated_at' => $timestamp, 
+                    'name' => 'Quality Of Service Report Email', 
+                    'type_id' => 1, 
+                    'subject' => 'Daily Quality Of Service Report', 
+                    'body' => 'Dear Concern, '. PHP_EOL .'Please downlaod the report from the following link: [link]' ,
+                    'updated_by' => 3, 
+                    'status' => 1
+                )
+        ));
     }
 }

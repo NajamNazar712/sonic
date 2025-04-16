@@ -58,6 +58,7 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
 use App\Http\Models\Rider;
+use App\Http\Models\Admin\TraxPayTransaction;
 
 class AdminReportsEmailController extends Controller
 {
@@ -2186,8 +2187,40 @@ class AdminReportsEmailController extends Controller
             ->orderBy('delivery_notes.created_at', 'desc')->get();
 
         $receive_deliveries_report_array[] = ['Receive Deliveries Report'];
-        $receive_deliveries_report_array['header'] = ['S. No.', 'Delivery Note No.', 'Hub', 'Rider', 'Route', 'No. Of Shipments', 'No. of Pending Shipments', 'No. of Delivered Shipments', 'Assigned By', 'Assigned Date', 'Total Collection', 'Status', 'Last Updated (Date)', 'Last Updated By'];
-        $receive_deliveries_report_array[] = ['S. No.' => '', 'Delivery Note No.' => '', 'Hub' => '', 'Rider' => '', 'Route' => '', 'No. Of Shipments' => '', 'No. of Pending Shipments' => '', 'No. of Delivered Shipments' => '', 'Assigned By' => '', 'Assigned Date' => '', 'Total Collection' => '', 'Status' => '', 'Last Updated (Date)' => '', 'Last Updated By' => ''];
+
+        $receive_deliveries_report_array['header'] = [
+            'S. No.',
+            'Delivery Note No.',
+            'Hub',
+            'Rider',
+            'Route',
+            'No. Of Shipments',
+            'No. of Pending Shipments',
+            'No. of Delivered Shipments',
+            'Assigned By',
+            'Assigned Date',
+            'Total Collection',
+            'Status',
+            'Last Updated (Date)',
+            'Last Updated By'
+        ];
+        
+        $receive_deliveries_report_array[] = [
+            'S. No.'                    => '',
+            'Delivery Note No.'         => '',
+            'Hub'                       => '',
+            'Rider'                     => '',
+            'Route'                     => '',
+            'No. Of Shipments'          => '',
+            'No. of Pending Shipments'  => '',
+            'No. of Delivered Shipments'=> '',
+            'Assigned By'               => '',
+            'Assigned Date'             => '',
+            'Total Collection'          => '',
+            'Status'                    => '',
+            'Last Updated (Date)'       => '',
+            'Last Updated By'           => ''
+        ];
 
         if(count($deliveries) > 0) {
             foreach ($deliveries as $shipment) {
@@ -3020,10 +3053,9 @@ class AdminReportsEmailController extends Controller
         return $link;
     }
 
-    static public function qsr_daily_report($to)
+    static public function qsr_daily_report()
     {
         $serial = 0;
-
         $connection = 'reports';
         $select = [
             'z.name  as zone',
@@ -3249,11 +3281,17 @@ class AdminReportsEmailController extends Controller
             'Order ID',
             'Account No.',
             'Shipper',
+            'Sales Person',
+            'KAM',
             'Sub Segment',
             'Consignee Name',
             'First Attempt Date',
             'Rider Picked Status Date',
             'Status',
+            'Last Location Screen Name',
+            'Sub Hub',
+            'Last Location Updated At',
+            'Entry Method',
             'Reason',
             'Remarks',
             'Total Attempt',
@@ -3262,13 +3300,15 @@ class AdminReportsEmailController extends Controller
             'Bag Seal Number',
             'Bag Status',
             'Service',
-            'Arrival Date',
+            'Origin Arrival Date',
+            'Destination Arrival Date',
             'Last Status Date',
             'Booked Status Date',
             'Shipping Mode',
             'Origin',
             'Destination',
             'Hub',
+            'Area',
             'Concerned Hub',
             'Return City',
             'Zone',
@@ -3284,11 +3324,17 @@ class AdminReportsEmailController extends Controller
             'Order ID'                   => '',
             'Account No.'                => '',
             'Shipper'                    => '',
+            'Sales Person'               => '',
+            'KAM'                        => '',
             'Sub Segment'                => '',
             'Consignee Name'             => '',
             'First Attempt Date'         => '',
             'Rider Picked Status Date'   => '',
             'Status'                     => '',
+            'Last Location Screen Name'  => '',
+            'Sub Hub'                    => '',
+            'Last Location Updated At'   => '',
+            'Entry Method'               => '',
             'Reason'                     => '',
             'Remarks'                    => '',
             'Total Attempt'              => '',
@@ -3297,13 +3343,15 @@ class AdminReportsEmailController extends Controller
             'Bag Seal Number'            => '',
             'Bag Status'                 => '',
             'Service'                    => '',
-            'Arrival Date'               => '',
+            'Origin Arrival Date'        => '',
+            'Destination Arrival Date'   => '',
             'Last Status Date'           => '',
             'Booked Status Date'         => '',
             'Shipping Mode'              => '',
             'Origin'                     => '',
             'Destination'                => '',
             'Hub'                        => '',
+            'Area'                       => '',
             'Concerned Hub'              => '',
             'Return City'                => '',
             'Zone'                       => '',
@@ -3338,17 +3386,36 @@ class AdminReportsEmailController extends Controller
                 $aging = Carbon::now()->diffInDays($sale->arrival) ?: '-';
                 $aging_last_status = Carbon::now()->diffInDays($sale->last_status_date) ?: '-';
 
+                $kam = '-';
+                if ($sale->stt_kam_id == null) {
+                    $kam = $sale->scu_kam_name;
+                } else {
+                    $kam = $sale->stt_kam_name;
+                }
+
+                $sub_hub = '-';
+                if ($sale->scanned_by_user_type == 5) {
+                    $rider = Rider::find($sale->scanned_by_id);
+                    $sub_hub = $rider->area->name ?? '-';
+                } elseif (isset($sale->ca_scanning_last_location_name)) {
+                    $sub_hub = $sale->ca_scanning_last_location_name;
+                }
+
                 $sales_array[] = [
                     'S. No.'                 => $serial,
                     'Tracking No.'           => $sale->tracking_number_link,
                     'Order ID'               => $sale->order_id,
                     'Account No.'            => $sale->account_no,
                     'Shipper'                => $sale->shipper,
+                    'Sales Person'           => $sale->shipper,
+                    'KAM'                    => $kam,
                     'Sub Segment'            => $sale->sub_segment,
                     'Consignee Name'         => $sale->name,
                     'First Attempt Date'     => $sale->first_attempt_date,
                     'Rider Picked Status Date' => $sale->rider_picked_status_date,
                     'Status'                 => $sale->status,
+                    'Last Location Screen name'     => $sale->last_location_screen_location_name,
+                    'Sub Hub'                => $sub_hub,
                     'Reason'                 => $sale->reason,
                     'Remarks'                => $sale->remarks,
                     'Total Attempt'          => $total_attempt,
@@ -3357,13 +3424,15 @@ class AdminReportsEmailController extends Controller
                     'Bag Seal Number'        => $sale->seal_number,
                     'Bag Status'             => $sale->bag_status,
                     'Service'                => $sale->service_type,
-                    'Arrival Date'           => $sale->arrival,
+                    'Origin Arrival Date'    => $sale->arrival,
+                    'Destination Arrival Date' => $sale->destination_arrival_date,
                     'Last Status Date'       => $sale->last_status_date,
                     'Booked Status Date'     => $sale->created_at,
                     'Shipping Mode'          => $sale->shipping_mode,
                     'Origin'                 => $sale->origin,
                     'Destination'            => $sale->destination,
                     'Hub'                    => $sale->hub,
+                    'Area'                   => $sale->area,
                     'Concerned Hub'          => $hub_name,
                     'Return City'            => $sale->return_city,
                     'Zone'                   => $sale->zone,
@@ -3680,9 +3749,17 @@ class AdminReportsEmailController extends Controller
             'Rider Category', 
             'Route', 
             'No. Of Shipments', 
+            'E-Comm (COD)',
+            'General Logistics (Retail)',
+            'General Logistics - E-Comm (Express)',
+            'Other Sub-Segments',
             'Total Weight', 
             'No. Of Pending Shipments',
-            'No. Of Delivered Shipments', 
+            'No. Of Delivered Shipments',
+            'E-Comm (COD)', 
+            'General Logistics (Retail)', 
+            'General Logistics - E-Comm (Express)', 
+            'Other Sub-Segments', 
             'Assigned By', 
             'Assigned Date', 
             'Total Collection', 
@@ -3697,10 +3774,92 @@ class AdminReportsEmailController extends Controller
         
         if (count($pending_deliveries) > 0) {
             $serial = 0;
-            $receive_deliveries_report_array = [['S. No.', 'Delivery Note No.', 'Hub', 'Zone', 'Business Category', 'Rider ID', 'Rider', 'Area', 'Rider Type', 'Rider Category', 'Route', 'No. Of Shipments', 'Total Weight', 'No. Of Pending Shipments', 'No. Of Delivered Shipments', 'Assigned By', 'Assigned Date', 'Total Collection', 'Status', 'Last Updated (Date)', 'Last Updated By', 'Created Via']];
-        
+            $receive_deliveries_report_array = [[
+                'S. No.', 
+                'Delivery Note No.', 
+                'Hub', 
+                'Zone', 
+                'Business Category', 
+                'Rider ID', 
+                'Rider', 
+                'Area',
+                'Rider Type', 
+                'Rider Category', 
+                'Route', 
+                'No. Of Shipments', 
+                'E-Comm (COD)',
+                'General Logistics (Retail)',
+                'General Logistics - E-Comm (Express)',
+                'Other Sub-Segments',
+                'Total Weight', 
+                'No. Of Pending Shipments',
+                'No. Of Delivered Shipments',
+                'E-Comm (COD)', 
+                'General Logistics (Retail)', 
+                'General Logistics - E-Comm (Express)', 
+                'Other Sub-Segments', 
+                'Assigned By', 
+                'Assigned Date',
+                'Total Collection', 
+                'Status', 
+                'Last Updated (Date)',
+                'Last Updated By', 
+                'Created Via'
+            ]];
+
             foreach ($pending_deliveries as $pending_delivery) {
                 $serial++;
+
+                $deliveryNoteId = [$pending_delivery->delivery_note_id];
+
+                // ECOM COD
+                $excel_ecom_cod = self::get_segment_type('delivery_note_shipments', $deliveryNoteId, 2, 5, null, 'delivery_note_id');
+                $excel_ecom_cod = $excel_ecom_cod > 0 ? $excel_ecom_cod : '-';
+
+                // GENERAL RETAIL
+                $excel_general_retail = self::get_segment_type('delivery_note_shipments', $deliveryNoteId, 1, 12, null, 'delivery_note_id');
+                $excel_general_retail = $excel_general_retail > 0 ? $excel_general_retail : '-';
+
+                // GENERAL LOGISTICS ECOM EXPRESS
+                $count_general = self::get_segment_type('delivery_note_shipments', $deliveryNoteId, 1, 2, null, 'delivery_note_id');
+                $count_ecomm = self::get_segment_type('delivery_note_shipments', $deliveryNoteId, 2, 7, null, 'delivery_note_id');
+                $excel_general_ecom_express = $count_general + $count_ecomm;
+                $excel_general_ecom_express = $excel_general_ecom_express > 0 ? $excel_general_ecom_express : '-';
+
+                // OTHERS
+                $excel_others = self::get_segment_type('delivery_note_shipments', $deliveryNoteId, [1, 2], [1, 3, 4, 6, 8, 9, 10, 11], null, 'delivery_note_id');
+                $excel_others = $excel_others > 0 ? $excel_others : '-';
+
+                // DELIVERED ECOM COD
+                $delivered_excel_ecom_cod = self::get_delivered_shipments($deliveryNoteId);
+                if (!empty($delivered_excel_ecom_cod)) {
+                    $delivered_excel_ecom_cod = self::get_segment_type('delivery_note_shipments', $delivered_excel_ecom_cod, 2, 5, 'delivered', 'delivery_note_id');
+                }
+                $delivered_excel_ecom_cod = $delivered_excel_ecom_cod > 0 ? $delivered_excel_ecom_cod : '-';
+
+                // DELIVERED GENERAL RETAIL
+                $delivered_excel_general_retail = self::get_delivered_shipments($deliveryNoteId);
+                if (!empty($delivered_excel_general_retail)) {
+                    $delivered_excel_general_retail = self::get_segment_type('delivery_note_shipments', $delivered_excel_general_retail, 1, 12, 'delivered', 'delivery_note_id');
+                }
+                $delivered_excel_general_retail = $delivered_excel_general_retail > 0 ? $delivered_excel_general_retail : '-';
+
+                // DELIVERED GENERAL ECOM EXPRESS
+                $delivered_shipments = self::get_delivered_shipments($deliveryNoteId);
+                $delivered_excel_general_ecom_express = !empty($delivered_shipments)
+                    ? self::get_segment_type('delivery_note_shipments', $delivered_shipments, [1,2], [1,3,4,6,8,9,10,11], 'delivered', 'delivery_note_id') 
+                    : 0;
+
+                $delivered_excel_general_ecom_express = $delivered_excel_general_ecom_express > 0 
+                    ? $delivered_excel_general_ecom_express 
+                    : '-';
+
+                // DELIVERED EXCEL OTHERS
+                $delivered_ids = self::get_delivered_shipments($deliveryNoteId);
+                $delivered_excel_others = !empty($delivered_ids)
+                    ? self::get_segment_type('delivery_note_shipments', $delivered_ids, [1, 2], [1, 3, 4, 6, 8, 9, 10, 11], 'delivered', 'delivery_note_id')
+                    : 0;
+                
                 $receive_deliveries_report_array[] = [
                     $serial,
                     $pending_delivery->delivery_note_id,
@@ -3714,9 +3873,18 @@ class AdminReportsEmailController extends Controller
                     $pending_delivery->operation_rider_id == 1 ? 'Field In Operations' : 'Hold In Operations',
                     $pending_delivery->start . ' to ' . $pending_delivery->end,
                     $pending_delivery->shipments_count,
+                    $excel_ecom_cod,
+                    $excel_general_retail,
+                    $excel_general_ecom_express,
+                    $excel_general_retail,
+                    $excel_others,
                     $pending_delivery->total_weight,
                     $pending_delivery->shipments_unverified_count,
                     $pending_delivery->delivered_shipments,
+                    $delivered_excel_ecom_cod,
+                    $delivered_excel_general_retail,
+                    $delivered_excel_ecom_cod,
+                    $$delivered_excel_others,
                     $pending_delivery->assignee,
                     $pending_delivery->created_at,
                     $pending_delivery->total_cod_amount,
@@ -3783,7 +3951,39 @@ class AdminReportsEmailController extends Controller
         
     }
 
-    static public function return_deliveries_receive($day) {
+    public static function get_segment_type($table, $ids, $segment, $subSegment, $type = null, $column)
+    {
+        $shipmentIdsQuery = DB::connection('reports')->table($table)->whereIn($column, $ids);
+
+        if ($type === null) {
+            $shipmentIds = $shipmentIdsQuery->pluck('shipment_id');
+        } else {
+            $shipmentIds = $ids;
+        }
+
+        $query = DB::connection('reports')->table('shipments')
+            ->join('users', 'users.id', '=', 'shipments.user_id')
+            ->whereIn('shipments.id', $shipmentIds);
+
+        if ($segment) {
+            $query->whereIn('users.segment_id', (array) $segment);
+        }
+
+        if ($subSegment) {
+            $query->whereIn('users.sub_segment_id', (array) $subSegment);
+        }
+
+        return $query->count();
+    }
+
+    public static function get_delivered_shipments($dn_ids){
+        $dncc_status = array(14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38);
+        $shipment_ids = DeliveryNoteShipment::whereIn('delivery_note_id', $dn_ids)->where('status', '>', 1)->whereNotIn('status', [8, 10, 11])->select('shipment_id')->get();
+        return Shipment::whereIn('id', $shipment_ids)->whereIn('shipper_status_id', $dncc_status)->pluck('id');
+    }
+
+
+    static public function return_deliveries_receive() {
         $return_deliveries = ReturnNote::join('cities AS oc', 'return_notes.hub_id', '=', 'oc.id')
         ->join('riders', 'return_notes.rider_id', '=', 'riders.id')
         ->leftjoin('city_areas as ca', 'ca.id', '=', 'riders.area_id')
@@ -3806,10 +4006,7 @@ class AdminReportsEmailController extends Controller
             'return_notes.created_at as created'
         ])
         ->whereIn('return_notes.status', [0, 3])
-        ->whereBetween('return_notes.created_at', [
-            Carbon::parse($day)->startOfDay()->format('Y-m-d H:i:s'),
-            Carbon::parse($day)->endOfDay()->format('Y-m-d H:i:s')
-        ])
+        ->orderBy('return_notes.id', 'desc')
         ->get();
 
         $return_deliveries_report_array = [];
@@ -3952,8 +4149,8 @@ class AdminReportsEmailController extends Controller
                 'riders.trax_id as rider_trax_id',
                 'riders.name as rider', 
                 'routes.code as route', 
-                'routes.start', 
-                'routes.end', 
+                'routes.start as route_start', 
+                'routes.end as route_end', 
                 'admins.name as assignee',
                 'ub.name as updated_by',
                 'delivery_notes.updated_at as updated_at',
@@ -3971,9 +4168,9 @@ class AdminReportsEmailController extends Controller
                 'delivery_notes.cash_collected_by',
                 'ccb.name as cash_collected', 
                 'delivery_notes.cash_collected_at', 
-                'delivery_notes.special_rider', 
-                'delivery_notes.special_rider_name', 
-                'delivery_notes.special_rider_phone',
+                'delivery_notes.special_rider as dn_special_rider', 
+                'delivery_notes.special_rider_name as dn_special_rider_name', 
+                'delivery_notes.special_rider_phone as dn_special_rider_phone',
                 'rdns.status as updated_via_app', 
                 'rd.id as rider_delivery_id', 
                 'rd.delivered_status as delivered_status', 
@@ -4020,6 +4217,19 @@ class AdminReportsEmailController extends Controller
             'No. Of Shipments Delivered',
             'Assigned By',
             'Assigned Date',
+            'Updated By',
+            'Updated Date',
+            'Cash Collection By',
+            'Cash Collection Date',
+            'DNCC Amount',
+            'Fintech Amount %',
+            'HBL Konnect Amount',
+            'HBL Konnect Amount %',
+            'Cash Amount',
+            'One Link Count',
+            'Created Via',
+            'Updated Via App',
+            'Last Updated At',
         ];
         
         // Add headers to the report array
@@ -4032,15 +4242,66 @@ class AdminReportsEmailController extends Controller
                 $serial++;
                 $rider_trax_id = str_replace('Trax', '', $delivery->rider_trax_id);
 
-                $statusLabels = [
-                    0 => 'Pending for Update',
-                    1 => 'Pending for Verification',
-                    2 => 'Cash Collected',
-                    3 => 'Completed',
-                    4 => 'Verified',
-                    5 => 'Canceled',
-                ];
-                $status = isset($statusLabels[$delivery->status]) ? $statusLabels[$delivery->status] : '-';
+                if ($delivery->status == 0) {
+                    if ($delivery->pending_status == 0) {
+                        $status = 'Pending for Update';
+                    } elseif ($delivery->pending_status == 1) {
+                        $status = 'Pending for Verification';
+                    } else {
+                        $status = '-';
+                    }
+                } elseif ($delivery->status == 1) {
+                    if ($delivery->dncc_status == 1) {
+                        $status = 'Completed';
+                    } elseif ($delivery->cash_collection_status == 1) {
+                        $status = 'Cash Collected';
+                    } else {
+                        $status = 'Verified';
+                    }
+                } elseif ($delivery->status == 4) {
+                    $status = 'Canceled';
+                } else {
+                    $status = '-';
+                }
+
+                $dncc_amount = $delivery->amount;
+                $fintech_amount_percent = '-';
+
+                $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $delivery->delivery_note)
+                ->pluck('shipment_id')
+                ->toArray();
+
+                $amount = TraxPayTransaction::join('fintech_payment_details as fpd', 'fpd.trax_pay_id', '=', 'trax_pay_transactions.id')
+                ->whereIn('trax_pay_transactions.shipment_id', $delivery_note_shipment)
+                ->sum('fpd.cod_amount');
+
+                if($amount > 0 && $dncc_amount > 0 )
+                {
+                    $fintech_amount_percent = $amount / $dncc_amount *100;
+                }
+
+                $hbl_konnect_amount_percentage = '-';
+                if ($delivery->transactions_amount > 0 && $dncc_amount) {
+                    $hbl_konnect_amount_percentage = $delivery->transactions_amount / $dncc_amount *100;
+                }
+
+                $rider = '-';
+                if ($delivery->dn_special_rider) {
+                    $rider = $delivery->rider . ' (' . $delivery->dn_special_rider_name . ')';
+                } else {
+                    $rider = $delivery->rider;
+                }
+
+                $route = $delivery->route . ' (' . $delivery->route_start . ' to ' . $delivery->route_end . ')';
+
+                $updated_via_app = '-';
+                if ($delivery->updated_via_app == 1) {
+                    $updated_via_app = 'Partial';
+                } else if ($delivery->updated_via_app == 2 ) {
+                    $updated_via_app = 'Yes';
+                } else if ($delivery->updated_via_app == 0) {
+                    $updated_via_app = 'No';
+                }
 
                 $delivery_note_history_report_array[] = [
                     $serial,
@@ -4049,15 +4310,31 @@ class AdminReportsEmailController extends Controller
                     $delivery->hub,
                     $delivery->zone_name,
                     $rider_trax_id,
-                    $delivery->rider,
+                    $rider,
                     $delivery->area,
+                    $delivery->rider_type,
                     $delivery->operation_rider_id == 1 ? 'Field In Operations' : 'Hold In Operations',
-                    $delivery->route,
+                    $route,
                     $delivery->shipments_count,
                     $delivery->total_weight,
                     $delivery->delivered_shipments,
                     $delivery->assignee,
                     $delivery->created_at,
+                    
+                    $delivery->updated_by,
+                    $delivery->updated_at,
+                    $delivery->cash_collected,
+                    $delivery->cash_collected_at,
+                    $delivery->amount,
+                    $amount,
+                    $fintech_amount_percent,
+                    $delivery->transactions_amount,
+                    $hbl_konnect_amount_percentage,
+                    $delivery->cash_amount,
+                    $delivery->one_link_payment_count,
+                    $delivery->created_via == 0 ? 'Sonic' : 'App',
+                    $updated_via_app,
+                    $delivery->last_updated_at,
                 ];
             }
         
@@ -4149,24 +4426,22 @@ class AdminReportsEmailController extends Controller
                 'sw.weight_type', 
                 'wt.name as weight_type_name',
                 'shipments.chargeable_weight', 
+                'shipments.replacement_weight as replacement_weight', 
                 'hub.name as hub_name',
                 'area.name as area_name'
             ])
         ->where('arv_date.shipper_status_id', '=', 2)
         ->whereNotNull('shipments.actual_weight')
         ->whereBetween('arv_date.created_at', [
-            // Carbon::parse($day)->startOfDay()->format('Y-m-d H:i:s'),
-            // Carbon::parse($day)->endOfDay()->format('Y-m-d H:i:s')
-
-            Carbon::parse('03 January, 2025')->startOfDay()->format('Y-m-d H:i:s'),
-            Carbon::parse('03 January, 2025')->endOfDay()->format('Y-m-d H:i:s')
+            Carbon::parse($day)->startOfDay()->format('Y-m-d H:i:s'),
+            Carbon::parse($day)->endOfDay()->format('Y-m-d H:i:s')
         ])
         ->get();
 
         $weight_qc_report = [];
 
         // Report Title
-        $weight_qc_report[] = ['Delivery Note History Report'];
+        $weight_qc_report[] = ['Weight QC Report'];
         
         // Header Row
         $headers = [
@@ -4183,6 +4458,7 @@ class AdminReportsEmailController extends Controller
             'Weight Input by Shipper',
             'Arrival Weight',
             'Weight Diffrence (Arrival Weight vs Shipper Weight)',
+            'Replacement Weight',
             'Weighted As',
             'Weight Recorded As'
         ];
@@ -4195,10 +4471,8 @@ class AdminReportsEmailController extends Controller
             
             foreach ($shipments as $shipment) {
                 $serial++;
-
                 $weight_difference = $shipment->actual_weight - $shipment->estimated_weight;
                 $shipment->length;
-
                 $weight_qc_report[] = [
                     $serial,
                     $shipment->tracking_number,
@@ -4213,6 +4487,7 @@ class AdminReportsEmailController extends Controller
                     $shipment->estimated_weight,
                     $shipment->actual_weight,
                     $weight_difference,
+                    $shipment->replacement_weight,
                     $shipment->length != null ? 'Volumetric' : 'Dense',
                     $shipment->weight_type_name
                 ];
@@ -4232,7 +4507,7 @@ class AdminReportsEmailController extends Controller
             $sheet->fromArray($weight_qc_report, NULL, 'A1', true);
         
             // Define last column dynamically
-            $lastColumn = 'O'; // Adjust based on actual column count
+            $lastColumn = 'P'; // Adjust based on actual column count
         
             // Apply styling to the header row
             $headerStyle = [
@@ -4243,7 +4518,7 @@ class AdminReportsEmailController extends Controller
             $sheet->getStyle("A2:{$lastColumn}2")->applyFromArray($headerStyle);
         
             // Set the title in the first row
-            $sheet->setCellValue('A1', 'Delivery Note History Report');
+            $sheet->setCellValue('A1', 'Weight QC Report');
         
             // Merge cells for title
             $sheet->mergeCells("A1:{$lastColumn}1");
@@ -4394,9 +4669,10 @@ class AdminReportsEmailController extends Controller
             ->whereNotIn('shipments.shipper_status_id', [1, 17])
             ->whereNotIn('u.id', [8761, 9358])
             ->whereBetween('sj.created_at', [
-                Carbon::parse('03 January, 2025')->startOfDay()->format('Y-m-d H:i:s'),
-                Carbon::parse('03 January, 2025')->endOfDay()->format('Y-m-d H:i:s')
+                Carbon::parse($day)->startOfDay()->format('Y-m-d H:i:s'),
+                Carbon::parse($day)->endOfDay()->format('Y-m-d H:i:s')
             ])
+            ->orderBy('sps.name', 'desc')
             ->groupBy('shipments.id')
         ->get();
 
@@ -4807,6 +5083,7 @@ class AdminReportsEmailController extends Controller
             ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
             ->whereIn('shipments.shipper_status_id', $status)
             ->whereNotNull('shipments.tracking_number')
+            ->orderBy('sj.created_at', 'desc')
             ->groupBy('shipments.id')
         ->get();
 
