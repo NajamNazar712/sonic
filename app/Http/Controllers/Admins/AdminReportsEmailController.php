@@ -4023,6 +4023,10 @@ class AdminReportsEmailController extends Controller
             'Area',
             'Rider', 
             'No. Of Shipments', 
+            'E-Comm (COD)', 
+            'General Logistics (Retail)', 
+            'General Logistics - E-Comm (Express)',
+            'Other Sub-Segments', 
             'No. Of Pending Shipments',
             'Assigned By', 
             'Assigned Date',  
@@ -4038,6 +4042,33 @@ class AdminReportsEmailController extends Controller
             foreach ($return_deliveries as $pending_delivery) {
                 $serial++;
                 $rider_trax_id = str_replace('Trax', '', $pending_delivery->rider_trax_id);
+
+                $returnId = [$pending_delivery->return_note];
+
+                // EXCEL ECOM COD
+                $excel_ecom_cod = 0;
+                $excel_ecom_cod = DeliveryController::get_segment_type('return_note_shipments', $returnId, 2, 5, null,'return_note_id');
+                $excel_ecom_cod = $excel_ecom_cod > 0 ? $excel_ecom_cod : '-';
+
+                // EXCEL GENERAL RETAIL
+                $excel_general_retail = 0;
+                $excel_general_retail = DeliveryController::get_segment_type('return_note_shipments', $returnId, 1, 12, null,'return_note_id');
+                $excel_general_retail = $excel_general_retail > 0 ? $excel_general_retail : '-';
+
+                // EXCEL GENERAL ECOM EXPRESS
+                $excel_general_ecom_express = 0;
+                $count_general = 0;
+                $count_ecomm = 0;
+                $count_general = DeliveryController::get_segment_type('return_note_shipments', $returnId, 1, 2, null,'return_note_id');
+                $count_ecomm = DeliveryController::get_segment_type('return_note_shipments', $returnId, 2, 7, null,'return_note_id');
+                $excel_general_ecom_express = $count_general + $count_ecomm;
+                $excel_general_ecom_express = $excel_general_ecom_express > 0 ? $excel_general_ecom_express : '-';
+
+                // EXCEL OTHERS
+                $excel_others = 0;
+                $excel_others = DeliveryController::get_segment_type('return_note_shipments', $returnId, [1,2], [1,3,4,6,8,9,10,11], null,'return_note_id');
+                $excel_others = $excel_others > 0 ? $excel_others : '-';
+
                 $return_deliveries_report_array[] = [
                     $serial,
                     $pending_delivery->return_note,
@@ -4046,6 +4077,10 @@ class AdminReportsEmailController extends Controller
                     $pending_delivery->area,
                     $pending_delivery->rider,
                     $pending_delivery->shipments_count,
+                    $excel_ecom_cod,
+                    $excel_general_retail,
+                    $excel_general_ecom_express,
+                    $excel_others,
                     $pending_delivery->shipments_unverified_count,
                     $pending_delivery->assignee,
                     $pending_delivery->created_at,
@@ -4064,7 +4099,7 @@ class AdminReportsEmailController extends Controller
             $sheet->fromArray($return_deliveries_report_array, NULL, 'A1', true);
         
             // Define last column dynamically
-            $lastColumn = 'K'; // Adjust based on actual column count
+            $lastColumn = 'O'; // Adjust based on actual column count
         
             // Apply styling to the header row
             $headerStyle = [
@@ -4191,6 +4226,7 @@ class AdminReportsEmailController extends Controller
                 Carbon::parse($day)->startOfDay()->format('Y-m-d H:i:s'),
                 Carbon::parse($day)->endOfDay()->format('Y-m-d H:i:s')
             ])
+            ->orderBy('admins.name', 'desc')
             ->groupBy('delivery_notes.id')
         ->get();
 
@@ -4201,36 +4237,46 @@ class AdminReportsEmailController extends Controller
         
         // Header Row
         $headers = [
-            'S. No.', 
-            'Delivery Note No.', 
-            'Status', 
-            'Hub', 
+            'S.No',
+            'Delivery Note No.',
+            'Status',
+            'Hub',
             'Zone',
-            'Rider ID', 
-            'Rider', 
+            'Rider ID',
+            'Rider',
             'Area',
-            'Rider Type', 
-            'Rider Category',  
+            'Rider Type',
+            'Rider Category',
             'Route',
             'No. Of Shipments',
+            'E-Comm (COD)',
+            'General Logistics (Retail)',
+            'General Logistics - E-Comm (Express)',
+            'Other Sub-Segments',
             'Total Weight',
             'No. Of Shipments Delivered',
+            'E-Comm (COD)',
+            'General Logistics (Retail)',
+            'General Logistics - E-Comm (Express)',
+            'Other Sub-Segments',
             'Assigned By',
             'Assigned Date',
             'Updated By',
             'Updated Date',
-            'Cash Collection By',
+            'Cash Collected By',
             'Cash Collection Date',
             'DNCC Amount',
+            'Fintech Amount',
             'Fintech Amount %',
             'HBL Konnect Amount',
             'HBL Konnect Amount %',
             'Cash Amount',
-            'One Link Count',
+            'One Link Payment Count',
             'Created Via',
             'Updated Via App',
             'Last Updated At',
         ];
+        
         
         // Add headers to the report array
         $delivery_note_history_report_array[] = $headers; 
@@ -4264,27 +4310,6 @@ class AdminReportsEmailController extends Controller
                     $status = '-';
                 }
 
-                $dncc_amount = $delivery->amount;
-                $fintech_amount_percent = '-';
-
-                $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $delivery->delivery_note)
-                ->pluck('shipment_id')
-                ->toArray();
-
-                $amount = TraxPayTransaction::join('fintech_payment_details as fpd', 'fpd.trax_pay_id', '=', 'trax_pay_transactions.id')
-                ->whereIn('trax_pay_transactions.shipment_id', $delivery_note_shipment)
-                ->sum('fpd.cod_amount');
-
-                if($amount > 0 && $dncc_amount > 0 )
-                {
-                    $fintech_amount_percent = $amount / $dncc_amount *100;
-                }
-
-                $hbl_konnect_amount_percentage = '-';
-                if ($delivery->transactions_amount > 0 && $dncc_amount) {
-                    $hbl_konnect_amount_percentage = $delivery->transactions_amount / $dncc_amount *100;
-                }
-
                 $rider = '-';
                 if ($delivery->dn_special_rider) {
                     $rider = $delivery->rider . ' (' . $delivery->dn_special_rider_name . ')';
@@ -4303,6 +4328,92 @@ class AdminReportsEmailController extends Controller
                     $updated_via_app = 'No';
                 }
 
+                $deliveryId = [$delivery->delivery_note];
+
+                // EXCEL ECOM COD
+                $excel_ecom_cod = 0;
+                $excel_ecom_cod = self::get_segment_type('delivery_note_shipments',$deliveryId, 2, 5, null,'delivery_note_id');
+                $excel_ecom_cod = $excel_ecom_cod > 0 ? $excel_ecom_cod : '-';
+
+                // GENERAL LOGISTICS RETAIL
+                $excel_general_retail = 0;
+                $excel_general_retail = self::get_segment_type('delivery_note_shipments',$deliveryId, 1, 12, null,'delivery_note_id');
+                $excel_general_retail = $excel_general_retail > 0 ? $excel_general_retail : '-';
+
+                // GENERAL ECOM EXPRESS
+                $excel_general_ecom_express = 0;
+                $count_general = 0;
+                $count_ecomm = 0;
+                $count_general = self::get_segment_type('delivery_note_shipments',$deliveryId, 1, 2, null,'delivery_note_id');
+                $count_ecomm = self::get_segment_type('delivery_note_shipments',$deliveryId, 2, 7, null,'delivery_note_id');
+                $excel_general_ecom_express = $count_general + $count_ecomm;
+                $excel_general_ecom_express = $excel_general_ecom_express > 0 ? $excel_general_ecom_express : '-';
+
+                // EXCEL OTHERS
+                $excel_others = 0;
+                $excel_others = self::get_segment_type('delivery_note_shipments',$deliveryId, [1,2], [1,3,4,6,8,9,10,11], null, 'delivery_note_id');
+                $excel_others = $excel_others > 0 ? $excel_others : '-';
+
+                // DELIVERED EXCEL ECOM COD
+                $delivered_excel_ecom_cod = 0;
+                $delivered_excel_ecom_cod_shipments = self::get_delivered_shipments($deliveryId);
+                if (!empty($delivered_excel_ecom_cod_shipments)) {
+                    $delivered_excel_ecom_cod = self::get_segment_type('delivery_note_shipments', $delivered_excel_ecom_cod_shipments, 2, 5, 'delivered', 'delivery_note_id');
+                }
+                $delivered_excel_ecom_cod = $delivered_excel_ecom_cod > 0 ? $delivered_excel_ecom_cod : '-';
+
+                // DELIVERED EXCEL GENERAL RETAIL
+                $delivered_excel_general_retail = 0;
+                $delivered_excel_general_retail_shipments = self::get_delivered_shipments($deliveryId);
+                if (!empty($delivered_excel_general_retail_shipments)) {
+                    $delivered_excel_general_retail = self::get_segment_type('delivery_note_shipments', $delivered_excel_general_retail_shipments, 1, 12, 'delivered', 'delivery_note_id');
+                }
+                $delivered_excel_general_retail = $delivered_excel_general_retail > 0 ? $delivered_excel_general_retail : '-';
+
+                // DELIVERED EXCEL GENERAL ECOM EXPRESS
+                $delivered_excel_general_ecom_express = 0;
+                $delivered_general_count = 0;
+                $delivered_ecom_count = 0;
+                $delivered_excel_general_ecom_express_shipments = self::get_delivered_shipments($deliveryId);
+                if (!empty($delivered_excel_general_ecom_express_shipments)) {
+                    $delivered_general_count = self::get_segment_type('delivery_note_shipments', $delivered_excel_general_ecom_express_shipments, 1, 2, 'delivered', 'delivery_note_id');
+                    $delivered_ecom_count = self::get_segment_type('delivery_note_shipments', $delivered_excel_general_ecom_express_shipments, 2, 7, 'delivered', 'delivery_note_id');
+                }
+                $delivered_excel_general_ecom_express = $delivered_general_count + $delivered_ecom_count;
+                $delivered_excel_general_ecom_express = $delivered_excel_general_ecom_express > 0 ? $delivered_excel_general_ecom_express : '-';
+
+                // DELIVERED EXCEL OTHERS
+                $delivered_excel_others = 0;
+                $delivered_excel_others_shipments = self::get_delivered_shipments($deliveryId);
+                if (!empty($delivered_excel_others_shipments)) {
+                    $delivered_excel_others = self::get_segment_type('delivery_note_shipments', $delivered_excel_others_shipments, [1,2], [1,3,4,6,8,9,10,11], 'delivered', 'delivery_note_id'); 
+                }
+                $delivered_excel_others = $delivered_excel_others > 0 ? $delivered_excel_others : '-';
+
+                // FINTECH AMOUNT
+                $dncc_amount = $delivery->amount;
+                $fintech_amount_percent = '-';
+
+                $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $delivery->delivery_note)
+                ->pluck('shipment_id')
+                ->toArray();
+
+                $fintech_shipments_charges = TraxPayTransaction::join('fintech_payment_details as fpd', 'fpd.trax_pay_id', '=', 'trax_pay_transactions.id')
+                ->whereIn('trax_pay_transactions.shipment_id', $delivery_note_shipment)
+                ->sum('fpd.cod_amount');
+
+                $fintech_shipments_charges = $fintech_shipments_charges > 0 ? $fintech_shipments_charges : 0;
+
+                if ($fintech_shipments_charges > 0 && $dncc_amount > 0) {
+                    $fintech_amount_percent = $fintech_shipments_charges / $dncc_amount *100;
+                }
+
+                // HBL KONNECT
+                $hbl_konnect_amount_percentage = '-';
+                if ($delivery->transactions_amount > 0 && $dncc_amount) {
+                    $hbl_konnect_amount_percentage = $delivery->transactions_amount / $dncc_amount *100;
+                }
+
                 $delivery_note_history_report_array[] = [
                     $serial,
                     $delivery->delivery_note,
@@ -4316,17 +4427,24 @@ class AdminReportsEmailController extends Controller
                     $delivery->operation_rider_id == 1 ? 'Field In Operations' : 'Hold In Operations',
                     $route,
                     $delivery->shipments_count,
+                    $excel_ecom_cod,
+                    $excel_general_retail,
+                    $excel_general_ecom_express,
+                    $excel_others,
                     $delivery->total_weight,
                     $delivery->delivered_shipments,
+                    $delivered_excel_ecom_cod,
+                    $delivered_excel_general_retail,
+                    $delivered_excel_general_ecom_express,
+                    $delivered_excel_others,
                     $delivery->assignee,
                     $delivery->created_at,
-                    
                     $delivery->updated_by,
                     $delivery->updated_at,
                     $delivery->cash_collected,
                     $delivery->cash_collected_at,
-                    $delivery->amount,
-                    $amount,
+                    $dncc_amount,
+                    $fintech_shipments_charges,
                     $fintech_amount_percent,
                     $delivery->transactions_amount,
                     $hbl_konnect_amount_percentage,
@@ -4349,7 +4467,7 @@ class AdminReportsEmailController extends Controller
             $sheet->fromArray($delivery_note_history_report_array, NULL, 'A1', true);
         
             // Define last column dynamically
-            $lastColumn = 'P'; // Adjust based on actual column count
+            $lastColumn = 'AL'; // Adjust based on actual column count
         
             // Apply styling to the header row
             $headerStyle = [
@@ -4436,6 +4554,7 @@ class AdminReportsEmailController extends Controller
             Carbon::parse($day)->startOfDay()->format('Y-m-d H:i:s'),
             Carbon::parse($day)->endOfDay()->format('Y-m-d H:i:s')
         ])
+        ->orderBy('hub_name', 'desc')
         ->get();
 
         $weight_qc_report = [];
@@ -5083,28 +5202,49 @@ class AdminReportsEmailController extends Controller
             ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
             ->whereIn('shipments.shipper_status_id', $status)
             ->whereNotNull('shipments.tracking_number')
-            ->orderBy('sj.created_at', 'desc')
+            ->orderBy('ssr.name', 'desc')
             ->groupBy('shipments.id')
         ->get();
 
-    
-
-
         $pending_deliveries_report_array = [];
-
        // Report Title
         $report_title = 'Pending Deliveries Report';
         $pending_deliveries_report_array[] = [$report_title];
 
         // Header Row
         $headers = [
-            'S. No.', 'Tracking No.', 'Shipper', 'Sub-Segment', 'Origin', 'Destination',
-            'Hub', 'Area', 'Consignee Name', 'Consignee Phone', 'Reattempt By', 'Address',
-            'Sub Stations', 'Weight', 'Collection Amount', 'Product Type', 'Product Description',
-            'Shipping Mode', 'Service Type', 'Status', 'Last Location Screen Name',
-            'Entry Method', 'Sub Hub', 'Last Location Updated At', 'Reason', 'Remarks',
-            'Origin Arrival Date', 'Destination Zone', 'Destination Arrival Date',
-            'Last Rider', 'Last Rider Trax ID', 'Status Date'
+            'S.No',
+            'Tracking .No',
+            'Shipper',
+            'Sub-Segment',
+            'Origin',
+            'Destination',
+            'Hub',
+            'Area',
+            'Consignee Name',
+            'Consignee Phone',
+            'Reattempt By',
+            'Address',
+            'Sub Station',
+            'Weight',
+            'Collection Amount',
+            'Product Type',
+            'Product Description',
+            'Shipping Mode',
+            'Service Type',
+            'Status',
+            'Last Location Screen Name',
+            'Entry Method',
+            'Sub Hub',
+            'Last Location Updated At',
+            'Reason',
+            'Remarks',
+            'Origin Arrival Date',
+            'Destination Zone',
+            'Destination Arrival Date',
+            'Last Rider',
+            'Last Rider Trax ID',
+            'Status Date'
         ];
 
         // Add headers to the report array
