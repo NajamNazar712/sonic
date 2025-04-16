@@ -133,7 +133,6 @@ class WalletBulkSettlementFromDonePayments implements ShouldQueue
                                 'gst_charges' => floatval($dps->gst),
                                 'sms_charges' => floatval($dps->sms_charges),
                                 'reverse_pickup_charges' => floatval($service_charges),
-                                'packaging_material_charges' => floatval($dps->packaging_material_charges),
                             ];
                         } elseif ($dps->type == 1) {
                             $charges = [
@@ -146,7 +145,6 @@ class WalletBulkSettlementFromDonePayments implements ShouldQueue
                                 'non_service_area_charges' => floatval($dps->nsa_osa_charges),
                                 'gst_charges' => floatval($dps->gst),
                                 'sms_charges' => floatval($dps->sms_charges),
-                                'packaging_material_charges' => floatval($dps->packaging_material_charges),
                             ];
                         }
                     }
