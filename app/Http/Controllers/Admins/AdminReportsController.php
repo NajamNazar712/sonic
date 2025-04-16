@@ -15926,53 +15926,46 @@ class AdminReportsController extends Controller
             if (!empty($rowArray['current_hub_id'])) {
                 $rowArray['current_hub_name'] = $rowArray['current_hub_name'];
             } else {
-                if (in_array($rowArray['shipper_status_id'], [1, 2, 61])) {
+                if (in_array($rowArray['current_hub_id'], [68])) {
+                        $rowArray['current_hub_name'] = $rowArray['misroutedCityname'];
+                } elseif (in_array($rowArray['current_hub_id'], [49, 3])) {
+                    if (in_array($shipment->cargo_status_id, [3, 2, 4, 7, 8, 9, 6])) { //Shipment In Transit || Shipment Misrouted Forwarded concered hub change reference TO-6939
+                            $rowArray['current_hub_name'] = $rowArray['destination'];
+                    }
+                } elseif (in_array($rowArray['current_hub_id'], [26, 73, 32, 70, 76])) {
+                    if (in_array($shipment['cargo_status_id'], [4, 7, 8, 9, 6])) { //Shipment In Transit || Shipment Misrouted Forwarded concered hub change reference TO-6939
+                            $rowArray['current_hub_name'] = $rowArray['origin'];
+                    }
+                } elseif (in_array($rowArray['current_hub_id'], [18, 34, 23, 24, 47, 48, 2])) {
                     $rowArray['current_hub_name'] = $rowArray['origin'];
-                } else {
-                    $rowArray['current_hub_name'] = $rowArray['hub'];
-                }
-            }
-            if (!empty($rowArray['current_hub_id'])) {
-                $rowArray['current_hub_name'] = $rowArray['current_hub_name'];
-            }elseif (in_array($rowArray['current_hub_id'], [68])) {
-                 $rowArray['current_hub_name'] = $rowArray['misroutedCityname'];
-            } elseif (in_array($rowArray['current_hub_id'], [49, 3])) {
-                if (in_array($shipment->cargo_status_id, [3, 2, 4, 7, 8, 9, 6])) { //Shipment In Transit || Shipment Misrouted Forwarded concered hub change reference TO-6939
-                     $rowArray['current_hub_name'] = $rowArray['destination'];
-                }
-            } elseif (in_array($rowArray['current_hub_id'], [26, 73, 32, 70, 76])) {
-                if (in_array($shipment['cargo_status_id'], [4, 7, 8, 9, 6])) { //Shipment In Transit || Shipment Misrouted Forwarded concered hub change reference TO-6939
-                     $rowArray['current_hub_name'] = $rowArray['origin'];
-                }
-            } elseif (in_array($rowArray['current_hub_id'], [18, 34, 23, 24, 47, 48, 2])) {
-                $rowArray['current_hub_name'] = $rowArray['origin'];
-            } elseif (in_array($rowArray['current_hub_id'], [54, 55, 69, 7, 4, 8])) {
-                     $rowArray['current_hub_name'] = (($shipment['intercepttype'] == 1) ?  $shipment['intercept_city_name'] : $shipment['destination']);
-               
-            } elseif (in_array($rowArray['current_hub_id'], [22, 21, 75])) {
-                if ($shipment['return_city'] != null) {
-                    $rowArray['current_hub_name'] = $rowArray['return_city'];
+                } elseif (in_array($rowArray['current_hub_id'], [54, 55, 69, 7, 4, 8])) {
+                            $rowArray['current_hub_name'] = (($shipment['intercepttype'] == 1) ?  $shipment['intercept_city_name'] : $shipment['destination']);
+
+                } elseif (in_array($rowArray['current_hub_id'], [22, 21, 75])) {
+                    if ($shipment['return_city'] != null) {
+                        $rowArray['current_hub_name'] = $rowArray['return_city'];
+                    }
                 }
             }
             
-            $days = Carbon::now()->diffInDays($rowArray['arrival']);
-            $rowArray['aging'] = ($days == 0) ? "-" : $days;
-            $days = Carbon::now()->diffInDays($rowArray['last_status_date']);
-            $rowArray['aging_last_status'] = ($days == 0) ? "-" : $days;
+                $days = Carbon::now()->diffInDays($rowArray['arrival']);
+                $rowArray['aging'] = ($days == 0) ? "-" : $days;
+                $days = Carbon::now()->diffInDays($rowArray['last_status_date']);
+                $rowArray['aging_last_status'] = ($days == 0) ? "-" : $days;
 
-            $rowArray['kam'] = $rowArray['stt_kam_id'] != null ?  $rowArray['stt_kam_name'] : $rowArray['scu_kam_name'];
+                $rowArray['kam'] = $rowArray['stt_kam_id'] != null ?  $rowArray['stt_kam_name'] : $rowArray['scu_kam_name'];
 
-            if (isset($rowArray['crm_request_id'])) {
-                $rowArray['crm_id_padded'] = str_pad($rowArray['crm_request_id'], 6, '0', STR_PAD_LEFT);
-            } else {
-                $rowArray['crm_id_padded'] = '-';
-            }
+                if (isset($rowArray['crm_request_id'])) {
+                    $rowArray['crm_id_padded'] = str_pad($rowArray['crm_request_id'], 6, '0', STR_PAD_LEFT);
+                } else {
+                    $rowArray['crm_id_padded'] = '-';
+                }
 
-            if (isset($rowArray['crm_request_id'])) {
-                $rowArray['crm_id_padded_link'] ='<u><a href=' . route('admin.crm.request.details', ['id' =>$rowArray['crm_request_id']]) . '  target="_blank">' . str_pad($rowArray['crm_request_id'], 6, '0', STR_PAD_LEFT) . '</a></u>';
-            } else {
-                $rowArray['crm_id_padded_link'] ='-';
-            }
+                if (isset($rowArray['crm_request_id'])) {
+                    $rowArray['crm_id_padded_link'] ='<u><a href=' . route('admin.crm.request.details', ['id' =>$rowArray['crm_request_id']]) . '  target="_blank">' . str_pad($rowArray['crm_request_id'], 6, '0', STR_PAD_LEFT) . '</a></u>';
+                } else {
+                    $rowArray['crm_id_padded_link'] ='-';
+                }
 
 
                 
