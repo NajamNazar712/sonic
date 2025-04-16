@@ -78,7 +78,7 @@ class WalletSettlementFromDonePayments implements ShouldQueue
         $done_payment_shipments->chunk(30)->each(function ($chunkedShipments) use($api,$token,$token_time) {
             foreach ($chunkedShipments as $dps) {
                 $pending_logs = [];
-                $LogChargeStatus = false;
+                $LogChargeStatus = true;
                 $shipmentId = $dps->shipment_id;
                 $shipment = Shipment::find($shipmentId);
                 $requestPayload = [];
@@ -96,8 +96,8 @@ class WalletSettlementFromDonePayments implements ShouldQueue
 
                     $check_arrival_paid_done = DonePaymentShipment::where('shipment_id',$shipmentId)->where('type',3)->exists();
                     $check_arrival_paid_pending = PendingPaymentShipment::where('shipment_id',$shipmentId)->where('type',3)->exists();
-                    if($logCharged2 == 0 && (!$check_arrival_paid_done || !$check_arrival_paid_pending )){
-                        $LogChargeStatus =true;
+                    if($logCharged2 == 0 && ($check_arrival_paid_done || $check_arrival_paid_pending )){
+                        $LogChargeStatus =false;
                     }
 
                     $charges = [];
