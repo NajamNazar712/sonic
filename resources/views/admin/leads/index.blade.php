@@ -251,6 +251,9 @@
                         <th class="border-primary border-darken-1"></th>
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Lead ID</th>
+                        <th class="border-primary border-darken-1">Lead Account Progress</th>
+                        <th class="border-primary border-darken-1">Pending Account Status</th>
+                        <th class="border-primary border-darken-1">Lead Account Status</th>
                         <th class="border-primary border-darken-1">Contact Person</th>
                         <th class="border-primary border-darken-1">City</th>
                         <th class="border-primary border-darken-1">Territory</th>
@@ -803,6 +806,16 @@
         </div>
     </div>
 
+    {{-- 
+                       @if (session('role_id') == 1 || in_array(769, session('permissions')))
+                    {
+                        text: '<i class="la la-plus"></i> Add Lead',
+                        className: 'btn btn-primary add_lead',
+                        enabled: true,
+                        action: function (e, dt, node, config) {
+                            $('#add_lead_modal').modal('show');
+                        }
+                    }, --}}
 
 @endsection
 
@@ -1073,6 +1086,9 @@
                             head = [];
                             head.push('S.No');
                             head.push('Lead ID');
+                            head.push('Lead Account Progress');
+                            head.push('Pending Account Status');
+                            head.push('Lead Account Status');
                             head.push('Contact Person');
                             head.push('City');
                             head.push('Territory');
@@ -1103,6 +1119,9 @@
 
                                 row.push(index + 1);
                                 row.push(values.lead_id);
+                                row.push(values.lead_progress);
+                                row.push(values.user_status);
+                                row.push(values.lead_account_status);
                                 row.push(values.contact_person);
                                 row.push(values.city);
                                 row.push(values.territory);
@@ -1144,16 +1163,7 @@
                 scrollX: true, scrollY: '500px',
                 buttons: [
 
-                        @if (session('role_id') == 1 || in_array(769, session('permissions')))
-                    {
-                        text: '<i class="la la-plus"></i> Add Lead',
-                        className: 'btn btn-primary add_lead',
-                        enabled: true,
-                        action: function (e, dt, node, config) {
-                            $('#add_lead_modal').modal('show');
-                        }
-                    },
-                        @endif
+     
                         @if (session('role_id') == 1 || in_array(678, session('permissions')))
                     {
                         text: 'Bulk Update Status',
@@ -1278,6 +1288,9 @@
                     {data: 'lead_id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
                     {data: 'lead_id_link', name: 'leads.id', class: 'align-middle lead_id_link'},
+                    {data: 'lead_progress', name: 'lead_progress', class: 'align-middle lead_progress', orderable: false, searchable: false},
+                    {data: 'user_status', name: 'user_status', class: 'align-middle user_status'},
+                    {data: 'lead_account_status', name: 'lead_account_status', class: 'align-middle lead_account_status'},
                     {data: 'contact_person', name: 'leads.contact_person', class: 'align-middle contact_person'},
                     {data: 'city', name: 'c.name', class: 'align-middle city'},
                     {data: 'territory', name: 't.name', class: 'align-middle territory'},
@@ -1332,12 +1345,22 @@
                         '<option value="Sonic">Sonic</option>' +
                         '<option value="Website">Website</option>' +
                         '</select>';
+                    var drop_select = '<select name="status_select_user" id="status_select_user" class="select2 form-control">' +
+                        '<option value="0">Request Received</option>' +
+                        '<option value="1">Rates Added</option>' +
+                        '<option value="2">Pending For Activation</option>' +
+                        '<option value="5">Rates Rejected</option>' +
+                        '</select>';
+                    var lead_account_status = '<select name="lead_account_status" id="lead_account_status" class="select2 form-control">' + 
+                    '<option value="1">Active</option>' +
+                    '<option value="0">Not Activated</option>' +
+                    '</select>';
 
                     this.api().columns().every(function (column_id) {
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.aging') || $(header).is('.reason_id') || $(header).is('.sale_person_tagged_aging')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.aging') || $(header).is('.reason_id') || $(header).is('.sale_person_tagged_aging') || $(header).is('.lead_progress')) {
                             $(td).appendTo($(search) || $(header).is('.serial_number'));
                         } else if ($(header).is('.status')) {
                             $(status_select).appendTo($(search))
@@ -1354,6 +1377,18 @@
                                 .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 }).wrap(td);
+                        }
+                        else if($(header).is('.user_status')){
+                            $(drop_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
+                        else if($(header).is('.lead_account_status')){
+                            $(lead_account_status).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
                         }
                          else {
                             var current = $(input).appendTo($(search)).on('change', function () {
@@ -1383,14 +1418,16 @@
                         placeholder: "Select Status",
                         width: '100%',
                         containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
+                        dropdownCssClass: 'form-control-sm p-0',
+                        allowClear: true
                     });
                     $("#service_select").prepend('<option value="" selected></option>').select2({
                         data: data2,
                         placeholder: "Select Status",
                         width: '100%',
                         containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
+                        dropdownCssClass: 'form-control-sm p-0',
+                        allowClear: true
                     });
 
                     $("#requested_via_select").prepend('<option selected></option>').select2({
@@ -1398,7 +1435,24 @@
                         placeholder: "Select Requested Resource",
                         width: '100%',
                         containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
+                        dropdownCssClass: 'form-control-sm p-0',
+                        allowClear: true
+
+                    });
+                    $("#status_select_user").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Status",
+                        width: '100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0',
+                        allowClear: true
+                    });
+
+                    $("#lead_account_status").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Lead Account Status",
+                        width: '100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0',
+                        allowClear: true
                     });
                     this.api().table().columns.adjust();
                 }
@@ -2619,6 +2673,30 @@
                     });
                 }
             });
+            $(document).on('click', '.mail_trigger', function() {
+                let lead_id = $(this).data('lead_id');
+                let email = $(this).data('email');
+
+                $.ajax({
+                    url: '{{ route('admin.leads.send_mail') }}',
+                    method: 'GET',
+                    data: {
+                        lead_id: lead_id,
+                        _token: $('meta[name="csrf-token"]').attr('content')
+                    },
+                    beforeSend: function() {
+                        swal("Sending...", "Please wait while the email is being sent.", "info");
+                    },
+                    success: function(response) {
+                        swal("Success!", "Mail sent successfully to " + email, "success");
+                        table.draw(true);
+                    },
+                    error: function(xhr) {
+                        swal("Oops!", "Something went wrong while sending the mail.", "error");
+                    }
+                });
+            });
+
 
         });
 

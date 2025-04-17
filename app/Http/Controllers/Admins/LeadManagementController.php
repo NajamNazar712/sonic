@@ -7,10 +7,15 @@ use Auth;
 use Exception;
 use Carbon\Carbon;
 use App\Http\Models\City;
+use Illuminate\Support\Str;
+use App\LeadProgressSetting;
 use Illuminate\Http\Request;
 use App\Http\Models\Admin\Admin;
-use Illuminate\Support\Facades\Log;
+use App\Http\Models\ServiceList;
 use Yajra\Datatables\Datatables;
+use App\Http\Models\Shipper\User;
+use App\Http\Models\WeightCharge;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\Lead\Lead;
 use App\Http\Models\Admin\Territory;
@@ -25,14 +30,11 @@ use App\Http\Models\Admin\Lead\LeadRemark;
 use App\Http\Models\Admin\Lead\LeadStatus;
 use App\Http\Models\Admin\Lead\LeadTagging;
 use App\Http\Models\Admin\Lead\PamLeadItem;
+use App\Http\Models\Admin\Lead\EditLeadLogs;
+use App\Models\Admin\Lead\LeadCallStatusLog;
 use App\Http\Models\Admin\Lead\LeadNotification;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Admins\ActivityTrailController;
-use App\Models\Admin\Lead\LeadCallStatusLog;
-use App\Http\Models\ServiceList;
-use App\Http\Models\Shipper\User;
-use Illuminate\Support\Str;
-use App\Http\Models\Admin\Lead\EditLeadLogs;
 
 class LeadManagementController extends Controller
 {
@@ -182,7 +184,7 @@ class LeadManagementController extends Controller
             ->leftjoin('admins as ub', 'ub.id', '=', 'leads.updated_by')
             ->leftjoin('service_list as sl', 'sl.id', '=', 'leads.service_id')
             ->leftjoin('lead_reasons as lsr', 'lsr.id', '=', 'leads.reason')
-            ->select('leads.id as lead_id', 'leads.id as leadid', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'rp.trax_id as rider_id', 'c.name as city', 't.name as territory', 'at.name as area', 'leads.sale_person_updated_at', 'lr.name as lead_reference', 'leads.updated_at as updated', 'sl.name as service', 'leads.brand as brand', 'leads.company as company', 'lsr.name as reason_id', 'leads.sale_person_updated_at as sale_person_tagged_time', 'leads.call_status as call_status_name','leads.expected_shipments as expected_shipments', 'u.brand_name as brand_name','leads.via_channel as via_channel');
+            ->select('leads.id as lead_id', 'leads.id as leadid', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'rp.trax_id as rider_id', 'c.name as city', 't.name as territory', 'at.name as area', 'leads.sale_person_updated_at', 'lr.name as lead_reference', 'leads.updated_at as updated', 'sl.name as service', 'leads.brand as brand', 'leads.company as company', 'lsr.name as reason_id', 'leads.sale_person_updated_at as sale_person_tagged_time', 'leads.call_status as call_status_name','leads.expected_shipments as expected_shipments', 'u.brand_name as brand_name','leads.via_channel as via_channel', 'u.status as user_status', 'u.id as user_id');
             // ->OrderByDesc('leads.requested_date');
         if (session('role_id') != 1) {
             $leads = $leads->whereIn('c.hub_id', session('hubs'));
@@ -279,6 +281,93 @@ class LeadManagementController extends Controller
             ->editColumn('via_channel', function ($lead) {
                 return isset($lead->via_channel) ?  $lead->via_channel : '-';
             })
+            ->editColumn('user_status', function ($lead) {
+                $user = User::find($lead->user_id);
+            
+                $statusLabels = [
+                    0 => 'Request Received',
+                    1 => 'Rates Added',
+                    2 => 'Pending for Activation',
+                    5 => 'Rates Rejected',
+                ];
+                
+                if (!$user) {
+                    return '-'; 
+                }
+            
+                return $statusLabels[$user->status] ?? '-';
+            })
+            
+            ->addColumn("lead_progress", function ($user) {
+                $user = User::find($user->user_id);
+                if(isset($user->lead_id)){
+                    $weight_charges = WeightCharge::where('user_id' , $user->user_id);
+
+                    $description = '-';
+                    
+                    if(($user->on_board_status < 1 && $user->created_at > '2024-06-13 00:00:00')){
+                        $lead_progress_setting = LeadProgressSetting::find(1);
+                        $percentage = $lead_progress_setting->percent;
+    
+                        $description = "Account is $percentage% completed";
+                    }else if(($weight_charges->exists() || $user->request_custom_quotation == 1) && !isset($user->rates_added_by)){
+                        $lead_progress_setting = LeadProgressSetting::find(2);
+                        $percentage = $lead_progress_setting->percent;
+    
+                        $description = "Account is $percentage% completed";
+    
+                    }else if (isset($user->rates_added_by) && $user->documents_status != 2){
+                        $lead_progress_setting = LeadProgressSetting::find(3);
+                        $percentage = $lead_progress_setting->percent;
+    
+                        $description = "Account is $percentage% completed";
+    
+                    }else if ($user->documents_status == 2 && $user->status != 3){
+                        $lead_progress_setting = LeadProgressSetting::find(4);
+                        $percentage = $lead_progress_setting->percent;
+                        
+                        $description = "Account is $percentage% completed";
+    
+                    }else if ($user->status == 3){
+                        $lead_progress_setting = LeadProgressSetting::find(5);
+                        $percentage = $lead_progress_setting->percent;
+    
+                        $description = "Account is activated";
+    
+                    }
+
+                    return $description;
+                }else{
+                    return '-';
+                }
+            })
+            ->addColumn("lead_account_status", function ($lead) {
+                return !User::where('email', $lead->email_address)->exists() ? 'Not Activated' : 'Activated';
+            })
+            ->filterColumn('user_status', function ($query, $keyword) {
+                $keyword = strtolower($keyword);
+
+                if ($keyword == 0 || $keyword == 1 || $keyword == 2 || $keyword == 5) {
+                    $query->where('u.status', '=', $keyword);
+                } else {
+                    $query->whereRaw('false');
+                }
+            })
+
+            ->filterColumn('lead_account_status', function($query, $keyword) {
+                if (strtolower($keyword) === '1') {
+                    $query->whereIn('email_address', function($q) {
+                        $q->select('email')
+                          ->from('users');
+                    });
+                } elseif (strtolower($keyword) === '0') {
+                    $query->whereNotIn('email_address', function($q) {
+                        $q->select('email')
+                          ->from('users');
+                    });
+                }
+            })
+
             ->addColumn('action', function ($lead) {
                 $dropdown = '
               <div class="btn-group">
@@ -307,6 +396,17 @@ class LeadManagementController extends Controller
                         $dropdown .= '<button type="button"  class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
                     }
                 }
+
+                if (!User::where('email', $lead->email_address)->exists()) {
+                    $dropdown .= '<button type="button" class="dropdown-item mail_trigger" data-lead_id="'.$lead->lead_id.'" data-email="'. $lead->email_address.'">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col-2"><i class="ft-mail"></i></div>
+                                    <div class="col-9 offset-1">Send Mail</div>
+                                </div>
+                            </button>';
+
+                }
+                
                 
                 if($lead->via_channel == 'Sonic' || !isset($lead->via_channel)){
                     if ((session('role_id') == 1 )) {
@@ -1157,4 +1257,12 @@ class LeadManagementController extends Controller
             ]);
         }
     }
+
+    public function send_mail(Request $request)
+    {
+        NotificationsController::send(230, $request->lead_id, Carbon::today());
+
+        return response()->json(['status' => 'success']);
+    }
+
 }
