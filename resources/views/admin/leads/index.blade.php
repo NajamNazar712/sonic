@@ -253,7 +253,6 @@
                         <th class="border-primary border-darken-1">Lead ID</th>
                         <th class="border-primary border-darken-1">Lead Account Progress</th>
                         <th class="border-primary border-darken-1">Pending Account Status</th>
-                        <th class="border-primary border-darken-1">Lead Account Status</th>
                         <th class="border-primary border-darken-1">Contact Person</th>
                         <th class="border-primary border-darken-1">City</th>
                         <th class="border-primary border-darken-1">Territory</th>
@@ -1088,7 +1087,6 @@
                             head.push('Lead ID');
                             head.push('Lead Account Progress');
                             head.push('Pending Account Status');
-                            head.push('Lead Account Status');
                             head.push('Contact Person');
                             head.push('City');
                             head.push('Territory');
@@ -1121,7 +1119,6 @@
                                 row.push(values.lead_id);
                                 row.push(values.lead_progress);
                                 row.push(values.user_status);
-                                row.push(values.lead_account_status);
                                 row.push(values.contact_person);
                                 row.push(values.city);
                                 row.push(values.territory);
@@ -1290,7 +1287,6 @@
                     {data: 'lead_id_link', name: 'leads.id', class: 'align-middle lead_id_link'},
                     {data: 'lead_progress', name: 'lead_progress', class: 'align-middle lead_progress', orderable: false, searchable: false},
                     {data: 'user_status', name: 'user_status', class: 'align-middle user_status'},
-                    {data: 'lead_account_status', name: 'lead_account_status', class: 'align-middle lead_account_status'},
                     {data: 'contact_person', name: 'leads.contact_person', class: 'align-middle contact_person'},
                     {data: 'city', name: 'c.name', class: 'align-middle city'},
                     {data: 'territory', name: 't.name', class: 'align-middle territory'},

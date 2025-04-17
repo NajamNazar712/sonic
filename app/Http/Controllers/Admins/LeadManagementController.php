@@ -341,9 +341,7 @@ class LeadManagementController extends Controller
                     return '-';
                 }
             })
-            ->addColumn("lead_account_status", function ($lead) {
-                return !User::where('email', $lead->email_address)->exists() ? 'Not Activated' : 'Activated';
-            })
+
             ->filterColumn('user_status', function ($query, $keyword) {
                 $keyword = strtolower($keyword);
 
@@ -354,19 +352,19 @@ class LeadManagementController extends Controller
                 }
             })
 
-            ->filterColumn('lead_account_status', function($query, $keyword) {
-                if (strtolower($keyword) === '1') {
-                    $query->whereIn('email_address', function($q) {
-                        $q->select('email')
-                          ->from('users');
-                    });
-                } elseif (strtolower($keyword) === '0') {
-                    $query->whereNotIn('email_address', function($q) {
-                        $q->select('email')
-                          ->from('users');
-                    });
-                }
-            })
+            // ->filterColumn('lead_account_status', function($query, $keyword) {
+            //     if (strtolower($keyword) === '1') {
+            //         $query->whereIn('email_address', function($q) {
+            //             $q->select('email')
+            //               ->from('users');
+            //         });
+            //     } elseif (strtolower($keyword) === '0') {
+            //         $query->whereNotIn('email_address', function($q) {
+            //             $q->select('email')
+            //               ->from('users');
+            //         });
+            //     }
+            // })
 
             ->addColumn('action', function ($lead) {
                 $dropdown = '
