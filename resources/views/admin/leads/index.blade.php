@@ -251,8 +251,6 @@
                         <th class="border-primary border-darken-1"></th>
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Lead ID</th>
-                        <th class="border-primary border-darken-1">Lead Account Progress</th>
-                        <th class="border-primary border-darken-1">Pending Account Status</th>
                         <th class="border-primary border-darken-1">Contact Person</th>
                         <th class="border-primary border-darken-1">City</th>
                         <th class="border-primary border-darken-1">Territory</th>
@@ -276,6 +274,8 @@
                         <th class="border-primary border-darken-1">Updated By</th>
                         <th class="border-primary border-darken-1">Updated AT</th>
                         <th class="border-primary border-darken-1">Requested Resource</th>
+                        <th class="border-primary border-darken-1">Lead Account Progress</th>
+                        <th class="border-primary border-darken-1">Pending Account Status</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
@@ -1085,8 +1085,6 @@
                             head = [];
                             head.push('S.No');
                             head.push('Lead ID');
-                            head.push('Lead Account Progress');
-                            head.push('Pending Account Status');
                             head.push('Contact Person');
                             head.push('City');
                             head.push('Territory');
@@ -1110,15 +1108,15 @@
                             head.push('Updated By');
                             head.push('Updated At');
                             head.push('Requested Resource');
-
+                            head.push('Lead Account Progress');
+                            head.push('Pending Account Status');
+                            
                             $.each(result.data, function (index, values) {
                                 row = [];
 
 
                                 row.push(index + 1);
                                 row.push(values.lead_id);
-                                row.push(values.lead_progress);
-                                row.push(values.user_status);
                                 row.push(values.contact_person);
                                 row.push(values.city);
                                 row.push(values.territory);
@@ -1145,6 +1143,8 @@
                                 row.push(values.updated_by);
                                 row.push(values.updated_at);
                                 row.push(values.via_channel);
+                                row.push(values.lead_progress);
+                                row.push(values.user_status);
                                 body.push(row);
                             });
                         },
@@ -1285,8 +1285,6 @@
                     {data: 'lead_id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
                     {data: 'lead_id_link', name: 'leads.id', class: 'align-middle lead_id_link'},
-                    {data: 'lead_progress', name: 'lead_progress', class: 'align-middle lead_progress', orderable: false, searchable: false},
-                    {data: 'user_status', name: 'user_status', class: 'align-middle user_status'},
                     {data: 'contact_person', name: 'leads.contact_person', class: 'align-middle contact_person'},
                     {data: 'city', name: 'c.name', class: 'align-middle city'},
                     {data: 'territory', name: 't.name', class: 'align-middle territory'},
@@ -1318,6 +1316,8 @@
                     {data: 'updated_by', name: 'ub.name', class: 'align-middle updated_by'},
                     {data: 'updated', name: 'leads.updated_at', class: 'align-middle updated'},
                     {data: 'via_channel', name: 'leads.via_channel', class: 'align-middle via_channel'},
+                    {data: 'lead_progress', name: 'lead_progress', class: 'align-middle lead_progress', orderable: false, searchable: false},
+                    {data: 'user_status', name: 'user_status', class: 'align-middle user_status'},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
                 ],
                 rowCallback: function (row, data, index) {
