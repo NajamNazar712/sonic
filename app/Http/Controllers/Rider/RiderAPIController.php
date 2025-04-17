@@ -8961,19 +8961,6 @@ class RiderAPIController extends Controller
 //            try {
                 //code...
                 $success_flag = false;
-                $delivery_note = DeliveryNote::find($request->delivery_note_id);
-
-                if (
-                    isset($delivery_note->rider) &&
-                    isset($delivery_note->rider->operation_rider_id) &&
-                    $delivery_note->rider->operation_rider_id == 2 &&
-                    $delivery_note->rider->id != '12879'
-                ) {
-                    return response()->json([
-                        'status' => 1,
-                        'error' => 'Delivered Status Only Allowed For Hold For Self Collection'
-                    ]);
-                }
 
                 $user_excluded_otp_shippers = DeliveryNoteShipment::join('shipments', 'shipments.id', 'delivery_note_shipments.shipment_id')
                 ->join('notification_setting_shippers as nss', 'shipments.user_id', 'nss.shipper_id')
