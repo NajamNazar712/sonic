@@ -14825,11 +14825,9 @@ class AdminReportsController extends Controller
             ->select('dc.name as destination_name', 'dc.id as destination_id', 'oc.name as origin_name', 'oc.id as origin_id', 'issue_sack_bag_origins.bag_count', 'issue_sack_bag_origins.sack_bag_no', 'issue_sack_bag_origins.status')
             ->where('issue_sack_bag_origins.bag_count', '>', 0);
 
-
         if ($destination_id = $request->get('destination_id')) {
             $sack_bag_utilization->where('issue_sack_bag_origins.sack_destination_id', $destination_id);
         }
-
 
         $datatable = Datatables::of($sack_bag_utilization);
         return $datatable->make(true);

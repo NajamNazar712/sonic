@@ -362,7 +362,6 @@
                 rowId: 'id',
                 order: [[2, 'desc']],
                 columns: [
-                
                     {
                         data: 'serial_number',
                         orderable: false,
@@ -378,67 +377,38 @@
                     {data: 'origin', name: 'origin', class: 'align-middle origin'},
                     {data: 'remarks', name: 'remarks', class: 'align-middle remarks', orderable: false},
                     {data: 'user_id', name: 'user_id', class: 'align-middle user_id'},
-                 
                 ],
                 rowCallback: function (row, data, index) {
                     var info = table.page.info();
-
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-
                     if ($.inArray(data.id, selected_rows) !== -1) {
                         table.row(row).select();
                     }
                 },
                 initComplete: function () {
-                
                     this.api().columns().every(function (column_id) {
                         var column = this;
                         var header = column.header();
-
-                        
-                        // if ($(header).is('.action') || $(header).is('.select') || $(header).is('.serial_number') || $(header).is('.shipments') || $(header).is('.status') || $(header).is('.trax_reason') || $(header).is('.trax_remarks') || $(header).is('.shipper_remarks') || $(header).is('.attempted_date') || $(header).is('.action') || $(header).is('.rider_remarks') || $(header).is('.brand_name') || $(header).is('.all_remarks')) {
-                        //     $(td).appendTo($(search));
-                        // } else {
-                        //     var current = $(input).appendTo($(search)).on('change', function () {
-                        //         column.search($(this).val(), false, false, true).draw();
-                        //     }).wrap(td).after(icon);
-
-                        //     if (column.search()) {
-                        //         current.val(column.search());
-                        //     }
-                        // }
                     });
-
                     this.api().table().columns.adjust();
                 }
-
-               
-
             });
-
-
-
-          
-            
-           
-               $("#add_sack_bag_form").validate({
-                            errorClass: "danger",
-                            successClass: 'success',
-                            errorPlacement: function (error, element) {
-                                error.addClass('w-100').appendTo(element.parent('.form-group'));
-                            },
-                            submitHandler: function (form) {
-                                if($("#sack_bag_no_check").val()!=1)
-                                {
-                                    form.submit();
-                                }else{
-                                    scan_sound(2);
-                                    toastr.error("Canvas Bag No# already exist!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                }
-                            }
+            $("#add_sack_bag_form").validate({
+                    errorClass: "danger",
+                    successClass: 'success',
+                    errorPlacement: function (error, element) {
+                        error.addClass('w-100').appendTo(element.parent('.form-group'));
+                    },
+                    submitHandler: function (form) {
+                        if($("#sack_bag_no_check").val()!=1)
+                        {
+                            form.submit();
+                        }else{
+                            scan_sound(2);
+                            toastr.error("Canvas Bag No# already exist!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                    }
                 });
-          
-
             
                 // add sackbag_no in detail on scan
                 $("#add_sack_bag_form #sackbag_detail").on("keydown","tr", function(e) {

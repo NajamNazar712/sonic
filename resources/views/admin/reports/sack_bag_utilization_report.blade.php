@@ -35,11 +35,11 @@
                             <th class="border-primary border-darken-1">S. No.</th>
                             <th class="border-primary border-darken-1">Canvas Bag No#</th>
                             <th class="border-primary border-darken-1">Issue Origin</th>
-                            <th class="border-primary border-darken-1">Scan By (User)</th>
-                            <th class="border-primary border-darken-1">Date Time</th>
+                            {{-- <th class="border-primary border-darken-1">Scan By (User)</th> --}}
+                            {{-- <th class="border-primary border-darken-1">Date Time</th> --}}
                             <th class="border-primary border-darken-1">Last Destination</th>
-                            <th class="border-primary border-darken-1">Scan By (User)</th>
-                            <th class="border-primary border-darken-1">Date Time</th>
+                            {{-- <th class="border-primary border-darken-1">Scan By (User)</th> --}}
+                            {{-- <th class="border-primary border-darken-1">Date Time</th> --}}
                             <th class="border-primary border-darken-1">Canvas Bag Count</th>
                             <th class="border-primary border-darken-1">Status</th>
                         </tr>
