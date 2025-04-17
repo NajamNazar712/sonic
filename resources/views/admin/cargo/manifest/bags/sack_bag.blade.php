@@ -22,9 +22,10 @@
                                     <th class="border-primary border-darken-1">S. No</th>
                                     <th class="border-primary border-darken-1">Canvas Bag No#</th>
                                     <th class="border-primary border-darken-1">Origin</th>
+                                    <th class="border-primary border-darken-1">Active Date / Time</th>
                                     <th class="border-primary border-darken-1">Remark</th>
+                                    <th class="border-primary border-darken-1">Inactive Date / Time</th>
                                     <th class="border-primary border-darken-1">User</th>
-
                                 </tr>
                                 </thead>
                             </table>
