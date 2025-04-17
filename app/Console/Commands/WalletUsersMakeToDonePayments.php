@@ -44,7 +44,7 @@ class WalletUsersMakeToDonePayments extends Command
 
         foreach($wallet_user_ids as $wallet_user_id) {
             $pending_payment = PendingPayment::with(['pending_payment_shipments' => function ($query) {
-                    $query->where('created_at', '<', Carbon::today()->format('H:i:s'));
+                    $query->where('created_at', '<', Carbon::today()->format('Y-m-d H:i:s'));
                 }])
                 ->where('user_id', $wallet_user_id)
                 ->where('created_at', '<', Carbon::today()->format('Y-m-d H:i:s'))
