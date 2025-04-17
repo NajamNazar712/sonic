@@ -15885,7 +15885,6 @@ class AdminReportsController extends Controller
             header('Content-Disposition: attachment; filename=data.csv');  
             $output = fopen("php://output", "w");  
             fputcsv($output, $headers);
-           
             foreach ($specificValues as $key => $row) {
                 // Convert the row to an associative array
                 $rowArray = (array) $row;
@@ -15923,7 +15922,6 @@ class AdminReportsController extends Controller
                 
                 $rowArray['shipper'] = ($rowArray['booking_type_id'] == 4) ? ($rowArray['shipper'] . ' (' . $rowArray['poc'] . ')') : $rowArray['shipper'];
 
-            if (!empty($rowArray['current_hub_id'])) {
                 if (in_array($rowArray['shipper_status_id'], [68])) {
                     $rowArray['current_hub_name'] = $rowArray['misroutedCityname'];
                 } elseif (in_array($rowArray['shipper_status_id'], [49, 3])) {
@@ -15943,9 +15941,18 @@ class AdminReportsController extends Controller
                         $rowArray['current_hub_name'] = $rowArray['return_city'];
                     }
                 }
-            } else {
-                $rowArray['current_hub_name'] = $rowArray['current_hub_name'];
-            }
+                else {
+                    if (!empty($rowArray['current_hub_id'])) {
+                        $rowArray['current_hub_name'] = $rowArray['current_hub_name'];
+                    }else{
+                        if (in_array($rowArray['shipper_status_id'], [1, 2, 61])) {
+                            $rowArray['current_hub_name'] = $rowArray['origin'];
+                        } else {
+                            $rowArray['current_hub_name'] = $rowArray['hub'];
+                        }
+                    }
+                
+                }
                 $days = Carbon::now()->diffInDays($rowArray['arrival']);
                 $rowArray['aging'] = ($days == 0) ? "-" : $days;
                 $days = Carbon::now()->diffInDays($rowArray['last_status_date']);
