@@ -15643,7 +15643,7 @@ class AdminReportsController extends Controller
         if ($arrival_search_from && $arrival_search_to) {
             $from1 = Carbon::parse($arrival_search_from)->format('Y-m-d H:i:s');
             $to1 = Carbon::parse($arrival_search_to)->format('Y-m-d H:i:s');
-            $shipments->whereBetween('sj.created_at', [$from1, $to1]);
+            // $shipments->whereBetween('sj.created_at', [$from1, $to1]);
         }
 
         if ($status_id = $request->get('search_shipment_status')) {
@@ -15925,22 +15925,19 @@ class AdminReportsController extends Controller
 
                 if (in_array($rowArray['shipper_status_id'], [68])) {
                     $rowArray['current_hub_name'] = $rowArray['misroutedCityname'];
-                } elseif (in_array($rowArray['shipper_status_id'], [49, 3])) {
-                    if (in_array($rowArray['cargo_status_id'], [3, 2, 4, 7, 8, 9, 6])) { //Shipment In Transit || Shipment Misrouted Forwarded concered hub change reference TO-6939
+                } elseif (in_array($rowArray['shipper_status_id'], [49, 3]) && (in_array($rowArray['cargo_status_id'], [3, 2, 4, 7, 8, 9, 6]))) {
+                      //Shipment In Transit || Shipment Misrouted Forwarded concered hub change reference TO-6939
                         $rowArray['current_hub_name'] = $rowArray['destination'];
-                    }
-                } elseif (in_array($rowArray['shipper_status_id'], [26, 73, 32, 70, 76])) {
-                    if (in_array($rowArray['cargo_status_id'], [4, 7, 8, 9, 6])) { //Shipment In Transit || Shipment Misrouted Forwarded concered hub change reference TO-6939
+                    
+                } elseif (in_array($rowArray['shipper_status_id'], [26, 73, 32, 70, 76]) && in_array($rowArray['cargo_status_id'], [4, 7, 8, 9, 6])) {
+                     //Shipment In Transit || Shipment Misrouted Forwarded concered hub change reference TO-6939
                         $rowArray['current_hub_name'] = $rowArray['origin'];
-                    }
                 } elseif (in_array($rowArray['shipper_status_id'], [18, 34, 23, 24, 47, 48, 2])) {
                     $rowArray['current_hub_name'] = $rowArray['origin'];
                 } elseif (in_array($rowArray['shipper_status_id'], [54, 55, 69, 7, 4, 8])) {
                     $rowArray['current_hub_name'] = (($rowArray['intercepttype'] == 1) ?  $rowArray['intercept_city_name'] : $rowArray['destination']);
-                } elseif (in_array($rowArray['shipper_status_id'], [22, 21, 75])) {
-                    if ($rowArray['return_city'] != null) {
-                        $rowArray['current_hub_name'] = $rowArray['return_city'];
-                    }
+                } elseif (in_array($rowArray['shipper_status_id'], [22, 21, 75]) && $rowArray['return_city'] != null) {
+                    $rowArray['current_hub_name'] = $rowArray['return_city'];
                 }
                 else {
                     if (!empty($rowArray['current_hub_id'])) {
