@@ -2669,6 +2669,7 @@
                     });
                 }
             });
+           
             $(document).on('click', '.mail_trigger', function() {
                 let lead_id = $(this).data('lead_id');
                 let email = $(this).data('email');
@@ -2684,16 +2685,23 @@
                         swal("Sending...", "Please wait while the email is being sent.", "info");
                     },
                     success: function(response) {
-                        swal("Success!", "Mail sent successfully to " + email, "success");
-                        table.draw(true);
+                        if (response.status === 'success') {
+                            swal("Success!", response.message, "success");
+                            table.draw(true);
+                        } else {
+                            swal("Info", response.message, "info");
+                        }
                     },
                     error: function(xhr) {
-                        swal("Oops!", "Something went wrong while sending the mail.", "error");
+                        const res = xhr.responseJSON;
+                        if (res && res.message) {
+                            swal("Error", res.message, "error");
+                        } else {
+                            swal("Oops!", "Something went wrong while sending the mail.", "error");
+                        }
                     }
                 });
             });
-
-
         });
 
     </script>
