@@ -16421,4 +16421,49 @@ class AdminReportsController extends Controller
         ->rawColumns(['tracking_number'])
         ->make(true);
     }
+
+    public function kam_and_poc_qsr_index() {
+        return view('admin.reports.kam_and_poc_qsr');
+    }
+
+    public function kam_and_poc_qsr_list() {
+        $connection = 'reports';
+        $select = [
+            'shipments.tracking_number as tracking_number',
+            'shipments.tracking_number as tracking_number_link',
+            'shipments.order_id as shipment_order_id',
+            'users.name as shipper',
+            'users.name as shipper',
+            'admin_sale_person'
+        ];
+
+        // $datatable = Datatables::of($shipments)
+        // ->editColumn('destination_arrival_date', function ($shipment) {
+        //     if ($shipment->origin != $shipment->destination){
+        //         if ($shipment->destination_arrival_date == null || $shipment->destination_arrival_date == ''){
+        //             return '-';
+        //         } else {
+        //             return $shipment->destination_arrival_date;
+        //         }
+        //     } else {
+        //         return $shipment->arrival;
+        //     }
+        // })
+        // ->addColumn('aging', function ($shipments) {
+        //     $days = Carbon::now()->diffInDays($shipments->arrival);
+        //     if ($days == 0) {
+        //         return "-";
+        //     } else {
+        //         return $days;
+        //     }
+        // })
+        // ->addColumn('aging_last_status', function ($shipments) {
+        //     $days = Carbon::now()->diffInDays($shipments->last_status_date);
+        //     if ($days == 0) {
+        //         return "-";
+        //     } else {
+        //         return $days;
+        //     }
+        // });
+    }
 }
