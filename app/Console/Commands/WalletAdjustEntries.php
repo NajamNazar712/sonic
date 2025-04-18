@@ -325,6 +325,11 @@ class WalletAdjustEntries extends Command
             $row++;
         }
 
+        $directory = storage_path('app/public/test2');
+
+        if (!file_exists($directory)) {
+            mkdir($directory, 0775, true); // recursively create directory
+        }
         // Save the file to the storage (local or cloud)
         $writer = new Xlsx($spreadsheet);
         $fileName = 'shipment_data_' . now()->format('Y_m_d_H_i_s') . '.xlsx';
