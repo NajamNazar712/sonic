@@ -238,16 +238,14 @@ class WalletAdjustEntries extends Command
                     'wallet_log_updated' => $dps->wallet_log_updated,
                     'dps_id' => $dps->id,
                     'dps_type' => $dps->type,
-                    'discrepancy' => [
-                        'missing_keys_in_old' => $missingKeys,
-                        'mismatched_values' => $mismatchedValues,
-                        'extra_keys_in_old' => array_keys($extraKeysInOld),
-                        'old_total' => $oldTotal,
-                        'new_total' => $newTotal,
-                        'difference' => $diffAmount,
-                        'payable' => $dps->payable2,
-                        'arrival_charges_issue' => $hasKeyDiscrepancy,
-                    ]
+                    'missing_keys_in_old' => $missingKeys,
+                    'mismatched_values' => $mismatchedValues,
+                    'extra_keys_in_old' => array_keys($extraKeysInOld),
+                    'old_total' => $oldTotal,
+                    'new_total' => $newTotal,
+                    'difference' => $diffAmount,
+                    'payable' => $dps->payable2,
+                    'arrival_charges_issue' => $hasKeyDiscrepancy,
                 ];
             } else {
                 $OtherIssuePayload[$shipmentId] = [
@@ -260,83 +258,89 @@ class WalletAdjustEntries extends Command
                     'wallet_log_updated' => $dps->wallet_log_updated,
                     'dps_id' => $dps->id,
                     'dps_type' => $dps->type,
-                    'discrepancy' => [
-                        'missing_keys_in_old' => $missingKeys,
-                        'mismatched_values' => $mismatchedValues,
-                        'extra_keys_in_old' => array_keys($extraKeysInOld),
-                        'old_total' => $oldTotal,
-                        'new_total' => $newTotal,
-                        'difference' => $diffAmount,
-                        'payable' => $dps->payable2,
-                        'arrival_charges_issue' => $hasKeyDiscrepancy,
-                    ]
+                    'missing_keys_in_old' => $missingKeys,
+                    'mismatched_values' => $mismatchedValues,
+                    'extra_keys_in_old' => array_keys($extraKeysInOld),
+                    'old_total' => $oldTotal,
+                    'new_total' => $newTotal,
+                    'difference' => $diffAmount,
+                    'payable' => $dps->payable2,
+                    'arrival_charges_issue' => $hasKeyDiscrepancy,
                 ];
             }
         }
 
         self::generateExcelFile($ArrivalIssuePayload,$OtherIssuePayload);
     }
-
     static function generateExcelFile($ArrivalIssuePayload, $OtherIssuePayload)
     {
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-        // Setting the header row (you can adjust based on your structure)
-        $sheet->setCellValue('A1', 'Client ID');
-        $sheet->setCellValue('B1', 'Wallet ID');
-        $sheet->setCellValue('C1', 'Reference ID');
-        $sheet->setCellValue('D1', 'Shipment ID');
-        $sheet->setCellValue('E1', 'Amount');
-        $sheet->setCellValue('F1', 'Charges');
-        $sheet->setCellValue('G1', 'Wallet Log Updated');
-        $sheet->setCellValue('H1', 'DPS ID');
-        $sheet->setCellValue('I1', 'DPS Type');
-        $sheet->setCellValue('J1', 'Discrepancy');
+        // Header row
+        $headers = [
+            'A1' => 'Client ID',
+            'B1' => 'Wallet ID',
+            'C1' => 'Reference ID',
+            'D1' => 'Shipment ID',
+            'E1' => 'Amount',
+            'F1' => 'Charges',
+            'G1' => 'Wallet Log Updated',
+            'H1' => 'DPS ID',
+            'I1' => 'DPS Type',
+            'J1' => 'Missing Keys In Old',
+            'K1' => 'Mismatched Values',
+            'L1' => 'Extra Keys In Old',
+            'M1' => 'Old Total',
+            'N1' => 'New Total',
+            'O1' => 'Difference',
+            'P1' => 'Payable',
+            'Q1' => 'Arrival Charges Issue',
+        ];
 
-        // You can decide to start writing data from row 2 onward
+        foreach ($headers as $cell => $value) {
+            $sheet->setCellValue($cell, $value);
+        }
+
+        // Write data rows
         $row = 2;
-        foreach ($ArrivalIssuePayload as $shipmentId => $data) {
-            $sheet->setCellValue('A' . $row, $data['client_id']);
-            $sheet->setCellValue('B' . $row, $data['wallet_id']);
-            $sheet->setCellValue('C' . $row, $data['reference_id']);
-            $sheet->setCellValue('D' . $row, $data['shipment_id']);
-            $sheet->setCellValue('E' . $row, $data['amount']);
-            $sheet->setCellValue('F' . $row, json_encode($data['charges']));
-            $sheet->setCellValue('G' . $row, $data['wallet_log_updated']);
-            $sheet->setCellValue('H' . $row, $data['dps_id']);
-            $sheet->setCellValue('I' . $row, $data['dps_type']);
-            $sheet->setCellValue('J' . $row, json_encode($data['discrepancy']));  // Store the discrepancy as a JSON string or handle as needed
-            $row++;
+        foreach ([$ArrivalIssuePayload, $OtherIssuePayload] as $payload) {
+            foreach ($payload as $data) {
+                $sheet->setCellValue('A' . $row, $data['client_id'] ?? '');
+                $sheet->setCellValue('B' . $row, $data['wallet_id'] ?? '');
+                $sheet->setCellValue('C' . $row, $data['reference_id'] ?? '');
+                $sheet->setCellValue('D' . $row, $data['shipment_id'] ?? '');
+                $sheet->setCellValue('E' . $row, $data['amount'] ?? 0);
+                $sheet->setCellValue('F' . $row, json_encode($data['charges'] ?? []));
+                $sheet->setCellValue('G' . $row, $data['wallet_log_updated'] ?? '');
+                $sheet->setCellValue('H' . $row, $data['dps_id'] ?? '');
+                $sheet->setCellValue('I' . $row, $data['dps_type'] ?? '');
+                $sheet->setCellValue('J' . $row, json_encode($data['missing_keys_in_old'] ?? []));
+                $sheet->setCellValue('K' . $row, json_encode($data['mismatched_values'] ?? []));
+                $sheet->setCellValue('L' . $row, json_encode($data['extra_keys_in_old'] ?? []));
+                $sheet->setCellValue('M' . $row, $data['old_total'] ?? 0);
+                $sheet->setCellValue('N' . $row, $data['new_total'] ?? 0);
+                $sheet->setCellValue('O' . $row, $data['difference'] ?? 0);
+                $sheet->setCellValue('P' . $row, $data['payable'] ?? 0);
+                $sheet->setCellValue('Q' . $row, $data['arrival_charges_issue'] ? 'Yes' : 'No');
+                $row++;
+            }
         }
 
-        // If you want to add $OtherIssuePayload, you can do it similarly
-        foreach ($OtherIssuePayload as $shipmentId => $data) {
-            $sheet->setCellValue('A' . $row, $data['client_id']);
-            $sheet->setCellValue('B' . $row, $data['wallet_id']);
-            $sheet->setCellValue('C' . $row, $data['reference_id']);
-            $sheet->setCellValue('D' . $row, $data['shipment_id']);
-            $sheet->setCellValue('E' . $row, $data['amount']);
-            $sheet->setCellValue('F' . $row, json_encode($data['charges']));
-            $sheet->setCellValue('G' . $row, $data['wallet_log_updated']);
-            $sheet->setCellValue('H' . $row, $data['dps_id']);
-            $sheet->setCellValue('I' . $row, $data['dps_type']);
-            $sheet->setCellValue('J' . $row, json_encode($data['discrepancy']));  // Store the discrepancy as a JSON string or handle as needed
-            $row++;
-        }
-
+        // Save file
         $directory = storage_path('app/public/test2');
-
         if (!file_exists($directory)) {
-            mkdir($directory, 0775, true); // recursively create directory
+            mkdir($directory, 0775, true);
         }
-        // Save the file to the storage (local or cloud)
-        $writer = new Xlsx($spreadsheet);
+
         $fileName = 'shipment_data_' . now()->format('Y_m_d_H_i_s') . '.xlsx';
-        $path = storage_path('app/public/test2/' . $fileName); // Save to storage path
+        $filePath = $directory . '/' . $fileName;
 
-        $writer->save($path);
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($filePath);
 
-        return response()->download($path);
+        return response()->download($filePath)->deleteFileAfterSend(true);
     }
+
+
 }
