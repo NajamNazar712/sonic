@@ -681,7 +681,8 @@ use Illuminate\Http\Request;
 
             Route::get('profile', 'ShipperAppController@profile')->name('profile');
 
-
+            //order management Api
+            Route::get('order_list', 'ShipperOrderManagementController@order_list')->name('order_list');
         });
     });
 

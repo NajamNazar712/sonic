@@ -158,4 +158,6 @@ class Shipment extends Model
     public function faf_charges_data() {
         return $this->belongsTo('App\ShipmentAdditionalCharges', 'id', 'shipment_id');
     }
+
+
 }
