@@ -526,7 +526,7 @@
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Fuel Surcharge');
-                            head.push('GST');
+                            head.push('Collection Amount');
                             head.push('Total Charges');
 
                             $.each(result.data, function(index, values) {
