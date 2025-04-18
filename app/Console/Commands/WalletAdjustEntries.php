@@ -128,8 +128,8 @@ class WalletAdjustEntries extends Command
             ->havingRaw('ABS(payable2) != ABS(total_charges)')
             ->havingRaw('payable != 0')->get();
 
-        $sensitiveDiscrepancies = [];
-        $otherDiscrepancies = [];
+        $OtherIssuePayload = [];
+        $ArrivalIssuePayload = [];
         foreach ($query as $dps) {
 
             $LogChargeStatus = true;
@@ -217,27 +217,6 @@ class WalletAdjustEntries extends Command
             $newTotal = round(array_sum(array_map('floatval', $charges)), 2);
             $diffAmount = round($newTotal - $oldTotal, 2);
 
-            $settlementPayload[$shipmentId] = [
-                "client_id" => $dps->user_id,
-                "wallet_id" => $dps->wallet_id,
-                "reference_id" => $dps->id,
-                "shipment_id" => $dps->tracking_number,
-                "amount" => $dps->type == 0 ? $dps->amount : 0,
-                "charges" => $charges,
-                'wallet_log_updated' => $dps->wallet_log_updated,
-                'dps_id' => $dps->id,
-                'dps_type' => $dps->type,
-                'discrepancy' =>  [
-                    'missing_keys_in_old' => $missingKeys,
-                    'mismatched_values' => $mismatchedValues,
-                    'extra_keys_in_old' => array_keys($extraKeysInOld),
-                    'old_total' => $oldTotal,
-                    'new_total' => $newTotal,
-                    'difference' => $diffAmount,
-                    'payable' => $dps->payable2,
-                ]
-            ];
-
             $hasKeyDiscrepancy = false;
             foreach (['faf_charges', 'weight_charges', 'fuel_surcharge'] as $key) {
                 if (array_key_exists($key, $mismatchedValues)) {
@@ -245,14 +224,55 @@ class WalletAdjustEntries extends Command
                     break;
                 }
             }
-
             if ($hasKeyDiscrepancy) {
-                $sensitiveDiscrepancies[$shipmentId] = $settlementPayload;
+
+                $ArrivalIssuePayload[$shipmentId] = [
+                    "client_id" => $dps->user_id,
+                    "wallet_id" => $dps->wallet_id,
+                    "reference_id" => $dps->id,
+                    "shipment_id" => $dps->tracking_number,
+                    "amount" => $dps->type == 0 ? $dps->amount : 0,
+                    "charges" => $charges,
+                    'wallet_log_updated' => $dps->wallet_log_updated,
+                    'dps_id' => $dps->id,
+                    'dps_type' => $dps->type,
+                    'discrepancy' => [
+                        'missing_keys_in_old' => $missingKeys,
+                        'mismatched_values' => $mismatchedValues,
+                        'extra_keys_in_old' => array_keys($extraKeysInOld),
+                        'old_total' => $oldTotal,
+                        'new_total' => $newTotal,
+                        'difference' => $diffAmount,
+                        'payable' => $dps->payable2,
+                        'arrival_charges_issue' => $hasKeyDiscrepancy,
+                    ]
+                ];
             } else {
-                $otherDiscrepancies[$shipmentId] = $settlementPayload;
+                $OtherIssuePayload[$shipmentId] = [
+                    "client_id" => $dps->user_id,
+                    "wallet_id" => $dps->wallet_id,
+                    "reference_id" => $dps->id,
+                    "shipment_id" => $dps->tracking_number,
+                    "amount" => $dps->type == 0 ? $dps->amount : 0,
+                    "charges" => $charges,
+                    'wallet_log_updated' => $dps->wallet_log_updated,
+                    'dps_id' => $dps->id,
+                    'dps_type' => $dps->type,
+                    'discrepancy' => [
+                        'missing_keys_in_old' => $missingKeys,
+                        'mismatched_values' => $mismatchedValues,
+                        'extra_keys_in_old' => array_keys($extraKeysInOld),
+                        'old_total' => $oldTotal,
+                        'new_total' => $newTotal,
+                        'difference' => $diffAmount,
+                        'payable' => $dps->payable2,
+                        'arrival_charges_issue' => $hasKeyDiscrepancy,
+                    ]
+                ];
             }
 
         }
-        dd($otherDiscrepancies,$sensitiveDiscrepancies);
+
+        dd(count($ArrivalIssuePayload),count($OtherIssuePayload));
     }
 }
