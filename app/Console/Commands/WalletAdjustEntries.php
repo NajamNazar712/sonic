@@ -302,7 +302,7 @@ class WalletAdjustEntries extends Command
             $sheet->setCellValue('C' . $row, $data['reference_id']);
             $sheet->setCellValue('D' . $row, $data['shipment_id']);
             $sheet->setCellValue('E' . $row, $data['amount']);
-            $sheet->setCellValue('F' . $row, $data['charges']);
+            $sheet->setCellValue('F' . $row, json_encode($data['charges']));
             $sheet->setCellValue('G' . $row, $data['wallet_log_updated']);
             $sheet->setCellValue('H' . $row, $data['dps_id']);
             $sheet->setCellValue('I' . $row, $data['dps_type']);
@@ -317,7 +317,7 @@ class WalletAdjustEntries extends Command
             $sheet->setCellValue('C' . $row, $data['reference_id']);
             $sheet->setCellValue('D' . $row, $data['shipment_id']);
             $sheet->setCellValue('E' . $row, $data['amount']);
-            $sheet->setCellValue('F' . $row, $data['charges']);
+            $sheet->setCellValue('F' . $row, json_encode($data['charges']));
             $sheet->setCellValue('G' . $row, $data['wallet_log_updated']);
             $sheet->setCellValue('H' . $row, $data['dps_id']);
             $sheet->setCellValue('I' . $row, $data['dps_type']);
