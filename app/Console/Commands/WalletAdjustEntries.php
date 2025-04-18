@@ -11,6 +11,8 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use App\Http\Controllers\FingaIntegrationController;
+use Illuminate\Support\Facades\Http;
 
 class WalletAdjustEntries extends Command
 {
@@ -270,6 +272,33 @@ class WalletAdjustEntries extends Command
             }
         }
 
+        $api = config('app.FINGA_URL');
+        foreach ($ArrivalIssuePayload as $shipmentId => $dps) {
+            $requestPayload = [
+                "client_id"    => $dps['client_id'],
+                "wallet_id"    => $dps['wallet_id'],
+                "reference_id" => $dps['reference_id'],
+                "shipment_id"  => $dps['shipment_id'],
+                "amount"       => floatval($dps['difference']), 
+            ];
+        
+            FingaIntegrationController::apiLog(9, 1, $requestPayload, $shipmentId);
+        
+            $token = FingaIntegrationController::getToken($api);
+            $response = Http::withHeaders([
+                'accept' => 'application/json',
+                'Authorization' => "Bearer " . $token,
+            ])->connectTimeout(120)->timeout(120)
+              ->post($api . 'transactions/log/adjustment', $requestPayload);
+        
+            if ($response->successful()) {
+                $body = json_decode($response->getBody());
+                FingaIntegrationController::apiLog(10, 'success', $body, $shipmentId);
+            } else {
+                $body = json_decode($response->getBody());
+                FingaIntegrationController::apiLog(10, 'error', $body, $shipmentId);
+            }
+        }
         self::generateExcelFile($ArrivalIssuePayload,$OtherIssuePayload);
     }
     static function generateExcelFile($ArrivalIssuePayload, $OtherIssuePayload)
