@@ -253,6 +253,6 @@ class WalletAdjustEntries extends Command
             }
 
         }
-
+        dd($otherDiscrepancies,$sensitiveDiscrepancies);
     }
 }
