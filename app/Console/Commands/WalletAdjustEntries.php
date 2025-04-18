@@ -9,6 +9,8 @@ use App\Http\Models\ShipmentServicesCharges;
 use App\Models\FinjaLogSettlementRecord;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class WalletAdjustEntries extends Command
 {
@@ -270,9 +272,66 @@ class WalletAdjustEntries extends Command
                     ]
                 ];
             }
-
         }
 
-        dd(count($ArrivalIssuePayload),count($OtherIssuePayload));
+        self::generateExcelFile($ArrivalIssuePayload,$OtherIssuePayload);
+    }
+
+    static function generateExcelFile($ArrivalIssuePayload, $OtherIssuePayload)
+    {
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Setting the header row (you can adjust based on your structure)
+        $sheet->setCellValue('A1', 'Client ID');
+        $sheet->setCellValue('B1', 'Wallet ID');
+        $sheet->setCellValue('C1', 'Reference ID');
+        $sheet->setCellValue('D1', 'Shipment ID');
+        $sheet->setCellValue('E1', 'Amount');
+        $sheet->setCellValue('F1', 'Charges');
+        $sheet->setCellValue('G1', 'Wallet Log Updated');
+        $sheet->setCellValue('H1', 'DPS ID');
+        $sheet->setCellValue('I1', 'DPS Type');
+        $sheet->setCellValue('J1', 'Discrepancy');
+
+        // You can decide to start writing data from row 2 onward
+        $row = 2;
+        foreach ($ArrivalIssuePayload as $shipmentId => $data) {
+            $sheet->setCellValue('A' . $row, $data['client_id']);
+            $sheet->setCellValue('B' . $row, $data['wallet_id']);
+            $sheet->setCellValue('C' . $row, $data['reference_id']);
+            $sheet->setCellValue('D' . $row, $data['shipment_id']);
+            $sheet->setCellValue('E' . $row, $data['amount']);
+            $sheet->setCellValue('F' . $row, $data['charges']);
+            $sheet->setCellValue('G' . $row, $data['wallet_log_updated']);
+            $sheet->setCellValue('H' . $row, $data['dps_id']);
+            $sheet->setCellValue('I' . $row, $data['dps_type']);
+            $sheet->setCellValue('J' . $row, json_encode($data['discrepancy']));  // Store the discrepancy as a JSON string or handle as needed
+            $row++;
+        }
+
+        // If you want to add $OtherIssuePayload, you can do it similarly
+        foreach ($OtherIssuePayload as $shipmentId => $data) {
+            $sheet->setCellValue('A' . $row, $data['client_id']);
+            $sheet->setCellValue('B' . $row, $data['wallet_id']);
+            $sheet->setCellValue('C' . $row, $data['reference_id']);
+            $sheet->setCellValue('D' . $row, $data['shipment_id']);
+            $sheet->setCellValue('E' . $row, $data['amount']);
+            $sheet->setCellValue('F' . $row, $data['charges']);
+            $sheet->setCellValue('G' . $row, $data['wallet_log_updated']);
+            $sheet->setCellValue('H' . $row, $data['dps_id']);
+            $sheet->setCellValue('I' . $row, $data['dps_type']);
+            $sheet->setCellValue('J' . $row, json_encode($data['discrepancy']));  // Store the discrepancy as a JSON string or handle as needed
+            $row++;
+        }
+
+        // Save the file to the storage (local or cloud)
+        $writer = new Xlsx($spreadsheet);
+        $fileName = 'shipment_data_' . now()->format('Y_m_d_H_i_s') . '.xlsx';
+        $path = storage_path('app/public/test2/' . $fileName); // Save to storage path
+
+        $writer->save($path);
+
+        return response()->download($path);
     }
 }
