@@ -2679,18 +2679,21 @@
                     method: 'GET',
                     data: {
                         lead_id: lead_id,
+                        email: email,
                         _token: $('meta[name="csrf-token"]').attr('content')
                     },
                     beforeSend: function() {
                         swal("Sending...", "Please wait while the email is being sent.", "info");
                     },
                     success: function(response) {
-                        if (response.status === 'success') {
-                            swal("Success!", response.message, "success");
-                            table.draw(true);
-                        } else {
-                            swal("Info", response.message, "info");
-                        }
+                        setTimeout(function() {
+                            if (response.status === 'success') {
+                                swal("Success!", response.message, "success");
+                                table.draw(true);
+                            } else {
+                                swal("Info", response.message, "info");
+                            }
+                        }, 2000);
                     },
                     error: function(xhr) {
                         const res = xhr.responseJSON;

@@ -1258,14 +1258,12 @@ class LeadManagementController extends Controller
 
     public function send_mail(Request $request)
     {
-        $lead = Lead::find($request->lead_id);
-    
-        if (!User::where('email', $lead->email_address)->exists()) {
+        if (!User::where('email', $request->email)->exists()) {
             NotificationsController::send(230, $request->lead_id, Carbon::today());
             return response()->json(['status' => 'success', 'message' => 'Mail sent successfully.']);
         }
     
-        return response()->json(['status' => 'error', 'message' => 'This email is already registered.'], 409);
+        return response()->json(['status' => 'error', 'message' => 'This email is already registered.']);
     }
     
 
