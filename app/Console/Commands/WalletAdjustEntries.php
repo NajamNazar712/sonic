@@ -217,7 +217,7 @@ class WalletAdjustEntries extends Command
             // New logic for totals and difference
             $oldTotal = round(array_sum(array_map('floatval', $oldCharges)), 2);
             $newTotal = round(array_sum(array_map('floatval', $charges)), 2);
-            $diffAmount = round($newTotal - $oldTotal, 2);
+            $diffAmount = round($oldTotal - $newTotal, 2);
 
             $hasKeyDiscrepancy = false;
             foreach (['faf_charges', 'weight_charges', 'fuel_surcharge'] as $key) {
