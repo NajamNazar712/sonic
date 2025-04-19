@@ -124,7 +124,7 @@ class WalletAdjustEntries extends Command
         ON merged.shipment_id = latest.shipment_id AND merged.id = latest.max_id
     ) AS latest_fpl"), 'latest_fpl.shipment_id', '=', 'dps.shipment_id')
             ->where('dps.wallet_action_bid', 3)
-            ->where('dps.charges', '>', 0)
+//            ->where('dps.charges', '>', 0)
             ->whereIn('dps.type', [0, 1])
             ->where('shipments.packaging_material_request', 0)
             ->where('flsr.wallet_log_charges_updated', 0)
@@ -240,14 +240,16 @@ class WalletAdjustEntries extends Command
                     'wallet_log_updated' => $dps->wallet_log_updated,
                     'dps_id' => $dps->id,
                     'dps_type' => $dps->type,
-                    'missing_keys_in_old' => $missingKeys,
-                    'mismatched_values' => $mismatchedValues,
-                    'extra_keys_in_old' => array_keys($extraKeysInOld),
-                    'old_total' => $oldTotal,
-                    'new_total' => $newTotal,
-                    'difference' => $diffAmount,
-                    'payable' => $dps->payable2,
-                    'arrival_charges_issue' => $hasKeyDiscrepancy,
+                    'discrepancy' => [
+                        'missing_keys_in_old' => $missingKeys,
+                        'mismatched_values' => $mismatchedValues,
+                        'extra_keys_in_old' => array_keys($extraKeysInOld),
+                        'old_total' => $oldTotal,
+                        'new_total' => $newTotal,
+                        'difference' => $diffAmount,
+                        'payable' => $dps->payable2,
+                        'arrival_charges_issue' => $hasKeyDiscrepancy,
+                    ]
                 ];
             } else {
                 $OtherIssuePayload[$shipmentId] = [
@@ -260,45 +262,47 @@ class WalletAdjustEntries extends Command
                     'wallet_log_updated' => $dps->wallet_log_updated,
                     'dps_id' => $dps->id,
                     'dps_type' => $dps->type,
-                    'missing_keys_in_old' => $missingKeys,
-                    'mismatched_values' => $mismatchedValues,
-                    'extra_keys_in_old' => array_keys($extraKeysInOld),
-                    'old_total' => $oldTotal,
-                    'new_total' => $newTotal,
-                    'difference' => $diffAmount,
-                    'payable' => $dps->payable2,
-                    'arrival_charges_issue' => $hasKeyDiscrepancy,
+                    'discrepancy' => [
+                        'missing_keys_in_old' => $missingKeys,
+                        'mismatched_values' => $mismatchedValues,
+                        'extra_keys_in_old' => array_keys($extraKeysInOld),
+                        'old_total' => $oldTotal,
+                        'new_total' => $newTotal,
+                        'difference' => $diffAmount,
+                        'payable' => $dps->payable2,
+                        'arrival_charges_issue' => $hasKeyDiscrepancy,
+                    ]
                 ];
             }
         }
 
-        $api = config('app.FINGA_URL');
-        foreach ($ArrivalIssuePayload as $shipmentId => $dps) {
-            $requestPayload = [
-                "client_id"    => $dps['client_id'],
-                "wallet_id"    => $dps['wallet_id'],
-                "reference_id" => $dps['reference_id'],
-                "shipment_id"  => $dps['shipment_id'],
-                "amount"       => floatval($dps['difference']), 
-            ];
-        
-            FingaIntegrationController::apiLog(9, 1, $requestPayload, $shipmentId);
-        
-            $token = FingaIntegrationController::getToken($api);
-            $response = Http::withHeaders([
-                'accept' => 'application/json',
-                'Authorization' => "Bearer " . $token,
-            ])->connectTimeout(120)->timeout(120)
-              ->post($api . 'transactions/log/adjustment', $requestPayload);
-        
-            if ($response->successful()) {
-                $body = json_decode($response->getBody());
-                FingaIntegrationController::apiLog(10, 'success', $body, $shipmentId);
-            } else {
-                $body = json_decode($response->getBody());
-                FingaIntegrationController::apiLog(10, 'error', $body, $shipmentId);
-            }
-        }
+//        $api = config('app.FINGA_URL');
+//        foreach ($ArrivalIssuePayload as $shipmentId => $dps) {
+//            $requestPayload = [
+//                "client_id"    => $dps['client_id'],
+//                "wallet_id"    => $dps['wallet_id'],
+//                "reference_id" => $dps['reference_id'],
+//                "shipment_id"  => $dps['shipment_id'],
+//                "amount"       => floatval($dps['difference']),
+//            ];
+//
+//            FingaIntegrationController::apiLog(9, 1, $requestPayload, $shipmentId);
+//
+//            $token = FingaIntegrationController::getToken($api);
+//            $response = Http::withHeaders([
+//                'accept' => 'application/json',
+//                'Authorization' => "Bearer " . $token,
+//            ])->connectTimeout(120)->timeout(120)
+//              ->post($api . 'transactions/log/adjustment', $requestPayload);
+//
+//            if ($response->successful()) {
+//                $body = json_decode($response->getBody());
+//                FingaIntegrationController::apiLog(10, 'success', $body, $shipmentId);
+//            } else {
+//                $body = json_decode($response->getBody());
+//                FingaIntegrationController::apiLog(10, 'error', $body, $shipmentId);
+//            }
+//        }
         self::generateExcelFile($ArrivalIssuePayload,$OtherIssuePayload);
     }
     static function generateExcelFile($ArrivalIssuePayload, $OtherIssuePayload)
@@ -306,69 +310,62 @@ class WalletAdjustEntries extends Command
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-        // Header row
-        $headers = [
-            'A1' => 'Client ID',
-            'B1' => 'Wallet ID',
-            'C1' => 'Reference ID',
-            'D1' => 'Shipment ID',
-            'E1' => 'Amount',
-            'F1' => 'Charges',
-            'G1' => 'Wallet Log Updated',
-            'H1' => 'DPS ID',
-            'I1' => 'DPS Type',
-            'J1' => 'Missing Keys In Old',
-            'K1' => 'Mismatched Values',
-            'L1' => 'Extra Keys In Old',
-            'M1' => 'Old Total',
-            'N1' => 'New Total',
-            'O1' => 'Difference',
-            'P1' => 'Payable',
-            'Q1' => 'Arrival Charges Issue',
-        ];
+        // Setting the header row (you can adjust based on your structure)
+        $sheet->setCellValue('A1', 'Client ID');
+        $sheet->setCellValue('B1', 'Wallet ID');
+        $sheet->setCellValue('C1', 'Reference ID');
+        $sheet->setCellValue('D1', 'Shipment ID');
+        $sheet->setCellValue('E1', 'Amount');
+        $sheet->setCellValue('F1', 'Charges');
+        $sheet->setCellValue('G1', 'Wallet Log Updated');
+        $sheet->setCellValue('H1', 'DPS ID');
+        $sheet->setCellValue('I1', 'DPS Type');
+        $sheet->setCellValue('J1', 'Discrepancy');
 
-        foreach ($headers as $cell => $value) {
-            $sheet->setCellValue($cell, $value);
-        }
-
-        // Write data rows
+        // You can decide to start writing data from row 2 onward
         $row = 2;
-        foreach ([$ArrivalIssuePayload, $OtherIssuePayload] as $payload) {
-            foreach ($payload as $data) {
-                $sheet->setCellValue('A' . $row, $data['client_id'] ?? '');
-                $sheet->setCellValue('B' . $row, $data['wallet_id'] ?? '');
-                $sheet->setCellValue('C' . $row, $data['reference_id'] ?? '');
-                $sheet->setCellValue('D' . $row, $data['shipment_id'] ?? '');
-                $sheet->setCellValue('E' . $row, $data['amount'] ?? 0);
-                $sheet->setCellValue('F' . $row, json_encode($data['charges'] ?? []));
-                $sheet->setCellValue('G' . $row, $data['wallet_log_updated'] ?? '');
-                $sheet->setCellValue('H' . $row, $data['dps_id'] ?? '');
-                $sheet->setCellValue('I' . $row, $data['dps_type'] ?? '');
-                $sheet->setCellValue('J' . $row, json_encode($data['missing_keys_in_old'] ?? []));
-                $sheet->setCellValue('K' . $row, json_encode($data['mismatched_values'] ?? []));
-                $sheet->setCellValue('L' . $row, json_encode($data['extra_keys_in_old'] ?? []));
-                $sheet->setCellValue('M' . $row, $data['old_total'] ?? 0);
-                $sheet->setCellValue('N' . $row, $data['new_total'] ?? 0);
-                $sheet->setCellValue('O' . $row, $data['difference'] ?? 0);
-                $sheet->setCellValue('P' . $row, $data['payable'] ?? 0);
-                $sheet->setCellValue('Q' . $row, $data['arrival_charges_issue'] ? 'Yes' : 'No');
-                $row++;
-            }
+        foreach ($ArrivalIssuePayload as $shipmentId => $data) {
+            $sheet->setCellValue('A' . $row, $data['client_id']);
+            $sheet->setCellValue('B' . $row, $data['wallet_id']);
+            $sheet->setCellValue('C' . $row, $data['reference_id']);
+            $sheet->setCellValue('D' . $row, $data['shipment_id']);
+            $sheet->setCellValue('E' . $row, $data['amount']);
+            $sheet->setCellValue('F' . $row, json_encode($data['charges']));
+            $sheet->setCellValue('G' . $row, $data['wallet_log_updated']);
+            $sheet->setCellValue('H' . $row, $data['dps_id']);
+            $sheet->setCellValue('I' . $row, $data['dps_type']);
+            $sheet->setCellValue('J' . $row, json_encode($data['discrepancy']));  // Store the discrepancy as a JSON string or handle as needed
+            $row++;
         }
 
-        // Save file
+        // If you want to add $OtherIssuePayload, you can do it similarly
+        foreach ($OtherIssuePayload as $shipmentId => $data) {
+            $sheet->setCellValue('A' . $row, $data['client_id']);
+            $sheet->setCellValue('B' . $row, $data['wallet_id']);
+            $sheet->setCellValue('C' . $row, $data['reference_id']);
+            $sheet->setCellValue('D' . $row, $data['shipment_id']);
+            $sheet->setCellValue('E' . $row, $data['amount']);
+            $sheet->setCellValue('F' . $row, json_encode($data['charges']));
+            $sheet->setCellValue('G' . $row, $data['wallet_log_updated']);
+            $sheet->setCellValue('H' . $row, $data['dps_id']);
+            $sheet->setCellValue('I' . $row, $data['dps_type']);
+            $sheet->setCellValue('J' . $row, json_encode($data['discrepancy']));  // Store the discrepancy as a JSON string or handle as needed
+            $row++;
+        }
+
         $directory = storage_path('app/public/test2');
+
         if (!file_exists($directory)) {
-            mkdir($directory, 0775, true);
+            mkdir($directory, 0775, true); // recursively create directory
         }
-
-        $fileName = 'shipment_data_' . now()->format('Y_m_d_H_i_s') . '.xlsx';
-        $filePath = $directory . '/' . $fileName;
-
+        // Save the file to the storage (local or cloud)
         $writer = new Xlsx($spreadsheet);
-        $writer->save($filePath);
+        $fileName = 'shipment_data_' . now()->format('Y_m_d_H_i_s') . '.xlsx';
+        $path = storage_path('app/public/test2/' . $fileName); // Save to storage path
 
-        return response()->download($filePath)->deleteFileAfterSend(true);
+        $writer->save($path);
+
+        return response()->download($path);
     }
 
 
