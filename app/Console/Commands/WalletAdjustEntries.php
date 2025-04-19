@@ -217,7 +217,7 @@ class WalletAdjustEntries extends Command
             }
             if ($hasKeyDiscrepancy) {
 
-                $ArrivalIssuePayload[$shipmentId] = [
+                $ArrivalIssuePayload[] = [
                     "client_id" => $dps->user_id,
                     "wallet_id" => $dps->wallet_id,
                     "reference_id" => $dps->id,
@@ -237,7 +237,7 @@ class WalletAdjustEntries extends Command
                     'arrival_charges_issue' => $hasKeyDiscrepancy,
                 ];
             } else {
-                $OtherIssuePayload[$shipmentId] = [
+                $OtherIssuePayload[] = [
                     "client_id" => $dps->user_id,
                     "wallet_id" => $dps->wallet_id,
                     "reference_id" => $dps->id,
