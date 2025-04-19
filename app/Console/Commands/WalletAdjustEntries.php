@@ -88,7 +88,7 @@ class WalletAdjustEntries extends Command
                         IFNULL(JSON_UNQUOTE(JSON_EXTRACT(fpl.details, '$.amount')), 0)
                 END, 2
             ) AS total_charges
-        ")
+        "),
             ])
             ->join('shipments', 'dps.shipment_id', '=', 'shipments.id')
             ->leftJoin('wallet_users as wu', function ($join) {
@@ -102,22 +102,36 @@ class WalletAdjustEntries extends Command
                 $join->on('dps2.shipment_id', '=', 'dps.shipment_id')
                     ->where('dps2.type', '=', 3);
             })
+
+            // Latest ID by reference_id from combined logs
             ->leftJoin(DB::raw('(
-        SELECT shipment_id, details,
-            JSON_UNQUOTE(JSON_EXTRACT(details, "$.reference_id")) AS reference_id
-        FROM finga_api_logs
-        UNION ALL
-        SELECT shipment_id, details,
-            JSON_UNQUOTE(JSON_EXTRACT(details, "$.reference_id")) AS reference_id
-        FROM finga_api_logs_archive
-    ) AS fpl'), 'fpl.reference_id', '=', 'dps.id')
+        SELECT MAX(id) AS id, JSON_UNQUOTE(JSON_EXTRACT(details, "$.reference_id")) AS reference_id
+        FROM (
+            SELECT id, details FROM finga_api_logs
+            UNION ALL
+            SELECT id, details FROM finga_api_logs_archive
+        ) AS combined_logs
+        GROUP BY reference_id
+    ) AS latest_fpl'), 'latest_fpl.reference_id', '=', 'dps.id')
+
+            // Fetch the full log entry with that latest ID
+            ->leftJoin(DB::raw('(
+        SELECT id, shipment_id, details
+        FROM (
+            SELECT id, shipment_id, details FROM finga_api_logs
+            UNION ALL
+            SELECT id, shipment_id, details FROM finga_api_logs_archive
+        ) AS all_logs
+    ) AS fpl'), 'fpl.id', '=', 'latest_fpl.id')
+
             ->where('dps.wallet_action_bid', 3)
             ->where('dps.charges', '>', 0)
             ->whereIn('dps.type', [0, 1])
             ->where('shipments.packaging_material_request', 0)
             ->where('flsr.wallet_log_charges_updated', 0)
             ->whereBetween('dps.created_at', ['2025-01-01 00:00:00', '2025-04-19 23:59:59'])
-            ->havingRaw('ABS(payable2) != ABS(total_charges)')->get();
+            ->havingRaw('ABS(payable2) != ABS(total_charges)')
+            ->get();
 
         $OtherIssuePayload = [];
         $ArrivalIssuePayload = [];
