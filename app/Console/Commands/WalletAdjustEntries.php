@@ -39,58 +39,61 @@ class WalletAdjustEntries extends Command
     {
 
         $query = DB::table('done_payment_shipments as dps')
-            ->selectRaw('
-                dps.*,
-                shipments.tracking_number, 
-                shipments.user_id, 
-                shipments.cash_handling_charges, 
-                shipments.insurance_charges, 
-                shipments.replacement_charges, 
-                shipments.try_and_buy_charges, 
-                shipments.intercept_charges, 
-                shipments.nsa_osa_charges, 
-                shipments.esc_charges, 
-                shipments.return_charges, 
-                shipments.weight_charges, 
-                shipments.fuel_surcharge, 
-                shipments.packaging_material_charges,
-                shipments.tracking_number,
-                shipments.id as shipment_id,
-                sac.wallet_charges,
-                sac.faf_charges,
-                ssc.reverse_pickup_charges,
-                wu.wallet_id as wallet_id,
-                flsr.wallet_settlement_updated,
-                flsr.wallet_log_updated,
-                flsr.wallet_log_charges_updated,
-                shipments.tracking_number,
-                shipments.id as shipment_id,
-                (dps.charges + dps.gst) AS payable2,
-                dps2.payable AS arrival_charges,
-                latest_fpl.details,
-                (
-                    IFNULL(JSON_UNQUOTE(JSON_EXTRACT(latest_fpl.details, "$.charges.esc_charges")), 0) +
-                    IFNULL(JSON_UNQUOTE(JSON_EXTRACT(latest_fpl.details, "$.charges.faf_charges")), 0) +
-                    IFNULL(JSON_UNQUOTE(JSON_EXTRACT(latest_fpl.details, "$.charges.gst_charges")), 0) +
-                    IFNULL(JSON_UNQUOTE(JSON_EXTRACT(latest_fpl.details, "$.charges.sms_charges")), 0) +
-                    IFNULL(JSON_UNQUOTE(JSON_EXTRACT(latest_fpl.details, "$.charges.fuel_surcharge")), 0) +
-                    IFNULL(JSON_UNQUOTE(JSON_EXTRACT(latest_fpl.details, "$.charges.return_charges")), 0) +
-                    IFNULL(JSON_UNQUOTE(JSON_EXTRACT(latest_fpl.details, "$.charges.weight_charges")), 0) +
-                    IFNULL(JSON_UNQUOTE(JSON_EXTRACT(latest_fpl.details, "$.charges.insurance_charges")), 0) +
-                    IFNULL(JSON_UNQUOTE(JSON_EXTRACT(latest_fpl.details, "$.charges.intercept_charges")), 0) +
-                    IFNULL(JSON_UNQUOTE(JSON_EXTRACT(latest_fpl.details, "$.charges.replacement_charges")), 0) +
-                    IFNULL(JSON_UNQUOTE(JSON_EXTRACT(latest_fpl.details, "$.charges.try_and_buy_charges")), 0) +
-                    IFNULL(JSON_UNQUOTE(JSON_EXTRACT(latest_fpl.details, "$.charges.cash_handling_charges")), 0) +
-                    IFNULL(JSON_UNQUOTE(JSON_EXTRACT(latest_fpl.details, "$.charges.reverse_pickup_charges")), 0) +
-                    IFNULL(JSON_UNQUOTE(JSON_EXTRACT(latest_fpl.details, "$.charges.non_service_area_charges")), 0) +
-                    IFNULL(JSON_UNQUOTE(JSON_EXTRACT(latest_fpl.details, "$.charges.packaging_material_charges")), 0) +
-                    IFNULL(JSON_UNQUOTE(JSON_EXTRACT(latest_fpl.details, "$.charges.reverse_pickup_charges")), 0)
-                ) AS total_charges
-    ')
+            ->select([
+                'dps.*',
+                'shipments.tracking_number',
+                'shipments.user_id',
+                'shipments.cash_handling_charges',
+                'shipments.insurance_charges',
+                'shipments.replacement_charges',
+                'shipments.try_and_buy_charges',
+                'shipments.intercept_charges',
+                'shipments.nsa_osa_charges',
+                'shipments.esc_charges',
+                'shipments.return_charges',
+                'shipments.weight_charges',
+                'shipments.fuel_surcharge',
+                'shipments.packaging_material_charges',
+                'shipments.id as shipment_id',
+                'sac.wallet_charges',
+                'sac.faf_charges',
+                'ssc.reverse_pickup_charges',
+                'wu.wallet_id',
+                'flsr.wallet_settlement_updated',
+                'flsr.wallet_log_updated',
+                'flsr.wallet_log_charges_updated',
+                DB::raw('(dps.charges + dps.gst) AS payable2'),
+                'dps2.payable AS arrival_charges',
+                'fpl.details',
+                DB::raw("
+            ROUND(
+                CASE
+                    WHEN JSON_EXTRACT(fpl.details, '$.charges') IS NOT NULL THEN
+                        IFNULL(JSON_UNQUOTE(JSON_EXTRACT(fpl.details, '$.charges.esc_charges')), 0) +
+                        IFNULL(JSON_UNQUOTE(JSON_EXTRACT(fpl.details, '$.charges.faf_charges')), 0) +
+                        IFNULL(JSON_UNQUOTE(JSON_EXTRACT(fpl.details, '$.charges.gst_charges')), 0) +
+                        IFNULL(JSON_UNQUOTE(JSON_EXTRACT(fpl.details, '$.charges.sms_charges')), 0) +
+                        IFNULL(JSON_UNQUOTE(JSON_EXTRACT(fpl.details, '$.charges.fuel_surcharge')), 0) +
+                        IFNULL(JSON_UNQUOTE(JSON_EXTRACT(fpl.details, '$.charges.return_charges')), 0) +
+                        IFNULL(JSON_UNQUOTE(JSON_EXTRACT(fpl.details, '$.charges.weight_charges')), 0) +
+                        IFNULL(JSON_UNQUOTE(JSON_EXTRACT(fpl.details, '$.charges.insurance_charges')), 0) +
+                        IFNULL(JSON_UNQUOTE(JSON_EXTRACT(fpl.details, '$.charges.intercept_charges')), 0) +
+                        IFNULL(JSON_UNQUOTE(JSON_EXTRACT(fpl.details, '$.charges.replacement_charges')), 0) +
+                        IFNULL(JSON_UNQUOTE(JSON_EXTRACT(fpl.details, '$.charges.try_and_buy_charges')), 0) +
+                        IFNULL(JSON_UNQUOTE(JSON_EXTRACT(fpl.details, '$.charges.cash_handling_charges')), 0) +
+                        IFNULL(JSON_UNQUOTE(JSON_EXTRACT(fpl.details, '$.charges.reverse_pickup_charges')), 0) +
+                        IFNULL(JSON_UNQUOTE(JSON_EXTRACT(fpl.details, '$.charges.non_service_area_charges')), 0) +
+                        IFNULL(JSON_UNQUOTE(JSON_EXTRACT(fpl.details, '$.charges.packaging_material_charges')), 0)
+                    ELSE
+                        IFNULL(JSON_UNQUOTE(JSON_EXTRACT(fpl.details, '$.amount')), 0)
+                END, 2
+            ) AS total_charges
+        ")
+            ])
             ->join('shipments', 'dps.shipment_id', '=', 'shipments.id')
-            ->leftjoin('wallet_users as wu', function ($join) {
+            ->leftJoin('wallet_users as wu', function ($join) {
                 $join->on('wu.user_id', '=', 'shipments.user_id')
-                    ->where('wu.substitute_user_id', '0');
+                    ->where('wu.substitute_user_id', '=', 0);
             })
             ->leftJoin('finja_log_settlement_records as flsr', 'flsr.shipment_id', '=', 'dps.shipment_id')
             ->leftJoin('shipment_additional_charges as sac', 'sac.shipment_id', '=', 'dps.shipment_id')
@@ -99,38 +102,22 @@ class WalletAdjustEntries extends Command
                 $join->on('dps2.shipment_id', '=', 'dps.shipment_id')
                     ->where('dps2.type', '=', 3);
             })
-            ->leftJoin(DB::raw("(
-        SELECT merged.shipment_id, merged.details FROM (
-            SELECT shipment_id, details, id
-            FROM finga_api_logs
-            WHERE nature_id IN (7, 21) OR nature = 'settlement-request'
-            UNION ALL
-            SELECT shipment_id, details, id
-            FROM finga_api_logs_archive
-            WHERE nature_id IN (7, 21) OR nature = 'settlement-request'
-        ) AS merged
-        INNER JOIN (
-            SELECT shipment_id, MAX(id) AS max_id FROM (
-                SELECT shipment_id, id
-                FROM finga_api_logs
-                WHERE nature_id IN (7, 21) OR nature = 'settlement-request'
-                UNION ALL
-                SELECT shipment_id, id
-                FROM finga_api_logs_archive
-                WHERE nature_id IN (7, 21) OR nature = 'settlement-request'
-            ) AS all_logs
-            GROUP BY shipment_id
-        ) AS latest
-        ON merged.shipment_id = latest.shipment_id AND merged.id = latest.max_id
-    ) AS latest_fpl"), 'latest_fpl.shipment_id', '=', 'dps.shipment_id')
+            ->leftJoin(DB::raw('(
+        SELECT shipment_id, details,
+            JSON_UNQUOTE(JSON_EXTRACT(details, "$.reference_id")) AS reference_id
+        FROM finga_api_logs
+        UNION ALL
+        SELECT shipment_id, details,
+            JSON_UNQUOTE(JSON_EXTRACT(details, "$.reference_id")) AS reference_id
+        FROM finga_api_logs_archive
+    ) AS fpl'), 'fpl.reference_id', '=', 'dps.id')
             ->where('dps.wallet_action_bid', 3)
-//            ->where('dps.charges', '>', 0)
+            ->where('dps.charges', '>', 0)
             ->whereIn('dps.type', [0, 1])
             ->where('shipments.packaging_material_request', 0)
             ->where('flsr.wallet_log_charges_updated', 0)
-            ->whereBetween('dps.created_at', ['2025-01-01 00:00:00', '2025-04-18 23:59:59'])
-            ->havingRaw('ABS(payable2) != ABS(total_charges)')
-            ->havingRaw('payable != 0')->get();
+            ->whereBetween('dps.created_at', ['2025-01-01 00:00:00', '2025-04-19 23:59:59'])
+            ->havingRaw('ABS(payable2) != ABS(total_charges)')->get();
 
         $OtherIssuePayload = [];
         $ArrivalIssuePayload = [];
@@ -362,7 +349,7 @@ class WalletAdjustEntries extends Command
             mkdir($directory, 0775, true);
         }
 
-        $fileName = 'shipment_data_' . now()->format('Y_m_d_H_i_s') . '.xlsx';
+        $fileName = 'shipment_data'. '.xlsx';
         $filePath = $directory . '/' . $fileName;
 
         $writer = new Xlsx($spreadsheet);
