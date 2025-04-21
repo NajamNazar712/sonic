@@ -15929,13 +15929,13 @@ class AdminReportsController extends Controller
                     $rowArray['current_hub_name'] = $rowArray['misroutedCityname'];
                 } elseif (in_array($rowArray['shipper_status_id'], [49, 3]) && (in_array($rowArray['cargo_status_id'], [3, 2, 4, 7, 8, 9, 6]))) {
                       //Shipment In Transit || Shipment Misrouted Forwarded concered hub change reference TO-6939
-                        $rowArray['current_hub_name'] = $rowArray['destination'];
+                        $rowArray['current_hub_name'] = $rowArray['hub'];
                     
                 } elseif (in_array($rowArray['shipper_status_id'], [26, 73, 32, 70, 76]) && in_array($rowArray['cargo_status_id'], [4, 7, 8, 9, 6])) {
                      //Shipment In Transit || Shipment Misrouted Forwarded concered hub change reference TO-6939
-                        $rowArray['current_hub_name'] = $rowArray['origin'];
+                        $rowArray['current_hub_name'] = $rowArray['origin_hub'];
                 } elseif (in_array($rowArray['shipper_status_id'], [18, 34, 23, 24, 47, 48, 2])) {
-                    $rowArray['current_hub_name'] = $rowArray['origin'];
+                    $rowArray['current_hub_name'] = $rowArray['origin_hub'];
                 } elseif (in_array($rowArray['shipper_status_id'], [54, 55, 69, 7, 4, 8])) {
                     $rowArray['current_hub_name'] = (($rowArray['intercepttype'] == 1) ?  $rowArray['intercept_city_name'] : $rowArray['destination']);
                 } elseif (in_array($rowArray['shipper_status_id'], [22, 21, 75]) && $rowArray['return_city'] != null) {
@@ -15946,7 +15946,7 @@ class AdminReportsController extends Controller
                         $rowArray['current_hub_name'] = $rowArray['current_hub_name'];
                     }else{
                         if (in_array($rowArray['shipper_status_id'], [1, 2, 61])) {
-                            $rowArray['current_hub_name'] = $rowArray['origin'];
+                            $rowArray['current_hub_name'] = $rowArray['origin_hub'];
                         } else {
                             $rowArray['current_hub_name'] = $rowArray['hub'];
                         }
