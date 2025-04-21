@@ -2991,7 +2991,9 @@ class ShipperShipmentBookController extends Controller
     {
         $user_id = session('user_id');
         if ($user_id == 4226) {
-            Log::channel('cronJobLog')->info('s Shipment ' . json_encode($request->all()));
+            $forms = $request->input('form');
+            $rowCount = is_array($forms) ? count($forms) : 0;
+            Log::channel('cronJobLog')->info('s Shipment ' . $rowCount);
         }
 
         $account_type = session('account_type');
