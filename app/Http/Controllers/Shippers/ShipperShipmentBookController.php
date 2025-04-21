@@ -2990,12 +2990,6 @@ class ShipperShipmentBookController extends Controller
     public function excel_store(Request $request)
     {
         $user_id = session('user_id');
-        if ($user_id == 4226) {
-            $forms = $request->input('form');
-            $rowCount = is_array($forms) ? count($forms) : 0;
-            Log::channel('cronJobLog')->info('s Shipment ' . $rowCount);
-        }
-
         $account_type = session('account_type');
         $pending_payable = PendingPayment::check_negative_payable($user_id,$account_type);
 
