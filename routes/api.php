@@ -681,8 +681,19 @@ use Illuminate\Http\Request;
 
             Route::get('profile', 'ShipperAppController@profile')->name('profile');
 
+            //meta api for booking resources
+            Route::get('booking_resources','ShipperAppController@booking_resources')->name('booking_resources');
+
+            //shipper pickup addresss and return addresses
+            Route::get('pickup_address/{shipper_id}','ShipperAppController@pickup_address')->name('pickup_address');
+
             //order management Api
-            Route::get('order_list', 'ShipperOrderManagementController@order_list')->name('order_list');
+            Route::prefix('orders')->name('orders.')->group(function (){
+                Route::get('order_list', 'ShipperOrderManagementController@order_list')->name('order_list');
+            });
+
+
+
         });
     });
 

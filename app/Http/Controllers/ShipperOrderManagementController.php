@@ -50,7 +50,8 @@ class ShipperOrderManagementController extends Controller
            ->orderBy('shipments.id', 'desc')
            ->paginate($perPage);
 
-       return response()->json($order_list);
+       return response()->json(['status' => 0 , 'message' => 'Success' ,'order_list'=>$order_list]);
+
 
 //       with('shipping_mode','status_shipper','payment_status')
    }

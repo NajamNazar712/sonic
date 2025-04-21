@@ -2,11 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\BookingType;
+use App\Http\Models\City;
+use App\Http\Models\DeliveryType;
+use App\Http\Models\Product;
+use App\Http\Models\ShippingMode;
 use Illuminate\Http\Request;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
-use Validator;
 use App\Http\Models\Shipper\UserBankInfo;
+use Illuminate\Support\Facades\Validator;
 
 
 class ShipperAppController extends Controller
@@ -49,6 +55,50 @@ class ShipperAppController extends Controller
         ->where('user_bank_infos.user_id', $request->shipper_id)->get();
         
         return response()->json(['status' => 0 , 'message' => 'Success' , 'data' => $record]);
+
+    }
+
+    public function booking_resources(Request $request)
+    {
+        $shipping_modes = ShippingMode::all();
+        $product_types = Product::all();
+        $service_types = BookingType::all();
+        $delivery_types = DeliveryType::all();
+        $cities = City::select('id','name','hub_id')
+            ->where('status',1)
+            ->get();
+
+        $booking_resoureces = [
+            'shipping_mode' => $shipping_modes,
+            'product_types' => $product_types,
+            'service_types' => $service_types,
+            'delivery_types' => $delivery_types,
+            'cities' => $cities,
+
+        ];
+        return response()->json(['status' => 0 , 'message' => 'Success' , 'booking_resoureces' => $booking_resoureces]);
+
+    }
+
+    public function pickup_address(Request $request)
+    {
+        $shipper_id = $request->shipper_id;
+
+        $pickup_addresses = UserShippingInfo::where('status',1)
+            ->where('user_id',$shipper_id)->get();
+
+        $return_addresses = null;
+
+        $global_setting = GlobalSettings::where('type','omni_users')->first();
+        if($global_setting) {
+            $omni_user = explode(',', $global_setting->text);
+           if(in_array($shipper_id,$omni_user)) {
+               $return_addresses = UserShippingInfo::where('status',1)
+                   ->where('user_id',$request->shipper_id)->get();
+           }
+        }
+
+        return response()->json(['status' => 0 , 'message' => 'Success' , 'pickup_addresses' => $pickup_addresses,'return_addresses' => $return_addresses]);
 
     }
 }
