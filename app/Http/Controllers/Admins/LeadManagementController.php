@@ -229,20 +229,24 @@ class LeadManagementController extends Controller
         }
         return Datatables::of($leads)
             ->filterColumn('status', function ($query, $keyword) {
-                if ($keyword != '') {
-                    $query->where(function ($q) use ($keyword) {
-                        $q->where('leads.status_id', $keyword);
-                        if ($keyword == '12') {
-                            $q->orWhereIn('leads.email_address', function ($subQuery) {
-                                $subQuery->select('email')
-                                         ->from('users')
-                                         ->where('status', '3');
-                            });
-                        }
-                    });                    
-                } else {
-                    $query->whereRaw('false');
-                }
+                $query->where(function ($q) use ($keyword) {
+                    if ($keyword == '12') {
+                        $q->where('leads.status_id', 12)
+                          ->orWhereIn('leads.email_address', function ($subQuery) {
+                              $subQuery->select('email')
+                                       ->from('users')
+                                       ->where('status', '3');
+                          });
+                    } else {
+                        $q->where('leads.status_id', $keyword)
+                          ->whereNotIn('leads.email_address', function ($subQuery) {
+                              $subQuery->select('email')
+                                       ->from('users')
+                                       ->where('status', '3');
+                          });
+                    }
+                });
+                
             })
             ->editColumn('reference_person', function ($query) {
                 if ($query->rider_id) {
