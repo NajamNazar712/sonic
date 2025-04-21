@@ -685,13 +685,25 @@ use Illuminate\Http\Request;
             Route::get('booking_resources','ShipperAppController@booking_resources')->name('booking_resources');
 
             //shipper pickup addresss and return addresses
-            Route::get('pickup_address/{shipper_id}','ShipperAppController@pickup_address')->name('pickup_address');
+            Route::get('pickup_address','ShipperAppController@pickup_address')->name('pickup_address');
 
             //order management Api
             Route::prefix('orders')->name('orders.')->group(function (){
-                Route::get('order_list', 'ShipperOrderManagementController@order_list')->name('order_list');
+                Route::get('order_list', 'ShipperOrderManagementApiController@order_list')->name('order_list');
             });
 
+            //finance Apis
+            Route::prefix('finance')->name('finance.')->group(function (){
+                    Route::get('payments','ShipperFinanceApiController@payment_list')->name('payments');
+            });
+
+            // CRM Apis
+            Route::prefix('crm')->name('crm.')->group(function (){
+                Route::post('add_request', 'ShippeCrmApiController@add_crm_request')->name('add_request');
+                Route::get('request_summary', 'ShippeCrmApiController@crm_request_summary')->name('request_summary');
+                Route::get('request_list', 'ShippeCrmApiController@crm_request_list')->name('request_list');
+                Route::post('single_crm_request','ShippeCrmApiController@single_crm_request')->name('single_crm_request');
+            });
 
 
         });

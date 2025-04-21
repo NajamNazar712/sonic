@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\BookingType;
 use App\Http\Models\City;
+use App\Http\Models\CRM\CrmRequestCaseNature;
+use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\DeliveryType;
 use App\Http\Models\Product;
 use App\Http\Models\ShippingMode;
@@ -67,6 +69,8 @@ class ShipperAppController extends Controller
         $cities = City::select('id','name','hub_id')
             ->where('status',1)
             ->get();
+        $crm_request_case_natures = CrmRequestCaseNature::all();
+        $crm_request_case_nature_types = CrmRequestCaseNatureType::where('status_id',1)->get();
 
         $booking_resoureces = [
             'shipping_mode' => $shipping_modes,
@@ -74,6 +78,8 @@ class ShipperAppController extends Controller
             'service_types' => $service_types,
             'delivery_types' => $delivery_types,
             'cities' => $cities,
+            'crm_request_case_natures'=>$crm_request_case_natures,
+            'crm_request_case_nature_types'=>$crm_request_case_nature_types
 
         ];
         return response()->json(['status' => 0 , 'message' => 'Success' , 'booking_resoureces' => $booking_resoureces]);

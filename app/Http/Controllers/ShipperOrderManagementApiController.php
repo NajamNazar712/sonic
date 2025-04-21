@@ -6,7 +6,7 @@ use App\Http\Models\Shipment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class ShipperOrderManagementController extends Controller
+class ShipperOrderManagementApiController extends Controller
 {
    public  function order_list(Request $request)
    {

@@ -4899,7 +4899,8 @@ class APIController extends Controller
                 } else {
                     return response()->json(['status' => 1, 'message' => 'case_nature_type_id not found!']);
                 }
-            } elseif ($nature_id == 4) {
+            }
+            elseif ($nature_id == 4) {
                 $crm_request_type = CrmRequestCaseNatureType::where('nature_id', $nature_id)->where('status_id', 1)->pluck('id')->toArray();
                 if (in_array($complaint_id, $crm_request_type)) {
                     if ($complaint_id == 26) {
@@ -5006,7 +5007,8 @@ class APIController extends Controller
                 } else {
                     return response()->json(['status' => 1, 'message' => 'case_nature_type_id not found!']);
                 }
-            } else if ($nature_id == 3) {
+            }
+            else if ($nature_id == 3) {
                 $rules = [
                     'description' => ['required'],
                 ];
@@ -5023,7 +5025,8 @@ class APIController extends Controller
                     // $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description);
                     return response()->json(['status' => 0, 'message' => 'CRM Request has been added', 'id' => $crm_request]);
                 }
-            } else {
+            }
+            else {
                 return response()->json(['status' => 1, 'message' => 'case_nature_id should be 1 (Complaints), 2 (Service Request) and 4 (Claims)']);
             }
         }
