@@ -9896,7 +9896,7 @@ class NotificationsController extends Controller
                             $body = str_replace('[rider]', $rider->name, $body);
                         }
 
-                        $to = '032083230070';
+                        $to = '03208323070';
                         self::sms($body, $to, null, null,$id);
                     }
                 } else if ($id == 186) {
