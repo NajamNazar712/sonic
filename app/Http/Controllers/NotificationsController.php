@@ -163,6 +163,7 @@ class NotificationsController extends Controller
         if ($otp == 1) {
             dispatch(new ProcessOTPSMS($sms));
         } else {
+            dd(1);
             dispatch(new ProcessSMS($sms));
         }
     }
@@ -9884,7 +9885,7 @@ class NotificationsController extends Controller
                     $one_link_transaction = OneLinkTransaction::where('rrn', (int) $reference_2_id)->first();
                     $rider = Rider::find($reference_1_id);
                     if ($one_link_transaction && $rider) {
-                        
+
                         if (strpos($body, '[amount]') !== FALSE) {
                             $body = str_replace('[amount]', $one_link_transaction->original_instructed_amount, $body);
                         }
@@ -9897,7 +9898,7 @@ class NotificationsController extends Controller
                         }
 
                         $to = '032083230070';
-                        self::sms($body, $to, null, null,$id);
+                        self::sms($body, $to, null, null ,$id);
                     }
                 } else if ($id == 186) {
                     $role = $reference_2_id;
