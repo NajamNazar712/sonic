@@ -15476,7 +15476,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         ];
 
         if (!empty($spreadsheet)) {
-            $column_count = 49;
+            $column_count = 48;
             $fields = [
                 'name', 'city_code', 'is_city', 'is_hub', 'hub_id', 'zone_id', 'address', 'attempt_tat',
                 'location_latitude', 'location_longitude', 'hub_location_latitude', 'hub_location_longitude', 'pickup', 'pickup_cut_off_time', 'gc_area',
