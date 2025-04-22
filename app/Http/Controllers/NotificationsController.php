@@ -9888,13 +9888,18 @@ class NotificationsController extends Controller
                         if (strpos($body, '[amount]') !== FALSE) {
                             $body = str_replace('[amount]', $one_link_transaction->original_instructed_amount, $body);
                         }
+                        dd(1);
                         if (strpos($body, '[tracking_number]') !== FALSE) {
                             $body = str_replace('[tracking_number]', $one_link_transaction->rrn, $body);
                         }
+                        dd(11);
+
                         if (strpos($body, '[rider]') !== FALSE) {
                             $body = str_replace('[rider]', $rider->name, $body);
                         }
-                        dd(4);
+
+                        dd(111);
+
                         $to = '032083230070';
                         self::sms($body, $to, null, null,$id);
                     }
