@@ -92,6 +92,10 @@ class ShipmentStatusWebhookController extends Controller
                     // Log::channel('botCallJobLog')->info('s ' . 'Webhook log payload' . json_encode($payload));
                 }
                 $response = $client->post('', [
+                    'headers' => [
+                        'User-Agent' => 'My-App/1.0', // Optional, mimic the same user agent as Postman
+                        'Accept' => 'application/json', // Expect a JSON response
+                    ],
                     'form_params' => $payload
                 ]);
                
@@ -108,8 +112,12 @@ class ShipmentStatusWebhookController extends Controller
                     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                     $response1 = curl_exec($ch);
                     curl_close($ch);
+                    $statusCode = $response->getStatusCode();
                     Log::channel('botCallJobLog')->info("cURL Response: " . $response1);
-
+                    Log::channel('botCallJobLog')->info("Status Code Check: " . $statusCode);
+                    $body = $response->getBody()->getContents(); // Get the response body
+                    Log::channel('botCallJobLog')->info("Guzzle Response Body: " . $body);
+                    Log::channel('botCallJobLog')->info("Guzzle Status Code: " . $response->getStatusCode());
                     // Log::channel('botCallJobLog')->info('s ' . 'Webhook log responseBody-body' . json_encode($response1));
                 }
                 if ($response instanceof \Psr\Http\Message\ResponseInterface) {
