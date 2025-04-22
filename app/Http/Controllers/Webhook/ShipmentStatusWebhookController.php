@@ -88,18 +88,31 @@ class ShipmentStatusWebhookController extends Controller
                 if($otp){
                     $payload['otp'] = $otp;
                 }
-               
-                $response = $client->post('', [
-                    'form_params' => $payload
-                ]);
+                
+                if ($user_id != 30860) {
+                    $response = $client->post('', [
+                        'form_params' => $payload
+                    ]);
+                }
 
+                if ($user_id == 30860) {
+                    $response = $client->post('', [
+                        'json' => $payload,
+                    ]);
+                    // $body = $response->getBody();
+                    // // // $body->rewind();  // Rewind the stream to ensure we're reading from the start
+                    // $responseBody = $body->getContents(); // Get the body content
+                    // Log::channel('botCallJobLog')->info("Guzzle Response Body: " . $responseBody);
+                    // // Log::channel('botCallJobLog')->info('s ' . 'Webhook log responseBody-body' . json_encode($response1));
+                }
                 if ($response instanceof \Psr\Http\Message\ResponseInterface) {
                     $status_code = $response->getStatusCode();
                 } else {
                     $status_code = 500;
                 }
-
-               
+                // if ($user_id == 30860) {
+                //     Log::channel('botCallJobLog')->info('s ' . 'Webhook log Status-Code' . $status_code . "Payload" . json_encode($payload));
+                // }
                 if (in_array($status_code, [200, 201, 202, 204])) {
                     break;
                 }
@@ -107,7 +120,7 @@ class ShipmentStatusWebhookController extends Controller
             }
             catch (\GuzzleHttp\Exception\ConnectException $e) {
                 // log the error here
-                if ($user_id == 32032) {
+                if ($user_id == 30860) {
                     Log::channel('botCallJobLog')->info('s ' . 'Webhook log check-error' . json_encode($e->getMessage()));
                 }
                 $res = $e->getMessage();

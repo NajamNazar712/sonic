@@ -10579,21 +10579,33 @@ class GlobalSettingsController extends Controller
     
     public function wallet_shippers_add(Request $request)
     {
-        $shipper_id = $request->wallet_shipper_id;
-       
-        if (!empty($shipper_id)) {
-            $shipper_exist = WalletShipperSetting::where('user_id', $shipper_id);
-            if ($shipper_exist->exists()) {
-                return redirect()->back()->with('error', 'Already Exist !');
-            } else {
-                $new_shipper = new WalletShipperSetting();
-                $new_shipper->user_id = $shipper_id;
-                $new_shipper->add_by = Auth::id();
-                $new_shipper->save();
-
-                return redirect()->back()->with('success', 'Updated!');
+        // dd($request->wallet_shipper_id);
+        $shipper_ids = (array) $request->wallet_shipper_id; 
+        $already_existing_ids = [];
+        $bulkData = [];
+        if (!empty($shipper_ids)) {
+            foreach ($shipper_ids as $id) {
+                $exists = WalletShipperSetting::where('user_id', $id)->exists();
+        
+                if ($exists) {
+                    $already_existing_ids[] = $id;
+                } else {
+                    $bulkData[] = [
+                        'user_id' => $id, 
+                        'add_by' => Auth::id(),
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                }
             }
-        } else {
+            WalletShipperSetting::insert($bulkData);        
+            if (!empty($already_existing_ids)) {
+                return redirect()->back()->with('error', 'Already exists for IDs: ' . implode(', ', $already_existing_ids));
+            } else {
+                return redirect()->back()->with('success', 'All Shippers Added Successfully!');
+            }
+        }
+         else {
             return redirect()->back()->with('error', 'Shipper Required !');
         }
     }

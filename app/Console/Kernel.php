@@ -172,7 +172,8 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\FailedStatusRePushToWallet',
         '\App\Console\Commands\RerunWalletSettlement',
         '\App\Console\Commands\BulkStatusSharingWithWallet',
-        
+        '\App\Console\Commands\WalletUsersMakeToDonePayments',
+        '\App\Console\Commands\UpdateShipmentAdditionalCharges',
         'App\Console\Commands\ReceiveDeliveriesReportNew',
         'App\Console\Commands\ReceiveReturnDeliveries',
         'App\Console\Commands\DailyDeliveryNoteHistory',
@@ -654,7 +655,9 @@ class Kernel extends ConsoleKernel
                 }
             }
         }
-
+        $schedule->command('update:shipment_additional_charges')->withoutOverlapping()->daily()->runInBackground();
+        $schedule->command('wallet-users:make-to-done')->dailyAt('06:00')->runInBackground();
+        
     }
     /**
      * Register the commands for the application.
