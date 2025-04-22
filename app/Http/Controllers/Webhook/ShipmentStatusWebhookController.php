@@ -93,7 +93,8 @@ class ShipmentStatusWebhookController extends Controller
                 }
                 $response = $client->post('', [
                     'headers' => [
-                        'Accept' => 'application/json'
+                        'Accept' => 'application/json',      // Ensure we accept JSON responses
+                        'Content-Type' => 'application/json' // Set Content-Type as JSON for the server
                     ],
                     'form_params' => $payload
                 ]);
