@@ -50,7 +50,7 @@ class ProcessSMS implements ShouldQueue
             }
         }
         catch(Exception $exception) {
-            $to = ['asad.ahsan@trax.pk'];
+            $to = ['asad.ahsan@trax.pk', 'muhammad.ahmed@trax.pk'];
             $subject = '[Error] SMS API';
             $body = 'Error Exception.<br/>' . json_encode($exception->getMessage());
 
