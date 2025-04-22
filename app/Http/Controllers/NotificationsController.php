@@ -9881,24 +9881,20 @@ class NotificationsController extends Controller
                         self::sms($body, $to, NULL, NULL, $id);
                     }
                 } else if ($id == 185) {
-                    $one_link_transaction = OneLinkTransaction::where('rrn', (int) $reference_2_id)->exists();
+                    $one_link_transaction = OneLinkTransaction::where('rrn', (int) $reference_2_id)->first();
                     $rider = Rider::find($reference_1_id);
                     if ($one_link_transaction && $rider) {
-                        dd(0);
+                        
                         if (strpos($body, '[amount]') !== FALSE) {
                             $body = str_replace('[amount]', $one_link_transaction->original_instructed_amount, $body);
                         }
-                        dd(1);
                         if (strpos($body, '[tracking_number]') !== FALSE) {
                             $body = str_replace('[tracking_number]', $one_link_transaction->rrn, $body);
                         }
-                        dd(11);
 
                         if (strpos($body, '[rider]') !== FALSE) {
                             $body = str_replace('[rider]', $rider->name, $body);
                         }
-
-                        dd(111);
 
                         $to = '032083230070';
                         self::sms($body, $to, null, null,$id);
