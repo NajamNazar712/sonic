@@ -101,29 +101,15 @@ class ShipmentStatusWebhookController extends Controller
                
 
                 if ($user_id == 30860) {
-                    $ch = curl_init();
-                    curl_setopt($ch, CURLOPT_URL, $url);
-                    curl_setopt($ch, CURLOPT_POST, 1);
-                    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-                    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                        'Content-Type: application/json',
-                        'Accept: application/json',
-                    ]);
-                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                    $response1 = curl_exec($ch);
-                    curl_close($ch);
-                    $statusCode = $response->getStatusCode();
-                    Log::channel('botCallJobLog')->info("cURL Response: " . $response1);
-                    Log::channel('botCallJobLog')->info("Status Code Check: " . $statusCode);
                     $response = $client->post($url, [
                         'headers' => [
                             'User-Agent' => 'My-App/1.0',
                             'Accept' => 'application/json',
                         ],
-                        'json' => $payload,
+                        'form_params' => $payload,
                     ]);
                     $body = $response->getBody();
-                    $body->rewind();  // Rewind the stream to ensure we're reading from the start
+                    // $body->rewind();  // Rewind the stream to ensure we're reading from the start
                     $responseBody = $body->getContents(); // Get the body content
                     Log::channel('botCallJobLog')->info("Guzzle Response Body: " . $responseBody);
 
