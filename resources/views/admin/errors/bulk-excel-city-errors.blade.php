@@ -36,7 +36,6 @@
                                         <th>Is Hub</th>
                                         <th>Select Hub</th>
                                         <th>Select Zone</th>
-                                        <th>Select Province</th>
                                         <th>Add Attempt TAT</th>
                                         <th>Location latitude</th>
                                         <th>Location longitude</th>

@@ -15694,7 +15694,6 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
             $cityID = array_column($forms, 'hub_id');
             $cities = City::whereIn('id', $cityID)->get()->keyBy('id');
-            $provinces = Province::whereIn('id', $provinceID)->get()->keyBy('id');
 
             foreach ($forms as $item) {
                 if ((array_key_exists('closest_hub', $item) && is_null($item['closest_hub'])) || $item['is_city'] == 1) {
@@ -15850,7 +15849,6 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             $hubs = City::pluck( 'name', 'id');
 
             $zones = Zone::pluck('name', 'id');
-            $provinces = Province::pluck('name', 'id');
 
             $vehicles = Fleet::where('status', 1)->pluck('reg_number','id');
 
@@ -15859,7 +15857,6 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 'errors' => $errors,
                 'hubs' => $hubs,
                 'zones' => $zones,
-                'provinces' => $provinces,
                 'vehicles' => $vehicles
             ]);
         }
