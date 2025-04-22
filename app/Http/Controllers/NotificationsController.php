@@ -9883,7 +9883,6 @@ class NotificationsController extends Controller
                 } else if ($id == 185) {
                     $one_link_transaction = OneLinkTransaction::where('rrn', (int) $reference_2_id)->exists();
                     $rider = Rider::find($reference_1_id);
-                    dd(1);
                     if ($one_link_transaction && $rider) {
 
                         dd(2);
