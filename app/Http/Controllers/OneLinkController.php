@@ -173,7 +173,7 @@ class OneLinkController extends Controller
             'stan' => $stan
         ])->first();
 
-        dd($stan);
+        dd($stan, $data);
         if ($existingTransaction) {
             try {
                 DB::transaction(function () use ($existingTransaction, $data, $natureId, $rrn, $subDept) {
