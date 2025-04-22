@@ -25,6 +25,7 @@ class RetryJobsInRange extends Command
         if($queue != null){
             $failedJobs = DB::table('failed_jobs')
             ->where('queue',$queue)
+            ->orderBy('id','desc')
                 ->get();
         }else{
             $failedJobs = DB::table('failed_jobs')
