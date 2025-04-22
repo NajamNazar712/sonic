@@ -223,6 +223,8 @@ class OneLinkController extends Controller
                     }
                 });
 
+                dd($stan);
+                
                 $response = [
                     "responseCode" => "00",
                     "responseDesc" => "Processed OK",

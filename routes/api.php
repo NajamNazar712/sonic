@@ -152,6 +152,9 @@ use Illuminate\Http\Request;
             Route::post('verifyDeliveredShipmentDQRCMerchant', 'OneLinkController@verifyDeliveredShipmentDQRCMerchant')->name('verifyDeliveredShipmentDQRCMerchant');
             Route::post('notifyMerchant', 'OneLinkController@notifyMerchant')->name('notifyMerchant');
             Route::post('1Link/paymentNotification', 'OneLinkController@paymentNotification')->name('paymentNotification');
+
+            Route::post('notifyMerchant', 'OneLinkController@notifyMerchant')->name('notifyMerchant');
+
         });
 
         //Current
