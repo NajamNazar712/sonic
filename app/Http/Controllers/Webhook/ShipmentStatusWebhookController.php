@@ -93,20 +93,16 @@ class ShipmentStatusWebhookController extends Controller
                 }
                 if ($user_id != 30860) {
                     $response = $client->post('', [
-                        'headers' => [
-                            'User-Agent' => 'My-App/1.0', // Optional, mimic the same user agent as Postman
-                            'Accept' => 'application/json', // Expect a JSON response
-                        ],
                         'form_params' => $payload
                     ]);
                 }
 
                 if ($user_id == 30860) {
                     $response = $client->post($url, [
-                        'headers' => [
-                            'User-Agent' => 'My-App/1.0',
-                            'Accept' => 'application/json',
-                        ],
+                        // 'headers' => [
+                        //     'User-Agent' => 'My-App/1.0',
+                        //     'Accept' => 'application/json',
+                        // ],
                         'json' => $payload,
                     ]);
                     $body = $response->getBody();
