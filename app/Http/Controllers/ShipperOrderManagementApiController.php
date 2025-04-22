@@ -11,8 +11,6 @@ class ShipperOrderManagementApiController extends Controller
    public  function order_list(Request $request)
    {
 
-       $perPage = request()->get('per_page', 50);
-
        $order_list = Shipment::join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
            ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
            ->join('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -47,10 +45,13 @@ class ShipperOrderManagementApiController extends Controller
                'sj.remarks as cancellation_remarks',
            ])
            ->groupBy('shipments.id')
-           ->orderBy('shipments.id', 'desc')
-           ->paginate($perPage);
+           ->orderBy('shipments.id', 'desc');
 
-       return response()->json(['status' => 0 , 'message' => 'Success' ,'order_list'=>$order_list]);
+       if($order_list->isNotEmpty()) {
+           return response()->json(['status' => 0 , 'message' => 'Success' ,'order_list'=>$order_list]);
+       }
+       return response()->json(['status' => 1 , 'message' => 'Shipments Order not found!']);
+
 
 
 //       with('shipping_mode','status_shipper','payment_status')
