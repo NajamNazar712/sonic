@@ -9769,7 +9769,9 @@ class GlobalSettingsController extends Controller
         return view('admin.settings.CRM.add_auto_assign')->with(['origins'=>$origins,'agents' => $agents, 'zones' => $zones, 'case_natures' => $case_natures, 'segments' => $segments, 'shipment_status' => $shipment_status]);
     }
     public function get_shipper_key($agent_id) {
-        $shipper_keys = SaleTierTag::join('users as u', 'u.id', 'sale_tier_tags.user_id')->WhereNotNull('kam')
+        $shipper_keys = SaleTierTag::join('users as u', 'u.id', 'sale_tier_tags.user_id')
+            ->where('u.status',3)
+            ->WhereNotNull('kam')
             ->where('kam',$agent_id)->select('u.id', 'u.name')->get();
         if($shipper_keys->isNotEmpty()){
             return response()->json(['status' => 1, 'shipper_keys' => $shipper_keys]);

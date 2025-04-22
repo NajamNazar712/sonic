@@ -2,27 +2,27 @@
 
 namespace App\Console\Commands;
 
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Admins\AdminReportsEmailController;
 use App\Http\Controllers\NotificationsController;
 use Carbon\Carbon;
-use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 
-class ReceiveReturnDeliveries extends Command
+class QualityOfServiceReport extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'email:daily_return_received_deliveries_report';
+    protected $signature = 'email:quality_of_service_report';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Daily Report for Return Received Deliveries';
+    protected $description = 'Receive Quality of Service Report';
 
     /**
      * Execute the console command.
@@ -31,14 +31,14 @@ class ReceiveReturnDeliveries extends Command
      */
     public function handle()
     {
-
         $setting = DB::table('global_settings')
-        ->where('type', 'receive_return_deliveries_report_time')
+        ->where('type', 'quality_of_service_report_time')
+        ->orWhere('type', 'quality_of_service_report_other_time')
         ->value('setting_value');
 
         if ($setting == 1) {
-            $response = AdminReportsEmailController::return_deliveries_receive();
-            NotificationsController::send(237, $response);
+            $response = AdminReportsEmailController::qsr_daily_report();
+            NotificationsController::send(242, $response);
         }
     }
 }
