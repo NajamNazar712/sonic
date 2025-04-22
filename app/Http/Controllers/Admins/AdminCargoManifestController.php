@@ -8035,26 +8035,44 @@ class AdminCargoManifestController extends Controller
         $id = $request->get('id');
         $status = $request->get('status');
         $auth_user = Auth::user();    
+
         if (!$id || is_null($status)) {
-            return response()->json(['error' => 'Invalid ID or Status provided.'], 400);
+            return response()->json(['error' => 'Invalid ID or Status provided.']);
         }
+
         $sack_bag = IssueSackBagOrigin::find($id);
         if (!$sack_bag) {
-            return response()->json(['error' => 'Sack-Bag not found.'], 404);
+            return response()->json(['error' => 'Sack-Bag not found.']);
         }
-        $sack_bag->status = (int)$status;
-        if ((int)$status === 0) {
+
+        $new_status = (int)$status;
+        $current_status = $sack_bag->status;
+
+        $sack_bag->status = $new_status;
+
+        if ($new_status === 0) {
             $sack_bag->inactive_at = Carbon::now();
             $sack_bag->inactive_by = $auth_user->id;
         } else {
             $sack_bag->inactive_at = null;
             $sack_bag->inactive_by = null;
         }
+
+        // Temporarily disable automatic timestamping
+        $sack_bag->timestamps = false;
+
+        // Manually update updated_at only when reactivating
+        if ($current_status == 0 && $new_status == 1) {
+            $sack_bag->updated_at = Carbon::now();
+            $sack_bag->active_by = $auth_user->id;
+        }
+
         $sack_bag->save();
+
         return response()->json(['success' => 'Sack-Bag status updated successfully.']);
     }
-    //sack_bag_no check during bag creation
 
+    //sack_bag_no check during bag creation
     public function sack_bag_no_check_for_cb(Request $request)
     {
         if ($sack_bag_no = $request->get('sack_bag_no')) {

@@ -333,6 +333,17 @@
                          
                         }
                     },
+                    {
+                        extend: 'excelHtml5',
+                        filename: 'Canvas Bag Report',
+                        title: '',
+                        text:'<i class="la la-file-excel-o"></i> Excel',
+                        className:'btn btn-primary',
+                        // Exclude the last column (Actions)
+                        exportOptions: {
+                            columns: ':not(:last-child)'
+                        }
+                    },
                 
                     'reset'
                 ],

@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::table('issue_sack_bag_origins', function (Blueprint $table) {
             $table->timestamp('inactive_at')->nullable()->after('updated_at');
             $table->integer('inactive_by')->nullable()->after('inactive_at');
+            $table->integer('active_by')->nullable()->after('inactive_by');
         });
     }
 
@@ -29,6 +30,7 @@ return new class extends Migration
         Schema::table('issue_sack_bag_origins', function (Blueprint $table) {
             $table->dropColumn('inactive_at');
             $table->dropColumn('inactive_by');
+            $table->dropColumn('active_by');
         });
     }
 };
