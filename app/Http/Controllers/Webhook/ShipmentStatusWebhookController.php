@@ -91,14 +91,15 @@ class ShipmentStatusWebhookController extends Controller
                 if ($user_id == 30860) {
                     // Log::channel('botCallJobLog')->info('s ' . 'Webhook log payload' . json_encode($payload));
                 }
-                $response = $client->post('', [
-                    'headers' => [
-                        'User-Agent' => 'My-App/1.0', // Optional, mimic the same user agent as Postman
-                        'Accept' => 'application/json', // Expect a JSON response
-                    ],
-                    'form_params' => $payload
-                ]);
-               
+                if ($user_id != 30860) {
+                    $response = $client->post('', [
+                        'headers' => [
+                            'User-Agent' => 'My-App/1.0', // Optional, mimic the same user agent as Postman
+                            'Accept' => 'application/json', // Expect a JSON response
+                        ],
+                        'form_params' => $payload
+                    ]);
+                }
 
                 if ($user_id == 30860) {
                     $response = $client->post($url, [
@@ -109,7 +110,7 @@ class ShipmentStatusWebhookController extends Controller
                         'json' => $payload,
                     ]);
                     $body = $response->getBody();
-                    $body->rewind();  // Rewind the stream to ensure we're reading from the start
+                    // $body->rewind();  // Rewind the stream to ensure we're reading from the start
                     $responseBody = $body->getContents(); // Get the body content
                     Log::channel('botCallJobLog')->info("Guzzle Response Body: " . $responseBody);
 
