@@ -9884,7 +9884,7 @@ class NotificationsController extends Controller
                     $one_link_transaction = OneLinkTransaction::where('rrn', (int) $reference_2_id)->exists();
                     $rider = Rider::find($reference_1_id);
                     if ($one_link_transaction && $rider) {
-
+                        dd(0);
                         if (strpos($body, '[amount]') !== FALSE) {
                             $body = str_replace('[amount]', $one_link_transaction->original_instructed_amount, $body);
                         }
