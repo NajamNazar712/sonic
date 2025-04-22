@@ -106,7 +106,7 @@ class ShipmentStatusWebhookController extends Controller
                             'User-Agent' => 'My-App/1.0',
                             'Accept' => 'application/json',
                         ],
-                        'form_params' => $payload,
+                        'json' => $payload,
                     ]);
                     $body = $response->getBody();
                     $body->rewind();  // Rewind the stream to ensure we're reading from the start
