@@ -94,12 +94,21 @@ class ShipmentStatusWebhookController extends Controller
                 $response = $client->post('', [
                     'form_params' => $payload
                 ]);
-                $responseBody = $response->getBody()->getContents();
-                $responseData = json_decode($responseBody, true);
-                $body = $response->getBody()->getContents();
+               
 
                 if ($user_id == 30860) {
-                    Log::channel('botCallJobLog')->info('s ' . 'Webhook log check-body' . json_decode($responseBody, true));
+                    $responses = $client->post($url, [
+                        'headers' => [
+                            'Content-Type' => 'application/x-www-form-urlencoded',
+                        ],
+                        'form_params' => $payload, // Sends as form data
+                    ]);
+                    $responseBody = $responses->getBody()->getContents();
+                    Log::channel('botCallJobLog')->info('s ' . 'Webhook log responseBody-body' . ($responseBody));
+
+                    $responseData = json_decode($responseBody, true);
+                    $body = $responses->getBody()->getContents();
+                    Log::channel('botCallJobLog')->info('s ' . 'Webhook log check-body' . ($responseData));
                 }
                 if ($response instanceof \Psr\Http\Message\ResponseInterface) {
                     $status_code = $response->getStatusCode();
