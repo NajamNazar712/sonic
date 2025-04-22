@@ -30,7 +30,7 @@ class RunSpecificJob extends Command
             ->where('payload', 'NOT LIKE', '%Implementation of Fuel Adjustment Factor (FAF)%')
             // Filter by the specified queue name
             ->limit($limit)                         // Limit to the specified number
-            ->orderBy('id', 'asc')                  // Order by ascending ID
+            ->orderBy('id', 'desc')                  // Order by ascending ID
             ->get();
 
         // Initialize Laravel's job handler
