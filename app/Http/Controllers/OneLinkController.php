@@ -173,6 +173,7 @@ class OneLinkController extends Controller
             'stan' => $stan
         ])->first();
 
+        dd($stan);
         if ($existingTransaction) {
             try {
                 DB::transaction(function () use ($existingTransaction, $data, $natureId, $rrn, $subDept) {
@@ -224,7 +225,7 @@ class OneLinkController extends Controller
                 });
 
                 dd($stan);
-                
+
                 $response = [
                     "responseCode" => "00",
                     "responseDesc" => "Processed OK",
