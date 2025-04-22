@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Queue\CallQueuedHandler;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
@@ -30,10 +29,8 @@ class RunSpecificJob extends Command
             ->where('queue', $queueName)
             ->where('payload', 'NOT LIKE', '%Implementation of Fuel Adjustment Factor (FAF)%')
             // Filter by the specified queue name
-            ->limit($limit)     
-            ->where('available_at', '<=', Carbon::now()->subHours(1))
-                    // Limit to the specified number
-            ->orderBy('id', 'desc')                  // Order by ascending ID
+            ->limit($limit)                         // Limit to the specified number
+            ->orderBy('id', 'asc')                  // Order by ascending ID
             ->get();
 
         // Initialize Laravel's job handler
