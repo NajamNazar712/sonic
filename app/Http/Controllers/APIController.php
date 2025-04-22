@@ -10460,10 +10460,10 @@ class APIController extends Controller
         $trackingNumbers = $shipmentsData->pluck('tracking_number');
         $shipments = Shipment::whereIn('tracking_number', $trackingNumbers)->get()->keyBy('tracking_number');
 
-        FinjaRequestLog::insert([
-            'requested' => json_encode($request->all()),
-            'ip_address' => $request->ip(),
-        ]);
+//        FinjaRequestLog::insert([
+//            'requested' => json_encode($request->all()),
+//            'ip_address' => $request->ip(),
+//        ]);
 
         foreach ($shipmentsData as $key => $shipmentData) {
             $tracking_number = $shipmentData['tracking_number'];
