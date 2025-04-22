@@ -80,8 +80,7 @@ class Kernel extends ConsoleKernel
         //'App\Console\Commands\TelenorCallResponse',
         'App\Console\Commands\OnHoldShipmentEmail',
         'App\Console\Commands\OverlandAgingReport',
-        'App\Console\Commands\PendingDeliveriesReport',
-        'App\Console\Commands\ReceiveDeliveriesReport',
+
         'App\Console\Commands\WebsiteLead',
         'App\Console\Commands\UserOTPGenerate',
         'App\Console\Commands\UserOTPVerifiy',
@@ -174,7 +173,19 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\RerunWalletSettlement',
         '\App\Console\Commands\BulkStatusSharingWithWallet',
         '\App\Console\Commands\WalletUsersMakeToDonePayments',
-        '\App\Console\Commands\UpdateShipmentAdditionalCharges'
+        '\App\Console\Commands\UpdateShipmentAdditionalCharges',
+        'App\Console\Commands\ReceiveDeliveriesReportNew',
+        'App\Console\Commands\ReceiveReturnDeliveries',
+        'App\Console\Commands\DailyDeliveryNoteHistory',
+        'App\Console\Commands\DailyWeightQCReport',
+        'App\Console\Commands\DailyOverAllSalesReport',
+        'App\Console\Commands\ReceiveDeliveriesReport',
+
+        'App\Console\Commands\QualityOfServiceReport',
+        'App\Console\Commands\PendingDeliveriesReportNew',
+
+        // 'App\Console\Commands\QsrEmail',
+        // 'App\Console\Commands\PendingDeliveriesReport',
 
     ];
 
@@ -453,8 +464,8 @@ class Kernel extends ConsoleKernel
 //        $schedule->command('telenor:callresponse')->twiceDaily(15, 18)->runInBackground();
         $schedule->command('email:overlandagingreport')->dailyAt('12:00')->runInBackground();
 
-        $schedule->command('email:pendingdeliveryreport')->dailyAt('01:00')->runInBackground();
-        $schedule->command('email:receivedeliveryreport')->dailyAt('01:00')->runInBackground();
+        // $schedule->command('email:pendingdeliveryreport')->dailyAt('01:00')->runInBackground();
+        // $schedule->command('email:receivedeliveryreport')->dailyAt('01:00')->runInBackground();
 
         $schedule->command('website:leads')->everyFiveMinutes()->runInBackground();
 //        $schedule->command('website:pamleads')->hourly()->runInBackground();
@@ -595,6 +606,55 @@ class Kernel extends ConsoleKernel
         $schedule->command('rerun:wallet_log_re_push')->hourly()->runInBackground(); // wallet
         $schedule->command('rerun_wallet_settlement')->everySixHours()->runInBackground(); //wallet
         $schedule->command('bulk:status-sharing-wallet')->withoutOverlapping()->everyFiveMinutes()->runInBackground();
+        
+
+        // $schedule->command('email:daily_received_deliveries_report')->dailyAt('09:00')->runInBackground();
+        // $schedule->command('email:daily_return_received_deliveries_report')->dailyAt('09:00')->runInBackground();
+        // $schedule->command('email:daily_delivery_note_history')->dailyAt('09:00')->runInBackground();
+        // $schedule->command('email:daily_weight_qc_report')->dailyAt('09:00')->runInBackground();
+        // $schedule->command('email:daily_overall_sales_report')->dailyAt('09:00')->runInBackground();
+        // $schedule->command('email:qsrreport')->dailyAt('09:00')->runInBackground();
+        // $schedule->command('email:qsrreport')->dailyAt('14:00')->runInBackground();
+        // $schedule->command('email:pendingdeliveryreport')->dailyAt('11:30')->runInBackground();
+
+        // $schedule->command('email:receivedeliveryreport')->dailyAt('09:00')->runInBackground();
+
+        $settings = DB::table('global_settings')
+        ->whereIn('type', [
+            'pending_deliveries_report_time',
+            'receive_deliveries_report_time',
+            'receive_return_deliveries_report_time',
+            'delivery_note_history_report_time',
+            'weight_qc_report_time',
+            'overall_sales_report_time',
+            'quality_of_service_report_time',
+            'quality_of_service_report_other_time'
+        ])
+        ->get()
+        ->keyBy('type');
+
+        $commands = [
+            'email:daily_received_deliveries_report' => ['receive_deliveries_report_time'],
+            'email:daily_return_received_deliveries_report' => ['receive_return_deliveries_report_time'],
+            'email:daily_delivery_note_history' => ['delivery_note_history_report_time'],
+            'email:daily_weight_qc_report' => ['weight_qc_report_time'],
+            'email:daily_overall_sales_report' => ['overall_sales_report_time'],
+            'email:pending_deliveries_report' => ['pending_deliveries_report_time'],
+            'email:quality_of_service_report' => [
+                'quality_of_service_report_time',
+                'quality_of_service_report_other_time',
+            ],
+        ];
+
+        foreach ($commands as $command => $settingKeys) {
+            foreach ((array) $settingKeys as $settingKey) {
+                if (isset($settings[$settingKey]) && $settings[$settingKey]->setting_value == 1) {
+                    $timeRaw = trim($settings[$settingKey]->text ?? '');
+                    $time = Carbon::createFromFormat('h:i A', $timeRaw)->format('H:i');
+                    $schedule->command($command)->dailyAt($time)->runInBackground();
+                }
+            }
+        }
         $schedule->command('update:shipment_additional_charges')->withoutOverlapping()->daily()->runInBackground();
         $schedule->command('wallet-users:make-to-done')->dailyAt('06:00')->runInBackground();
         

@@ -8962,7 +8962,6 @@ class RiderAPIController extends Controller
                 //code...
                 $success_flag = false;
 
-
                 $user_excluded_otp_shippers = DeliveryNoteShipment::join('shipments', 'shipments.id', 'delivery_note_shipments.shipment_id')
                 ->join('notification_setting_shippers as nss', 'shipments.user_id', 'nss.shipper_id')
                 ->join('notification_settings as ns', 'nss.notification_setting_id', 'ns.id')

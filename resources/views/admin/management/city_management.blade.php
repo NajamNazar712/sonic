@@ -25,6 +25,7 @@
                                     <th class="border-primary border-darken-1" >Hub Code</th>
                                     <th class="border-primary border-darken-1" >Iata Code</th>
                                     <th class="border-primary border-darken-1" >Zone</th>
+                                    <th class="border-primary border-darken-1" >Province</th>
                                     <th class="border-primary border-darken-1" >Businees Category</th>
                                     <th class="border-primary border-darken-1" >GC Area</th>
                                     <th class="border-primary border-darken-1" >Attempt Tat</th>
@@ -163,6 +164,7 @@
                             head.push('Hub Code');
                             head.push('Iata Code');
                             head.push('Zone');
+                            head.push('Province');
                             head.push('Business Category');
                             head.push('GC Area');
                             head.push('Attempt Tat');
@@ -186,6 +188,7 @@
                                 row.push(values.hub_id);
                                 row.push(values.iata_code);
                                 row.push(values.zone);
+                                row.push(values.province_name);
                                 row.push(values.business_category);
                                 row.push(values.gc_area);
                                 row.push(values.attempt_tat);
@@ -400,6 +403,7 @@
                     {data: 'hub_id', name: 'cities.hub_id', class: 'align-middle hub_id'},
                     {data: 'iata_code', name: 'cities.iata_code', class: 'align-middle iata_code'},
                     {data: 'zone', name: 'z.name', class: 'align-middle zone'},
+                    {data: 'province_name', name: 'provinces.name', class: 'align-middle province_name'},
                     {data: 'business_category', name: 'bc.id', class: 'align-middle business_category'},
                     {data: 'gc_area', name: 'cities.gc_area', class: 'align-middle gc_area'},
                     {data: 'attempt_tat', name: 'cities.attempt_tat', class: 'align-middle attempt_tat'},
