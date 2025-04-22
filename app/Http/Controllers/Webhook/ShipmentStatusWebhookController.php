@@ -109,7 +109,7 @@ class ShipmentStatusWebhookController extends Controller
                         'form_params' => $payload,
                     ]);
                     $body = $response->getBody();
-                    // $body->rewind();  // Rewind the stream to ensure we're reading from the start
+                    $body->rewind();  // Rewind the stream to ensure we're reading from the start
                     $responseBody = $body->getContents(); // Get the body content
                     Log::channel('botCallJobLog')->info("Guzzle Response Body: " . $responseBody);
 
