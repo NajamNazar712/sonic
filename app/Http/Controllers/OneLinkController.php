@@ -165,7 +165,7 @@ class OneLinkController extends Controller
         $data = $request->all();
 
         $rrn = (int) $data['info']['rrn'];
-        $stan = (int) $data['info']['stan'];
+        $stan = $data['info']['stan'];
         $subDept = (int) $data['messageInfo']['subDept'];
 
         $existingTransaction = OneLinkTransaction::where([
