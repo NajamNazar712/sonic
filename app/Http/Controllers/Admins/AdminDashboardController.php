@@ -15478,7 +15478,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         if (!empty($spreadsheet)) {
             $column_count = 49;
             $fields = [
-                'name', 'city_code', 'is_city', 'is_hub', 'hub_id', 'zone_id', 'province_id', 'address', 'attempt_tat',
+                'name', 'city_code', 'is_city', 'is_hub', 'hub_id', 'zone_id', 'address', 'attempt_tat',
                 'location_latitude', 'location_longitude', 'hub_location_latitude', 'hub_location_longitude', 'pickup', 'pickup_cut_off_time', 'gc_area',
                 'regular_rush', 'regular_saver_plus', 'regular_swift', 'regular_same_day',
                 'replacement_rush', 'replacement_saver_plus', 'replacement_swift', 'replacement_same_day',
@@ -15536,7 +15536,6 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             'city_code' => 'nullable',
             'hub_id' => 'required_without:zone_id|required_if:is_city,1|hub_id_check',
             'zone_id' => 'required_without:hub_id|required_if:is_hub,1|zone_id_check',
-            'province_id' => 'required',
             'is_city' => 'required_without_all:is_hub|nullable|boolean',
             'is_hub'  => 'required_without_all:is_city|nullable|boolean',
             'attempt_tat' => 'required|integer|min:1',
@@ -15560,7 +15559,6 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             'name.required' => 'City Name is required.',
             'hub_id.required_without' => 'Select Hub is required when you set is_city bit to 1.',
             'zone_id.required_without' => 'Select Zone is required when you set is_hub bit to 1.',
-            'province_id.required' => 'Province is required.',
             'attempt_tat.required' => 'Add Attempt TAT is required.',
             'latitude.required' => 'Latitude is required.',
             'longitude.required' => 'Longitude is required.',
@@ -15582,7 +15580,6 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             'name' => 'City Name',
             'hub_id' => 'Select Hub',
             'zone_id' => 'Select Zone',
-            'province_id' => 'Select Province',
             'attempt_tat' => 'Attempt TAT',
             'latitude' => 'Latitude',
             'longitude' => 'Longitude',
@@ -15697,7 +15694,6 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
             $cityID = array_column($forms, 'hub_id');
             $cities = City::whereIn('id', $cityID)->get()->keyBy('id');
-            $provinceID = array_column($forms, 'province_id');
             $provinces = Province::whereIn('id', $provinceID)->get()->keyBy('id');
 
             foreach ($forms as $item) {
@@ -15709,9 +15705,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 }
 
                 if (isset($item['is_hub']) && $item['is_hub'] == "1") {
-                    $province = $provinces->get($item['province_id']);
                     $item['hub'] = 1;
-                    $item['province_id'] = $province ? $province->id : null;
                     $item['created_at'] = now();
                     $item['updated_at'] = now();
                     $item['is_excel'] = 1;

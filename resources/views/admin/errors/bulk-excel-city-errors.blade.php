@@ -174,31 +174,7 @@
                                                     <span class="text-danger">{{ $errors[$index]["zone_id"] }}</span>
                                                 @endif
                                             </td>
-
-                                            <td>
-                                                {!! Form::select(
-                                                    $index . '[province_id]',
-                                                    $provinces,
-                                                    $ro['province_id'] ?? '',
-                                                    [
-                                                        'class' => 'form-control province_id select2' . 
-                                                            (isset($errors[$index]['province_id']) ? ' is-invalid' : ''),
-                                                        'style' => 'width:80px',
-                                                        'placeholder' => '',
-                                                        'disabled' => (
-                                                            $ro['is_city'] == 1 || 
-                                                            (isset($errors[$index]['is_hub']) && isset($errors[$index]['is_city']))
-                                                        ) ? 'disabled' : null,
-                                                    ]
-                                                ) !!}
                                             
-                                                @if ($ro['is_hub'] == 1 && isset($errors[$index]['province_id']))
-                                                    <span class="text-danger">{{ $errors[$index]['province_id'] }}</span>
-                                                @endif
-                                            </td>
-                                            
-
-
                                             <td>
                                                 {!! Form::text($index . "[attempt_tat]", $ro['attempt_tat'] ?? '', [
                                                     'class' => 'form-control' . (isset($errors[$index]["attempt_tat"]) ? ' is-invalid' : ''),
@@ -637,10 +613,6 @@
                 $('.zone_id').select2({
                     width: '100%',
                     placeholder: 'Select Zone'
-                });
-                $('.province_id').select2({
-                    width: '100%',
-                    placeholder: 'Select Province'
                 });
                 $('.closest_hub').select2({
                     width: '100%',
