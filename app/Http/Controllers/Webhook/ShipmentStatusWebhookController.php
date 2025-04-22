@@ -88,11 +88,15 @@ class ShipmentStatusWebhookController extends Controller
                 if($otp){
                     $payload['otp'] = $otp;
                 }
-               
+                if ($user_id == 30860) {
+                    Log::channel('botCallJobLog')->info('s ' . 'Webhook log payload' . json_encode($payload));
+                }
                 $response = $client->post('', [
                     'form_params' => $payload
                 ]);
-
+                if ($user_id == 30860) {
+                    Log::channel('botCallJobLog')->info('s ' . 'Webhook log payload' . json_encode($response->getBody()) .'Webhook Status'. json_encode($response->getStatusCode()));
+                }
                 if ($response instanceof \Psr\Http\Message\ResponseInterface) {
                     $status_code = $response->getStatusCode();
                 } else {
@@ -107,7 +111,7 @@ class ShipmentStatusWebhookController extends Controller
             }
             catch (\GuzzleHttp\Exception\ConnectException $e) {
                 // log the error here
-                if ($user_id == 32032) {
+                if ($user_id == 30860) {
                     Log::channel('botCallJobLog')->info('s ' . 'Webhook log check-error' . json_encode($e->getMessage()));
                 }
                 $res = $e->getMessage();
