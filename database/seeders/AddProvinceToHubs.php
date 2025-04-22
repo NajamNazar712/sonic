@@ -111,7 +111,18 @@ class AddProvinceToHubs extends Seeder
 
         foreach ($provinceCities as $provinceId => $cities) {
             foreach ($cities as $cityName) {
-                City::where('name', 'LIKE', "%{$cityName}%")->update(['province_id' => $provinceId]);
+                // Set province for the hub city itself
+                $hubCity = City::where('name', $cityName)->first();
+
+                if ($hubCity) {
+                    $hubCity->province_id = $provinceId;
+                    $hubCity->save();
+
+                    // Set province for all other cities that share this hub_id
+                    City::where('hub_id', $hubCity->id)
+                        ->where('id', '!=', $hubCity->id)
+                        ->update(['province_id' => $provinceId]);
+                }
             }
         }
     }
