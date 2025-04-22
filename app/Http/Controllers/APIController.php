@@ -10439,7 +10439,7 @@ class APIController extends Controller
         $rules = [
             'wallet_id' => ['required', 'exists:wallet_users,wallet_id'],
             'shipments' => ['required', 'array', 'min:1'],
-            'shipments.*.tracking_number' => ['required', 'exists:shipments,tracking_number'],
+//            'shipments.*.tracking_number' => ['required', 'exists:shipments,tracking_number'],
             'shipments.*.charges' => ['required', 'numeric', 'min:0', 'max:100000'],
         ];
 
