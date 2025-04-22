@@ -96,8 +96,11 @@ class ShipmentStatusWebhookController extends Controller
                 ]);
                 $body = $response->getBody()->getContents();
                 $length = strlen($body);
+                $headers = $response->getHeaders();
                 if ($user_id == 30860) {
-                    Log::channel('botCallJobLog')->info('Response headers: ' . ($length));
+                    Log::channel('botCallJobLog')->info('Response headers: ' . json_encode($headers));
+
+                    Log::channel('botCallJobLog')->info('Response bodyLengt: ' . ($length));
 
                     // Log::channel('botCallJobLog')->info('s Webhook log response: ' . $responseBody . ' | Webhook Status: ' . json_encode($response->getStatusCode()));
                 }
