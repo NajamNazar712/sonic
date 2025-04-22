@@ -88,9 +88,7 @@ class ShipmentStatusWebhookController extends Controller
                 if($otp){
                     $payload['otp'] = $otp;
                 }
-                if ($user_id == 30860) {
-                    // Log::channel('botCallJobLog')->info('s ' . 'Webhook log payload' . json_encode($payload));
-                }
+                
                 if ($user_id != 30860) {
                     $response = $client->post('', [
                         'form_params' => $payload
@@ -99,17 +97,13 @@ class ShipmentStatusWebhookController extends Controller
 
                 if ($user_id == 30860) {
                     $response = $client->post('', [
-                        // 'headers' => [
-                        //     'User-Agent' => 'My-App/1.0',
-                        //     'Accept' => 'application/json',
-                        // ],
                         'json' => $payload,
                     ]);
-                    $body = $response->getBody();
-                    // // $body->rewind();  // Rewind the stream to ensure we're reading from the start
-                    $responseBody = $body->getContents(); // Get the body content
-                    Log::channel('botCallJobLog')->info("Guzzle Response Body: " . $responseBody);
-                    // Log::channel('botCallJobLog')->info('s ' . 'Webhook log responseBody-body' . json_encode($response1));
+                    // $body = $response->getBody();
+                    // // // $body->rewind();  // Rewind the stream to ensure we're reading from the start
+                    // $responseBody = $body->getContents(); // Get the body content
+                    // Log::channel('botCallJobLog')->info("Guzzle Response Body: " . $responseBody);
+                    // // Log::channel('botCallJobLog')->info('s ' . 'Webhook log responseBody-body' . json_encode($response1));
                 }
                 if ($response instanceof \Psr\Http\Message\ResponseInterface) {
                     $status_code = $response->getStatusCode();
