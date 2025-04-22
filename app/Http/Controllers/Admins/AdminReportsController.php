@@ -15937,7 +15937,7 @@ class AdminReportsController extends Controller
                 } elseif (in_array($rowArray['shipper_status_id'], [18, 34, 23, 24, 47, 48, 2])) {
                     $rowArray['current_hub_name'] = $rowArray['origin_hub'];
                 } elseif (in_array($rowArray['shipper_status_id'], [54, 55, 69, 7, 4, 8])) {
-                    $rowArray['current_hub_name'] = (($rowArray['intercepttype'] == 1) ?  $rowArray['intercept_city_name'] : $rowArray['destination']);
+                    $rowArray['current_hub_name'] = (($rowArray['intercepttype'] == 1) ?  $rowArray['intercept_city_name'] : $rowArray['hub']);
                 } elseif (in_array($rowArray['shipper_status_id'], [22, 21, 75]) && $rowArray['return_city'] != null) {
                     $rowArray['current_hub_name'] = $rowArray['return_city'];
                 }
