@@ -31,7 +31,7 @@ class RunSpecificJob extends Command
             ->where('payload', 'NOT LIKE', '%Implementation of Fuel Adjustment Factor (FAF)%')
             // Filter by the specified queue name
             ->limit($limit)     
-            ->where('available_at', '<=', Carbon::now()->subHours(2))
+            ->where('available_at', '<=', Carbon::now()->subHours(1))
                     // Limit to the specified number
             ->orderBy('id', 'desc')                  // Order by ascending ID
             ->get();
