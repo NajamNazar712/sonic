@@ -43,7 +43,7 @@
                     <fieldset class="form-group">
                         <select name="province_id" id="province" class="form-control select2" data-rule-required="true" data-msg-required="Province is required">
                             @foreach($provinces as $province)
-                                <option value="{{ $province->id }}" @if ($province->id == $city->province_id) selected="selected" @endif>{{ $province->name }}</option>
+                                <option value="{{ $province->id }}" @if ($province->id == $city->province_id) selected @endif>{{ $province->name }}</option>
                             @endforeach
                         </select>
                     </fieldset>
@@ -357,12 +357,6 @@
         $('#hub_list').prepend('<option value="" selected="selected"></option>').select2({
             placeholder: 'Select a Hub',
             dropdownParent: $("#editCity")
-        });
-
-        $('#province').prepend('<option value="" selected="selected"></option>').select2({
-            placeholder: 'Province',
-            dropdownParent: $("#editCity"),
-            width:'100%'
         });
 
         $('#zone').select2({
