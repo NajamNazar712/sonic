@@ -220,6 +220,7 @@ class OneLinkController extends Controller
                         if ($delivery_note) {
                             $delivery_note->increment('one_link_payment_count');
                         }
+
                     }
                 });
 
@@ -236,6 +237,10 @@ class OneLinkController extends Controller
                     ]
                 ];
                 $status = 200;
+
+                
+                NotificationsController::app_notification(19, $subDept, 2, $subDept, $rrn);
+                NotificationsController::send(185, $subDept, $rrn);
             } catch (\Exception $e) {
                 $response = [
                     "responseCode" => "99",

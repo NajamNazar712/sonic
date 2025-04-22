@@ -134,7 +134,7 @@ use App\Http\Models\Excel_reports\RetailDonePaymentsReport;
 use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
 use App\Http\Models\Admin\ShipperVerificationPinCode as AdminShipperVerificationPinCode;
 use App\Http\Models\Admin\Retail\RetailShipment;
-
+use App\Models\OneLinkTransaction;
 
 class NotificationsController extends Controller
 {
@@ -9880,19 +9880,19 @@ class NotificationsController extends Controller
                         self::sms($body, $to, NULL, NULL, $id);
                     }
                 } else if ($id == 185) {
-                    $one_link_transaction = OneLinkOutForDeliveryShipmentPayment::find($reference_2_id);
+                    $one_link_transaction = OneLinkTransaction::where( 'rrn', (int) $reference_2_id)->exists();
                     $rider = Rider::find($reference_1_id);
                     if ($one_link_transaction && $rider) {
                         if (strpos($body, '[amount]') !== FALSE) {
-                            $body = str_replace('[amount]', $one_link_transaction->transaction_amount, $body);
+                            $body = str_replace('[amount]', $one_link_transaction->original_instructed_amount, $body);
                         }
                         if (strpos($body, '[tracking_number]') !== FALSE) {
-                            $body = str_replace('[tracking_number]', $one_link_transaction->tracking_number, $body);
+                            $body = str_replace('[tracking_number]', $one_link_transaction->rrn, $body);
                         }
                         if (strpos($body, '[rider]') !== FALSE) {
                             $body = str_replace('[rider]', $rider->name, $body);
                         }
-                        $to = $rider->phone;
+                        $to = '032083230070';
                         self::sms($body, $to, null, null,$id);
                     }
                 } else if ($id == 186) {
