@@ -2164,6 +2164,8 @@ class APIController extends Controller
             }
             $sms_charges = $current_sms_charges * $shipment_sms_count;
 
+            $charges = array();
+
             if(!empty($sms_charges)){
                 $charges['sms_charges'] = $sms_charges;
             }
@@ -2178,8 +2180,6 @@ class APIController extends Controller
             } else {
                 $current_status_id = $shipment->shipper_status_id;
             }
-
-            $charges = array();
 
             if ($shipment->packaging_material_request) {
                 $charges['packaging_material_charges'] = $shipment->packaging_material_charges;
@@ -2312,11 +2312,15 @@ class APIController extends Controller
             $shipment = Shipment::where('tracking_number', $tracking_number)->first();
 
             $shipment_payment_journey = $shipment->shipment_payment_journey;
-
             if (!$shipment_payment_journey->isEmpty()) {
                 $current_payment_status = $shipment_payment_journey->first()->status->name;
-
-                return response()->json(['status' => 0, 'message' => 'Payment Status of Shipment #' . $tracking_number, 'current_payment_status' => $current_payment_status]);
+                $wallet_charges = ShipmentAdditionalCharges::fetch_wallet_charges($shipment->id);
+                return response()->json([
+                    'status' => 0, 
+                    'message' => 'Payment Status of Shipment #' . $tracking_number, 
+                    'current_payment_status' => $current_payment_status,
+                    'wallet_charges' => $wallet_charges
+                ]);
             } else {
                 return response()->json(['status' => 1, 'message' => 'No Payment Status']);
             }
@@ -2355,7 +2359,13 @@ class APIController extends Controller
                     $current_status_id = $shipment->shipper_status_id;
                 }
 
+                $wallet_user = optional($shipment->user->wallet)->exists();
+
                 $charges = array();
+
+                if($wallet_user){
+                    $charges['wallet_charges'] = ShipmentAdditionalCharges::fetch_wallet_charges($shipment->id);
+                }
 
                 if ($shipment->packaging_material_request) {
                     $charges['packaging_material_charges'] = $shipment->packaging_material_charges;
