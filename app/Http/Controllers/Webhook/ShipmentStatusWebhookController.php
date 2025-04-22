@@ -115,8 +115,10 @@ class ShipmentStatusWebhookController extends Controller
                     $statusCode = $response->getStatusCode();
                     Log::channel('botCallJobLog')->info("cURL Response: " . $response1);
                     Log::channel('botCallJobLog')->info("Status Code Check: " . $statusCode);
-                    $body = $response->getBody()->getContents(); // Get the response body
-                    Log::channel('botCallJobLog')->info("Guzzle Response Body: " . $body);
+                    $body = $response->getBody();
+                    $body->rewind();  // Ensure the stream is at the start
+                    $bodyContents = $body->getContents();
+                    Log::channel('botCallJobLog')->info("Guzzle Response Body: " . $bodyContents);
                     Log::channel('botCallJobLog')->info("Guzzle Status Code: " . $response->getStatusCode());
                     // Log::channel('botCallJobLog')->info('s ' . 'Webhook log responseBody-body' . json_encode($response1));
                 }
