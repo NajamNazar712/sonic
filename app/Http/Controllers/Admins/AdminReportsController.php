@@ -15272,6 +15272,7 @@ class AdminReportsController extends Controller
             'bt.booking_type as service_type',
             'sj.created_at as arrival',
             'oc.name as origin',
+            'och.name as origin_hub',
             'dc.name as destination',
             'h.name as hub',
             'ca.name as area',
@@ -15356,6 +15357,7 @@ class AdminReportsController extends Controller
             ->leftJoin('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->leftJoin('cities as och', 'oc.hub_id', 'och.id') // och for origin city hub
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->join('cities as h', 'dc.hub_id', '=', 'h.id')
             ->leftjoin('user_shipping_infos AS rsi', 'shipments.return_address_id', '=', 'rsi.id')
@@ -15722,16 +15724,16 @@ class AdminReportsController extends Controller
                 }
                 elseif(in_array($shipment->shipper_status_id ,[49, 3])){
                     if(in_array($shipment->cargo_status_id,[3,2,4, 7, 8, 9,6])){ //Shipment In Transit || Shipment Misrouted Forwarded concered hub change reference TO-6939
-                        return $shipment->destination;
+                        return $shipment->hub;
                     }
                 }elseif(in_array($shipment->shipper_status_id ,[26, 73,32, 70, 76])){
                     if(in_array($shipment->cargo_status_id,[4, 7, 8, 9,6])){ //Shipment In Transit || Shipment Misrouted Forwarded concered hub change reference TO-6939
-                        return $shipment->origin;
+                        return $shipment->origin_hub;
                     }
                 }elseif(in_array($shipment->shipper_status_id,[18, 34, 23,24, 47, 48,2])){
-                    return $shipment->origin;
+                    return $shipment->origin_hub;
                 }elseif(in_array($shipment->shipper_status_id,[54,55, 69,7, 4,8])){
-                    return (($shipment->intercepttype == 1) ?  $shipment->intercept_city_name : $shipment->destination);
+                    return (($shipment->intercepttype == 1) ?  $shipment->intercept_city_name : $shipment->hub);
                 }elseif(in_array($shipment->shipper_status_id,[22, 21,75])){
                     if($shipment->return_city != null){
                         return $shipment->return_city;
@@ -15741,7 +15743,7 @@ class AdminReportsController extends Controller
                     return $shipment->current_hub_name;
                 } else {
                     if (in_array($shipment->shipper_status_id, [1, 2, 61])) {
-                        return $shipment->origin;
+                        return $shipment->origin_hub;
                     } else {
                         return $shipment->hub;
                     }
@@ -15927,13 +15929,13 @@ class AdminReportsController extends Controller
                     $rowArray['current_hub_name'] = $rowArray['misroutedCityname'];
                 } elseif (in_array($rowArray['shipper_status_id'], [49, 3]) && (in_array($rowArray['cargo_status_id'], [3, 2, 4, 7, 8, 9, 6]))) {
                       //Shipment In Transit || Shipment Misrouted Forwarded concered hub change reference TO-6939
-                        $rowArray['current_hub_name'] = $rowArray['destination'];
+                        $rowArray['current_hub_name'] = $rowArray['hub'];
                     
                 } elseif (in_array($rowArray['shipper_status_id'], [26, 73, 32, 70, 76]) && in_array($rowArray['cargo_status_id'], [4, 7, 8, 9, 6])) {
                      //Shipment In Transit || Shipment Misrouted Forwarded concered hub change reference TO-6939
-                        $rowArray['current_hub_name'] = $rowArray['origin'];
+                        $rowArray['current_hub_name'] = $rowArray['origin_hub'];
                 } elseif (in_array($rowArray['shipper_status_id'], [18, 34, 23, 24, 47, 48, 2])) {
-                    $rowArray['current_hub_name'] = $rowArray['origin'];
+                    $rowArray['current_hub_name'] = $rowArray['origin_hub'];
                 } elseif (in_array($rowArray['shipper_status_id'], [54, 55, 69, 7, 4, 8])) {
                     $rowArray['current_hub_name'] = (($rowArray['intercepttype'] == 1) ?  $rowArray['intercept_city_name'] : $rowArray['destination']);
                 } elseif (in_array($rowArray['shipper_status_id'], [22, 21, 75]) && $rowArray['return_city'] != null) {
@@ -15944,7 +15946,7 @@ class AdminReportsController extends Controller
                         $rowArray['current_hub_name'] = $rowArray['current_hub_name'];
                     }else{
                         if (in_array($rowArray['shipper_status_id'], [1, 2, 61])) {
-                            $rowArray['current_hub_name'] = $rowArray['origin'];
+                            $rowArray['current_hub_name'] = $rowArray['origin_hub'];
                         } else {
                             $rowArray['current_hub_name'] = $rowArray['hub'];
                         }
