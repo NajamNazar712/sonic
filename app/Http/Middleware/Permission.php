@@ -659,6 +659,7 @@ class Permission
 
             'reports.shipment_reversal_report.index' => 1001,
             'reports.lost_and_case_closed_summary_report.index' => 1021,
+            'reports.kam_and_poc_qsr.index' => 1032,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
