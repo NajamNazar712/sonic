@@ -7970,13 +7970,48 @@ class AdminCargoManifestController extends Controller
         }
         $issuebag = IssueSackBagOrigin::join('cities as c', 'c.id', '=', 'issue_sack_bag_origins.origin')
             ->join('admins as ad', 'ad.id', '=', 'issue_sack_bag_origins.user_id')
-            ->select('issue_sack_bag_origins.sack_bag_no as sack_bag_no', 'c.name as origin', 'ad.name as user_id', 'issue_sack_bag_origins.remarks');
+            ->select(
+                'issue_sack_bag_origins.sack_bag_no as sack_bag_no', 
+                'c.name as origin', 
+                'ad.name as user_id',
+                'issue_sack_bag_origins.remarks',
+                'issue_sack_bag_origins.created_at as active_time',
+                'issue_sack_bag_origins.inactive_at as inactive_time',
+                'issue_sack_bag_origins.inactive_by as inactive_by',
+                'issue_sack_bag_origins.status as status',
+                'issue_sack_bag_origins.id as sack_bag_id'
+            );
 
-        // if (session('role_id') != 1) {
-        //     $cargo->where('cargo_manifest_draft_bags.origin_id', Auth::user()->default_hub_id);
-        // }
+        $datatables = Datatables::of($issuebag)
+        ->addColumn('action', function ($sack_bag) {
+            $dropdown = '
+                <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">';
 
-        $datatables = Datatables::of($issuebag);
+            if ($sack_bag->status == 1) {
+                $dropdown .= '<button type="button" class="dropdown-item status_sack_bag" data-id="' . $sack_bag->sack_bag_id . '" data-status="0">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col-2"><i class="ft-x-circle"></i></div>
+                                    <div class="col-9 offset-1">Inactive</div>
+                                </div>
+                            </button>';
+            } elseif ($sack_bag->status == 0) {
+                $dropdown .= '<button type="button" class="dropdown-item status_sack_bag" data-id="' . $sack_bag->sack_bag_id . '" data-status="1">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col-2"><i class="ft-check-circle"></i></div>
+                                    <div class="col-9 offset-1">Active</div>
+                                </div>
+                            </button>';
+            }
+        
+            $dropdown .= '</div>
+                </div>';
+        
+            return $dropdown;
+        })
+        ->rawColumns(['action'])
+        ;
 
         return $datatables->make(true);
     }
@@ -7995,6 +8030,29 @@ class AdminCargoManifestController extends Controller
         }
     }
 
+    public function update_sack_bag_status(Request $request)
+    {
+        $id = $request->get('id');
+        $status = $request->get('status');
+        $auth_user = Auth::user();    
+        if (!$id || is_null($status)) {
+            return response()->json(['error' => 'Invalid ID or Status provided.'], 400);
+        }
+        $sack_bag = IssueSackBagOrigin::find($id);
+        if (!$sack_bag) {
+            return response()->json(['error' => 'Sack-Bag not found.'], 404);
+        }
+        $sack_bag->status = (int)$status;
+        if ((int)$status === 0) {
+            $sack_bag->inactive_at = Carbon::now();
+            $sack_bag->inactive_by = $auth_user->id;
+        } else {
+            $sack_bag->inactive_at = null;
+            $sack_bag->inactive_by = null;
+        }
+        $sack_bag->save();
+        return response()->json(['success' => 'Sack-Bag status updated successfully.']);
+    }
     //sack_bag_no check during bag creation
 
     public function sack_bag_no_check_for_cb(Request $request)
