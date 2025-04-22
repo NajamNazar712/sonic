@@ -45,7 +45,8 @@ class ShipperOrderManagementApiController extends Controller
                'sj.remarks as cancellation_remarks',
            ])
            ->groupBy('shipments.id')
-           ->orderBy('shipments.id', 'desc');
+           ->orderBy('shipments.id', 'desc')
+           ->get();
 
        if($order_list->isNotEmpty()) {
            return response()->json(['status' => 0 , 'message' => 'Success' ,'order_list'=>$order_list]);
