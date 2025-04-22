@@ -95,8 +95,12 @@
                 <div class="modal-header">
                     <h4 class="modal-title" id="">Edit User</h4>
                 </div>
-                <form method="post" id="crm_agent_edit"  action="{{route('admin.settings.auto_tagging.submit')}}">
+                <form method="post" id="crm_agent_edit"  action="{{route('admin.settings.auto_tagging.update')}}">
                     @csrf
+
+                    <input type="hidden" name="current_admin_id" id="current_admin_id">
+                    <input type="hidden" name="current_city_id" id="current_city_id">
+                    <input type="hidden" name="current_city_area_id" id="current_city_area_id">
 
                 <div class="modal-body">
                     <input type="hidden" name="crm_agent_id" id="crm_agent_id">
@@ -171,12 +175,19 @@
                 $('#city_area_id').val('').trigger('change.select2');
                 $('#crm_case_nature_id').val('').trigger('change.select2');
                 $('#crm_case_nature_type_id').val('').trigger('change.select2');
+                $('#current_admin_id').val('');
+                $('#current_city_id').val('');
+                $('#current_city_area_id').val('');
+
             });
 
             $('#EditAgentModal').on('hidden.bs.modal', function () {
                 $('#edit_crm_case_nature_id').val([]).trigger('change.select2');
                 $('#edit_crm_case_nature_type_id').val([]).trigger('change.select2');
                 $('#edit_city_area_id').val([]).trigger('change.select2');
+                $('#current_admin_id').val('');
+                $('#current_city_id').val('');
+                $('#current_city_area_id').val('');
             });
 
             $('#agent_id').prepend('<option selected></option>').select2({
@@ -495,6 +506,10 @@
                     $('#edit_crm_case_nature_id').val(case_nature_ids).change();
                     $('#crm_agent_id').val(data.crm_agent_id);
                     
+                    $('#current_city_id').val(data.city_id).change();
+                    $('#current_city_area_id').val(city_area_id).change();
+                    $('#current_admin_id').val(data.agent_id);
+
                     $('#EditAgentModal').modal('show');
 
                 })

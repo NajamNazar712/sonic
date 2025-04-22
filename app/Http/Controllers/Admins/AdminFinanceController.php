@@ -143,7 +143,7 @@ use App\Http\Models\WalletUser;
 use App\Http\Controllers\FingaIntegrationController;
 use Illuminate\Support\Facades\Http;
 use App\Jobs\CODAmountChangeSendToWallet;
-
+use App\Jobs\WalletBulkSettlementFromDonePayments;
 
 class AdminFinanceController extends Controller
 {
@@ -7669,46 +7669,30 @@ class AdminFinanceController extends Controller
 
                                 $shipment = Shipment::with(['user.wallet'])->find($pending_payment_shipment->shipment_id);
                                 if($shipment->user->wallet) {
-                                    if($pending_payment_shipment->type == 3) {
-                                        $log_bid = $this->isWalletLogUpdated($pending_payment_shipment->shipment_id);
-                                        if(!$log_bid) {
+                                    $log_bid = $this->isWalletLogUpdated($pending_payment_shipment->shipment_id);
+                                    if(!$log_bid) {
+                                        $cod_amount = $shipment->amount;
+                                        $status_array = [14, 25, 31, 38, 37, 18, 20];
+                                        if(in_array($shipment->shipper_status_id, $status_array) && $pending_payment_shipment->type == 2) {
+                                            $cod_amount = 0;
+                                        }
+                                        if(!array_key_exists($pending_payment_shipment->shipment_id, $pending_logs)) {
                                             $pending_logs[$pending_payment_shipment->shipment_id] = [
                                                 "shipmentId" => $shipment->id,
                                                 "wallet_id" => $shipment->user->wallet->wallet_id,
-                                                "client_id" => $shipment->user->id, 
-                                                "reference_id" => (string) Str::uuid(), 
-                                                "shipment_id" => $shipment->tracking_number, 
-                                                "amount" => $shipment->amount, 
+                                                "client_id" =>  $shipment->user->id,
+                                                "reference_id" => (string) Str::uuid(),
+                                                "shipment_id" => $shipment->tracking_number,
+                                                "amount" => $cod_amount,
                                                 "order_created_date" => $shipment->created_at,
-                                                // "charges" => [
-                                                //     'weight_charges' =>  floatval($shipment->weight_charges),
-                                                //     'fuel_surcharge' =>  floatval($shipment->fuel_surcharge),
-                                                //     'faf_charges' => $shipment->faf_charges_data ? floatval($shipment->faf_charges_data->faf_charges) : 0,
-                                                //     'arrival_charges_gst' => floatval($pending_payment_shipment->gst),
-                                                //     'arrival_sms_charges' => floatval($pending_payment_shipment->sms_charges)
-                                                // ]
-                                            ]; 
+                                            ];
                                         }
+                                    }
+                                    if($pending_payment_shipment->type == 3) {
                                         $finja_status = 0;
-
                                     } elseif($pending_payment_shipment->type == 0 || $pending_payment_shipment->type == 1) {
-                                        $log_bid = $this->isWalletLogUpdated($pending_payment_shipment->shipment_id);
                                         $settlement_bid = $this->isWalletSettlementUpdated($pending_payment_shipment->shipment_id);
                                         if(!$log_bid) {
-                                            if(!array_key_exists($pending_payment_shipment->shipment_id, $pending_logs)) {
-                                                $pending_logs[$pending_payment_shipment->shipment_id] = [
-                                                    "shipmentId" => $shipment->id,
-                                                    "wallet_id" => $shipment->user->wallet->wallet_id,
-                                                    "client_id" =>  $shipment->user->id, 
-                                                    "reference_id" => (string) Str::uuid(), 
-                                                    "shipment_id" => $shipment->tracking_number, 
-                                                    "amount" => $shipment->amount, 
-                                                    "order_created_date" => $shipment->created_at,
-                                                    // "charges" => [
-                                                    //     'weight_charges' =>  0
-                                                    // ]
-                                                ];
-                                            }
                                             $finja_status = 1;
                                         } elseif($settlement_bid) {
                                             $finja_status = 2;
@@ -7716,30 +7700,6 @@ class AdminFinanceController extends Controller
                                             $finja_status = 1;
                                         }
                                     } elseif( $pending_payment_shipment->type == 2) {
-
-                                        $log_bid = $this->isWalletLogUpdated($pending_payment_shipment->shipment_id);
-                                        if(!$log_bid) {
-                                            
-                                            $status_array = [14, 25, 31, 38, 37, 18, 20];
-                                            if(in_array($shipment->shipper_status_id, $status_array)) {
-                                                $cod_amount = 0;
-                                            } else {
-                                                $cod_amount = $shipment->amount;
-                                            }
-                                            
-                                            $pending_logs[$pending_payment_shipment->shipment_id] = [
-                                                "shipmentId" => $shipment->id,
-                                                "wallet_id" => $shipment->user->wallet->wallet_id,
-                                                "client_id" => $shipment->user->id, 
-                                                "reference_id" => (string) Str::uuid(), 
-                                                "shipment_id" => $shipment->tracking_number, 
-                                                "amount" => $cod_amount,
-                                                "order_created_date" => $shipment->created_at,
-                                                // "charges" => [
-                                                //     'weight_charges' =>  0
-                                                // ]
-                                            ]; 
-                                        }
                                         $finja_status = 2;
                                     }
                                 }
@@ -7856,46 +7816,30 @@ class AdminFinanceController extends Controller
                             if ($pending_payment_shipment) {
                                 $shipment = Shipment::with(['user.wallet'])->find($pending_payment_shipment->shipment_id);
                                 if($shipment->user->wallet) {
-                                    if($pending_payment_shipment->type == 3) {
-                                        $log_bid = $this->isWalletLogUpdated($pending_payment_shipment->shipment_id);
-                                        if(!$log_bid) {
+                                    $log_bid = $this->isWalletLogUpdated($pending_payment_shipment->shipment_id);
+                                    if(!$log_bid) {
+                                        $cod_amount = $shipment->amount;
+                                        $status_array = [14, 25, 31, 38, 37, 18, 20];
+                                        if(in_array($shipment->shipper_status_id, $status_array) && $pending_payment_shipment->type == 2) {
+                                            $cod_amount = 0;
+                                        }
+                                        if(!array_key_exists($pending_payment_shipment->shipment_id, $pending_logs)) {
                                             $pending_logs[$pending_payment_shipment->shipment_id] = [
                                                 "shipmentId" => $shipment->id,
                                                 "wallet_id" => $shipment->user->wallet->wallet_id,
-                                                "client_id" =>  $shipment->user->id, 
-                                                "reference_id" => (string) Str::uuid(), 
-                                                "shipment_id" => $shipment->tracking_number, 
-                                                "amount" => $shipment->amount,
+                                                "client_id" =>  $shipment->user->id,
+                                                "reference_id" => (string) Str::uuid(),
+                                                "shipment_id" => $shipment->tracking_number,
+                                                "amount" => $cod_amount,
                                                 "order_created_date" => $shipment->created_at,
-                                                // "charges" => [
-                                                //     'weight_charges' =>  floatval($shipment->weight_charges),
-                                                //     'fuel_surcharge' =>  floatval($shipment->fuel_surcharge),
-                                                //     'faf_charges' => $shipment->faf_charges_data ? floatval($shipment->faf_charges_data->faf_charges) : 0,
-                                                //     'arrival_charges_gst' => floatval($pending_payment_shipment->gst),
-                                                //     'arrival_sms_charges' => floatval($pending_payment_shipment->sms_charges)
-                                                // ]
-                                            ]; 
+                                            ];
                                         }
+                                    }
+                                    if($pending_payment_shipment->type == 3) {
                                         $finja_status = 0;
-
                                     } elseif($pending_payment_shipment->type == 0 || $pending_payment_shipment->type == 1 ) {
-                                        $log_bid = $this->isWalletLogUpdated($pending_payment_shipment->shipment_id);
                                         $settlement_bid = $this->isWalletSettlementUpdated($pending_payment_shipment->shipment_id);
                                         if(!$log_bid) {
-                                            if(!array_key_exists($pending_payment_shipment->shipment_id, $pending_logs)) {
-                                                $pending_logs[$pending_payment_shipment->shipment_id] = [
-                                                    "shipmentId" => $shipment->id,
-                                                    "wallet_id" => $shipment->user->wallet->wallet_id,
-                                                    "client_id" => $shipment->user->id, 
-                                                    "reference_id" => (string) Str::uuid(), 
-                                                    "shipment_id" => $shipment->tracking_number, 
-                                                    "amount" => $shipment->amount, 
-                                                    "order_created_date" => $shipment->created_at,
-                                                    // "charges" => [
-                                                    //     'weight_charges' =>  0
-                                                    // ]
-                                                ];
-                                            }
                                             $finja_status = 1;
                                         } elseif($settlement_bid) {
                                             $finja_status = 2;
@@ -7903,21 +7847,6 @@ class AdminFinanceController extends Controller
                                             $finja_status = 1;
                                         }
                                     } elseif($pending_payment_shipment->type == 2) {
-                                        $log_bid = $this->isWalletLogUpdated($pending_payment_shipment->shipment_id);
-                                        if(!$log_bid) {
-                                            $pending_logs[$pending_payment_shipment->shipment_id] = [
-                                                "shipmentId" => $shipment->id,
-                                                "wallet_id" => $shipment->user->wallet->wallet_id,
-                                                "client_id" => $shipment->user->id, 
-                                                "reference_id" => (string) Str::uuid(), 
-                                                "shipment_id" => $shipment->tracking_number, 
-                                                "amount" => 0, 
-                                                "order_created_date" => $shipment->created_at,
-                                                // "charges" => [
-                                                //     'weight_charges' =>  0
-                                                // ]
-                                            ]; 
-                                        }
                                         $finja_status = 2;
                                     }
                                 }
@@ -8761,7 +8690,7 @@ class AdminFinanceController extends Controller
                 }
 
                 $dropdown .= '<button type="button" class="dropdown-item export_to_excel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-download"></i></div><div class="col-9 offset-1">Export to Excel</div></button>
-                    <button type="button" class="dropdown-item request_add"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Request</div></button>
+                    <button type="button" class="dropdown-item request_add"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Get Support</div></button>
                   </div>
                 </div>
             ';
@@ -9055,89 +8984,92 @@ class AdminFinanceController extends Controller
                 foreach ($rows as $key => $row) {
                     $payment_id = (int)$row['payment_id'];
                     $done_payment = DonePayment::find($payment_id);
-                    $status = strtolower($row['status']);
-                    if ($status == "paid") {
-                        if ($done_payment->status != 1) {
-                            $payment_clear = new VisionSoftCodPaymentClear();
-                            $payment_clear->payment_id = $payment_id;
-                            $payment_clear->status = 1;
-                            $payment_clear->save();
-
-                            $done_payment->company_bank_id = (int)$row['company_bank_id'];
-                            $done_payment->status_updated_at = Carbon::now();
-                            $done_payment->status_updated_by = Auth::id();
-                            $done_payment->status = 1;
-
-                            $done_payment->save();
-
-                            foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
-                                $shipment = $done_payment_shipment->shipment;
-
-                                if ($done_payment_shipment->type == 1) {
-                                    $shipment->payment_status_id = 7; //charges deducted
-
-                                    $shipment->save();
-
-                                    ShipmentsPaymentJourneyController::add($shipment->id, 7, Auth::id(), '', $done_payment->id);
-                                } else if ($done_payment_shipment->type == 3) {
-                                    $shipment->payment_status_id = 12; //Arrival charges deducted
-
-                                    $shipment->save();
-
-                                    ShipmentsPaymentJourneyController::add($shipment->id, 12, Auth::id(), '', $done_payment->id);
-                                } else {
-                                    $shipment->payment_status_id = 3;
-
-                                    $shipment->save();
-
-                                    ShipmentsPaymentJourneyController::add($shipment->id, 3, Auth::id(), '', $done_payment->id);
+                    if($done_payment->is_wallet_payment == 0) {
+                        $status = strtolower($row['status']);
+                        if ($status == "paid") {
+                            if ($done_payment->status != 1) {
+                                $payment_clear = new VisionSoftCodPaymentClear();
+                                $payment_clear->payment_id = $payment_id;
+                                $payment_clear->status = 1;
+                                $payment_clear->save();
+    
+                                $done_payment->company_bank_id = (int)$row['company_bank_id'];
+                                $done_payment->status_updated_at = Carbon::now();
+                                $done_payment->status_updated_by = Auth::id();
+                                $done_payment->status = 1;
+    
+                                $done_payment->save();
+    
+                                foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
+                                    $shipment = $done_payment_shipment->shipment;
+    
+                                    if ($done_payment_shipment->type == 1) {
+                                        $shipment->payment_status_id = 7; //charges deducted
+    
+                                        $shipment->save();
+    
+                                        ShipmentsPaymentJourneyController::add($shipment->id, 7, Auth::id(), '', $done_payment->id);
+                                    } else if ($done_payment_shipment->type == 3) {
+                                        $shipment->payment_status_id = 12; //Arrival charges deducted
+    
+                                        $shipment->save();
+    
+                                        ShipmentsPaymentJourneyController::add($shipment->id, 12, Auth::id(), '', $done_payment->id);
+                                    } else {
+                                        $shipment->payment_status_id = 3;
+    
+                                        $shipment->save();
+    
+                                        ShipmentsPaymentJourneyController::add($shipment->id, 3, Auth::id(), '', $done_payment->id);
+                                    }
                                 }
                             }
-                        }
-                    } elseif ($status == "reverted") {
-                        if ($done_payment->status != 2 && $done_payment->status != 1) {
-                            /*$payment_clear = new VisionSoftCodPaymentClear();
-                            $payment_clear->payment_id = $payment_id;
-                            $payment_clear->status = 2;
-                            $payment_clear->save();*/
-
-                            $done_payment->company_bank_id = (int)$row['company_bank_id'];
-                            $done_payment->status_updated_at = Carbon::now();
-                            $done_payment->status_updated_by = Auth::id();
-                            $done_payment->status = 2;
-
-                            $done_payment->save();
-
-                            foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
-                                $shipment = $done_payment_shipment->shipment;
-
-                                if ($done_payment_shipment->type == 1) {
-                                    $shipment->payment_status_id = 6;
-
-                                    $shipment->save();
-
-                                    ShipmentsPaymentJourneyController::add($shipment->id, 6, Auth::id(), '', $done_payment->id);
-                                } else if ($done_payment_shipment->type == 3) {
-                                    $shipment->payment_status_id = 11; //Arrival charges reverted
-
-                                    $shipment->save();
-
-                                    ShipmentsPaymentJourneyController::add($shipment->id, 11, Auth::id(), '', $done_payment->id);
-                                } else {
-                                    $shipment->payment_status_id = 2;
-
-                                    $shipment->save();
-
-                                    ShipmentsPaymentJourneyController::add($shipment->id, 2, Auth::id(), '', $done_payment->id);
+                        } elseif ($status == "reverted") {
+                            if ($done_payment->status != 2 && $done_payment->status != 1) {
+                                /*$payment_clear = new VisionSoftCodPaymentClear();
+                                $payment_clear->payment_id = $payment_id;
+                                $payment_clear->status = 2;
+                                $payment_clear->save();*/
+    
+                                $done_payment->company_bank_id = (int)$row['company_bank_id'];
+                                $done_payment->status_updated_at = Carbon::now();
+                                $done_payment->status_updated_by = Auth::id();
+                                $done_payment->status = 2;
+    
+                                $done_payment->save();
+    
+                                foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
+                                    $shipment = $done_payment_shipment->shipment;
+    
+                                    if ($done_payment_shipment->type == 1) {
+                                        $shipment->payment_status_id = 6;
+    
+                                        $shipment->save();
+    
+                                        ShipmentsPaymentJourneyController::add($shipment->id, 6, Auth::id(), '', $done_payment->id);
+                                    } else if ($done_payment_shipment->type == 3) {
+                                        $shipment->payment_status_id = 11; //Arrival charges reverted
+    
+                                        $shipment->save();
+    
+                                        ShipmentsPaymentJourneyController::add($shipment->id, 11, Auth::id(), '', $done_payment->id);
+                                    } else {
+                                        $shipment->payment_status_id = 2;
+    
+                                        $shipment->save();
+    
+                                        ShipmentsPaymentJourneyController::add($shipment->id, 2, Auth::id(), '', $done_payment->id);
+                                    }
                                 }
                             }
+    
+                            if ($done_payment->status == 2) {
+                                NotificationsController::send(92, $done_payment->id);
+                            }
+    
                         }
-
-                        if ($done_payment->status == 2) {
-                            NotificationsController::send(92, $done_payment->id);
-                        }
-
                     }
+                    
                 }
                 return redirect()->back()->with(['success' => 'Status of ' . count($rows) . ' Payment(s) has been Updated']);
             }
@@ -14878,15 +14810,15 @@ class AdminFinanceController extends Controller
                 $shipment =  $invoice_shipment->shipment_archieve;
             }
             $arrival_charges_applied = ShipmentAdditionalCharges::check_additional_charges($shipment->id,true,false,false);;
-            $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
-
-            if ($shipment_journey->exists()) {
-                $date = $shipment_journey->first()->created_at;
-            } else {
-                $date = $shipment->created_at;
-            }
-
-            $date = Carbon::parse($date)->format('Y-m-d');
+//            $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
+//
+//            if ($shipment_journey->exists()) {
+//                $date = $shipment_journey->first()->created_at;
+//            } else {
+//                $date = $shipment->created_at;
+//            }
+//
+//            $date = Carbon::parse($date)->format('Y-m-d');
             $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment->id);
             $row = array();
 
@@ -21542,14 +21474,14 @@ class AdminFinanceController extends Controller
         }
         return false;
     }
-    
+
 
     public function mark_settlement(Request $request) {
 
         $done_payment = DonePayment::where('id',  $request->id)->update(['status' => 3, 'status_updated_at' => Carbon::now()]);
 
         if($done_payment) {
-            WalletSettlementFromDonePayments::dispatch($request->id,  Auth::id());
+            WalletBulkSettlementFromDonePayments::dispatch($request->id,  Auth::id());
         }
 
         return response()->json(['status'=> 1 , 'success' => 'Wallet Settlement Request sent.!']);
@@ -21584,7 +21516,7 @@ class AdminFinanceController extends Controller
                     $type = 'Returned';
                 } elseif($dps->type == 2) {
                     $type = 'Adjustment';
-                } elseif($dps->type == 2) {
+                } elseif($dps->type == 3) {
                     $type = 'Arrival';
                 }
 
@@ -21597,6 +21529,210 @@ class AdminFinanceController extends Controller
             }
         }
         return response()->json(['data' => $data]);
+    }
+
+    static function update_payment_done_payment($shipment_id, $type, $done_payment_id = null)
+    {
+        $shipment = Shipment::find($shipment_id);
+        $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment_id);
+        $check_arrival = ShipmentAdditionalCharges::check_additional_charges($shipment_id, true);
+        $service_charges = ShipmentServicesCharges::where('shipment_id', $shipment_id);
+
+        $get_wallet_charges_if_applicable = ShipmentAdditionalCharges::get_wallet_charges_if_applicable($shipment_id);
+        if($get_wallet_charges_if_applicable) {
+            $wallet_charges = ShipmentAdditionalCharges::fetch_wallet_charges($shipment_id);
+        }else{
+            $wallet_charges = ShipmentAdditionalCharges::show_wallet_charges_by_type($shipment_id,$type);
+        }
+        if ($service_charges->exists()) {
+            $service_charges = $service_charges->first();
+            $service_charges = $service_charges->reverse_pickup_charges;
+        } else {
+            $service_charges = 0;
+        }
+        $setting = CorporateReimbursementSetting::where('user_id', $shipment->user_id);
+        $crs = false;
+        if ($setting->exists()) {
+            $setting = $setting->first();
+            if ($setting->setting_on == 1 && $shipment->user->account_type_id == 2) {
+                $crs = true;
+            }
+        }
+        $amount = $shipment->amount;
+        if ($shipment->shipment_type == 1) {
+            if (!$shipment->packaging_material_request) {
+                if ($type == 0) {
+                    if ($check_arrival) {
+                        $charges = $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->esc_charges + $service_charges;
+                    } else {
+                        $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->esc_charges + $service_charges + $faf_charges;
+                    }
+                    if ($shipment->business_category_id == 1) {
+                        $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id, $shipment->pickup_address->city->id)), 2, PHP_ROUND_HALF_DOWN);
+                    } else {
+                        $gst = ROUND(($charges * self::international_gst()), 2, PHP_ROUND_HALF_DOWN);
+                    }
+
+                    if ($crs) {
+                        $wht = (($charges + $gst) * 3) / 100;
+                    } else {
+                        $wht = 0;
+                    }
+                    $payable = $amount - ($charges + $gst + $wallet_charges - $wht);
+                } else if ($type == 3) {
+                    $charges = $shipment->weight_charges + $shipment->fuel_surcharge + $faf_charges;
+                    if ($shipment->business_category_id == 1) {
+                        $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id, $shipment->pickup_address->city->id)), 2, PHP_ROUND_HALF_DOWN);
+                    } else {
+                        $gst = ROUND(($charges * self::international_gst()), 2, PHP_ROUND_HALF_DOWN);
+                    }
+
+                    if ($crs) {
+                        $wht = (($charges + $gst) * 3) / 100;
+                    } else {
+                        $wht = 0;
+                    }
+                    $payable = 0 - ($charges + $gst - $wht);
+                    $amount = 0;
+                } else {
+                    $amount = 0;
+                    if ($check_arrival) {
+                        $charges = $shipment->insurance_charges + $shipment->return_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges;
+                    } else {
+                        $charges = $shipment->weight_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->intercept_charges + $shipment->nsa_osa_charges+$faf_charges;
+                    }
+                    if ($shipment->business_category_id == 1) {
+                        $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id, $shipment->pickup_address->city->id)), 2, PHP_ROUND_HALF_DOWN);
+                    } else {
+                        $gst = ROUND(($charges * self::international_gst()), 2, PHP_ROUND_HALF_DOWN);
+                    }
+
+                    if ($crs) {
+                        $wht = (($charges + $gst) * 3) / 100;
+                    } else {
+                        $wht = 0;
+                    }
+                    $payable = 0 - ($charges + $gst + $wallet_charges - $wht);
+                }
+            } else {
+                $charges = $shipment->packaging_material_charges;
+                $gst = 0;
+
+                if ($crs) {
+                    $wht = (($charges + $gst) * 3) / 100;
+                } else {
+                    $wht = 0;
+                }
+
+                $payable = $amount - ($charges + $gst - $wht);
+            }
+            $account_type_id = $shipment->user->account_type_id;
+            $current_sms_charges = $shipment->user->sms_charges;
+            $sms_charges_status = $shipment->user->sms_charges_status;
+            $sms_charges = 0;
+            $valid = FALSE;
+
+            if ($account_type_id == 1) {
+                if (DonePaymentShipment::where('shipment_id', $shipment_id)->where('type', $type)->exists()) {
+                    $valid = TRUE;
+                }
+            } else {
+                if (DonePaymentShipment::where('shipment_id', $shipment_id)->where('type', $type)->exists()) {
+                    $valid = TRUE;
+                }
+            }
+            if($shipment->packaging_material_request && $type == 3){
+                $valid = FALSE;
+            }
+
+            if ($valid) {
+                if($get_wallet_charges_if_applicable  && $type != 3) {
+                    ShipmentAdditionalCharges::settle_wallet_finova_charges($shipment_id, $type);
+                }
+                if ($sms_charges_status == 1 && $type != 3) {
+                    $shipment_sms_count = 0;
+                    $shipment_sms = ShipmentSmsLogs::select('notification_id', DB::raw('count(*) as count'))->where('shipment_id', $shipment->id)->where('paid', 0)->groupBy('notification_id')->get();
+
+
+                    foreach ($shipment_sms as $notification) {
+                        $notification_setting = NotificationSetting::where('notification_id', $notification->notification_id)->where('charged_sms_toggle', 1);
+                        if ($notification_setting->exists()) {
+                            $notification_setting = $notification_setting->first();
+                            $charging_frequency = $notification_setting->charging_frequency;
+                            if ($notification->count <= $charging_frequency) {
+                                $shipment_sms_count += $notification->count;
+                            } else {
+                                $shipment_sms_count += $charging_frequency;
+                            }
+                        }
+                    }
+                    $sms_charges = $current_sms_charges * $shipment_sms_count;
+                    $payable = $payable - $sms_charges;
+                    ShipmentSmsLogs::where('shipment_id', $shipment->id)->update(['paid' => 1]);
+                }
+                if ($account_type_id == 1 || ($account_type_id == 2 && !$shipment->packaging_material_request) || $crs) {
+                    $done_payment = DonePayment::find($done_payment_id);
+
+                    if (!empty($done_payment)) {
+                        $done_payment_shipments = DonePaymentShipment::where('done_payment_id', $done_payment->id)->where('shipment_id', $shipment_id)->where('type', $type)->latest()->first();
+                        if (!empty($done_payment_shipments)) {
+                            if ($account_type_id == 1) {
+                                $done_payment_shipments->done_payment_id = $done_payment->id;
+                                $done_payment_shipments->shipment_id = $shipment_id;
+                                $done_payment_shipments->type = $type;
+                                $done_payment_shipments->amount = $amount;
+                                $done_payment_shipments->charges = $charges;
+                                $done_payment_shipments->gst = $gst;
+                                $done_payment_shipments->wht = 0;
+                                $done_payment_shipments->payable = $payable;
+                                $done_payment_shipments->sms_charges = $sms_charges;
+                                $done_payment_shipments->save();
+
+                                $results = DB::select('CALL update_done_payment_statistics(?)', [$done_payment->id]);
+
+
+                            } else {
+                                if (!$shipment->packaging_material_request) {
+
+                                    $done_payment_shipments->done_payment_id = $done_payment->id;
+                                    $done_payment_shipments->shipment_id = $shipment_id;
+                                    $done_payment_shipments->type = $type;
+                                    $done_payment_shipments->amount = $amount;
+                                    if ($crs) {
+                                        $done_payment_shipments->charges = $charges;
+                                        $done_payment_shipments->gst = $gst;
+                                        $done_payment_shipments->wht = $wht;
+                                        $done_payment_shipments->payable = $payable;
+                                        $done_payment_shipments->sms_charges = $sms_charges;
+                                    } else {
+                                        $done_payment_shipments->charges = 0;
+                                        $done_payment_shipments->gst = 0;
+                                        $done_payment_shipments->wht = 0;
+                                        $done_payment_shipments->payable = $amount;
+                                        $done_payment_shipments->sms_charges = 0;
+                                    }
+                                    $done_payment_shipments->save();
+
+                                    $results = DB::select('CALL update_done_payment_statistics(?)', [$done_payment->id]);
+                                } else {
+                                    if ($crs) {
+                                        $done_payment_shipments->done_payment_id = $done_payment->id;
+                                        $done_payment_shipments->shipment_id = $shipment_id;
+                                        $done_payment_shipments->type = $type;
+                                        $done_payment_shipments->amount = $amount;
+                                        $done_payment_shipments->payable = $payable;
+                                        $done_payment_shipments->save();
+
+                                        $results = DB::select('CALL update_done_payment_statistics(?)', [$done_payment->id]);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
     }
 
 }
