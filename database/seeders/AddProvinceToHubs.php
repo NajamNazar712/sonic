@@ -107,6 +107,11 @@ class AddProvinceToHubs extends Seeder
                 'Swat',
                 'Timergarah',
             ],
+            5 => [ // Azad Jammu and Kashmir
+                'Kotli',
+                'Muzaffarabad',
+                'Rawalakot',
+            ],
         ];
 
         foreach ($provinceCities as $provinceId => $cities) {

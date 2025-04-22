@@ -15,11 +15,23 @@ class AddingProvinceSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('provinces')->insert([
-            ['id' => 1, 'name' => 'Sindh', 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 2, 'name' => 'Punjab', 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 3, 'name' => 'Balochistan', 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 4, 'name' => 'Khyber Pakhtunkhwa', 'created_at' => now(), 'updated_at' => now()],
-        ]);
+        $provinces = [
+            ['id' => 1, 'name' => 'Sindh'],
+            ['id' => 2, 'name' => 'Punjab'],
+            ['id' => 3, 'name' => 'Balochistan'],
+            ['id' => 4, 'name' => 'Khyber Pakhtunkhwa'],
+            ['id' => 5, 'name' => 'Azad Jammu And Kashmir'],
+        ];
+    
+        foreach ($provinces as $province) {
+            DB::table('provinces')->updateOrInsert(
+                ['id' => $province['id']],
+                [
+                    'name' => $province['name'],
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            );
+        }
     }
 }
