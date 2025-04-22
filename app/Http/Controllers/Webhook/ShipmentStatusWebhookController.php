@@ -92,16 +92,14 @@ class ShipmentStatusWebhookController extends Controller
                     Log::channel('botCallJobLog')->info('s ' . 'Webhook log payload' . json_encode($payload));
                 }
                 $response = $client->post('', [
-                    'headers' => [
-                        'Accept' => 'application/json',      // Ensure we accept JSON responses
-                        'Content-Type' => 'application/json' // Set Content-Type as JSON for the server
-                    ],
                     'form_params' => $payload
                 ]);
+                $responseBody = $response->getBody()->getContents();
+                $responseData = json_decode($responseBody, true);
                 $body = $response->getBody()->getContents();
 
                 // if ($user_id == 30860) {
-                    Log::channel('botCallJobLog')->info('s ' . 'Webhook log check-body' . json_decode($body));
+                    Log::channel('botCallJobLog')->info('s ' . 'Webhook log check-body' . ($responseData));
                 // }
                 if ($response instanceof \Psr\Http\Message\ResponseInterface) {
                     $status_code = $response->getStatusCode();
