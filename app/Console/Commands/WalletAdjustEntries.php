@@ -223,7 +223,7 @@ class WalletAdjustEntries extends Command
             $diffAmount = round($oldTotal - $newTotal, 2);
 
             $push_to_adjustment = false;
-            if (round($oldTotal + abs($diffAmount), 2) == round($dps->payble2, 2)) {
+            if (round($oldTotal + abs($diffAmount), 2) == round($dps->payable2, 2)) {
                 $push_to_adjustment = true;
             }
 
