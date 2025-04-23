@@ -135,6 +135,7 @@ class WalletAdjustEntries extends Command
 
         $OtherIssuePayload = [];
         $ArrivalIssuePayload = [];
+        $PushtoAdjsutmentData = [];
         foreach ($query as $dps) {
 
             $LogChargeStatus = true;
@@ -284,36 +285,60 @@ class WalletAdjustEntries extends Command
                     'push_to_adjustment'=>$push_to_adjustment
                 ];
             }
-        }
 
-//        $api = config('app.FINGA_URL');
-//        foreach ($ArrivalIssuePayload as $shipmentId => $dps) {
-//            $requestPayload = [
-//                "client_id"    => $dps['client_id'],
-//                "wallet_id"    => $dps['wallet_id'],
-//                "reference_id" => $dps['reference_id'],
-//                "shipment_id"  => $dps['shipment_id'],
-//                "amount"       => floatval($dps['difference']),
-//            ];
-//
-//            FingaIntegrationController::apiLog(9, 1, $requestPayload, $shipmentId);
-//
-//            $token = FingaIntegrationController::getToken($api);
-//            $response = Http::withHeaders([
-//                'accept' => 'application/json',
-//                'Authorization' => "Bearer " . $token,
-//            ])->connectTimeout(120)->timeout(120)
-//              ->post($api . 'transactions/log/adjustment', $requestPayload);
-//
-//            if ($response->successful()) {
-//                $body = json_decode($response->getBody());
-//                FingaIntegrationController::apiLog(10, 'success', $body, $shipmentId);
-//            } else {
-//                $body = json_decode($response->getBody());
-//                FingaIntegrationController::apiLog(10, 'error', $body, $shipmentId);
-//            }
-//        }
-        self::generateExcelFile($ArrivalIssuePayload,$OtherIssuePayload);
+            if($push_to_adjustment){
+                $PushtoAdjsutmentData[] = [
+                    "client_id" => $dps->user_id,
+                    "wallet_id" => $dps->wallet_id,
+                    "reference_id" => $dps->id,
+                    "shipment_id" => $dps->tracking_number,
+                    "amount" => $dps->type == 0 ? $dps->amount : 0,
+                    "charges" => $charges,
+                    'wallet_log_updated' => $dps->wallet_log_updated,
+                    'dps_id' => $dps->id,
+                    'dps_type' => $dps->type,
+                    'missing_keys_in_old' => $missingKeys,
+                    'mismatched_values' => $mismatchedValues,
+                    'extra_keys_in_old' => array_keys($extraKeysInOld),
+                    'old_total' => $oldTotal,
+                    'new_total' => $newTotal,
+                    'difference' => $diffAmount,
+                    'payable' => $dps->payable2,
+                    'arrival_charges_issue' => $hasKeyDiscrepancy,
+                    'push_to_adjustment'=>$push_to_adjustment,
+                    'ship_id'=>$shipmentId,
+                ];
+            }
+        }
+        $api = config('app.FINGA_URL');
+        foreach ($PushtoAdjsutmentData  as $dps) {
+            $shipmentId = $dps['ship_id'];
+            $requestPayload = [
+                "client_id"    => $dps['client_id'],
+                "wallet_id"    => $dps['wallet_id'],
+                "reference_id" => $dps['reference_id'],
+                "shipment_id"  => $dps['shipment_id'],
+                "amount"       => floatval($dps['difference']),
+            ];
+
+            FingaIntegrationController::apiLog(9, 1, $requestPayload, $shipmentId);
+
+            $token = FingaIntegrationController::getToken($api);
+            $response = Http::withHeaders([
+                'accept' => 'application/json',
+                'Authorization' => "Bearer " . $token,
+            ])->connectTimeout(120)->timeout(120)
+              ->post($api . 'transactions/log/adjustment', $requestPayload);
+
+            if ($response->successful()) {
+                $body = json_decode($response->getBody());
+                FingaIntegrationController::apiLog(10, 'success', $body, $shipmentId);
+            } else {
+                $body = json_decode($response->getBody());
+                FingaIntegrationController::apiLog(10, 'error', $body, $shipmentId);
+            }
+        }
+        //self::generateExcelFile($ArrivalIssuePayload,$OtherIssuePayload);
     }
     static function generateExcelFile($ArrivalIssuePayload, $OtherIssuePayload)
     {
