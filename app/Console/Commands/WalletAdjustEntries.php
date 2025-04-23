@@ -222,8 +222,10 @@ class WalletAdjustEntries extends Command
             $newTotal = round(array_sum(array_map('floatval', $charges)), 2);
             $diffAmount = round($oldTotal - $newTotal, 2);
 
+            $adjustedTotal = round($oldTotal + $diffAmount, 2); // add or subtract depending on sign
+
             $push_to_adjustment = false;
-            if (round($oldTotal + abs($diffAmount), 2) == round($dps->payable2, 2)) {
+            if ($adjustedTotal == round($dps->payable2, 2)) {
                 $push_to_adjustment = true;
             }
 
