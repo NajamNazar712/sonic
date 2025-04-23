@@ -14821,8 +14821,19 @@ class AdminReportsController extends Controller
 
         $sack_bag_utilization = IssueSackBagOrigin::join('cities as dc', 'dc.id', '=', 'issue_sack_bag_origins.sack_destination_id')
             ->join('cities as oc', 'oc.id', '=', 'issue_sack_bag_origins.origin')
+            ->leftJoin('cargo_manifest_bags', 'cargo_manifest_bags.sack_bag_id', 'issue_sack_bag_origins.id')
             ->whereNotNull('issue_sack_bag_origins.sack_destination_id')
-            ->select('dc.name as destination_name', 'dc.id as destination_id', 'oc.name as origin_name', 'oc.id as origin_id', 'issue_sack_bag_origins.bag_count', 'issue_sack_bag_origins.sack_bag_no', 'issue_sack_bag_origins.status')
+            ->select(
+                'dc.name as destination_name', 
+                'dc.id as destination_id', 
+                'oc.name as origin_name', 
+                'oc.id as origin_id', 
+                'issue_sack_bag_origins.bag_count', 
+                'issue_sack_bag_origins.sack_bag_no', 
+                'issue_sack_bag_origins.status',
+                'cargo_manifest_bags.created_by as bag_scanned_by',
+                'cargo_manifest_bags.created_at as bag_scanned_at'
+            )
             ->where('issue_sack_bag_origins.bag_count', '>', 0);
 
         if ($destination_id = $request->get('destination_id')) {

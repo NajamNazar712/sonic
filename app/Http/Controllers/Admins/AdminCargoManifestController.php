@@ -2332,13 +2332,8 @@ class AdminCargoManifestController extends Controller
 
     public function create_store(Request $request) //create bag -> store
     {
-
-
         $sack_bag_no = $request->input('sack_bag_no');
-        // $origin_hub_id=$request->input('origin_hub_id');
         $sack_bag = IssueSackBagOrigin::where('sack_bag_no', $sack_bag_no)->where('status', 1);
-        // ->where('origin',$origin_hub_id)
-        // if($sack_bag->exists()){
         $shipments = 0;
         $quantity = 0;
         $shipments_weight = 0;
@@ -2346,8 +2341,7 @@ class AdminCargoManifestController extends Controller
         $shipment_ids = explode(',', $request->input('shipment_ids'));
         $open_box_ids = explode(',', $request->input('open_box_ids'));
         foreach ($shipment_ids as $key => $shipment_id) {
-            $shipment = Shipment::find($shipment_id);
-
+                $shipment = Shipment::find($shipment_id);
                 if ($shipment->shipper_status_id == 20) {
                     $lost_shipment = ManifestBagLostShipment::where('shipment_id', $shipment_id)->latest()->first();
                     if ($lost_shipment) {
@@ -2360,7 +2354,6 @@ class AdminCargoManifestController extends Controller
                     }
                 }
 
-
                 if (in_array($shipment->shipper_status_id, [2, 20, 30, 37, 49, 55, 68, 69, 70, 72, 73,75,76 ])) {
                     $shipments++;
                     $shipments_weight += $shipment->actual_weight;
@@ -2369,9 +2362,7 @@ class AdminCargoManifestController extends Controller
                     unset($shipment_ids[$key]);
                 }
             }
-            //dd($shipment_ids);
             if (!empty($shipment_ids)) {
-
                 $bag = new CargoManifestBag();
                 $bag->seal_number = $request->input('seal_number');
                 $bag->origin_hub_id = $request->input('origin_hub_id');
@@ -2390,34 +2381,22 @@ class AdminCargoManifestController extends Controller
                     $sack_bag = $sack_bag->first();
                     $bag->sack_bag_id = $sack_bag->id;
                     $bag->is_sack_bag = 1;
-
-                    // $sack_bag->sack_destination_id = $request->input('destination_hub_id');
                     $sack_bag->save();
                 } else {
                     $bag->is_sack_bag = 0;
                 }
 
                 $bag->save();
-
-
                 CargoManifestBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), NULL, NULL, 1);
-
                 $id = $bag->id;
-
                 foreach ($shipment_ids as $shipment_id) {
-
                     $bag_shipment = new CargoManifestBagShipments();
-
                     $bag_shipment->cargo_manifest_bag_id = $id;
                     $bag_shipment->shipment_id = $shipment_id;
-
                     $bag_shipment->save();
-
                     $shipment = Shipment::find($shipment_id);
-
                     $shipper_status_id = NULL;
                     $consignee_status_id = NULL;
-
                     //journey of intransit stopped on bag creation / moved to manifest creation as per TO-6734 done by Najam Nazar
                     // if ($request->input('bag_type') == 1) {
                     //     $shipper_status_id = 3;
@@ -2445,9 +2424,7 @@ class AdminCargoManifestController extends Controller
 
                     // $shipment->shipper_status_id = $shipper_status_id;
                     // $shipment->consignee_status_id = $consignee_status_id;
-
                     // $shipment->save();
-
 
                     if (in_array($shipment_id, $open_box_ids)) {
                         $shipment->open_box = 1;
