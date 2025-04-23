@@ -305,12 +305,14 @@ class WalletAdjustEntries extends Command
                     'difference' => $diffAmount,
                     'payable' => $dps->payable2,
                     'arrival_charges_issue' => $hasKeyDiscrepancy,
-                    'push_to_adjustment'=>$push_to_adjustment
+                    'push_to_adjustment'=>$push_to_adjustment,
+                    'ship_id'=>$shipmentId,
                 ];
             }
         }
         $api = config('app.FINGA_URL');
-        foreach ($PushtoAdjsutmentData as $shipmentId => $dps) {
+        foreach ($PushtoAdjsutmentData  as $dps) {
+            $shipmentId = $dps['ship_id'];
             $requestPayload = [
                 "client_id"    => $dps['client_id'],
                 "wallet_id"    => $dps['wallet_id'],
