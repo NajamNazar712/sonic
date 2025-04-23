@@ -3885,11 +3885,7 @@ class AdminReportsEmailController extends Controller
                     $pending_delivery->city_area_name,
                     $pending_delivery->rt,
                     $pending_delivery->operation_rider_id == 1 ? 'Field In Operations' : 'Hold In Operations',
-
-                    // route_code
-                    // $pending_delivery->route_start . ' to ' . $pending_delivery->route_end,
                     $pending_delivery->route_code . ' (' .  $pending_delivery->route_start . ' to ' . $pending_delivery->route_end . ') ',
-
                     $pending_delivery->shipments_count,
                     $excel_ecom_cod,
                     $excel_general_retail,
