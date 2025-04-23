@@ -3896,7 +3896,7 @@ class AdminReportsEmailController extends Controller
                     $delivered_excel_ecom_cod,
                     $delivered_excel_general_retail,
                     $delivered_excel_ecom_cod,
-                    $$delivered_excel_others,
+                    $delivered_excel_others,
                     $pending_delivery->assignee,
                     $pending_delivery->created_at,
                     $pending_delivery->total_cod_amount,
