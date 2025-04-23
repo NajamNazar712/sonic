@@ -129,7 +129,7 @@ class WalletAdjustEntries extends Command
             ->whereIn('dps.type', [0, 1])
             ->where('shipments.packaging_material_request', 0)
             ->where('flsr.wallet_log_charges_updated', 0)
-            ->whereBetween('dps.created_at', ['2025-01-01 00:00:00', '2025-04-19 23:59:59'])
+            ->whereBetween('dps.created_at', ['2025-01-01 00:00:00', '2025-04-30 23:59:59'])
             ->havingRaw('ABS(payable2) != ABS(total_charges)')
             ->get();
 
@@ -222,6 +222,11 @@ class WalletAdjustEntries extends Command
             $newTotal = round(array_sum(array_map('floatval', $charges)), 2);
             $diffAmount = round($oldTotal - $newTotal, 2);
 
+            $push_to_adjustment = false;
+            if (round($oldTotal + abs($diffAmount), 2) == round($dps->payble2, 2)) {
+                $push_to_adjustment = true;
+            }
+
             $hasKeyDiscrepancy = false;
             foreach (['faf_charges', 'weight_charges', 'fuel_surcharge'] as $key) {
                 if (array_key_exists($key, $mismatchedValues)) {
@@ -249,6 +254,7 @@ class WalletAdjustEntries extends Command
                     'difference' => $diffAmount,
                     'payable' => $dps->payable2,
                     'arrival_charges_issue' => $hasKeyDiscrepancy,
+                    'push_to_adjustment'=>$push_to_adjustment
                 ];
             } else {
                 $OtherIssuePayload[] = [
@@ -269,6 +275,7 @@ class WalletAdjustEntries extends Command
                     'difference' => $diffAmount,
                     'payable' => $dps->payable2,
                     'arrival_charges_issue' => $hasKeyDiscrepancy,
+                    'push_to_adjustment'=>$push_to_adjustment
                 ];
             }
         }
@@ -326,6 +333,7 @@ class WalletAdjustEntries extends Command
             'O1' => 'Difference',
             'P1' => 'Payable',
             'Q1' => 'Arrival Charges Issue',
+            'R1' => 'push adjustment',
         ];
 
         foreach ($headers as $cell => $value) {
@@ -353,6 +361,7 @@ class WalletAdjustEntries extends Command
                 $sheet->setCellValue('O' . $row, $data['difference'] ?? 0);
                 $sheet->setCellValue('P' . $row, $data['payable'] ?? 0);
                 $sheet->setCellValue('Q' . $row, $data['arrival_charges_issue'] ? 'Yes' : 'No');
+                $sheet->setCellValue('R' . $row, $data['push_to_adjustment'] ? 'Yes' : 'No');
                 $row++;
             }
         }
