@@ -3710,9 +3710,9 @@ class AdminReportsEmailController extends Controller
                 'delivery_notes.id as delivery_note_id',
                 'oc.name as hub',
                 'riders.name as rider',
-                'routes.code as route',
-                'routes.start',
-                'routes.end',
+                'routes.code as route_code',
+                'routes.start as route_start',
+                'routes.end  as route_end',
                 'admins.name as assignee',
                 'delivery_notes.created_at',
                 'delivery_notes.total_cod_amount as amount',
@@ -3812,7 +3812,7 @@ class AdminReportsEmailController extends Controller
                 'Other Sub-Segments', 
                 'Assigned By', 
                 'Assigned Date',
-                'Total Collection', 
+                'Total COD', 
                 'Status', 
                 'Last Updated (Date)',
                 'Last Updated By', 
@@ -3872,6 +3872,8 @@ class AdminReportsEmailController extends Controller
                     ? self::get_segment_type('delivery_note_shipments', $delivered_ids, [1, 2], [1, 3, 4, 6, 8, 9, 10, 11], 'delivered', 'delivery_note_id')
                     : 0;
                 
+                $total_cod_amount = DeliveryNote::where('id', $pending_delivery->delivery_note_id)->first()->total_cod_amount;
+
                 $receive_deliveries_report_array[] = [
                     $serial,
                     $pending_delivery->delivery_note_id,
@@ -3883,12 +3885,11 @@ class AdminReportsEmailController extends Controller
                     $pending_delivery->city_area_name,
                     $pending_delivery->rt,
                     $pending_delivery->operation_rider_id == 1 ? 'Field In Operations' : 'Hold In Operations',
-                    $pending_delivery->start . ' to ' . $pending_delivery->end,
+                    $pending_delivery->route_code . ' (' .  $pending_delivery->route_start . ' to ' . $pending_delivery->route_end . ') ',
                     $pending_delivery->shipments_count,
                     $excel_ecom_cod,
                     $excel_general_retail,
                     $excel_general_ecom_express,
-                    $excel_general_retail,
                     $excel_others,
                     $pending_delivery->total_weight,
                     $pending_delivery->shipments_unverified_count,
@@ -3899,7 +3900,7 @@ class AdminReportsEmailController extends Controller
                     $delivered_excel_others,
                     $pending_delivery->assignee,
                     $pending_delivery->created_at,
-                    $pending_delivery->total_cod_amount,
+                    $total_cod_amount,
                     $pending_delivery->pending_status == 0 ? 'Pending for Update' : 'Pending for Verification',
                     $pending_delivery->last_updated_at,
                     $pending_delivery->updated_by,
@@ -3918,7 +3919,7 @@ class AdminReportsEmailController extends Controller
             $sheet->fromArray($receive_deliveries_report_array, NULL, 'A2', true);
         
             // Total Columns
-            $lastColumn = 'V'; // Adjust based on actual column count
+            $lastColumn = 'AD'; // Adjust based on actual column count
         
             // Apply styling to the header row
             $headerStyle = [
