@@ -82,6 +82,7 @@ class ShipmentStatusWebhookController extends Controller
                 $payload['order_id'] = $orderId ?? '-';
                 $payload['status'] = $status;
                 $payload['date_time'] = $date;
+                $payload['courier_name'] = 'Trax';
                 if($reason){
                     $payload['reason'] = $reason;
                 }
