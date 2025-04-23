@@ -26,6 +26,7 @@
                                     <th class="border-primary border-darken-1">Remark</th>
                                     <th class="border-primary border-darken-1">Inactive Date / Time</th>
                                     <th class="border-primary border-darken-1">User</th>
+                                    <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Action</th>
                                 </tr>
                                 </thead>
@@ -385,6 +386,7 @@
                     {data: 'remarks', name: 'remarks', class: 'align-middle remarks', orderable: false},
                     {data: 'inactive_time', name: 'inactive_time', class: 'align-middle inactive_time'},
                     {data: 'user_id', name: 'user_id', class: 'align-middle user_id'},
+                    {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'action', class: 'align-middle action', name:'action'}
                 ],
                 rowCallback: function (row, data, index) {

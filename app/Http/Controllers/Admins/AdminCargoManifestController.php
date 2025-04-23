@@ -7979,10 +7979,62 @@ class AdminCargoManifestController extends Controller
                 'issue_sack_bag_origins.inactive_at as inactive_time',
                 'issue_sack_bag_origins.inactive_by as inactive_by',
                 'issue_sack_bag_origins.status as status',
-                'issue_sack_bag_origins.id as sack_bag_id'
+                'issue_sack_bag_origins.id as sack_bag_id',
+                'issue_sack_bag_origins.active_by as sack_bag_active_by',
+                'issue_sack_bag_origins.inactive_by as sack_bag_inactive_by',
+                'issue_sack_bag_origins.updated_at as new_active_time',
             );
 
         $datatables = Datatables::of($issuebag)
+        ->editColumn('status', function ($sack_bag){
+            $status = '-';
+            if ($sack_bag->status == 1) {
+                $status = "Active";
+            } else {
+                $status = "Inactive";
+            }
+            return $status;
+        })
+
+        ->editColumn('user_id', function ($sack_bag) {
+            $user = '-';
+            if ($sack_bag->sack_bag_active_by == null && $sack_bag->sack_bag_inactive_by == null) {
+                $user = $sack_bag->user_id;
+            } else if ($sack_bag->sack_bag_active_by != null) {
+                $user = optional(Admin::find($sack_bag->sack_bag_active_by))->name ?? '-';
+            } else if ($sack_bag->sack_bag_inactive_by != null) {
+                $user = optional(Admin::find($sack_bag->sack_bag_inactive_by))->name ?? '-';
+            }        
+            return $user;
+        })
+
+        ->editColumn('remarks', function ($sack_bag){
+            $remarks = '-';
+            if ($sack_bag->remarks != null) {
+                $remarks = $sack_bag->remarks; 
+            }
+            return $remarks;
+        })
+        
+        ->editColumn('inactive_time', function ($sack_bag){
+            $inactive_time = '-';
+            if ($sack_bag->inactive_time != null) {
+                $inactive_time = $sack_bag->inactive_time; 
+            }
+            return $inactive_time;
+        })
+
+        ->editColumn('active_time', function ($sack_bag) {
+            if ($sack_bag->status == 0) {
+                return '-';
+            }
+            if ($sack_bag->new_active_time !== null) {
+                return $sack_bag->new_active_time;
+            }
+            return $sack_bag->active_time ?? '-';
+        })
+        
+
         ->addColumn('action', function ($sack_bag) {
             $dropdown = '
                 <div class="btn-group">
@@ -8066,9 +8118,7 @@ class AdminCargoManifestController extends Controller
             $sack_bag->updated_at = Carbon::now();
             $sack_bag->active_by = $auth_user->id;
         }
-
         $sack_bag->save();
-
         return response()->json(['success' => 'Sack-Bag status updated successfully.']);
     }
 
