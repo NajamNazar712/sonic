@@ -3404,21 +3404,30 @@ class AdminReportsEmailController extends Controller
                     $sub_hub = $sale->ca_scanning_last_location_name;
                 }
 
+                $entry_method = '-';
+                if ($sale->entry_method == 1){
+                    $entry_method = 'Scanned';
+                } else {
+                    $entry_method = 'Manual';
+                }
+
                 $sales_array[] = [
                     'S. No.'                 => $serial,
                     'Tracking No.'           => $sale->tracking_number_link,
                     'Order ID'               => $sale->order_id,
                     'Account No.'            => $sale->account_no,
                     'Shipper'                => $sale->shipper,
-                    'Sales Person'           => $sale->shipper,
+                    'Sales Person'           => $sale->sales_person_name,
                     'KAM'                    => $kam,
                     'Sub Segment'            => $sale->sub_segment,
                     'Consignee Name'         => $sale->name,
                     'First Attempt Date'     => $sale->first_attempt_date,
                     'Rider Picked Status Date' => $sale->rider_picked_status_date,
                     'Status'                 => $sale->status,
-                    'Last Location Screen name'     => $sale->last_location_screen_location_name,
+                    'Last Location Screen name' => $sale->last_location_screen_location_name,
                     'Sub Hub'                => $sub_hub,
+                    'Last Location Updated At' => $sale->last_location_updated_at,
+                    'Entry Method'           => $entry_method,
                     'Reason'                 => $sale->reason,
                     'Remarks'                => $sale->remarks,
                     'Total Attempt'          => $total_attempt,
@@ -3451,7 +3460,7 @@ class AdminReportsEmailController extends Controller
             $sheet->getDefaultColumnDimension()->setWidth(20);
             
             // Define last column dynamically
-            $lastColumn = 'AF'; // Adjust based on actual column count
+            $lastColumn = 'AN'; // Adjust based on actual column count
             
             // Set the title in the first row
             $sheet->setCellValue('A1', 'Quality of Service Report');
