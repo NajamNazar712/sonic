@@ -309,7 +309,6 @@ class WalletAdjustEntries extends Command
                 ];
             }
         }
-        dd(count($PushtoAdjsutmentData));
         $api = config('app.FINGA_URL');
         foreach ($PushtoAdjsutmentData as $shipmentId => $dps) {
             $requestPayload = [
