@@ -10498,4 +10498,17 @@ class APIController extends Controller
         ]);
     }
 
+    public function marco_cities(Request $request)
+    {
+        $cities = City::where('status', 1)->where('business_category_id', 1);
+
+        if ($cities->exists()) {
+            $cities = $cities->select('id', 'name')->get();
+
+            return response()->json(['status' => 0, 'message' => 'List of Cities', 'cities' => $cities]);
+        } else {
+            return response()->json(['status' => 1, 'message' => ' No City Present']);
+        }
+    }
+
 }
