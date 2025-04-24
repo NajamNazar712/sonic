@@ -5,7 +5,7 @@ namespace App\Services;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 
-class OneLinkService
+class   OneLinkService
 {
     protected $baseUrl;
     protected $clientId;
