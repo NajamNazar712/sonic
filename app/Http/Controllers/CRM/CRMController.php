@@ -439,7 +439,7 @@ class CRMController extends Controller
                     
                 }
                 // auto change service type
-                else if($case_nature_type_id == 39 && in_array($shipment->shipper_status_id,[2, 3, 4, 5, 7, 8, 9, 11, 12, 13, 15, 30, 32, 49, 53, 54, 55, 56, 62, 65, 66, 67])){
+                else if($case_nature_type_id == 39 && in_array($shipment->shipper_status_id,[2, 3, 4, 5, 7, 8, 9, 11, 12, 13,20, 15, 30, 32, 49, 53, 54, 55, 56, 62, 65, 66, 67])){
 
                     //testedQ
                     $proceed = true;
@@ -451,10 +451,20 @@ class CRMController extends Controller
                             ->first();
 
                         $proceed = $shipment_journey ? true : false;
+                    } else if(in_array($shipment->shipper_status_id,[13,20])) {
+
+                        //rvr check exist then verified anas ba said
+                        $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)
+                            ->where('shipper_status_id', 12);
+
+                        if ($shipment_journey->exists()) {
+                            $shipment_journey_verified = $shipment_journey->where('verification', 1)->first();
+                            $proceed = $shipment_journey_verified ? true : false;
+                        }
                     }
 
                     if ($proceed) {
-                        // Update CRM request status
+                        // Update CRM request statusS
                         foreach ([2, 4] as $status) {
                             $crm_request->status_id = $status;
                             $crm_request->save();
