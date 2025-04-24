@@ -188,7 +188,6 @@ class OneLinkController extends Controller
 
         $data = $request->all();
 
-        dd($data);
         $rrn =  $data['info']['rrn'];
         $stan = $data['info']['stan'];
         $subDept = $data['messageInfo']['subDept'];
@@ -197,6 +196,7 @@ class OneLinkController extends Controller
             'rrn' => $rrn,
             'stan' => $stan
         ])->first();
+        dd($data, $existingTransaction);
 
         if ($existingTransaction) {
             try {
