@@ -242,11 +242,15 @@ class OneLinkController extends Controller
                     
                         $delivery_note = DeliveryNote::find($subDept);
                         if ($delivery_note) {
+                            dd(21);
+
                             $delivery_note->increment('one_link_payment_count');
                     
                             NotificationsController::app_notification(19, $delivery_note->rider_id, 2, $delivery_note->rider_id, $rrn);
                             NotificationsController::send(185, $delivery_note->rider_id, $rrn);
                         } else {
+
+                            dd(2);
                             return response()->json([
                                 'status' => false,
                                 'message' => 'Delivery Note not found.',
