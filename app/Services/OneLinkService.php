@@ -24,14 +24,18 @@ class OneLinkService
 
     public function logRequest($endpoint, $requestData = null, $responseData = null, $status = 'pending')
     {
-        DB::table('one_link_api_logs')->insert([
+        $insertedId = DB::table('one_link_api_logs')->insertGetId([
             'endpoint'      => $endpoint,
             'request_data'  => json_encode($requestData),
             'response_data' => json_encode($responseData),
             'status'        => $status,
+            'shipment_id'   => isset($requestData['info']['rrn']) ? (int) $requestData['info']['rrn'] : null,
             'created_at'    => now(),
             'updated_at'    => now(),
         ]);
+
+        return $insertedId;
+
     }
 
     public function logError($message)
@@ -95,8 +99,8 @@ class OneLinkService
                 ->post($url, $data);
 
             if ($response->successful()) {
-                $this->logRequest($logLabel, $data, $response->json(), 'success');
-                return $response->json();
+                $response_id =  $this->logRequest($logLabel, $data, $response->json(), 'success');
+                return ['success' => 'Success', 'details' => $response->json(),'response_id'=>$response_id];
             }
 
             $this->logRequest($logLabel, $data, $response->body(), 'error');

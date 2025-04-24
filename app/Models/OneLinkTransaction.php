@@ -26,7 +26,14 @@ class OneLinkTransaction extends Model
         'account_title',
         'longitude',
         'latitude',
-        'nature_id'
+        'nature_id',
+        'shipment_id',
+        'expiry_time',
+        'log_id'
     ];
+
+    public function one_link_log() {
+        return $this->hasOne('App\Models\OneLinkApiLog', 'log_id', 'id');
+    }
     
 }
