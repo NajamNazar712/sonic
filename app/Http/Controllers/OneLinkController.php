@@ -98,7 +98,7 @@ class OneLinkController extends Controller
                 $response = $this->oneLinkService->generateDQRCMerchant($data);
                 $status = isset($response['error']) ? 'error' : 'success';
                 if (isset($response['details']['responseCode']) && $response['details']['responseCode'] == '00') {
-                    $response_id = isset($response['response_id']) ?? 0;
+                    $response_id = isset($response['response_id']) ? $response['response_id'] : 0;
                     OneLinkTransaction::create([
                         'rrn' => $response['details']['info']['rrn'],
                         'stan' => $response['details']['info']['stan'],
@@ -196,7 +196,6 @@ class OneLinkController extends Controller
             'rrn' => $rrn,
             'stan' => $stan
         ])->first();
-        dd($data, $existingTransaction);
 
         if ($existingTransaction) {
             try {
@@ -268,7 +267,7 @@ class OneLinkController extends Controller
             } catch (\Exception $e) {
                 $response = [
                     "responseCode" => "99",
-                    "responseDesc" => "Processing Error"
+                    "responseDesc" => $e->getMessage(),
                 ];
                 $status = 500;
             }
