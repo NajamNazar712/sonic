@@ -177,25 +177,26 @@ class OneLinkController extends Controller
         return null;
     }
 
+
     protected function processTransaction(Request $request, string $logType, array $rules, int $natureId)
     {
         $validationResponse = $this->validateRequest($request, $rules, $logType);
-
+    
         if ($validationResponse) {
             return $validationResponse;
         }
-
+    
         $data = $request->all();
-
+    
         $rrn =  $data['info']['rrn'];
         $stan = $data['info']['stan'];
         $subDept = $data['messageInfo']['subDept'];
-
+    
         $existingTransaction = OneLinkTransaction::where([
             'rrn' => $rrn,
             'stan' => $stan
         ])->first();
-
+    
         if ($existingTransaction) {
             try {
                 DB::transaction(function () use ($existingTransaction, $data, $natureId, $rrn, $subDept) {
@@ -206,7 +207,7 @@ class OneLinkController extends Controller
                         'status' => $data['messageInfo']['status'] ?? 'pending',
                         'nature_id' => $natureId
                     ];
-
+    
                     if ($natureId === 1) {
                         $updateData = array_merge($updateData, [
                             'message_id' => $data['messageInfo']['originalMessageId'],
@@ -228,9 +229,9 @@ class OneLinkController extends Controller
                             'latitude' => $data['senderInfo']['latitude'],
                         ]);
                     }
-
+    
                     $existingTransaction->update($updateData);
-
+    
                     if ($natureId == 2) {
                         $shipment = Shipment::find($rrn);
                         if ($shipment) {
@@ -238,16 +239,14 @@ class OneLinkController extends Controller
                                 'received_amount' => $data['messageInfo']['originalInstructedAmount'] ?? 0
                             ]);
                         }
-                    
+    
                         $delivery_note = DeliveryNote::find($subDept);
                         if ($delivery_note) {
-                        
                             $delivery_note->increment('one_link_payment_count');
-                    
+    
                             NotificationsController::app_notification(19, $delivery_note->rider_id, 2, $delivery_note->rider_id, $rrn);
                             NotificationsController::send(185, $delivery_note->rider_id, $rrn);
                         } else {
-
                             throw new JsonResponseException(response()->json([
                                 'status' => false,
                                 'message' => 'Delivery Note not found.',
@@ -255,10 +254,8 @@ class OneLinkController extends Controller
                             ], 404));
                         }
                     }
-                    
                 });
-
-
+    
                 $response = [
                     "responseCode" => "00",
                     "responseDesc" => "Processed OK",
@@ -271,6 +268,10 @@ class OneLinkController extends Controller
                     ]
                 ];
                 $status = 200;
+    
+            } catch (JsonResponseException $e) {
+                return $e->response;
+    
             } catch (\Exception $e) {
                 $response = [
                     "responseCode" => "99",
@@ -292,10 +293,11 @@ class OneLinkController extends Controller
             ];
             $status = 404;
         }
-
+    
         $this->oneLinkService->logRequest($logType, $data, $response, $status);
         return response()->json($response, $status);
     }
+    
 
 
     public function notifyMerchant(Request $request)
