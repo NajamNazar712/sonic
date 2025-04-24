@@ -100,8 +100,8 @@ class MissingFirstCallInitiate extends Command
                 }
             }
             $failedJobs = DB::table('failed_jobs')
-            ->get();
-            if($failedJobs->isNotEmpty()){
+                ->get();
+            if ($failedJobs->isNotEmpty()) {
                 foreach ($failedJobs as $job) {
                     Artisan::call('queue:retry', ['id' => $job->id]);
                 }
