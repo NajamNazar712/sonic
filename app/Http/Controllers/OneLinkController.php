@@ -45,7 +45,7 @@ class OneLinkController extends Controller
 
             return response()->json([
                 'success' => 'success',
-                'status' => 1,
+                'status' => 0,
                 'data' => $existing_log,
                 'expiryDateTime' => $expiry_time,
                 'remainingTimeInSeconds' => $remaining_seconds,
