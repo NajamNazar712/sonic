@@ -239,16 +239,22 @@ class OneLinkController extends Controller
                                 'received_amount' => $data['messageInfo']['originalInstructedAmount'] ?? 0
                             ]);
                         }
-
+                    
                         $delivery_note = DeliveryNote::find($subDept);
                         if ($delivery_note) {
                             $delivery_note->increment('one_link_payment_count');
+                    
+                            NotificationsController::app_notification(19, $delivery_note->rider_id, 2, $delivery_note->rider_id, $rrn);
+                            NotificationsController::send(185, $delivery_note->rider_id, $rrn);
+                        } else {
+                            return response()->json([
+                                'status' => false,
+                                'message' => 'Delivery Note not found.',
+                                'sub_dept' => $subDept
+                            ], 404);
                         }
-
-                        $delivery_note = DeliveryNote::find($subDept);
-                        NotificationsController::app_notification(19, $delivery_note->rider_id, 2, $delivery_note->rider_id, $rrn);
-                        NotificationsController::send(185, $delivery_note->rider_id, $rrn);
                     }
+                    
                 });
 
 
