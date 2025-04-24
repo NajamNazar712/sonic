@@ -111,8 +111,8 @@ class OneLinkController extends Controller
 
                         return response()->json([
                             'success' => $status === 'success',
-                            'status' => isset($response['responseCode']) && $response['responseCode'] == '00' ? 0 : 1,
-                            'data' => $response,
+                            'status' => isset($response['details']['responseCode']) && $response['details']['responseCode'] == '00' ? 0 : 1,
+                            'data' => $response['details'],
                             'expiryDateTime' => $data['paymentDetails']['expiryDateTime'],
                         ]);
                     } catch (\Exception $e) {
