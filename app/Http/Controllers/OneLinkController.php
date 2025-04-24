@@ -141,7 +141,7 @@ class OneLinkController extends Controller
         $validator = Validator::make($request->all(), [
             'delivery_note_id' => 'required|integer|exists:delivery_notes,id',
             'shipment_id'      => 'required|integer|exists:delivery_note_shipments,shipment_id',
-            'cod_amount'       => 'required|numeric',
+            'cod_amount'       => 'required|string',
             'latitude'         => 'required|numeric|between:-90,90',
             'longitude'        => 'required|numeric|between:-180,180',
         ]);
@@ -167,7 +167,7 @@ class OneLinkController extends Controller
             return $this->generateDQRCMerchant(
                 $request->delivery_note_id,
                 $request->shipment_id,
-                $request->cod_amount,
+                (float) $request->cod_amount,
                 $request->latitude,
                 $request->longitude
             );
