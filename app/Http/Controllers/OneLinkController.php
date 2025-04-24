@@ -270,6 +270,9 @@ class OneLinkController extends Controller
                 $status = 200;
     
             } catch (JsonResponseException $e) {
+                $response = $e->response->getData(true);
+                $status = $e->response->status();
+                $this->oneLinkService->logRequest($logType, $data, $response, $status);
                 return $e->response;
     
             } catch (\Exception $e) {
@@ -278,6 +281,8 @@ class OneLinkController extends Controller
                     "responseDesc" => $e->getMessage(),
                 ];
                 $status = 500;
+                $this->oneLinkService->logRequest($logType, $data, $response, $status);
+                return response()->json($response, $status);
             }
         } else {
             $response = [
