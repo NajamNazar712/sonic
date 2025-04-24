@@ -155,6 +155,8 @@ use Illuminate\Http\Request;
             Route::post('1Link/paymentNotification', 'OneLinkController@paymentNotification')->name('paymentNotification');
             Route::post('notifyMerchant', 'OneLinkController@notifyMerchant')->name('notifyMerchant2');
             Route::post('paymentNotification', 'OneLinkController@paymentNotification')->name('paymentNotificationpaymentNotification');
+            Route::post('verifyDeliveredShipmentDQRCMerchant', 'OneLinkController@verifyDeliveredShipmentDQRCMerchant')->name('verifyDeliveredShipmentDQRCMerchant');
+
         });
 
         //Current
@@ -188,10 +190,6 @@ use Illuminate\Http\Request;
         Route::post('rider_attendance_details', 'Rider\RiderAPIController@rider_checkin')->name('rider_attendance_details');
 
         Route::middleware('RiderAPIToken')->group(function () {
-
-            Route::prefix('oneLink')->name('oneLink.')->group(function () {
-                Route::post('verifyDeliveredShipmentDQRCMerchant', 'OneLinkController@verifyDeliveredShipmentDQRCMerchant')->name('verifyDeliveredShipmentDQRCMerchant');
-            });
 
             Route::get('check_app_version', 'Rider\RiderAPIController@check_bolt_version')->name('check_app_version');
             Route::post('validate_otp', 'Rider\RiderAPIController@validate_otp')->name('validate_otp');
