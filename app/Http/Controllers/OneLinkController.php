@@ -55,7 +55,7 @@ class OneLinkController extends Controller
             ]);
         } else {
             $execution_time = now()->format('Y-m-d\TH:i:s');
-            $expiry_time = now()->addMinutes(5)->format('Y-m-d\TH:i:s');
+            $expiry_time = now()->addHours(1)->format('Y-m-d\TH:i:s');
             $remaining_seconds = now()->diffInSeconds($expiry_time, false); // false = future is positive, past is negative
 
             $data = [
