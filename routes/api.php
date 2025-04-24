@@ -26,6 +26,7 @@ use Illuminate\Http\Request;
     Route::post('delete_device_token', 'APIController@delete_device_token')->name('delete_device_token');
     Route::post('rcp_sms_from_consignee', 'APIController@rcp_sms_from_consignee')->name('rcp_sms_from_consignee');
     Route::post('fintech_getToken','APIController@fintech_getToken')->name('fintech_getToken');
+    Route::get('marco_cities', 'APIController@marco_cities')->name('marco_cities');
     Route::middleware('FinvoWalletAuth')->group(function () {
         Route::post('v2/fintech_getToken','APIController@fintech_getToken')->name('v2.fintech_getToken');
     });
@@ -33,6 +34,7 @@ use Illuminate\Http\Request;
         Route::post('fin_sms', 'APIController@fin_sms')->name('fin_sms');
         Route::post('fintech_charges','APIController@fintech_charges')->name('fintech_charges');
         Route::post('v2/fintech_charges/bulk','APIController@fintech_charges_bulk')->name('fintech_charges_bulk');
+        Route::post('v2/fintech_charges/bulk/fix','APIController@fintech_charges_bulk_dev_fix')->name('fintech_charges_bulk_fix');
         Route::post('v2/fintech_account_type', 'APIController@fintech_account_type')->name('finance_types.update.bulk');
     });
 

@@ -44,8 +44,8 @@
                         @csrf
                         <div class="modal-body">
                             <div class="form-group" id="select_shipper">
-                                <select name="wallet_shipper_id" id="wallet_shipper_id" class="form-control select2"
-                                        data-rule-required="true" data-msg-required="Shipper is required">
+                                <select name="wallet_shipper_id[]" id="wallet_shipper_id" class="form-control select2"
+                                        data-rule-required="true" data-msg-required="Shipper is required" multiple="multiple">
                                     @foreach($shippers as $shipper)
                                         <option value="{{ $shipper->id }}"> {{ $shipper->name }} </option>
                                     @endforeach
@@ -89,12 +89,11 @@
             var wallet_shipper_obj = [];
             wallet_shipper_obj.length = 0;
 
-            $('#wallet_shipper_id').prepend('<option selected></option>').select2({
+            $('#wallet_shipper_id').select2({
                 width: '100%',
                 placeholder: "Select Shipper",
                 allowClear: true,
-                dropdownParent:$('#wallet_shipper_add'),
-                data: wallet_shipper_obj
+
             });
 
             var table = $('#datatable').DataTable({
