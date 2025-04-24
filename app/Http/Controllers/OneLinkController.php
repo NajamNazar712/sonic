@@ -188,6 +188,7 @@ class OneLinkController extends Controller
 
         $data = $request->all();
 
+        dd($data);
         $rrn =  $data['info']['rrn'];
         $stan = $data['info']['stan'];
         $subDept = $data['messageInfo']['subDept'];
