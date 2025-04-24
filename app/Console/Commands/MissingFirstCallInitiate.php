@@ -99,6 +99,13 @@ class MissingFirstCallInitiate extends Command
                     }
                 }
             }
+            $failedJobs = DB::table('failed_jobs')
+                ->get();
+            if ($failedJobs->isNotEmpty()) {
+                foreach ($failedJobs as $job) {
+                    Artisan::call('queue:retry', ['id' => $job->id]);
+                }
+            }
             // if ($this->argument('startDate') != 0 && $this->argument('endDate') != 0) {
             //     $rvShipments = RvShipmentTicket::where([['rv_shipment_tickets.updated_at', '>=', $timeStart], ['rv_shipment_tickets.updated_at', '<=', $timeEnd]])->where('is_bot',1)
             //         ->where('in_progress',1)
