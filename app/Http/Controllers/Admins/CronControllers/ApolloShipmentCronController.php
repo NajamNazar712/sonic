@@ -18,6 +18,7 @@ class ApolloShipmentCronController extends Controller
     {
 
 
+
         $time_stamp = Carbon::now();
         $apollo_booking_journeys = [];
         $apollo_piece_journeys = [];
@@ -41,21 +42,21 @@ class ApolloShipmentCronController extends Controller
 
 //        $journeys = $shipmentJourneys->orderBy('sj.id')->get();
         $client = new \GuzzleHttp\Client([
-            'base_uri' => 'https://movere-staging.sonic.pk/api',
-//            'base_uri' => 'https://api-apollo.sonic.pk/api/',
+//            'base_uri' => 'https://movere-staging.sonic.pk/api/',
+            'base_uri' => 'https://api-apollo.sonic.pk/api/',
             'http_errors' => FALSE,
             'connect_timeout' => 60,
             'timeout' => 60
         ]);
         $hasSentAny = false;
         $shipmentJourneys->orderBy('sj.id')->chunk($chunkSize, function ($journeys) use ($client, $time_stamp, &$hasSentAny) {
+
             try {
                 $response = $client->post('sonic/shipments/journeys/bulk-create', [
                     'json' => [
                         'journeys' => $journeys,
                     ]
                 ]);
-
                 $responseBody = $response->getBody()->getContents();
                 $responseData = json_decode($responseBody, true);
 
