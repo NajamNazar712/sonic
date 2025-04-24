@@ -6,14 +6,13 @@ use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Http\Models\Shipment;
-use App\Models\OneLinkApiLog;
 use App\Services\OneLinkService;
-use App\Http\Models\RiderDelivery;
 use App\Models\OneLinkTransaction;
 use Illuminate\Support\Facades\DB;
 use App\Http\Models\Admin\DeliveryNote;
 use Illuminate\Support\Facades\Validator;
-use App\Http\Models\Admin\DeliveryNoteShipment;
+use App\Exceptions\JsonResponseException;
+
 
 class OneLinkController extends Controller
 {
@@ -242,18 +241,18 @@ class OneLinkController extends Controller
                     
                         $delivery_note = DeliveryNote::find($subDept);
                         if ($delivery_note) {
-
+                        
                             $delivery_note->increment('one_link_payment_count');
                     
                             NotificationsController::app_notification(19, $delivery_note->rider_id, 2, $delivery_note->rider_id, $rrn);
                             NotificationsController::send(185, $delivery_note->rider_id, $rrn);
                         } else {
 
-                            return response()->json([
+                            throw new JsonResponseException(response()->json([
                                 'status' => false,
                                 'message' => 'Delivery Note not found.',
                                 'sub_dept' => $subDept
-                            ]);
+                            ], 404));
                         }
                     }
                     
