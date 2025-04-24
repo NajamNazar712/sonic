@@ -25,101 +25,101 @@ class OneLinkController extends Controller
     }
 
     public function generateDQRCMerchant($delivery_note_id, $shipment_id, $cod_amount, $latitude, $longitude)
-            {
-                if (!$delivery_note_id || !$shipment_id || !$cod_amount || !$latitude || !$longitude) {
-                    return response()->json(['error' => 'Missing required parameters'], 400);
-                }
-                $date_time_now = Carbon::now()->format('Y-m-d H:i:s');
-                $check_transaction = OneLinkTransaction::with('one_link_log')
-                    ->where('shipment_id',$shipment_id)
-                    ->where('status','pending')
-                    ->where('expiry_time', '>', $date_time_now)
-                    ->latest()
-                    ->first();
+    {
+        if (!$delivery_note_id || !$shipment_id || !$cod_amount || !$latitude || !$longitude) {
+            return response()->json(['error' => 'Missing required parameters'], 400);
+        }
+        $date_time_now = Carbon::now()->format('Y-m-d H:i:s');
+        $check_transaction = OneLinkTransaction::with('one_link_log')
+            ->where('shipment_id', $shipment_id)
+            ->where('status', 'pending')
+            ->where('expiry_time', '>', $date_time_now)
+            ->latest()
+            ->first();
 
-                if(!empty($check_transaction)){
-                    $existing_log = $check_transaction->one_link_log->response_data;
-                    $expiry_time = Carbon::parse($check_transaction->expiry_time)->format('Y-m-d\TH:i:s');
-                    return response()->json([
-                        'success' => 'success',
-                        'status' => 1,
-                        'data' => $existing_log,
-                        'expiryDateTime' => $expiry_time,
+        if (!empty($check_transaction)) {
+            $existing_log = $check_transaction->one_link_log->response_data;
+            $expiry_time = Carbon::parse($check_transaction->expiry_time)->format('Y-m-d\TH:i:s');
+            return response()->json([
+                'success' => 'success',
+                'status' => 1,
+                'data' => $existing_log,
+                'expiryDateTime' => $expiry_time,
+            ]);
+        } else {
+            $execution_time = now()->format('Y-m-d\TH:i:s');
+            $expiry_time = now()->addHours(1)->format('Y-m-d\TH:i:s');
+            $data = [
+                "merchantDetails" => [
+                    "dbaName" => "Sonic",
+                    "merchantName" => "Trax Online (Pvt.) Ltd.",
+                    "iban" => "PK94AIIN0000102514490014",
+                    "bankBic" => "AIIN",
+                    "merchantCategoryCode" => "4215",
+                    "merchantID" => "854710236963454",
+                    "postalAddress" => [
+                        "townName" => "KARACHI",
+                        "subDept" => (string) $delivery_note_id,
+                        "addressLine" => "Plot 105, Sector 7-A, Mehran Town, Korangi, Karachi"
+                    ],
+                    "contactDetails" => [
+                        "phoneNo" => "+92-2138772222",
+                        "mobileNo" => "",
+                        "email" => "info@trax.pk",
+                        "dept" => "Head office",
+                        "website" => "www.trax.pk",
+                        "merchantChannelId" => "400"
+                    ],
+                    "geoLocation" => [
+                        "lat" => (string) $latitude,
+                        "longt" => (string) $longitude
+                    ]
+                ],
+                "payerDetails" => [
+                    "additionalRequiredDetails" => "AME",
+                    "identificationDetails" => [
+                        "loyaltyNo" => "SOME LOYALTY NUMB",
+                        "customerLabel" => "SOME CUST LABEL"
+                    ]
+                ],
+                "paymentDetails" => [
+                    "executionDateTime" => $execution_time,
+                    "expiryDateTime" => $expiry_time,
+                    "instructedAmount" => $cod_amount,
+                    "transactionType" => "064"
+                ],
+                "info" => [
+                    "stan" => strtoupper(Str::random(6)),
+                    "rrn" => str_pad((string)$shipment_id, 12, '0', STR_PAD_LEFT)
+                ]
+            ];
+
+            try {
+                $response = $this->oneLinkService->generateDQRCMerchant($data);
+                $status = isset($response['error']) ? 'error' : 'success';
+                if (isset($response['details']['responseCode']) && $response['details']['responseCode'] == '00') {
+                    $response_id = isset($response['response_id']) ?? 0;
+                    OneLinkTransaction::create([
+                        'rrn' => $response['details']['info']['rrn'],
+                        'stan' => $response['details']['info']['stan'],
+                        'shipment_id' => $shipment_id,
+                        'expiry_time' => $expiry_time,
+                        'status' => 'pending',
+                        'log_id' => $response_id
                     ]);
-                }else {
-                    $execution_time = now()->format('Y-m-d\TH:i:s');
-                    $expiry_time = now()->addHours(1)->format('Y-m-d\TH:i:s');
-                    $data = [
-                        "merchantDetails" => [
-                            "dbaName" => "Sonic",
-                            "merchantName" => "Trax Online (Pvt.) Ltd.",
-                            "iban" => "PK94AIIN0000102514490014",
-                            "bankBic" => "AIIN",
-                            "merchantCategoryCode" => "4215",
-                            "merchantID" => "854710236963454",
-                            "postalAddress" => [
-                                "townName" => "KARACHI",
-                                "subDept" => (string)$delivery_note_id,
-                                "addressLine" => "Plot 105, Sector 7-A, Mehran Town, Korangi, Karachi"
-                            ],
-                            "contactDetails" => [
-                                "phoneNo" => "+92-2138772222",
-                                "mobileNo" => "",
-                                "email" => "info@trax.pk",
-                                "dept" => "Head office",
-                                "website" => "www.trax.pk",
-                                "merchantChannelId" => "400"
-                            ],
-                            "geoLocation" => [
-                                "lat" => (string)$latitude,
-                                "longt" => (string)$longitude
-                            ]
-                        ],
-                        "payerDetails" => [
-                            "additionalRequiredDetails" => "AME",
-                            "identificationDetails" => [
-                                "loyaltyNo" => "SOME LOYALTY NUMB",
-                                "customerLabel" => "SOME CUST LABEL"
-                            ]
-                        ],
-                        "paymentDetails" => [
-                            "executionDateTime" => $execution_time,
-                            "expiryDateTime" => $expiry_time,
-                            "instructedAmount" => $cod_amount,
-                            "transactionType" => "064"
-                        ],
-                        "info" => [
-                            "stan" => strtoupper(Str::random(6)),
-                            "rrn" => str_pad((string)$shipment_id, 12, '0', STR_PAD_LEFT)
-                        ]
-                    ];
-
-                    try {
-                        $response = $this->oneLinkService->generateDQRCMerchant($data);
-                        $status = isset($response['error']) ? 'error' : 'success';
-                        if (isset($response['details']['responseCode']) && $response['details']['responseCode'] == '00') {
-                            $response_id = isset($response['response_id']) ?? 0;
-                            OneLinkTransaction::create([
-                                'rrn' => $response['details']['info']['rrn'],
-                                'stan' => $response['details']['info']['stan'],
-                                'shipment_id' => $shipment_id,
-                                'expiry_time' => $expiry_time,
-                                'status' => 'pending',
-                                'log_id' => $response_id
-                            ]);
-                        }
-
-                        return response()->json([
-                            'success' => $status === 'success',
-                            'status' => isset($response['details']['responseCode']) && $response['details']['responseCode'] == '00' ? 0 : 1,
-                            'data' => $response['details'],
-                            'expiryDateTime' => $data['paymentDetails']['expiryDateTime'],
-                        ]);
-                    } catch (\Exception $e) {
-                        return response()->json(['error' => 'Exception occurred', 'details' => $e->getMessage()], 500);
-                    }
                 }
+
+                return response()->json([
+                    'success' => $status === 'success',
+                    'status' => isset($response['details']['responseCode']) && $response['details']['responseCode'] == '00' ? 0 : 1,
+                    'data' => $response['details'],
+                    'expiryDateTime' => $data['paymentDetails']['expiryDateTime'],
+                ]);
+            } catch (\Exception $e) {
+                return response()->json(['error' => 'Exception occurred', 'details' => $e->getMessage()], 500);
             }
+        }
+    }
 
     public function verifyDeliveredShipmentDQRCMerchant(Request $request)
     {
@@ -245,10 +245,9 @@ class OneLinkController extends Controller
                             $delivery_note->increment('one_link_payment_count');
                         }
 
-                        $delivery_note = DeliveryNote::find($subDept); 
+                        $delivery_note = DeliveryNote::find($subDept);
                         NotificationsController::app_notification(19, $delivery_note->rider_id, 2, $delivery_note->rider_id, $rrn);
                         NotificationsController::send(185, $delivery_note->rider_id, $rrn);
-
                     }
                 });
 
@@ -265,10 +264,6 @@ class OneLinkController extends Controller
                     ]
                 ];
                 $status = 200;
-
-                
-
-
             } catch (\Exception $e) {
                 $response = [
                     "responseCode" => "99",
