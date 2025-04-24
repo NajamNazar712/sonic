@@ -38,7 +38,7 @@ class OneLinkController extends Controller
             ->latest()
             ->first();
 
-        if (!empty($check_transaction) && !empty($check_transaction->one_link_log->response_data)) {
+        if (!empty($check_transaction)) {
             $existing_log = json_decode($check_transaction->one_link_log->response_data, true);
             $expiry_time = Carbon::parse($check_transaction->expiry_time)->format('Y-m-d\TH:i:s');
             $remaining_seconds = now()->diffInSeconds($expiry_time, false); // false = future is positive, past is negative
@@ -107,7 +107,7 @@ class OneLinkController extends Controller
                 $response = $this->oneLinkService->generateDQRCMerchant($data);
                 $status = isset($response['error']) ? 'error' : 'success';
                 if (isset($response['details']['responseCode']) && $response['details']['responseCode'] == '00') {
-                    $response_id = isset($response['response_id']) ? $response['response_id'] : 0;
+                    $response_id = $this->oneLinkService->logRequest('generateDQRCMerchant', $data, $response['details'], $status);
                     OneLinkTransaction::create([
                         'rrn' => $response['details']['info']['rrn'],
                         'stan' => $response['details']['info']['stan'],
@@ -115,7 +115,6 @@ class OneLinkController extends Controller
                         'expiry_time' => $expiry_time,
                         'status' => 'pending',
                         'log_id' => $response_id,
-                        'response_data' => json_encode($response['details'])
 
                     ]);
                 }
