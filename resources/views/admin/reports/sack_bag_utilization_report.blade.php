@@ -35,11 +35,11 @@
                             <th class="border-primary border-darken-1">S. No.</th>
                             <th class="border-primary border-darken-1">Canvas Bag No#</th>
                             <th class="border-primary border-darken-1">Issue Origin</th>
-                            {{-- <th class="border-primary border-darken-1">Scan By (User)</th> --}}
-                            {{-- <th class="border-primary border-darken-1">Date Time</th> --}}
+                            <th class="border-primary border-darken-1">Scan By (User)</th>
+                            <th class="border-primary border-darken-1">Date Time</th>
                             <th class="border-primary border-darken-1">Last Destination</th>
-                            {{-- <th class="border-primary border-darken-1">Scan By (User)</th> --}}
-                            {{-- <th class="border-primary border-darken-1">Date Time</th> --}}
+                            <th class="border-primary border-darken-1">Scan By (User)</th>
+                            <th class="border-primary border-darken-1">Date Time</th>
                             <th class="border-primary border-darken-1">Canvas Bag Count</th>
                             <th class="border-primary border-darken-1">Status</th>
                         </tr>
@@ -271,7 +271,11 @@
                         {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                         { data:'sack_bag_no',class: 'align-middle text-center sack_bag_no', orderable: false, searchable: false},
                         { data:'origin_name',class: 'align-middle text-center origin_name', orderable: false, searchable: false},
+                        { data:'bag_scanned_by',class: 'align-middle text-center bag_scanned_by', orderable: false, searchable: false},
+                        { data:'bag_scanned_at',class: 'align-middle text-center bag_scanned_at', orderable: false, searchable: false},
                         { data:'destination_name',class: 'align-middle text-center destination_name', orderable: false, searchable: false},
+                        { data:'bag_received_by',class: 'align-middle text-center bag_received_by', orderable: false, searchable: false},
+                        { data:'bag_received_at',class: 'align-middle text-center bag_received_at', orderable: false, searchable: false},
                         { data:'bag_count',class: 'align-middle text-center bag_count', orderable: false, searchable: false},
                         { data:'status',class: 'align-middle text-center status', orderable: false, searchable: false,render:function(data,type,row){
                             if(row.status==1)

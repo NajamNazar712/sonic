@@ -8079,23 +8079,22 @@ class AdminCargoManifestController extends Controller
 
         $sack_bag->status = $new_status;
 
+        // Always update the timestamp manually
+        $sack_bag->updated_at = Carbon::now();
+
         if ($new_status === 0) {
+            // Deactivating
             $sack_bag->inactive_at = Carbon::now();
             $sack_bag->inactive_by = $auth_user->id;
-        } else {
-            $sack_bag->inactive_at = null;
-            $sack_bag->inactive_by = null;
-        }
-
-        // Temporarily disable automatic timestamping
-        $sack_bag->timestamps = false;
-
-        // Manually update updated_at only when reactivating
-        if ($current_status == 0 && $new_status == 1) {
-            $sack_bag->updated_at = Carbon::now();
+        } elseif ($current_status === 0 && $new_status === 1) {
+            // Reactivating (do not clear inactive_at/by)
             $sack_bag->active_by = $auth_user->id;
         }
+
+        // Prevent Laravel from auto-managing timestamps
+        $sack_bag->timestamps = false;
         $sack_bag->save();
+
         return response()->json(['success' => 'Sack-Bag status updated successfully.']);
     }
 
