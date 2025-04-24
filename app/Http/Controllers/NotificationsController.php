@@ -354,7 +354,6 @@ class NotificationsController extends Controller
     static public function send($id, $reference_1_id, $reference_2_id = NULL, $reference_3_id = NULL,$array_data = array())
     {
         $notification = Notification::find($id);
-
         if ($notification) {
             // if ($notification->status)
             if ($notification->status || ($id == 81 && $notification->status == 0)) {
@@ -6994,18 +6993,20 @@ class NotificationsController extends Controller
                     }
 
                     self::email($subject, $body, $to);
-                } else if ($id == 110) {
-                    $date = $reference_1_id;
-                    $file = $reference_2_id;
-                    $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
-                    if (strpos($body, '[link]') !== FALSE) {
-                        $body = str_replace('[link]', $link, $body);
-                    }
-                    $cc = ['shahbaz.abbasi@trax.pk'];
-                    $to = array();
+                } 
+                // else if ($id == 110) {
+                //     $date = $reference_1_id;
+                //     $file = $reference_2_id;
+                //     $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
+                //     if (strpos($body, '[link]') !== FALSE) {
+                //         $body = str_replace('[link]', $link, $body);
+                //     }
+                //     $cc = ['shahbaz.abbasi@trax.pk'];
+                //     $to = array();
 
-                    self::email($subject, $body, $to, $cc);
-                } else if ($id == 111) {
+                //     self::email($subject, $body, $to, $cc);
+                // } 
+                else if ($id == 111) {
                     $date = $reference_1_id;
                     $file = $reference_2_id;
                     $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
@@ -11026,14 +11027,18 @@ class NotificationsController extends Controller
                     $html .= '</thead>';
                     $html .= '<tbody>';
                     $agent = [];
+                    $activeAdmins = Admin::where('status', 1)->pluck('id')->toArray();
+
                     $index = 0;
                     if ($case_natures->isNotEmpty()) {
                         foreach ($case_natures as $key => $value) {
                             $agent_id = $value["agent_id"];
-                            $agent[$agent_id]['status_id'][] = $value['status_id'];
-                            $agent[$agent_id]['ticket_id'][] = $value['id'];
-                            $agent[$agent_id]['created_at'][] = $value['created_at'];
-                            $agent[$agent_id]['updated_at'][] = $value['updated_at'];
+                            if (in_array($agent_id, $activeAdmins)) {
+                                $agent[$agent_id]['status_id'][] = $value['status_id'];
+                                $agent[$agent_id]['ticket_id'][] = $value['id'];
+                                $agent[$agent_id]['created_at'][] = $value['created_at'];
+                                $agent[$agent_id]['updated_at'][] = $value['updated_at'];
+                            }
                         }
                     }
                     foreach ($agent as $key => $value) {
@@ -11089,17 +11094,23 @@ class NotificationsController extends Controller
                     $html .= '</table>';
                     $body = str_replace('[preview]', $html, $notification->body);
                     self::email($subject, $body, $to, $cc);
-                } else if ($id == 226) {
-                    $file = $reference_1_id;
-                    $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
-                    if (strpos($body, '[link]') !== FALSE) {
-                        $body = str_replace('[link]', $link, $body);
-                        $body .= '<br/><br/><strong>Note: This link will expire after 7 days.</strong>';
-                    }
-                    $to = ['tauseef.sarfaraz@trax.pk', 'mansoor.ahmad@trax.pk', 'shahbaz.abbasi@trax.pk'];
+                } 
+                // else if ($id == 226) {
+                //     $file = $reference_1_id;
+                //     $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
+                //     if (strpos($body, '[link]') !== FALSE) {
+                //         $body = str_replace('[link]', $link, $body);
+                //         $body .= '<br/><br/><strong>Note: This link will expire after 7 days.</strong>';
+                //     }
+                //     $to = [
+                //             'tauseef.sarfaraz@trax.pk', 
+                //             'mansoor.ahmad@trax.pk', 
+                //             // 'shahbaz.abbasi@trax.pk'
+                //         ];
 
-                    self::email($subject, $body, $to);
-                } else if ($id == 227) {
+                //     self::email($subject, $body, $to);
+                // } 
+                else if ($id == 227) {
                     $file = $reference_1_id;
                     $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
                     if (strpos($body, '[link]') !== FALSE) {
@@ -11421,6 +11432,36 @@ class NotificationsController extends Controller
                     }
                 }
 
+                else if (/* $id == 110 || $id == 226 || */ $id == 236 || $id == 237 || $id == 238 || $id == 239 || $id == 240 || $id == 241 || $id == 242) {
+                    $date = Carbon::today()->format('Y-m-d');
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+                    if (strpos($subject, '[date]') !== FALSE) {
+                        $subject = str_replace('[date]', $date, $subject);
+                    }
+
+                    if (strpos($body, '[date]') !== FALSE) {
+                        $body = str_replace('[date]', $date, $body);
+                    }
+
+                    $link = '<a href="' . $reference_1_id . '" target="_blank">Report</a>';
+
+                    if (strpos($subject, '[link]') !== FALSE) {
+                        $subject = str_replace('[link]', $link, $subject);
+                    }
+
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+
+                    $to = array();
+                    $bcc = array();
+                    $to[] = 'shahbaz.abbasi@trax.pk';
+                    $to[] = 'mansoor.ahmad@trax.pk';
+                    $to[] = 'zeeshan.aslam@trax.pk';
+
+                    self::email($subject, $body, $to, NULL, $bcc);
+                }
             }
         }
     }

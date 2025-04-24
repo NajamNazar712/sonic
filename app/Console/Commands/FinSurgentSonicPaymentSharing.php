@@ -54,10 +54,7 @@ class FinSurgentSonicPaymentSharing extends Command
                 ->where('u.substitute_user_id', '0');
 //                ->where('u.created_at', '<=', $date);
         })->select(['pending_payments.*', 'u.wallet_id', 'u.user_id as user_id'])->get();
-        $api = config('app.FINGA_URL');
-        $token = FingaIntegrationController::getToken($api);
-        $token_time = Carbon::now();
-
+    
         foreach($pending_payment_wallet_users as $pending_payment) {
 
             $pending_payment_shipment_ids = PendingPaymentShipment::leftJoin('finja_log_settlement_records as sac', 'pending_payment_shipments.shipment_id', '=', 'sac.shipment_id')
@@ -69,7 +66,8 @@ class FinSurgentSonicPaymentSharing extends Command
             })
             ->select(['pending_payment_shipments.*'])
             ->get();
-            $pending_payment_shipment_ids->chunk(50)->each(function ($chunkedShipments) use($api,$token,$token_time,$date,$pending_payment) {
+            $pending_payment_shipment_ids->chunk(100)->each(function ($chunkedShipments) use($date,$pending_payment) {
+                $requestPayload = [];
                 foreach ($chunkedShipments as $pending_payment_shipment) {
                     if ($pending_payment_shipment) {
 
@@ -77,30 +75,18 @@ class FinSurgentSonicPaymentSharing extends Command
                         if (!empty($shipment)) {
                             $this->updatePaymentBeforeLog($shipment, $pending_payment_shipment);
 
-                            $requestPayload = [
+                            $requestPayload[$shipment->id] = [
                                 "client_id" => $pending_payment->user_id,
                                 "wallet_id" => $pending_payment->wallet_id,
                                 "reference_id" => (string)Str::uuid(),
                                 "shipment_id" => $shipment->tracking_number,
                                 "amount" => $shipment->amount,
                                 "order_created_date" => $shipment->created_at,
-                                // "charges" => [
-                                //     'weight_charges' => floatval($shipment->weight_charges),
-                                //     'fuel_surcharge' => floatval($shipment->fuel_surcharge),
-                                //     'faf_charges' => floatval($faf_charges),
-                                //     'arrival_charges_gst' => floatval($gst),
-                                //     'arrival_sms_charges' => floatval($pending_payment_shipment->sms_charges)
-                                // ] // removed after new requierment
                             ];
-                            if ($token_time->diffInMinutes(Carbon::now()) >= 4) {
-                                $token = FingaIntegrationController::getToken($api);
-                                $token_time = Carbon::now(); // Update the token time
-                            }
-                            $this->arrival_shipment_logs($requestPayload, $pending_payment_shipment,null,$token);
                         }
                     }
                 }
-                sleep(60);
+                $this->arrival_shipment_logs_bulk($requestPayload);
             });
         }
         return Command::SUCCESS;

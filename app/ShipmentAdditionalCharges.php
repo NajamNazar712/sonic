@@ -14,13 +14,18 @@ class ShipmentAdditionalCharges extends Model
 {
 
     protected $fillable = [
-        'shipment_id',
         'faf_charges',
-        'arrival_charges_applied',
-        'zero_cod_discount_applied',
-        'return_cod_discount_applied',
+        'shipment_id',
         'payment_type',
+        'return_cod_discount_applied',
+        'zero_cod_discount_applied',
+        'arrival_charges_applied',
+        'apollo_shipment_id',
+        'apollo_is_piece',
+        'wallet_charges',
+        'wallet_charges_updated_at',
     ];
+
     static function fetch_faf_charges($shipment_id){
         $shipment_additional_charges = ShipmentAdditionalCharges::where('shipment_id', $shipment_id)->latest()->first();
         if(!empty($shipment_additional_charges)){
