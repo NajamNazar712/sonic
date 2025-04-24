@@ -441,6 +441,7 @@ class CRMController extends Controller
                 // auto change service type
                 else if($case_nature_type_id == 39 && in_array($shipment->shipper_status_id,[2, 3, 4, 5, 7, 8, 9, 11, 12, 13, 15, 30, 32, 49, 53, 54, 55, 56, 62, 65, 66, 67])){
 
+                    //testedQ
                     $proceed = true;
 
                     if (in_array($shipment->shipper_status_id, [7, 8, 9, 12, 15, 30, 56, 65])) {
