@@ -3110,7 +3110,10 @@ class AdminReportsEmailController extends Controller
             'ssj_last_location.admin_id as scanned_by_id',
             'last_screen_location.name as last_location_screen_location_name',
             'ssj_last_location.entry_method as entry_method',
-            'destination_sj.created_at as destination_arrival_date'
+            'destination_sj.created_at as destination_arrival_date',
+            'intercept_approved.name as intercept_city_name',
+            'irb.intercept_type as intercepttype',
+            'shipmentMisrouted.name as misroutedCityname',
         ];
 
         $sales = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
@@ -3188,7 +3191,7 @@ class AdminReportsEmailController extends Controller
                     ->where(
                         'sjr.id',
                         '=',
-                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(20,21,22,23,24,25,47,48,60))')
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(20,21,22,23,24,25,47,48,60,68))')
                     );
             })
             ->leftjoin('products as p', 'p.id', '=', 'si.product_type_id')
@@ -3250,6 +3253,28 @@ class AdminReportsEmailController extends Controller
                     ->where('ssjal_last_location.hub_id', '=', DB::raw('journey.city_id'))
                     ->where('ssjal_last_location.shipment_id', '=', DB::raw('journey.shipment_id'));
             })
+            ->leftJoin('intercept_re_book_request_histories as irb', function ($join) {
+                $join->on('irb.shipment_id', '=', 'shipments.id')
+                    ->whereRaw('irb.id = (
+                                    select max(id) 
+                                    from intercept_re_book_request_histories 
+                                    where intercept_re_book_request_histories.shipment_id = shipments.id
+                                    and intercept_re_book_request_histories.intercept_type = 1
+                                )');
+            })
+            ->leftjoin('cities as intercept_approved', 'intercept_approved.id', '=', 'irb.old_consignee_city_id')
+            ->leftJoin('shipments_journey as sjms', function ($join) use ($connection) {
+                $join->on('sjms.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'sjms.id',
+                        '=',
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id  = 68)')
+                    );
+            })
+            ->leftjoin('cities as shipmentMisrouted', function ($join) {
+                $join->on('shipmentMisrouted.id', '=', 'sjr.city_id')
+                    ->where('sjr.shipper_status_id', '=', 68);
+            })
             ->leftJoin('city_areas as ca_scanning_last_location_name', 'ssjal_last_location.area_id', '=', 'ca_scanning_last_location_name.id')
             ->leftJoin('shipment_scanning_screen_locations as last_screen_location', 'last_screen_location.id', '=', 'ssj_last_location.screen_location_id')
             ->leftJoin('shipments_journey as destination_sj', function ($join) {
@@ -3272,13 +3297,14 @@ class AdminReportsEmailController extends Controller
                 ->where('destination_sj.id', '=', DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id in (4, 2))'));
             })
             ->whereNotIn('shipments.shipper_status_id', [1, 14, 17, 25, 31, 36, 38])
-            ->whereNotIn('shipments.shipper_status_id', [51])
+            ->whereNotNull('shipments.tracking_number')
             ->select($select)
             ->groupBy('shipments.id')
         ->get();
 
         // $receive_deliveries_report_array[] = ['Quality of Service Report'];
-        $sales_array['header'] = [
+        $sales_array['header'] = 
+        [
             'S. No.',
             'Tracking No.',
             'Order ID',
