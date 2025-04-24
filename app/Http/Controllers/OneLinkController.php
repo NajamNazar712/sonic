@@ -267,7 +267,7 @@ class OneLinkController extends Controller
             } catch (\Exception $e) {
                 $response = [
                     "responseCode" => "99",
-                    "responseDesc" => "Processing Error"
+                    "responseDesc" => $e->getMessage(),
                 ];
                 $status = 500;
             }
