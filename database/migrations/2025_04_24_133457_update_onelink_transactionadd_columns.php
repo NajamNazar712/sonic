@@ -14,6 +14,7 @@ return new class extends Migration
     public function up()
     {
 
+        //check
         Schema::table('one_link_transactions', function (Blueprint $table) {
             $table->integer('shipment_id')->nullable()->index();
             $table->dateTime('expiry_time')->nullable();
