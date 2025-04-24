@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Http\Models\Shipment;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Models\Admin\DeliveryNote;
 use Illuminate\Support\Facades\Validator;
 use App\Exceptions\JsonResponseException;
+
 
 
 class OneLinkController extends Controller
@@ -40,15 +42,23 @@ class OneLinkController extends Controller
         if (!empty($check_transaction)) {
             $existing_log = json_decode($check_transaction->one_link_log->response_data,true);
             $expiry_time = Carbon::parse($check_transaction->expiry_time)->format('Y-m-d\TH:i:s');
+            $remaining_seconds = now()->diffInSeconds($expiry_time, false); // false = future is positive, past is negative
+
             return response()->json([
                 'success' => 'success',
                 'status' => 1,
                 'data' => $existing_log,
                 'expiryDateTime' => $expiry_time,
+                'remainingTimeInSeconds' => $remaining_seconds,
+                'remainingTimeHuman' => now()->diffForHumans($expiry_time, [
+                    'parts' => 2, 'short' => true, 'syntax' => CarbonInterface::DIFF_RELATIVE_TO_NOW
+                ]),
             ]);
         } else {
             $execution_time = now()->format('Y-m-d\TH:i:s');
-            $expiry_time = now()->addHours(1)->format('Y-m-d\TH:i:s');
+            $expiry_time = now()->addMinutes(5)->format('Y-m-d\TH:i:s');
+            $remaining_seconds = now()->diffInSeconds($expiry_time, false); // false = future is positive, past is negative
+
             $data = [
                 "merchantDetails" => [
                     "dbaName" => "Sonic",
@@ -114,6 +124,11 @@ class OneLinkController extends Controller
                     'status' => isset($response['details']['responseCode']) && $response['details']['responseCode'] == '00' ? 0 : 1,
                     'data' => $response['details'],
                     'expiryDateTime' => $data['paymentDetails']['expiryDateTime'],
+                    'remainingTimeInSeconds' => $remaining_seconds,
+                    'remainingTimeHuman' => now()->diffForHumans($expiry_time, [
+                        'parts' => 2, 'short' => true, 'syntax' => CarbonInterface::DIFF_RELATIVE_TO_NOW
+                    ]),
+
                 ]);
             } catch (\Exception $e) {
                 return response()->json(['error' => 'Exception occurred', 'details' => $e->getMessage()], 500);
