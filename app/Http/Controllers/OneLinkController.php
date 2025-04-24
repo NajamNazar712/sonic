@@ -38,6 +38,7 @@ class OneLinkController extends Controller
             ->latest()
             ->first();
 
+            dd($check_transaction);
         if (!empty($check_transaction)) {
             $existing_log = json_decode($check_transaction->one_link_log->response_data, true);
             $expiry_time = Carbon::parse($check_transaction->expiry_time)->format('Y-m-d\TH:i:s');
