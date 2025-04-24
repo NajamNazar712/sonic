@@ -8,6 +8,7 @@ use App\Http\Models\City;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\DeliveryType;
+use App\Http\Models\PaymentMode;
 use App\Http\Models\Product;
 use App\Http\Models\ShippingMode;
 use Illuminate\Http\Request;
@@ -66,6 +67,7 @@ class ShipperAppController extends Controller
         $product_types = Product::all();
         $service_types = BookingType::all();
         $delivery_types = DeliveryType::all();
+        $payment_modes = PaymentMode::all();
         $cities = City::select('id','name','hub_id')
             ->where('status',1)
             ->get();
@@ -76,7 +78,9 @@ class ShipperAppController extends Controller
             'product_types' => $product_types,
             'service_types' => $service_types,
             'delivery_types' => $delivery_types,
-            'cities' => $cities
+            'payment_modes' =>$payment_modes,
+            'cities' => $cities,
+
 
         ];
         return response()->json(['status' => 0 , 'message' => 'Success' , 'booking_resoureces' => $booking_resoureces]);
