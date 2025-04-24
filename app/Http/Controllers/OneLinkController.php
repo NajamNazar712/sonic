@@ -7,14 +7,13 @@ use Carbon\CarbonInterface;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Http\Models\Shipment;
-use App\Models\OneLinkApiLog;
 use App\Services\OneLinkService;
-use App\Http\Models\RiderDelivery;
 use App\Models\OneLinkTransaction;
 use Illuminate\Support\Facades\DB;
 use App\Http\Models\Admin\DeliveryNote;
 use Illuminate\Support\Facades\Validator;
-use App\Http\Models\Admin\DeliveryNoteShipment;
+use App\Exceptions\JsonResponseException;
+
 
 
 class OneLinkController extends Controller
@@ -193,25 +192,26 @@ class OneLinkController extends Controller
         return null;
     }
 
+
     protected function processTransaction(Request $request, string $logType, array $rules, int $natureId)
     {
         $validationResponse = $this->validateRequest($request, $rules, $logType);
-
+    
         if ($validationResponse) {
             return $validationResponse;
         }
-
+    
         $data = $request->all();
-
+    
         $rrn =  $data['info']['rrn'];
         $stan = $data['info']['stan'];
         $subDept = $data['messageInfo']['subDept'];
-
+    
         $existingTransaction = OneLinkTransaction::where([
             'rrn' => $rrn,
             'stan' => $stan
         ])->first();
-
+    
         if ($existingTransaction) {
             try {
                 DB::transaction(function () use ($existingTransaction, $data, $natureId, $rrn, $subDept) {
@@ -222,7 +222,7 @@ class OneLinkController extends Controller
                         'status' => $data['messageInfo']['status'] ?? 'pending',
                         'nature_id' => $natureId
                     ];
-
+    
                     if ($natureId === 1) {
                         $updateData = array_merge($updateData, [
                             'message_id' => $data['messageInfo']['originalMessageId'],
@@ -244,9 +244,9 @@ class OneLinkController extends Controller
                             'latitude' => $data['senderInfo']['latitude'],
                         ]);
                     }
-
+    
                     $existingTransaction->update($updateData);
-
+    
                     if ($natureId == 2) {
                         $shipment = Shipment::find($rrn);
                         if ($shipment) {
@@ -254,25 +254,23 @@ class OneLinkController extends Controller
                                 'received_amount' => $data['messageInfo']['originalInstructedAmount'] ?? 0
                             ]);
                         }
-                    
+    
                         $delivery_note = DeliveryNote::find($subDept);
                         if ($delivery_note) {
                             $delivery_note->increment('one_link_payment_count');
-                    
+    
                             NotificationsController::app_notification(19, $delivery_note->rider_id, 2, $delivery_note->rider_id, $rrn);
                             NotificationsController::send(185, $delivery_note->rider_id, $rrn);
                         } else {
-                            return response()->json([
+                            throw new JsonResponseException(response()->json([
                                 'status' => false,
                                 'message' => 'Delivery Note not found.',
                                 'sub_dept' => $subDept
-                            ], 404);
+                            ], 404));
                         }
                     }
-                    
                 });
-
-
+    
                 $response = [
                     "responseCode" => "00",
                     "responseDesc" => "Processed OK",
@@ -285,12 +283,21 @@ class OneLinkController extends Controller
                     ]
                 ];
                 $status = 200;
+    
+            } catch (JsonResponseException $e) {
+                $response = $e->response->getData(true);
+                $status = $e->response->status();
+                $this->oneLinkService->logRequest($logType, $data, $response, $status);
+                return $e->response;
+    
             } catch (\Exception $e) {
                 $response = [
                     "responseCode" => "99",
                     "responseDesc" => $e->getMessage(),
                 ];
                 $status = 500;
+                $this->oneLinkService->logRequest($logType, $data, $response, $status);
+                return response()->json($response, $status);
             }
         } else {
             $response = [
@@ -306,10 +313,11 @@ class OneLinkController extends Controller
             ];
             $status = 404;
         }
-
+    
         $this->oneLinkService->logRequest($logType, $data, $response, $status);
         return response()->json($response, $status);
     }
+    
 
 
     public function notifyMerchant(Request $request)
