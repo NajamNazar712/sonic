@@ -606,7 +606,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('rerun:wallet_log_re_push')->hourly()->runInBackground(); // wallet
         $schedule->command('rerun_wallet_settlement')->everySixHours()->runInBackground(); //wallet
         $schedule->command('bulk:status-sharing-wallet')->withoutOverlapping()->everyFiveMinutes()->runInBackground();
-        
+        $schedule->command('api:visionsoftexcel_multiple')->dailyAt('20:01')->runInBackground();
+
 
         // $schedule->command('email:daily_received_deliveries_report')->dailyAt('09:00')->runInBackground();
         // $schedule->command('email:daily_return_received_deliveries_report')->dailyAt('09:00')->runInBackground();
