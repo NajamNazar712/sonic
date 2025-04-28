@@ -3523,7 +3523,15 @@ class AdminReportsController extends Controller
 
             // ->leftJoin('sales_tiers as st', 'st.id', '=', 'scu.tier_id')
             ->leftJoin('sales_commissions as sc', 'sc.shipper_id', '=', 'u.id')
-            ->leftJoin('sales_commission_users as scu','scu.sales_commission_id', '=', 'sc.id')
+            ->leftjoin('sales_commission_users as scu', function($join){
+                $join->on('scu.sales_commission_id', '=','sc.id')
+                    ->where(
+                        'scu.id',
+                        '=',
+                        DB::raw('(select max(id) from sales_commission_users where sales_commission_users.tier_id = 3)')
+
+                    );
+            })
             ->leftJoin('admins as scun', 'scun.id', '=', 'scu.user_id')
             ->leftJoin('sale_tier_tags as st', 'st.user_id', '=', 'u.id')
             ->leftJoin('admins as rf', 'rf.id', '=', 'st.ref')
