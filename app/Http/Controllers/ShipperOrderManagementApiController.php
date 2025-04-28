@@ -48,7 +48,8 @@ class ShipperOrderManagementApiController extends Controller
            ->where('shipments.user_id',$request->shipper_id)
            ->groupBy('shipments.id')
            ->orderBy('shipments.id', 'desc')
-           ->count();
+           ->get() // <-- fetch all rows
+           ->count(); // <-- then count how many rows
 dd($order_list);
        if($order_list->isNotEmpty()) {
            return response()->json(['status' => 0 , 'message' => 'Success' ,'order_list'=>$order_list]);
