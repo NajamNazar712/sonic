@@ -65,9 +65,9 @@ class ShipperAppController extends Controller
     {
         $shipping_modes = ShippingMode::all();
         $product_types = Product::all();
-        $service_types = BookingType::all();
+        $service_types = BookingType::where('id',1)->get();
         $delivery_types = DeliveryType::all();
-        $payment_modes = PaymentMode::all();
+        $payment_modes = PaymentMode::whereIn('id',[1,4])->get();
         $cities = City::select('id','name','hub_id')
             ->where('status',1)
             ->get();
