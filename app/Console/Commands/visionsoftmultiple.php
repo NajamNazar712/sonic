@@ -41,8 +41,8 @@ class visionsoftmultiple extends Command
     public function handle()
     {
         // Set the start and end dates for September 2024
-        $startDate = Carbon::create(2025, 03, 22)->startOfDay();
-        $endDate = Carbon::create(2025, 03, 27)->endOfDay();
+        $startDate = Carbon::create(2024, 7, 01)->startOfDay();
+        $endDate = Carbon::create(2024, 8, 31)->endOfDay();
 
         // Loop through each day in September 2024
         for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {

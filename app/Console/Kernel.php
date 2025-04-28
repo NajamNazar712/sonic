@@ -600,13 +600,14 @@ class Kernel extends ConsoleKernel
 //        $schedule->command('email:revenuereport_lastmonth 3')->dailyAt('11:30')->runInBackground();
 
         $schedule->command('update:shipper_segment_logs')->everyFiveMinutes()->runInBackground();
-        $schedule->command('apollo:fetch-shipments-status')->everyFiveMinutes()->runInBackground();
+//        $schedule->command('apollo:fetch-shipments-status')->everyFifteenMinutes()->runInBackground();
         $schedule->command('fingsurgent:sonic-payment')->hourly()->runInBackground(); //wallet
 //        $schedule->command('status:re-push-wallet')->hourly()->runInBackground(); // wallet no need now after bulk status work
         $schedule->command('rerun:wallet_log_re_push')->hourly()->runInBackground(); // wallet
         $schedule->command('rerun_wallet_settlement')->everySixHours()->runInBackground(); //wallet
         $schedule->command('bulk:status-sharing-wallet')->withoutOverlapping()->everyFiveMinutes()->runInBackground();
-        
+//        $schedule->command('api:visionsoftexcel_multiple')->dailyAt('20:01')->runInBackground();
+
 
         // $schedule->command('email:daily_received_deliveries_report')->dailyAt('09:00')->runInBackground();
         // $schedule->command('email:daily_return_received_deliveries_report')->dailyAt('09:00')->runInBackground();
