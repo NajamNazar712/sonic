@@ -22,28 +22,28 @@ class ShipperOrderManagementApiController extends Controller
                    ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.verification = 1)'));
            })
            ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sj.status_reason_id')
-           ->select([
-               'shipments.tracking_number',
-               'shipments.order_id',
-               'shipments.booked_by',
-               'shipments.shipping_mode_id',
-               'sm.mode as service_type',
-               'shipments.shipper_status_id',
-               'ss.name as status',
-               'sj.status_reason_id',
-               'ssr.name as reason',
-               'shipments.payment_status_id',
-               'sps.name as payment_status',
-               'usi.city_id as origin_id',
-               'oc.name as origin',
-               'shipments.consignee_city_id',
-               'dc.name as destination',
-               'shipments.consignee_name',
-               'shipments.consignee_phone_number_1',
-               'shipments.amount as collection_amount',
-               'shipments.pickup_date as booking_date',
-               'sj.remarks as cancellation_remarks',
-           ])
+//           ->select([
+//               'shipments.tracking_number',
+//               'shipments.order_id',
+//               'shipments.booked_by',
+//               'shipments.shipping_mode_id',
+//               'sm.mode as service_type',
+//               'shipments.shipper_status_id',
+//               'ss.name as status',
+//               'sj.status_reason_id',
+//               'ssr.name as reason',
+//               'shipments.payment_status_id',
+//               'sps.name as payment_status',
+//               'usi.city_id as origin_id',
+//               'oc.name as origin',
+//               'shipments.consignee_city_id',
+//               'dc.name as destination',
+//               'shipments.consignee_name',
+//               'shipments.consignee_phone_number_1',
+//               'shipments.amount as collection_amount',
+//               'shipments.pickup_date as booking_date',
+//               'sj.remarks as cancellation_remarks',
+//           ])
            ->where('shipments.user_id',$request->shipper_id)
            ->groupBy('shipments.id')
            ->orderBy('shipments.id', 'desc')
