@@ -44,6 +44,7 @@ class ShipperOrderManagementApiController extends Controller
 //               'shipments.pickup_date as booking_date',
 //               'sj.remarks as cancellation_remarks',
 //           ])
+           ->select('sj.id')
            ->where('shipments.user_id',$request->shipper_id)
            ->groupBy('shipments.id')
            ->orderBy('shipments.id', 'desc')
