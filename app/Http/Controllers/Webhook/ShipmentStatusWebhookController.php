@@ -100,10 +100,10 @@ class ShipmentStatusWebhookController extends Controller
                     $response = $client->post('', [
                         'json' => $payload,
                     ]);
-                    // $body = $response->getBody();
+                    $body = $response->getBody();
                     // // // $body->rewind();  // Rewind the stream to ensure we're reading from the start
-                    // $responseBody = $body->getContents(); // Get the body content
-                    // Log::channel('botCallJobLog')->info("Guzzle Response Body: " . $responseBody);
+                    $responseBody = $body->getContents(); // Get the body content
+                    Log::channel('botCallJobLog')->info("Guzzle Response Body: " . $responseBody);
                     // // Log::channel('botCallJobLog')->info('s ' . 'Webhook log responseBody-body' . json_encode($response1));
                 }
                 if ($response instanceof \Psr\Http\Message\ResponseInterface) {
