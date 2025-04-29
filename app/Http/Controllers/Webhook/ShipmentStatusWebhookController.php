@@ -144,7 +144,7 @@ class ShipmentStatusWebhookController extends Controller
             catch(RequestException $e){
                 $status_code = 400;
                 $res = $e->getMessage();
-                if ($user_id == 32032) {
+                if ($user_id == 30860) {
                     Log::channel('botCallJobLog')->info('s ' . 'Webhook log check-error' . json_encode($res));
                 }
                 $notification_data['status_code'] = $status_code;
