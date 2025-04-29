@@ -112,7 +112,7 @@ class ShipmentStatusWebhookController extends Controller
                     $status_code = 500;
                 }
                 // if ($user_id == 30860) {
-                    // Log::channel('botCallJobLog')->info('s ' . 'Webhook log Status-Code' . $status_code . "Payload" . json_encode($payload));
+                    Log::channel('botCallJobLog')->info('s ' . 'Webhook log Status-Code' . $status_code . "Payload" . json_encode($payload."User ID". $user_id));
                 // }
                 if (in_array($status_code, [200, 201, 202, 204])) {
                     break;
