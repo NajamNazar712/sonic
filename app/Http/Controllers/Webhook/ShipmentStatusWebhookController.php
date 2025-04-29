@@ -104,16 +104,19 @@ class ShipmentStatusWebhookController extends Controller
                     // // // $body->rewind();  // Rewind the stream to ensure we're reading from the start
                     $responseBody = $body->getContents(); // Get the body content
                     Log::channel('botCallJobLog')->info("Guzzle Response Body: " . $responseBody);
-                    // // Log::channel('botCallJobLog')->info('s ' . 'Webhook log responseBody-body' . json_encode($response1));
+                    $response1 = $client->post('', [
+                        'form_params' => $payload
+                    ]);
+                    Log::channel('botCallJobLog')->info('s ' . 'Webhook log responseBody-body' . json_encode($response1));
                 }
                 if ($response instanceof \Psr\Http\Message\ResponseInterface) {
                     $status_code = $response->getStatusCode();
                 } else {
                     $status_code = 500;
                 }
-                if ($user_id == 30860) {
-                    Log::channel('botCallJobLog')->info('s ' . 'Webhook log Status-Code' . $status_code . "Payload" . json_encode($payload));
-                }
+                // if ($user_id == 30860) {
+                    Log::channel('botCallJobLog')->info('s ' . 'Webhook log Status-Code' . $status_code . "Payload" . json_encode($payload."User ID". $user_id));
+                // }
                 if (in_array($status_code, [200, 201, 202, 204])) {
                     break;
                 }
