@@ -51,16 +51,19 @@ class visionsoftmultiple extends Command
             $end = Carbon::create($date)->format('Y-m-d 23:59:59');
 
             $cod_payment_excel = VisionSoftAPIController::cod_payable_excel($st,$end);
-            $cod_receivable_excel = VisionSoftAPIController::cod_receivable_excel($st,$end);
+//            $cod_receivable_excel = VisionSoftAPIController::cod_receivable_excel($st,$end);
             $links = "";
 
-            if(!empty($cod_receivable_excel)) {
-                $links .= "<strong>COD Receivables: </strong> <br>" . "<a download='$cod_receivable_excel' href='$cod_receivable_excel' >$cod_receivable_excel</a>" . "<br>";
-            }
+//            if(!empty($cod_receivable_excel)) {
+//                $links .= "<strong>COD Receivables: </strong> <br>" . "<a download='$cod_receivable_excel' href='$cod_receivable_excel' >$cod_receivable_excel</a>" . "<br>";
+//            }
             if(!empty($cod_payment_excel)) {
                 $links .= "<strong>COD Payable: </strong> <br>" . "<a download='$cod_payment_excel' href='$cod_payment_excel' >$cod_payment_excel</a>" . "<br>";
             }
-            if(!empty($cod_payment_excel) || !empty($cod_receivable_excel)) {
+//            if(!empty($cod_payment_excel) || !empty($cod_receivable_excel)) {
+//                NotificationsController::send(213, $links);
+//            }
+            if(!empty($cod_payment_excel)) {
                 NotificationsController::send(213, $links);
             }
         }
