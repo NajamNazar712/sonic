@@ -36,8 +36,27 @@ class FinvoWalletUserAuthMiddleware
                 if (!empty($user)) {
                     if($user->wallet->wallet_id == $wallet_id) {
                         if (Hash::check($password, $user->password)) {
-                            $request->merge(['user_id' => $user->id]);
-                            return $next($request);
+                            if($user->id != 46611) {
+                                if ($user->blacklist == 1) {
+                                    return response()->json([
+                                        'status' => 1,
+                                        'message' => 'Your Account is Blacklisted.'
+                                    ]);
+                                } else if ($user->status != 3) {
+                                    return response()->json([
+                                        'status' => 1,
+                                        'message' => 'Your Account is not Activated yet.'
+                                    ]);
+                                } else if ($user->phone_number_verified == 0) {
+                                    return response()->json(['status' => 1, 'message' => 'Your Account phone number is not verified.']);
+                                } else {
+                                    $request->merge(['user_id' => $user->id]);
+                                    return $next($request);
+                                }
+                            }else{
+                                $request->merge(['user_id' => $user->id]);
+                                return $next($request);
+                            }
                         } else {
                             return response()->json([
                                 'status' => 1,
