@@ -5935,7 +5935,11 @@ class GlobalSettingsController extends Controller
             $shipper_non_key=[];
 
             if(in_array($selected_agent->role_id ,[43,67,75,115])){
-                $shipper_key = SaleTierTag::join('users as u', 'u.id', 'sale_tier_tags.user_id')->WhereNotNull('kam')->select('u.id', 'u.name')->get();
+                $shipper_key = SaleTierTag::join('users as u', 'u.id', 'sale_tier_tags.user_id')
+                    ->WhereNotNull('kam')
+                    ->where('kam', '=', $id)
+                    ->where('u.status', '=', 3)
+                    ->select('u.id', 'u.name')->get();
             }
             else if(in_array($selected_agent->role_id ,[37, 28])){
                 // $shipper_non_key = SaleTierTag::join('users as u', 'u.id', 'sale_tier_tags.user_id')->WhereNull('kam')->select('u.id', 'u.name')->get();
