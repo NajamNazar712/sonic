@@ -32,6 +32,9 @@ class ProcessShipmentStatusWebhook implements ShouldQueue
      */
     public function handle()
     {
+        if ($this->shipment['user_id'] == 30860) {
+            Log::channel('botCallJobLog')->info('s ' . 'Webhook log process' . json_encode($this->shipment));
+        }
         $user_id = $this->shipment['user_id'];
         $tracking_number = $this->shipment['tracking_number'];
         $status = $this->shipment['status'];
