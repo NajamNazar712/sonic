@@ -10504,11 +10504,7 @@ class DeliveryController extends Controller
     
     public function shipment_otp_scanning_history_index()
     {
-        if (in_array(session('role_id'), [1, 155])) {
-            return view('admin.otp.non_cod_shipment_scan_history');
-        } else {
-            return view('access_denied');
-        }
+        return view('admin.otp.non_cod_shipment_scan_history');
     }
 
     public function shipment_otp_scanning_history_list(Request $request)

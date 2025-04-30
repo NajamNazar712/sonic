@@ -697,7 +697,7 @@
                                                 OTP</a></li>
                                     @endif
 
-                                    @if (in_array(session('role_id'), [1, 155]))
+                                    @if (session('role_id') == 1 || in_array(1033, session('permissions')))
                                         <li>
                                             <a class="menu-item" href="{{ route('admin.shipment_otp.scanning_history') }}">
                                                 Non-COD Shipments Scanning History
