@@ -10274,17 +10274,17 @@ class DeliveryController extends Controller
             $otp = $otp->whereIn('dc.hub_id', session('hubs'));
         }
 
+        $otpRecords = $otp->get();
+
         // Make logs for who scanned cn numbers
-        foreach ($tracking_numbers as $tracking_number) {
-            $shipment = Shipment::where('tracking_number', $tracking_number)->first();
-            if ($shipment) {
-                $shipment_otp = ShipmentOtp::where('shipment_id', $shipment->id)->first();
+        foreach ($otpRecords as $record) {
+            if (!empty($record->dbf_otp)) {
                 NonCodShipmentLogs::create([
-                    'tracking_number' => trim($tracking_number),
+                    'tracking_number' => trim($record->tracking_number),
                     'trax_id' => $user->trax_id,
                     'employee_name' => $user->name,
                     'employee_designation' => $user->designation ?? '-',
-                    'shipment_otp' => $shipment_otp->dbf_otp ?? null,
+                    'shipment_otp' => $record->dbf_otp,
                 ]);
             }
         }
@@ -10509,7 +10509,32 @@ class DeliveryController extends Controller
 
     public function shipment_otp_scanning_history_list(Request $request)
     {
-        $logs = NonCodShipmentLogs::get();
+        $logs = NonCodShipmentLogs::whereNotNull('shipment_otp')->orderby('id', 'desc');
+
+        // Check if there are search values and apply them
+        foreach ($request->get('columns') as $column) {
+            if ($column['search']['value']) {
+                $searchValue = $column['search']['value'];
+                switch ($column['name']) {
+                    case 'employee_name':
+                        $logs->where('employee_name', 'like', '%' . $searchValue . '%');
+                        break;
+                    case 'employee_designation':
+                        $logs->where('employee_designation', 'like', '%' . $searchValue . '%');
+                        break;
+                    case 'trax_id':
+                        $logs->where('trax_id', 'like', '%' . $searchValue . '%');
+                        break;
+                    case 'tracking_number':
+                        $logs->where('tracking_number', 'like', '%' . $searchValue . '%');
+                        break;
+                    case 'shipment_otp':
+                        $logs->where('shipment_otp', 'like', '%' . $searchValue . '%');
+                        break;
+                }
+            }
+        }
+
         $datatables = Datatables::of($logs)
             ->addColumn('tracking_number', function ($shipments) {
                 return $shipments->tracking_number;
