@@ -376,8 +376,8 @@
                         name: 'id',
                         class: 'align-middle serial_number',
                         targets: 1,
-                        render: function (data, type, row) {
-                            return '';
+                        render: function (data, type, row, meta) {
+                            return meta.row + 1;
                         }
                     },
                     {data: 'sack_bag_no', name: 'sack_bag_no', class: 'align-middle sack_bag_no'},
