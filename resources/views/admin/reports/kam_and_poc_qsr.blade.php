@@ -253,7 +253,6 @@
             {
                 $('#from_date').val(null).trigger('change');
                 $('#to_date').val(null).trigger('change');
-                // console.log(selectedOption);
             }
         });
         $('#to_date1').change(function() {
@@ -262,7 +261,6 @@
             {
                 $('#from_date').val(null).trigger('change');
                 $('#to_date').val(null).trigger('change');
-                // console.log(selectedOption);
             }
         });
 
@@ -432,8 +430,8 @@
         let option = '';
         var columnNames2 = table.settings().init().columns.map(function (column) {
             if(column.download){
-                let col_name = column.value;
-                let col_text = column.text;
+                let col_name = column.data;
+                let col_text = column.title;
                 if (col_name && col_text) {
                     option += `<option value="${col_name}">${col_text}</option>`;
                 }
