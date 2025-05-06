@@ -16834,11 +16834,14 @@ class AdminReportsController extends Controller
             ->leftJoin('delivery_note_shipments as dns', 'dns.shipment_id', '=', 'shipments.id')
             ->leftJoin('delivery_notes as delivery_note', 'delivery_note.id', '=', 'dns.delivery_note_id')
         ->leftJoin('riders', 'riders.id', '=', 'delivery_note.rider_id')
-        ->leftJoin('sale_tier_tags', 'sale_tier_tags.user_id', '=', 'users.id')
+        ->leftJoin('sale_tier_tags', 'sale_tier_tags.user_id', '=', 'shipments.user_id')
         ->leftJoin('admins as poc_admin', 'poc_admin.id', '=', 'sale_tier_tags.poc')
         ->leftJoin('admins as kam_admin', 'kam_admin.id', '=', 'sale_tier_tags.kam')
-        ->whereNotNull('sale_tier_tags.poc')
-        ->whereNotNull('sale_tier_tags.kam')
+        ->where(function($query) {
+            $query->whereNotNull('sale_tier_tags.poc')
+                 ->orWhereNotNull('sale_tier_tags.kam');
+        })
+
         ->select($select)
         ->groupBy('shipments.id');
 
@@ -16855,7 +16858,7 @@ class AdminReportsController extends Controller
         if ($arrival_search_from && $arrival_search_to) {
             $from1 = Carbon::parse($arrival_search_from)->format('Y-m-d H:i:s');
             $to1 = Carbon::parse($arrival_search_to)->format('Y-m-d H:i:s');
-            $shipments->whereBetween('journey.created_at', [$from1, $to1]);
+            $shipments->whereBetween('shipment_arival_journey.created_at', [$from1, $to1]);
         }
 
         $datatable = Datatables::of($shipments)
@@ -17032,10 +17035,11 @@ class AdminReportsController extends Controller
                     $time_from = CrmSettings::where('name','TAT Cut-Off Time From')->first();
                     $time_to = CrmSettings::where('name','TAT Cut-Off Time To')->first();
                     $to_formatted = date($time_format, strtotime($time_to->setting_value));
-                    $cut_off_check = $shipment->request_in_process_created_at->format($time_format);
+                    // $cut_off_check = $shipment->request_in_process_created_at->format($time_format);
+                    $cut_off_check = Carbon::parse($shipment->request_in_process_created_at)->format($time_format);
                     $additional_tat = $current->diffInWeekdays($last_closed);
                     $current_tat = $additional_tat;
-                    $last_closed_check = $last_closed->toDateString();
+                    $last_closed_check = $last_closed ? $last_closed->toDateString() : Carbon::now()->toDateString();
                     $current_check = $current->toDateString();
                     if($last_closed_check <= $current_check){
                         if($to_formatted < $cut_off_check){
