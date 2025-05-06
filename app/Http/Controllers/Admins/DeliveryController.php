@@ -2607,80 +2607,23 @@ class DeliveryController extends Controller
                         } else {
                             $remarks = null;
                             if ($request->status_drop[$shipment] == 12) {
+                               
+                                $journey = ShipmentsJourney::where('shipment_id',$shipment)->whereIn('status_reason_id',[27,35])->count();
                                 
+                                if(in_array($request->reason_drop[$shipment],[27,35]) && $journey > 0){
+                                    $request->merge([
+                                        'shipment_id' => $shipment,
+                                        'remarks' => null,
+                                        'rv_assign_agent_sub_status_id' => null
+                                    ]);
+                                    $this->return_confirm($request,346);
+                                    return redirect()->back()->with('success', 'Statuses updated successfully!');
+                                }
                                 if(in_array($request->reason_drop[$shipment],[12,34])){
                                     $remarks = $this->remarksNSAOSAJourneyRVR($delivery_note_id,$shipment_details->user_id);
                                 }
                                 
-                                // $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment)->latest()->first();
-                                // if ($return_assign_shipment) {
-                                //     $return_assign_shipment->status = 0;
-                                //     $return_assign_shipment->save();
-
-                                //     $return_assign_log = new ReturnAssignedShipmentLogs();
-                                //     $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-                                //     $return_assign_log->status = 6;
-                                //     $return_assign_log->assigned_by = Auth::id();
-                                //     $return_assign_log->save();
-                                // }
-
-                                // $return_assign_shipment = RcpAssignedShipment::where('shipment_id', $shipment)->where('assigned_status', 1)->where('shipment_status', '!=', 0)->latest()->first();
-                                // if ($return_assign_shipment) {
-
-                                //     //getting the agent id from log to whom this shipment was assigned
-                                //     $agent_id = RcpAssignedShipmentLog::where('rcp_assigned_shipment_id',$return_assign_shipment->id)->where('status', 1)->first();
-
-                                //     // Updating tables if the agent exist same day
-                                //     $check_agent_return_confirmation = RcpAssignedAgent::where('admin_id',$agent_id->admin_id)->whereDate('created_at',date('Y-m-d'))->latest()->first();
-                                //     if($check_agent_return_confirmation){
-                                //             $check_agent_return_confirmation->increment('total_shipments');
-                                //             $check_agent_return_confirmation->increment('assigned_shipments');
-                                //             $check_agent_return_confirmation->increment('pending_shipments');
-                                //             $check_agent_return_confirmation->save();
-
-                                //             $assign_shipments = new RcpAssignedShipment();
-                                //             $assign_shipments->rcp_assigned_agent_id = $check_agent_return_confirmation->id;
-                                //             $assign_shipments->shipment_id = $shipment;
-                                //             $assign_shipments->assigned_status = 1;
-                                //             $assign_shipments->assigned_by = Auth::id();
-                                //             $assign_shipments->admin_id = $check_agent_return_confirmation->admin_id;
-                                //             $assign_shipments->save();
-
-                                //             //updating logs
-                                //             $assign_shipments_logs = new RcpAssignedShipmentLog();
-                                //             $assign_shipments_logs->rcp_assigned_shipment_id = $assign_shipments->id;
-                                //             $assign_shipments_logs->shipment_id = $shipment;
-                                //             $assign_shipments_logs->status = 1;
-                                //             $assign_shipments_logs->admin_id = $check_agent_return_confirmation->admin_id;
-                                //             $assign_shipments_logs->save();
-                                //             }
-                                //         else{
-
-                                //             $agent_return_confirmation = new RcpAssignedAgent;
-                                //             $agent_return_confirmation->admin_id = $agent_id->admin_id;
-                                //             $agent_return_confirmation->total_shipments = $agent_return_confirmation->total_shipments + 1 ;
-                                //             $agent_return_confirmation->assigned_shipments = $agent_return_confirmation->assigned_shipments + 1 ;
-                                //             $agent_return_confirmation->pending_shipments = $agent_return_confirmation->pending_shipments + 1 ;
-                                //             $agent_return_confirmation->save();
-
-                                //             $assign_shipments = new RcpAssignedShipment();
-                                //             $assign_shipments->shipment_id = $shipment;
-                                //             $assign_shipments->rcp_assigned_agent_id = $agent_return_confirmation->id;
-                                //             $assign_shipments->assigned_status = 1;
-                                //             $assign_shipments->assigned_by = Auth::id();
-                                //             $assign_shipments->admin_id = $agent_return_confirmation->admin_id;
-                                //             $assign_shipments->save();
-
-                                //             //updating logs
-                                //             $assign_shipments_logs = new RcpAssignedShipmentLog();
-                                //             $assign_shipments_logs->rcp_assigned_shipment_id = $assign_shipments->id;
-                                //             $assign_shipments_logs->shipment_id = $shipment;
-                                //             $assign_shipments_logs->status = 1;
-                                //             $assign_shipments_logs->admin_id = $assign_shipments->admin_id;
-                                //             $assign_shipments_logs->save();
-                                //         }
-
-                                //     }
+                                
                                 //if Shipper Status Id = 12 (Shipment - Reason Validation Required) Then fetch Those Shipments in Get Ticket
                                
                                 $this->rvshipmentticketInsert($shipment, $request->status_drop[$shipment], $request->reason_drop[$shipment], $shipment_status->user_id);
@@ -4022,27 +3965,26 @@ class DeliveryController extends Controller
                         if ($shipper_status_id == 12 && in_array($status_reason_id, [27, 35]) && $verification) {
                             $globalAdminId = 346;
 
-                            Shipment::where('id', $shipment)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
+                            Shipment::where('id', $shipment)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);
 
-                            if ($shipment_details->shipment_type == 1) {
-                                if ($shipment_details->booking_type_id != 4) {
-                                    ShipmentChargesController::return($shipment);
-                                    if ($shipment_details->packaging_material_request != 1) {
-                                        AdminFinanceController::add_payment($shipment, 1);
-                                    }
-                                } else {
-                                    ShipmentChargesController::walk_in_return($shipment);
-                                    $shipment_details->walk_in_status = 2;
-                                    $shipment_details->save();
-                                    AdminFinanceController::done_payment($shipment, 1);
-                                }
-                            }
-                            ShipmentsJourneyController::add($shipment, 20, 20, $status_reason_id, $shipment_journey_remarks, NULL, $globalAdminId, null, null, 1, null, null, null, null, null);
+                            // if ($shipment_details->shipment_type == 1) {
+                            //     if ($shipment_details->booking_type_id != 4) {
+                            //         ShipmentChargesController::return($shipment);
+                            //         if ($shipment_details->packaging_material_request != 1) {
+                            //             AdminFinanceController::add_payment($shipment, 1);
+                            //         }
+                            //     } else {
+                            //         ShipmentChargesController::walk_in_return($shipment);
+                            //         $shipment_details->walk_in_status = 2;
+                            //         $shipment_details->save();
+                            //         AdminFinanceController::done_payment($shipment, 1);
+                            //     }
+                            // }
+                            ShipmentsJourneyController::add($shipment, 65, 65, $status_reason_id, $shipment_journey_remarks, NULL, $globalAdminId, null, null, 1, null, null, null, null, null);
 
                             //Remove Shipment from RV Shipment Ticket
                             RvShipmentTicket::where('shipment_id', $shipment)->delete();
 
-                            // dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($shipment));
                         }
                     }
 

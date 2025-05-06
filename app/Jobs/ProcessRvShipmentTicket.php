@@ -2,7 +2,6 @@
 
 namespace App\Jobs;
 
-use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Traits\RvTrait;
@@ -14,10 +13,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Support\Facades\Log;
 use App\Http\Models\RvShipmentAssignAgent;
-use App\Http\Models\Shipment;
 use App\RvShipmentAgent;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\DB;
 
 class ProcessRvShipmentTicket implements ShouldQueue
@@ -44,9 +41,9 @@ class ProcessRvShipmentTicket implements ShouldQueue
     public function handle()
     {
         // Log::channel('cronJobLog')->info('s ' . 'rv_shipment_ticket Initiated');
-        if (!in_array($this->shipment['status_reason_id'], [12, 27, 35])) { //only drop this shipment in rv_shipment_tickets if its status_reason_id is not in [12,27,35]
+        if (!in_array($this->shipment['status_reason_id'], [12])) { //only drop this shipment in rv_shipment_tickets if its status_reason_id is not in [12]
             // Log::channel('cronJobLog')->info('s ' . 'rv_shipment_ticket In');
-
+            $shipment_status = (in_array($this->shipment['status_reason_id'],[27,35]) && $this->shipment['shipper_status_id'] == 12) ? 65 : $this->shipment['shipper_status_id'];
             $globalSettings = GlobalSettings::where('setting_value', 1)
                 ->whereIn('type', [
                     'rv_disable_shippers_excluded_shippers',
@@ -114,14 +111,14 @@ class ProcessRvShipmentTicket implements ShouldQueue
             RvShipmentTicket::withTrashed()->updateOrCreate(
                 ['shipment_id' => $this->shipment['shipment_id']],
                 [
-                    'shipment_shipper_status_id' => $this->shipment['shipper_status_id'],
+                    'shipment_shipper_status_id' => $shipment_status,
                     'shipment_status_reason_id' => $this->shipment['status_reason_id'],
                     'shipment_user_id' => $this->shipment['shipment_user_id'],
                     'call_count' => $this->shipment['call_count'],
                     'is_bot' => $isBot,
                     'in_progress' => 0,
                     'is_completed' => 0,
-                    'deleted_at' => null,
+                    'deleted_at' => (($shipment_status == 65) ? Carbon::now()->format('Y-m-d H:i:s') : null),
                     'halt_shipper' => 0,
                     'disabled_shipper' => $isShipperDisabled,
                     'delete_reason' => null,
@@ -129,11 +126,10 @@ class ProcessRvShipmentTicket implements ShouldQueue
                 ]
             );
             //need to Continue This
-            if($isBot)
+            if($isBot || $shipment_status == 65)
             {
                 $adminId = 4620;
 
-                $shipmentJourneyId = ShipmentsJourney::where('shipment_id', $this->shipment['shipment_id'])->latest()->select('id')->first();
                 $data = [
                     'agent_id' => $adminId, // testing purpose
                     'shipment_id' => $this->shipment['shipment_id'],
@@ -158,8 +154,10 @@ class ProcessRvShipmentTicket implements ShouldQueue
                 // dispatchNow($job); 
                 // Bus::dispatchNow(new BotCallDispatch($this->shipment['shipment_id']));
              
-                dispatch(new BotCallDispatch($this->shipment['shipment_id']));
                    
+            }
+            if($isBot){
+                dispatch(new BotCallDispatch($this->shipment['shipment_id']));       
             }
 
         }
