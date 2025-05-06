@@ -6612,7 +6612,7 @@ class AdminFinanceController extends Controller
                  $join->on('wu.user_id', '=', 'u.id')
                     ->where('wu.substitute_user_id', '0');
             })
-            ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', 'ppc.amount as total_amount', 'ppc.charges as total_charges','u.payment_cycle_days as payment_cycle_days', 'ppc.gst as total_gst', 'ppc.wht as total_wht', 'ppc.payable as total_payable', 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'pc.name as payment_cycle', 'pc.id as payment_cycle_id','u.documents_status', DB::raw('IFNULL(psfp.pending_shipments_count,0) as total_pending_shipments'),'sts.status as star_status', 'u.id as user_id', 'ppc.sms_charges as total_sms_charges', 'wu.id as wallet_user');
+            ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', 'ppc.amount as total_amount', 'ppc.charges as total_charges','u.payment_cycle_days as payment_cycle_days', 'ppc.gst as total_gst', 'ppc.wht as total_wht', 'ppc.payable as total_payable', 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'pc.name as payment_cycle', 'pc.id as payment_cycle_id','u.documents_status', DB::raw('IFNULL(psfp.pending_shipments_count,0) as total_pending_shipments'),'sts.status as star_status', 'u.id as user_id', 'ppc.sms_charges as total_sms_charges', 'wu.id as wallet_user', 'wu.finova_account_type as wallet_finance');
             // ->groupBy('pending_payments.id'); // removed by the instruction of waqas bhai
 
         // dd($pending_payments);
@@ -6735,8 +6735,9 @@ class AdminFinanceController extends Controller
         }
         $wallet_user = $request->input('wallet_filter',0);
         if($wallet_user == 1) {
-            $pending_payments->whereNotNull('wu.id');
-
+            $pending_payments->whereNotNull('wu.id')->where('wu.finova_account_type', '>', 0);
+        }elseif($wallet_user == 2) {
+            $pending_payments->whereNotNull('wu.id')->where('wu.finova_account_type', 0);
         } else {
             $pending_payments->whereNull('wu.id');
         }

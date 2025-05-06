@@ -2092,6 +2092,18 @@
                                                 });
                                             }
                                         }
+                                        else if (data.status == 5) {
+                                            UnblockPagePermanently();
+                                            toastr.error(data.error, 'Error!', {
+                                                positionClass: 'toast-top-center',
+                                                containerId: 'toast-top-center'
+                                            });
+
+                                            swal.close();
+
+                                            triggerRefreshInAllTabs()
+                                
+                                        }
                                         else {
                                             UnblockPagePermanently();
                                             toastr.error(data.error, 'Error!', {
