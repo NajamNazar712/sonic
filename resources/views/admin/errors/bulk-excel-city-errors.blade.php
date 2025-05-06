@@ -173,8 +173,7 @@
                                                     <span class="text-danger">{{ $errors[$index]["zone_id"] }}</span>
                                                 @endif
                                             </td>
-
-
+                                            
                                             <td>
                                                 {!! Form::text($index . "[attempt_tat]", $ro['attempt_tat'] ?? '', [
                                                     'class' => 'form-control' . (isset($errors[$index]["attempt_tat"]) ? ' is-invalid' : ''),

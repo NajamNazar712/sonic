@@ -234,6 +234,7 @@ use App\Http\Models\Operataions\OperationsForecastLastUpdatedTime;
 use App\Http\Models\Operataions\OperationsOutgoingTopCustomersShipments;
 use App\Http\Models\Operataions\OperationsOutgoingPickupRequestShipments;
 use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
+use App\Http\Models\Province;
 
 class AdminDashboardController extends Controller
 {   use RateReusableTrait;
@@ -11256,7 +11257,8 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
             ->leftjoin('business_categories as bc', 'bc.id', '=', 'cities.business_category_id')
             ->join('zones as z', 'cities.zone_id', '=', 'z.id')
-            ->select(['cities.id as city_id', 'cities.city_code as city_code', 'cities.id as id', 'cities.name as name', 'h.name as hub', 'cities.hub_id', 'z.name as zone', 'cities.hub as isHub', 'cities.status as status', 'ch.created_at as updated', 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat', 'cities.location_latitude', 'cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category', 'cities.hub_location_latitude', 'cities.hub_location_longitude', 'cities.iata_code as iata_code','cities.booking_enable_status as booking_enable_status', 'c.name as created_by', 'cities.created_at as created_at'])
+            ->leftJoin('provinces', 'provinces.id', 'cities.province_id')
+            ->select(['cities.id as city_id', 'cities.city_code as city_code', 'cities.id as id', 'cities.name as name', 'h.name as hub', 'cities.hub_id', 'z.name as zone', 'cities.hub as isHub', 'cities.status as status', 'ch.created_at as updated', 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat', 'cities.location_latitude', 'cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category', 'cities.hub_location_latitude', 'cities.hub_location_longitude', 'cities.iata_code as iata_code','cities.booking_enable_status as booking_enable_status', 'c.name as created_by', 'cities.created_at as created_at', 'provinces.name as province_name'])
             ->where('cities.permanent_disabled',0);
 
         return Datatables::of($cities)
@@ -11372,7 +11374,8 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         $shippingMode = ShippingMode::all();
         $booking = BookingType::where('id', '!=', 4)->get();
         $vehicles = Fleet::where('status', 1)->select(['id', 'reg_number'])->get();
-        return view('admin.management.add_city_form')->with(['hubs' => $hubs, 'zones' => $zones, 'shippingMode' => $shippingMode, 'bookings' => $booking, 'vehicles' => $vehicles]);
+        $provinces = Province::all();
+        return view('admin.management.add_city_form')->with(['hubs' => $hubs, 'zones' => $zones, 'shippingMode' => $shippingMode, 'bookings' => $booking, 'vehicles' => $vehicles, 'provinces' => $provinces]);
     }
 
     public function getEditCityForm($id)
@@ -11405,7 +11408,8 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         foreach ($walk_in_city as $walk_in_detail) {
             $walk_in_delivery[$walk_in_detail['delivery']] = $walk_in_detail['delivery'];
         }
-        return view('admin.management.edit_city_form')->with(['hubs' => $hubs, 'zones' => $zones, 'shippingMode' => $shippingMode, 'bookings' => $booking, 'isHub' => $isHub, 'city' => $city, 'delivery' => $delivery, 'cityhub' => $cityhub, 'walk_in_city' => $walk_in_delivery, 'osa_list' => $osa_list, 'vehicles' => $vehicles]);
+        $provinces = Province::all();
+        return view('admin.management.edit_city_form')->with(['hubs' => $hubs, 'zones' => $zones, 'shippingMode' => $shippingMode, 'bookings' => $booking, 'isHub' => $isHub, 'city' => $city, 'delivery' => $delivery, 'cityhub' => $cityhub, 'walk_in_city' => $walk_in_delivery, 'osa_list' => $osa_list, 'vehicles' => $vehicles, 'provinces' => $provinces]);
 
     }
 
@@ -11492,6 +11496,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                         'hub' => 1,
                         'hub_id' => $id,
                         'zone_id' => $request->zone_id,
+                        'province_id' => $request->province_id,
                         'pickup' => ($request->has('pickup')) ? 1 : 0,
                         'gc_area' => ($request->has('gc_area')) ? 1 : 0,
                         'attempt_tat' => $request->attempt_tat,
@@ -11507,6 +11512,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                         'hub' => 1,
                         'hub_id' => $id,
                         'zone_id' => $request->zone_id,
+                        'province_id' => $request->province_id,
                         'pickup' => ($request->has('pickup')) ? 1 : 0,
                         'status' => $city_id->status,
                         'gc_area' => ($request->has('gc_area')) ? 1 : 0,
@@ -11637,7 +11643,6 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             ]);
 
             if (!empty($request->walk_in_delivery)) {
-//                dd($request->walk_in_delivery);
                 foreach ($request->walk_in_delivery as $index => $delivery_walk_in) {
                     WalkInCities::create([
                         'city_id' => $city->id,
@@ -11692,11 +11697,13 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
             return redirect()->back()->with('success', 'City added successfully');
         } elseif ($request->postType == 'hub') {
+
             $city = City::create([
                 'name' => $request->cityName,
                 'city_code' => $request->city_code,
                 'hub' => 1,
                 'zone_id' => $request->zone_id,
+                'province_id' => $request->province_id,
                 'pickup' => ($request->has('pickup')) ? 1 : 0,
                 'gc_area' => ($request->has('gc_area')) ? 1 : 0,
                 'attempt_tat' => $request->attempt_tat,
@@ -15773,7 +15780,6 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             $cities = City::whereIn('id', $cityID)->get()->keyBy('id');
 
             foreach ($forms as $item) {
-
                 if ((array_key_exists('closest_hub', $item) && is_null($item['closest_hub'])) || $item['is_city'] == 1) {
                     unset($item['closest_hub']);
                 }
