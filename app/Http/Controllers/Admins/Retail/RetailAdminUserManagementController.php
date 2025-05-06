@@ -42,6 +42,7 @@ use App\Http\Models\Admin\Admin;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use App\Models\RetailLog;
 
 class RetailAdminUserManagementController extends Controller
 {
@@ -1565,6 +1566,17 @@ class RetailAdminUserManagementController extends Controller
                     }
                     $dropdown .= '<button type="button" class="dropdown-item" data-target-id=' . $data->id . ' rel="editretailuser" data-toggle="modal" data-target="#editRetailUser"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
 
+                    $dropdown .= '<button type="button" class="dropdown-item view_logs">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col-2">
+                                    <i class="ft-edit"></i>
+                                </div>
+                                <div class="col-9 offset-1">
+                                    View Logs
+                                </div>
+                            </div>
+                        </button>';
+
                     if ($data->category != 1){
                         $dropdown .= '
                             <a href="' . route("admin.retail.users.retail_history", ["id" => $data->id]) . '" class="text-dark" target="_blank">
@@ -1735,6 +1747,39 @@ class RetailAdminUserManagementController extends Controller
         $retail_user->address = $request->address;
         $retail_user->updated_by = Auth::id();
         $retail_user->trax_id = $request->trax_id;
+
+        $changedFields = [];
+        $fieldNames = [
+          'name' => 'Name',
+          'category' => 'Category',
+          'phone_no' => 'Phone no',
+          'cnic' => 'CNIC',
+          'address' => 'Address',
+          'trax_id' => 'Trax ID',
+          'category_id' => 'Category ID'
+        ];
+
+        foreach ($fieldNames as $field => $fieldName) {
+            $originalValue = trim($retail_user->getOriginal($field));
+            $currentValue = trim($retail_user->$field);
+            if ($retail_user->isDirty($field) && $originalValue !== $currentValue) {
+                if($field == 'category_id'){
+                    if($request->store == 1) {
+                        $old = RetailFranchise::find($originalValue);
+                        $new = RetailFranchise::find($currentValue);
+                        $fieldName = 'Franchise';
+                    }else{
+                        $old = RetailTraxCenter::find($originalValue);
+                        $new = RetailTraxCenter::find($currentValue);
+                        $fieldName = 'Trax Center';
+                    }
+                    $changedFields[] = $fieldName . ': ' . $old->name . ' -> ' . $new->name;
+                }else {
+                    $changedFields[] = $fieldName . ': ' . $originalValue . ' -> ' . $currentValue;
+                }
+            }
+        }
+        
         $retail_user->save();
         
         // if ($retail_user->category == 2){
@@ -1825,6 +1870,11 @@ class RetailAdminUserManagementController extends Controller
             // Delete old records not present in the new request
             foreach ($retail_user_old_product_percentages as $oldPercentage) {
                 if (!in_array($oldPercentage->retail_shipping_mode_id, $matchingRetailShippingModeIds)) {
+                    $shippingMode =RetailShippingMode::find($oldPercentage->retail_shipping_mode_id);
+                    //dd($retailShippingModes);
+                    $shippingModeName = $shippingMode->name ?? 'Unknown';
+                    $logEntry = "{$shippingModeName}: {$oldPercentage->product_percentage}";
+                    $changedFields[] = $logEntry;
                     $oldPercentage->delete();
                 }
             }
@@ -1854,10 +1904,27 @@ class RetailAdminUserManagementController extends Controller
 
         // retail user family info
         $familyMemberNames = $request->family_member_name;
+        
+        $familyTypeMap = [
+            1 => 'Spouse',
+            2 => 'Children',
+            3 => 'Father',
+            4 => 'Mother',
+            5 => 'Spouse DOB'
+        ];
+        
+        $changedFields[] = RetailUserFamilyInformation::where('retail_user_id', $retail_user->id)
+        ->whereNotNull('family_member_name')
+        ->get(['family_member_name', 'salary', 'agreement_start_date', 'family_member_type'])
+        ->map(function ($item) use ($familyTypeMap) {
+            $typeLabel = $familyTypeMap[$item->family_member_type] ?? $item->family_member_type;
+            $details = trim($item->family_member_name); // Add more fields if needed
+            return "{$typeLabel}: {$details}";
+        });
+        
+        RetailUserFamilyInformation::where('retail_user_id', $retail_user->id)->delete();
         foreach ($familyMemberNames as $key => $familyMemberName) {
             // Delete existing records for the retail user only if new family member information is present
-            RetailUserFamilyInformation::where('retail_user_id', $retail_user->id)->delete();
-            foreach ($familyMemberNames as $key => $familyMemberName) {
                 $family_member_type = null;
                 if ($key == 0) {
                     $family_member_type = 3; // Father
@@ -1878,7 +1945,6 @@ class RetailAdminUserManagementController extends Controller
                 $family_member_new_data->salary = $request->salary;
                 $family_member_new_data->agreement_start_date = $request->agreement_start_date;
                 $family_member_new_data->save();
-            }
         }
 
         $baseDirectory = 'retail_user_attachments';
@@ -1932,6 +1998,14 @@ class RetailAdminUserManagementController extends Controller
             $new_attachments->updated_by = $admin->id;
             $new_attachments->save();
         }
+
+        $record = new RetailLog;
+        $record->changed_by_id = auth()->user()->id;
+        $record->data = implode(', ', $changedFields);
+        $record->changed_in_record_id = $retail_user->id;
+        $record->screen_name = 'Retail User';
+        $record->save();
+        
         return redirect()->back()->with('success', 'Retail User Updated Successfully!');
     }
 
@@ -3665,5 +3739,20 @@ class RetailAdminUserManagementController extends Controller
         }
         
         return response()->json(['data' => $data]);
+    }
+
+    public function view_logs(Request $request){
+        $logs = RetailLog::leftJoin('admins as changed_by', 'retail_logs.changed_by_id', '=', 'changed_by.id')->where('retail_logs.changed_in_record_id', $request->id)->where('retail_logs.screen_name', $request->screen_name)->orderBy('retail_logs.created_at', 'desc')->select('retail_logs.*', 'changed_by.name')->get();
+        if ($logs->isNotEmpty()) {
+            return response()->json([
+                'status' => 0,
+                'logs' => $logs
+            ]);
+        } else {
+            return response()->json([
+                'status' => 1,
+                'message' => 'No logs found for this lead.'
+            ]);
+        }
     }
 }
