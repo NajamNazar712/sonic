@@ -9612,7 +9612,81 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             ->leftjoin('faf_charges', function($join){
                 $join->on('faf_charges.user_id', '=', 'users.id')->where('faf_charges.status', '=', 1);
             })
-            ->select(['users.ntn_no', 'users.blacklist', 'rrb.name as rates_rejected_by', 'users.disable_at as disable_at', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.disable_reason as disable_reason', 'users.rejected_reason as rejected_reason', 'users.rate_status as rate_status', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'p.product_name as product_type', 'rab.name as added_by', 'rabna.name as updated_by', 'users.created_at', 'rabb.name as approved_by', 'rabba.name as account_activated_by', 'users.activated_at as activated_date', 'users.status', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'poc.name as tagged_poc', 'k.name as kam', 'r.name as ref','r.trax_id as rider_id', 'users.address as address', 'users.email', 't.name as territory', 'users.corporate_rate_type_id as corporate_rate_type_id', 'users.new_rate_type_id as new_rate_type_id', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name','ucs.status_count as status_count','z.name as zone', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso','scun.name as search','scun_r.name as search_user_type','users.lead_id', 'users.average_shipments', 'bdru.name as reason','users.sms_charges','faf_charges.status as fc_status'])
+            ->leftJoin('wallet_users', 'wallet_users.user_id', 'users.id')
+
+            // ->select(['users.ntn_no', 'users.blacklist', 'rrb.name as rates_rejected_by', 'users.disable_at as disable_at', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.disable_reason as disable_reason', 'users.rejected_reason as rejected_reason', 'users.rate_status as rate_status', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'p.product_name as product_type', 'rab.name as added_by', 'rabna.name as updated_by', 'users.created_at', 'rabb.name as approved_by', 'rabba.name as account_activated_by', 'users.activated_at as activated_date', 'users.status', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'poc.name as tagged_poc', 'k.name as kam', 'r.name as ref','r.trax_id as rider_id', 'users.address as address', 'users.email', 't.name as territory', 'users.corporate_rate_type_id as corporate_rate_type_id', 'users.new_rate_type_id as new_rate_type_id', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name','ucs.status_count as status_count','z.name as zone', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso','scun.name as search','scun_r.name as search_user_type','users.lead_id', 'users.average_shipments', 'bdru.name as reason','users.sms_charges','faf_charges.status as fc_status'])
+
+            ->select([
+                'users.ntn_no',
+                'users.blacklist',
+                'rrb.name as rates_rejected_by',
+                'users.disable_at',
+                'users.rates_added_at',
+                'users.rates_approved_at',
+                'users.rates_rejected_at',
+                'users.disable_reason',
+                'users.rejected_reason',
+                'users.rate_status',
+                'users.id',
+                'ad.name as admin_tag_id',
+                'users.name',
+                'cities.name as city',
+                'users.poc',
+                'p.product_name as product_type',
+                'rab.name as added_by',
+                'rabna.name as updated_by',
+                'users.created_at',
+                'rabb.name as approved_by',
+                'rabba.name as account_activated_by',
+                'users.activated_at as activated_date',
+                'users.status',
+                'users.account_type_id',
+                'at.name as account_type',
+                'users.documents_status',
+                'users.documents_status_reason as documents_rejection_reason',
+                'users.other_product_name',
+                'users.auto_shipment_cancellation_days',
+                'du.phone as duplicate_phone',
+                'du.cnic as duplicate_cnic',
+                'du.iban as duplicate_iban',
+                'du.name as duplicate_name',
+                'users.brand_name',
+                'iui.status as international_rate_status',
+                'iui.rejected_reason as international_rejected_reason',
+                'uda.uploaded_at as documents_uploaded_at',
+                'uda.approved_at as documents_approved_at',
+                'dab.name as documents_approved_by',
+                'drb.name as documents_rejected_by',
+                'uda.rejected_at as documents_rejected_at',
+                'poc.name as tagged_poc',
+                'k.name as kam',
+                'r.name as ref',
+                'r.trax_id as rider_id',
+                'users.address',
+                'users.email',
+                't.name as territory',
+                'users.corporate_rate_type_id',
+                'users.new_rate_type_id',
+                'seg.name as segment',
+                'seg_sub.name as sub_segment',
+                'ref.name as referral_name',
+                'ucs.status_count',
+                'z.name as zone',
+                'pc.id as payment_cycle_id',
+                'pc.name as payment_cycle',
+                'users.payment_cycle_days',
+                'e.name as eso',
+                'scun.name as search',
+                'scun_r.name as search_user_type',
+                'users.lead_id',
+                'users.average_shipments',
+                'bdru.name as reason',
+                'users.sms_charges',
+                'faf_charges.status as fc_status',
+                'wallet_users.user_id as wallet_shippers'
+            ])
+            
+            
             ->whereIn('users.status', [3, 4, 6])
             ->where('users.blacklist', 0)
             ->groupBy('users.id');
@@ -10019,6 +10093,16 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             })
             ->filterColumn('users.average_shipments', function ($query, $keyword) {
                 return $query->where('users.average_shipments', '=', $keyword);
+            })
+            ->editColumn('wallet_shippers', function($user){
+                return $user->wallet_shippers ? "Fintech" : "Normal";
+            })
+            ->filterColumn('wallet_shippers', function($query, $keyword){
+                if($keyword == 1) {
+                    $query->whereNotNull('wallet_users.user_id');
+                } else if($keyword == 2) {
+                    $query->whereNull('wallet_users.user_id');
+                }
             })
             ->addColumn("action", function ($result) {
                 if ($result->id != 8761 && $result->id != 9358) {
