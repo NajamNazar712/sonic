@@ -4,57 +4,23 @@
 
 @section('content')
     <h1 class="mb-1">
-        Non-COD Shipments OTP
+        Non-COD Shipments Scanning History
     </h1>
 
     <div class="card">
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-                @if(session('role_id') == 1 || in_array(819,session('permissions')))
-                    <form action="{{route('admin.shipment_otp.update')}}" method="post" novalidate="novalidate" id="delivery_otp_form">
-                        @csrf
-                        <div class="row justify-content-center">
-                            <div class="input-group col-3">
-                                <label class="mr-2 font-medium-3"><b>Shipment OTP: </b></label>
-                                <div class="form-group">
-                                    <input type="checkbox" name="otp_toggle" id="otp_toggle" class="switchery otp_toggle" data-size="sm" data-switchery="true" @if(isset($setting->setting_value) && $setting->setting_value == 1) checked @endif>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row justify-content-center mb-4">
-                            <div class="input-group col-2">
-                                <button class="btn btn-primary">Update</button>
-                            </div>
-                        </div>
-                    </form>
-                @endif
-
-                <form id="tracking_number_search" class="mb-1" novalidate="novalidate">
-                    <div class="row justify-content-center">
-                        <div class="col-3">
-                            <div class="form-group">
-                                <input type="text" name="tracking_number" id="tracking_number" class="form-control tracking_number" 
-                                    placeholder="Tracking Number*" data-tags-input-name="tracking_number">
-                            </div>
-                        </div>
-                        <div class="form-group ml-1">
-                            <button type="submit" class="btn btn-primary">Search</button>
-                        </div>
-                    </div>
-                </form>
-
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">OTP</th>
-                        <th class="border-primary border-darken-1">Rider</th>
-                        <th class="border-primary border-darken-1">Area</th>
-                        <th class="border-primary border-darken-1">Location</th>
-                        <th class="border-primary border-darken-1">Generated At</th>
+                        <th class="border-primary border-darken-1">Employee Name</th>
+                        <th class="border-primary border-darken-1">Employee Designation</th>
+                        <th class="border-primary border-darken-1">Trax ID</th>
+                        <th class="border-primary border-darken-1">Scanned At</th>
                     </tr>
                     </thead>
                 </table>
@@ -148,28 +114,31 @@
                 params.length = -1;
                 params.excel = true;
                 var jsonResult = $.ajax({
-                    url: '{{ route('admin.shipment_otp.list') }}',
+                    url: '{{ route('admin.shipment_otp.shipment_otp_scanning_history_list') }}',
                     data: params,
                     success: function (result) {
                         head = [];
-
                         head.push('S.No');
                         head.push('Tracking No.');
+                        head.push('Trax ID');
+                        head.push('Employee Name');
+                        head.push('Employee Designation');
                         head.push('OTP');
-                        head.push('Rider');
-                        head.push('Area');
-                        head.push('Generated At');
+                        head.push('Scanned At');
+
                         $.each(result.data, function(index, values) {
                             row = [];
-                            row.push(index + 1);
-                            row.push(values.tracking_number);
-                            row.push(values.otp);
-                            row.push(values.rider_name);
-                            row.push(values.area);
-                            row.push(values.generated_at);
+                            row.push(index + 1);                            
+                            row.push(values.tracking_number);               
+                            row.push(values.trax_id);                       
+                            row.push(values.employee_name);                 
+                            row.push(values.employee_designation);          
+                            row.push(values.shipment_otp);                  
+                            row.push(values.created_at);                    
                             body.push(row);
                         });
                     },
+
                     async: false
                 });
 
@@ -182,7 +151,7 @@
             buttons: [
                 {
                     extend: 'excel',
-                    title: 'Non-COD Shipments OTP',
+                    title: 'Non-COD Shipments Scanning History',
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 },
@@ -194,28 +163,23 @@
             autoWidth: false,
             pagingType: 'full_numbers',
             processing: true,
-            deferLoading: 0,
             language: {
                 processing: data_table_loader
             },
             serverSide: true,
             ajax:{
-                url: '{{ route('admin.shipment_otp.list') }}',
-                data: function (d) {
-                    d.tracking_number = $('#tracking_number').val();
-                }
+                url: '{{ route('admin.shipment_otp.shipment_otp_scanning_history_list') }}',
             },
             rowId: 'shId',
             order: [[5, 'desc']],
             columns: [
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                {data: 'tracking_number_link', name: 's.tracking_number', class: 'align-middle name'},
-                {data: 'otp', name: 'shipment_otps.dbf_otp', class: 'align-middle otp'},
-                {data: 'rider_name', name: 'r.name', class: 'align-middle rider_name'},
-                {data: 'area', name: 'ca.name', class: 'align-middle area'},
-                {data: 'location', name: 'location', class: 'align-middle location', orderable: false, searchable: false},
-                {data: 'generated_at', name: 'shipment_otps.updated_at', class: 'align-middle generated_at'},
-
+                {data: 'tracking_number_link', name: 'tracking_number', class: 'align-middle name'},
+                {data: 'shipment_otp', name: 'shipment_otp', class: 'align-middle otp'},
+                {data: 'employee_name', name: 'employee_name', class: 'align-middle employee_name'},
+                {data: 'employee_designation', name: 'employee_designation', class: 'align-middle employee_designation'},
+                {data: 'trax_id', name: 'trax_id', class: 'align-middle trax_id'},
+                {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
             ],
             rowCallback: function(row, data, index) {
                 var info = table.page.info();
@@ -230,8 +194,6 @@
                 this.api().columns().every(function(column_id) {
                     var column = this;
                     var header = column.header();
-
-
                     if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.destination_arrival') || $(header).is('.location')) {
                         $(td).appendTo($(search));
                     }
@@ -246,79 +208,6 @@
                     }
                 });
                 this.api().table().columns.adjust();
-            }
-        });
-
-        var select = $('#tracking_number').selectize({
-            placeholder: 'Tracking Number*',
-            delimiter: ',',
-            createOnBlur: true,
-            persist: false,
-            plugins: ['remove_button'],
-            onDropdownOpen: function(dropdown) {
-                dropdown.remove();
-            },
-            onType: function(str) {
-                var regex = /^[0-9,]+$/;
-                if (!regex.test(str)) {
-                    select[0].selectize.setTextboxValue('');
-                }
-            },
-            create: function(input) {
-                if (input.length >= 1 && Math.floor(input) == input && $.isNumeric(input)) {
-                    return {
-                        value: input,
-                        text: input
-                    }
-                } else {
-                    return false;
-                }
-            },
-        });
-
-        $('#tracking_number_search').bind('submit',function (e) {
-            var tracking_number = $('#tracking_number_search .tracking_number').val();
-            if (tracking_number != '') {
-                table.draw();
-            }
-            e.preventDefault();
-        });
-
-        $("#delivery_otp_form").validate({
-            errorClass: 'danger',
-            successClass: 'success',
-            errorPlacement: function(error, element) {
-                error.addClass('w-100').appendTo(element.parents('.form-group'));
-            },
-            submitHandler: function (form) {
-                swal({
-                    title: 'Are You Sure?',
-                    text: 'Select Yes to toggle Shipment OTP!',
-                    icon: 'warning',
-                    buttons: {
-                        cancel: {
-                            text: 'No',
-                            value: null,
-                            visible: true,
-                            closeModal: true,
-                        },
-                        confirm: {
-                            text: 'Yes',
-                            value: true,
-                            visible: true,
-                            closeModal: true
-                        }
-                    },
-                    closeOnClickOutside: false,
-                    closeOnEsc: false,
-                    dangerMode: true
-                }).then(function (confirm) {
-                    if(confirm){
-                        $(form).find('button[type=submit]').attr('disabled', 'disabled');
-                        blockPagePermanently();
-                        form.submit();
-                    }
-                });
             }
         });
     </script>

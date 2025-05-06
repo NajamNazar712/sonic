@@ -4392,6 +4392,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('', 'Admins\DeliveryController@shipment_otp_index')->name('index');
         Route::get('list', 'Admins\DeliveryController@shipment_otp_list')->name('list');
         Route::post('update', 'Admins\DeliveryController@shipment_otp_update')->name('update');
+        Route::post('search_tracking_number', 'Admins\DeliveryController@search_tracking_number')->name('search_tracking_number');
+        Route::get('scanning_history', 'Admins\DeliveryController@shipment_otp_scanning_history_index')->name('scanning_history');
+        Route::get('shipment_otp_scanning_history_list', 'Admins\DeliveryController@shipment_otp_scanning_history_list')->name('shipment_otp_scanning_history_list');
     });
 
     Route::prefix('otp_history')->name('otp_history.')->group(function () {
