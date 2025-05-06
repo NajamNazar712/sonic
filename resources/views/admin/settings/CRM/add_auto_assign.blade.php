@@ -144,7 +144,7 @@
                                         <div class="col-6">
                                             <div class="form-group">
                                                 <label>Shipper with KAM &nbsp;(<input type="checkbox" class="checkAll"  >Select All)</label>
-                                                <select name="shipper_key_id[]" disabled id="shipper_key_id" class="form-control select2" multiple="multiple"  >
+                                                <select name="shipper_key_id[]" disabled id="shipper_key_id" class="form-control select2" multiple="multiple">
 {{--                                                    @foreach($shipper_key as $cn)--}}
 {{--                                                        <option value="{{ $cn->id }}" > {{ $cn->name }} </option>--}}
 {{--                                                    @endforeach--}}
@@ -194,10 +194,11 @@
     <script>
         $(document).ready(function() {
 
-            function getShipperKey() {
-
+            function getShipperKey(agent_id) {
+                let url = "{{ route('admin.settings.auto_assigning.get_shipper_key', ['agent_id' => '__AGENT_ID__']) }}";
+                url = url.replace('__AGENT_ID__', agent_id);
                 $.ajax({
-                    url:'{!! route("admin.settings.auto_assigning.get_shipper_key") !!}',
+                    url: url,
                     method: 'GET'
                 }).done(function (data) {
                     if(data.status == 1){
@@ -211,6 +212,11 @@
                         $('#shipper_key_id').find('option').filter(function() {
                             return $.trim($(this).text()) === '';
                         }).remove();
+                    }else {
+                        toastr.error('No shipper against this KAM', 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
                     }
                 })
             }
@@ -320,9 +326,6 @@
                     });
                 }
 
-
-
-
             });
 
             $('#origin_area_id').select2({
@@ -344,11 +347,12 @@
                 $('#shipper_non_key_id').empty();
 
                 var role_id = $(this).find(':selected').data('role_id');
+                var agent_id = $(this).val();
                 if(role_id==28 || role_id==37){
                     getShipperNonKey()
 
                 } else if (role_id==43 || role_id==67 || role_id==75 || role_id==115) {
-                    getShipperKey();
+                    getShipperKey(agent_id);
                 }
 
             });
@@ -518,7 +522,21 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
-                    form.submit();
+                    let role_id = $('#agent_id').find(':selected').data('role_id') || 0; // Ensure role_id is a number
+                    if ([43, 67, 75, 115].includes(role_id)){
+                        let shipper_ids = $('#shipper_key_id').val();
+                        if(shipper_ids!=''){
+                            form.submit();
+                        }else {
+                            toastr.error('Select At least one shipper', 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                            return false;
+                        }
+                    } else {
+                        form.submit();
+                    }
                 }
 
             });

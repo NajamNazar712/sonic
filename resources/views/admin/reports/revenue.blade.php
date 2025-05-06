@@ -170,6 +170,7 @@
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Return City</th>
                         <th class="border-primary border-darken-1">Zone</th>
+                        <th class="border-primary border-darken-1">Province</th>
                         <th class="border-primary border-darken-1">Class</th>
                         <th class="border-primary border-darken-1">Shipping Mode</th>
                         <th class="border-primary border-darken-1">Collection Amount</th>
@@ -431,6 +432,7 @@
                             head.push('Hub');
                             head.push('Return City');
                             head.push('Zone');
+                            head.push('Province');
                             head.push('Class');
                             head.push('Shipping Mode');
                             head.push('Collection Amount');
@@ -479,6 +481,7 @@
                                 row.push(values.hub);
                                 row.push(values.return_city);
                                 row.push(values.zone);
+                                row.push(values.province_name);
                                 row.push(values.class);
                                 row.push(values.shipping_mode);
                                 row.push(values.p_collection_amount);
@@ -580,6 +583,7 @@
                     { data:'hub' ,name: 'h.name', class: 'align-middle hub'},
                     { data:'return_city', name: 'return_city', class: 'align-middle return_city'},
                     { data:'zone' ,name: 'z.name', class: 'align-middle zone'},
+                    { data: 'province_name' ,name: 'provinces.name', class: 'align-middle province_name'},
                     { data:'class' ,name: 'zcc.class', class: 'align-middle class'},
                     { data:'shipping_mode' ,name: 'sm.mode', class: 'align-middle shipping_mode'},
                     { data:'p_collection_amount' ,name: 'pps.amount', class: 'align-middle collection_amount'},
@@ -605,7 +609,7 @@
                     { data:'estimated_charges' ,name: 'estimated_charges', class: 'align-middle estimated_charges',sortable:false},
                     { data: 'faf_charges' ,name: 'faf_charges', class: 'align-middle faf_charges'},
                     { data: 'p_net_payable' ,name: 'pps.payable', class: 'align-middle net_payable'},
-                    { data: 'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle delivered_or_returned'}
+                    { data: 'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle delivered_or_returned'},   
                 ],
                 rowCallback: function(row, data, index) {
                     
