@@ -29,8 +29,8 @@ class FingaIntegrationController extends Controller
         if (Cache::has($cacheKey)) {
             return Cache::get($cacheKey);
         }
-
-        $password = App::environment(['local', 'staging']) ? "4TE7+r]7ddI2" : "9l2|_XTI4MiP";
+        $password = config('app.FINGA_PASSWORD');
+//        $password = App::environment(['local', 'staging']) ? "" : $env_password;
 
         // Make API request for new token
         $response = Http::withHeaders([

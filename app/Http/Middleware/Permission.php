@@ -1037,6 +1037,8 @@ class Permission
 
             'settings.shipper_negative_payable.index' => 982,
             'settings.faf_charges.index'=>997,
+            // 'settings.reports.email_delivery_time.index' => 1031,
+            'settings.email_delivery_time.index' => 1031,
 
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
