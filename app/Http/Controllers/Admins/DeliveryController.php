@@ -756,7 +756,7 @@ class DeliveryController extends Controller
                             ->latest()
                             ->first();
                         
-                        if ($latestAgentAssignment->rv_assign_agent_status_id == 2 && $latestAgentAssignment->agent_id == 4620) {
+                        if (optional($latestAgentAssignment)->rv_assign_agent_status_id == 2 && $latestAgentAssignment->agent_id == 4620) {
                             return ['status' => 1, 'error' => 'Shipment status is re-attempt for Hold-in-operation category'];
                         }
                     }
@@ -2252,6 +2252,21 @@ class DeliveryController extends Controller
         if (DeliveryNote::where('id', $delivery_note_id)->where('pending_status', 1)->exists()) {
             return response()->json(['status' => 0, 'error' => 'Delivery note already updated']);
         }
+
+        $delivery_note = DeliveryNote::find($delivery_note_id);
+        if (
+            $selected_status == 14 &&
+            isset($delivery_note->rider) &&
+            isset($delivery_note->rider->operation_rider_id) &&
+            $delivery_note->rider->operation_rider_id == 2 &&
+            $delivery_note->rider->id != '12879'
+        ) {
+            return response()->json([
+                'status' => 5,
+                'error' => 'Delivered Status Only Allowed For Hold For Self Collection'
+            ]);
+        }
+
         $selected_reason = $request->selected_reason;
         $reason_for_first_attempt = array(7, 8, 35, 19, 34, 12, 27, 40);
 

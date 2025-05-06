@@ -12,6 +12,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use App\Http\Traits\RvTrait;
 use App\Jobs\BotCallDispatch;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 
 use function GuzzleHttp\json_encode;
@@ -97,6 +98,13 @@ class MissingFirstCallInitiate extends Command
                         // Log::channel('botCallJobLog')->info('s ' . 'call missing entry check' . $value['id']);
                         $this->rvshipmentticketInsert($value['id'], $value['shipper_status_id'], $journey['status_reason_id'], $value['user_id']);
                     }
+                }
+            }
+            $failedJobs = DB::table('failed_jobs')
+                ->get();
+            if ($failedJobs->isNotEmpty()) {
+                foreach ($failedJobs as $job) {
+                    Artisan::call('queue:retry', ['id' => $job->id]);
                 }
             }
             // if ($this->argument('startDate') != 0 && $this->argument('endDate') != 0) {
