@@ -2049,8 +2049,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@qsr_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@qsr_list')->name('list');
             Route::get('updated_shippers_list', 'Admins\AdminReportsController@updated_shippers_list')->name('updated_shippers_list');
-
         });
+
+        Route::prefix('kam_and_poc_qsr')->name('kam_and_poc_qsr.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@kam_and_poc_qsr_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@kam_and_poc_qsr_list')->name('list');
+        });
+
         Route::prefix('qsr_old')->name('qsr_old.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@qsrold_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@qsrold_list')->name('list');
@@ -2560,6 +2565,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('lost_and_case_closed_summary')->name('lost_and_case_closed_summary_report.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@lost_and_case_closed_summary_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@lost_and_case_closed_summary_list')->name('list');
+        });
+
+        // KAM AND POC QRS REPORT
+        Route::prefix('kam_and_poc_qsr')->name('kam_and_poc_qsr.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@kam_and_poc_qsr_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@kam_and_poc_qsr_list')->name('list');
         });
     });
 
