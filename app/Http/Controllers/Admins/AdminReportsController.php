@@ -14835,70 +14835,63 @@ class AdminReportsController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 742);
         }
-        // $sack_bag_utilization = CargoManifestBag::JOIN('cities AS c','c.id','=','cargo_manifest_bags.destination_hub_id')    
-        // ->select('c.id AS destination_id','c.name AS destination_city', DB::raw('COUNT(DISTINCT cargo_manifest_bags.sack_bag_no) AS stock_sack_bag'))
-        // ->whereNotNull('cargo_manifest_bags.sack_bag_no')
-        // ->where('cargo_manifest_bags.sack_bag_no', '!=', 'N/A')
-        // ->where('cargo_manifest_bags.destination_hub_id','=',$destination)
-        // ->groupBy('cargo_manifest_bags.destination_hub_id');
-
-        //old qurey
-        // $sack_bag_utilization = CargoManifestBag::join('cities as c', function ($join) {
-        //     $join->on('c.id', '=', 'cargo_manifest_bags.destination_hub_id')
-        //          ->where('c.status', '=', 1);
-        // })
-        // ->where('cargo_manifest_bags.is_sack_bag', '=', 1)
-        // ->where('cargo_manifest_bags.destination_hub_id', '=', $destination_id)
-        // ->groupBy('cargo_manifest_bags.destination_hub_id')
-        // ->select([
-        //     'c.id as destination_id',
-        //     'c.name as destination_name',
-        //     DB::raw('COUNT(DISTINCT cargo_manifest_bags.sack_bag_id) as stock_sack_bag'),
-        //     // DB::raw('COUNT(cargo_manifest_bags.sack_bag_id) - COUNT(DISTINCT cargo_manifest_bags.sack_bag_id) as re_used_sack_bag'),
-        // ])
-        // ->get();
 
         $sack_bag_utilization = IssueSackBagOrigin::join('cities as dc', 'dc.id', '=', 'issue_sack_bag_origins.sack_destination_id')
             ->join('cities as oc', 'oc.id', '=', 'issue_sack_bag_origins.origin')
+            ->leftJoin('cargo_manifest_bags', 'cargo_manifest_bags.sack_bag_id', 'issue_sack_bag_origins.id')
+            ->leftJoin('admins', 'admins.id', 'cargo_manifest_bags.created_by')
+            ->leftJoin('admins as receiver', 'receiver.id', 'cargo_manifest_bags.updated_by')
             ->whereNotNull('issue_sack_bag_origins.sack_destination_id')
-            ->select('dc.name as destination_name', 'dc.id as destination_id', 'oc.name as origin_name', 'oc.id as origin_id', 'issue_sack_bag_origins.bag_count', 'issue_sack_bag_origins.sack_bag_no', 'issue_sack_bag_origins.status')
+            ->select(
+                'dc.name as destination_name', 
+                'dc.id as destination_id', 
+                'oc.name as origin_name', 
+                'oc.id as origin_id', 
+                'issue_sack_bag_origins.bag_count', 
+                'issue_sack_bag_origins.sack_bag_no', 
+                'issue_sack_bag_origins.status',
+                'admins.name as bag_scanned_by',
+                'cargo_manifest_bags.created_at as bag_scanned_at',
+                'receiver.name as bag_received_by',
+                'cargo_manifest_bags.updated_at as bag_received_at',
+            )
             ->where('issue_sack_bag_origins.bag_count', '>', 0);
-
 
         if ($destination_id = $request->get('destination_id')) {
             $sack_bag_utilization->where('issue_sack_bag_origins.sack_destination_id', $destination_id);
         }
 
+        $datatable = Datatables::of($sack_bag_utilization)
+        ->editColumn('bag_scanned_by', function ($canvas_bag){
+            $bag_scanned_by = '-';
+            if ($canvas_bag->bag_scanned_by != null){
+                $bag_scanned_by = $canvas_bag->bag_scanned_by;
+            }
+            return $bag_scanned_by;
+        })
 
-        $datatable = Datatables::of($sack_bag_utilization);
-        // ->addColumn('stock_sack_bag_btn', function ($sack_bag_utilization) {
-        //     if ($sack_bag_utilization->stock_sack_bag > 0) {
-        //         return '<button class="btn btn-sm btn-outline-info align-middle stock_sack_bag_btn">'.$sack_bag_utilization->stock_sack_bag.'</button>';
-        //     } else {
-        //         return 0;
-        //     }
-        // });
-        // ->addColumn('sack_bag_count_btn', function ($sack_bag_utilization) {
-        //     if ($sack_bag_utilization->sack_bag_count > 0) {
-        //         return '<button class="btn btn-sm btn-outline-info align-middle sack_bag_count_btn">' . $sack_bag_utilization->sack_bag_count . '</button>';
-        //     } else {
-        //         return 0;
-        //     }
-        // });
-        // ->addColumn('re_used_sack_bag_btn', function ($sack_bag_utilization) {
-        //     if ($sack_bag_utilization->re_used_sack_bag > 0) {
-        //         return '<button class="btn btn-sm btn-outline-info align-middle re_used_sack_bag_btn">'.$sack_bag_utilization->re_used_sack_bag.'</button>';
-        //     } else {
-        //         return 0;
-        //     }
-        // });
+        ->editColumn('bag_scanned_at', function ($canvas_bag){
+            $bag_scanned_at = '-';
+            if ($canvas_bag->bag_scanned_at != null){
+                $bag_scanned_at = $canvas_bag->bag_scanned_at;
+            }
+            return $bag_scanned_at;
+        })
 
-        // if ($request->get('search_from') && $request->get('search_to')) {
-        //     $from = $request->get('search_from');
-        //     $to = $request->get('search_to');
-        //     $datatable->whereBetween('cargo_manifest_bags.created_at', [$from, $to]);
-        // }
+        ->editColumn('bag_scanned_at', function ($canvas_bag){
+            $bag_scanned_at = '-';
+            if ($canvas_bag->bag_scanned_at != null){
+                $bag_scanned_at = $canvas_bag->bag_scanned_at;
+            }
+            return $bag_scanned_at;
+        })
 
+        ->editColumn('bag_received_at', function ($canvas_bag) {
+            return $canvas_bag->bag_received_at != $canvas_bag->bag_scanned_at
+                ? $canvas_bag->bag_received_at
+                : '-';
+        })
+        ;
         return $datatable->make(true);
     }
 
@@ -15040,12 +15033,7 @@ class AdminReportsController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 744);
         }
-        $sack_bag_statuses = City::
-            // leftJoin('issue_sack_bag_origins as isu', function ($join) {
-            //     $join->on('cities.id', '=', 'isu.sack_destination_id')
-            //         ->where('isu.sack_status_id', '=', 1);
-            // })
-            leftJoin('issue_sack_bag_origins as cb', function ($join) {
+        $sack_bag_statuses = City::leftJoin('issue_sack_bag_origins as cb', function ($join) {
                 $join->on('cities.id', '=', 'cb.sack_destination_id')
                     ->where('cb.sack_status_id', '=', 2);
             })
@@ -15065,21 +15053,18 @@ class AdminReportsController extends Controller
             ->havingRaw('COUNT(cb.sack_bag_no) > 0 OR COUNT(tm.sack_bag_no) > 0 OR COUNT(br.sack_bag_no) > 0 OR COUNT(sdm.sack_bag_no) > 0')
             ->select(
                 'cities.name as destination_name',
-                // DB::raw('COUNT(isu.sack_bag_no) as isu'),
                 DB::raw('COUNT(DISTINCT cb.sack_bag_no) as cb'),
                 DB::raw('COUNT(DISTINCT tm.sack_bag_no) as tm'),
                 DB::raw('COUNT(DISTINCT br.sack_bag_no) as br'),
                 DB::raw('COUNT(DISTINCT sdm.sack_bag_no) as sdm')
             );
-
         if ($destination_id = $request->get('destination_id')) {
             $sack_bag_statuses->where('cities.id', $destination_id);
         }
         $datatable = Datatables::of($sack_bag_statuses)
-            ->addColumn('total_hand', function ($sack_bag_statuses) {
-                return ($sack_bag_statuses->br + $sack_bag_statuses->sdm);
-            });
-
+        ->addColumn('total_hand', function ($sack_bag_statuses) {
+            return ($sack_bag_statuses->br + $sack_bag_statuses->sdm);
+        });
 
         return $datatable->make(true);
     }

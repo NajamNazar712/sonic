@@ -4512,6 +4512,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('list', 'Admins\AdminCargoManifestController@sack_bag_list')->name('list');
         Route::post('store', 'Admins\AdminCargoManifestController@add_sack_bag')->name('store');
         Route::post('sack_bag_check', 'Admins\AdminCargoManifestController@sack_bag_no_check')->name('sack_bag_check');
+        Route::post('update_sack_bag_status', 'Admins\AdminCargoManifestController@update_sack_bag_status')->name('update_sack_bag_status');
     });
 
     //New Moudles Routes
