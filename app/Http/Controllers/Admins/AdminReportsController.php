@@ -3387,7 +3387,7 @@ class AdminReportsController extends Controller
     }
     public function overall_sales_list(Request $request)
     {
-        $connection = 'reports';
+        $connection = 'reports_2';
 
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 150);
@@ -3525,7 +3525,15 @@ class AdminReportsController extends Controller
 
             // ->leftJoin('sales_tiers as st', 'st.id', '=', 'scu.tier_id')
             ->leftJoin('sales_commissions as sc', 'sc.shipper_id', '=', 'u.id')
-            ->leftJoin('sales_commission_users as scu','scu.sales_commission_id', '=', 'sc.id')
+            ->leftjoin('sales_commission_users as scu', function($join){
+                $join->on('scu.sales_commission_id', '=','sc.id')
+                    ->where(
+                        'scu.id',
+                        '=',
+                        DB::raw('(select max(id) from sales_commission_users where sales_commission_users.tier_id = 3)')
+
+                    );
+            })
             ->leftJoin('admins as scun', 'scun.id', '=', 'scu.user_id')
             ->leftJoin('sale_tier_tags as st', 'st.user_id', '=', 'u.id')
             ->leftJoin('admins as rf', 'rf.id', '=', 'st.ref')
@@ -3534,7 +3542,7 @@ class AdminReportsController extends Controller
             'shipments.booking_type_id', 'usi.poc', 'adsp.id', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges', 'u.account_type_id as account_type_id', DB::raw('SUM(is.gst) as is_gst'), DB::raw('SUM(pis.gst) as pis_gst'), 'shipments.packaging_charges', 'dr.received_or_refused_by', 'shipments.special_instructions', 'shipments.intercept_charges', 'bc.name as business_shipment_type', 'ibs.international_tracking_number', 'usi.vendor', 'dr.shipper_status_id as dr_status_id', 'shipments.shipment_type', 'rc.name as return_city', 'dr.cnic as dr_cnic', 'dr.relation as dr_relation', 'shipments.consignee_address as consignee_address', 'scs.name as sub_segment', 'sjfa.created_at as first_attempt_date', 'spjpaid_date.created_at as paid_date', 'spjproceed_date.created_at as processed_date', 'si.quantity as item_quantity', 'shipments.pieces as pieces', 'scun.id as scun_id', 'rf.id as ref_id', 'rf.name as ref', 'och.name as origin_hub', 'shipments.tracking_number as tracking_number_excel', DB::raw('SUM(pps.sms_charges) as pps_sms_charges'), DB::raw('SUM(dps.sms_charges) as dps_sms_charges'), DB::raw('SUM(pis.sms_charges) as pis_sms_charges'), DB::raw('SUM(is.sms_charges) as is_sms_charges'), DB::raw('SUM(faf_charges.faf_charges) as faf_charges'), DB::raw('SUM(ss_charge.reverse_pickup_charges) as reverse_pickup_charges'), 'ibs.cost')
             ->whereNotIn('shipments.shipper_status_id', [1, 17])
             ->whereNotIn('u.id', [8761, 9358])
-//            ->whereBetween('sj.created_at', [$from, $to])
+            //    ->whereBetween('sj.created_at', [$from, $to])
             ->groupBy('shipments.id');
         $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
 
@@ -3604,7 +3612,7 @@ class AdminReportsController extends Controller
         if ($search_business_category = $request->get('search_business_category')) {
             $sales->where('shipments.business_category_id', '=', $search_business_category);
         }
-//        $sales->whereBetween('sj.created_at', [$from, $to]);
+        //    $sales->whereBetween('sj.created_at', [$from, $to]);
         if ($search_origin_hub = $request->get('search_origin_hub')) {
             $sales->where('och.id', '=', $search_origin_hub);
         }
@@ -5655,7 +5663,9 @@ class AdminReportsController extends Controller
                         ->where('is.type', '!=',2 );
                 })
                 ->leftjoin('shipment_additional_charges as faf_charges', 'faf_charges.shipment_id', '=', 'shipments.id')
-            ->leftJoin('invoices', 'is.invoice_id', '=', 'invoices.id');
+            ->leftJoin('invoices', 'is.invoice_id', '=', 'invoices.id')
+            ->leftjoin('provinces', 'provinces.id', 'dc.province_id')
+            ;
         //        if (!$request->get('search_date_from') && !$request->get('search_date_to')) {
         //            $now = Carbon::now();
         //            $yesterday = Carbon::now()->subDays(3);
@@ -5688,7 +5698,7 @@ class AdminReportsController extends Controller
             });
         }
 
-        $sales->select('shipments.id as shipment_id','shipments.tracking_number','shipments.fintech_charges as fintech_amount','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges',DB::raw('SUM(DISTINCT pps.charges) as p_total_charges'),DB::raw('SUM(DISTINCT pps.amount) as p_collection_amount'),DB::raw('SUM(DISTINCT pps.payable) as p_net_payable'),DB::raw('SUM(DISTINCT pps.gst) as p_gst'),DB::raw('SUM(DISTINCT dps.amount) as d_collection_amount'),DB::raw('SUM(DISTINCT dps.charges) as d_total_charges'),DB::raw('SUM(DISTINCT dps.payable) as d_net_payable'),DB::raw('SUM(DISTINCT dps.gst) as d_gst'),'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class','oc.id as origin_city_id','dc.id as destination_city_id','dnsdn.station_deposit_note_id as sdn_id','dps.done_payment_id as payment_id','shipments.booking_type_id','usi.poc','shipments.shipper_status_id as shipment_status','shipments.nsa_osa_charges','u.account_type_id as account_type_id',DB::raw('SUM(DISTINCT pis.gst) as pis_gst'),DB::raw('SUM(DISTINCT is.gst) as is_gst'),'shipments.packaging_charges','shipments.intercept_charges','bc.name','dr.shipper_status_id as dr_status_id','shipments.shipment_type','invoices.invoice_number','rc.name as return_city',DB::raw('SUM(DISTINCT ss_charge.reverse_pickup_charges) as reverse_pickup_charges'),DB::raw('SUM(DISTINCT pps.sms_charges) as pps_sms_charges'),DB::raw('SUM(DISTINCT dps.sms_charges) as dps_sms_charges'),DB::raw('SUM(DISTINCT pis.sms_charges) as pis_sms_charges'),DB::raw('SUM(DISTINCT is.sms_charges) as is_sms_charges'), 'faf_charges.faf_charges')
+        $sales->select('shipments.id as shipment_id','shipments.tracking_number','shipments.fintech_charges as fintech_amount','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges',DB::raw('SUM(DISTINCT pps.charges) as p_total_charges'),DB::raw('SUM(DISTINCT pps.amount) as p_collection_amount'),DB::raw('SUM(DISTINCT pps.payable) as p_net_payable'),DB::raw('SUM(DISTINCT pps.gst) as p_gst'),DB::raw('SUM(DISTINCT dps.amount) as d_collection_amount'),DB::raw('SUM(DISTINCT dps.charges) as d_total_charges'),DB::raw('SUM(DISTINCT dps.payable) as d_net_payable'),DB::raw('SUM(DISTINCT dps.gst) as d_gst'),'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class','oc.id as origin_city_id','dc.id as destination_city_id','dnsdn.station_deposit_note_id as sdn_id','dps.done_payment_id as payment_id','shipments.booking_type_id','usi.poc','shipments.shipper_status_id as shipment_status','shipments.nsa_osa_charges','u.account_type_id as account_type_id',DB::raw('SUM(DISTINCT pis.gst) as pis_gst'),DB::raw('SUM(DISTINCT is.gst) as is_gst'),'shipments.packaging_charges','shipments.intercept_charges','bc.name','dr.shipper_status_id as dr_status_id','shipments.shipment_type','invoices.invoice_number','rc.name as return_city',DB::raw('SUM(DISTINCT ss_charge.reverse_pickup_charges) as reverse_pickup_charges'),DB::raw('SUM(DISTINCT pps.sms_charges) as pps_sms_charges'),DB::raw('SUM(DISTINCT dps.sms_charges) as dps_sms_charges'),DB::raw('SUM(DISTINCT pis.sms_charges) as pis_sms_charges'),DB::raw('SUM(DISTINCT is.sms_charges) as is_sms_charges'), 'faf_charges.faf_charges', 'provinces.name as province_name')
             ->whereNotIn('shipments.shipper_status_id', [1, 17])
             ->whereNotIn('u.id', [8761, 9358]);
 
@@ -15274,6 +15284,7 @@ class AdminReportsController extends Controller
             'bt.booking_type as service_type',
             'sj.created_at as arrival',
             'oc.name as origin',
+            'och.name as origin_hub',
             'dc.name as destination',
             'h.name as hub',
             'ca.name as area',
@@ -15358,6 +15369,7 @@ class AdminReportsController extends Controller
             ->leftJoin('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->leftJoin('cities as och', 'oc.hub_id', 'och.id') // och for origin city hub
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->join('cities as h', 'dc.hub_id', '=', 'h.id')
             ->leftjoin('user_shipping_infos AS rsi', 'shipments.return_address_id', '=', 'rsi.id')
@@ -15724,16 +15736,16 @@ class AdminReportsController extends Controller
                 }
                 elseif(in_array($shipment->shipper_status_id ,[49, 3])){
                     if(in_array($shipment->cargo_status_id,[3,2,4, 7, 8, 9,6])){ //Shipment In Transit || Shipment Misrouted Forwarded concered hub change reference TO-6939
-                        return $shipment->destination;
+                        return $shipment->hub;
                     }
                 }elseif(in_array($shipment->shipper_status_id ,[26, 73,32, 70, 76])){
                     if(in_array($shipment->cargo_status_id,[4, 7, 8, 9,6])){ //Shipment In Transit || Shipment Misrouted Forwarded concered hub change reference TO-6939
-                        return $shipment->origin;
+                        return $shipment->origin_hub;
                     }
                 }elseif(in_array($shipment->shipper_status_id,[18, 34, 23,24, 47, 48,2])){
-                    return $shipment->origin;
+                    return $shipment->origin_hub;
                 }elseif(in_array($shipment->shipper_status_id,[54,55, 69,7, 4,8])){
-                    return (($shipment->intercepttype == 1) ?  $shipment->intercept_city_name : $shipment->destination);
+                    return (($shipment->intercepttype == 1) ?  $shipment->intercept_city_name : $shipment->hub);
                 }elseif(in_array($shipment->shipper_status_id,[22, 21,75])){
                     if($shipment->return_city != null){
                         return $shipment->return_city;
@@ -15743,7 +15755,7 @@ class AdminReportsController extends Controller
                     return $shipment->current_hub_name;
                 } else {
                     if (in_array($shipment->shipper_status_id, [1, 2, 61])) {
-                        return $shipment->origin;
+                        return $shipment->origin_hub;
                     } else {
                         return $shipment->hub;
                     }
@@ -15929,15 +15941,15 @@ class AdminReportsController extends Controller
                     $rowArray['current_hub_name'] = $rowArray['misroutedCityname'];
                 } elseif (in_array($rowArray['shipper_status_id'], [49, 3]) && (in_array($rowArray['cargo_status_id'], [3, 2, 4, 7, 8, 9, 6]))) {
                       //Shipment In Transit || Shipment Misrouted Forwarded concered hub change reference TO-6939
-                        $rowArray['current_hub_name'] = $rowArray['destination'];
+                        $rowArray['current_hub_name'] = $rowArray['hub'];
                     
                 } elseif (in_array($rowArray['shipper_status_id'], [26, 73, 32, 70, 76]) && in_array($rowArray['cargo_status_id'], [4, 7, 8, 9, 6])) {
                      //Shipment In Transit || Shipment Misrouted Forwarded concered hub change reference TO-6939
-                        $rowArray['current_hub_name'] = $rowArray['origin'];
+                        $rowArray['current_hub_name'] = $rowArray['origin_hub'];
                 } elseif (in_array($rowArray['shipper_status_id'], [18, 34, 23, 24, 47, 48, 2])) {
-                    $rowArray['current_hub_name'] = $rowArray['origin'];
+                    $rowArray['current_hub_name'] = $rowArray['origin_hub'];
                 } elseif (in_array($rowArray['shipper_status_id'], [54, 55, 69, 7, 4, 8])) {
-                    $rowArray['current_hub_name'] = (($rowArray['intercepttype'] == 1) ?  $rowArray['intercept_city_name'] : $rowArray['destination']);
+                    $rowArray['current_hub_name'] = (($rowArray['intercepttype'] == 1) ?  $rowArray['intercept_city_name'] : $rowArray['hub']);
                 } elseif (in_array($rowArray['shipper_status_id'], [22, 21, 75]) && $rowArray['return_city'] != null) {
                     $rowArray['current_hub_name'] = $rowArray['return_city'];
                 }
@@ -15946,7 +15958,7 @@ class AdminReportsController extends Controller
                         $rowArray['current_hub_name'] = $rowArray['current_hub_name'];
                     }else{
                         if (in_array($rowArray['shipper_status_id'], [1, 2, 61])) {
-                            $rowArray['current_hub_name'] = $rowArray['origin'];
+                            $rowArray['current_hub_name'] = $rowArray['origin_hub'];
                         } else {
                             $rowArray['current_hub_name'] = $rowArray['hub'];
                         }

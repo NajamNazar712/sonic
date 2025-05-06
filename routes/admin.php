@@ -2626,7 +2626,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             // Route::post('udpate', 'Admins\GlobalSettingsController@delivery_revert_access_update')->name('update');
         });
 
-
         Route::prefix('delivery_revert_access')->name('delivery_revert_access.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@delivery_revert_access_index')->name('index');
             Route::post('store', 'Admins\GlobalSettingsController@delivery_revert_access_store')->name('store');
@@ -3040,7 +3039,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('get_sub_segments', 'Admins\GlobalSettingsController@get_sub_segments')->name('get_sub_segments');
             Route::post('get_origin_areas','Admins\GlobalSettingsController@get_origin_areas')->name('get_origin_areas');
             Route::post('get_origin_hub','Admins\GlobalSettingsController@get_origin_hub')->name('get_origin_hub');
-            Route::get('get_shipper_key', 'Admins\GlobalSettingsController@get_shipper_key')->name('get_shipper_key');
+            Route::get('get_shipper_key/{agent_id}', 'Admins\GlobalSettingsController@get_shipper_key')->name('get_shipper_key');
             Route::get('get_shipper_non_key', 'Admins\GlobalSettingsController@get_shipper_non_key')->name('get_shipper_non_key');
 
         });
@@ -3579,6 +3578,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@faf_charges_store')->name('store');
         });
 
+        // Route::prefix('reports/email_delivery_time')->name('reports.email_delivery_time.')->group(function () {
+        //     Route::get('', 'Admins\GlobalSettingsController@email_delivery_time_index')->name('index');
+        //     Route::post('', 'Admins\GlobalSettingsController@email_delivery_time_update')->name('update');
+        // });
+        Route::prefix('email_delivery_time')->name('email_delivery_time.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@email_delivery_time_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@email_delivery_time_update')->name('update');
+        });
 
     });
 
