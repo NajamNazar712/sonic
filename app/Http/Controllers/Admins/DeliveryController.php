@@ -128,7 +128,7 @@ use App\Http\Traits\CommonTrait;
 use App\Jobs\ProcessRvShipmentTicket;
 use App\RvShipmentTicket;
 use GuzzleHttp\Client;
-use App\HTTP\Models\Admin\NonCodShipmentLog;
+use App\Http\Models\Admin\NonCodShipmentLog;
 
 class DeliveryController extends Controller
 {
