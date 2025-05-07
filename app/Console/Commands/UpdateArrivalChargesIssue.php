@@ -99,11 +99,11 @@ class UpdateArrivalChargesIssue extends Command
                 } else {
                     $new_gst = ROUND(($new_weight_charges * AdminFinanceController::international_gst()), 2, PHP_ROUND_HALF_DOWN);
                 }
-                $payable = $new_weight_charges + $new_gst;
+                $payable = 0 - ($new_weight_charges + $new_gst);
                 $pending_payment_id[$value->pending_payment_id] = $value->pending_payment_id;
 
 
-                if (!empty($payable) && !empty($value->pending_payment_shipment_id)) {
+                if (!empty($value->pending_payment_shipment_id)) {
                     PendingPaymentShipment::where('id', $value->pending_payment_shipment_id)->update(['charges' => $new_weight_charges, 'gst' => $new_gst, 'payable' => $payable]);
                 }
             }
