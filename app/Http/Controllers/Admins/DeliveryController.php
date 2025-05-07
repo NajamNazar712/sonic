@@ -128,7 +128,7 @@ use App\Http\Traits\CommonTrait;
 use App\Jobs\ProcessRvShipmentTicket;
 use App\RvShipmentTicket;
 use GuzzleHttp\Client;
-use App\HTTP\Models\Admin\NonCodShipmentLogs;
+use App\HTTP\Models\Admin\NonCodShipmentLog;
 
 class DeliveryController extends Controller
 {
@@ -10236,7 +10236,7 @@ class DeliveryController extends Controller
         // Make logs for who scanned cn numbers
         foreach ($otpRecords as $record) {
             if (!empty($record->dbf_otp)) {
-                NonCodShipmentLogs::create([
+                NonCodShipmentLog::create([
                     'tracking_number' => trim($record->tracking_number),
                     'trax_id' => $user->trax_id,
                     'employee_name' => $user->name,
@@ -10466,7 +10466,7 @@ class DeliveryController extends Controller
 
     public function shipment_otp_scanning_history_list(Request $request)
     {
-        $logs = NonCodShipmentLogs::whereNotNull('shipment_otp')->orderby('id', 'desc');
+        $logs = NonCodShipmentLog::whereNotNull('shipment_otp')->orderby('id', 'desc');
 
         // Check if there are search values and apply them
         foreach ($request->get('columns') as $column) {
