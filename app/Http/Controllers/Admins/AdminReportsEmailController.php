@@ -3298,6 +3298,10 @@ class AdminReportsEmailController extends Controller
             })
             ->whereNotIn('shipments.shipper_status_id', [1, 14, 17, 25, 31, 36, 38])
             ->whereNotNull('shipments.tracking_number')
+            ->where(function ($query) {
+                $query->whereNull('cr.status_id')
+                      ->orWhere('cr.status_id', '!=', 4);
+            })
             ->select($select)
             ->groupBy('shipments.id')
         ->get();
