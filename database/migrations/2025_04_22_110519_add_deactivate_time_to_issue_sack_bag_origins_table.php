@@ -14,9 +14,9 @@ return new class extends Migration
     public function up()
     {
         Schema::table('issue_sack_bag_origins', function (Blueprint $table) {
-            $table->timestamp('inactive_at')->nullable()->after('updated_at');
-            $table->integer('inactive_by')->nullable()->after('inactive_at');
-            $table->integer('active_by')->nullable()->after('inactive_by');
+            $table->timestamp('inactive_at')->nullable()->after('updated_at')->index();
+            $table->integer('inactive_by')->nullable()->after('inactive_at')->index();
+            $table->integer('active_by')->nullable()->after('inactive_by')->index();
         });
     }
 
