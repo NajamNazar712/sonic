@@ -488,30 +488,67 @@ class RetailAdminUserManagementController extends Controller
 
             $franchise->save();
 
-            $retail_franchise_product_percentage = RetailFranchiseProductPercentage::where('franchise_id', $franchise->id)->get();
-            if ($retail_franchise_product_percentage->isNotEmpty()) {
-                RetailFranchiseProductPercentage::where('franchise_id', $franchise->id)->delete();
-            }
-            $new_retail_shipping_mode_names = json_decode($request->input('retail_shipping_mode_id'));
-            $new_product_percentages = json_decode($request->input('product_percentage'));
+            $existingPercentages = RetailFranchiseProductPercentage::where('franchise_id', $franchise->id)->get()->keyBy('retail_shipping_mode_id');
 
-            $new_retail_shipping_mode_ids = [];
-            foreach ($new_retail_shipping_mode_names as $name) {
-                $retailShippingMode = RetailShippingMode::where('name', $name)->first();
-                if ($retailShippingMode) {
-                    $new_retail_shipping_mode_ids[] = $retailShippingMode->id;
+            $new_names = json_decode($request->input('retail_shipping_mode_id'));
+            $new_percentages = json_decode($request->input('product_percentage'));
+            
+            $new_ids = [];
+            foreach ($new_names as $name) {
+                $mode = RetailShippingMode::where('name', $name)->first();
+                if ($mode) {
+                    $new_ids[] = $mode->id;
+                }
+            }
+            
+            foreach ($existingPercentages as $old_id => $old) {
+                $modeName = RetailShippingMode::find($old_id)->name;
+                
+                if (!in_array($old_id, $new_ids)) {
+                    $changedFields[] = "{$modeName}: {$old->product_percentage}% -> removed";
+                } else {                    
+                    $index = array_search($old_id, $new_ids);
+                    $new_percentage = $new_percentages[$index];
+                    if ($old->product_percentage != $new_percentage) {
+                        $changedFields[] = "{$modeName}: {$old->product_percentage}% -> {$new_percentage}%";
+                    }
                 }
             }
 
-            // Insert or update data
-            foreach ($new_retail_shipping_mode_ids as $key => $retail_shipping_mode_id) {
-                $retail_franchise_product_percentage = new RetailFranchiseProductPercentage();
-                $retail_franchise_product_percentage->franchise_id = $franchise->id;
-                $retail_franchise_product_percentage->retail_shipping_mode_id = $retail_shipping_mode_id;
-                $retail_franchise_product_percentage->product_percentage = $new_product_percentages[$key];
-                $retail_franchise_product_percentage->updated_by = $admin->id;
-                $retail_franchise_product_percentage->save();
+            RetailFranchiseProductPercentage::where('franchise_id', $franchise->id)->delete();
+
+            foreach ($new_ids as $key => $id) {
+                RetailFranchiseProductPercentage::create([
+                    'franchise_id' => $franchise->id,
+                    'retail_shipping_mode_id' => $id,
+                    'product_percentage' => $new_percentages[$key],
+                    'updated_by' => $admin->id,
+                ]);
             }
+            // $retail_franchise_product_percentage = RetailFranchiseProductPercentage::where('franchise_id', $franchise->id)->get();
+            // if ($retail_franchise_product_percentage->isNotEmpty()) {
+            //     RetailFranchiseProductPercentage::where('franchise_id', $franchise->id)->delete();
+            // }
+            // $new_retail_shipping_mode_names = json_decode($request->input('retail_shipping_mode_id'));
+            // $new_product_percentages = json_decode($request->input('product_percentage'));
+
+            // $new_retail_shipping_mode_ids = [];
+            // foreach ($new_retail_shipping_mode_names as $name) {
+            //     $retailShippingMode = RetailShippingMode::where('name', $name)->first();
+            //     if ($retailShippingMode) {
+            //         $new_retail_shipping_mode_ids[] = $retailShippingMode->id;
+            //     }
+            // }
+
+            // // Insert or update data
+            // foreach ($new_retail_shipping_mode_ids as $key => $retail_shipping_mode_id) {
+            //     $retail_franchise_product_percentage = new RetailFranchiseProductPercentage();
+            //     $retail_franchise_product_percentage->franchise_id = $franchise->id;
+            //     $retail_franchise_product_percentage->retail_shipping_mode_id = $retail_shipping_mode_id;
+            //     $retail_franchise_product_percentage->product_percentage = $new_product_percentages[$key];
+            //     $retail_franchise_product_percentage->updated_by = $admin->id;
+            //     $retail_franchise_product_percentage->save();
+            // }
 
             //areeb old code
             // $franchise_retail_product_charges = RetailFranchiseCharge::where('franchise_id', $franchise->id)->first();
