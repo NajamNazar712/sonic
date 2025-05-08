@@ -129,6 +129,7 @@ class ProcessRvShipmentTicket implements ShouldQueue
             if($isBot || $shipment_status == 65)
             {
                 $adminId = 4620;
+                $shipmentJourneyId = ShipmentsJourney::where('shipment_id', $this->shipment['shipment_id'])->latest()->select('id')->first();
 
                 $data = [
                     'agent_id' => $adminId, // testing purpose
