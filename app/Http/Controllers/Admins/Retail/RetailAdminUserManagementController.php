@@ -242,6 +242,16 @@ class RetailAdminUserManagementController extends Controller
                                 </div>
                             </a>
                             ';
+                            $dropdown  .= '<button type="button" class="dropdown-item view_logs">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col-2">
+                                    <i class="ft-edit"></i>
+                                </div>
+                                <div class="col-9 offset-1">
+                                    View Logs
+                                </div>
+                            </div>
+                        </button>';
             
                     $dropdown .= '</div></div>';
                     
@@ -453,6 +463,29 @@ class RetailAdminUserManagementController extends Controller
             $franchise->discount = $request->discount;
             $franchise->insurance = $request->edit_insurance;
             $franchise->updated_by = Auth::id();
+            
+
+            $changedFields = [];
+            $fieldNames = [
+              'cnic' => 'CNIC Status',
+              'name' => 'Name',
+              'phone_no' => 'Phone no',
+              'cnic' => 'CNIC',
+              'email' => 'Email',
+              'location_latitude' => 'Location Latitude',
+              'location_longitude' => 'Location Longitude',
+              'discount' => 'Discount',
+              'insurance' => 'Insurance'
+            ];
+    
+            foreach ($fieldNames as $field => $fieldName) {
+                $originalValue = trim($franchise->getOriginal($field));
+                $currentValue = trim($franchise->$field);
+                if ($franchise->isDirty($field) && $originalValue !== $currentValue) {
+                    $changedFields[] = $fieldName . ': ' . $originalValue . ' -> ' . $currentValue;
+                }
+            }
+
             $franchise->save();
 
             $retail_franchise_product_percentage = RetailFranchiseProductPercentage::where('franchise_id', $franchise->id)->get();
@@ -480,23 +513,76 @@ class RetailAdminUserManagementController extends Controller
                 $retail_franchise_product_percentage->save();
             }
 
+            //areeb old code
+            // $franchise_retail_product_charges = RetailFranchiseCharge::where('franchise_id', $franchise->id)->first();
+            // if ($franchise_retail_product_charges != null){
+            //     $franchise_retail_product_charges->delete();
+            //     $new_charges = new RetailFranchiseCharge();
+            //     $new_charges->franchise_id = $franchise->id;
+            //     $new_charges->franchise_gst = $request->franchise_gst;
+            //     $new_charges->franchise_withholding = $request->franchise_withholding;
+            //     $new_charges->franchise_deduction = $request->franchise_deduction;
+            //     $new_charges->security_deposit = $request->security_deposit;
+            //     $new_charges->license_fees = $request->license_fees;
+            //     $new_charges->bank_id = $request->bank_id;
+            //     $bank_name = BanksList::where('id', $request->bank_id)->first()->name;
+            //     $new_charges->bank_name = $bank_name;
+            //     $new_charges->security_cheque_number = $request->security_cheque_number;
+            //     $new_charges->license_cheque_number = $request->license_cheque_number;
+            //     $new_charges->save();
+            // } else {
+            //     $new_charges = new RetailFranchiseCharge();
+            //     $new_charges->franchise_id = $franchise->id;
+            //     $new_charges->franchise_gst = $request->franchise_gst;
+            //     $new_charges->franchise_withholding = $request->franchise_withholding;
+            //     $new_charges->franchise_deduction = $request->franchise_deduction;
+            //     $new_charges->security_deposit = $request->security_deposit;
+            //     $new_charges->license_fees = $request->license_fees;
+            //     $new_charges->bank_id = $request->bank_id;
+            //     $bank_name = BanksList::where('id', $request->bank_id)->first()->name;
+            //     $new_charges->bank_name = $bank_name;
+            //     $new_charges->security_cheque_number = $request->security_cheque_number;
+            //     $new_charges->license_cheque_number = $request->license_cheque_number;
+            //     $new_charges->save();
+            // }
+
             $franchise_retail_product_charges = RetailFranchiseCharge::where('franchise_id', $franchise->id)->first();
-            if ($franchise_retail_product_charges != null){
-                $franchise_retail_product_charges->delete();
-                $new_charges = new RetailFranchiseCharge();
-                $new_charges->franchise_id = $franchise->id;
-                $new_charges->franchise_gst = $request->franchise_gst;
-                $new_charges->franchise_withholding = $request->franchise_withholding;
-                $new_charges->franchise_deduction = $request->franchise_deduction;
-                $new_charges->security_deposit = $request->security_deposit;
-                $new_charges->license_fees = $request->license_fees;
-                $new_charges->bank_id = $request->bank_id;
-                $bank_name = BanksList::where('id', $request->bank_id)->first()->name;
-                $new_charges->bank_name = $bank_name;
-                $new_charges->security_cheque_number = $request->security_cheque_number;
-                $new_charges->license_cheque_number = $request->license_cheque_number;
-                $new_charges->save();
+
+            if ($franchise_retail_product_charges) {
+                // Update existing record
+                $franchise_retail_product_charges->franchise_id = $franchise->id;
+                $franchise_retail_product_charges->franchise_gst = $request->franchise_gst;
+                $franchise_retail_product_charges->franchise_withholding = $request->franchise_withholding;
+                $franchise_retail_product_charges->franchise_deduction = $request->franchise_deduction;
+                $franchise_retail_product_charges->security_deposit = $request->security_deposit;
+                $franchise_retail_product_charges->license_fees = $request->license_fees;
+                $franchise_retail_product_charges->bank_id = $request->bank_id;
+                $bank = BanksList::find($request->bank_id);
+                $franchise_retail_product_charges->bank_name = $bank ? $bank->name : null;
+                $franchise_retail_product_charges->security_cheque_number = $request->security_cheque_number;
+                $franchise_retail_product_charges->license_cheque_number = $request->license_cheque_number;
+                
+                $fieldNames = [
+                    'franchise_gst' => 'Franchise GST',
+                    'franchise_withholding' => 'Franchise Withholding',
+                    'franchise_deduction' => 'Franchise Deduction',
+                    'security_deposit' => 'Security Deposit',
+                    'license_fees' => 'License Fees',
+                    'bank_name' => 'Bank',
+                    'security_cheque_number' => 'Security Cheque No',
+                    'license_cheque_number' => 'License Cheque No'
+                ];
+
+                foreach ($fieldNames as $field => $fieldName) {
+                    $originalValue = trim($franchise_retail_product_charges->getOriginal($field));
+                    $currentValue = trim($franchise_retail_product_charges->$field);
+                    if ($franchise_retail_product_charges->isDirty($field) && $originalValue !== $currentValue) {
+                        $changedFields[] = $fieldName . ': ' . $originalValue . ' -> ' . $currentValue;
+                    }
+                }
+                $franchise_retail_product_charges->save();
             } else {
+                // Create new record
                 $new_charges = new RetailFranchiseCharge();
                 $new_charges->franchise_id = $franchise->id;
                 $new_charges->franchise_gst = $request->franchise_gst;
@@ -505,8 +591,8 @@ class RetailAdminUserManagementController extends Controller
                 $new_charges->security_deposit = $request->security_deposit;
                 $new_charges->license_fees = $request->license_fees;
                 $new_charges->bank_id = $request->bank_id;
-                $bank_name = BanksList::where('id', $request->bank_id)->first()->name;
-                $new_charges->bank_name = $bank_name;
+                $bank = BanksList::find($request->bank_id);
+                $new_charges->bank_name = $bank ? $bank->name : null;
                 $new_charges->security_cheque_number = $request->security_cheque_number;
                 $new_charges->license_cheque_number = $request->license_cheque_number;
                 $new_charges->save();
@@ -550,6 +636,14 @@ class RetailAdminUserManagementController extends Controller
             }
             $franchise_retail_product_attachment_edit->updated_by = $admin->id;
             $franchise_retail_product_attachment_edit->save();
+            if(!empty($changedFields)) {
+                $record = new RetailLog;
+                $record->changed_by_id = auth()->user()->id;
+                $record->data = implode(', ', $changedFields);
+                $record->changed_in_record_id = $franchise->id;
+                $record->screen_name = 'Retail Franchise';
+                $record->save();
+            }
             return redirect()->back()->with('success', 'Franchise Updated Successfully!');
         } else {
             return redirect()->back()->with('error', 'Name must be unique!');
@@ -1998,13 +2092,14 @@ class RetailAdminUserManagementController extends Controller
             $new_attachments->updated_by = $admin->id;
             $new_attachments->save();
         }
-
-        $record = new RetailLog;
-        $record->changed_by_id = auth()->user()->id;
-        $record->data = implode(', ', $changedFields);
-        $record->changed_in_record_id = $retail_user->id;
-        $record->screen_name = 'Retail User';
-        $record->save();
+        if(!empty($changedFields)) {
+            $record = new RetailLog;
+            $record->changed_by_id = auth()->user()->id;
+            $record->data = implode(', ', $changedFields);
+            $record->changed_in_record_id = $retail_user->id;
+            $record->screen_name = 'Retail User';
+            $record->save();
+        }
         
         return redirect()->back()->with('success', 'Retail User Updated Successfully!');
     }
