@@ -126,8 +126,7 @@ trait FinSurgentLogTrait
             } else {
                 $gst = ROUND(($charges * AdminFinanceController::international_gst()), 2, PHP_ROUND_HALF_DOWN);
             }
-
-            $payable = $charges + $gst;
+            $payable = 0 - ($charges + $gst);
             $pending_payment_id = $pending_payment_shipment->pending_payment_id;
             if (!empty($payable)) {
                 PendingPaymentShipment::where('id', $pending_payment_shipment->id)->update(['charges' => $charges, 'gst' => $gst, 'payable' => $payable]);
