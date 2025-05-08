@@ -4329,7 +4329,7 @@ class AdminReportsEmailController extends Controller
             
             foreach ($deliveries as $delivery) {
                 $serial++;
-                $rider_trax_id = str_replace('Trax', '', $delivery->rider_trax_id);
+                $rider_trax_id = $delivery->rider_trax_id;
 
                 if ($delivery->status == 0) {
                     if ($delivery->pending_status == 0) {
