@@ -2610,17 +2610,8 @@ class DeliveryController extends Controller
                             $remarks = null;
                             if ($request->status_drop[$shipment] == 12) {
                                
-                                $journey = ShipmentsJourney::where('shipment_id',$shipment)->whereIn('status_reason_id',[27,35])->count();
+                                // $journey = ShipmentsJourney::where('shipment_id',$shipment)->whereIn('status_reason_id',[27,35])->count();
                                 
-                                if(in_array($request->reason_drop[$shipment],[27,35]) && $journey > 0){
-                                    $request->merge([
-                                        'shipment_id' => $shipment,
-                                        'remarks' => null,
-                                        'rv_assign_agent_sub_status_id' => null
-                                    ]);
-                                    $this->return_confirm($request,346);
-                                    return redirect()->back()->with('success', 'Statuses updated successfully!');
-                                }
                                 if(in_array($request->reason_drop[$shipment],[12,34])){
                                     $remarks = $this->remarksNSAOSAJourneyRVR($delivery_note_id,$shipment_details->user_id);
                                 }
@@ -3966,23 +3957,29 @@ class DeliveryController extends Controller
                         // 35 = Delivery Stopped
                         if ($shipper_status_id == 12 && in_array($status_reason_id, [27, 35]) && $verification) {
                             $globalAdminId = 346;
+                            $journey = ShipmentsJourney::where('shipment_id', $shipment_details->id)->whereIn('status_reason_id', [27, 35])->count();
+                            if($journey > 0){
+                                Shipment::where('id', $shipment)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
+                                if ($shipment_details->shipment_type == 1) {
+                                    if ($shipment_details->booking_type_id != 4) {
+                                        ShipmentChargesController::return($shipment);
+                                        if ($shipment_details->packaging_material_request != 1) {
+                                            AdminFinanceController::add_payment($shipment, 1);
+                                        }
+                                    } else {
+                                        ShipmentChargesController::walk_in_return($shipment);
+                                        $shipment_details->walk_in_status = 2;
+                                        $shipment_details->save();
+                                        AdminFinanceController::done_payment($shipment, 1);
+                                    }
+                                }
+                                ShipmentsJourneyController::add($shipment, 20, 20, $status_reason_id, $shipment_journey_remarks, NULL, $globalAdminId, null, null, 1, null, null, null, null, null);
+                                
+                            }else{
+                                Shipment::where('id', $shipment)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);
+                                ShipmentsJourneyController::add($shipment, 65, 65, $status_reason_id, $shipment_journey_remarks, NULL, $globalAdminId, null, null, 1, null, null, null, null, null);
+                            }
 
-                            Shipment::where('id', $shipment)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);
-
-                            // if ($shipment_details->shipment_type == 1) {
-                            //     if ($shipment_details->booking_type_id != 4) {
-                            //         ShipmentChargesController::return($shipment);
-                            //         if ($shipment_details->packaging_material_request != 1) {
-                            //             AdminFinanceController::add_payment($shipment, 1);
-                            //         }
-                            //     } else {
-                            //         ShipmentChargesController::walk_in_return($shipment);
-                            //         $shipment_details->walk_in_status = 2;
-                            //         $shipment_details->save();
-                            //         AdminFinanceController::done_payment($shipment, 1);
-                            //     }
-                            // }
-                            ShipmentsJourneyController::add($shipment, 65, 65, $status_reason_id, $shipment_journey_remarks, NULL, $globalAdminId, null, null, 1, null, null, null, null, null);
 
                             //Remove Shipment from RV Shipment Ticket
                             RvShipmentTicket::where('shipment_id', $shipment)->delete();
