@@ -3296,7 +3296,7 @@ class AdminReportsEmailController extends Controller
                         })
                 ->where('destination_sj.id', '=', DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id in (4, 2))'));
             })
-            ->whereNotIn('shipments.shipper_status_id', [1, 14, 17, 25, 31, 36, ,51])
+            ->whereNotIn('shipments.shipper_status_id', [1, 14, 17, 25, 31, 36,51])
             ->whereNotNull('shipments.tracking_number')
             // ->where(function ($query) {
             //     $query->whereNull('cr.status_id')
