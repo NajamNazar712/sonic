@@ -521,7 +521,9 @@ class ShipperFinanceController extends Controller
 
         foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
             $shipment = $done_payment_shipment->shipment;
-
+            if (!isset($shipment->id)) {
+                $shipment = $done_payment_shipment->shipment_archive;
+            }
 
             $done_fintech_charges = $this->calculate_fintech_charges($done_payment_shipment->shipment_id);
             $total_fintech_charges = $total_fintech_charges + $done_fintech_charges;
@@ -880,6 +882,9 @@ class ShipperFinanceController extends Controller
             $total_wallet_charges = 0;
             foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
                 $shipment = $done_payment_shipment->shipment;
+                if (!isset($shipment->id)) {
+                    $shipment = $done_payment_shipment->shipment_archive;
+                }
                 $service_charges = ShipmentServicesCharges::where('shipment_id', $shipment->id);
                 if ($service_charges->exists()) {
                     $service_charges = $service_charges->first();

@@ -14,7 +14,6 @@
                 @include('admin.inc.messages')
 
                 <div id="search_form" class="row mb-2 justify-content-center">
-                    {{-- <div class="col-4"></div> --}}
                     <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_origin" id="search_origin" class="form-control select2">
@@ -24,27 +23,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    {{-- <div class="col-4"></div> --}}
-                    {{-- <div class="col-4">
-                        <div class="form-group input-group">
-                            <div class="input-group-prepend">
-                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
-                            </span>
-                            </div>
-                            <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="{{ Carbon\Carbon::now() }}">
-                        </div>
-                    </div>
-                    <div class="col-4">
-                        <div class="form-group input-group">
-                            <div class="input-group-prepend">
-                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
-                            </span>
-                            </div>
-                            <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="{{ Carbon\Carbon::now() }}">
-                        </div>
-                    </div> --}}
+
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                     </div>
@@ -56,17 +35,13 @@
                             <th class="border-primary border-darken-1">S. No.</th>
                             <th class="border-primary border-darken-1">Canvas Bag No#</th>
                             <th class="border-primary border-darken-1">Issue Origin</th>
+                            <th class="border-primary border-darken-1">Scan By (User)</th>
+                            <th class="border-primary border-darken-1">Date Time</th>
                             <th class="border-primary border-darken-1">Last Destination</th>
-                            {{-- <th class="border-primary border-darken-1">Address</th> --}}
+                            <th class="border-primary border-darken-1">Scan By (User)</th>
+                            <th class="border-primary border-darken-1">Date Time</th>
                             <th class="border-primary border-darken-1">Canvas Bag Count</th>
                             <th class="border-primary border-darken-1">Status</th>
-
-                            {{-- <th class="border-primary border-darken-1">Re-used Sack Bag</th> --}}
-                            {{-- <th class="border-primary border-darken-1">Rider Picked</th>
-                            <th class="border-primary border-darken-1">No. of Arrived Shipments</th>
-                            <th class="border-primary border-darken-1">Balance Shipments</th> --}}
-                              {{-- <th class="border-primary border-darken-1">Rider</th> --}}
-
                         </tr>
                         </thead>
                     </table>
@@ -90,17 +65,14 @@
             <div class="modal-body">
                 <div class="container">
                     <table class="table table-bordered " id="stock_sack_bag_datatable">
-                            <thead>
-                                    <tr role="row" class="bg-primary white">
-                                        <th class="border-primary border-darken-1">S. No.</th>
-                                        <th class="border-primary border-darken-1">Canvas Bag No#</th>
-                                    </tr>
-                            </thead>
-                            <tbody>
-
-                            </tbody>
-
-                        </table>
+                        <thead>
+                                <tr role="row" class="bg-primary white">
+                                    <th class="border-primary border-darken-1">S. No.</th>
+                                    <th class="border-primary border-darken-1">Canvas Bag No#</th>
+                                </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -122,17 +94,14 @@
             <div class="modal-body">
                 <div class="container">
                     <table class="table table-bordered " id="stock_sack_bag_datatable">
-                            <thead>
-                                    <tr role="row" class="bg-primary white">
-                                        <th class="border-primary border-darken-1">S. No.</th>
-                                        <th class="border-primary border-darken-1">Canvas Bag No#</th>
-                                    </tr>
-                            </thead>
-                            <tbody>
-
-                            </tbody>
-
-                        </table>
+                        <thead>
+                                <tr role="row" class="bg-primary white">
+                                    <th class="border-primary border-darken-1">S. No.</th>
+                                    <th class="border-primary border-darken-1">Canvas Bag No#</th>
+                                </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -209,11 +178,6 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            // $('#datatable_wrapper').hide();
-            
-            
-
-            
             $('#search_origin').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Destination',
                 width:'100%',
@@ -221,7 +185,6 @@
             });
 
             var max = '{{ Carbon\Carbon::now() }}';
-
             var from_date = $('#from_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
@@ -259,21 +222,10 @@
                 }
             });
 
-            // $('#datatable').append("<tfoot><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tfoot>");
-           
             var table = $('#datatable').DataTable({
                     dom: '<"d-inline-block"l><"pull-right"B>tipr',
                     scrollX: true, scrollY: '500px',
-                    // deferLoading:0,
                     buttons: [
-                        // {
-                        //     extend: 'excelHtml5',
-                        //     title: 'Shipment Report',   
-                        //     className: 'btn btn-primary excel',
-                        //     text:'<i class="la la-file-excel-o"></i> Excel',
-                        //     footer: true
-                        // },
-
                         {
                             extend: 'excelHtml5',
                             title: 'Shipment Report',
@@ -319,7 +271,11 @@
                         {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                         { data:'sack_bag_no',class: 'align-middle text-center sack_bag_no', orderable: false, searchable: false},
                         { data:'origin_name',class: 'align-middle text-center origin_name', orderable: false, searchable: false},
+                        { data:'bag_scanned_by',class: 'align-middle text-center bag_scanned_by', orderable: false, searchable: false},
+                        { data:'bag_scanned_at',class: 'align-middle text-center bag_scanned_at', orderable: false, searchable: false},
                         { data:'destination_name',class: 'align-middle text-center destination_name', orderable: false, searchable: false},
+                        { data:'bag_received_by',class: 'align-middle text-center bag_received_by', orderable: false, searchable: false},
+                        { data:'bag_received_at',class: 'align-middle text-center bag_received_at', orderable: false, searchable: false},
                         { data:'bag_count',class: 'align-middle text-center bag_count', orderable: false, searchable: false},
                         { data:'status',class: 'align-middle text-center status', orderable: false, searchable: false,render:function(data,type,row){
                             if(row.status==1)
@@ -329,10 +285,6 @@
                                 return 'Inactive';
                             }
                         }},
-
-                        // { data:'re_used_sack_bag_btn',class: 'align-middle text-center re_used_sack_bag', orderable: false, searchable: false}
-                        // { data:'total_sack_bag',class: 'align-middle text-center total_sack_bag', orderable: false, searchable: false},
-        
                     ],
                     rowCallback: function(row, data, index) {
                         var info = table.page.info();
@@ -341,7 +293,6 @@
                     initComplete: function() {
                         this.api().table().columns.adjust();
                     },
-               
                 });
             $('#search_filter_btn').on('click',function () {
                 var city_id=$("#search_origin").val();
@@ -352,11 +303,7 @@
                     table.draw();
                 }
             });
-
-          
-            
         });
-        // $("body").on('click','.stock_sack_bag_btn',function()
         $("body").on('click','.sack_bag_count_btn',function(){
             $("#StockSackBagModal table tbody").empty();
             var destination_id=$(this).parent('td').parent('tr').attr('id');
@@ -367,23 +314,16 @@
                 method:'POST',
                 data:{
                     'destination_id':destination_id,
-                    // 'from_date':from_date,
-                    // 'to_date':to_date,
                     '_token':'{{ csrf_token() }}'
                 }
             }).done(function(data){
-               if(data.status==1){
-                    $.each(data.sack_bag_list,function(key,value){
-                        $("#StockSackBagModal table tbody").append('<tr id="8" role="row" class="odd"><td class=" align-middle seriral_no">'+(key+1)+'</td><td class=" align-middle sack_bag_no">'+value.sack_bag_no+'</td></tr>');
-                    });
-                    $("#StockSackBagModal").modal('show');
-               }
+                if(data.status==1){
+                        $.each(data.sack_bag_list,function(key,value){
+                            $("#StockSackBagModal table tbody").append('<tr id="8" role="row" class="odd"><td class=" align-middle seriral_no">'+(key+1)+'</td><td class=" align-middle sack_bag_no">'+value.sack_bag_no+'</td></tr>');
+                        });
+                        $("#StockSackBagModal").modal('show');
+                }
             });
         });
-
-   
-
-
-
     </script>
 @endsection
