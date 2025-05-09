@@ -110,7 +110,6 @@ class ProcessRvShipmentTicket implements ShouldQueue
                 }
                 
             }
-            dd($this->shipment['call_count']);
             // $userId = [2234, 23825, 13060, 1049];
             // Log::channel('cronJobLog')->info('s ' . 'rv_shipment_ticket Saved');
             $isBot = ((in_array($this->shipment['status_reason_id'], $botCallStatus) && $botcallenable && $isShipperDisabled == 0) ? 1 : 0);
