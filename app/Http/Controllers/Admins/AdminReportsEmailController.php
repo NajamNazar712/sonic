@@ -4084,7 +4084,7 @@ class AdminReportsEmailController extends Controller
             
             foreach ($return_deliveries as $pending_delivery) {
                 $serial++;
-                $rider_trax_id = str_replace('Trax', '', $pending_delivery->rider_trax_id);
+                $rider_trax_id = $pending_delivery->rider_trax_id;
 
                 $returnId = [$pending_delivery->return_note];
 
