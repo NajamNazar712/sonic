@@ -53,7 +53,7 @@
                                         <div class="mb-4">
                                             <div class="bg-blue">
                                                 <h3 class="form-section white">
-                                                    <b>ID:</b> 242 | <b>Name:</b> Receive Quality of Service Report Email
+                                                    <b>ID:</b> 242 | <b>Name:</b> Quality of Service Report Email
                                                 </h3>
                                             </div>
                                             <div class="col-12 mb-2 d-flex">

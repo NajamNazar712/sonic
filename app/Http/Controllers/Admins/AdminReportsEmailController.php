@@ -3296,8 +3296,12 @@ class AdminReportsEmailController extends Controller
                         })
                 ->where('destination_sj.id', '=', DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id in (4, 2))'));
             })
-            ->whereNotIn('shipments.shipper_status_id', [1, 14, 17, 25, 31, 36, 38])
+            ->whereNotIn('shipments.shipper_status_id', [1, 14, 17, 25, 31, 36, 38, 51])
             ->whereNotNull('shipments.tracking_number')
+            // ->where(function ($query) {
+            //     $query->whereNull('cr.status_id')
+            //           ->orWhere('cr.status_id', '!=', 4);
+            // })
             ->select($select)
             ->groupBy('shipments.id')
         ->get();
@@ -4325,7 +4329,7 @@ class AdminReportsEmailController extends Controller
             
             foreach ($deliveries as $delivery) {
                 $serial++;
-                $rider_trax_id = str_replace('Trax', '', $delivery->rider_trax_id);
+                $rider_trax_id = $delivery->rider_trax_id;
 
                 if ($delivery->status == 0) {
                     if ($delivery->pending_status == 0) {
