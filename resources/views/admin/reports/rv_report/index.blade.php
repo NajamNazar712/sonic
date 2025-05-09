@@ -108,6 +108,7 @@
                                     <th class="border-primary border-darken-1">Current Status</th>
                                     <th class="border-primary border-darken-1">Current Status Date</th>
                                     <th class="border-primary border-darken-1">Fake Status</th>
+                                    <th class="border-primary border-darken-1">Return Confirm Reason</th>
                                     <th class="border-primary border-darken-1">Delivery Attempt Count</th>
                                     <th class="border-primary border-darken-1">Re-Attempt Count</th>
                                     <th class="border-primary border-darken-1">Call History</th>
@@ -467,6 +468,7 @@
                             head.push('Current Status');
                             head.push('Current Status Date');
                             head.push('Fake Status');
+                            head.push('Return Confirm Reason');
                             head.push('Delivery Attempt Count');
                             head.push('Re Attempt Count');
                             head.push('Call Count');
@@ -497,6 +499,7 @@
                                 row.push(values.current_status);
                                 row.push(values.current_status_date);
                                 row.push(values.fake_status);
+                                row.push(values.rc_reason_name);
                                 row.push(values.delivery_attempt_count);
                                 row.push(values.re_attempt_count);
                                 row.push(values.call_count);
@@ -571,6 +574,7 @@
                     {data: 'current_status', name: 's_status.name', class: 'align-middle current_status',searchable: false},
                     {data: 'current_status_date', name: 'shipments.updated_at', class: 'align-middle current_status_date',searchable: false},
                     {data: 'fake_status', name: 'fake_status', class: 'align-middle fake_status',searchable: false},
+                    {data: 'rc_reason_name', name: 'rc_reason_name', class: 'align-middle fake_status',searchable: false},
                     {data: 'delivery_attempt_count', name: 'delivery_attempt_count', class: 'align-middle delivery_attempt_count',searchable: false},
                     {data: 're_attempt_count', name: 're_attempt_count', class: 'align-middle re_attempt_count',searchable: false},
                     {data: 'unresponsive_count', name: 'unresponsive_count', class: 'align-middle unresponsive_count',searchable: false},

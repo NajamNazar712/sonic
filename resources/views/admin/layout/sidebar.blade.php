@@ -696,6 +696,15 @@
                                                 href="{{ route('admin.shipment_otp.index') }}">Non-COD Shipments
                                                 OTP</a></li>
                                     @endif
+
+                                    @if (session('role_id') == 1 || in_array(1033, session('permissions')))
+                                        <li>
+                                            <a class="menu-item" href="{{ route('admin.shipment_otp.scanning_history') }}">
+                                                Non-COD Shipments Scanning History
+                                            </a>
+                                        </li>
+                                    @endif
+
                                     @if (session('role_id') == 1 || in_array(35, session('permissions')))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.delivery.rider_request.index') }}">Pending
@@ -1525,6 +1534,16 @@
                             <li><a class="menu-item" href="{{ route('admin.reports.qsr.index') }}">Quality of
                                     Service</a></li>
                         @endif
+
+                        @if (session('role_id') == 1 || in_array(70, session('permissions')))
+                            <li>
+                                <a class="menu-item" href="{{ route('admin.reports.kam_and_poc_qsr.index') }}">
+                                    KAM & POC QSR
+                                </a>
+                            </li>
+                        @endif
+
+
                         @if (session('role_id') == 1 || in_array(71, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.reports.qa.index') }}">Quality
                                     Assurance</a>
