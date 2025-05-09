@@ -270,12 +270,17 @@ class RetailAdminUserManagementController extends Controller
         if ($request->status == 1) {
             $franchise->status = 1;
             $franchise->updated_by = Auth::id();
+            $changedFields[] = 'Franchise Status' . ': ' . ($franchise->getOriginal('status') == 1 ? 'Active' : 'In-Active') . ' -> ' . ($franchise->status == 1  ? 'Active' : 'In-Active');
+            self::retail_logs(Auth::id(), $changedFields, $franchise->id, $screen_name = 'Retail Franchise');
             $franchise->save();
 
             return response()->json(['status' => 1, 'success' => 'Franchise Enabled Successfully']);
         } elseif ($request->status == 0) {
             $franchise->status = 0;
             $franchise->updated_by = Auth::id();
+            $changedFields[] = 'Franchise Status' . ': ' . ($franchise->getOriginal('status') == 1 ? 'Active' : 'In-Active') . ' -> ' . ($franchise->status == 1  ? 'Active' : 'In-Active');
+            self::retail_logs(Auth::id(), $changedFields, $franchise->id, $screen_name = 'Retail Franchise');
+
             $franchise->save();
 
             $franchise_users = RetailUser::where('category', 1)->where('category_id', $franchise->id)->where('status', 1);
@@ -475,14 +480,19 @@ class RetailAdminUserManagementController extends Controller
               'location_latitude' => 'Location Latitude',
               'location_longitude' => 'Location Longitude',
               'discount' => 'Discount',
-              'insurance' => 'Insurance'
+              'insurance' => 'Insurance',
+              'cnic_status' => 'CNIC Status'
             ];
     
             foreach ($fieldNames as $field => $fieldName) {
                 $originalValue = trim($franchise->getOriginal($field));
                 $currentValue = trim($franchise->$field);
                 if ($franchise->isDirty($field) && $originalValue !== $currentValue) {
-                    $changedFields[] = $fieldName . ': ' . $originalValue . ' -> ' . $currentValue;
+                    if($field == 'cnic_status') {
+                        $changedFields[] = $fieldName . ': ' . ($originalValue == 1 ? 'Enable' : 'Disable') . ' -> ' . ($currentValue == 1 ? 'Enable' : 'Disable');
+                    } else {
+                        $changedFields[] = $fieldName . ': ' . $originalValue . ' -> ' . $currentValue;
+                    }
                 }
             }
 
@@ -674,12 +684,7 @@ class RetailAdminUserManagementController extends Controller
             $franchise_retail_product_attachment_edit->updated_by = $admin->id;
             $franchise_retail_product_attachment_edit->save();
             if(!empty($changedFields)) {
-                $record = new RetailLog;
-                $record->changed_by_id = auth()->user()->id;
-                $record->data = implode(', ', $changedFields);
-                $record->changed_in_record_id = $franchise->id;
-                $record->screen_name = 'Retail Franchise';
-                $record->save();
+                self::retail_logs(Auth::id(), $changedFields, $franchise->id, $screen_name = 'Retail Franchise');
             }
             return redirect()->back()->with('success', 'Franchise Updated Successfully!');
         } else {
@@ -1773,8 +1778,11 @@ class RetailAdminUserManagementController extends Controller
             if ($user->store->status == 1) {
                 $user->status = 1;
                 $user->updated_by = Auth::id();
-                $user->save();
 
+                $changedFields[] = 'User Status' . ': ' . ($user->getOriginal('status') == 1 ? 'Active' : 'In-Active') . ' -> ' . ($user->status == 1  ? 'Active' : 'In-Active');
+                self::retail_logs(Auth::id(), $changedFields, $user->id, $screen_name = 'Retail User');
+                $user->save();
+                
                 return response()->json(['status' => 1, 'success' => 'User Enabled Successfully']);
             } else {
                 return response()->json(['status' => 0, 'error' => 'User Store is Disabled']);
@@ -1782,6 +1790,9 @@ class RetailAdminUserManagementController extends Controller
         } elseif ($request->status == 0) {
             $user->status = 0;
             $user->updated_by = Auth::id();
+            $changedFields[] = 'User Status' . ': ' . ($user->getOriginal('status') == 1 ? 'Active' : 'In-Active') . ' -> ' . ($user->status == 1  ? 'Active' : 'In-Active');
+            self::retail_logs(Auth::id(), $changedFields, $user->id, $screen_name = 'Retail User');
+
             $user->save();
             return response()->json(['status' => 1, 'success' => 'User Disabled Successfully']);
         } else {
@@ -2130,12 +2141,7 @@ class RetailAdminUserManagementController extends Controller
             $new_attachments->save();
         }
         if(!empty($changedFields)) {
-            $record = new RetailLog;
-            $record->changed_by_id = auth()->user()->id;
-            $record->data = implode(', ', $changedFields);
-            $record->changed_in_record_id = $retail_user->id;
-            $record->screen_name = 'Retail User';
-            $record->save();
+            self::retail_logs(Auth::id(), $changedFields, $retail_user->id, $screen_name = 'Retail User');
         }
         
         return redirect()->back()->with('success', 'Retail User Updated Successfully!');
@@ -3883,8 +3889,17 @@ class RetailAdminUserManagementController extends Controller
         } else {
             return response()->json([
                 'status' => 1,
-                'message' => 'No logs found for this lead.'
+                'message' => 'No logs found..!'
             ]);
         }
+    }
+
+    public static function retail_logs($changed_by_id, $data, $changed_in_record_id ,  $screen_name) {
+        $record = new RetailLog;
+        $record->changed_by_id = $changed_by_id;
+        $record->data = implode(', ', $data);
+        $record->changed_in_record_id = $changed_in_record_id;
+        $record->screen_name = $screen_name;
+        $record->save();
     }
 }
