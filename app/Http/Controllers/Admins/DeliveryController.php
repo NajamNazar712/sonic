@@ -3976,8 +3976,27 @@ class DeliveryController extends Controller
                                 ShipmentsJourneyController::add($shipment, 20, 20, $status_reason_id, $shipment_journey_remarks, NULL, $globalAdminId, null, null, 1, null, null, null, null, null);
                                 
                             }else{
-                                Shipment::where('id', $shipment)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);
-                                ShipmentsJourneyController::add($shipment, 65, 65, $status_reason_id, $shipment_journey_remarks, NULL, $globalAdminId, null, null, 1, null, null, null, null, null);
+                                    Shipment::where('id', $shipment)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);
+
+                                    $data = [
+                                        'agent_id' => 346, // testing purpose
+                                        'shipment_id' => $shipment_details->shipment_id,
+                                        'shipments_journey_id' => $journey->id,
+                                        'rv_assign_agent_status_id' => 7,
+                                        'rv_assign_agent_sub_status_id' => null,
+                                        'rv_assign_agent_sub_status_id' => null,
+                                        'assigned_to_type_id' => 0,
+                                        'assigned_by' => 0,
+                                        'rv_state_id' => 2,
+                                        'updated_by_id' => 346
+                                    ];
+                                    $this->rv_shipment_assign($data);
+                                    ShipmentsJourneyController::add($shipment_details->id, 65, 65, $journey->status_reason_id, NULL, $shipment_details->user_id, 346);
+
+                                    NotificationsController::send(220, $shipment);
+                                    RvShipmentAssignAgent::where('shipment_id', $shipment_details->id)
+                                        // ->whereDate('created_at',$date)
+                                        ->update(['unresponsive_count' => 3, 'unresponsive_email_count' => 1, 'unresponsive_email_time' => date('Y-m-d h:i:s')]);                                    
                             }
 
 
