@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Admins;
 use App\FafCharges;
 use App\FafChargesGlobal;
 use App\FafChargesGlobalHistory;
+use App\Http\Models\Admin\CrmAgentAutoAssignOriginArea;
+use App\Http\Models\Admin\CrmAgentAutoAssignOriginHub;
+use App\Http\Models\Admin\CrmAgentAutoAssignOriginZone;
 use Carbon\Carbon;
 use App\Http\Models\City;
 use App\Http\Models\Zone;
@@ -169,9 +172,17 @@ use App\Http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
 use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyBlacklisted;
 use App\RvShipmentTicket;
 use App\Http\Models\CrmCaseNatureRemark;
+use App\Http\Models\InternationalUserRate;
+use App\Models\InternationalZonalMarginColumn;
+use App\Models\WalletShipperSetting;
+use Illuminate\Support\Str;
+use App\Http\Traits\CommonTrait;
+use App\ChangeLogs;
 
 class GlobalSettingsController extends Controller
 {
+    use CommonTrait;
+
     public function __construct()
     {
         $this->middleware('auth:admin');
@@ -1719,7 +1730,7 @@ class GlobalSettingsController extends Controller
                     } else {
                         $dropdown .= '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
                     }
-                    
+
 
                     $dropdown .= '
                             <a href="' . route('admin.settings.crm_case_nature_types.edit', ['id' => $data->id]) . '" target="_blank" class="dropdown-item text-dark">
@@ -1799,15 +1810,15 @@ class GlobalSettingsController extends Controller
     }
 
     public function crm_case_nature_types_edit_form()
-    {   
+    {
         $case_nature = CrmRequestCaseNature::whereNotIn('id', [3])->select(['id', 'name'])->get();
         $shipment_status = ShipmentStatus::where('status', 1)->get();
         $admin_departments = AdminDepartment::get();
         return view('admin.settings.crm_case_nature.edit_form', compact('case_nature', 'shipment_status', 'admin_departments'));
     }
 
-    public function crm_case_nature_types_edit_ajax_list(Request $request) 
-    {   
+    public function crm_case_nature_types_edit_ajax_list(Request $request)
+    {
         $case_nature_id = $request->id;
         $crm_case = CrmRequestCaseNatureType::where('id', $case_nature_id)->get();
         $remarks = CrmCaseNatureRemark::where('case_nature_id', $case_nature_id)->get();
@@ -1920,20 +1931,20 @@ class GlobalSettingsController extends Controller
         $shipper_visibility = $request->has('shipper_visibility');
         $remarks_visibility = $request->has('remarks_visibility');
         $remarks = $request->input('remarks');
-    
+
         $caseNatureType = CrmRequestCaseNatureType::findOrFail($case_nature_id);
 
-        if ($caseNatureType->status_id == 0){
+        if ($caseNatureType->status_id == 0) {
             return redirect()->back()->with('error', 'Please enable the case nature first');
         }
-    
+
         if ($type !== $caseNatureType->type) {
             $existingCaseNatureType = CrmRequestCaseNatureType::where('type', $type)->first();
             if ($existingCaseNatureType && $existingCaseNatureType->id !== $case_nature_id) {
                 return redirect()->back()->with('error', 'Same Case Nature Type already exists!');
             }
         }
-        
+
         $caseNatureType->type = $type;
         $caseNatureType->shipment_status = $shipment_status;
         $caseNatureType->admin_departments = $admin_departments;
@@ -1941,7 +1952,7 @@ class GlobalSettingsController extends Controller
         $caseNatureType->remarks_visibility = $remarks_visibility;
         $caseNatureType->nature_id = $case_nature;
         $caseNatureType->save();
-    
+
         // Handle remarks update
         $existingRemarks = CrmCaseNatureRemark::where('case_nature_id', $caseNatureType->id)->get();
         // Delete remarks that are not in the new remarks
@@ -1951,7 +1962,7 @@ class GlobalSettingsController extends Controller
             }
         }
 
-        if ($remarks != null){
+        if ($remarks != null) {
             // Add or update remarks
             foreach ($remarks as $remark) {
                 $existingRemark = CrmCaseNatureRemark::where('case_nature_id', $caseNatureType->id)->where('remarks', $remark)->first();
@@ -2062,7 +2073,7 @@ class GlobalSettingsController extends Controller
                 $dropdown .= '<button type="button" data-target-id=' . $leads->head_admin_id . ' class="dropdown-item assign" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus"></i></div><div class="col-9 offset-1">Assign</div></button>';
 
                 return $dropdown;
-           })->rawColumns(['action','tagged_admins_count'])->make(true);
+            })->rawColumns(['action', 'tagged_admins_count'])->make(true);
     }
 
     public function multiple_sale_tagging_submit(Request $request)
@@ -2207,7 +2218,7 @@ class GlobalSettingsController extends Controller
                     $settings->type = 'rv_shipper_priority';
                     $settings->setting_value = 1;
                 }
-                $settings->text = $result_str != "" ?  $result_str : $values_array_1;
+                $settings->text = $result_str != "" ? $result_str : $values_array_1;
                 $settings->save();
             }
             return redirect()->back()->with('success', 'Settings Updated!');
@@ -3957,7 +3968,8 @@ class GlobalSettingsController extends Controller
         BookingSmsForShippers::truncate();
         if ($shippers != null) {
             if (count($shippers) > 0) {
-                foreach ($shippers as $shipper) {;
+                foreach ($shippers as $shipper) {
+                    ;
                     $business_shipment = new BookingSmsForShippers();
                     $business_shipment->user_id = $shipper;
                     $business_shipment->save();
@@ -4012,11 +4024,10 @@ class GlobalSettingsController extends Controller
     }
 
 
-
     public function setup_fintech_charges_index()
     {
 
-        $fintechSetup =  new FintechCompany();
+        $fintechSetup = new FintechCompany();
         return view('admin.settings.fintech.fintech_companies_list');
     }
 
@@ -4031,12 +4042,12 @@ class GlobalSettingsController extends Controller
 
     public function setup_fintech_charges_list()
     {
-        $fintechSetup =  new FintechCompany();
+        $fintechSetup = new FintechCompany();
         $FintechValues = $fintechSetup::leftJoin('admins AS created_by', 'created_by.id', '=', 'fintech_companies.added_by')
             ->leftJoin('admins AS updated_by', 'updated_by.id', '=', 'fintech_companies.updated_by')
-            ->select(['fintech_companies.company_name', 'fintech_companies.status',  'fintech_companies.added_by','fintech_companies.updated_by','fintech_companies.created_at as added','fintech_companies.updated_at as updated' ,'created_by.name as admin1', 'updated_by.name as admin2' ,'fintech_companies.id']);
-            //->orderBy('fintech_companies.id', 'DESC');
-            //->get();
+            ->select(['fintech_companies.company_name', 'fintech_companies.status', 'fintech_companies.added_by', 'fintech_companies.updated_by', 'fintech_companies.created_at as added', 'fintech_companies.updated_at as updated', 'created_by.name as admin1', 'updated_by.name as admin2', 'fintech_companies.id']);
+        //->orderBy('fintech_companies.id', 'DESC');
+        //->get();
 
         $datatable = Datatables::of($FintechValues)
             ->editColumn('status', function ($data) {
@@ -4066,7 +4077,6 @@ class GlobalSettingsController extends Controller
             })->rawColumns(['action']);
 
 
-
         return $datatable->make(true);
     }
 
@@ -4075,15 +4085,15 @@ class GlobalSettingsController extends Controller
         $FintecCompany = FintechCompany::where('id', $req->id);
         if ($FintecCompany->first()->status == '1') {
             $FintecCompany->update([
-                'status' =>  '0'
+                'status' => '0'
             ]);
-            $message =  'Fintech Company has been disable successfully!';
+            $message = 'Fintech Company has been disable successfully!';
         } else {
             $FintecCompany->update([
-                'status' =>  '1'
+                'status' => '1'
             ]);
 
-            $message =  'Fintech Company has been enable successfully!';
+            $message = 'Fintech Company has been enable successfully!';
         }
 
         return response()->json([
@@ -4098,15 +4108,15 @@ class GlobalSettingsController extends Controller
         if (!empty($req->fintech_range_up)) {
             DB::beginTransaction();
             try {
-                $FintechSetup =  new FintechCompany();
-                $FintechSetup->company_name  = $req->company_name;
-                $FintechSetup->added_by      = Auth::id();
-                $FintechSetup->updated_by    = Auth::id();
+                $FintechSetup = new FintechCompany();
+                $FintechSetup->company_name = $req->company_name;
+                $FintechSetup->added_by = Auth::id();
+                $FintechSetup->updated_by = Auth::id();
                 $FintechSetup->save();
                 for ($i = 0; $i < count($req->fintech_range_up); $i++) {
-                    $charges            =  $req->charges[$i];
-                    $additional_charges =  $req->additional_charges[$i];
-                    $fed_charges        =  $req->fed_tax[$i];
+                    $charges = $req->charges[$i];
+                    $additional_charges = $req->additional_charges[$i];
+                    $fed_charges = $req->fed_tax[$i];
 
                     if (strpos($charges, '%') !== false) {
                         $charges_type = 1;
@@ -4129,21 +4139,21 @@ class GlobalSettingsController extends Controller
                         $fedd_charges = str_replace('%', '', $fed_charges);
                     } else {
                         $fed_type = 0;
-                        $fedd_charges =  $req->fed_tax[$i];
+                        $fedd_charges = $req->fed_tax[$i];
                     }
 
-                    if ($req->fintech_range_up[$i] != '' &&  $req->fintech_range_down[$i] != '' &&  $req->charges[$i] != '' &&  $req->fed_tax[$i] != '') {
-                        $FintechSetupValues =  new FintechCompanyCharges();
-                        $FintechSetupValues->company_Id                        = $FintechSetup->id;
-                        $FintechSetupValues->range_up                          = $req->fintech_range_up[$i];
-                        $FintechSetupValues->range_down                        = $req->fintech_range_down[$i];
-                        $FintechSetupValues->charges                           = $fintech_charges;
-                        $FintechSetupValues->charges_is_percentage             = $charges_type;
-                        $FintechSetupValues->additional_charges                = $add_charges;
-                        $FintechSetupValues->additional_charges_is_percentage  = $additional_type;
-                        $FintechSetupValues->fed_tax                           = $fedd_charges;
-                        $FintechSetupValues->fed_tax_is_percentage             = $fed_type;
-                        $FintechSetupValues->payment_type_id                   = $req->payment_type[$i];
+                    if ($req->fintech_range_up[$i] != '' && $req->fintech_range_down[$i] != '' && $req->charges[$i] != '' && $req->fed_tax[$i] != '') {
+                        $FintechSetupValues = new FintechCompanyCharges();
+                        $FintechSetupValues->company_Id = $FintechSetup->id;
+                        $FintechSetupValues->range_up = $req->fintech_range_up[$i];
+                        $FintechSetupValues->range_down = $req->fintech_range_down[$i];
+                        $FintechSetupValues->charges = $fintech_charges;
+                        $FintechSetupValues->charges_is_percentage = $charges_type;
+                        $FintechSetupValues->additional_charges = $add_charges;
+                        $FintechSetupValues->additional_charges_is_percentage = $additional_type;
+                        $FintechSetupValues->fed_tax = $fedd_charges;
+                        $FintechSetupValues->fed_tax_is_percentage = $fed_type;
+                        $FintechSetupValues->payment_type_id = $req->payment_type[$i];
                         $FintechSetupValues->save();
                     }
                 }
@@ -4161,8 +4171,8 @@ class GlobalSettingsController extends Controller
 
     public function setup_fintech_charges_edit($id)
     {
-        $fintechsetupValues =  new FintechCompanyCharges();
-        $FintechSetup =  new FintechCompany();
+        $fintechsetupValues = new FintechCompanyCharges();
+        $FintechSetup = new FintechCompany();
         $fintech_payment_type = new FintechPaymentType();
         $payment_type = $fintech_payment_type::all();
         $fintech_company_name = $FintechSetup::where('id', $id)->first();
@@ -4177,9 +4187,9 @@ class GlobalSettingsController extends Controller
         try {
             if (!empty($req->fintech_range_up)) {
                 for ($i = 0; $i < count($req->fintech_range_up); $i++) {
-                    $charges            =  $req->charges[$i];
-                    $additional_charges =  $req->additional_charges[$i];
-                    $fed_charges        =  $req->fed_tax[$i];
+                    $charges = $req->charges[$i];
+                    $additional_charges = $req->additional_charges[$i];
+                    $fed_charges = $req->fed_tax[$i];
 
                     if (strpos($charges, '%') !== false) {
                         $charges_type = 1;
@@ -4202,29 +4212,29 @@ class GlobalSettingsController extends Controller
                         $fedd_charges = str_replace('%', '', $fed_charges);
                     } else {
                         $fed_type = 0;
-                        $fedd_charges =  $req->fed_tax[$i];
+                        $fedd_charges = $req->fed_tax[$i];
                     }
-                    if ($req->fintech_range_up[$i] != '' &&  $req->fintech_range_down[$i] != '' &&  $req->charges[$i] != '' &&  $req->fed_tax[$i] != '') {
-                        $FintechSetupValues =  new FintechCompanyCharges();
-                        $FintechSetupValues->company_Id                        = $req->company_id;
-                        $FintechSetupValues->range_up                          = $req->fintech_range_up[$i];
-                        $FintechSetupValues->range_down                        = $req->fintech_range_down[$i];
-                        $FintechSetupValues->charges                           = $fintech_charges;
-                        $FintechSetupValues->charges_is_percentage             = $charges_type;
-                        $FintechSetupValues->additional_charges                = $add_charges;
-                        $FintechSetupValues->additional_charges_is_percentage  = $additional_type;
-                        $FintechSetupValues->fed_tax                           = $fedd_charges;
-                        $FintechSetupValues->fed_tax_is_percentage             = $fed_type;
-                        $FintechSetupValues->payment_type_id                   = $req->fintech_payment_type[$i];
+                    if ($req->fintech_range_up[$i] != '' && $req->fintech_range_down[$i] != '' && $req->charges[$i] != '' && $req->fed_tax[$i] != '') {
+                        $FintechSetupValues = new FintechCompanyCharges();
+                        $FintechSetupValues->company_Id = $req->company_id;
+                        $FintechSetupValues->range_up = $req->fintech_range_up[$i];
+                        $FintechSetupValues->range_down = $req->fintech_range_down[$i];
+                        $FintechSetupValues->charges = $fintech_charges;
+                        $FintechSetupValues->charges_is_percentage = $charges_type;
+                        $FintechSetupValues->additional_charges = $add_charges;
+                        $FintechSetupValues->additional_charges_is_percentage = $additional_type;
+                        $FintechSetupValues->fed_tax = $fedd_charges;
+                        $FintechSetupValues->fed_tax_is_percentage = $fed_type;
+                        $FintechSetupValues->payment_type_id = $req->fintech_payment_type[$i];
                         $FintechSetupValues->save();
                     }
                 }
             }
             for ($j = 0; $j < count($req->IndexID); $j++) {
 
-                $charges            =  $req->charges_edit[$j];
-                $additional_charges =  $req->additional_charges_edit[$j];
-                $fed_charges        =  $req->fed_tax_edit[$j];
+                $charges = $req->charges_edit[$j];
+                $additional_charges = $req->additional_charges_edit[$j];
+                $fed_charges = $req->fed_tax_edit[$j];
 
                 if (strpos($charges, '%') !== false) {
                     $charges_type = 1;
@@ -4247,24 +4257,24 @@ class GlobalSettingsController extends Controller
                     $fedd_charges = str_replace('%', '', $fed_charges);
                 } else {
                     $fed_type = 0;
-                    $fedd_charges =  $req->fed_tax_edit[$j];
+                    $fedd_charges = $req->fed_tax_edit[$j];
                 }
-                $FintechSetupValues =  new FintechCompanyCharges();
+                $FintechSetupValues = new FintechCompanyCharges();
                 $FintechSetupValues::where('id', $req->IndexID[$j])->update([
-                    'range_up'                          => $req->fintech_range_up_edit[$j],
-                    'range_down'                        => $req->fintech_range_down_edit[$j],
-                    'charges'                           => $fintech_charges,
-                    'charges_is_percentage'             => $charges_type,
-                    'additional_charges'                => $add_charges,
-                    'additional_charges_is_percentage'  => $additional_type,
-                    'fed_tax'                           => $fedd_charges,
-                    'fed_tax_is_percentage'             => $fed_type,
-                    'payment_type_id'                   => $req->payment_type[$j]
+                    'range_up' => $req->fintech_range_up_edit[$j],
+                    'range_down' => $req->fintech_range_down_edit[$j],
+                    'charges' => $fintech_charges,
+                    'charges_is_percentage' => $charges_type,
+                    'additional_charges' => $add_charges,
+                    'additional_charges_is_percentage' => $additional_type,
+                    'fed_tax' => $fedd_charges,
+                    'fed_tax_is_percentage' => $fed_type,
+                    'payment_type_id' => $req->payment_type[$j]
                 ]);
             }
-            $FintechSetup =  new FintechCompany();
+            $FintechSetup = new FintechCompany();
             $FintechSetup::where('id', $req->company_id)->update([
-                'updated_by' =>  Auth::id(),
+                'updated_by' => Auth::id(),
             ]);
 
             DB::commit();
@@ -4278,7 +4288,7 @@ class GlobalSettingsController extends Controller
     public function standard_fintech_charges_index()
     {
         $StandardFintectCharges = new standard_fintech_charges();
-        $value =  $StandardFintectCharges::first();
+        $value = $StandardFintectCharges::first();
         return view('admin.settings.fintech.standard_fintech_charges', compact('value'));
     }
 
@@ -4289,8 +4299,8 @@ class GlobalSettingsController extends Controller
         // dd($req->all());
 
         $validator = Validator::make($req->all(), [
-            'standard_fintech_charges'  => 'required',
-            'standard_FED_Charges'      => 'required',
+            'standard_fintech_charges' => 'required',
+            'standard_FED_Charges' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -4300,13 +4310,13 @@ class GlobalSettingsController extends Controller
                 $values = $StandardFintectCharges::where('id', '1')->first();
                 if (!empty($values)) {
                     $StandardFintectCharges->where('id', '1')->update([
-                        'standard_fintech_charges'  =>  $req->standard_fintech_charges,
-                        'standard_fed_charges'      =>  $req->standard_FED_Charges,
+                        'standard_fintech_charges' => $req->standard_fintech_charges,
+                        'standard_fed_charges' => $req->standard_FED_Charges,
                         'updated_by' => Auth::id(),
                     ]);
                 } else {
-                    $StandardFintectCharges->standard_fintech_charges   = $req->standard_fintech_charges;
-                    $StandardFintectCharges->standard_fed_charges       = $req->standard_FED_Charges;
+                    $StandardFintectCharges->standard_fintech_charges = $req->standard_fintech_charges;
+                    $StandardFintectCharges->standard_fed_charges = $req->standard_FED_Charges;
                     $StandardFintectCharges->created_by = Auth::id();
                     $StandardFintectCharges->updated_by = Auth::id();
                     $StandardFintectCharges->save();
@@ -4664,40 +4674,34 @@ class GlobalSettingsController extends Controller
 
     public function international_rates_upload_index()
     {
+        $zoneColumnsArray = $this->zoneMarginColumnName()['zoneColumnArray'];
         ActivityTrailController::createActivityTrailLog(Auth::id(), 381);
-        return view('admin.settings.international.excel_upload');
+        return view('admin.settings.international.excel_upload',compact('zoneColumnsArray'));
     }
 
     public function international_standard_dhl_rates_list(Request $request)
     {
+        $zoneColumnsArray = $this->zoneMarginColumnName()['zoneColumnArray'];
+
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 382);
         }
-        $rates_list = InternationalStandardDhlRate::select('id', 'range_up', 'range_down', 'zone_1', 'zone_2', 'zone_3', 'zone_4', 'zone_5', 'zone_6', 'zone_7', 'zone_8', 'zone_9', 'zone_10', 'zone_11', 'zone_1b', 'zone_8b');
-
+        $rates_list = InternationalStandardDhlRate::select(
+            array_merge(['id', 'range_up', 'range_down'], $zoneColumnsArray)
+        );
         return Datatables::of($rates_list)->make(true);
     }
 
     public function international_rates_upload_excel(Request $request)
     {
-
-        $names = [
+        $zoneColumnsArray = $this->zoneMarginColumnName()['zoneColumnArray'];
+        $names = array_merge([
             'range_up' => 'Range Up',
             'range_down' => 'Range Down',
-            'zone_1' => 'Zone 1A',
-            'zone_1b' => 'Zone 1B',
-            'zone_2' => 'Zone 2',
-            'zone_3' => 'Zone 3',
-            'zone_4' => 'Zone 4',
-            'zone_5' => 'Zone 5',
-            'zone_6' => 'Zone 6',
-            'zone_7' => 'Zone 7',
-            'zone_8' => 'Zone 8A',
-            'zone_8b' => 'Zone 8B',
-            'zone_9' => 'Zone 9',
-            'zone_10' => 'Zone 10',
-            'zone_11' => 'Zone 11',
-        ];
+        ], array_combine(
+            $zoneColumnsArray,
+            array_map(fn($zone) => ucwords(str_replace('_', ' ', $zone)), $zoneColumnsArray)
+        ));
 
         $messages = [
             'required' => ':attribute is Required.',
@@ -4705,41 +4709,26 @@ class GlobalSettingsController extends Controller
             'exists' => 'Given :attribute is Invalid.',
         ];
         $rules = [
-            'range_up' => ['required', 'numeric', 'between:0.01,300', Rule::exists('international_standard_dhl_rates', 'range_up')],
-            'range_down' => ['required', 'numeric', 'between:0.01,300', Rule::exists('international_standard_dhl_rates', 'range_down')],
-            'zone_1' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_1b' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_2' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_3' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_4' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_5' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_6' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_7' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_8' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_8b' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_9' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_10' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_11' => ['required', 'numeric', 'between:0,1000000'],
-
+            'range_up' => [
+                'required',
+                'numeric',
+                'between:0.01,300',
+                Rule::exists('international_standard_dhl_rates', 'range_up')
+            ],
+            'range_down' => [
+                'required',
+                'numeric',
+                'between:0.01,300',
+                Rule::exists('international_standard_dhl_rates', 'range_down')
+            ]
         ];
-
-        $fields = [
-            0  => 'range_up',
-            1  => 'range_down',
-            2  => 'zone_1',
-            3  => 'zone_1b', // Moved zone_1b next to zone_1
-            4  => 'zone_2',
-            5  => 'zone_3',
-            6  => 'zone_4',
-            7  => 'zone_5',
-            8  => 'zone_6',
-            9  => 'zone_7',
-            10 => 'zone_8',
-            11 => 'zone_8b', // Moved zone_8b next to zone_8
-            12 => 'zone_9',
-            13 => 'zone_10',
-            14 => 'zone_11'
-        ];
+        foreach ($zoneColumnsArray as $zone) {
+            $rules[$zone] = ['required', 'numeric', 'between:0,1000000'];
+        }
+        $fields = array_merge([
+            0 => 'range_up',
+            1 => 'range_down'
+        ], array_values($zoneColumnsArray));
 
 
         if ($file = $request->file('rates')) {
@@ -4747,29 +4736,18 @@ class GlobalSettingsController extends Controller
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
-            $header = [
+            $header = array_merge([
                 'Range Up',
-                'Range Down',
-                'Zone 1A',
-                'Zone 1B', // Moved Zone 1B next to Zone 1
-                'Zone 2',
-                'Zone 3',
-                'Zone 4',
-                'Zone 5',
-                'Zone 6',
-                'Zone 7',
-                'Zone 8A',
-                'Zone 8B', // Moved Zone 8B next to Zone 8
-                'Zone 9',
-                'Zone 10',
-                'Zone 11'
-            ];
+                'Range Down'
+            ], array_map(function ($zone) {
+                return ucwords(str_replace('_', ' ', $zone));
+            }, $zoneColumnsArray));
 
             if (isset($spreadsheet)) {
                 $header_correct = true;
 
                 foreach ($spreadsheet[0] as $index => $header_value) {
-                    if ($index == 12) {
+                    if ($index == count($header)) {
                     } elseif (!isset($header[$index]) || $header_value != $header[$index]) {
                         $header_correct = false;
                         break;
@@ -4829,6 +4807,7 @@ class GlobalSettingsController extends Controller
                         }
                     }
                 }
+              
                 if (empty($errors)) {
                     $updated = 0;
                     $not_updated = 0;
@@ -4836,36 +4815,16 @@ class GlobalSettingsController extends Controller
                         $row_id = $key + 2;
                         $range_up = trim($row['range_up']);
                         $range_down = trim($row['range_down']);
-                        $zone_1 = trim($row['zone_1']);
-                        $zone_2 = trim($row['zone_2']);
-                        $zone_3 = trim($row['zone_3']);
-                        $zone_4 = trim($row['zone_4']);
-                        $zone_5 = trim($row['zone_5']);
-                        $zone_6 = trim($row['zone_6']);
-                        $zone_7 = trim($row['zone_7']);
-                        $zone_8 = trim($row['zone_8']);
-                        $zone_9 = trim($row['zone_9']);
-                        $zone_10 = trim($row['zone_10']);
-                        $zone_11 = trim($row['zone_11']);
-                        $zone_1b = trim($row['zone_1b']);
-                        $zone_8b = trim($row['zone_8b']);
-
+                       
                         $standard_rate = InternationalStandardDhlRate::where('range_up', $range_up)->where('range_down', $range_down);
                         if ($standard_rate->exists()) {
                             $standard_rate = $standard_rate->first();
-                            $standard_rate->zone_1 = ($zone_1 != null) ? $zone_1 : 0;
-                            $standard_rate->zone_2 = ($zone_2 != null) ? $zone_2 : 0;
-                            $standard_rate->zone_3 = ($zone_3 != null) ? $zone_3 : 0;
-                            $standard_rate->zone_4 = ($zone_4 != null) ? $zone_4 : 0;
-                            $standard_rate->zone_5 = ($zone_5 != null) ? $zone_5 : 0;
-                            $standard_rate->zone_6 = ($zone_6 != null) ? $zone_6 : 0;
-                            $standard_rate->zone_7 = ($zone_7 != null) ? $zone_7 : 0;
-                            $standard_rate->zone_8 = ($zone_8 != null) ? $zone_8 : 0;
-                            $standard_rate->zone_9 = ($zone_9 != null) ? $zone_9 : 0;
-                            $standard_rate->zone_10 = ($zone_10 != null) ? $zone_10 : 0;
-                            $standard_rate->zone_11 = ($zone_11 != null) ? $zone_11 : 0;
-                            $standard_rate->zone_1b = ($zone_1b != null) ? $zone_1b : 0;
-                            $standard_rate->zone_8b = ($zone_8b != null) ? $zone_8b : 0;
+                            foreach ($zoneColumnsArray as $zoneColumn) {
+                                if (isset($row[$zoneColumn])) {
+                                    $standard_rate->$zoneColumn = trim($row[$zoneColumn] != null ? $row[$zoneColumn] : 0);
+                                }
+                            }
+                            
                             $standard_rate->save();
                             $updated++;
                         } else {
@@ -5349,7 +5308,7 @@ class GlobalSettingsController extends Controller
                     $dropdown .= $disable;
                 }
                 return $dropdown;
-            })->rawColumns(['action','junctions','starting_id','end_id']);
+            })->rawColumns(['action', 'junctions', 'starting_id', 'end_id']);
         return $datatable->make(true);
     }
 
@@ -5687,14 +5646,14 @@ class GlobalSettingsController extends Controller
     public function crm_auto_assigning_index()
     {
         $settings = GlobalSettings::where('type', '=', 'crm_agent_auto_assigning')->first();
-        $agents = Admin::select('id', 'name')->whereIn('role_id', [37, 28])->get(); //37,28 role
+        $agents = Admin::select('id', 'name')->whereIn('role_id', [37, 28,43,67,75,115])->get(); //37,28 role
         ActivityTrailController::createActivityTrailLog(Auth::id(), 469);
         return view('admin.settings.CRM.auto_assigning')->with(['agents' => $agents, 'settings' => $settings]);
     }
 
     public function crm_auto_assigning_list()
     {
-        $roles = CrmAgentAutoAssign::with('zones.zones', 'hubs.hubs', 'case_natures', 'case_nature_types', 'business_types', 'sub_business_types', 'shipper_keys', 'shipper_non_keys', 'shipment_statuses')
+        $roles = CrmAgentAutoAssign::with('origin_zones.zones','origin_hubs.hubs','origin_areas.city_area','zones.zones', 'hubs.hubs', 'case_natures', 'case_nature_types', 'business_types', 'sub_business_types', 'shipper_keys', 'shipper_non_keys', 'shipment_statuses')
             ->join('admins as ad', 'ad.id', '=', 'crm_agent_auto_assigns.agent_id')
             ->select([
                 'crm_agent_auto_assigns.id',
@@ -5703,6 +5662,7 @@ class GlobalSettingsController extends Controller
                 'crm_agent_auto_assigns.status',
                 'ad.name as agent_name',
             ]);
+
 
         $datatables = Datatables::of($roles)
             ->addColumn('action', function ($roles) {
@@ -5722,74 +5682,204 @@ class GlobalSettingsController extends Controller
                     }
 
                     $dropdown .= '</div>
-                  </div>
-          ';
+                  </div>';
 
                     return $dropdown;
                 } else {
                     return '';
                 }
             })
+
+
+            ->addColumn('origin_zone', function ($roles) {
+                $zone = "<ul>";
+                $counter = 0;
+                foreach ($roles->origin_zones as $value) {
+                    if ($counter < 3) {
+                        $zone .= "<li>" . $value->zones->name . "</li>";
+                    } else {
+                        $zone .= "<li class='hidden-text' style='display:none;'>" . $value->zones->name . "</li>";
+                    }
+                    $counter++;
+                }
+                if ($counter > 3) {
+                    $zone .= "<li><a href='javascript:void(0)' class='read-more'>Read more</a></li>";
+                }
+                return $zone . "</ul>";
+            })
+            ->addColumn('origin_hub', function ($roles) {
+                $hub = "<ul>";
+                $counter = 0;
+                foreach ($roles->origin_hubs as $value) {
+                    if ($counter < 3) {
+                        $hub .= "<li>" . $value->hubs->name . "</li>";
+                    } else {
+                        $hub .= "<li class='hidden-text' style='display:none;'>" . $value->hubs->name . "</li>";
+                    }
+                    $counter++;
+                }
+                if ($counter > 3) {
+                    $hub .= "<li><a href='javascript:void(0)' class='read-more'>Read more</a></li>";
+                }
+                return $hub . "</ul>";
+            })
+            ->addColumn('origin_area', function ($roles) {
+                $hub = "<ul>";
+                $counter = 0;
+                foreach ($roles->origin_areas as $value) {
+                    if ($counter < 3) {
+                        $hub .= "<li>" . $value->city_area->name . "</li>";
+                    } else {
+                        $hub .= "<li class='hidden-text' style='display:none;'>" . $value->city_area->name . "</li>";
+                    }
+                    $counter++;
+                }
+                if ($counter > 3) {
+                    $hub .= "<li><a href='javascript:void(0)' class='read-more'>Read more</a></li>";
+                }
+                return $hub . "</ul>";
+            })
             ->addColumn('zone', function ($roles) {
                 $zone = "<ul>";
+                $counter = 0;
                 foreach ($roles->zones as $value) {
-                    $zone .= "<li>" . $value->zones->name . "</li>";
+                    if ($counter < 3) {
+                        $zone .= "<li>" . $value->zones->name . "</li>";
+                    } else {
+                        $zone .= "<li class='hidden-text' style='display:none;'>" . $value->zones->name . "</li>";
+                    }
+                    $counter++;
+                }
+                if ($counter > 3) {
+                    $zone .= "<li><a href='javascript:void(0)' class='read-more'>Read more</a></li>";
                 }
                 return $zone . "</ul>";
             })
             ->addColumn('hub', function ($roles) {
                 $hub = "<ul>";
+                $counter = 0;
                 foreach ($roles->hubs as $value) {
-                    $hub .= "<li>" . $value->hubs->name . "</li>";
+                    if ($counter < 3) {
+                        $hub .= "<li>" . $value->hubs->name . "</li>";
+                    } else {
+                        $hub .= "<li class='hidden-text' style='display:none;'>" . $value->hubs->name . "</li>";
+                    }
+                    $counter++;
+                }
+                if ($counter > 3) {
+                    $hub .= "<li><a href='javascript:void(0)' class='read-more'>Read more</a></li>";
                 }
                 return $hub . "</ul>";
             })
             ->addColumn('case_nature', function ($roles) {
                 $case_natures = "<ul>";
+                $counter = 0;
                 foreach ($roles->case_natures as $value) {
-                    $case_natures .= "<li>" . $value->case_natures->name . "</li>";
+                    if ($counter < 3) {
+                        $case_natures .= "<li>" . $value->case_natures->name . "</li>";
+                    } else {
+                        $case_natures .= "<li class='hidden-text' style='display:none;'>" . $value->case_natures->name . "</li>";
+                    }
+                    $counter++;
+                }
+                if ($counter > 3) {
+                    $case_natures .= "<li><a href='javascript:void(0)' class='read-more'>Read more</a></li>";
                 }
                 return $case_natures . "</ul>";
             })
             ->addColumn('case_nature_type', function ($roles) {
                 $case_natures_type = "<ul>";
+                $counter = 0; // Initialize counter
                 foreach ($roles->case_nature_types as $value) {
-                    $case_natures_type .= "<li>" . $value->case_nature_types->type . "</li>";
+                    if ($counter < 3) { // Show only the first 3 items
+                        $case_natures_type .= "<li>" . $value->case_nature_types->type . "</li>";
+                    } else {
+                        $case_natures_type .= "<li class='hidden-text' style='display:none;'>" . $value->case_nature_types->type . "</li>";
+                    }
+                    $counter++;
+                }
+                if ($counter > 3) {
+                    $case_natures_type .= "<li><a href='javascript:void(0)' class='read-more'>Read more</a></li>";
                 }
                 return $case_natures_type . "</ul>";
             })
             ->addColumn('business_segment', function ($roles) {
                 $business_segment = "<ul>";
+                $counter = 0;
                 foreach ($roles->business_types as $value) {
-                    $business_segment .= "<li>" . $value->business_types->name . "</li>";
+                    if ($counter < 3) {
+                        $business_segment .= "<li>" . $value->business_types->name . "</li>";
+                    } else {
+                        $business_segment .= "<li class='hidden-text' style='display:none;'>" . $value->business_types->name . "</li>";
+                    }
+                    $counter++;
+                }
+                if ($counter > 3) {
+                    $business_segment .= "<li><a href='javascript:void(0)' class='read-more'>Read more</a></li>";
                 }
                 return $business_segment . "</ul>";
             })
-            ->addColumn('sub_business_segment', function ($roles) {
+             ->addColumn('sub_business_segment', function ($roles) {
                 $sub_business_types = "<ul>";
+                $counter = 0;
                 foreach ($roles->sub_business_types as $value) {
-                    $sub_business_types .= "<li>" . $value->sub_business_types->name . "</li>";
+                    if ($counter < 3) {
+                        $sub_business_types .= "<li>" . $value->sub_business_types->name . "</li>";
+                    } else {
+                        $sub_business_types .= "<li class='hidden-text' style='display:none;'>" . $value->sub_business_types->name . "</li>";
+                    }
+                    $counter++;
+                }
+                if ($counter > 3) {
+                    $sub_business_types .= "<li><a href='javascript:void(0)' class='read-more'>Read more</a></li>";
                 }
                 return $sub_business_types . "</ul>";
             })
             ->addColumn('shipper_key', function ($roles) {
                 $shipper_key = "<ul>";
+                $counter = 0;
                 foreach ($roles->shipper_keys as $value) {
-                    $shipper_key .= "<li>" . $value->shipper_keys->name . "</li>";
+                    if ($counter < 3) {
+                        $shipper_key .= "<li>" . $value->shipper_keys->name . "</li>";
+                    } else {
+                        $shipper_key .= "<li class='hidden-text' style='display:none;'>" . $value->shipper_keys->name . "</li>";
+                    }
+                    $counter++;
+                }
+                if ($counter > 3) {
+                    $shipper_key .= "<li><a href='javascript:void(0)' class='read-more'>Read more</a></li>";
                 }
                 return $shipper_key . "</ul>";
             })
             ->addColumn('shipper_non_key', function ($roles) {
                 $shipper_non_key = "<ul>";
+                $counter = 0;
                 foreach ($roles->shipper_non_keys as $value) {
-                    $shipper_non_key .= "<li>" . $value->shipper_non_keys->name . "</li>";
+                    if ($counter < 3) {
+                        $shipper_non_key .= "<li>" . $value->shipper_non_keys->name . "</li>";
+                    } else {
+                        $shipper_non_key .= "<li class='hidden-text' style='display:none;'>" . $value->shipper_non_keys->name . "</li>";
+                    }
+                    $counter++;
+                }
+                if ($counter > 3) {
+                    $shipper_non_key .= "<li><a href='javascript:void(0)' class='read-more'>Read more</a></li>";
                 }
                 return $shipper_non_key . "</ul>";
             })
             ->addColumn('shipment_status', function ($roles) {
                 $shipment_statuses = "<ul>";
+                $counter = 0; // Initialize counter
                 foreach ($roles->shipment_statuses as $value) {
-                    $shipment_statuses .= "<li>" . $value->shipment_statuses->name . "</li>";
+                    if ($counter < 3) { // Show only the first 3 statuses
+                        $shipment_statuses .= "<li>" . $value->shipment_statuses->name . "</li>";
+                    } else {
+                        $shipment_statuses .= "<li class='hidden-text' style='display:none;'>" . $value->shipment_statuses->name . "</li>";
+                    }
+                    $counter++;
+                }
+                if ($counter > 3) {
+                    $shipment_statuses .= "<li><a href='javascript:void(0)' class='read-more'>Read more</a></li>";
                 }
                 return $shipment_statuses . "</ul>";
             })
@@ -5799,7 +5889,11 @@ class GlobalSettingsController extends Controller
                 } else {
                     return 'Disable';
                 }
-            })->rawColumns([   'zone',
+            })->rawColumns([
+                'origin_zone',
+                'origin_hub',
+                'origin_area',
+                'zone',
                 'hub',
                 'case_nature',
                 'case_nature_type',
@@ -5817,7 +5911,7 @@ class GlobalSettingsController extends Controller
 
     public function crm_auto_assigning_edit($id)
     {
-        $selected_agent =  CrmAgentAutoAssign::with('zones.zones', 'hubs.hubs', 'case_natures', 'case_nature_types', 'business_types', 'sub_business_types', 'shipper_keys', 'shipper_non_keys', 'shipment_statuses')
+        $selected_agent =  CrmAgentAutoAssign::with('origin_zones.zones','origin_hubs.hubs','origin_areas.city_area','zones.zones', 'hubs.hubs', 'case_natures', 'case_nature_types', 'business_types', 'sub_business_types', 'shipper_keys', 'shipper_non_keys', 'shipment_statuses')
             ->join('admins as ad', 'ad.id', '=', 'crm_agent_auto_assigns.agent_id')
             ->select([
                 'crm_agent_auto_assigns.id',
@@ -5825,37 +5919,56 @@ class GlobalSettingsController extends Controller
                 'crm_agent_auto_assigns.created_at',
                 'crm_agent_auto_assigns.status',
                 'ad.name as agent_name',
+                'ad.role_id as role_id'
             ])
             ->where('crm_agent_auto_assigns.agent_id', $id);
 
         if ($selected_agent->exists()) {
             $selected_agent = $selected_agent->first();
 
-            $agents = Admin::select('id', 'name')->whereIn('role_id', [37, 28])->get(); //37,28 role
+            $agents = Admin::select('id', 'name','role_id')->whereIn('role_id', [37, 28,43,67,75,115])->where('status',1)->get(); //37,28 role // add kam roles
             $zones = Zone::where('status', 1)->where('business_category_id', 1)->get();
             $case_natures = CrmRequestCaseNature::all();
             $segments = Segment::all();
             $shipment_status = ShipmentStatus::select('id', 'name')->get();
-            $shipper_key = SaleTierTag::join('users as u', 'u.id', 'sale_tier_tags.user_id')->WhereNotNull('kam')->select('u.id', 'u.name')->get();
-            // $shipper_non_key = SaleTierTag::join('users as u', 'u.id', 'sale_tier_tags.user_id')->WhereNull('kam')->select('u.id', 'u.name')->get();
-            $shipper_non_key = User::with('sale_tier_tags')
-                ->where('status', '=', 3)
-                ->where('blacklist', '=', 0)
-                ->get()
-                ->filter(function ($user) {
-                    if (isset($user->sale_tier_tags['user_id'])) {
-                        $kam_status = $user->sale_tier_tags['kam'];
-                        if (empty($kam_status)) {
+            $shipper_key=[];
+            $shipper_non_key=[];
+
+            if(in_array($selected_agent->role_id ,[43,67,75,115])){
+                $shipper_key = SaleTierTag::join('users as u', 'u.id', 'sale_tier_tags.user_id')
+                    ->WhereNotNull('kam')
+                    ->where('kam', '=', $id)
+                    ->where('u.status', '=', 3)
+                    ->select('u.id', 'u.name')->get();
+            }
+            else if(in_array($selected_agent->role_id ,[37, 28])){
+                // $shipper_non_key = SaleTierTag::join('users as u', 'u.id', 'sale_tier_tags.user_id')->WhereNull('kam')->select('u.id', 'u.name')->get();
+                $shipper_non_key = User::with('sale_tier_tags')
+                    ->where('status', '=', 3)
+                    ->where('blacklist', '=', 0)
+                    ->get()
+                    ->filter(function ($user) {
+                        if (isset($user->sale_tier_tags['user_id'])) {
+                            $kam_status = $user->sale_tier_tags['kam'];
+                            if (empty($kam_status)) {
+                                return $user;
+                            }
+                        } else {
                             return $user;
                         }
-                    } else {
-                        return $user;
-                    }
-                });
+                    });
+            }
+
 
 
             $zn = $selected_agent->zones->pluck('zone_id')->toArray();
             $hubs = City::whereIn('zone_id', $zn)->get();
+
+//            $origin_zone_ids = $selected_agent->origin_zones->pluck('origin_zone_id')->toArray();
+//            $origin_hubs = City::where('hub',1)->whereIn('zone_id', $origin_zone_ids)->get();
+//
+//            $origin_ids = $selected_agent->origin_hubs->pluck('origin_hub_id')->toArray();
+//            $origin_areas = CityArea::whereIn('city_id',$origin_ids)->get();
 
             $cn = $selected_agent->case_natures->pluck('case_nature_id')->toArray();
             $case_nature_types = CrmRequestCaseNatureType::whereIn('nature_id', $cn)->get();
@@ -5863,139 +5976,187 @@ class GlobalSettingsController extends Controller
             $bsi = $selected_agent->business_types->pluck('business_segment_id')->toArray();
             $sub_segment = SubCategorySegment::whereIn('segment_id', $bsi)->select('id', 'name')->orderby('name', 'asc')->get();
 
-            return view('admin.settings.CRM.edit_auto_assign')->with(['selected_agent' => $selected_agent, 'agents' => $agents, 'zones' => $zones, 'case_natures' => $case_natures, 'segments' => $segments, 'sub_segment' => $sub_segment, 'shipper_key' => $shipper_key, 'shipper_non_key' => $shipper_non_key, 'shipment_status' => $shipment_status, 'hubs' => $hubs, 'case_nature_types' => $case_nature_types]);
+            return view('admin.settings.CRM.edit_auto_assign')->with(['selected_agent' => $selected_agent, 'agents' => $agents,'zones' => $zones, 'case_natures' => $case_natures, 'segments' => $segments, 'sub_segment' => $sub_segment, 'shipper_key' => $shipper_key, 'shipper_non_key' => $shipper_non_key, 'shipment_status' => $shipment_status, 'hubs' => $hubs, 'case_nature_types' => $case_nature_types]);
         } else {
             return redirect()->route('admin.settings.auto_assigning.index')->with(['error' => 'No Agent Found With Given ID']);
         }
     }
 
 
-
     public function crm_auto_assigning_submit(Request $request)
     {
-        $admin_id = isset($request->admin_id) ? $request->admin_id : $request->id;
-        if (isset($request->id)) {
 
-            CrmAgentAutoAssign::where('agent_id', $admin_id)->delete();
-            CrmAgentAutoAssignHub::where('agent_id', $admin_id)->delete();
-            CrmAgentAutoAssignZone::where('agent_id', $admin_id)->delete();
-            CrmAgentAutoAssignShipStatus::where('agent_id', $admin_id)->delete();
-            CrmAgentAutoAssignCnType::where('agent_id', $admin_id)->delete();
-            CrmAgentAutoAssignCaseNature::where('agent_id', $admin_id)->delete();
-            CrmAgentAutoAssignBusSeg::where('agent_id', $admin_id)->delete();
-            CrmAgentAutoAssignShipper::where('agent_id', $admin_id)->delete();
-            CrmAgentAutoAssignSNKey::where('agent_id', $admin_id)->delete();
-            CrmAgentAutoAssignSubSegment::where('agent_id', $admin_id)->delete();
-        }
-        $crm_agent = CrmAgentAutoAssign::where('agent_id', $admin_id);
-        if (!$crm_agent->exists()) {
+        try {
+            DB::beginTransaction();
+            $admin_id = isset($request->admin_id) ? $request->admin_id : $request->id;
+            $current_agent_id = $request->id;
+            if (isset($current_agent_id)) {
 
-            $agents = $admin_id;
-            $shipment_status_id = $request->input('shipment_status_id', null);
-            $zone_id = $request->input('zone_id', null);
-            $hub_id = $request->input('hub_id', null);
-            $case_nature_id = $request->input('case_nature_id', null);
-            $case_nature_type_id = $request->input('case_nature_type_id', null);
-            $shipper_key_id = $request->input('shipper_key_id', null);
-            $shipper_non_key_id = $request->input('shipper_non_key_id', null);
-            $business_segment_id = $request->input('business_segment_id', null);
-            $sub_business_segment_id = $request->input('sub_business_segment_id', null);
+                CrmAgentAutoAssign::where('agent_id', $current_agent_id)->delete();
+                CrmAgentAutoAssignHub::where('agent_id', $current_agent_id)->delete();
+                CrmAgentAutoAssignZone::where('agent_id', $current_agent_id)->delete();
+                CrmAgentAutoAssignShipStatus::where('agent_id', $current_agent_id)->delete();
+                CrmAgentAutoAssignCnType::where('agent_id', $current_agent_id)->delete();
+                CrmAgentAutoAssignCaseNature::where('agent_id', $current_agent_id)->delete();
+                CrmAgentAutoAssignBusSeg::where('agent_id', $current_agent_id)->delete();
+                CrmAgentAutoAssignShipper::where('agent_id', $current_agent_id)->delete();
+                CrmAgentAutoAssignSNKey::where('agent_id', $current_agent_id)->delete();
+                CrmAgentAutoAssignSubSegment::where('agent_id', $current_agent_id)->delete();
+                CrmAgentAutoAssignOriginHub::where('agent_id', $current_agent_id)->delete();
+                CrmAgentAutoAssignOriginArea::where('agent_id',$current_agent_id)->delete();
+                CrmAgentAutoAssignOriginZone::where('agent_id',$current_agent_id)->delete();
 
-            $crm_agent = new CrmAgentAutoAssign();
-            $crm_agent->agent_id = $agents;
-            $crm_agent->status = isset($request->status) ? $request->status : 0;
-            $crm_agent->save();
-
-            if (!empty($business_segment_id)) {
-                foreach ($business_segment_id as $key => $value) {
-                    $bs[$key]['agent_id'] = $agents;
-                    $bs[$key]['business_segment_id'] = $value;
-                    $bs[$key]['created_at'] = Carbon::now();
-                    $bs[$key]['updated_at'] = Carbon::now();
-                }
-                CrmAgentAutoAssignBusSeg::insert($bs);
-            }
-            if (!empty($sub_business_segment_id)) {
-                foreach ($sub_business_segment_id as $key => $value) {
-                    $sbs[$key]['agent_id'] = $agents;
-                    $sbs[$key]['sub_segment_id'] = $value;
-                    $sbs[$key]['created_at'] = Carbon::now();
-                    $sbs[$key]['updated_at'] = Carbon::now();
-                }
-                CrmAgentAutoAssignSubSegment::insert($sbs);
-            }
-            if (!empty($case_nature_id)) {
-                foreach ($case_nature_id as $key => $value) {
-                    $cn[$key]['agent_id'] = $agents;
-                    $cn[$key]['case_nature_id'] = $value;
-                    $cn[$key]['created_at'] = Carbon::now();
-                    $cn[$key]['updated_at'] = Carbon::now();
-                }
-                CrmAgentAutoAssignCaseNature::insert($cn);
-            }
-            if (!empty($case_nature_type_id)) {
-                foreach ($case_nature_type_id as $key => $value) {
-                    $cnt[$key]['agent_id'] = $agents;
-                    $cnt[$key]['case_nature_type_id'] = $value;
-                    $cnt[$key]['created_at'] = Carbon::now();
-                    $cnt[$key]['updated_at'] = Carbon::now();
-                }
-                CrmAgentAutoAssignCnType::insert($cnt);
-            }
-            if (!empty($hub_id)) {
-                foreach ($hub_id as $key => $value) {
-                    $hub[$key]['agent_id'] = $agents;
-                    $hub[$key]['hub_id'] = $value;
-                    $hub[$key]['created_at'] = Carbon::now();
-                    $hub[$key]['updated_at'] = Carbon::now();
-                }
-                CrmAgentAutoAssignHub::insert($hub);
-            }
-            if (!empty($zone_id)) {
-                foreach ($zone_id as $key => $value) {
-                    $zn[$key]['agent_id'] = $agents;
-                    $zn[$key]['zone_id'] = $value;
-                    $zn[$key]['created_at'] = Carbon::now();
-                    $zn[$key]['updated_at'] = Carbon::now();
-                }
-                CrmAgentAutoAssignZone::insert($zn);
-            }
-            if (!empty($shipper_key_id)) {
-                foreach ($shipper_key_id as $key => $value) {
-                    $sk[$key]['agent_id'] = $agents;
-                    $sk[$key]['shipper_key_id'] = $value;
-                    $sk[$key]['created_at'] = Carbon::now();
-                    $sk[$key]['updated_at'] = Carbon::now();
-                }
-                CrmAgentAutoAssignShipper::insert($sk);
-            }
-            if (!empty($shipper_non_key_id)) {
-                foreach ($shipper_non_key_id as $key => $value) {
-                    $snk[$key]['agent_id'] = $agents;
-                    $snk[$key]['shipper_non_key_id'] = $value;
-                    $snk[$key]['created_at'] = Carbon::now();
-                    $snk[$key]['updated_at'] = Carbon::now();
-                }
-                CrmAgentAutoAssignSNKey::insert($snk);
-            }
-            if (!empty($shipment_status_id)) {
-                foreach ($shipment_status_id as $key => $value) {
-                    $ss[$key]['agent_id'] = $agents;
-                    $ss[$key]['shipment_status_id'] = $value;
-                    $ss[$key]['created_at'] = Carbon::now();
-                    $ss[$key]['updated_at'] = Carbon::now();
-                }
-                CrmAgentAutoAssignShipStatus::insert($ss);
             }
 
-            if (isset($request->id)) {
+            $crm_agent = CrmAgentAutoAssign::where('agent_id', $admin_id);
+            if (!$crm_agent->exists()) {
 
-                return redirect()->route('admin.settings.auto_assigning.index')->with('success', 'Edit Agent Successfully!');
+                $agents = $admin_id;
+                $shipment_status_id = $request->input('shipment_status_id', null);
+                $zone_id = $request->input('zone_id', null);
+                $hub_id = $request->input('hub_id', null);
+                $case_nature_id = $request->input('case_nature_id', null);
+                $case_nature_type_id = $request->input('case_nature_type_id', null);
+                $shipper_key_id = $request->input('shipper_key_id', null);
+                $shipper_non_key_id = $request->input('shipper_non_key_id', null);
+                $business_segment_id = $request->input('business_segment_id', null);
+                $sub_business_segment_id = $request->input('sub_business_segment_id', null);
+
+                $origin_zone_id = $request->input('origin_zone_id', null);
+                $origin_id = $request->input('origin_id', null);
+                $origin_area_id = $request->input('origin_area_id', null);
+
+                $crm_agent = new CrmAgentAutoAssign();
+                $crm_agent->agent_id = $agents;
+                $crm_agent->status = isset($request->status) ? $request->status : 0;
+                $crm_agent->save();
+
+                if (!empty($business_segment_id)) {
+                    foreach ($business_segment_id as $key => $value) {
+                        $bs[$key]['agent_id'] = $agents;
+                        $bs[$key]['business_segment_id'] = $value;
+                        $bs[$key]['created_at'] = Carbon::now();
+                        $bs[$key]['updated_at'] = Carbon::now();
+                    }
+                    CrmAgentAutoAssignBusSeg::insert($bs);
+                }
+                if (!empty($sub_business_segment_id)) {
+                    foreach ($sub_business_segment_id as $key => $value) {
+                        $sbs[$key]['agent_id'] = $agents;
+                        $sbs[$key]['sub_segment_id'] = $value;
+                        $sbs[$key]['created_at'] = Carbon::now();
+                        $sbs[$key]['updated_at'] = Carbon::now();
+                    }
+                    CrmAgentAutoAssignSubSegment::insert($sbs);
+                }
+                if (!empty($case_nature_id)) {
+                    foreach ($case_nature_id as $key => $value) {
+                        $cn[$key]['agent_id'] = $agents;
+                        $cn[$key]['case_nature_id'] = $value;
+                        $cn[$key]['created_at'] = Carbon::now();
+                        $cn[$key]['updated_at'] = Carbon::now();
+                    }
+                    CrmAgentAutoAssignCaseNature::insert($cn);
+                }
+                if (!empty($case_nature_type_id)) {
+                    foreach ($case_nature_type_id as $key => $value) {
+                        $cnt[$key]['agent_id'] = $agents;
+                        $cnt[$key]['case_nature_type_id'] = $value;
+                        $cnt[$key]['created_at'] = Carbon::now();
+                        $cnt[$key]['updated_at'] = Carbon::now();
+                    }
+                    CrmAgentAutoAssignCnType::insert($cnt);
+                }
+                if (!empty($hub_id)) {
+                    foreach ($hub_id as $key => $value) {
+                        $hub[$key]['agent_id'] = $agents;
+                        $hub[$key]['hub_id'] = $value;
+                        $hub[$key]['created_at'] = Carbon::now();
+                        $hub[$key]['updated_at'] = Carbon::now();
+                    }
+                    CrmAgentAutoAssignHub::insert($hub);
+                }
+                if (!empty($zone_id)) {
+                    foreach ($zone_id as $key => $value) {
+                        $zn[$key]['agent_id'] = $agents;
+                        $zn[$key]['zone_id'] = $value;
+                        $zn[$key]['created_at'] = Carbon::now();
+                        $zn[$key]['updated_at'] = Carbon::now();
+                    }
+                    CrmAgentAutoAssignZone::insert($zn);
+                }
+                if (!empty($shipper_key_id)) {
+                    foreach ($shipper_key_id as $key => $value) {
+                        $sk[$key]['agent_id'] = $agents;
+                        $sk[$key]['shipper_key_id'] = $value;
+                        $sk[$key]['created_at'] = Carbon::now();
+                        $sk[$key]['updated_at'] = Carbon::now();
+                    }
+                    CrmAgentAutoAssignShipper::insert($sk);
+                }
+                if (!empty($shipper_non_key_id)) {
+                    foreach ($shipper_non_key_id as $key => $value) {
+                        $snk[$key]['agent_id'] = $agents;
+                        $snk[$key]['shipper_non_key_id'] = $value;
+                        $snk[$key]['created_at'] = Carbon::now();
+                        $snk[$key]['updated_at'] = Carbon::now();
+                    }
+                    CrmAgentAutoAssignSNKey::insert($snk);
+                }
+                if (!empty($shipment_status_id)) {
+                    foreach ($shipment_status_id as $key => $value) {
+                        $ss[$key]['agent_id'] = $agents;
+                        $ss[$key]['shipment_status_id'] = $value;
+                        $ss[$key]['created_at'] = Carbon::now();
+                        $ss[$key]['updated_at'] = Carbon::now();
+                    }
+                    CrmAgentAutoAssignShipStatus::insert($ss);
+                }
+
+                if (!empty($origin_zone_id)) {
+                    foreach ($origin_zone_id as $key => $value) {
+                        $origin_zn[$key]['agent_id'] = $agents;
+                        $origin_zn[$key]['origin_zone_id'] = $value;
+                        $origin_zn[$key]['created_at'] = Carbon::now();
+                        $origin_zn[$key]['updated_at'] = Carbon::now();
+                    }
+                    CrmAgentAutoAssignOriginZone::insert($origin_zn);
+                }
+
+                if (!empty($origin_id)) {
+                    foreach ($origin_id as $key => $value) {
+                        $origin_hub[$key]['agent_id'] = $agents;
+                        $origin_hub[$key]['origin_hub_id'] = $value;
+                        $origin_hub[$key]['created_at'] = Carbon::now();
+                        $origin_hub[$key]['updated_at'] = Carbon::now();
+                    }
+                    CrmAgentAutoAssignOriginHub::insert($origin_hub);
+                }
+
+                if (!empty($origin_area_id)) {
+                    foreach ($origin_area_id as $key => $value) {
+                        $origin_area[$key]['agent_id'] = $agents;
+                        $origin_area[$key]['origin_area_id'] = $value;
+                        $origin_area[$key]['created_at'] = Carbon::now();
+                        $origin_area[$key]['updated_at'] = Carbon::now();
+                    }
+                    CrmAgentAutoAssignOriginArea::insert($origin_area);
+                }
+
+                DB::commit();
+
+                if (isset($request->id)) {
+                    return redirect()->route('admin.settings.auto_assigning.index')->with('success', 'Edit Agent Successfully!');
+                } else {
+                    return redirect()->route('admin.settings.auto_assigning.index')->with('success', 'Agent Added!');
+                }
             } else {
-                return redirect()->route('admin.settings.auto_assigning.index')->with('success', 'Agent Added!');
+                DB::rollBack();
+                return redirect()->route('admin.settings.auto_assigning.index')->with('error', 'Agent Already Exists!');
             }
-        } else {
-            return redirect()->route('admin.settings.auto_assigning.index')->with('error', 'Agent Already Exists!');
+        }catch (\Exception $ex){
+            DB::rollBack();
+            return redirect()->route('admin.settings.auto_assigning.index')->with('error', 'Internal Server Error');
         }
     }
 
@@ -6107,19 +6268,31 @@ class GlobalSettingsController extends Controller
     public function crm_auto_tagging_list()
     {
         $roles = CrmAutoTagUser::join('admins as ad', 'ad.id', '=', 'crm_auto_tag_users.admin_id')
-            ->join('cities as c', 'c.id', 'crm_auto_tag_users.city_id')
-            ->leftJoin('city_areas as ca', 'ca.id', 'crm_auto_tag_users.city_area_id')
-            ->leftJoin('crm_request_case_nature as cn', 'cn.id', 'crm_auto_tag_users.crm_case_nature_id')
-            ->leftJoin('crm_request_case_nature_types as cnt', 'cnt.id', 'crm_auto_tag_users.crm_case_nature_type_id')
-            ->select('crm_auto_tag_users.id', 'ad.name as agent_name', 'c.name as city_name', 'crm_auto_tag_users.status', 'ca.name as city_area_name', 'cn.name as case_natue', 'cnt.type as case_nature_type');
+        ->join('cities as c', 'c.id', 'crm_auto_tag_users.city_id')
+        ->leftJoin('city_areas as ca', 'ca.id', 'crm_auto_tag_users.city_area_id')
+        ->leftJoin('crm_request_case_nature as cn', 'cn.id', 'crm_auto_tag_users.crm_case_nature_id')
+        ->leftJoin('crm_request_case_nature_types as cnt', 'cnt.id', 'crm_auto_tag_users.crm_case_nature_type_id')
+        ->select('crm_auto_tag_users.id', 'ad.name as agent_name', 'c.name as city_name', 'crm_auto_tag_users.status', 'ca.name as city_area_name',  DB::raw("GROUP_CONCAT(cnt.type ORDER BY cnt.type ASC SEPARATOR ', ') as case_nature_types"),
+        DB::raw("GROUP_CONCAT(cnt.id ORDER BY cnt.id ASC SEPARATOR ', ') as case_nature_type_ids"),
+        DB::raw("GROUP_CONCAT(DISTINCT cn.name ORDER BY cn.name ASC SEPARATOR ', ') as case_natue"),
+        DB::raw("GROUP_CONCAT(DISTINCT cn.id ORDER BY cn.id ASC SEPARATOR ', ') as case_nature_ids")
+        )
+        ->groupBy('ad.id', 'c.id', 'ca.id');
 
         $datatables = Datatables::of($roles)
             ->addColumn('action', function ($roles) {
                 if (session('role_id') == 1 || in_array(640, session('permissions'))) {
+                 
+                    $case_nature_type_ids = explode(',', $roles->case_nature_type_ids);
+                    $case_nature_types_json = json_encode($case_nature_type_ids);
+
+                    $case_nature_ids = explode(',', $roles->case_nature_ids);
+                    $case_nature_ids = json_encode($case_nature_ids);
+
                     $dropdown = '<div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">
-                    <button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>
+                    <button type="button" class="dropdown-item edit" data-case_nature_type_ids=\'' . addslashes($case_nature_types_json) . '\' data-case_nature_ids=\'' . addslashes($case_nature_ids) . '\'><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>
                     ';
                     // $dropdown .=' <button type="button" class="dropdown-item delete"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Delete</div></button>';
                     if ($roles->status == 1) {
@@ -6160,8 +6333,8 @@ class GlobalSettingsController extends Controller
                 }
             })
             ->editColumn('case_nature_type', function ($roles) {
-                if ($roles->case_nature_type) {
-                    return $roles->case_nature_type;
+                if ($roles->case_nature_types) {
+                    return $roles->case_nature_types;
                 } else {
                     return '<p class="text-center"> -- </p>';
                 }
@@ -6193,37 +6366,68 @@ class GlobalSettingsController extends Controller
     public function case_nature_types(Request $request)
     {
         $validations = [
-            'crm_case_nature_id' => 'required|numeric',
+            'crm_case_nature_id' => 'required|array',
         ];
 
         $validate = Validator::make($request->all(), $validations);
 
-        if ($validate->fails()) {
+        if ($validate->fails() || count($request->all()) == 0) {
             return [];
         }
 
         $crm_case_nature_id = $request->crm_case_nature_id;
-        $case_nature_types = CrmRequestCaseNatureType::where('nature_id', $crm_case_nature_id)->select('id', 'type as name')->get();
+        $case_nature_types = CrmRequestCaseNatureType::whereIn('nature_id', $crm_case_nature_id)->select('id', 'type as name')->get();
 
         return $case_nature_types;
     }
-
     public function crm_auto_tagging_submit(Request $request)
     {
-
-        $crm_agent = CrmAutoTagUser::where('city_id', $request->city_id)->where('city_area_id', $request->city_area_id)->where('crm_case_nature_id', $request->crm_case_nature_id)->where('crm_case_nature_type_id', $request->crm_case_nature_type_id)->where('admin_id', $request->admin_id)->where('status', 1);
-        if (!$crm_agent->exists()) {
-            CrmAutoTagUser::create($request->all());
-            return redirect()->back()->with('success', 'Agent Added!');
-        } else {
-            return redirect()->back()->with('error', 'Selected User on this Location already exist, Please edit the Tagged user');
+        $crm_case_nature_type_ids = is_array($request->crm_case_nature_type_id) 
+            ? $request->crm_case_nature_type_id 
+            : [$request->crm_case_nature_type_id];
+    
+        $exists = CrmAutoTagUser::where('city_id', $request->city_id)
+            ->where('city_area_id', $request->city_area_id)
+            ->whereIn('crm_case_nature_type_id', $crm_case_nature_type_ids)
+            ->where('admin_id', $request->admin_id)
+            ->where('status', 1)
+            ->exists(); 
+    
+        if ($exists) {
+            return redirect()->back()->with('error', 'Selected user on this location already exists. Please edit the tagged user.');
         }
-    }
 
+        $parents = CrmRequestCaseNatureType::whereIn('id', $crm_case_nature_type_ids)
+            ->pluck('nature_id', 'id');
+
+        $insertData = [];
+
+        foreach ($crm_case_nature_type_ids as $type_id) {
+            if (isset($parents[$type_id])) {
+                $insertData[] = [
+                    'city_id' => $request->city_id,
+                    'city_area_id' => $request->city_area_id,
+                    'crm_case_nature_id' => $parents[$type_id],
+                    'crm_case_nature_type_id' => $type_id,
+                    'admin_id' => $request->admin_id,
+                    'status' => 1,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+        }
+
+        if (!empty($insertData)) {
+            CrmAutoTagUser::insert($insertData);
+        }
+    
+        return redirect()->back()->with('success', 'Agent(s) added successfully!');
+    }
+    
+    
     public function crm_auto_tagging_data(Request $request)
     {
         $crm_agent_data = CrmAutoTagUser::find($request->id);
-
         $agent_id = $crm_agent_data->admin_id;
         $city_id = $crm_agent_data->city_id;
         $crm_agent_id = $crm_agent_data->id;
@@ -6244,25 +6448,91 @@ class GlobalSettingsController extends Controller
     }
 
 
+
     public function crm_auto_tagging_update(Request $request)
     {
-
-        $crm_agent = CrmAutoTagUser::where('city_id', $request->city_id)->where('city_area_id', $request->city_area_id)->where('crm_case_nature_id', $request->crm_case_nature_id)->where('crm_case_nature_type_id', $request->crm_case_nature_type_id);
-        if (!$crm_agent->exists()) {
-            $crm_agent_data = CrmAutoTagUser::find($request->crm_agent_id);
-
-            $crm_agent_data->admin_id = $request->admin_id;
-            $crm_agent_data->city_id = $request->city_id;
-            $crm_agent_data->city_area_id = $request->city_area_id;
-            $crm_agent_data->crm_case_nature_id = $request->crm_case_nature_id;
-            $crm_agent_data->crm_case_nature_type_id = $request->crm_case_nature_type_id;
-            $crm_agent_data->save();
-            return redirect()->back()->with('success', 'Agent Updated!');
-        } else {
-            return redirect()->back()->with('error', 'User on this Location already exist, Please edit the Tagged user');
+        try {
+            $adminId = $request->admin_id;
+            $currentAdminId = $request->current_admin_id;
+            $cityId = $request->city_id;
+            $currentCityId = $request->current_city_id;
+            $cityAreaId = $request->city_area_id;
+            $currentCityAreaId = $request->current_city_area_id;
+            $crm_case_nature_type_ids = array_unique($request->crm_case_nature_type_id);
+    
+            DB::beginTransaction();
+            try {
+                $existingEntry = CrmAutoTagUser::where('admin_id', $adminId)
+                    ->where('city_id', $cityId)
+                    ->where('city_area_id', $cityAreaId)
+                    ->exists();
+    
+                if ($existingEntry && ($currentAdminId != $adminId || $currentCityId != $cityId || $currentCityAreaId != $cityAreaId)) {
+                    return redirect()->back()->with('error', 'Selected city, area, or admin already have agents. Please update existing agents.');
+                }
+    
+                $existingRecords = CrmAutoTagUser::where('admin_id', $currentAdminId)
+                    ->where('city_id', $currentCityId)
+                    ->where('city_area_id', $currentCityAreaId)
+                    ->get();
+    
+                $existingRecordsMap = $existingRecords->pluck('id', 'crm_case_nature_type_id')->toArray();
+                $entriesToInsert = [];
+                $entriesToUpdate = [];
+                $entriesToDelete = array_diff(array_keys($existingRecordsMap), $crm_case_nature_type_ids);
+    
+                foreach ($crm_case_nature_type_ids as $caseNatureTypeId) {
+                    if (isset($existingRecordsMap[$caseNatureTypeId])) {
+                        $entriesToUpdate[] = $existingRecordsMap[$caseNatureTypeId]; 
+                    } else {
+                        $parent = CrmRequestCaseNatureType::find($caseNatureTypeId);
+                        if ($parent) {
+                            $entriesToInsert[] = [
+                                'admin_id' => $adminId,
+                                'city_id' => $cityId,
+                                'city_area_id' => $cityAreaId,
+                                'crm_case_nature_id' => $parent->nature_id,
+                                'crm_case_nature_type_id' => $caseNatureTypeId,
+                                'status' => 1,
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ];
+                        }
+                    }
+                }
+    
+                if (!empty($entriesToUpdate)) {
+                    CrmAutoTagUser::whereIn('id', $entriesToUpdate)->update([
+                        'admin_id' => $adminId,
+                        'city_id' => $cityId,
+                        'city_area_id' => $cityAreaId,
+                        'updated_at' => now(),
+                    ]);
+                }
+    
+                if (!empty($entriesToInsert)) {
+                    CrmAutoTagUser::insert($entriesToInsert);
+                }
+    
+                $entriesToDelete = array_diff(array_keys($existingRecordsMap), $crm_case_nature_type_ids);
+                if (!empty($entriesToDelete)) {
+                    CrmAutoTagUser::where('admin_id', $currentAdminId)
+                    ->where('city_id', $currentCityId)
+                    ->where('city_area_id', $currentCityAreaId)->whereIn('crm_case_nature_type_id', $entriesToDelete)->delete();
+                }
+    
+                DB::commit();
+    
+                return redirect()->back()->with('success', 'CRM Auto Tagging updated successfully.');
+            } catch (\Exception $e) {
+                DB::rollBack();
+                return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
+            }
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Validation Error: ' . $e->getMessage());
         }
     }
-
+    
     public function crm_auto_tagging_enable_disable(Request $request)
     {
         $crm_agent = CrmAutoTagUser::find($request->id);
@@ -9390,8 +9660,8 @@ class GlobalSettingsController extends Controller
             $all_shipper_settings->type = 'rv_disable_shippers_all_shippers';
         }
         $all_shipper_settings->setting_value = ($request->has('all_shipper_toggle')) ? 1 : 0;
-
         $all_shipper_settings->save();
+        $changes = $all_shipper_settings;
 
         if ($request->has('all_shipper_toggle') && $request->has('excluded_users')) {
             $excluded_users = implode(',', $request->excluded_users);
@@ -9406,7 +9676,7 @@ class GlobalSettingsController extends Controller
             $settings->setting_value = 1;
             $settings->text = $excluded_users;
             $settings->save();
-
+            $changes = $settings;
             // Update disabled users in RV shipment tickets (Set disable_shipper to 0 of given shippers)
             $shippers = explode(',', $excluded_users);
             $this->updateDisabledUserInRvShipmentTickets($shippers, 0);
@@ -9426,6 +9696,8 @@ class GlobalSettingsController extends Controller
             $settings->setting_value = 1;
             $settings->text = $only_users;
             $settings->save();
+            $changes = $settings;
+
             GlobalSettings::where('type', 'rv_disable_shippers_all_shippers')->update(['setting_value' => 0, 'text' => NULL]);
             GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers')->update(['setting_value' => 0, 'text' => NULL]);
 
@@ -9444,16 +9716,23 @@ class GlobalSettingsController extends Controller
             $this->updateDisabledUserInRvShipmentTickets(null, 1);
         }
 
+        ChangeLogs::create([
+            'table_name' => $changes->getTable(),
+            'record_id' => $changes->getKey(),
+            'old_data' => json_encode($changes->getOriginal()),
+            'new_data' => json_encode($changes->getChanges()),
+            'updated_by' => Auth::id(),
+        ]);
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
     private function updateDisabledUserInRvShipmentTickets($shipperUserIds = null, $isDisabled = null)
     {
         if (!empty($shipperUserIds)) {
-            RvShipmentTicket::whereIn('shipment_user_id', $shipperUserIds)->update(['disabled_shipper' => $isDisabled]);
-            RvShipmentTicket::whereNotIn('shipment_user_id', $shipperUserIds)->update(['disabled_shipper' => !$isDisabled]);
+            RvShipmentTicket::whereIn('shipment_user_id', $shipperUserIds)->where('halt_shipper', 0)->update(['disabled_shipper' => $isDisabled]);
+            RvShipmentTicket::whereNotIn('shipment_user_id', $shipperUserIds)->where('halt_shipper', 0)->update(['disabled_shipper' => !$isDisabled]);
         } else {
-            RvShipmentTicket::where('disabled_shipper', $isDisabled ? 0 : 1)->update(['disabled_shipper' => $isDisabled]);
+            RvShipmentTicket::where('disabled_shipper', $isDisabled ? 0 : 1)->where('halt_shipper',0)->update(['disabled_shipper' => $isDisabled]);
         }
     }
 
@@ -9482,20 +9761,44 @@ class GlobalSettingsController extends Controller
     public function add_auto_assign_agent()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 661);
-        $agents = Admin::select('id', 'name')->whereIn('role_id', [37, 28])->get(); //37,28 role
+        $agents = Admin::select('id', 'name','role_id')->whereIn('role_id', [37, 28,43,67,75,115])->where('status',1)->get(); //37,28 role
         $zones = Zone::where('status', 1)->where('business_category_id', 1)->get();
         $case_natures = CrmRequestCaseNature::all();
         $segments = Segment::all();
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
-        $shipper_key = SaleTierTag::join('users as u', 'u.id', 'sale_tier_tags.user_id')->WhereNotNull('kam')->select('u.id', 'u.name')->get();
         //$shipper_non_key = SaleTierTag::join('users as u','u.id','sale_tier_tags.user_id')->WhereNull('kam')->select('u.id','u.name')->get();
-        $shipper_non_key = User::with('sale_tier_tags')
+
+
+        $origins = City::select('id','name')->where('status',1)->get();
+        return view('admin.settings.CRM.add_auto_assign')->with(['origins'=>$origins,'agents' => $agents, 'zones' => $zones, 'case_natures' => $case_natures, 'segments' => $segments, 'shipment_status' => $shipment_status]);
+    }
+    public function get_shipper_key($agent_id) {
+        $shipper_keys = SaleTierTag::join('users as u', 'u.id', 'sale_tier_tags.user_id')
+            ->where('u.status',3)
+            ->WhereNotNull('kam')
+            ->where('kam',$agent_id)->select('u.id', 'u.name')->get();
+        if($shipper_keys->isNotEmpty()){
+            return response()->json(['status' => 1, 'shipper_keys' => $shipper_keys]);
+        }else {
+            return response()->json(['status' => 0, 'error' => 'No data Found']);
+        }
+    }
+
+    public function get_shipper_non_key()
+    {
+        $shipper_non_keys = User::with('sale_tier_tags')
             ->where('status', '=', 3)
             ->where('blacklist', '=', 0)
             ->whereDoesntHave('sale_tier_tags')
+            ->select('users.id','users.name')
             ->get();
-        return view('admin.settings.CRM.add_auto_assign')->with(['agents' => $agents, 'zones' => $zones, 'case_natures' => $case_natures, 'segments' => $segments, 'shipper_key' => $shipper_key, 'shipper_non_key' => $shipper_non_key, 'shipment_status' => $shipment_status]);
+        if($shipper_non_keys){
+            return response()->json(['status' => 1, 'shipper_non_keys' => $shipper_non_keys]);
+        }else {
+            return response()->json(['status' => 0, 'error' => 'No data Found']);
+        }
     }
+
     public function global_status(Request $request)
     {
         $settings = GlobalSettings::where('type', '=', 'crm_agent_auto_assigning');
@@ -9524,6 +9827,27 @@ class GlobalSettingsController extends Controller
         }
     }
 
+    public function get_origin_areas(Request $request)
+    {
+        if (isset($request->origin_ids)) {
+            $origin_ids = $request->origin_ids;
+            $origin_areas = CityArea::whereIn('city_id', $origin_ids)->select('id', 'name')->orderby('name', 'asc')->get();
+            return response()->json(['status' => 1, 'origin_areas' => $origin_areas]);
+        } else {
+            return response()->json(['status' => 0, 'error' => 'No data Found']);
+        }
+    }
+    public function get_origin_hub(Request $request)
+    {
+        if (isset($request->origin_zone_id)) {
+            $zone = $request->origin_zone_id;
+            $origin_hubs = City::where('hub', 1)->whereIn('zone_id', $zone)->select('id', 'name')->orderby('name', 'asc')->get();
+
+            return response()->json(['status' => 1, 'origin_hubs' => $origin_hubs]);
+        } else {
+            return response()->json(['status' => 0, 'error' => 'No data Found']);
+        }
+    }
     public function airway_bill_address_visibility_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 680);
@@ -10207,4 +10531,224 @@ class GlobalSettingsController extends Controller
 
 
     }
+
+    public function wallet_shippers_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 818);
+        $shippers = User::where('status', '=', 3)
+            ->where('blacklist', 0)
+            ->where('account_type_id', 1)
+            ->get();
+        return view('admin.settings.wallet_shippers.index')->with(['shippers' => $shippers]);
+    }
+    
+
+    public function wallet_shippers_list()
+    {
+        $wallet_shippers = WalletShipperSetting::join('users as u', 'wallet_shipper_settings.user_id', '=', 'u.id')
+            ->select('u.name as shipper_name', 'wallet_shipper_settings.id as id', 'wallet_shipper_settings.status as status', 'wallet_shipper_settings.created_at as created');
+
+        $datatables = Datatables::of($wallet_shippers);
+            // ->editColumn('status', function ($wallet_shippers) {
+            //     if ($wallet_shippers->status == 1) {
+            //         return 'Enable';
+            //     } else {
+            //         return 'Disable';
+            //     }
+            // })
+            // ->addColumn('action', function ($wallet_shippers) {
+            //     if (session('role_id') == 1 || count(array_intersect([1007, 848], session('permissions'))) !== 0) {
+
+            //         $dropdown = '<div class="btn-group">
+            //         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+            //         <div class="dropdown-menu dropdown-menu-sm">
+            //         ';
+            //         if (session('role_id') == 1 || in_array(1025, session('permissions'))) {
+            //             if ($wallet_shippers ->status == 1) {
+
+            //                 $dropdown .= ' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+            //             } else {
+            //                 $dropdown .= ' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+            //             }
+            //         }
+
+            //         $dropdown .= '</div></div>';
+            //         return $dropdown;
+            //     } else {
+            //         return '';
+            //     }
+            // });
+        return $datatables->make(true);
+    }
+    
+    public function wallet_shippers_add(Request $request)
+    {
+        // dd($request->wallet_shipper_id);
+        $shipper_ids = (array) $request->wallet_shipper_id; 
+        $already_existing_ids = [];
+        $bulkData = [];
+        if (!empty($shipper_ids)) {
+            foreach ($shipper_ids as $id) {
+                $exists = WalletShipperSetting::where('user_id', $id)->exists();
+        
+                if ($exists) {
+                    $already_existing_ids[] = $id;
+                } else {
+                    $bulkData[] = [
+                        'user_id' => $id, 
+                        'add_by' => Auth::id(),
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                }
+            }
+            WalletShipperSetting::insert($bulkData);        
+            if (!empty($already_existing_ids)) {
+                return redirect()->back()->with('error', 'Already exists for IDs: ' . implode(', ', $already_existing_ids));
+            } else {
+                return redirect()->back()->with('success', 'All Shippers Added Successfully!');
+            }
+        }
+         else {
+            return redirect()->back()->with('error', 'Shipper Required !');
+        }
+    }
+
+    public function wallet_shippers_enable_disable(Request $request)
+    {
+        $wallet_shipper = WalletShipperSetting::find($request->id);
+       
+        if ($wallet_shipper->status == 1) {
+            $wallet_shipper->status = 0;
+           
+            $wallet_shipper->save();
+            return redirect()->back()->with('success', 'Shipper Disabled !');
+        } else {
+            $wallet_shipper->status = 1;
+            $wallet_shipper->save();
+            return redirect()->back()->with('success', 'Shipper Enabled !');
+        }
+    }
+
+    public function zonal_margin_column_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 681);
+       
+        $zoneColumn = collect(InternationalStandardDhlRate::first())
+            ->keys()
+            ->filter(function ($key) {
+                return Str::startsWith($key, 'zone_');
+            })
+            ->values();
+        $marginColumn = collect(InternationalUserRate::first())
+            ->keys()
+            ->filter(function ($key) {
+                return Str::startsWith($key, 'margin_');
+            })
+            ->values();
+        $ZoneMarginColumn = InternationalZonalMarginColumn::where('type',1)->first();
+       
+        return view('admin.settings.international.zonal_margin_column_mapping')->with(['zoneColumn' => $zoneColumn, 'marginColumn' => $marginColumn , 'selectedMarginColumns' => ($ZoneMarginColumn->margin_column ??  null), 'selectedZoneColumn'=> ($ZoneMarginColumn->zone_column??  null)]);
+    }
+
+    public function ZoneMarginColumnSubmit(Request $request)
+    {
+        InternationalZonalMarginColumn::updateOrCreate(
+            ['type' => 1],
+            [
+            'type' => 1,
+            'margin_column'=> implode(',', $request->margin_column),
+            'zone_column'=> implode(',', $request->zone_column),
+            ]
+        );
+        return redirect()->back()->with('success', 'Zone & Margin Column Added!');
+    }
+
+    public function email_delivery_time_index() {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 824);
+    
+        $settings = GlobalSettings::whereIn('type', [
+            'pending_deliveries_report_time', 
+            'quality_of_service_report_time',
+            'quality_of_service_report_other_time',
+            'receive_deliveries_report_time',
+            'receive_return_deliveries_report_time',
+            'delivery_note_history_report_time',
+            'weight_qc_report_time',
+            'overall_sales_report_time'
+        ])->get()->keyBy('type');
+    
+        $pending_deliveries_report_time = $settings['pending_deliveries_report_time']->text ?? null;
+        $quality_of_service_report_time = $settings['quality_of_service_report_time']->text ?? null;
+        $quality_of_service_report_other_time = $settings['quality_of_service_report_other_time']->text ?? null;
+        $receive_deliveries_report_time = $settings['receive_deliveries_report_time']->text ?? null;
+        $receive_return_deliveries_report_time = $settings['receive_return_deliveries_report_time']->text ?? null;
+        $delivery_note_history_report_time = $settings['delivery_note_history_report_time']->text ?? null;
+        $weight_qc_report_time = $settings['weight_qc_report_time']->text ?? null;
+        $overall_sales_report_time = $settings['overall_sales_report_time']->text ?? null;
+    
+        $pending_deliveries_report_toggle = $settings['pending_deliveries_report_time']->setting_value ?? 0;
+        $quality_of_service_report_toggle = $settings['quality_of_service_report_time']->setting_value ?? 0;
+        $receive_deliveries_toggle = $settings['receive_deliveries_report_time']->setting_value ?? 0;
+        $receive_return_deliveries_report_toggle = $settings['receive_return_deliveries_report_time']->setting_value ?? 0;
+        $delivery_note_history_report_toggle = $settings['delivery_note_history_report_time']->setting_value ?? 0;
+        $weight_qc_report_toggle = $settings['weight_qc_report_time']->setting_value ?? 0;
+        $overall_sales_report_toggle = $settings['overall_sales_report_time']->setting_value ?? 0;
+    
+        return view('admin.settings.email_setting.index', compact(
+            'pending_deliveries_report_time', 
+            'quality_of_service_report_time', 
+            'quality_of_service_report_other_time',
+            'receive_deliveries_report_time',
+            'receive_return_deliveries_report_time',
+            'delivery_note_history_report_time',
+            'weight_qc_report_time',
+            'overall_sales_report_time',
+            'pending_deliveries_report_toggle', 
+            'quality_of_service_report_toggle',
+            'receive_deliveries_toggle',
+            'receive_return_deliveries_report_toggle',
+            'delivery_note_history_report_toggle',
+            'weight_qc_report_toggle',
+            'overall_sales_report_toggle'
+        ));
+    }
+
+    public function email_delivery_time_update(Request $request) {
+        $settings = [
+            'pending_deliveries_report_time' => $request->pending_deliveries_report_time,
+            'quality_of_service_report_time' => $request->quality_of_service_report_time,
+            'quality_of_service_report_other_time' => $request->quality_of_service_report_other_time,
+            'receive_deliveries_report_time' => $request->receive_deliveries_report_time,
+            'receive_return_deliveries_report_time' => $request->receive_return_deliveries_report_time,
+            'delivery_note_history_report_time' => $request->delivery_note_history_report_time,
+            'weight_qc_report_time' => $request->weight_qc_report_time,
+            'overall_sales_report_time' => $request->overall_sales_report_time,
+        ];
+    
+        $toggles = [
+            'pending_deliveries_report_time' => $request->pending_deliveries_report_toggle == 'on' ? 1 : 0,
+            'quality_of_service_report_time' => $request->quality_of_service_toggle == 'on' ? 1 : 0, // Used for both times
+            'quality_of_service_report_other_time' => $request->quality_of_service_toggle == 'on' ? 1 : 0, // Ensure same toggle
+            'receive_deliveries_report_time' => $request->receive_delivieries_toggle == 'on' ? 1 : 0,
+            'receive_return_deliveries_report_time' => $request->receive_return_deliveries_toggle == 'on' ? 1 : 0,
+            'delivery_note_history_report_time' => $request->delivery_note_history_toggle == 'on' ? 1 : 0,
+            'weight_qc_report_time' => $request->weight_qc_toggle == 'on' ? 1 : 0,
+            'overall_sales_report_time' => $request->overall_sales_toggle == 'on' ? 1 : 0,
+        ];
+    
+        foreach ($settings as $type => $text) {
+            if (!empty($text)) {
+                GlobalSettings::updateOrCreate(
+                    ['type' => $type], 
+                    ['text' => $text, 'setting_value' => $toggles[$type]]
+                );
+            } else {
+                GlobalSettings::where('type', $type)->update(['setting_value' => $toggles[$type]]);
+            }
+        }
+    
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+    
 }

@@ -658,6 +658,10 @@ class Permission
             'reports.issuance_sack_bag.index' => 937,
 
             'reports.shipment_reversal_report.index' => 1001,
+            'reports.lost_and_case_closed_summary_report.index' => 1021,
+            'reports.kam_and_poc_qsr.index' => 1032,
+
+            
 
             'packaging.index' => 76,
             'packaging.list' => 76,
@@ -1034,6 +1038,8 @@ class Permission
 
             'settings.shipper_negative_payable.index' => 982,
             'settings.faf_charges.index'=>997,
+            // 'settings.reports.email_delivery_time.index' => 1031,
+            'settings.email_delivery_time.index' => 1031,
 
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
@@ -1290,6 +1296,7 @@ class Permission
 
             'shipment_otp.index' => 815,
             'shipment_otp.list' => 815,
+            'shipment_otp.scanning_history' => 1033,
 
             'delivery.rider_request.index' => 35,
             'delivery.rider_request.list' => 35,

@@ -89,7 +89,7 @@
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Add Request</h4>
+                    <h4 class="modal-title white">Get Support</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -129,6 +129,23 @@
                                             </select>
                                         </fieldset>
                                     </div>
+
+                                    <div class="col-6">
+                                        <fieldset class="form-group">
+                                            <select name="case_nature_complainant" id="case_nature_complainant"
+                                                    class="form-control select2">
+                                                <option value="1">Consignee</option>
+                                                <option value="2">Shipper</option>
+                                            </select>
+                                        </fieldset>
+                                    </div>
+                                    <div class="col-6">
+                                        <fieldset class="form-group">
+                                            <input type="text" class="form-control" placeholder="Enter Phone Number" name="complainant_phone" id="complainant_phone">
+                                        </fieldset>
+                                    </div>
+
+
                                     <div class="col-6">
                                         <fieldset class="form-group">
                                             <select name="complaint_channel" id="complaint_channels" class="form-control select2">
@@ -394,6 +411,10 @@
                 'min': 0.00,
                 'max': 1000000.00
             });
+            $('#complainant_phone').inputmask({
+                mask: '9999-9999999',
+                'clearIncomplete': true
+            });
             $('#search_tracking_number').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
@@ -525,6 +546,12 @@
                     allowClear:true,
                     dropdownParent:$('#add_request_form')
                 });
+                $('#case_nature_complainant').prepend('<option value="" selected="selected"></option>').select2({
+                    width: '100%',
+                    placeholder: "Select Complainant",
+                    allowClear: true,
+                    dropdownParent: $('#add_request_form')
+                });
                 $('.phone_number').inputmask({
                     'mask': '9999-9999999',
                     'clearIncomplete': true
@@ -612,6 +639,9 @@
                         var case_nature_complaint_id = $('#case_nature_complaints').val();
                         var case_nature_channel_id = $('#complaint_channels').val();
                         var complaint_description = $('#complaint_description').val();
+                        var complainant_phone = $('#complainant_phone').val();
+                        var case_nature_complainant = $('#case_nature_complainant').val();
+
                         if(!case_nature_complaint_id){
                             nature_flag = false;
                             var error = "Please select Complaint type!";
@@ -627,6 +657,22 @@
                             var error = "Please select Description!";
                             toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         }
+                        if (!complainant_phone) {
+                            nature_flag = false;
+                            var error = "Please enter complainant phone!";
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                        if (!case_nature_complainant) {
+                            nature_flag = false;
+                            var error = "Please select complainant!";
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
                         if(nature_flag){
                             $('#AddNewRequest').attr('disabled',true);
                             $.ajax({
@@ -638,7 +684,9 @@
                                     'case_nature_id' : case_nature_id,
                                     'complaint_id' : case_nature_complaint_id,
                                     'channel_id': case_nature_channel_id,
-                                    'description' : complaint_description
+                                    'description' : complaint_description,
+                                    'complainant_phone' : $('#complainant_phone').val(),
+                                    'case_nature_complainant' : $('#case_nature_complainant').val(),
                                 }
                             })
                                 .done(function(data) {
@@ -693,8 +741,7 @@
                                 });
                         }
 
-                    }
-                    else if(case_nature_id == 2){
+                    }else if(case_nature_id == 2){
                         var nature_flag = true;
                         var case_nature_complaint_id = $('#case_nature_requests').val();
                         var case_nature_channel_id = $('#request_channels').val();
@@ -749,7 +796,9 @@
                                                 'case_nature_id' : case_nature_id,
                                                 'complaint_id' : case_nature_complaint_id,
                                                 'channel_id': case_nature_channel_id,
-                                                'description' : service_description
+                                                'description' : service_description,
+                                                'complainant_phone' : $('#complainant_phone').val(),
+                                                'case_nature_complainant' : $('#case_nature_complainant').val(),
                                             }
                                         })
                                             .done(function(data) {
@@ -806,7 +855,8 @@
                                         $('#AddNewRequest').attr('disabled',false);
                                     }
                                 });
-                            }else {
+                            }
+                            else {
                                 $.ajax({
                                     url: '{!! route('admin.crm.request.add') !!}',
                                     method: 'POST',
@@ -816,7 +866,9 @@
                                         'case_nature_id' : case_nature_id,
                                         'complaint_id' : case_nature_complaint_id,
                                         'channel_id': case_nature_channel_id,
-                                        'description' : service_description
+                                        'description' : service_description,
+                                        'complainant_phone' : $('#complainant_phone').val(),
+                                        'case_nature_complainant' : $('#case_nature_complainant').val(),
                                     }
                                 })
                                     .done(function(data) {
@@ -870,10 +922,8 @@
                                         $('#AddNewRequest').attr('disabled',false);
                                     });
                             }
-
                         }
-                    }
-                    else if(case_nature_id == 3) {
+                    }else if(case_nature_id == 3) {
                         var feedback_flag = true;
                         var feedback_channel = $('#feedback_channel_request').val();
                         var feedback_description = $('#feedback_description_request').val();
@@ -1082,7 +1132,8 @@
                     $('#case_nature_claim').val('').trigger('change');
                     $('#claim_channel').val('').trigger('change');
                     $('#claim_product_cost').val('');
-
+                    $('#case_nature_complainant').val('').trigger('change');
+                    $('#complainant_phone').val('');
                 });
                 var validator_consignee_info_form = $( "#update_consignee_info_form" ).validate({
                     errorClass: 'danger',

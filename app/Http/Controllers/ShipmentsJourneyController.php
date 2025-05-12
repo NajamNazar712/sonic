@@ -29,6 +29,8 @@ use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\CRM\CrmRequestTagging;
 use Vectorface\Whip\Whip;
 use Auth;
+use App\Jobs\ShipmentStatusSharingWithWallet;
+use App\Models\StatusSharingWithWallet;
 
 class ShipmentsJourneyController extends Controller
 {
@@ -153,6 +155,22 @@ class ShipmentsJourneyController extends Controller
         }
 
       $shipment_journey->save();
+
+        if(in_array($shipper_status_id, [5,8,13,14,18,20,36,37,30])) {
+            
+            $shipment = Shipment::join('wallet_users as u', function ($join) {
+                $join->on('u.user_id', '=', 'shipments.user_id')
+                   ->where('u.substitute_user_id', '0');
+            })->where('shipments.id', $shipment_id)->first();
+            if($shipment) {
+                StatusSharingWithWallet::create([
+                    'shipment_id' => $shipment_id,
+                    'is_send' => 0,
+                    'status_id' => $shipper_status_id,
+                ]);
+                //ShipmentStatusSharingWithWallet::dispatch($data, 1);
+            }
+        }
 
         if($remarks_id != null){
             $shipment_journey_id = $shipment_journey->id;

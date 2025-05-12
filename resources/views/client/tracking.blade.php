@@ -35,6 +35,26 @@
 
                             <div class="tracking" id="tracking">
                             </div>
+                                <div class="modal fade" id="rider_information" role="dialog"
+                                    aria-labelledby="rider_information_title" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h4 class="modal-title" id="rider_information_title">Rider Information</h4>
+
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">×</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary"
+                                                    data-dismiss="modal">Close</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                         </div>
                     </div>
                 </div>
@@ -42,13 +62,13 @@
         </div>
     </div>
 
-    {{-- Add Request --}}
+    {{-- Get Support --}}
     <div class="modal fade text-left" id="AddRequestModal" data-backdrop="static" tabindex="-1" role="dialog"
         aria-labelledby="AddRequestModal" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Add Request</h4>
+                    <h4 class="modal-title white">Get Support</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -95,7 +115,7 @@
                                 </div>
                             </div>
 
-                            
+
                             <div class="complaints d-none" id="request_complaints">
                                 <div class="row justify-content-center">
                                     <div class="col-10">
@@ -109,12 +129,29 @@
                                             </select>
                                         </fieldset>
                                     </div>
+                                    <div class="col-10">
+                                        <fieldset class="form-group">
+                                            <select name="case_nature_complainant" id="case_nature_complainant"
+                                                    class="form-control select2" data-rule-required="true"
+                                                    data-msg-required="Complainant is required">
+                                                <option value="1">Consignee</option>
+                                                <option value="2">Shipper</option>
+                                            </select>
+                                        </fieldset>
+                                    </div>
+
+                                    <div class="col-10">
+                                        <fieldset class="form-group">
+                                            <input type="text" class="form-control" placeholder="Enter Phone Number" name="complainant_phone" id="complainant_phone"  data-rule-required="true"
+                                                   data-msg-required="Complainant Phone is required">
+                                        </fieldset>
+                                    </div>
                                     @foreach($case_nature_complaints as $complaint)
                                         @if($complaint->remarks_visibility == 1)
                                             <div class="col-10 d-none" id="case_nature_remarks_div">
                                                 <fieldset class="form-group">
                                                     <select name="complaint_description[]" id="case_nature_remarks" class="form-control select2" multiple="multiple">
-                                                    
+
                                                     </select>
                                                 </fieldset>
                                             </div>
@@ -165,7 +202,7 @@
                                                     <div class="input-group-prepend">
                                                         <span class="input-group-text">Old COD Amount</span>
                                                     </div>
-        
+
                                                     <input type="text" name="old_amount" id="old_amount" readonly class="form-control rounded-right">
                                                 </fieldset>
                                             </div>
@@ -174,7 +211,7 @@
                                                     <div class="input-group-prepend">
                                                         <span class="input-group-text">New COD Amount</span>
                                                     </div>
-        
+
                                                     <input type="text" name="new_amount" id="new_amount" class="form-control rounded-right new_amount" placeholder="Enter Amount" data-rule-required="true" data-msg-required="New COD Amount is required">
                                                 </fieldset>
                                             </div>
@@ -183,7 +220,7 @@
                                                     <div class="input-group-prepend">
                                                         <span class="input-group-text">Enter Parcel Value</span>
                                                     </div>
-        
+
                                                     <input type="text" name="cod_parcel_value" id="cod_parcel_value" class="form-control rounded-right cod_parcel_value" placeholder="Parcel Value" data-rule-required="true" data-msg-required="Parcel Value is required"  oninput="if(this.value=='0') this.value=''">
                                                 </fieldset>
                                             </div>
@@ -200,7 +237,7 @@
                                             <div class="col-10 d-none" id="case_nature_service_remarks_div">
                                                 <fieldset class="form-group">
                                                     <select name="service_description[]" id="case_nature_service_remarks" class="form-control select2" multiple="multiple">
-                                                        
+
                                                     </select>
                                                 </fieldset>
                                             </div>
@@ -218,7 +255,7 @@
                                             <textarea class="form-control" name="service_description[]" id="service_description" rows="5" placeholder="Enter Description*" data-rule-required="true" data-msg-required="Description is required"></textarea>
                                         </fieldset>
                                     </div>
-                                    
+
                                 </div>
                             </div>
                             <div class="feedback d-none" id="request_feedback">
@@ -382,7 +419,7 @@
                                             <div class="col-10 d-none" id="case_nature_claim_remarks_div">
                                                 <fieldset class="form-group">
                                                     <select name="description[]" id="case_nature_claim_remarks" class="form-control select2" multiple="multiple" data-rule-required="true" data-msg-required="Claim remarks is required.">
-                                                        
+
                                                     </select>
                                                 </fieldset>
                                             </div>
@@ -553,6 +590,10 @@
 				'allowPlus': false
 			});
 
+            $('#complainant_phone').inputmask({
+                mask: '9999-9999999',
+                'clearIncomplete': true
+            });
 			var select = $('#track_form .tracking_numbers').selectize({
 				placeholder: 'Tracking Number(s)*',
 				delimiter: ',',
@@ -581,6 +622,12 @@
                 }
             });
 
+            $('#case_nature_complainant').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: "Select Complainant",
+                allowClear: true,
+                dropdownParent: $('#add_request_form')
+            });
             @if (app('request')->has('tracking_number'))
                 track({{ app('request')->input('tracking_number') }});
             @endif
@@ -636,7 +683,7 @@
                                 shipment +=
                                     '<button class="btn btn-secondary ml-auto mr-0 mr-sm-1  add_request" id=' +
                                     id + ' data-tracking=' + details.tracking_number +
-                                    '>Add Request</button>';
+                                    '>Get Support</button>';
                                 shipment +=
                                     '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 call_status" id=' +
                                     id + ' data-tracking=' + details.tracking_number +
@@ -740,11 +787,11 @@
                                     if (details.pickup.vendor) {
                                         // shipment += '<td>' + details.pickup.vendor + '</td>';
                                         shipment += '<td></td>'
-                                    } 
+                                    }
                                     // else {
                                     //     shipment += '<td></td>'
                                     // }
-                                } 
+                                }
                                 else {
                                     shipment += '<td><strong>Brand Name</strong></td>';
                                     if (details.pickup.pickup_brand_name) {
@@ -890,9 +937,15 @@
                                 shipment += '<td><strong>Piece(s)</strong></td>';
                                 shipment += '<td>' + details.order_information.pieces + '</td>';
                                 shipment += '<td><strong>Business Category</strong></td>';
-                                shipment += '<td>' + details.order_information.business_category +
-                                    '</td>';
+                                shipment += '<td>' + details.order_information.business_category + '</td>';
                                 shipment += '</tr>';
+
+                                // Sub segment of shipper
+                                shipment += '<tr>';
+                                shipment += '<td><strong>Sub Segment</strong></td>';
+                                shipment += '<td>' + details.order_information.sub_segment + '</td>';
+                                shipment += '</tr>';
+
                                 shipment += '</tbody>';
                                 shipment += '</table>';
                                 shipment += '</div>';
@@ -1131,7 +1184,49 @@
                 $('#requested_shipments').html(tracking_rows);
                 $('#AddRequestModal').modal('show');
             });
+            $('#tracking').on('click', '.rider_information', function() {
+                id = $(this).attr('data-id');
+                var showRiderResponseBtn = $(this).attr('data-showRiderRespone');
+                var note = $(this).attr('data-note');
 
+                $.ajax({
+                        url: '{!! route('cod.tracking.rider_information') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'id': id
+                        }
+                    })
+                    .done(function(data) {
+                        var details = '<table class="table table-sm table-bordered"><tbody>';
+
+                        details +=
+                            '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Name</strong></td><td class="align-middle text-center">' +
+                            data.name + '</td></tr>';
+                        details +=
+                            '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Phone Number</strong></td><td class="align-middle text-center">' +
+                            data.phone_number + '</td></tr>';
+                        details +=
+                            '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>City</strong></td><td class="align-middle text-center">' +
+                            data.city + '</td></tr>';
+                        details +=
+                            '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Category</strong></td><td class="align-middle text-center">' +
+                            data.category + '</td></tr>';
+                        details +=
+                            '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Route</strong></td><td class="align-middle text-center">' +
+                            data.route + '</td></tr>';
+                        if (showRiderResponseBtn != undefined) {
+                            details += '<tr data-id="' + data.id + '" data-note="' + note +
+                                '"><td class="align-middle text-center"><button type="button" class="btn btn-warning btnRiderResponsiveStatus" data-type="1">Unresponsive</button></td><td class="align-middle text-center"><button type="button" class="btn btn-danger btnRiderResponsiveStatus" data-type="2">Powered Off</button></td></tr>';
+                        }
+
+                        details += '</tbody></table>';
+
+                        $('#rider_information .modal-body').html(details);
+
+                        $('#rider_information').modal('show');
+                    });
+            });
             // $('#case_nature_select').prepend('<option value="" selected="selected"></option>').select2({
             //     width: '100%',
             //     placeholder: "Select Case Nature",
@@ -1191,7 +1286,7 @@
                 $.ajax({
                     url: '{{ route('cod.tracking.shipper_visibility') }}',
                     type: 'POST',
-                    data: { 
+                    data: {
                         'id': id,
                         'shipment_id': shipment_id,
                     },
@@ -1364,7 +1459,7 @@
                         success: function(response) {
                             var $remarksDropdown = $('#case_nature_service_remarks');
                             $remarksDropdown.empty();
-                            
+
                             $.each(response.data, function(index, item) {
                                 $remarksDropdown.append('<option value="' + item.id + '">' + item.remarks + '</option>');
                             });
@@ -1427,7 +1522,7 @@
                 $('#case_nature_claim_remarks_div').addClass('d-none');
                 $('#claim_description_div_new').addClass('d-none');
                 $('#claim_description_div').addClass('d-none');
-                
+
                 if (claimId) {
                     $.ajax({
                         url: '{{ route('cod.tracking.case_nature_claim_remarks') }}',
@@ -1440,7 +1535,7 @@
                         success: function(response) {
                             var $remarksDropdown = $('#case_nature_claim_remarks');
                             $remarksDropdown.empty();
-                            
+
                             $.each(response.data, function(index, item) {
                                 $remarksDropdown.append('<option value="' + item.id + '">' + item.remarks + '</option>');
                             });
@@ -1727,7 +1822,7 @@
                                 containerId: 'toast-top-center'
                             });
                         }
-                        
+
                         if (feedback_flag) {
                             $('#AddNewRequest').attr('disabled', true);
                             $.ajax({
@@ -1793,7 +1888,7 @@
                                     $('#AddNewRequest').attr('disabled', false);
                                 });
                         }
-                    } 
+                    }
 
                     else if (case_nature_id === 4) {
                         var nature_flag = true;
@@ -1801,7 +1896,7 @@
                         var product_cost = $('#claim_product_cost').val();
                         var check_product_picture = $('#product_picture').val();
                         var check_invoice_picture = $('#invoice_picture').val();
-                        // var claim_description = $('#claim_description').val();                        
+                        // var claim_description = $('#claim_description').val();
                         $('#shipment_ids').val($('#requested_shipment_id').val());
                         $('#case_nature_id').val(case_nature_id);
                         $('#complaint_id').val(case_nature_claim_id);
@@ -1810,7 +1905,7 @@
                         var formData = new FormData($('#add_request_form')[0]);
                         var claim_description = '';
                         if ($('#case_nature_claim_remarks_div').length && !$('#case_nature_claim_remarks_div').hasClass('d-none')) {
-                            
+
                             var selectedOptions = $('#case_nature_claim_remarks option:selected');
                             var selectedTexts = [];
                             var useTextarea = false;
@@ -1976,11 +2071,11 @@
                             /*********
                             // Commented this because in Complain type = 1, the value set in different variable
                             // i.e: $('#case_nature_complaints').val();
-                            // so this should be manage according to case nature except here, which seems like it already handled in first two, 
+                            // so this should be manage according to case nature except here, which seems like it already handled in first two,
                             // if required for three four, then adjust this on top like case nature
                             *********/
                             // var complaint_id = $('#case_nature_requests').val();
-                        
+
                             if(complaint_id == 12)
                             {
                                 swal({
@@ -2006,7 +2101,7 @@
                                     dangerMode: true
                                 }).then(function (confirm) {
                                     if (confirm) {
-                                        
+
                                         var is_zero_cod = 0;
                                         if($('#new_amount').val() == 0 && $('#new_amount').val() != '')
                                         {
@@ -2022,6 +2117,8 @@
                                                 'case_nature_id': case_nature_id,
                                                 'complaint_id': complaint_id,
                                                 'description': description,
+                                                'complainant_phone' : $('#complainant_phone').val(),
+                                                'case_nature_complainant' : $('#case_nature_complainant').val(),
                                                 'cod_new_amount': $('#new_amount').val(),
                                                 'cod_remarks': $('#cod_remarks').val(),
                                                 'is_zero_cod': is_zero_cod,
@@ -2209,6 +2306,8 @@
                                         'case_nature_id': case_nature_id,
                                         'complaint_id': complaint_id,
                                         'description': description,
+                                        'complainant_phone' : $('#complainant_phone').val(),
+                                        'case_nature_complainant' : $('#case_nature_complainant').val(),
                                     }
                                 })
                                 .done(function (data) {
@@ -2269,7 +2368,7 @@
                                     $('#receiving_sheet_div').addClass('d-none');
                                     $('#AddNewRequest').attr('disabled',false);
                                 });
-                            }   
+                            }
                     }
                 }
             });
@@ -2305,6 +2404,8 @@
                 // $('#cod_amount_input').addClass('d-none');
                 // $('#cod_amount').val('');
                 $('#AddNewRequest').attr('disabled',false);
+                $('#case_nature_complainant').val('').trigger('change');
+                $('#complainant_phone').val('');
             });
 
 
@@ -2402,14 +2503,14 @@
                 var words = text.trim().split(/\s+/); // Split the text into words
 
                 if (words.length > wordLimit) {
-                    
+
                     words = words.slice(0, wordLimit); // Keep only the first 10 words
                     textarea.val(words.join(' ')); // Update the textarea value
                 }
             });
 
             $('#new_amount').on('keyup', function () {
-            
+
                 var new_amount = $(this).val();
 
                 if(new_amount == 0 && new_amount != '')
@@ -2421,7 +2522,7 @@
                 }
 
             });
-            
+
 		});
 	</script>
 @endsection

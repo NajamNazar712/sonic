@@ -41,6 +41,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Yajra\Datatables\Datatables;
+use DB;
 
 class RetailTrackingController extends Controller
 {
@@ -72,6 +73,19 @@ class RetailTrackingController extends Controller
             $shipment = Shipment::where('tracking_number', $tracking_number);
             if ($shipment->exists()) {
                 $shipment = $shipment->first();
+
+                $sub_segment_name = '-';
+                $sub_segment = DB::table('shipper_segment_logs')
+                ->leftJoin('sub_category_segments', 'sub_category_segments.id', 'shipper_segment_logs.sub_segment_id')
+                ->where('shipment_id', $shipment->id)
+                ->select('sub_category_segments.name')
+                ->first();
+
+                if ($sub_segment && $sub_segment->name)
+                {
+                    $sub_segment_name = $sub_segment->name;
+                }
+
                     if($shipment->shipment_type == 2){
                         $check = false;
 
@@ -239,6 +253,8 @@ class RetailTrackingController extends Controller
 
                             $details['order_information']['parcel_value'] = $parcelAmount;
                             $details['order_information']['quantity'] = $retailShipmentQuantity;
+
+                            $details['order_information']['sub_segment'] = $sub_segment_name;
 
                             foreach ($shipment->shipment_journey as $journey) {
                                 $journey_details = array();

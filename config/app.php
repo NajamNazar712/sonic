@@ -106,6 +106,10 @@ return [
 
     'key' => env('APP_KEY'),
 
+    'FINGA_URL' => env('FINGA_URL', 'https://api.wallet.finova-tech.com/api/'),
+    'FINGA_PASSWORD' => env('FINGA_PASSWORD', '9l2|_XTI4MiP'),
+
+
     'cipher' => 'AES-256-CBC',
 
     /*

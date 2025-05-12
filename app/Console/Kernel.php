@@ -80,8 +80,7 @@ class Kernel extends ConsoleKernel
         //'App\Console\Commands\TelenorCallResponse',
         'App\Console\Commands\OnHoldShipmentEmail',
         'App\Console\Commands\OverlandAgingReport',
-        'App\Console\Commands\PendingDeliveriesReport',
-        'App\Console\Commands\ReceiveDeliveriesReport',
+
         'App\Console\Commands\WebsiteLead',
         'App\Console\Commands\UserOTPGenerate',
         'App\Console\Commands\UserOTPVerifiy',
@@ -100,17 +99,17 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\RiderWisePickupEmail',
         'App\Console\Commands\InactiveRiderReport',
         'App\Console\Commands\EmailsOfReturnConfirmToKams',
-		'App\Console\Commands\RetailDonePaymentReport',
+        'App\Console\Commands\RetailDonePaymentReport',
         'App\Console\Commands\DonePaymentReport',
         'App\Console\Commands\PasswordUpdateForAdminUser',
         'App\Console\Commands\NotPickedShipmentsJourney',
         'App\Console\Commands\LastMileStatusReport',
-		'App\Console\Commands\ShipperPaymentCalculation',
+        'App\Console\Commands\ShipperPaymentCalculation',
         'App\Console\Commands\ReturnSheetReceive',
         'App\Console\Commands\RiderDeactivateAutomatically',
         'App\Console\Commands\RevenueReportMonthlyEmail',
         'App\Console\Commands\RevenueReportMonthlyByDeliveryDate',
-		'App\Console\Commands\SaleIncentiveReport',
+        'App\Console\Commands\SaleIncentiveReport',
         'App\Console\Commands\AutoAssignCrmAgent',
         'App\Console\Commands\PendingPaymentCalculationJob',
 
@@ -122,9 +121,9 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\ReattemptRatioCalculate',
         'App\Console\Commands\ShortOfBusinessShippers',
         'App\Console\Commands\BirthdayMessage',
-		'App\Console\Commands\AutoComplaintHighAging',
-		'App\Console\Commands\LeaveCountUpdate',
-		'App\Console\Commands\EmployeeConfirmationDays',
+        'App\Console\Commands\AutoComplaintHighAging',
+        'App\Console\Commands\LeaveCountUpdate',
+        'App\Console\Commands\EmployeeConfirmationDays',
         'App\Console\Commands\MonthAverageDestinationReportEmail',
         'App\Console\Commands\ReversionDeliveredShipments',
         'App\Console\Commands\RevenueReportCutOffDays',
@@ -139,12 +138,12 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\RetailSalesReportByDeliveryCutOffDays',
         'App\Console\Commands\RetailSalesReportByDeliveryRemainingDays',
         'App\Console\Commands\DailyAutoCommentForCRMClaims',
-		'App\Console\Commands\WeeklyAttendanceSummaryLineManager',
-		'App\Console\Commands\LateEmployeePenalty',
-		'App\Console\Commands\AttendanceAdjustmentShiftWise',
-		'App\Console\Commands\RiderFuelAllocationDeliveryNoteCalculation',
+        'App\Console\Commands\WeeklyAttendanceSummaryLineManager',
+        'App\Console\Commands\LateEmployeePenalty',
+        'App\Console\Commands\AttendanceAdjustmentShiftWise',
+        'App\Console\Commands\RiderFuelAllocationDeliveryNoteCalculation',
         'App\Console\Commands\VisionSoftApiExcel',
-		'App\Console\Commands\CreateInvoiceOriginWise',
+        'App\Console\Commands\CreateInvoiceOriginWise',
         'App\Console\Commands\InvalidEmailVisit',
         'App\Console\Commands\NotificationReturnedDeliveredToShipper',
         // 'App\Console\Commands\AgentUnassignedTicket ',
@@ -169,8 +168,26 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\UpdateArrivalChargesIssue',
         \App\Console\Commands\AddMissingSegmentLogs::class,
         '\App\Console\Commands\ApolloShipmentFetchStatus',
+        '\App\Console\Commands\FinSurgentSonicPaymentSharing',
+        '\App\Console\Commands\FailedStatusRePushToWallet',
+        '\App\Console\Commands\RerunWalletSettlement',
+        '\App\Console\Commands\BulkStatusSharingWithWallet',
+        '\App\Console\Commands\WalletUsersMakeToDonePayments',
+        '\App\Console\Commands\UpdateShipmentAdditionalCharges',
+        'App\Console\Commands\ReceiveDeliveriesReportNew',
+        'App\Console\Commands\ReceiveReturnDeliveries',
+        'App\Console\Commands\DailyDeliveryNoteHistory',
+        'App\Console\Commands\DailyWeightQCReport',
+        'App\Console\Commands\DailyOverAllSalesReport',
+        'App\Console\Commands\ReceiveDeliveriesReport',
 
-        ];
+        'App\Console\Commands\QualityOfServiceReport',
+        'App\Console\Commands\PendingDeliveriesReportNew',
+
+        // 'App\Console\Commands\QsrEmail',
+        // 'App\Console\Commands\PendingDeliveriesReport',
+
+    ];
 
     /**
      * Define the application's command schedule.
@@ -222,14 +239,14 @@ class Kernel extends ConsoleKernel
                 // run 1 hour before from the shift ends, to get save from the next day switch as well
                 $dailyAt = Carbon::parse($shift->end_time)->subHour(1)->format('H:i:s');
                 $schedule->command('employee:attendanceadjustment', [$shift->id, 'web'])
-                ->dailyAt($dailyAt)
-                ->runInBackground();
+                    ->dailyAt($dailyAt)
+                    ->runInBackground();
 
                 // run after 30 mins from the shift starts, to notify employee to mark attendance if forgets
                 $dailyAt = Carbon::parse($shift->start_time)->addMinutes(30)->format('H:i:s');
                 $schedule->command('employee:attendanceadjustment', [$shift->id, 'app'])
-                ->dailyAt($dailyAt)
-                ->runInBackground();
+                    ->dailyAt($dailyAt)
+                    ->runInBackground();
             }
         }
         //rv agent cron jobs start
@@ -447,8 +464,8 @@ class Kernel extends ConsoleKernel
 //        $schedule->command('telenor:callresponse')->twiceDaily(15, 18)->runInBackground();
         $schedule->command('email:overlandagingreport')->dailyAt('12:00')->runInBackground();
 
-        $schedule->command('email:pendingdeliveryreport')->dailyAt('01:00')->runInBackground();
-        $schedule->command('email:receivedeliveryreport')->dailyAt('01:00')->runInBackground();
+        // $schedule->command('email:pendingdeliveryreport')->dailyAt('01:00')->runInBackground();
+        // $schedule->command('email:receivedeliveryreport')->dailyAt('01:00')->runInBackground();
 
         $schedule->command('website:leads')->everyFiveMinutes()->runInBackground();
 //        $schedule->command('website:pamleads')->hourly()->runInBackground();
@@ -518,10 +535,10 @@ class Kernel extends ConsoleKernel
             $schedule->command('report:lastmilestatus')->cron($hourly)->withoutOverlapping()->runInBackground();
         }
 
-		//$incentive_date = SalesIncentiveDate::first();
-		//        if($incentive_date){
-		//            $schedule->command('report:SalesIncentive')->monthlyOn($incentive_date->cron_day, '03:00')->runInBackground();
-		//        }
+        //$incentive_date = SalesIncentiveDate::first();
+        //        if($incentive_date){
+        //            $schedule->command('report:SalesIncentive')->monthlyOn($incentive_date->cron_day, '03:00')->runInBackground();
+        //        }
 //        $schedule->command('crm:autoassign')->dailyAt('17:00')->runInBackground();
         $schedule->command('crm:autoassign_new')->dailyAt('17:00')->runInBackground();
 
@@ -557,12 +574,12 @@ class Kernel extends ConsoleKernel
         }
 
 
-		$schedule->command('invoice:revenueoriginwise')->weeklyOn(7, '1:00')->runInBackground();
+        $schedule->command('invoice:revenueoriginwise')->weeklyOn(7, '1:00')->runInBackground();
 
-		$schedule->command('sms:returned_delivered_sms')->dailyAt('11:00')->runInBackground();
+        $schedule->command('sms:returned_delivered_sms')->dailyAt('11:00')->runInBackground();
 //		$schedule->command('email:qsrreport')->dailyAt('10:01')->runInBackground(); //ye filhal bnd ki hai due to r2 shutdown issue
-		$schedule->command('email:pendingdeliveriesreport')->dailyAt('09:01')->runInBackground();
-		$schedule->command('clean:7DaysOlderQrsPDReportStorage')->dailyAt('06:00')->runInBackground();
+        $schedule->command('email:pendingdeliveriesreport')->dailyAt('09:01')->runInBackground();
+        $schedule->command('clean:7DaysOlderQrsPDReportStorage')->dailyAt('06:00')->runInBackground();
 
         // Commission calculation schedule
         $schedule->command('commission:calculate_commission')->monthlyOn(1, '00:00')->runInBackground();
@@ -583,7 +600,65 @@ class Kernel extends ConsoleKernel
 //        $schedule->command('email:revenuereport_lastmonth 3')->dailyAt('11:30')->runInBackground();
 
         $schedule->command('update:shipper_segment_logs')->everyFiveMinutes()->runInBackground();
-        $schedule->command('apollo:fetch-shipments-status')->everyFiveMinutes()->runInBackground();
+//        $schedule->command('apollo:fetch-shipments-status')->everyFifteenMinutes()->runInBackground();
+        $schedule->command('fingsurgent:sonic-payment')->hourly()->runInBackground(); //wallet
+//        $schedule->command('status:re-push-wallet')->hourly()->runInBackground(); // wallet no need now after bulk status work
+        $schedule->command('rerun:wallet_log_re_push')->hourly()->runInBackground(); // wallet
+        $schedule->command('rerun_wallet_settlement')->everySixHours()->runInBackground(); //wallet
+        $schedule->command('bulk:status-sharing-wallet')->withoutOverlapping()->everyFiveMinutes()->runInBackground();
+//        $schedule->command('api:visionsoftexcel_multiple')->dailyAt('20:01')->runInBackground();
+
+
+        // $schedule->command('email:daily_received_deliveries_report')->dailyAt('09:00')->runInBackground();
+        // $schedule->command('email:daily_return_received_deliveries_report')->dailyAt('09:00')->runInBackground();
+        // $schedule->command('email:daily_delivery_note_history')->dailyAt('09:00')->runInBackground();
+        // $schedule->command('email:daily_weight_qc_report')->dailyAt('09:00')->runInBackground();
+        // $schedule->command('email:daily_overall_sales_report')->dailyAt('09:00')->runInBackground();
+        // $schedule->command('email:qsrreport')->dailyAt('09:00')->runInBackground();
+        // $schedule->command('email:qsrreport')->dailyAt('14:00')->runInBackground();
+        // $schedule->command('email:pendingdeliveryreport')->dailyAt('11:30')->runInBackground();
+
+        // $schedule->command('email:receivedeliveryreport')->dailyAt('09:00')->runInBackground();
+
+        $settings = DB::table('global_settings')
+        ->whereIn('type', [
+            'pending_deliveries_report_time',
+            'receive_deliveries_report_time',
+            'receive_return_deliveries_report_time',
+            'delivery_note_history_report_time',
+            'weight_qc_report_time',
+            'overall_sales_report_time',
+            'quality_of_service_report_time',
+            'quality_of_service_report_other_time'
+        ])
+        ->get()
+        ->keyBy('type');
+
+        $commands = [
+            'email:daily_received_deliveries_report' => ['receive_deliveries_report_time'],
+            'email:daily_return_received_deliveries_report' => ['receive_return_deliveries_report_time'],
+            'email:daily_delivery_note_history' => ['delivery_note_history_report_time'],
+            'email:daily_weight_qc_report' => ['weight_qc_report_time'],
+            'email:daily_overall_sales_report' => ['overall_sales_report_time'],
+            'email:pending_deliveries_report' => ['pending_deliveries_report_time'],
+            'email:quality_of_service_report' => [
+                'quality_of_service_report_time',
+                'quality_of_service_report_other_time',
+            ],
+        ];
+
+        foreach ($commands as $command => $settingKeys) {
+            foreach ((array) $settingKeys as $settingKey) {
+                if (isset($settings[$settingKey]) && $settings[$settingKey]->setting_value == 1) {
+                    $timeRaw = trim($settings[$settingKey]->text ?? '');
+                    $time = Carbon::createFromFormat('h:i A', $timeRaw)->format('H:i');
+                    $schedule->command($command)->dailyAt($time)->runInBackground();
+                }
+            }
+        }
+        $schedule->command('update:shipment_additional_charges')->withoutOverlapping()->daily()->runInBackground();
+        $schedule->command('wallet-users:make-to-done')->dailyAt('06:00')->runInBackground();
+        
     }
     /**
      * Register the commands for the application.

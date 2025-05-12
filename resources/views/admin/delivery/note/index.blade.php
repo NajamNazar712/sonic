@@ -636,6 +636,7 @@
                                 'tracking':tracking,
                                 'rider_id':rider_id,
                                 'action' : window.lastAction,
+                                'operation_rider_type_id' : $('#operation_rider_type_id').val(),
                                 '_token': '{{ csrf_token() }}'
                             }
                         }).done(function (data) {
@@ -801,6 +802,7 @@
                                     'hub_id':hub_id,
                                     'rider_id':rider_id,
                                     'action' : window.lastAction,
+                                    'operation_rider_type_id' : $('#operation_rider_type_id').val(),
                                     '_token':'{!! csrf_token() !!}'
                                 }
                             }).done(function (data) {

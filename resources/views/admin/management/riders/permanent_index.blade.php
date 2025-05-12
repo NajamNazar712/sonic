@@ -172,9 +172,9 @@
                                 row.push(values.category);
                                 row.push(values.status);
                                 row.push(values.created_by);
-                                row.push(values.created);
+                                row.push(values.created_at);
                                 row.push(values.updated_by);
-                                row.push(values.updated);
+                                row.push(values.updated_at);
                                 body.push(row);
                             });
                         },

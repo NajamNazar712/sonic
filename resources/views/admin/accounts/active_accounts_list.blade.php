@@ -66,6 +66,7 @@
                                         <th class="border-primary border-darken-1">City</th>
                                         <th class="border-primary border-darken-1">Territory</th>
                                         <th class="border-primary border-darken-1">Product Type</th>
+                                        <th class="border-primary border-darken-1">User Type</th>
                                         <th class="border-primary border-darken-1">Status</th>
                                         <th class="border-primary border-darken-1">Sales Person Tagged</th>
                                         <th class="border-primary border-darken-1">POC Tagged</th>
@@ -106,6 +107,7 @@
                                         {{-- <th class="border-primary border-darken-1">Referral Code</th> --}}
                                         <th class="border-primary border-darken-1">Payment Cycle</th>
                                         <th class="border-primary border-darken-1">Payment Cycle Days</th>
+                                        
                                         <th class="border-primary border-darken-1">Action</th>
                                     </tr>
                                 </thead>
@@ -1121,6 +1123,7 @@ function checkboxStatus() {
                         head.push('City');
                         head.push('Territory');
                         head.push('Product Type');
+                        head.push('User Type');
                         head.push('Status');
                         head.push('Sales Person Tagged');
                         head.push('POC Tagged');
@@ -1161,6 +1164,7 @@ function checkboxStatus() {
                         //head.push('Referral Code');
                         head.push('Payment Cycle');
                         head.push('Payment Cycle Days');
+                        
                         $.each(result.data, function(index, values) {
                             row = [];
 
@@ -1184,6 +1188,7 @@ function checkboxStatus() {
                             row.push(values.city);
                             row.push(values.territory);
                             row.push(values.product_type);
+                            row.push(values.wallet_shippers)
                             row.push(values.status);
                             row.push(values.admin_tag_id);
                             row.push(values.tagged_poc);
@@ -1224,6 +1229,7 @@ function checkboxStatus() {
                             //row.push(values.referral_name);
                             row.push(values.payment_cycle);
                             row.push(values.payment_cycle_days);
+                            
                             body.push(row);
                         });
                     },
@@ -1778,7 +1784,7 @@ function checkboxStatus() {
             serverSide: true,
            deferLoading: 0,
             rowId: 'id',
-            order: [[27, 'desc']],
+            order: [[17, 'desc']],
             ajax: {
                url: '{{ route('admin.accounts.active.ajax') }}',
                 method: 'post',
@@ -1806,6 +1812,7 @@ function checkboxStatus() {
                 {data: 'city', name: 'cities.name', class: 'align-middle city'},
                 {data: 'territory', name: 't.name', class: 'align-middle territory'},
                 {data: 'product_type', name: 'product_type', class: 'align-middle product_type'},
+                {data: 'wallet_shippers', name: 'wallet_shippers', class: 'align-middle wallet_shippers'},
                 {data: 'status', name: 'status', class: 'align-middle status'},
                 {data: 'admin_tag_id', name: 'ad.name', class: 'align-middle admin_tag_id'},
                 {data: 'tagged_poc', name: 'poc.name', class: 'align-middle tagged_poc'},
@@ -1869,6 +1876,13 @@ function checkboxStatus() {
                     '<option value="4">Disable</option>' +
                     '<option value="6">Booking Paused</option>' +
                     '</select>';
+
+                var wallet_shippers = '<select name="wallet_shippers" id="wallet_shippers" class="select2 form-control">' +
+                    '<option value="1">Fintech</option>' +
+                    '<option value="2">Normal</option>' +
+                    '<option value="3">All Type</option>' +
+                    '</select>';
+
                 var documents_drop_select = '<select name="documents_status_select" id="documents_status_select" class="select2 form-control">' +
                     '<option value="0">Incomplete</option>' +
                     '<option value="1">Pending for Approval</option>' +
@@ -1909,7 +1923,14 @@ function checkboxStatus() {
                             .on( 'change', function () {
                                 column.search($(this).val(), false, false, true).draw();
                             } ).wrap(td);
-                    }else if($(header).is('.product_type')){
+                    }
+                    else if($(header).is('.wallet_shippers')){
+                        $(wallet_shippers).appendTo($(search))
+                            .on( 'change', function () {
+                                column.search($(this).val(), false, false, true).draw();
+                            } ).wrap(td);
+                    }
+                    else if($(header).is('.product_type')){
                         $(product_select).appendTo($(search))
                             .on( 'change', function () {
                                 column.search($(this).val(), false, false, true).draw();
@@ -1976,6 +1997,12 @@ function checkboxStatus() {
                 });
                 $("#status_select").prepend('<option value="" selected></option>').select2({
                     placeholder: "Select a Status",
+                    width:'100%',
+                    containerCssClass: 'select-xs',
+                    dropdownCssClass: 'form-control-sm p-0'
+                });
+                $("#wallet_shippers").prepend('<option value="" selected></option>').select2({
+                    placeholder: "Select User Type",
                     width:'100%',
                     containerCssClass: 'select-xs',
                     dropdownCssClass: 'form-control-sm p-0'
