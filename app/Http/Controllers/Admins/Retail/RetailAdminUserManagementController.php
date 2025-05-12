@@ -654,6 +654,14 @@ class RetailAdminUserManagementController extends Controller
                         // Delete old attachment if it exists
                         $old_attachment = $franchise_retail_product_attachment_edit->$attachment_name;
                         if ($old_attachment) {
+                            $terms = [
+                                '1' => 'Franchise Agreement',
+                                '2' => 'Cheque Images',
+                                '3' => 'Location Images',
+                                '4' => 'Miscellaneous',
+                                '5' => 'Attachment 5'
+                            ];
+                            $changedFields[] = $terms[$i] . ' ' . 'Changed at' . ' ' .  now()->toDateTimeString();
                             Storage::disk('public')->delete('franchise_product_attachment_' . $i . '/' . $old_attachment);
                         }
                         // Store new attachment
@@ -2105,6 +2113,14 @@ class RetailAdminUserManagementController extends Controller
                     // Delete old attachment if it exists
                     $old_attachment = $old_attachments->$attachment_name;
                     if ($old_attachment) {
+                        $terms = [
+                            '1' => 'Employee Form',
+                            '2' => 'CNIC Front Image',
+                            '3' => 'CNIC Back Image',
+                            '4' => 'Profile Picture',
+                            '5' => 'Attachment 5'
+                        ];
+                        $changedFields[] = $terms[$i] . ' ' . 'Changed at' . ' ' .  now()->toDateTimeString();
                         Storage::disk('public')->delete($old_attachment);
                     }
                     
