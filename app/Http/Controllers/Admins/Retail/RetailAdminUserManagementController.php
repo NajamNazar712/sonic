@@ -221,11 +221,11 @@ class RetailAdminUserManagementController extends Controller
                         $dropdown .= '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
                     }
                     
-                    if ($data->discount != Null) {
-                        $dropdown .= '<button type="button" class="dropdown-item edit_discount"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Edit Discount</div></button>';
-                    } else {
-                        $dropdown .= '<button type="button" class="dropdown-item add_discount"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Add Discount</div></button>';
-                    }
+                    // if ($data->discount != Null) {
+                    //     $dropdown .= '<button type="button" class="dropdown-item edit_discount"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Edit Discount</div></button>';
+                    // } else {
+                    //     $dropdown .= '<button type="button" class="dropdown-item add_discount"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Add Discount</div></button>';
+                    // }
                     
                     $dropdown .= '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
             
@@ -1400,6 +1400,16 @@ class RetailAdminUserManagementController extends Controller
                             <div class="col-9 offset-1">Edit</div>
                         </div>
                     </button>';
+                    $dropdown .= '<button type="button" class="dropdown-item view_logs">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col-2">
+                                    <i class="ft-edit"></i>
+                                </div>
+                                <div class="col-9 offset-1">
+                                    View Logs
+                                </div>
+                            </div>
+                        </button>';
 
                     // Adding Excel export dropdown item
                     $dropdown .= '
@@ -1431,11 +1441,16 @@ class RetailAdminUserManagementController extends Controller
         if ($request->status == 1) {
             $trax_center->status = 1;
             $trax_center->updated_by = Auth::id();
+
+            $changedFields[] = 'Center Status' . ': ' . ($trax_center->getOriginal('status') == 1 ? 'Active' : 'In-Active') . ' -> ' . ($trax_center->status == 1  ? 'Active' : 'In-Active');
+            self::retail_logs(Auth::id(), $changedFields, $trax_center->id, $screen_name = 'Retail Center');
             $trax_center->save();
 
             return response()->json(['status' => 1, 'success' => 'Trax Center Enabled Successfully']);
         } elseif ($request->status == 0) {
             $trax_center->status = 0;
+            $changedFields[] = 'Center Status' . ': ' . ($trax_center->getOriginal('status') == 1 ? 'Active' : 'In-Active') . ' -> ' . ($trax_center->status == 1  ? 'Active' : 'In-Active');
+            self::retail_logs(Auth::id(), $changedFields, $trax_center->id, $screen_name = 'Retail Center');
             $trax_center->updated_by = Auth::id();
             $trax_center->save();
 
@@ -1517,6 +1532,7 @@ class RetailAdminUserManagementController extends Controller
     {
         $date = Carbon::now()->format('Y_m_d');
         $existing_trax_center = RetailTraxCenter::where('name', $request->name)->where('id', '!=', $request->trax_center_id);
+        $changedFields = [];
         if (!$existing_trax_center->exists()) {
             $trax_center = RetailTraxCenter::find($request->trax_center_id);
 
@@ -1529,6 +1545,25 @@ class RetailAdminUserManagementController extends Controller
             $trax_center->discount = $request->discount;
             $trax_center->insurance = $request->edit_insurance;
             $trax_center->updated_by = Auth::id();
+
+            $fieldNames = [
+                'name' => 'Name',
+                'phone_no' => 'Phone No',
+                'email' => 'Email',
+                'cnic' => 'CNIC',
+                'location_latitude' => 'Latitude',
+                'location_longitude' => 'Longitude',
+                'discount' => 'Discount',
+                'insurance' => 'Insurance'
+            ];
+
+            foreach ($fieldNames as $field => $fieldName) {
+                $originalValue = trim($trax_center->getOriginal($field));
+                $currentValue = trim($trax_center->$field);
+                if ($trax_center->isDirty($field) && $originalValue !== $currentValue) {
+                    $changedFields[] = $fieldName . ': ' . $originalValue . ' -> ' . $currentValue;
+                }
+            }
             $trax_center->save();
 
             $trax_center_attachment = TraxCenterAttachment::where('retail_trax_center_id', $request->trax_center_id)->first();
@@ -1544,6 +1579,25 @@ class RetailAdminUserManagementController extends Controller
                 if ($request->agreement_end_date != null){
                     $trax_center_attachment->agreement_end_date = $request->agreement_end_date;
                 }
+
+                $fieldNames = [
+                    'advance_amount' => 'Advance Amount',
+                    'rental' => 'Rental',
+                    'landlord_name' => 'Landlord Name',
+                    'landlord_contact_number' => 'Landlord Contact Number',
+                    'location_latitude' => 'Latitude',
+                    'shop_address' => 'Shop Address',
+                    'agreement_start_date' => 'Agreement Start Date',
+                    'agreement_end_date' => 'Agreement End Date'
+                ];
+    
+                foreach ($fieldNames as $field => $fieldName) {
+                    $originalValue = trim($trax_center_attachment->getOriginal($field));
+                    $currentValue = trim($trax_center_attachment->$field);
+                    if ($trax_center_attachment->isDirty($field) && $originalValue !== $currentValue) {
+                        $changedFields[] = $fieldName . ': ' . $originalValue . ' -> ' . $currentValue;
+                    }
+                }
                 // Handle file uploads
                 for ($i = 1; $i <= 5; $i++) {
                     $attachment_name = 'attachment_' . $i;
@@ -1553,6 +1607,15 @@ class RetailAdminUserManagementController extends Controller
                         $folderName = 'trax_center_attachment_' . $i;
                         $filePath = $file->storeAs('trax_center_attachments' . DIRECTORY_SEPARATOR . $folderName, $fileName, 'public');
                         $trax_center_attachment->{$attachment_name} = $fileName;
+
+                        $terms = [
+                            '1' => 'Agreement File',
+                            '2' => 'Landlord CNIC Front',
+                            '3' => 'Landlord CNIC Back',
+                            '4' => 'Location Pictures',
+                            '5' => 'Attachment 5'
+                        ];
+                        $changedFields[] = $terms[$i] . ' ' . 'Changed at' . ' ' .  now()->toDateTimeString();
                     }
                 }
             
@@ -1580,6 +1643,10 @@ class RetailAdminUserManagementController extends Controller
                     }
                 }
                 $new_trax_center_attachments->save();
+            }
+
+            if(!empty($changedFields)) {
+                self::retail_logs(Auth::id(), $changedFields, $trax_center->id, $screen_name = 'Retail Center');
             }
             return redirect()->back()->with('success', 'Trax Center Updated Successfully!');
         } else {
