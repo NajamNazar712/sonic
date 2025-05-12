@@ -6702,7 +6702,7 @@ class AdminReportsController extends Controller
             }
 
             $select = [
-                'crm_requests.id as request_number',
+                'crm_requests.id as request_number', 
                 's.tracking_number as tracking_number',
                 'crsh.created_at as reopen_date',
                 'crcn.id as case_nature_id',
