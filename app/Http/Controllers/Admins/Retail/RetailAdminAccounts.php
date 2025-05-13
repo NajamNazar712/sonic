@@ -126,7 +126,7 @@ class RetailAdminAccounts extends Controller
       if(strlen($request->iban) !== 24){
         return redirect()->back()->with('error', 'Invalid Iban No');
       }
-      
+        $changedFields = [];
         $shipper_account = RetailShipperInfo::find($request->id);
         if($shipper_account){
             $shipper_account->iban = $request->iban;
@@ -136,12 +136,13 @@ class RetailAdminAccounts extends Controller
                 $filename = 'retail_shipper_' . $shipper_account->id . '_cheque_image.png';
 
                 $file = $request->file('cheque_image');
+                $changedFields[] = 'Cheque Image' . ' ' . 'Changed at' . ' ' .  now()->toDateTimeString();
 
                 Storage::disk('public')->putFileAs('retail_shipper_cheque', $file, $filename);
                 $shipper_account->cheque_image = $filename;
                 $shipper_account->completed_status = 1;
             }
-            $changedFields = [];
+            
             $fieldNames = [
               'iban' => 'IBAN',
               'account_number' => 'Account Number',
@@ -151,9 +152,9 @@ class RetailAdminAccounts extends Controller
             foreach ($fieldNames as $field => $fieldName) {
                 if ($shipper_account->isDirty($field)) {
                   if($field == 'bank_id') { 
-                      $old_bank = BanksList::find($shipper_account->getOriginal($field));
-                      $new_bank = BanksList::find($shipper_account->$field);
-                      $changedFields[] = $fieldName . ': ' . $old_bank->name . ' -> ' . $new_bank->name;
+                      $old_bank_name = optional(BanksList::find($shipper_account->getOriginal($field)))->name ?? 'N/A';
+                      $new_bank_name = optional(BanksList::find($shipper_account->$field))->name ?? 'N/A';
+                      $changedFields[] = $fieldName . ': ' . $old_bank_name . ' -> ' . $new_bank_name;
                   } else {
                     $changedFields[] = $fieldName . ': ' . $shipper_account->getOriginal($field) . ' -> ' . $shipper_account->$field;
                   }
