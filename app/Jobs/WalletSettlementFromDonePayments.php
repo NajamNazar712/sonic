@@ -60,196 +60,197 @@ class WalletSettlementFromDonePayments implements ShouldQueue
         $done_payment_shipments = DonePaymentShipment::join('shipments as s','s.id', 'done_payment_shipments.shipment_id')
             ->leftjoin('shipment_additional_charges as sc', 'sc.shipment_id', 's.id')
             ->leftjoin('shipment_services_charges as ssc', 'ssc.shipment_id', 's.id')
-            ->leftjoin('wallet_users as wu', function ($join) {
+            ->leftJoin('wallet_users as wu', function ($join) {
                 $join->on('wu.user_id', '=', 's.user_id')
-                    ->where('wu.substitute_user_id', '0');
+                    ->whereRaw('wu.id = (SELECT MAX(id) FROM wallet_users WHERE user_id = s.user_id AND substitute_user_id = 0)');
             })
             ->leftjoin('finja_log_settlement_records as sac', 'done_payment_shipments.shipment_id', '=', 'sac.shipment_id')
             ->where('done_payment_shipments.done_payment_id', $this->payment_id)
             ->whereIn('done_payment_shipments.wallet_action_bid', [0,1,2])
-            // ->where(function ($query) {
-            //     $query->where('sac.wallet_settlement_updated', 0);
-            // })
             ->select(['done_payment_shipments.*', 'wu.user_id as user_id', 'wu.wallet_id as wallet_id', 's.tracking_number', 's.cash_handling_charges', 's.insurance_charges','s.replacement_charges','s.try_and_buy_charges','s.intercept_charges','s.nsa_osa_charges','s.esc_charges','s.return_charges', 'sac.wallet_settlement_updated', 's.weight_charges', 's.fuel_surcharge','sc.faf_charges', 'ssc.reverse_pickup_charges', 'sc.wallet_charges', 'sac.wallet_log_charges_updated','sac.wallet_log_updated','s.packaging_material_charges'])->get();
         //dd($done_payment_shipments);
         
         $api = config('app.FINGA_URL');
         $token = FingaIntegrationController::getToken($api);
         $token_time = Carbon::now();
-        $done_payment_shipments->chunk(30)->each(function ($chunkedShipments) use($api,$token,$token_time) {
+        $check_shipment = array();
+
+        $done_payment_shipments->chunk(30)->each(function ($chunkedShipments) use($api,$token,$token_time,&$check_shipment) {
             foreach ($chunkedShipments as $dps) {
-                $pending_logs = [];
-                $LogChargeStatus = true;
-                $shipmentId = $dps->shipment_id;
-                $shipment = Shipment::find($shipmentId);
+                if (!isset($check_shipment[$dps->shipment_id])) {
+                    $check_shipment[$dps->shipment_id] = true;
+                    $pending_logs = [];
+                    $LogChargeStatus = true;
+                    $shipmentId = $dps->shipment_id;
+                    $shipment = Shipment::find($shipmentId);
 
-                $service_charges = ShipmentServicesCharges::where('shipment_id', $shipmentId);
-                if ($service_charges->exists()) {
-                    $service_charges = $service_charges->first();
-                    $service_charges = $service_charges->reverse_pickup_charges;
-                } else {
-                    $service_charges = 0;
-                }
-                if ($dps->wallet_action_bid == 1 && $dps->wallet_settlement_updated == 1) {
-                    $dps->wallet_action_bid =  self::run_log_and_settle($dps,$shipment);
-                }
-
-                $requestPayload = [];
-                $url = "";
-                if ($dps->wallet_action_bid == 1 && $dps->wallet_settlement_updated == 1) {
-                    $dps->wallet_action_bid =  self::run_log_and_settle($dps,$shipment);
-                }
-                $send_request = true;
-                $success = false;
-                if ($dps->wallet_action_bid == 1 && $dps->wallet_settlement_updated == 0) {
-                    // $logCharged = !empty($dps->wallet_log_charges_updated) ? $dps->wallet_log_charges_updated : 0;
-
-                    $logCharged = FinjaLogSettlementRecord::where('shipment_id', $shipmentId)->first();
-                    $logCharged2 = !empty($logCharged) ? $logCharged->wallet_log_charges_updated : 0;
-
-                    $check_arrival_paid_done = DonePaymentShipment::where('shipment_id',$shipmentId)->where('type',3)->exists();
-                    $check_arrival_paid_pending = PendingPaymentShipment::where('shipment_id',$shipmentId)->where('type',3)->exists();
-                    if($logCharged2 == 0 && ($check_arrival_paid_done || $check_arrival_paid_pending )){
-                        $LogChargeStatus =false;
+                    $service_charges = ShipmentServicesCharges::where('shipment_id', $shipmentId);
+                    if ($service_charges->exists()) {
+                        $service_charges = $service_charges->first();
+                        $service_charges = $service_charges->reverse_pickup_charges;
+                    } else {
+                        $service_charges = 0;
+                    }
+                    if ($dps->wallet_action_bid == 1 && $dps->wallet_settlement_updated == 1) {
+                        $dps->wallet_action_bid = self::run_log_and_settle($dps, $shipment);
                     }
 
-                    $charges = [];
-                    if ($shipment->packaging_material_request == 1) {
-                        $charges = [
-                            'packaging_material_charges' => floatval($shipment->packaging_material_charges),
-                            'gst_charges' => floatval($dps->gst),
-                            'sms_charges' => floatval($dps->sms_charges),
-                        ];
-                    }else {
-                        if ($dps->type == 0) {
-                            $charges = [
-                                'faf_charges' => $LogChargeStatus ? floatval($dps->faf_charges) : 0,
-                                'weight_charges' => $LogChargeStatus ? floatval($dps->weight_charges) : 0,
-                                'fuel_surcharge' => $LogChargeStatus ? floatval($dps->fuel_surcharge) : 0,
-                                'cash_handling_charges' => floatval($dps->cash_handling_charges),
-                                'insurance_charges' => floatval($dps->insurance_charges),
-                                'replacement_charges' => floatval($dps->replacement_charges),
-                                'try_and_buy_charges' => floatval($dps->try_and_buy_charges),
-                                'intercept_charges' => floatval($dps->intercept_charges),
-                                'non_service_area_charges' => floatval($dps->nsa_osa_charges),
-                                'esc_charges' => floatval($dps->esc_charges),
-                                'gst_charges' => floatval($dps->gst),
-                                'sms_charges' => floatval($dps->sms_charges),
-                                'reverse_pickup_charges' => floatval($service_charges),
-                            ];
-                        } elseif ($dps->type == 1) {
-                            $charges = [
-                                'faf_charges' => $LogChargeStatus ? floatval($dps->faf_charges) : 0,
-                                'weight_charges' => $LogChargeStatus ? floatval($dps->weight_charges) : 0,
-                                'fuel_surcharge' => $LogChargeStatus ? floatval($dps->fuel_surcharge) : 0,
-                                'insurance_charges' => floatval($dps->insurance_charges),
-                                'return_charges' => floatval($dps->return_charges),
-                                'intercept_charges' => floatval($dps->intercept_charges),
-                                'non_service_area_charges' => floatval($dps->nsa_osa_charges),
-                                'gst_charges' => floatval($dps->gst),
-                                'sms_charges' => floatval($dps->sms_charges),
-                            ];
+                    $requestPayload = [];
+                    $url = "";
+                    if ($dps->wallet_action_bid == 1 && $dps->wallet_settlement_updated == 1) {
+                        $dps->wallet_action_bid = self::run_log_and_settle($dps, $shipment);
+                    }
+                    $send_request = true;
+                    $success = false;
+                    if ($dps->wallet_action_bid == 1 && $dps->wallet_settlement_updated == 0) {
+                        // $logCharged = !empty($dps->wallet_log_charges_updated) ? $dps->wallet_log_charges_updated : 0;
+
+                        $logCharged = FinjaLogSettlementRecord::where('shipment_id', $shipmentId)->first();
+                        $logCharged2 = !empty($logCharged) ? $logCharged->wallet_log_charges_updated : 0;
+
+                        $check_arrival_paid_done = DonePaymentShipment::where('shipment_id', $shipmentId)->where('type', 3)->exists();
+                        $check_arrival_paid_pending = PendingPaymentShipment::where('shipment_id', $shipmentId)->where('type', 3)->exists();
+                        if ($logCharged2 == 0 && ($check_arrival_paid_done || $check_arrival_paid_pending)) {
+                            $LogChargeStatus = false;
                         }
-                    }
 
-                    $requestPayload = [
-                        "client_id" => $dps->user_id,
-                        "wallet_id" => $dps->wallet_id,
-                        "reference_id" => $dps->id,
-                        "shipment_id" => $dps->tracking_number,
-                        "amount" => $dps->type == 0 ? $dps->amount : 0,
-                        "charges" => $charges,
-                    ];
-
-                    $request_nature = 7;
-                    $response_nature = 8;
-                    $url = $api . 'transactions/log/settlement';
-                    $data = [
-                        'shipment_id' => $dps->shipment_id,
-                        'wallet_settlement_updated' => true,
-                        'wallet_settlement_updated_at' => Carbon::now(),
-                    ];
-
-                } elseif ($dps->wallet_action_bid == 2) {
-                    $type = FinjaLogSettlementRecord::check_wallet_charges_type($dps->shipment_id);
-                    $payable = $dps->payable;
-                    if ($type) {
-                        $wallet_charges = ShipmentAdditionalCharges::fetch_wallet_charges($dps->shipment_id);
-                        $payable = $dps->payable - $wallet_charges;
-                    }
-                    $requestPayload = [
-                        "client_id" => $dps->user_id,
-                        "wallet_id" => $dps->wallet_id,
-                        "reference_id" => $dps->id,
-                        "shipment_id" => $dps->tracking_number,
-                        "amount" => floatval($payable),
-                    ];
-                    $request_nature = 9;
-                    $response_nature = 10;
-                    $url = $api . 'transactions/log/adjustment';
-                    $data = [
-                        'shipment_id' => $dps->shipment_id,
-                        'wallet_adjustment_updated' => true,
-                        'wallet_adjustment_updated_at' => Carbon::now(),
-                    ];
-                    if ($payable == 0) {
-                        $send_request = false;
-                    }
-                } elseif ($dps->wallet_action_bid == 0) {
-                    $requestPayload = [
-                        "client_id" => $dps->user_id,
-                        "wallet_id" => $dps->wallet_id,
-                        "shipment_id" => $dps->tracking_number,
-                        "charges" => [
-                            'faf_charges' => floatval($dps->faf_charges),
-                            'weight_charges' => floatval($dps->weight_charges),
-                            'fuel_surcharge' => floatval($dps->fuel_surcharge),
-                            'arrival_charges_gst' => floatval($dps->gst),
-                        ]
-                    ];
-                    $request_nature = 5;
-                    $response_nature = 6;
-                    $url = $api . 'transactions/log/charge';
-                    $data = [
-                        'shipment_id' => $dps->shipment_id,
-                        'wallet_log_charges_updated' => true,
-                        'wallet_log_charges_updated_at' => Carbon::now(),
-                    ];
-                }
-                if(!empty($requestPayload) && !empty($url)) {
-                    try {
-                        // if ($token_time->diffInMinutes(Carbon::now()) >= 4) {
-                        //     
-                        //     $token_time = Carbon::now(); // Update the token time
-                        // }
-                        $token = FingaIntegrationController::getToken($api);
-                        if ($token && $send_request) {
-                            FingaIntegrationController::apiLog($request_nature, 1, $requestPayload, $shipmentId);
-                            $response = Http::withHeaders([
-                                'accept' => 'application/json',
-                                'Authorization' => "Bearer " . $token,
-
-                            ])->connectTimeout(120)->timeout(120)->post($url, $requestPayload);
-                            if ($response->successful()) {
-
-                                $body = $response->getBody();
-                                $body = json_decode($body);
-                                $success = true;
-                                FingaIntegrationController::apiLog($response_nature, 'success', $body, $shipmentId);
-
-                            } else {
-                                $body = $response->getBody();
-                                $body = json_decode($body,true);
-                                if (isset($body['error']) && str_contains($body['error'], 'Original transaction not found.') && $dps->wallet_log_updated == 1) {
-                                    $success = true;
-                                    FingaIntegrationController::apiLog($response_nature, 'success (duplicate ignored)', $body, $shipmentId);
-                                }else{
-                                    FingaIntegrationController::apiLog($response_nature, 'error', $body, $shipmentId);
-                                }
+                        $charges = [];
+                        if ($shipment->packaging_material_request == 1) {
+                            $charges = [
+                                'packaging_material_charges' => floatval($shipment->packaging_material_charges),
+                                'gst_charges' => floatval($dps->gst),
+                                'sms_charges' => floatval($dps->sms_charges),
+                            ];
+                        } else {
+                            if ($dps->type == 0) {
+                                $charges = [
+                                    'faf_charges' => $LogChargeStatus ? floatval($dps->faf_charges) : 0,
+                                    'weight_charges' => $LogChargeStatus ? floatval($dps->weight_charges) : 0,
+                                    'fuel_surcharge' => $LogChargeStatus ? floatval($dps->fuel_surcharge) : 0,
+                                    'cash_handling_charges' => floatval($dps->cash_handling_charges),
+                                    'insurance_charges' => floatval($dps->insurance_charges),
+                                    'replacement_charges' => floatval($dps->replacement_charges),
+                                    'try_and_buy_charges' => floatval($dps->try_and_buy_charges),
+                                    'intercept_charges' => floatval($dps->intercept_charges),
+                                    'non_service_area_charges' => floatval($dps->nsa_osa_charges),
+                                    'esc_charges' => floatval($dps->esc_charges),
+                                    'gst_charges' => floatval($dps->gst),
+                                    'sms_charges' => floatval($dps->sms_charges),
+                                    'reverse_pickup_charges' => floatval($service_charges),
+                                ];
+                            } elseif ($dps->type == 1) {
+                                $charges = [
+                                    'faf_charges' => $LogChargeStatus ? floatval($dps->faf_charges) : 0,
+                                    'weight_charges' => $LogChargeStatus ? floatval($dps->weight_charges) : 0,
+                                    'fuel_surcharge' => $LogChargeStatus ? floatval($dps->fuel_surcharge) : 0,
+                                    'insurance_charges' => floatval($dps->insurance_charges),
+                                    'return_charges' => floatval($dps->return_charges),
+                                    'intercept_charges' => floatval($dps->intercept_charges),
+                                    'non_service_area_charges' => floatval($dps->nsa_osa_charges),
+                                    'gst_charges' => floatval($dps->gst),
+                                    'sms_charges' => floatval($dps->sms_charges),
+                                ];
                             }
                         }
 
-                        if($success || !$send_request){
+                        $requestPayload = [
+                            "client_id" => $dps->user_id,
+                            "wallet_id" => $dps->wallet_id,
+                            "reference_id" => $dps->id,
+                            "shipment_id" => $dps->tracking_number,
+                            "amount" => $dps->type == 0 ? $dps->amount : 0,
+                            "charges" => $charges,
+                        ];
+
+                        $request_nature = 7;
+                        $response_nature = 8;
+                        $url = $api . 'transactions/log/settlement';
+                        $data = [
+                            'shipment_id' => $dps->shipment_id,
+                            'wallet_settlement_updated' => true,
+                            'wallet_settlement_updated_at' => Carbon::now(),
+                        ];
+
+                    } elseif ($dps->wallet_action_bid == 2) {
+                        $type = FinjaLogSettlementRecord::check_wallet_charges_type($dps->shipment_id);
+                        $payable = $dps->payable;
+                        if ($type) {
+                            $wallet_charges = ShipmentAdditionalCharges::fetch_wallet_charges($dps->shipment_id);
+                            $payable = $dps->payable - $wallet_charges;
+                        }
+                        $requestPayload = [
+                            "client_id" => $dps->user_id,
+                            "wallet_id" => $dps->wallet_id,
+                            "reference_id" => $dps->id,
+                            "shipment_id" => $dps->tracking_number,
+                            "amount" => floatval($payable),
+                        ];
+                        $request_nature = 9;
+                        $response_nature = 10;
+                        $url = $api . 'transactions/log/adjustment';
+                        $data = [
+                            'shipment_id' => $dps->shipment_id,
+                            'wallet_adjustment_updated' => true,
+                            'wallet_adjustment_updated_at' => Carbon::now(),
+                        ];
+                        if ($payable == 0) {
+                            $send_request = false;
+                        }
+                    } elseif ($dps->wallet_action_bid == 0) {
+                        $requestPayload = [
+                            "client_id" => $dps->user_id,
+                            "wallet_id" => $dps->wallet_id,
+                            "shipment_id" => $dps->tracking_number,
+                            "charges" => [
+                                'faf_charges' => floatval($dps->faf_charges),
+                                'weight_charges' => floatval($dps->weight_charges),
+                                'fuel_surcharge' => floatval($dps->fuel_surcharge),
+                                'arrival_charges_gst' => floatval($dps->gst),
+                            ]
+                        ];
+                        $request_nature = 5;
+                        $response_nature = 6;
+                        $url = $api . 'transactions/log/charge';
+                        $data = [
+                            'shipment_id' => $dps->shipment_id,
+                            'wallet_log_charges_updated' => true,
+                            'wallet_log_charges_updated_at' => Carbon::now(),
+                        ];
+                    }
+                    if (!empty($requestPayload) && !empty($url)) {
+                        try {
+                            // if ($token_time->diffInMinutes(Carbon::now()) >= 4) {
+                            //
+                            //     $token_time = Carbon::now(); // Update the token time
+                            // }
+                            $token = FingaIntegrationController::getToken($api);
+                            if ($token && $send_request) {
+                                FingaIntegrationController::apiLog($request_nature, 1, $requestPayload, $shipmentId);
+                                $response = Http::withHeaders([
+                                    'accept' => 'application/json',
+                                    'Authorization' => "Bearer " . $token,
+
+                                ])->connectTimeout(120)->timeout(120)->post($url, $requestPayload);
+                                if ($response->successful()) {
+
+                                    $body = $response->getBody();
+                                    $body = json_decode($body);
+                                    $success = true;
+                                    FingaIntegrationController::apiLog($response_nature, 'success', $body, $shipmentId);
+
+                                } else {
+                                    $body = $response->getBody();
+                                    $body = json_decode($body, true);
+                                    if (isset($body['error']) && str_contains($body['error'], 'Original transaction not found.') && $dps->wallet_log_updated == 1) {
+                                        $success = true;
+                                        FingaIntegrationController::apiLog($response_nature, 'success (duplicate ignored)', $body, $shipmentId);
+                                    } else {
+                                        FingaIntegrationController::apiLog($response_nature, 'error', $body, $shipmentId);
+                                    }
+                                }
+                            }
+
+                            if ($success || !$send_request) {
                                 FinjaLogSettlementRecord::updateOrCreate(
                                 // Condition to find the record
                                     ['shipment_id' => $shipmentId],
@@ -309,18 +310,19 @@ class WalletSettlementFromDonePayments implements ShouldQueue
 
                                     ShipmentsPaymentJourneyController::add($dps->shipment_id, 3, $this->id, '', $this->payment_id);
                                 }
+                            }
+
+                        } catch (\Throwable $th) {
+
+                            $errorBody = [
+                                'error' => $th->getMessage(),
+                                'code' => $th->getCode()
+                            ];
+                            FingaIntegrationController::apiLog($response_nature, 'exception', $errorBody, $shipmentId);
                         }
-
-                    } catch (\Throwable $th) {
-
-                        $errorBody = [
-                            'error' => $th->getMessage(),
-                            'code' => $th->getCode()
-                        ];
-                        FingaIntegrationController::apiLog($response_nature, 'exception', $errorBody, $shipmentId);
                     }
-                }
 
+                }
             }
             sleep(15);
         });
