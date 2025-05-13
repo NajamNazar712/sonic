@@ -16539,6 +16539,7 @@ class AdminReportsController extends Controller
             'irb.intercept_type as intercepttype',
             'intercept_approved.name as intercept_city_name',
             'user_shipping_info.poc as poc',
+            'shipmentMisrouted.name as misroutedCityname',
         ];
         
         $shipments = DB::connection($connection)
@@ -16828,6 +16829,21 @@ class AdminReportsController extends Controller
         ->leftJoin('sale_tier_tags', 'sale_tier_tags.user_id', '=', 'shipments.user_id')
         ->leftJoin('admins as poc_admin', 'poc_admin.id', '=', 'sale_tier_tags.poc')
         ->leftJoin('admins as kam_admin', 'kam_admin.id', '=', 'sale_tier_tags.kam')
+
+        ->leftJoin('shipments_journey as sjr', function ($join) use ($connection) {
+            $join->on('sjr.shipment_id', '=', 'shipments.id')
+                ->where(
+                    'sjr.id',
+                    '=',
+                    DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(20,21,22,23,24,25,47,48,60,68))')
+                );
+        })
+
+        ->leftjoin('cities as shipmentMisrouted', function ($join) {
+            $join->on('shipmentMisrouted.id', '=', 'sjr.city_id')
+                ->where('sjr.shipper_status_id', '=', 68);
+        })
+
         ->where(function($query) {
             $query->whereNotNull('sale_tier_tags.poc')
                  ->orWhereNotNull('sale_tier_tags.kam');
