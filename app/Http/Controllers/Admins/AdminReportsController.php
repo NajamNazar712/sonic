@@ -17705,11 +17705,15 @@ class AdminReportsController extends Controller
                 $delivery_notes = DeliveryNote::whereIn('id', $delivery_note_ids)
                     ->whereHas('rider', function ($query) {
                         $query->whereIn('operation_rider_id', [1, 2]);
-                    })->get();
-
-                    $rider = Rider::where('id', $delivery_notes->rider_id)->select('name')->first();
-                    
-                    $delivery_notes_count = $delivery_notes->count();
+                    })
+                ->get();
+                
+                $first_delivery_note = $delivery_notes->first();
+                $rider = $first_delivery_note ? $first_delivery_note->rider : '-';
+                
+                $rider_name = $rider ? $rider->name : null;
+                
+                $delivery_notes_count = $delivery_notes->count();
 
                 $rowArray['total_attempt'] = $delivery_notes_count;
             } else {
