@@ -2130,15 +2130,29 @@ class RetailAdminUserManagementController extends Controller
             5 => 'Spouse DOB'
         ];
         
-        $changedFields[] = RetailUserFamilyInformation::where('retail_user_id', $retail_user->id)
+        $familyInfo = RetailUserFamilyInformation::where('retail_user_id', $retail_user->id)
         ->whereNotNull('family_member_name')
-        ->get(['family_member_name', 'salary', 'agreement_start_date', 'family_member_type'])
-        ->map(function ($item) use ($familyTypeMap) {
-            $typeLabel = $familyTypeMap[$item->family_member_type] ?? $item->family_member_type;
-            $details = trim($item->family_member_name); // Add more fields if needed
-            return "{$typeLabel}: {$details}";
-        });
+        ->get(['family_member_name', 'salary', 'agreement_start_date', 'family_member_type']);
+    
+        // Add salary and agreement date once (from first record)
+        if ($familyInfo->isNotEmpty()) {
+            $first = $familyInfo->first();
         
+            if ($first->salary) {
+                $changedFields[] = 'Salary: ' . $first->salary;
+            }
+        
+            if ($first->agreement_start_date) {
+                $changedFields[] = 'Agreement Start Date: ' . $first->agreement_start_date;
+            }
+        }
+        
+        // Add each family member
+        foreach ($familyInfo as $item) {
+            $type = $familyTypeMap[$item->family_member_type] ?? $item->family_member_type;
+            $changedFields[] = "{$type}: {$item->family_member_name}";
+        }
+    
         RetailUserFamilyInformation::where('retail_user_id', $retail_user->id)->delete();
         foreach ($familyMemberNames as $key => $familyMemberName) {
             // Delete existing records for the retail user only if new family member information is present
