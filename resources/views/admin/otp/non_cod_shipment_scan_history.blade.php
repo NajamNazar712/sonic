@@ -11,6 +11,23 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
+
+
+                <form id="tracking_number_search" class="mb-1" novalidate="novalidate">
+                    <div class="row justify-content-center">
+                        <div class="col-3">
+                            <div class="form-group">
+                                <input type="text" name="tracking_number" id="tracking_number" class="form-control tracking_number" 
+                                    placeholder="Tracking Number*" data-tags-input-name="tracking_number">
+                            </div>
+                        </div>
+                        <div class="form-group ml-1">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                        </div>
+                    </div>
+                </form>
+
+
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
@@ -163,12 +180,16 @@
             autoWidth: false,
             pagingType: 'full_numbers',
             processing: true,
+            deferLoading: 0,
             language: {
                 processing: data_table_loader
             },
             serverSide: true,
             ajax:{
                 url: '{{ route('admin.shipment_otp.shipment_otp_scanning_history_list') }}',
+                data: function (d) {
+                    d.tracking_number = $('#tracking_number').val();
+                }
             },
             rowId: 'shId',
             order: [[5, 'desc']],
@@ -210,5 +231,47 @@
                 this.api().table().columns.adjust();
             }
         });
+
+
+        var select = $('#tracking_number').selectize({
+            placeholder: 'Tracking Number*',
+            delimiter: ',',
+            createOnBlur: true,
+            persist: false,
+            plugins: ['remove_button'],
+            onDropdownOpen: function(dropdown) {
+                dropdown.remove();
+            },
+            onType: function(str) {
+                var regex = /^[0-9,]+$/;
+                if (!regex.test(str)) {
+                    select[0].selectize.setTextboxValue('');
+                }
+            },
+            create: function(input) {
+                if (input.length >= 1 && Math.floor(input) == input && $.isNumeric(input)) {
+                    return {
+                        value: input,
+                        text: input
+                    }
+                } else {
+                    return false;
+                }
+            },
+        });
+
+        $('#tracking_number_search').bind('submit',function (e) {
+            var tracking_number = $('#tracking_number_search .tracking_number').val();
+            if (tracking_number != '') {
+                scan_sound(1);
+                table.draw();
+            } else {
+                scan_sound(2);
+                toastr.error('Please enter a tracking number.', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+            }
+            e.preventDefault();
+        });
+
+
     </script>
 @endsection

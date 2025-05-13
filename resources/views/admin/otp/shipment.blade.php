@@ -279,7 +279,12 @@
         $('#tracking_number_search').bind('submit',function (e) {
             var tracking_number = $('#tracking_number_search .tracking_number').val();
             if (tracking_number != '') {
+                scan_sound(1);
                 table.draw();
+            }
+            else {
+                scan_sound(2);
+                toastr.error('Please enter a tracking number.', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
             }
             e.preventDefault();
         });

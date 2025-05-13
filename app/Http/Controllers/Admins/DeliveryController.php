@@ -10470,7 +10470,21 @@ class DeliveryController extends Controller
 
     public function shipment_otp_scanning_history_list(Request $request)
     {
-        $logs = NonCodShipmentLog::whereNotNull('shipment_otp')->orderby('id', 'desc');
+        // $logs = NonCodShipmentLog::whereNotNull('shipment_otp')->orderby('id', 'desc');
+        $tracking_numbers = explode(',', $request->tracking_number);
+        $logs = NonCodShipmentLog::join('shipments as shipment', 'shipment.tracking_number', '=', 'non_cod_shipment_logs.tracking_number')
+            ->whereNotNull('non_cod_shipment_logs.shipment_otp')
+            ->whereIn('shipment.tracking_number', $tracking_numbers)
+            ->orderBy('non_cod_shipment_logs.id', 'desc')
+            ->select([
+                'non_cod_shipment_logs.id as log_id',
+                'non_cod_shipment_logs.tracking_number',
+                'non_cod_shipment_logs.shipment_otp',
+                'non_cod_shipment_logs.employee_name',
+                'non_cod_shipment_logs.employee_designation',
+                'non_cod_shipment_logs.trax_id',
+                'non_cod_shipment_logs.created_at',
+            ]);
 
         // Check if there are search values and apply them
         foreach ($request->get('columns') as $column) {
