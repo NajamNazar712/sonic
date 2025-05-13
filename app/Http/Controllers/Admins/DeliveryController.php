@@ -3958,7 +3958,7 @@ class DeliveryController extends Controller
                         if ($shipper_status_id == 12 && in_array($status_reason_id, [27, 35]) && $verification) {
                             $globalAdminId = 346;
                             $journey = ShipmentsJourney::where('shipment_id', $shipment_details->id)->whereIn('status_reason_id', [27, 35])->count();
-                            if($journey > 1){
+                            if($journey > 2){
                                 Shipment::where('id', $shipment)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
                                 if ($shipment_details->shipment_type == 1) {
                                     if ($shipment_details->booking_type_id != 4) {
@@ -3973,30 +3973,17 @@ class DeliveryController extends Controller
                                         AdminFinanceController::done_payment($shipment, 1);
                                     }
                                 }
-                                ShipmentsJourneyController::add($shipment, 20, 20, $status_reason_id, $shipment_journey_remarks, NULL, $globalAdminId, null, null, 1, null, null, null, null, null);
+                                ShipmentsJourneyController::add($shipment, 20, 20, $status_reason_id, $journey->remarks ?? NULL, NULL, $globalAdminId, null, null, 1, null, null, null, null, null);
                                 
                             }else{
                                     Shipment::where('id', $shipment)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);
 
-                                    $data = [
-                                        'agent_id' => 346, // testing purpose
-                                        'shipment_id' => $shipment_details->shipment_id,
-                                        'shipments_journey_id' => $journey->id,
-                                        'rv_assign_agent_status_id' => 7,
-                                        'rv_assign_agent_sub_status_id' => null,
-                                        'rv_assign_agent_sub_status_id' => null,
-                                        'assigned_to_type_id' => 0,
-                                        'assigned_by' => 0,
-                                        'rv_state_id' => 2,
-                                        'updated_by_id' => 346
-                                    ];
-                                    $this->rv_shipment_assign($data);
-                                    ShipmentsJourneyController::add($shipment_details->id, 65, 65, $journey->status_reason_id, NULL, $shipment_details->user_id, 346);
+                                    ShipmentsJourneyController::add($shipment_details->id, 65, 65, $status_reason_id, NULL, $shipment_details->user_id, 346);
 
                                     NotificationsController::send(220, $shipment);
                                     RvShipmentAssignAgent::where('shipment_id', $shipment_details->id)
                                         // ->whereDate('created_at',$date)
-                                        ->update(['unresponsive_count' => 3, 'unresponsive_email_count' => 1, 'unresponsive_email_time' => date('Y-m-d h:i:s')]);                                    
+                                        ->update(['agent_id'=> 346,'rv_state_id'=>2, 'rv_assign_agent_status_id' => 7,'unresponsive_count' => 3, 'unresponsive_email_count' => 1, 'unresponsive_email_time' => date('Y-m-d h:i:s')]);                                    
                             }
 
 
@@ -4084,6 +4071,7 @@ class DeliveryController extends Controller
         }
     }catch (\Throwable $th)
         {
+            error_log('data'.print_r($th->getMessage(),true));
             return redirect()->back()->with('error', 'Something Went Wrong !');
         }
     }
