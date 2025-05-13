@@ -3957,7 +3957,7 @@ class DeliveryController extends Controller
                         // 35 = Delivery Stopped
                         if ($shipper_status_id == 12 && in_array($status_reason_id, [27, 35]) && $verification) {
                             $globalAdminId = 346;
-                            $journey = ShipmentsJourney::where('shipment_id', $shipment_details->id)->whereIn('status_reason_id', [27, 35])->count();
+                            $journey = ShipmentsJourney::where(['shipment_id'=>$shipment_details->id, 'verification' => 0])->whereIn('status_reason_id', [27, 35])->count();
                             if($journey > 0){
                                 Shipment::where('id', $shipment)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
                                 if ($shipment_details->shipment_type == 1) {
