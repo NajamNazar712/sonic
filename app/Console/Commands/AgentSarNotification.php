@@ -113,7 +113,7 @@ class AgentSarNotification extends Command
                 ->where('rv_shipment_assign_agents.unresponsive_email_time', '<=', $nowSub48Hours)
                 ->select('rv_shipment_assign_agents.*') // Select only columns from rv_shipment_assign_agents
                 ->get();
-
+                
             if ($unresponsive_shipments->isNotEmpty()) {
                 foreach ($unresponsive_shipments as $shipment) {
 

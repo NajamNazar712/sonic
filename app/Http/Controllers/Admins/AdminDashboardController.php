@@ -10721,7 +10721,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 }
             })
             ->addColumn("lead_progress", function ($user) {
-                if($user->lead_id){
+                if(isset($user->lead_id)){
                     $weight_charges = WeightCharge::where('user_id' , $user->id);
 
                     $description = '-';

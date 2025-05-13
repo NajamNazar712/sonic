@@ -342,7 +342,7 @@
                                     <div class="col-5">
                                         <div class="form-group">
                                             <div class="input-group mb-2">
-                                                <input type="text" name="product_percentage[]" id="product_percentage_edit" class="form-control product_percentage_edit" placeholder="Commission"  value="" max="100">
+                                                <input type="text" name="product_percentage[]" id="product_percentage_edit" class="form-control product_percentage_edit" placeholder="Commission"  value="">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text" id="basic-addon2">%</span>
                                                 </div>
@@ -432,6 +432,32 @@
                             <button type="submit" name="edit" class="btn btn-primary edit" value="Add">Update</button>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="logs_modal" role="dialog" aria-labelledby="logs_modal_title" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Admin Name</th>
+                                <th>Changed Fields</th>
+                                <th>Date of change</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Log entries will be injected here by JavaScript -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -702,6 +728,68 @@
                 });
             });
 
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.view_logs', function() {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                if($(this).hasClass('view_logs')) {
+                    $.ajax({
+                        url: "{{ route('admin.retail.view_logs') }}",
+                        method: 'GET',
+                        data: {
+                            'id': id,
+                            'screen_name' : 'Retail Franchise'
+                        },
+                        success: function (data) {
+                            if (data.status == 0) {
+                                var logs = data.logs;
+                                var logContent = '';
+                                if (logs.length > 0) {
+                        
+                                    logs.forEach(function (log) {
+                                        let editedFieldsFormatted = log.data
+                                            .split(', ')
+                                            .map(field => {
+                                                // Split the field at "->", keep the "->" and make the part after it bold
+                                                let parts = field.split('->');
+                                                if (parts.length > 1) {
+                                                    return parts[0] + ' <strong>' + '-> ' + parts[1].trim() + '</strong>';
+                                                }
+                                                return field; // Return as is if "->" is not found
+                                            })
+                                            .join('<br>'); // Add line breaks between fields
+
+                                        logContent += '<tr>';
+                                        logContent += '<td>' + log.name + '</td>';
+                                        logContent += '<td>' + editedFieldsFormatted + '</td>';
+                                        logContent += '<td>' + log.created_at + '</td>';
+                                        logContent += '</tr>';
+                                    });
+
+                                    $('#logs_modal table tbody').html(logContent);
+                                    $('#logs_modal').modal('show');
+                                } else {
+                                    toastr.error('No logs found for this record.', 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+                            } else {
+                                toastr.error(data.message, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+                        },
+                        error: function () {
+                            // Handle errors in the AJAX request
+                            toastr.error('Something went wrong while retrieving logs.', 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    });
+                }
+            });
+
             $('#add_franchise').on('hide.bs.modal', function () {
                 $('#hub').val(null).trigger('change');
                 $('#name').val('');
@@ -950,7 +1038,7 @@
                 var selectedOptionEdit = $("#retail_shipping_mode_id_edit option:selected").text();
                 var productPercentageEdit = $("#product_percentage_edit").val();
 
-                if (productPercentageEdit.trim() === '' || !$.isNumeric(productPercentageEdit)) {
+                if (productPercentageEdit.trim() === '' || !$.isNumeric(productPercentageEdit) || productPercentageEdit > 100 ) {
                     $("#error_message_edit").text("Please enter a valid product percentage.").show();
                     $("#product_percentage_edit").attr("required", true);
                 } else {

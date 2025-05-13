@@ -9695,6 +9695,9 @@ class AdminFinanceController extends Controller
         $total_wallet_charges = 0;
         foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
             $shipment = $done_payment_shipment->shipment;
+            if (!isset($shipment->id)) {
+                $shipment = $done_payment_shipment->shipment_archive;
+            }
             $service_charges = ShipmentServicesCharges::where('shipment_id', $shipment->id);
             if ($service_charges->exists()) {
                 $service_charges = $service_charges->first();
