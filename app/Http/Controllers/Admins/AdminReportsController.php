@@ -16539,6 +16539,7 @@ class AdminReportsController extends Controller
             'irb.intercept_type as intercepttype',
             'intercept_approved.name as intercept_city_name',
             'user_shipping_info.poc as poc',
+            'shipmentMisrouted.name as misroutedCityname',
         ];
         
         $shipments = DB::connection($connection)
@@ -16828,6 +16829,21 @@ class AdminReportsController extends Controller
         ->leftJoin('sale_tier_tags', 'sale_tier_tags.user_id', '=', 'shipments.user_id')
         ->leftJoin('admins as poc_admin', 'poc_admin.id', '=', 'sale_tier_tags.poc')
         ->leftJoin('admins as kam_admin', 'kam_admin.id', '=', 'sale_tier_tags.kam')
+
+        ->leftJoin('shipments_journey as sjr', function ($join) use ($connection) {
+            $join->on('sjr.shipment_id', '=', 'shipments.id')
+                ->where(
+                    'sjr.id',
+                    '=',
+                    DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(20,21,22,23,24,25,47,48,60,68))')
+                );
+        })
+
+        ->leftjoin('cities as shipmentMisrouted', function ($join) {
+            $join->on('shipmentMisrouted.id', '=', 'sjr.city_id')
+                ->where('sjr.shipper_status_id', '=', 68);
+        })
+
         ->where(function($query) {
             $query->whereNotNull('sale_tier_tags.poc')
                  ->orWhereNotNull('sale_tier_tags.kam');
@@ -17702,6 +17718,7 @@ class AdminReportsController extends Controller
                 $in_process_tat = $current_tat;
             }
 
+            $rider_name = '-';
             if ($delivery_note_shipment->exists()) {
                 $delivery_note_ids = $delivery_note_shipment->pluck('delivery_note_id')->toArray();
 
@@ -17735,29 +17752,29 @@ class AdminReportsController extends Controller
             $rowArray['shipper'] = ($rowArray['booking_type_id'] == 4) ? ($rowArray['shipper'] . ' (' . $rowArray['poc'] . ')') : $rowArray['shipper'];
 
             if (in_array($rowArray['shipper_status_id'], [68])) {
-                $rowArray['current_hub_name'] = $rowArray['misroutedCityname'];
+                $rowArray['concerned_hub_name'] = $rowArray['misroutedCityname'];
             } elseif (in_array($rowArray['shipper_status_id'], [49, 3]) && (in_array($rowArray['bag_status'], [3, 2, 4, 7, 8, 9, 6]))) {
                     //Shipment In Transit || Shipment Misrouted Forwarded concered hub change reference TO-6939
-                    $rowArray['current_hub_name'] = $rowArray['destination'];
+                    $rowArray['concerned_hub_name'] = $rowArray['destination'];
                 
             } elseif (in_array($rowArray['shipper_status_id'], [26, 73, 32, 70, 76]) && in_array($rowArray['bag_status'], [4, 7, 8, 9, 6])) {
                     //Shipment In Transit || Shipment Misrouted Forwarded concered hub change reference TO-6939
-                    $rowArray['current_hub_name'] = $rowArray['origin'];
+                    $rowArray['concerned_hub_name'] = $rowArray['origin'];
             } elseif (in_array($rowArray['shipper_status_id'], [18, 34, 23, 24, 47, 48, 2])) {
-                $rowArray['current_hub_name'] = $rowArray['origin'];
+                $rowArray['concerned_hub_name'] = $rowArray['origin'];
             } elseif (in_array($rowArray['shipper_status_id'], [54, 55, 69, 7, 4, 8])) {
-                $rowArray['current_hub_name'] = (($rowArray['intercepttype'] == 1) ?  $rowArray['intercept_city_name'] : $rowArray['destination']);
+                $rowArray['concerned_hub_name'] = (($rowArray['intercepttype'] == 1) ?  $rowArray['intercept_city_name'] : $rowArray['destination']);
             } elseif (in_array($rowArray['shipper_status_id'], [22, 21, 75]) && $rowArray['return_city'] != null) {
-                $rowArray['current_hub_name'] = $rowArray['return_city'];
+                $rowArray['concerned_hub_name'] = $rowArray['return_city'];
             }
             else {
-                if (!empty($rowArray['current_hub_id'])) {
-                    $rowArray['current_hub_name'] = $rowArray['current_hub_name'];
+                if (!empty($rowArray['concerned_hub'])) {
+                    $rowArray['concerned_hub_name'] = $rowArray['concerned_hub_name'];
                 }else{
                     if (in_array($rowArray['shipper_status_id'], [1, 2, 61])) {
-                        $rowArray['current_hub_name'] = $rowArray['origin'];
+                        $rowArray['concerned_hub_name'] = $rowArray['origin'];
                     } else {
-                        $rowArray['current_hub_name'] = $rowArray['hub'];
+                        $rowArray['concerned_hub_name'] = $rowArray['hub'];
                     }
                 }
             
