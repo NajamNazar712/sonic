@@ -16540,6 +16540,7 @@ class AdminReportsController extends Controller
             'intercept_approved.name as intercept_city_name',
             'user_shipping_info.poc as poc',
             'shipmentMisrouted.name as misroutedCityname',
+            'crm_case_nature.name as crm_case_nature'
         ];
         
         $shipments = DB::connection($connection)
@@ -17118,9 +17119,9 @@ class AdminReportsController extends Controller
                 $in_process_tat = $current_tat;
             } 
 
-            // Sum of days
-            if ($launched_tat != '' && $in_process_tat != '') {
-                return $launched_tat + $in_process_tat;
+            if ($launched_tat !== '' && $in_process_tat !== '') {
+                $sum = $launched_tat + $in_process_tat;
+                return $sum >= 0 ? $sum : 0;
             } else {
                 return "-";
             }
@@ -17162,8 +17163,8 @@ class AdminReportsController extends Controller
             }
         })
         ->editColumn('crm_case_nature', function ($shipment) {
-            if ($shipment->valid_invalid_crm_status) {
-                return $shipment->valid_invalid_crm_status;
+            if ($shipment->crm_case_nature) {
+                return $shipment->crm_case_nature;
             } else {
                 return '-';
             }
