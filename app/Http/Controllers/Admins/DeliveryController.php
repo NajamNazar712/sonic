@@ -10470,91 +10470,38 @@ class DeliveryController extends Controller
 
     public function shipment_otp_scanning_history_list(Request $request)
     {
-        // $logs = NonCodShipmentLog::whereNotNull('shipment_otp')->orderby('id', 'desc');
         $tracking_numbers = explode(',', $request->tracking_number);
-        $logs = NonCodShipmentLog::join('shipments as shipment', 'shipment.tracking_number', '=', 'non_cod_shipment_logs.tracking_number')
-            ->whereNotNull('non_cod_shipment_logs.shipment_otp')
-            ->whereIn('shipment.tracking_number', $tracking_numbers)
-            ->orderBy('non_cod_shipment_logs.id', 'desc')
-            ->select([
-                'non_cod_shipment_logs.id as log_id',
-                'non_cod_shipment_logs.tracking_number',
-                'non_cod_shipment_logs.shipment_otp',
-                'non_cod_shipment_logs.employee_name',
-                'non_cod_shipment_logs.employee_designation',
-                'non_cod_shipment_logs.trax_id',
-                'non_cod_shipment_logs.created_at',
-            ]);
+        $logs = NonCodShipmentLog::whereNotNull('shipment_otp')
+            ->whereIn('tracking_number', $tracking_numbers);
 
-        // Check if there are search values and apply them
-        foreach ($request->get('columns') as $column) {
-            if ($column['search']['value']) {
-                $searchValue = $column['search']['value'];
-                switch ($column['name']) {
-                    case 'employee_name':
-                        $logs->where('employee_name', 'like', '%' . $searchValue . '%');
-                        break;
-                    case 'employee_designation':
-                        $logs->where('employee_designation', 'like', '%' . $searchValue . '%');
-                        break;
-                    case 'trax_id':
-                        $logs->where('trax_id', 'like', '%' . $searchValue . '%');
-                        break;
-                    case 'tracking_number':
-                        $logs->where('tracking_number', 'like', '%' . $searchValue . '%');
-                        break;
-                    case 'shipment_otp':
-                        $logs->where('shipment_otp', 'like', '%' . $searchValue . '%');
-                        break;
-                }
-            }
-        }
-
+        // Add the necessary columns and formatting
         $datatables = Datatables::of($logs)
-            ->addColumn('tracking_number', function ($shipments) {
+            ->editColumn('tracking_number', function ($shipments) {
                 return $shipments->tracking_number;
             })
             ->addColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
-            ->addColumn('shipment_otp', function ($shipments) {
-                if ($shipments->shipment_otp) {
-                    return $shipments->shipment_otp;
-                } else {
-                    return " - ";
-                }
+            ->editColumn('shipment_otp', function ($shipments) {
+                return $shipments->shipment_otp ? $shipments->shipment_otp : " - ";
             })
-            ->addColumn('employee_name', function ($shipments) {
-                if ($shipments->employee_name) {
-                    return $shipments->employee_name;
-                } else {
-                    return " - ";
-                }
+            ->editColumn('employee_name', function ($shipments) {
+                return $shipments->employee_name ? $shipments->employee_name : " - ";
             })
-            ->addColumn('employee_designation', function ($shipments) {
-                if ($shipments->employee_designation) {
-                    return $shipments->employee_designation;
-                } else {
-                    return " - ";
-                }
+            ->editColumn('employee_designation', function ($shipments) {
+                return $shipments->employee_designation ? $shipments->employee_designation : " - ";
             })
-            ->addColumn('trax_id', function ($shipments) {
-                if ($shipments->trax_id) {
-                    return $shipments->trax_id;
-                } else {
-                    return " - ";
-                }
+            ->editColumn('trax_id', function ($shipments) {
+                return $shipments->trax_id ? $shipments->trax_id : " - ";
             })
-            ->addColumn('generated_at', function ($shipments) {
-                if ($shipments->updated_at) {
-                    return Carbon::parse($shipments->updated_at)->format("Y-m-d H:i:s");
-                } else {
-                    return " - ";
-                }
+            ->editColumn('generated_at', function ($shipments) {
+                return $shipments->updated_at ? Carbon::parse($shipments->updated_at)->format("Y-m-d H:i:s") : " - ";
             })
             ->rawColumns(['tracking_number_link'])
-        ->make(true);
+            ->make(true);
+    
         return $datatables;
     }
+    
 }

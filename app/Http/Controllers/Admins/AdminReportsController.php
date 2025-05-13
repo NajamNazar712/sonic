@@ -16537,6 +16537,7 @@ class AdminReportsController extends Controller
             'shipments.booking_type_id as booking_type_id',
             'shipments.shipper_status_id as shipper_status_id',
             'irb.intercept_type as intercepttype',
+            'intercept_approved.name as intercept_city_name',
             'user_shipping_info.poc as poc',
         ];
         
@@ -16583,6 +16584,7 @@ class AdminReportsController extends Controller
                                 and intercept_re_book_request_histories.intercept_type = 1
                             )');
             })
+            ->leftjoin('cities as intercept_approved', 'intercept_approved.id', '=', 'irb.old_consignee_city_id')
 
             ->join('shipment_status', 'shipment_status.id', '=', 'shipments.shipper_status_id')
 
@@ -17571,6 +17573,7 @@ class AdminReportsController extends Controller
                     // Compare dates to adjust TAT
                     $launched_check = $launched->toDateString();
                     $current_check = $current->toDateString();
+                    $cut_off_check = $launched->format($time_format);
                     if ($launched_check <= $current_check && $to_formatted < $cut_off_check) {
                         $current_tat -= 1; // After cut-off, reduce TAT
                     }
@@ -17702,18 +17705,22 @@ class AdminReportsController extends Controller
             if ($delivery_note_shipment->exists()) {
                 $delivery_note_ids = $delivery_note_shipment->pluck('delivery_note_id')->toArray();
 
-                $delivery_notes = DeliveryNote::whereIn('id', $delivery_note_ids)
+                // Prepare base query
+                $delivery_notes_query = DeliveryNote::whereIn('id', $delivery_note_ids)
                     ->whereHas('rider', function ($query) {
                         $query->whereIn('operation_rider_id', [1, 2]);
-                    })
-                ->get();
-                
-                $first_delivery_note = $delivery_notes->first();
-                $rider = $first_delivery_note ? $first_delivery_note->rider : '-';
-                
-                $rider_name = $rider ? $rider->name : null;
-                
-                $delivery_notes_count = $delivery_notes->count();
+                    });
+
+                // Get count without loading all records
+                $delivery_notes_count = $delivery_notes_query->count();
+
+                // Get the first delivery note with rider eager loaded
+                $first_delivery_note = $delivery_notes_query->with('rider')->first();
+
+                // Safely get rider name
+                $rider_name = $first_delivery_note && $first_delivery_note->rider
+                ? $first_delivery_note->rider->name
+                : '-';
 
                 $rowArray['total_attempt'] = $delivery_notes_count;
             } else {
@@ -17729,11 +17736,11 @@ class AdminReportsController extends Controller
 
             if (in_array($rowArray['shipper_status_id'], [68])) {
                 $rowArray['current_hub_name'] = $rowArray['misroutedCityname'];
-            } elseif (in_array($rowArray['shipper_status_id'], [49, 3]) && (in_array($rowArray['cargo_status_id'], [3, 2, 4, 7, 8, 9, 6]))) {
+            } elseif (in_array($rowArray['shipper_status_id'], [49, 3]) && (in_array($rowArray['bag_status'], [3, 2, 4, 7, 8, 9, 6]))) {
                     //Shipment In Transit || Shipment Misrouted Forwarded concered hub change reference TO-6939
                     $rowArray['current_hub_name'] = $rowArray['destination'];
                 
-            } elseif (in_array($rowArray['shipper_status_id'], [26, 73, 32, 70, 76]) && in_array($rowArray['cargo_status_id'], [4, 7, 8, 9, 6])) {
+            } elseif (in_array($rowArray['shipper_status_id'], [26, 73, 32, 70, 76]) && in_array($rowArray['bag_status'], [4, 7, 8, 9, 6])) {
                     //Shipment In Transit || Shipment Misrouted Forwarded concered hub change reference TO-6939
                     $rowArray['current_hub_name'] = $rowArray['origin'];
             } elseif (in_array($rowArray['shipper_status_id'], [18, 34, 23, 24, 47, 48, 2])) {
@@ -17816,7 +17823,7 @@ class AdminReportsController extends Controller
             $rowArray['complainant_phone_number'] = $crm_shipment->complainant_phone ?? '-';
             $rowArray['shipment_quantity'] = Shipment::where('tracking_number', $rowArray['shipment_tracking_number'])->first()->quantity ?? '-';
             $rowArray['shipment_pieces'] = Shipment::where('tracking_number', $rowArray['shipment_tracking_number'])->first()->pieces ?? '-';
-            $rowArray['rider_name'] = $rider->name ?? '-';
+            $rowArray['rider_name'] = $rider_name;
             $rowArray['crm_case_nature'] = $crm_request_and_status?->request_type ?? '-';
             $rowArray['request_status'] = $crm_request_and_status?->crm_status ?? '-';
 
