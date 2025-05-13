@@ -17416,11 +17416,10 @@ class AdminReportsController extends Controller
         
         $final_Array = array();
         $specificValues = $shipments->select($select)->get()->toarray();
-    
-        
         header('Content-Type: text/csv; charset=utf-8');  
         header('Content-Disposition: attachment; filename=data.csv');  
         $output = fopen("php://output", "w");  
+        $serialNumber = 1;
         fputcsv($output, $headers);
         foreach ($specificValues as $key => $row) {
             // Convert the row to an associative array
@@ -17428,18 +17427,291 @@ class AdminReportsController extends Controller
 
             //Total Attempt before formatting tracking_number
             $shipment = Shipment::where('tracking_number', $rowArray['shipment_tracking_number'])->first()->id ?? 0;
+            
             $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment);
+
+            $crm_shipment = Shipment::where('tracking_number', $rowArray['shipment_tracking_number'])
+                ->leftJoin('crm_requests', 'crm_requests.shipment_id', '=', 'shipments.id')
+                ->leftJoin(DB::raw('(
+                    SELECT 
+                        id AS request_number_id,  -- crm_requests.id for launched requests
+                        shipment_id, 
+                        created_at AS request_launched_created_at,
+                        complainant_phone
+                    FROM crm_requests
+                    WHERE status_id = 1
+                    AND id IN (
+                        SELECT MAX(id) 
+                        FROM crm_requests
+                        WHERE status_id = 1
+                        GROUP BY shipment_id
+                    )
+                ) AS request_launched_date'), 'request_launched_date.shipment_id', '=', 'shipments.id')
+                
+                ->leftJoin(DB::raw('(
+                    SELECT 
+                        id AS request_number_id,  -- crm_requests.id for in-process requests
+                        shipment_id, 
+                        created_at AS request_in_process_created_at
+                    FROM crm_requests
+                    WHERE status_id = 2
+                    AND id IN (
+                        SELECT MAX(id) 
+                        FROM crm_requests
+                        WHERE status_id = 2
+                        GROUP BY shipment_id
+                    )
+                ) AS request_in_process_date'), 'request_in_process_date.shipment_id', '=', 'shipments.id')
+                
+                ->leftJoin(DB::raw('(
+                    SELECT 
+                        id AS request_number_id,  -- crm_requests.id for closed requests
+                        shipment_id, 
+                        created_at AS request_closed_created_at
+                    FROM crm_requests
+                    WHERE status_id = 4
+                    AND id IN (
+                        SELECT MAX(id) 
+                        FROM crm_requests
+                        WHERE status_id = 4
+                        GROUP BY shipment_id
+                    )
+                ) AS request_closed_date'), 'request_closed_date.shipment_id', '=', 'shipments.id')
+
+                ->leftJoin('crm_comments', function ($join) {
+                    $join->on('crm_comments.crm_request_id', '=', 'request_closed_date.request_number_id') // Join on request_number_id from the closed requests
+                        ->whereRaw('crm_comments.id = (
+                            select max(id) 
+                            from crm_comments 
+                            where crm_request_id = request_closed_date.request_number_id
+                        )');
+                })
+
+                ->select(
+                    'request_launched_date.request_launched_created_at',
+                    'request_in_process_date.request_in_process_created_at',
+                    'request_closed_date.request_closed_created_at',
+                    'request_launched_date.request_number_id AS request_launched_id',  // crm_requests.id for launched requests
+                    'request_in_process_date.request_number_id AS request_in_process_id',  // crm_requests.id for in-process requests
+                    'request_closed_date.request_number_id AS request_closed_id',  // crm_requests.id for closed requests
+                    'crm_comments.comment as case_closed_comments',
+                    'request_launched_date.complainant_phone as complainant_phone_number'
+                )
+            ->first();
+
+
+            $launched_tat = 0;
+            $in_process_tat = 0;
+
+            if (!is_null($crm_shipment->request_launched_created_at)) {
+                Carbon::setWeekendDays([Carbon::SUNDAY]);
+                
+                // Get the last reopened request if any
+                $re_open_count = CrmRequestStatusHistory::where('crm_request_id', $crm_shipment->request_launched_id) // use correct request_launched_id
+                    ->where('status_id', 5)
+                    ->latest('id')
+                    ->first();
+            
+                if ($re_open_count) {
+                    $launched = Carbon::parse($re_open_count->created_at);
+                    $last_closed = CrmRequestStatusHistory::where('crm_request_id', $crm_shipment->request_launched_id) // use correct request_launched_id
+                        ->where('status_id', 4)
+                        ->where('created_at', '>=', $re_open_count->created_at)
+                        ->first();
+            
+                    $current = $last_closed ? $last_closed->created_at : Carbon::now();
+            
+                    $time_format = 'H:i';
+            
+                    $time_to = CrmSettings::where('name', 'TAT Cut-Off Time To')->first();
+                    $to_formatted = Carbon::parse($time_to->setting_value)->format($time_format);
+            
+                    // Use the launched date directly from the query result
+                    $launched = Carbon::parse($crm_shipment->request_launched_created_at);
+                    $cut_off_check = $launched->format($time_format);
+            
+                    $additional_tat = $current->diffInWeekdays($launched);
+                    $current_tat = $additional_tat;
+            
+                    // Compare dates to adjust TAT
+                    $launched_check = $launched->toDateString();
+                    $current_check = $current->toDateString();
+                    if ($launched_check <= $current_check && $to_formatted < $cut_off_check) {
+                        $current_tat -= 1; // After cut-off, reduce TAT
+                    }
+            
+                    $holidays = CrmTatHolidays::whereBetween('holiday', [$launched, $current])->get();
+                    foreach ($holidays as $holiday) {
+                        $holiday_formatted = date('Y-m-d H:i:s', strtotime($holiday->holiday));
+                        $holiday_formatted_check = date('Y-m-d', strtotime($holiday->holiday));
+                        $launched_formatted_check = date('Y-m-d', strtotime($launched));
+            
+                        // Adjust TAT based on holidays
+                        if ($launched < $holiday_formatted || $current > $holiday_formatted) {
+                            if ($holiday_formatted_check == $launched_formatted_check && $to_formatted < $cut_off_check) {
+                                $current_tat += 1; // Holiday adjustments
+                            }
+                            $current_tat -= 1; // Reduce TAT for holidays
+                        }
+                    }
+                } else {
+                    $launched = Carbon::parse($crm_shipment->request_launched_created_at)->startOfDay();
+                    $first_closed = CrmRequestStatusHistory::where('crm_request_id', $crm_shipment->request_launched_id) // use correct request_launched_id
+                        ->where('status_id', 4)
+                        ->first();
+            
+                    $current = $first_closed ? $first_closed->created_at : Carbon::now();
+            
+                    $time_format = 'H:i';
+                    $time_to = CrmSettings::where('name', 'TAT Cut-Off Time To')->first();
+                    $to_formatted = date($time_format, strtotime($time_to->setting_value));
+            
+                    $current_tat = $current->diffInWeekdays($launched);
+            
+                    // Compare dates to adjust TAT
+                    $launched_check = $launched->toDateString();
+                    $current_check = $current->toDateString();
+                    if ($launched_check <= $current_check && $to_formatted < $cut_off_check) {
+                        $current_tat -= 1; // After cut-off, reduce TAT
+                    }
+            
+                    // Adjust TAT for holidays
+                    $holidays = CrmTatHolidays::whereBetween('holiday', [$launched, $current])->get();
+                    foreach ($holidays as $holiday) {
+                        $holiday_formatted = date('Y-m-d H:i:s', strtotime($holiday->holiday));
+                        $holiday_formatted_check = date('Y-m-d', strtotime($holiday->holiday));
+                        $launched_formatted_check = date('Y-m-d', strtotime($launched));
+            
+                        if ($launched < $holiday_formatted || $current > $holiday_formatted) {
+                            if ($holiday_formatted_check == $launched_formatted_check && $to_formatted < $cut_off_check) {
+                                $current_tat += 1; // Holiday adjustments
+                            }
+                            $current_tat -= 1; // Reduce TAT for holidays
+                        }
+                    }
+                }
+            
+                $launched_tat = $current_tat;
+            }
+
+            if (!is_null($crm_shipment->request_in_process_created_at)) {
+                Carbon::setWeekendDays([Carbon::SUNDAY]);
+                
+                // Use request_in_process_id instead of request_number_id
+                $re_open_count = CrmRequestStatusHistory::where('crm_request_id', $crm_shipment->request_in_process_id)
+                    ->where('status_id', 5)
+                    ->latest('id')
+                    ->first();
+            
+                if ($re_open_count) {
+                    $last_closed = CrmRequestStatusHistory::where('crm_request_id', $crm_shipment->request_in_process_id)
+                        ->where('status_id', 4)
+                        ->where('created_at', '>=', $re_open_count->created_at)->first();
+            
+                    if ($last_closed) {
+                        $current = $last_closed->created_at;
+                    } else {
+                        $current = Carbon::now();
+                    }
+                    
+                    $time_format = 'H:i';
+                    $time_from = CrmSettings::where('name', 'TAT Cut-Off Time From')->first();
+                    $time_to = CrmSettings::where('name', 'TAT Cut-Off Time To')->first();
+                    $to_formatted = date($time_format, strtotime($time_to->setting_value));
+                    $cut_off_check = Carbon::parse($crm_shipment->request_in_process_created_at)->format($time_format);
+                    $additional_tat = $current->diffInWeekdays($last_closed);
+                    $current_tat = $additional_tat;
+            
+                    $last_closed_check = $last_closed ? $last_closed->toDateString() : Carbon::now()->toDateString();
+                    $current_check = $current->toDateString();
+                    if ($last_closed_check <= $current_check) {
+                        if ($to_formatted < $cut_off_check) {
+                            $after_cut_off = $current_tat - 1;
+                            $current_tat = $after_cut_off;
+                        }
+                    }
+            
+                    $holidays = CrmTatHolidays::whereBetween('holiday', [$last_closed, $current])->get();
+                    foreach ($holidays as $holiday) {
+                        $holiday_formatted = date('Y-m-d H:i:s', strtotime($holiday->holiday));
+                        $holiday_formatted_check = date('Y-m-d', strtotime($holiday->holiday));
+                        $last_closed_formatted_check = date('Y-m-d', strtotime($last_closed));
+                        if ($last_closed < $holiday_formatted || $current > $holiday_formatted) {
+                            if ($holiday_formatted_check == $last_closed_formatted_check) {
+                                if ($to_formatted < $cut_off_check) {
+                                    $after_cut_off = $current_tat + 1;
+                                    $current_tat = $after_cut_off;
+                                }
+                            }
+                            $after_holidays = $current_tat - 1;
+                            $current_tat = $after_holidays;
+                        }
+                    }
+                } else {
+                    $last_closed = Carbon::parse($crm_shipment->request_in_process_created_at)->startOfDay();
+                    $first_closed = CrmRequestStatusHistory::where('crm_request_id', $crm_shipment->request_in_process_id)
+                        ->where('status_id', 4)
+                        ->first();
+                    
+                    if ($first_closed) {
+                        $current = $first_closed->created_at;
+                    } else {
+                        $current = Carbon::now();
+                    }
+            
+                    $time_format = 'H:i';
+                    $time_from = CrmSettings::where('name', 'TAT Cut-Off Time From')->first();
+                    $time_to = CrmSettings::where('name', 'TAT Cut-Off Time To')->first();
+                    $to_formatted = date($time_format, strtotime($time_to->setting_value));
+                    
+                    // Convert to Carbon instance and format
+                    $cut_off_check = Carbon::parse($crm_shipment->request_in_process_created_at)->format($time_format);
+                    
+                    $current_tat = $current->diffInWeekdays($last_closed);
+            
+                    $last_closed_check = $last_closed->toDateString();
+                    $current_check = $current->toDateString();
+                    if ($last_closed_check <= $current_check) {
+                        if ($to_formatted < $cut_off_check) {
+                            $after_cut_off = $current_tat - 1;
+                            $current_tat = $after_cut_off;
+                        }
+                    }
+            
+                    $holidays = CrmTatHolidays::whereBetween('holiday', [$last_closed, $current])->get();
+                    foreach ($holidays as $holiday) {
+                        $holiday_formatted = date('Y-m-d H:i:s', strtotime($holiday->holiday));
+                        $holiday_formatted_check = date('Y-m-d', strtotime($holiday->holiday));
+                        $last_closed_formatted_check = date('Y-m-d', strtotime($last_closed));
+                        if ($last_closed < $holiday_formatted || $current > $holiday_formatted) {
+                            if ($holiday_formatted_check == $last_closed_formatted_check) {
+                                if ($to_formatted < $cut_off_check) {
+                                    $after_cut_off = $current_tat + 1;
+                                    $current_tat = $after_cut_off;
+                                }
+                            }
+                            $after_holidays = $current_tat - 1;
+                            $current_tat = $after_holidays;
+                        }
+                    }
+                }
+            
+                $in_process_tat = $current_tat;
+            }
 
             if ($delivery_note_shipment->exists()) {
                 $delivery_note_ids = $delivery_note_shipment->pluck('delivery_note_id')->toArray();
 
                 $delivery_notes = DeliveryNote::whereIn('id', $delivery_note_ids)
                     ->whereHas('rider', function ($query) {
-                        $query->where('operation_rider_id', 1);
-                    })
-                    ->count();
+                        $query->whereIn('operation_rider_id', [1, 2]);
+                    })->get();
 
-                $rowArray['total_attempt'] = $delivery_notes;
+                    $rider = Rider::where('id', $delivery_notes->rider_id)->select('name')->first();
+                    
+                    $delivery_notes_count = $delivery_notes->count();
+
+                $rowArray['total_attempt'] = $delivery_notes_count;
             } else {
                 $rowArray['total_attempt'] = '-';
             }
@@ -17517,7 +17789,35 @@ class AdminReportsController extends Controller
 
             // $rowArray['entry_method'] =  ($rowArray['entry_method'] == 1 ? 'Scanned' : 'Manual');
 
+            if (!is_null($crm_shipment)) {
+                $rowArray['request_launched_date_created_at'] = $crm_shipment->request_launched_created_at;
+            } else {
+                $rowArray['request_launched_date_created_at'] = '-';
+            }
+        
+            $crm_request_and_status = DB::table('shipments')
+            ->where('shipments.id', $shipment)
+            ->leftJoin('crm_requests as request', 'request.shipment_id', '=', 'shipments.id')
+            ->leftJoin('crm_request_case_nature_types as request_type', 'request_type.id', '=', 'request.case_nature_type_id')
+            ->leftJoin('crm_request_statuses as crm_status', 'crm_status.id', '=', 'request.status_id')
+            ->select(
+                'request_type.type as request_type',
+                'crm_status.name as crm_status'
+            )
+            ->first();
+
+            $rowArray['current_tat'] = $in_process_tat + $launched_tat;
+            $rowArray['request_closed_created_at'] = $crm_shipment->request_closed_created_at ?? '-';
+            $rowArray['case_closed_remarks'] = strip_tags($crm_shipment->case_closed_comments ?? '-');
+            $rowArray['complainant_phone_number'] = $crm_shipment->complainant_phone ?? '-';
+            $rowArray['shipment_quantity'] = Shipment::where('tracking_number', $rowArray['shipment_tracking_number'])->first()->quantity ?? '-';
+            $rowArray['shipment_pieces'] = Shipment::where('tracking_number', $rowArray['shipment_tracking_number'])->first()->pieces ?? '-';
+            $rowArray['rider_name'] = $rider->name ?? '-';
+            $rowArray['crm_case_nature'] = $crm_request_and_status?->request_type ?? '-';
+            $rowArray['request_status'] = $crm_request_and_status?->crm_status ?? '-';
+
             $filteredArray = [];// Iterate over $fieldsToRetrieve to maintain sequence
+            
             foreach ($fieldsToRetrieve as $field) {
                 // Check if the field exists in the row array
                 if (array_key_exists($field, $rowArray)) {
@@ -17525,6 +17825,7 @@ class AdminReportsController extends Controller
                     $filteredArray[$field] = $rowArray[$field];
                 }
             }
+
             $final_Array[] = $rowArray;
             fputcsv($output, $filteredArray);
         }
