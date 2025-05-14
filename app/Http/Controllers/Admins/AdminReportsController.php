@@ -16742,15 +16742,7 @@ class AdminReportsController extends Controller
             ->leftjoin('crm_request_statuses as crm_request_status', 'crm_request_status.id', '=', 'request_number.status_id')
             ->leftjoin('crm_request_case_nature as crm_case_nature', 'crm_case_nature.id', '=', 'request_number.case_nature_id')
 
-            ->leftJoin(DB::raw('(
-                SELECT *
-                FROM crm_request_case_nature_types AS sub_crm
-                WHERE sub_crm.id IN (
-                    SELECT MAX(id)
-                    FROM crm_request_case_nature_types
-                    GROUP BY nature_id
-                )
-            ) as crm_case_nature_types'), 'crm_case_nature_types.id', '=', 'request_number.case_nature_type_id')
+            ->leftjoin('crm_request_case_nature_types as crm_case_nature_types', 'crm_case_nature_types.id', '=', 'request_number.case_nature_type_id')
 
             ->leftJoin('crm_requests as request_launched_date', function ($join) {
                 $join->on('request_launched_date.shipment_id', '=', 'shipments.id')
