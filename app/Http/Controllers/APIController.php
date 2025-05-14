@@ -8151,7 +8151,6 @@ class APIController extends Controller
                     if ($hbl_konnect_transaction_delivery_note->exists()) {
                         $hbl_konnect_transaction_delivery_note = $hbl_konnect_transaction_delivery_note->first();
                         $transaction_amount = $hbl_konnect_transaction_delivery_note->transactions_amount + $amount;
-                        dd($transaction_amount);
                     } else {
                         $hbl_konnect_transaction_delivery_note = new HblKonnectTransactionRetailNote();
                         $hbl_konnect_transaction_delivery_note->retail_note_id = $retail_note_id;
