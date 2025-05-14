@@ -17110,14 +17110,7 @@ class AdminReportsController extends Controller
             }
             return $rider_name;
         })
-        ->editColumn('complaint_description', function ($shipment) {
-            if ($shipment->complaint_description == 1) {
-                return "Consignee";
-            } elseif ($shipment->complaint_description == 2) {
-                return "Shipper";
-            }
-            return '-';
-        })
+
         ->addColumn('crm_id_padded', function ($shipment) {
             if ($shipment->request_number_id) {
                 return str_pad($shipment->request_number_id, 6, '0', STR_PAD_LEFT);
