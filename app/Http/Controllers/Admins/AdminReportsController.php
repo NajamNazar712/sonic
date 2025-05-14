@@ -16527,7 +16527,7 @@ class AdminReportsController extends Controller
             'request_in_process_created_at.updated_at as request_in_process_created_at',
             'request_closed_created_at.updated_at as request_closed_created_at',
             'crm_comments.comment as case_closed_remarks',
-            'complaint_description.description as complaint_description',
+            'complaint_description.case_nature_complainant as complaint_description',
             'complaint_description.complainant_phone as complainant_phone_number',
             'shipment_items.quantity as shipment_quantity',
             'shipments.pieces as shipment_pieces',
@@ -16790,20 +16790,8 @@ class AdminReportsController extends Controller
                         where crm_request_id = case_closed_requests.id
                     )');
             })
-            
-            ->leftJoin('crm_requests as complaint_description', function ($join) {
-                $join->on('complaint_description.shipment_id', '=', 'shipments.id')
-                    ->where(
-                        'complaint_description.id',
-                        '=',
-                        DB::connection('reports')->raw('(
-                            select max(id) 
-                            from crm_requests 
-                            where crm_requests.shipment_id = shipments.id 
-                            and crm_requests.status_id = 1
-                        )')
-                    );
-            })
+
+            ->leftJoin('crm_requests as complaint_description', 'complaint_description.shipment_id', '=', 'shipments.id')
             ->leftJoin('shipment_items', 'shipment_items.shipment_id', 'shipments.id')
             ->leftJoin('delivery_note_shipments as dns', 'dns.shipment_id', '=', 'shipments.id')
             ->leftJoin('delivery_notes as delivery_note', 'delivery_note.id', '=', 'dns.delivery_note_id')
@@ -17123,11 +17111,12 @@ class AdminReportsController extends Controller
             return $rider_name;
         })
         ->editColumn('complaint_description', function ($shipment) {
-            $complaint_description = '-';
-            if ($shipment->complaint_description != null) {
-                $complaint_description = $shipment->complaint_description;
+            if ($shipment->complaint_description == 1) {
+                return "Consignee";
+            } elseif ($shipment->complaint_description == 2) {
+                return "Shipper";
             }
-            return $complaint_description;
+            return '-';
         })
         ->addColumn('crm_id_padded', function ($shipment) {
             if ($shipment->request_number_id) {
@@ -17347,14 +17336,6 @@ class AdminReportsController extends Controller
         ->editColumn('case_closed_remarks', function ($shipment) {
             if ($shipment->case_closed_remarks) {
                 return strip_tags($shipment->case_closed_remarks);
-            } else {
-                return '-';
-            }
-        })
-
-        ->editColumn('complaint_description', function ($shipment) {
-            if ($shipment->complaint_description) {
-                return $shipment->complaint_description;
             } else {
                 return '-';
             }
@@ -17810,13 +17791,28 @@ class AdminReportsController extends Controller
                 ->select(
                     'crm_request_status.name as status_name',
                     'crm_request_case_nature.name as case_nature_name',
-                    'crm_case_nature_types.type as case_nature_type_name'
+                    'crm_case_nature_types.type as case_nature_type_name',
                 )
                 ->leftJoin('crm_request_statuses as crm_request_status', 'crm_request_status.id', '=', 'crm_requests.status_id')
                 ->leftJoin('crm_request_case_nature as crm_request_case_nature', 'crm_request_case_nature.id', '=', 'crm_requests.case_nature_id')
                 ->leftJoin('crm_request_case_nature_types as crm_case_nature_types', 'crm_case_nature_types.id', '=', 'crm_requests.case_nature_type_id')
                 ->where('crm_requests.shipment_id', $shipment)
             ->first();
+
+            $complainant = DB::table('crm_requests')
+                ->where('shipment_id', $shipment)
+                ->orderByDesc('id')
+                ->first();
+
+            $complainant_type = '-';
+
+            if (isset($complainant->case_nature_complainant)) {
+                if ($complainant->case_nature_complainant == 1) {
+                    $complainant_type = 'Consignee';
+                } elseif ($complainant->case_nature_complainant == 2) {
+                    $complainant_type = 'Shipper';
+                }
+            }
 
             $rowArray['current_tat'] = $in_process_tat + $launched_tat;
             $rowArray['request_closed_created_at'] = $crm_shipment->request_closed_created_at ?? '-';
@@ -17827,6 +17823,7 @@ class AdminReportsController extends Controller
             $rowArray['rider_name'] = $rider_name;
             $rowArray['crm_case_nature'] = $crm_request_and_status->case_nature_name ?? '-';
             $rowArray['crm_case_nature_type'] = $crm_request_and_status->case_nature_type_name ?? '-';
+            $rowArray['complaint_description'] = $complainant_type;
 
             $filteredArray = [];// Iterate over $fieldsToRetrieve to maintain sequence
             
