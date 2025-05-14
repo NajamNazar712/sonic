@@ -16524,8 +16524,8 @@ class AdminReportsController extends Controller
             'request_number.id as request_number_id',  // Unique alias for request_number
             'crm_valid_status.status_id as valid_invalid_crm_status',
             'request_launched_date.created_at as request_launched_date_created_at',
-            'request_in_process_created_at.created_at as request_in_process_created_at',
-            'request_closed_created_at.created_at as request_closed_created_at',
+            'request_in_process_created_at.updated_at as request_in_process_created_at',
+            'request_closed_created_at.updated_at as request_closed_created_at',
             'crm_comments.comment as case_closed_remarks',
             'complaint_description.description as complaint_description',
             'complaint_description.complainant_phone as complainant_phone_number',
@@ -16744,19 +16744,8 @@ class AdminReportsController extends Controller
 
             ->leftjoin('crm_request_case_nature_types as crm_case_nature_types', 'crm_case_nature_types.id', '=', 'request_number.case_nature_type_id')
 
-            ->leftJoin('crm_requests as request_launched_date', function ($join) {
-                $join->on('request_launched_date.shipment_id', '=', 'shipments.id')
-                    ->where(
-                        'request_launched_date.id',
-                        '=',
-                        DB::connection('reports')->raw('(
-                            select max(id) 
-                            from crm_requests 
-                            where crm_requests.shipment_id = shipments.id 
-                            and crm_requests.status_id = 1
-                        )')
-                    );
-            })
+            ->leftJoin('crm_requests as request_launched_date', 'request_launched_date.shipment_id', '=', 'shipments.id')
+
             ->leftJoin('crm_requests as request_in_process_created_at', function ($join) {
                 $join->on('request_in_process_created_at.shipment_id', '=', 'shipments.id')
                     ->where(
