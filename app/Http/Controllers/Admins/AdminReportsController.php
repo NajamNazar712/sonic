@@ -16742,15 +16742,7 @@ class AdminReportsController extends Controller
             ->leftjoin('crm_request_statuses as crm_request_status', 'crm_request_status.id', '=', 'request_number.status_id')
             ->leftjoin('crm_request_case_nature as crm_case_nature', 'crm_case_nature.id', '=', 'request_number.case_nature_id')
 
-            ->leftJoin(DB::raw('(
-                SELECT *
-                FROM crm_request_case_nature_types AS sub_crm
-                WHERE sub_crm.id IN (
-                    SELECT MAX(id)
-                    FROM crm_request_case_nature_types
-                    GROUP BY nature_id
-                )
-            ) as crm_case_nature_types'), 'crm_case_nature_types.id', '=', 'request_number.case_nature_type_id')
+            ->leftjoin('crm_request_case_nature_types as crm_case_nature_types', 'crm_case_nature_types.id', '=', 'request_number.case_nature_type_id')
 
             ->leftJoin('crm_requests as request_launched_date', function ($join) {
                 $join->on('request_launched_date.shipment_id', '=', 'shipments.id')
@@ -17823,16 +17815,18 @@ class AdminReportsController extends Controller
             } else {
                 $rowArray['request_launched_date_created_at'] = '-';
             }
-        
-            $crm_request_and_status = DB::table('shipments')
-            ->where('shipments.id', $shipment)
-            ->leftJoin('crm_requests as request', 'request.shipment_id', '=', 'shipments.id')
-            ->leftJoin('crm_request_case_nature_types as request_type', 'request_type.id', '=', 'request.case_nature_type_id')
-            ->leftJoin('crm_request_statuses as crm_status', 'crm_status.id', '=', 'request.status_id')
-            ->select(
-                'request_type.type as request_type',
-                'crm_status.name as crm_status'
-            )
+
+            
+            $crm_request_and_status = DB::table('crm_requests')
+                ->select(
+                    'crm_request_status.name as status_name',
+                    'crm_request_case_nature.name as case_nature_name',
+                    'crm_case_nature_types.type as case_nature_type_name'
+                )
+                ->leftJoin('crm_request_statuses as crm_request_status', 'crm_request_status.id', '=', 'crm_requests.status_id')
+                ->leftJoin('crm_request_case_nature as crm_request_case_nature', 'crm_request_case_nature.id', '=', 'crm_requests.case_nature_id')
+                ->leftJoin('crm_request_case_nature_types as crm_case_nature_types', 'crm_case_nature_types.id', '=', 'crm_requests.case_nature_type_id')
+                ->where('crm_requests.shipment_id', $shipment)
             ->first();
 
             $rowArray['current_tat'] = $in_process_tat + $launched_tat;
@@ -17842,8 +17836,8 @@ class AdminReportsController extends Controller
             $rowArray['shipment_quantity'] = Shipment::where('tracking_number', $rowArray['shipment_tracking_number'])->first()->quantity ?? '-';
             $rowArray['shipment_pieces'] = Shipment::where('tracking_number', $rowArray['shipment_tracking_number'])->first()->pieces ?? '-';
             $rowArray['rider_name'] = $rider_name;
-            $rowArray['crm_case_nature'] = $crm_request_and_status?->request_type ?? '-';
-            $rowArray['request_status'] = $crm_request_and_status?->crm_status ?? '-';
+            $rowArray['crm_case_nature'] = $crm_request_and_status->case_nature_name ?? '-';
+            $rowArray['crm_case_nature_type'] = $crm_request_and_status->case_nature_type_name ?? '-';
 
             $filteredArray = [];// Iterate over $fieldsToRetrieve to maintain sequence
             
