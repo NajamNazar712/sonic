@@ -10635,7 +10635,7 @@ class APIController extends Controller
     function customRound($amount)
     {
         $decimal = $amount - floor($amount);
-        if ($decimal <= 0.05) {
+        if ($decimal <= 0.49) {
             return floor($amount);
         } else {
             return ceil($amount);
