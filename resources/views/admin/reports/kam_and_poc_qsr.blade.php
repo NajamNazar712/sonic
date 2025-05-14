@@ -411,7 +411,9 @@
                 { data: 'current_tat', title: 'TAT (launched + in process)', class: 'current_tat', download: true },
                 { data: 'request_closed_created_at', title: 'Closed Date', class: 'request_closed_created_at', download: true },
                 { data: 'case_closed_remarks', title: 'Case Closed Remark', class: 'case_closed_remarks', download: true },
-                { data: 'complaint_description', title: 'Complainant', class: 'complaint_description', download: true },
+                // { data: 'complaint_description', title: 'Complainant', class: 'complaint_description', download: true },
+                { data: 'complaint_description', title: 'Complainant', class: 'complaint_description', download: true, render: (data) => data == 1 ? 'Consignee' : data == 2 ? 'Shipper' : '-' },
+
                 { data: 'complainant_phone_number', title: 'Complainant Contact Number', class: 'complainant_phone_number', download: true },
                 { data: 'shipment_quantity', title: 'Item Quantity', class: 'shipment_quantity', download: true },
                 { data: 'shipment_pieces', title: 'Pieces', class: 'shipment_pieces', download: true },
