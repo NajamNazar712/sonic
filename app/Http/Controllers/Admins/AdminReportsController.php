@@ -17792,12 +17792,36 @@ class AdminReportsController extends Controller
                 ->where('crm_requests.shipment_id', $shipment)
             ->first();
 
+            $valid_invalid_crm = DB::table('crm_requests')
+                ->leftJoin('crm_request_status_histories as crm_valid_status', function ($join) {
+                    $join->on('crm_valid_status.crm_request_id', '=', 'crm_requests.id')
+                        ->whereIn('crm_valid_status.status_id', [6, 7])
+                        ->whereRaw('crm_valid_status.id = (
+                            select max(id)
+                            from crm_request_status_histories
+                            where crm_request_status_histories.crm_request_id = crm_requests.id
+                            and crm_request_status_histories.status_id in (6, 7)
+                        )');
+                })
+                ->leftJoin('crm_request_statuses', 'crm_request_statuses.id', '=', 'crm_valid_status.status_id')
+                ->select('crm_request_statuses.name as status_name')
+                ->where('crm_requests.shipment_id', $shipment)
+            ->first();
+
+            $valid_invalid_crm_status = '-';
+
+            if (isset($valid_invalid_crm->status_name)) {
+                $valid_invalid_crm_status = $valid_invalid_crm->status_name;
+            }
+
+
             $complainant = DB::table('crm_requests')
                 ->where('shipment_id', $shipment)
                 ->orderByDesc('id')
                 ->first();
 
             $complainant_type = '-';
+            $complainant_phone = '-';
 
             if (isset($complainant->case_nature_complainant)) {
                 if ($complainant->case_nature_complainant == 1) {
@@ -17807,16 +17831,21 @@ class AdminReportsController extends Controller
                 }
             }
 
+            if (isset($complainant->complainant_phone)) {
+                $complainant_phone = $complainant->complainant_phone;
+            }
+
             $rowArray['current_tat'] = $in_process_tat + $launched_tat;
             $rowArray['request_closed_created_at'] = $crm_shipment->request_closed_created_at ?? '-';
             $rowArray['case_closed_remarks'] = strip_tags($crm_shipment->case_closed_comments ?? '-');
-            $rowArray['complainant_phone_number'] = $crm_shipment->complainant_phone ?? '-';
+            $rowArray['complainant_phone_number'] = $complainant_phone ?? '-';
             $rowArray['shipment_quantity'] = Shipment::where('tracking_number', $rowArray['shipment_tracking_number'])->first()->quantity ?? '-';
             $rowArray['shipment_pieces'] = Shipment::where('tracking_number', $rowArray['shipment_tracking_number'])->first()->pieces ?? '-';
             $rowArray['rider_name'] = $rider_name;
             $rowArray['crm_case_nature'] = $crm_request_and_status->case_nature_name ?? '-';
             $rowArray['crm_case_nature_type'] = $crm_request_and_status->case_nature_type_name ?? '-';
             $rowArray['complaint_description'] = $complainant_type;
+            $rowArray['valid_invalid_crm_status'] = $valid_invalid_crm_status;
 
             $filteredArray = [];// Iterate over $fieldsToRetrieve to maintain sequence
             
