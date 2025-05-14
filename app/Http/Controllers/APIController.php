@@ -8146,17 +8146,18 @@ class APIController extends Controller
                     }
 
                     $transaction_amount = $amount;
-
+                    
                     $hbl_konnect_transaction_delivery_note = HblKonnectTransactionRetailNote::where('retail_note_id', $retail_note_id);
                     if ($hbl_konnect_transaction_delivery_note->exists()) {
                         $hbl_konnect_transaction_delivery_note = $hbl_konnect_transaction_delivery_note->first();
                         $transaction_amount = $hbl_konnect_transaction_delivery_note->transactions_amount + $amount;
+                        dd($transaction_amount);
                     } else {
                         $hbl_konnect_transaction_delivery_note = new HblKonnectTransactionRetailNote();
                         $hbl_konnect_transaction_delivery_note->retail_note_id = $retail_note_id;
                     }
-
-                    $cash_amount = $retail_note->total_cash - $transaction_amount;
+                    $cash_amount = $this->customRound($retail_note->total_cash) - $transaction_amount;
+                    
                     if ($cash_amount < 0) {
                         $hbl_konnect_transaction_delivery_note = HblKonnectTransactionRetailNote::where('retail_note_id', $retail_note_id);
                         if ($hbl_konnect_transaction_delivery_note->exists()) {
@@ -8164,7 +8165,7 @@ class APIController extends Controller
 
                             $remaining_amount = $hbl_konnect_transaction_delivery_note->cash_amount;
 
-                            return ['status' => 0, 'message' => 'Net amount should be less then or equal to ' . $this->customRound($remaining_amount)];
+                            return ['status' => 0, 'message' => 'Net amount should be less then or equal to ' . ($remaining_amount)];
                         }
                     }
                     $hbl_konnect_transaction_delivery_note->transactions_amount = $transaction_amount;
