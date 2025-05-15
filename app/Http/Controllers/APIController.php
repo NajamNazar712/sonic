@@ -8024,7 +8024,7 @@ class APIController extends Controller
                             $admin_trax_id = $admin->trax_id;
                             $admin_cnic = $admin->cnic;
                         }
-                        return response()->json(['status' => 0, 'retail_note_id' =>  str_pad($retail_note->id, 6, '0', STR_PAD_LEFT), 'amount' => $net_amount, 'admin_name' => $admin_name, 'admin_trax_id' => $admin_trax_id, 'admin_cnic' => $admin_cnic]);
+                        return response()->json(['status' => 0, 'retail_note_id' =>  str_pad($retail_note->id, 6, '0', STR_PAD_LEFT), 'amount' => $this->customRound($net_amount), 'admin_name' => $admin_name, 'admin_trax_id' => $admin_trax_id, 'admin_cnic' => $admin_cnic]);
                     } else {
                         return response()->json(['status' => 11, 'message' => 'Retail Note restricted!']);
                     }
@@ -8146,7 +8146,7 @@ class APIController extends Controller
                     }
 
                     $transaction_amount = $amount;
-
+                    
                     $hbl_konnect_transaction_delivery_note = HblKonnectTransactionRetailNote::where('retail_note_id', $retail_note_id);
                     if ($hbl_konnect_transaction_delivery_note->exists()) {
                         $hbl_konnect_transaction_delivery_note = $hbl_konnect_transaction_delivery_note->first();
@@ -8155,8 +8155,8 @@ class APIController extends Controller
                         $hbl_konnect_transaction_delivery_note = new HblKonnectTransactionRetailNote();
                         $hbl_konnect_transaction_delivery_note->retail_note_id = $retail_note_id;
                     }
-
-                    $cash_amount = $retail_note->total_cash - $transaction_amount;
+                    $cash_amount = $this->customRound($retail_note->total_cash) - $transaction_amount;
+                    
                     if ($cash_amount < 0) {
                         $hbl_konnect_transaction_delivery_note = HblKonnectTransactionRetailNote::where('retail_note_id', $retail_note_id);
                         if ($hbl_konnect_transaction_delivery_note->exists()) {
@@ -8164,7 +8164,7 @@ class APIController extends Controller
 
                             $remaining_amount = $hbl_konnect_transaction_delivery_note->cash_amount;
 
-                            return ['status' => 0, 'message' => 'Net amount should be less then or equal to ' . $remaining_amount];
+                            return ['status' => 0, 'message' => 'Net amount should be less then or equal to ' . ($remaining_amount)];
                         }
                     }
                     $hbl_konnect_transaction_delivery_note->transactions_amount = $transaction_amount;
@@ -10632,5 +10632,13 @@ class APIController extends Controller
             return response()->json(['status' => 1, 'message' => ' No City Present']);
         }
     }
-
+    function customRound($amount)
+    {
+        $decimal = $amount - floor($amount);
+        if ($decimal <= 0.49) {
+            return floor($amount);
+        } else {
+            return ceil($amount);
+        }
+    }
 }
