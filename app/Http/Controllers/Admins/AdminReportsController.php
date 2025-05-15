@@ -16483,7 +16483,7 @@ class AdminReportsController extends Controller
     }
 
     public function kam_and_poc_qsr_list(Request $request) {
-        $connection = 'reports';
+        $connection = 'reports_2';
 
         $select = [
             'shipments.id as shipment_id',
@@ -16595,7 +16595,7 @@ class AdminReportsController extends Controller
                     ->where(
                         'journey.id',
                         '=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)')
+                        DB::connection('reports_2')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)')
                     );
             })
 
@@ -16656,7 +16656,7 @@ class AdminReportsController extends Controller
                     ->where(
                         'cargo_bag_shipments.id',
                         '=',
-                        DB::connection('reports')->raw('(select max(id) from cargo_manifest_bag_shipments where cargo_manifest_bag_shipments.shipment_id = shipments.id)')
+                        DB::connection('reports_2')->raw('(select max(id) from cargo_manifest_bag_shipments where cargo_manifest_bag_shipments.shipment_id = shipments.id)')
                     );
             })
 
@@ -16680,7 +16680,7 @@ class AdminReportsController extends Controller
                                             });
                                     });
                         })
-                ->where('destination_shipment_journey.id', '=', DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id in (4, 2))'));
+                ->where('destination_shipment_journey.id', '=', DB::connection('reports_2')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id in (4, 2))'));
             })
 
             ->leftJoin('shipments_journey as shipment_arival_journey', function ($join) {
@@ -16688,7 +16688,7 @@ class AdminReportsController extends Controller
                     ->where(
                         'shipment_arival_journey.id',
                         '=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)')
+                        DB::connection('reports_2')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)')
                     );
             })
 
@@ -16713,7 +16713,7 @@ class AdminReportsController extends Controller
                     ->where(
                         'request_number.id',
                         '=',
-                        DB::connection('reports')->raw('(select max(id) from crm_requests where crm_requests.shipment_id = shipments.id)')
+                        DB::connection('reports_2')->raw('(select max(id) from crm_requests where crm_requests.shipment_id = shipments.id)')
                     );
             })
 
@@ -16751,7 +16751,7 @@ class AdminReportsController extends Controller
                     ->where(
                         'request_in_process_created_at.id',
                         '=',
-                        DB::connection('reports')->raw('(
+                        DB::connection('reports_2')->raw('(
                             select max(id) 
                             from crm_requests 
                             where crm_requests.shipment_id = shipments.id 
@@ -16764,7 +16764,7 @@ class AdminReportsController extends Controller
                     ->where(
                         'request_closed_created_at.id',
                         '=',
-                        DB::connection('reports')->raw('(
+                        DB::connection('reports_2')->raw('(
                             select max(id) 
                             from crm_requests 
                             where crm_requests.shipment_id = shipments.id 
