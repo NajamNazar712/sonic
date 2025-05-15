@@ -6,6 +6,8 @@ use App\Jobs\WalletSettlementFromDonePayments;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use DB;
+use App\Jobs\WalletBulkSettlementFromDonePayments;
+
 class RerunWalletSettlement extends Command
 {
     /**
@@ -46,7 +48,8 @@ class RerunWalletSettlement extends Command
 
         $donePayments->chunk(5)->each(function ($chunkedShipments)  {
             foreach ($chunkedShipments as $value){
-                WalletSettlementFromDonePayments::dispatch($value->id,  346);
+                //WalletSettlementFromDonePayments::dispatch($value->id,  346);
+                WalletBulkSettlementFromDonePayments::dispatch($value->id,  346);
             }
 
         });
