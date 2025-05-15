@@ -16827,7 +16827,7 @@ class AdminReportsController extends Controller
         if ($search_from && $search_to) {
             $from = Carbon::parse($search_from)->format('Y-m-d H:i:s');
             $to = Carbon::parse($search_to)->format('Y-m-d H:i:s');
-            $shipments->whereBetween('journey.created_at', [$from, $to]);
+            $shipments->whereBetween('shipments.created_at', [$from, $to]);
         }
 
         $arrival_search_from = $request->get('arrival_search_from');
