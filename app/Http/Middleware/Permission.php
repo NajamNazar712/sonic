@@ -659,6 +659,9 @@ class Permission
 
             'reports.shipment_reversal_report.index' => 1001,
             'reports.lost_and_case_closed_summary_report.index' => 1021,
+            'reports.kam_and_poc_qsr.index' => 1032,
+
+            
 
             'packaging.index' => 76,
             'packaging.list' => 76,
@@ -1293,6 +1296,7 @@ class Permission
 
             'shipment_otp.index' => 815,
             'shipment_otp.list' => 815,
+            'shipment_otp.scanning_history' => 1033,
 
             'delivery.rider_request.index' => 35,
             'delivery.rider_request.list' => 35,

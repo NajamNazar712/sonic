@@ -42,6 +42,7 @@ use App\Http\Models\Admin\Admin;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use App\Models\RetailLog;
 
 class RetailAdminUserManagementController extends Controller
 {
@@ -220,11 +221,11 @@ class RetailAdminUserManagementController extends Controller
                         $dropdown .= '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
                     }
                     
-                    if ($data->discount != Null) {
-                        $dropdown .= '<button type="button" class="dropdown-item edit_discount"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Edit Discount</div></button>';
-                    } else {
-                        $dropdown .= '<button type="button" class="dropdown-item add_discount"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Add Discount</div></button>';
-                    }
+                    // if ($data->discount != Null) {
+                    //     $dropdown .= '<button type="button" class="dropdown-item edit_discount"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Edit Discount</div></button>';
+                    // } else {
+                    //     $dropdown .= '<button type="button" class="dropdown-item add_discount"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Add Discount</div></button>';
+                    // }
                     
                     $dropdown .= '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
             
@@ -241,6 +242,16 @@ class RetailAdminUserManagementController extends Controller
                                 </div>
                             </a>
                             ';
+                            $dropdown  .= '<button type="button" class="dropdown-item view_logs">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col-2">
+                                    <i class="ft-edit"></i>
+                                </div>
+                                <div class="col-9 offset-1">
+                                    View Logs
+                                </div>
+                            </div>
+                        </button>';
             
                     $dropdown .= '</div></div>';
                     
@@ -259,12 +270,17 @@ class RetailAdminUserManagementController extends Controller
         if ($request->status == 1) {
             $franchise->status = 1;
             $franchise->updated_by = Auth::id();
+            $changedFields[] = 'Franchise Status' . ': ' . ($franchise->getOriginal('status') == 1 ? 'Active' : 'In-Active') . ' -> ' . ($franchise->status == 1  ? 'Active' : 'In-Active');
+            self::retail_logs(Auth::id(), $changedFields, $franchise->id, $screen_name = 'Retail Franchise');
             $franchise->save();
 
             return response()->json(['status' => 1, 'success' => 'Franchise Enabled Successfully']);
         } elseif ($request->status == 0) {
             $franchise->status = 0;
             $franchise->updated_by = Auth::id();
+            $changedFields[] = 'Franchise Status' . ': ' . ($franchise->getOriginal('status') == 1 ? 'Active' : 'In-Active') . ' -> ' . ($franchise->status == 1  ? 'Active' : 'In-Active');
+            self::retail_logs(Auth::id(), $changedFields, $franchise->id, $screen_name = 'Retail Franchise');
+
             $franchise->save();
 
             $franchise_users = RetailUser::where('category', 1)->where('category_id', $franchise->id)->where('status', 1);
@@ -452,50 +468,168 @@ class RetailAdminUserManagementController extends Controller
             $franchise->discount = $request->discount;
             $franchise->insurance = $request->edit_insurance;
             $franchise->updated_by = Auth::id();
-            $franchise->save();
+            
 
-            $retail_franchise_product_percentage = RetailFranchiseProductPercentage::where('franchise_id', $franchise->id)->get();
-            if ($retail_franchise_product_percentage->isNotEmpty()) {
-                RetailFranchiseProductPercentage::where('franchise_id', $franchise->id)->delete();
-            }
-            $new_retail_shipping_mode_names = json_decode($request->input('retail_shipping_mode_id'));
-            $new_product_percentages = json_decode($request->input('product_percentage'));
-
-            $new_retail_shipping_mode_ids = [];
-            foreach ($new_retail_shipping_mode_names as $name) {
-                $retailShippingMode = RetailShippingMode::where('name', $name)->first();
-                if ($retailShippingMode) {
-                    $new_retail_shipping_mode_ids[] = $retailShippingMode->id;
+            $changedFields = [];
+            $fieldNames = [
+              'cnic' => 'CNIC Status',
+              'name' => 'Name',
+              'phone_no' => 'Phone no',
+              'cnic' => 'CNIC',
+              'email' => 'Email',
+              'location_latitude' => 'Location Latitude',
+              'location_longitude' => 'Location Longitude',
+              'discount' => 'Discount',
+              'insurance' => 'Insurance',
+              'cnic_status' => 'CNIC Status'
+            ];
+    
+            foreach ($fieldNames as $field => $fieldName) {
+                $originalValue = trim($franchise->getOriginal($field));
+                $currentValue = trim($franchise->$field);
+                if ($franchise->isDirty($field) && $originalValue !== $currentValue) {
+                    if($field == 'cnic_status') {
+                        $changedFields[] = $fieldName . ': ' . ($originalValue == 1 ? 'Enable' : 'Disable') . ' -> ' . ($currentValue == 1 ? 'Enable' : 'Disable');
+                    } else {
+                        $changedFields[] = $fieldName . ': ' . $originalValue . ' -> ' . $currentValue;
+                    }
                 }
             }
 
-            // Insert or update data
-            foreach ($new_retail_shipping_mode_ids as $key => $retail_shipping_mode_id) {
-                $retail_franchise_product_percentage = new RetailFranchiseProductPercentage();
-                $retail_franchise_product_percentage->franchise_id = $franchise->id;
-                $retail_franchise_product_percentage->retail_shipping_mode_id = $retail_shipping_mode_id;
-                $retail_franchise_product_percentage->product_percentage = $new_product_percentages[$key];
-                $retail_franchise_product_percentage->updated_by = $admin->id;
-                $retail_franchise_product_percentage->save();
+            $franchise->save();
+
+            $existingPercentages = RetailFranchiseProductPercentage::where('franchise_id', $franchise->id)->get()->keyBy('retail_shipping_mode_id');
+
+            $new_names = json_decode($request->input('retail_shipping_mode_id'));
+            $new_percentages = json_decode($request->input('product_percentage'));
+            
+            $new_ids = [];
+            foreach ($new_names as $name) {
+                $mode = RetailShippingMode::where('name', $name)->first();
+                if ($mode) {
+                    $new_ids[] = $mode->id;
+                }
+            }
+            
+            foreach ($existingPercentages as $old_id => $old) {
+                $modeName = RetailShippingMode::find($old_id)->name;
+                
+                if (!in_array($old_id, $new_ids)) {
+                    $changedFields[] = "{$modeName}: {$old->product_percentage}% -> removed";
+                } else {                    
+                    $index = array_search($old_id, $new_ids);
+                    $new_percentage = $new_percentages[$index];
+                    if ($old->product_percentage != $new_percentage) {
+                        $changedFields[] = "{$modeName}: {$old->product_percentage}% -> {$new_percentage}%";
+                    }
+                }
             }
 
+            RetailFranchiseProductPercentage::where('franchise_id', $franchise->id)->delete();
+
+            foreach ($new_ids as $key => $id) {
+                RetailFranchiseProductPercentage::create([
+                    'franchise_id' => $franchise->id,
+                    'retail_shipping_mode_id' => $id,
+                    'product_percentage' => $new_percentages[$key],
+                    'updated_by' => $admin->id,
+                ]);
+            }
+            // $retail_franchise_product_percentage = RetailFranchiseProductPercentage::where('franchise_id', $franchise->id)->get();
+            // if ($retail_franchise_product_percentage->isNotEmpty()) {
+            //     RetailFranchiseProductPercentage::where('franchise_id', $franchise->id)->delete();
+            // }
+            // $new_retail_shipping_mode_names = json_decode($request->input('retail_shipping_mode_id'));
+            // $new_product_percentages = json_decode($request->input('product_percentage'));
+
+            // $new_retail_shipping_mode_ids = [];
+            // foreach ($new_retail_shipping_mode_names as $name) {
+            //     $retailShippingMode = RetailShippingMode::where('name', $name)->first();
+            //     if ($retailShippingMode) {
+            //         $new_retail_shipping_mode_ids[] = $retailShippingMode->id;
+            //     }
+            // }
+
+            // // Insert or update data
+            // foreach ($new_retail_shipping_mode_ids as $key => $retail_shipping_mode_id) {
+            //     $retail_franchise_product_percentage = new RetailFranchiseProductPercentage();
+            //     $retail_franchise_product_percentage->franchise_id = $franchise->id;
+            //     $retail_franchise_product_percentage->retail_shipping_mode_id = $retail_shipping_mode_id;
+            //     $retail_franchise_product_percentage->product_percentage = $new_product_percentages[$key];
+            //     $retail_franchise_product_percentage->updated_by = $admin->id;
+            //     $retail_franchise_product_percentage->save();
+            // }
+
+            //areeb old code
+            // $franchise_retail_product_charges = RetailFranchiseCharge::where('franchise_id', $franchise->id)->first();
+            // if ($franchise_retail_product_charges != null){
+            //     $franchise_retail_product_charges->delete();
+            //     $new_charges = new RetailFranchiseCharge();
+            //     $new_charges->franchise_id = $franchise->id;
+            //     $new_charges->franchise_gst = $request->franchise_gst;
+            //     $new_charges->franchise_withholding = $request->franchise_withholding;
+            //     $new_charges->franchise_deduction = $request->franchise_deduction;
+            //     $new_charges->security_deposit = $request->security_deposit;
+            //     $new_charges->license_fees = $request->license_fees;
+            //     $new_charges->bank_id = $request->bank_id;
+            //     $bank_name = BanksList::where('id', $request->bank_id)->first()->name;
+            //     $new_charges->bank_name = $bank_name;
+            //     $new_charges->security_cheque_number = $request->security_cheque_number;
+            //     $new_charges->license_cheque_number = $request->license_cheque_number;
+            //     $new_charges->save();
+            // } else {
+            //     $new_charges = new RetailFranchiseCharge();
+            //     $new_charges->franchise_id = $franchise->id;
+            //     $new_charges->franchise_gst = $request->franchise_gst;
+            //     $new_charges->franchise_withholding = $request->franchise_withholding;
+            //     $new_charges->franchise_deduction = $request->franchise_deduction;
+            //     $new_charges->security_deposit = $request->security_deposit;
+            //     $new_charges->license_fees = $request->license_fees;
+            //     $new_charges->bank_id = $request->bank_id;
+            //     $bank_name = BanksList::where('id', $request->bank_id)->first()->name;
+            //     $new_charges->bank_name = $bank_name;
+            //     $new_charges->security_cheque_number = $request->security_cheque_number;
+            //     $new_charges->license_cheque_number = $request->license_cheque_number;
+            //     $new_charges->save();
+            // }
+
             $franchise_retail_product_charges = RetailFranchiseCharge::where('franchise_id', $franchise->id)->first();
-            if ($franchise_retail_product_charges != null){
-                $franchise_retail_product_charges->delete();
-                $new_charges = new RetailFranchiseCharge();
-                $new_charges->franchise_id = $franchise->id;
-                $new_charges->franchise_gst = $request->franchise_gst;
-                $new_charges->franchise_withholding = $request->franchise_withholding;
-                $new_charges->franchise_deduction = $request->franchise_deduction;
-                $new_charges->security_deposit = $request->security_deposit;
-                $new_charges->license_fees = $request->license_fees;
-                $new_charges->bank_id = $request->bank_id;
-                $bank_name = BanksList::where('id', $request->bank_id)->first()->name;
-                $new_charges->bank_name = $bank_name;
-                $new_charges->security_cheque_number = $request->security_cheque_number;
-                $new_charges->license_cheque_number = $request->license_cheque_number;
-                $new_charges->save();
+
+            if ($franchise_retail_product_charges) {
+                // Update existing record
+                $franchise_retail_product_charges->franchise_id = $franchise->id;
+                $franchise_retail_product_charges->franchise_gst = $request->franchise_gst;
+                $franchise_retail_product_charges->franchise_withholding = $request->franchise_withholding;
+                $franchise_retail_product_charges->franchise_deduction = $request->franchise_deduction;
+                $franchise_retail_product_charges->security_deposit = $request->security_deposit;
+                $franchise_retail_product_charges->license_fees = $request->license_fees;
+                $franchise_retail_product_charges->bank_id = $request->bank_id;
+                $bank = BanksList::find($request->bank_id);
+                $franchise_retail_product_charges->bank_name = $bank ? $bank->name : null;
+                $franchise_retail_product_charges->security_cheque_number = $request->security_cheque_number;
+                $franchise_retail_product_charges->license_cheque_number = $request->license_cheque_number;
+                
+                $fieldNames = [
+                    'franchise_gst' => 'Franchise GST',
+                    'franchise_withholding' => 'Franchise Withholding',
+                    'franchise_deduction' => 'Franchise Deduction',
+                    'security_deposit' => 'Security Deposit',
+                    'license_fees' => 'License Fees',
+                    'bank_name' => 'Bank',
+                    'security_cheque_number' => 'Security Cheque No',
+                    'license_cheque_number' => 'License Cheque No'
+                ];
+
+                foreach ($fieldNames as $field => $fieldName) {
+                    $originalValue = trim($franchise_retail_product_charges->getOriginal($field));
+                    $currentValue = trim($franchise_retail_product_charges->$field);
+                    if ($franchise_retail_product_charges->isDirty($field) && $originalValue !== $currentValue) {
+                        $changedFields[] = $fieldName . ': ' . $originalValue . ' -> ' . $currentValue;
+                    }
+                }
+                $franchise_retail_product_charges->save();
             } else {
+                // Create new record
                 $new_charges = new RetailFranchiseCharge();
                 $new_charges->franchise_id = $franchise->id;
                 $new_charges->franchise_gst = $request->franchise_gst;
@@ -504,8 +638,8 @@ class RetailAdminUserManagementController extends Controller
                 $new_charges->security_deposit = $request->security_deposit;
                 $new_charges->license_fees = $request->license_fees;
                 $new_charges->bank_id = $request->bank_id;
-                $bank_name = BanksList::where('id', $request->bank_id)->first()->name;
-                $new_charges->bank_name = $bank_name;
+                $bank = BanksList::find($request->bank_id);
+                $new_charges->bank_name = $bank ? $bank->name : null;
                 $new_charges->security_cheque_number = $request->security_cheque_number;
                 $new_charges->license_cheque_number = $request->license_cheque_number;
                 $new_charges->save();
@@ -520,6 +654,14 @@ class RetailAdminUserManagementController extends Controller
                         // Delete old attachment if it exists
                         $old_attachment = $franchise_retail_product_attachment_edit->$attachment_name;
                         if ($old_attachment) {
+                            $terms = [
+                                '1' => 'Franchise Agreement',
+                                '2' => 'Cheque Images',
+                                '3' => 'Location Images',
+                                '4' => 'Miscellaneous',
+                                '5' => 'Attachment 5'
+                            ];
+                            $changedFields[] = $terms[$i] . ' ' . 'Changed at' . ' ' .  now()->toDateTimeString();
                             Storage::disk('public')->delete('franchise_product_attachment_' . $i . '/' . $old_attachment);
                         }
                         // Store new attachment
@@ -549,6 +691,9 @@ class RetailAdminUserManagementController extends Controller
             }
             $franchise_retail_product_attachment_edit->updated_by = $admin->id;
             $franchise_retail_product_attachment_edit->save();
+            if(!empty($changedFields)) {
+                self::retail_logs(Auth::id(), $changedFields, $franchise->id, $screen_name = 'Retail Franchise');
+            }
             return redirect()->back()->with('success', 'Franchise Updated Successfully!');
         } else {
             return redirect()->back()->with('error', 'Name must be unique!');
@@ -1255,6 +1400,16 @@ class RetailAdminUserManagementController extends Controller
                             <div class="col-9 offset-1">Edit</div>
                         </div>
                     </button>';
+                    $dropdown .= '<button type="button" class="dropdown-item view_logs">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col-2">
+                                    <i class="ft-edit"></i>
+                                </div>
+                                <div class="col-9 offset-1">
+                                    View Logs
+                                </div>
+                            </div>
+                        </button>';
 
                     // Adding Excel export dropdown item
                     $dropdown .= '
@@ -1286,11 +1441,16 @@ class RetailAdminUserManagementController extends Controller
         if ($request->status == 1) {
             $trax_center->status = 1;
             $trax_center->updated_by = Auth::id();
+
+            $changedFields[] = 'Center Status' . ': ' . ($trax_center->getOriginal('status') == 1 ? 'Active' : 'In-Active') . ' -> ' . ($trax_center->status == 1  ? 'Active' : 'In-Active');
+            self::retail_logs(Auth::id(), $changedFields, $trax_center->id, $screen_name = 'Retail Center');
             $trax_center->save();
 
             return response()->json(['status' => 1, 'success' => 'Trax Center Enabled Successfully']);
         } elseif ($request->status == 0) {
             $trax_center->status = 0;
+            $changedFields[] = 'Center Status' . ': ' . ($trax_center->getOriginal('status') == 1 ? 'Active' : 'In-Active') . ' -> ' . ($trax_center->status == 1  ? 'Active' : 'In-Active');
+            self::retail_logs(Auth::id(), $changedFields, $trax_center->id, $screen_name = 'Retail Center');
             $trax_center->updated_by = Auth::id();
             $trax_center->save();
 
@@ -1372,6 +1532,7 @@ class RetailAdminUserManagementController extends Controller
     {
         $date = Carbon::now()->format('Y_m_d');
         $existing_trax_center = RetailTraxCenter::where('name', $request->name)->where('id', '!=', $request->trax_center_id);
+        $changedFields = [];
         if (!$existing_trax_center->exists()) {
             $trax_center = RetailTraxCenter::find($request->trax_center_id);
 
@@ -1384,6 +1545,25 @@ class RetailAdminUserManagementController extends Controller
             $trax_center->discount = $request->discount;
             $trax_center->insurance = $request->edit_insurance;
             $trax_center->updated_by = Auth::id();
+
+            $fieldNames = [
+                'name' => 'Name',
+                'phone_no' => 'Phone No',
+                'email' => 'Email',
+                'cnic' => 'CNIC',
+                'location_latitude' => 'Latitude',
+                'location_longitude' => 'Longitude',
+                'discount' => 'Discount',
+                'insurance' => 'Insurance'
+            ];
+
+            foreach ($fieldNames as $field => $fieldName) {
+                $originalValue = trim($trax_center->getOriginal($field));
+                $currentValue = trim($trax_center->$field);
+                if ($trax_center->isDirty($field) && $originalValue !== $currentValue) {
+                    $changedFields[] = $fieldName . ': ' . $originalValue . ' -> ' . $currentValue;
+                }
+            }
             $trax_center->save();
 
             $trax_center_attachment = TraxCenterAttachment::where('retail_trax_center_id', $request->trax_center_id)->first();
@@ -1399,6 +1579,25 @@ class RetailAdminUserManagementController extends Controller
                 if ($request->agreement_end_date != null){
                     $trax_center_attachment->agreement_end_date = $request->agreement_end_date;
                 }
+
+                $fieldNames = [
+                    'advance_amount' => 'Advance Amount',
+                    'rental' => 'Rental',
+                    'landlord_name' => 'Landlord Name',
+                    'landlord_contact_number' => 'Landlord Contact Number',
+                    'location_latitude' => 'Latitude',
+                    'shop_address' => 'Shop Address',
+                    'agreement_start_date' => 'Agreement Start Date',
+                    'agreement_end_date' => 'Agreement End Date'
+                ];
+    
+                foreach ($fieldNames as $field => $fieldName) {
+                    $originalValue = trim($trax_center_attachment->getOriginal($field));
+                    $currentValue = trim($trax_center_attachment->$field);
+                    if ($trax_center_attachment->isDirty($field) && $originalValue !== $currentValue) {
+                        $changedFields[] = $fieldName . ': ' . $originalValue . ' -> ' . $currentValue;
+                    }
+                }
                 // Handle file uploads
                 for ($i = 1; $i <= 5; $i++) {
                     $attachment_name = 'attachment_' . $i;
@@ -1408,6 +1607,15 @@ class RetailAdminUserManagementController extends Controller
                         $folderName = 'trax_center_attachment_' . $i;
                         $filePath = $file->storeAs('trax_center_attachments' . DIRECTORY_SEPARATOR . $folderName, $fileName, 'public');
                         $trax_center_attachment->{$attachment_name} = $fileName;
+
+                        $terms = [
+                            '1' => 'Agreement File',
+                            '2' => 'Landlord CNIC Front',
+                            '3' => 'Landlord CNIC Back',
+                            '4' => 'Location Pictures',
+                            '5' => 'Attachment 5'
+                        ];
+                        $changedFields[] = $terms[$i] . ' ' . 'Changed at' . ' ' .  now()->toDateTimeString();
                     }
                 }
             
@@ -1435,6 +1643,10 @@ class RetailAdminUserManagementController extends Controller
                     }
                 }
                 $new_trax_center_attachments->save();
+            }
+
+            if(!empty($changedFields)) {
+                self::retail_logs(Auth::id(), $changedFields, $trax_center->id, $screen_name = 'Retail Center');
             }
             return redirect()->back()->with('success', 'Trax Center Updated Successfully!');
         } else {
@@ -1565,6 +1777,17 @@ class RetailAdminUserManagementController extends Controller
                     }
                     $dropdown .= '<button type="button" class="dropdown-item" data-target-id=' . $data->id . ' rel="editretailuser" data-toggle="modal" data-target="#editRetailUser"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
 
+                    $dropdown .= '<button type="button" class="dropdown-item view_logs">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col-2">
+                                    <i class="ft-edit"></i>
+                                </div>
+                                <div class="col-9 offset-1">
+                                    View Logs
+                                </div>
+                            </div>
+                        </button>';
+
                     if ($data->category != 1){
                         $dropdown .= '
                             <a href="' . route("admin.retail.users.retail_history", ["id" => $data->id]) . '" class="text-dark" target="_blank">
@@ -1630,8 +1853,11 @@ class RetailAdminUserManagementController extends Controller
             if ($user->store->status == 1) {
                 $user->status = 1;
                 $user->updated_by = Auth::id();
-                $user->save();
 
+                $changedFields[] = 'User Status' . ': ' . ($user->getOriginal('status') == 1 ? 'Active' : 'In-Active') . ' -> ' . ($user->status == 1  ? 'Active' : 'In-Active');
+                self::retail_logs(Auth::id(), $changedFields, $user->id, $screen_name = 'Retail User');
+                $user->save();
+                
                 return response()->json(['status' => 1, 'success' => 'User Enabled Successfully']);
             } else {
                 return response()->json(['status' => 0, 'error' => 'User Store is Disabled']);
@@ -1639,6 +1865,9 @@ class RetailAdminUserManagementController extends Controller
         } elseif ($request->status == 0) {
             $user->status = 0;
             $user->updated_by = Auth::id();
+            $changedFields[] = 'User Status' . ': ' . ($user->getOriginal('status') == 1 ? 'Active' : 'In-Active') . ' -> ' . ($user->status == 1  ? 'Active' : 'In-Active');
+            self::retail_logs(Auth::id(), $changedFields, $user->id, $screen_name = 'Retail User');
+
             $user->save();
             return response()->json(['status' => 1, 'success' => 'User Disabled Successfully']);
         } else {
@@ -1735,6 +1964,39 @@ class RetailAdminUserManagementController extends Controller
         $retail_user->address = $request->address;
         $retail_user->updated_by = Auth::id();
         $retail_user->trax_id = $request->trax_id;
+
+        $changedFields = [];
+        $fieldNames = [
+          'name' => 'Name',
+          'category' => 'Category',
+          'phone_no' => 'Phone no',
+          'cnic' => 'CNIC',
+          'address' => 'Address',
+          'trax_id' => 'Trax ID',
+          'category_id' => 'Category ID'
+        ];
+
+        foreach ($fieldNames as $field => $fieldName) {
+            $originalValue = trim($retail_user->getOriginal($field));
+            $currentValue = trim($retail_user->$field);
+            if ($retail_user->isDirty($field) && $originalValue !== $currentValue) {
+                if($field == 'category_id'){
+                    if($request->store == 1) {
+                        $old = RetailFranchise::find($originalValue);
+                        $new = RetailFranchise::find($currentValue);
+                        $fieldName = 'Franchise';
+                    }else{
+                        $old = RetailTraxCenter::find($originalValue);
+                        $new = RetailTraxCenter::find($currentValue);
+                        $fieldName = 'Trax Center';
+                    }
+                    $changedFields[] = $fieldName . ': ' . $old->name . ' -> ' . $new->name;
+                }else {
+                    $changedFields[] = $fieldName . ': ' . $originalValue . ' -> ' . $currentValue;
+                }
+            }
+        }
+        
         $retail_user->save();
         
         // if ($retail_user->category == 2){
@@ -1825,6 +2087,11 @@ class RetailAdminUserManagementController extends Controller
             // Delete old records not present in the new request
             foreach ($retail_user_old_product_percentages as $oldPercentage) {
                 if (!in_array($oldPercentage->retail_shipping_mode_id, $matchingRetailShippingModeIds)) {
+                    $shippingMode =RetailShippingMode::find($oldPercentage->retail_shipping_mode_id);
+                    //dd($retailShippingModes);
+                    $shippingModeName = $shippingMode->name ?? 'Unknown';
+                    $logEntry = "{$shippingModeName}: {$oldPercentage->product_percentage}";
+                    $changedFields[] = $logEntry;
                     $oldPercentage->delete();
                 }
             }
@@ -1854,10 +2121,41 @@ class RetailAdminUserManagementController extends Controller
 
         // retail user family info
         $familyMemberNames = $request->family_member_name;
+        
+        $familyTypeMap = [
+            1 => 'Spouse',
+            2 => 'Children',
+            3 => 'Father',
+            4 => 'Mother',
+            5 => 'Spouse DOB'
+        ];
+        
+        $familyInfo = RetailUserFamilyInformation::where('retail_user_id', $retail_user->id)
+        ->whereNotNull('family_member_name')
+        ->get(['family_member_name', 'salary', 'agreement_start_date', 'family_member_type']);
+    
+        // Add salary and agreement date once (from first record)
+        if ($familyInfo->isNotEmpty()) {
+            $first = $familyInfo->first();
+        
+            if ($first->salary) {
+                $changedFields[] = 'Salary: ' . $first->salary;
+            }
+        
+            if ($first->agreement_start_date) {
+                $changedFields[] = 'Agreement Start Date: ' . $first->agreement_start_date;
+            }
+        }
+        
+        // Add each family member
+        foreach ($familyInfo as $item) {
+            $type = $familyTypeMap[$item->family_member_type] ?? $item->family_member_type;
+            $changedFields[] = "{$type}: {$item->family_member_name}";
+        }
+    
+        RetailUserFamilyInformation::where('retail_user_id', $retail_user->id)->delete();
         foreach ($familyMemberNames as $key => $familyMemberName) {
             // Delete existing records for the retail user only if new family member information is present
-            RetailUserFamilyInformation::where('retail_user_id', $retail_user->id)->delete();
-            foreach ($familyMemberNames as $key => $familyMemberName) {
                 $family_member_type = null;
                 if ($key == 0) {
                     $family_member_type = 3; // Father
@@ -1878,7 +2176,6 @@ class RetailAdminUserManagementController extends Controller
                 $family_member_new_data->salary = $request->salary;
                 $family_member_new_data->agreement_start_date = $request->agreement_start_date;
                 $family_member_new_data->save();
-            }
         }
 
         $baseDirectory = 'retail_user_attachments';
@@ -1897,6 +2194,14 @@ class RetailAdminUserManagementController extends Controller
                     // Delete old attachment if it exists
                     $old_attachment = $old_attachments->$attachment_name;
                     if ($old_attachment) {
+                        $terms = [
+                            '1' => 'Employee Form',
+                            '2' => 'CNIC Front Image',
+                            '3' => 'CNIC Back Image',
+                            '4' => 'Profile Picture',
+                            '5' => 'Attachment 5'
+                        ];
+                        $changedFields[] = $terms[$i] . ' ' . 'Changed at' . ' ' .  now()->toDateTimeString();
                         Storage::disk('public')->delete($old_attachment);
                     }
                     
@@ -1932,6 +2237,10 @@ class RetailAdminUserManagementController extends Controller
             $new_attachments->updated_by = $admin->id;
             $new_attachments->save();
         }
+        if(!empty($changedFields)) {
+            self::retail_logs(Auth::id(), $changedFields, $retail_user->id, $screen_name = 'Retail User');
+        }
+        
         return redirect()->back()->with('success', 'Retail User Updated Successfully!');
     }
 
@@ -3665,5 +3974,29 @@ class RetailAdminUserManagementController extends Controller
         }
         
         return response()->json(['data' => $data]);
+    }
+
+    public function view_logs(Request $request){
+        $logs = RetailLog::leftJoin('admins as changed_by', 'retail_logs.changed_by_id', '=', 'changed_by.id')->where('retail_logs.changed_in_record_id', $request->id)->where('retail_logs.screen_name', $request->screen_name)->orderBy('retail_logs.created_at', 'desc')->select('retail_logs.*', 'changed_by.name')->get();
+        if ($logs->isNotEmpty()) {
+            return response()->json([
+                'status' => 0,
+                'logs' => $logs
+            ]);
+        } else {
+            return response()->json([
+                'status' => 1,
+                'message' => 'No logs found..!'
+            ]);
+        }
+    }
+
+    public static function retail_logs($changed_by_id, $data, $changed_in_record_id ,  $screen_name) {
+        $record = new RetailLog;
+        $record->changed_by_id = $changed_by_id;
+        $record->data = implode(', ', $data);
+        $record->changed_in_record_id = $changed_in_record_id;
+        $record->screen_name = $screen_name;
+        $record->save();
     }
 }
