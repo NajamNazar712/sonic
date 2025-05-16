@@ -2031,7 +2031,7 @@ class APIController extends Controller
             }
 
             $details = array();
-
+            $details['shipment_id'] = $shipment->id;
             $details['tracking_number'] = $tracking_number;
 
             $details['order_id'] = $shipment->order_id;
@@ -3626,6 +3626,7 @@ class APIController extends Controller
                 $shipments = Shipment::where('user_id', $user_id)->where('order_id', $order_id)->get();
                 foreach ($shipments as $shipment) {
                     $detail = array();
+
 
                     $detail['tracking_number'] = $shipment->tracking_number;
 

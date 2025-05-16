@@ -704,6 +704,7 @@ use Illuminate\Http\Request;
                 Route::get('request_summary', 'ShippeCrmApiController@crm_request_summary')->name('request_summary');
                 Route::get('request_list', 'ShippeCrmApiController@crm_request_list')->name('request_list');
                 Route::post('single_crm_request','ShippeCrmApiController@single_crm_request')->name('single_crm_request');
+                Route::post('receiving_sheet','ShippeCrmApiController@get_receving_sheet')->name('receiving_sheet');
             });
 
 
