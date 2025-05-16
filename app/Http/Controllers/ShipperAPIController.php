@@ -56,6 +56,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Validator;
 use Illuminate\Support\Str;
+use App\Http\Models\Admin\Retail\RetailShipperInfo;
 
 class ShipperAPIController extends Controller
 {
@@ -117,9 +118,11 @@ class ShipperAPIController extends Controller
     public function login(Request $request)
     {
         $rules = [
-            'email_address' => ['required', 'email'],
-            'password' => ['required', 'min:6']
-        ];
+            'app_type' => ['required', 'in:1,2'], // 1 -> shipper-app , 2-> Retail app
+            'email_address' => ['required_if:app_type,1', 'email'],
+            'phone_no' => ['required_if:app_type,2'],
+            'password' => ['required', 'min:6'],
+        ];  
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
 
@@ -128,41 +131,73 @@ class ShipperAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $shipper = User::where('email', $request->email_address);
-            if ($shipper->exists()) {
-                $shipper = $shipper->first();
-                if ($shipper->blacklist) {
-                    return response()->json(['status' => 1, 'message' => 'Your Account is Blacklisted, Contact Admin']);
-                } else if ($shipper->status != 3) {
-                    return response()->json(['status' => 1, 'message' => 'Your Account is Not Activated Yet, Contact Admin']);
-                } else if ($shipper->phone_number_verified == 0) {
-                    return response()->json(['status' => 1, 'message' => 'Your Account phone number is not verified, Contact Admin']);
-                }
-                if (Hash::check($request->input('password'), $shipper->password)) {
-                    $information = array();
-                    $information['name'] = $shipper->name;
-                    $information['shipper_id'] = $shipper->id;
-                    $information['phone_number'] = $shipper->phone;
-                    if ($shipper->api_token) {
-                        $information['api_token'] = $shipper->api_token;
-                    } else {
-                        $api_token = uniqid(base64_encode(Str::random(60)));
 
-                        $shipper->api_token = $api_token;
-
-                        $shipper->save();
-
-                        $information['api_token'] = $api_token;
+            if($request->app_type == 1) {
+                $shipper = User::where('email', $request->email_address);
+                if ($shipper->exists()) {
+                    $shipper = $shipper->first();
+                    if ($shipper->blacklist) {
+                        return response()->json(['status' => 1, 'message' => 'Your Account is Blacklisted, Contact Admin']);
+                    } else if ($shipper->status != 3) {
+                        return response()->json(['status' => 1, 'message' => 'Your Account is Not Activated Yet, Contact Admin']);
+                    } else if ($shipper->phone_number_verified == 0) {
+                        return response()->json(['status' => 1, 'message' => 'Your Account phone number is not verified, Contact Admin']);
                     }
-                    $information['account_type'] = $shipper->account_type_id;
-                    EmployeeDeviceToken::where('employee_type_id', 2)->where('employee_id', $shipper->id)->delete();
-                    return response()->json(['status' => 0, 'message' => 'Login Successful', 'information' => $information]);
+                    if (Hash::check($request->input('password'), $shipper->password)) {
+                        $information = array();
+                        $information['name'] = $shipper->name;
+                        $information['shipper_id'] = $shipper->id;
+                        $information['phone_number'] = $shipper->phone;
+                        $information['app_type'] = 1;
+                        if ($shipper->api_token) {
+                            $information['api_token'] = $shipper->api_token;
+                        } else {
+                            $api_token = uniqid(base64_encode(Str::random(60)));
+
+                            $shipper->api_token = $api_token;
+
+                            $shipper->save();
+
+                            $information['api_token'] = $api_token;
+                        }
+                        $information['account_type'] = $shipper->account_type_id;
+                        EmployeeDeviceToken::where('employee_type_id', 2)->where('employee_id', $shipper->id)->delete();
+                        return response()->json(['status' => 0, 'message' => 'Login Successful', 'information' => $information]);
+                    } else {
+                        return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
+                    }
                 } else {
                     return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
                 }
-            } else {
-                return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
+            }else {
+                $retail_user = RetailShipperInfo::where('shipper_phone_no', $request->phone_no)->first();
+                if($retail_user) {
+                    if (Hash::check($request->input('password'), $retail_user->password)) {
+                        $information = array();
+                        $information['name'] = $retail_user->shipper_name;
+                        //$information['shipper_id'] = $retail_user->id;
+                        $information['phone_number'] = $retail_user->shipper_phone_no;
+                        if ($retail_user->api_token) {
+                            $information['api_token'] = $retail_user->api_token;
+                        } else {
+                            $api_token = uniqid(base64_encode(Str::random(60)));
+
+                            $retail_user->api_token = $api_token;
+
+                            $retail_user->save();
+
+                            $information['api_token'] = $api_token;
+                            $information['app_type'] = 2;
+                        }
+                        return response()->json(['status' => 0, 'message' => 'Login Successful', 'information' => $information]);
+                    } else {
+                        return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
+                    }
+                } else {
+                    return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
+                }
             }
+            
         }
     }
 
