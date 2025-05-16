@@ -216,7 +216,7 @@ class ShipperDashboardController extends Controller
             }
             else{
 
-                $sales_person_tag = SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->first();
+                $sales_person_tag = SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->latest()->first();
                 if($sales_person_tag){
                     $sales_person_tag = Admin::find($sales_person_tag->admin_id);
                     $sales_person_data['name'] = $sales_person_tag->name;
@@ -234,7 +234,7 @@ class ShipperDashboardController extends Controller
                             ->join('admins as a','a.id','=','scu.user_id')
                             ->where('sales_commissions.shipper_id',session('user_id'))
                             ->wherein('scu.tier_id',[2,3])
-                            ->select('a.name as name','a.email as email','a.phone_number as phone','scu.tier_id as tier_id')->get();
+                            ->select('a.name as name','a.email as email','a.phone_number as phone','scu.tier_id as tier_id')->orderBy('scu.created_at', 'desc')->get();
 
                 $poc = array();
                 $kam = array();
@@ -255,7 +255,7 @@ class ShipperDashboardController extends Controller
                     $routes = Route::whereIn('id', $route_ids)->where('status', 1)->pluck('id')->toArray();
                     $riders = Rider::join('cities as oc','riders.city_id','=','oc.id')
                         ->wherein('riders.route_id',$routes)
-                        ->select('riders.phone as phone', 'riders.name as name','oc.name as city')->get();
+                        ->select('riders.phone as phone', 'riders.name as name','oc.name as city')->orderBy('riders.created_at', 'desc')->get();
                 }
 
                 $percentage = null; 
