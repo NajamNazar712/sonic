@@ -2961,7 +2961,6 @@ class APIController extends Controller
             if ($shipment->user->blacklist == 0) {
                 $details = array();
 
-                $details['shipment_id'] = $shipment->id;
                 $details['tracking_number'] = $tracking_number;
 
                 $shipper = $shipment->user;
@@ -3628,6 +3627,7 @@ class APIController extends Controller
                 foreach ($shipments as $shipment) {
                     $detail = array();
 
+                    $detail['shipment_id'] = $shipment->id;
                     $detail['tracking_number'] = $shipment->tracking_number;
 
                     $detail['order_id'] = $shipment->order_id;
