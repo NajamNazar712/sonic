@@ -8802,7 +8802,7 @@ class NotificationsController extends Controller
 
                     $email = array_values($email);
 
-                    $cc = ['m.sohail@trax.pk', 'tauseef.sarfaraz@trax.pk', 'Shahrukh.raheem@trax.pk', 'Mohsin.khan@trax.pk', 'ops.excellence@trax.pk'];
+                    $cc = ['m.sohail@trax.pk', 'tauseef.sarfaraz@trax.pk', 'cs.dept@trax.pk', 'Mohsin.khan@trax.pk', 'ops.excellence@trax.pk'];
                     if (count($email) > 0) {
                         self::email($subject, $body, $email, $cc);
                     }
@@ -10708,8 +10708,9 @@ class NotificationsController extends Controller
                     self::email($subject, $body, $to);
                 } else if ($id == 221) {
                     $responses = $reference_1_id;
-                    $to = 'mohsin.khan@trax.pk';
-                    $cc = 'shahrukh.raheem@trax.pk';
+
+                    $to = array("mohsin.khan@trax.pk", "muhammad.zain@trax.pk", "muhammad.anas@trax.pk");
+                    $cc = 'tauseef.sarfaraz@trax.pk';
 
                     $date = Carbon::now()->toFormattedDateString();
 
@@ -10813,8 +10814,8 @@ class NotificationsController extends Controller
                 } else if ($id == 223) {
                     //Crm Progress Report
                     $now = Carbon::now();
-                    $to = 'mohsin.khan@trax.pk';
-                    $cc = 'shahrukh.raheem@trax.pk';
+                    $to = array("mohsin.khan@trax.pk", "muhammad.zain@trax.pk", "muhammad.anas@trax.pk");
+                    $cc = 'tauseef.sarfaraz@trax.pk';
                     $crm_complaints_2_days_closure = [];
                     $crm_services_2_days_closure = [];
                     $crm_claims_10_days_closure = [];
