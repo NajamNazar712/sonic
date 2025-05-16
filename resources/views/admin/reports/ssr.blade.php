@@ -21,18 +21,18 @@
                     <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_shipper" id="search_shipper" class="form-control select2">
-                                @foreach($shippers as $shipper)
+                                {{-- @foreach($shippers as $shipper)
                                     <option value="{{$shipper->id}}">{{$shipper->name}}</option>
-                                @endforeach
+                                @endforeach --}}
                             </select>
                         </fieldset>
                     </div>
                     <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_shippers[]" id="search_shippers" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
-                                @foreach($shippers as $shipper)
+                                {{-- @foreach($shippers as $shipper)
                                     <option value="{{$shipper->id}}">{{$shipper->name}}</option>
-                                @endforeach
+                                @endforeach --}}
                             </select>
                         </fieldset>
                     </div>
@@ -149,6 +149,30 @@
                             <input type="text" name="arrival_time_to" class="form-control bg-primary border-primary white rounded-right pickatime arrival_time_to" value="11:30 PM" id="arrival_time_to" placeholder="To">
                         </div>
                     </div>
+
+                    <div class="col-3">
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                    <span class="la la-calendar-o"></span>
+                                </span>
+                            </div>
+                            <input type="text" name="search_date_from_delivered_return" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from_delivered_return" placeholder="Delivered/Returned Date (From)">
+                        </div>
+                    </div>
+
+                    <div class="col-3 ">
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                    <span class="la la-calendar-o"></span>
+                                </span>
+                            </div>
+                            <input type="text" name="search_date_to_delivered_return" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to_delivered_return" placeholder="Delivered/Returned Date (To)">
+                        </div>
+
+                    </div>
+
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                     </div>
@@ -163,15 +187,17 @@
                         <th class="border-primary border-darken-1">Sales Person</th>
                         <th class="border-primary border-darken-1">Actual Weight</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
+                        <th class="border-primary border-darken-1">Delivered/Returned Date</th>
                         <th class="border-primary border-darken-1">Shipper Zone</th>
                         <th class="border-primary border-darken-1">Weight Charges</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
-                        {{-- <th class="border-primary border-darken-1">Packaging Charges</th> --}}
                         <th class="border-primary border-darken-1">Fuel Surcharge</th>
-                        <th class="border-primary border-darken-1">GST</th>
+
+{{--                        <th class="border-primary border-darken-1">GST</th>--}}
+                        <th class="border-primary border-darken-1">Collection Amount</th>
+
                         <th class="border-primary border-darken-1">Total Charges</th>
-                        {{-- <th class="border-primary border-darken-1">Packing Charges</th> --}}
                     </tr>
                     </thead>
                 </table>
@@ -274,11 +300,58 @@
                 placeholder: 'Select Business Category',
                 allowClear:true
             });
-           $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Shipper',
+        //    $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
+        //         placeholder:'Select Shipper',
+        //         width:'100%',
+        //         allowClear:true
+        //     });
+
+            $('#search_shipper').select2({
                 width:'100%',
-                allowClear:true
+                placeholder:"Select Shipper",
+                allowClear:true,
+                multiple: false,
+                minimumInputLength: 2,
+                ajax: {
+                    dataType: 'json',
+                    url:  '{!! route('admin.accounts.shipper_names.dropdown',['type'=>'active']) !!}',
+                        data: function (params) {
+                            return {
+                                search: params.term,
+                            }
+                        },
+                        processResults: function (data) {
+                            return {
+                                results: data
+                            };
+                        },
+                    delay: 700,
+                }
             });
+
+            $('#search_shippers').select2({
+                width:'100%',
+                placeholder:"Select Multiple Shippers",
+                allowClear:true,
+                multiple: true,
+                minimumInputLength: 2,
+                ajax: {
+                    dataType: 'json',
+                    url:  '{!! route('admin.accounts.shipper_names.dropdown',['type'=>'active']) !!}',
+                        data: function (params) {
+                            return {
+                                search: params.term,
+                            }
+                        },
+                        processResults: function (data) {
+                            return {
+                                results: data
+                            };
+                        },
+                    delay: 700,
+                }
+            });
+
             $('#search_origin').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Origin City',
                 width:'100%',
@@ -299,11 +372,11 @@
                 width:'100%',
                 allowClear:true
             });
-            $('#search_shippers').select2({
-                width:'100%',
-                placeholder:"Select Multiple Shippers",
-                allowClear:true,
-            });
+            // $('#search_shippers').select2({
+            //     width:'100%',
+            //     placeholder:"Select Multiple Shippers",
+            //     allowClear:true,
+            // });
             $('.arrival_time_from').pickatime({
                 clear: '',
                 format: 'h:i A',
@@ -358,7 +431,7 @@
             });
             var from_date = $('#search_date_from').pickadate({
                 firstDay: 1,
-                clear: '',
+                clear: 'Clear',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
@@ -376,7 +449,7 @@
 
             var to_date = $('#search_date_to').pickadate({
                 firstDay: 1,
-                clear: '',
+                clear: 'Clear',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
@@ -392,6 +465,35 @@
                     }
                 }
             });
+
+            var from_date = $('#search_date_from_delivered_return').pickadate({
+                firstDay: 1,
+                clear: 'Clear',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_date_to').pickadate('picker').set('min', $('#search_date_from_delivered_return').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
+            var to_date = $('#search_date_to_delivered_return').pickadate({
+                firstDay: 1,
+                clear: 'Clear',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_date_from_delivered_return').pickadate('picker').set('max', $('#search_date_to_delivered_return').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     blockPagePermanently();
@@ -418,15 +520,14 @@
                             head.push('Sales Person');
                             head.push('Actual Weight');
                             head.push('Arrival Date');
+                            head.push('Delivered/Returned Date');
                             head.push('Shipper Zone');
                             head.push('Weight Charges');
                             head.push('Origin');
                             head.push('Destination');
-                            // head.push('Packaging Charges');
                             head.push('Fuel Surcharge');
-                            head.push('GST');
+                            head.push('Collection Amount');
                             head.push('Total Charges');
-                            // head.push('Packing Charges');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -438,15 +539,16 @@
                                 row.push(values.sales_person);
                                 row.push(values.actual_weight);
                                 row.push(values.arrival_date);
+                                row.push(values.delivered_or_returned);
                                 row.push(values.shipper_zone);
                                 row.push(values.weight_charges);
                                 row.push(values.origin_city_name);
                                 row.push(values.destination_city_name);
-                                // row.push(values.packaging_material_charges);
                                 row.push(values.fuel_surcharge);
-                                row.push(values.p_gst);
+                                // row.push(values.p_gst);
+                                row.push(values.collection_amount);
+
                                 row.push(values.p_total_charges);
-                                // row.push(values.packaging_charges);
 
                                 body.push(row);
                             });
@@ -498,6 +600,8 @@
                         d.arrival_time_from= $('input[name="arrival_time_from"]').val();
                         d.arrival_time_to= $('input[name="arrival_time_to"]').val();
                         d.search_shipping_mode = $('#search_shipping_mode').val();
+                        d.search_date_from_delivered_return = $('input[name="search_date_from_delivered_return_formatted"]').val();
+                        d.search_date_to_delivered_return = $('input[name="search_date_to_delivered_return_formatted"]').val();
                     }
                 },
                 order: [[2, 'desc']],
@@ -509,15 +613,15 @@
                     { data: 'sales_person' ,name: 'adsp.name', class: 'align-middle sales_person'},
                     { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle actual_weight'},
                     { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle arrival_date'},
+                    { data: 'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle delivered_or_returned'},
                     { data:'shipper_zone' ,name: 'sz.name', class: 'align-middle shipper_zone'},
                     { data:'weight_charges' ,name: 'shipments.weight_charges', class: 'align-middle weight_charges'},
                     { data:'origin_city_name' ,name: 'oc.name', class: 'align-middle origin_city_name'},
                     { data:'destination_city_name' ,name: 'dc.name', class: 'align-middle destination_city_name'},
-                    // { data:'packaging_material_charges' ,name: 'shipments.packaging_material_charges', class: 'align-middle packaging_material_charges'},
                     { data:'fuel_surcharge' ,name: 'shipments.fuel_surcharge', class: 'align-middle fuel_surcharge'},
-                    { data:'p_gst' ,name: 'pps.p_gst', class: 'align-middle p_gst',sortable:false},
+                    // { data:'p_gst' ,name: 'pps.p_gst', class: 'align-middle p_gst',sortable:false},
+                    { data:'collection_amount' ,name: 'shipments.amount', class: 'align-middle collection_amount'},
                     { data:'p_total_charges' ,name: 'pps.charges', class: 'align-middle total_charges'},
-                    // { data:'packaging_charges' ,name: 'shipments.packaging_charges', class: 'align-middle packaging_charges',sortable:false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -530,7 +634,6 @@
             $('#search_filter_btn').on('click',function () {
                 table.draw();
             });
-
         });
     </script>
 @endsection

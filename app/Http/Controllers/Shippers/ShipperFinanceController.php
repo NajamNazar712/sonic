@@ -213,7 +213,7 @@ class ShipperFinanceController extends Controller
                   <div class="dropdown-menu dropdown-menu-sm">
                     <button type="button" class="dropdown-item view_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Details</div></button>
                     <button type="button" class="dropdown-item export_to_excel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-download"></i></div><div class="col-9 offset-1">Export to Excel</div></button>
-                    <button type="button" class="dropdown-item request_add"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Request</div></button>
+                    <button type="button" class="dropdown-item request_add"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Get Support</div></button>
                   </div>
                 </div>
             ';
@@ -521,7 +521,9 @@ class ShipperFinanceController extends Controller
 
         foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
             $shipment = $done_payment_shipment->shipment;
-
+            if (!isset($shipment->id)) {
+                $shipment = $done_payment_shipment->shipment_archive;
+            }
 
             $done_fintech_charges = $this->calculate_fintech_charges($done_payment_shipment->shipment_id);
             $total_fintech_charges = $total_fintech_charges + $done_fintech_charges;
@@ -880,6 +882,9 @@ class ShipperFinanceController extends Controller
             $total_wallet_charges = 0;
             foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
                 $shipment = $done_payment_shipment->shipment;
+                if (!isset($shipment->id)) {
+                    $shipment = $done_payment_shipment->shipment_archive;
+                }
                 $service_charges = ShipmentServicesCharges::where('shipment_id', $shipment->id);
                 if ($service_charges->exists()) {
                     $service_charges = $service_charges->first();

@@ -44,8 +44,9 @@
                                         <div class="form-group">
                                             <select name="wallet_filter"
                                                 class="select2 wallet_filter">
-                                                <option value="1">Wallet Users</option>
-                                                <option value="2">Non-Wallet Users</option>
+                                                <option value="1">Wallet Users - With Financing</option>
+                                                <option value="2">Wallet Users - Without Financing</option>
+                                                <option value="3">Non-Wallet Users</option>
                                             </select>
                                         </div>
                                     </form>

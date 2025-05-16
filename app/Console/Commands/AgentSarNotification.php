@@ -113,7 +113,7 @@ class AgentSarNotification extends Command
                 ->where('rv_shipment_assign_agents.unresponsive_email_time', '<=', $nowSub48Hours)
                 ->select('rv_shipment_assign_agents.*') // Select only columns from rv_shipment_assign_agents
                 ->get();
-
+                
             if ($unresponsive_shipments->isNotEmpty()) {
                 foreach ($unresponsive_shipments as $shipment) {
 
@@ -206,6 +206,7 @@ class AgentSarNotification extends Command
                 })
                 ->where('disabled_shipper',1)
                 ->where('halt_shipper',0)
+                ->whereNotIn('shipment_status_reason_id',[27,35])
                 ->where('rv_shipment_tickets.updated_at','>=',$date.' 00:00:00')
                 ->where('rv_shipment_tickets.updated_at','<=', date('Y-m-d').' 23:59:59')
                 ->select('rv_shipment_tickets.*', 'shipments_journey.id as journeyId')->get();

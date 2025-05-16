@@ -7,6 +7,7 @@ use App\Http\Controllers\NotificationsController;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class QsrEmail extends Command
 {
@@ -41,15 +42,21 @@ class QsrEmail extends Command
      */
     public function handle()
     {
-        // $start_date = Carbon::yesterday()->startOfDay()->addHours(10)->toDateTimeString();
-        $end_date = Carbon::today()->startOfDay()->addHours(10)->toDateTimeString();
+        $setting = DB::table('global_settings')
+        ->where('type', 'quality_of_service_report_time')
+        ->orWhere('type', 'quality_of_service_report_other_time')
+        ->value('setting_value');
 
-        // $start_date = Carbon::yesterday()->subYear()->toDateTimeString();
-        // $end_date = Carbon::today()->toDateTimeString();
+        if ($setting == 1) {
+            // $start_date = Carbon::yesterday()->startOfDay()->addHours(10)->toDateTimeString();
+            $end_date = Carbon::today()->startOfDay()->addHours(10)->toDateTimeString();
 
-        // $response = AdminReportsEmailController::qsr_daily_report($start_date, $end_date);
-        $response = AdminReportsEmailController::qsr_daily_report($end_date);
-        NotificationsController::send(226, $response);
+            // $start_date = Carbon::yesterday()->subYear()->toDateTimeString();
+            // $end_date = Carbon::today()->toDateTimeString();
 
+            // $response = AdminReportsEmailController::qsr_daily_report($start_date, $end_date);
+            $response = AdminReportsEmailController::qsr_daily_report($end_date);
+            NotificationsController::send(226, $response);
+        }
     }
 }

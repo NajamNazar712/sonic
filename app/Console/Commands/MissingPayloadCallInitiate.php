@@ -48,35 +48,33 @@ class MissingPayloadCallInitiate extends Command
     public function handle()
     {
         //
-        try{
-            
-            
-            if($this->argument('startDate') != 0){
+        try {
+
+
+            if ($this->argument('startDate') != 0) {
                 $timeStart = $this->argument('startDate');
-            }else{
+            } else {
                 $timeStart = Carbon::now()->format('Y-m-d');
             }
-            
-            $shipments = ApiCallLog::join('shipments as s', 's.id', 'api_call_logs.shipment_id')->whereDate('api_call_logs.created_at','>=', $timeStart)->where('payload', 'null')->where('s.shipper_status_id', 12)->select("call_count_initiate", "shipment_id")->get();
-            
-            if(!empty($shipments)){
-                
-                foreach($shipments as $value){
-                    if($value->call_count_initiate == 1){
-                        dispatch(new BotCallDispatch($value->shipment_id));                 
-                    }elseif($value->call_count_initiate == 2){
+
+            $shipments = ApiCallLog::join('shipments as s', 's.id', 'api_call_logs.shipment_id')->whereDate('api_call_logs.created_at', '>=', $timeStart)->where('payload', 'null')->where('s.shipper_status_id', 12)->select("call_count_initiate", "shipment_id")->get();
+
+            if (!empty($shipments)) {
+
+                foreach ($shipments as $value) {
+                    if ($value->call_count_initiate == 1) {
+                        dispatch(new BotCallDispatch($value->shipment_id));
+                    } elseif ($value->call_count_initiate == 2) {
                         dispatch(new BotCallDispatchSecod($value->shipment_id));
-                    }else{
+                    } else {
                         dispatch(new BotCallDispatchThird($value->shipment_id));
                     }
                 }
             }
-          
         } catch (\Throwable $th) {
             Log::channel('botCallJobLog')->info($th->getMessage());
 
             // $this->createRvCronLog($th->getMessage() . ' Unresponsive Count ');
         }
-
     }
 }
