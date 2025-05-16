@@ -2031,7 +2031,7 @@ class APIController extends Controller
             }
 
             $details = array();
-            $detail['shipment_id'] = $shipment->id;
+            $details['shipment_id'] = $shipment->id;
             $details['tracking_number'] = $tracking_number;
 
             $details['order_id'] = $shipment->order_id;
