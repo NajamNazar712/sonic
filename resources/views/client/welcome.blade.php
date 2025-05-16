@@ -82,6 +82,7 @@
                                         <td><h4>{{$p['phone']}}</h4></td>
                                         <td><h4>{{$p['email']}}</h4></td>
                                     </tr>
+                                    @break
                                 @endforeach
                                 </tbody>
                             @endif
@@ -100,6 +101,7 @@
                                         <td><h4>{{$k['phone']}}</h4></td>
                                         <td><h4>{{$k['email']}}</h4></td>
                                     </tr>
+                                    @break
                                 @endforeach
                                 </tbody>
                             @endif
@@ -122,6 +124,7 @@
                                         <td><h4>{{$rider->phone}}</h4></td>
                                         <td><h4>{{$rider->city}}</h4></td>
                                     </tr>
+                                    @break
                                 @endforeach
                                 </tbody>
                             </table>
