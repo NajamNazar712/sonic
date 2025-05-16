@@ -243,15 +243,15 @@ class ShippeCrmApiController extends Controller
 
     public function get_receving_sheet(Request $request)
     {
-        $validate = Validator::make($request->all(), [
-            'tracking_number' => ['required', 'integer'],
+        $validate = Validator::make($request->only('shipment_id'), [
+            'shipment_id' => ['required', 'integer'],
         ]);
 
         if($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         }
 
-        $shipment = Shipment::where('tracking_number',$request->tracking_number)->first();
+        $shipment = Shipment::find($request->shipment_id);
         if($shipment){
             if($shipment->receiving_sheet_shipment){
                 $receiving_sheet_id = $shipment->receiving_sheet_shipment->receiving_sheet_id;

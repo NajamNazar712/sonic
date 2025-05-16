@@ -2961,6 +2961,7 @@ class APIController extends Controller
             if ($shipment->user->blacklist == 0) {
                 $details = array();
 
+                $details['shipment_id'] = $shipment->id;
                 $details['tracking_number'] = $tracking_number;
 
                 $shipper = $shipment->user;
