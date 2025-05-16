@@ -207,7 +207,7 @@ class ShippeCrmApiController extends Controller
     {
 
         $validate = Validator::make($request->all(), [
-            'tracking_number' => ['required', 'integer', 'digits_between:10,20'],
+            'tracking_number' => ['required', 'integer'],
         ]);
 
         if($validate->fails()) {
@@ -239,6 +239,29 @@ class ShippeCrmApiController extends Controller
 
         return response()->json(['status' => 0 , 'message' => 'Success' ,'crm_request'=>$crm_requests]);
 
+    }
+
+    public function get_receving_sheet(Request $request)
+    {
+        $validate = Validator::make($request->all(), [
+            'tracking_number' => ['required', 'integer'],
+        ]);
+
+        if($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+
+        $shipment = Shipment::where('tracking_number',$request->tracking_number)->first();
+        if($shipment){
+            if($shipment->receiving_sheet_shipment){
+                $receiving_sheet_id = $shipment->receiving_sheet_shipment->receiving_sheet_id;
+                return response()->json(['status' => 1,'receiving_sheet_id' => $receiving_sheet_id]);
+            }
+            else{
+                return response()->json(['status' => 0,'error'=>'Receiving Sheet does not exists']);
+            }
+        }
+        return response()->json(['status' => 0,'error'=>'No Shipments Found']);
     }
 
 }
