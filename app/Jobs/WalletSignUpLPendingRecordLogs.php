@@ -18,7 +18,8 @@ use App\Http\Models\PendingPayment;
 use App\Http\Models\PendingPaymentShipment;
 use Illuminate\Support\Str;
 use App\Jobs\ShipmentStatusSharingWithWallet;
-
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class WalletSignUpLPendingRecordLogs implements ShouldQueue
 {
@@ -81,12 +82,22 @@ class WalletSignUpLPendingRecordLogs implements ShouldQueue
 
                     if (empty($shipment)) {
                         $shipment = ShipmentsArchieve::leftJoin('wallet_users as u', function ($join) {
-                            $join->on('u.user_id', '=', 'shipment_archives.user_id')
+                            $join->on('u.user_id', '=', 'shipments_archive.user_id')
                                 ->where('u.substitute_user_id', '0');
                         })
-                            ->where('shipment_archives.id', $pending_payment_shipment->shipment_id)
-                            ->select('shipment_archives.*', 'u.wallet_id as wallet_user_id')
-                            ->first();
+                        ->where('shipments_archive.id', $pending_payment_shipment->shipment_id)
+                        ->select('shipments_archive.*', 'u.wallet_id as wallet_user_id')
+                        ->first();
+
+                        if (!empty($shipment)) {
+                            $data = $shipment->toArray();
+
+                            // Filter only the columns that exist in `shipments` table
+                            $columns = Schema::getColumnListing('shipments');
+                            $filteredData = collect($data)->only($columns)->toArray();
+
+                            DB::table('shipments')->insert($filteredData);
+                        }
                     }
                     if ($pending_payment_shipment->type == 3) {
                         $log_bid = AdminFinanceController::isWalletLogUpdated($pending_payment_shipment->shipment_id);
