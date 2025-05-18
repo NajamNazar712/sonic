@@ -68,6 +68,10 @@ class ApolloShipmentCronController extends Controller
                 ]);
 
                 $responseBody = $response->getBody()->getContents();
+                Log::channel('apolloJobLog')->info('Apollo API Response', [
+                    'status' => $response->getStatusCode(),
+                    'body' => $responseBody
+                ]);
                 $responseData = json_decode($responseBody, true);
 
                 if (!empty($responseData['response.success'])) {

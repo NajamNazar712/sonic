@@ -138,11 +138,12 @@ class AutoDeliveryNoteVerify extends Command
                                         }
                                         ShipmentsJourneyController::add($shipment->id, 20, 20, $journey->status_reason_id, $journey->remarks ?? NULL, NULL, 346, null, null, 1, null, null, null, null, null);
                                     } else {
+                                        $rvshipments = RvShipmentAssignAgent::where('shipment_id',$shipment->id);
                                         Shipment::where('id', $shipment->id)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);
 
                                         ShipmentsJourneyController::add($shipment->id, 65, 65, $journey->status_reason_id, NULL, $shipment->user_id, 346);
 
-                                        NotificationsController::send(220, $shipment);
+                                        NotificationsController::send(220, $rvshipments);
                                         RvShipmentAssignAgent::where('shipment_id', $shipment->id)
                                             // ->whereDate('created_at',$date)
                                             ->update(['agent_id' => 346, 'rv_state_id' => 2, 'rv_assign_agent_status_id' => 7, 'unresponsive_count' => 3, 'unresponsive_email_count' => 1, 'unresponsive_email_time' => date('Y-m-d h:i:s')]);
