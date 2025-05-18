@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Http\Controllers\FingaIntegrationController;
+use App\ShipmentsArchieve;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -69,13 +70,24 @@ class WalletSignUpLPendingRecordLogs implements ShouldQueue
                     //     $token_time = Carbon::now();
                     // }
                     $token = FingaIntegrationController::getToken($api);
-                    $shipment = Shipment::leftjoin('wallet_users as u', function ($join) {
+
+                    $shipment = Shipment::leftJoin('wallet_users as u', function ($join) {
                         $join->on('u.user_id', '=', 'shipments.user_id')
                             ->where('u.substitute_user_id', '0');
                     })
                         ->where('shipments.id', $pending_payment_shipment->shipment_id)
                         ->select('shipments.*', 'u.wallet_id as wallet_user_id')
                         ->first();
+
+                    if (empty($shipment)) {
+                        $shipment = ShipmentsArchieve::leftJoin('wallet_users as u', function ($join) {
+                            $join->on('u.user_id', '=', 'shipment_archives.user_id')
+                                ->where('u.substitute_user_id', '0');
+                        })
+                            ->where('shipment_archives.id', $pending_payment_shipment->shipment_id)
+                            ->select('shipment_archives.*', 'u.wallet_id as wallet_user_id')
+                            ->first();
+                    }
                     if ($pending_payment_shipment->type == 3) {
                         $log_bid = AdminFinanceController::isWalletLogUpdated($pending_payment_shipment->shipment_id);
                         if (!$log_bid) {
