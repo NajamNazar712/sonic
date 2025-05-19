@@ -5,7 +5,7 @@ git pull
 echo "Running migrations..."
 php artisan migrate
 echo "Running new seeders..."
-SEEDERS=$(git diff --name-only HEAD@{1} HEAD | grep 'database/seeders/.*Seeder.php')
+SEEDERS=$(git diff --name-only HEAD@{1} HEAD | grep '^database/seeders/.*\.php$')
 
 for seeder in $SEEDERS
 do
