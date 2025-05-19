@@ -17,8 +17,20 @@ class ShipperAPIToken
     public function handle($request, Closure $next)
     {
         $api_token = $request->header('Authorization');
+        $app_type = $request->app_type;
 
         if ($api_token) {
+
+            if($app_type == 2) {
+                if(RetailShipperInfo::where('api_token', $api_token)->first()) {
+                    return $next($request);
+                } else {
+                    return response()->json([
+                        'status' => 1,
+                        'message' => 'Invalid API Token (Authorization).'
+                    ]);
+                }
+            }
             $shipper = User::where('api_token', $api_token);
             if ($shipper->exists()) {
                 $shipper = $shipper->first();
