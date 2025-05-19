@@ -13,6 +13,6 @@ class AccountTypeTableChange extends Seeder
      */
     public function run()
     {
-        DB::table('account_types')->where('id', 1)->update(['name' => 'Cash on Delivery Account']);
+        DB::table('account_types')->where('id', 1)->update(['name' => 'Cash on Delivery Account']);;
     }
 }
