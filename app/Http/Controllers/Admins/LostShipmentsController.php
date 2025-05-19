@@ -234,10 +234,10 @@ class LostShipmentsController extends Controller
                 if (!empty($shipments->remarks)) {
                     return $shipments->remarks;
                 } 
-                elseif ($shipments->status_reason_id != 89 && empty($shipments->remarks)) {
+                elseif ($shipments->status_reason_id != 90 && empty($shipments->remarks)) {
                     $fallback = ShipmentsJourney::where([
                         'shipment_id' => $shipments->shId,
-                        'status_reason_id' => 89
+                        'status_reason_id' => 90
                         ])->latest()->first();
 
                         return $fallback?->remarks ?? '-';
