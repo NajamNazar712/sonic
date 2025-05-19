@@ -114,42 +114,36 @@ class WalletBulkSettlementFromDonePayments implements ShouldQueue
 
 
                         $charges = [];
-                        if ($shipment->packaging_material_request == 1) {
+
+                        if ($dps->type == 0) {
                             $charges = [
+                                'faf_charges' => $LogChargeStatus ? floatval($dps->faf_charges) : 0,
+                                'weight_charges' => $LogChargeStatus ? floatval($dps->weight_charges) : 0,
+                                'fuel_surcharge' => $LogChargeStatus ? floatval($dps->fuel_surcharge) : 0,
+                                'cash_handling_charges' => floatval($dps->cash_handling_charges),
+                                'insurance_charges' => floatval($dps->insurance_charges),
+                                'replacement_charges' => floatval($dps->replacement_charges),
+                                'try_and_buy_charges' => floatval($dps->try_and_buy_charges),
+                                'intercept_charges' => floatval($dps->intercept_charges),
+                                'non_service_area_charges' => floatval($dps->nsa_osa_charges),
+                                'esc_charges' => floatval($dps->esc_charges),
+                                'gst_charges' => floatval($dps->gst),
+                                'sms_charges' => floatval($dps->sms_charges),
+                                'reverse_pickup_charges' => floatval($service_charges),
                                 'packaging_material_charges' => floatval($shipment->packaging_material_charges),
+                            ];
+                        } elseif ($dps->type == 1) {
+                            $charges = [
+                                'faf_charges' => $LogChargeStatus ? floatval($dps->faf_charges) : 0,
+                                'weight_charges' => $LogChargeStatus ? floatval($dps->weight_charges) : 0,
+                                'fuel_surcharge' => $LogChargeStatus ? floatval($dps->fuel_surcharge) : 0,
+                                'insurance_charges' => floatval($dps->insurance_charges),
+                                'return_charges' => floatval($dps->return_charges),
+                                'intercept_charges' => floatval($dps->intercept_charges),
+                                'non_service_area_charges' => floatval($dps->nsa_osa_charges),
                                 'gst_charges' => floatval($dps->gst),
                                 'sms_charges' => floatval($dps->sms_charges),
                             ];
-                        } else {
-                            if ($dps->type == 0) {
-                                $charges = [
-                                    'faf_charges' => $LogChargeStatus ? floatval($dps->faf_charges) : 0,
-                                    'weight_charges' => $LogChargeStatus ? floatval($dps->weight_charges) : 0,
-                                    'fuel_surcharge' => $LogChargeStatus ? floatval($dps->fuel_surcharge) : 0,
-                                    'cash_handling_charges' => floatval($dps->cash_handling_charges),
-                                    'insurance_charges' => floatval($dps->insurance_charges),
-                                    'replacement_charges' => floatval($dps->replacement_charges),
-                                    'try_and_buy_charges' => floatval($dps->try_and_buy_charges),
-                                    'intercept_charges' => floatval($dps->intercept_charges),
-                                    'non_service_area_charges' => floatval($dps->nsa_osa_charges),
-                                    'esc_charges' => floatval($dps->esc_charges),
-                                    'gst_charges' => floatval($dps->gst),
-                                    'sms_charges' => floatval($dps->sms_charges),
-                                    'reverse_pickup_charges' => floatval($service_charges),
-                                ];
-                            } elseif ($dps->type == 1) {
-                                $charges = [
-                                    'faf_charges' => $LogChargeStatus ? floatval($dps->faf_charges) : 0,
-                                    'weight_charges' => $LogChargeStatus ? floatval($dps->weight_charges) : 0,
-                                    'fuel_surcharge' => $LogChargeStatus ? floatval($dps->fuel_surcharge) : 0,
-                                    'insurance_charges' => floatval($dps->insurance_charges),
-                                    'return_charges' => floatval($dps->return_charges),
-                                    'intercept_charges' => floatval($dps->intercept_charges),
-                                    'non_service_area_charges' => floatval($dps->nsa_osa_charges),
-                                    'gst_charges' => floatval($dps->gst),
-                                    'sms_charges' => floatval($dps->sms_charges),
-                                ];
-                            }
                         }
 
                         $settlementPayload[$shipmentId] = [
