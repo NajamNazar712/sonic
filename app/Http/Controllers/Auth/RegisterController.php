@@ -949,4 +949,18 @@ class RegisterController extends Controller
             return 'false';
         }
     }
+
+    public function check_email(Request $request)
+    {
+        $email = $request->email;
+
+        $existsInUsers = DB::table('users')->where('email', $email)->exists();
+        $existsInSubstitutes = DB::table('substitute_users')->where('email', $email)->exists();
+
+        $isUnique = !($existsInUsers || $existsInSubstitutes);
+
+        return response()->json($isUnique);
+    }
+
+
 }
