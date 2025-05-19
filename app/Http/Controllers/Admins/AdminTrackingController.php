@@ -1676,7 +1676,7 @@ class AdminTrackingController extends Controller
                             $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
                             $journey_details['remarks'] = !empty($journey->remarks)
                                 ? $journey->remarks
-                                : (($journey->shipper_status_id == 18 && empty($journey->remarks))
+                                : (($journey->shipper_status_id == 18 && $journey?->status_reason_id != 89 && empty($journey->remarks))
                                     ? (ShipmentsJourney::where([
                                         'shipment_id' => $journey->shipment_id,
                                         'status_reason_id' => 89
