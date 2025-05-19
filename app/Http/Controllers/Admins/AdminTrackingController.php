@@ -1674,7 +1674,14 @@ class AdminTrackingController extends Controller
                             }
                             $journey_details['area_log'] = $this->setJourneyDetails($scanning_data);
                             $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
-                            $journey_details['remarks'] = ($journey->remarks) ? $journey->remarks : '';
+                            $journey_details['remarks'] = !empty($journey->remarks)
+                                ? $journey->remarks
+                                : (($journey->shipper_status_id == 18 && empty($journey->remarks))
+                                    ? (ShipmentsJourney::where([
+                                        'shipment_id' => $journey->shipment_id,
+                                        'status_reason_id' => 89
+                                    ])->latest()->first()?->remarks ?? '-')
+                                    : '-');
                             $journey_details['user'] = $user;
                             $journey_details['city'] = ($journey->city_id) ? $journey->city->name : '';;
                             $received_or_refused_by = '';
