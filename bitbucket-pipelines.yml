@@ -1,0 +1,11 @@
+image: atlassian/default-image:3
+
+pipelines:
+  branches:
+    sprint_132:
+      - step:
+          name: 'Deploy to Sprint_132 VM'
+          deployment: sprint_132
+          script:
+            - echo "Deploying to sprint_132 branch VM..."
+            - ssh -o StrictHostKeyChecking=no $SPRINT_132_HOST "cd /var/www/html/sonic && ./deploy.sh"
