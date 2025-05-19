@@ -16,7 +16,4 @@ pipelines:
           deployment: Production
           script:
             - echo "Deploying to production server..."
-            - mkdir -p ~/.ssh
-            - echo "$PRODUCTION_SSH_KEY" > ~/.ssh/bitbucket_production_key
-            - chmod 600 ~/.ssh/bitbucket_production_key
-            - ssh -i ~/.ssh/bitbucket_production_key -o StrictHostKeyChecking=no $PRODUCTION_HOST "cd /var/www/html/sonic && ./deploy.sh"
+            - ssh -o StrictHostKeyChecking=no $PRODUCTION_HOST "cd /var/www/html/sonic && ./deploy.sh"
