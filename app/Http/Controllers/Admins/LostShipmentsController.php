@@ -230,13 +230,21 @@ class LostShipmentsController extends Controller
                         return " - ";
                     }
                 })
-                ->editColumn('remarks', function ($shipments) {
-                    if ($shipments->remarks) {
-                        return $shipments->remarks;
+               ->editColumn('remarks', function ($shipments) {
+                if (!empty($shipments->remarks)) {
+                    return $shipments->remarks;
+                } elseif (empty($shipments->remarks)) {
+                    $fallback = ShipmentsJourney::where([
+                        'shipment_id' => $shipments->shId,
+                        'status_reason_id' => 89
+                        ])->latest()->first();
+
+                        return $fallback?->remarks ?? '-';
                     } else {
-                        return " - ";
+                        return " ";
                     }
                 })
+
                 ->editColumn('amount', function($shipment){
                     return number_format($shipment->amount);
                 })
