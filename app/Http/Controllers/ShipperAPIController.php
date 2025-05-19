@@ -118,10 +118,9 @@ class ShipperAPIController extends Controller
     public function login(Request $request)
     {
         $rules = [
-            'app_type' => ['required', 'in:1,2'], // 1 -> shipper-app , 2-> Retail app
-            'email_address' => ['required_if:app_type,1', 'email'],
-            'phone_no' => ['required_if:app_type,2'],
-            'password' => ['required', 'min:6'],
+            'email_address' => ['sometimes', 'required', 'email'],
+            'phone_no'      => ['sometimes', 'required'],
+            'password'      => ['required', 'min:6'],
         ];  
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -132,7 +131,37 @@ class ShipperAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
 
-            if($request->app_type == 1) {
+            $app_type  = $request->has('phone_no') ? 2 : 1;
+
+            if($app_type == 2) {
+                $retail_user = RetailShipperInfo::where('shipper_phone_no', $request->phone_no)->first();
+                if($retail_user) {
+                    if (Hash::check($request->input('password'), $retail_user->password)) {
+                        $information = array();
+                        $information['name'] = $retail_user->shipper_name;
+                        //$information['shipper_id'] = $retail_user->id;
+                        $information['phone_number'] = $retail_user->shipper_phone_no;
+                        $information['app_type'] = 2;
+                        if ($retail_user->api_token) {
+                            $information['api_token'] = $retail_user->api_token;
+                        } else {
+                            $api_token = uniqid(base64_encode(Str::random(60)));
+
+                            $retail_user->api_token = $api_token;
+
+                            $retail_user->save();
+
+                            $information['api_token'] = $api_token;
+                           
+                        }
+                        return response()->json(['status' => 0, 'message' => 'Login Successful', 'information' => $information]);
+                    } else {
+                        return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
+                    }
+                } else {
+                    return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
+                }
+            }else {
                 $shipper = User::where('email', $request->email_address);
                 if ($shipper->exists()) {
                     $shipper = $shipper->first();
@@ -162,33 +191,6 @@ class ShipperAPIController extends Controller
                         }
                         $information['account_type'] = $shipper->account_type_id;
                         EmployeeDeviceToken::where('employee_type_id', 2)->where('employee_id', $shipper->id)->delete();
-                        return response()->json(['status' => 0, 'message' => 'Login Successful', 'information' => $information]);
-                    } else {
-                        return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
-                    }
-                } else {
-                    return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
-                }
-            }else {
-                $retail_user = RetailShipperInfo::where('shipper_phone_no', $request->phone_no)->first();
-                if($retail_user) {
-                    if (Hash::check($request->input('password'), $retail_user->password)) {
-                        $information = array();
-                        $information['name'] = $retail_user->shipper_name;
-                        //$information['shipper_id'] = $retail_user->id;
-                        $information['phone_number'] = $retail_user->shipper_phone_no;
-                        if ($retail_user->api_token) {
-                            $information['api_token'] = $retail_user->api_token;
-                        } else {
-                            $api_token = uniqid(base64_encode(Str::random(60)));
-
-                            $retail_user->api_token = $api_token;
-
-                            $retail_user->save();
-
-                            $information['api_token'] = $api_token;
-                            $information['app_type'] = 2;
-                        }
                         return response()->json(['status' => 0, 'message' => 'Login Successful', 'information' => $information]);
                     } else {
                         return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
