@@ -255,13 +255,13 @@ class ShippeCrmApiController extends Controller
         if($shipment){
             if($shipment->receiving_sheet_shipment){
                 $receiving_sheet_id = $shipment->receiving_sheet_shipment->receiving_sheet_id;
-                return response()->json(['status' => 1,'receiving_sheet_id' => $receiving_sheet_id]);
+                return response()->json(['status' => 0,'receiving_sheet_id' => $receiving_sheet_id]);
             }
             else{
-                return response()->json(['status' => 0,'error'=>'Receiving Sheet does not exists']);
+                return response()->json(['status' => 1,'error'=>'Receiving Sheet does not exists']);
             }
         }
-        return response()->json(['status' => 0,'error'=>'No Shipments Found']);
+        return response()->json(['status' => 1,'error'=>'No Shipments Found']);
     }
 
 }
