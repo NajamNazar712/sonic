@@ -100,6 +100,7 @@ class AddCrmRequest extends FormRequest
             'shipment_ids.required' => 'At least one shipment must be selected.',
             'shipment_ids.array' => 'Shipment IDs must be an array.',
             'shipment_ids.min' => 'Select at least one shipment.',
+
             'case_nature_id.required' => 'Case nature is required.',
             'case_nature_id.in' => 'Invalid case nature selected.',
             'complaint_id.required' => 'Complaint ID is required.',
@@ -177,7 +178,7 @@ class AddCrmRequest extends FormRequest
     protected function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(response()->json([
-            'status' => false,
+            'status' => 1,
             'message' => 'Validation errors',
             'errors' => $validator->errors()
         ], 422));

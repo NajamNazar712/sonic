@@ -690,6 +690,7 @@ use Illuminate\Http\Request;
             //order management Api
             Route::prefix('orders')->name('orders.')->group(function (){
                 Route::get('order_list', 'ShipperOrderManagementApiController@order_list')->name('order_list');
+                Route::post('cancel_all', 'ShipperOrderManagementApiController@order_cancel_all')->name('cancel_all');
             });
 
             //finance Apis
@@ -699,12 +700,12 @@ use Illuminate\Http\Request;
 
             // CRM Apis
             Route::prefix('crm')->name('crm.')->group(function (){
-                Route::get('request_resources','ShippeCrmApiController@crm_request_resources')->name('request_resources');
-                Route::post('add_request', 'ShippeCrmApiController@add_crm_request')->name('add_request');
-                Route::get('request_summary', 'ShippeCrmApiController@crm_request_summary')->name('request_summary');
-                Route::get('request_list', 'ShippeCrmApiController@crm_request_list')->name('request_list');
-                Route::post('single_crm_request','ShippeCrmApiController@single_crm_request')->name('single_crm_request');
-                Route::post('receiving_sheet','ShippeCrmApiController@get_receving_sheet')->name('receiving_sheet');
+                Route::get('request_resources','ShipperCrmApiController@crm_request_resources')->name('request_resources');
+                Route::post('add_request', 'ShipperCrmApiController@add_crm_request')->name('add_request');
+                Route::get('request_summary', 'ShipperCrmApiController@crm_request_summary')->name('request_summary');
+                Route::get('request_list', 'ShipperCrmApiController@crm_request_list')->name('request_list');
+                Route::post('single_crm_request','ShipperCrmApiController@single_crm_request')->name('single_crm_request');
+                Route::post('receiving_sheet','ShipperCrmApiController@get_receving_sheet')->name('receiving_sheet');
             });
 
 
