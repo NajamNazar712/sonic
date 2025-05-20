@@ -3,13 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Admins\AdminCRMController;
+use App\Http\Controllers\CRM\CRMCommentController;
 use App\Http\Controllers\CRM\CRMController;
+use App\Http\Models\Admin\ChangeShipmentAmountLog;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\CRM\CrmRequestChannel;
 use App\Http\Models\Shipment;
+use App\Http\Requests\AddCrmRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use function foo\func;
@@ -17,7 +21,1038 @@ use function foo\func;
 class ShippeCrmApiController extends Controller
 {
 
-    public function add_crm_request(Request $request)
+    public function add_crm_request(AddCrmRequest $request) {
+
+
+        $nature_id = $request->case_nature_id;
+        $complaint_id = $request->complaint_id;
+        $app_type = $request->app_type;
+        $description = $request->description;
+        $user_id = session('user_id');
+        $shipment_ids = explode(',', $request->input('shipment_ids'));
+        $launched_by = $app_type == 1 ? 2 : 3; // check shipper or retail shipper
+        $present_shipments = array();
+
+        if (!empty($shipment_ids)) {
+            foreach ($shipment_ids as $shipment_id) {
+                $shipment = Shipment::find($shipment_id);
+                if ($shipment) {
+
+                    if ($complaint_id == 12 && in_array($shipment->shipper_status_id, [14, 18, 30, 36, 37, 20, 21, 22, 23, 24, 25, 26, 32, 44, 47, 48, 57, 60, 51])) // for cod change automation
+                    {
+                        return response()->json(['status' => 1,'error'=>'Request cannot be catered at this status of the shipment.']);
+                    }
+
+                    $is_shipment = CrmRequest::where('shipment_id', $shipment_id)->where('case_nature_id', $nature_id)->first();
+                    $already_lodged = false;
+
+                    if ($is_shipment) {
+                        $already_lodged = true;
+                        if ($is_shipment->case_nature_id != $nature_id) {
+
+                            if($nature_id == 4 && $complaint_id!=26) {
+
+                                $product_cost = $request->product_cost;
+                                $product_picture = $request->file('product_picture');
+                                $invoice_picture = $request->file('invoice_picture');
+                                //21 (shipment damage)
+                                $damage_product_picture = null;
+                                $damage_claim_product_cost = null;
+                                $product_packaging_picture = null;
+                                $actual_product_picture = null;
+                                //22 (content short)
+                                $missing_product_picture = null;
+                                $claim_content_product_cost = null;
+                                $product_packaging_picture_content_short = null;
+                                $actual_product_picture_content_short = null;
+
+                                if ($complaint_id == 21) {
+                                    $product_packaging_picture = $request->file('product_packaging_picture');
+                                    $actual_product_picture = $request->file('actual_product_picture');
+                                    $damage_product_picture = $request->file('damage_product_picture');
+                                    $damage_claim_product_cost = $request->damage_claim_product_cost;
+
+                                } elseif ($complaint_id == 22) {
+                                    $product_packaging_picture_content_short =  $request->file('product_packaging_picture');
+                                    $actual_product_picture_content_short  =  $request->file('actual_product_picture');
+                                    $missing_product_picture = $request->file('missing_product_picture');
+                                    $claim_content_product_cost = $request->claim_content_product_cost;
+                                }
+
+                                CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment_id, $user_id, NULL, $description, $product_cost,$product_picture, $invoice_picture,$damage_product_picture, $product_packaging_picture,$actual_product_picture,$damage_claim_product_cost,$missing_product_picture,$product_packaging_picture_content_short, $actual_product_picture_content_short, $claim_content_product_cost);
+                            }
+                            else {
+
+                                if ($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1) {
+                                    if (in_array($complaint_id, [11, 13])) {
+                                        $present_shipments[] = $shipment->tracking_number;
+                                        $flag = true;
+                                        $cannot_change = true;
+                                    }
+                                    // by pass this stage
+//                                else {
+//                                    // by pass this stage
+////                                    // && $is_automated_cod_change remove this condition because already set by complaint id 12 cod change
+////                                    if ($complaint_id == 12) {
+////                                        // by pass this stage
+//////                                            if ($shipment->shipper_status_id == 5) {
+//////                                                $description = $description . " (change old amouunt $shipment->amount to new amount $request->cod_new_amount )";
+//////                                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+//////
+//////                                            } else {
+////
+////                                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $is_automated_cod_change);
+//////                                            }
+////                                    } else {
+////                                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id,$user_id, NULL, $description);
+////                                    }
+//
+//                                    if($complaint_id != 12) {
+//                                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment_id,$user_id, NULL, $description);
+//                                    }
+//                                }
+                                }
+
+                                if ($complaint_id == 12) {
+                                    if ($shipment->shipper_status_id == 5) {
+                                        $description = $description . " (change old amouunt $shipment->amount to new amount $request->cod_new_amount )";
+                                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment_id, $user_id, NULL, $description);
+
+                                    } else {
+                                        $crm_request_padded_id =  CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment_id, $user_id, NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1);
+                                    }
+                                } else {
+                                    $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment_id,$user_id, NULL, $description);
+                                }
+                            }
+                        } else {
+                            $present_shipments[] = $shipment->tracking_number;
+                        }
+                    }
+                    else {
+                        if($nature_id == 4 && $complaint_id!=26) {
+
+                            $product_cost = $request->product_cost;
+                            $product_picture = $request->file('product_picture');
+                            $invoice_picture = $request->file('invoice_picture');
+                            //21 (shipment damage)
+                            $damage_product_picture = null;
+                            $damage_claim_product_cost = null;
+                            $product_packaging_picture = null;
+                            $actual_product_picture = null;
+                            //22 (content short)
+                            $missing_product_picture = null;
+                            $claim_content_product_cost = null;
+                            $product_packaging_picture_content_short = null;
+                            $actual_product_picture_content_short = null;
+
+                            if ($complaint_id == 21) {
+                                $product_packaging_picture = $request->file('product_packaging_picture');
+                                $actual_product_picture = $request->file('actual_product_picture');
+                                $damage_product_picture = $request->file('damage_product_picture');
+                                $damage_claim_product_cost = $request->damage_claim_product_cost;
+
+                            } elseif ($complaint_id == 22) {
+                                $product_packaging_picture_content_short =  $request->file('product_packaging_picture');
+                                $actual_product_picture_content_short  =  $request->file('actual_product_picture');
+                                $missing_product_picture = $request->file('missing_product_picture');
+                                $claim_content_product_cost = $request->claim_content_product_cost;
+                            }
+
+                            CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment_id, $user_id, NULL, $description, $product_cost,$product_picture, $invoice_picture,$damage_product_picture, $product_packaging_picture,$actual_product_picture,$damage_claim_product_cost,$missing_product_picture,$product_packaging_picture_content_short, $actual_product_picture_content_short, $claim_content_product_cost);
+                        }
+                        else {
+                            if ($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1) {
+                                if (in_array($complaint_id, [11, 13])) {
+                                    $present_shipments[] = $shipment->tracking_number;
+                                    $flag = true;
+                                    $cannot_change = true;
+                                }
+                                // by pass this stage
+//                                else {
+//                                    // by pass this stage
+////                                    // && $is_automated_cod_change remove this condition because already set by complaint id 12 cod change
+////                                    if ($complaint_id == 12) {
+////                                        // by pass this stage
+//////                                            if ($shipment->shipper_status_id == 5) {
+//////                                                $description = $description . " (change old amouunt $shipment->amount to new amount $request->cod_new_amount )";
+//////                                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+//////
+//////                                            } else {
+////
+////                                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $is_automated_cod_change);
+//////                                            }
+////                                    } else {
+////                                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id,$user_id, NULL, $description);
+////                                    }
+//
+//                                    if($complaint_id != 12) {
+//                                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment_id,$user_id, NULL, $description);
+//                                    }
+//                                }
+                            }
+
+                            if ($complaint_id == 12) {
+                                if ($shipment->shipper_status_id == 5) {
+                                    $description = $description . " (change old amouunt $shipment->amount to new amount $request->cod_new_amount )";
+                                    $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment_id, $user_id, NULL, $description);
+
+                                } else {
+                                    $crm_request_padded_id =  CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment_id, $user_id, NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1);
+                                }
+                            } else {
+                                $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment_id,$user_id, NULL, $description);
+                            }
+                        }
+                    }
+
+                    if ($nature_id == 2) {
+                        if ($complaint_id == 13) {
+                            $shipment->consignee_phone_number_2 = $request->alternate_phone;
+                            $shipment->save();
+                        }
+                        else if ($complaint_id == 12 && !$already_lodged) // for cod change automation
+                        {
+                            if ($request->has('cod_new_amount')) {
+                                if ($request->cod_new_amount >= 0 && $shipment->shipper_status_id != 5) {
+
+                                    $crm_request_id = CrmRequest::where('shipment_id', $shipment->id)->pluck('id')->first();
+                                    $default_agent_id = 306;
+                                    $comment_by = 0;
+                                    $comment_type = 0;
+                                    $comment = "Dear Customer,
+                                                    Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system
+                                                    
+                                                    CRM automated Comment";
+
+                                    CRMCommentController::add($crm_request_id, $default_agent_id, $comment_by, $comment_type, $comment, 1);
+
+                                    $old_amount = $shipment->amount;
+                                    $message = "Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system";
+                                    $shipment->amount = $request->cod_new_amount;
+                                    if ($request->is_zero_cod == 1 && $request->cod_parcel_value > 0) {
+                                        $comment = "Dear Customer,
+                                            Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system
+                                            Due to change of COD amount 0. parcel value has been updated from ($shipment->parcel_value) to ($request->cod_parcel_value)
+                                            
+                                            CRM automated Comment";
+                                        $shipment->parcel_value = $request->cod_parcel_value;
+                                    }
+                                    ChangeShipmentAmountLog::create([
+                                        'shipment_id' => $shipment->id,
+                                        'old_amount' => $old_amount,
+                                        'new_amount' => $request->cod_new_amount,
+                                        'remarks' => $request->cod_remarks,
+                                        'admin_id' => 346 // for global admin
+                                    ]);
+                                    $shipment->save();
+                                }
+                            }
+                        }
+                        else if ($complaint_id == 32) {
+                            $shipment->special_instructions = 'Allow to Open Shipment';
+                            $shipment->save();
+                        }
+                    }
+                }
+
+            }
+
+            if ($nature_id == 1 && isset($crm_request_padded_id)) {
+                $case_nature_complainant =  $request->case_nature_complainant;
+                $complainant_phone =  $request->complainant_phone;
+                AdminCRMController::updateComplaintPhone($crm_request_padded_id,$case_nature_complainant, $complainant_phone);
+            }
+
+            if (!empty($present_shipments)) {
+                if (count($shipment_ids) === count($present_shipments)) {
+                    return response()->json([
+                        'status' => 1,
+                        'error' => 'Requests or complaints already exist for all provided shipments.',
+                        'already_existed_shipments' => $present_shipments
+                    ]);
+                }
+
+                return response()->json([
+                    'status' => 0,
+                    'success' => 'Requests added, but some shipments already have existing requests or complaints.',
+                    'already_existed_shipments' => $present_shipments
+                ]);
+            }
+
+            return response()->json([
+                'status' => 0,
+                'success' => 'Requests successfully added.',
+                'already_existed_shipments' => []
+            ]);
+        }
+    }
+
+    public function add_crm_request_final_with_commit_code(Request $request) {
+
+        $nature_id = $request->case_nature_id;
+        $complaint_id = $request->complaint_id;
+        $app_type = $request->app_type;
+        $description = $request->description;
+        $user_id = session('user_id');
+        $shipment_ids = explode(',', $request->input('shipment_ids'));
+        $launched_by = $app_type == 1 ? 2 : 3; // check shipper or retail shipper
+        $present_shipments = array();
+        $flag = false;
+        $cannot_change = false;
+
+//        $receiving_sheet_id = $request->receiving_sheet_id;
+
+//        $shipment_ids = $request->shipment_ids;
+//        $shipment_id = $request->shipment_id;
+
+//        $alternate_phone = null; // default
+//        if($request->has('alternate_phone')){
+//            if($request->alternate_phone){
+//                $alternate_phone = $request->alternate_phone;
+//            }
+//        }
+
+//        $is_automated_cod_change = false;
+//        if($request->has('is_automated_cod_change')){
+//            if($request->is_automated_cod_change){
+//                $is_automated_cod_change = true;
+//            }else{
+//                $is_automated_cod_change = false;
+//            }
+//        }
+
+
+        // if($complaint_id == 23 && $receiving_sheet_id != null){
+
+        //by pass this stage
+//        if($complaint_id == 23){
+//            $description_text = $request->description ;
+//            // $description = '<strong>' .'Receiving Sheet No: ' .$receiving_sheet_id. '</strong>'. PHP_EOL. $description_text;
+//            $description = $description_text;
+//        }
+//        else{
+//            $description = $request->description;
+//        }
+
+
+//        if(!$request->case_nature_id){
+//            return ['status' => 0, 'error' => 'Case nature not selected!'];
+//        }
+
+        //        if(session('user_type') == 2){
+//            $launched_by = 2;
+//        }
+        //        if ($request->has('payment_request')) {
+//            if($request->payment_request == 1){
+//                $payment_id = $request->payment_id;
+//                $payment_id_padded = str_pad($request->payment_id, 6, 0, STR_PAD_LEFT);
+//                if(!empty($payment_id)){
+//                    $payment = DonePayment::find($payment_id);
+//                    $payment_shipment = DonePaymentShipment::where('done_payment_id', $payment->id)->first();
+//                    $shipment = Shipment::where('id', $payment_shipment->shipment_id)->first();
+//                    $is_shipment = CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_id', $nature_id);
+//                    if($is_shipment->exists()){
+//                        return ['status' => 0, 'error' => 'Request/Complaint already lodged for the Payment ID: ' . $payment_id_padded];
+//                    }
+//                    else{
+//                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment->id, session('user_id'), NULL, $description);
+//                    }
+//                    return ['status' => 1, 'success' => 'Request(s) successfully added'];
+//                }else{
+//                    return ['status' => 0, 'error' => 'No Payment selected!'];
+//                }
+//            }
+//        }
+        //        elseif ($request->has('pickup_request')) {
+        //            if($request->pickup_request == 1){
+        //                $pickup_request_ids = $request->pickup_request_ids;
+        //                if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
+        //                    $pickup_request_ids = explode(',', $request->input('pickup_request_ids'));
+        //                }
+        //                else{
+        //                    if($complaint_id == 26){
+        //                        $pickup_request_ids = explode(',', $request->input('pickup_request_ids'));
+        //                    }
+        //                }
+        //                if(!empty($pickup_request_ids)){
+        //                    foreach ($pickup_request_ids as $pickup_request_id){
+        //                        $pickup_request_shipment = V2PickupRequestShipment::where('pickup_request_id', $pickup_request_id)->first();
+        //                        $shipment = Shipment::where('id', $pickup_request_shipment->shipment_id)->first();
+        //                        $shipment_id = $shipment->id;
+        //                        $is_shipment = CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_id', $nature_id)->first();
+        //                        if($is_shipment){
+        //                            if($is_shipment->case_nature_id != $nature_id){
+        //                                if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
+        //
+        //                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL , NULL, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
+        //                                }
+        //                                else{
+        //
+        //                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+        //                                }
+        //                            }else{
+        //
+        //                                $present_shipments[] = $shipment->tracking_number;
+        //                                $flag = true;
+        //                            }
+        //                        }else{
+        //                            if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
+        //                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL , NULL, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
+        //                            }
+        //                            else{
+        //                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+        //                            }
+        //                        }
+        //                    }
+        //                    return ['status' => 1, 'success' => 'Request(s) successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
+        //                }else{
+        //                    return ['status' => 0, 'error' => 'No Pickup Request selected!'];
+        //                }
+        //            }
+        //        }
+
+
+//        if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
+//            $shipment_ids = explode(',', $request->input('shipment_ids'));
+//        } else {
+//            if ($complaint_id == 26) {
+//                $shipment_ids = explode(',', $request->input('shipment_ids'));
+//            }
+//        }
+
+        if (!empty($shipment_ids)) {
+            foreach ($shipment_ids as $shipment_id) {
+                $shipment = Shipment::find($shipment_id);
+                if ($shipment) {
+
+                    if ($complaint_id == 12 && in_array($shipment->shipper_status_id, [14, 18, 30, 36, 37, 20, 21, 22, 23, 24, 25, 26, 32, 44, 47, 48, 57, 60, 51])) // for cod change automation
+                    {
+                        return response()->json(['status' => 1,'error'=>'Request cannot be catered at this status of the shipment.']);
+                    }
+
+                    $is_shipment = CrmRequest::where('shipment_id', $shipment_id)->where('case_nature_id', $nature_id)->first();
+                    $already_lodged = false;
+
+                    if ($is_shipment) {
+                        $already_lodged = true;
+                        if ($is_shipment->case_nature_id != $nature_id) {
+
+                            if($nature_id == 4 && $complaint_id!=26) {
+
+                                $product_cost = $request->product_cost;
+                                $product_picture = $request->file('product_picture');
+                                $invoice_picture = $request->file('invoice_picture');
+                                //21 (shipment damage)
+                                $damage_product_picture = null;
+                                $damage_claim_product_cost = null;
+                                $product_packaging_picture = null;
+                                $actual_product_picture = null;
+                                //22 (content short)
+                                $missing_product_picture = null;
+                                $claim_content_product_cost = null;
+                                $product_packaging_picture_content_short = null;
+                                $actual_product_picture_content_short = null;
+
+                                if ($complaint_id == 21) {
+                                    $product_packaging_picture = $request->file('product_packaging_picture');
+                                    $actual_product_picture = $request->file('actual_product_picture');
+                                    $damage_product_picture = $request->file('damage_product_picture');
+                                    $damage_claim_product_cost = $request->damage_claim_product_cost;
+
+                                } elseif ($complaint_id == 22) {
+                                    $product_packaging_picture_content_short =  $request->file('product_packaging_picture');
+                                    $actual_product_picture_content_short  =  $request->file('actual_product_picture');
+                                    $missing_product_picture = $request->file('missing_product_picture');
+                                    $claim_content_product_cost = $request->claim_content_product_cost;
+                                }
+
+                                CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment_id, $user_id, NULL, $description, $product_cost,$product_picture, $invoice_picture,$damage_product_picture, $product_packaging_picture,$actual_product_picture,$damage_claim_product_cost,$missing_product_picture,$product_packaging_picture_content_short, $actual_product_picture_content_short, $claim_content_product_cost);
+                            }
+                            //by this stage
+//                            if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
+//
+//                                $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, NULL, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'));
+//                            }
+                            else {
+
+                                if ($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1) {
+                                    if (in_array($complaint_id, [11, 13])) {
+                                        $present_shipments[] = $shipment->tracking_number;
+                                        $flag = true;
+                                        $cannot_change = true;
+                                    }
+                                    // by pass this stage
+//                                else {
+//                                    // by pass this stage
+////                                    // && $is_automated_cod_change remove this condition because already set by complaint id 12 cod change
+////                                    if ($complaint_id == 12) {
+////                                        // by pass this stage
+//////                                            if ($shipment->shipper_status_id == 5) {
+//////                                                $description = $description . " (change old amouunt $shipment->amount to new amount $request->cod_new_amount )";
+//////                                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+//////
+//////                                            } else {
+////
+////                                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $is_automated_cod_change);
+//////                                            }
+////                                    } else {
+////                                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id,$user_id, NULL, $description);
+////                                    }
+//
+//                                    if($complaint_id != 12) {
+//                                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment_id,$user_id, NULL, $description);
+//                                    }
+//                                }
+                                }
+
+                                if ($complaint_id == 12) {
+                                    if ($shipment->shipper_status_id == 5) {
+                                        $description = $description . " (change old amouunt $shipment->amount to new amount $request->cod_new_amount )";
+                                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment_id, $user_id, NULL, $description);
+
+                                    } else {
+                                        $crm_request_padded_id =  CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment_id, $user_id, NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1);
+                                    }
+                                } else {
+                                    $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment_id,$user_id, NULL, $description);
+                                }
+                                //by this stage
+//                                if ($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1) {
+//                                    if (in_array($complaint_id, [11, 13])) {
+//                                        $present_shipments[] = $shipment->tracking_number;
+//                                        $flag = true;
+//                                        $cannot_change = true;
+//                                    } else {
+//
+//                                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+//                                    }
+//                                } else {
+//                                    $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+//                                }
+                            }
+                        } else {
+
+                            $present_shipments[] = $shipment->tracking_number;
+                            $flag = true;
+                        }
+                    }
+                    else {
+
+                        // by pass this stage
+//                        if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
+//                            if ($nature_id == 4) {
+//
+//
+//                                $product_cost = $request->product_cost;
+//                                $product_picture = $request->file('product_picture');
+//                                $invoice_picture = $request->file('invoice_picture');
+//                                //21 (shipment damage)
+//                                $damage_product_picture = null;
+//                                $damage_claim_product_cost = null;
+//                                $product_packaging_picture = null;
+//                                $actual_product_picture = null;
+//                                //22 (content short)
+//                                $missing_product_picture = null;
+//                                $claim_content_product_cost = null;
+//                                $product_packaging_picture_content_short = null;
+//                                $actual_product_picture_content_short = null;
+//
+//                                if ($complaint_id == 21) {
+//                                    $product_packaging_picture = $request->file('product_packaging_picture');
+//                                    $actual_product_picture = $request->file('actual_product_picture');
+//                                    $damage_product_picture = $request->file('damage_product_picture');
+//                                    $damage_claim_product_cost = $request->damage_claim_product_cost;
+//
+//                                } elseif ($complaint_id == 22) {
+//                                    $product_packaging_picture_content_short =  $request->file('product_packaging_picture');
+//                                    $actual_product_picture_content_short  =  $request->file('actual_product_picture');
+//                                    $missing_product_picture = $request->file('missing_product_picture');
+//                                    $claim_content_product_cost = $request->claim_content_product_cost;
+//                                }
+//
+//                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $user_id, NULL, $description, $product_cost,$product_picture, $invoice_picture,$damage_product_picture, $product_packaging_picture,$actual_product_picture,$damage_claim_product_cost,$missing_product_picture,$product_packaging_picture_content_short, $actual_product_picture_content_short, $claim_content_product_cost);
+//                                // by pass this stage
+////                                else {
+////                                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'), null, null, null, null, null, null, null, null);
+////                                    }
+//                            } else {
+//                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $user_id, NULL, NULL, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'));
+//                            }
+//                        }
+                        if($nature_id == 4 && $complaint_id!=26) {
+
+                            $product_cost = $request->product_cost;
+                            $product_picture = $request->file('product_picture');
+                            $invoice_picture = $request->file('invoice_picture');
+                            //21 (shipment damage)
+                            $damage_product_picture = null;
+                            $damage_claim_product_cost = null;
+                            $product_packaging_picture = null;
+                            $actual_product_picture = null;
+                            //22 (content short)
+                            $missing_product_picture = null;
+                            $claim_content_product_cost = null;
+                            $product_packaging_picture_content_short = null;
+                            $actual_product_picture_content_short = null;
+
+                            if ($complaint_id == 21) {
+                                $product_packaging_picture = $request->file('product_packaging_picture');
+                                $actual_product_picture = $request->file('actual_product_picture');
+                                $damage_product_picture = $request->file('damage_product_picture');
+                                $damage_claim_product_cost = $request->damage_claim_product_cost;
+
+                            } elseif ($complaint_id == 22) {
+                                $product_packaging_picture_content_short =  $request->file('product_packaging_picture');
+                                $actual_product_picture_content_short  =  $request->file('actual_product_picture');
+                                $missing_product_picture = $request->file('missing_product_picture');
+                                $claim_content_product_cost = $request->claim_content_product_cost;
+                            }
+
+                            CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment_id, $user_id, NULL, $description, $product_cost,$product_picture, $invoice_picture,$damage_product_picture, $product_packaging_picture,$actual_product_picture,$damage_claim_product_cost,$missing_product_picture,$product_packaging_picture_content_short, $actual_product_picture_content_short, $claim_content_product_cost);
+                        }
+                        else {
+                            if ($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1) {
+                                if (in_array($complaint_id, [11, 13])) {
+                                    $present_shipments[] = $shipment->tracking_number;
+                                    $flag = true;
+                                    $cannot_change = true;
+                                }
+                                // by pass this stage
+//                                else {
+//                                    // by pass this stage
+////                                    // && $is_automated_cod_change remove this condition because already set by complaint id 12 cod change
+////                                    if ($complaint_id == 12) {
+////                                        // by pass this stage
+//////                                            if ($shipment->shipper_status_id == 5) {
+//////                                                $description = $description . " (change old amouunt $shipment->amount to new amount $request->cod_new_amount )";
+//////                                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+//////
+//////                                            } else {
+////
+////                                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $is_automated_cod_change);
+//////                                            }
+////                                    } else {
+////                                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id,$user_id, NULL, $description);
+////                                    }
+//
+//                                    if($complaint_id != 12) {
+//                                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment_id,$user_id, NULL, $description);
+//                                    }
+//                                }
+                            }
+//                            else {
+                                if ($complaint_id == 12) {
+                                    if ($shipment->shipper_status_id == 5) {
+                                        $description = $description . " (change old amouunt $shipment->amount to new amount $request->cod_new_amount )";
+                                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment_id, $user_id, NULL, $description);
+
+                                    } else {
+                                        $crm_request_padded_id =  CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment_id, $user_id, NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1);
+                                    }
+                                } else {
+                                    $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment_id,$user_id, NULL, $description);
+                                }
+//                            }
+                        }
+                    }
+
+                    if ($nature_id == 2) {
+                        if ($complaint_id == 13) {
+                            $shipment->consignee_phone_number_2 = $request->alternate_phone;
+                            $shipment->save();
+                        }
+                        else if ($complaint_id == 12 && !$already_lodged) // for cod change automation
+                        {
+                            if ($request->has('cod_new_amount')) {
+                                if ($request->cod_new_amount >= 0 && $shipment->shipper_status_id != 5) {
+
+                                    $crm_request_id = CrmRequest::where('shipment_id', $shipment->id)->pluck('id')->first();
+                                    $default_agent_id = 306;
+                                    $comment_by = 0;
+                                    $comment_type = 0;
+                                    $comment = "Dear Customer,
+                                                    Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system
+                                                    
+                                                    CRM automated Comment";
+
+                                    CRMCommentController::add($crm_request_id, $default_agent_id, $comment_by, $comment_type, $comment, 1);
+
+                                    $old_amount = $shipment->amount;
+                                    $message = "Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system";
+                                    $shipment->amount = $request->cod_new_amount;
+                                    if ($request->is_zero_cod == 1 && $request->cod_parcel_value > 0) {
+                                        $comment = "Dear Customer,
+                                            Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system
+                                            Due to change of COD amount 0. parcel value has been updated from ($shipment->parcel_value) to ($request->cod_parcel_value)
+                                            
+                                            CRM automated Comment";
+                                        $shipment->parcel_value = $request->cod_parcel_value;
+                                    }
+                                    ChangeShipmentAmountLog::create([
+                                        'shipment_id' => $shipment->id,
+                                        'old_amount' => $old_amount,
+                                        'new_amount' => $request->cod_new_amount,
+                                        'remarks' => $request->cod_remarks,
+                                        'admin_id' => 346 // for global admin
+                                    ]);
+                                    $shipment->save();
+                                }
+                            }
+                        }
+                        else if ($complaint_id == 32) {
+                            $shipment->special_instructions = 'Allow to Open Shipment';
+                            $shipment->save();
+                        }
+                    }
+                }
+
+            }
+
+            if ($nature_id == 1 && isset($crm_request_padded_id)) {
+                $case_nature_complainant =  $request->case_nature_complainant;
+                $complainant_phone =  $request->complainant_phone;
+                AdminCRMController::updateComplaintPhone($crm_request_padded_id,$case_nature_complainant, $complainant_phone);
+            }
+
+            if (!empty($present_shipments)) {
+                if (count($shipment_ids) === count($present_shipments)) {
+                    return response()->json([
+                        'status' => 1,
+                        'error' => 'Requests or complaints already exist for all provided shipments.',
+                        'already_existed_shipments' => $present_shipments
+                    ]);
+                }
+
+                return response()->json([
+                    'status' => 0,
+                    'success' => 'Requests added, but some shipments already have existing requests or complaints.',
+                    'already_existed_shipments' => $present_shipments
+                ]);
+            }
+
+            return response()->json([
+                'status' => 0,
+                'success' => 'Requests successfully added.',
+                'already_existed_shipments' => []
+            ]);
+//            return ['status' => 1, 'success' => $message, 'flag' => $flag, 'already_existed_shipments' => $present_shipments, 'cannot_change' => $cannot_change];
+//            return ['status' => 1, 'success' => 'Request(s) successfully added'];
+        }
+
+    }
+
+    public function add_crm_request_bkop1(Request $request) {
+        $nature_id = $request->case_nature_id;
+        $complaint_id = $request->complaint_id;
+        $app_type = $request->app_type;
+        $user_id = session('user_id');
+        $description = $request->description;
+        $shipment_ids = explode(',', $request->input('shipment_ids'));
+        $launched_by = $app_type == 1 ? 2 : 3; // check shipper or retail shipper
+
+
+//        $shipment_ids = $request->shipment_ids;
+//        $shipment_id = $request->shipment_id;
+//        $receiving_sheet_id = $request->receiving_sheet_id;
+//        $alternate_phone = null; // default
+//        if($request->has('alternate_phone')){
+//            if($request->alternate_phone){
+//                $alternate_phone = $request->alternate_phone;
+//            }
+//        }
+
+        $is_automated_cod_change = false;
+        if($request->has('is_automated_cod_change')){
+            if($request->is_automated_cod_change){
+                $is_automated_cod_change = true;
+            }else{
+                $is_automated_cod_change = false;
+            }
+        }
+
+        // if($complaint_id == 23 && $receiving_sheet_id != null){
+
+        //by pass this stage
+//        if($complaint_id == 23){
+//            $description_text = $request->description ;
+//            // $description = '<strong>' .'Receiving Sheet No: ' .$receiving_sheet_id. '</strong>'. PHP_EOL. $description_text;
+//            $description = $description_text;
+//        }
+//        else{
+//            $description = $request->description;
+//        }
+
+
+//        if(!$request->case_nature_id){
+//            return ['status' => 0, 'error' => 'Case nature not selected!'];
+//        }
+        $present_shipments = array();
+        $flag = false;
+        $cannot_change = false;
+        //        if(session('user_type') == 2){
+//            $launched_by = 2;
+//        }
+        //        if ($request->has('payment_request')) {
+//            if($request->payment_request == 1){
+//                $payment_id = $request->payment_id;
+//                $payment_id_padded = str_pad($request->payment_id, 6, 0, STR_PAD_LEFT);
+//                if(!empty($payment_id)){
+//                    $payment = DonePayment::find($payment_id);
+//                    $payment_shipment = DonePaymentShipment::where('done_payment_id', $payment->id)->first();
+//                    $shipment = Shipment::where('id', $payment_shipment->shipment_id)->first();
+//                    $is_shipment = CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_id', $nature_id);
+//                    if($is_shipment->exists()){
+//                        return ['status' => 0, 'error' => 'Request/Complaint already lodged for the Payment ID: ' . $payment_id_padded];
+//                    }
+//                    else{
+//                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment->id, session('user_id'), NULL, $description);
+//                    }
+//                    return ['status' => 1, 'success' => 'Request(s) successfully added'];
+//                }else{
+//                    return ['status' => 0, 'error' => 'No Payment selected!'];
+//                }
+//            }
+//        }
+    //        elseif ($request->has('pickup_request')) {
+    //            if($request->pickup_request == 1){
+    //                $pickup_request_ids = $request->pickup_request_ids;
+    //                if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
+    //                    $pickup_request_ids = explode(',', $request->input('pickup_request_ids'));
+    //                }
+    //                else{
+    //                    if($complaint_id == 26){
+    //                        $pickup_request_ids = explode(',', $request->input('pickup_request_ids'));
+    //                    }
+    //                }
+    //                if(!empty($pickup_request_ids)){
+    //                    foreach ($pickup_request_ids as $pickup_request_id){
+    //                        $pickup_request_shipment = V2PickupRequestShipment::where('pickup_request_id', $pickup_request_id)->first();
+    //                        $shipment = Shipment::where('id', $pickup_request_shipment->shipment_id)->first();
+    //                        $shipment_id = $shipment->id;
+    //                        $is_shipment = CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_id', $nature_id)->first();
+    //                        if($is_shipment){
+    //                            if($is_shipment->case_nature_id != $nature_id){
+    //                                if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
+    //
+    //                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL , NULL, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
+    //                                }
+    //                                else{
+    //
+    //                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+    //                                }
+    //                            }else{
+    //
+    //                                $present_shipments[] = $shipment->tracking_number;
+    //                                $flag = true;
+    //                            }
+    //                        }else{
+    //                            if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
+    //                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL , NULL, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
+    //                            }
+    //                            else{
+    //                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+    //                            }
+    //                        }
+    //                    }
+    //                    return ['status' => 1, 'success' => 'Request(s) successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
+    //                }else{
+    //                    return ['status' => 0, 'error' => 'No Pickup Request selected!'];
+    //                }
+    //            }
+    //        }
+
+
+//        if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
+//            $shipment_ids = explode(',', $request->input('shipment_ids'));
+//        } else {
+//            if ($complaint_id == 26) {
+//                $shipment_ids = explode(',', $request->input('shipment_ids'));
+//            }
+//        }
+        $message = "Request(s) successfully added";
+        if (!empty($shipment_ids)) {
+                foreach ($shipment_ids as $shipment_id) {
+                    $shipment = Shipment::find($shipment_id);
+                    if ($shipment) {
+
+                        if ($complaint_id == 12 && in_array($shipment->shipper_status_id, [14, 18, 30, 36, 37, 20, 21, 22, 23, 24, 25, 26, 32, 44, 47, 48, 57, 60, 51])) // for cod change automation
+                        {
+                            return ['status' => 0, 'error' => 'Request cannot be catered at this status of the shipment.'];
+                        }
+
+                        $is_shipment = CrmRequest::where('shipment_id', $shipment_id)->where('case_nature_id', $nature_id)->first();
+
+                        $already_lodged = false;
+                        if ($is_shipment) {
+                            $already_lodged = true;
+                            if ($is_shipment->case_nature_id != $nature_id) {
+                                if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
+                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, NULL, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'));
+                                } else {
+                                    if ($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1) {
+                                        if (in_array($complaint_id, [11, 13])) {
+                                            $present_shipments[] = $shipment->tracking_number;
+                                            $flag = true;
+                                            $cannot_change = true;
+                                        } else {
+
+                                            CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                                        }
+                                    } else {
+                                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                                    }
+                                }
+                            } else {
+
+                                $present_shipments[] = $shipment->tracking_number;
+                                $flag = true;
+                            }
+                        }
+                        else {
+
+                            if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
+                                if ($nature_id == 4) {
+
+
+                                    $product_cost = $request->product_cost;
+                                    $product_picture = $request->file('product_picture');
+                                    $invoice_picture = $request->file('invoice_picture');
+                                    //21 (shipment damage)
+                                    $damage_product_picture = null;
+                                    $damage_claim_product_cost = null;
+                                    $product_packaging_picture = null;
+                                    $actual_product_picture = null;
+                                    //22 (content short)
+                                    $missing_product_picture = null;
+                                    $claim_content_product_cost = null;
+                                    $product_packaging_picture_content_short = null;
+                                    $actual_product_picture_content_short = null;
+
+                                    if ($complaint_id == 21) {
+                                        $product_packaging_picture = $request->file('product_packaging_picture');
+                                        $actual_product_picture = $request->file('actual_product_picture');
+                                        $damage_product_picture = $request->file('damage_product_picture');
+                                        $damage_claim_product_cost = $request->damage_claim_product_cost;
+
+                                    } elseif ($complaint_id == 22) {
+                                        $product_packaging_picture_content_short =  $request->file('product_packaging_picture');
+                                        $actual_product_picture_content_short  =  $request->file('actual_product_picture');
+                                        $missing_product_picture = $request->file('missing_product_picture');
+                                        $claim_content_product_cost = $request->claim_content_product_cost;
+                                    }
+
+                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $user_id, NULL, $description, $product_cost,$product_picture, $invoice_picture,$damage_product_picture, $product_packaging_picture,$actual_product_picture,$damage_claim_product_cost,$missing_product_picture,$product_packaging_picture_content_short, $actual_product_picture_content_short, $claim_content_product_cost);
+                                   // by pass this stage
+//                                else {
+//                                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'), null, null, null, null, null, null, null, null);
+//                                    }
+                                } else {
+                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $user_id, NULL, NULL, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'));
+                                }
+                            }
+                            else {
+                                // later improvement
+                                if ($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1) {
+                                    //this condition false already handle below nature id 2
+                                    if (in_array($complaint_id, [11, 13])) {
+                                        $present_shipments[] = $shipment->tracking_number;
+                                        $flag = true;
+                                        $cannot_change = true;
+                                    }
+                                    else {
+                                        // && $is_automated_cod_change remove this condition because already set by complaint id 12 cod change
+                                        if ($complaint_id == 12) {
+                                            // by pass this stage
+//                                            if ($shipment->shipper_status_id == 5) {
+//                                                $description = $description . " (change old amouunt $shipment->amount to new amount $request->cod_new_amount )";
+//                                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+//
+//                                            } else {
+
+                                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $is_automated_cod_change);
+//                                            }
+                                        } else {
+                                            $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id,$user_id, NULL, $description);
+                                        }
+                                    }
+                                }
+                                else {
+                                    if ($complaint_id == 12) {
+                                        if ($shipment->shipper_status_id == 5) {
+                                            $description = $description . " (change old amouunt $shipment->amount to new amount $request->cod_new_amount )";
+                                            CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+
+                                        } else {
+                                            CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1);
+                                        }
+                                    } else {
+                                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                                    }
+                                }
+                            }
+                        }
+
+                        if ($nature_id == 2) {
+                            if ($complaint_id == 13) {
+                                $shipment->consignee_phone_number_2 = $request->alternate_phone;
+                                $shipment->save();
+                            }
+                            else if ($complaint_id == 12 && !$already_lodged && $is_automated_cod_change) // for cod change automation
+                            {
+                                if ($request->has('cod_new_amount')) {
+                                    if ($request->cod_new_amount >= 0 && $shipment->shipper_status_id != 5) {
+
+                                        $crm_request_id = CrmRequest::where('shipment_id', $shipment->id)->pluck('id')->first();
+                                        $default_agent_id = 306;
+                                        $comment_by = 0;
+                                        $comment_type = 0;
+                                        $comment = "Dear Customer,
+                                                    Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system
+                                                    
+                                                    CRM automated Comment";
+
+                                        CRMCommentController::add($crm_request_id, $default_agent_id, $comment_by, $comment_type, $comment, 1);
+
+                                        $old_amount = $shipment->amount;
+                                        $message = "Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system";
+                                        $shipment->amount = $request->cod_new_amount;
+                                        if ($request->is_zero_cod == 1 && $request->cod_parcel_value > 0) {
+                                            $comment = "Dear Customer,
+                                            Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system
+                                            Due to change of COD amount 0. parcel value has been updated from ($shipment->parcel_value) to ($request->cod_parcel_value)
+                                            
+                                            CRM automated Comment";
+                                            $shipment->parcel_value = $request->cod_parcel_value;
+                                        }
+                                        ChangeShipmentAmountLog::create([
+                                            'shipment_id' => $shipment->id,
+                                            'old_amount' => $old_amount,
+                                            'new_amount' => $request->cod_new_amount,
+                                            'remarks' => $request->cod_remarks,
+                                            'admin_id' => 346 // for global admin
+                                        ]);
+                                        $shipment->save();
+                                    }
+                                }
+                            } else if ($complaint_id == 32) {
+                                $shipment->special_instructions = 'Allow to Open Shipment';
+                                $shipment->save();
+                            }
+                        }
+                    }
+
+                }
+                if ($nature_id == 1) {
+                    AdminCRMController::updateComplaintPhone($crm_request_padded_id ?? CrmRequest::max('id'), $request->case_nature_complainant, $request->complainant_phone);
+                }
+
+                return ['status' => 1, 'success' => $message, 'flag' => $flag, 'already_existed_shipments' => $present_shipments, 'cannot_change' => $cannot_change];
+//            return ['status' => 1, 'success' => 'Request(s) successfully added'];
+            }
+
+    }
+    public function add_crm_request_bkp(Request $request)
     {
 
         $rules = [

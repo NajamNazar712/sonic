@@ -27,7 +27,7 @@ class AddCrmRequest extends FormRequest
         $case_nature_id = (int) $this->input('case_nature_id');
         $complaint_id = (int) $this->input('complaint_id');
         $rules = [
-            'shipment_ids' => 'required|array|min:1',
+            'shipment_ids' => ['required', 'regex:/^\d+(,\d+)*$/'],
             'case_nature_id' => 'required|in:1,2,3,4',
             'complaint_id' =>  'required|integer',
             'description' => 'required|string',
@@ -79,7 +79,7 @@ class AddCrmRequest extends FormRequest
                     $rules['missing_product_picture'] =  'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048';
                     $rules['claim_content_product_cost'] = 'required|numeric|min:0';
                 }
-
+//
                 if( $complaint_id == 23) {
                     $rules['receiving_sheet_id'] = 'required|integer|gt:0';
                 }
