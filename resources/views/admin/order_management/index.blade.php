@@ -286,7 +286,7 @@
                                     </div>
                                     <div class="col-10" id="claim_product_cost_div">
                                         <fieldset class="form-group">
-                                            <input class="form-control" name="claim_product_cost" id="claim_product_cost" value="" placeholder="Enter Product Cost">
+                                            <input class="form-control" name="claim_product_cost" id="claim_product_cost" value="" placeholder="Enter Claim Amount">
                                         </fieldset>
                                     </div>
                                     <div class="col-10 d-none" id="receiving_sheet_div">
@@ -2031,7 +2031,7 @@
                             var nature_flag = true;
                             var case_nature_claim_id = $('#case_nature_claim').val();
                             var case_nature_channel_id = $('#claim_channel').val();
-                            var product_cost = $('#claim_product_cost').val();
+                            var product_cost = parseFloat($('#claim_product_cost').inputmask('unmaskedvalue'));
                             var check_product_picture = $('#product_picture').val();
                             var check_invoice_picture = $('#invoice_picture').val();
                             $('#shipment_ids').val(selected_rows);

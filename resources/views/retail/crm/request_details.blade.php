@@ -1023,7 +1023,7 @@
                                         </div>
                                         <div class="col-8">
                                             <fieldset class="form-group">
-                                                <input class="form-control" name="claim_product_cost" id="claim_product_cost" value="" placeholder="Enter Product Cost">
+                                                <input class="form-control" name="claim_product_cost" id="claim_product_cost" value="" placeholder="Enter Claim Amount">
                                             </fieldset>
                                         </div>
                                         <div class="col-8 text-left">
@@ -2201,7 +2201,7 @@
                     else if(case_nature_id === 4){
                         var nature_flag = true;
                         var case_nature_claim_id = $('#case_nature_claim').val();
-                        var product_cost = $('#claim_product_cost').val();
+                        var product_cost = parseFloat($('#claim_product_cost').inputmask('unmaskedvalue'));
                         var check_product_picture = $('#product_picture').val();
                         var check_invoice_picture = $('#invoice_picture').val();
                         $('#tracking_number').val(tracking_number);
