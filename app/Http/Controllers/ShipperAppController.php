@@ -11,6 +11,8 @@ use App\Http\Models\DeliveryType;
 use App\Http\Models\PaymentMode;
 use App\Http\Models\Product;
 use App\Http\Models\ShippingMode;
+use App\Http\Requests\ValidateShipmentIdRequest;
+use App\RvAgentCallHistory;
 use Illuminate\Http\Request;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
@@ -108,4 +110,35 @@ class ShipperAppController extends Controller
         return response()->json(['status' => 0 , 'message' => 'Success' , 'pickup_addresses' => $pickup_addresses,'return_addresses' => $return_addresses]);
 
     }
+
+    public function shipment_call_status_history(ValidateShipmentIdRequest $request)
+    {
+        $mergedArray = [];
+        $data = RvAgentCallHistory::with(['rv_call_finding' => function ($query) {
+            $query->select('id', 'name');
+        }, 'shipment.status_shipper' => function ($query) {
+            $query->select('id', 'name');
+        },  'updated_by'])->where('shipment_id', $request->shipment_id)->orderby('updated_at', 'desc')->get();
+
+        if($data->isNotEmpty()){
+            foreach ($data as $item) {
+                $mergedArray[] = [
+                    'data' => $item,
+                    'user_name' => $item->updated_by->name ?? '-',
+                ];
+            }
+            return response()->json([
+                'status' => 0,
+                'call_history' => $mergedArray,
+            ]);
+        }
+        else{
+            return response()->json([
+                'status' => 1,
+                'error' => 'Shipment call history does not exists',
+            ]);
+        }
+
+    }
+
 }

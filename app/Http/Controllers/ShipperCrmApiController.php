@@ -14,6 +14,7 @@ use App\Http\Models\CRM\CrmRequestChannel;
 use App\Http\Models\Shipment;
 
 use App\Http\Requests\AddCrmRequest;
+use App\Http\Requests\ValidateShipmentIdRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -350,16 +351,8 @@ class ShipperCrmApiController extends Controller
 
     }
 
-    public function get_receving_sheet(Request $request)
+    public function get_receving_sheet(ValidateShipmentIdRequest $request)
     {
-
-        $validate = Validator::make($request->only('shipment_id'), [
-            'shipment_id' => ['required', 'integer'],
-        ]);
-
-        if($validate->fails()) {
-            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-        }
 
         $shipment = Shipment::find($request->shipment_id);
         if($shipment){

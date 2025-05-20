@@ -681,6 +681,9 @@ use Illuminate\Http\Request;
 
             Route::get('profile', 'ShipperAppController@profile')->name('profile');
 
+            //Shipment Call History
+            Route::post('shipment_call_status_history', 'ShipperAppController@shipment_call_status_history')->name('profile');
+
             //meta api for booking resources
             Route::get('booking_resources','ShipperAppController@booking_resources')->name('booking_resources');
 

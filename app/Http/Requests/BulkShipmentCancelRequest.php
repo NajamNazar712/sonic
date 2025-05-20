@@ -39,7 +39,6 @@ use Illuminate\Http\Exceptions\HttpResponseException;
                 'reason.required'       => 'Reason is required.',
             ];
         }
-
         protected function failedValidation(Validator $validator)
         {
             throw new HttpResponseException(response()->json([
@@ -48,4 +47,5 @@ use Illuminate\Http\Exceptions\HttpResponseException;
                 'errors' => $validator->errors()
             ], 422));
         }
+
     }
