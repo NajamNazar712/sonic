@@ -16427,6 +16427,11 @@ class AdminReportsController extends Controller
 
     public function kam_and_poc_qsr_index() {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 825);
+        $zones = DB::connection('reports')->table('zones')->where('status', 1)->select('id', 'name')->get(); 
+        $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
+        $cities = DB::connection('reports')->table('cities')->where('status', 1)->select('id', 'name')->get();
+        $shipment_status = ShipmentStatus::where('id', '>', 0)->select('id', 'name')->get();
+        $areas = DB::connection('reports')->table('city_areas')->where('status', 1)->select('id', 'name')->get();
         $table_headers = [
             "Tracking Number",
             "Order ID",
@@ -16453,7 +16458,7 @@ class AdminReportsController extends Controller
             "Origin",
             "Destination",
             "Hub",
-            "Area",
+            "Consignee City Area",
             "Concerned Hub",
             "Return City",
             "Zone",
@@ -16479,7 +16484,7 @@ class AdminReportsController extends Controller
             "Pieces",
             "Rider"
         ];
-        return view('admin.reports.kam_and_poc_qsr', compact('table_headers'));
+        return view('admin.reports.kam_and_poc_qsr', compact('table_headers'))->with(['zones' => $zones , 'table_headers' => $table_headers, 'hubs' => $hubs , 'cities' => $cities, 'shipment_status' => $shipment_status, 'areas'=> $areas]);
     }
 
     public function kam_and_poc_qsr_list(Request $request) {
@@ -16821,6 +16826,38 @@ class AdminReportsController extends Controller
 
         ->select($select)
         ->groupBy('shipments.id');
+
+        if ($search_shippers = $request->get('search_shippers')) {
+            $shipments->whereIn('shipments.user_id', $search_shippers);
+        }
+        if ($origin = $request->get('search_origin')) {
+            $shipments->where('origin_city.id', '=', $origin);
+        }
+        if ($destination = $request->get('search_destination')) {
+            $shipments->where('destination_city.id', '=', $destination);
+        }
+        if ($zone = $request->get('search_zone')) {
+            $shipments->where('zone.id', '=', $zone);
+        }
+        if ($hub = $request->get('search_hub')) {
+            $shipments->where('hub.id', '=', $hub);
+        }
+        if ($search_qsr = $request->get('search_qsr')) {
+            if ($search_qsr != 3) {
+                if ($search_qsr == 1) {
+                    $shipments->whereIn('shipments.shipper_status_id', [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 49, 51, 52, 54, 55]);
+                }
+                if ($search_qsr == 2) {
+                    $shipments->whereIn('shipments.shipper_status_id', [20, 21, 22, 23, 24, 26, 27, 28, 29, 32, 33, 34, 35, 37, 44, 45, 46, 47, 48, 50]);
+                }
+            }
+        }
+        if ($status_id = $request->get('search_shipment_status')) {
+            $shipments->where('shipment_status.id', '=', $status_id);
+        }
+        if ($search_area = $request->get('search_area')) {
+            $shipments->where('ssjal.area_id', '=', $search_area);
+        }
 
         $search_from = $request->get('search_from');
         $search_to = $request->get('search_to');
