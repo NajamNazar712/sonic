@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Http\Models\Shipper\User;
 use Closure;
+use App\Http\Models\Admin\Retail\RetailShipperInfo;
 
 class ShipperAPIToken
 {
