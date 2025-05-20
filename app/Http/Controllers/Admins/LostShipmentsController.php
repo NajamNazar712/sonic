@@ -1126,9 +1126,9 @@ class LostShipmentsController extends Controller
                 }
             }
 
-            $shipment = ShipmentsJourney::where('shipment_id', $shipment_id)->where('status_reason_id', '89')->latest('id')->first();
+            $latest_shipment_journey = ShipmentsJourney::where('shipment_id', $shipment_id)->where('status_reason_id', 90)->latest()->first();
 
-            ShipmentsJourneyController::add($shipment_id, 18, NULL, NULL, $shipment->remarks, NULL, Auth::id(), NULL, NULL, $request->approve);
+            ShipmentsJourneyController::add($shipment_id, 18, NULL, NULL, $latest_shipment_journey?->remarks, NULL, Auth::id(), NULL, NULL, $request->approve);
             $this->updateLostShipmentApproval($shipment_id, 'approval_count', 1);
         }
         return response()->json(['status' => 1, 'success' => 'Shipment Has Been Approved To Lost !!']);
