@@ -18,12 +18,15 @@ class ShipperAPIToken
     public function handle($request, Closure $next)
     {
         $api_token = $request->header('Authorization');
-        $app_type = $request->app_type;
+        $app_type = $request->header('Via');
+
 
         if ($api_token) {
 
             if($app_type == 2) {
-                if(RetailShipperInfo::where('api_token', $api_token)->first()) {
+                $retail_user = RetailShipperInfo::where('api_token', $api_token)->first();
+                if($retail_user) {
+                    $request->merge(['retail_user_id' => $retail_user->id,'app_type'=>2]);
                     return $next($request);
                 } else {
                     return response()->json([
@@ -35,7 +38,7 @@ class ShipperAPIToken
             $shipper = User::where('api_token', $api_token);
             if ($shipper->exists()) {
                 $shipper = $shipper->first();
-                $request->merge(['shipper_id' => $shipper->id]);
+                $request->merge(['shipper_id' => $shipper->id,'app_type'=>1]);
                 return $next($request);
             } else {
                 return response()->json([

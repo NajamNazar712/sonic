@@ -28,9 +28,9 @@ class ShippeCrmApiController extends Controller
         $complaint_id = $request->complaint_id;
         $app_type = $request->app_type;
         $description = $request->description;
-        $user_id = session('user_id');
+        $user_id = $app_type == 2 ? $request->retail_user_id : $request->shipper_id;
         $shipment_ids = explode(',', $request->input('shipment_ids'));
-        $launched_by = $app_type == 1 ? 2 : 3; // check shipper or retail shipper
+        $launched_by = $app_type == 2 ? 3 : 1; // check shipper or retail shipper
         $present_shipments = array();
 
         if (!empty($shipment_ids)) {
@@ -86,31 +86,7 @@ class ShippeCrmApiController extends Controller
                                 if ($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1) {
                                     if (in_array($complaint_id, [11, 13])) {
                                         $present_shipments[] = $shipment->tracking_number;
-                                        $flag = true;
-                                        $cannot_change = true;
                                     }
-                                    // by pass this stage
-//                                else {
-//                                    // by pass this stage
-////                                    // && $is_automated_cod_change remove this condition because already set by complaint id 12 cod change
-////                                    if ($complaint_id == 12) {
-////                                        // by pass this stage
-//////                                            if ($shipment->shipper_status_id == 5) {
-//////                                                $description = $description . " (change old amouunt $shipment->amount to new amount $request->cod_new_amount )";
-//////                                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
-//////
-//////                                            } else {
-////
-////                                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $is_automated_cod_change);
-//////                                            }
-////                                    } else {
-////                                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id,$user_id, NULL, $description);
-////                                    }
-//
-//                                    if($complaint_id != 12) {
-//                                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment_id,$user_id, NULL, $description);
-//                                    }
-//                                }
                                 }
 
                                 if ($complaint_id == 12) {
@@ -165,31 +141,7 @@ class ShippeCrmApiController extends Controller
                             if ($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1) {
                                 if (in_array($complaint_id, [11, 13])) {
                                     $present_shipments[] = $shipment->tracking_number;
-                                    $flag = true;
-                                    $cannot_change = true;
                                 }
-                                // by pass this stage
-//                                else {
-//                                    // by pass this stage
-////                                    // && $is_automated_cod_change remove this condition because already set by complaint id 12 cod change
-////                                    if ($complaint_id == 12) {
-////                                        // by pass this stage
-//////                                            if ($shipment->shipper_status_id == 5) {
-//////                                                $description = $description . " (change old amouunt $shipment->amount to new amount $request->cod_new_amount )";
-//////                                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
-//////
-//////                                            } else {
-////
-////                                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $is_automated_cod_change);
-//////                                            }
-////                                    } else {
-////                                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id,$user_id, NULL, $description);
-////                                    }
-//
-//                                    if($complaint_id != 12) {
-//                                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment_id,$user_id, NULL, $description);
-//                                    }
-//                                }
                             }
 
                             if ($complaint_id == 12) {
