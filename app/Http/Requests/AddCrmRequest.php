@@ -115,29 +115,60 @@ class AddCrmRequest extends FormRequest
             'cod_new_amount.gt' => 'COD amount must be greater than 0.',
             'cod_remarks.required' => 'COD remarks are required.',
 
+            // Claim (case_nature_id = 4)
+            'claim_product_cost.required'      => 'Claim product cost is required.',
+            'claim_product_cost.numeric'       => 'Claim product cost must be a number.',
+            'claim_product_cost.min'           => 'Claim product cost must be at least 0.',
+
             // Product images
-            'product_picture.required' => 'Product picture is required.',
-            'invoice_picture.required' => 'Invoice picture is required.',
+            'product_picture.required'         => 'Product picture is required.',
+            'product_picture.image'            => 'Product picture must be an image.',
+            'product_picture.mimes'            => 'Product picture must be a file of type: jpeg, png, jpg, gif, webp.',
+            'product_picture.max'              => 'Product picture must not be greater than 2MB.',
+
+            // Invoice images
+            'invoice_picture.required'         => 'Invoice picture is required.',
+            'invoice_picture.image'            => 'Invoice picture must be an image.',
+            'invoice_picture.mimes'            => 'Invoice picture must be a file of type: jpeg, png, jpg, gif, webp.',
+            'invoice_picture.max'              => 'Invoice picture must not be greater than 2MB.',
+
+            // Product Packaging images
             'product_packaging_picture.required' => 'Packaging picture is required.',
-            'actual_product_picture.required' => 'Actual product picture is required.',
+            'product_packaging_picture.image'    => 'Packaging picture must be an image.',
+            'product_packaging_picture.mimes'    => 'Packaging picture must be a file of type: jpeg, png, jpg, gif, webp.',
+            'product_packaging_picture.max'      => 'Packaging picture must not be greater than 2MB.',
 
-            'product_picture.image' => 'Product picture must be an image.',
-            'invoice_picture.image' => 'Invoice picture must be an image.',
-            'product_packaging_picture.image' => 'Packaging picture must be an image.',
-            'actual_product_picture.image' => 'Actual product picture must be an image.',
+            // Actual Product images
+            'actual_product_picture.required'  => 'Actual product picture is required.',
+            'actual_product_picture.image'     => 'Actual product picture must be an image.',
+            'actual_product_picture.mimes'     => 'Actual product picture must be a file of type: jpeg, png, jpg, gif, webp.',
+            'actual_product_picture.max'       => 'Actual product picture must not be greater than 2MB.',
 
-            // Damage claim
-            'damage_product_picture.required' => 'Damage picture is required.',
+            // Damage claim (complaint_id = 21)
+            'damage_product_picture.required'  => 'Damage picture is required.',
+            'damage_product_picture.image'     => 'Damage picture must be an image.',
+            'damage_product_picture.mimes'     => 'Damage picture must be a file of type: jpeg, png, jpg, gif, webp.',
+            'damage_product_picture.max'       => 'Damage picture must not be greater than 2MB.',
+
             'damage_claim_product_cost.required' => 'Damage claim product cost is required.',
+            'damage_claim_product_cost.numeric'  => 'Damage claim product cost must be a number.',
+            'damage_claim_product_cost.min'      => 'Damage claim product cost must be at least 0.',
 
-            // Missing claim
-            'missing_product_picture.required' => 'Missing product picture is required.',
+            // Missing claim (complaint_id = 22)
+            'missing_product_picture.required'   => 'Missing product picture is required.',
+            'missing_product_picture.image'      => 'Missing product picture must be an image.',
+            'missing_product_picture.mimes'      => 'Missing product picture must be a file of type: jpeg, png, jpg, gif, webp.',
+            'missing_product_picture.max'        => 'Missing product picture must not be greater than 2MB.',
+
             'claim_content_product_cost.required' => 'Claim content product cost is required.',
+            'claim_content_product_cost.numeric'  => 'Claim content product cost must be a number.',
+            'claim_content_product_cost.min'      => 'Claim content product cost must be at least 0.',
 
-            // Receiving sheet
-            'receiving_sheet_id.required' => 'Receiving sheet ID is required.',
-            'receiving_sheet_id.integer' => 'Receiving sheet ID must be a valid number.',
-            'receiving_sheet_id.gt' => 'Receiving sheet ID must be greater than 0.',
+            // Receiving sheet (complaint_id = 23)
+            'receiving_sheet_id.required'       => 'Receiving sheet ID is required.',
+            'receiving_sheet_id.integer'        => 'Receiving sheet ID must be a valid number.',
+            'receiving_sheet_id.gt'             => 'Receiving sheet ID must be greater than 0.',
+
         ];
     }
 }
