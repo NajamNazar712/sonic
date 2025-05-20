@@ -620,7 +620,8 @@
                                             }).get(),
                                             service_type_select: $('#service_type_select').val(),
                                             search_kam: $('#search_kam').val(),
-                                            search_sale_person: $('#search_sale_person').val()
+                                            search_sale_person: $('#search_sale_person').val(),
+                                            search_area :  $("#search_area").val()
                                         },
                                         beforeSend: function() {
                                             swal({

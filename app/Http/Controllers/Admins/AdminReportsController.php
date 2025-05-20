@@ -15657,7 +15657,7 @@ class AdminReportsController extends Controller
             $shipments->where('bt.id', '=', $service_type_select);
         }
         if ($search_area = $request->get('search_area')) {
-            $shipments->where('ssjal.area_id', '=', $search_area);
+            $shipments->where('caa.city_area_id', '=', $search_area);
         }
         if($search_sale_person =  $request->get('search_sale_person')) {
             $shipments->where('spt.admin_id', $search_sale_person);
@@ -16856,7 +16856,7 @@ class AdminReportsController extends Controller
             $shipments->where('shipment_status.id', '=', $status_id);
         }
         if ($search_area = $request->get('search_area')) {
-            $shipments->where('ssjal.area_id', '=', $search_area);
+            $shipments->where('consignee_address_area.city_area_id', '=', $search_area);
         }
 
         $search_from = $request->get('search_from');
