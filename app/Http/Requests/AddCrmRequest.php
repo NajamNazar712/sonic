@@ -69,6 +69,8 @@ class AddCrmRequest extends FormRequest
                     $rules['claim_product_cost'] = 'required|numeric|min:0';
                     $rules['product_picture'] =  'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048';
                     $rules['invoice_picture'] =  'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048';
+                }
+                if($complaint_id == 21  || $complaint_id == 22) {
                     $rules['product_packaging_picture'] =  'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048';
                     $rules['actual_product_picture'] =  'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048';
                 }
