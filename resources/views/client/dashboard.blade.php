@@ -2059,7 +2059,7 @@
                                 }
                                 if (!product_cost) {
                                     nature_flag = false;
-                                    var error = "Please Enter Claim Amount!";
+                                    var error = "Claim Amount cannot be zero !!";
                                     toastr.error(error, 'Error!', {
                                         positionClass: 'toast-top-center',
                                         containerId: 'toast-top-center'
