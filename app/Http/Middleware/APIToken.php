@@ -19,6 +19,7 @@ class APIToken
     public function handle($request, Closure $next)
     {
         $api_token = $request->header('Authorization');
+        $app_type = $request->header('Via');
 
         if($api_token) {
             $user = User::where('api_token', $api_token);
@@ -42,7 +43,7 @@ class APIToken
                     return response()->json(['status' => 1, 'message' => 'Your Account phone number is not verified.']);
                 }
                 else {
-                    $request->merge(['user_id' => $user->id]);
+                    $request->merge(['user_id' => $user->id,'app_type'=>$app_type]);
 
                     return $next($request);
                 }

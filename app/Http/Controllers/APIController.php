@@ -153,6 +153,16 @@ class APIController extends Controller
 
         'service_type_id' => 'Service Type ID',
         'pickup_address_id' => 'Pickup Address ID',
+
+        //for shipper app
+        'new_pickup_address' => 'New Pickup Address',
+        'new_pickup_person_of_contact' => 'New Pickup Person of Contact',
+        'new_pickup_vendor' => 'New Pickup Vendor',
+        'new_pickup_phone_number' => 'New Pickup Phone Number',
+        'new_pickup_email_address' => 'New Pickup Email Address',
+        'new_pickup_city_id' => 'New Pickup City',
+        'make_default_address' => 'Make Default Address',
+
         'information_display' => 'Information Display',
         'consignee_city_id' => 'Consignee City ID',
         'consignee_name' => 'Consignee Name',
@@ -244,9 +254,22 @@ class APIController extends Controller
 
         'pickup_address_id.exists' => 'Invalid Store ID',
         'phone_number' => ':attribute format is Invalid or must be integer, required Format is: (03000000000, +92-300-0000000, 300-0000000, 0300-0000000).',
+        'new_pickup_phone_number_regex' => ':attribute format is Invalid or must be integer, required Format is: (03000000000, +92-300-0000000, 300-0000000, 0300-0000000).',
         'origin_check' => 'Origin city not allowed, please contact your sales person!',
         'destination_check' => 'Destination city not allowed, please contact your sales person!',
         'destination_return_check' => 'Return city not allowed, please contact your sales person!',
+
+        //for shipper app
+        'new_pickup_address.required' => 'The new pickup address is required.',
+        'new_pickup_person_of_contact.required' => 'The new pickup person of contact is required.',
+        'new_pickup_vendor.required' => 'The new pickup vendor is required.',
+        'new_pickup_phone_number.regex' => ':attribute format is Invalid or must be integer, required Format is: (03000000000, +92-300-0000000, 300-0000000, 0300-0000000).',
+        'new_pickup_email_address.required' => 'The new pickup email address is required.',
+        'new_pickup_email_address.email' => 'The new pickup email address must be a valid email.',
+        'new_pickup_city_id.required' => 'The new pickup city is required.',
+        'new_pickup_city_id.exists' => 'The selected new pickup city is invalid.',
+        'make_default_address.boolean' => 'The make default address field must be 0 or 1.',
+
     ];
 
     public static function phone_number($phone_number)
@@ -546,6 +569,7 @@ class APIController extends Controller
             });
         }
 
+
         Validator::extend('origin_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
             $data = $validator->getData();
             if (isset($data['shipping_mode_id']) && isset($data['service_type_id'])) {
@@ -612,6 +636,7 @@ class APIController extends Controller
 
 
         if ($user_type['account_type_id'] == 1) {
+
             $rules = [
                 'service_type_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function ($query) {
                     $query->whereNotIn('id', [4]);
@@ -619,9 +644,7 @@ class APIController extends Controller
                 'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('rate_statuses', 'shipping_mode_id')->where(function ($query) use ($user_id) {
                     $query->where('user_id', $user_id)->where('status', 1);
                 })],
-                'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
-                    $query->where('user_id', $user_id)->where('hidden', 0);
-                }), 'origin_check'],
+                //pickup addres here
                 'return_address_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
                     $query->where('user_id', $user_id)->where('hidden', 0);
                 }), 'destination_return_check'],
@@ -689,6 +712,7 @@ class APIController extends Controller
                     },
                 ],
             ];
+
             $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
             if ($ccd_booking->exists()) {
                 $ccd_booking = $ccd_booking->first();
@@ -703,14 +727,15 @@ class APIController extends Controller
                     })];
                 }
             }
-        } else {
+        }
+        else {
+
             $rules = [
                 'service_type_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function ($query) {
                     $query->whereNotIn('id', [4]);
                 })],
-                'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
-                    $query->where('user_id', $user_id)->where('hidden', 0);
-                }), 'origin_check'],
+
+                //pickup addres here
                 'return_address_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
                     $query->where('user_id', $user_id)->where('hidden', 0);
                 }), 'destination_return_check'],
@@ -829,6 +854,57 @@ class APIController extends Controller
             }
         }
 
+        //this is for shipper app
+        if($request->app_type==1 && (!$request->has('pickup_address_id') || is_null($request->pickup_address_id))) {
+
+            if (preg_match('/^(92|03)\d+/', $request->new_pickup_phone_number)) {
+                Validator::extend('new_pickup_phone_number_regex', function ($attribute, $value, $parameters) {
+                    if ($value) {
+                        $value = $this->phone_number($value);
+
+                        if (preg_match('/^((\+92)|(92)|(0092))-{0,1}\d{10}$|^03\d{9}$/', $value)) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+                });
+            } else {
+                Validator::extend('new_pickup_phone_number_regex', function ($attribute, $value, $parameters) {
+                    if ($value) {
+                        $value = $this->phone_number($value);
+
+                        if (preg_match('/^\d+$/', $value)) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+                });
+            }
+
+            $rules['new_pickup_address'] = ['required', 'string'];
+            $rules['new_pickup_person_of_contact'] = ['required', 'string', 'max:255'];
+            $rules['new_pickup_vendor'] = ['required', 'string'];
+            $rules['new_pickup_phone_number'] = ['required', 'new_pickup_phone_number_regex'];
+            $rules['new_pickup_email_address'] = ['required', 'email', 'max:255'];
+            $rules['make_default_address'] = ['required','integer','in:0,1'];
+            $rules['new_pickup_city_id'] = [
+                'required',
+                'integer',
+                'digits_between:1,10',
+                Rule::exists('cities', 'id')->where('business_category_id', 1)
+//                    'origin_check',
+            ];
+        }
+        else {
+            $rules ['pickup_address_id'] = [
+                'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
+                    $query->where('user_id', $user_id)->where('hidden', 0);
+                }), 'origin_check'],
+            ];
+        }
+
         $validate = Validator::make($request->all(), $rules, $this->messages);
 
         $validate->setAttributeNames($this->names);
@@ -926,6 +1002,15 @@ class APIController extends Controller
             else {
                 $shipment_pre_book = null;
             }
+
+            //if pickup address id is null or not set then create new pickup address this code only for shipper app
+            if($request->app_type==1 && (!$request->has('pickup_address_id') || is_null($request->pickup_address_id))) {
+                $pickup_address_id = ShipperShipmentBookController::add_pickup_address($user_id, $request->input('new_pickup_address'), $request->input('new_pickup_person_of_contact'), $request->input('new_pickup_vendor'), substr_replace($request->input('new_pickup_phone_number'), '-', 4, 0), $request->input('new_pickup_email_address'), $request->input('new_pickup_city_id'), $request->input('make_default_address'), false);
+                $request->merge([
+                    'pickup_address_id' => $pickup_address_id
+                ]);
+            }
+
             if ($service_type_id != 5) {
                 $user_shipping_info = UserShippingInfo::find($request->input('pickup_address_id'));
 
