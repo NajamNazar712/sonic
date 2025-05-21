@@ -3831,7 +3831,8 @@
                         }
                         if (!product_cost) {
                             nature_flag = false;
-                            var error = "Claim Amount cannot be zero !!";
+                            var error = isNaN(product_cost) ? "Please enter Product Cost!" : "Claim Amount cannot be zero !!";
+                            
                             toastr.error(error, 'Error!', {
                                 positionClass: 'toast-top-center',
                                 containerId: 'toast-top-center'
