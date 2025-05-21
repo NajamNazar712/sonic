@@ -5664,12 +5664,15 @@ class GlobalSettingsController extends Controller
                 'ad.status'
             ]);
 
-        if ($request->get('enable_disable') == '1') {
-            $roles->where('ad.status', '1');
+
+       $enable_disable = $request->input('enable_disable');
+
+        if ($enable_disable === '1' || is_null($enable_disable)) {
+            $roles->where('ad.status', 1);
         } else {
-            $roles->where('ad.status', '!=', '1');
+            $roles->where('ad.status', '!=', 1);
         }
-        
+
         $datatables = Datatables::of($roles)
             ->addColumn('action', function ($roles) {
                 if (session('role_id') == 1 || in_array(618, session('permissions'))) {
