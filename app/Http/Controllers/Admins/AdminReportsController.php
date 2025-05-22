@@ -16504,7 +16504,8 @@ class AdminReportsController extends Controller
             'city_area_last_scan_location.name as sub_hub',
             'shipment_status_reason.name as reason',
             'shipments_journey_remarks.remarks as shipment_journey_remarks',
-            'shipment_journey_last_scanned_by.admin_id as last_scanned_by',
+            //'shipment_journey_last_scanned_by.admin_id as last_scanned_by',
+            'adm.name as last_scanned_by',
             'shipment_journey_last_scanned_by.created_at as last_scanned_by_date',
             'last_screen_location.name as last_location_screen_location_name',
             'cargo_status.name as bag_status',
@@ -16650,11 +16651,8 @@ class AdminReportsController extends Controller
                     )');
             })
 
-            ->leftJoin('admins as adm', function ($join) {
-                $join->on('adm.id', '=', 'shipment_journey_last_scanned_by.admin_id')
-                    ->where('adm.role_id', '<>', 1);
-            })
-
+            ->leftJoin('admins as adm', 'adm.id', '=', 'shipment_journey_last_scanned_by.admin_id')
+                
             ->leftJoin('shipment_scanning_screen_locations as last_screen_location', 'last_screen_location.id', '=', 'shipment_journey_last_scanned_by.screen_location_id')
 
             ->leftJoin('cargo_manifest_bag_shipments as cargo_bag_shipments', function ($join) {
@@ -16798,16 +16796,18 @@ class AdminReportsController extends Controller
 
             // ->leftJoin('crm_requests as complaint_description', 'complaint_description.shipment_id', '=', 'shipments.id')
             ->leftJoin('shipment_items', 'shipment_items.shipment_id', 'shipments.id')
-            ->leftJoin('delivery_note_shipments as dns',function($join) use ($connection) {
-                $join->on('dns.shipment_id', '=', 'shipments.id')
-                    ->whereRaw('dns.created_at = (
-                        SELECT MAX(created_at)
-                        FROM delivery_note_shipments
-                        WHERE delivery_note_shipments.shipment_id = shipments.id
-                    )');
-            })
-            ->leftJoin('delivery_notes as delivery_note', 'delivery_note.id', '=', 'dns.delivery_note_id')
-        ->leftJoin('riders', 'riders.id', '=', 'delivery_note.rider_id')
+        ->leftJoin(DB::raw('(
+            SELECT dns1.*
+            FROM delivery_note_shipments dns1
+            JOIN delivery_notes dn1 ON dn1.id = dns1.delivery_note_id
+            JOIN riders r1 ON r1.id = dn1.rider_id
+            WHERE r1.operation_rider_id = 1
+            ORDER BY dns1.created_at DESC
+        ) as recent_dns'), function ($join) {
+            $join->on('recent_dns.shipment_id', '=', 'shipments.id');
+        })
+        ->leftJoin('delivery_notes as dn', 'dn.id', '=', 'recent_dns.delivery_note_id')
+        ->leftJoin('riders', 'riders.id', '=', 'dn.rider_id')
         ->leftJoin('sale_tier_tags', 'sale_tier_tags.user_id', '=', 'shipments.user_id')
         ->leftJoin('admins as poc_admin', 'poc_admin.id', '=', 'sale_tier_tags.poc')
         ->leftJoin('admins as kam_admin', 'kam_admin.id', '=', 'sale_tier_tags.kam')
@@ -17154,14 +17154,14 @@ class AdminReportsController extends Controller
                             return '-';
                         }
                     })
-                    ->editColumn('last_scanned_by', function ($shipment) {
-                        if ($shipment->last_scanned_by) {
-                            $admin = Admin::where('id', $shipment->last_scanned_by)->first();
-                            return $admin->name;
-                        } else {
-                            return '-';
-                        }
-                    })
+                    // ->editColumn('last_scanned_by', function ($shipment) {
+                    //     if ($shipment->last_scanned_by) {
+                    //         $admin = Admin::where('id', $shipment->last_scanned_by)->first();
+                    //         return $admin->name;
+                    //     } else {
+                    //         return '-';
+                    //     }
+                    // })
                     ->editColumn('request_number_id', function ($shipment) {
                         if ($shipment->request_number_id) {
                             return '<u><a href=' . route('admin.crm.request.details', ['id' => $shipment->request_number_id]) . '  target="_blank">' . str_pad($shipment->request_number_id, 6, '0', STR_PAD_LEFT) . '</a></u>';
