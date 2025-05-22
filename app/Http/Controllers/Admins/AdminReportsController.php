@@ -16200,18 +16200,33 @@ class AdminReportsController extends Controller
             'shipments.updated_at AS latest_shipment',
             'shipments.tracking_number',
             'lost_shipment_responsibles.*',
-            'admins.name AS admin_name',
-            'riders.name AS rider_name',
-            'admin_employees.trax_id AS admin_trax_id',
-            'rider_employees.trax_id AS rider_trax_id',
+            DB::raw('
+                CASE 
+                    WHEN lost_shipment_responsibles.user_type = 1 THEN admins.name
+                    WHEN lost_shipment_responsibles.user_type = 2 THEN riders.name
+                    ELSE NULL
+                END AS defaulter_name
+            '),
+            DB::raw('
+                CASE 
+                    WHEN lost_shipment_responsibles.user_type = 1 THEN admins.trax_id
+                    WHEN lost_shipment_responsibles.user_type = 2 THEN riders.trax_id
+                    ELSE NULL
+                END AS trax_id
+            '),
             'city.name AS responsible_city',
             'requested_admins.name AS requested_admin_name',
             'request_approved_admins.name AS request_approved_admin',
             'user_shipment.name AS shipper_name',
             'shipments.amount AS cod_amount',
             'shipments.parcel_value AS parcel_value',
-            'admin_status.name AS admin_status',
-            'rider_status.name AS rider_status',
+            DB::raw('
+                CASE 
+                    WHEN lost_shipment_responsibles.user_type = 1 THEN admin_status.name
+                    WHEN lost_shipment_responsibles.user_type = 2 THEN rider_status.name
+                    ELSE NULL
+                END AS employee_status
+            '),
             'shipment_status.name AS latest_shipment_status',
             DB::raw('(
                 SELECT GROUP_CONCAT(shipper_status_id)
@@ -16322,26 +16337,6 @@ class AdminReportsController extends Controller
                 $lost_approved_by = $shipments->request_approved_admin;
             }
             return $lost_approved_by;
-        })
-        ->addColumn('defaulter_name', function ($shipments) {
-            return $shipments->admin_name . ' ' . $shipments->rider_name;
-        })
-        ->orderColumn('defaulter_name', function ($query, $direction) {
-            $query->orderBy('admin_name', $direction)->orderBy('rider_name', $direction);
-        })
-        ->addColumn('employee_status', function ($shipments) {
-            $adminEmployeeStatus = $shipments->admin_status ?? '';
-            $riderEmployeeStatus = $shipments->rider_status ?? '';
-            return $adminEmployeeStatus . ' ' . $riderEmployeeStatus;
-        })
-        ->orderColumn('employee_status', function ($query, $direction) {
-            $query->orderBy('admin_status', $direction)->orderBy('rider_status', $direction);
-        })
-        ->addColumn('trax_id', function ($shipments) {
-            return $shipments->admin_trax_id . ' ' . $shipments->rider_trax_id;
-        })
-        ->orderColumn('trax_id', function ($query, $direction) {
-            $query->orderBy('admin_trax_id', $direction)->orderBy('rider_trax_id', $direction);
         })
         ->addColumn('case_closed_remarks', function ($shipments) {
             if ($shipments->case_closed_remarks != "") {
