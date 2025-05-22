@@ -16554,17 +16554,15 @@ class AdminReportsController extends Controller
         $shipments = DB::connection($connection)
             ->table('shipments')
             ->join('users', 'shipments.user_id', '=', 'users.id')
-
-            ->leftJoin('admins as admin_sale_person', function ($join) {
-                $join->on('admin_sale_person.id', '=', 'users.id')
-                    ->where('admin_sale_person.id', '=', DB::raw('(
-                        select max(id) 
-                        from sale_person_tags 
-                        where sale_person_tags.user_id = users.id 
-                        and sale_person_tags.status = 0
-                    )'));
+            ->leftJoin('sale_person_tags as spt', function($join){
+                $join->on('spt.user_id', '=', 'users.id')
+                    ->where(
+                        'spt.id',
+                        '=',
+                        DB::connection('reports_2')->raw('(select max(id) from sale_person_tags where sale_person_tags.user_id = users.id and sale_person_tags.status = 0)')
+                    );
             })
-
+            ->leftJoin('admins as admin_sale_person', 'admin_sale_person.id', '=', 'spt.admin_id' )
             ->leftJoin('shipments_journey as shipments_journey_first_attempt', function ($join) use ($connection) {
                 $join->on('shipments_journey_first_attempt.shipment_id', '=', 'shipments.id')
                     ->where('shipments_journey_first_attempt.id', '=', DB::connection($connection)->raw('(
