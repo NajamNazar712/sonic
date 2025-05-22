@@ -26,7 +26,7 @@ class ShipperAPIToken
             if($app_type == 2) {
                 $retail_user = RetailShipperInfo::where('api_token', $api_token)->first();
                 if($retail_user) {
-                    $request->merge(['retail_user_id' => $retail_user->id,'app_type'=>$app_type]);
+                    $request->merge(['retail_shipper_id' => $retail_user->id,'app_type'=>$app_type]);
                     return $next($request);
                 } else {
                     return response()->json([

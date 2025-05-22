@@ -28,70 +28,78 @@ class AddCrmRequest extends FormRequest
 
         $case_nature_id = (int) $this->input('case_nature_id');
         $complaint_id = (int) $this->input('complaint_id');
+        $app_type = (int) $this->input('app_type');
+
         $rules = [
-            'shipment_ids' => ['required', 'regex:/^\d+(,\d+)*$/'],
+            'shipment_ids' => 'required', 'regex:/^([1-9]\d*)(,([1-9]\d*))*$/',
             'case_nature_id' => 'required|in:1,2,3,4',
-            'complaint_id' =>  'required|integer',
+            'complaint_id' =>  'required_unless:case_nature_id,4|integer',
             'description' => 'required|string',
         ];
 
-        switch ($case_nature_id) {
-            case 1: //Complaint
-                $rules['complainant_phone'] = 'required|regex:/^03\d{2}-\d{7}$/';
-                $rules['case_nature_complainant'] = 'required|in:1,2';
-
-                break;
-
-            case 2: //Service Request
-
-                if($complaint_id == 12) {
-                    /**
-                     * is_automated_cod_change
-                     * is_zero_cod
-                     * cod_parcel_value
-                     * complainant_phone
-                     * case_nature_complainant
-                     **/
-                    $rules['cod_new_amount'] =  'required|numeric|gt:0';
-                    $rules['cod_remarks'] = 'required|string';
-
-                }
-
-                if($complaint_id == 13) {
-                    $rules['alternate_phone'] = 'required|regex:/^03\d{2}-\d{7}$/';
-                }
-
-                break;
-
-            case 4:
-
-                if($complaint_id != 26) {
-                    $rules['claim_product_cost'] = 'required|numeric|min:0';
-                    $rules['product_picture'] =  'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048';
-                    $rules['invoice_picture'] =  'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048';
-                }
-                if($complaint_id == 21  || $complaint_id == 22) {
-                    $rules['product_packaging_picture'] =  'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048';
-                    $rules['actual_product_picture'] =  'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048';
-                }
-
-                if($complaint_id == 21) {
-                    $rules['damage_product_picture'] =  'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048';
-                    $rules['damage_claim_product_cost'] = 'required|numeric|min:0';
-                }
-                if ($complaint_id == 22) {
-                    $rules['missing_product_picture'] =  'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048';
-                    $rules['claim_content_product_cost'] = 'required|numeric|min:0';
-                }
-//
-                if( $complaint_id == 23) {
-                    $rules['receiving_sheet_id'] = 'required|integer|gt:0';
-                }
-
-                break;
-
+        if($app_type == 2) {
+            $rules['channel_id'] = 'required|integer';
         }
-        
+
+        if($app_type == 1) {
+            switch ($case_nature_id) {
+                case 1: //Complaint
+                    $rules['complainant_phone'] = 'required|regex:/^03\d{2}-\d{7}$/';
+                    $rules['case_nature_complainant'] = 'required|in:1,2';
+
+                    break;
+
+                case 2: //Service Request
+
+                    if($complaint_id == 12) {
+                        /**
+                         * is_automated_cod_change
+                         * is_zero_cod
+                         * cod_parcel_value
+                         * complainant_phone
+                         * case_nature_complainant
+                         **/
+                        $rules['cod_new_amount'] =  'required|numeric|gt:0';
+                        $rules['cod_remarks'] = 'required|string';
+
+                    }
+
+                    if($complaint_id == 13) {
+                        $rules['alternate_phone'] = 'required|regex:/^03\d{2}-\d{7}$/';
+                    }
+
+                    break;
+
+                case 4:
+
+                    if($complaint_id != 26) {
+                        $rules['claim_product_cost'] = 'required|numeric|min:0';
+                        $rules['product_picture'] =  'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048';
+                        $rules['invoice_picture'] =  'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048';
+                    }
+                    if($complaint_id == 21  || $complaint_id == 22) {
+                        $rules['product_packaging_picture'] =  'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048';
+                        $rules['actual_product_picture'] =  'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048';
+                    }
+
+                    if($complaint_id == 21) {
+                        $rules['damage_product_picture'] =  'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048';
+                        $rules['damage_claim_product_cost'] = 'required|numeric|min:0';
+                    }
+                    if ($complaint_id == 22) {
+                        $rules['missing_product_picture'] =  'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048';
+                        $rules['claim_content_product_cost'] = 'required|numeric|min:0';
+                    }
+//
+                    if( $complaint_id == 23) {
+                        $rules['receiving_sheet_id'] = 'required|integer|gt:0';
+                    }
+
+                    break;
+
+            }
+        }
+
         return $rules;
     }
 
@@ -107,6 +115,10 @@ class AddCrmRequest extends FormRequest
             'case_nature_id.in' => 'Invalid case nature selected.',
             'complaint_id.required' => 'Complaint ID is required.',
             'description.required' => 'Description is required.',
+
+            //for retail app
+            'channel_id.required' => 'Channel ID is required',
+            'channel_id.integer' => 'Channel ID must be a valid number.',
 
             // Phone numbers
             'complainant_phone.required' => 'Complainant phone is required.',

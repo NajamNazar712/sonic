@@ -7,6 +7,7 @@ use App\Http\Controllers\CRM\CRMCommentController;
 use App\Http\Controllers\CRM\CRMController;
 use App\Http\Models\Admin\ChangeShipmentAmountLog;
 
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
@@ -22,22 +23,39 @@ use function foo\func;
 
 class ShipperCrmApiController extends Controller
 {
-
     public function add_crm_request(AddCrmRequest $request) {
 
 
         $nature_id = $request->case_nature_id;
         $complaint_id = $request->complaint_id;
-        $app_type = $request->app_type;
+        $app_type = $request->app_type; // if app_type=1 shipper else app_type=2 retail
         $description = $request->description;
-        $user_id = $app_type == 2 ? $request->retail_user_id : $request->shipper_id;
+        $user_id = $request->shipper_id;
+        if($app_type == 2) {
+            $setting = GlobalSettings::where('type', 'retail_store')->first();
+            $user_id = $setting->setting_value;
+        }
         $shipment_ids = explode(',', $request->input('shipment_ids'));
-        $launched_by = $app_type == 2 ? 3 : 1; // check shipper or retail shipper
+        $launched_by = $app_type == 1 ? 1 : 3; //if app_type=1 shipper-1 else app_type=2 retail-3
         $present_shipments = array();
+        $not_found_shipments = array();
+
+        $channel_id=1;
+        if($app_type == 2) {
+            $channel_id = $request->channel_id;
+        }
 
         if (!empty($shipment_ids)) {
             foreach ($shipment_ids as $shipment_id) {
-                $shipment = Shipment::find($shipment_id);
+
+                if ($app_type == 2) {
+                    $shipment = Shipment::whereHas('retail', function ($query) use ($user_id) {
+                        $query->where('shipper_account_no', $user_id);
+                    })->where('id',$shipment_id)->first();
+                }else {
+                    $shipment = Shipment::where('id',$shipment_id)->where('user_id',$user_id)->first();
+                }
+
                 if ($shipment) {
 
                     if ($complaint_id == 12 && in_array($shipment->shipper_status_id, [14, 18, 30, 36, 37, 20, 21, 22, 23, 24, 25, 26, 32, 44, 47, 48, 57, 60, 51])) // for cod change automation
@@ -50,117 +68,62 @@ class ShipperCrmApiController extends Controller
 
                     if ($is_shipment) {
                         $already_lodged = true;
-                        if ($is_shipment->case_nature_id != $nature_id) {
-
-                            if($nature_id == 4 && $complaint_id!=26) {
-
-                                $product_cost = $request->product_cost;
-                                $product_picture = $request->file('product_picture');
-                                $invoice_picture = $request->file('invoice_picture');
-                                //21 (shipment damage)
-                                $damage_product_picture = null;
-                                $damage_claim_product_cost = null;
-                                $product_packaging_picture = null;
-                                $actual_product_picture = null;
-                                //22 (content short)
-                                $missing_product_picture = null;
-                                $claim_content_product_cost = null;
-                                $product_packaging_picture_content_short = null;
-                                $actual_product_picture_content_short = null;
-
-                                if ($complaint_id == 21) {
-                                    $product_packaging_picture = $request->file('product_packaging_picture');
-                                    $actual_product_picture = $request->file('actual_product_picture');
-                                    $damage_product_picture = $request->file('damage_product_picture');
-                                    $damage_claim_product_cost = $request->damage_claim_product_cost;
-
-                                } elseif ($complaint_id == 22) {
-                                    $product_packaging_picture_content_short =  $request->file('product_packaging_picture');
-                                    $actual_product_picture_content_short  =  $request->file('actual_product_picture');
-                                    $missing_product_picture = $request->file('missing_product_picture');
-                                    $claim_content_product_cost = $request->claim_content_product_cost;
-                                }
-
-                                CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment_id, $user_id, NULL, $description, $product_cost,$product_picture, $invoice_picture,$damage_product_picture, $product_packaging_picture,$actual_product_picture,$damage_claim_product_cost,$missing_product_picture,$product_packaging_picture_content_short, $actual_product_picture_content_short, $claim_content_product_cost);
-                            }
-                            else {
-
-                                if ($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1) {
-                                    if (in_array($complaint_id, [11, 13])) {
-                                        $present_shipments[] = $shipment->tracking_number;
-                                    }
-                                }
-
-                                if ($complaint_id == 12) {
-                                    if ($shipment->shipper_status_id == 5) {
-                                        $description = $description . " (change old amouunt $shipment->amount to new amount $request->cod_new_amount )";
-                                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment_id, $user_id, NULL, $description);
-
-                                    } else {
-                                        $crm_request_padded_id =  CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment_id, $user_id, NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1);
-                                    }
-                                } else {
-                                    $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment_id,$user_id, NULL, $description);
-                                }
-                            }
-                        } else {
+                        if ($is_shipment->case_nature_id == $nature_id) {
                             $present_shipments[] = $shipment->tracking_number;
+                            continue;
                         }
+                    }
+                    if($nature_id == 4 && $complaint_id!=26) {
+
+                        $product_cost = $request->product_cost;
+                        $product_picture = $request->file('product_picture');
+                        $invoice_picture = $request->file('invoice_picture');
+                        //21 (shipment damage)
+                        $damage_product_picture = null;
+                        $damage_claim_product_cost = null;
+                        $product_packaging_picture = null;
+                        $actual_product_picture = null;
+                        //22 (content short)
+                        $missing_product_picture = null;
+                        $claim_content_product_cost = null;
+                        $product_packaging_picture_content_short = null;
+                        $actual_product_picture_content_short = null;
+
+                        if ($complaint_id == 21 && $app_type == 1) {
+                            $product_packaging_picture = $request->file('product_packaging_picture');
+                            $actual_product_picture = $request->file('actual_product_picture');
+                            $damage_product_picture = $request->file('damage_product_picture');
+                            $damage_claim_product_cost = $request->damage_claim_product_cost;
+
+                        } elseif ($complaint_id == 22 && $app_type == 1) {
+                            $product_packaging_picture_content_short =  $request->file('product_packaging_picture');
+                            $actual_product_picture_content_short  =  $request->file('actual_product_picture');
+                            $missing_product_picture = $request->file('missing_product_picture');
+                            $claim_content_product_cost = $request->claim_content_product_cost;
+                        }
+
+                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, $user_id, $launched_by, $shipment_id, $user_id, NULL, $description, $product_cost,$product_picture, $invoice_picture,$damage_product_picture, $product_packaging_picture,$actual_product_picture,$damage_claim_product_cost,$missing_product_picture,$product_packaging_picture_content_short, $actual_product_picture_content_short, $claim_content_product_cost);
                     }
                     else {
-                        if($nature_id == 4 && $complaint_id!=26) {
-
-                            $product_cost = $request->product_cost;
-                            $product_picture = $request->file('product_picture');
-                            $invoice_picture = $request->file('invoice_picture');
-                            //21 (shipment damage)
-                            $damage_product_picture = null;
-                            $damage_claim_product_cost = null;
-                            $product_packaging_picture = null;
-                            $actual_product_picture = null;
-                            //22 (content short)
-                            $missing_product_picture = null;
-                            $claim_content_product_cost = null;
-                            $product_packaging_picture_content_short = null;
-                            $actual_product_picture_content_short = null;
-
-                            if ($complaint_id == 21) {
-                                $product_packaging_picture = $request->file('product_packaging_picture');
-                                $actual_product_picture = $request->file('actual_product_picture');
-                                $damage_product_picture = $request->file('damage_product_picture');
-                                $damage_claim_product_cost = $request->damage_claim_product_cost;
-
-                            } elseif ($complaint_id == 22) {
-                                $product_packaging_picture_content_short =  $request->file('product_packaging_picture');
-                                $actual_product_picture_content_short  =  $request->file('actual_product_picture');
-                                $missing_product_picture = $request->file('missing_product_picture');
-                                $claim_content_product_cost = $request->claim_content_product_cost;
+                        if ($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1) {
+                            if (in_array($complaint_id, [11, 13])) {
+                                $present_shipments[] = $shipment->tracking_number;
                             }
-
-                            CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment_id, $user_id, NULL, $description, $product_cost,$product_picture, $invoice_picture,$damage_product_picture, $product_packaging_picture,$actual_product_picture,$damage_claim_product_cost,$missing_product_picture,$product_packaging_picture_content_short, $actual_product_picture_content_short, $claim_content_product_cost);
                         }
-                        else {
-                            if ($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1) {
-                                if (in_array($complaint_id, [11, 13])) {
-                                    $present_shipments[] = $shipment->tracking_number;
-                                }
-                            }
 
-                            if ($complaint_id == 12) {
-                                if ($shipment->shipper_status_id == 5) {
-                                    $description = $description . " (change old amouunt $shipment->amount to new amount $request->cod_new_amount )";
-                                    $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment_id, $user_id, NULL, $description);
+                        if ($complaint_id == 12 && $app_type == 1) {
+                            if ($shipment->shipper_status_id == 5) {
+                                $description = $description . " (change old amouunt $shipment->amount to new amount $request->cod_new_amount )";
+                                $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, $user_id, $launched_by, $shipment_id, $user_id, NULL, $description);
 
-                                } else {
-                                    $crm_request_padded_id =  CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment_id, $user_id, NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1);
-                                }
                             } else {
-                                $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment_id,$user_id, NULL, $description);
+                                $crm_request_padded_id =  CRMController::add($nature_id, $complaint_id, $channel_id, 1, $user_id, $launched_by, $shipment_id, $user_id, NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1);
                             }
+                        } else {
+                            $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, $user_id, $launched_by, $shipment_id,$user_id, NULL, $description);
                         }
                     }
-
-                    if ($nature_id == 2) {
+                    if ($nature_id == 2 && $app_type == 1) {
                         if ($complaint_id == 13) {
                             $shipment->consignee_phone_number_2 = $request->alternate_phone;
                             $shipment->save();
@@ -209,40 +172,28 @@ class ShipperCrmApiController extends Controller
                         }
                     }
                 }
-
+                else {
+                    $not_found_shipments[]=$shipment_id;
+                }
             }
 
-            if ($nature_id == 1 && isset($crm_request_padded_id)) {
+            if ($nature_id == 1 && isset($crm_request_padded_id) && $app_type == 1) {
                 $case_nature_complainant =  $request->case_nature_complainant;
                 $complainant_phone =  $request->complainant_phone;
                 AdminCRMController::updateComplaintPhone($crm_request_padded_id,$case_nature_complainant, $complainant_phone);
             }
 
-            if (!empty($present_shipments)) {
-                if (count($shipment_ids) === count($present_shipments)) {
-                    return response()->json([
-                        'status' => 1,
-                        'error' => 'Requests or complaints already exist for all provided shipments.',
-                        'already_existed_shipments' => $present_shipments
-                    ]);
-                }
-
-                return response()->json([
-                    'status' => 0,
-                    'success' => 'Requests added, but some shipments already have existing requests or complaints.',
-                    'already_existed_shipments' => $present_shipments
-                ]);
-            }
-
             return response()->json([
                 'status' => 0,
-                'success' => 'Requests successfully added.',
-                'already_existed_shipments' => []
+                'error' => 'Requests processed: some already existed, some shipments not found, others added successfully.',
+                'already_existed_shipments' => $present_shipments,
+                'not_found_shipments' => $not_found_shipments
             ]);
         }
     }
     public function crm_request_summary(Request $request)
     {
+
         $shipper_id = $request->shipper_id;
 
         $launched = CrmRequest::where('status_id',1)
@@ -263,8 +214,10 @@ class ShipperCrmApiController extends Controller
 
     public function crm_request_resources(Request $request)
     {
-        $case_nature = CrmRequestCaseNature::where('id','!=',3)->get();
-        $channels = CrmRequestChannel::all();
+        $case_nature = $request->app_type == 2
+            ? CrmRequestCaseNature::all() :
+            CrmRequestCaseNature::where('id','!=',3)->get();
+
         $complaints = CrmRequestCaseNatureType::where('status_id',1)->where('nature_id',1)->get();
         $service_requests = CrmRequestCaseNatureType::where('status_id',1)->where('nature_id',2)->get();
         $claims = CrmRequestCaseNatureType::where('status_id',1)->where('nature_id',4)->get();
@@ -272,6 +225,10 @@ class ShipperCrmApiController extends Controller
             ['id' => 1, 'complainant_type' => 'Consignee'],
             ['id' => 2, 'complainant_type' => 'Shipper'],
         ];
+        $channels = $request->app_type == 2
+            ? CrmRequestChannel::where('id', '!=', 1)->get()
+            : CrmRequestChannel::all();
+
 
         return response()->json(['status' => 0, 'case_nature' => $case_nature, 'channels' => $channels, 'complaints' => $complaints, 'service_requests' => $service_requests, 'claims' => $claims, 'complainants' => $complainants]);
 
@@ -279,8 +236,25 @@ class ShipperCrmApiController extends Controller
 
     public function crm_request_list(Request $request)
     {
+        $app_type = $request->app_type;
 
-        $shipper_id = $request->shipper_id;
+        $selects = [
+            'crm_requests.id as id',
+            's.tracking_number as tracking_number', 's.id as shipment_id',
+            'crcn.name as case_nature',
+            'crcnt.type as case_nature_type',
+            'crc.channel as channel',
+            'crs.name as request_status',
+            'ad.name as agent',
+            'a.name as name',
+            'crm_requests.launched_by as launched_added_by',
+            'crm_requests.created_at as created_at',
+            'crm_requests.description as description',
+            'crm_requests.status_id',
+            'ss.name as shipment_status',
+            'crmst.created_at as closed_at',
+            'crm_requests.launched_by_id'
+        ];
 
         $crm_requests = CrmRequest::leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_requests.case_nature_id')
             ->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'crm_requests.case_nature_type_id')
@@ -297,20 +271,32 @@ class ShipperCrmApiController extends Controller
                     ->where('crm_requests.status_id', 4)
                     ->where('crmst.id', '=',
                         DB::raw('(select max(id) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id)'));
-            })
-            ->leftjoin('users as u', 'u.id', '=', 'crm_requests.shipper_id')
-            ->select('crm_requests.id as id', 's.tracking_number as tracking_number','s.id as shipment_id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as request_status', 'ad.name as agent', 'a.name as name', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at','crm_requests.description','crm_requests.status_id', 'ss.name as shipment_status','crm_requests.description as descr','crmst.created_at as closed_at','crm_requests.launched_by_id','crmcrs.name as at_fault', 'u.name as shipper_name')
-            ->where('crm_requests.shipper_id', $shipper_id)
+            });
+
+            // Conditional joins and filters
+            if ($app_type == 2) {
+                $selects[] = 'rsi.shipper_name';
+                $crm_requests = $crm_requests
+                    ->leftJoin('retail_shipments as rs', 'rs.shipment_id', '=', 'crm_requests.shipment_id')
+                    ->leftJoin('retail_shipper_infos as rsi', 'rsi.id', '=', 'rs.shipper_account_no')
+                    ->where('rs.shipper_account_no', $request->retail_shipper_id);
+            } else {
+                $selects[]='u.name as shipper_name';
+                $crm_requests = $crm_requests
+                    ->leftJoin('users as u', 'u.id', '=', 'crm_requests.shipper_id')
+                    ->where('crm_requests.shipper_id', $request->shipper_id);
+            }
+
+        // Final query
+        $crm_requests = $crm_requests->select($selects)
             ->orderBy('crm_requests.id', 'desc')
-            ->get();
+            ->cursorPaginate(50);
+
 
         if($crm_requests->isNotEmpty()) {
             return response()->json(['status' => 0 , 'message' => 'Success' ,'crm_requests'=>$crm_requests]);
         }
         return response()->json(['status' => 1 , 'message' => 'CRM Complaints not found!']);
-
-
-
 
     }
     public function single_crm_request(Request $request)
