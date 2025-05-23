@@ -7179,6 +7179,13 @@ class AdminFinanceController extends Controller
         if ($request->filled('requested_to_date')) {
             $pending_payment_shipments->whereDate('pending_payment_shipments.created_at', '<=', $request->requested_to_date);
         }
+        if ($request->filled('arrival_from_date')) {
+            $pending_payment_shipments->whereDate('sj.created_at', '>=', $request->arrival_from_date);
+        }
+
+        if ($request->filled('arrival_to_date')) {
+            $pending_payment_shipments->whereDate('sj.created_at', '<=', $request->arrival_to_date);
+        }
 
 
 
