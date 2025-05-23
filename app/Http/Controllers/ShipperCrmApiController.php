@@ -290,7 +290,7 @@ class ShipperCrmApiController extends Controller
         // Final query
         $crm_requests = $crm_requests->select($selects)
             ->orderBy('crm_requests.id', 'desc')
-            ->cursorPaginate(50);
+            ->cursorPaginate(20);
 
 
         if($crm_requests->isNotEmpty()) {
