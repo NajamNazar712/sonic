@@ -585,7 +585,7 @@
                 }
             });
             $('#arrival_from_date').pickadate({
-            //firstDay: 1,
+                //firstDay: 1,
                 clear: 'Clear',
                 max: '{{ Carbon\Carbon::now() }}',
                 // format: 'dd mmmm, yyyy',
@@ -596,13 +596,13 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        $('#arrival_to_date').pickadate('picker').set('max', $('#arrival_from_date')
+                        $('#arrival_to_date').pickadate('picker').set('min', $('#arrival_from_date')
                             .pickadate('picker').get('select'));
                     }
                 }
             });
             $('#arrival_to_date').pickadate({
-            //firstDay: 1,
+                //firstDay: 1,
                 clear: 'Clear',
                 max: '{{ Carbon\Carbon::now() }}',
                 // format: 'dd mmmm, yyyy',
@@ -613,7 +613,7 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        $('#arrival_from_date').pickadate('picker').set('max', $('#arrival_to_date')
+                        $('#arrival_from_date').pickadate('picker').set('max', $('#rarrival_to_date')
                             .pickadate('picker').get('select'));
                     }
                 }
