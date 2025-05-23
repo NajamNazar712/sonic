@@ -7171,6 +7171,15 @@ class AdminFinanceController extends Controller
         if ($request->has('pickup_address_id')) {
             $pending_payment_shipments->where('s.pickup_address_id', $request->pickup_address_id);
         }
+        
+        if ($request->filled('requested_from_date')) {
+            $pending_payment_shipments->whereDate('pending_payment_shipments.created_at', '>=', $request->requested_from_date);
+        }
+
+        if ($request->filled('requested_to_date')) {
+            $pending_payment_shipments->whereDate('pending_payment_shipments.created_at', '<=', $request->requested_to_date);
+        }
+
 
 
         $datatables = Datatables::of($pending_payment_shipments)
