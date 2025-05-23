@@ -32,7 +32,7 @@ class CreatePaymentsForMissingShipmentsSeeder extends Seeder
                 $shipment = ShipmentsArchieve::find($shipment_id);
             }
             if($shipment){
-                if (in_array($shipment->shipper_status_id, [14, 16, 30, 31, 36, 37])) {
+                if (in_array($shipment->shipper_status_id, [14, 16, 30, 31, 36, 37,25])) {
 
                     if ($shipment->booking_type_id == 2) {
                         ShipmentChargesController::replacement($shipment_id,$shipment);
