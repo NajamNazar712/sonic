@@ -596,9 +596,10 @@ class CreatePaymentsForMissingShipmentsSeeder extends Seeder
 
             if(empty($pending_payment_shipment) && empty($done_payment_shipment)){
                 $payment_push_to_cron[$ship->id] = $ship->tracking_number;
+                CronDonePayment::insert(['tracking_number'=>$ship->tracking_number]);
             }
 
         }
-        dd(count($payment_push_to_cron));
+
     }
 }
