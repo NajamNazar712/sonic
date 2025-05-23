@@ -5661,16 +5661,15 @@ class GlobalSettingsController extends Controller
                 'crm_agent_auto_assigns.created_at as created',
                 'crm_agent_auto_assigns.status',
                 'ad.name as agent_name',
-                'ad.status'
             ]);
 
 
        $enable_disable = $request->input('enable_disable');
 
-        if ($enable_disable === '1' || is_null($enable_disable)) {
-            $roles->where('ad.status', 1);
+        if ($enable_disable == '1' || is_null($enable_disable)) {
+            $roles->where('crm_agent_auto_assigns.status', 1);
         } else {
-            $roles->where('ad.status', '!=', 1);
+            $roles->where('crm_agent_auto_assigns.status', 0);
         }
 
         $datatables = Datatables::of($roles)
