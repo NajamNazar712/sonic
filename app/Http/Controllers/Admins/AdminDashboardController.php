@@ -1330,24 +1330,35 @@ class AdminDashboardController extends Controller
         $keyword = $request->search;
         $subSegment = $request->input('sub_segment_select', null);
         $account_tye_id = $request->input('account_type_id', null);
-        $shippers = User::where('name', 'like', '%' . $keyword . '%');
+        $report_type = $request->report_type; //1 => for kam & poc qsr report
+        if($report_type == 1) {
+            $shippers = User::leftJoin('sale_tier_tags', 'sale_tier_tags.user_id', '=', 'users.id')
+            ->where(function($query) {
+            $query->whereNotNull('sale_tier_tags.poc')
+                 ->orWhereNotNull('sale_tier_tags.kam');
+            })
+            ->where('users.name', 'like', '%' . $keyword . '%');
+
+        } else {
+            $shippers = User::where('name', 'like', '%' . $keyword . '%');
+        }
         
         if($type == 'active')
         {
-            $shippers = $shippers->whereIn('status', [3, 4]);
+            $shippers = $shippers->whereIn('users.status', [3, 4]);
         }
         elseif($type == 'pending')
         {
-            $shippers = $shippers->whereIn('status', [0, 1, 2, 5]);
+            $shippers = $shippers->whereIn('users.status', [0, 1, 2, 5]);
         }
         if($subSegment){
-            $shippers = $shippers->where('segment_id', $subSegment);
+            $shippers = $shippers->where('users.segment_id', $subSegment);
         }
         if($account_tye_id){
-            $shippers = $shippers->whereIn('account_type_id', $account_tye_id);
+            $shippers = $shippers->whereIn('users.account_type_id', $account_tye_id);
         }
 
-        $shippers = $shippers->select('id','name as text')->take(10)->get()->toArray();
+        $shippers = $shippers->select('users.id','name as text')->take(10)->get()->toArray();
 
         return response()->json($shippers);
     }

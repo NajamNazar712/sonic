@@ -266,7 +266,8 @@
                 data: function (params) {
                     return {
                         search: params.term,
-                        sub_segment_select : $('#sub_segment_select').val()
+                        sub_segment_select : $('#sub_segment_select').val(),
+                        report_type : 1
                     }
                 },
                 processResults: function (data) {
