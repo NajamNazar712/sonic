@@ -524,7 +524,7 @@
 
          
             $('#requested_from_date').pickadate({
-                firstDay: 1,
+                //firstDay: 1,
                 clear: '',
                 max: '{{ Carbon\Carbon::now() }}',
                 // format: 'dd mmmm, yyyy',
@@ -542,7 +542,7 @@
             });
 
             $('#requested_to_date').pickadate({
-                firstDay: 1,
+                //firstDay: 1,
                 clear: '',
                 max: '{{ Carbon\Carbon::now() }}',
                 // format: 'dd mmmm, yyyy',
@@ -1921,8 +1921,13 @@
                 selected_rows_shipments = [];
                 shipperTotal = {};
                 selected_shippers_id = [];
+                $('#requested_from_date').val('');
+                $('#requested_to_date').val('');
+            
+                $('[name="requested_from_date_formatted"]').val('');
+                $('[name="requested_to_date_formatted"]').val('');
 
-                
+
             });
 
             var payable_list = [];
