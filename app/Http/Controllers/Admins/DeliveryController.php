@@ -128,7 +128,7 @@ use App\Http\Traits\CommonTrait;
 use App\Jobs\ProcessRvShipmentTicket;
 use App\RvShipmentTicket;
 use GuzzleHttp\Client;
-use App\HTTP\Models\Admin\NonCodShipmentLogs;
+use App\Http\Models\Admin\NonCodShipmentLog;
 
 class DeliveryController extends Controller
 {
@@ -2610,17 +2610,8 @@ class DeliveryController extends Controller
                             $remarks = null;
                             if ($request->status_drop[$shipment] == 12) {
                                
-                                $journey = ShipmentsJourney::where('shipment_id',$shipment)->whereIn('status_reason_id',[27,35])->count();
+                                // $journey = ShipmentsJourney::where('shipment_id',$shipment)->whereIn('status_reason_id',[27,35])->count();
                                 
-                                if(in_array($request->reason_drop[$shipment],[27,35]) && $journey > 0){
-                                    $request->merge([
-                                        'shipment_id' => $shipment,
-                                        'remarks' => null,
-                                        'rv_assign_agent_sub_status_id' => null
-                                    ]);
-                                    $this->return_confirm($request,346);
-                                    return redirect()->back()->with('success', 'Statuses updated successfully!');
-                                }
                                 if(in_array($request->reason_drop[$shipment],[12,34])){
                                     $remarks = $this->remarksNSAOSAJourneyRVR($delivery_note_id,$shipment_details->user_id);
                                 }
@@ -3966,23 +3957,36 @@ class DeliveryController extends Controller
                         // 35 = Delivery Stopped
                         if ($shipper_status_id == 12 && in_array($status_reason_id, [27, 35]) && $verification) {
                             $globalAdminId = 346;
+                            $journey = ShipmentsJourney::where('shipment_id', $shipment_details->id)->whereIn('status_reason_id', [27, 35])->count();
+                            if($journey > 2){
+                                Shipment::where('id', $shipment)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
+                                if ($shipment_details->shipment_type == 1) {
+                                    if ($shipment_details->booking_type_id != 4) {
+                                        ShipmentChargesController::return($shipment);
+                                        if ($shipment_details->packaging_material_request != 1) {
+                                            AdminFinanceController::add_payment($shipment, 1);
+                                        }
+                                    } else {
+                                        ShipmentChargesController::walk_in_return($shipment);
+                                        $shipment_details->walk_in_status = 2;
+                                        $shipment_details->save();
+                                        AdminFinanceController::done_payment($shipment, 1);
+                                    }
+                                }
+                                ShipmentsJourneyController::add($shipment, 20, 20, $status_reason_id, $journey->remarks ?? NULL, NULL, $globalAdminId, null, null, 1, null, null, null, null, null);
+                                
+                            }else{
+                                    $rvshipments = RvShipmentAssignAgent::where('shipment_id', $shipment_details->id);
+                                    Shipment::where('id', $shipment)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);
 
-                            Shipment::where('id', $shipment)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);
+                                    ShipmentsJourneyController::add($shipment_details->id, 65, 65, $status_reason_id, NULL, $shipment_details->user_id, 346);
 
-                            // if ($shipment_details->shipment_type == 1) {
-                            //     if ($shipment_details->booking_type_id != 4) {
-                            //         ShipmentChargesController::return($shipment);
-                            //         if ($shipment_details->packaging_material_request != 1) {
-                            //             AdminFinanceController::add_payment($shipment, 1);
-                            //         }
-                            //     } else {
-                            //         ShipmentChargesController::walk_in_return($shipment);
-                            //         $shipment_details->walk_in_status = 2;
-                            //         $shipment_details->save();
-                            //         AdminFinanceController::done_payment($shipment, 1);
-                            //     }
-                            // }
-                            ShipmentsJourneyController::add($shipment, 65, 65, $status_reason_id, $shipment_journey_remarks, NULL, $globalAdminId, null, null, 1, null, null, null, null, null);
+                                    RvShipmentAssignAgent::where('shipment_id', $shipment_details->id)
+                                    // ->whereDate('created_at',$date)
+                                    ->update(['agent_id'=> 346,'rv_state_id'=>2, 'rv_assign_agent_status_id' => 7,'unresponsive_count' => 3, 'unresponsive_email_count' => 1, 'unresponsive_email_time' => date('Y-m-d h:i:s')]);                                    
+                                    NotificationsController::send(220, $rvshipments);
+                            }
+
 
                             //Remove Shipment from RV Shipment Ticket
                             RvShipmentTicket::where('shipment_id', $shipment)->delete();
@@ -4068,6 +4072,7 @@ class DeliveryController extends Controller
         }
     }catch (\Throwable $th)
         {
+            error_log('data'.print_r($th->getMessage(),true));
             return redirect()->back()->with('error', 'Something Went Wrong !');
         }
     }
@@ -7204,7 +7209,8 @@ class DeliveryController extends Controller
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
             ->leftjoin('rider_delivery_note_statuses as rdns', 'rdns.delivery_note_id', '=', 'delivery_notes.id')
-            ->leftjoin('rider_deliveries as rd', 'rd.delivery_note_id', '=', 'delivery_notes.id')
+            //commenting this as it has no issue now and also it is effecting sum of actual weights
+            //->leftjoin('rider_deliveries as rd', 'rd.delivery_note_id', '=', 'delivery_notes.id')
             ->leftjoin('rider_types as rt', 'rt.id', '=', 'riders.rider_type_id')
             ->leftjoin('cities as c', 'c.id', '=', 'riders.city_id')
             ->leftJoin('city_areas as ca', function ($join) {
@@ -7227,7 +7233,7 @@ class DeliveryController extends Controller
             ->leftjoin('shipments', 'delivery_note_shipments.shipment_id', '=', 'shipments.id') // Join with shipments table
 
 
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.trax_id as rider_trax_id','riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at','delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount','delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.status', 'delivery_notes.pending_status','delivery_notes.cash_collection_status', 'delivery_notes.dncc_status', 'delivery_notes.last_updated_at', 'delivery_notes.cash_collected_by','ccb.name as cash_collected', 'delivery_notes.cash_collected_at', 'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone','rdns.status as updated_via_app', 'rd.id as rider_delivery_id', 'rd.delivered_status as delivered_status', 'rd.picture_path as picture_path', 'rt.name as rider_type','zn.name as zone_name', 'hktdn.transactions_amount as transactions_amount', 'hktdn.cash_amount as cash_amount', 'delivery_notes.one_link_payment_count','delivery_notes.created_via_app as created_via', 'riders.operation_rider_id', 'ca.name as area','one_link_cash.transaction_amount as one_link_amount', DB::raw('SUM(shipments.actual_weight) as total_weight')])
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.trax_id as rider_trax_id','riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at','delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount','delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.status', 'delivery_notes.pending_status','delivery_notes.cash_collection_status', 'delivery_notes.dncc_status', 'delivery_notes.last_updated_at', 'delivery_notes.cash_collected_by','ccb.name as cash_collected', 'delivery_notes.cash_collected_at', 'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone','rdns.status as updated_via_app', 'rt.name as rider_type','zn.name as zone_name', 'hktdn.transactions_amount as transactions_amount', 'hktdn.cash_amount as cash_amount', 'delivery_notes.one_link_payment_count','delivery_notes.created_via_app as created_via', 'riders.operation_rider_id', 'ca.name as area','one_link_cash.transaction_amount as one_link_amount', DB::raw('SUM(shipments.actual_weight) as total_weight')])
 
             ->where('riders.operation_rider_id', $request->get('operation_rider_id'))
             ->when($request->get('delivery_note_numbers'),function($data) use ($deliveryNoteNumbers){
@@ -10236,7 +10242,7 @@ class DeliveryController extends Controller
         // Make logs for who scanned cn numbers
         foreach ($otpRecords as $record) {
             if (!empty($record->dbf_otp)) {
-                NonCodShipmentLogs::create([
+                NonCodShipmentLog::create([
                     'tracking_number' => trim($record->tracking_number),
                     'trax_id' => $user->trax_id,
                     'employee_name' => $user->name,
@@ -10466,77 +10472,38 @@ class DeliveryController extends Controller
 
     public function shipment_otp_scanning_history_list(Request $request)
     {
-        $logs = NonCodShipmentLogs::whereNotNull('shipment_otp')->orderby('id', 'desc');
+        $tracking_numbers = explode(',', $request->tracking_number);
+        $logs = NonCodShipmentLog::whereNotNull('shipment_otp')
+            ->whereIn('tracking_number', $tracking_numbers);
 
-        // Check if there are search values and apply them
-        foreach ($request->get('columns') as $column) {
-            if ($column['search']['value']) {
-                $searchValue = $column['search']['value'];
-                switch ($column['name']) {
-                    case 'employee_name':
-                        $logs->where('employee_name', 'like', '%' . $searchValue . '%');
-                        break;
-                    case 'employee_designation':
-                        $logs->where('employee_designation', 'like', '%' . $searchValue . '%');
-                        break;
-                    case 'trax_id':
-                        $logs->where('trax_id', 'like', '%' . $searchValue . '%');
-                        break;
-                    case 'tracking_number':
-                        $logs->where('tracking_number', 'like', '%' . $searchValue . '%');
-                        break;
-                    case 'shipment_otp':
-                        $logs->where('shipment_otp', 'like', '%' . $searchValue . '%');
-                        break;
-                }
-            }
-        }
-
+        // Add the necessary columns and formatting
         $datatables = Datatables::of($logs)
-            ->addColumn('tracking_number', function ($shipments) {
+            ->editColumn('tracking_number', function ($shipments) {
                 return $shipments->tracking_number;
             })
             ->addColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
-            ->addColumn('shipment_otp', function ($shipments) {
-                if ($shipments->shipment_otp) {
-                    return $shipments->shipment_otp;
-                } else {
-                    return " - ";
-                }
+            ->editColumn('shipment_otp', function ($shipments) {
+                return $shipments->shipment_otp ? $shipments->shipment_otp : " - ";
             })
-            ->addColumn('employee_name', function ($shipments) {
-                if ($shipments->employee_name) {
-                    return $shipments->employee_name;
-                } else {
-                    return " - ";
-                }
+            ->editColumn('employee_name', function ($shipments) {
+                return $shipments->employee_name ? $shipments->employee_name : " - ";
             })
-            ->addColumn('employee_designation', function ($shipments) {
-                if ($shipments->employee_designation) {
-                    return $shipments->employee_designation;
-                } else {
-                    return " - ";
-                }
+            ->editColumn('employee_designation', function ($shipments) {
+                return $shipments->employee_designation ? $shipments->employee_designation : " - ";
             })
-            ->addColumn('trax_id', function ($shipments) {
-                if ($shipments->trax_id) {
-                    return $shipments->trax_id;
-                } else {
-                    return " - ";
-                }
+            ->editColumn('trax_id', function ($shipments) {
+                return $shipments->trax_id ? $shipments->trax_id : " - ";
             })
-            ->addColumn('generated_at', function ($shipments) {
-                if ($shipments->updated_at) {
-                    return Carbon::parse($shipments->updated_at)->format("Y-m-d H:i:s");
-                } else {
-                    return " - ";
-                }
+            ->editColumn('generated_at', function ($shipments) {
+                return $shipments->updated_at ? Carbon::parse($shipments->updated_at)->format("Y-m-d H:i:s") : " - ";
             })
             ->rawColumns(['tracking_number_link'])
-        ->make(true);
+            ->make(true);
+    
         return $datatables;
     }
+    
 }

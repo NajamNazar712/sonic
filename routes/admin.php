@@ -4036,6 +4036,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/check-lead', 'Admins\LeadManagementController@checkLead')->name('check.lead');
         Route::get('view_logs', 'Admins\LeadManagementController@view_logs')->name('view_logs');
 
+        Route::get('send_mail', 'Admins\LeadManagementController@send_mail')->name('send_mail');
+
     });
 
     Route::prefix('pam_leads')->name('pam_leads.')->group(function () {
@@ -4045,6 +4047,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 
     Route::prefix('retail')->name('retail.')->group(function () {
+        Route::get('view_logs', 'Admins\Retail\RetailAdminUserManagementController@view_logs')->name('view_logs');
         Route::prefix('franchise')->name('franchise.')->group(function () {
             Route::get('', 'Admins\Retail\RetailAdminUserManagementController@franchise_index')->name('index');
             Route::get('list', 'Admins\Retail\RetailAdminUserManagementController@franchise_list')->name('list');

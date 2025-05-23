@@ -280,7 +280,12 @@ class Kernel extends ConsoleKernel
         {
             $schedule->command('agent:botcallunresponsive')->everyFifteenMinutes()->runInBackground();
             $schedule->command('missingfirst:call')->hourly()->runInBackground();
-
+            $schedule->command('missingfirst:call', [
+                '--start' => Carbon::yesterday()->startOfDay()->toDateTimeString(), 
+                '--end' => Carbon::yesterday()->endOfDay()->toDateTimeString()      
+            ])
+                ->dailyAt('00:30') // runs at 12:30 AM every night
+                ->runInBackground();
         }
 
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
@@ -601,6 +606,8 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('update:shipper_segment_logs')->everyFiveMinutes()->runInBackground();
 //        $schedule->command('apollo:fetch-shipments-status')->everyFifteenMinutes()->runInBackground();
+        $schedule->command('apollo:fetch-shipments-status')->dailyAt('15:36')->runInBackground();
+
         $schedule->command('fingsurgent:sonic-payment')->hourly()->runInBackground(); //wallet
 //        $schedule->command('status:re-push-wallet')->hourly()->runInBackground(); // wallet no need now after bulk status work
         $schedule->command('rerun:wallet_log_re_push')->hourly()->runInBackground(); // wallet

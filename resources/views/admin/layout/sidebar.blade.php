@@ -1535,7 +1535,7 @@
                                     Service</a></li>
                         @endif
 
-                        @if (session('role_id') == 1 || in_array(70, session('permissions')))
+                        @if (session('role_id') == 1 || in_array(1032, session('permissions')))
                             <li>
                                 <a class="menu-item" href="{{ route('admin.reports.kam_and_poc_qsr.index') }}">
                                     KAM & POC QSR

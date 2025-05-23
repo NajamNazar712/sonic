@@ -1,11 +1,11 @@
 <?php
 
-namespace App\HTTP\Models\Admin;
+namespace App\Http\Models\Admin;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class NonCodShipmentLogs extends Model
+class NonCodShipmentLog extends Model
 {
     use HasFactory;
 

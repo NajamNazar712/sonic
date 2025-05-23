@@ -11826,13 +11826,13 @@ class RiderAPIController extends Controller
 
                                             if($shipper_status_id == 12) //if Shipper Status Id = 12 (Shipment - Reason Validation Required) Then fetch Those Shipments in Get Ticket
                                             {
-                                                $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->whereIn('status_reason_id', [27, 35])->count();
-                                                if(in_array($request->status_reason_id,[27,35]) && $journey > 0){
-                                                    $this->auto_return_confirm($shipment->id);
-                                                    ShipmentsJourneyController::add($shipment->id, 20, 20, $request->status_reason_id, $remarks, NULL, 346, $request->delivery_note_id, NULL, 1, NULL, $rider_id, NULL, NULL, $remarks_id);
-                                                }else{
+                                                // $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->whereIn('status_reason_id', [27, 35])->count();
+                                                // if(in_array($request->status_reason_id,[27,35]) && $journey > 0){
+                                                //     $this->auto_return_confirm($shipment->id);
+                                                //     ShipmentsJourneyController::add($shipment->id, 20, 20, $request->status_reason_id, $remarks, NULL, 346, $request->delivery_note_id, NULL, 1, NULL, $rider_id, NULL, NULL, $remarks_id);
+                                                // }else{
                                                     $this->rvshipmentticketInsert($shipment->id, $shipper_status_id, $request->status_reason_id, $shipment->user_id);
-                                                }
+                                                // }
                                             }
 
                                             $rider_delivery_note_status = RiderDeliveryNoteStatus::where('delivery_note_id', $request->delivery_note_id);

@@ -276,13 +276,16 @@ class NotificationsController extends Controller
         $filterBlockedEmails = function ($emails) use ($block_email) {
             if (is_array($emails)) {
                 return array_values(array_filter($emails, function ($email) use ($block_email) {
+                    $email = strtolower(preg_replace('/\s+/', '', $email)); // trim and lowercase
                     return !in_array($email, $block_email);
                 }));
-            } elseif (is_string($emails) && in_array($emails, $block_email)) {
-                return null;
+            } elseif (is_string($emails)) {
+                $email = strtolower(preg_replace('/\s+/', '', $emails)); // sanitize single email
+                return in_array($email, $block_email) ? null : $email;
             }
             return $emails;
         };
+
 
 
         if ($to) {
@@ -10709,7 +10712,7 @@ class NotificationsController extends Controller
                 } else if ($id == 221) {
                     $responses = $reference_1_id;
 
-                    $to = array("mohsin.khan@trax.pk", "muhammad.zain@trax.pk", "muhammad.anas@trax.pk");
+                    $to = array("mohsin.khan@trax.pk", "muhammad.zain@trax.pk", "anas.khan@slgtrax.com");
                     $cc = 'tauseef.sarfaraz@trax.pk';
 
                     $date = Carbon::now()->toFormattedDateString();
@@ -10814,7 +10817,7 @@ class NotificationsController extends Controller
                 } else if ($id == 223) {
                     //Crm Progress Report
                     $now = Carbon::now();
-                    $to = array("mohsin.khan@trax.pk", "muhammad.zain@trax.pk", "muhammad.anas@trax.pk");
+                    $to = array("mohsin.khan@trax.pk", "muhammad.zain@trax.pk", "anas.khan@slgtrax.com");
                     $cc = 'tauseef.sarfaraz@trax.pk';
                     $crm_complaints_2_days_closure = [];
                     $crm_services_2_days_closure = [];

@@ -16,51 +16,65 @@ class ApolloShipmentCronController extends Controller
 
     public static function fetch_shipment_statuses()
     {
-
-
-
         $time_stamp = Carbon::now();
-        $apollo_booking_journeys = [];
-        $apollo_piece_journeys = [];
+        $chunkSize = 500;
+        $hasSentAny = false;
 
         $apollo_cron = ApolloCronJobLog::select('last_run_time')->where('id', 1)->first();
 
-        $shipmentJourneys = DB::table('shipments_journey as sj')
-            ->join('shipments as s', 's.id', 'sj.shipment_id')
-//            ->join('user_shipping_infos as us','us.id','sj.pickup_address_id')
+        // Build initial query
+        $shipmentJourneysQuery = DB::table('shipments_journey as sj')
+            ->join('shipments as s', 's.id', '=', 'sj.shipment_id')
             ->join('shipment_additional_charges as sd', 'sj.shipment_id', '=', 'sd.shipment_id')
             ->whereNotNull('sd.apollo_shipment_id');
-//            ->whereNotIn('sj.shipper_status_id',[1]);
 
         if ($apollo_cron && $apollo_cron->last_run_time) {
-            $shipmentJourneys->where('sj.updated_at', '>=', $apollo_cron->last_run_time);
-        } else {
-            $shipmentJourneys->whereBetween('sj.updated_at', [$time_stamp->toDateString() . ' 00:00:01', $time_stamp->toDateString() . ' 23:59:59']);
-        }
-        $shipmentJourneys->select('sj.*', 'sd.apollo_shipment_id', 's.actual_weight', 'sd.apollo_is_piece');
-        $chunkSize = 500;
+            $minId = DB::table('shipments_journey as sj')
+                ->leftJoin('shipments as s', 's.id', '=', 'sj.shipment_id')
+                ->leftJoin('shipment_additional_charges as sd', 'sj.shipment_id', '=', 'sd.shipment_id')
+                ->whereNotNull('sd.apollo_shipment_id')
+                ->where('sj.updated_at', '>=', $apollo_cron->last_run_time)
+                ->min('sj.id');
 
-//        $journeys = $shipmentJourneys->orderBy('sj.id')->get();
+            $shipmentJourneysQuery->where('sj.id', '>=', $minId);
+        } else {
+            $shipmentJourneysQuery->whereBetween('sj.updated_at', [
+                $time_stamp->toDateString() . ' 00:00:01',
+                $time_stamp->toDateString() . ' 23:59:59'
+            ]);
+        }
+
+        // Fetch records
+        $shipmentJourneys = $shipmentJourneysQuery
+            ->select('sj.*', 'sd.apollo_shipment_id', 's.actual_weight', 'sd.apollo_is_piece')
+            ->orderBy('sj.id')
+            ->get();
+
+        // Create Guzzle HTTP client
         $client = new \GuzzleHttp\Client([
-//            'base_uri' => 'https://movere-staging.sonic.pk/api/',
             'base_uri' => 'https://api-apollo.sonic.pk/api/',
-            'http_errors' => FALSE,
+            'http_errors' => false,
             'connect_timeout' => 60,
             'timeout' => 60
         ]);
-        $hasSentAny = false;
-        $shipmentJourneys->orderBy('sj.id')->chunk($chunkSize, function ($journeys) use ($client, $time_stamp, &$hasSentAny) {
 
+        // Process records in chunks
+        $shipmentJourneys->chunk($chunkSize)->each(function ($chunk) use ($client, $time_stamp, &$hasSentAny) {
             try {
                 $response = $client->post('sonic/shipments/journeys/bulk-create', [
                     'json' => [
-                        'journeys' => $journeys,
+                        'journeys' => $chunk,
                     ]
                 ]);
+
                 $responseBody = $response->getBody()->getContents();
+                Log::channel('apolloJobLog')->info('Apollo API Response', [
+                    'status' => $response->getStatusCode(),
+                    'body' => $responseBody
+                ]);
                 $responseData = json_decode($responseBody, true);
 
-                if (isset($responseData['response.success'])) {
+                if (!empty($responseData['response.success'])) {
                     $hasSentAny = true;
                 } else {
                     Log::channel('apolloJobLog')->error('API response does not indicate success', [
@@ -85,6 +99,7 @@ class ApolloShipmentCronController extends Controller
             ApolloCronJobLog::where('id', 1)->update(['last_run_time' => $time_stamp]);
         }
     }
+
     public static function fetch_shipment_statuses_backup()
     {
 
