@@ -23,7 +23,7 @@ return new class extends Migration
             $table->integer('user_id');
             $table->integer('substitute_user_id')->default(0);
             $table->boolean('status')->default(0);
-            $table->tinyInteger('finova_account_type')->after('status')->default(0);
+            $table->tinyInteger('finova_account_type')->default(0);
             $table->timestamps();
         });
     }

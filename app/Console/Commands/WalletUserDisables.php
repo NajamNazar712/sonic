@@ -32,13 +32,11 @@ class WalletUserDisables extends Command
     {
         $wallet_users = WalletUser::whereIn('user_id', [44309, 42723])->get();
         $success_delete = [];
-
         foreach ($wallet_users as $user) {
             $done_payment = DonePayment::where('user_id', $user->user_id)
                 ->where('status', 0)
                 ->where('is_wallet_payment', 1)
                 ->first();
-
             if (empty($done_payment)) {
                 $wallet_user_disable = $user->replicate();
                 $wallet_user_disable->setTable('wallet_user_disables');
