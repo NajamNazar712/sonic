@@ -524,7 +524,7 @@
 
          
             $('#requested_from_date').pickadate({
-                firstDay: 1,
+                //firstDay: 1,
                 clear: '',
                 max: '{{ Carbon\Carbon::now() }}',
                 // format: 'dd mmmm, yyyy',
@@ -542,7 +542,7 @@
             });
 
             $('#requested_to_date').pickadate({
-                firstDay: 1,
+                //firstDay: 1,
                 clear: '',
                 max: '{{ Carbon\Carbon::now() }}',
                 // format: 'dd mmmm, yyyy',
