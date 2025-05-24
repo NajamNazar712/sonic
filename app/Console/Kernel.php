@@ -665,7 +665,8 @@ class Kernel extends ConsoleKernel
         }
         $schedule->command('update:shipment_additional_charges')->withoutOverlapping()->daily()->runInBackground();
         $schedule->command('wallet-users:make-to-done')->dailyAt('06:00')->runInBackground();
-        
+        $schedule->command('disable_wallet_users')->twiceDaily('13','18')->runInBackground();
+
     }
     /**
      * Register the commands for the application.
