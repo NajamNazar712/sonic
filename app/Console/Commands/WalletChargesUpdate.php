@@ -37,7 +37,7 @@ class WalletChargesUpdate extends Command
     public function handle()
     {
 
-            $filePath = storage_path('app/FinovaChargesMayasof21-05-25.csv');
+            $filePath = storage_path('app/FinovaChargesMay.csv');
 
             // Load Excel file
             $spreadsheet = IOFactory::load($filePath);
