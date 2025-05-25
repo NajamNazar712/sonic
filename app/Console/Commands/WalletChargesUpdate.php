@@ -36,7 +36,7 @@ class WalletChargesUpdate extends Command
      */
     public function handle()
     {
-
+            Log::channel('cronJobLog')->info('wallet_charges_update started');   
             $filePath = storage_path('app/FinovaChargesMay.csv');
 
             // Load Excel file
@@ -153,12 +153,15 @@ class WalletChargesUpdate extends Command
             });
 
             // Final response
-            echo json_encode([
+            $response = [
                 'status' => empty($errors) ? 1 : 0,
                 'message' => empty($errors) ? 'All charges updated successfully.' : 'Some charges could not be updated due to errors.',
                 'success' => $success,
                 'errors' => $errors,
-            ]);
-            
+            ];
+            Log::channel('cronJobLog')->info('wallet_charges_update result:', $response);
+
+            echo json_encode($response);
+
     }
 }
