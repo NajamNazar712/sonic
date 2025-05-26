@@ -2410,6 +2410,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('ssr')->name('ssr.')->group(function () {
             Route::get('', 'Admins\Reports\SSRController@ssr_index')->name('index');
             Route::post('list', 'Admins\Reports\SSRController@ssr_list')->name('list');
+            Route::post('get_sub_segments','Admins\Reports\SSRController@get_sub_segments')->name('get_sub_segments');
         });
 
         Route::prefix('shipper_summary')->name('shipper_summary.')->group(function () {
