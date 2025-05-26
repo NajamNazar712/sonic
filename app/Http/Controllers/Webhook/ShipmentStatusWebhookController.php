@@ -93,10 +93,21 @@ class ShipmentStatusWebhookController extends Controller
                     $payload['otp'] = $otp;
                 }
                 if ($user_id == 12221) {
-                    $response = $client->post('', [
-                        'json' => $payload
-                    ]);
-                    Log::channel('botCallJobLog')->info('s ' . 'Webhook log responseBody-body' . json_encode($response));
+                    try {
+                        $response = $client->post('', [
+                            'json' => $payload
+                        ]);
+
+                        // Read the body content
+                        $body = $response->getBody();
+                        $body->rewind();  // Ensure we read from the beginning
+                        $responseBody = $body->getContents();
+
+                        // Log the raw body content
+                        Log::channel('botCallJobLog')->info('Webhook response body: ' . $responseBody);
+                    } catch (\Exception $e) {
+                        Log::channel('botCallJobLog')->error('Webhook request failed: ' . $e->getMessage());
+                    }
                 }
                 if ($user_id != 30860) {
                     $response = $client->post('', [
