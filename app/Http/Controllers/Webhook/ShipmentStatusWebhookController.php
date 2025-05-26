@@ -74,9 +74,9 @@ class ShipmentStatusWebhookController extends Controller
         $client = new Client(['base_uri' => $url, 'http_errors' => FALSE, 'connect_timeout' => 30, 'timeout' => 30]);
         
         $notification_data = ['user_id' => $user_id, 'url' => $url];
-        // if ($user_id == 30860) {
-        //     Log::channel('botCallJobLog')->info('s ' . 'Webhook log check-error' . json_encode($notification_data));
-        // }
+        if ($user_id == 12221) {
+            Log::channel('botCallJobLog')->info('s ' . 'Webhook log check-error' . json_encode($notification_data));
+        }
         for($i = 0; $i < $attempts; $i++){
             try{
 
@@ -98,7 +98,16 @@ class ShipmentStatusWebhookController extends Controller
                         'form_params' => $payload
                     ]);
                 }
-
+                if($user_id == 12221){
+                    $body = $response->getBody();
+                    $body->rewind();  // Rewind the stream to ensure we're reading from the start
+                    $responseBody = $body->getContents(); // Get the body content
+                    Log::channel('botCallJobLog')->info("Guzzle Response Body: " . $responseBody);
+                    $response1 = $client->post('', [
+                        'form_params' => $payload
+                    ]);
+                    Log::channel('botCallJobLog')->info('s ' . 'Webhook log responseBody-body' . json_encode($response1));
+                }
                 if ($user_id == 30860) {
                     $response = $client->post('', [
                         'json' => $payload,
