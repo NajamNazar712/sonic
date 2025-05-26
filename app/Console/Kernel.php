@@ -183,7 +183,7 @@ class Kernel extends ConsoleKernel
 
         'App\Console\Commands\QualityOfServiceReport',
         'App\Console\Commands\PendingDeliveriesReportNew',
-
+        'App\Console\Commands\WalletChargesUpdate',
         // 'App\Console\Commands\QsrEmail',
         // 'App\Console\Commands\PendingDeliveriesReport',
 
@@ -280,7 +280,12 @@ class Kernel extends ConsoleKernel
         {
             $schedule->command('agent:botcallunresponsive')->everyFifteenMinutes()->runInBackground();
             $schedule->command('missingfirst:call')->hourly()->runInBackground();
-
+            $schedule->command('missingfirst:call', [
+                '--start' => Carbon::yesterday()->startOfDay()->toDateTimeString(), 
+                '--end' => Carbon::yesterday()->endOfDay()->toDateTimeString()      
+            ])
+                ->dailyAt('00:30') // runs at 12:30 AM every night
+                ->runInBackground();
         }
 
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
@@ -660,7 +665,12 @@ class Kernel extends ConsoleKernel
         }
         $schedule->command('update:shipment_additional_charges')->withoutOverlapping()->daily()->runInBackground();
         $schedule->command('wallet-users:make-to-done')->dailyAt('06:00')->runInBackground();
-        
+        $schedule->command('disable_wallet_users')->twiceDaily('13','18')->runInBackground();
+        $walletChargesUpdate = GlobalSettings::where(['type' => 'wallet_charges_updated', 'setting_value' => 1])->first();
+        if ($walletChargesUpdate) {
+            $time = $walletChargesUpdate->text; // e.g., '11:00'
+            $schedule->command('wallet_charges_update')->dailyAt($time)->runInBackground();
+        }
     }
     /**
      * Register the commands for the application.
