@@ -92,7 +92,7 @@ class ShipmentStatusWebhookController extends Controller
                 if($otp){
                     $payload['otp'] = $otp;
                 }
-                if (in_array($user_id, [30860, 12221])) {
+                if (in_array($user_id, [12221])) {
                     try {
                         $response = $client->post('', [
                             'json' => $payload
