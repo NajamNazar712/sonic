@@ -11259,7 +11259,8 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             ->leftjoin('business_categories as bc', 'bc.id', '=', 'cities.business_category_id')
             ->join('zones as z', 'cities.zone_id', '=', 'z.id')
             ->leftJoin('provinces', 'provinces.id', 'cities.province_id')
-            ->select(['cities.id as city_id', 'cities.city_code as city_code', 'cities.id as id', 'cities.name as name', 'h.name as hub', 'cities.hub_id', 'z.name as zone', 'cities.hub as isHub', 'cities.status as status', 'ch.created_at as updated', 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat', 'cities.location_latitude', 'cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category', 'cities.hub_location_latitude', 'cities.hub_location_longitude', 'cities.iata_code as iata_code','cities.booking_enable_status as booking_enable_status', 'c.name as created_by', 'cities.created_at as created_at', 'provinces.name as province_name'])
+            ->select(['cities.id as city_id', 'cities.city_code as city_code', 'cities.id as id', 'cities.name as name', 'h.name as hub', 'cities.hub_id', 'z.name as zone', 'cities.hub as isHub', 'cities.status as status', 'ch.created_at as updated', 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat', 'cities.location_latitude', 'cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category', 'cities.hub_location_latitude', 'cities.hub_location_longitude', 'cities.iata_code as iata_code','cities.booking_enable_status as booking_enable_status', 'c.name as created_by', 'cities.created_at as created_at', 'provinces.name as province_name', DB::raw('(SELECT COUNT(*) FROM city_status_change_logs WHERE city_status_change_logs.city_id = cities.id AND column_type = 2) as status_change_logs_count')
+            ,DB::raw('(SELECT COUNT(*) FROM city_status_change_logs WHERE city_status_change_logs.city_id = cities.id AND column_type = 1) as booking_status_change_logs_count')])
             ->where('cities.permanent_disabled',0)
             ->withCount(['statusChangeLogs', 'bookingEnableDisableLogs']);
 
@@ -11314,6 +11315,16 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 }
 
                 return '-';
+            })
+            ->orderColumn('status_logs', 'status_change_logs_count $1')
+            ->orderColumn('booking_enable_disable_logs', 'booking_enable_disable_logs_count $1')
+            ->filterColumn('status_logs', function ($query, $keyword) {
+                $keyword = trim($keyword);
+                $query->whereRaw('(SELECT COUNT(*) FROM city_status_change_logs WHERE city_status_change_logs.city_id = cities.id AND column_type = 2) = ?', [(int) $keyword]);
+            })
+            ->filterColumn('booking_enable_disable_logs', function ($query, $keyword) {
+                $keyword = trim($keyword);
+                $query->whereRaw('(SELECT COUNT(*) FROM city_status_change_logs WHERE city_status_change_logs.city_id = cities.id AND column_type = 1) = ?', [(int) $keyword]);
             })
             ->addColumn("action", function ($result) {
                 if (session('role_id') == 1 || count(array_intersect([90, 91,850], session('permissions'))) !== 0) {

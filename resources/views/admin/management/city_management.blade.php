@@ -233,8 +233,8 @@
                                 row.push(values.updated);
                                 row.push(values.address);
                                 row.push(values.booking_enable_status);
-                                row.push(values.status_logs);
-                                row.push(values.booking_enable_disable_logs);
+                                row.push(values.status_change_logs_count);
+                                row.push(values.booking_status_change_logs_count);
 
                                 body.push(row);
                             });
