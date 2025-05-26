@@ -2,6 +2,7 @@
 
 namespace App\Http\Models;
 
+use App\Models\CityStatusChangeLog;
 use Illuminate\Database\Eloquent\Model;
 
 class City extends Model
@@ -60,4 +61,15 @@ class City extends Model
     {
         return $this->hasMany('App\Http\Models\RvAgentAssignHub');
     }
+
+    public function statusChangeLogs()
+    {
+        return $this->hasMany(CityStatusChangeLog::class, 'city_id')->where('column_type', 2);
+    }
+
+    public function bookingEnableDisableLogs()
+    {
+        return $this->hasMany(CityStatusChangeLog::class, 'city_id')->where('column_type', 1);
+    }
+
 }

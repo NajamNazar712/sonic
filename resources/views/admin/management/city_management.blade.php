@@ -39,6 +39,9 @@
                                     <th class="border-primary border-darken-1" >OSA</th>
                                     <th class="border-primary border-darken-1" >Address</th>
                                     <th class="border-primary border-darken-1" >Booking Enable Status</th>
+                                    <th class="border-primary border-darken-1" >Status Logs</th>
+                                    <th class="border-primary border-darken-1" >Booking Enable/Disable Logs</th>
+
                                     <th class="border-primary border-darken-1" ></th>
                                 </tr>
                                 </thead>
@@ -96,6 +99,35 @@
                 </div>
             </div>
         </div>
+
+        <!--Status Log Modal -->
+        <div class="modal fade" id="statusLogModal" tabindex="-1" aria-labelledby="statusLogModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="statusLogModalTitle">Status Change Logs</h5>
+                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                        <th>Sr. No</th>
+                        <th>City Name</th>
+                        <th>Status</th>
+                        <th>Updated At</th>
+                        <th>Updated By</th>
+                        </tr>
+                    </thead>
+                    <tbody id="statusLogTableBody"></tbody>
+                    </table>
+                </div>
+                </div>
+            </div>
+        </div>
+
     </section>
 @endsection
 
@@ -175,6 +207,8 @@
                             head.push('Updated At');
                             head.push('Address');
                             head.push('Booking Enable Status');
+                            head.push('Status Logs');
+                            head.push('Booking Enable/Disable Logs');
 
 
                             $.each(result.data, function(index, values) {
@@ -199,6 +233,8 @@
                                 row.push(values.updated);
                                 row.push(values.address);
                                 row.push(values.booking_enable_status);
+                                row.push(values.status_logs);
+                                row.push(values.booking_enable_disable_logs);
 
                                 body.push(row);
                             });
@@ -281,7 +317,7 @@
                                             type: 'POST',
                                             url: "{!! route('admin.management.enable_booking_status') !!}",
                                             data: {
-                                                userIDS: selected_rows,
+                                                cityIDS: selected_rows,
                                                 '_token': '{{ csrf_token() }}'
                                             },
                                             success: function(res) {
@@ -332,7 +368,7 @@
                                             type: 'POST',
                                             url: "{!! route('admin.management.disable_booking_status') !!}",
                                             data: {
-                                                userIDS: selected_rows,
+                                                cityIDS: selected_rows,
                                                 '_token': '{{ csrf_token() }}'
                                             },
                                             success: function(res) {
@@ -416,8 +452,9 @@
                     {data: 'hub_location', name: 'hub_location', class: 'align-middle hub_location', orderable: false, searchable: false},
                     {data: 'osa_list', name: 'osa_list', class: 'align-middle osa_list', orderable: false, searchable: false},
                     {data: 'address', name: 'cities.address', class: 'align-middle address'},
-                    {data: 'booking_enable_status', name: 'cities.booking_enable_status', class: 'align-middle booking_enable_status'},
-
+                    {data: 'booking_enable_status', name: 'cities.booking_enable_status', class: 'align-middle booking_enable_status'},                   
+                    {data: 'status_logs', name: 'status_logs', class: 'align-middle status_logs'},
+                    {data: 'booking_enable_disable_logs', name: 'booking_enable_disable_logs', class: 'align-middle booking_enable_disable_logs'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
                rowCallback: function(row, data, index) {
@@ -794,9 +831,48 @@
                 }
 
             }
-
         });
 
+        $(document).off('click.statusLogs').on('click.statusLogs', '.status_logs, .booking_enable_disable_logs', function (event) {
+            const button = $(event.currentTarget); 
+            const cityId = button.data('id');
+            const type = button.data('type');
+
+            if(cityId && type){
+
+                let baseUrl = @json(route('admin.management.get_city_status_logs', ['cityId' => 'CITY_ID_PLACEHOLDER']));
+                let url = baseUrl.replace('CITY_ID_PLACEHOLDER', cityId) + '?type=' + type;
+
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function (response) {
+                        let rows = '';
+                        response.forEach((log, index) => {
+                            rows += `
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td>${log.city_name}</td>
+                                    <td>${log.new_status ? 'Enabled' : 'Disabled'}</td>
+                                    <td>${log.changed_at}</td>
+                                    <td>${log.updated_by_name}</td>
+                                </tr>
+                            `;
+                        });
+
+                        $('#statusLogModalTitle').text(
+                            type === 'city' ? 'City Enable/Disable Logs' : 'Booking Enable/Disable Logs'
+                        );
+
+                        $('#statusLogTableBody').html(rows);
+                        $('#statusLogModal').modal('show');
+                    },
+                    error: function () {
+                        console.log('error');
+                    }
+                });
+            }
+        });
 
     </script>
 
