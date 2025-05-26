@@ -92,7 +92,7 @@ class ShipmentStatusWebhookController extends Controller
                 if($otp){
                     $payload['otp'] = $otp;
                 }
-                if ($user_id == 12221) {
+                if (in_array($user_id, [30860, 12221])) {
                     try {
                         $response = $client->post('', [
                             'json' => $payload
@@ -109,7 +109,7 @@ class ShipmentStatusWebhookController extends Controller
                         Log::channel('botCallJobLog')->error('Webhook request failed: ' . $e->getMessage());
                     }
                 }
-                if ($user_id != 30860) {
+                if (!in_array($user_id, [30860, 12221])) {
                     $response = $client->post('', [
                         'form_params' => $payload
                     ]);
