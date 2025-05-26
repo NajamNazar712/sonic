@@ -103,10 +103,10 @@ class ShipmentStatusWebhookController extends Controller
                     $body->rewind();  // Rewind the stream to ensure we're reading from the start
                     $responseBody = $body->getContents(); // Get the body content
                     Log::channel('botCallJobLog')->info("Guzzle Response Body: " . $responseBody);
-                    $response1 = $client->post('', [
-                        'form_params' => $payload
+                    $response = $client->post('', [
+                        'json' => $payload,
                     ]);
-                    Log::channel('botCallJobLog')->info('s ' . 'Webhook log responseBody-body' . json_encode($response1));
+                    Log::channel('botCallJobLog')->info('s ' . 'Webhook log responseBody-body' . json_encode($response));
                 }
                 if ($user_id == 30860) {
                     $response = $client->post('', [
