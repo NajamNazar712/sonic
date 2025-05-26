@@ -12963,7 +12963,7 @@ class AdminAPIController extends Controller
     public function shipmentTrack(Request $request)
     {
         $rules = [
-            'tracking_number' => ['required', 'integer', 'digits_between:10,20'],
+            'tracking_number' => ['required', 'integer', 'digits_between:10,20', 'exists:shipments,tracking_number'],
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
