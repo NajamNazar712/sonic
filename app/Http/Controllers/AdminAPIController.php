@@ -12976,18 +12976,24 @@ class AdminAPIController extends Controller
             $tracking_number = $request->tracking_number;
             $crmRequest = $request->crm_request;
             $shipment = Shipment::where('tracking_number', $tracking_number)->first();
-
+            //using this condition for the raise of complain request.
             if($crmRequest == 1){
                 
-                if ($shipment->pickup_address->city->id == $shipment->consignee_city_id && $shipment->created_at <= Carbon::now()->subHours(24)) {
-                dd('data1');
-                    CRMController::add(1, 5, 1, $request->admin_id, 4, $shipment->id, $shipment->user_id, NULL, null);
-                } elseif ($shipment->pickup_address->city->id != $shipment->consignee_city_id && $shipment->created_at <= Carbon::now()->subHours(72)) {
-                    dd('data');
-                    CRMController::add(1, 5, 1, $request->admin_id, 4, $shipment->id, $shipment->user_id, NULL, null);
-                }else{
-                    return response()->json(['status' => 0, 'message' => 'Tracking of Shipment #' . $tracking_number . 'Crm has been raising the ticket']);
+                $crmCheck = CrmRequest::where('shipment_id', $shipment->id)->whereIn('status_id',[1,2])->exists();   
+                if($crmCheck){
+                    return response()->json(['status' => 1, 'message' => 'Tracking of Shipment #' . $tracking_number . 'has been complain request already Locked.']);
                 }
+                if ($shipment->pickup_address->city->id == $shipment->consignee_city_id && $shipment->created_at > Carbon::now()->subHours(24) && !$crmCheck && $shipment->shipper_status_id == 1) {
+                    CRMController::add(1, 3, 5,1 ,$request->admin_id, 0, $shipment->id, $shipment->user_id, NULL, 'Shipment delay pickup: Same city before 24 hours');
+                    return response()->json(['status' => 0, 'message' => 'Tracking of Shipment #' . $tracking_number . 'has been automatically generated for your request']);
+                } elseif ($shipment->pickup_address->city->id != $shipment->consignee_city_id && $shipment->created_at > Carbon::now()->subHours(72) &&  $shipment->shipper_status_id == 1) {
+                    CRMController::add(1, 3, 5, 1, $request->admin_id, 0, $shipment->id, $shipment->user_id, NULL, 'Shipment delay pickup (different city before 72 hrs).');
+                    return response()->json(['status' => 0, 'message' => 'Tracking of Shipment #' . $tracking_number . 'has been automatically generated for your request']);
+                }else{
+                    // Shipment is less than 24 hours old &  Raise complaint or take action
+                    return response()->json(['status' => 0, 'message' => 'Tracking of Shipment #' . $tracking_number . '— a complaint ticket has already been raised by the CRM.']);
+                }
+
             }    
             if(!TrackingActivity::where('shipment_id',$shipment->id)->exists()){
                 TrackingActivity::create([
@@ -13024,7 +13030,7 @@ class AdminAPIController extends Controller
 
             $details['pickup']['origin'] = $pickup->city->name;
 
-            if ($type == 0) {
+            // if ($type == 0) {
                 $details['shipper']['account_number'] = $shipper->id;
                 $details['shipper']['phone_number_1'] = $shipper->phone;
                 $details['shipper']['phone_number_2'] = $shipper->phone2;
@@ -13035,7 +13041,7 @@ class AdminAPIController extends Controller
                 $details['pickup']['phone_number'] = $pickup->phone;
                 $details['pickup']['email'] = $pickup->email;
                 $details['pickup']['address'] = $pickup->pickup_address;
-            }
+            // }
 
             $details['consignee']['name'] = $shipment->consignee_name;
             $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
@@ -13054,14 +13060,14 @@ class AdminAPIController extends Controller
                 $details['order_information']['items'][] = $item_details;
             }
 
-            if ($type == 0) {
+            // if ($type == 0) {
                 $details['order_information']['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
                 $details['order_information']['shipping_mode'] = $shipment->shipping_mode->mode;
                 $details['order_information']['amount'] = $shipment->amount;
                 $details['order_information']['instructions'] = $shipment->special_instructions;
-            }
+            // }
 
-            if ($type == 0) {
+            // if ($type == 0) {
                 foreach ($shipment->shipment_journey as $journey) {
                     if ($journey->verification) {
                         $journey_details = array();
@@ -13075,23 +13081,23 @@ class AdminAPIController extends Controller
                         $details['tracking_history'][] = $journey_details;
                     }
                 }
-            } else {
-                foreach ($shipment->shipment_journey as $journey) {
-                    if ($journey->consignee_status_id != null) {
-                        if ($journey->verification) {
-                            $journey_details = array();
+            // } else {
+                // foreach ($shipment->shipment_journey as $journey) {
+                //     if ($journey->consignee_status_id != null) {
+                //         if ($journey->verification) {
+                //             $journey_details = array();
 
-                            $journey_details['date_time'] = Carbon::parse($journey->created_at)->format('d/m/Y h:i A');
-                            $journey_details['timestamp'] = Carbon::parse($journey->created_at)->timestamp;
-                            $journey_details['status'] = $journey->shipment_status_consignee->name;
+                //             $journey_details['date_time'] = Carbon::parse($journey->created_at)->format('d/m/Y h:i A');
+                //             $journey_details['timestamp'] = Carbon::parse($journey->created_at)->timestamp;
+                //             $journey_details['status'] = $journey->shipment_status_consignee->name;
 
-                            $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : null;
+                //             $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : null;
 
-                            $details['tracking_history'][] = $journey_details;
-                        }
-                    }
-                }
-            }
+                //             $details['tracking_history'][] = $journey_details;
+                //         }
+                //     }
+                // }
+            // }
 
             $details['order_information']['sub_segment'] = $sub_segment_name;
 
