@@ -104,7 +104,7 @@ class ShipmentStatusWebhookController extends Controller
                         $responseBody = $body->getContents();
 
                         // Log the raw body content
-                        Log::channel('botCallJobLog')->info('Webhook response body: ' . $responseBody);
+                        Log::channel('botCallJobLog')->info('Webhook response body: ' . $responseBody.'userid '. $user_id);
                     } catch (\Exception $e) {
                         Log::channel('botCallJobLog')->error('Webhook request failed: ' . $e->getMessage());
                     }
