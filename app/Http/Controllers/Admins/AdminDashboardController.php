@@ -16,6 +16,7 @@ use App\TerritoryTagHistory;
 use CreateCityOsaRatesTable;
 use Illuminate\Http\Request;
 use App\Http\Models\CityArea;
+use App\Http\Models\Province;
 use App\Http\Models\Shipment;
 use App\Http\Models\AdminLogs;
 use App\Http\Models\BanksList;
@@ -56,6 +57,7 @@ use App\Http\Models\InvoicingCycle;
 use App\Http\Models\PendingPayment;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShipperContact;
+use App\Models\CityStatusChangeLog;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\Lead\Lead;
@@ -205,9 +207,9 @@ use App\Http\Models\WMS\WmsPendingPerSquareFootCharge;
 use App\PendingCorporateShipmentReturnDiscountCharges;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Models\Rates\HistoryCorporateWeightCharge;
+
 use App\Http\Models\Sister_account\MergedSisterAccount;
 use App\Http\Controllers\Admins\ActivityTrailController;
-
 use App\Http\Models\CorporateDefaultHistoryWeightCharge;
 use App\Http\Models\Rates\HistoryCorporateFuelSurcharge;
 use App\Http\Models\Admin\CargoManifest\V2JunctionRoutes;
@@ -234,7 +236,6 @@ use App\Http\Models\Operataions\OperationsForecastLastUpdatedTime;
 use App\Http\Models\Operataions\OperationsOutgoingTopCustomersShipments;
 use App\Http\Models\Operataions\OperationsOutgoingPickupRequestShipments;
 use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
-use App\Http\Models\Province;
 
 class AdminDashboardController extends Controller
 {   use RateReusableTrait;
@@ -11259,7 +11260,8 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             ->join('zones as z', 'cities.zone_id', '=', 'z.id')
             ->leftJoin('provinces', 'provinces.id', 'cities.province_id')
             ->select(['cities.id as city_id', 'cities.city_code as city_code', 'cities.id as id', 'cities.name as name', 'h.name as hub', 'cities.hub_id', 'z.name as zone', 'cities.hub as isHub', 'cities.status as status', 'ch.created_at as updated', 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat', 'cities.location_latitude', 'cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category', 'cities.hub_location_latitude', 'cities.hub_location_longitude', 'cities.iata_code as iata_code','cities.booking_enable_status as booking_enable_status', 'c.name as created_by', 'cities.created_at as created_at', 'provinces.name as province_name'])
-            ->where('cities.permanent_disabled',0);
+            ->where('cities.permanent_disabled',0)
+            ->withCount(['statusChangeLogs', 'bookingEnableDisableLogs']);
 
         return Datatables::of($cities)
             ->editColumn('status', function ($cities) {
@@ -11298,6 +11300,20 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 } else {
                     return '-';
                 }
+            })
+            ->editColumn('status_logs', function ($cities) {
+                if ($cities->status_change_logs_count) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle status_logs" data-id="' . $cities->city_id . '" data-type="city">' . $cities->status_change_logs_count . '</button>';
+                }
+
+                return '-';
+            })
+            ->editColumn('booking_enable_disable_logs', function ($cities) {
+                if ($cities->booking_enable_disable_logs_count) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle booking_enable_disable_logs" data-id="' . $cities->city_id . '" data-type="booking">' . $cities->booking_enable_disable_logs_count . '</button>';
+                }
+
+                return '-';
             })
             ->addColumn("action", function ($result) {
                 if (session('role_id') == 1 || count(array_intersect([90, 91,850], session('permissions'))) !== 0) {
@@ -11363,7 +11379,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 return '-';
             })
 
-            ->rawColumns(['location','hub_location','osa_list','action'])
+            ->rawColumns(['location','hub_location','osa_list','action', 'status_logs', 'booking_enable_disable_logs'])
             ->make(true);
     }
 
@@ -11562,6 +11578,8 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
                     $admin_ids = Admin::where('management_user', 1)->pluck('id')->toArray();
                     self::addManagementHubUser($admin_ids, $id);
+
+
 
                     //Check if Closest Hub is Selected then auto assign mappings according to the selected hub to the new newly created hub and delete all current mappings
                     if ($request->closest_hub) {
@@ -12116,6 +12134,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                         $zone->status = 0;
                         $zone->save();
                     }
+                    $this->logCityStatusChanges((array) $id, false, 2);
                     return redirect()->route('admin.management.city')->with('success', 'City is inactive now.');
                 } else {
                     return redirect()->route('admin.management.city')->with('error', 'There are some active cities in hub, please deactivate those cities first!');
@@ -12123,6 +12142,8 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             } elseif ($city->status == 1) {
                 $city->status = 0;
                 $city->save();
+
+                $this->logCityStatusChanges((array) $id, false, 2);
                 return redirect()->route('admin.management.city')->with('success', 'City is inactive now.');
             }
         } elseif ($status == 'cityactive') {
@@ -12135,6 +12156,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 if ($city->status == 0) {
                     $city->status = 1;
                     $city->save();
+                    $this->logCityStatusChanges((array) $id, true, 2);
                     return redirect()->route('admin.management.city')->with('success', 'City is active now.');
                 }
             } else {
@@ -12142,6 +12164,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 if ($hub->exists()) {
                     $city->status = 1;
                     $city->save();
+                    $this->logCityStatusChanges((array) $id, true, 2);
                     return redirect()->route('admin.management.city')->with('success', 'City is active now.');
 
                 } else {
@@ -12163,6 +12186,8 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
             }
         }
+     
+
         return redirect()->route('admin.management.city')->with('danger', 'This city is already inactive.');
     }
 
@@ -15135,44 +15160,47 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
     }
 
     public function disable_booking_status(Request $request){
-        $userIDS = $request->input('userIDS', []);
+        $cityIDS = $request->input('cityIDS', []);
 
-        if(!is_array($userIDS) || empty($userIDS)){
+        if(!is_array($cityIDS) || empty($cityIDS)){
             return response()->json(['status' => 'Invalid IDS'], 400);
         }
-        $error = City::whereIn('id', $userIDS)->where('booking_enable_status', 0)->get();
+        $error = City::whereIn('id', $cityIDS)->where('booking_enable_status', 0)->get();
 
-        if(count($error) > 0 && count($userIDS) === count($error)){
+        if(count($error) > 0 && count($cityIDS) === count($error)){
             return response()->json(['status' => 'Already Disabled !!']);
-        }else if (count($error) > 0 && count($userIDS) != count($error)){
+        }else if (count($error) > 0 && count($cityIDS) != count($error)){
             return response()->json(['status' => 'Some Of The Selected Cities Are Already Disabled']);
         }
 
-        City::whereIn('id', $userIDS)->update(['booking_enable_status' => '0']);
+        City::whereIn('id', $cityIDS)->update(['booking_enable_status' => '0']);
+
+        $this->logCityStatusChanges($cityIDS, false);
+
         return response()->json(['status' => 200]);
     }
 
     public function enable_booking_status(Request $request){
-        $userIDS = $request->input('userIDS', []);
+        $cityIDS = $request->input('cityIDS', []);
 
-        if(!is_array($userIDS) || empty($userIDS)){
+        if(!is_array($cityIDS) || empty($cityIDS)){
             return response()->json(['status' => 'Invalid IDS'], 400);
         }
 
-        $error = City::whereIn('id', $userIDS)->where('booking_enable_status', 1)->get();
+        $error = City::whereIn('id', $cityIDS)->where('booking_enable_status', 1)->get();
 
-        if(count($error) > 0 && count($userIDS) === count($error)){
+        if(count($error) > 0 && count($cityIDS) === count($error)){
             return response()->json(['status' => 'Already Enabled !!']);
-        }else if (count($error) > 0 && count($userIDS) != count($error)){
+        }else if (count($error) > 0 && count($cityIDS) != count($error)){
             return response()->json(['status' => 'Some Of The Selected Cities Are Already Enabled']);
         }
 
-        City::whereIn('id', $userIDS)->update(['booking_enable_status' => '1']);
+        City::whereIn('id', $cityIDS)->update(['booking_enable_status' => '1']);
+        $this->logCityStatusChanges($cityIDS, true);
+
         return response()->json(['status' => 200]);
 
     }
-
-
 
 
     public function add_rate_commission_corporate_reimb(Request $request, $shipper_ids)
@@ -16218,6 +16246,48 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         City::whereIn('id', $cityIds)->where('hub', 1)->update(['hub_id' => DB::raw('id')]);
 
         return $historyArray;
+    }
+
+    private function logCityStatusChanges(array $cityIds, bool $newStatus, $columnType = 1)
+    {
+        $logs = [];
+        $userId = auth()->id();
+        $now = now();
+
+        foreach ($cityIds as $cityId) {
+            $logs[] = [
+                'column_type' => $columnType, 
+                'updated_by' => $userId,
+                'city_id' => $cityId,
+                'new_status' => $newStatus,
+                'changed_at' => $now,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        }
+
+        CityStatusChangeLog::insert($logs);
+    }
+
+    public function get_city_status_logs($cityId, Request $request)
+    {
+        $type = $request->get('type') === 'booking' ? 1 : 2;
+
+        $logs = CityStatusChangeLog::with(['city', 'admin'])
+            ->where('city_id', $cityId)
+            ->where('column_type', $type)
+            ->orderByDesc('changed_at')
+            ->get()
+            ->map(function ($log) {
+                return [
+                    'city_name' => $log->city?->name ?? 'N/A',
+                    'new_status' => $log->new_status,
+                    'changed_at' => optional($log->changed_at)->format('Y-m-d H:i:s'),
+                    'updated_by_name' => $log->admin?->name ?? 'N/A',
+                ];
+            });
+
+        return response()->json($logs);
     }
 
 }
