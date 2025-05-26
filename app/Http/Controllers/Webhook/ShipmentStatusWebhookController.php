@@ -74,9 +74,9 @@ class ShipmentStatusWebhookController extends Controller
         $client = new Client(['base_uri' => $url, 'http_errors' => FALSE, 'connect_timeout' => 30, 'timeout' => 30]);
         
         $notification_data = ['user_id' => $user_id, 'url' => $url];
-        if ($user_id == 12221) {
-            Log::channel('botCallJobLog')->info('s ' . 'Webhook log check-error' . json_encode($notification_data));
-        }
+        // if ($user_id == 30860) {
+        //     Log::channel('botCallJobLog')->info('s ' . 'Webhook log check-error' . json_encode($notification_data));
+        // }
         for($i = 0; $i < $attempts; $i++){
             try{
 
@@ -92,13 +92,19 @@ class ShipmentStatusWebhookController extends Controller
                 if($otp){
                     $payload['otp'] = $otp;
                 }
-                
-                if (!in_array($user_id, [30860, 12221])) {
+                if ($user_id == 12221) {
+                    $response = $client->post('', [
+                        'json' => $payload
+                    ]);
+                    Log::channel('botCallJobLog')->info('s ' . 'Webhook log responseBody-body' . json_encode($response));
+                }
+                if ($user_id != 30860) {
                     $response = $client->post('', [
                         'form_params' => $payload
                     ]);
                 }
-                if (in_array($user_id,[30860, 12221])) {
+
+                if ($user_id == 30860) {
                     $response = $client->post('', [
                         'json' => $payload,
                     ]);
@@ -109,7 +115,7 @@ class ShipmentStatusWebhookController extends Controller
                     // $response1 = $client->post('', [
                     //     'form_params' => $payload
                     // ]);
-                    Log::channel('botCallJobLog')->info('s ' . 'Webhook log responseBody-body' . json_encode($response1));
+                    // Log::channel('botCallJobLog')->info('s ' . 'Webhook log responseBody-body' . json_encode($response1));
                 }
                 if ($response instanceof \Psr\Http\Message\ResponseInterface) {
                     $status_code = $response->getStatusCode();
