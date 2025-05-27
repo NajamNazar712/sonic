@@ -21,6 +21,7 @@
                             <th class="border-primary border-darken-1">Shipper CNIC</th>
                             <th class="border-primary border-darken-1">Parent Shipper</th>
                             <th class="border-primary border-darken-1">Substitute User</th>
+                            <th class="border-primary border-darken-1">Financing Product Type</th>
                         </tr>
                     </thead>
                 </table>
@@ -74,6 +75,7 @@
                         head.push('Shipper CNIC');
                         head.push('Parent Shipper');
                         head.push('Substitute User');
+                        head.push('Financing Product Type');
 
                         $.each(result.data, function(index, values) {
                             row = [];
@@ -85,6 +87,7 @@
                             row.push(values.wallet_user_cnic);
                             row.push(values.parent_user_name);
                             row.push(values.substitute_name);
+                            row.push(values.finova_account_type);
                             body.push(row);
                         });
                     },
@@ -190,6 +193,12 @@
                     data: 'substitute_name',
                     name: 'substitute_name',
                     class: 'align-middle substitute_name',
+                    orderable: false
+                },
+                {
+                    data: 'finova_account_type',
+                    name: 'finova_account_type',
+                    class: 'align-middle finova_account_type',
                     orderable: false
                 },
             ],

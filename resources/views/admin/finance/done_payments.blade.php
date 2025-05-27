@@ -168,6 +168,7 @@
 										<th class="border-primary border-darken-1">Sale Person</th>
 										<th class="border-primary border-darken-1">City</th>
 										<th class="border-primary border-darken-1">Phone No(s).</th>
+										<th class="border-primary border-darken-1">Finova Account Type</th>
 										<th class="border-primary border-darken-1">Address</th>
 										<th class="border-primary border-darken-1">Total Shipments</th>
 										<th class="border-primary border-darken-1">Delivered Shipments</th>
@@ -598,6 +599,7 @@
 							head.push('Sale Person');
                             head.push('City');
                             head.push('Phone No(s).');
+                            head.push('Finova Account Type');
                             head.push('Address');
                             head.push('Total Shipments');
                             head.push('Delivered Shipments');
@@ -636,6 +638,7 @@
 								row.push(values.sale_person_name);
                                 row.push(values.city);
                                 row.push(values.phone_numbers);
+                                row.push(values.finova_account_type);
                                 row.push(values.address);
                                 row.push(values.total_shipments);
                                 row.push(values.delivered_shipments_count);
@@ -890,6 +893,7 @@
 					{data:'sale_person_name', name: 'sale_admin.name', class: 'align-middle text-center sale_person_name'},
 					{data:'city', name: 'c.name', class: 'align-middle text-center city'},
 					{data:'phone_numbers', name: 'phone_numbers', class: 'align-middle text-center phone_numbers'},
+					{data:'finova_account_type', name: 'finova_account_type', class: 'align-middle text-center finova_account_type'},
 					{data:'address', name: 'u.address', class: 'align-middle text-center address'},
 					{data:'total_shipments', name: 'done_payments.total_shipments', class: 'align-middle text-center total_shipments'},
 					{data:'delivered_shipments', name: 'done_payments.delivered_shipments', class: 'align-middle text-center delivered_shipments'},

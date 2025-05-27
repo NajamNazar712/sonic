@@ -6912,6 +6912,15 @@ class AdminFinanceController extends Controller
                     return '-';
                 }
             })
+            ->addColumn('finova_account_type', function ($pending_payment) {
+                if(in_array($pending_payment->wallet_finance, [1, 2, 3, 4 ])) {
+                    return 'Arrival';
+                } elseif($pending_payment->wallet_finance == 5) {
+                    return 'Delivered';
+                } else{
+                    return '-';
+                }
+            })
             ->addColumn('action', function ($pending_payment) {
                 $view_details_button = '<button type="button" class="dropdown-item view_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Details</div></button>';
                 $make_payments_button_modal = '<button type="button" class="dropdown-item make_payment"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-credit-card"></i></div><div class="col-9 offset-1">Make Payment (modal)</div></button>';
@@ -8294,7 +8303,7 @@ class AdminFinanceController extends Controller
             'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 'done_payments.ibft_charges', 
             'dpc.packaging_charges', 'dpc.adjustment as adjustment_charges', 'done_payments.status_updated_at as status_updated_at', 
             'dpc.wht as total_wht', 'done_payments.created_at as start_date', 'done_payments.updated_at as end_date', 'ad.name as admin_name', 
-            'done_payments.updated_at as updated_at','sts.status as star_status','u.payment_cycle_days as payment_cycle_days','pc.name as payment_cycle', 'pc.id as payment_cycle_id', 'dpc.sms_charges as total_sms_charges','done_payments.arrival_shipment as arrival_shipment_shipments_count','done_payments.arrival_shipment', 'sale_admin.name as sale_person_name','wu.id as wallet_user' , 'done_payments.is_wallet_payment');
+            'done_payments.updated_at as updated_at','sts.status as star_status','u.payment_cycle_days as payment_cycle_days','pc.name as payment_cycle', 'pc.id as payment_cycle_id', 'dpc.sms_charges as total_sms_charges','done_payments.arrival_shipment as arrival_shipment_shipments_count','done_payments.arrival_shipment', 'sale_admin.name as sale_person_name','wu.id as wallet_user' , 'done_payments.is_wallet_payment', 'wu.finova_account_type as finova_account_type');
 
         if (session('department_id') == 7) {
             if (!in_array(session('id'), session('sale_users_bypass'))) {
@@ -8545,6 +8554,15 @@ class AdminFinanceController extends Controller
             })
             ->removeColumn('phone')
             ->removeColumn('phone2')
+            ->editColumn('finova_account_type', function ($done_payment) {
+                if(in_array($done_payment->finova_account_type, [1, 2, 3, 4 ])) {
+                    return 'Arrival';
+                } elseif($done_payment->finova_account_type == 5) {
+                    return 'Delivered';
+                } else{
+                    return '-';
+                }
+            })
             ->editColumn('payment_cycle_days', function ($pending_payment) {
                 $payment_cycle = $pending_payment->payment_cycle_id;
                 $payment_cycle_days = $pending_payment->payment_cycle_days;
@@ -20563,9 +20581,19 @@ class AdminFinanceController extends Controller
                 'wallet_users.cnic as wallet_user_cnic',
                 'users.name as parent_user_name',
                 'substitute_users.name as substitute_name',
-                'wallet_users.wallet_id as wallet_id'
+                'wallet_users.wallet_id as wallet_id',
+                'wallet_users.finova_account_type as finova_account_type'
             );
-        $datatables = Datatables::of($wallet_users);
+        $datatables = Datatables::of($wallet_users)
+            ->editColumn('finova_account_type', function ($wallet_users) {
+                if(in_array($wallet_users->finova_account_type, [1, 2, 3, 4 ])) {
+                    return 'Arrival';
+                } elseif($wallet_users->finova_account_type == 5) {
+                    return 'Delivered';
+                } else{
+                    return 'Non-Financing User';
+                }
+            });
         return $datatables->make(true); 
     }
 
