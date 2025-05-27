@@ -31,7 +31,7 @@ class WalletUserDisables extends Command
     public function handle()
     {
         $userId = $this->argument('user_id');
-        $wallet_users = WalletUser::whereIn('user_id', [$userId])->get();
+        $wallet_users = WalletUser::whereIn('user_id', [explode(',', $userId)])->get();
         dd($userId,$wallet_users);
         // $success_delete = [];
         // foreach ($wallet_users as $user) {
