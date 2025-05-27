@@ -1749,7 +1749,7 @@
                 var bankValue = $('#bank').val();
                 var chequeImageValue = $('#cheque_image').val();
 
-                if (ibanNoValue === '' || accountNoValue === '' || bankValue === '' || chequeImageValue === '') {
+                if ((ibanNoValue === '' || accountNoValue === '' || bankValue === '' || chequeImageValue === '') && $('#shipping_mode').val() == 3) {
                     if (ibanNoValue === '') {
                         $('#iban_no').addClass('required');
                     } else {
@@ -1773,6 +1773,11 @@
                     } else {
                         $('#cheque_image').removeClass('required');
                     }
+                }else{
+                    $('#iban_no').removeClass('required');
+                    $('#account_no').removeClass('required');
+                    $('#bank').removeClass('required');
+                    $('#cheque_image').removeClass('required');
                 }
             });
 
