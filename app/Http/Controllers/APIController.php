@@ -10672,7 +10672,7 @@ class APIController extends Controller
                 return response()->json(['success' => false, 'message' => 'Invalid city, service, or reference.'], 422);
             }
 
-           $lead = new Lead();
+            $lead = new Lead();
             $lead->company_name = $validated['company_name'];
             $lead->contact_person = $validated['contact_person'];
             $lead->email = $validated['email'];
