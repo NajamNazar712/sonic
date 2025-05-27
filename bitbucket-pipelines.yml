@@ -10,10 +10,10 @@ pipelines:
             - echo "Deploying to sprint_132 branch VM..."
             - ssh -o StrictHostKeyChecking=no $SPRINT_132_HOST "cd /var/www/html/sonic && ./deploy.sh"
 
-    master:
-      - step:
-          name: 'Deploy to Production VM'
-          deployment: Production
-          script:
-            - echo "Deploying to production server..."
-            - ssh -o StrictHostKeyChecking=no $PRODUCTION_HOST "cd /var/www/html/sonic && ./deploy.sh"
+    # master:
+    #   - step:
+    #       name: 'Deploy to Production VM'
+    #       deployment: Production
+    #       script:
+    #         - echo "Deploying to production server..."
+    #         - ssh -o StrictHostKeyChecking=no $PRODUCTION_HOST "cd /var/www/html/sonic && ./deploy.sh"
