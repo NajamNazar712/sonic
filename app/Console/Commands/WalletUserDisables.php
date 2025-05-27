@@ -32,7 +32,7 @@ class WalletUserDisables extends Command
     {
         $userId = $this->argument('user_id');
         $wallet_users = WalletUser::whereIn('user_id', [$userId])->get();
-        dd($wallet_users);
+        dd($userId,$wallet_users);
         // $success_delete = [];
         // foreach ($wallet_users as $user) {
         //     $done_payment = DonePayment::where('user_id', $user->user_id)
