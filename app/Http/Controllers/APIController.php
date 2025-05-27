@@ -51,6 +51,7 @@ use App\Jobs\ProcessRvShipmentTicket;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\ShipmentOrderDate;
 use App\Http\Models\Admin\DeliveryNote;
+use App\Http\Models\Admin\Lead\LeadLog;
 use App\Http\Models\ShipperSegmentLogs;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Models\Admin\LeadReference;
