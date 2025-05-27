@@ -6915,8 +6915,10 @@ class AdminFinanceController extends Controller
             ->addColumn('finova_account_type', function ($pending_payment) {
                 if(in_array($pending_payment->wallet_finance, [1, 2, 3, 4 ])) {
                     return 'Arrival';
-                } elseif($pending_payment->wallet_finance == 5) {
+                } elseif($pending_payment->wallet_finance === 5) {
                     return 'Delivered';
+                } elseif($pending_payment->wallet_finance === 0){
+                    return 'Basic';
                 } else{
                     return '-';
                 }
@@ -8557,8 +8559,10 @@ class AdminFinanceController extends Controller
             ->editColumn('finova_account_type', function ($done_payment) {
                 if(in_array($done_payment->finova_account_type, [1, 2, 3, 4 ])) {
                     return 'Arrival';
-                } elseif($done_payment->finova_account_type == 5) {
+                } elseif($done_payment->finova_account_type === 5) {
                     return 'Delivered';
+                } elseif($done_payment->finova_account_type === 0) {
+                    return 'Basic';
                 } else{
                     return '-';
                 }
@@ -20591,7 +20595,7 @@ class AdminFinanceController extends Controller
                 } elseif($wallet_users->finova_account_type == 5) {
                     return 'Delivered';
                 } else{
-                    return 'Non-Financing User';
+                    return 'Basic';
                 }
             });
         return $datatables->make(true); 
