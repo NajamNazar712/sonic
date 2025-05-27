@@ -114,7 +114,10 @@ use App\Http\Models\Shopify\ShopifyInvoiceSetting;
 use App\Http\Controllers\Admins\AdminCRMController;
 use App\Http\Models\Admin\Retail\RetailCashDeposit;
 use App\Http\Models\Admin\standard_fintech_charges;
-use App\Http\Models\Blacklist\BlacklistedConsignee;
+use App\Http\Models\/* This block of code is creating a new `Lead` object and populating its properties
+with data from the incoming lead information. Here's a breakdown of what each
+line is doing: */
+Blacklist\BlacklistedConsignee;
 use App\Http\Models\Blacklist\ConsigneeInformation;
 use App\Http\Models\ShipmentReplacementParcelImage;
 use App\Http\Controllers\ShipmentsJourneyController;
@@ -10684,8 +10687,16 @@ class APIController extends Controller
             $lead->avg_shipment = $validated['avg_shipment'];
             $lead->avg_parcel = $validated['avg_parcel'];
             $lead->business_address = $validated['business_address'];
-            $lead->ntn_number = $validated['ntn_number'];
-            $lead->activation_code = Str::uuid();
+            $lead->ntn_number = $validated['ntn_number'] ?? null;
+            $lead->activation_code = Str::random(8);
+            $lead->requested_date = Carbon::now();
+            $lead->email_address = $validated['email'];
+            $lead->company = $validated['company_name'];
+            $lead->business_registered_status = isset($validated['business_address']) ? 1 : 0;
+            $lead->via_channel = 'Website';
+            $lead_tagging = LeadTagging::where(['city_id' => $city->id, 'status' => 1])->first();
+            $lead->sale_person_id = $lead_tagging ? $lead_tagging->sale_person_id : null;
+            $lead->expected_shipments = $validated['avg_shipment'];
             $lead->save();
 
             LeadLog::create(['lead_id' => $lead->id]);
