@@ -40,7 +40,7 @@ class WalletUserDisables extends Command
                 ->first();
             if (empty($done_payment)) {
                 $wallet_user_disable = $user->replicate();
-                $wallet_user_disable->setTable('wallet_user_disables');
+                $wallet_user_disable->setTable('wallet_users_disables');
 
                 if ($wallet_user_disable->save()) {
                     $user->delete();
