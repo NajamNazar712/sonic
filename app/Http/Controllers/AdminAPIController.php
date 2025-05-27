@@ -11687,7 +11687,14 @@ class AdminAPIController extends Controller
                                         } else {
                                             CRMController::add($nature_id, $case_nature_type_id, $channel_id, 1, $admin_id, $launched_by, $shipment_id, $shipper_id, NULL, $description);
                                         }
-                                    } else {
+                                    }
+
+//                                    // auto change service type
+//                                    else if($case_nature_type_id == 39 && in_array($shipment->shipper_status_id,[53,2,3,4,5,12,65,66,21,56])) {
+//                                        $crm_request_padded_id = CRMController::add($nature_id, $case_nature_type_id, $channel_id, 1, $admin_id, $launched_by, $shipment_id, $shipment->user_id, NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, null,true);
+//                                    }
+
+                                    else {
                                         CRMController::add($nature_id, $case_nature_type_id, $channel_id, 1, $admin_id, $launched_by, $shipment_id, $shipper_id, NULL, $description);
                                     }
                                 }
@@ -11715,7 +11722,14 @@ class AdminAPIController extends Controller
                                     } else {
                                         CRMController::add($nature_id, $case_nature_type_id, $channel_id, 1, $admin_id, $launched_by, $shipment_id, $shipper_id, NULL, $description);
                                     }
-                                } else {
+                                }
+
+                                // auto change service type
+//                                else if($case_nature_type_id == 39 && in_array($shipment->shipper_status_id,[53,2,3,4,5,12,65,66,21,56])) {
+//                                    $crm_request_padded_id = CRMController::add($nature_id, $case_nature_type_id, $channel_id, 1, $admin_id, $launched_by, $shipment_id, $shipment->user_id, NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, null,true);
+//                                }
+
+                                else {
                                     CRMController::add($nature_id, $case_nature_type_id, $channel_id, 1, $admin_id, $launched_by, $shipment_id, $shipper_id, NULL, $description);
                                 }
                             }
