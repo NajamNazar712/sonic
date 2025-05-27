@@ -42,6 +42,8 @@ use Illuminate\Http\Request;
 
     Route::post('employee_attendance_details', 'APIController@employee_checkin')->name('employee_attendance_details');
 
+    Route::post('lead_website', 'APIController@storeWebsiteLead');
+
     Route::middleware('APIToken')->group(function () {
         Route::post('verify', 'APIController@verify')->name('verify');
 

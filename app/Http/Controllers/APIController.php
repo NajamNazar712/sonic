@@ -2,37 +2,35 @@
 
 namespace App\Http\Controllers;
 
-use App\FafCharges;
-use App\FinjaSmsLog;
-use App\Http\Controllers\Admins\AdminCRMController;
-use App\Http\Models\NotificationSetting;
-use App\Http\Models\PendingPaymentShipment;
-use App\Http\Models\ShipmentSmsLogs;
-use App\Http\Models\WalletUser;
-use App\Models\FinjaRequestLog;
-use App\ShipmentAdditionalCharges;
 use DB;
 use SnappyPDF;
 use Validator;
 use SnappyImage;
 use Carbon\Carbon;
+use App\FafCharges;
+use App\FinjaSmsLog;
 use App\GuestApiToken;
 use App\Http\Models\City;
 use App\Http\Models\Zone;
 use Vectorface\Whip\Whip;
 use App\Http\Models\Rider;
+use Illuminate\Support\Str;
 use App\Http\Models\Invoice;
 use App\Http\Traits\RvTrait;
 use Illuminate\Http\Request;
 use App\Http\Models\Shipment;
+use App\Http\Models\WalletUser;
+use App\Models\FinjaRequestLog;
 use Illuminate\Validation\Rule;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\DonePayment;
 use App\Http\Models\HR\Employee;
+use App\Http\Models\ServiceList;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Consolidation;
 use App\Http\Models\ZoneClassCity;
+use App\ShipmentAdditionalCharges;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\GulAhmedCities;
 use App\Http\Models\PendingPayment;
@@ -44,6 +42,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\Lead\Lead;
 use App\Http\Models\InvoiceShipment;
 use App\Http\Models\ShipmentPrebook;
+use App\Http\Models\ShipmentSmsLogs;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Models\Admin\FtlRequest;
@@ -52,9 +51,12 @@ use App\Jobs\ProcessRvShipmentTicket;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\ShipmentOrderDate;
 use App\Http\Models\Admin\DeliveryNote;
+use App\Http\Models\ShipperSegmentLogs;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Models\Admin\LeadReference;
 use App\Http\Models\DonePaymentShipment;
 use App\Http\Models\EmployeeDeviceToken;
+use App\Http\Models\NotificationSetting;
 use App\Http\Models\Shipper\ReturnSheet;
 use App\Http\Models\Admin\FintechCompany;
 use App\Http\Models\Admin\GlobalSettings;
@@ -72,6 +74,7 @@ use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\DonePaymentCalculation;
 use App\Http\Models\InterceptReBookRequest;
 use App\Http\Models\PackagingMaterialTypes;
+use App\Http\Models\PendingPaymentShipment;
 use App\Http\Models\ReceivingSheetShipment;
 use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\Shipper\SubstituteUser;
@@ -107,6 +110,7 @@ use App\Http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\Admin\Settings\GeneralSetting;
 use App\Http\Models\Admin\ShipperInterceptExclude;
 use App\Http\Models\Shopify\ShopifyInvoiceSetting;
+use App\Http\Controllers\Admins\AdminCRMController;
 use App\Http\Models\Admin\Retail\RetailCashDeposit;
 use App\Http\Models\Admin\standard_fintech_charges;
 use App\Http\Models\Blacklist\BlacklistedConsignee;
@@ -136,8 +140,6 @@ use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransaction;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionDeliveryNote;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransactionRetail;
-use Illuminate\Support\Str;
-use App\Http\Models\ShipperSegmentLogs;
 
 class APIController extends Controller
 {
@@ -10641,4 +10643,53 @@ class APIController extends Controller
             return ceil($amount);
         }
     }
+
+    public function storeWebsiteLead(Request $request)
+    {
+        $validated = $request->validate([
+            'company_name' => 'required|string',
+            'contact_person' => 'required|string',
+            'email' => 'required|email',
+            'phone_number' => 'required|string',
+            'cnic_number' => 'required|string',
+            'city_name' => 'required|string',
+            'reference_name' => 'required|string',
+            'service_name' => 'required|string',
+            'avg_shipment' => 'required|numeric',
+            'avg_parcel' => 'required|numeric',
+            'business_address' => 'required|string',
+            'ntn_number' => 'nullable|string',
+        ]);
+
+        $city = City::where('name', $validated['city_name'])->first();
+        $service = ServiceList::where('name', $validated['service_name'])->first();
+        $reference = LeadReference::where('name', $validated['reference_name'])->first();
+
+        if (!$city || !$service || !$reference) {
+            return response()->json(['success' => false, 'message' => 'Invalid data'], 422);
+        }
+
+        $lead = new Lead();
+        $lead->company_name = $validated['company_name'];
+        $lead->contact_person = $validated['contact_person'];
+        $lead->email = $validated['email'];
+        $lead->phone_number = $validated['phone_number'];
+        $lead->cnic_number = $validated['cnic_number'];
+        $lead->city_id = $city->id;
+        $lead->service_id = $service->id;
+        $lead->reference_id = $reference->id;
+        $lead->avg_shipment = $validated['avg_shipment'];
+        $lead->avg_parcel = $validated['avg_parcel'];
+        $lead->business_address = $validated['business_address'];
+        $lead->ntn_number = $validated['ntn_number'];
+        $lead->activation_code = Str::uuid();
+        $lead->save();
+
+        LeadLog::create(['lead_id' => $lead->id]);
+
+        return response()->json([
+            'success' => true,
+            'activation_url' => route('cod.signup', ['id' => $lead->id, 'token' => $lead->activation_code]),
+        ]);
+    }    
 }
