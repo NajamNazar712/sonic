@@ -10647,50 +10647,63 @@ class APIController extends Controller
 
     public function storeWebsiteLead(Request $request)
     {
-        $validated = $request->validate([
-            'company_name' => 'required|string',
-            'contact_person' => 'required|string',
-            'email' => 'required|email',
-            'phone_number' => 'required|string',
-            'cnic_number' => 'required|string',
-            'city_name' => 'required|string',
-            'reference_name' => 'required|string',
-            'service_name' => 'required|string',
-            'avg_shipment' => 'required|numeric',
-            'avg_parcel' => 'required|numeric',
-            'business_address' => 'required|string',
-            'ntn_number' => 'nullable|string',
-        ]);
+        try {
+            $validated = $request->validate([
+                'company_name' => 'required|string',
+                'contact_person' => 'required|string',
+                'email' => 'required|email',
+                'phone_number' => 'required|string',
+                'cnic_number' => 'required|string',
+                'city_name' => 'required|string',
+                'reference_name' => 'required|string',
+                'service_name' => 'required|string',
+                'avg_shipment' => 'required|numeric',
+                'avg_parcel' => 'required|numeric',
+                'business_address' => 'required|string',
+                'ntn_number' => 'nullable|string',
+            ]);
 
-        $city = City::where('name', $validated['city_name'])->first();
-        $service = ServiceList::where('name', $validated['service_name'])->first();
-        $reference = LeadReference::where('name', $validated['reference_name'])->first();
+            $city = City::where('name', $validated['city_name'])->first();
+            $service = ServiceList::where('name', $validated['service_name'])->first();
+            $reference = LeadReference::where('name', $validated['reference_name'])->first();
 
-        if (!$city || !$service || !$reference) {
-            return response()->json(['success' => false, 'message' => 'Invalid data'], 422);
+            if (!$city || !$service || !$reference) {
+                return response()->json(['success' => false, 'message' => 'Invalid city, service, or reference.'], 422);
+            }
+
+            $lead = new Lead();
+            $lead->company_name = $validated['company_name'];
+            $lead->contact_person = $validated['contact_person'];
+            $lead->email = $validated['email'];
+            $lead->phone_number = $validated['phone_number'];
+            $lead->cnic_number = $validated['cnic_number'];
+            $lead->city_id = $city->id;
+            $lead->service_id = $service->id;
+            $lead->reference_id = $reference->id;
+            $lead->avg_shipment = $validated['avg_shipment'];
+            $lead->avg_parcel = $validated['avg_parcel'];
+            $lead->business_address = $validated['business_address'];
+            $lead->ntn_number = $validated['ntn_number'];
+            $lead->activation_code = Str::uuid();
+            $lead->save();
+
+            LeadLog::create(['lead_id' => $lead->id]);
+
+            return response()->json([
+                'success' => true,
+                'activation_url' => route('cod.signup', ['id' => $lead->id, 'token' => $lead->activation_code]),
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Something went wrong. Please try again later.',
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ], 500);
         }
-
-        $lead = new Lead();
-        $lead->company_name = $validated['company_name'];
-        $lead->contact_person = $validated['contact_person'];
-        $lead->email = $validated['email'];
-        $lead->phone_number = $validated['phone_number'];
-        $lead->cnic_number = $validated['cnic_number'];
-        $lead->city_id = $city->id;
-        $lead->service_id = $service->id;
-        $lead->reference_id = $reference->id;
-        $lead->avg_shipment = $validated['avg_shipment'];
-        $lead->avg_parcel = $validated['avg_parcel'];
-        $lead->business_address = $validated['business_address'];
-        $lead->ntn_number = $validated['ntn_number'];
-        $lead->activation_code = Str::uuid();
-        $lead->save();
-
-        LeadLog::create(['lead_id' => $lead->id]);
-
-        return response()->json([
-            'success' => true,
-            'activation_url' => route('cod.signup', ['id' => $lead->id, 'token' => $lead->activation_code]),
-        ]);
-    }    
+    }
+    
 }
+    
+
