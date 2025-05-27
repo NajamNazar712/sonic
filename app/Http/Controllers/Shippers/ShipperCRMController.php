@@ -479,6 +479,10 @@ class ShipperCRMController extends Controller
                                             CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
                                         }
                                     }
+                                    // auto change service type
+//                                    else if($complaint_id == 39 && in_array($shipment->shipper_status_id,[53,2,3,4,5,12,65,66,21,56])) {
+//                                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, null,true);
+//                                    }
                                     else{
                                         CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
                                     }
@@ -542,6 +546,10 @@ class ShipperCRMController extends Controller
                                             CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $is_automated_cod_change);
                                         }
                                     }
+                                    // auto change service type
+//                                    else if($complaint_id == 39 && in_array($shipment->shipper_status_id,[53,2,3,4,5,12,65,66,21,56])) {
+//                                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, null,true);
+//                                    }
                                     else{
                                         $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
                                     }
@@ -686,6 +694,10 @@ class ShipperCRMController extends Controller
                                         CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $is_automated_cod_change);
                                     }
                                 }
+                                // auto change service type
+//                                else if($complaint_id == 39 && in_array($shipment->shipper_status_id,[53,2,3,4,5,12,65,66,21,56])) {
+//                                    $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, null,true);
+//                                }
                                 else{
                                     $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
                                 }
@@ -738,6 +750,10 @@ class ShipperCRMController extends Controller
                                 }
                                 
                             }
+                            // auto change service type
+//                            else if($complaint_id == 39 && in_array($shipment->shipper_status_id,[53,2,3,4,5,12,65,66,21,56])) {
+//                                $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, null,true);
+//                            }
                             else{
                                 $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
                             }

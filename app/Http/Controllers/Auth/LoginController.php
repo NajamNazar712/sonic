@@ -151,7 +151,7 @@ class LoginController extends Controller
     protected function authenticated(Request $request, $user)
     {
         $packaging_charges_check = TRUE;
-        $user_info = SubstituteUser::where('email',$request->email)->where('user_id',$user->id)->first();
+        $user_info = SubstituteUser::where('email',$request->email)->first();
         $user_info_id = ($user_info) ? $user_info->id : NULL;  
        
         session(['substitute_user_id' => $user_info_id]);
