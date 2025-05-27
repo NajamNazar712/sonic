@@ -6658,6 +6658,7 @@ class AdminCargoManifestController extends Controller
         $shipment_ids_array_misrouted = array();
         $short_received_shipments_array = array();
         $shipments_already_marked_received_array = array();
+        $shipmentNoReceive = array();
         $admin = Admin::where('id',\auth()->id())->select('default_hub_id')->first();
         $default_hub_id = $admin->default_hub_id;
         $default_hub_name = $admin->city->name;
@@ -6693,6 +6694,11 @@ class AdminCargoManifestController extends Controller
                 foreach ($shipment_ids as $shipment_id) {
                     $bag_shipment = CargoManifestBagShipments::where('shipment_id', $shipment_id)/*->where('status', 0)*/;
                     $shipment = Shipment::find($shipment_id);
+                    if (in_array($shipment->shipper_status_id, [5, 14, 25, 31, 36, 38])) // all delivered statuses
+                    {
+                        $shipmentNoReceive[] = $shipment->tracking_number;
+                        continue;
+                    }
                     if ($bag_shipment->exists()) {
                         $bag_shipment = $bag_shipment->latest()->first();
 
@@ -6969,6 +6975,11 @@ class AdminCargoManifestController extends Controller
                 foreach ($shipment_ids as $shipment_id) {
                     $bag_shipment = CargoManifestBagShipments::where('shipment_id', $shipment_id)/*->where('status', 0)*/;
                     $shipment = Shipment::find($shipment_id);
+                    if (in_array($shipment->shipper_status_id, [5, 14, 25, 31, 36, 38])) // all delivered statuses
+                    {
+                        $shipmentNoReceive[] = $shipment->tracking_number;
+                        continue;
+                    }
                     $omni_return_city_hub = $shipment->return_address_id != NULL ? $shipment->return_address->city->hub_id : NULL;
                     $omni_return_city = $shipment->return_address_id;
                     if ($bag_shipment->exists()) {
@@ -7508,11 +7519,18 @@ class AdminCargoManifestController extends Controller
                 }
                 $misrouted_html .= "</ul>";
             }
+            if (count($shipmentNoReceive) > 0) {
+                $rm_html = "The following shipments are not marked as received in the bag because they are currently out for delivery.<br><ul>";
+                foreach ($shipmentNoReceive as $m) {
+                    $rm_html .= "<li>" . $m . "</li>";
+                }
+                $rm_html .= "</ul>";
+            }
 //            Log::channel('cronJobLog')->info('cargo:check_11');
             DB::commit();
 //            Log::channel('cronJobLog')->info('cargo:completed');
             //return redirect()->back()->with('success', 'Selected Shipments of Bag Number(s)#' . $all_bag_ids . ' has been Received');
-            return back()->with(['sr_html' => $sr_html, 'received_html' => $received_html, 'already_received_shipments_html' => $already_received_shipments_html, 'misrouted_html' => $misrouted_html]);
+            return back()->with(['sr_html' => $sr_html, 'received_html' => $received_html, 'already_received_shipments_html' => $already_received_shipments_html, 'misrouted_html' => $misrouted_html,'rm_html'=> $rm_html]);
         } catch (\Throwable $th) {
             DB::rollBack();
             Log::channel('cronJobLog')->error('cargo:failed'.json_encode($th->getMessage()), ['trace' => json_encode($th->getTraceAsString())]);
@@ -8144,4 +8162,6 @@ class AdminCargoManifestController extends Controller
             return redirect()->route('admin.cargo_manifest.bags.sack_bag.index')->with(['error' => 'Sack Bag Not Added: Empty Data']);
         }
     }
+
+    
 }
