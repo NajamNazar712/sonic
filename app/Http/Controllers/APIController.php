@@ -10684,9 +10684,19 @@ class APIController extends Controller
             $lead->avg_shipment = $validated['avg_shipment'];
             $lead->avg_parcel = $validated['avg_parcel'];
             $lead->business_address = $validated['business_address'];
-            $lead->ntn_number = $validated['ntn_number'];
+            $lead->ntn_number = $validated['ntn_number'] ?? null;
             $lead->activation_code = Str::uuid();
+            $lead->requested_date = Carbon::now();
+            $lead->email_address = $validated['email'];
+            $lead->company = $validated['company_name'];
+            $lead->business_registered_status = isset($validated['business_address']) ? 1 : 0;
+            $lead->via_channel = 'Website';
+            $lead_tagging = LeadTagging::where(['city_id' => $city->id, 'status' => 1])->first();
+            $lead->sale_person_id = $lead_tagging ? $lead_tagging->sale_person_id : null;
+            $lead->expected_shipments = $validated['avg_shipment'];
+
             $lead->save();
+
 
             LeadLog::create(['lead_id' => $lead->id]);
 
