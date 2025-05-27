@@ -32,26 +32,25 @@ class WalletUserDisables extends Command
     {
         $userId = explode(',', $this->argument('user_id'));
         $wallet_users = WalletUser::whereIn('user_id', $userId)->get();
-        dd($wallet_users);
-        // $success_delete = [];
-        // foreach ($wallet_users as $user) {
-        //     $done_payment = DonePayment::where('user_id', $user->user_id)
-        //         ->where('status', 0)
-        //         ->where('is_wallet_payment', 1)
-        //         ->first();
-        //     if (empty($done_payment)) {
-        //         $wallet_user_disable = $user->replicate();
-        //         $wallet_user_disable->setTable('wallet_user_disables');
+        $success_delete = [];
+        foreach ($wallet_users as $user) {
+            $done_payment = DonePayment::where('user_id', $user->user_id)
+                ->where('status', 0)
+                ->where('is_wallet_payment', 1)
+                ->first();
+            if (empty($done_payment)) {
+                $wallet_user_disable = $user->replicate();
+                $wallet_user_disable->setTable('wallet_user_disables');
 
-        //         if ($wallet_user_disable->save()) {
-        //             $user->delete();
-        //             $success_delete[] = $user->user_id;
-        //         }
-        //     }
-        // }
+                if ($wallet_user_disable->save()) {
+                    $user->delete();
+                    $success_delete[] = $user->user_id;
+                }
+            }
+        }
 
-        // $this->info('Wallet users disabled and deleted: ' . implode(', ', $success_delete));
-        // return Command::SUCCESS;
+        $this->info('Wallet users disabled and deleted: ' . implode(', ', $success_delete));
+        return Command::SUCCESS;
     }
 
 }
