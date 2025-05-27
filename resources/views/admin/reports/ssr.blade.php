@@ -572,6 +572,8 @@
                             head.push('Tracking No.');
                             head.push('Account No.');
                             head.push('Shipper');
+                            head.push('Segment');
+                            head.push('Sub Segment');
                             head.push('Sales Person');
                             head.push('Actual Weight');
                             head.push('Arrival Date');
@@ -591,6 +593,8 @@
                                 row.push(values.tracking_number);
                                 row.push(values.account_no);
                                 row.push(values.shipper);
+                                row.push(values.segment_name);
+                                row.push(values.sub_segment_name);
                                 row.push(values.sales_person);
                                 row.push(values.actual_weight);
                                 row.push(values.arrival_date);
