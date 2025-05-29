@@ -11425,6 +11425,26 @@ class NotificationsController extends Controller
                     }
                 }
 
+                else if ($id == 243) {
+                    $retail = RetailShipperInfo::find($reference_1_id);
+                    if ($retail) {
+                        if (strpos($body, '[user_name]') !== FALSE) {
+                            $body = str_replace('[user_name]', $retail->shipper_name, $body);
+                        }
+                        if (strpos($body, '[otp]') !== FALSE) {
+                            $body = str_replace('[otp]', $retail->retail_otp, $body);
+                        }
+                        if (strpos($body, '[expire_at]') !== FALSE) {
+                            $body = str_replace('[expire_at]', $reference_2_id, $body);
+                        }
+                        $to = '03493388467';
+//                        $to = '03208323070';
+                        self::sms($body, $to, null, null,$id);
+//                        self::sms_otp($body, $to, $retail->shipper_name, $retail->retail_otp, 1, NULL, $id);
+
+                    }
+                }
+
             }
         }
     }

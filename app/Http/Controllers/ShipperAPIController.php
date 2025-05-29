@@ -65,6 +65,8 @@ class ShipperAPIController extends Controller
     private $names = [
         'email_address' => 'Email Address',
         'password' => 'Password',
+        'otp' => 'Retail Otp',
+        'phone_no' => 'Phone Number',
 
         'rider_location_latitude' => 'Rider Location Latitude',
         'rider_location_longtidue' => 'Rider Location Longitude',
@@ -113,6 +115,9 @@ class ShipperAPIController extends Controller
         'image' => ':attribute must be an Image.',
         'rider_location_latitude.regex' => ':attribute is Invalid Latitude Coordinates.',
         'rider_location_longitude.regex' => ':attribute is Invalid Longitude Coordinates.',
+//        'phone_no.exists' => 'This phone number is not registered.',
+        'phone_no.regex' => ':attribute format is invalid. Allowed formats are: 0342-0803886 or 9239-4343434.',
+        'phone_no.required' => ':attribute is required.',
     ];
 
     public function login(Request $request)
@@ -203,6 +208,142 @@ class ShipperAPIController extends Controller
         }
     }
 
+    public function reset_password(Request $request)
+    {
+        $rules = [
+            'otp' => ['required','digits:6'],
+            'password' => ['required', 'min:6'],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+
+        $is_retail = $request->header('Via') == 2;
+        if ($is_retail) {
+            $retail_shipper = RetailShipperInfo::where('retail_otp', $request->otp)->first();
+
+            if (!$retail_shipper) {
+                return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
+            }
+
+            if ($retail_shipper->otp_expire_at < now()) {
+                return response()->json(['status' => 1, 'message' => 'OTP has expired']);
+            }
+
+            // Check if password reset limit reached for today
+//            if ($retail_shipper->password_reset_limit_at && $retail_shipper->password_reset_limit_at->isToday()) {
+//                if ($retail_shipper->password_reset_limit >= 3) {
+//                    return response()->json([
+//                        'status' => 1,
+//                        'message' => 'Password reset limit exceeded for today. Please try again tomorrow.'
+//                    ]);
+//                } else {
+//                    // Increment count since still under limit
+//                    $retail_shipper->password_reset_limit++;
+//                }
+//            } else {
+//                // New day: reset count to 1 and update timestamp
+//                $retail_shipper->password_reset_limit = 1;
+//                $retail_shipper->password_reset_at = now();
+//            }
+
+            // Reset password & clear API token & otp
+            $retail_shipper->password = Hash::make($request->password);
+            $retail_shipper->api_token = null;
+            $retail_shipper->retail_otp = null;
+            $retail_shipper->otp_expire_at = null;
+            $retail_shipper->save();
+
+            return response()->json(['status' => 0, 'message' => 'Password reset successful']);
+        }
+
+        return response()->json(['status' => 1, 'message' => 'Unauthorized request']);
+    }
+
+    public function sendOtp(Request $request)
+    {
+
+        $rules = [
+            'phone_no' => ['required', 'regex:/^(03\d{2}-\d{7}|92\d{2}-\d{7})$/'],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+
+        $retail = RetailShipperInfo::where('shipper_phone_no',$request->phone_no)->where('status',1)->first();
+        if($retail) {
+
+                if ($retail->password_reset_at && $retail->password_reset_at->isToday()) {
+                    if ($retail->password_reset_limit >= 3) {
+                        return response()->json([
+                            'status' => 1,
+                            'message' => 'OTP request limit exceeded for today. Please try again tomorrow.'
+                        ]);
+                    }
+
+                    // Same day: increment limit
+                    $retail->password_reset_limit += 1;
+
+                } else {
+                    // New day: start fresh
+                    $retail->password_reset_limit = 1;
+                    $retail->password_reset_at = Carbon::now();
+                }
+
+                // Generate and save OTP
+                $minutes = 10;
+                $otp = mt_rand(100000, 999999);
+
+                $retail->retail_otp = $otp;
+                $retail->otp_expire_at =  Carbon::now()->addMinutes($minutes);
+                $retail->save();
+
+                //send notification
+                NotificationsController::send(243, $retail->id, $minutes);
+
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'OTP sent successfully.',
+                    'otp_expire_at' => $retail->otp_expire_at->toDateTimeString()
+                ]);
+        }
+
+        return response()->json(['status' => 1, 'message' => 'Retail shipper does not exist.']);
+
+    }
+    public function verifyOtp(Request $request)
+    {
+        $rules = [
+            'otp' => ['required','digits:6'],
+            'phone_no' => ['required', 'regex:/^(03\d{2}-\d{7}|92\d{2}-\d{7})$/'],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+
+        $retail_shipper = RetailShipperInfo::where('shipper_phone_no', $request->phone_no)
+            ->where('retail_otp', $request->otp)
+            ->first();
+
+        if (!$retail_shipper) {
+            return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
+        }
+
+        if (!$retail_shipper->otp_expire_at || $retail_shipper->otp_expire_at < now()) {
+            return response()->json(['status' => 1, 'message' => 'OTP has expired']);
+        }
+
+        return response()->json(['status' => 0, 'message' => 'OTP verified successfully']);
+    }
     public function shipment_history(Request $request)
     {
         $rules = [
