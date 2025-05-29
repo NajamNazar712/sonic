@@ -379,6 +379,14 @@ class LeadManagementController extends Controller
             
                 return $userExists ? 'Account Activated' : $lead->status;
             })
+
+            ->addColumn('lead_account_link', function ($lead) {
+                if (!empty($lead->lead_id) && !empty($lead->activation_code)) {
+                    return route('cod.signup', ['id' => $lead->lead_id, 'token' => $lead->activation_code]);
+                }
+                return '-';
+            })
+
             
             ->addColumn('action', function ($lead) {
                 $dropdown = '
