@@ -276,6 +276,7 @@
                         <th class="border-primary border-darken-1">Requested Resource</th>
                         <th class="border-primary border-darken-1">Lead Account Progress</th>
                         <th class="border-primary border-darken-1">Pending Account Status</th>
+                        <th class="border-primary border-darken-1">Lead Active Account Link</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
@@ -1110,7 +1111,8 @@
                             head.push('Requested Resource');
                             head.push('Lead Account Progress');
                             head.push('Pending Account Status');
-                            
+                            head.push('Lead Active Account Link');
+
                             $.each(result.data, function (index, values) {
                                 row = [];
 
@@ -1145,6 +1147,8 @@
                                 row.push(values.via_channel);
                                 row.push(values.lead_progress);
                                 row.push(values.user_status);
+                                row.push(values.lead_account_link);
+
                                 body.push(row);
                             });
                         },
@@ -1318,6 +1322,7 @@
                     {data: 'via_channel', name: 'leads.via_channel', class: 'align-middle via_channel'},
                     {data: 'lead_progress', name: 'lead_progress', class: 'align-middle lead_progress', orderable: false, searchable: false},
                     {data: 'user_status', name: 'user_status', class: 'align-middle user_status'},
+                    {data: 'lead_account_link', name: 'lead_account_link', class: 'align-middle lead_account_link', orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
                 ],
                 rowCallback: function (row, data, index) {
@@ -1356,7 +1361,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.aging') || $(header).is('.reason_id') || $(header).is('.sale_person_tagged_aging') || $(header).is('.lead_progress')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.aging') || $(header).is('.reason_id') || $(header).is('.sale_person_tagged_aging') || $(header).is('.lead_progress') || $(header).is('.lead_account_link')) {
                             $(td).appendTo($(search) || $(header).is('.serial_number'));
                         } else if ($(header).is('.status')) {
                             $(status_select).appendTo($(search))
