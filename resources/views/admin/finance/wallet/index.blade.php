@@ -16,12 +16,13 @@
                             <th class="border-primary border-darken-1">S. No.</th>
                             <th class="border-primary border-darken-1">Wallet ID</th>
                             <th class="border-primary border-darken-1">Wallet Shipper name</th>
+                            <th class="border-primary border-darken-1">Financing Product Type</th>
                             <th class="border-primary border-darken-1">Shipper Email</th>
                             <th class="border-primary border-darken-1">Shipper Phone</th>
                             <th class="border-primary border-darken-1">Shipper CNIC</th>
                             <th class="border-primary border-darken-1">Parent Shipper</th>
                             <th class="border-primary border-darken-1">Substitute User</th>
-                            <th class="border-primary border-darken-1">Financing Product Type</th>
+                            
                         </tr>
                     </thead>
                 </table>
@@ -70,24 +71,26 @@
                         head.push('S.No');
                         head.push('Wallet ID');
                         head.push('Wallet User Name');
+                        head.push('Financing Product Type');
                         head.push('Shipper Email');
                         head.push('Shipper Phone');
                         head.push('Shipper CNIC');
                         head.push('Parent Shipper');
                         head.push('Substitute User');
-                        head.push('Financing Product Type');
+                        
 
                         $.each(result.data, function(index, values) {
                             row = [];
                             row.push(index + 1);
                             row.push(values.wallet_id);
                             row.push(values.wallet_user_name);
+                            row.push(values.finova_account_type);
                             row.push(values.wallet_user_email);
                             row.push(values.wallet_user_phone);
                             row.push(values.wallet_user_cnic);
                             row.push(values.parent_user_name);
                             row.push(values.substitute_name);
-                            row.push(values.finova_account_type);
+                            
                             body.push(row);
                         });
                     },
@@ -160,7 +163,12 @@
                     class: 'align-middle wallet_user_name',
                     orderable: false
                 },
-
+                {
+                    data: 'finova_account_type',
+                    name: 'finova_account_type',
+                    class: 'align-middle finova_account_type',
+                    orderable: false
+                },
                 {
                     data: 'wallet_user_email',
                     name: 'wallet_users.email',
@@ -195,12 +203,7 @@
                     class: 'align-middle substitute_name',
                     orderable: false
                 },
-                {
-                    data: 'finova_account_type',
-                    name: 'finova_account_type',
-                    class: 'align-middle finova_account_type',
-                    orderable: false
-                },
+               
             ],
         });
         table.draw();

@@ -168,7 +168,7 @@
 										<th class="border-primary border-darken-1">Sale Person</th>
 										<th class="border-primary border-darken-1">City</th>
 										<th class="border-primary border-darken-1">Phone No(s).</th>
-										<th class="border-primary border-darken-1">Finova Account Type</th>
+										<th class="border-primary border-darken-1">Financing Product Type</th>
 										<th class="border-primary border-darken-1">Address</th>
 										<th class="border-primary border-darken-1">Total Shipments</th>
 										<th class="border-primary border-darken-1">Delivered Shipments</th>
@@ -599,7 +599,7 @@
 							head.push('Sale Person');
                             head.push('City');
                             head.push('Phone No(s).');
-                            head.push('Finova Account Type');
+                            head.push('Financing Product Type');
                             head.push('Address');
                             head.push('Total Shipments');
                             head.push('Delivered Shipments');
