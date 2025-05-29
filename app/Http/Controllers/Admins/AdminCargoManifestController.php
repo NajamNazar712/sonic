@@ -6100,10 +6100,10 @@ class AdminCargoManifestController extends Controller
                     if (Auth::user()->default_hub_id == $details['destination_id'])
                         $misroute = 0;
                 } else {
-                    $details['origin'] = $shipment->pickup_address->city->name;
-                    $details['destination'] = $shipment->consignee_city->name;
-                    $details['destination_id'] = $shipment->consignee_city->id;
-                    $details['hub'] = $shipment->consignee_city->hub_city->name;
+                    $details['origin'] = $shipment->pickup_address->city?->name;
+                    $details['destination'] = $shipment->consignee_city?->name;
+                    $details['destination_id'] = $shipment->consignee_city?->id;
+                    $details['hub'] = $shipment->consignee_city->hub_city?->name;
 
                     if (Auth::user()->default_hub_id == $details['destination_id'])
                         $misroute = 0;
