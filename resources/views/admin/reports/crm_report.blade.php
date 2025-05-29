@@ -180,6 +180,9 @@
                         <!-- Parcel Value column added -->
                         <th class="border-primary border-darken-1">Parcel Value</th>
 
+                        <!-- Claim Amount column added -->
+                        <th class="border-primary border-darken-1">Claim Amount</th>
+
                         <th class="border-primary border-darken-1">COD Value</th>
                         <th class="border-primary border-darken-1">Adjusted Amount</th>
                         <th class="border-primary border-darken-1">Weight Adjusted Amount</th>
@@ -607,6 +610,9 @@
                     // Parcel Value column added here
                     {data: 'parcel_value', name: 's.parcel_value', class: 'align-middle parcel_value', text: 'Parcel Value', value: 'parcel_value', download: true},
 
+                    // Parcel Value column added here
+                    {data: 'product_cost', name: 'crm_requests.product_cost', class: 'align-middle product_cost', text: 'Claim Amount', value: 'product_cost', download: true},
+                    
                     {data: 'cod_amount', name: 's.amount', class: 'align-middle cod_amount', text: 'COD Amount', value: 'cod_amount', download: true},
                     {data: 'adjusted_amount', name: 'adjustment.adjustment_amount', class: 'align-middle adjusted_amount', text: 'Adjusted Amount', value: 'adjusted_amount', download: true},
                     {data: 'weight_charges', name: 'change_shipment_weight_logs.new_charges', class: 'align-middle weight_charges', text: 'Weight Charges', value: 'weight_charges', download: true},
