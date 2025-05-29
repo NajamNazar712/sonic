@@ -7,7 +7,7 @@ pipelines:
           name: 'Deploy to Sprint_132 VM'
           deployment: sprint_133
           script:
-            - echo "Deploying to sprint_133 branch VM..."
+            - echo "Deploying to sprint_132 branch VM..."
             - ssh -o StrictHostKeyChecking=no $SPRINT_132_HOST "cd /var/www/html/sonic && ./deploy.sh"
 
     master:
