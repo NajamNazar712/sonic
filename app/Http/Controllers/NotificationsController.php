@@ -276,13 +276,16 @@ class NotificationsController extends Controller
         $filterBlockedEmails = function ($emails) use ($block_email) {
             if (is_array($emails)) {
                 return array_values(array_filter($emails, function ($email) use ($block_email) {
+                    $email = strtolower(preg_replace('/\s+/', '', $email)); // trim and lowercase
                     return !in_array($email, $block_email);
                 }));
-            } elseif (is_string($emails) && in_array($emails, $block_email)) {
-                return null;
+            } elseif (is_string($emails)) {
+                $email = strtolower(preg_replace('/\s+/', '', $emails)); // sanitize single email
+                return in_array($email, $block_email) ? null : $email;
             }
             return $emails;
         };
+
 
 
         if ($to) {
