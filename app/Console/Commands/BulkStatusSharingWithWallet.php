@@ -47,7 +47,7 @@ class BulkStatusSharingWithWallet extends Command
             ])->get();
         $data->chunk(50)->each(function ($chunkedData){
             Log::channel('botCallJobLog')->info('s ' . 'status sharing wallet job initiated');
-            //BulkStatusSharingWithWalletJob::dispatch($chunkedData->toArray());
+            BulkStatusSharingWithWalletJob::dispatch($chunkedData->toArray());
             Log::channel('botCallJobLog')->info('s ' . 'status sharing wallet job dispatched');
         });
 
