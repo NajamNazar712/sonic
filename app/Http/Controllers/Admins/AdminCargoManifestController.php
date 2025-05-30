@@ -7487,6 +7487,7 @@ class AdminCargoManifestController extends Controller
             $sr_html = '';
             $already_received_shipments_html = '';
             $misrouted_html = '';
+            $rm_html = '';
 
             if (count($short_received_shipments_array) > 0) {
                 $sr_html = "Following Shipments(s) are marked as short received.<br><ul>";
