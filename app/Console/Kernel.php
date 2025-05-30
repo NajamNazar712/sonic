@@ -197,7 +197,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('bulk:status-sharing-wallet')->withoutOverlapping()->cron('*/5 * * * *')->runInBackground();
+        $schedule->command('bulk:status-sharing-wallet')->withoutOverlapping()->everyMinute()->runInBackground();
 
         $schedule->command('create:service_ledger')->dailyAt('00:00')->runInBackground();
         // $schedule->command('job:run email 25000')->dailyAt('02:02')->runInBackground();
