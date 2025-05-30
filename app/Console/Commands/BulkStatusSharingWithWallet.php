@@ -6,6 +6,7 @@ use App\Http\Controllers\FingaIntegrationController;
 use Illuminate\Console\Command;
 use App\Models\StatusSharingWithWallet;
 use App\Jobs\BulkStatusSharingWithWalletJob;
+use Illuminate\Support\Facades\Log;
 
 class BulkStatusSharingWithWallet extends Command
 {
@@ -44,8 +45,10 @@ class BulkStatusSharingWithWallet extends Command
                 'fls.logged_cod_charges',
                 'wu.wallet_id'
             ])->get();
-        $data->chunk(10)->each(function ($chunkedData){
+        $data->chunk(50)->each(function ($chunkedData){
+            Log::channel('botCallJobLog')->info('s ' . 'status sharing wallet job initiated');
             BulkStatusSharingWithWalletJob::dispatch($chunkedData->toArray());
+            Log::channel('botCallJobLog')->info('s ' . 'status sharing wallet job dispatched');
         });
 
     }   
