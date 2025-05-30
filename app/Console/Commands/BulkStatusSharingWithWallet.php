@@ -31,6 +31,7 @@ class BulkStatusSharingWithWallet extends Command
      */
     public function handle()
     {
+        Log::channel('botCallJobLog')->info('s ' . 'status sharing wallet job initiated');
 //        $api = config('app.FINGA_URL');
 //        $token = FingaIntegrationController::getToken($api);
         $data = StatusSharingWithWallet::join('shipments as s', 's.id', 'status_sharing_with_wallets.shipment_id')
@@ -46,10 +47,9 @@ class BulkStatusSharingWithWallet extends Command
                 'wu.wallet_id'
             ])->get();
         $data->chunk(50)->each(function ($chunkedData){
-            Log::channel('botCallJobLog')->info('s ' . 'status sharing wallet job initiated');
+            
             BulkStatusSharingWithWalletJob::dispatch($chunkedData->toArray());
-            Log::channel('botCallJobLog')->info('s ' . 'status sharing wallet job dispatched');
         });
-
+        Log::channel('botCallJobLog')->info('s ' . 'status sharing wallet job dispatched');
     }   
 }
