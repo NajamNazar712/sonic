@@ -14,7 +14,7 @@ class WalletUserDisables extends Command
      *
      * @var string
      */
-    protected $signature = 'disable_wallet_users';
+    protected $signature = 'disable_wallet_users {user_id?}';
 
     /**
      * The console command description.
@@ -30,7 +30,8 @@ class WalletUserDisables extends Command
      */
     public function handle()
     {
-        $wallet_users = WalletUser::whereIn('user_id', [44309, 42723])->get();
+        $userId = explode(',', $this->argument('user_id'));
+        $wallet_users = WalletUser::whereIn('user_id', $userId)->get();
         $success_delete = [];
         foreach ($wallet_users as $user) {
             $done_payment = DonePayment::where('user_id', $user->user_id)
@@ -39,7 +40,7 @@ class WalletUserDisables extends Command
                 ->first();
             if (empty($done_payment)) {
                 $wallet_user_disable = $user->replicate();
-                $wallet_user_disable->setTable('wallet_user_disables');
+                $wallet_user_disable->setTable('wallet_users_disables');
 
                 if ($wallet_user_disable->save()) {
                     $user->delete();

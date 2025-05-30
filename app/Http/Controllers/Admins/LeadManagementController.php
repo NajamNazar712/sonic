@@ -184,7 +184,7 @@ class LeadManagementController extends Controller
             ->leftjoin('admins as ub', 'ub.id', '=', 'leads.updated_by')
             ->leftjoin('service_list as sl', 'sl.id', '=', 'leads.service_id')
             ->leftjoin('lead_reasons as lsr', 'lsr.id', '=', 'leads.reason')
-            ->select('leads.id as lead_id', 'leads.id as leadid', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'rp.trax_id as rider_id', 'c.name as city', 't.name as territory', 'at.name as area', 'leads.sale_person_updated_at', 'lr.name as lead_reference', 'leads.updated_at as updated', 'sl.name as service', 'leads.brand as brand', 'leads.company as company', 'lsr.name as reason_id', 'leads.sale_person_updated_at as sale_person_tagged_time', 'leads.call_status as call_status_name', 'leads.expected_shipments as expected_shipments', 'u.brand_name as brand_name', 'leads.via_channel as via_channel', 'u.status as user_status', 'u.id as user_id');
+            ->select('leads.id as lead_id', 'leads.id as leadid', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'rp.trax_id as rider_id', 'c.name as city', 't.name as territory', 'at.name as area', 'leads.sale_person_updated_at', 'lr.name as lead_reference', 'leads.updated_at as updated', 'sl.name as service', 'leads.brand as brand', 'leads.company as company', 'lsr.name as reason_id', 'leads.sale_person_updated_at as sale_person_tagged_time', 'leads.call_status as call_status_name', 'leads.expected_shipments as expected_shipments', 'u.brand_name as brand_name', 'leads.via_channel as via_channel', 'u.status as user_status', 'u.id as user_id', 'leads.activation_code as activation_code');
         // ->OrderByDesc('leads.requested_date');
         if (session('role_id') != 1) {
             $leads = $leads->whereIn('c.hub_id', session('hubs'));
@@ -379,6 +379,14 @@ class LeadManagementController extends Controller
             
                 return $userExists ? 'Account Activated' : $lead->status;
             })
+
+            ->addColumn('lead_account_link', function ($lead) {
+                if (!empty($lead->lead_id) && !empty($lead->activation_code)) {
+                    return route('cod.signup', ['id' => $lead->lead_id, 'token' => $lead->activation_code]);
+                }
+                return '-';
+            })
+
             
             ->addColumn('action', function ($lead) {
                 $dropdown = '

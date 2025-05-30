@@ -171,6 +171,7 @@
                                         <th class="border-primary border-darken-1">Shipper</th>
                                         <th class="border-primary border-darken-1">City</th>
                                         <th class="border-primary border-darken-1">Phone No(s).</th>
+                                        <th class="border-primary border-darken-1">Financing Product Type</th>
                                         <th class="border-primary border-darken-1">Address</th>
                                         <th class="border-primary border-darken-1">Created Datetime</th>
                                         <th class="border-primary border-darken-1">Total Shipments</th>
@@ -762,6 +763,7 @@
                             head.push('Shipper');
                             head.push('City');
                             head.push('Phone No(s).');
+                            head.push('Financing Product Type');
                             head.push('Address');
                             head.push('Created Datetime');
                             head.push('Total Shipments');
@@ -794,6 +796,7 @@
                                 row.push(values.shipper);
                                 row.push(values.city);
                                 row.push(values.phone_numbers);
+                                row.push(values.finova_account_type);
                                 row.push(values.address);
                                 row.push(values.created_at);
                                 row.push(values.total_shipments);
@@ -1069,6 +1072,11 @@
                         data: 'phone_numbers',
                         name: 'phone_numbers',
                         class: 'align-middle text-center phone_numbers'
+                    },
+                    {
+                        data: 'finova_account_type',
+                        name: 'finova_account_type',
+                        class: 'align-middle text-center finova_account_type'
                     },
                     {
                         data: 'address',
