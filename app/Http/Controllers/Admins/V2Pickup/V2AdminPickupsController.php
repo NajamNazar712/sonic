@@ -2237,7 +2237,7 @@ class V2AdminPickupsController extends Controller
                     $details['rider_assigned'] = $rider_assigned_flag;
                     $details['rider_picked'] = $rider_picked;
                     $details['city'] = $shipment->consignee_city->name;
-                    $details['hub'] = $shipment->consignee_city->hub_city->name;
+                    $details['hub'] = $shipment->consignee_city->hub_city?->name;
 
                     $id = Auth::user();
 
