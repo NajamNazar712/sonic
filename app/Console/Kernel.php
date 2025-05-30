@@ -184,6 +184,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\QualityOfServiceReport',
         'App\Console\Commands\PendingDeliveriesReportNew',
         'App\Console\Commands\WalletChargesUpdate',
+        'App\Console\Commands\BulkStatusSharingWithWalletReplicate',
         // 'App\Console\Commands\QsrEmail',
         // 'App\Console\Commands\PendingDeliveriesReport',
 
@@ -197,7 +198,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('bulk:status-sharing-wallet')->withoutOverlapping()->everyMinute()->runInBackground();
+        $schedule->command('bulk:status-sharing-wallet-replicate')->withoutOverlapping()->everyMinute()->runInBackground();
 
         $schedule->command('create:service_ledger')->dailyAt('00:00')->runInBackground();
         // $schedule->command('job:run email 25000')->dailyAt('02:02')->runInBackground();
