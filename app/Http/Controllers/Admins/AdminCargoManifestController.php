@@ -7484,6 +7484,7 @@ class AdminCargoManifestController extends Controller
             //remove misrouted shipment ids from $short_received_shipments_array end
 
             $received_html = '';
+            $rm_html = '';
             $sr_html = '';
             $already_received_shipments_html = '';
             $misrouted_html = '';
