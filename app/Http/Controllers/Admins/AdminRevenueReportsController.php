@@ -39,7 +39,7 @@ class AdminRevenueReportsController extends Controller
         }
         $from_id = DB::table('shipments_journey')->select(DB::raw('MIN(id) as id'))->where('created_at', '>=', $from)->first()->id;
         $to_id = DB::table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to)->first()->id;
-        dd($from_id, $to_id);
+        dd($from, $to);
         $connection = 'reports';
         $sales = DB::connection($connection)->table('shipments_journey as sj')
             ->join('shipments', 'shipments.id', 'sj.shipment_id')
