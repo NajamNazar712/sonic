@@ -446,21 +446,19 @@ class RetailShipmentBookController extends Controller
             $shipper_info->shipper_address = $request->shipper_address;
             $shipper_info->city_id = $pickup_city_id;
 
-            if($shipping_mode_check == 3 ){
-                if (!$shipper_info->iban_no && (!$request->iban_no || $request->iban_no == '')) {
-                    return redirect()->back()->with(['error' => 'Please provide the IBAN number']);
-                }
-                if (!$shipper_info->account_no && (!$request->account_no || $request->account_no == '')) {
-                    return redirect()->back()->with(['error' => 'Please provide the account number']);
-                }
-                if (!$shipper_info->bank && (!$request->bank || $request->bank == '')) {
-                    return redirect()->back()->with(['error' => 'Please choose a bank']);
-                }
-                if (!$shipper_info->cheque_image && !$request->hasFile('cheque_image')) {
-                    return redirect()->back()->with(['error' => 'Please provide the cheque image']);
-                }
+            if (!$shipper_info->iban_no && (!$request->iban_no || $request->iban_no == '')) {
+                return redirect()->back()->with(['error' => 'Please provide the IBAN number']);
             }
-           
+            if (!$shipper_info->account_no && (!$request->account_no || $request->account_no == '')) {
+                return redirect()->back()->with(['error' => 'Please provide the account number']);
+            }
+            if (!$shipper_info->bank && (!$request->bank || $request->bank == '')) {
+                return redirect()->back()->with(['error' => 'Please choose a bank']);
+            }
+            if (!$shipper_info->cheque_image && !$request->hasFile('cheque_image')) {
+                return redirect()->back()->with(['error' => 'Please provide the cheque image']);
+            }
+
             if ($request->iban_no != null && $request->account_no != null && $request->bank != null) {
                 $shipper_info->bank_id = $request->bank;
                 $shipper_info->iban = $request->iban_no;
@@ -486,20 +484,18 @@ class RetailShipmentBookController extends Controller
             $shipper_info->city_id = $pickup_city_id;
             $shipper_info->save();
 
-            if($shipping_mode_check == 3 ){
-                if ($request->iban_no == null || $request->iban_no == ''){
-                    return redirect()->back()->with(['error' => 'Please provide the IBAN number']);
-                } 
-                if ($request->account_no == null || $request->account_no == '') {
-                    return redirect()->back()->with(['error' => 'Please provide the account number']);
-                } 
-                if ($request->bank == null || $request->bank == ''){
-                    return redirect()->back()->with(['error' => 'Please choose a bank']);
-                } 
-                if (!$request->hasFile('cheque_image')){
-                    return redirect()->back()->with(['error' => 'Please provide the cheque image']);
-                } 
-            }
+            if ($request->iban_no == null || $request->iban_no == ''){
+                return redirect()->back()->with(['error' => 'Please provide the IBAN number']);
+            } 
+            if ($request->account_no == null || $request->account_no == '') {
+                return redirect()->back()->with(['error' => 'Please provide the account number']);
+            } 
+            if ($request->bank == null || $request->bank == ''){
+                return redirect()->back()->with(['error' => 'Please choose a bank']);
+            } 
+            if (!$request->hasFile('cheque_image')){
+                return redirect()->back()->with(['error' => 'Please provide the cheque image']);
+            } 
 
             if ($request->hasFile('cheque_image') && $request->iban_no != null && $request->account_no != null && $request->bank != null) {
                 $shipper_info->bank_id = $request->bank;
