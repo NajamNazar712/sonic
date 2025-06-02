@@ -1039,7 +1039,7 @@
                                     $('#bank').removeClass('required');
                                     first_shipment = false;
                                 }
-                                else if(cod == true && ($('#iban_no').val() == null || $('#iban_no').val() == '') && $('#shipping_mode').val() == 3){
+                                else if(cod == true && ($('#iban_no').val() == null || $('#iban_no').val() == '')) {
                                     $('#iban_no').addClass('required');
                                     $('#account_no').addClass('required');
                                     $('#bank').addClass('required');
@@ -1749,7 +1749,7 @@
                 var bankValue = $('#bank').val();
                 var chequeImageValue = $('#cheque_image').val();
 
-                if ((ibanNoValue === '' || accountNoValue === '' || bankValue === '' || chequeImageValue === '') && $('#shipping_mode').val() == 3) {
+                if ((ibanNoValue === '' || accountNoValue === '' || bankValue === '' || chequeImageValue === ''))  {
                     if (ibanNoValue === '') {
                         $('#iban_no').addClass('required');
                     } else {
