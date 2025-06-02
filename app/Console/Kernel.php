@@ -184,6 +184,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\QualityOfServiceReport',
         'App\Console\Commands\PendingDeliveriesReportNew',
         'App\Console\Commands\WalletChargesUpdate',
+        'App\Console\Commands\BulkStatusSharingWithWalletReplicate',
         // 'App\Console\Commands\QsrEmail',
         // 'App\Console\Commands\PendingDeliveriesReport',
 
@@ -197,6 +198,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        $schedule->command('bulk:status-sharing-wallet-replicate')->withoutOverlapping()->everyFiveMinutes()->runInBackground();
+
         $schedule->command('create:service_ledger')->dailyAt('00:00')->runInBackground();
         // $schedule->command('job:run email 25000')->dailyAt('02:02')->runInBackground();
         $schedule->command('corporate_reimbursement_setting:update')->monthlyOn(1, '00:15')->runInBackground();
@@ -613,7 +616,7 @@ class Kernel extends ConsoleKernel
 //        $schedule->command('status:re-push-wallet')->hourly()->runInBackground(); // wallet no need now after bulk status work
         $schedule->command('rerun:wallet_log_re_push')->hourly()->runInBackground(); // wallet
         $schedule->command('rerun_wallet_settlement')->everySixHours()->runInBackground(); //wallet
-        $schedule->command('bulk:status-sharing-wallet')->withoutOverlapping()->everyFiveMinutes()->runInBackground();
+        // $schedule->command('bulk:status-sharing-wallet')->withoutOverlapping()->everyFiveMinutes()->runInBackground();
 //        $schedule->command('api:visionsoftexcel_multiple')->dailyAt('20:01')->runInBackground();
 
 

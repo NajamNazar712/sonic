@@ -6,6 +6,7 @@ use App\Http\Controllers\FingaIntegrationController;
 use Illuminate\Console\Command;
 use App\Models\StatusSharingWithWallet;
 use App\Jobs\BulkStatusSharingWithWalletJob;
+use Illuminate\Support\Facades\Log;
 
 class BulkStatusSharingWithWallet extends Command
 {
@@ -30,6 +31,9 @@ class BulkStatusSharingWithWallet extends Command
      */
     public function handle()
     {
+        try {
+
+            Log::channel('botCallJobLog')->info('s ' . 'status sharing wallet job initiated');
 //        $api = config('app.FINGA_URL');
 //        $token = FingaIntegrationController::getToken($api);
         $data = StatusSharingWithWallet::join('shipments as s', 's.id', 'status_sharing_with_wallets.shipment_id')
@@ -44,9 +48,17 @@ class BulkStatusSharingWithWallet extends Command
                 'fls.logged_cod_charges',
                 'wu.wallet_id'
             ])->get();
-        $data->chunk(10)->each(function ($chunkedData){
+        $data->chunk(50)->each(function ($chunkedData){
+            
             BulkStatusSharingWithWalletJob::dispatch($chunkedData->toArray());
         });
-
+        Log::channel('botCallJobLog')->info('s ' . 'status sharing wallet job dispatched');
+    }catch (\Throwable $e) {
+    Log::channel('botCallJobLog')->error('Status sharing job failed: ' . $e->getMessage(), [
+        'line' => $e->getLine(),
+        'file' => $e->getFile(),
+        'trace' => $e->getTraceAsString(),
+    ]);
+}
     }   
 }
