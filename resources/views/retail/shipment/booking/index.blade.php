@@ -1773,11 +1773,6 @@
                     } else {
                         $('#cheque_image').removeClass('required');
                     }
-                }else{
-                    $('#iban_no').removeClass('required');
-                    $('#account_no').removeClass('required');
-                    $('#bank').removeClass('required');
-                    $('#cheque_image').removeClass('required');
                 }
             });
 
