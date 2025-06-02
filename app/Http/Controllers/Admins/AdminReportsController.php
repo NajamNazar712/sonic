@@ -6767,7 +6767,7 @@ class AdminReportsController extends Controller
                         WHEN crm_requests.case_nature_complainant IS NULL THEN '-' 
                         ELSE 'Shipper' 
                     END as case_nature_complainant
-                ")
+                "),'crm_requests.product_cost as product_cost'
 
             ];
 
