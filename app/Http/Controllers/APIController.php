@@ -1014,6 +1014,9 @@ class APIController extends Controller
             if ($service_type_id != 5) {
                 $user_shipping_info = UserShippingInfo::find($request->input('pickup_address_id'));
 
+                if(!$user_shipping_info) {
+                    return response()->json(['status' => 1, 'message' => 'Pickup Address not found!']);
+                }
                 if (!$user_shipping_info->status) {
                     return response()->json(['status' => 1, 'message' => 'Pickup Address ID #' . $request->input('pickup_address_id') . ' is disabled']);
                 }
@@ -1140,8 +1143,11 @@ class APIController extends Controller
 
                 $pickup_address_id_for_delivery = $request->input('pickup_address_id');
                 $pickup_address_for_delivery = UserShippingInfo::find($pickup_address_id_for_delivery);
-                $delivery_city = City::find($pickup_address_for_delivery->city_id);
+                if(!$pickup_address_for_delivery) {
+                    return response()->json(['status' => 1, 'message' => 'Pickup Address not found!']);
+                }
 
+                $delivery_city = City::find($pickup_address_for_delivery->city_id);
                 if (!$delivery_city->status) {
                     return response()->json(['status' => 1, 'message' => 'Consignee City ID #' . $request->input('consignee_city_id') . ' is deactivated']);
                 }
