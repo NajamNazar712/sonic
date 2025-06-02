@@ -249,7 +249,7 @@ $(".steps-validation").validate({
             required: true,
             email: true,
             remote: {
-                url: '{{ route("cod.register.check_email") }}',
+                url: "/cod/check_email",
                 type: 'GET',
                 data: {
                     email: function() {
