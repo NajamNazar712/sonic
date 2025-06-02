@@ -5893,7 +5893,7 @@ class AdminCargoManifestController extends Controller
             //   }
 
             if (in_array($shipment->shipper_status_id, [5, 14, 25, 31, 36, 38])) // all delivered statuses
-                return ['status' => 1, 'error' => 'Shipment is on out for delivery !'];
+                return ['status' => 1, 'error' => 'Shipment is not allowed to receive!'];
 
             if ($shipment->shipper_status_id == 1) // shipment not arrived at center
                 return ['status' => 1, 'error' => 'Shipment not arrived at center yet !'];
