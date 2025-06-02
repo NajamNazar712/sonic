@@ -1749,7 +1749,7 @@
                 var bankValue = $('#bank').val();
                 var chequeImageValue = $('#cheque_image').val();
 
-                if ((ibanNoValue === '' || accountNoValue === '' || bankValue === '' || chequeImageValue === '')) {
+                if (ibanNoValue === '' || accountNoValue === '' || bankValue === '' || chequeImageValue === '') {
                     if (ibanNoValue === '') {
                         $('#iban_no').addClass('required');
                     } else {
