@@ -461,6 +461,7 @@ class AdminRetailReportController extends Controller
         $contents = ob_get_contents();
         ob_end_clean();
         $filePath = '/reports/retail/' . $filename;
+        dd($filePath);
         Storage::disk('public')->put($filePath, $contents);
         $from = Carbon::parse($from)->toDateString();
         $to = Carbon::parse($to)->toDateString();
