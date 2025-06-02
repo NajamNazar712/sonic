@@ -464,6 +464,7 @@ class AdminRetailReportController extends Controller
         Storage::disk('public')->put($filePath, $contents);
         $from = Carbon::parse($from)->toDateString();
         $to = Carbon::parse($to)->toDateString();
+        dd($filePath);
         return ['file_path' => $filePath, 'from' => $from, 'to' => $to];
     }
 
@@ -662,6 +663,7 @@ class AdminRetailReportController extends Controller
         Storage::disk('public')->put($filePath, $contents);
         $from = Carbon::parse($from)->toDateString();
         $to = Carbon::parse($to)->toDateString();
+        dd($filePath);
         return ['file_path' => $filePath, 'from' => $from, 'to' => $to];
     }
 }
