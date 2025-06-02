@@ -14,7 +14,77 @@
                 @include('admin.inc.messages')
 
                 <div class="row mb-2 justify-content-start">
-                    <div class="col-3">
+
+
+                    <div class="col-4">
+                            <fieldset class="form-group">
+                                <select name="search_shipper[]" id="search_shippers" class="form-control select2" multiple required data-rule-required="true" data-msg-required="This field is required">
+                                </select>
+                            </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_zone" id="search_zone" class="form-control select2">
+                                @foreach($zones as $zone)
+                                    <option value="{{$zone->id}}">{{$zone->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_hub" id="search_hub" class="form-control select2">
+                                @foreach($hubs as $hub)
+                                    <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_origin" id="search_origin" class="form-control select2">
+                                @foreach($cities as $origin)
+                                    <option value="{{$origin->id}}">{{$origin->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_destination" id="search_destination" class="form-control select2">
+                                @foreach($cities as $destination)
+                                    <option value="{{$destination->id}}">{{$destination->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_qsr" id="search_qsr" class="form-control select2">
+                                <option value="1">Delivery</option>
+                                <option value="2">Return</option>
+                                <option value="3">All</option>
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_shipment_status" id="search_shipment_status" class="form-control select2">
+                                @foreach($shipment_status as $status)
+                                    <option value="{{$status->id}}">{{$status->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <select name="search_area" id="search_area" class="select2">
+                            @foreach($areas as $area)
+                                <option value="{{$area->id}}">{{$area->name}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-4">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -24,7 +94,7 @@
                             <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="{{ Carbon\Carbon::now() }}">
                         </div>
                     </div>
-                    <div class="col-3">
+                    <div class="col-4">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -34,7 +104,7 @@
                             <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="{{ Carbon\Carbon::now() }}">
                         </div>
                     </div>
-                    <div class="col-3">
+                    <div class="col-4">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -44,7 +114,7 @@
                             <input type="text" name="from_date1" class="form-control bg-primary border-primary white rounded-right" id="from_date1" placeholder="Arrival Date From">
                         </div>
                     </div>
-                    <div class="col-3">
+                    <div class="col-4">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -179,6 +249,66 @@
             }
         });
 
+        $('#search_shipment_status').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select Status',
+            width:'100%',
+            allowClear:true
+        });
+        $('#search_shippers').select2({
+            width:'100%',
+            placeholder:"Select Shipper",
+            allowClear:true,
+            multiple: true,
+            minimumInputLength: 2,
+            ajax: {
+                dataType: 'json',
+                url:  '{!! route('admin.accounts.shipper_names.dropdown',['type'=>'active']) !!}',
+                data: function (params) {
+                    return {
+                        search: params.term,
+                        sub_segment_select : $('#sub_segment_select').val(),
+                        report_type : 1
+                    }
+                },
+                processResults: function (data) {
+                    return {
+                        results: data
+                    };
+                },
+                delay: 700,
+            }
+        });
+        $('#search_origin').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select Origin City',
+            width:'100%',
+            allowClear:true
+        });
+
+        $('#search_destination').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select Destination City',
+            width:'100%',
+            allowClear:true
+        });
+        $('#search_qsr').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select QSR',
+            width:'100%',
+            allowClear:true
+        });
+        $('#search_zone').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select Zone',
+            width:'100%',
+            allowClear:true
+        });
+        $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select Hub',
+            width:'100%',
+            allowClear:true
+        });
+        $('#search_area').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select Area',
+            width:'100%',
+            allowClear:true
+        });
         var from_max = '{{ Carbon\Carbon::now() }}';
         var to_max = '{{ Carbon\Carbon::now() }}';
         var from_date = $('#from_date').pickadate({
@@ -298,6 +428,14 @@
                             data: {
                                 excel: true,
                                 _token: $('meta[name="csrf-token"]').attr('content'),
+                                search_shipment_status: $('#search_shipment_status').val(),
+                                search_shippers: $('#search_shippers').val(),
+                                search_origin: $('#search_origin').val(),
+                                search_destination: $('#search_destination').val(),
+                                search_qsr: $('#search_qsr').val(),
+                                search_zone: $('#search_zone').val(),
+                                search_hub: $('#search_hub').val(),
+                                search_area :  $("#search_area").val(),
                                 search_from: $('input[name="from_date_formatted"]').val(),
                                 search_to: $('input[name="to_date_formatted"]').val(),
                                 arrival_search_from: $('input[name="from_date1_formatted"]').val(),
@@ -359,6 +497,14 @@
                     d.search_to = $('input[name="to_date_formatted"]').val();
                     d.arrival_search_from = $('input[name="from_date1_formatted"]').val();
                     d.arrival_search_to = $('input[name="to_date1_formatted"]').val();
+                    d.search_shipment_status= $('#search_shipment_status').val();
+                    d.search_shippers= $('#search_shippers').val();
+                    d.search_origin= $('#search_origin').val();
+                    d.search_destination= $('#search_destination').val();
+                    d.search_qsr= $('#search_qsr').val();
+                    d.search_zone= $('#search_zone').val();
+                    d.search_hub= $('#search_hub').val();
+                    d.search_area = $("#search_area").val();
                 }
             },
 
@@ -391,7 +537,7 @@
                 { data: 'origin', title: 'Origin', class: 'origin', download: true },
                 { data: 'destination', title: 'Destination', class: 'destination', download: true },
                 { data: 'hub', title: 'Hub', class: 'hub', download: true },
-                { data: 'area', title: 'Area', class: 'area', download: true },
+                { data: 'area', title: 'Consignee City Area', class: 'area', download: true },
                 { data: 'concerned_hub_name', title: 'Concerned Hub', class: 'concerned_hub_name', download: true },
                 { data: 'return_city', title: 'Return City', class: 'return_city', download: true },
                 { data: 'zone', title: 'Zone', class: 'zone', download: true },
