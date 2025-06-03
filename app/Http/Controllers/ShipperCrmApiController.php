@@ -60,7 +60,7 @@ class ShipperCrmApiController extends Controller
 
                     if ($complaint_id == 12 && in_array($shipment->shipper_status_id, [14, 18, 30, 36, 37, 20, 21, 22, 23, 24, 25, 26, 32, 44, 47, 48, 57, 60, 51])) // for cod change automation
                     {
-                        return response()->json(['status' => 1,'error'=>'Request cannot be catered at this status of the shipment.']);
+                        return response()->json(['status' => 1,'message'=>'Request cannot be catered at this status of the shipment.']);
                     }
 
                     $is_shipment = CrmRequest::where('shipment_id', $shipment_id)->where('case_nature_id', $nature_id)->first();
@@ -70,7 +70,7 @@ class ShipperCrmApiController extends Controller
                         $already_lodged = true;
                         if ($is_shipment->case_nature_id == $nature_id) {
                             $present_shipments[] = $shipment->tracking_number;
-                            continue;
+                            return response()->json(['status' => 1,'message'=>'Request/Complaint already lodged.']);
                         }
                     }
                     if($nature_id == 4 && $complaint_id!=26) {
@@ -108,6 +108,7 @@ class ShipperCrmApiController extends Controller
                         if ($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1) {
                             if (in_array($complaint_id, [11, 13])) {
                                 $present_shipments[] = $shipment->tracking_number;
+                                return response()->json(['status' => 1,'message'=>'Request cannot be catered at this status of the shipment.']);
                             }
                         }
 
@@ -174,6 +175,8 @@ class ShipperCrmApiController extends Controller
                 }
                 else {
                     $not_found_shipments[]=$shipment_id;
+                    return response()->json(['status' => 1,'message'=>'Shipment not found!']);
+
                 }
             }
 
@@ -183,9 +186,11 @@ class ShipperCrmApiController extends Controller
                 AdminCRMController::updateComplaintPhone($crm_request_padded_id,$case_nature_complainant, $complainant_phone);
             }
 
+
+
             return response()->json([
                 'status' => 0,
-                'error' => 'Requests processed: some already existed, some shipments not found, others added successfully.',
+                'message' => 'CRM requests have been added successfully.',
                 'already_existed_shipments' => $present_shipments,
                 'not_found_shipments' => $not_found_shipments
             ]);
