@@ -79,7 +79,7 @@ class ShipperOrderManagementApiController extends Controller
             ->addSelect('sm.mode as service_type','shipments.id')
             ->where('shipments.user_id', $shipper_id)
             ->orderBy('shipments.id', 'desc')
-            ->cursorPaginate(1);
+            ->cursorPaginate(20);
     }
 
     private function retail_shipper_list($retail_id)
@@ -91,7 +91,7 @@ class ShipperOrderManagementApiController extends Controller
             ->addSelect('rs.id','sm.name as service_type')
             ->where('rsi.id', $retail_id)
             ->orderBy('rs.id', 'desc')
-            ->cursorPaginate(1);
+            ->cursorPaginate(20);
     }
 
 }
