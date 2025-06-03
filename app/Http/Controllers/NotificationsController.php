@@ -11437,8 +11437,8 @@ class NotificationsController extends Controller
                         if (strpos($body, '[expire_at]') !== FALSE) {
                             $body = str_replace('[expire_at]', $reference_2_id, $body);
                         }
-                      $to = $retail->shipper_phone_no;
-                        self::sms($body, $to, 1, null,$id);
+                        $to = $retail->shipper_phone_no;
+                        self::sms($body, $to, null, null,$id);
                     }
                 }
 
