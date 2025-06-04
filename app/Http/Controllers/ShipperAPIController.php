@@ -220,9 +220,9 @@ class ShipperAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         }
-
-        $is_retail = $request->header('Via') == 2;
-        if ($is_retail) {
+        //said by mobile team disable condition becuase not send via 2
+//        $is_retail = $request->header('Via') == 2;
+//        if ($is_retail) {
             $retail_shipper = RetailShipperInfo::where('retail_otp', $request->otp)->first();
 
             if (!$retail_shipper) {
@@ -258,9 +258,9 @@ class ShipperAPIController extends Controller
             $retail_shipper->save();
 
             return response()->json(['status' => 0, 'message' => 'Password reset successful']);
-        }
+//        }
 
-        return response()->json(['status' => 1, 'message' => 'Unauthorized request']);
+//        return response()->json(['status' => 1, 'message' => 'Unauthorized request']);
     }
 
     public function sendOtp(Request $request)
