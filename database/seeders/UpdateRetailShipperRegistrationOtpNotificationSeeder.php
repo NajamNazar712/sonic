@@ -26,7 +26,7 @@ class UpdateRetailShipperRegistrationOtpNotificationSeeder extends Seeder
                 'name' => 'Retail Shipper App registration OTP',
                 'type_id' => 2,
                 'subject' => null,
-                'body' => 'Dear [user_name], your code for Retail Shipper App is [otp]. It will expire in [expire_at] minutes. For help, visit trax.pk.',
+                'body' => 'Dear [user_name], your code for Trax Retail Shipper App is [otp]. It will expire in [expire_at] minutes. For help, contact Trax support.',
                 'updated_by' => 3495,
                 'status' => 0
             ]
