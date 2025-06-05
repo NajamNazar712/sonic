@@ -69,8 +69,8 @@
                                     <div class="row">
                                         <div class="col-4">
                                             <div class="form-group">
-                                                <label>Origin Zone&nbsp;(<input type="checkbox" class="checkAll" id="origin_zone_id_checkbox">Select All)</label>
-                                                <select name="origin_zone_id[]" id="origin_zone_id" class="form-control select2" multiple="multiple">
+                                                <label>Origin Zone*&nbsp;(<input type="checkbox" class="checkAll" id="origin_zone_id_checkbox">Select All)</label>
+                                                <select name="origin_zone_id[]" id="origin_zone_id" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
                                                     @foreach($zones as $zone)
                                                         <option value="{{ $zone->id }}" > {{ $zone->name }} </option>
                                                     @endforeach
@@ -525,6 +525,7 @@
                     let role_id = $('#agent_id').find(':selected').data('role_id') || 0; // Ensure role_id is a number
                     if ([43, 67, 75, 115].includes(role_id)){
                         let shipper_ids = $('#shipper_key_id').val();
+
                         if(shipper_ids!=''){
                             form.submit();
                         }else {
