@@ -702,7 +702,7 @@ use Illuminate\Http\Request;
 
             //finance Apis
             Route::prefix('finance')->name('finance.')->group(function (){
-                    Route::get('payments','ShipperFinanceApiController@payment_list')->name('payments');
+                  Route::get('payments','ShipperFinanceApiController@payment_list')->name('payments');
             });
 
             // CRM Apis
