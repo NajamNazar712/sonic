@@ -320,6 +320,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('city/disable_booking_status', 'Admins\AdminDashboardController@disable_booking_status')->name('disable_booking_status');
         Route::post('city/enable_booking_status', 'Admins\AdminDashboardController@enable_booking_status')->name('enable_booking_status');
 
+
+        Route::get('city/{id}/changes', 'Admins\AdminDashboardController@getAjaxCityChanges')->name('getAjaxCityChanges');
+
         //Route
         Route::prefix('route')->name('route.')->group(function () {
             Route::get('/', 'Admins\AdminDashboardController@routeView')->name('index');
