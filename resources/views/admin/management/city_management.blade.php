@@ -104,8 +104,10 @@
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">City Changes</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title"><strong>City Changes</strong></h5>
+                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                </button>
             </div>
             <div class="modal-body">
                 <div id="changedDataContent">
@@ -845,7 +847,7 @@
             3: 'Swift'
         }[id] || '-';
     }
-      $(document).on('click', '.city_logs', function () {
+    $(document).on('click', '.city_logs', function () {
         let cityId = $(this).data('id');
 
         if (cityId) {
@@ -860,7 +862,10 @@
                     } else {
                         response.forEach(entry => {
                             const changes = entry.changes;
-                            html += `<div class="mb-4"><h5 class="fw-bold text-center">Changes on <strong>${entry.timestamp}</strong></h5>`;
+                            
+                            if(Object.keys(changes).length){
+                                html += `<div class="mb-4"><h5 class="fw-bold text-center">Changes on <strong>${entry.timestamp} (${entry.admin_name})</strong></h5>`;
+                            }
 
                             // City Fields
                             if (changes.city) {
@@ -872,8 +877,6 @@
                                 });
                                 html += '</tbody></table>';
                             }
-
-                            console.log(response);
                             
                             // OSA Rates
                             if (changes.osa_rates) {
@@ -914,7 +917,7 @@
                                 html += '</tbody></table>';
                             }
 
-                            html += '</div>'; // end of one log entry
+                            html += '</div>'; 
                         });
                     }
 

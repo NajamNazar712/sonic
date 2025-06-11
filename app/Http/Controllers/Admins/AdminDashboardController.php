@@ -16236,23 +16236,32 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
     {
         $cityId = $oldCity->id;
 
+        $oldHub = City::find($oldCity->hub_id);
+        $oldZone = Zone::find($oldCity->zone_id);
+
         $oldData = [
-            'city' => $oldCity->only([
-                'name',
-                'city_code',
-                'hub',
-                'hub_id',
-                'zone_id',
-                'pickup',
-                'gc_area',
-                'attempt_tat',
-                'location_latitude',
-                'location_longitude',
-                'hub_location_latitude',
-                'hub_location_longitude',
-                'address',
-                'pickup_cut_off_time'
-            ]),
+            'city' => array_merge(
+                $oldCity->only([
+                    'name',
+                    'city_code',
+                    'hub',
+                    'hub_id',
+                    'zone_id',
+                    'pickup',
+                    'gc_area',
+                    'attempt_tat',
+                    'location_latitude',
+                    'location_longitude',
+                    'hub_location_latitude',
+                    'hub_location_longitude',
+                    'address',
+                    'pickup_cut_off_time'
+                ]),
+                [
+                    'hub_name' => $oldHub ? $oldHub->name : null,
+                    'zone_name' => $oldZone ? $oldZone->name : null,
+                ]
+            ),
             'osa_rates' => $oldCity->osaRates->map(function ($r) {
                 return ['osa_name' => $r->osa_name, 'osa_rate' => $r->osa_rate];
             })->toArray(),
@@ -16265,24 +16274,32 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         ];
 
         $newCity = City::with(['osaRates', 'deliveries', 'walkIns'])->find($cityId);
+        $newHub = City::find($newCity->hub_id);
+        $newZone = Zone::find($newCity->zone_id);
 
         $newData = [
-            'city' => $newCity->only([
-                'name',
-                'city_code',
-                'hub',
-                'hub_id',
-                'zone_id',
-                'pickup',
-                'gc_area',
-                'attempt_tat',
-                'location_latitude',
-                'location_longitude',
-                'hub_location_latitude',
-                'hub_location_longitude',
-                'address',
-                'pickup_cut_off_time'
-            ]),
+            'city' => array_merge(
+                $newCity->only([
+                    'name',
+                    'city_code',
+                    'hub',
+                    'hub_id',
+                    'zone_id',
+                    'pickup',
+                    'gc_area',
+                    'attempt_tat',
+                    'location_latitude',
+                    'location_longitude',
+                    'hub_location_latitude',
+                    'hub_location_longitude',
+                    'address',
+                    'pickup_cut_off_time'
+                ]),
+                [
+                    'hub_name' => $newHub ? $newHub->name : null,
+                    'zone_name' => $newZone ? $newZone->name : null,
+                ]
+            ),
             'osa_rates' => $newCity->osaRates->map(function ($r) {
                 return ['osa_name' => $r->osa_name, 'osa_rate' => $r->osa_rate];
             })->toArray(),
@@ -16298,15 +16315,24 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             'city_id' => $cityId,
             'old_data' => $oldData,
             'new_data' => $newData,
-            'admin_id' => Auth::id(),
+            'admin_id' => auth()->id(),
         ]);
     }
 
-    public static function getCityChanges(array $oldData, array $newData): array
+
+    public static function getCityChanges(array $oldData, array $newData)
     {
         $changes = [];
 
+        $excludedFields = ['zone_id', 'hub_id'];
+
+
         foreach ($oldData['city'] as $key => $oldValue) {
+
+            if (in_array($key, $excludedFields)) {
+                continue;
+            }
+
             $newValue = $newData['city'][$key] ?? null;
             if ($oldValue != $newValue) {
                 $changes['city'][$key] = [
@@ -16346,7 +16372,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
     public function getAjaxCityChanges($id)
     {
-        $logs = CityLog::where('city_id', $id)
+        $logs = CityLog::with('admin')->where('city_id', $id)
             ->orderByDesc('id')  
             ->get();
 
@@ -16362,7 +16388,8 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
             $allChanges[] = [
                 'timestamp' => $log->created_at->toDateTimeString(),
-                'changes' => $this->getCityChanges($oldData, $newData)
+                'changes' => $this->getCityChanges($oldData, $newData),
+                'admin_name' => $log->admin?->name
             ];
         }
 

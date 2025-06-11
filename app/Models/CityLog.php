@@ -20,4 +20,9 @@ class CityLog extends Model
         'old_data' => 'array',
         'new_data' => 'array',
     ];
+
+    public function admin()
+    {
+        return $this->belongsTo('App\Http\Models\Admin\Admin');
+    }
 }
