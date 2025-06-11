@@ -1212,11 +1212,23 @@ class ShipperAPIController extends Controller
         $delivery_type = DeliveryType::orderBy('delivery_type')->get();
         $charges_modes = ChargesModes::whereIn('id', [3])->get();
         $check = NonServiceArea::pluck('name')->toArray();
-        $air_waybill = ShipperAirWaybillSettings::where('user_id', $user_id);
-        if ($air_waybill->exists()) {
-            $air_waybill = $air_waybill->first();
-        } else {
-            $air_waybill = null;
+//        $air_waybill = ShipperAirWaybillSettings::where('user_id', $user_id);
+//        if ($air_waybill->exists()) {
+//            $air_waybill = $air_waybill->first();
+//        } else {
+//            $air_waybill = null;
+//        }
+//        $airway_bill_address_visibility_users = 1;
+        $air_waybill = 1;
+        $bypass_settings = GlobalSettings::where('type', 'airway_bill_address_visibility_setting');
+        if ($bypass_settings->exists()) {
+            $bypass_settings = $bypass_settings->first();
+            if ($bypass_settings->text != NULL) {
+                $airway_bill_address_visibility_accounts = array_map('intval', explode(',', $bypass_settings->text));
+                if (in_array(session('user_id'), $airway_bill_address_visibility_accounts)) {
+                    $air_waybill = 0;
+                }
+            }
         }
         $approve_ftl_requests = FtlRequest::where('shipper_id', $user_id)->where('status_id', 3)->get();
         $omni_user = 0;
@@ -1347,13 +1359,23 @@ class ShipperAPIController extends Controller
         }
         $check = NonServiceArea::pluck('name')->toArray();
         $charges_modes = ChargesModes::whereIn('id', [4])->get();
-        $air_waybill = ShipperAirWaybillSettings::where('user_id', $user_id);
-        if ($air_waybill->exists()) {
-            $air_waybill = $air_waybill->first();
-        } else {
-            $air_waybill = null;
+//        $air_waybill = ShipperAirWaybillSettings::where('user_id', $user_id);
+//        if ($air_waybill->exists()) {
+//            $air_waybill = $air_waybill->first();
+//        } else {
+//            $air_waybill = null;
+//        }
+        $air_waybill = 1;
+        $bypass_settings = GlobalSettings::where('type', 'airway_bill_address_visibility_setting');
+        if ($bypass_settings->exists()) {
+            $bypass_settings = $bypass_settings->first();
+            if ($bypass_settings->text != NULL) {
+                $airway_bill_address_visibility_accounts = array_map('intval', explode(',', $bypass_settings->text));
+                if (in_array(session('user_id'), $airway_bill_address_visibility_accounts)) {
+                    $air_waybill = 0;
+                }
+            }
         }
-
         $omni_user = 0;
         $settings = GlobalSettings::where('type', 'omni_users');
         if ($settings->exists()) {
