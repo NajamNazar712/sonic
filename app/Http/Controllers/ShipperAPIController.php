@@ -57,6 +57,8 @@ use Illuminate\Support\Facades\Storage;
 use Validator;
 use Illuminate\Support\Str;
 use App\Http\Models\Admin\Retail\RetailShipperInfo;
+use App\Models\WalletShipperSetting;
+
 
 class ShipperAPIController extends Controller
 {
@@ -167,9 +169,10 @@ class ShipperAPIController extends Controller
                     return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
                 }
             }else {
-                $shipper = User::where('email', $request->email_address);
-                if ($shipper->exists()) {
-                    $shipper = $shipper->first();
+                //$shipper = User::where('email', $request->email_address);
+                $shipper = User::with('wallet')->where('email', $request->email_address)->first();
+                if ($shipper) {
+                    //$shipper = $shipper->first();
                     if ($shipper->blacklist) {
                         return response()->json(['status' => 1, 'message' => 'Your Account is Blacklisted, Contact Admin']);
                     } else if ($shipper->status != 3) {
@@ -183,6 +186,9 @@ class ShipperAPIController extends Controller
                         $information['shipper_id'] = $shipper->id;
                         $information['phone_number'] = $shipper->phone;
                         $information['app_type'] = 1;
+                        $information['wallet_sign_up_allow'] = WalletShipperSetting::where('user_id', $shipper->id)->where('status', 1)->exists() ? 1 : 0;
+                        $information['wallet_user'] = ($shipper->wallet) ? 1 : 0;
+
                         if ($shipper->api_token) {
                             $information['api_token'] = $shipper->api_token;
                         } else {
