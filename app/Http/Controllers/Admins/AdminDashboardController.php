@@ -16389,7 +16389,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             $allChanges[] = [
                 'timestamp' => $log->created_at->toDateTimeString(),
                 'changes' => $this->getCityChanges($oldData, $newData),
-                'admin_name' => $log->admin?->name
+                'admin' => $log->admin?->name . ' - ' . $log->admin?->trax_id
             ];
         }
 

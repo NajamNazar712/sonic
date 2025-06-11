@@ -864,7 +864,7 @@
                             const changes = entry.changes;
                             
                             if(Object.keys(changes).length){
-                                html += `<div class="mb-4"><h5 class="fw-bold text-center">Changes on <strong>${entry.timestamp} (${entry.admin_name})</strong></h5>`;
+                                html += `<div class="mb-4"><h5 class="fw-bold text-center">Changes on <strong>${entry.timestamp} (${entry.admin})</strong></h5>`;
                             }
 
                             // City Fields
