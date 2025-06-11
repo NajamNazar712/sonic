@@ -232,21 +232,32 @@ class LeadManagementController extends Controller
                 $query->where(function ($q) use ($keyword) {
                     if ($keyword == '12') {
                         $q->where('leads.status_id', 12)
-                          ->orWhereIn('leads.email_address', function ($subQuery) {
-                              $subQuery->select('email')
-                                       ->from('users')
-                                       ->where('status', '3');
-                          });
-                    } else {
-                        $q->where('leads.status_id', $keyword)
-                          ->whereNotIn('leads.email_address', function ($subQuery) {
-                              $subQuery->select('email')
-                                       ->from('users')
-                                       ->where('status', '3');
-                          });
+                        ->orWhereIn('leads.email_address', function ($subQuery) {
+                            $subQuery->select('email')
+                                    ->from('users')
+                                    ->where('status', '3');
+                        });
+                    } elseif ($keyword == '11') {
+                        $q->where('leads.status_id', 11)
+                        ->orWhereIn('leads.email_address', function ($subQuery) {
+                            $subQuery->select('email')
+                                    ->from('users')
+                                    ->where('blacklist', '1'); 
+                        });
+                
+                    } elseif ($keyword == '1') {
+                        $q->where('leads.status_id', 1)
+                        ->whereIn('leads.email_address', function ($subQuery) {
+                            $subQuery->select('email')
+                                    ->from('users')
+                                    ->where('blacklist', '!=', '1')
+                                    ->where('status', '!=', '3');
+                        });
+                    }               
+                    else {
+                        $q->where('leads.status_id', $keyword);
                     }
                 });
-                
             })
             ->editColumn('reference_person', function ($query) {
                 if ($query->rider_id) {
@@ -375,9 +386,15 @@ class LeadManagementController extends Controller
             // })
 
             ->editColumn('status', function ($lead) {
-                $userExists = User::where('email', $lead->email_address)->where('status', '3')->exists();
+
+                if(User::where(['email'=> $lead->email_address, 'blacklist' => 1])->exists()) {
+                    return 'Blocked';
+                }else{
+                    $userExists = User::where('email', $lead->email_address)->where('status', '3')->exists();
             
-                return $userExists ? 'Account Activated' : $lead->status;
+                    return $userExists ? 'Account Activated' : $lead->status;
+                }
+             
             })
 
             ->addColumn('lead_account_link', function ($lead) {
