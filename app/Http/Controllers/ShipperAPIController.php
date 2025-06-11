@@ -58,6 +58,10 @@ use Validator;
 use Illuminate\Support\Str;
 use App\Http\Models\Admin\Retail\RetailShipperInfo;
 use App\Models\WalletShipperSetting;
+use App\Http\Models\WalletUser;
+use App\Jobs\WalletSignUpLPendingRecordLogs;
+use App\Http\Models\Shipper\UserBankInfo;
+use App\Http\Controllers\FingaIntegrationController;
 
 
 class ShipperAPIController extends Controller
@@ -1619,4 +1623,161 @@ class ShipperAPIController extends Controller
             }
         }
     }
+
+    public function updateprofilewalletbulk(Request $request)
+    {
+        $names = [
+            'name' => 'Name ',
+            'phone' => 'Phone',
+            'cnic' => 'CNIC',
+            'email' => 'Email',
+        ];
+
+        $messages = [
+            'required' => ':attribute is Required.',
+            'required_if' => ':attribute is Required when :other is :value.',
+            'filled' => ':attribute is Optional but cannot be Empty if Present.',
+            'integer' => ':attribute must be an Integer.',
+            'numeric' => ':attribute must be a Number.',
+            'boolean' => ':attribute must be 0 or 1.',
+            'digits_between' => ':attribute must be between :min and :max Digits.',
+            'email' => ':attribute must be a Valid Email Address.',
+            'exists' => 'Given :attribute is of Invalid ID.',
+            'unique' => ':attribute is already Present.',
+            'date_format' => ':attribute must be of valid Format, required Format is: YYYY-MM-DD.',
+            'in' => ':attribute must be No or Yes.',
+            'check_duplicate' => 'Phone Or Email Already Exists',
+            'check_cnic' => 'Cnic Already Exists',
+            'phone' => 'Phone starts with 03 or 923 followed by 9 digits',
+            'name' => 'Only alphabetic characters and spaces',
+        ];
+
+        $rules = [
+            'name' => ['required', 'max:255', 'regex:/^[a-zA-Z\s]+$/'],
+            'email' => ['required', 'max:255', 'email', 'check_duplicate'],
+            'phone' => ['required', 'max:255', 'regex:/^(03|923)[0-9]{2,3}-?[0-9]{7}$/'],
+            'cnic' => ['required', 'max:255','check_cnic']
+        ];
+
+
+        Validator::extend('check_duplicate', function ($attribute, $value, $parameters, $validator)  {
+            $data = $validator->getData();
+            $phone = $data['phone'];
+            $email = $data['email'];
+
+            $user = WalletUser::where('email', $email)->orWhere('phone', $phone);
+            if($user->exists()) {
+                return FALSE;
+            } else{
+                return true;
+            }
+        });
+
+        Validator::extend('check_cnic', function ($attribute, $value, $parameters, $validator)  {
+            $data = $validator->getData();
+            $cnic = $data['cnic'];;
+
+            $user = WalletUser::where('cnic', $cnic);
+            if($user->exists()) {
+                return FALSE;
+            } else{
+                return true;
+            }
+        });
+        $errors = array();
+        $data = array();
+
+        $bank = 0;
+        foreach ($request->users as $key => $row) {
+            $row_id = $row['id'];
+            $validate = Validator::make($row, $rules, $messages);
+
+            $validate->setAttributeNames($names);
+
+            if ($validate->fails()) {
+                foreach ($validate->errors()->toArray() as $key => $error_array) {
+                    foreach ($error_array as $error) {
+                        if (!isset($errors[$row_id][$key])) {
+                            $errors[$row_id][$key] = $error;
+                        }
+                    }
+                }
+
+
+            } else {
+                $data[$key] = [
+                    'name' => $row['name'],
+                    'cnic' => $row['cnic'],
+                    'phone' => $row['phone'],
+                    'email' => $row['email'],
+                    'user_id' => $request->shipper_id,
+                    'status' => 1,
+                    'substitute_user_id' => isset($row['substitute_user_id']) ? $row['substitute_user_id'] : 0
+                ];
+            }
+        }
+        if(!empty($errors)){
+            return response()->json(['status' => 0, 'error' => $errors]);
+        }else{
+            $api = config('app.FINGA_URL');
+            $token = FingaIntegrationController::getToken($api);
+            $login_data = collect($data)->first();
+            $url = FingaIntegrationController::getLoginUrl($api, $token, $login_data['phone'], $login_data['cnic'], $login_data['email']);
+            $finja = FingaIntegrationController::signUp($data,$request->shipper_id );
+
+            if (isset($finja['error'])) {
+                $finjaArray = json_decode(json_encode($finja), true);
+
+                $errorMessages = collect($finjaArray['error']['users']);
+
+                foreach ($errorMessages as $error_val){
+                    $key = array_key_first(array_filter($data, function ($row) use ($error_val) {
+                        return $row['phone'] === $error_val['mobile_no'];
+                    }));
+
+                    $data[$key]['message'] = $error_val['message'];
+
+                }
+                return response()->json(['status' => 0, 'error_2' => $data]);
+            } else {
+
+                $final['url'] = $url;
+                //$url = route('cod.wallet.finja_dashboard', ['url' => $finja['url']]);
+                foreach ($data as $key=>$value) {
+                    $data[$key]['wallet_id'] = $finja['wallet_id'];
+                    $data[$key]['created_at'] = Carbon::now();
+                    $data[$key]['updated_at'] = Carbon::now();
+                }
+                WalletUser::wallet_create($data);
+                
+                $hasSubstituteZero = array_filter($data, function ($item) {
+                    return isset($item['substitute_user_id']) && $item['substitute_user_id'] == 0;
+                });
+                if (!empty($hasSubstituteZero)) {
+                    if(UserBankInfo::where('user_id',$request->shipper_id)->exists())
+                    {
+                        UserBankInfo::where('user_id', $request->shipper_id)->update(['default_bank' => 0]);
+                    }
+                    $user_city_id = User::where('id', $request->shipper_id)->value('city_id');
+                    $user_bank = new UserBankInfo();
+                    $user_bank->user_id = $request->shipper_id;
+                    $user_bank->bank_name = 48;
+                    $user_bank->bank_branch = 'N/A';
+                    $user_bank->account_no = '923322149092';
+                    $user_bank->account_title = 'N/A';
+                    $user_bank->iban = 'PK06TMFB0000000087042403';
+                    $user_bank->city_id =  $user_city_id;
+                    $user_bank->default_bank = 1; // always make the new bank info as default
+                    $user_bank->save();
+
+                }
+                WalletSignUpLPendingRecordLogs::dispatch($request->shipper_id);
+                return response()->json(['status' => 1, 'output' => $final]);
+
+            }
+        }
+        return response()->json(['status' => 1, 'success'=>'Profile Information Successfully Updated"']);
+    }
+    
+    
 }

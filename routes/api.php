@@ -641,9 +641,11 @@ use Illuminate\Http\Request;
         Route::post('reset_password', 'ShipperAPIController@reset_password')->name('reset_password');
         Route::post('send_otp', 'ShipperAPIController@sendOtp')->name('reset_password');
         Route::post('verify_otp', 'ShipperAPIController@verifyOtp')->name('reset_password');
+        
 
         Route::post('test', 'ShipperAPIController@test')->name('test');
         Route::middleware('ShipperAPIToken')->group(function () {
+            Route::post('wallet_registration', 'ShipperAPIController@updateprofilewalletbulk')->name('wallet_registration');
             Route::post('pod_tracking', 'ShipperAPIController@shipment_pod_tracking')->name('pod_tracking');
             Route::post('shipment_history', 'ShipperAPIController@shipment_history')->name('shipment_history');
             Route::prefix('subscription')->name('subscription.')->group(function () {
