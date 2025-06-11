@@ -1801,5 +1801,23 @@ class ShipperAPIController extends Controller
         return response()->json(['status' => 1, 'success'=>'Profile Information Successfully Updated"']);
     }
     
+    public function wallet_login(Request $request) {
+
+        $api = config('app.FINGA_URL');
+        $token = FingaIntegrationController::getToken($api);
+        $user = WalletUser::where('user_id', $request->shipper_id)->where('substitute_user_id', 0)->first();
+        if(!empty($user)) {
+
+            $phone = $user->phone;
+            $cnic = $user->cnic;
+            $email = $user->email;
+            $url= FingaIntegrationController::getLoginUrl($api, $token, $phone, $cnic, $email);
+            $final['url'] = $url;
+            return response()->json(['status' => 1, 'output' => $final]);
+        }else{
+           
+        }
+
+    }
     
 }
