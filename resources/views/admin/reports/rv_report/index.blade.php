@@ -22,7 +22,7 @@
                                             <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number" style="text-align: right;" fdprocessedid="l9xr5h">
                                         </fieldset>
                                     </div>
-                                {{-- Search by shipper name --}}
+                                    {{-- Search by shipper name --}}
                                     <div class="col-4">
                                         <div class="form-group">
                                             <select name="search_shipper_name" id="search_shipper_name" class="form-control select2">
@@ -32,7 +32,7 @@
                                             </select>
                                         </div>
                                     </div>
-                                {{-- Search by agent name --}}
+                                    {{-- Search by agent name --}}
                                     <div class="col-4">
                                         <div class="form-group">
                                             <select name="search_agent_name" id="search_agent_name" class="form-control select2">
@@ -74,6 +74,17 @@
                                         
                                     </div>
                                 </form>
+                                    <div class="row justify-content-end">
+
+                                        <div class="col-6">
+                                            <h4 for="export" class="font">Excel Column(s):</h4>
+                                            <fieldset class="form-group">
+                                                <select name="export[]" id="export" class="form-control select2" multiple="multiple">
+                                                    <option value="selectAll">Select All</option>
+                                                </select>
+                                            </fieldset>
+                                        </div>
+                                    </div>
                             </div>
 
 
@@ -416,114 +427,77 @@
                 }
             });
 
-            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
-                if ( this.context.length ) {
-                    body = [];
-                    var params = table.ajax.params();
-                    if(params !== undefined){
-                        params.start = 0;
-                        params.length = -1;
-                        params.excel = true;
-                    }
-                    else{
-                        params = {
-                            'excel':true,
-                        }
-                    }
-                    var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.rv_report.list') }}',
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        },
-                        data: params,
-                        success: function (result) {
-                            head = [];
-
-                            head.push('S.No');  
-                            head.push('Tracking No.');
-                            head.push('Shipper');
-                            head.push('Origin');
-                            head.push('Destination');
-                            head.push('Hub');
-                            // head.push('Area');
-                            // head.push('Consignee');
-                            // head.push('Number');
-                            // head.push('Address');
-                            head.push('COD Amount');
-                            // head.push('Weight');
-                            head.push('Shipping Mode');
-                            head.push('Service Type');
-                            head.push('Arrival Date');
-                            head.push('Action');
-                            head.push('Call Status');
-                            head.push('Call Findings');
-                            head.push('Remarks');
-                            head.push('Action Date');
-                            head.push('Action Updated By');
-                            head.push('RCP Agent Updated By');
-                            head.push('RV Status');
-                            head.push('RV Reason');
-                            head.push('RV Status Date');
-                            head.push('Current Status');
-                            head.push('Current Status Date');
-                            head.push('Fake Status');
-                            head.push('Return Confirm Reason');
-                            head.push('Delivery Attempt Count');
-                            head.push('Re Attempt Count');
-                            head.push('Call Count');
-                            
-                            $.each(result.data, function(index, values) {
-                                row = [];
-
-                                row.push(index + 1);
-                                row.push(values.tracking_number.split(">")[2].slice(0,-3));
-                                row.push(values.shipper_name);
-                                row.push(values.origin);
-                                row.push(values.destination);
-                                row.push(values.hub);
-                                row.push(values.cod_amount);
-                                row.push(values.shipping_mode);
-                                row.push(values.service_type);
-                                row.push(values.arrival_date);
-                                row.push(values.action);
-                                row.push(values.call_status);
-                                row.push(values.reason);
-                                row.push(values.remarks);
-                                row.push(values.action_date);
-                                row.push(values.action_updated_by);
-                                row.push(values.rcp_agent_updated_by);
-                                row.push(values.rv_status_name);
-                                row.push(values.rv_reason);
-                                row.push(values.rv_status_date);
-                                row.push(values.current_status);
-                                row.push(values.current_status_date);
-                                row.push(values.fake_status);
-                                row.push(values.rc_reason_name);
-                                row.push(values.delivery_attempt_count);
-                                row.push(values.re_attempt_count);
-                                row.push(values.call_count);
-
-                                body.push(row);
-                            });
-                        },
-                        async: false
-                    });
-                    
-                    return {body: body, header: head};
-                    
-                }
-            });
-
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons: [{
-                    extend: 'excelHtml5',
-                    title: 'RV Report',
-                    text: '<i class="la la-file-excel-o"></i> Excel',
-                    className: 'btn btn-primary datatable_excel_btn',
-                    
-                },'reset'],
+                buttons: [
+                    {
+                        extend: 'excel',
+                        title: 'RV Report',
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                        action: function(e){
+                                    if ($('#export').val().length === 0) {
+                                        swal({
+                                            text: 'Atleast 1 column should be selected for export.!',
+                                            title: 'Please select excel column(s)',
+                                            icon: 'warning',
+                                            buttons: {
+                                                cancel: {
+                                                    text: 'OK',
+                                                    value: null,
+                                                    visible: true,
+                                                    closeModal: true,
+                                                }
+                                            },
+                                            dangerMode: true
+                                        })
+                                        return;
+                                    }
+                                    $.ajax({
+                                        url: "{{ route('admin.reports.rv_report.list') }}",
+                                        method: "POST",
+                                        data: {
+                                            excel: true,
+                                            _token: $('meta[name="csrf-token"]').attr('content'),
+                                            search_tracking_no : $('#search_tracking_no').val(),
+                                            search_shipper_name : $('#search_shipper_name').val(),
+                                            search_agent_name : $('#search_agent_name').val(),
+                                            search_date_from : $('input[name="search_date_from_formatted"]').val(),
+                                            search_date_to : $('input[name="search_date_to_formatted"]').val()
+                                        },
+                                        beforeSend: function() {
+                                            swal({
+                                                title: 'Please Wait!',
+                                                text: 'Downloading is in progress',
+                                                icon: 'info',
+                                                buttons: false,
+                                                closeOnClickOutside: false,
+                                                closeOnEsc: false
+                                            });
+                                        },
+                                        complete: function() {
+                                            // Hide loader
+                                            swal.close();
+                                        },
+                                        success: function(response) {
+                                            var blob = new Blob([response], {
+                                                type: 'text/csv'
+                                            });
+                                            var url = window.URL.createObjectURL(blob);
+                                            var a = document.createElement('a');
+                                            a.href = url;
+                                            a.download = 'RV Report.csv';
+                                            document.body.appendChild(a);
+                                            a.click();
+                                            window.URL.revokeObjectURL(url);
+                                            document.body.removeChild(a);
+                                        },
+                                        error: function(xhr, status, error) {
+                                            console.error('Failed to fetch CSV data:', status, error);
+                                        }
+                                    });
+                                }
+                    },'reset'],
                 scrollX: true, scrollY: '500px',
                 autoWidth: false,
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
@@ -631,6 +605,27 @@
                         console.error(xhr, status, error);
                     }
                 });
+            });
+
+            let option = '';
+            var columnNames2 = table.settings().init().columns.map(function (column) {
+                if(column.download){
+                    let col_name = column.value;
+                    let col_text = column.text;
+                
+                    // if(column.as){
+                    //     col_name+= ' as ' +column.as;
+                    // }
+                    if (col_name && col_text) {
+                        option += `<option value="${col_name}">${col_text}</option>`;
+                    }
+                }
+            });
+            $('#export').append(option).select2({
+                columns: 1,
+                placeholder: 'Excel Column(s)',
+                search: true,
+                selectAll: true
             });
         });
     </script>
