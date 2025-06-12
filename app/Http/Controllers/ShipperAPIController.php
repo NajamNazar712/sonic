@@ -1162,13 +1162,14 @@ class ShipperAPIController extends Controller
     {
         $shipper = User::find($request->shipper_id);
         if ($shipper) {
-            if ($shipper->account_type_id == 1) {
-                $booking_types = BookingType::whereNotIn('id', [4, 6])->get();
-            } elseif ($shipper->account_type_id == 2) {
-                $booking_types = BookingType::whereNotIn('id', [4])->get();
-            } else {
-                return response()->json(['status' => 1, 'message' => 'Invalid Account Type']);
-            }
+            $booking_types = BookingType::whereNotIn('id', [4])->get();
+//            if ($shipper->account_type_id == 1) {
+//                $booking_types = BookingType::whereNotIn('id', [4, 6])->get();
+//            } elseif ($shipper->account_type_id == 2) {
+//                $booking_types = BookingType::whereNotIn('id', [4])->get();
+//            } else {
+//                return response()->json(['status' => 1, 'message' => 'Invalid Account Type']);
+//            }
             return response()->json(['status' => 0, 'message' => 'Booking Types Found!', 'booking_types' => $booking_types]);
         }
         return response()->json(['status' => 1, 'message' => 'Invalid Shipper']);
