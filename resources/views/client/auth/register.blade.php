@@ -1442,7 +1442,7 @@ Corporate Invoicing Amount refers to an account where Trax would send a monthly 
                 }
                 if (error == 0) {
                     $.ajax({
-                        url: "name/match/{name}",
+                        url: "register/name/match/{name}",
                         type: 'GET',
                         data: {
                             name: name
