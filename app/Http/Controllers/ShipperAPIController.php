@@ -1166,7 +1166,7 @@ class ShipperAPIController extends Controller
     {
         $shipper = User::find($request->shipper_id);
         if ($shipper) {
-            $booking_types = BookingType::whereNotIn('id', [4])->get();
+            $booking_types = BookingType::whereNotIn('id', [4, 6])->get();
 //            if ($shipper->account_type_id == 1) {
 //                $booking_types = BookingType::whereNotIn('id', [4, 6])->get();
 //            } elseif ($shipper->account_type_id == 2) {
