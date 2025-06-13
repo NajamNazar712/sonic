@@ -645,6 +645,11 @@ use Illuminate\Http\Request;
 
         Route::post('test', 'ShipperAPIController@test')->name('test');
         Route::middleware('ShipperAPIToken')->group(function () {
+
+            Route::prefix('retail')->name('retail.')->group(function () {
+                Route::get('shipment_track', 'APIController@retail_shipment_track')->name('track');
+            });
+
             Route::post('wallet_registration', 'ShipperAPIController@updateprofilewalletbulk')->name('wallet_registration');
             Route::post('wallet_login', 'ShipperAPIController@wallet_login')->name('wallet_login');
             Route::post('pod_tracking', 'ShipperAPIController@shipment_pod_tracking')->name('pod_tracking');

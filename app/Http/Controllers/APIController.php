@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\FafCharges;
 use App\FinjaSmsLog;
 use App\Http\Controllers\Admins\AdminCRMController;
+use App\Http\Models\Admin\Retail\RetailShipperInfo;
+use App\Http\Models\Admin\Retail\RetailShippingMode;
 use App\Http\Models\NotificationSetting;
 use App\Http\Models\PendingPaymentShipment;
 use App\Http\Models\ShipmentSmsLogs;
@@ -802,6 +804,7 @@ class APIController extends Controller
                         }
                     },
                 ],
+                'booked_by' => ['nullable','integer']
             ];
 
             $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
@@ -1337,13 +1340,13 @@ class APIController extends Controller
 
             $business_category_id = 1;
             if ($user_type['account_type_id'] == 1) {
-                $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces_quantity, $self_collection, $business_category_id, $open_shipment, $return_address_id, $parcel_value);
+                $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces_quantity, $self_collection, $business_category_id, $open_shipment, $return_address_id, $parcel_value,$booked_by);
             } else {
 
                 if ($user_type['corporate_rate_type_id'] == 3) {
                     $delivery_type_id = 1;
                 }
-                $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment, $return_address_id, $parcel_value);
+                $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment, $return_address_id, $parcel_value,$booked_by);
             }
 
 
@@ -2079,6 +2082,143 @@ class APIController extends Controller
             }
 
             return response()->json(['status' => 0, 'message' => 'Status of Shipment #' . $tracking_number, 'current_status' => $current_status, 'reason' => $reason, 'current_status_datetime' => $current_status_datetime, 'origin' => $origin, 'destination' => $destination, 'order_date' => $order_date, 'booking_date' => $booking_date]);
+        }
+    }
+
+    public function retail_shipment_track(Request $request)
+    {
+        $user_id = $request->retail_shipper_id;
+
+        $rules = [
+            'tracking_number' => ['required', 'integer', 'digits_between:10,20'],
+            'type' => ['required', 'boolean'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $tracking_number = $request->tracking_number;
+            $type = $request->type;
+
+            $shipment = Shipment::join('retail_shipments as rs','rs.shipment_id','shipments.id')
+                ->where('rs.shipper_account_no',$user_id)->where('shipments.tracking_number',$tracking_number)->first();
+           if($shipment) {
+               $tracking_number = $request->tracking_number;
+               $type = $request->type;
+               $retail_shipper = RetailShipperInfo::where('id',$user_id)->first();
+               $shipping_mode = RetailShippingMode::where('id',$shipment->shipping_mode)->first();
+//               $shipment = Shipment::whereIn('user_id', $user_ids)->where('tracking_number', $tracking_number)->first();
+
+               $sub_segment_name = '-';
+               $sub_segment = DB::table('shipper_segment_logs')
+                   ->leftJoin('sub_category_segments', 'sub_category_segments.id', 'shipper_segment_logs.sub_segment_id')
+                   ->where('shipment_id', $shipment->id)
+                   ->select('sub_category_segments.name')
+                   ->first();
+
+               if ($sub_segment && $sub_segment->name)
+               {
+                   $sub_segment_name = $sub_segment->name;
+               }
+
+               $details = array();
+               $details['shipment_id'] = $shipment->id;
+               $details['tracking_number'] = $tracking_number;
+
+               $details['order_id'] = $shipment->order_id;
+
+               $details['order_date'] = $shipment->pickup_date;
+               $details['booking_date'] = $shipment->created_at;
+
+               $shipper = $shipment->user;
+
+               $details['shipper']['name'] = $retail_shipper->shipper_name;
+
+               $pickup = $shipment->pickup_address;
+
+               $details['pickup']['origin'] = $pickup->city->name;
+
+               if ($type == 0) {
+                   $details['shipper']['account_number'] = $shipper->id;
+                   $details['shipper']['phone_number_1'] = $retail_shipper->shipper_phone_no;
+//                   $details['shipper']['phone_number_2'] = $shipper->phone2;
+//                   $details['shipper']['email'] = $shipper->email;
+                   $details['shipper']['city'] = $retail_shipper->retail_city->name;
+
+                   $details['pickup']['person_of_contact'] = $pickup->poc;
+                   $details['pickup']['phone_number'] = $pickup->phone;
+                   $details['pickup']['email'] = $pickup->email;
+                   $details['pickup']['address'] = $pickup->pickup_address;
+               }
+
+               $details['consignee']['name'] = $shipment->consignee_name;
+               $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
+               $details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
+               $details['consignee']['destination'] = $shipment->consignee_city->name;
+               $details['consignee']['address'] = $shipment->consignee_address;
+
+               foreach ($shipment->items as $item) {
+                   $item_details = array();
+
+                   $item_details['order_id'] = $shipment->order_id;
+                   $item_details['product_type'] = $item->product->product_name;
+                   $item_details['description'] = $item->description;
+                   $item_details['quantity'] = $item->quantity;
+
+                   $details['order_information']['items'][] = $item_details;
+               }
+               if ($type == 0) {
+                   $details['order_information']['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
+                   $details['order_information']['shipping_mode'] = $shipping_mode->name;
+                   $details['order_information']['amount'] = $shipment->amount;
+                   $details['order_information']['instructions'] = $shipment->special_instructions;
+               }
+
+               if ($type == 0) {
+                   foreach ($shipment->shipment_journey as $journey) {
+                       if ($journey->verification) {
+                           $journey_details = array();
+
+                           $journey_details['date_time'] = Carbon::parse($journey->created_at)->format('d/m/Y h:i A');
+                           $journey_details['timestamp'] = Carbon::parse($journey->created_at)->timestamp;
+                           $journey_details['status'] = $journey->shipment_status_shipper->name;
+
+                           $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : null;
+
+                           $details['tracking_history'][] = $journey_details;
+                       }
+                   }
+               } else {
+                   foreach ($shipment->shipment_journey as $journey) {
+                       if ($journey->consignee_status_id != null) {
+                           if ($journey->verification) {
+                               $journey_details = array();
+
+                               $journey_details['date_time'] = Carbon::parse($journey->created_at)->format('d/m/Y h:i A');
+                               $journey_details['timestamp'] = Carbon::parse($journey->created_at)->timestamp;
+                               $journey_details['status'] = $journey->shipment_status_consignee->name;
+
+                               $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : null;
+
+                               $details['tracking_history'][] = $journey_details;
+                           }
+                       }
+                   }
+               }
+
+               $details['order_information']['sub_segment'] = $sub_segment_name;
+
+               return response()->json(['status' => 0, 'message' => 'Tracking of Shipment #' . $tracking_number, 'details' => $details]);
+           }
+            
+
+            return response()->json(['status' => 1, 'message' => 'Shipment not found!']);
+
+
         }
     }
 

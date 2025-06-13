@@ -164,7 +164,7 @@ class ShipperShipmentBookController extends Controller
     }
 
 
-    static public function book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces, $self_collection, $business_category_id, $open_shipment, $return_address_id,$parcel_value = null)
+    static public function book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces, $self_collection, $business_category_id, $open_shipment, $return_address_id,$parcel_value = null,$booked_by=null)
     {
 
         $information_display = self::information_display_check($user_id);
@@ -210,7 +210,7 @@ class ShipperShipmentBookController extends Controller
         $shipment->consignee_status_id = 1;
 
         $shipment->try_and_buy_fees = $try_and_buy_charges;
-        $shipment->booked_by = session('user_type');
+        $shipment->booked_by = $booked_by ?? session('user_type');
         $shipment->pieces = $pieces;
         $shipment->business_category_id = $business_category_id;
         if ($return_address_id) {
@@ -3882,7 +3882,7 @@ class ShipperShipmentBookController extends Controller
         }
     }
 
-    static public function corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment, $return_address_id,$parcel_value = null)
+    static public function corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment, $return_address_id,$parcel_value = null,$booked_by=null)
     {
 
         $information_display = self::information_display_check($user_id);
@@ -3933,7 +3933,7 @@ class ShipperShipmentBookController extends Controller
 
         $shipment->try_and_buy_fees = $try_and_buy_charges;
 
-        $shipment->booked_by = session('user_type');
+        $shipment->booked_by = $booked_by ?? session('user_type');
         $shipment->pieces = $pieces;
         if ($return_address_id) {
             $shipment->return_address_id = $return_address_id;
