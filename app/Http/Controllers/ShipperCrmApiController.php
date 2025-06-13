@@ -31,10 +31,10 @@ class ShipperCrmApiController extends Controller
         $app_type = $request->app_type; // if app_type=1 shipper else app_type=2 retail
         $description = $request->description;
         $user_id = $request->shipper_id;
-        if($app_type == 2) {
-            $setting = GlobalSettings::where('type', 'retail_store')->first();
-            $user_id = $setting->setting_value;
-        }
+//        if($app_type == 2) {
+//            $setting = GlobalSettings::where('type', 'retail_store')->first();
+//            $user_id = $setting->setting_value;
+//        }
         $shipment_ids = explode(',', $request->input('shipment_ids'));
         $launched_by = $app_type == 1 ? 1 : 3; //if app_type=1 shipper-1 else app_type=2 retail-3
         $present_shipments = array();
@@ -49,6 +49,7 @@ class ShipperCrmApiController extends Controller
             foreach ($shipment_ids as $shipment_id) {
 
                 if ($app_type == 2) {
+                    $user_id = $request->retail_shipper_id;
                     $shipment = Shipment::whereHas('retail', function ($query) use ($user_id) {
                         $query->where('shipper_account_no', $user_id);
                     })->where('id',$shipment_id)->first();
