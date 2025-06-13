@@ -49,7 +49,8 @@ class ShipperCrmApiController extends Controller
             foreach ($shipment_ids as $shipment_id) {
 
                 if ($app_type == 2) {
-                    $user_id = $request->retail_shipper_id;
+                    $user_id = GlobalSettings::where('type', 'retail_store')->first('setting_value') ?? 1126;
+//                    $user_id = $request->retail_shipper_id;
                     $shipment = Shipment::whereHas('retail', function ($query) use ($user_id) {
                         $query->where('shipper_account_no', $user_id);
                     })->where('id',$shipment_id)->first();
