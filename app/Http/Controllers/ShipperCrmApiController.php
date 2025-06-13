@@ -36,7 +36,7 @@ class ShipperCrmApiController extends Controller
 //            $user_id = $setting->setting_value;
 //        }
         $shipment_ids = explode(',', $request->input('shipment_ids'));
-        $launched_by = $app_type == 1 ? 1 : 3; //if app_type=1 shipper-1 else app_type=2 retail-3
+        $launched_by = $app_type == 1 ? 1 : 5; //if app_type=1 shipper-1 else app_type=2 retail-3
         $present_shipments = array();
         $not_found_shipments = array();
 
@@ -49,15 +49,14 @@ class ShipperCrmApiController extends Controller
             foreach ($shipment_ids as $shipment_id) {
 
                 if ($app_type == 2) {
-                    $user_id = GlobalSettings::where('type', 'retail_store')->first('setting_value') ?? 1126;
+                    $user_id = GlobalSettings::where('type', 'retail_store')->value('setting_value') ?? 1126;
 //                    $user_id = $request->retail_shipper_id;
-                    $shipment = Shipment::whereHas('retail', function ($query) use ($user_id) {
-                        $query->where('shipper_account_no', $user_id);
+                    $shipment = Shipment::whereHas('retail', function ($query) use ($user_id,$request) {
+                        $query->where('shipper_account_no', $request->retail_shipper_id);
                     })->where('id',$shipment_id)->first();
                 }else {
                     $shipment = Shipment::where('id',$shipment_id)->where('user_id',$user_id)->first();
                 }
-
                 if ($shipment) {
 
                     if ($complaint_id == 12 && in_array($shipment->shipper_status_id, [14, 18, 30, 36, 37, 20, 21, 22, 23, 24, 25, 26, 32, 44, 47, 48, 57, 60, 51])) // for cod change automation
