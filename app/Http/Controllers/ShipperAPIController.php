@@ -1376,7 +1376,7 @@ class ShipperAPIController extends Controller
             $bypass_settings = $bypass_settings->first();
             if ($bypass_settings->text != NULL) {
                 $airway_bill_address_visibility_accounts = array_map('intval', explode(',', $bypass_settings->text));
-                if (in_array(session('user_id'), $airway_bill_address_visibility_accounts)) {
+                if (in_array($request->shipper_id, $airway_bill_address_visibility_accounts)) {
                     $air_waybill = 0;
                 }
             }
