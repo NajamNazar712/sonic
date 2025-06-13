@@ -388,6 +388,29 @@
                 placeholder: 'Select Agent',
                 allowClear: true,
         });
+
+            $('#export').select2({
+                width:'100%',
+                placeholder:"Excel Column(s)",
+                allowClear:true,
+            });
+            $('#export').on('select2:select', function(e) {
+                var selectAll = $('#export').find('option[value="selectAll"]');
+                var firstOption = $('#export option').first();
+                if (e.params.data.id === 'selectAll') {
+                    firstOption.data().data.text = 'Un Select All';
+                    $('#export').find('option').not(selectAll).prop('selected', true).trigger('change');
+                    
+                }
+            });
+            $('#export').on('select2:unselect', function(e) {
+                var selectAll = $('#export').find('option[value="selectAll"]');
+                var firstOption = $('#export option').first();
+                if (e.params.data.id === 'selectAll') {
+                    firstOption.data().data.text = 'Select All';
+                    $('#export').find('option').not(selectAll).prop('selected', false).trigger('change');
+                }
+            });
             $('#search_tracking_no').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
@@ -463,7 +486,11 @@
                                             search_shipper_name : $('#search_shipper_name').val(),
                                             search_agent_name : $('#search_agent_name').val(),
                                             search_date_from : $('input[name="search_date_from_formatted"]').val(),
-                                            search_date_to : $('input[name="search_date_to_formatted"]').val()
+                                            search_date_to : $('input[name="search_date_to_formatted"]').val(),
+                                            selectedValue: $('#export').val(),
+                                            selectedTexts: $('#export option:selected').map(function() {
+                                                return $(this).text()
+                                            }).get()
                                         },
                                         beforeSend: function() {
                                             swal({
@@ -526,33 +553,33 @@
                 order: [[13, 'desc']],
                 columns: [
                     {name: 'serial_number', class: 'align-middle serial_number', orderable: false, searchable: false, targets: 0, render: function(data, type, row) {return '';}},
-                    {data: 'tracking_number', name: 'tracking_number', class: 'text-center align-middle tracking_number',searchable: false},
-                    {data: 'shipper_name', name: 'shipper_name', class: 'align-middle shipper_name',searchable: false},
-                    {data: 'origin', name: 'origin', class: 'text-center align-middle origin',searchable: false},
-                    {data: 'destination', name: 'destination', class: 'align-middle destination',searchable: false},
-                    {data: 'hub', name: 'hub', class: 'align-middle hub',searchable: false},
-                    {data: 'cod_amount', name: 'cod_amount', class: 'align-middle cod_amount',searchable: false},
-                    {data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode',searchable: false},
-                    {data: 'service_type', name: 'service_type', class: 'align-middle service_type',searchable: false},
-                    {data: 'arrival_date', name: 'arrival_date', class: 'align-middle arrival_date',searchable: false},
-                    {data: 'action', name: 'action', class: 'align-middle action',searchable: false},
-                    {data: 'call_status', name: 'call_status', class: 'align-middle reason',searchable: false},
-                    {data: 'reason', name: 'reason', class: 'align-middle reason',searchable: false},
-                    {data: 'remarks', name: 'remarks', class: 'align-middle remarks',searchable: false},
-                    {data: 'action_date', name: 'action_date', class: 'align-middle action_date',searchable: false},
-                    {data: 'action_updated_by', name: 'action_updated_by', class: 'align-middle action_updated_by',searchable: false},
-                    {data: 'rcp_agent_updated_by', name: 'rcp_agent_updated_by', class: 'align-middle rcp_agent_updated_by',searchable: false},
-                    {data: 'rv_status_name', name: 'rv_status.name', class: 'align-middle rv_status_name',searchable: false},
-                    {data: 'rv_reason', name: 'rv_reason.name', class: 'align-middle rv_reason',searchable: false},
-                    {data: 'rv_status_date', name: 'sj.updated_at', class: 'align-middle rv_status_date',searchable: false},
-                    {data: 'current_status', name: 's_status.name', class: 'align-middle current_status',searchable: false},
-                    {data: 'current_status_date', name: 'shipments.updated_at', class: 'align-middle current_status_date',searchable: false},
-                    {data: 'fake_status', name: 'fake_status', class: 'align-middle fake_status',searchable: false},
-                    {data: 'rc_reason_name', name: 'rc_reason_name', class: 'align-middle fake_status',searchable: false},
-                    {data: 'delivery_attempt_count', name: 'delivery_attempt_count', class: 'align-middle delivery_attempt_count',searchable: false},
-                    {data: 're_attempt_count', name: 're_attempt_count', class: 'align-middle re_attempt_count',searchable: false},
-                    {data: 'unresponsive_count', name: 'unresponsive_count', class: 'align-middle unresponsive_count',searchable: false},
-                    {data: 'call_count', name: 'call_count', class: 'align-middle call_count',searchable: false},
+                    {data: 'tracking_number', name: 'tracking_number', class: 'text-center align-middle tracking_number',searchable: false, text:'Tracking Number', value:'tracking_number',download:true},
+                    {data: 'shipper_name', name: 'shipper_name', class: 'align-middle shipper_name',searchable: false, text:'Shipper Name', value:'shipper_name',download:true},
+                    {data: 'origin', name: 'origin', class: 'text-center align-middle origin',searchable: false,text:'Origin', value:'origin',download:true },
+                    {data: 'destination', name: 'destination', class: 'align-middle destination',searchable: false , text:'Destination', value:'destination',download:true},
+                    {data: 'hub', name: 'hub', class: 'align-middle hub',searchable: false, text:'Hub', value:'hub',download:true},
+                    {data: 'cod_amount', name: 'cod_amount', class: 'align-middle cod_amount',searchable: false, text:'COD Amount', value:'cod_amount',download:true},
+                    {data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode',searchable: false, text:'Shipping Mode', value:'shipping_mode',download:true},
+                    {data: 'service_type', name: 'service_type', class: 'align-middle service_type',searchable: false, text:'Service Type', value:'service_type',download:true},
+                    {data: 'arrival_date', name: 'arrival_date', class: 'align-middle arrival_date',searchable: false,text:'Arrival Date', value:'arrival_date',download:true },
+                    {data: 'action', name: 'action', class: 'align-middle action',searchable: false,text:'Action', value:'action',download:true},
+                    {data: 'call_status', name: 'call_status', class: 'align-middle reason',searchable: false, text:'Call Status', value:'call_status',download:true},
+                    {data: 'reason', name: 'reason', class: 'align-middle reason',searchable: false, text:'Call Findings', value:'reason',download:true},
+                    {data: 'remarks', name: 'remarks', class: 'align-middle remarks',searchable: false, text:'Remarks', value:'remarks',download:true},
+                    {data: 'action_date', name: 'action_date', class: 'align-middle action_date',searchable: false, text:'Action Date', value:'action_date',download:true},
+                    {data: 'action_updated_by', name: 'action_updated_by', class: 'align-middle action_updated_by',searchable: false,text:'Action Updated By', value:'action_updated_by',download:true},
+                    {data: 'rcp_agent_updated_by', name: 'rcp_agent_updated_by', class: 'align-middle rcp_agent_updated_by',searchable: false, text:'RCP Agent Updated By', value:'rcp_agent_updated_by',download:true},
+                    {data: 'rv_status_name', name: 'rv_status.name', class: 'align-middle rv_status_name',searchable: false, text:'RV Status', value:'rv_status_name',download:true},
+                    {data: 'rv_reason', name: 'rv_reason.name', class: 'align-middle rv_reason',searchable: false,text:'RV Reason', value:'rv_reason',download:true },
+                    {data: 'rv_status_date', name: 'sj.updated_at', class: 'align-middle rv_status_date',searchable: false,text:'RV Status Date', value:'rv_status_date',download:true },
+                    {data: 'current_status', name: 's_status.name', class: 'align-middle current_status',searchable: false,text:'Current Status', value:'current_status',download:true},
+                    {data: 'current_status_date', name: 'shipments.updated_at', class: 'align-middle current_status_date',searchable: false, text:'Current Status Date', value:'current_status_date',download:true},
+                    {data: 'fake_status', name: 'fake_status', class: 'align-middle fake_status',searchable: false,text:'Fake Status', value:'fake_status',download:true },
+                    {data: 'rc_reason_name', name: 'rc_reason_name', class: 'align-middle fake_status',searchable: false,text:'Return Confirm Reason', value:'rc_reason_name',download:true },
+                    {data: 'delivery_attempt_count', name: 'delivery_attempt_count', class: 'align-middle delivery_attempt_count',searchable: false, text:'Delivery Attempt Count', value:'delivery_attempt_count',download:true},
+                    {data: 're_attempt_count', name: 're_attempt_count', class: 'align-middle re_attempt_count',searchable: false,text:'Re-Attempt Count', value:'re_attempt_count',download:true },
+                    {data: 'unresponsive_count', name: 'unresponsive_count', class: 'align-middle unresponsive_count',searchable: false, text:'Call History', value:'unresponsive_count',download:false},
+                    {data: 'call_count', name: 'call_count', class: 'align-middle call_count',searchable: false, text:'Call Count', value:'call_count',download:true},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
