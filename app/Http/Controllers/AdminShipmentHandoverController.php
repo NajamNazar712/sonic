@@ -1704,26 +1704,6 @@ class AdminShipmentHandoverController extends Controller
         return ['status' => 1, 'error' => 'Shipment not found.'];
       }
 
-      $handover_shipments = HandoverShipments::where('shipment_id', $shipment->id)
-      ->take(3)
-      ->join('handovers', 'handover_shipments.handover_id', '=', 'handovers.id')
-      ->whereNotNull('handovers.bag_number')
-      ->orderby('handover_shipments.created_at','desc')
-      ->get();
-
-      if ($handover_shipments->count() === 3) {
-          $handover_ids = $handover_shipments->pluck('handover_id');
-          $hubs = Handover::whereIn('id', $handover_ids)
-            ->pluck('hub');
-          if ($hubs->every(function ($hub) use ($hubs) {
-            return $hub == $hubs->first();
-          })) {
-              if ($hubs->first() == $request->hub_id) {
-                return ['status' => 1, 'error' => 'You cannot add more handovers for this hub.'];
-              }
-          }
-      }
-
       $handover_exists = HandoverShipments::where('shipment_id', $shipment->id)
       ->latest('updated_at')
       ->where('status', 1)
@@ -1748,16 +1728,10 @@ class AdminShipmentHandoverController extends Controller
         69, 70, 72, 73, 75, 76
       ];
 
-      // normal shipments
-      if ($selected_bag_type == 1){
-        $allowed_status_ids = $normal_status_ids;
-      } 
-      // return shipments
-      else {
-        $allowed_status_ids = $return_status_ids;
-      }
+      //  Determine allowed statuses based on bag type
+      $allowed_status_ids = (($selected_bag_type == 1) ? $normal_status_ids : $return_status_ids);
 
-      if (($shipment->shipper_status_id == 18 || $shipment->shipper_status_id == 51)){
+      if (in_array($shipment->shipper_status_id,[18,51])){
         return ['status' => 1, 'error' => 'This shipment is related to lost or case close'];
       }
 

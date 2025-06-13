@@ -22,6 +22,22 @@
                         <div class="card-body">
                             @include('admin.inc.messages')
 
+                            <div class="row mb-2 justify-content-center">
+                                <div class="col-3">
+                                    <fieldset class="position-relative has-icon-left">
+                                        <select class="form-control select2" name="enable_disable" id="enable_disable">
+                                            <option value="1">Enable</option>
+                                            <option value="0">Disable</option>
+                                        </select>
+                                    </fieldset>
+                                </div>
+                                <div class="col-2">
+                                    <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                                </div>
+                            </div>
+
+                            
+
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr role="row" class="bg-primary white">
@@ -125,6 +141,12 @@
             $(document).on('click', '.read-more', function () {
                 $(this).closest('ul').find('.hidden-text').toggle(); // Toggle hidden items
                 $(this).text($(this).text() === 'Read more' ? 'Read less' : 'Read more'); // Toggle link text
+            });
+
+            $('#enable_disable').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Status',
+                width:'100%',
+                allowClear:true
             });
 
             // // Initially, hide all items except the first 3
@@ -309,9 +331,15 @@
                 language: {
                     processing: data_table_loader
                 },
-                ajax: '{{ route('admin.settings.auto_assigning.list') }}',
+                ajax : {
+                    url: '{{ route('admin.settings.auto_assigning.list') }}',
+                    data: function (d) {
+                        d.enable_disable = $('#enable_disable').val();
+                    }      
+                },
                 rowId: 'id',
                 order: [[12, 'desc']],
+                deferLoading: 0,
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: ' serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'agent_name', name: 'ad.name', class: ' agent_name'},
@@ -491,6 +519,11 @@
                 }
                 
                 });
+
+            $('#search_filter_btn').on('click',function () {
+                table.draw();
+            });
+
         });
     </script>
     <style>
