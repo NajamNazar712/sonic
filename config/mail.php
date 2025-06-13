@@ -56,7 +56,7 @@ return [
     */
 
     'from' => [
-        'address' => 'info@trax.pk',
+        'address' => 'info@slgtrax.com',
         'name' => 'TRAX',
     ],
 
