@@ -2691,7 +2691,7 @@ class APIController extends Controller
     public function shipment_cancel(Request $request)
     {
         $user_id = $request->user_id;
-
+        $remarks = 'Cancelled by Shipper';
         $rules = [
             'tracking_number' => ['required', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function ($query) use ($user_id) {
                 $query->where('user_id', $user_id);
@@ -2718,10 +2718,12 @@ class APIController extends Controller
                     $shipment->consignee_status_id = 17;
 
                     $shipment->save();
-
+                    if($request->has('remarks')) {
+                        $remarks = $request->remarks;
+                    }
                     V2AdminPickupsController::cancel($shipment->id);
 
-                    ShipmentsJourneyController::add($shipment->id, 17, 17, null, 'Cancelled by Shipper', $user_id, null);
+                    ShipmentsJourneyController::add($shipment->id, 17, 17, null,$remarks , $user_id, null);
 
                     return response()->json(['status' => 0, 'message' => 'Shipment #' . $tracking_number . ' is Cancelled']);
                 } else {

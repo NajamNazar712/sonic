@@ -244,6 +244,46 @@ class ShipperCrmApiController extends Controller
     {
         $app_type = $request->app_type;
 
+        if($app_type == 2) {
+
+            $launched = CrmRequest::leftJoin('retail_shipments as rs', 'rs.shipment_id', '=', 'crm_requests.shipment_id')
+            ->leftJoin('retail_shipper_infos as rsi', 'rsi.id', '=', 'rs.shipper_account_no')
+            ->where('status_id',1)
+            ->where('rs.shipper_account_no', $request->retail_shipper_id)
+            ->count();
+
+            $in_process = CrmRequest::leftJoin('retail_shipments as rs', 'rs.shipment_id', '=', 'crm_requests.shipment_id')
+            ->leftJoin('retail_shipper_infos as rsi', 'rsi.id', '=', 'rs.shipper_account_no')
+            ->where('status_id',2)
+            ->where('rs.shipper_account_no', $request->retail_shipper_id)
+            ->count();
+            
+            $closed = CrmRequest::leftJoin('retail_shipments as rs', 'rs.shipment_id', '=', 'crm_requests.shipment_id')
+            ->leftJoin('retail_shipper_infos as rsi', 'rsi.id', '=', 'rs.shipper_account_no')
+            ->where('status_id',4)
+            ->where('rs.shipper_account_no', $request->retail_shipper_id)
+            ->count();
+
+        } else {
+            $launched = CrmRequest::where('status_id',1)
+            ->where('shipper_id', $request->shipper_id)
+            ->count();
+
+            $in_process = CrmRequest::where('status_id',2)
+                ->where('shipper_id', $request->shipper_id)
+                ->count();
+
+            $closed = CrmRequest::where('status_id',4)
+                ->where('shipper_id', $request->shipper_id)
+                ->count();
+        }
+
+        $request_count = [
+            'launched' => $launched,
+            'in_process' => $in_process,
+            'closed' => $closed
+        ];
+        
         $selects = [
             'crm_requests.id as id',
             's.tracking_number as tracking_number', 's.id as shipment_id',
@@ -300,7 +340,7 @@ class ShipperCrmApiController extends Controller
 
 
         if($crm_requests->isNotEmpty()) {
-            return response()->json(['status' => 0 , 'message' => 'Success' ,'crm_requests'=>$crm_requests]);
+            return response()->json(['status' => 0 , 'message' => 'Success' ,'crm_requests'=>$crm_requests, 'request_count' => $request_count]);
         }
         return response()->json(['status' => 1 , 'message' => 'CRM Complaints not found!']);
 
