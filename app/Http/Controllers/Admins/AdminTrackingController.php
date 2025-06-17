@@ -1369,6 +1369,7 @@ class AdminTrackingController extends Controller
                         if ($sub_segment && $sub_segment->name){
                             $details['order_information']['sub_segment'] = $sub_segment->name;
                         }
+                        $details['order_information']['channel'] = optional(optional($shipment->bookingChannel)->channel)->name ?? '-';
 
                         $details['order_information']['instructions'] = $shipment->special_instructions;
                         $details['order_information']['pieces'] = $shipment->pieces;

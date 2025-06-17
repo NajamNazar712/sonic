@@ -76,6 +76,7 @@
                                         <th class="border-primary border-darken-1">Shipper</th>
                                         <th class="border-primary border-darken-1">Booked By</th>
                                         <th class="border-primary border-darken-1">Service Type</th>
+                                        <th class="border-primary border-darken-1">Booking Channel</th>
                                         <th class="border-primary border-darken-1">Status</th>
                                         <th class="border-primary border-darken-1">Reason</th>
                                         <th class="border-primary border-darken-1">Payment Status</th>
@@ -793,6 +794,7 @@
                             head.push('Shipper');
                             head.push('Booked By');
                             head.push('Service Type');
+                            head.push('Booking Channel');
                             head.push('Status');
                             head.push('Reason');
                             head.push('Payment Status');
@@ -815,6 +817,7 @@
                                 row.push(values.user_name);
                                 row.push(values.booked_by);
                                 row.push(values.service_type);
+                                row.push(values.channel_name);
                                 row.push(values.status);
                                 row.push(values.reason);
                                 row.push(values.payment_status);
@@ -1112,6 +1115,7 @@
                     {data: 'user_name', name: 'u.name', class: 'align-middle user_name'},
                     {data: 'booked_by', name: 'shipments.booked_by', class: 'align-middle booked_by'},
                     {data: 'service_type', name: 'bt.id', class: 'align-middle service_type'},
+                    {data: 'channel_name', name: 'channels.name', class: 'align-middle channel_name'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
                     {data: 'payment_status', name: 'payment_status', class: 'align-middle payment_status'},
