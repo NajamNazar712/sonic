@@ -222,11 +222,12 @@ class ShipperShipmentBookController extends Controller
 
         
         $shipment_id = $shipment->id;
-
-        $channel = new BookingChannel;
-        $channel->shipment_id = $shipment_id;
-        $channel->channel_id = $channel_id;
-        $channel->save();
+        if($channel_id != null) {
+            $channel = new BookingChannel;
+            $channel->shipment_id = $shipment_id;
+            $channel->channel_id = $channel_id;
+            $channel->save();
+        }
         
         $shipment_detail = new ShipmentDetail();
         $shipment_detail->shipment_id = $shipment_id;
@@ -3952,11 +3953,13 @@ class ShipperShipmentBookController extends Controller
 
         $shipment_id = $shipment->id;
 
-        $channel = new BookingChannel;
-        $channel->shipment_id = $shipment_id;
-        $channel->channel_id = $channel_id;
-        $channel->save();
-
+        if($channel_id != null) {
+            $channel = new BookingChannel;
+            $channel->shipment_id = $shipment_id;
+            $channel->channel_id = $channel_id;
+            $channel->save();
+        }
+        
         $shipment_detail = new ShipmentDetail();
         $shipment_detail->shipment_id = $shipment_id;
         $shipment_detail->is_open = $open_shipment;
