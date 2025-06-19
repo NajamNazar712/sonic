@@ -28,9 +28,10 @@ class TestEmailCheck extends Command
      */
     public function handle()
     {
-        Mail::raw('This is a test email from Laravel.', function ($message) {
-            $message->to('uit.mohsin95@gmail.com')->from('return@slgtrax.com')
-                ->subject('Laravel Test Email');
+        Mail::mailer('huawei_email')->raw('This is a test email from Laravel.', function ($message) {
+            $message->to('uit.mohsin95@gmail.com')
+                ->from('return@slgtrax.com', 'SLG Trax') // optional name
+                ->subject('Laravel Test Email via Huawei');
         });
     }
 }
