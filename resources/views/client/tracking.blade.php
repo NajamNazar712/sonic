@@ -1781,6 +1781,7 @@
                     // }
 
                     else if (case_nature_id == 2) {
+                        var alternate_phone = $('#alternate_phone').val();
                         var complaint_id = $('#case_nature_requests').val();
                         var description = "";
                         if (!$('#case_nature_service_remarks_div').hasClass('d-none')) {
@@ -2308,6 +2309,7 @@
                                         'description': description,
                                         'complainant_phone' : $('#complainant_phone').val(),
                                         'case_nature_complainant' : $('#case_nature_complainant').val(),
+                                        'alternate_phone': alternate_phone,
                                     }
                                 })
                                 .done(function (data) {
