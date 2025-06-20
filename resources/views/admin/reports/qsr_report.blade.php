@@ -238,7 +238,7 @@
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
-                        <th class="border-primary border-darken-1">Area</th>
+                        <th class="border-primary border-darken-1">Consignee City Area</th>
                         <th class="border-primary border-darken-1">Concerned Hub</th>
                         <th class="border-primary border-darken-1">Return City</th>
                         <th class="border-primary border-darken-1">Zone</th>
@@ -620,7 +620,8 @@
                                             }).get(),
                                             service_type_select: $('#service_type_select').val(),
                                             search_kam: $('#search_kam').val(),
-                                            search_sale_person: $('#search_sale_person').val()
+                                            search_sale_person: $('#search_sale_person').val(),
+                                            search_area :  $("#search_area").val()
                                         },
                                         beforeSend: function() {
                                             swal({
@@ -739,7 +740,7 @@
                     {data: 'origin', name: 'oc.name', as:'origin', class: 'align-middle origin',text:'Origin',value:'origin',download:true},
                     {data: 'destination', name: 'dc.name', as:'destination', class: 'align-middle destination',text:'Destination',value:'destination',download:true},
                     {data: 'hub', name: 'h.name', as:'hub', class: 'align-middle hub',text:'Hub',value:'hub',download:true},
-                    {data: 'area', name: 'ca.name', as:'area', class: 'align-middle area',text:'Area',value:'area',download:true},
+                    {data: 'area', name: 'ca.name', as:'area', class: 'align-middle area',text:'Consignee City Area',value:'area',download:true},
                     {data: 'current_hub', name: 'cmbh.name', as:'current_hub_name', class: 'align-middle current_hub',text:'Concerned Hub',value:'current_hub_name',download:true},
                     {data: 'return_city', name: 'rc.name',as:'return_city', class: 'align-middle return_city',text:'Return City',value:'return_city',download:true},
                     {data: 'zone', name: 'z.name',as:'zone',class: 'align-middle zone',text:'Zone',value:'zone',download:true},
