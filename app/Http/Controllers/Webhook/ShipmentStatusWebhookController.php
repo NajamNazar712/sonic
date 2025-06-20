@@ -24,8 +24,10 @@ class ShipmentStatusWebhookController extends Controller
         $date = Carbon::now()->toDateTimeString();
         $shipment = Shipment::find($shipment_id);
         $user_id = $shipment->user_id;
-
         $subscriber = ShipmentStatusSubscription::where('user_id', $user_id)->where('status', 1);
+        if ($user_id == 13060) {
+         Log::channel('botCallJobLog')->info('s ' . 'Webhook log subscriber' . $subscriber->first() . "User ID" . $user_id);
+        }
         if($subscriber->exists()){
             $subscriber = $subscriber->first();
                        $data = array();
