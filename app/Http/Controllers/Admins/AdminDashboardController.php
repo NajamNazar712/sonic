@@ -16281,6 +16281,48 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         return $historyArray;
     }
 
+    private function logCityStatusChanges(array $cityIds, bool $newStatus, $columnType = 1)
+    {
+        $logs = [];
+        $userId = auth()->id();
+        $now = now();
+
+        foreach ($cityIds as $cityId) {
+            $logs[] = [
+                'column_type' => $columnType, 
+                'updated_by' => $userId,
+                'city_id' => $cityId,
+                'new_status' => $newStatus,
+                'changed_at' => $now,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        }
+
+        CityStatusChangeLog::insert($logs);
+    }
+
+    public function get_city_status_logs($cityId, Request $request)
+    {
+        $type = $request->get('type') === 'booking' ? 1 : 2;
+
+        $logs = CityStatusChangeLog::with(['city', 'admin'])
+            ->where('city_id', $cityId)
+            ->where('column_type', $type)
+            ->orderByDesc('changed_at')
+            ->get()
+            ->map(function ($log) {
+                return [
+                    'city_name' => $log->city?->name ?? 'N/A',
+                    'new_status' => $log->new_status,
+                    'changed_at' => optional($log->changed_at)->format('Y-m-d H:i:s'),
+                    'updated_by_name' => $log->admin?->name ?? 'N/A',
+                ];
+            });
+
+        return response()->json($logs);
+    }
+    
     public static function logCityChangesAfterUpdate($oldCity)
     {
         $cityId = $oldCity->id;
