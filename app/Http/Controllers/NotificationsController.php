@@ -319,16 +319,16 @@ class NotificationsController extends Controller
 
                 // Determine mailer based on $from
                 $fromAddress = (str_contains($from, 'return')) ? 'return@slgtrax.com' : 'info@slgtrax.com';
-                $selectedMailer = (str_contains($from, 'return')) ? 'mail2' : null;
+                $selectedMailer = 'huawei_email';
 
                 if ($id == 230) {
                     $mailable = new NotificationsDispatchNow($subject, $body);
                 } else {
-                    $mailable = new Notifications($subject, $body, $fromAddress);
+                    $mailable = new Notifications($subject, $body, $fromAddress);;
                 }
 
                 // Select mailer
-                $mail = $selectedMailer ? Mail::mailer($selectedMailer)->to($to) : Mail::to($to);
+                $mail = Mail::mailer($selectedMailer)->to($to);
 
                 if ($cc) {
                     $mail->cc($cc);

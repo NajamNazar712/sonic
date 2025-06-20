@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Http\Models\DonePayment;
 use App\Http\Models\WalletUser;
+use App\Models\WalletShipperSetting;
 use App\Models\WalletUserDisable;
 use Illuminate\Console\Command;
 
@@ -44,6 +45,7 @@ class WalletUserDisables extends Command
 
                 if ($wallet_user_disable->save()) {
                     $user->delete();
+                    WalletShipperSetting::where('user_id',$user->user_id)->delete();
                     $success_delete[] = $user->user_id;
                 }
             }

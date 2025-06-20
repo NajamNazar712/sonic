@@ -336,7 +336,8 @@ class AdminCargoManifestController extends Controller
         }
         $today = Carbon::today();
         $on_hold_shipments = ShipmentOnHold::whereDate('dispatch_date', '>', $today)->where('status', 1)->pluck('shipment_id')->toArray();
-        $shipments = DB::connection('reports_2')->table('shipments')->join('booking_types as bt', 'shipments.booking_type_id', '=', 'bt.id')
+        $shipments = DB::connection('reports_2')->table('shipments')
+            ->leftjoin('booking_types as bt', 'shipments.booking_type_id', '=', 'bt.id')
             ->leftjoin('shipment_status as ss', 'shipments.shipper_status_id', '=', 'ss.id')
             ->leftjoin('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->leftjoin('users as u', 'shipments.user_id', '=', 'u.id')
