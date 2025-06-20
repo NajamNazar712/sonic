@@ -74,6 +74,7 @@
                                         <th class="border-primary border-darken-1">Agent</th>
                                         <th class="border-primary border-darken-1">Agent Assigned By</th>
                                         <th class="border-primary border-darken-1">Parcel Value</th>
+                                        <th class="border-primary border-darken-1">Claim Amount</th>
                                         <th class="border-primary border-darken-1">COD Value</th>
                                         <th class="border-primary border-darken-1">Segment</th>
                                         <th class="border-primary border-darken-1">Weight</th>
@@ -369,6 +370,7 @@
                                 head.push('Agent');
                                 head.push('Agent Assigned By');
                                 head.push('Parcel Value');
+                                head.push('Claim Amount');
                                 head.push('COD Value');
                                 head.push('Segment');
                                 head.push('Weight');
@@ -412,6 +414,7 @@
                                     row.push(values.agent); // {data: 'agent', name: 'ad.name'}
                                     row.push(values.agent_assigned_by); // {data: 'agent_assigned_by', name: 'resby.name'}
                                     row.push(values.parcel_value); // {data: 'parcel_value', name: 'parcel_value'}
+                                    row.push(values.product_cost); // {data: 'product_cost', name: 'product_cost'}
                                     row.push(values.cod_value); // {data: 'cod_value', name: 'cod_value'}
                                     row.push(values.segment); // {data: 'segment', name: 'seg.name'}
                                     row.push(values.actual_weight); // {data: 'actual_weight', name: 's.actual_weight'}
@@ -700,6 +703,7 @@
                     {data: 'agent', name: 'ad.name', class: 'align-middle agent'}, // Agent
                     {data: 'agent_assigned_by', name: 'resby.name', class: 'align-middle agent_assigned_by'}, // Agent Assigned By
                     {data: 'parcel_value', name: 's.parcel_value', class: 'align-middle parcel_value'}, // Parcel Value
+                    {data: 'product_cost', name: 'crm_requests.product_cost', class: 'align-middle product_cost'}, // Claim Amount
                     {data: 'cod_value', name: 's.amount', class: 'align-middle cod_value'}, // COD Value
                     {data: 'segment', name: 'seg.name', class: 'align-middle segment'}, // Segment
                     {data: 'actual_weight', name: 's.actual_weight', class: 'align-middle actual_weight'}, // Weight
