@@ -315,40 +315,32 @@ class NotificationsController extends Controller
                 }
             }
 
-            if($to){
+            if ($to) {
 
-                if($id == 230){
+                // Determine mailer based on $from
+                $fromAddress = (str_contains($from, 'return')) ? 'return@slgtrax.com' : 'info@slgtrax.com';
+                $selectedMailer = 'huawei_email';
 
-                    $mail = new NotificationsDispatchNow($subject, $body);
-
-                    if ($cc) {
-                        $mail->cc($cc);
-                    }
-        
-                    if ($bcc) {
-                        $mail->bcc($bcc);
-                    }
-
-                    $mail = Mail::to($to)->send($mail);
-                    
-                }else{
-                    $mail = Mail::to($to);
-                
-                    if ($cc) {
-                        $mail->cc($cc);
-                    }
-        
-                    if ($bcc) {
-                        $mail->bcc($bcc);
-                    }
-
-                    $mail->send(new Notifications($subject, $body, $from));
+                if ($id == 230) {
+                    $mailable = new NotificationsDispatchNow($subject, $body);
+                } else {
+                    $mailable = new Notifications($subject, $body, $fromAddress);;
                 }
 
-                
-    
-              
+                // Select mailer
+                $mail = Mail::mailer($selectedMailer)->to($to);
+
+                if ($cc) {
+                    $mail->cc($cc);
+                }
+
+                if ($bcc) {
+                    $mail->bcc($bcc);
+                }
+
+                $mail->send($mailable);
             }
+
 
 
         }

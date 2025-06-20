@@ -165,7 +165,7 @@ class RetailRatesCalculationController extends Controller
                 }
             }
 
-            $zone_city_gst = ZoneCitiesGst::where('zone_id',$pickup_city->zone->id)->where('city_id',$pickup_city->id);
+            $zone_city_gst = ZoneCitiesGst::where('zone_id',$pickup_city->zone?->id)->where('city_id',$pickup_city->id);
             if ($zone_city_gst->exists())
             {
                 $zone_city_gst = $zone_city_gst->first();
@@ -173,7 +173,7 @@ class RetailRatesCalculationController extends Controller
             }
             else
             {
-                $gst = 1 + $pickup_city->zone->gst;
+                $gst = 1 + $pickup_city->zone?->gst;
             }
 
             $charges_without_gst = round($charges / $gst, 2); //
@@ -218,7 +218,7 @@ class RetailRatesCalculationController extends Controller
                     $charges = $weight_charge[$zone_id];
 
                     $city = City::find($pickup_city_id);
-                    $zone_city_gst = ZoneCitiesGst::where('zone_id',$city->zone->id)->where('city_id',$city->id);
+                    $zone_city_gst = ZoneCitiesGst::where('zone_id',$city->zone?->id)->where('city_id',$city->id);
                     if ($zone_city_gst->exists())
                     {
                         $zone_city_gst = $zone_city_gst->first();
@@ -226,7 +226,7 @@ class RetailRatesCalculationController extends Controller
                     }
                     else
                     {
-                        $gst = 1 + $city->zone->gst;
+                        $gst = 1 + $city->zone?->gst;
                     }
                     // $gst_charges = round($charges * $gst,2);
                     // $charges = round($charges - $gst_charges,2);
