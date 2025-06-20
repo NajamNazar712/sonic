@@ -319,6 +319,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         //        Route::post('shippingModesAjax', 'Admins\AdminDashboardController@modesAjax')->name('shippingModes.ajax');
         Route::post('city/disable_booking_status', 'Admins\AdminDashboardController@disable_booking_status')->name('disable_booking_status');
         Route::post('city/enable_booking_status', 'Admins\AdminDashboardController@enable_booking_status')->name('enable_booking_status');
+        Route::get('city/status-logs/{cityId}', 'Admins\AdminDashboardController@get_city_status_logs')->name('get_city_status_logs');
 
         //Route
         Route::prefix('route')->name('route.')->group(function () {
@@ -2410,6 +2411,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('ssr')->name('ssr.')->group(function () {
             Route::get('', 'Admins\Reports\SSRController@ssr_index')->name('index');
             Route::post('list', 'Admins\Reports\SSRController@ssr_list')->name('list');
+            Route::post('get_sub_segments','Admins\Reports\SSRController@get_sub_segments')->name('get_sub_segments');
         });
 
         Route::prefix('shipper_summary')->name('shipper_summary.')->group(function () {
