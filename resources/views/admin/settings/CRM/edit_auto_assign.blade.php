@@ -76,8 +76,8 @@
                                 <div class="row">
                                     <div class="col-4">
                                         <div class="form-group">
-                                            <label>Origin Zone&nbsp;(<input type="checkbox" class="checkAll" >Select All)</label>
-                                            <select name="origin_zone_id[]" id="origin_zone_id" class="form-control select2" multiple="multiple">
+                                            <label>Origin Zone*&nbsp;(<input type="checkbox" class="checkAll" >Select All)</label>
+                                            <select name="origin_zone_id[]" id="origin_zone_id" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
                                                 <option value="" disabled>Select</option>
                                                 @foreach($zones as $zone)
                                                     <option value="{{ $zone->id }}" {{ in_array($zone->id, $origin_zone_id)  ? 'selected' : '' }}> {{ $zone->name }} </option>
@@ -179,7 +179,7 @@
                                         <div class="col-6">
                                             <div class="form-group">
                                                 <label>Shipper without KAM &nbsp;(<input type="checkbox" class="checkAll"  >Select All)</label>
-                                                <select name="shipper_non_key_id[]" id="shipper_non_key_id" class="form-control select2" multiple="multiple"  >
+                                                <select name="shipper_non_key_id[]" id="shipper_non_key_id" class="form-control select2" multiple="multiple"  @if(empty($shipper_non_key)) disabled @endif>
                                                     @foreach($shipper_non_key as $cn)
                                                     <option value="{{ $cn->id }}" {{ in_array($cn->id, $snk)  ? 'selected' : '' }}>
                                                         {{ $cn->name }}
@@ -222,10 +222,11 @@
     <script>
         $(document).ready(function() {
 
-            function getShipperKey() {
-
+            function getShipperKey(agent_id) {
+                let url = "{{ route('admin.settings.auto_assigning.get_shipper_key', ['agent_id' => '__AGENT_ID__']) }}";
+                url = url.replace('__AGENT_ID__', agent_id);
                 $.ajax({
-                    url:'{!! route("admin.settings.auto_assigning.get_shipper_key") !!}',
+                    url:url,
                     method: 'GET'
                 }).done(function (data) {
                     if(data.status == 1){
@@ -239,6 +240,11 @@
                         $('#shipper_key_id').find('option').filter(function() {
                             return $.trim($(this).text()) === '';
                         }).remove();
+                    }else {
+                        toastr.error('No shipper against this KAM', 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
                     }
                 })
             }
@@ -450,11 +456,12 @@
                 $('#shipper_non_key_id').empty();
 
                 var role_id = $(this).find(':selected').data('role_id');
+                var agent_id = $(this).val();
                 if(role_id==28 || role_id==37){
                     getShipperNonKey()
 
                 } else if (role_id==43 || role_id==67 || role_id==75 || role_id==115) {
-                    getShipperKey();
+                    getShipperKey(agent_id);
                 }
 
             });
@@ -594,9 +601,26 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
-                    $('#agent_id').prop('disabled', false);
-                    form.submit();
+                    let role_id = $('#agent_id').find(':selected').data('role_id') || 0; // Ensure role_id is a number
+                    if ([43, 67, 75, 115].includes(role_id)){
+                        let shipper_ids = $('#shipper_key_id').val();
+                        if(shipper_ids!=''){
+                            form.submit();
+                        }else {
+                            toastr.error('Select At least one shipper', 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                            return false;
+                        }
+                    } else {
+                        form.submit();
+                    }
                 }
+                // submitHandler: function(form) {
+                //     $('#agent_id').prop('disabled', false);
+                //     form.submit();
+                // }
             });
 
             $("#crm_agent_assign .checkAll").on('click',function (){

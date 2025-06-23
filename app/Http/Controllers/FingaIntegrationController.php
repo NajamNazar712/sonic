@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Auth;
 use Illuminate\Support\Facades\App;
+use App\Models\WalletUserDisable;
 class FingaIntegrationController extends Controller
 {
 
@@ -29,8 +30,8 @@ class FingaIntegrationController extends Controller
         if (Cache::has($cacheKey)) {
             return Cache::get($cacheKey);
         }
-
-        $password = App::environment(['local', 'staging']) ? "4TE7+r]7ddI2" : "9l2|_XTI4MiP";
+        $password = config('app.FINGA_PASSWORD');
+//        $password = App::environment(['local', 'staging']) ? "" : $env_password;
 
         // Make API request for new token
         $response = Http::withHeaders([
@@ -56,7 +57,11 @@ class FingaIntegrationController extends Controller
 
         $api = config('app.FINGA_URL');
         $token = $this->getToken($api);
-        $user = WalletUser::where('user_id', session('user_id'));
+        if(session('user_id') == 42723) {
+            $user = WalletUserDisable::where('user_id', session('user_id'));
+        }else{
+            $user = WalletUser::where('user_id', session('user_id'));
+        }
 
         if (session('user_type') == 1) {
             $user->where('substitute_user_id', 0);

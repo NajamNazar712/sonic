@@ -44,8 +44,9 @@
                                         <div class="form-group">
                                             <select name="wallet_filter"
                                                 class="select2 wallet_filter">
-                                                <option value="1">Wallet Users</option>
-                                                <option value="2">Non-Wallet Users</option>
+                                                <option value="1">Wallet Users - With Financing</option>
+                                                <option value="2">Wallet Users - Without Financing</option>
+                                                <option value="3">Non-Wallet Users</option>
                                             </select>
                                         </div>
                                     </form>
@@ -169,7 +170,9 @@
                                         <th class="border-primary border-darken-1">S. No.</th>
                                         <th class="border-primary border-darken-1">Shipper</th>
                                         <th class="border-primary border-darken-1">City</th>
+                                        <th class="border-primary border-darken-1">Territory</th>
                                         <th class="border-primary border-darken-1">Phone No(s).</th>
+                                        <th class="border-primary border-darken-1">Financing Product Type</th>
                                         <th class="border-primary border-darken-1">Address</th>
                                         <th class="border-primary border-darken-1">Created Datetime</th>
                                         <th class="border-primary border-darken-1">Total Shipments</th>
@@ -309,7 +312,7 @@
 
                                         <div class="container mt-5">
                                             <div class="row">
-                                                <div class="col-md-4">
+                                                <div class="col-md-3">
                                                     <div class="form-group input-group">
                                                         <div class="input-group-prepend">
                                                             <span
@@ -319,10 +322,10 @@
                                                         </div>
                                                         <input type="text" name="requested_from_date"
                                                             class="form-control bg-primary border-primary white rounded-right"
-                                                            id="requested_from_date" placeholder="Requested Date From">
+                                                            id="requested_from_date" placeholder="Delivery/Return Date From">
                                                     </div>
                                                 </div>
-                                                <div class="col-md-4">
+                                                <div class="col-md-3">
                                                     <div class="form-group input-group">
                                                         <div class="input-group-prepend">
                                                             <span
@@ -332,10 +335,36 @@
                                                         </div>
                                                         <input type="text" name="requested_to_date"
                                                             class="form-control bg-primary border-primary white rounded-right"
-                                                            id="requested_to_date" placeholder="Requested Date To">
+                                                            id="requested_to_date" placeholder="Delivery/Return Date To">
                                                     </div>
                                                 </div>
-                                                <div class="col-md-2">
+                                                <div class="col-md-3">
+                                                    <div class="form-group input-group">
+                                                        <div class="input-group-prepend">
+                                                            <span
+                                                                class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                                <span class="la la-calendar-o small-calender-icon"></span>
+                                                            </span>
+                                                        </div>
+                                                        <input type="text" name="arrival_from_date"
+                                                            class="form-control bg-primary border-primary white rounded-right"
+                                                            id="arrival_from_date" placeholder="Arrival Date From">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group input-group">
+                                                        <div class="input-group-prepend">
+                                                            <span
+                                                                class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                                <span class="la la-calendar-o small-calender-icon"></span>
+                                                            </span>
+                                                        </div>
+                                                        <input type="text" name="arrival_to_date"
+                                                            class="form-control bg-primary border-primary white rounded-right"
+                                                            id="arrival_to_date" placeholder="Arrival Date To">
+                                                    </div>
+                                                </div>
+                                                <div class="col">
                                                     <div class="form-group input-group" style="margin-top: -20px ">
                                                         <button type="button" id="search_filter_btn"
                                                             class="float-right mb-1 mt-2 btn btn-outline-primary btn-min-width"><i
@@ -523,8 +552,8 @@
 
          
             $('#requested_from_date').pickadate({
-                firstDay: 1,
-                clear: '',
+                //firstDay: 1,
+                clear: 'Clear',
                 max: '{{ Carbon\Carbon::now() }}',
                 // format: 'dd mmmm, yyyy',
                 format: 'yyyy-mm-dd',
@@ -541,8 +570,8 @@
             });
 
             $('#requested_to_date').pickadate({
-                firstDay: 1,
-                clear: '',
+                //firstDay: 1,
+                clear: 'Clear',
                 max: '{{ Carbon\Carbon::now() }}',
                 // format: 'dd mmmm, yyyy',
                 format: 'yyyy-mm-dd',
@@ -553,6 +582,40 @@
                 onSet: function(context) {
                     if (context.select) {
                         $('#requested_from_date').pickadate('picker').set('max', $('#requested_to_date')
+                            .pickadate('picker').get('select'));
+                    }
+                }
+            });
+            $('#arrival_from_date').pickadate({
+                //firstDay: 1,
+                clear: 'Clear',
+                max: '{{ Carbon\Carbon::now() }}',
+                // format: 'dd mmmm, yyyy',
+                format: 'yyyy-mm-dd',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#arrival_to_date').pickadate('picker').set('min', $('#arrival_from_date')
+                            .pickadate('picker').get('select'));
+                    }
+                }
+            });
+            $('#arrival_to_date').pickadate({
+                //firstDay: 1,
+                clear: 'Clear',
+                max: '{{ Carbon\Carbon::now() }}',
+                // format: 'dd mmmm, yyyy',
+                format: 'yyyy-mm-dd',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#arrival_from_date').pickadate('picker').set('max', $('#rarrival_to_date')
                             .pickadate('picker').get('select'));
                     }
                 }
@@ -700,7 +763,9 @@
                             head.push('S.No');
                             head.push('Shipper');
                             head.push('City');
+                            head.push('Territory');
                             head.push('Phone No(s).');
+                            head.push('Financing Product Type');
                             head.push('Address');
                             head.push('Created Datetime');
                             head.push('Total Shipments');
@@ -732,7 +797,9 @@
                                 row.push(index + 1);
                                 row.push(values.shipper);
                                 row.push(values.city);
+                                row.push(values.territory);
                                 row.push(values.phone_numbers);
+                                row.push(values.finova_account_type);
                                 row.push(values.address);
                                 row.push(values.created_at);
                                 row.push(values.total_shipments);
@@ -1005,9 +1072,20 @@
                         class: 'align-middle text-center city'
                     },
                     {
+                        data: 'territory',
+                        name: 't.name',
+                        class: 'align-middle text-center territory'
+                    },
+                    {
                         data: 'phone_numbers',
                         name: 'phone_numbers',
                         class: 'align-middle text-center phone_numbers'
+                    },
+                    
+                    {
+                        data: 'finova_account_type',
+                        name: 'finova_account_type',
+                        class: 'align-middle text-center finova_account_type'
                     },
                     {
                         data: 'address',
@@ -1434,6 +1512,8 @@
                         d.ids = selected_rows;
                         d.requested_from_date = $('input[name="requested_from_date_formatted"]').val();
                         d.requested_to_date = $('input[name="requested_to_date_formatted"]').val();
+                        d.arrival_from_date = $('input[name="arrival_from_date_formatted"]').val();
+                        d.arrival_to_date = $('input[name="arrival_to_date_formatted"]').val();
                     }
                 },
                 rowId: 'id',
@@ -1559,7 +1639,7 @@
                         name: 'sj.created_at',
                         class: 'align-middle arrival_date'
                     },
-                    {data: 'shipper_id', name: 'u.id', class: 'align-middle shipper_id d-none', searchable: false,},
+                    //{data: 'shipper_id', name: 'u.id', class: 'align-middle shipper_id d-none', searchable: false,},
                 ],
                 rowCallback: function(row, data, index) {
                     $('td:eq(1)', row).html(index + 1);
@@ -1634,7 +1714,25 @@
             });
             //End Make Payment Modal Datatable
 
+            // $('#search_filter_btn').on('click', function() {
+            //     make_payments_table.rows('.selected').deselect();
+            //     selected_rows_shipments = [];
+            //     make_payments_table.draw(true);
+            //     calculation
+            // });
             $('#search_filter_btn').on('click', function() {
+                make_payments_table.rows().nodes().each(function(index) {
+                    var row = make_payments_table.row(index);
+                    if ($(row.node().firstChild).hasClass('select-checkbox') &&
+                        $(row.node()).hasClass('selected')) {
+                        row.deselect();
+
+                        var parent = $(row.node());
+
+                        calculation(parent);
+                    }
+                });
+                selected_rows_shipments = [];
                 make_payments_table.draw(true);
             });
 
@@ -1920,8 +2018,18 @@
                 selected_rows_shipments = [];
                 shipperTotal = {};
                 selected_shippers_id = [];
+                $('#requested_from_date').val('');
+                $('#requested_to_date').val('');
+            
+                $('[name="requested_from_date_formatted"]').val('');
+                $('[name="requested_to_date_formatted"]').val('');
+                $('#arrival_from_date').val('');
+                $('#arrival_to_date').val('');
+            
+                $('[name="arrival_from_date_formatted"]').val('');
+                $('[name="arrival_to_date_formatted"]').val('');
 
-                
+
             });
 
             var payable_list = [];

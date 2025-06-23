@@ -276,13 +276,16 @@ class NotificationsController extends Controller
         $filterBlockedEmails = function ($emails) use ($block_email) {
             if (is_array($emails)) {
                 return array_values(array_filter($emails, function ($email) use ($block_email) {
+                    $email = strtolower(preg_replace('/\s+/', '', $email)); // trim and lowercase
                     return !in_array($email, $block_email);
                 }));
-            } elseif (is_string($emails) && in_array($emails, $block_email)) {
-                return null;
+            } elseif (is_string($emails)) {
+                $email = strtolower(preg_replace('/\s+/', '', $emails)); // sanitize single email
+                return in_array($email, $block_email) ? null : $email;
             }
             return $emails;
         };
+
 
 
         if ($to) {
@@ -312,40 +315,32 @@ class NotificationsController extends Controller
                 }
             }
 
-            if($to){
+            if ($to) {
 
-                if($id == 230){
+                // Determine mailer based on $from
+                $fromAddress = (str_contains($from, 'return')) ? 'return@slgtrax.com' : 'info@slgtrax.com';
+                $selectedMailer = 'huawei_email';
 
-                    $mail = new NotificationsDispatchNow($subject, $body);
-
-                    if ($cc) {
-                        $mail->cc($cc);
-                    }
-        
-                    if ($bcc) {
-                        $mail->bcc($bcc);
-                    }
-
-                    $mail = Mail::to($to)->send($mail);
-                    
-                }else{
-                    $mail = Mail::to($to);
-                
-                    if ($cc) {
-                        $mail->cc($cc);
-                    }
-        
-                    if ($bcc) {
-                        $mail->bcc($bcc);
-                    }
-
-                    $mail->send(new Notifications($subject, $body, $from));
+                if ($id == 230) {
+                    $mailable = new NotificationsDispatchNow($subject, $body);
+                } else {
+                    $mailable = new Notifications($subject, $body, $fromAddress);;
                 }
 
-                
-    
-              
+                // Select mailer
+                $mail = Mail::mailer($selectedMailer)->to($to);
+
+                if ($cc) {
+                    $mail->cc($cc);
+                }
+
+                if ($bcc) {
+                    $mail->bcc($bcc);
+                }
+
+                $mail->send($mailable);
             }
+
 
 
         }
@@ -354,7 +349,6 @@ class NotificationsController extends Controller
     static public function send($id, $reference_1_id, $reference_2_id = NULL, $reference_3_id = NULL,$array_data = array())
     {
         $notification = Notification::find($id);
-
         if ($notification) {
             // if ($notification->status)
             if ($notification->status || ($id == 81 && $notification->status == 0)) {
@@ -6994,18 +6988,20 @@ class NotificationsController extends Controller
                     }
 
                     self::email($subject, $body, $to);
-                } else if ($id == 110) {
-                    $date = $reference_1_id;
-                    $file = $reference_2_id;
-                    $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
-                    if (strpos($body, '[link]') !== FALSE) {
-                        $body = str_replace('[link]', $link, $body);
-                    }
-                    $cc = ['shahbaz.abbasi@trax.pk'];
-                    $to = array();
+                }
+                // else if ($id == 110) {
+                //     $date = $reference_1_id;
+                //     $file = $reference_2_id;
+                //     $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
+                //     if (strpos($body, '[link]') !== FALSE) {
+                //         $body = str_replace('[link]', $link, $body);
+                //     }
+                //     $cc = ['shahbaz.abbasi@trax.pk'];
+                //     $to = array();
 
-                    self::email($subject, $body, $to, $cc);
-                } else if ($id == 111) {
+                //     self::email($subject, $body, $to, $cc);
+                // }
+                else if ($id == 111) {
                     $date = $reference_1_id;
                     $file = $reference_2_id;
                     $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
@@ -8801,7 +8797,7 @@ class NotificationsController extends Controller
 
                     $email = array_values($email);
 
-                    $cc = ['m.sohail@trax.pk', 'tauseef.sarfaraz@trax.pk', 'Shahrukh.raheem@trax.pk', 'Mohsin.khan@trax.pk', 'ops.excellence@trax.pk'];
+                    $cc = ['m.sohail@trax.pk', 'tauseef.sarfaraz@trax.pk', 'cs.dept@trax.pk', 'Mohsin.khan@trax.pk', 'ops.excellence@trax.pk'];
                     if (count($email) > 0) {
                         self::email($subject, $body, $email, $cc);
                     }
@@ -10707,8 +10703,9 @@ class NotificationsController extends Controller
                     self::email($subject, $body, $to);
                 } else if ($id == 221) {
                     $responses = $reference_1_id;
-                    $to = 'mohsin.khan@trax.pk';
-                    $cc = 'shahrukh.raheem@trax.pk';
+
+                    $to = array("mohsin.khan@trax.pk", "muhammad.zain@trax.pk", "anas.khan@slgtrax.com");
+                    $cc = 'tauseef.sarfaraz@trax.pk';
 
                     $date = Carbon::now()->toFormattedDateString();
 
@@ -10812,8 +10809,8 @@ class NotificationsController extends Controller
                 } else if ($id == 223) {
                     //Crm Progress Report
                     $now = Carbon::now();
-                    $to = 'mohsin.khan@trax.pk';
-                    $cc = 'shahrukh.raheem@trax.pk';
+                    $to = array("mohsin.khan@trax.pk", "muhammad.zain@trax.pk", "anas.khan@slgtrax.com");
+                    $cc = 'tauseef.sarfaraz@trax.pk';
                     $crm_complaints_2_days_closure = [];
                     $crm_services_2_days_closure = [];
                     $crm_claims_10_days_closure = [];
@@ -11093,17 +11090,23 @@ class NotificationsController extends Controller
                     $html .= '</table>';
                     $body = str_replace('[preview]', $html, $notification->body);
                     self::email($subject, $body, $to, $cc);
-                } else if ($id == 226) {
-                    $file = $reference_1_id;
-                    $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
-                    if (strpos($body, '[link]') !== FALSE) {
-                        $body = str_replace('[link]', $link, $body);
-                        $body .= '<br/><br/><strong>Note: This link will expire after 7 days.</strong>';
-                    }
-                    $to = ['tauseef.sarfaraz@trax.pk', 'mansoor.ahmad@trax.pk', 'shahbaz.abbasi@trax.pk'];
+                }
+                // else if ($id == 226) {
+                //     $file = $reference_1_id;
+                //     $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
+                //     if (strpos($body, '[link]') !== FALSE) {
+                //         $body = str_replace('[link]', $link, $body);
+                //         $body .= '<br/><br/><strong>Note: This link will expire after 7 days.</strong>';
+                //     }
+                //     $to = [
+                //             'tauseef.sarfaraz@trax.pk',
+                //             'mansoor.ahmad@trax.pk',
+                //             // 'shahbaz.abbasi@trax.pk'
+                //         ];
 
-                    self::email($subject, $body, $to);
-                } else if ($id == 227) {
+                //     self::email($subject, $body, $to);
+                // }
+                else if ($id == 227) {
                     $file = $reference_1_id;
                     $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
                     if (strpos($body, '[link]') !== FALSE) {
@@ -11425,6 +11428,86 @@ class NotificationsController extends Controller
                     }
                 }
 
+                else if (/* $id == 110 || $id == 226 || */ $id == 236 || $id == 237 || $id == 238 || $id == 239 || $id == 240 || $id == 241 || $id == 242) {
+                    $date = Carbon::today()->format('Y-m-d');
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+                    if (strpos($subject, '[date]') !== FALSE) {
+                        $subject = str_replace('[date]', $date, $subject);
+                    }
+
+                    if (strpos($body, '[date]') !== FALSE) {
+                        $body = str_replace('[date]', $date, $body);
+                    }
+
+                    $link = '<a href="' . $reference_1_id . '" target="_blank">Report</a>';
+
+                    if (strpos($subject, '[link]') !== FALSE) {
+                        $subject = str_replace('[link]', $link, $subject);
+                    }
+
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+
+                    $to = array();
+                    $bcc = array();
+                    $to[] = 'shahbaz.abbasi@trax.pk';
+                    $to[] = 'mansoor.ahmad@trax.pk';
+
+                    self::email($subject, $body, $to, NULL, $bcc);
+                } else if( $id == 244) {
+
+                    $delivery_note = DeliveryNote::find($reference_1_id);
+
+                    $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $reference_1_id)
+                        ->where('shipment_id', $reference_2_id)->first();
+
+                    $shipment = Shipment::find($reference_2_id);
+                    $to = $shipment->consignee_phone_number_1;
+                    $shipment_otp = ShipmentOtp::where('shipment_id', $shipment->id);
+
+                    if ($delivery_note->special_rider) {
+                        if (strpos($body, '[rider_number]') !== FALSE) {
+                            if ($delivery_note_shipment->rider_information) {
+                                $body = str_replace('[rider_number]', str_replace('-', '', $delivery_note->special_rider_phone), $body);
+                            } else {
+                                $body = str_replace('[rider_number]', '', $body);
+                            }
+                        }
+                    } else {
+                        if (strpos($body, '[rider_number]') !== FALSE) {
+                            if ($delivery_note_shipment->rider_information) {
+                                $body = str_replace('[rider_number]', str_replace('-', '', $delivery_note->rider->phone), $body);
+                            } else {
+                                $body = str_replace('[rider_number]', '', $body);
+                            }
+                        }
+                    }
+
+                    if ($shipment_otp->exists()) {
+                        $shipment_otp = $shipment_otp->first();
+                        if (strpos($body, '[otp]') !== FALSE) {
+                            $body = str_replace('[otp]', $shipment_otp->otp, $body);
+                        }
+                    }
+
+                    if (strpos($body, '[tracking_number]') !== FALSE) {
+                        $body = str_replace('[tracking_number]', $shipment->tracking_number, $body);
+                    }
+
+                    self::sms($body, $to, null,$shipment->id,$id);
+                }
+                else if($id == 245) {
+                    $shipment = Shipment::find($reference_1_id);
+                    $to = $shipment->consignee_phone_number_1;
+
+                    if (strpos($body, '[tracking_number]') !== FALSE) {
+                        $body = str_replace('[tracking_number]', $shipment->tracking_number, $body);
+                    }
+                    self::sms($body, $to, null,$shipment->id,$id);
+                }
+
                 else if ($id == 243) {
                     $retail = RetailShipperInfo::find($reference_1_id);
                     if ($retail) {
@@ -11442,7 +11525,6 @@ class NotificationsController extends Controller
 //                        self::sms($body, $to, 1, null,$id);
                     }
                 }
-
             }
         }
     }

@@ -67,7 +67,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-3">
+                    <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_hub" id="search_hub" class="form-control select2">
                                 @foreach($hubs as $hub)
@@ -76,7 +76,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-3">
+                    <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_status" id="search_status" class="form-control select2">
                                 @foreach($statuses as $status)
@@ -85,7 +85,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-3">
+                    <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_business_category" id="search_business_category" class="form-control select2">
                                 @foreach($business_categories as $bc)
@@ -95,12 +95,30 @@
                         </fieldset>
                     </div>
 
-                    <div class="col-3">
+                    <div class="col-4">
                         <div class="form-group">
                             <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2" data-rule-required="true" data-msg-required="Shipping Mode is required">
                                 @foreach($shipping_modes as $shipping_mode)
                                     <option value="{{$shipping_mode->id}}">{{$shipping_mode->mode}}</option>
                                 @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="form-group">
+                            <select name="search_segment_id" id="search_segment_id" class="form-control select2" data-rule-required="true" data-msg-required="Segment is required">
+                                @foreach($segments as $segment)
+                                    <option value="{{$segment->id}}">{{$segment->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="form-group">
+                            <select name="search_sub_segment_id" id="search_sub_segment_id" class="form-control select2" data-rule-required="true" data-msg-required="Sub Segment is required">
+{{--                                @foreach($sub_segments as $sub_segment)--}}
+{{--                                    <option value="{{$sub_segment->id}}">{{$sub_segment->name}}</option>--}}
+{{--                                @endforeach--}}
                             </select>
                         </div>
                     </div>
@@ -184,6 +202,8 @@
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Account No.</th>
                         <th class="border-primary border-darken-1">Shipper</th>
+                        <th class="border-primary border-darken-1">Segment</th>
+                        <th class="border-primary border-darken-1">Sub Segment</th>
                         <th class="border-primary border-darken-1">Sales Person</th>
                         <th class="border-primary border-darken-1">Actual Weight</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
@@ -193,7 +213,10 @@
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Fuel Surcharge</th>
-                        <th class="border-primary border-darken-1">GST</th>
+
+{{--                        <th class="border-primary border-darken-1">GST</th>--}}
+                        <th class="border-primary border-darken-1">Collection Amount</th>
+
                         <th class="border-primary border-darken-1">Total Charges</th>
                     </tr>
                     </thead>
@@ -292,6 +315,41 @@
                 width:'100%',
                 allowClear:true
             });
+
+            $('#search_segment_id').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Segment',
+                width:'100%',
+                allowClear:true
+            }).on('change', function () {
+                $('#search_sub_segment_id')
+                    .empty()
+                    .prepend('<option value="" selected="selected"></option>');
+                var segment_id = parseInt($(this).val());
+                if(segment_id != null && segment_id != '') {
+                    $.ajax({
+                        url:'{!! route("admin.reports.ssr.get_sub_segments") !!}',
+                        method: 'POST',
+                        data: {
+                            'segment_id': segment_id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if(data.status == 1){
+                            let options = "";
+                            $.each(data.sub_segment, function(index, field) {
+                                options+=`<option value='${field.id}' >${field.name}</option>`;
+                            });
+                            $('#search_sub_segment_id').append(options);
+                        }
+                    })
+                }
+            });
+            $('#search_sub_segment_id').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Sub Segment',
+                width:'100%',
+                allowClear:true
+            });
+
             $('#search_business_category').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select Business Category',
@@ -514,6 +572,8 @@
                             head.push('Tracking No.');
                             head.push('Account No.');
                             head.push('Shipper');
+                            head.push('Segment');
+                            head.push('Sub Segment');
                             head.push('Sales Person');
                             head.push('Actual Weight');
                             head.push('Arrival Date');
@@ -523,7 +583,7 @@
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Fuel Surcharge');
-                            head.push('GST');
+                            head.push('Collection Amount');
                             head.push('Total Charges');
 
                             $.each(result.data, function(index, values) {
@@ -533,6 +593,8 @@
                                 row.push(values.tracking_number);
                                 row.push(values.account_no);
                                 row.push(values.shipper);
+                                row.push(values.segment_name);
+                                row.push(values.sub_segment_name);
                                 row.push(values.sales_person);
                                 row.push(values.actual_weight);
                                 row.push(values.arrival_date);
@@ -542,7 +604,9 @@
                                 row.push(values.origin_city_name);
                                 row.push(values.destination_city_name);
                                 row.push(values.fuel_surcharge);
-                                row.push(values.p_gst);
+                                // row.push(values.p_gst);
+                                row.push(values.collection_amount);
+
                                 row.push(values.p_total_charges);
 
                                 body.push(row);
@@ -595,6 +659,8 @@
                         d.arrival_time_from= $('input[name="arrival_time_from"]').val();
                         d.arrival_time_to= $('input[name="arrival_time_to"]').val();
                         d.search_shipping_mode = $('#search_shipping_mode').val();
+                        d.search_segment_id = $('#search_segment_id').val();
+                        d.search_sub_segment_id = $('#search_sub_segment_id').val();
                         d.search_date_from_delivered_return = $('input[name="search_date_from_delivered_return_formatted"]').val();
                         d.search_date_to_delivered_return = $('input[name="search_date_to_delivered_return_formatted"]').val();
                     }
@@ -605,6 +671,8 @@
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number_link'},
                     { data:'account_no' ,name: 'u.id', class: 'align-middle account_no'},
                     { data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},
+                    { data:'segment_name' ,name: 'sg.name', class: 'align-middle segment_name'},
+                    { data:'sub_segment_name' ,name: 'scs.name', class: 'align-middle sub_segment_name'},
                     { data: 'sales_person' ,name: 'adsp.name', class: 'align-middle sales_person'},
                     { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle actual_weight'},
                     { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle arrival_date'},
@@ -614,7 +682,8 @@
                     { data:'origin_city_name' ,name: 'oc.name', class: 'align-middle origin_city_name'},
                     { data:'destination_city_name' ,name: 'dc.name', class: 'align-middle destination_city_name'},
                     { data:'fuel_surcharge' ,name: 'shipments.fuel_surcharge', class: 'align-middle fuel_surcharge'},
-                    { data:'p_gst' ,name: 'pps.p_gst', class: 'align-middle p_gst',sortable:false},
+                    // { data:'p_gst' ,name: 'pps.p_gst', class: 'align-middle p_gst',sortable:false},
+                    { data:'collection_amount' ,name: 'shipments.amount', class: 'align-middle collection_amount'},
                     { data:'p_total_charges' ,name: 'pps.charges', class: 'align-middle total_charges'},
                 ],
                 rowCallback: function(row, data, index) {

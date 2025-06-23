@@ -233,7 +233,7 @@
                                     </div>
                                     <div class="col-8" id="claim_product_cost_div">
                                         <fieldset class="form-group">
-                                            <input class="form-control" name="claim_product_cost" id="claim_product_cost" value="" placeholder="Enter Product Cost">
+                                            <input class="form-control" name="claim_product_cost" id="claim_product_cost" value="" placeholder="Enter Claim Amount">
                                         </fieldset>
                                     </div>
                                     <div class="col-8 text-left" id="claim_product_picture_div">
@@ -763,70 +763,165 @@
                         }
                         if(nature_flag){
                             $('#AddNewRequest').attr('disabled',true);
-                            $.ajax({
-                                url: '{!! route('admin.crm.request.add') !!}',
-                                method: 'POST',
-                                data: {
-                                    '_token': '{{ csrf_token() }}',
-                                    'shipment_id': shipment_id,
-                                    'case_nature_id' : case_nature_id,
-                                    'complaint_id' : case_nature_complaint_id,
-                                    'channel_id': case_nature_channel_id,
-                                    'description' : service_description,
-                                    'complainant_phone' : $('#complainant_phone').val(),
-                                    'case_nature_complainant' : $('#case_nature_complainant').val(),
-                                }
-                            })
-                                .done(function(data) {
-                                    if (data.status) {
-                                        if(data.flag){
-                                            var html = '';
+                            if(case_nature_complaint_id == 39) {
+                                swal({
+                                    title: 'Are you sure to change service type?',
+                                    text: 'Select Yes to change service type!',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function (confirm){
+                                    if(confirm){
+                                        $.ajax({
+                                            url: '{!! route('admin.crm.request.add') !!}',
+                                            method: 'POST',
+                                            data: {
+                                                '_token': '{{ csrf_token() }}',
+                                                'shipment_id': shipment_id,
+                                                'case_nature_id' : case_nature_id,
+                                                'complaint_id' : case_nature_complaint_id,
+                                                'channel_id': case_nature_channel_id,
+                                                'description' : service_description,
+                                                'complainant_phone' : $('#complainant_phone').val(),
+                                                'case_nature_complainant' : $('#case_nature_complainant').val(),
+                                            }
+                                        })
+                                            .done(function(data) {
+                                                if (data.status) {
+                                                    if(data.flag){
+                                                        var html = '';
 
-                                            $.each(data.already_existed_shipments, function(index, tracking_number) {
-                                                html += tracking_number + '<br/>';
+                                                        $.each(data.already_existed_shipments, function(index, tracking_number) {
+                                                            html += tracking_number + '<br/>';
+                                                        });
+
+                                                        if (!data.cannot_change) {
+                                                            html += '<br/>Request/Complaint already lodged for the above Shipment(s)!';
+                                                        }
+                                                        else {
+                                                            html += '<br/>Request for Change cannot be opened for the above Shipment(s) at the Current Status!';
+                                                        }
+
+                                                        content = document.createElement('div');
+                                                        content.innerHTML = html;
+
+                                                        swal({
+                                                            title: 'Request / Complaint Cannot Be Lodged!',
+                                                            content: content,
+                                                            icon: 'warning',
+                                                            buttons: {
+                                                                cancel: {
+                                                                    text: 'Close',
+                                                                    value: null,
+                                                                    visible: true,
+                                                                    closeModal: true,
+                                                                },
+                                                            },
+                                                            closeOnClickOutside: false,
+                                                            closeOnEsc: false,
+                                                            dangerMode: true
+                                                        });
+                                                    }else{
+                                                        toastr.success(data.success, 'Success!', {
+                                                            positionClass: 'toast-bottom-center',
+                                                            containerId: 'toast-bottom-center'
+                                                        });
+                                                    }
+                                                    // toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                                }
+                                                else {
+                                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                                }
+
+                                                $('#AddRequestModal').modal('hide');
+                                                $('#AddNewRequest').attr('disabled',false);
                                             });
+                                    }else{
+                                        $('#AddNewRequest').attr('disabled',false);
+                                    }
+                                });
+                            }
+                            else {
+                                $.ajax({
+                                    url: '{!! route('admin.crm.request.add') !!}',
+                                    method: 'POST',
+                                    data: {
+                                        '_token': '{{ csrf_token() }}',
+                                        'shipment_id': shipment_id,
+                                        'case_nature_id' : case_nature_id,
+                                        'complaint_id' : case_nature_complaint_id,
+                                        'channel_id': case_nature_channel_id,
+                                        'description' : service_description,
+                                        'complainant_phone' : $('#complainant_phone').val(),
+                                        'case_nature_complainant' : $('#case_nature_complainant').val(),
+                                    }
+                                })
+                                    .done(function(data) {
+                                        if (data.status) {
+                                            if(data.flag){
+                                                var html = '';
 
-                                            if (!data.cannot_change) {
-                                            html += '<br/>Request/Complaint already lodged for the above Shipment(s)!';
+                                                $.each(data.already_existed_shipments, function(index, tracking_number) {
+                                                    html += tracking_number + '<br/>';
+                                                });
+
+                                                if (!data.cannot_change) {
+                                                    html += '<br/>Request/Complaint already lodged for the above Shipment(s)!';
+                                                }
+                                                else {
+                                                    html += '<br/>Request for Change cannot be opened for the above Shipment(s) at the Current Status!';
+                                                }
+
+                                                content = document.createElement('div');
+                                                content.innerHTML = html;
+
+                                                swal({
+                                                    title: 'Request / Complaint Cannot Be Lodged!',
+                                                    content: content,
+                                                    icon: 'warning',
+                                                    buttons: {
+                                                        cancel: {
+                                                            text: 'Close',
+                                                            value: null,
+                                                            visible: true,
+                                                            closeModal: true,
+                                                        },
+                                                    },
+                                                    closeOnClickOutside: false,
+                                                    closeOnEsc: false,
+                                                    dangerMode: true
+                                                });
+                                            }else{
+                                                toastr.success(data.success, 'Success!', {
+                                                    positionClass: 'toast-bottom-center',
+                                                    containerId: 'toast-bottom-center'
+                                                });
+                                            }
+                                            // toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                         }
                                         else {
-                                            html += '<br/>Request for Change cannot be opened for the above Shipment(s) at the Current Status!';
+                                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                         }
 
-                                            content = document.createElement('div');
-                                            content.innerHTML = html;
-
-                                            swal({
-                                                title: 'Request / Complaint Cannot Be Lodged!',
-                                                content: content,
-                                                icon: 'warning',
-                                                buttons: {
-                                                    cancel: {
-                                                        text: 'Close',
-                                                        value: null,
-                                                        visible: true,
-                                                        closeModal: true,
-                                                    },
-                                                },
-                                                closeOnClickOutside: false,
-                                                closeOnEsc: false,
-                                                dangerMode: true
-                                            });
-                                        }else{
-                                            toastr.success(data.success, 'Success!', {
-                                                positionClass: 'toast-bottom-center',
-                                                containerId: 'toast-bottom-center'
-                                            });
-                                        }
-                                        // toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                    }
-                                    else {
-                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                    }
-
-                                    $('#AddRequestModal').modal('hide');
-                                    $('#AddNewRequest').attr('disabled',false);
-                                });
+                                        $('#AddRequestModal').modal('hide');
+                                        $('#AddNewRequest').attr('disabled',false);
+                                    });
+                            }
                         }
                     }else if(case_nature_id == 3) {
                         var feedback_flag = true;
@@ -917,7 +1012,7 @@
                         var nature_flag = true;
                         var case_nature_claim_id = $('#case_nature_claim').val();
                         var case_nature_channel_id = $('#claim_channel').val();
-                        var product_cost = $('#claim_product_cost').val();
+                        var product_cost = parseFloat($('#claim_product_cost').inputmask('unmaskedvalue'));
                         var check_product_picture = $('#product_picture').val();
                         var check_invoice_picture = $('#invoice_picture').val();
                         $('#shipment_ids').val(shipment_id);
@@ -948,7 +1043,7 @@
                             }
                             if(!product_cost){
                                 nature_flag = false;
-                                var error = "Please enter Product Cost!";
+                                var error = isNaN(product_cost) ? "Please enter Claim Amount!" : "Claim Amount cannot be zero !!";
                                 toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             }
                             if(!check_invoice_picture){

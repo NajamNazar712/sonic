@@ -1714,7 +1714,7 @@ class GlobalSettingsController extends Controller
             ->orderBy('crm_request_case_nature_types.id', 'desc');
         $datatable = Datatables::of($case_nature_types)
             ->editColumn('status', function ($case_nature_types) {
-                if ($case_nature_types->status == 1) {
+                if ($case_nature_types?->status == 1) {
                     return 'Enable';
                 } else {
                     return 'Disable';
@@ -1867,7 +1867,7 @@ class GlobalSettingsController extends Controller
             }
         }
         $case_nature_types = CrmRequestCaseNatureType::where('type', $type);
-        if ($case_nature_types->exists()) {
+        if ($case_nature_types?->exists()) {
             // return response()->json(['status' => 0, 'error' => 'Same Case Nature Type already exists!']);
             return redirect()->back()->with('error', 'Same Case Nature Type already exists!');
         } else {
@@ -5651,7 +5651,7 @@ class GlobalSettingsController extends Controller
         return view('admin.settings.CRM.auto_assigning')->with(['agents' => $agents, 'settings' => $settings]);
     }
 
-    public function crm_auto_assigning_list()
+    public function crm_auto_assigning_list(Request $request)
     {
         $roles = CrmAgentAutoAssign::with('origin_zones.zones','origin_hubs.hubs','origin_areas.city_area','zones.zones', 'hubs.hubs', 'case_natures', 'case_nature_types', 'business_types', 'sub_business_types', 'shipper_keys', 'shipper_non_keys', 'shipment_statuses')
             ->join('admins as ad', 'ad.id', '=', 'crm_agent_auto_assigns.agent_id')
@@ -5663,6 +5663,14 @@ class GlobalSettingsController extends Controller
                 'ad.name as agent_name',
             ]);
 
+
+       $enable_disable = $request->input('enable_disable');
+
+        if ($enable_disable == '1' || is_null($enable_disable)) {
+            $roles->where('crm_agent_auto_assigns.status', 1);
+        } else {
+            $roles->where('crm_agent_auto_assigns.status', 0);
+        }
 
         $datatables = Datatables::of($roles)
             ->addColumn('action', function ($roles) {
@@ -5696,9 +5704,9 @@ class GlobalSettingsController extends Controller
                 $counter = 0;
                 foreach ($roles->origin_zones as $value) {
                     if ($counter < 3) {
-                        $zone .= "<li>" . $value->zones->name . "</li>";
+                        $zone .= "<li>" . $value->zones?->name  . "</li>";
                     } else {
-                        $zone .= "<li class='hidden-text' style='display:none;'>" . $value->zones->name . "</li>";
+                        $zone .= "<li class='hidden-text' style='display:none;'>" . $value->zones?->name . "</li>";
                     }
                     $counter++;
                 }
@@ -5712,9 +5720,9 @@ class GlobalSettingsController extends Controller
                 $counter = 0;
                 foreach ($roles->origin_hubs as $value) {
                     if ($counter < 3) {
-                        $hub .= "<li>" . $value->hubs->name . "</li>";
+                        $hub .= "<li>" . $value->hubs?->name  . "</li>";
                     } else {
-                        $hub .= "<li class='hidden-text' style='display:none;'>" . $value->hubs->name . "</li>";
+                        $hub .= "<li class='hidden-text' style='display:none;'>" . $value->hubs?->name . "</li>";
                     }
                     $counter++;
                 }
@@ -5728,9 +5736,9 @@ class GlobalSettingsController extends Controller
                 $counter = 0;
                 foreach ($roles->origin_areas as $value) {
                     if ($counter < 3) {
-                        $hub .= "<li>" . $value->city_area->name . "</li>";
+                        $hub .= "<li>" . $value->city_area?->name . "</li>";
                     } else {
-                        $hub .= "<li class='hidden-text' style='display:none;'>" . $value->city_area->name . "</li>";
+                        $hub .= "<li class='hidden-text' style='display:none;'>" . $value->city_area?->name . "</li>";
                     }
                     $counter++;
                 }
@@ -5744,9 +5752,9 @@ class GlobalSettingsController extends Controller
                 $counter = 0;
                 foreach ($roles->zones as $value) {
                     if ($counter < 3) {
-                        $zone .= "<li>" . $value->zones->name . "</li>";
+                        $zone .= "<li>" . $value->zones?->name . "</li>";
                     } else {
-                        $zone .= "<li class='hidden-text' style='display:none;'>" . $value->zones->name . "</li>";
+                        $zone .= "<li class='hidden-text' style='display:none;'>" . $value->zones?->name . "</li>";
                     }
                     $counter++;
                 }
@@ -5760,9 +5768,9 @@ class GlobalSettingsController extends Controller
                 $counter = 0;
                 foreach ($roles->hubs as $value) {
                     if ($counter < 3) {
-                        $hub .= "<li>" . $value->hubs->name . "</li>";
+                        $hub .= "<li>" . $value->hubs?->name . "</li>";
                     } else {
-                        $hub .= "<li class='hidden-text' style='display:none;'>" . $value->hubs->name . "</li>";
+                        $hub .= "<li class='hidden-text' style='display:none;'>" . $value->hubs?->name . "</li>";
                     }
                     $counter++;
                 }
@@ -5776,9 +5784,9 @@ class GlobalSettingsController extends Controller
                 $counter = 0;
                 foreach ($roles->case_natures as $value) {
                     if ($counter < 3) {
-                        $case_natures .= "<li>" . $value->case_natures->name . "</li>";
+                        $case_natures .= "<li>" . $value->case_natures?->name . "</li>";
                     } else {
-                        $case_natures .= "<li class='hidden-text' style='display:none;'>" . $value->case_natures->name . "</li>";
+                        $case_natures .= "<li class='hidden-text' style='display:none;'>" . $value->case_natures?->name . "</li>";
                     }
                     $counter++;
                 }
@@ -5792,9 +5800,9 @@ class GlobalSettingsController extends Controller
                 $counter = 0; // Initialize counter
                 foreach ($roles->case_nature_types as $value) {
                     if ($counter < 3) { // Show only the first 3 items
-                        $case_natures_type .= "<li>" . $value->case_nature_types->type . "</li>";
+                        $case_natures_type .= "<li>" . $value->case_nature_types?->type . "</li>";
                     } else {
-                        $case_natures_type .= "<li class='hidden-text' style='display:none;'>" . $value->case_nature_types->type . "</li>";
+                        $case_natures_type .= "<li class='hidden-text' style='display:none;'>" . $value->case_nature_types?->type . "</li>";
                     }
                     $counter++;
                 }
@@ -5808,9 +5816,9 @@ class GlobalSettingsController extends Controller
                 $counter = 0;
                 foreach ($roles->business_types as $value) {
                     if ($counter < 3) {
-                        $business_segment .= "<li>" . $value->business_types->name . "</li>";
+                        $business_segment .= "<li>" . $value->business_types?->name . "</li>";
                     } else {
-                        $business_segment .= "<li class='hidden-text' style='display:none;'>" . $value->business_types->name . "</li>";
+                        $business_segment .= "<li class='hidden-text' style='display:none;'>" . $value->business_types?->name . "</li>";
                     }
                     $counter++;
                 }
@@ -5824,9 +5832,9 @@ class GlobalSettingsController extends Controller
                 $counter = 0;
                 foreach ($roles->sub_business_types as $value) {
                     if ($counter < 3) {
-                        $sub_business_types .= "<li>" . $value->sub_business_types->name . "</li>";
+                        $sub_business_types .= "<li>" . $value->sub_business_types?->name . "</li>";
                     } else {
-                        $sub_business_types .= "<li class='hidden-text' style='display:none;'>" . $value->sub_business_types->name . "</li>";
+                        $sub_business_types .= "<li class='hidden-text' style='display:none;'>" . $value->sub_business_types?->name . "</li>";
                     }
                     $counter++;
                 }
@@ -5840,9 +5848,9 @@ class GlobalSettingsController extends Controller
                 $counter = 0;
                 foreach ($roles->shipper_keys as $value) {
                     if ($counter < 3) {
-                        $shipper_key .= "<li>" . $value->shipper_keys->name . "</li>";
+                        $shipper_key .= "<li>" . $value->shipper_keys?->name . "</li>";
                     } else {
-                        $shipper_key .= "<li class='hidden-text' style='display:none;'>" . $value->shipper_keys->name . "</li>";
+                        $shipper_key .= "<li class='hidden-text' style='display:none;'>" . $value->shipper_keys?->name . "</li>";
                     }
                     $counter++;
                 }
@@ -5856,9 +5864,9 @@ class GlobalSettingsController extends Controller
                 $counter = 0;
                 foreach ($roles->shipper_non_keys as $value) {
                     if ($counter < 3) {
-                        $shipper_non_key .= "<li>" . $value->shipper_non_keys->name . "</li>";
+                        $shipper_non_key .= "<li>" . $value->shipper_non_keys?->name . "</li>";
                     } else {
-                        $shipper_non_key .= "<li class='hidden-text' style='display:none;'>" . $value->shipper_non_keys->name . "</li>";
+                        $shipper_non_key .= "<li class='hidden-text' style='display:none;'>" . $value->shipper_non_keys?->name . "</li>";
                     }
                     $counter++;
                 }
@@ -5872,9 +5880,9 @@ class GlobalSettingsController extends Controller
                 $counter = 0; // Initialize counter
                 foreach ($roles->shipment_statuses as $value) {
                     if ($counter < 3) { // Show only the first 3 statuses
-                        $shipment_statuses .= "<li>" . $value->shipment_statuses->name . "</li>";
+                        $shipment_statuses .= "<li>" . $value->shipment_statuses?->name . "</li>";
                     } else {
-                        $shipment_statuses .= "<li class='hidden-text' style='display:none;'>" . $value->shipment_statuses->name . "</li>";
+                        $shipment_statuses .= "<li class='hidden-text' style='display:none;'>" . $value->shipment_statuses?->name . "</li>";
                     }
                     $counter++;
                 }
@@ -5903,7 +5911,6 @@ class GlobalSettingsController extends Controller
                 'shipper_non_key',
                 'shipment_status',
                 'action']);
-
 
         return $datatables->make(true);
     }
@@ -5935,7 +5942,11 @@ class GlobalSettingsController extends Controller
             $shipper_non_key=[];
 
             if(in_array($selected_agent->role_id ,[43,67,75,115])){
-                $shipper_key = SaleTierTag::join('users as u', 'u.id', 'sale_tier_tags.user_id')->WhereNotNull('kam')->select('u.id', 'u.name')->get();
+                $shipper_key = SaleTierTag::join('users as u', 'u.id', 'sale_tier_tags.user_id')
+                    ->WhereNotNull('kam')
+                    ->where('kam', '=', $id)
+                    ->where('u.status', '=', 3)
+                    ->select('u.id', 'u.name')->get();
             }
             else if(in_array($selected_agent->role_id ,[37, 28])){
                 // $shipper_non_key = SaleTierTag::join('users as u', 'u.id', 'sale_tier_tags.user_id')->WhereNull('kam')->select('u.id', 'u.name')->get();
@@ -5966,10 +5977,10 @@ class GlobalSettingsController extends Controller
 //            $origin_ids = $selected_agent->origin_hubs->pluck('origin_hub_id')->toArray();
 //            $origin_areas = CityArea::whereIn('city_id',$origin_ids)->get();
 
-            $cn = $selected_agent->case_natures->pluck('case_nature_id')->toArray();
+            $cn = $selected_agent->case_natures?->pluck('case_nature_id')->toArray();
             $case_nature_types = CrmRequestCaseNatureType::whereIn('nature_id', $cn)->get();
 
-            $bsi = $selected_agent->business_types->pluck('business_segment_id')->toArray();
+            $bsi = $selected_agent->business_types?->pluck('business_segment_id')->toArray();
             $sub_segment = SubCategorySegment::whereIn('segment_id', $bsi)->select('id', 'name')->orderby('name', 'asc')->get();
 
             return view('admin.settings.CRM.edit_auto_assign')->with(['selected_agent' => $selected_agent, 'agents' => $agents,'zones' => $zones, 'case_natures' => $case_natures, 'segments' => $segments, 'sub_segment' => $sub_segment, 'shipper_key' => $shipper_key, 'shipper_non_key' => $shipper_non_key, 'shipment_status' => $shipment_status, 'hubs' => $hubs, 'case_nature_types' => $case_nature_types]);
@@ -9768,9 +9779,12 @@ class GlobalSettingsController extends Controller
         $origins = City::select('id','name')->where('status',1)->get();
         return view('admin.settings.CRM.add_auto_assign')->with(['origins'=>$origins,'agents' => $agents, 'zones' => $zones, 'case_natures' => $case_natures, 'segments' => $segments, 'shipment_status' => $shipment_status]);
     }
-    public function get_shipper_key() {
-        $shipper_keys = SaleTierTag::join('users as u', 'u.id', 'sale_tier_tags.user_id')->WhereNotNull('kam')->select('u.id', 'u.name')->get();
-        if($shipper_keys){
+    public function get_shipper_key($agent_id) {
+        $shipper_keys = SaleTierTag::join('users as u', 'u.id', 'sale_tier_tags.user_id')
+            ->where('u.status',3)
+            ->WhereNotNull('kam')
+            ->where('kam',$agent_id)->select('u.id', 'u.name')->get();
+        if($shipper_keys?->isNotEmpty()){
             return response()->json(['status' => 1, 'shipper_keys' => $shipper_keys]);
         }else {
             return response()->json(['status' => 0, 'error' => 'No data Found']);
@@ -10576,21 +10590,33 @@ class GlobalSettingsController extends Controller
     
     public function wallet_shippers_add(Request $request)
     {
-        $shipper_id = $request->wallet_shipper_id;
-       
-        if (!empty($shipper_id)) {
-            $shipper_exist = WalletShipperSetting::where('user_id', $shipper_id);
-            if ($shipper_exist->exists()) {
-                return redirect()->back()->with('error', 'Already Exist !');
-            } else {
-                $new_shipper = new WalletShipperSetting();
-                $new_shipper->user_id = $shipper_id;
-                $new_shipper->add_by = Auth::id();
-                $new_shipper->save();
-
-                return redirect()->back()->with('success', 'Updated!');
+        // dd($request->wallet_shipper_id);
+        $shipper_ids = (array) $request->wallet_shipper_id; 
+        $already_existing_ids = [];
+        $bulkData = [];
+        if (!empty($shipper_ids)) {
+            foreach ($shipper_ids as $id) {
+                $exists = WalletShipperSetting::where('user_id', $id)->exists();
+        
+                if ($exists) {
+                    $already_existing_ids[] = $id;
+                } else {
+                    $bulkData[] = [
+                        'user_id' => $id, 
+                        'add_by' => Auth::id(),
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                }
             }
-        } else {
+            WalletShipperSetting::insert($bulkData);        
+            if (!empty($already_existing_ids)) {
+                return redirect()->back()->with('error', 'Already exists for IDs: ' . implode(', ', $already_existing_ids));
+            } else {
+                return redirect()->back()->with('success', 'All Shippers Added Successfully!');
+            }
+        }
+         else {
             return redirect()->back()->with('error', 'Shipper Required !');
         }
     }
@@ -10644,4 +10670,92 @@ class GlobalSettingsController extends Controller
         );
         return redirect()->back()->with('success', 'Zone & Margin Column Added!');
     }
+
+    public function email_delivery_time_index() {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 824);
+    
+        $settings = GlobalSettings::whereIn('type', [
+            'pending_deliveries_report_time', 
+            'quality_of_service_report_time',
+            'quality_of_service_report_other_time',
+            'receive_deliveries_report_time',
+            'receive_return_deliveries_report_time',
+            'delivery_note_history_report_time',
+            'weight_qc_report_time',
+            'overall_sales_report_time'
+        ])->get()->keyBy('type');
+    
+        $pending_deliveries_report_time = $settings['pending_deliveries_report_time']->text ?? null;
+        $quality_of_service_report_time = $settings['quality_of_service_report_time']->text ?? null;
+        $quality_of_service_report_other_time = $settings['quality_of_service_report_other_time']->text ?? null;
+        $receive_deliveries_report_time = $settings['receive_deliveries_report_time']->text ?? null;
+        $receive_return_deliveries_report_time = $settings['receive_return_deliveries_report_time']->text ?? null;
+        $delivery_note_history_report_time = $settings['delivery_note_history_report_time']->text ?? null;
+        $weight_qc_report_time = $settings['weight_qc_report_time']->text ?? null;
+        $overall_sales_report_time = $settings['overall_sales_report_time']->text ?? null;
+    
+        $pending_deliveries_report_toggle = $settings['pending_deliveries_report_time']->setting_value ?? 0;
+        $quality_of_service_report_toggle = $settings['quality_of_service_report_time']->setting_value ?? 0;
+        $receive_deliveries_toggle = $settings['receive_deliveries_report_time']->setting_value ?? 0;
+        $receive_return_deliveries_report_toggle = $settings['receive_return_deliveries_report_time']->setting_value ?? 0;
+        $delivery_note_history_report_toggle = $settings['delivery_note_history_report_time']->setting_value ?? 0;
+        $weight_qc_report_toggle = $settings['weight_qc_report_time']->setting_value ?? 0;
+        $overall_sales_report_toggle = $settings['overall_sales_report_time']->setting_value ?? 0;
+    
+        return view('admin.settings.email_setting.index', compact(
+            'pending_deliveries_report_time', 
+            'quality_of_service_report_time', 
+            'quality_of_service_report_other_time',
+            'receive_deliveries_report_time',
+            'receive_return_deliveries_report_time',
+            'delivery_note_history_report_time',
+            'weight_qc_report_time',
+            'overall_sales_report_time',
+            'pending_deliveries_report_toggle', 
+            'quality_of_service_report_toggle',
+            'receive_deliveries_toggle',
+            'receive_return_deliveries_report_toggle',
+            'delivery_note_history_report_toggle',
+            'weight_qc_report_toggle',
+            'overall_sales_report_toggle'
+        ));
+    }
+
+    public function email_delivery_time_update(Request $request) {
+        $settings = [
+            'pending_deliveries_report_time' => $request->pending_deliveries_report_time,
+            'quality_of_service_report_time' => $request->quality_of_service_report_time,
+            'quality_of_service_report_other_time' => $request->quality_of_service_report_other_time,
+            'receive_deliveries_report_time' => $request->receive_deliveries_report_time,
+            'receive_return_deliveries_report_time' => $request->receive_return_deliveries_report_time,
+            'delivery_note_history_report_time' => $request->delivery_note_history_report_time,
+            'weight_qc_report_time' => $request->weight_qc_report_time,
+            'overall_sales_report_time' => $request->overall_sales_report_time,
+        ];
+    
+        $toggles = [
+            'pending_deliveries_report_time' => $request->pending_deliveries_report_toggle == 'on' ? 1 : 0,
+            'quality_of_service_report_time' => $request->quality_of_service_toggle == 'on' ? 1 : 0, // Used for both times
+            'quality_of_service_report_other_time' => $request->quality_of_service_toggle == 'on' ? 1 : 0, // Ensure same toggle
+            'receive_deliveries_report_time' => $request->receive_delivieries_toggle == 'on' ? 1 : 0,
+            'receive_return_deliveries_report_time' => $request->receive_return_deliveries_toggle == 'on' ? 1 : 0,
+            'delivery_note_history_report_time' => $request->delivery_note_history_toggle == 'on' ? 1 : 0,
+            'weight_qc_report_time' => $request->weight_qc_toggle == 'on' ? 1 : 0,
+            'overall_sales_report_time' => $request->overall_sales_toggle == 'on' ? 1 : 0,
+        ];
+    
+        foreach ($settings as $type => $text) {
+            if (!empty($text)) {
+                GlobalSettings::updateOrCreate(
+                    ['type' => $type], 
+                    ['text' => $text, 'setting_value' => $toggles[$type]]
+                );
+            } else {
+                GlobalSettings::where('type', $type)->update(['setting_value' => $toggles[$type]]);
+            }
+        }
+    
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+    
 }

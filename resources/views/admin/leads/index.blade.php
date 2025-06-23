@@ -274,6 +274,9 @@
                         <th class="border-primary border-darken-1">Updated By</th>
                         <th class="border-primary border-darken-1">Updated AT</th>
                         <th class="border-primary border-darken-1">Requested Resource</th>
+                        <th class="border-primary border-darken-1">Lead Account Progress</th>
+                        <th class="border-primary border-darken-1">Pending Account Status</th>
+                        <th class="border-primary border-darken-1">Lead Active Account Link</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
@@ -803,6 +806,16 @@
         </div>
     </div>
 
+    {{-- 
+                       @if (session('role_id') == 1 || in_array(769, session('permissions')))
+                    {
+                        text: '<i class="la la-plus"></i> Add Lead',
+                        className: 'btn btn-primary add_lead',
+                        enabled: true,
+                        action: function (e, dt, node, config) {
+                            $('#add_lead_modal').modal('show');
+                        }
+                    }, --}}
 
 @endsection
 
@@ -1096,6 +1109,9 @@
                             head.push('Updated By');
                             head.push('Updated At');
                             head.push('Requested Resource');
+                            head.push('Lead Account Progress');
+                            head.push('Pending Account Status');
+                            head.push('Lead Active Account Link');
 
                             $.each(result.data, function (index, values) {
                                 row = [];
@@ -1129,6 +1145,10 @@
                                 row.push(values.updated_by);
                                 row.push(values.updated_at);
                                 row.push(values.via_channel);
+                                row.push(values.lead_progress);
+                                row.push(values.user_status);
+                                row.push(values.lead_account_link);
+
                                 body.push(row);
                             });
                         },
@@ -1144,16 +1164,7 @@
                 scrollX: true, scrollY: '500px',
                 buttons: [
 
-                        @if (session('role_id') == 1 || in_array(769, session('permissions')))
-                    {
-                        text: '<i class="la la-plus"></i> Add Lead',
-                        className: 'btn btn-primary add_lead',
-                        enabled: true,
-                        action: function (e, dt, node, config) {
-                            $('#add_lead_modal').modal('show');
-                        }
-                    },
-                        @endif
+     
                         @if (session('role_id') == 1 || in_array(678, session('permissions')))
                     {
                         text: 'Bulk Update Status',
@@ -1309,6 +1320,9 @@
                     {data: 'updated_by', name: 'ub.name', class: 'align-middle updated_by'},
                     {data: 'updated', name: 'leads.updated_at', class: 'align-middle updated'},
                     {data: 'via_channel', name: 'leads.via_channel', class: 'align-middle via_channel'},
+                    {data: 'lead_progress', name: 'lead_progress', class: 'align-middle lead_progress', orderable: false, searchable: false},
+                    {data: 'user_status', name: 'user_status', class: 'align-middle user_status'},
+                    {data: 'lead_account_link', name: 'lead_account_link', class: 'align-middle lead_account_link', orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
                 ],
                 rowCallback: function (row, data, index) {
@@ -1332,12 +1346,22 @@
                         '<option value="Sonic">Sonic</option>' +
                         '<option value="Website">Website</option>' +
                         '</select>';
+                    var drop_select = '<select name="status_select_user" id="status_select_user" class="select2 form-control">' +
+                        '<option value="0">Request Received</option>' +
+                        '<option value="1">Rates Added</option>' +
+                        '<option value="2">Pending For Activation</option>' +
+                        '<option value="5">Rates Rejected</option>' +
+                        '</select>';
+                    var lead_account_status = '<select name="lead_account_status" id="lead_account_status" class="select2 form-control">' + 
+                    '<option value="1">Active</option>' +
+                    '<option value="0">Not Activated</option>' +
+                    '</select>';
 
                     this.api().columns().every(function (column_id) {
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.aging') || $(header).is('.reason_id') || $(header).is('.sale_person_tagged_aging')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.aging') || $(header).is('.reason_id') || $(header).is('.sale_person_tagged_aging') || $(header).is('.lead_progress') || $(header).is('.lead_account_link')) {
                             $(td).appendTo($(search) || $(header).is('.serial_number'));
                         } else if ($(header).is('.status')) {
                             $(status_select).appendTo($(search))
@@ -1354,6 +1378,18 @@
                                 .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 }).wrap(td);
+                        }
+                        else if($(header).is('.user_status')){
+                            $(drop_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
+                        else if($(header).is('.lead_account_status')){
+                            $(lead_account_status).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
                         }
                          else {
                             var current = $(input).appendTo($(search)).on('change', function () {
@@ -1383,14 +1419,16 @@
                         placeholder: "Select Status",
                         width: '100%',
                         containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
+                        dropdownCssClass: 'form-control-sm p-0',
+                        allowClear: true
                     });
                     $("#service_select").prepend('<option value="" selected></option>').select2({
                         data: data2,
                         placeholder: "Select Status",
                         width: '100%',
                         containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
+                        dropdownCssClass: 'form-control-sm p-0',
+                        allowClear: true
                     });
 
                     $("#requested_via_select").prepend('<option selected></option>').select2({
@@ -1398,7 +1436,24 @@
                         placeholder: "Select Requested Resource",
                         width: '100%',
                         containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
+                        dropdownCssClass: 'form-control-sm p-0',
+                        allowClear: true
+
+                    });
+                    $("#status_select_user").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Status",
+                        width: '100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0',
+                        allowClear: true
+                    });
+
+                    $("#lead_account_status").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Lead Account Status",
+                        width: '100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0',
+                        allowClear: true
                     });
                     this.api().table().columns.adjust();
                 }
@@ -2619,7 +2674,42 @@
                     });
                 }
             });
+           
+            $(document).on('click', '.mail_trigger', function() {
+                let lead_id = $(this).data('lead_id');
+                let email = $(this).data('email');
 
+                $.ajax({
+                    url: '{{ route('admin.leads.send_mail') }}',
+                    method: 'GET',
+                    data: {
+                        lead_id: lead_id,
+                        email: email,
+                        _token: $('meta[name="csrf-token"]').attr('content')
+                    },
+                    beforeSend: function() {
+                        swal("Sending...", "Please wait while the email is being sent.", "info");
+                    },
+                    success: function(response) {
+                        setTimeout(function() {
+                            if (response.status === 'success') {
+                                swal("Success!", response.message, "success");
+                                table.draw(true);
+                            } else {
+                                swal("Info", response.message, "info");
+                            }
+                        }, 2000);
+                    },
+                    error: function(xhr) {
+                        const res = xhr.responseJSON;
+                        if (res && res.message) {
+                            swal("Error", res.message, "error");
+                        } else {
+                            swal("Oops!", "Something went wrong while sending the mail.", "error");
+                        }
+                    }
+                });
+            });
         });
 
     </script>

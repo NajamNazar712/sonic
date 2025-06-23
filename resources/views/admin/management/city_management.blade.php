@@ -25,6 +25,7 @@
                                     <th class="border-primary border-darken-1" >Hub Code</th>
                                     <th class="border-primary border-darken-1" >Iata Code</th>
                                     <th class="border-primary border-darken-1" >Zone</th>
+                                    <th class="border-primary border-darken-1" >Province</th>
                                     <th class="border-primary border-darken-1" >Businees Category</th>
                                     <th class="border-primary border-darken-1" >GC Area</th>
                                     <th class="border-primary border-darken-1" >Attempt Tat</th>
@@ -38,6 +39,10 @@
                                     <th class="border-primary border-darken-1" >OSA</th>
                                     <th class="border-primary border-darken-1" >Address</th>
                                     <th class="border-primary border-darken-1" >Booking Enable Status</th>
+                                    <th class="border-primary border-darken-1" >Status Logs</th>
+                                    <th class="border-primary border-darken-1" >Booking Enable/Disable Logs</th>
+
+                                    <th class="border-primary border-darken-1" >City Log</th>
                                     <th class="border-primary border-darken-1" ></th>
                                 </tr>
                                 </thead>
@@ -95,6 +100,57 @@
                 </div>
             </div>
         </div>
+
+        <!--Status Log Modal -->
+        <div class="modal fade" id="statusLogModal" tabindex="-1" aria-labelledby="statusLogModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="statusLogModalTitle">Status Change Logs</h5>
+                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                        <th>Sr. No</th>
+                        <th>City Name</th>
+                        <th>Status</th>
+                        <th>Updated At</th>
+                        <th>Updated By</th>
+                        </tr>
+                    </thead>
+                    <tbody id="statusLogTableBody"></tbody>
+                    </table>
+                </div>
+                </div>
+            </div>
+        </div>
+
+
+        {{-- City Logs --}}
+        <!-- View Changes Modal -->
+        <div class="modal fade" id="viewChangesModal" tabindex="-1" aria-labelledby="viewChangesLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><strong>City Changes</strong></h5>
+                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="changedDataContent">
+
+                </div>
+            </div>
+            </div>
+        </div>
+        </div>
+
+        {{-- End --}}
     </section>
 @endsection
 
@@ -163,6 +219,7 @@
                             head.push('Hub Code');
                             head.push('Iata Code');
                             head.push('Zone');
+                            head.push('Province');
                             head.push('Business Category');
                             head.push('GC Area');
                             head.push('Attempt Tat');
@@ -173,6 +230,8 @@
                             head.push('Updated At');
                             head.push('Address');
                             head.push('Booking Enable Status');
+                            head.push('Status Logs');
+                            head.push('Booking Enable/Disable Logs');
 
 
                             $.each(result.data, function(index, values) {
@@ -186,6 +245,7 @@
                                 row.push(values.hub_id);
                                 row.push(values.iata_code);
                                 row.push(values.zone);
+                                row.push(values.province_name);
                                 row.push(values.business_category);
                                 row.push(values.gc_area);
                                 row.push(values.attempt_tat);
@@ -196,6 +256,8 @@
                                 row.push(values.updated);
                                 row.push(values.address);
                                 row.push(values.booking_enable_status);
+                                row.push(values.status_change_logs_count);
+                                row.push(values.booking_status_change_logs_count);
 
                                 body.push(row);
                             });
@@ -278,7 +340,7 @@
                                             type: 'POST',
                                             url: "{!! route('admin.management.enable_booking_status') !!}",
                                             data: {
-                                                userIDS: selected_rows,
+                                                cityIDS: selected_rows,
                                                 '_token': '{{ csrf_token() }}'
                                             },
                                             success: function(res) {
@@ -329,7 +391,7 @@
                                             type: 'POST',
                                             url: "{!! route('admin.management.disable_booking_status') !!}",
                                             data: {
-                                                userIDS: selected_rows,
+                                                cityIDS: selected_rows,
                                                 '_token': '{{ csrf_token() }}'
                                             },
                                             success: function(res) {
@@ -400,6 +462,7 @@
                     {data: 'hub_id', name: 'cities.hub_id', class: 'align-middle hub_id'},
                     {data: 'iata_code', name: 'cities.iata_code', class: 'align-middle iata_code'},
                     {data: 'zone', name: 'z.name', class: 'align-middle zone'},
+                    {data: 'province_name', name: 'provinces.name', class: 'align-middle province_name'},
                     {data: 'business_category', name: 'bc.id', class: 'align-middle business_category'},
                     {data: 'gc_area', name: 'cities.gc_area', class: 'align-middle gc_area'},
                     {data: 'attempt_tat', name: 'cities.attempt_tat', class: 'align-middle attempt_tat'},
@@ -412,7 +475,9 @@
                     {data: 'hub_location', name: 'hub_location', class: 'align-middle hub_location', orderable: false, searchable: false},
                     {data: 'osa_list', name: 'osa_list', class: 'align-middle osa_list', orderable: false, searchable: false},
                     {data: 'address', name: 'cities.address', class: 'align-middle address'},
-                    {data: 'booking_enable_status', name: 'cities.booking_enable_status', class: 'align-middle booking_enable_status'},
+                    {data: 'booking_enable_status', name: 'cities.booking_enable_status', class: 'align-middle booking_enable_status'},                   
+                    {data: 'status_logs', name: 'status_logs', class: 'align-middle status_logs'},
+                    {data: 'booking_enable_disable_logs', name: 'booking_enable_disable_logs', class: 'align-middle booking_enable_disable_logs'},                    {data: 'city_logs', name: 'city_logs', class: 'align-middle city_logs'},
 
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
@@ -790,9 +855,157 @@
                 }
 
             }
-
         });
 
+        $(document).off('click.statusLogs').on('click.statusLogs', '.status_logs, .booking_enable_disable_logs', function (event) {
+            const button = $(event.currentTarget); 
+            const cityId = button.data('id');
+            const type = button.data('type');
+
+            if(cityId && type){
+
+                let baseUrl = @json(route('admin.management.get_city_status_logs', ['cityId' => 'CITY_ID_PLACEHOLDER']));
+                let url = baseUrl.replace('CITY_ID_PLACEHOLDER', cityId) + '?type=' + type;
+
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function (response) {
+                        let rows = '';
+                        response.forEach((log, index) => {
+                            rows += `
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td>${log.city_name}</td>
+                                    <td>${log.new_status ? 'Enabled' : 'Disabled'}</td>
+                                    <td>${log.changed_at}</td>
+                                    <td>${log.updated_by_name}</td>
+                                </tr>
+                            `;
+                        });
+
+                        $('#statusLogModalTitle').text(
+                            type === 'city' ? 'City Enable/Disable Logs' : 'Booking Enable/Disable Logs'
+                        );
+
+                        $('#statusLogTableBody').html(rows);
+                        $('#statusLogModal').modal('show');
+                    },
+                    error: function () {
+                        console.log('error');
+                    }
+                });
+            }
+        });
+    function mapShippingMode(id) {
+        return {
+            1: 'Rush',
+            2: 'Saver Plus',
+            3: 'Swift',
+            4: 'Same Day'
+        }[id] || '-';
+    }
+
+    function mapBookingType(id) {
+        return {
+            1: 'Regular',
+            2: 'Replacement',
+            3: 'Try and Buy',
+            5: 'Reverse Pickup',
+            6: 'FTL'
+        }[id] || '-';
+    }
+
+    function mapWalkInType(id) {
+        return {
+            1: 'Rush',
+            2: 'Saver Plus',
+            3: 'Swift'
+        }[id] || '-';
+    }
+    $(document).on('click', '.city_logs', function () {
+        let cityId = $(this).data('id');
+
+        if (cityId) {
+            $.ajax({
+                url: '/admin/management/city/' + cityId + '/changes',
+                type: 'GET',
+                success: function (response) {
+                    let html = '';
+
+                    if (response.length === 0) {
+                        html = '<p>No changes found.</p>';
+                    } else {
+                        response.forEach(entry => {
+                            const changes = entry.changes;
+                            
+                            if(Object.keys(changes).length){
+                                html += `<div class="mb-4"><h5 class="fw-bold text-center">Changes on <strong>${entry.timestamp} (${entry.admin})</strong></h5>`;
+                            }
+
+                            // City Fields
+                            if (changes.city) {
+                                html += '<h6 class="fw-bold text-center">City Fields</h6><table class="table table-bordered">';
+                                html += '<thead><tr><th>Field</th><th>Old</th><th>New</th></tr></thead><tbody>';
+                                $.each(changes.city, function (key, value) {
+                                    let label = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                                    html += `<tr><td>${label}</td><td>${value.old}</td><td>${value.new}</td></tr>`;
+                                });
+                                html += '</tbody></table>';
+                            }
+                            
+                            // OSA Rates
+                            if (changes.osa_rates) {
+                                html += '<h6 class="fw-bold text-center">OSA Rates</h6>';
+                                html += '<table class="table table-bordered"><thead><tr><th>Action</th><th>OSA Name</th><th>Rate</th></tr></thead><tbody>';
+                                changes.osa_rates.removed.forEach(item => {
+                                    html += `<tr><td>Removed</td><td>${item.osa_name}</td><td>${item.osa_rate}</td></tr>`;
+                                });
+                                changes.osa_rates.added.forEach(item => {
+                                    html += `<tr><td>Added</td><td>${item.osa_name}</td><td>${item.osa_rate}</td></tr>`;
+                                });
+                                html += '</tbody></table>';
+                            }
+
+                            // Deliveries
+                            if (changes.deliveries) {
+                                html += '<h6 class="fw-bold text-center">City Deliveries</h6>';
+                                html += '<table class="table table-bordered"><thead><tr><th>Action</th><th>Booking Type</th><th>Shipping Mode</th></tr></thead><tbody>';
+                                changes.deliveries.removed.forEach(item => {
+                                    html += `<tr><td>Removed</td><td>${mapBookingType(item.booking_type_id)}</td><td>${mapShippingMode(item.shipping_mode_id)}</td></tr>`;
+                                });
+                                changes.deliveries.added.forEach(item => {
+                                    html += `<tr><td>Added</td><td>${mapBookingType(item.booking_type_id)}</td><td>${mapShippingMode(item.shipping_mode_id)}</td></tr>`;
+                                });
+                                html += '</tbody></table>';
+                            }
+
+                            // Walk-In Cities
+                            if (changes.walk_ins) {
+                                html += '<h6 class="fw-bold text-center">Walk-In Cities</h6>';
+                                html += '<table class="table table-bordered"><thead><tr><th>Action</th><th>Walk-in Info</th></tr></thead><tbody>';
+                                changes.walk_ins.removed.forEach(item => {
+                                    html += `<tr><td>Removed</td><td>${mapWalkInType(item.delivery)}</td></tr>`;
+                                });
+                                changes.walk_ins.added.forEach(item => {
+                                    html += `<tr><td>Added</td><td>${mapWalkInType(item.delivery)}</td></tr>`;
+                                });
+                                html += '</tbody></table>';
+                            }
+
+                            html += '</div>'; 
+                        });
+                    }
+
+                    $('#changedDataContent').html(html);
+                    $('#viewChangesModal').modal('show');
+                },
+                error: function () {
+                    alert('Failed to load changes.');
+                }
+            });
+        }
+    });
 
     </script>
 

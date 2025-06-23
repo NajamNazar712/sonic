@@ -336,7 +336,8 @@ class AdminCargoManifestController extends Controller
         }
         $today = Carbon::today();
         $on_hold_shipments = ShipmentOnHold::whereDate('dispatch_date', '>', $today)->where('status', 1)->pluck('shipment_id')->toArray();
-        $shipments = DB::connection('reports_2')->table('shipments')->join('booking_types as bt', 'shipments.booking_type_id', '=', 'bt.id')
+        $shipments = DB::connection('reports_2')->table('shipments')
+            ->leftjoin('booking_types as bt', 'shipments.booking_type_id', '=', 'bt.id')
             ->leftjoin('shipment_status as ss', 'shipments.shipper_status_id', '=', 'ss.id')
             ->leftjoin('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->leftjoin('users as u', 'shipments.user_id', '=', 'u.id')
@@ -2332,13 +2333,8 @@ class AdminCargoManifestController extends Controller
 
     public function create_store(Request $request) //create bag -> store
     {
-
-
         $sack_bag_no = $request->input('sack_bag_no');
-        // $origin_hub_id=$request->input('origin_hub_id');
         $sack_bag = IssueSackBagOrigin::where('sack_bag_no', $sack_bag_no)->where('status', 1);
-        // ->where('origin',$origin_hub_id)
-        // if($sack_bag->exists()){
         $shipments = 0;
         $quantity = 0;
         $shipments_weight = 0;
@@ -2346,8 +2342,7 @@ class AdminCargoManifestController extends Controller
         $shipment_ids = explode(',', $request->input('shipment_ids'));
         $open_box_ids = explode(',', $request->input('open_box_ids'));
         foreach ($shipment_ids as $key => $shipment_id) {
-            $shipment = Shipment::find($shipment_id);
-
+                $shipment = Shipment::find($shipment_id);
                 if ($shipment->shipper_status_id == 20) {
                     $lost_shipment = ManifestBagLostShipment::where('shipment_id', $shipment_id)->latest()->first();
                     if ($lost_shipment) {
@@ -2360,7 +2355,6 @@ class AdminCargoManifestController extends Controller
                     }
                 }
 
-
                 if (in_array($shipment->shipper_status_id, [2, 20, 30, 37, 49, 55, 68, 69, 70, 72, 73,75,76 ])) {
                     $shipments++;
                     $shipments_weight += $shipment->actual_weight;
@@ -2369,9 +2363,7 @@ class AdminCargoManifestController extends Controller
                     unset($shipment_ids[$key]);
                 }
             }
-            //dd($shipment_ids);
             if (!empty($shipment_ids)) {
-
                 $bag = new CargoManifestBag();
                 $bag->seal_number = $request->input('seal_number');
                 $bag->origin_hub_id = $request->input('origin_hub_id');
@@ -2390,34 +2382,22 @@ class AdminCargoManifestController extends Controller
                     $sack_bag = $sack_bag->first();
                     $bag->sack_bag_id = $sack_bag->id;
                     $bag->is_sack_bag = 1;
-
-                    // $sack_bag->sack_destination_id = $request->input('destination_hub_id');
                     $sack_bag->save();
                 } else {
                     $bag->is_sack_bag = 0;
                 }
 
                 $bag->save();
-
-
                 CargoManifestBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), NULL, NULL, 1);
-
                 $id = $bag->id;
-
                 foreach ($shipment_ids as $shipment_id) {
-
                     $bag_shipment = new CargoManifestBagShipments();
-
                     $bag_shipment->cargo_manifest_bag_id = $id;
                     $bag_shipment->shipment_id = $shipment_id;
-
                     $bag_shipment->save();
-
                     $shipment = Shipment::find($shipment_id);
-
                     $shipper_status_id = NULL;
                     $consignee_status_id = NULL;
-
                     //journey of intransit stopped on bag creation / moved to manifest creation as per TO-6734 done by Najam Nazar
                     // if ($request->input('bag_type') == 1) {
                     //     $shipper_status_id = 3;
@@ -2445,9 +2425,7 @@ class AdminCargoManifestController extends Controller
 
                     // $shipment->shipper_status_id = $shipper_status_id;
                     // $shipment->consignee_status_id = $consignee_status_id;
-
                     // $shipment->save();
-
 
                     if (in_array($shipment_id, $open_box_ids)) {
                         $shipment->open_box = 1;
@@ -6681,6 +6659,7 @@ class AdminCargoManifestController extends Controller
         $shipment_ids_array_misrouted = array();
         $short_received_shipments_array = array();
         $shipments_already_marked_received_array = array();
+        $shipmentNoReceive = array();
         $admin = Admin::where('id',\auth()->id())->select('default_hub_id')->first();
         $default_hub_id = $admin->default_hub_id;
         $default_hub_name = $admin->city->name;
@@ -6716,6 +6695,11 @@ class AdminCargoManifestController extends Controller
                 foreach ($shipment_ids as $shipment_id) {
                     $bag_shipment = CargoManifestBagShipments::where('shipment_id', $shipment_id)/*->where('status', 0)*/;
                     $shipment = Shipment::find($shipment_id);
+                    if (in_array($shipment->shipper_status_id, [5, 14, 25, 31, 36, 38])) // all delivered statuses
+                    {
+                        $shipmentNoReceive[] = $shipment->tracking_number;
+                        continue;
+                    }
                     if ($bag_shipment->exists()) {
                         $bag_shipment = $bag_shipment->latest()->first();
 
@@ -6992,6 +6976,11 @@ class AdminCargoManifestController extends Controller
                 foreach ($shipment_ids as $shipment_id) {
                     $bag_shipment = CargoManifestBagShipments::where('shipment_id', $shipment_id)/*->where('status', 0)*/;
                     $shipment = Shipment::find($shipment_id);
+                    if (in_array($shipment->shipper_status_id, [5, 14, 25, 31, 36, 38])) // all delivered statuses
+                    {
+                        $shipmentNoReceive[] = $shipment->tracking_number;
+                        continue;
+                    }
                     $omni_return_city_hub = $shipment->return_address_id != NULL ? $shipment->return_address->city->hub_id : NULL;
                     $omni_return_city = $shipment->return_address_id;
                     if ($bag_shipment->exists()) {
@@ -7496,6 +7485,7 @@ class AdminCargoManifestController extends Controller
             //remove misrouted shipment ids from $short_received_shipments_array end
 
             $received_html = '';
+            $rm_html = '';
             $sr_html = '';
             $already_received_shipments_html = '';
             $misrouted_html = '';
@@ -7531,11 +7521,18 @@ class AdminCargoManifestController extends Controller
                 }
                 $misrouted_html .= "</ul>";
             }
+            if (count($shipmentNoReceive) > 0) {
+                $rm_html = "The following shipments are not marked as received in the bag because they are currently out for delivery.<br><ul>";
+                foreach ($shipmentNoReceive as $m) {
+                    $rm_html .= "<li>" . $m . "</li>";
+                }
+                $rm_html .= "</ul>";
+            }
 //            Log::channel('cronJobLog')->info('cargo:check_11');
             DB::commit();
 //            Log::channel('cronJobLog')->info('cargo:completed');
             //return redirect()->back()->with('success', 'Selected Shipments of Bag Number(s)#' . $all_bag_ids . ' has been Received');
-            return back()->with(['sr_html' => $sr_html, 'received_html' => $received_html, 'already_received_shipments_html' => $already_received_shipments_html, 'misrouted_html' => $misrouted_html]);
+            return back()->with(['sr_html' => $sr_html, 'received_html' => $received_html, 'already_received_shipments_html' => $already_received_shipments_html, 'misrouted_html' => $misrouted_html,'rm_html'=> $rm_html]);
         } catch (\Throwable $th) {
             DB::rollBack();
             Log::channel('cronJobLog')->error('cargo:failed'.json_encode($th->getMessage()), ['trace' => json_encode($th->getTraceAsString())]);
@@ -7970,13 +7967,100 @@ class AdminCargoManifestController extends Controller
         }
         $issuebag = IssueSackBagOrigin::join('cities as c', 'c.id', '=', 'issue_sack_bag_origins.origin')
             ->join('admins as ad', 'ad.id', '=', 'issue_sack_bag_origins.user_id')
-            ->select('issue_sack_bag_origins.sack_bag_no as sack_bag_no', 'c.name as origin', 'ad.name as user_id', 'issue_sack_bag_origins.remarks');
+            ->select(
+                'issue_sack_bag_origins.sack_bag_no as sack_bag_no', 
+                'c.name as origin', 
+                'ad.name as user_id',
+                'issue_sack_bag_origins.remarks',
+                'issue_sack_bag_origins.created_at as active_time',
+                'issue_sack_bag_origins.inactive_at as inactive_time',
+                'issue_sack_bag_origins.inactive_by as inactive_by',
+                'issue_sack_bag_origins.status as status',
+                'issue_sack_bag_origins.id as sack_bag_id',
+                'issue_sack_bag_origins.active_by as sack_bag_active_by',
+                'issue_sack_bag_origins.inactive_by as sack_bag_inactive_by',
+                'issue_sack_bag_origins.updated_at as new_active_time',
+            );
 
-        // if (session('role_id') != 1) {
-        //     $cargo->where('cargo_manifest_draft_bags.origin_id', Auth::user()->default_hub_id);
-        // }
+        $datatables = Datatables::of($issuebag)
+        ->editColumn('status', function ($sack_bag){
+            $status = '-';
+            if ($sack_bag->status == 1) {
+                $status = "Active";
+            } else {
+                $status = "Inactive";
+            }
+            return $status;
+        })
 
-        $datatables = Datatables::of($issuebag);
+        ->editColumn('user_id', function ($sack_bag) {
+            $user = '-';
+            if ($sack_bag->sack_bag_active_by == null && $sack_bag->sack_bag_inactive_by == null) {
+                $user = $sack_bag->user_id;
+            } else if ($sack_bag->sack_bag_active_by != null) {
+                $user = optional(Admin::find($sack_bag->sack_bag_active_by))->name ?? '-';
+            } else if ($sack_bag->sack_bag_inactive_by != null) {
+                $user = optional(Admin::find($sack_bag->sack_bag_inactive_by))->name ?? '-';
+            }        
+            return $user;
+        })
+
+        ->editColumn('remarks', function ($sack_bag){
+            $remarks = '-';
+            if ($sack_bag->remarks != null) {
+                $remarks = $sack_bag->remarks; 
+            }
+            return $remarks;
+        })
+        
+        ->editColumn('inactive_time', function ($sack_bag){
+            $inactive_time = '-';
+            if ($sack_bag->inactive_time != null) {
+                $inactive_time = $sack_bag->inactive_time; 
+            }
+            return $inactive_time;
+        })
+
+        ->editColumn('active_time', function ($sack_bag) {
+            if ($sack_bag->status == 0) {
+                return '-';
+            }
+            if ($sack_bag->new_active_time !== null) {
+                return $sack_bag->new_active_time;
+            }
+            return $sack_bag->active_time ?? '-';
+        })
+        
+
+        ->addColumn('action', function ($sack_bag) {
+            $dropdown = '
+                <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">';
+
+            if ($sack_bag->status == 1) {
+                $dropdown .= '<button type="button" class="dropdown-item status_sack_bag" data-id="' . $sack_bag->sack_bag_id . '" data-status="0">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col-2"><i class="ft-x-circle"></i></div>
+                                    <div class="col-9 offset-1">Inactive</div>
+                                </div>
+                            </button>';
+            } elseif ($sack_bag->status == 0) {
+                $dropdown .= '<button type="button" class="dropdown-item status_sack_bag" data-id="' . $sack_bag->sack_bag_id . '" data-status="1">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col-2"><i class="ft-check-circle"></i></div>
+                                    <div class="col-9 offset-1">Active</div>
+                                </div>
+                            </button>';
+            }
+        
+            $dropdown .= '</div>
+                </div>';
+        
+            return $dropdown;
+        })
+        ->rawColumns(['action'])
+        ;
 
         return $datatables->make(true);
     }
@@ -7995,8 +8079,46 @@ class AdminCargoManifestController extends Controller
         }
     }
 
-    //sack_bag_no check during bag creation
+    public function update_sack_bag_status(Request $request)
+    {
+        $id = $request->get('id');
+        $status = $request->get('status');
+        $auth_user = Auth::user();    
 
+        if (!$id || is_null($status)) {
+            return response()->json(['error' => 'Invalid ID or Status provided.']);
+        }
+
+        $sack_bag = IssueSackBagOrigin::find($id);
+        if (!$sack_bag) {
+            return response()->json(['error' => 'Sack-Bag not found.']);
+        }
+
+        $new_status = (int)$status;
+        $current_status = $sack_bag->status;
+
+        $sack_bag->status = $new_status;
+
+        // Always update the timestamp manually
+        $sack_bag->updated_at = Carbon::now();
+
+        if ($new_status === 0) {
+            // Deactivating
+            $sack_bag->inactive_at = Carbon::now();
+            $sack_bag->inactive_by = $auth_user->id;
+        } elseif ($current_status === 0 && $new_status === 1) {
+            // Reactivating (do not clear inactive_at/by)
+            $sack_bag->active_by = $auth_user->id;
+        }
+
+        // Prevent Laravel from auto-managing timestamps
+        $sack_bag->timestamps = false;
+        $sack_bag->save();
+
+        return response()->json(['success' => 'Sack-Bag status updated successfully.']);
+    }
+
+    //sack_bag_no check during bag creation
     public function sack_bag_no_check_for_cb(Request $request)
     {
         if ($sack_bag_no = $request->get('sack_bag_no')) {
@@ -8042,4 +8164,6 @@ class AdminCargoManifestController extends Controller
             return redirect()->route('admin.cargo_manifest.bags.sack_bag.index')->with(['error' => 'Sack Bag Not Added: Empty Data']);
         }
     }
+
+    
 }

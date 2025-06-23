@@ -850,6 +850,26 @@ trait RvTrait
                     $this->return_confirm($request);
                     return ['status' => 1, 'success'=> 'Shipment Updated Successfully', 'rv_agent_call_history_record_id' => $status->id];
                 }
+                //if unresponsive count 3 & status_reason_id is 27,35 then shipment status will be auto return confirm
+                else if ($rv_shipment_assign_agent->unresponsive_count > 2 && in_array($rv_shipment_ticket->shipment_status_reason_id,[27,35])) {
+
+                    $request->merge([
+                        'shipment_id' => $rv_shipment_assign_agent->shipment_id,
+                        'remarks' => $request->remarks,
+                        'rv_assign_agent_sub_status_id' => null
+                    ]);
+                    $this->return_confirm($request);
+                }
+                //Auto-return if shipment has 3+ unresponsive attempts and is halted (halt_shipper=1)
+                else if ($rv_shipment_assign_agent->unresponsive_count >= 3 && RvShipmentTicket::where(['shipment_id'=>$request->shipment_id,'halt_shipper'=>1])->exists()) {
+
+                    $request->merge([
+                        'shipment_id' => $rv_shipment_assign_agent->shipment_id,
+                        'remarks' => $request->remarks,
+                        'rv_assign_agent_sub_status_id' => null
+                    ]);
+                    $this->return_confirm($request);
+                }
                 //if unresponsive count is 3 unassigned the shipment & set the assign_agent_status_id to 7, the shipment will be shown to to the shipper 
                 else if ($rv_shipment_assign_agent->unresponsive_count == 3) {
                     //if the bot unresponsive count is 2 unassigned the shipment & set the assign_agent_status_id to 7, the shipment will be shown to to the shipper 
@@ -2150,4 +2170,6 @@ trait RvTrait
             return $remarks;
         }
     }
+
+    
 }

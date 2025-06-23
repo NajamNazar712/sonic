@@ -2,39 +2,37 @@
 
 namespace App\Http\Controllers;
 
-use App\FafCharges;
-use App\FinjaSmsLog;
-use App\Http\Controllers\Admins\AdminCRMController;
-use App\Http\Models\Admin\Retail\RetailShipperInfo;
-use App\Http\Models\Admin\Retail\RetailShippingMode;
-use App\Http\Models\NotificationSetting;
-use App\Http\Models\PendingPaymentShipment;
-use App\Http\Models\ShipmentSmsLogs;
-use App\Http\Models\WalletUser;
-use App\Models\FinjaRequestLog;
-use App\ShipmentAdditionalCharges;
 use DB;
 use SnappyPDF;
 use Validator;
 use SnappyImage;
 use Carbon\Carbon;
+use App\FafCharges;
+use App\FinjaSmsLog;
 use App\GuestApiToken;
 use App\Http\Models\City;
+use App\Http\Models\Admin\Retail\RetailShipperInfo;
+use App\Http\Models\Admin\Retail\RetailShippingMode;
 use App\Http\Models\Zone;
 use Vectorface\Whip\Whip;
 use App\Http\Models\Rider;
+use Illuminate\Support\Str;
 use App\Http\Models\Invoice;
 use App\Http\Traits\RvTrait;
 use Illuminate\Http\Request;
 use App\Http\Models\Shipment;
+use App\Http\Models\WalletUser;
+use App\Models\FinjaRequestLog;
 use Illuminate\Validation\Rule;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\DonePayment;
 use App\Http\Models\HR\Employee;
+use App\Http\Models\ServiceList;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Consolidation;
 use App\Http\Models\ZoneClassCity;
+use App\ShipmentAdditionalCharges;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\GulAhmedCities;
 use App\Http\Models\PendingPayment;
@@ -46,6 +44,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\Lead\Lead;
 use App\Http\Models\InvoiceShipment;
 use App\Http\Models\ShipmentPrebook;
+use App\Http\Models\ShipmentSmsLogs;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Models\Admin\FtlRequest;
@@ -54,9 +53,13 @@ use App\Jobs\ProcessRvShipmentTicket;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\ShipmentOrderDate;
 use App\Http\Models\Admin\DeliveryNote;
+use App\Http\Models\Admin\Lead\LeadLog;
+use App\Http\Models\ShipperSegmentLogs;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Models\Admin\LeadReference;
 use App\Http\Models\DonePaymentShipment;
 use App\Http\Models\EmployeeDeviceToken;
+use App\Http\Models\NotificationSetting;
 use App\Http\Models\Shipper\ReturnSheet;
 use App\Http\Models\Admin\FintechCompany;
 use App\Http\Models\Admin\GlobalSettings;
@@ -74,6 +77,7 @@ use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\DonePaymentCalculation;
 use App\Http\Models\InterceptReBookRequest;
 use App\Http\Models\PackagingMaterialTypes;
+use App\Http\Models\PendingPaymentShipment;
 use App\Http\Models\ReceivingSheetShipment;
 use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\Shipper\SubstituteUser;
@@ -109,6 +113,7 @@ use App\Http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\Admin\Settings\GeneralSetting;
 use App\Http\Models\Admin\ShipperInterceptExclude;
 use App\Http\Models\Shopify\ShopifyInvoiceSetting;
+use App\Http\Controllers\Admins\AdminCRMController;
 use App\Http\Models\Admin\Retail\RetailCashDeposit;
 use App\Http\Models\Admin\standard_fintech_charges;
 use App\Http\Models\Blacklist\BlacklistedConsignee;
@@ -138,8 +143,7 @@ use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransaction;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionDeliveryNote;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransactionRetail;
-use Illuminate\Support\Str;
-use App\Http\Models\ShipperSegmentLogs;
+use Exception;
 
 class APIController extends Controller
 {
@@ -2216,7 +2220,7 @@ class APIController extends Controller
 
                return response()->json(['status' => 0, 'message' => 'Tracking of Shipment #' . $tracking_number, 'details' => $details]);
            }
-            
+
 
             return response()->json(['status' => 1, 'message' => 'Shipment not found!']);
 
@@ -2397,6 +2401,8 @@ class APIController extends Controller
             }
             $sms_charges = $current_sms_charges * $shipment_sms_count;
 
+            $charges = array();
+
             if(!empty($sms_charges)){
                 $charges['sms_charges'] = $sms_charges;
             }
@@ -2411,8 +2417,6 @@ class APIController extends Controller
             } else {
                 $current_status_id = $shipment->shipper_status_id;
             }
-
-            $charges = array();
 
             if ($shipment->packaging_material_request) {
                 $charges['packaging_material_charges'] = $shipment->packaging_material_charges;
@@ -2545,11 +2549,15 @@ class APIController extends Controller
             $shipment = Shipment::where('tracking_number', $tracking_number)->first();
 
             $shipment_payment_journey = $shipment->shipment_payment_journey;
-
             if (!$shipment_payment_journey->isEmpty()) {
                 $current_payment_status = $shipment_payment_journey->first()->status->name;
-
-                return response()->json(['status' => 0, 'message' => 'Payment Status of Shipment #' . $tracking_number, 'current_payment_status' => $current_payment_status]);
+                $wallet_charges = ShipmentAdditionalCharges::fetch_wallet_charges($shipment->id);
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'Payment Status of Shipment #' . $tracking_number,
+                    'current_payment_status' => $current_payment_status,
+                    'wallet_charges' => $wallet_charges
+                ]);
             } else {
                 return response()->json(['status' => 1, 'message' => 'No Payment Status']);
             }
@@ -2588,7 +2596,13 @@ class APIController extends Controller
                     $current_status_id = $shipment->shipper_status_id;
                 }
 
+                $wallet_user = optional($shipment->user->wallet)->exists();
+
                 $charges = array();
+
+                if($wallet_user){
+                    $charges['wallet_charges'] = ShipmentAdditionalCharges::fetch_wallet_charges($shipment->id);
+                }
 
                 if ($shipment->packaging_material_request) {
                     $charges['packaging_material_charges'] = $shipment->packaging_material_charges;
@@ -8253,7 +8267,7 @@ class APIController extends Controller
                             $admin_trax_id = $admin->trax_id;
                             $admin_cnic = $admin->cnic;
                         }
-                        return response()->json(['status' => 0, 'retail_note_id' =>  str_pad($retail_note->id, 6, '0', STR_PAD_LEFT), 'amount' => $net_amount, 'admin_name' => $admin_name, 'admin_trax_id' => $admin_trax_id, 'admin_cnic' => $admin_cnic]);
+                        return response()->json(['status' => 0, 'retail_note_id' =>  str_pad($retail_note->id, 6, '0', STR_PAD_LEFT), 'amount' => $this->customRound($net_amount), 'admin_name' => $admin_name, 'admin_trax_id' => $admin_trax_id, 'admin_cnic' => $admin_cnic]);
                     } else {
                         return response()->json(['status' => 11, 'message' => 'Retail Note restricted!']);
                     }
@@ -8384,8 +8398,8 @@ class APIController extends Controller
                         $hbl_konnect_transaction_delivery_note = new HblKonnectTransactionRetailNote();
                         $hbl_konnect_transaction_delivery_note->retail_note_id = $retail_note_id;
                     }
+                    $cash_amount = $this->customRound($retail_note->total_cash) - $transaction_amount;
 
-                    $cash_amount = $retail_note->total_cash - $transaction_amount;
                     if ($cash_amount < 0) {
                         $hbl_konnect_transaction_delivery_note = HblKonnectTransactionRetailNote::where('retail_note_id', $retail_note_id);
                         if ($hbl_konnect_transaction_delivery_note->exists()) {
@@ -8393,7 +8407,7 @@ class APIController extends Controller
 
                             $remaining_amount = $hbl_konnect_transaction_delivery_note->cash_amount;
 
-                            return ['status' => 0, 'message' => 'Net amount should be less then or equal to ' . $remaining_amount];
+                            return ['status' => 0, 'message' => 'Net amount should be less then or equal to ' . ($remaining_amount)];
                         }
                     }
                     $hbl_konnect_transaction_delivery_note->transactions_amount = $transaction_amount;
@@ -10592,6 +10606,11 @@ class APIController extends Controller
         $trackingNumbers = $shipmentsData->pluck('tracking_number');
         $shipments = Shipment::whereIn('tracking_number', $trackingNumbers)->get()->keyBy('tracking_number');
 
+        FinjaRequestLog::insert([
+            'requested' => json_encode($request->all()),
+            'ip_address' => $request->ip(),
+        ]);
+
         foreach ($shipmentsData as $key => $shipmentData) {
             $tracking_number = $shipmentData['tracking_number'];
             $charges = $shipmentData['charges'];
@@ -10606,11 +10625,6 @@ class APIController extends Controller
 
             $shipment = $shipments[$tracking_number];
             $shipment_id = $shipment->id;
-
-            FinjaRequestLog::insert([
-                'requested' => json_encode($request->all()),
-                'ip_address' => $request->ip(),
-            ]);
 
             ShipmentAdditionalCharges::where('shipment_id', $shipment_id)
                 ->update(['wallet_charges' => $charges, 'wallet_charges_updated_at' => now()]);
@@ -10663,12 +10677,13 @@ class APIController extends Controller
         ]);
     }
 
-    public function fintech_account_type(Request $request)
+    public function fintech_charges_bulk_dev_fix(Request $request)
     {
         $rules = [
-            'wallet_users' => ['required', 'array', 'min:1'],
-            'wallet_users.*.wallet_id' => ['required', 'exists:wallet_users,wallet_id'],
-            'wallet_users.*.finova_account_type' => ['required', 'numeric'],
+            'wallet_id' => ['required', 'exists:wallet_users,wallet_id'],
+            'shipments' => ['required', 'array', 'min:1'],
+//            'shipments.*.tracking_number' => ['required', 'exists:shipments,tracking_number'],
+            'shipments.*.charges' => ['required', 'numeric', 'min:0', 'max:100000'],
         ];
 
         $validator = Validator::make($request->all(), $rules, $this->messages);
@@ -10683,50 +10698,262 @@ class APIController extends Controller
 
         $errors = [];
         $success = [];
-        $globalSetting = GlobalSettings::where(['setting_value' => 1, 'type' => 'wallet_account_type'])->exists();
+        $shipmentsData = collect($request->shipments);
 
-        if($globalSetting) {
-            $walletDataRequest = collect($request->wallet_users);
+        $trackingNumbers = $shipmentsData->pluck('tracking_number');
+        $shipments = Shipment::whereIn('tracking_number', $trackingNumbers)->get()->keyBy('tracking_number');
 
-            $wallet_ids = $walletDataRequest->pluck('wallet_id');
-            $wallet = WalletUser::whereIn('wallet_id', $wallet_ids)->where('substitute_user_id', 0)->get()->keyBy('wallet_id');
-            foreach ($walletDataRequest as $key => $walletDataRow) {
-                $wallet_id = $walletDataRow['wallet_id'];
-                $finova_account_type = $walletDataRow['finova_account_type'];
-                if (!isset($wallet[$wallet_id])) {
-                    $errors[$key] = [
-                        'wallet_id' => $wallet_id,
-                        'error' => 'Wallet not found'
-                    ];
-                    continue;
-                }
-                $wallet_primary_id = $wallet[$wallet_id]->id;
+//        FinjaRequestLog::insert([
+//            'requested' => json_encode($request->all()),
+//            'ip_address' => $request->ip(),
+//        ]);
 
-                FinjaRequestLog::insert([
-                    'requested' => json_encode($request->all()),
-                    'ip_address' => $request->ip(),
-                ]);
+        foreach ($shipmentsData as $key => $shipmentData) {
+            $tracking_number = $shipmentData['tracking_number'];
+            $charges = $shipmentData['charges'];
 
-                WalletUser::where('id', $wallet_primary_id)
-                    ->update(['finova_account_type' => $finova_account_type]);
-
-                $success[] = $wallet_id;
+            if (!isset($shipments[$tracking_number])) {
+                $errors[$key] = [
+                    'tracking_number' => $tracking_number,
+                    'error' => 'Shipment not found'
+                ];
+                continue;
             }
 
-            return response()->json([
-                'status' => empty($errors) ? 1 : 0,
-                'message' => empty($errors) ? 'All Wallet Accounts updated successfully.' : 'Some Accounts could not be updated due to errors.',
-                'success' => $success,
-                'errors' => $errors,
-            ]);
-        }else{
+            $shipment = $shipments[$tracking_number];
+            $shipment_id = $shipment->id;
+
+            $existingCharge = ShipmentAdditionalCharges::where('shipment_id', $shipment_id)->first();
+
+            if ($existingCharge) {
+                if ($existingCharge->wallet_charges == 0 || $existingCharge->wallet_charges == 0.00 || $existingCharge->wallet_charges === null) {
+                    // Update both wallet charges and the timestamp if charges are 0, 0.00, or null
+                    $existingCharge->update([
+                        'wallet_charges' => $charges,
+                        'wallet_charges_updated_at' => now(),
+                    ]);
+                } elseif ($charges > 0) {
+                    // If charges are greater than 0, update only the wallet charges, without changing the timestamp
+                    $existingCharge->update([
+                        'wallet_charges' => $charges,
+                    ]);
+                }
+            }
+
+
+            $pending_payment = PendingPaymentShipment::where('shipment_id', $shipment_id)
+                ->whereIn('type', [0, 1])
+                ->latest()
+                ->first();
+
+            if ($pending_payment) {
+                AdminFinanceController::update_payment($shipment_id, $pending_payment->type);
+                $success[] = $tracking_number;
+                continue;
+            }
+
+            $done_payment_query = DonePaymentShipment::where('shipment_id', $shipment_id)
+                ->whereIn('type', [0, 1])
+                ->latest();
+
+            $check_pending_process = (clone $done_payment_query)->whereHas('done_payment', function ($query) {
+                $query->whereIn('status', [0,1,3])->where('is_wallet_payment', 1);
+            })->exists();
+
+            if ($check_pending_process) {
+                $done_payment = (clone $done_payment_query)->first();
+                AdminFinanceController::update_payment_done_payment($shipment_id, $done_payment->type, $done_payment->done_payment_id);
+                $success[] = $tracking_number;
+                continue;
+            }
+
+            $check_paid_late = (clone $done_payment_query)->whereHas('done_payment', function ($query) {
+                $query->where('status', 1)->where('is_wallet_payment', 1);
+            })->exists();
+
+            if ($check_paid_late) {
+                $errors[$key] = [
+                    'tracking_number' => $tracking_number,
+                    'error' => 'Payment cannot be processed now'
+                ];
+            } else {
+                $success[] = $tracking_number;
+            }
+        }
+
+        return response()->json([
+            'status' => empty($errors) ? 1 : 0,
+            'message' => empty($errors) ? 'All charges updated successfully.' : 'Some charges could not be updated due to errors.',
+            'success' => $success,
+            'errors' => $errors,
+        ]);
+    }
+
+    public function fintech_account_type(Request $request)
+    {
+        $walletUsers = $request->input('wallet_users');
+        $errors = [];
+        $success = [];
+
+        FinjaRequestLog::insert([
+            'requested' => json_encode($request->all()),
+            'ip_address' => $request->ip(),
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        if (empty($walletUsers) || !is_array($walletUsers)) {
             return response()->json([
                 'status' => 0,
-                'message' =>  'The Api is currently Inactive',
+                'message' => 'wallet_users must be a non-empty array',
+                'errors' => ['wallet_users' => ['The wallet_users field is required and must be a non-empty array.']],
+            ]);
+        }
+
+        $globalSetting = GlobalSettings::where(['setting_value' => 1, 'type' => 'wallet_account_type'])->exists();
+
+        if (!$globalSetting) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'The API is currently inactive',
                 'success' => [],
                 'errors' => [],
             ]);
         }
+
+        $wallet_ids = collect($walletUsers)->pluck('wallet_id')->toArray();
+
+        $walletUserMap = WalletUser::whereIn('wallet_id', $wallet_ids)
+            ->where('substitute_user_id', 0)
+            ->pluck('wallet_id','wallet_id')->toArray();
+        foreach ($walletUsers as $index => $walletData) {
+            $wallet_id = $walletData['wallet_id'];
+            $validator = Validator::make($walletData, [
+                'wallet_id' => ['required', 'numeric','wallet_id' => [
+                    'required',
+                    'numeric',
+                    Rule::exists('wallet_users', 'wallet_id')->where(function ($query) {
+                        $query->where('substitute_user_id', 0);
+                    }),
+                ],
+                ],
+                'finova_account_type' => ['required', 'numeric'],
+            ]);
+
+            if ($validator->fails()) {
+                $errors[$index] = $validator->errors()->toArray();
+                continue;
+            }
+
+
+            $finova_account_type = $walletData['finova_account_type'];
+
+            WalletUser::where('wallet_id', $wallet_id)
+                ->update(['finova_account_type' => $finova_account_type]);
+
+            $success[] = $wallet_id;
+        }
+
+        return response()->json([
+            'status' => empty($errors) ? 1 : 0,
+            'message' => empty($errors)
+                ? 'All Wallet Accounts updated successfully.'
+                : 'Some Accounts could not be updated due to errors.',
+            'success' => $success,
+            'errors' => $errors,
+        ]);
+    }
+
+    public function marco_cities(Request $request)
+    {
+        $cities = City::where('status', 1)->where('business_category_id', 1);
+
+        if ($cities->exists()) {
+            $cities = $cities->select('id', 'name')->get();
+
+            return response()->json(['status' => 0, 'message' => 'List of Cities', 'cities' => $cities]);
+        } else {
+            return response()->json(['status' => 1, 'message' => ' No City Present']);
+        }
+    }
+    function customRound($amount)
+    {
+        $decimal = $amount - floor($amount);
+        if ($decimal <= 0.49) {
+            return floor($amount);
+        } else {
+            return ceil($amount);
+        }
+    }
+
+    public function storeWebsiteLead(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'company_name' => 'required|string',
+                'contact_person' => 'required|string',
+                'email' => 'required|email',
+                'phone_number' => 'required|string',
+                'cnic_number' => 'required|string',
+                'city_name' => 'required|string',
+                'reference_name' => 'required|string',
+                'service_name' => 'required|string',
+                'avg_shipment' => 'required|numeric',
+                'avg_parcel' => 'required|numeric',
+                'business_address' => 'required|string',
+                'ntn_number' => 'nullable|string',
+            ]);
+
+            $city = City::where('name', $validated['city_name'])->first();
+            $service = ServiceList::where('name', $validated['service_name'])->first();
+            $reference = LeadReference::where('name', $validated['reference_name'])->first();
+
+            if (!$city || !$service || !$reference) {
+                return response()->json(['success' => false, 'message' => 'Invalid city, service, or reference.'], 422);
+            }
+
+            $lead = new Lead();
+            $lead->company_name = $validated['company_name'];
+            $lead->contact_person = $validated['contact_person'];
+            $lead->email = $validated['email'];
+            $lead->phone_number = $validated['phone_number'];
+            $lead->cnic_number = $validated['cnic_number'];
+            $lead->city_id = $city->id;
+            $lead->service_id = $service->id;
+            $lead->reference_id = $reference->id;
+            $lead->avg_shipment = $validated['avg_shipment'];
+            $lead->avg_parcel = $validated['avg_parcel'];
+            $lead->business_address = $validated['business_address'];
+            $lead->ntn_number = $validated['ntn_number'] ?? null;
+            $lead->activation_code = Str::uuid();
+            $lead->requested_date = Carbon::now();
+            $lead->email_address = $validated['email'];
+            $lead->company = $validated['company_name'];
+            $lead->business_registered_status = isset($validated['business_address']) ? 1 : 0;
+            $lead->via_channel = 'Website';
+            $lead_tagging = LeadTagging::where(['city_id' => $city->id, 'status' => 1])->first();
+            $lead->sale_person_id = $lead_tagging ? $lead_tagging->sale_person_id : null;
+            $lead->expected_shipments = $validated['avg_shipment'];
+
+            $lead->save();
+
+
+            LeadLog::create(['lead_id' => $lead->id]);
+
+            return response()->json([
+                'success' => true,
+                'activation_url' => route('cod.signup', ['id' => $lead->id, 'token' => $lead->activation_code]),
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Something went wrong. Please try again later.',
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ], 500);
+        }
     }
 
 }
+
+

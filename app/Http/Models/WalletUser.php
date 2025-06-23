@@ -5,10 +5,11 @@ namespace App\Http\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class WalletUser extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     static function wallet_create($data = array())
     {

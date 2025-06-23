@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admins\Reports;
 
 use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\Segment;
+use App\Http\Models\SubCategorySegment;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -35,7 +37,8 @@ class SSRController extends Controller
         $sales_persons = DB::connection('reports')->table('admins')->join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('ar.department_id', 7)->get();
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id', 'mode']);
         $business_categories = DB::connection('reports')->table('business_categories')->select('id', 'name')->get();
-        return view('admin.reports.ssr')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'statuses' => $statuses, 'sales_persons' => $sales_persons, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes]);
+        $segments = Segment::select('id', 'name')->get();
+        return view('admin.reports.ssr')->with(['shippers' => $shippers,'segments'=>$segments, 'cities' => $cities, 'hubs' => $hubs, 'statuses' => $statuses, 'sales_persons' => $sales_persons, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes]);
     }
 
     public function ssr_list(Request $request)
@@ -135,13 +138,15 @@ class SSRController extends Controller
                         DB::connection($connection)->raw('(select max(id) from invoice_shipments where invoice_shipments.shipment_id = shipments.id and invoice_shipments.type != 2)')
                     );
             })
+            ->leftJoin('segments as sg', 'sg.id', '=', 'u.segment_id')
+            ->leftJoin('sub_category_segments as scs', 'scs.id', '=', 'u.sub_segment_id')
             ->leftjoin('invoices', 'is.invoice_id', '=', 'invoices.id')
             ->leftjoin('international_shipments as ibs', 'ibs.shipment_id', '=', 'shipments.id')
             ->leftjoin('riders as r', 'r.id', '=', 'sj.rider_id')
             ->join('business_categories as bc', 'bc.id', '=', 'shipments.business_category_id')
             ->leftjoin('cities as sc', 'u.city_id', '=', 'sc.id')
             ->leftjoin('zones as sz', 'sz.id', '=', 'sc.zone_id')
-            ->select('shipments.id as shipment_id', 'shipments.tracking_number', 'shipments.tracking_number as tracking_number_link', 'u.id as account_no', 'u.name as shipper', 'sj.created_at as arrival_date', 'shipments.actual_weight', 'shipments.weight_charges', 'shipments.cash_handling_charges', 'shipments.insurance_charges', 'shipments.fuel_surcharge', 'shipments.packaging_material_charges', 'pps.gst as p_gst', 'pps.charges as p_total_charges', 'dps.amount as d_collection_amount', 'dps.gst as d_gst', 'dps.charges as d_total_charges', 'dps.payable as d_net_payable', 'sm.id as shipping_mode_id', 'shipments.chargeable_weight', 'z.name as zone', 'oc.id as origin_city_id', 'oc.name as origin_city_name', 'dc.id as destination_city_id', 'dc.name as destination_city_name', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst', 'shipments.packaging_charges', 'dr.shipper_status_id as dr_status_id', 'sz.name as shipper_zone', 'dr.created_at as delivered_or_returned')
+            ->select('shipments.id as shipment_id', 'shipments.tracking_number', 'shipments.tracking_number as tracking_number_link', 'u.id as account_no', 'u.name as shipper', 'sj.created_at as arrival_date', 'shipments.actual_weight', 'shipments.weight_charges', 'shipments.cash_handling_charges', 'shipments.insurance_charges', 'shipments.fuel_surcharge', 'shipments.packaging_material_charges', 'pps.gst as p_gst', 'pps.charges as p_total_charges', 'dps.amount as d_collection_amount', 'dps.gst as d_gst', 'dps.charges as d_total_charges', 'dps.payable as d_net_payable', 'sm.id as shipping_mode_id', 'shipments.chargeable_weight', 'z.name as zone', 'oc.id as origin_city_id', 'oc.name as origin_city_name', 'dc.id as destination_city_id', 'dc.name as destination_city_name', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst', 'shipments.packaging_charges', 'dr.shipper_status_id as dr_status_id', 'sz.name as shipper_zone', 'dr.created_at as delivered_or_returned', 'shipments.amount as collection_amount','sg.name as segment_name','scs.name as sub_segment_name')
             ->whereNotIn('shipments.shipper_status_id', [1, 17])
             ->whereNotIn('u.id', [8761, 9358])
             // ->whereBetween('sj.created_at', [$from, $to])
@@ -263,8 +268,12 @@ class SSRController extends Controller
                 }
                 return number_format((float)$gst, 2);
             })
+            ->editColumn('collection_amount', function ($sale) {
+                $total = $sale->collection_amount;
+                return number_format((float)$total, 2);
+            })
             ->editColumn('p_total_charges', function ($sale) {
-                $total = '';
+                    $total = '';
                 if ($sale->p_total_charges != null) {
                     $total = $sale->p_total_charges;
                 } else if ($sale->d_total_charges != null) {
@@ -284,6 +293,12 @@ class SSRController extends Controller
         }
         if ($search_shippers = $request->get('search_shippers')) {
             $sales->whereIn('shipments.user_id', $search_shippers);
+        }
+        if ($search_segment_id = $request->get('search_segment_id')) {
+            $sales->where('u.segment_id', '=', $search_segment_id);
+        }
+        if ($search_sub_segment_id = $request->get('search_sub_segment_id')) {
+            $sales->where('u.sub_segment_id', $search_sub_segment_id);
         }
         if ($mode = $request->get('search_shipping_mode')) {
             $sales->where('sm.id', '=', $mode);
@@ -308,4 +323,17 @@ class SSRController extends Controller
             ->make(true);
     }
 
+    public function get_sub_segments(Request  $request)
+    {
+
+        if (isset($request->segment_id)) {
+            $segment_id = $request->segment_id;
+
+            $sub_segments = SubCategorySegment::where('segment_id', $segment_id)->select('id', 'name')->orderby('name', 'asc')->get();
+
+            return response()->json(['status' => 1, 'sub_segment' => $sub_segments]);
+        } else {
+            return response()->json(['status' => 0, 'error' => 'No data Found']);
+        }
+    }
 }

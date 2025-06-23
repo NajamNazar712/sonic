@@ -4435,14 +4435,14 @@ class AdminFinanceController extends Controller
     {
         $shipment_id = $request->input('shipment_id');
         $amount = str_replace(',', '', $request->input('amount'));
-
+        
         $shipment = Shipment::find($shipment_id);
-
+        
         $change_shipment_amount = new ChangeShipmentAmountLog();
 
         $change_shipment_amount->shipment_id = $shipment->id;
         $change_shipment_amount->old_amount = $shipment->amount;
-        $change_shipment_amount->new_amount = $amount;
+        $change_shipment_amount->new_amount = $amount ?? 0;
         $change_shipment_amount->admin_id = Auth::id();
         $change_shipment_amount->remarks = $request->remarks;
         $change_shipment_amount->save();
@@ -6612,7 +6612,8 @@ class AdminFinanceController extends Controller
                  $join->on('wu.user_id', '=', 'u.id')
                     ->where('wu.substitute_user_id', '0');
             })
-            ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', 'ppc.amount as total_amount', 'ppc.charges as total_charges','u.payment_cycle_days as payment_cycle_days', 'ppc.gst as total_gst', 'ppc.wht as total_wht', 'ppc.payable as total_payable', 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'pc.name as payment_cycle', 'pc.id as payment_cycle_id','u.documents_status', DB::raw('IFNULL(psfp.pending_shipments_count,0) as total_pending_shipments'),'sts.status as star_status', 'u.id as user_id', 'ppc.sms_charges as total_sms_charges', 'wu.id as wallet_user');
+            ->leftjoin('territories as t', 't.id', '=', 'u.territory_id')
+            ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', 'ppc.amount as total_amount', 'ppc.charges as total_charges','u.payment_cycle_days as payment_cycle_days', 'ppc.gst as total_gst', 'ppc.wht as total_wht', 'ppc.payable as total_payable', 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'pc.name as payment_cycle', 'pc.id as payment_cycle_id','u.documents_status', DB::raw('IFNULL(psfp.pending_shipments_count,0) as total_pending_shipments'),'sts.status as star_status', 'u.id as user_id', 'ppc.sms_charges as total_sms_charges', 'wu.id as wallet_user', 'wu.finova_account_type as wallet_finance','t.name as territory');
             // ->groupBy('pending_payments.id'); // removed by the instruction of waqas bhai
 
         // dd($pending_payments);
@@ -6735,8 +6736,9 @@ class AdminFinanceController extends Controller
         }
         $wallet_user = $request->input('wallet_filter',0);
         if($wallet_user == 1) {
-            $pending_payments->whereNotNull('wu.id');
-
+            $pending_payments->whereNotNull('wu.id')->where('wu.finova_account_type', '>', 0);
+        }elseif($wallet_user == 2) {
+            $pending_payments->whereNotNull('wu.id')->where('wu.finova_account_type', 0);
         } else {
             $pending_payments->whereNull('wu.id');
         }
@@ -6908,6 +6910,17 @@ class AdminFinanceController extends Controller
                         return '-';
                     }
                 } else {
+                    return '-';
+                }
+            })
+            ->addColumn('finova_account_type', function ($pending_payment) {
+                if(in_array($pending_payment->wallet_finance, [1, 2, 3, 4 ])) {
+                    return 'Arrival';
+                } elseif($pending_payment->wallet_finance === 5) {
+                    return 'Delivered';
+                } elseif($pending_payment->wallet_finance === 0){
+                    return 'Basic';
+                } else{
                     return '-';
                 }
             })
@@ -7170,6 +7183,22 @@ class AdminFinanceController extends Controller
         if ($request->has('pickup_address_id')) {
             $pending_payment_shipments->where('s.pickup_address_id', $request->pickup_address_id);
         }
+        
+        if ($request->filled('requested_from_date')) {
+            $pending_payment_shipments->whereDate('pending_payment_shipments.created_at', '>=', $request->requested_from_date);
+        }
+
+        if ($request->filled('requested_to_date')) {
+            $pending_payment_shipments->whereDate('pending_payment_shipments.created_at', '<=', $request->requested_to_date);
+        }
+        if ($request->filled('arrival_from_date')) {
+            $pending_payment_shipments->whereDate('sj.created_at', '>=', $request->arrival_from_date);
+        }
+
+        if ($request->filled('arrival_to_date')) {
+            $pending_payment_shipments->whereDate('sj.created_at', '<=', $request->arrival_to_date);
+        }
+
 
 
         $datatables = Datatables::of($pending_payment_shipments)
@@ -8264,6 +8293,7 @@ class AdminFinanceController extends Controller
             })
             //leftJoin to join as admin will always present
             ->join('admins as sale_admin','sale_admin.id','=','spt.admin_id')
+            ->leftjoin('territories as t', 't.id', '=', 'u.territory_id')
             ->leftjoin('wallet_users as wu', function ($join) {
                 $join->on('wu.user_id', '=', 'u.id')
                     ->where('wu.substitute_user_id', '0');
@@ -8277,7 +8307,7 @@ class AdminFinanceController extends Controller
             'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 'done_payments.ibft_charges', 
             'dpc.packaging_charges', 'dpc.adjustment as adjustment_charges', 'done_payments.status_updated_at as status_updated_at', 
             'dpc.wht as total_wht', 'done_payments.created_at as start_date', 'done_payments.updated_at as end_date', 'ad.name as admin_name', 
-            'done_payments.updated_at as updated_at','sts.status as star_status','u.payment_cycle_days as payment_cycle_days','pc.name as payment_cycle', 'pc.id as payment_cycle_id', 'dpc.sms_charges as total_sms_charges','done_payments.arrival_shipment as arrival_shipment_shipments_count','done_payments.arrival_shipment', 'sale_admin.name as sale_person_name','wu.id as wallet_user' , 'done_payments.is_wallet_payment');
+            'done_payments.updated_at as updated_at','sts.status as star_status','u.payment_cycle_days as payment_cycle_days','pc.name as payment_cycle', 'pc.id as payment_cycle_id', 'dpc.sms_charges as total_sms_charges','done_payments.arrival_shipment as arrival_shipment_shipments_count','done_payments.arrival_shipment', 'sale_admin.name as sale_person_name','wu.id as wallet_user' , 'done_payments.is_wallet_payment', 'wu.finova_account_type as finova_account_type','t.name as territory');
 
         if (session('department_id') == 7) {
             if (!in_array(session('id'), session('sale_users_bypass'))) {
@@ -8528,6 +8558,17 @@ class AdminFinanceController extends Controller
             })
             ->removeColumn('phone')
             ->removeColumn('phone2')
+            ->editColumn('finova_account_type', function ($done_payment) {
+                if(in_array($done_payment->finova_account_type, [1, 2, 3, 4 ])) {
+                    return 'Arrival';
+                } elseif($done_payment->finova_account_type === 5) {
+                    return 'Delivered';
+                } elseif($done_payment->finova_account_type === 0) {
+                    return 'Basic';
+                } else{
+                    return '-';
+                }
+            })
             ->editColumn('payment_cycle_days', function ($pending_payment) {
                 $payment_cycle = $pending_payment->payment_cycle_id;
                 $payment_cycle_days = $pending_payment->payment_cycle_days;
@@ -9694,6 +9735,9 @@ class AdminFinanceController extends Controller
         $total_wallet_charges = 0;
         foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
             $shipment = $done_payment_shipment->shipment;
+            if (!isset($shipment->id)) {
+                $shipment = $done_payment_shipment->shipment_archive;
+            }
             $service_charges = ShipmentServicesCharges::where('shipment_id', $shipment->id);
             if ($service_charges->exists()) {
                 $service_charges = $service_charges->first();
@@ -20543,9 +20587,19 @@ class AdminFinanceController extends Controller
                 'wallet_users.cnic as wallet_user_cnic',
                 'users.name as parent_user_name',
                 'substitute_users.name as substitute_name',
-                'wallet_users.wallet_id as wallet_id'
+                'wallet_users.wallet_id as wallet_id',
+                'wallet_users.finova_account_type as finova_account_type'
             );
-        $datatables = Datatables::of($wallet_users);
+        $datatables = Datatables::of($wallet_users)
+            ->editColumn('finova_account_type', function ($wallet_users) {
+                if(in_array($wallet_users->finova_account_type, [1, 2, 3, 4 ])) {
+                    return 'Arrival';
+                } elseif($wallet_users->finova_account_type == 5) {
+                    return 'Delivered';
+                } else{
+                    return 'Basic';
+                }
+            });
         return $datatables->make(true); 
     }
 

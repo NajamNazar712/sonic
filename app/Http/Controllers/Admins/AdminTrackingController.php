@@ -1341,14 +1341,15 @@ class AdminTrackingController extends Controller
                             }
                         }
 
-                        $details['order_information']['parcel_value'] = number_format($shipment->parcel_value);
+                        // $details['order_information']['parcel_value'] = number_format($shipment->parcel_value);
 
-                        // $details['order_information']['parcel_value'] = '';
-                        // if ($retail_shipment){
-                        //     $details['order_information']['parcel_value'] = $retail_shipement_parcel_amount;
-                        // } else {
-                        //     $details['order_information']['parcel_value'] = number_format($shipment->parcel_value);
-                        // }
+                        /* branch: Hotfix-Parcel-Value */
+                        $details['order_information']['parcel_value'] = '';
+                        if ($retail_shipment){
+                            $details['order_information']['parcel_value'] = $retail_shipment->parcel_amount ?? '-';
+                        } else {
+                            $details['order_information']['parcel_value'] = number_format($shipment->parcel_value);
+                        }
 
 
                         $details['order_information']['account_type_id'] = $shipment->user->account_type_id;
@@ -1674,7 +1675,15 @@ class AdminTrackingController extends Controller
                             }
                             $journey_details['area_log'] = $this->setJourneyDetails($scanning_data);
                             $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
-                            $journey_details['remarks'] = ($journey->remarks) ? $journey->remarks : '';
+                            $journey_details['remarks'] = !empty($journey?->remarks)
+                            ? $journey->remarks
+                            : (($journey?->shipper_status_id == 18 && $journey?->status_reason_id != 90 && empty($journey?->remarks))
+                                ? (ShipmentsJourney::where([
+                                    'shipment_id' => $journey?->shipment_id,
+                                    'status_reason_id' => 90
+                                ])->latest()->first()?->remarks ?? '-')
+                                : '-');
+
                             $journey_details['user'] = $user;
                             $journey_details['city'] = ($journey->city_id) ? $journey->city->name : '';;
                             $received_or_refused_by = '';
