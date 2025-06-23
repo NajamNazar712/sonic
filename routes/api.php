@@ -512,6 +512,8 @@ use Illuminate\Http\Request;
                 Route::get('check_v2', 'AdminAPIController@check_profile_v2')->name('check_v2');
                 Route::post('check_v3', 'AdminAPIController@check_profile_v3')->name('check_v3');
                 Route::post('update_v2', 'AdminAPIController@update_profile_v2')->name('update_v2');
+
+                Route::post('get_shipper_info','AdminAPIController@get_shipper_info')->name('get_shipper_info');
             });
             Route::get('profile', 'AdminAPIController@admin_profile')->name('profile');
             Route::get('employee_id', 'AdminAPIController@get_employee_id')->name('employee_id');
