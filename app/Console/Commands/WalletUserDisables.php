@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Http\Models\DonePayment;
 use App\Http\Models\WalletUser;
+use App\Models\WalletShipperSetting;
 use App\Models\WalletUserDisable;
 use Illuminate\Console\Command;
 
@@ -30,7 +31,11 @@ class WalletUserDisables extends Command
      */
     public function handle()
     {
-        $userId = explode(',', $this->argument('user_id'));
+        if ($this->hasArgument('user_id') && null !== $this->argument('user_id')) {
+            $userId = explode(',', $this->argument('user_id'));
+        } else {
+            $userId = [44309,33952,27424];
+        }
         $wallet_users = WalletUser::whereIn('user_id', $userId)->get();
         $success_delete = [];
         foreach ($wallet_users as $user) {
@@ -44,6 +49,7 @@ class WalletUserDisables extends Command
 
                 if ($wallet_user_disable->save()) {
                     $user->delete();
+                    WalletShipperSetting::where('user_id',$user->user_id)->delete();
                     $success_delete[] = $user->user_id;
                 }
             }
