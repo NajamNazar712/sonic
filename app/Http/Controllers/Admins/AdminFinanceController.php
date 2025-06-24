@@ -19690,11 +19690,7 @@ class AdminFinanceController extends Controller
                         $gst = ROUND(($charges * self::international_gst()), 2, PHP_ROUND_HALF_DOWN);
                     }
 
-                    if ($crs) {
-                        $wht = (($charges + $gst) * 3) / 100;
-                    } else {
-                        $wht = 0;
-                    }
+                    $wht = 0;
                     $payable = 0 - ($charges + $gst - $wht);
                     $amount = 0;
                 } else {
@@ -21650,11 +21646,8 @@ class AdminFinanceController extends Controller
                         $gst = ROUND(($charges * self::international_gst()), 2, PHP_ROUND_HALF_DOWN);
                     }
 
-                    if ($crs) {
-                        $wht = (($charges + $gst) * 3) / 100;
-                    } else {
-                        $wht = 0;
-                    }
+                    $wht = 0;
+
                     $payable = 0 - ($charges + $gst - $wht);
                     $amount = 0;
                 } else {
