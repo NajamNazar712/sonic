@@ -396,10 +396,16 @@
                         </div>
                         <div class="row">
                             <div class="col-md-6">
-                                <div class="form-group row">
-                                    <div class="col-md-9">
-                                        <label>URL</label>
-                                        <input type="text" data-rule-maxlength="190" data-msg-maxlength="URL can be maximum 190 characters" id="url" class="form-control border-primary" value="{{$user->url}}" name="url">
+                                <div class="row">
+                                    <div class="form-group col-md-9">
+                                        <label>Parent Product Type</label>
+                                        <span class="danger">*</span>
+                                        <select name="parent_product_id" id="parent_product_id" data-rule-required="true" data-msg-required="Parent Product Type is required" class="select2 form-control required" style="width: 100%">
+                                            <option value="">Select Parent Product Type</option>
+                                            @foreach($parent_products as $single_product)
+                                                <option value="{{$single_product->id}}" {{ $user->parent_product_id == $single_product->id ? 'selected' : '' }} >{{$single_product->name}}</option>
+                                            @endforeach
+                                        </select>
                                     </div>
                                 </div>
                             </div>
@@ -544,6 +550,14 @@
                                     </select>
                                 </div>
                             </div>
+                        </div>
+                        <div class="col-md-6">
+                                <div class="form-group row">
+                                    <div class="col-md-9">
+                                        <label>URL</label>
+                                        <input type="text" data-rule-maxlength="190" data-msg-maxlength="URL can be maximum 190 characters" id="url" class="form-control border-primary" value="{{$user->url}}" name="url">
+                                    </div>
+                                </div>
                         </div>
 
                         </div>
@@ -940,6 +954,31 @@
                                     $('#sub_segment_id').prepend('<option value="" selected="selected"></option>')
                                 $.each(data.sub_segments, function (index, sub_segments) {
                                     $('#sub_segment_id').append('<option value="'+sub_segments.id+'" id="trax_center">'+sub_segments.name+'</option>')
+                                });
+                   }
+                });
+            });
+
+            $('#parent_product_id').select2({
+                placeholder: "Select Parent Product Type",
+                width:'100%',
+            }).bind('change', function() {
+                var id = $(this).val();
+                $.ajax({
+                    url: '{!! route('cod.get_products') !!}',
+                    method: 'GET',
+                    data: {
+                        'parent_product_id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    console.log(data);
+                   if (data.status == 0) {
+                    // $('#sub_segment_id').prop("disabled", false);
+                       $('#product_id').children().remove();
+                                    $('#product_id').prepend('<option value="" selected="selected"></option>')
+                                $.each(data.products, function (index, products) {
+                                    $('#product_id').append('<option value="'+products.id+'" id="trax_center">'+products.product_name+'</option>')
                                 });
                    }
                 });

@@ -2660,6 +2660,11 @@
                                                href="{{ route('admin.settings.faf_charges.index') }}">FAF Charges</a></li>
                                     @endif
 
+                                     @if (session('role_id') == 1 || in_array(997, session('permissions')))
+                                        <li><a class="menu-item"
+                                               href="{{ route('admin.settings.product_tax.index') }}">Product Tax Percentage</a></li>
+                                    @endif
+
                                 </ul>
                             </li>
                         @endif

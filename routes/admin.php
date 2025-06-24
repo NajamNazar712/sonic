@@ -2817,6 +2817,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@cod_cap_zones_update')->name('update');
         });
 
+        Route::prefix('product_tax')->name('product_tax.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@product_tax_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@product_tax_update')->name('update');
+        });
         Route::prefix('ibft_charges')->name('ibft_charges.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@ibft_charges_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@ibft_charges_store')->name('store');

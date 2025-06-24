@@ -178,6 +178,7 @@ use App\Models\WalletShipperSetting;
 use Illuminate\Support\Str;
 use App\Http\Traits\CommonTrait;
 use App\ChangeLogs;
+use App\Models\ParentProduct;
 
 class GlobalSettingsController extends Controller
 {
@@ -10755,6 +10756,26 @@ class GlobalSettingsController extends Controller
             }
         }
     
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+    public function product_tax_index()
+    {
+        $data = ParentProduct::get();
+        return view('admin.settings.product_percentage')->with(['data' => $data]);
+    }
+
+    public function product_tax_update(Request $request)
+    {
+        if($request->has('percentage')) {
+            //dd($request->percentage);
+            foreach($request->percentage as $key => $value) {
+
+                ParentProduct::where('id', $key)->update(['tax_percentage' => $value]);
+
+            }
+        }
+      
         return redirect()->back()->with('success', 'Settings Updated!');
     }
     
