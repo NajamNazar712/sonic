@@ -513,7 +513,6 @@ use Illuminate\Http\Request;
                 Route::post('check_v3', 'AdminAPIController@check_profile_v3')->name('check_v3');
                 Route::post('update_v2', 'AdminAPIController@update_profile_v2')->name('update_v2');
 
-                Route::post('get_shipper_info','AdminAPIController@get_shipper_info')->name('get_shipper_info');
             });
             Route::get('profile', 'AdminAPIController@admin_profile')->name('profile');
             Route::get('employee_id', 'AdminAPIController@get_employee_id')->name('employee_id');
@@ -653,6 +652,7 @@ use Illuminate\Http\Request;
                 Route::get('list', 'ShipperAPIController@shipper_subscription_list')->name('list');
                 Route::post('delete', 'ShipperAPIController@shipper_subscription_delete')->name('delete');
             });
+            Route::get('get_shipper_info','ShipperAPIController@get_shipper_info')->name('get_shipper_info');
             Route::get('notification_history', 'ShipperAPIController@notification_history')->name('notification_history');
 
             Route::prefix('add_request')->name('add_request.')->group(function () {
