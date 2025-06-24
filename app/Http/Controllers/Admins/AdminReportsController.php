@@ -3387,7 +3387,7 @@ class AdminReportsController extends Controller
     }
     public function overall_sales_list(Request $request)
     {
-        $connection = 'reports_2';
+        $connection = 'reports';
 
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 150);
