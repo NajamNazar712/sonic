@@ -2,6 +2,7 @@
 <form action="{{route('admin.management.city.edit',['id'=>$city->id])}}" method="post" class="mt-2" id="editCityHubForm" novalidate="novalidate">
     {{csrf_field()}}
     <input type="hidden" name="_method" value="PUT">
+     @if ($cxEtdTypeEdited != 1) 
     <div class="row">
         <div class="col-6">
             <div class="row">
@@ -278,6 +279,23 @@
             </div>
         </div>
     </div>
+        
+    @endif
+    @if ($cxEtdTypeEdited == 1) 
+        <div class="row">
+                <div class="col-8">
+                    <input type="hidden" name="cx_city_etd_type" value="1"/>
+                    <fieldset class="form-group">
+                        <select name="city_type_etd_id" id="city_type_etd_id" class="form-control select2" data-rule-required="true" data-msg-required="Province is required">
+                                <option value="null" >{{"Not Selected"}}</option>
+                            @foreach($cityEtdlist as $list)
+                                <option value="{{ $list->id }}" @if (isset($city) && $city->city_type_etd_id == $list->id)  selected @endif>{{ $list->name }}</option>
+                            @endforeach
+                        </select>
+                    </fieldset>
+                </div>
+        </div>
+    @endif
     <div class="modal-footer">
         <button type="submit" class="btn btn-warning btn-min-width mr-1 mb-1" id="confirmAction">Update City</button>
         <button type="button" class="btn btn-primary btn-min-width mr-1 mb-1" data-dismiss="modal">Cancel</button>
@@ -520,7 +538,10 @@
         $('#pickup_checkbox').on('ifUnchecked', function(event){
             $('#pickup_cut_off_time').prop('disabled', true);
         });
-
+        $('#city_type_etd_id').prepend('<option value=""></option>').select2({
+            placeholder: 'Select a City Type ETD',
+            dropdownParent: $("#editCity")
+        });
         $( "#editCityHubForm" ).validate({
 
 
@@ -537,7 +558,7 @@
                     $(form).find('button[type=submit]').attr('disabled', 'disabled');
                     swal({
                         title: 'Please Wait!',
-                        text: 'City/Hub is being updated!',
+                        text: @json($cxEtdTypeEdited == 1 ? 'Cx ETD City is being updated!' : 'City/Hub is being updated!'),
                         icon: 'info',
                         buttons: false,
                         closeOnClickOutside: false,
