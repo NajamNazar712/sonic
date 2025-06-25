@@ -17939,9 +17939,9 @@ class AdminReportsController extends Controller
                     $action_updated_by = $action_updated_by->name;
                 }
             }
-            else{
-                return '-';
-            }
+            // else{
+            //     return '-';
+            // }
 
             $delivery_attempt_count = ShipmentsJourney::where('shipment_id', $rowArray['shipment_id'])->where('shipper_status_id', 5)->count();
             $re_attempt_count = ShipmentsJourney::where('shipment_id', $rowArray['shipment_id'])->where('shipper_status_id', 13)->count();
