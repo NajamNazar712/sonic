@@ -1629,7 +1629,7 @@ class AdminReportsEmailController extends Controller
                 $link = '<a href="' .  url('/') . '/' . $file_name_without_path . '" target="_blank">Report</a>';
                 $mail->send(new ReportsEmail("Retail Payment", 'Retail Payment Report Link ' . ' ' . $link, null));
             
-                NotificationsController::send(141, $date, url('/') . '/' . $file_name_without_path);
+                // NotificationsController::send(141, $date, url('/') . '/' . $file_name_without_path);
 //                Log::channel('cronJobLog')->info('s ' .'report:retail End');
             }
         }catch(\Throwable $th){
