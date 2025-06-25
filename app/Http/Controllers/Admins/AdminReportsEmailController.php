@@ -1549,7 +1549,7 @@ class AdminReportsEmailController extends Controller
 //        Log::channel('cronJobLog')->info('s ' .'report:retail Running');
         try{
 
-            $retail_done_payments = RetailDonePaymentCalculation::whereDate('created_at', '2025-06-24');
+            $retail_done_payments = RetailDonePaymentCalculation::whereDate('created_at', '2024-06-12');
             RetailDonePaymentsReport::truncate();
             if($retail_done_payments->exists()){
                 $total_amount = 0;
