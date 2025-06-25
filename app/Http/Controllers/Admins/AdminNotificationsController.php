@@ -1276,6 +1276,12 @@ class AdminNotificationsController extends Controller
 
             $details['fields'] = [''];
         }
+        else if ($id == 243)
+        {
+            $details['receiver'] = ['Retail Shipper'];
+
+            $details['fields'] = ['user_name','otp','expire_at'];
+        }
 
         else if (/* $id == 110 || $id == 226 || */ $id == 236 || $id == 237 || $id == 238 || $id == 239 || $id == 240 || $id == 241 || $id == 242)
         {
