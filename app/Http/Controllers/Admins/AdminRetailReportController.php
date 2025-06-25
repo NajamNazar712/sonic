@@ -282,7 +282,7 @@ class AdminRetailReportController extends Controller
             $from = Carbon::today()->subMonth(1)->firstOfMonth()->addDays(20)->toDateTimeString();
             $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();
         }
-        dd($from, $to);
+        
         $sales = DB::connection('reports')->table('shipments')->join('retail_shipments as rs', 'rs.shipment_id', '=','shipments.id')
             ->leftjoin('retail_users as ru','ru.id','=','rs.retail_user_id')
             ->leftjoin('retail_shipper_infos as rsi', 'rsi.id', '=', 'rs.shipper_account_no')

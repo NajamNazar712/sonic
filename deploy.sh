@@ -1,7 +1,9 @@
 #!/bin/bash
 
 echo "Pulling latest changes..."
-git pull 
+git pull
+echo "Artisan Down..."
+php artisan down
 echo "Running migrations..."
 php artisan migrate --force
 echo "Running new seeders..."
@@ -14,5 +16,7 @@ do
   php artisan db:seed --class=$SEEDER_CLASS --force
 done
 
+echo "Artisan Up..."
+php artisan up
 echo "Deployment complete."
 
