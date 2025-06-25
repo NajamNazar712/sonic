@@ -11456,6 +11456,56 @@ class NotificationsController extends Controller
                     $to[] = 'mansoor.ahmad@trax.pk';
 
                     self::email($subject, $body, $to, NULL, $bcc);
+                } else if( $id == 244) {
+                    
+                    $delivery_note = DeliveryNote::find($reference_1_id);
+
+                    $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $reference_1_id)
+                        ->where('shipment_id', $reference_2_id)->first();
+
+                    $shipment = Shipment::find($reference_2_id);
+                    $to = $shipment->consignee_phone_number_1;
+                    $shipment_otp = ShipmentOtp::where('shipment_id', $shipment->id);
+
+                    if ($delivery_note->special_rider) {
+                        if (strpos($body, '[rider_number]') !== FALSE) {
+                            if ($delivery_note_shipment->rider_information) {
+                                $body = str_replace('[rider_number]', str_replace('-', '', $delivery_note->special_rider_phone), $body);
+                            } else {
+                                $body = str_replace('[rider_number]', '', $body);
+                            }
+                        }
+                    } else {
+                        if (strpos($body, '[rider_number]') !== FALSE) {
+                            if ($delivery_note_shipment->rider_information) {
+                                $body = str_replace('[rider_number]', str_replace('-', '', $delivery_note->rider->phone), $body);
+                            } else {
+                                $body = str_replace('[rider_number]', '', $body);
+                            }
+                        }
+                    }
+
+                    if ($shipment_otp->exists()) {
+                        $shipment_otp = $shipment_otp->first();
+                        if (strpos($body, '[otp]') !== FALSE) {
+                            $body = str_replace('[otp]', $shipment_otp->otp, $body);
+                        }
+                    }
+
+                    if (strpos($body, '[tracking_number]') !== FALSE) {
+                        $body = str_replace('[tracking_number]', $shipment->tracking_number, $body);
+                    }
+
+                    self::sms($body, $to, null,$shipment->id,$id);
+                }
+                else if($id == 245) {
+                    $shipment = Shipment::find($reference_1_id);
+                    $to = $shipment->consignee_phone_number_1;
+
+                    if (strpos($body, '[tracking_number]') !== FALSE) {
+                        $body = str_replace('[tracking_number]', $shipment->tracking_number, $body);
+                    }
+                    self::sms($body, $to, null,$shipment->id,$id);
                 }
             }
         }
