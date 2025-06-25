@@ -54,11 +54,11 @@ class MissingFirstCallInitiate extends Command
         //
         try{
 
-            $shipmentId = ApiCallLog::where('created_at','>=','2025-06-23 16:30:00')->where('status_code', 403)->groupBy('shipment_id')->pluck('shipment_id')->toArray();
-            foreach ($shipmentId as $ids) {
-                dispatch(new BotCallDispatch($ids));
-            }
-            return true;  
+            // $shipmentId = ApiCallLog::where('created_at','>=','2025-06-23 16:30:00')->where('status_code', 403)->groupBy('shipment_id')->pluck('shipment_id')->toArray();
+            // foreach ($shipmentId as $ids) {
+            //     dispatch(new BotCallDispatch($ids));
+            // }
+            // return true;  
         if($this->argument('startDate') != 0 && $this->argument('endDate') != 0 ){
             $timeEnd = $this->argument('endDate');
             $timeStart = $this->argument('startDate');
