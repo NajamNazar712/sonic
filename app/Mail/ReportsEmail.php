@@ -22,7 +22,7 @@ class ReportsEmail extends Mailable
         $this->subject = $subject;
         $this->body = nl2br($body);
 
-        dd($from);
+        $from = $from ? $from : 'info@slgtrax.com';
         if ($from) {
             $this->from($from, 'TRAX');
         }
