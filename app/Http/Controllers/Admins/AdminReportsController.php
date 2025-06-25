@@ -3539,7 +3539,7 @@ class AdminReportsController extends Controller
             ->leftJoin('admins as rf', 'rf.id', '=', 'st.ref')
             ->leftjoin('shipment_additional_charges as faf_charges', 'faf_charges.shipment_id', '=', 'shipments.id')
             ->select( 'invoices.invoice_number', 'r.name as ridername', 'ssr.name as reason', 'sjr.remarks as remark', 'p.product_name as category', 'si.description as description', 'shipments.id as shipment_id', 'shipments.fintech_charges as fintech_charges', 'shipments.order_id as order_id', 'shipments.tracking_number as tracking_number_link', 'u.id as account_no', 'u.name as shipper', 'usi.pickup_address as shipper_address', 'ss.name as current_status', 'bt.booking_type as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.amount as s_collection_amount', 'sps.name as payment_status', 'shipments.actual_weight', 'shipments.weight_charges', 'shipments.cash_handling_charges', 'shipments.insurance_charges', 'shipments.return_charges', 'shipments.replacement_charges', 'shipments.fuel_surcharge', 'shipments.try_and_buy_charges', 'shipments.packaging_material_charges', DB::raw('SUM(pps.charges) as p_total_charges'), DB::raw('SUM(DISTINCT pps.amount) as p_collection_amount'), DB::raw('SUM(DISTINCT pps.payable) as p_net_payable'), DB::raw('SUM(DISTINCT pps.gst) as p_gst'), DB::raw('SUM(DISTINCT dps.amount) as d_collection_amount'), DB::raw('SUM(DISTINCT dps.charges) as d_total_charges'), DB::raw('SUM(DISTINCT dps.payable) as d_net_payable'), DB::raw('SUM(DISTINCT dps.gst) as d_gst'), 'sm.mode as shipping_mode', 'sm.id as shipping_mode_id', 'shipments.chargeable_weight', 'dr.created_at as delivered_or_returned', 'z.name as zone', 'zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', DB::raw('MAX(dps.done_payment_id) as payment_id'),
-            'shipments.booking_type_id', 'usi.poc', 'adsp.id', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges', 'u.account_type_id as account_type_id', DB::raw('SUM(DISTINCT is.gst) as is_gst'), DB::raw('SUM(DISTINCT pis.gst) as pis_gst'), 'shipments.packaging_charges', 'dr.received_or_refused_by', 'shipments.special_instructions', 'shipments.intercept_charges', 'bc.name as business_shipment_type', 'ibs.international_tracking_number', 'usi.vendor', 'dr.shipper_status_id as dr_status_id', 'shipments.shipment_type', 'rc.name as return_city', 'dr.cnic as dr_cnic', 'dr.relation as dr_relation', 'shipments.consignee_address as consignee_address', 'scs.name as sub_segment', 'sjfa.created_at as first_attempt_date', 'spjpaid_date.created_at as paid_date', 'spjproceed_date.created_at as processed_date', 'si.quantity as item_quantity', 'shipments.pieces as pieces', 'scun.id as scun_id', 'rf.id as ref_id', 'rf.name as ref', 'och.name as origin_hub', 'shipments.tracking_number as tracking_number_excel', DB::raw('SUM(DISTINCT pps.sms_charges) as pps_sms_charges'), DB::raw('SUM(DISTINCT dps.sms_charges) as dps_sms_charges'), DB::raw('SUM(DISTINCT pis.sms_charges) as pis_sms_charges'), DB::raw('SUM(DISTINCT is.sms_charges) as is_sms_charges'), DB::raw('SUM(DISTINCT faf_charges.faf_charges) as faf_charges'), DB::raw('SUM(DISTINCT ss_charge.reverse_pickup_charges) as reverse_pickup_charges'), 'ibs.cost')
+            'shipments.booking_type_id', 'usi.poc', 'adsp.id', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges', 'u.account_type_id as account_type_id', DB::raw('SUM(DISTINCT is.gst) as is_gst'), DB::raw('SUM(DISTINCT pis.gst) as pis_gst'), 'shipments.packaging_charges', 'dr.received_or_refused_by', 'shipments.special_instructions', 'shipments.intercept_charges', 'bc.name as business_shipment_type', 'ibs.international_tracking_number', 'usi.vendor', 'dr.shipper_status_id as dr_status_id', 'shipments.shipment_type', 'rc.name as return_city', 'dr.cnic as dr_cnic', 'dr.relation as dr_relation', 'shipments.consignee_address as consignee_address', 'scs.name as sub_segment', 'sjfa.created_at as first_attempt_date', 'spjpaid_date.created_at as paid_date', 'spjproceed_date.created_at as processed_date', 'si.quantity as item_quantity', 'shipments.pieces as pieces', 'scun.id as scun_id', 'rf.id as ref_id', 'rf.name as ref', 'och.name as origin_hub', 'shipments.tracking_number as tracking_number_excel', DB::raw('SUM(DISTINCT pps.sms_charges) as pps_sms_charges'), DB::raw('SUM(DISTINCT dps.sms_charges) as dps_sms_charges'), DB::raw('SUM(DISTINCT pis.sms_charges) as pis_sms_charges'), DB::raw('SUM(DISTINCT is.sms_charges) as is_sms_charges'), DB::raw('SUM(DISTINCT faf_charges.faf_charges) as faf_charges'), DB::raw('SUM(DISTINCT ss_charge.reverse_pickup_charges) as reverse_pickup_charges'), 'ibs.cost', DB::raw('SUM(DISTINCT dps.wht) as dps_wht'),DB::raw('SUM(DISTINCT pps.wht) as pps_wht'), DB::raw('SUM(DISTINCT pis.wht) as pis_wht'), DB::raw('SUM(DISTINCT is.wht) as is_wht'))
             ->whereNotIn('shipments.shipper_status_id', [1, 17])
             ->whereNotIn('u.id', [8761, 9358])
             //    ->whereBetween('sj.created_at', [$from, $to])
@@ -3766,6 +3766,25 @@ class AdminReportsController extends Controller
                     }
                 }
                 return number_format((float) $gst, 2);
+            })
+            ->editColumn('pps_wht', function ($sale) {
+                $wht = 0;
+                if ($sale->account_type_id == 1) {
+                    if ($sale->pps_wht != null) {
+                        $wht+= $sale->pps_wht;
+                    }
+                    if ($sale->dps_wht != null) {
+                        $wht+= $sale->dps_wht;
+                    }
+                } else {
+                    if ($sale->pis_wht != null) {
+                        $wht+= $sale->pis_wht;
+                    }
+                    if ($sale->is_wht != null) {
+                        $wht+= $sale->is_wht;
+                    }
+                }
+                return number_format((float) $wht, 2);
             })
             ->editColumn('pps_sms_charges', function ($sale) {
                 $sms_charges = 0;
@@ -5698,7 +5717,7 @@ class AdminReportsController extends Controller
             });
         }
 
-        $sales->select('shipments.id as shipment_id','shipments.tracking_number','shipments.fintech_charges as fintech_amount','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges',DB::raw('SUM(DISTINCT pps.charges) as p_total_charges'),DB::raw('SUM(DISTINCT pps.amount) as p_collection_amount'),DB::raw('SUM(DISTINCT pps.payable) as p_net_payable'),DB::raw('SUM(DISTINCT pps.gst) as p_gst'),DB::raw('SUM(DISTINCT dps.amount) as d_collection_amount'),DB::raw('SUM(DISTINCT dps.charges) as d_total_charges'),DB::raw('SUM(DISTINCT dps.payable) as d_net_payable'),DB::raw('SUM(DISTINCT dps.gst) as d_gst'),'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class','oc.id as origin_city_id','dc.id as destination_city_id','dnsdn.station_deposit_note_id as sdn_id','dps.done_payment_id as payment_id','shipments.booking_type_id','usi.poc','shipments.shipper_status_id as shipment_status','shipments.nsa_osa_charges','u.account_type_id as account_type_id',DB::raw('SUM(DISTINCT pis.gst) as pis_gst'),DB::raw('SUM(DISTINCT is.gst) as is_gst'),'shipments.packaging_charges','shipments.intercept_charges','bc.name','dr.shipper_status_id as dr_status_id','shipments.shipment_type','invoices.invoice_number','rc.name as return_city',DB::raw('SUM(DISTINCT ss_charge.reverse_pickup_charges) as reverse_pickup_charges'),DB::raw('SUM(DISTINCT pps.sms_charges) as pps_sms_charges'),DB::raw('SUM(DISTINCT dps.sms_charges) as dps_sms_charges'),DB::raw('SUM(DISTINCT pis.sms_charges) as pis_sms_charges'),DB::raw('SUM(DISTINCT is.sms_charges) as is_sms_charges'), 'faf_charges.faf_charges', 'provinces.name as province_name')
+        $sales->select('shipments.id as shipment_id','shipments.tracking_number','shipments.fintech_charges as fintech_amount','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges',DB::raw('SUM(DISTINCT pps.charges) as p_total_charges'),DB::raw('SUM(DISTINCT pps.amount) as p_collection_amount'),DB::raw('SUM(DISTINCT pps.payable) as p_net_payable'),DB::raw('SUM(DISTINCT pps.gst) as p_gst'),DB::raw('SUM(DISTINCT dps.amount) as d_collection_amount'),DB::raw('SUM(DISTINCT dps.charges) as d_total_charges'),DB::raw('SUM(DISTINCT dps.payable) as d_net_payable'),DB::raw('SUM(DISTINCT dps.gst) as d_gst'),'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class','oc.id as origin_city_id','dc.id as destination_city_id','dnsdn.station_deposit_note_id as sdn_id','dps.done_payment_id as payment_id','shipments.booking_type_id','usi.poc','shipments.shipper_status_id as shipment_status','shipments.nsa_osa_charges','u.account_type_id as account_type_id',DB::raw('SUM(DISTINCT pis.gst) as pis_gst'),DB::raw('SUM(DISTINCT is.gst) as is_gst'),'shipments.packaging_charges','shipments.intercept_charges','bc.name','dr.shipper_status_id as dr_status_id','shipments.shipment_type','invoices.invoice_number','rc.name as return_city',DB::raw('SUM(DISTINCT ss_charge.reverse_pickup_charges) as reverse_pickup_charges'),DB::raw('SUM(DISTINCT pps.sms_charges) as pps_sms_charges'),DB::raw('SUM(DISTINCT dps.sms_charges) as dps_sms_charges'),DB::raw('SUM(DISTINCT pis.sms_charges) as pis_sms_charges'),DB::raw('SUM(DISTINCT is.sms_charges) as is_sms_charges'), 'faf_charges.faf_charges', 'provinces.name as province_name', DB::raw('SUM(DISTINCT dps.wht) as dps_wht'),DB::raw('SUM(DISTINCT pps.wht) as pps_wht'), DB::raw('SUM(DISTINCT pis.wht) as pis_wht'), DB::raw('SUM(DISTINCT is.wht) as is_wht') )
             ->whereNotIn('shipments.shipper_status_id', [1, 17])
             ->whereNotIn('u.id', [8761, 9358]);
 
@@ -5872,6 +5891,25 @@ class AdminReportsController extends Controller
                     }
                 }
                 return number_format((float) $sms_charges, 2);
+            })
+            ->editColumn('pps_wht', function ($sale) {
+                $wht = 0;
+                if ($sale->account_type_id == 1) {
+                    if ($sale->pps_wht != null) {
+                        $wht+= $sale->pps_wht;
+                    }
+                    if ($sale->dps_wht != null) {
+                        $wht+= $sale->dps_wht;
+                    }
+                } else {
+                    if ($sale->pis_wht != null) {
+                        $wht+= $sale->pis_wht;
+                    }
+                    if ($sale->is_wht != null) {
+                        $wht+= $sale->is_wht;
+                    }
+                }
+                return number_format((float) $wht, 2);
             })
             ->editColumn('p_total_charges', function ($sale) {
                 $total = 0;
