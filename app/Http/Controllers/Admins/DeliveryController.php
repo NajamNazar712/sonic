@@ -1263,7 +1263,10 @@ class DeliveryController extends Controller
                         $otp = mt_rand(100000, 999999);
                         $shipment_otp->otp = $otp;
                         $shipment_otp->save();
-                        if ($shipment_obj->amount == 0) {
+                        if(in_array($shipment_obj->user_id, [43066, 41969])) {
+                            NotificationsController::send(244, $note->id, $shipment_id);
+                        }
+                        else if ($shipment_obj->amount == 0) {
                             //English
                             NotificationsController::send(132, $note->id, $shipment_id);
                             //Urdu
