@@ -13000,10 +13000,36 @@ class AdminReportsController extends Controller
 
     public function rv_report_list(Request $request)
     {
-        if ($request->get('excel') && $request->get('excel') == true) {
-            ActivityTrailController::createActivityTrailLog(Auth::id(), 705);
-        }
-
+        
+        $select =    [
+            'shipments.id as shipment_id',
+            'sjj.created_at as arrival_date', 
+            'shipments.tracking_number as tracking_number',
+            'users.name as shipper_name', 
+            'origin_city.name as origin', 
+            'area.name as area', 
+            'destination_city.name as destination',
+            'hub.name as hub',
+            'shipments.amount as cod_amount', 
+            'shipping_modes.mode as shipping_mode', 
+            'booking_types.booking_type as service_type', 
+            'rv_aas.name as action', 'rv_aass.name as reason',
+            'rv_shipment_assign_agent_details.remarks as remarks', 
+            'rv_shipment_assign_agent_details.created_at as action_date',
+            'rv_shipment_assign_agent_details.updated_type_id as updated_type_id',
+            'rv_shipment_assign_agent_details.updated_by_id as updated_by_id',
+            'rv_fakes.name as fake_status', 
+            's_status.name as current_status', 
+            'shipments.updated_at as current_status_date',
+            'rv_shipment_assign_agents.unresponsive_count as call_count',
+            'rv_status.name as rv_status_name',
+            'sj.updated_at as rv_status_date',
+            'rv_shipment_assign_agent_details.rv_state_id as rv_state_id', 
+            'add.id as agent_id', 
+            'rv_reason.name as rv_reason',
+            'rach.call_status as call_status', 
+            'rc_reason.name as rc_reason_name'
+        ];
         $rv_report = RvShipmentAssignAgentDetails::join('shipments', 'rv_shipment_assign_agent_details.shipment_id','shipments.id')
         ->join('rv_shipment_assign_agents', 'rv_shipment_assign_agents.id', 'rv_shipment_assign_agent_details.rv_shipment_assign_agent_id')
         ->leftjoin('users', 'shipments.user_id', 'users.id')
@@ -13046,19 +13072,41 @@ class AdminReportsController extends Controller
                 ->where('sjrc.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 20)'));
         })
         ->leftjoin('shipment_status_reason as rc_reason', 'sjrc.status_reason_id', 'rc_reason.id')
-        ->select('shipments.id as shipment_id','sjj.created_at as arrival_date', 'shipments.tracking_number as tracking_number',
-        'users.name as shipper_name', 'origin_city.name as origin', 'area.name as area', 'destination_city.name as destination', 'hub.name as hub',
-        'shipments.amount as cod_amount', 'shipping_modes.mode as shipping_mode', 'booking_types.booking_type as service_type', 'rv_aas.name as action', 'rv_aass.name as reason',
-        'rv_shipment_assign_agent_details.remarks as remarks', 'rv_shipment_assign_agent_details.created_at as action_date',
-        'rv_shipment_assign_agent_details.updated_type_id as updated_type_id','rv_shipment_assign_agent_details.updated_by_id as updated_by_id',
-        'rv_fakes.name as fake_status', 's_status.name as current_status', 'shipments.updated_at as current_status_date',
-        'rv_shipment_assign_agents.unresponsive_count as call_count','rv_status.name as rv_status_name','sj.updated_at as rv_status_date','rv_shipment_assign_agent_details.rv_state_id as rv_state_id', 'add.id as agent_id', 'rv_reason.name as rv_reason','rach.call_status as call_status', 'rc_reason.name as rc_reason_name')
+        ->select($select)
         ->where('rv_shipment_assign_agent_details.rv_state_id', '!=', 1)
         ->where('rv_shipment_assign_agent_details.rv_assign_agent_status_id', '!=', '')
         ->whereColumn('rv_shipment_assign_agent_details.agent_id', 'rv_shipment_assign_agent_details.updated_by_id')
         ->groupBy('rv_shipment_assign_agent_details.created_at','rv_shipment_assign_agent_details.shipment_id');
 
-        $datatable = Datatables::of($rv_report)
+        if ($tracking_num = $request->get('search_tracking_no')) {
+            $rv_report->where('shipments.tracking_number', '=', $tracking_num);
+        }
+        if ($shipper_id = $request->get('search_shipper_name')) {
+            $shipper_name = User::where('id', $shipper_id)->value('name');
+            $rv_report->where('users.name', '=', $shipper_name);
+        }
+        if ($agent_id = $request->get('search_agent_name')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $rv_report->where('add.id', '=', $agent_id);
+            // $rv_report->where('rv_shipment_assign_agent_details.agent_id', '=', $agent_id);
+            $rv_report->where('rv_shipment_assign_agent_details.updated_type_id',2);
+
+        }
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $rv_report->whereBetween('rv_shipment_assign_agent_details.created_at', [$from, $to]);
+        }
+
+        if($request->get('excel') && $request->get('excel') == true) {
+            $fieldsToRetrieve = $request->input('selectedValue', []); 
+            $headers = $request->input('selectedTexts',[]);
+            //dd($fieldsToRetrieve);
+            $this->rv_report_csv_export($headers,$fieldsToRetrieve, $rv_report,$select);
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 705);
+        } else{
+             $datatable = Datatables::of($rv_report)
                     ->editColumn('tracking_number', function($rv_report) {
                         $route = route('admin.tracking.index');
                         return "<u><a href='{$route}?tracking_number=$rv_report->tracking_number' class='tracking' target='_blank'>$rv_report->tracking_number</a></u>";
@@ -13167,30 +13215,11 @@ class AdminReportsController extends Controller
                         }
                     });
 
-        if ($tracking_num = $request->get('search_tracking_no')) {
-            $rv_report->where('shipments.tracking_number', '=', $tracking_num);
+            return $datatable
+            ->rawColumns(['tracking_number', 'unresponsive_count'])
+            ->make(true);
         }
-        if ($shipper_id = $request->get('search_shipper_name')) {
-            $shipper_name = User::where('id', $shipper_id)->value('name');
-            $rv_report->where('users.name', '=', $shipper_name);
-        }
-        if ($agent_id = $request->get('search_agent_name')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $rv_report->where('add.id', '=', $agent_id);
-            // $rv_report->where('rv_shipment_assign_agent_details.agent_id', '=', $agent_id);
-            $rv_report->where('rv_shipment_assign_agent_details.updated_type_id',2);
-
-        }
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $rv_report->whereBetween('rv_shipment_assign_agent_details.created_at', [$from, $to]);
-        }
-
-        return $datatable
-        ->rawColumns(['tracking_number', 'unresponsive_count'])
-        ->make(true);
+       
     }
 
     public function rv_call_history(Request $request)
@@ -17674,5 +17703,85 @@ class AdminReportsController extends Controller
             fputcsv($output, $filteredArray);
         }
         fclose($output);   
+    }
+
+    public function rv_report_csv_export($headers ,$fieldsToRetrieve, $shipments,$select) {
+
+        $headers = array_filter($headers, function($value) {
+            return $value !== 'Select All';
+        });            
+        $fieldsToRetrieve = array_filter($fieldsToRetrieve, function($value) {
+            return $value !== 'selectAll';
+        }); 
+        
+        $final_Array = array();
+        $specificValues = $shipments->select($select)->get()->toarray();
+        header('Content-Type: text/csv; charset=utf-8');  
+        header('Content-Disposition: attachment; filename=data.csv');  
+        $output = fopen("php://output", "w");  
+        $serialNumber = 1;
+        fputcsv($output, $headers);
+
+        foreach ($specificValues as $key => $row) {
+            // Convert the row to an associative array
+            $rowArray = (array) $row;
+
+            $agent = '-';
+            $action_updated_by = "-";
+            if ($rowArray['rv_state_id'] != 1 && $rowArray['updated_type_id'] == 2) {
+                $agent = Admin::where('id', $rowArray['agent_id'])->select('name')->first();
+                if ($agent) {
+                    $agent = $agent->name;
+                }
+            }
+
+            if (($rowArray['updated_type_id'] == 1) && ($rowArray['rv_state_id'] != 1) && ($rowArray['updated_by_id'] != NULL)) {
+                $action_updated_by = Admin::where('id', $rowArray['updated_by_id'])->select('name')->first();
+                if ($action_updated_by) {
+                    $action_updated_by = $action_updated_by->name;
+                }
+            }
+            //shipper or retail user
+            else if(($rowArray['updated_type_id'] == 3) || ($rowArray['updated_type_id'] == 5) && ($rowArray['updated_by_id'] != NULL)){
+                
+                $action_updated_by = User::where('id', $rowArray['updated_by_id'])->select('name')->first();
+                if ($action_updated_by) {
+                    $action_updated_by = $action_updated_by->name;
+                }
+            }
+            //substitute user
+            else if($rowArray['updated_type_id'] == 4){
+            
+                $action_updated_by = SubstituteUser::where('id', $rowArray['updated_by_id'])->select('name')->first();
+                if ($action_updated_by) {
+                    $action_updated_by = $action_updated_by->name;
+                }
+            }
+            else{
+                return '-';
+            }
+
+            $delivery_attempt_count = ShipmentsJourney::where('shipment_id', $rowArray['shipment_id'])->where('shipper_status_id', 5)->count();
+            $re_attempt_count = ShipmentsJourney::where('shipment_id', $rowArray['shipment_id'])->where('shipper_status_id', 13)->count();
+           
+            $rowArray['rcp_agent_updated_by'] = $agent;
+            $rowArray['action_updated_by'] = $action_updated_by;
+            $rowArray['delivery_attempt_count'] = $delivery_attempt_count;
+            $rowArray['re_attempt_count'] = $re_attempt_count;
+
+            $filteredArray = [];// Iterate over $fieldsToRetrieve to maintain sequence
+            
+            foreach ($fieldsToRetrieve as $field) {
+                // Check if the field exists in the row array
+                if (array_key_exists($field, $rowArray)) {
+                    // Add the field to the filtered array
+                    $filteredArray[$field] = $rowArray[$field];
+                }
+            }
+
+            $final_Array[] = $rowArray;
+            fputcsv($output, $filteredArray);
+        }
+        fclose($output);
     }
 }
