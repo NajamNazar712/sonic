@@ -247,7 +247,7 @@ class LeadManagementController extends Controller
                 
                     } elseif ($keyword == '1') {
                         $q->where('leads.status_id', 1)
-                        ->whereIn('leads.email_address', function ($subQuery) {
+                        ->orWhereIn('leads.email_address', function ($subQuery) {
                             $subQuery->select('email')
                                     ->from('users')
                                     ->where('blacklist', '!=', '1')
