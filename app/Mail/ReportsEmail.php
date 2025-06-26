@@ -22,9 +22,10 @@ class ReportsEmail extends Mailable
         $this->subject = $subject;
         $this->body = nl2br($body);
 
-
-        if ($from) {
+        if (filter_var($from, FILTER_VALIDATE_EMAIL)) {
             $this->from($from, 'TRAX');
+        } else {
+            $this->from('info@slgtrax.com', 'TRAX');
         }
     }
 
