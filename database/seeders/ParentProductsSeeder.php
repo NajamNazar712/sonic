@@ -19,18 +19,18 @@ class ParentProductsSeeder extends Seeder
         DB::table('parent_products')->insert([
             [
                 'id' => 1,
-                'name' => 'On supply of electronic goods',
+                'name' => 'Electronic Goods',
                 'tax_percentage' => 0.25
                 
             ],
             [
                 'id' => 2,
-                'name' =>'On supply of clothing articles, apparels, garments etc',
+                'name' =>'Clothing Articles / Apparel / Garments',
                 'tax_percentage' => 2
             ],
             [
                 'id' => 3,
-                'name' => 'On supply of goods other than mentioned in S. No.  1 and 2 above',
+                'name' => 'Other',
                 'tax_percentage' => 1
             ]
         ]);
