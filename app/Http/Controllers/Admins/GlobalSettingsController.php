@@ -10767,12 +10767,12 @@ class GlobalSettingsController extends Controller
 
     public function product_tax_update(Request $request)
     {
+
         if($request->has('percentage')) {
-            //dd($request->percentage);
+            
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 831);
             foreach($request->percentage as $key => $value) {
-
                 ParentProduct::where('id', $key)->update(['tax_percentage' => $value]);
-
             }
         }
       

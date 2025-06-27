@@ -2052,6 +2052,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('updated_shippers_list', 'Admins\AdminReportsController@updated_shippers_list')->name('updated_shippers_list');
         });
 
+        Route::prefix('wht')->name('wht.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@wht_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@wht_list')->name('list');
+        });
         Route::prefix('kam_and_poc_qsr')->name('kam_and_poc_qsr.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@kam_and_poc_qsr_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@kam_and_poc_qsr_list')->name('list');

@@ -1983,6 +1983,14 @@
                                 </a>
                             </li>
                         @endif
+
+                        @if (session('role_id') == 1 || in_array(1036, session('permissions')))
+                            <li>
+                                <a class="menu-item" href="{{ route('admin.reports.wht.index') }}">
+                                    With Holding Tax Report
+                                </a>
+                            </li>
+                        @endif
                     </ul>
                 </li>
             @endif

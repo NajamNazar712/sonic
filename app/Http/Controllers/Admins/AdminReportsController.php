@@ -17713,4 +17713,93 @@ class AdminReportsController extends Controller
         }
         fclose($output);   
     }
+
+    public function wht_index() {
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 829);
+        return view('admin.reports.wht_report');
+    }
+
+    public function wht_list(Request $request) {
+
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 830);
+        }
+ 
+        $search_date_from = $request->search_date_from;
+        $search_date_to =  $request->search_date_to;
+        
+        $invoices = User::join('invoices', 'invoices.user_id', 'users.id')
+        ->leftJoin('cities as c', 'c.id', 'users.city_id')
+        ->leftJoin('parent_products as pp', 'pp.id', 'users.parent_product_id')
+        ->where('users.account_type_id', 2)
+        ->whereBetween('invoices.invoicing_date', [$search_date_from, $search_date_to])
+        ->select([
+            DB::raw('2 as account_type'),
+            'invoices.invoice_number as invoice_id',
+            'invoices.invoicing_date as invoice_date',
+            DB::raw('NULL as payment_id'),
+            DB::raw('NULL as payment_date'),
+            'users.ntn_no as ntn_no',
+            'users.cnic as cnic',
+            'users.name as customer_name',
+            'c.name as city_name',
+            'users.brand_name as brand_name',
+            DB::raw('0 as taxable_amount'),
+            'invoices.total_wht as tax_amount',
+            'pp.tax_percentage as tax_percentage'
+        ]);
+
+        $payments = User::join('done_payments as dp', 'dp.user_id', 'users.id')
+        ->join('done_payment_shipments as dps', 'dps.done_payment_id', 'dp.id')
+        ->leftJoin('parent_products as pp', 'pp.id', 'users.parent_product_id')
+        ->leftJoin('cities as c', 'c.id', 'users.city_id')
+        ->where('users.account_type_id', 1)
+        ->whereBetween('dp.created_at', [$search_date_from, $search_date_to])
+        ->select([
+            DB::raw('1 as account_type'),
+            DB::raw('NULL as invoice_id'),
+            DB::raw('NULL as invoice_date'),
+            'dp.id as payment_id',
+            'dp.created_at as payment_date',
+            'users.ntn_no as ntn_no',
+            'users.cnic as cnic',
+            'users.name as customer_name',
+            'c.name as city_name',
+            'users.brand_name as brand_name',
+            DB::raw('SUM(dps.amount) as taxable_amount'),
+            DB::raw('SUM(dps.wht) as tax_amount'),
+            'pp.tax_percentage as tax_percentage'
+        ])
+        ->groupBy([
+            'dp.id',
+            'dp.created_at',
+            'users.ntn_no',
+            'users.cnic',
+            'users.name',
+            'c.name',
+            'users.brand_name',
+        ]);
+        
+        $total = DB::query()->fromSub($payments->union($invoices), 'total');
+
+        $datatables = Datatables::of($total)
+            ->editColumn('account_type', function ($total) {
+                if ($total->account_type == 1) {
+                   return 'Reimbursement Account';
+                } elseif($total->account_type == 2) {
+                    return 'Corporate Invoicing Account';
+                }
+            })
+            ->editColumn('tax_percentage', function ($total) {
+                if ($total->tax_amount != 0) {
+                   return $total->tax_percentage;
+                } elseif($total->account_type == 2) {
+                    return '-';
+                }
+            });
+            
+        return $datatables->make(true);
+
+    }
 }
