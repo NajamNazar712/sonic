@@ -49,6 +49,7 @@ class ShipperOrderManagementApiController extends Controller
                     ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.verification = 1)'));
             })
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sj.status_reason_id')
+            ->leftJoin('booking_types as bt', 'shipments.booking_type_id', '=', 'bt.id')
             ->select([
                 'shipments.id as shipment_id',
                 'shipments.tracking_number',
@@ -71,6 +72,8 @@ class ShipperOrderManagementApiController extends Controller
                 'shipments.amount as collection_amount',
                 'shipments.pickup_date as booking_date',
                 'sj.remarks as cancellation_remarks',
+                'shipments.booking_type_id',
+                'bt.booking_type'
             ]);
     }
 
@@ -108,28 +111,54 @@ class ShipperOrderManagementApiController extends Controller
         $todayStart = Carbon::today()->startOfDay();
         $todayEnd = Carbon::today()->endOfDay();
 
-        $shipment_status = [14, 25, 17];
+        $shipment_status = [14,18,19,36,38,51,31,25,17];
         if ($app_type == 1):
             $shipment_status[] = 1;
         endif;
 
         // 1. Over all in process
         $over_all_in_process = Shipment::whereNotIn('shipper_status_id', $shipment_status)
-            ->where('user_id', $user_id)
-            ->whereBetween('pickup_date', [$startDate, $endDate])
-            ->count();
+            ->whereBetween('pickup_date', [$startDate, $endDate]);
+
+        if ($app_type == 2) {
+            $over_all_in_process = $over_all_in_process
+                ->join('retail_shipments', 'retail_shipments.shipment_id', '=', 'shipments.id')
+                ->where('shipment_type', 2)
+                ->where('retail_shipments.shipper_account_no', $user_id);
+        } else {
+            $over_all_in_process = $over_all_in_process->where('shipment_type', 1)
+                ->where('user_id', $user_id);
+        }
+        $over_all_in_process = $over_all_in_process->count();
 
         // 2. Today bookings
         $today_bookings = Shipment::where('shipper_status_id', 1)
-            ->where('user_id', $user_id)
-            ->whereBetween('pickup_date', [$todayStart,$todayEnd])
-            ->count();
+            ->whereBetween('pickup_date', [$todayStart,$todayEnd]);
+
+        if($app_type == 2) {
+            $today_bookings = $today_bookings->join('retail_shipments', 'retail_shipments.shipment_id', '=', 'shipments.id')
+                ->where('shipment_type', 2)
+                ->where('retail_shipments.shipper_account_no', $user_id);
+        } else{
+            $today_bookings =  $today_bookings->where('shipment_type', 1)
+                ->where('user_id', $user_id);
+        }
+        $today_bookings = $today_bookings->count();
 
         // 3. Last day arrivals
         $last_day_arrivals = Shipment::whereIn('shipper_status_id', [2, 4])
-            ->where('user_id', $user_id)
-            ->whereBetween('pickup_date', [ $last_start_day, $last_end_day ])
-            ->count();
+            ->whereBetween('pickup_date', [ $last_start_day, $last_end_day ]);
+
+        if($app_type == 2) {
+            $last_day_arrivals = $last_day_arrivals->join('retail_shipments', 'retail_shipments.shipment_id', '=', 'shipments.id')
+                ->where('shipment_type', 2)
+                ->where('retail_shipments.shipper_account_no', $user_id);
+        } else {
+            $last_day_arrivals = $last_day_arrivals->where('shipment_type', 1)
+                 ->where('user_id', $user_id);
+        }
+
+        $last_day_arrivals = $last_day_arrivals->count();
 
         // 4. Last day delivered
         $last_day_delivered = Shipment::where('shipper_status_id', 14)
