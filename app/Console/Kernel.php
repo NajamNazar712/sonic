@@ -185,6 +185,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\PendingDeliveriesReportNew',
         'App\Console\Commands\WalletChargesUpdate',
         'App\Console\Commands\BulkStatusSharingWithWalletReplicate',
+        'App\Console\Commands\TicketDraftingCRM',
         // 'App\Console\Commands\QsrEmail',
         // 'App\Console\Commands\PendingDeliveriesReport',
 
@@ -670,6 +671,9 @@ class Kernel extends ConsoleKernel
         $schedule->command('update:shipment_additional_charges')->withoutOverlapping()->daily()->runInBackground();
         $schedule->command('wallet-users:make-to-done')->dailyAt('06:00')->runInBackground();
         $schedule->command('disable_wallet_users')->twiceDaily('13','18')->runInBackground();
+        $schedule->command('ticketdraft:crm')
+            ->dailyAt('00:15') // runs at 12:15 AM every night
+            ->runInBackground();
         $walletChargesUpdate = GlobalSettings::where(['type' => 'wallet_charges_updated', 'setting_value' => 1])->first();
         if ($walletChargesUpdate) {
             $time = $walletChargesUpdate->text; // e.g., '11:00'

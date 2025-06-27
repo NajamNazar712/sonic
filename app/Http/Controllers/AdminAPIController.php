@@ -13023,6 +13023,8 @@ class AdminAPIController extends Controller
             $details['shipment_status'] = $shipment->status_shipper->name;
 
             $shipper = $shipment->user;
+            $etd = $shipment->pickup_city_etd;
+            $details['etd_working_days'] = $etd->label;
 
             $details['shipper']['name'] = $shipper->name;
 
