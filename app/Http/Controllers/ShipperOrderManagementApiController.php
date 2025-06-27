@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Models\Shipment;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -10,10 +11,11 @@ class ShipperOrderManagementApiController extends Controller
 {
    public  function order_list(Request $request)
    {
-
        if ($request->app_type == 2 ) {
+           $shipments_summary = $this->shipments_summary($request->retail_shipper_id,$request->app_type);
            $order_list = $this->retail_shipper_list($request->retail_shipper_id);
        } else {
+           $shipments_summary = $this->shipments_summary($request->shipper_id,$request->app_type);
            $order_list = $this->shipper_order_list($request->shipper_id);
        }
 
@@ -21,13 +23,15 @@ class ShipperOrderManagementApiController extends Controller
            return response()->json([
                'status' => 0,
                'message' => 'Success',
-               'order_list' => $order_list
+               'order_list' => $order_list,
+               'shipments_summary' =>$shipments_summary
            ]);
        }
 
        return response()->json([
            'status' => 1,
-           'message' => 'Shipments Order not found!'
+           'message' => 'Shipments Order not found!',
+           'shipments_summary' =>$shipments_summary
        ]);
 
    }
@@ -92,6 +96,62 @@ class ShipperOrderManagementApiController extends Controller
             ->where('rsi.id', $retail_id)
             ->orderBy('rs.id', 'desc')
             ->cursorPaginate(20);
+    }
+
+    private function shipments_summary($user_id,$app_type)
+    {
+
+        $startDate = Carbon::now()->subMonths(6)->startOfDay();
+        $endDate = Carbon::now()->endOfDay();
+        $last_start_day =  Carbon::yesterday()->startOfDay();
+        $last_end_day =  Carbon::yesterday()->endOfDay();
+        $todayStart = Carbon::today()->startOfDay();
+        $todayEnd = Carbon::today()->endOfDay();
+
+        $shipment_status = [14, 25, 17];
+        if ($app_type == 1):
+            $shipment_status[] = 1;
+        endif;
+
+        // 1. Over all in process
+        $over_all_in_process = Shipment::whereNotIn('shipper_status_id', $shipment_status)
+            ->where('user_id', $user_id)
+            ->whereBetween('pickup_date', [$startDate, $endDate])
+            ->count();
+
+        // 2. Today bookings
+        $today_bookings = Shipment::where('shipper_status_id', 1)
+            ->where('user_id', $user_id)
+            ->whereBetween('pickup_date', [$todayStart,$todayEnd])
+            ->count();
+
+        // 3. Last day arrivals
+        $last_day_arrivals = Shipment::whereIn('shipper_status_id', [2, 4])
+            ->where('user_id', $user_id)
+            ->whereBetween('pickup_date', [ $last_start_day, $last_end_day ])
+            ->count();
+
+        // 4. Last day delivered
+        $last_day_delivered = Shipment::where('shipper_status_id', 14)
+            ->where('user_id', $user_id)
+            ->whereBetween('pickup_date', [ $last_start_day, $last_end_day ])
+            ->count();
+
+        // 5. Last day returns
+        $last_day_returns = Shipment::where('shipper_status_id', 25)
+            ->where('user_id', $user_id)
+            ->whereBetween('pickup_date', [ $last_start_day, $last_end_day ])
+            ->count();
+
+        $shipment_summary = [
+            'over_all_in_process' =>$over_all_in_process,
+            'today_bookings' =>$today_bookings,
+            'last_day_arrivals' =>$last_day_arrivals,
+            'last_day_delivered' =>$last_day_delivered,
+            'last_day_returns' =>$last_day_returns,
+        ];
+
+        return $shipment_summary;
     }
 
 }

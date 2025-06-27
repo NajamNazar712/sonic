@@ -193,7 +193,8 @@ class ShipperCrmApiController extends Controller
                 'status' => 0,
                 'message' => 'CRM requests have been added successfully.',
                 'already_existed_shipments' => $present_shipments,
-                'not_found_shipments' => $not_found_shipments
+                'not_found_shipments' => $not_found_shipments,
+                'crm_request_id' => $crm_request_id
             ]);
         }
     }
