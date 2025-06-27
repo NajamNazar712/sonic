@@ -9429,7 +9429,7 @@ class AdminFinanceController extends Controller
                               <td>' . $done_fintech_charges . '</td>
                               <td>' . (($done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->charges, 2) : '0') . '</td>
                               <td>' . (($done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->gst, 2) : '0') . '</td>
-                              <td>' . (($done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->wht, 2) : '0') . '</td>
+                              <td>' . number_format($done_payment_shipment->wht, 2) . '</td>
                               <td>' . (($done_payment_shipment->sms_charges != 0) ? number_format($done_payment_shipment->sms_charges, 2) : '0') . '</td>
                               <td>' . number_format($done_payment_shipment->amount - $done_payment_shipment->payable, 2) . '</td>
                               <td>' . number_format($done_payment_shipment->payable, 2) . '</td>
@@ -19744,7 +19744,7 @@ class AdminFinanceController extends Controller
                     // } // commenting this as instructed my Mr.Mohsin changing wht to new requirement TO-7109
 
                     $wht = 0;
-                    if(in_array($shipment->shipper_status_id, [14, 31, 36, 37,38]) && $shipment->amount > 0) {
+                    if(in_array($shipment->shipper_status_id, [14, 31, 36, 37]) && $shipment->amount > 0) {
                         
                         $wht = self::wht($shipment->user_id, $shipment->amount);
                         
@@ -21376,7 +21376,7 @@ class AdminFinanceController extends Controller
                     //     $wht = 0;
                     // }
                     $wht = 0;
-                    if(in_array($shipment->shipper_status_id, [14, 31, 36, 37,38]) && $shipment->amount > 0) {
+                    if(in_array($shipment->shipper_status_id, [14, 31, 36, 37]) && $shipment->amount > 0) {
 
                         $wht = self::wht($shipment->user_id, $shipment->amount);
 
@@ -21741,7 +21741,7 @@ class AdminFinanceController extends Controller
                     //     $wht = 0;
                     // }
                     $wht = 0;
-                    if(in_array($shipment->shipper_status_id, [14, 31, 36, 37,38]) && $shipment->amount > 0) {
+                    if(in_array($shipment->shipper_status_id, [14, 31, 36, 37]) && $shipment->amount > 0) {
 
                         $wht += self::wht($shipment->user_id, $shipment->amount);
                     }
