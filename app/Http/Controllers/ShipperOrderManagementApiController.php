@@ -101,7 +101,7 @@ class ShipperOrderManagementApiController extends Controller
     private function shipments_summary($user_id,$app_type)
     {
 
-        $startDate = Carbon::now()->subMonths(6)->startOfDay();
+        $startDate = Carbon::create(2025, 1, 1)->startOfDay();
         $endDate = Carbon::now()->endOfDay();
         $last_start_day =  Carbon::yesterday()->startOfDay();
         $last_end_day =  Carbon::yesterday()->endOfDay();
