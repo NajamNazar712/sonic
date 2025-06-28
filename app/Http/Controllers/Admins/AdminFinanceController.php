@@ -193,19 +193,35 @@ class AdminFinanceController extends Controller
         }
     }
 
-    static public function wht($user_id, $amount){ 
+    static public function wht($user_id, $amount, $packaging_request, $shipment_id){ 
 
         $parent_product_id = User::where('id', $user_id)->value('parent_product_id');
-        
-        if($parent_product_id) {
+        $arrival_date = ShipmentsJourney::where('shipment_id', $shipment_id)->where('shipper_status_id', 2)->whereDate('created_at', '>=', '2025-07-01');
+        if($parent_product_id  && $packaging_request == 0 && $arrival_date->exists()) {
 
             $tax_percentage  = ParentProduct::where('id', $parent_product_id)->value('tax_percentage');
-            $tax_amount  = ($amount * floatval($tax_percentage)) / 100;
-            return $tax_amount;
+            if($tax_percentage != 0) {
+                $tax_amount  = ($amount * floatval($tax_percentage)) / 100;
+                return $tax_amount;
+            }
+        } 
+        return 0;
+    }
 
-        } else {
-            return 0;
-        }
+    static public function cod_sst($user_id, $amount, $packaging_request, $shipment_id){ 
+
+        $parent_product_id = User::where('id', $user_id)->value('parent_product_id');
+        $arrival_date = ShipmentsJourney::where('shipment_id', $shipment_id)->where('shipper_status_id', 2)->whereDate('created_at', '>=', '2025-07-01');
+        if($parent_product_id && $packaging_request == 0 && $arrival_date->exists()) {
+
+            $sst_percentage  = ParentProduct::where('id', $parent_product_id)->value('sst_percentage');
+            if($sst_percentage != 0) {
+                $cod_sst  = ($amount * floatval($sst_percentage)) / 100;
+                return $cod_sst;
+            }
+        } 
+
+        return 0;
     }
     
     static public function gst($zone_id,$city_id = Null)
@@ -6627,7 +6643,7 @@ class AdminFinanceController extends Controller
                  $join->on('wu.user_id', '=', 'u.id')
                     ->where('wu.substitute_user_id', '0');
             })
-            ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', 'ppc.amount as total_amount', 'ppc.charges as total_charges','u.payment_cycle_days as payment_cycle_days', 'ppc.gst as total_gst', 'ppc.wht as total_wht', 'ppc.payable as total_payable', 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'pc.name as payment_cycle', 'pc.id as payment_cycle_id','u.documents_status', DB::raw('IFNULL(psfp.pending_shipments_count,0) as total_pending_shipments'),'sts.status as star_status', 'u.id as user_id', 'ppc.sms_charges as total_sms_charges', 'wu.id as wallet_user', 'wu.finova_account_type as wallet_finance');
+            ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', 'ppc.amount as total_amount', 'ppc.charges as total_charges','u.payment_cycle_days as payment_cycle_days', 'ppc.gst as total_gst', 'ppc.wht as total_wht', 'ppc.payable as total_payable', 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'pc.name as payment_cycle', 'pc.id as payment_cycle_id','u.documents_status', DB::raw('IFNULL(psfp.pending_shipments_count,0) as total_pending_shipments'),'sts.status as star_status', 'u.id as user_id', 'ppc.sms_charges as total_sms_charges', 'wu.id as wallet_user', 'wu.finova_account_type as wallet_finance', 'ppc.cod_sst as total_cod_sst');
             // ->groupBy('pending_payments.id'); // removed by the instruction of waqas bhai
 
         // dd($pending_payments);
@@ -6767,7 +6783,7 @@ class AdminFinanceController extends Controller
                 }
             ])
             ->addColumn('total_deductable', function ($pending_payments) {
-                return number_format(($pending_payments->total_charges + $pending_payments->total_gst + $pending_payments->total_sms_charges), 2);
+                return number_format(($pending_payments->total_charges + $pending_payments->total_gst + $pending_payments->total_sms_charges + $pending_payments->total_wht + $pending_payments->total_cod_sst), 2);
 
             })
             ->editColumn('fintech_charges', function ($shipment) {
@@ -6880,6 +6896,9 @@ class AdminFinanceController extends Controller
             })
             ->editColumn('total_wht', function ($pending_payment) {
                 return number_format($pending_payment->total_wht, 2);
+            })
+            ->editColumn('total_cod_sst', function ($pending_payment) {
+                return number_format($pending_payment->total_cod_sst, 2);
             })
             ->editColumn('total_sms_charges', function ($pending_payment) {
                 return number_format($pending_payment->total_sms_charges, 2);
@@ -7077,9 +7096,11 @@ class AdminFinanceController extends Controller
                     $detail['gst'] = number_format($pending_payment_shipment->gst, 2);
                     $detail['sms_charges'] = number_format($pending_payment_shipment->sms_charges, 2);
                     $detail['fintech_charges'] = number_format($fn_charges, 2);
-                    $detail['deductable'] = number_format(($pending_payment_shipment->charges + $fn_charges +$pending_payment_shipment->gst + $pending_payment_shipment->sms_charges), 2);
+                    $detail['deductable'] = number_format(($pending_payment_shipment->charges + $fn_charges +$pending_payment_shipment->gst + $pending_payment_shipment->sms_charges + $pending_payment_shipment->wht + $pending_payment_shipment->cod_sst), 2);
                     $detail['payable'] = number_format($pending_payment_shipment->payable - $fn_charges, 2);
                     $detail['faf_charges'] = number_format($faf_charges, 2);
+                    $detail['wht'] = number_format($pending_payment_shipment->wht, 2);
+                    $detail['cod_sst'] = number_format($pending_payment_shipment->cod_sst, 2);
 
                     $details[] = $detail;
                 }
@@ -7106,6 +7127,8 @@ class AdminFinanceController extends Controller
                 $detail['deductable'] = number_format(($pending_payment_shipment->charges + $fn_charges +$pending_payment_shipment->gst +$pending_payment_shipment->sms_charges ), 2);
                 $detail['payable'] = number_format($pending_payment_shipment->payable - $fn_charges, 2);
                 $detail['faf_charges'] = number_format($faf_charges, 2);
+                $detail['wht'] = number_format($pending_payment_shipment->wht, 2);
+                $detail['cod_sst'] = number_format($pending_payment_shipment->cod_sst, 2);
                 $details[] = $detail;
             }
 
@@ -7187,7 +7210,7 @@ class AdminFinanceController extends Controller
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id = 2)'));
             })
             ->leftjoin('shipment_additional_charges as sac','sac.shipment_id','s.id')
-            ->select('sfc.fintech_charges as fintech_charges', 'pending_payment_shipments.id', 'u.name as shipper', 's.tracking_number as shipment', 's.id as ShipmentID' ,'pending_payment_shipments.type', 'ss.name as status', 'pending_payment_shipments.created_at', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.wht', 'pending_payment_shipments.payable', 'consolidations.consolidation_id', 'oc.name as origin', 'u.account_type_id', 's.pickup_address_id','sj.created_at as arrival_date','s.packaging_charges','u.id as shipper_id', 'pending_payment_shipments.sms_charges as sms_charges','sac.faf_charges','sac.arrival_charges_applied','pending_payment_shipments.created_at as created' );
+            ->select('sfc.fintech_charges as fintech_charges', 'pending_payment_shipments.id', 'u.name as shipper', 's.tracking_number as shipment', 's.id as ShipmentID' ,'pending_payment_shipments.type', 'ss.name as status', 'pending_payment_shipments.created_at', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.wht', 'pending_payment_shipments.payable', 'consolidations.consolidation_id', 'oc.name as origin', 'u.account_type_id', 's.pickup_address_id','sj.created_at as arrival_date','s.packaging_charges','u.id as shipper_id', 'pending_payment_shipments.sms_charges as sms_charges','sac.faf_charges','sac.arrival_charges_applied','pending_payment_shipments.created_at as created' , 'pending_payment_shipments.cod_sst' );
 
         if ($request->has('ids')) {
             $pending_payment_shipments->whereIn('pending_payment_shipments.pending_payment_id', $request->ids);
@@ -7237,7 +7260,7 @@ class AdminFinanceController extends Controller
             })
             ->editColumn('deductable', function ($pending_payment_shipments) {
                 // $fn_charges = $this->calculate_fintech_charges($pending_payment_shipments->ShipmentID);
-                return number_format($pending_payment_shipments->charges + $pending_payment_shipments->fintech_charges + $pending_payment_shipments->gst + $pending_payment_shipments->sms_charges , 2);
+                return number_format($pending_payment_shipments->charges + $pending_payment_shipments->fintech_charges + $pending_payment_shipments->gst + $pending_payment_shipments->sms_charges + $pending_payment_shipments->wht + $pending_payment_shipments->cod_sst , 2);
             })
             ->addColumn('aging', function ($pending_payment_shipments) {
                 $now = Carbon::now()->startOfDay();
@@ -7258,6 +7281,9 @@ class AdminFinanceController extends Controller
             })
             ->editColumn('wht', function ($pending_payment_shipment) {
                 return number_format($pending_payment_shipment->wht, 2);
+            })
+            ->editColumn('cod_sst', function ($pending_payment_shipment) {
+                return number_format($pending_payment_shipment->cod_sst, 2);
             })
             ->editColumn('sms_charges', function ($pending_payment_shipment) {
                 return number_format($pending_payment_shipment->sms_charges, 2);
@@ -7288,7 +7314,7 @@ class AdminFinanceController extends Controller
                 }
             })
             ->filterColumn('deductable', function ($query, $keyword) {
-                $query->where(DB::raw('pending_payment_shipments.charges + pending_payment_shipments.gst + pending_payment_shipments.sms_charges'), '=', $keyword);
+                $query->where(DB::raw('pending_payment_shipments.charges + pending_payment_shipments.gst + pending_payment_shipments.sms_charges + pending_payment_shipments.wht + pending_payment_shipments.cod_sst'), '=', $keyword);
             })
             ->editColumn('faf_charges', function ($pending_payment_shipment) {
                 $faf_charges = $pending_payment_shipment->faf_charges;
@@ -7341,7 +7367,7 @@ class AdminFinanceController extends Controller
 
         $details = array();
 
-        $details[] = ['S. No.', 'Shipper', 'Shipment', 'Origin','Type', 'Status', 'Delivery / Return Datetime', 'Aging', 'Amount', 'Charges', 'GST', 'WHT', 'SMS Charges','Packing Charges', 'Deductable', 'Payable', 'Arrival Date' ];
+        $details[] = ['S. No.', 'Shipper', 'Shipment', 'Origin','Type', 'Status', 'Delivery / Return Datetime', 'Aging', 'Amount', 'Charges', 'GST', 'WHT', 'COD SST', 'SMS Charges','Packing Charges', 'Deductable', 'Payable', 'Arrival Date' ];
 
         $serial_number = 1;
 
@@ -7380,9 +7406,10 @@ class AdminFinanceController extends Controller
             $row[] = $pending_payment_shipment->charges;
             $row[] = $pending_payment_shipment->gst;
             $row[] = $pending_payment_shipment->wht;
+            $row[] = $pending_payment_shipment->cod_sst;
             $row[] = $pending_payment_shipment->sms_charges;
             $row[] = $shipment->packaging_charges;
-            $row[] = ($pending_payment_shipment->charges + $pending_payment_shipment->gst);
+            $row[] = ($pending_payment_shipment->charges + $pending_payment_shipment->gst + $pending_payment_shipment->wht + $pending_payment_shipment->cod_sst );
             $row[] = $pending_payment_shipment->payable;
             $row[] = ($arrival_date) ? $arrival_date->created_at : '';
 
@@ -7756,6 +7783,7 @@ class AdminFinanceController extends Controller
                                 $done_payment_shipment->charges = $pending_payment_shipment->charges;
                                 $done_payment_shipment->gst = $pending_payment_shipment->gst;
                                 $done_payment_shipment->wht = $pending_payment_shipment->wht;
+                                $done_payment_shipment->cod_sst = $pending_payment_shipment->cod_sst;
                                 $done_payment_shipment->payable = $pending_payment_shipment->payable;
                                 $done_payment_shipment->sms_charges = $pending_payment_shipment->sms_charges;
                                 $done_payment->company_bank_id = $company_bank;
@@ -7777,7 +7805,7 @@ class AdminFinanceController extends Controller
                                     }
                                 }
 
-                                self::add_done_payment_charges($done_payment->id, $pending_payment_shipment->amount, $pending_payment_shipment->charges, $pending_payment_shipment->gst, $pending_payment_shipment->payable, $packaging_material_charges, $adjustment_amount, null, $pending_payment_shipment->wht, ($done_payment->ibft_charges ?? 0), $done_payment_shipment->sms_charges);
+                                self::add_done_payment_charges($done_payment->id, $pending_payment_shipment->amount, $pending_payment_shipment->charges, $pending_payment_shipment->gst, $pending_payment_shipment->payable, $packaging_material_charges, $adjustment_amount, null, $pending_payment_shipment->wht, ($done_payment->ibft_charges ?? 0), $done_payment_shipment->sms_charges ,$pending_payment_shipment->cod_sst);
                                 $pending_payment_shipment->delete();
 
                                 self::adjustment_logs_done(1, $pending_payment_shipment_id, $done_payment_shipment->id);
@@ -7917,6 +7945,7 @@ class AdminFinanceController extends Controller
                                 $done_payment_shipment->charges = $pending_payment_shipment->charges;
                                 $done_payment_shipment->gst = $pending_payment_shipment->gst;
                                 $done_payment_shipment->wht = $pending_payment_shipment->wht;
+                                $done_payment_shipment->cod_sst = $pending_payment_shipment->cod_sst;
                                 $done_payment_shipment->payable = $pending_payment_shipment->payable;
                                 $done_payment_shipment->sms_charges = $pending_payment_shipment->sms_charges;
                                 $done_payment->company_bank_id = $company_bank;
@@ -7942,13 +7971,13 @@ class AdminFinanceController extends Controller
                                     $adjustment_amount = $pending_payment_shipment->amount;
                                 }
 
-                                self::add_done_payment_charges($done_payment->id, $pending_payment_shipment->amount, $pending_payment_shipment->charges, $pending_payment_shipment->gst, $pending_payment_shipment->payable, $packaging_material_charges, $adjustment_amount, null, $pending_payment_shipment->wht, ($done_payment->ibft_charges ?? 0), $pending_payment_shipment->sms_charges);
+                                self::add_done_payment_charges($done_payment->id, $pending_payment_shipment->amount, $pending_payment_shipment->charges, $pending_payment_shipment->gst, $pending_payment_shipment->payable, $packaging_material_charges, $adjustment_amount, null, $pending_payment_shipment->wht, ($done_payment->ibft_charges ?? 0), $pending_payment_shipment->sms_charges, $pending_payment_shipment->cod_sst);
 
                                 self::adjustment_logs_done(1, $pending_payment_shipment_id, $done_payment_shipment->id);
 
                                 $pending_payment_shipment->delete();
 
-                                self::sub_pending_payment_charges($pending_payment_shipment->pending_payment_id, $pending_payment_shipment->amount, $pending_payment_shipment->charges, $pending_payment_shipment->gst, $pending_payment_shipment->payable, null, $pending_payment_shipment->wht, $pending_payment_shipment->sms_charges);
+                                self::sub_pending_payment_charges($pending_payment_shipment->pending_payment_id, $pending_payment_shipment->amount, $pending_payment_shipment->charges, $pending_payment_shipment->gst, $pending_payment_shipment->payable, null, $pending_payment_shipment->wht, $pending_payment_shipment->sms_charges, $pending_payment_shipment->cod_sst);
 
                                 if ($done_payment_shipment->type == 1) {
                                     $shipment = Shipment::find($pending_payment_shipment->shipment_id);
@@ -8320,7 +8349,7 @@ class AdminFinanceController extends Controller
             'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 'done_payments.ibft_charges', 
             'dpc.packaging_charges', 'dpc.adjustment as adjustment_charges', 'done_payments.status_updated_at as status_updated_at', 
             'dpc.wht as total_wht', 'done_payments.created_at as start_date', 'done_payments.updated_at as end_date', 'ad.name as admin_name', 
-            'done_payments.updated_at as updated_at','sts.status as star_status','u.payment_cycle_days as payment_cycle_days','pc.name as payment_cycle', 'pc.id as payment_cycle_id', 'dpc.sms_charges as total_sms_charges','done_payments.arrival_shipment as arrival_shipment_shipments_count','done_payments.arrival_shipment', 'sale_admin.name as sale_person_name','wu.id as wallet_user' , 'done_payments.is_wallet_payment', 'wu.finova_account_type as finova_account_type');
+            'done_payments.updated_at as updated_at','sts.status as star_status','u.payment_cycle_days as payment_cycle_days','pc.name as payment_cycle', 'pc.id as payment_cycle_id', 'dpc.sms_charges as total_sms_charges','done_payments.arrival_shipment as arrival_shipment_shipments_count','done_payments.arrival_shipment', 'sale_admin.name as sale_person_name','wu.id as wallet_user' , 'done_payments.is_wallet_payment', 'wu.finova_account_type as finova_account_type' ,'dpc.cod_sst as total_cod_sst');
 
         if (session('department_id') == 7) {
             if (!in_array(session('id'), session('sale_users_bypass'))) {
@@ -9355,6 +9384,7 @@ class AdminFinanceController extends Controller
 		$total_faf_charges = 0;
 		$total_wallet_charges = 0;
         $calculate_total_fintech_charges = [];
+        $total_cod_sst = 0;
         foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
 
             $done_fintech_charges = $this->calculate_fintech_charges($done_payment_shipment->shipment_id);
@@ -9430,6 +9460,7 @@ class AdminFinanceController extends Controller
                               <td>' . (($done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->charges, 2) : '0') . '</td>
                               <td>' . (($done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->gst, 2) : '0') . '</td>
                               <td>' . number_format($done_payment_shipment->wht, 2) . '</td>
+                               <td>' . number_format($done_payment_shipment->cod_sst, 2) . '</td>
                               <td>' . (($done_payment_shipment->sms_charges != 0) ? number_format($done_payment_shipment->sms_charges, 2) : '0') . '</td>
                               <td>' . number_format($done_payment_shipment->amount - $done_payment_shipment->payable, 2) . '</td>
                               <td>' . number_format($done_payment_shipment->payable, 2) . '</td>
@@ -9479,6 +9510,7 @@ class AdminFinanceController extends Controller
 
                     $total_gst += $done_payment_shipment->gst;
                     $total_wht += $done_payment_shipment->wht;
+                    $total_cod_sst += $done_payment_shipment->cod_sst;
                     $total_charges += $done_payment_shipment->charges;
                     $total_payable += $done_payment_shipment->payable;
                     $total_sms_charges += $done_payment_shipment->sms_charges;
@@ -9513,6 +9545,7 @@ class AdminFinanceController extends Controller
                                 <td class="color secondary"><strong>' . number_format($total_charges, 2) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_gst, 2) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_wht, 2) . '</strong></td>
+                                <td class="color secondary"><strong>' . number_format($total_cod_sst, 2) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_sms_charges, 2) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_collection_amount - $total_payable, 2) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_payable, 2) . '</strong></td>
@@ -9560,6 +9593,7 @@ class AdminFinanceController extends Controller
                               <td class="color primary"><strong>Total Charges (PKR)</strong></td>
                               <td class="color primary"><strong>GST</strong></td>
                               <td class="color primary"><strong>WHT</strong></td>
+                              <td class="color primary"><strong>COD SST</strong></td>
                               <td class="color primary"><strong>SMS Charges</strong></td>
                               <td class="color primary"><strong>Net Retained Amount (PKR)</strong></td>
                               <td class="color primary"><strong>Net Disbursement Amount (PKR)</strong></td>
@@ -9642,8 +9676,12 @@ class AdminFinanceController extends Controller
                                     </tr>
 
                                     <tr>
-                                        <td class="color secondary"><strong>Total WHT (Deductable)</strong></td>
+                                        <td class="color secondary"><strong>Total WHT</strong></td>
                                         <td class="color secondary">' . number_format($total_wht, 2) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color secondary"><strong>Total COD SST </strong></td>
+                                        <td class="color secondary">' . number_format($total_cod_sst, 2) . '</td>
                                     </tr>
                                     <tr>
                                         <td class="color secondary"><strong>Total Packing Charges</strong></td>
@@ -9667,8 +9705,7 @@ class AdminFinanceController extends Controller
                                     </tr>
                                     <tr>
                                         <td class="color primary"><strong>Overall Charges</strong></td>
-                                        <td class="color secondary"><strong>' . number_format(($total_charges + $total_sms_charges + $total_gst - array_sum($calculate_total_fintech_charges) - $total_adjustments + $done_payment->ibft_charges
-                                        +$total_wht), 2) . '</strong></td>
+                                        <td class="color secondary"><strong>' . number_format(($total_charges + $total_sms_charges + $total_wht + $total_cod_sst + $total_gst - array_sum($calculate_total_fintech_charges) - $total_adjustments + $done_payment->ibft_charges), 2) . '</strong></td>
                                     </tr>
                                   </tbody>
                                 </table>
@@ -9721,7 +9758,7 @@ class AdminFinanceController extends Controller
 
         $details = array();
 
-        $details[] = ['S. No.', 'Tracking No.', 'Booking Date', 'Type', 'Order ID', 'Vendor', 'Origin', 'Consignee Name', 'Consignee Phone', 'Destination', 'Service Type', 'Weight (kg)', 'Collection Amount (PKR)', 'Weight Charges (PKR)','Finoava Wallet Charges (PKR)', 'Cash Handling Charges (PKR)', 'OSA Charges (PKR)', 'Adjustments (PKR)', 'Total Charges (PKR)', 'GST', 'WHT','SMS Charges', 'Net Retained Amount (PKR)', 'Net Disbursement Amount (PKR)'];
+        $details[] = ['S. No.', 'Tracking No.', 'Booking Date', 'Type', 'Order ID', 'Vendor', 'Origin', 'Consignee Name', 'Consignee Phone', 'Destination', 'Service Type', 'Weight (kg)', 'Collection Amount (PKR)', 'Weight Charges (PKR)','Finoava Wallet Charges (PKR)', 'Cash Handling Charges (PKR)', 'OSA Charges (PKR)', 'Adjustments (PKR)', 'Total Charges (PKR)', 'GST', 'WHT', 'COD SST','SMS Charges', 'Net Retained Amount (PKR)', 'Net Disbursement Amount (PKR)'];
 
         $account_type_id = $done_payment->shipper->account_type_id;
 
@@ -9747,6 +9784,7 @@ class AdminFinanceController extends Controller
         $total_sms_charges = 0;
  		$total_faf_charges = 0;
         $total_wallet_charges = 0;
+        $total_cod_sst = 0;
         foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
             $shipment = $done_payment_shipment->shipment;
             if (!isset($shipment->id)) {
@@ -9815,7 +9853,8 @@ class AdminFinanceController extends Controller
 
             $row[] = (($done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->charges, 2) : '0');
             $row[] = (($done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->gst, 2) : '0');
-            $row[] = (($done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->wht, 2) : '0');
+            $row[] = number_format($done_payment_shipment->wht, 2);
+            $row[] = number_format($done_payment_shipment->cod_sst, 2);
             $row[] = (($done_payment_shipment->sms_charges != 0) ? number_format($done_payment_shipment->sms_charges, 2) : '0');
             $row[] = (($done_payment_shipment->amount != 0) ? number_format($done_payment_shipment->amount - $done_payment_shipment->payable, 2) : '0');
             $row[] = (($done_payment_shipment->payable != 0) ? number_format($done_payment_shipment->payable, 2) : '0');
@@ -9864,6 +9903,7 @@ class AdminFinanceController extends Controller
 
                 $total_gst += $done_payment_shipment->gst;
                 $total_wht += $done_payment_shipment->wht;
+                $total_cod_sst += $done_payment_shipment->cod_sst;
                 $total_charges += $done_payment_shipment->charges;
                 $total_payable += $done_payment_shipment->payable;
                 $total_sms_charges += $done_payment_shipment->sms_charges;
@@ -9881,7 +9921,7 @@ class AdminFinanceController extends Controller
 
         $total_columns = count($details[0]);
 
-        $summary = ['Total Weight Charges' => $total_weight_charges,'Total Finova Charges'=>$total_wallet_charges, 'Total Cash Handling Charges' => $total_cash_handling_charges, 'Total Insurance Charges' => $total_insurance_charges, 'Total Replacement Charges' => $total_replacement_charges, 'Total Try & Buy Charges' => $total_try_and_buy_charges, 'Total Reverse Pickup Charges' => $total_reverse_pickup_charges , 'Total Return Charges' => $total_return_charges, 'Total Fuel Surcharge' => $total_fuel_surcharge, 'Total FAF Charges' =>$total_faf_charges, 'Total Intercept Charges' => $total_intercept_charges, 'Total OSA Charges' => $total_nsa_osa_charges, 'Total Charges (w/o GST)' => ($total_charges - $total_packaging_material_charges), 'Total GST' => $total_gst, 'Total WHT (Deductable)' => $total_wht, 'Total SMS Charges' => $total_sms_charges , 'Total Packaging Material Charges' => $total_packaging_material_charges, 'Total Adjustments' => $total_adjustments, 'IBFT Charges' => $done_payment->ibft_charges, 'Overall Charges' => ($total_charges + $total_sms_charges + $total_gst - $total_adjustments + $done_payment->ibft_charges +$total_wht)];
+        $summary = ['Total Weight Charges' => $total_weight_charges,'Total Finova Charges'=>$total_wallet_charges, 'Total Cash Handling Charges' => $total_cash_handling_charges, 'Total Insurance Charges' => $total_insurance_charges, 'Total Replacement Charges' => $total_replacement_charges, 'Total Try & Buy Charges' => $total_try_and_buy_charges, 'Total Reverse Pickup Charges' => $total_reverse_pickup_charges , 'Total Return Charges' => $total_return_charges, 'Total Fuel Surcharge' => $total_fuel_surcharge, 'Total FAF Charges' =>$total_faf_charges, 'Total Intercept Charges' => $total_intercept_charges, 'Total OSA Charges' => $total_nsa_osa_charges, 'Total Charges (w/o GST)' => ($total_charges - $total_packaging_material_charges), 'Total GST' => $total_gst, 'Total WHT' => $total_wht, 'Total COD SST' => $total_cod_sst ,'Total SMS Charges' => $total_sms_charges , 'Total Packaging Material Charges' => $total_packaging_material_charges, 'Total Adjustments' => $total_adjustments, 'IBFT Charges' => $done_payment->ibft_charges, 'Overall Charges' => ($total_charges + $total_sms_charges + $total_gst - $total_adjustments + $done_payment->ibft_charges +$total_wht + $total_cod_sst)];
 
         $details[] = [];
 
@@ -9953,11 +9993,12 @@ class AdminFinanceController extends Controller
 
         $current_date = Carbon::now()->startOfDay();
         $current_date_string = $current_date->toDateString();
-        $users = User::where('account_type_id', 2)->get();
+        $billing_period_from_date = $current_date_string;
+        $users = User::where('id', 10454)->get();
 
         foreach ($users as $user) {
 
-            $generate = FALSE;
+            $generate = true;
 
             $user_id = $user->id;
 
@@ -10041,6 +10082,7 @@ class AdminFinanceController extends Controller
                         $shipment_count = 0;
                         $total_sms_charges = 0;
                         $total_wht = 0;
+                        $total_cod_sst = 0;
 
                         $returned_shipper = GlobalSettings::where('type', 'invoice_against_return_delivered_shipper')->select('text')->first();
                         $array = explode(",", $returned_shipper->text);
@@ -10072,6 +10114,7 @@ class AdminFinanceController extends Controller
                                 $invoice_shipment->charges = $pending_invoice_shipment->charges;$invoice_shipment->sms_charges = $pending_invoice_shipment->sms_charges;
                                 $invoice_shipment->gst = $pending_invoice_shipment->gst;
                                 $invoice_shipment->wht = $pending_invoice_shipment->wht;
+                                $invoice_shipment->cod_sst = $pending_invoice_shipment->cod_sst;
                                 $invoice_shipment->invoice_amount = $pending_invoice_shipment->invoice_amount;
 
                                 $invoice_shipment->save();
@@ -10094,6 +10137,8 @@ class AdminFinanceController extends Controller
                                 $total_charges = $total_charges + $pending_invoice_shipment->charges;
                                 $total_gst = $total_gst + $pending_invoice_shipment->gst;
                                 $total_wht = $total_wht + $pending_invoice_shipment->wht;
+                                $total_cod_sst = $total_cod_sst + $pending_invoice_shipment->cod_sst;
+
                                 $total_invoice_amount = $total_invoice_amount + $pending_invoice_shipment->invoice_amount;
 
                                 $pending_invoice_shipment->delete();
@@ -10113,6 +10158,7 @@ class AdminFinanceController extends Controller
                             $invoice->total_charges = $total_charges;
                             $invoice->total_gst = $total_gst;
                             $invoice->total_wht = $total_wht;
+                            $invoice->cod_sst =  $total_cod_sst;
                             $invoice->total_sms_charges = $total_sms_charges;
                             $invoice->total_invoice_amount = ROUND($total_invoice_amount, 0, PHP_ROUND_HALF_DOWN);
 
@@ -10602,7 +10648,8 @@ class AdminFinanceController extends Controller
                     $final_array[$origin][$shipment->id]['esc_charges'] = ($invoice_shipment->type != 2) ? $shipment->esc_charges : 0;
                     $final_array[$origin][$shipment->id]['sms_charges'] = $invoice_shipment->sms_charges;
                     $final_array[$origin][$shipment->id]['wht'] = $invoice_shipment->wht;
-                    $final_array[$origin][$shipment->id]['total_charges'] = $invoice_shipment->charges + $invoice_shipment->sms_charges + $invoice_shipment->wht;
+                    $final_array[$origin][$shipment->id]['cod_sst'] = $invoice_shipment->cod_sst;
+                    $final_array[$origin][$shipment->id]['total_charges'] = $invoice_shipment->charges + $invoice_shipment->sms_charges + $invoice_shipment->wht  + $invoice_shipment->cod_sst;
                     $final_array[$origin][$shipment->id]['gst'] = $invoice_shipment->gst;
                     $final_array[$origin][$shipment->id]['total_invoice_amount'] = $invoice_shipment->invoice_amount;
                     $serial_number[$origin]++;
@@ -10641,7 +10688,8 @@ class AdminFinanceController extends Controller
 
                     $final_array[$origin][$shipment->id]['sms_charges'] += $invoice_shipment->sms_charges;
                     $final_array[$origin][$shipment->id]['wht'] += $invoice_shipment->wht;
-                    $final_array[$origin][$shipment->id]['total_charges'] += $invoice_shipment->charges + $invoice_shipment->sms_charges +  $invoice_shipment->wht;
+                    $final_array[$origin][$shipment->id]['cod_sst'] += $invoice_shipment->cod_sst;
+                    $final_array[$origin][$shipment->id]['total_charges'] += $invoice_shipment->charges + $invoice_shipment->sms_charges +  $invoice_shipment->wht + $invoice_shipment->cod_sst;
                     $final_array[$origin][$shipment->id]['gst'] += $invoice_shipment->gst;
                     $final_array[$origin][$shipment->id]['total_invoice_amount'] += $invoice_shipment->invoice_amount;
                 }
@@ -10666,6 +10714,7 @@ class AdminFinanceController extends Controller
                         <td>' . number_format($final_array[$origin][$shipment->id]['esc_charges'], 2) . '</td>
                         <td>' . number_format($final_array[$origin][$shipment->id]['sms_charges'], 2) . '</td>
                         <td>' . number_format($final_array[$origin][$shipment->id]['wht'], 2) . '</td>
+                         <td>' . number_format($final_array[$origin][$shipment->id]['cod_sst'], 2) . '</td>
                         <td>' . number_format($final_array[$origin][$shipment->id]['total_charges'], 2) . '</td>
                         <td>' . number_format($final_array[$origin][$shipment->id]['gst'], 2) . '</td>
                         <td>' . number_format($final_array[$origin][$shipment->id]['total_invoice_amount'], 2) . '</td>
@@ -10729,6 +10778,9 @@ class AdminFinanceController extends Controller
                 if (!isset($total_wht[$origin])) {
                     $total_wht[$origin] = 0;
                 }
+                if (!isset($total_cod_sst[$origin])) {
+                    $total_cod_sst[$origin] = 0;
+                }
                 if (!isset($total_reverse_pickup_charges[$origin])) {
                     $total_reverse_pickup_charges[$origin] = 0;
                 }
@@ -10766,13 +10818,14 @@ class AdminFinanceController extends Controller
                         }
 						$total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                         $total_wht[$origin] += $invoice_shipment->wht;
+                        $total_cod_sst[$origin] += $invoice_shipment->cod_sst;
                     }
 
                 } else {
                     $total_adjustment_charges[$origin] += $invoice_shipment->invoice_amount;
                 }
 
-                $total_charges += $invoice_shipment->charges + $invoice_shipment->sms_charges + $invoice_shipment->sms_charges + $invoice_shipment->wht;
+                $total_charges += $invoice_shipment->charges + $invoice_shipment->sms_charges + $invoice_shipment->sms_charges + $invoice_shipment->wht + $invoice_shipment->cod_sst;
                 $total_gst += $invoice_shipment->gst;
                 $total_invoice_amount += $invoice_shipment->invoice_amount;
             }
@@ -10780,7 +10833,7 @@ class AdminFinanceController extends Controller
                     <table class="table table-sm table-bordered border">
                       <thead>
                         <tr>
-                            <th colspan="17" class="color primary text-center">Invoice Summary</th>
+                            <th colspan="18" class="color primary text-center">Invoice Summary</th>
                         </tr>
                         <tr>
                             <th class="color secondary">Origin</th>
@@ -10800,6 +10853,7 @@ class AdminFinanceController extends Controller
                             <th class="color secondary">Adjustment Charges (PKR)</th>
                             <th class="color secondary">SMS Charges(PKR)</th>
                             <th class="color secondary">WHT (PKR)</th>
+                            <th class="color secondary">COD SST (PKR)</th>
 
                         </tr>
                       </thead>
@@ -10826,6 +10880,7 @@ class AdminFinanceController extends Controller
                             <td>' . number_format($total_adjustment_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_sms_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_wht[$origin], 2) . '</td>
+                            <td>' . number_format($total_cod_sst[$origin], 2) . '</td>
                             
                         </tr>
             ';
@@ -10907,7 +10962,7 @@ class AdminFinanceController extends Controller
                     <table class="table table-sm table-bordered border shipments_summary">
                       <thead>
                         <tr>
-                            <th class="color primary text-center" colspan="20">Shipment(s) Summary - ' . $origin . '</th>
+                            <th class="color primary text-center" colspan="21">Shipment(s) Summary - ' . $origin . '</th>
                         </tr>
                         <tr>
                           <th class="color secondary">S. No.</th>
@@ -10927,6 +10982,7 @@ class AdminFinanceController extends Controller
                           <th class="color secondary">Extra Service Charges (PKR)</th>
                           <th class="color secondary">SMS Charges (PKR)</th>
                           <th class="color secondary">WHT (PKR)</th>
+                          <th class="color secondary">COD SST (PKR)</th>
                           <th class="color secondary">Total Charges (PKR)</th>
                           <th class="color secondary">GST (PKR)</th>
                           <th class="color secondary">Invoice Amount (PKR)</th>
@@ -11807,6 +11863,9 @@ class AdminFinanceController extends Controller
                 if (!isset($total_wht[$origin])) {
                     $total_wht[$origin] = 0;
                 }
+                if (!isset($total_cod_sst[$origin])) {
+                    $total_cod_sst[$origin] = 0;
+                }
 
                 if ($invoice_shipment->type != 2) {
                     if ($invoice_shipment->type == 0) {
@@ -11840,13 +11899,14 @@ class AdminFinanceController extends Controller
                         }
                         $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                         $total_wht[$origin] += $invoice_shipment->wht;
+                         $total_cod_sst[$origin] += $invoice_shipment->cod_sst;
                     }
 
                 } else {
                     $total_adjustment_charges[$origin] += $invoice_shipment->invoice_amount;
                 }
 
-                $total_charges[$origin] += $invoice_shipment->charges + $invoice_shipment->sms_charges + $invoice_shipment->wht;
+                $total_charges[$origin] += $invoice_shipment->charges + $invoice_shipment->sms_charges + $invoice_shipment->wht + $invoice_shipment->cod_sst;
                 $total_gst[$origin] += $invoice_shipment->gst;
                 $total_invoice_amount[$origin] += $invoice_shipment->invoice_amount;
             }
@@ -11994,7 +12054,7 @@ class AdminFinanceController extends Controller
                         <tbody>
                         <tr>
                             <td>Weight Charges</td>
-                            <td rowspan="16">' . $shipment_counts[$origin] . '</td>
+                            <td rowspan="17">' . $shipment_counts[$origin] . '</td>
                             <td>' . number_format($total_weight_charges[$origin], 2) . '</td>
                         </tr>
                         <tr>
@@ -12056,6 +12116,11 @@ class AdminFinanceController extends Controller
                         <tr>
                             <td>WHT</td>
                             <td>' . number_format($total_wht[$origin], 2) . '</td>
+                        </tr>
+
+                         <tr>
+                            <td>COD SST</td>
+                            <td>' . number_format($total_cod_sst[$origin], 2) . '</td>
                         </tr>
                       </tbody>
                       </table>
@@ -12882,7 +12947,8 @@ class AdminFinanceController extends Controller
                 $final_array[$origin][$shipment->id]['esc_charges'] = ($invoice_shipment->type != 2) ? $shipment->esc_charges : 0;
                 $final_array[$origin][$shipment->id]['sms_charges'] = $invoice_shipment->sms_charges;
                 $final_array[$origin][$shipment->id]['wht'] = $invoice_shipment->wht;
-                $final_array[$origin][$shipment->id]['total_charges'] = $invoice_shipment->charges + $invoice_shipment->sms_charges + $invoice_shipment->wht;
+                $final_array[$origin][$shipment->id]['cod_sst'] = $invoice_shipment->cod_sst;
+                $final_array[$origin][$shipment->id]['total_charges'] = $invoice_shipment->charges + $invoice_shipment->sms_charges + $invoice_shipment->wht + $invoice_shipment->cod_sst;
                 $final_array[$origin][$shipment->id]['gst'] = $invoice_shipment->gst;
                 $final_array[$origin][$shipment->id]['total_invoice_amount'] = $invoice_shipment->invoice_amount;
                 $serial_number[$origin]++;
@@ -12920,7 +12986,8 @@ class AdminFinanceController extends Controller
 
                 $final_array[$origin][$shipment->id]['sms_charges'] += $invoice_shipment->sms_charges;
                 $final_array[$origin][$shipment->id]['wht'] += $invoice_shipment->wht;
-                $final_array[$origin][$shipment->id]['total_charges'] += $invoice_shipment->charges + $invoice_shipment->sms_charges +  $invoice_shipment->wht ;
+                $final_array[$origin][$shipment->id]['cod_sst'] += $invoice_shipment->cod_sst;
+                $final_array[$origin][$shipment->id]['total_charges'] += $invoice_shipment->charges + $invoice_shipment->sms_charges +  $invoice_shipment->wht + $invoice_shipment->cod_sst ;
                 $final_array[$origin][$shipment->id]['gst'] += $invoice_shipment->gst;
                 $final_array[$origin][$shipment->id]['total_invoice_amount'] += $invoice_shipment->invoice_amount;
             }
@@ -12945,6 +13012,7 @@ class AdminFinanceController extends Controller
                         <td>' . number_format($final_array[$origin][$shipment->id]['esc_charges'], 2) . '</td>
                         <td>' . number_format($final_array[$origin][$shipment->id]['sms_charges'], 2) . '</td>
                         <td>' . number_format($final_array[$origin][$shipment->id]['wht'], 2) . '</td>
+                        <td>' . number_format($final_array[$origin][$shipment->id]['cod_sst'], 2) . '</td>
                         <td>' . number_format($final_array[$origin][$shipment->id]['total_charges'], 2) . '</td>
                         <td>' . number_format($final_array[$origin][$shipment->id]['gst'], 2) . '</td>
                         <td>' . number_format($final_array[$origin][$shipment->id]['total_invoice_amount'], 2) . '</td>
@@ -13019,10 +13087,13 @@ class AdminFinanceController extends Controller
                 $total_invoice_amount[$gst] = 0;
             }
             if (!isset($total_sms_charges[$origin])) {
-                    $total_sms_charges[$origin] = 0;
+                $total_sms_charges[$origin] = 0;
             }
             if (!isset($total_wht[$origin])) {
-                    $total_wht[$origin] = 0;
+                $total_wht[$origin] = 0;
+            }
+            if (!isset($total_cod_sst[$origin])) {
+                $total_cod_sst[$origin] = 0;
             }
 
             if ($invoice_shipment->type != 2) {
@@ -13057,6 +13128,7 @@ class AdminFinanceController extends Controller
                     }
                     $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                     $total_wht[$origin] += $invoice_shipment->wht;
+                    $total_cod_sst[$origin] += $invoice_shipment->cod_sst;
                 }
 
             } else {
@@ -13068,7 +13140,7 @@ class AdminFinanceController extends Controller
 
                 $total_charges[$gst] += (($invoice_shipment->charges + $invoice_shipment->sms_charges) - $shipment->packaging_material_charges);
             } else {
-                $total_charges[$gst] += $invoice_shipment->charges + $invoice_shipment->sms_charges + $invoice_shipment->wht;
+                $total_charges[$gst] += $invoice_shipment->charges + $invoice_shipment->sms_charges + $invoice_shipment->wht + $invoice_shipment->cod_sst;
             }
 
             $total_gst[$gst] += $invoice_shipment->gst;
@@ -13167,7 +13239,7 @@ class AdminFinanceController extends Controller
                     <table class="table table-sm table-bordered border">
                       <thead>
                         <tr>
-                            <th colspan="16" class="color primary text-center">Invoice Summary</th>
+                            <th colspan="17" class="color primary text-center">Invoice Summary</th>
                         </tr>
                         <tr>
                             <th class="color secondary">Origin</th>
@@ -13186,6 +13258,8 @@ class AdminFinanceController extends Controller
                             <th class="color secondary">Extra Service Charges (PKR)</th>
                             <th class="color secondary">SMS Charges (PKR)</th>
                             <th class="color secondary">WHT (PKR)</th>
+                            <th class="color secondary">COD SST (PKR)</th>
+
 
                         </tr>
                       </thead>
@@ -13211,6 +13285,7 @@ class AdminFinanceController extends Controller
                             <td>' . number_format($total_extra_service_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_sms_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_wht[$origin], 2) . '</td>
+                            <td>' . number_format($total_cod_sst[$origin], 2) . '</td>
 
 
                         </tr>
@@ -13287,7 +13362,7 @@ class AdminFinanceController extends Controller
                     <table class="table table-sm table-bordered border shipments_summary">
                       <thead>
                         <tr>
-                            <th class="color primary text-center" colspan="20">Shipment(s) Summary - ' . $origin . '</th>
+                            <th class="color primary text-center" colspan="21">Shipment(s) Summary - ' . $origin . '</th>
                         </tr>
                         <tr>
                           <th class="color secondary">S. No.</th>
@@ -13307,6 +13382,7 @@ class AdminFinanceController extends Controller
                           <th class="color secondary">Extra Service Charges (PKR)</th>
                           <th class="color secondary">SMS Charges (PKR)</th>
                           <th class="color secondary">WHT(PKR)</th>
+                          <th class="color secondary">COD SST(PKR)</th>
                           <th class="color secondary">Total Charges (PKR)</th>
                           <th class="color secondary">GST (PKR)</th>
                           <th class="color secondary">Invoice Amount (PKR)</th>
@@ -14197,7 +14273,7 @@ class AdminFinanceController extends Controller
             'invoices.tax_amount as tax_amount', 'ius_sub.latest_deposit_date as deposit_date', 
             'is.name as status', 'invoices.status_id as status_id', 'invoices.invoicing_date as invoicing_date', 'ic.name as invoicing_cycle', 
             'invoices.invoice_type as invoice_type', DB::raw('NULL as payment_type'), DB::raw('2 as account_type'), 'is.id as is_id',
-            'invoices.deposited_amount as deposited_amount','invoices.adjusted_amount as adjusted_amount','sts.status as star_status', 'invoices.total_sms_charges as sms_charges', 'invoices.total_wht as total_wht')
+            'invoices.deposited_amount as deposited_amount','invoices.adjusted_amount as adjusted_amount','sts.status as star_status', 'invoices.total_sms_charges as sms_charges', 'invoices.total_wht as total_wht', 'invoices.cod_sst as total_cod_sst')
             ->where('ubi.default_bank', 1);
         if (session('department_id') == 7 && !in_array(session('id'), session('sale_users_bypass'))) {
             $invoice->whereIn('invoices.user_id', $request->search_shipper);
@@ -14215,7 +14291,7 @@ class AdminFinanceController extends Controller
             })
             ->join('admins as sales_person', 'sales_person.id', '=', 'spt.admin_id')
             ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
-            ->select('u.id as shipper_account_id','sales_person.name as sales_person_name','invoice_for_reimbursements.id as id', 'invoice_for_reimbursements.invoice_number as invoice_number', 'invoice_for_reimbursements.invoice_number as invoice_number_btn', 'u.name as shipper', 'c.name as city', 'invoice_for_reimbursements.total_charges as total_charges', 'invoice_for_reimbursements.total_gst as total_gst', 'invoice_for_reimbursements.total_invoice_amount as total_invoice_amount', 'invoice_for_reimbursements.created_at as created_at', DB::raw('NULL as due_date'), DB::raw('NULL as received_date'), DB::raw('NULL as company_bank'), DB::raw('NULL as received_amount'), DB::raw('NULL as tax_amount'), DB::raw('NULL as deposit_date'), DB::raw('NULL as status'), DB::raw('NULL as status_id'), 'invoice_for_reimbursements.invoicing_date as invoicing_date', DB::raw('NULL as invoicing_cycle'), DB::raw('NULL as invoice_type'), 'invoice_for_reimbursements.payment_type as payment_type', DB::raw('1 as account_type'), DB::raw('NULL as is_id'), DB::raw('NULL as deposited_amount'),DB::raw('NULL as adjusted_amount'),'sts.status as star_status',DB::raw('NULL as sms_charges'), DB::raw('NULL as total_wht'))
+            ->select('u.id as shipper_account_id','sales_person.name as sales_person_name','invoice_for_reimbursements.id as id', 'invoice_for_reimbursements.invoice_number as invoice_number', 'invoice_for_reimbursements.invoice_number as invoice_number_btn', 'u.name as shipper', 'c.name as city', 'invoice_for_reimbursements.total_charges as total_charges', 'invoice_for_reimbursements.total_gst as total_gst', 'invoice_for_reimbursements.total_invoice_amount as total_invoice_amount', 'invoice_for_reimbursements.created_at as created_at', DB::raw('NULL as due_date'), DB::raw('NULL as received_date'), DB::raw('NULL as company_bank'), DB::raw('NULL as received_amount'), DB::raw('NULL as tax_amount'), DB::raw('NULL as deposit_date'), DB::raw('NULL as status'), DB::raw('NULL as status_id'), 'invoice_for_reimbursements.invoicing_date as invoicing_date', DB::raw('NULL as invoicing_cycle'), DB::raw('NULL as invoice_type'), 'invoice_for_reimbursements.payment_type as payment_type', DB::raw('1 as account_type'), DB::raw('NULL as is_id'), DB::raw('NULL as deposited_amount'),DB::raw('NULL as adjusted_amount'),'sts.status as star_status',DB::raw('NULL as sms_charges'), DB::raw('NULL as total_wht'), DB::raw('NULL as total_cod_sst'))
             ->where('invoice_for_reimbursements.to_show', 1);
 
         if (session('department_id') == 7 && !in_array(session('id'), session('sale_users_bypass'))) {
@@ -14354,6 +14430,9 @@ class AdminFinanceController extends Controller
             })
             ->editColumn('total_wht', function ($invoice) {
                 return number_format($invoice->total_wht, 2);
+            })
+            ->editColumn('total_cod_sst', function ($invoice) {
+                return number_format($invoice->total_cod_sst, 2);
             })
             ->editColumn('sms_charges', function ($invoice) {
                 if($invoice->sms_charges) {
@@ -14907,7 +14986,7 @@ class AdminFinanceController extends Controller
 
         $details = array();
 
-        $details[] = ['S. No.', 'Tracking No.', 'Origin', 'Destination', 'Arrival Date', 'Weight (kg)', 'Weight Charges (PKR)', 'Fuel Surcharge (PKR)', 'FAF CHARGES (PKR)', 'OSA Charges (PKR)', 'Adjustment Charges (PKR)', 'Total Charges (PKR)', 'GST (PKR)', 'SMS Charges' ,'WHT', 'Invoice Amount (PKR)', 'Intercept Charges  (PKR)'];
+        $details[] = ['S. No.', 'Tracking No.', 'Origin', 'Destination', 'Arrival Date', 'Weight (kg)', 'Weight Charges (PKR)', 'Fuel Surcharge (PKR)', 'FAF CHARGES (PKR)', 'OSA Charges (PKR)', 'Adjustment Charges (PKR)', 'Total Charges (PKR)', 'GST (PKR)', 'SMS Charges' ,'WHT', 'COD SST', 'Invoice Amount (PKR)', 'Intercept Charges  (PKR)'];
 
         $serial_number = 1;
 
@@ -14946,6 +15025,7 @@ class AdminFinanceController extends Controller
                 $row[] = $invoice_shipment->gst;
                 $row[] = $invoice_shipment->sms_charges;
                 $row[] = $invoice_shipment->wht;
+                $row[] = $invoice_shipment->cod_sst;
                 $row[] = $invoice_shipment->invoice_amount;
                 $row[] = ($invoice_shipment->type != 2) ?  (($invoice_shipment->type != 3) ? $shipment->intercept_charges : 0) : 0;
 
@@ -14983,9 +15063,10 @@ class AdminFinanceController extends Controller
                 $details[$shipment->id][12] += $invoice_shipment->gst;
                 $details[$shipment->id][13] += $invoice_shipment->sms_charges;
                 $details[$shipment->id][14] += $invoice_shipment->wht;
-                $details[$shipment->id][15] += $invoice_shipment->invoice_amount;
-                if ($details[$shipment->id][16] == 0) {
-                    $details[$shipment->id][16] += ($invoice_shipment->type != 2) ?  (($invoice_shipment->type != 3) ? $shipment->intercept_charges : 0) : 0;
+                $details[$shipment->id][15] += $invoice_shipment->cod_sst;
+                $details[$shipment->id][16] += $invoice_shipment->invoice_amount;
+                if ($details[$shipment->id][17] == 0) {
+                    $details[$shipment->id][17] += ($invoice_shipment->type != 2) ?  (($invoice_shipment->type != 3) ? $shipment->intercept_charges : 0) : 0;
                 }
             }
 
@@ -15831,7 +15912,7 @@ class AdminFinanceController extends Controller
         }
     }
 
-    static public function add_pending_payment_charges($pending_payment_id, $amount, $charges, $gst, $payable, $wht = 0, $retail = NULL ,$sms_charges = 0)
+    static public function add_pending_payment_charges($pending_payment_id, $amount, $charges, $gst, $payable, $wht = 0, $retail = NULL ,$sms_charges = 0, $cod_sst = 0)
     {
         if ($retail != null) {
             $pending_payment_charges = RetailPendingPaymentCalculation::where('retail_pending_payment_id', $pending_payment_id);
@@ -15855,6 +15936,7 @@ class AdminFinanceController extends Controller
                 $pending_payment_charges->charges = $pending_payment_charges->charges + $charges;
                 $pending_payment_charges->gst = $pending_payment_charges->gst + $gst;
                 $pending_payment_charges->wht = $pending_payment_charges->wht + $wht;
+                $pending_payment_charges->cod_sst = $pending_payment_charges->cod_sst + $cod_sst;
                 $pending_payment_charges->payable = $pending_payment_charges->payable + $payable;
                 $pending_payment_charges->sms_charges = $pending_payment_charges->sms_charges + $sms_charges;
                 $pending_payment_charges->save();
@@ -15865,6 +15947,7 @@ class AdminFinanceController extends Controller
                 $pending_payment_charges->charges = $charges;
                 $pending_payment_charges->gst = $gst;
                 $pending_payment_charges->wht = $wht;
+                $pending_payment_charges->cod_sst = $cod_sst;
                 $pending_payment_charges->payable = $payable;
                 $pending_payment_charges->sms_charges = $sms_charges;
                 $pending_payment_charges->save();
@@ -15872,7 +15955,7 @@ class AdminFinanceController extends Controller
         }
     }
 
-    static public function add_done_payment_charges($done_payment_id, $amount, $charges, $gst, $payable, $packaging_material_charges, $adjustment_amount, $retail = NULL, $wht = 0, $ibft_charges = 0, $sms_charges = 0)
+    static public function add_done_payment_charges($done_payment_id, $amount, $charges, $gst, $payable, $packaging_material_charges, $adjustment_amount, $retail = NULL, $wht = 0, $ibft_charges = 0, $sms_charges = 0, $cod_sst = 0)
     {
         if ($retail != null) {
             $done_payment_charges = RetailDonePaymentCalculation::where('retail_done_payment_id', $done_payment_id);
@@ -15898,6 +15981,7 @@ class AdminFinanceController extends Controller
                 $done_payment_charges->charges = $done_payment_charges->charges + $charges;
                 $done_payment_charges->gst = $done_payment_charges->gst + $gst;
                 $done_payment_charges->wht = $done_payment_charges->wht + $wht;
+                $done_payment_charges->cod_sst = $done_payment_charges->cod_sst + $cod_sst;
                 $done_payment_charges->payable = $done_payment_charges->payable + $payable;
                 $done_payment_charges->packaging_charges = $done_payment_charges->packaging_charges + $packaging_material_charges;
                 $done_payment_charges->adjustment = $done_payment_charges->adjustment + $adjustment_amount;
@@ -15914,6 +15998,7 @@ class AdminFinanceController extends Controller
                 $done_payment_charges->charges = $charges;
                 $done_payment_charges->gst = $gst;
                 $done_payment_charges->wht = $wht;
+                $done_payment_charges->cod_sst = $cod_sst;
                 $done_payment_charges->payable = $payable;
                 $done_payment_charges->packaging_charges = $packaging_material_charges;
                 $done_payment_charges->adjustment = $adjustment_amount;
@@ -15927,7 +16012,7 @@ class AdminFinanceController extends Controller
         }
     }
 
-    static public function sub_pending_payment_charges($pending_payment_id, $amount, $charges, $gst, $payable, $retail = NULL, $wht = 0, $sms_charges=0)
+    static public function sub_pending_payment_charges($pending_payment_id, $amount, $charges, $gst, $payable, $retail = NULL, $wht = 0, $sms_charges=0 , $cod_sst = 0 )
     {
 
         if ($retail != null) {
@@ -15946,6 +16031,7 @@ class AdminFinanceController extends Controller
                 $pending_payment_charges->charges = $pending_payment_charges->charges - $charges;
                 $pending_payment_charges->gst = $pending_payment_charges->gst - $gst;
                 $pending_payment_charges->wht = $pending_payment_charges->wht - $wht;
+                $pending_payment_charges->cod_sst = $pending_payment_charges->cod_sst - $cod_sst;
                 $pending_payment_charges->payable = $pending_payment_charges->payable - $payable;
                 $pending_payment_charges->sms_charges = $pending_payment_charges->sms_charges - $sms_charges;
                 $pending_payment_charges->save();
@@ -19131,6 +19217,9 @@ class AdminFinanceController extends Controller
                 if (!isset($total_wht[$origin])) {
                     $total_wht[$origin] = 0;
                 }
+                 if (!isset($total_cod_sst[$origin])) {
+                    $total_cod_sst[$origin] = 0;
+                }
 
 
                 if ($invoice_shipment->type != 2) {
@@ -19158,6 +19247,7 @@ class AdminFinanceController extends Controller
                         $total_insurance_charges[$origin] += $shipment->insurance_charges;
                         $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                         $total_wht[$origin] += $invoice_shipment->wht;
+                        $total_cod_sst[$origin] += $invoice_shipment->cod_sst;
 
                         $total_intercept_charges[$origin] += $shipment->intercept_charges;
                         $total_nsa_osa_charges[$origin] += $shipment->nsa_osa_charges;
@@ -19172,7 +19262,7 @@ class AdminFinanceController extends Controller
                     $total_adjustment_charges[$origin] += $invoice_shipment->invoice_amount;
                 }
 
-                $total_charges += $invoice_shipment->charges + $invoice_shipment->sms_charges + $invoice_shipment->wht  ;
+                $total_charges += $invoice_shipment->charges + $invoice_shipment->sms_charges + $invoice_shipment->wht + $invoice_shipment->cod_sst;
                 $total_gst += $invoice_shipment->gst;
                 $total_invoice_amount += $invoice_shipment->invoice_amount;
             }
@@ -19181,7 +19271,7 @@ class AdminFinanceController extends Controller
                     <table class="table table-sm table-bordered border">
                       <thead>
                         <tr>
-                            <th colspan="17" class="color primary text-center">Invoice Summary</th>
+                            <th colspan="18" class="color primary text-center">Invoice Summary</th>
                         </tr>
                         <tr>
                             <th class="color secondary">Origin</th>
@@ -19201,6 +19291,7 @@ class AdminFinanceController extends Controller
                             <th class="color secondary">Adjustment Charges (PKR)</th>
                             <th class="color secondary">SMS Charges (PKR)</th>
                             <th class="color secondary">WHT(PKR)</th>
+                            <th class="color secondary">COD SST(PKR)</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -19226,6 +19317,7 @@ class AdminFinanceController extends Controller
                             <td>' . number_format($total_adjustment_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_sms_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_wht[$origin], 2) . '</td>
+                              <td>' . number_format($total_cod_sst[$origin], 2) . '</td>
                         </tr>
                 ';
             }
@@ -19744,13 +19836,15 @@ class AdminFinanceController extends Controller
                     // } // commenting this as instructed my Mr.Mohsin changing wht to new requirement TO-7109
 
                     $wht = 0;
+                    $cod_sst = 0;
                     if(in_array($shipment->shipper_status_id, [14, 31, 36, 37]) && $shipment->amount > 0) {
                         
-                        $wht = self::wht($shipment->user_id, $shipment->amount);
+                        $wht = self::wht($shipment->user_id, $shipment->amount, $shipment->packaging_material_request, $shipment->id);
+                        $cod_sst = self::cod_sst($shipment->user_id, $shipment->amount, $shipment->packaging_material_request, $shipment->id);
                         
                     }
                     
-                    $payable = $amount - ($charges + $gst + $wallet_charges + $wht);
+                    $payable = $amount - ($charges + $gst + $wallet_charges + $wht + $cod_sst);
                 } else if ($type == 3) {
                     $charges = $shipment->weight_charges + $shipment->fuel_surcharge + $faf_charges;
                     if ($shipment->business_category_id == 1) {
@@ -19760,7 +19854,8 @@ class AdminFinanceController extends Controller
                     }
 
                     $wht = 0;
-                    $payable = 0 - ($charges + $gst + $wht);
+                    $cod_sst = 0;
+                    $payable = 0 - ($charges + $gst + $wht + $cod_sst);
                     $amount = 0;
                 } else {
                     $amount = 0;
@@ -19781,7 +19876,8 @@ class AdminFinanceController extends Controller
                     //     $wht = 0;
                     // } // commenting this as instructed my Mr.Mohsin changing wht to new requirement TO-7109
                     $wht = 0;
-                    $payable = 0 - ($charges + $gst + $wallet_charges + $wht);
+                    $cod_sst = 0;
+                    $payable = 0 - ($charges + $gst + $wallet_charges + $wht + $cod_sst);
                 }
             } else {
                 $charges = $shipment->packaging_material_charges;
@@ -19793,13 +19889,13 @@ class AdminFinanceController extends Controller
                 //     $wht = 0;
                 // } // commenting this as instructed my Mr.Mohsin changing wht to new requirement TO-7109
                 $wht = 0;
-
+                $cod_sst = 0;
                 // if(in_array($shipment->shipper_status_id, [14, 31, 36, 37,38]) && $shipment->amount > 0) {
 
-                //     $wht += self::wht($shipment->user_id, $shipment->amount);
+                //     $wht += self::wht($shipment->user_id, $shipment->amount, $shipment->packaging_material_request, $shipment->id);
                 // }
 
-                $payable = $amount - ($charges + $gst + $wht);
+                $payable = $amount - ($charges + $gst + $wht + $cod_sst);
             }
 
             $account_type_id = $shipment->user->account_type_id;
@@ -19908,12 +20004,13 @@ class AdminFinanceController extends Controller
                         $pending_payment_shipment->charges = $charges;
                         $pending_payment_shipment->gst = $gst;
                         $pending_payment_shipment->wht = $wht;
+                        $pending_payment_shipment->cod_sst = $cod_sst;
                         $pending_payment_shipment->payable = $payable;
                         $pending_payment_shipment->transaction_id = $transaction_id;
                         $pending_payment_shipment->sms_charges = $sms_charges;
                         $pending_payment_shipment->save();
 
-                        self::add_pending_payment_charges($pending_payment->id, $amount, $charges, $gst, $payable, $wht, NULL, $sms_charges);
+                        self::add_pending_payment_charges($pending_payment->id, $amount, $charges, $gst, $payable, $wht, NULL, $sms_charges, $cod_sst);
                     } else {
                         if (!$shipment->packaging_material_request) {
 
@@ -19925,12 +20022,14 @@ class AdminFinanceController extends Controller
                                 $pending_payment_shipment->charges = $charges;
                                 $pending_payment_shipment->gst = $gst;
                                 $pending_payment_shipment->wht = $wht;
+                                $pending_payment_shipment->cod_sst = $cod_sst;
                                 $pending_payment_shipment->payable = $payable;
                                 $pending_payment_shipment->sms_charges = $sms_charges;
                             } else {
                                 $pending_payment_shipment->charges = 0;
                                 $pending_payment_shipment->gst = 0;
                                 $pending_payment_shipment->wht = 0;
+                                $pending_payment_shipment->cod_sst = 0;
                                 $pending_payment_shipment->payable = $amount;
                                 $pending_payment_shipment->sms_charges = 0;
                             }
@@ -19938,9 +20037,9 @@ class AdminFinanceController extends Controller
                             $pending_payment_shipment->save();
 
                             if ($crs) {
-                                self::add_pending_payment_charges($pending_payment->id, $amount, $charges, $gst, $payable, $wht, NULL ,$sms_charges);
+                                self::add_pending_payment_charges($pending_payment->id, $amount, $charges, $gst, $payable, $wht, NULL ,$sms_charges, $cod_sst);
                             } else {
-                                self::add_pending_payment_charges($pending_payment->id, $amount, 0, 0, $amount, 0, NULL, 0);
+                                self::add_pending_payment_charges($pending_payment->id, $amount, 0, 0, $amount, 0, NULL, 0, 0);
                             }
 
                             $pending_invoice_shipment = new PendingInvoiceShipment();
@@ -19950,9 +20049,10 @@ class AdminFinanceController extends Controller
                             $pending_invoice_shipment->charges = $charges;
                             $pending_invoice_shipment->gst = $gst;
                             $pending_invoice_shipment->wht = $wht;
+                            $pending_invoice_shipment->cod_sst = $cod_sst;
                             $pending_invoice_shipment->transaction_id = $transaction_id;
                             $pending_invoice_shipment->sms_charges = $sms_charges;
-                            $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges + $wht;
+                            $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges + $wht + $cod_sst;
                             $pending_invoice_shipment->save();
                         } else {
                             if ($crs) {
@@ -19964,7 +20064,7 @@ class AdminFinanceController extends Controller
                                 $pending_payment_shipment->transaction_id = $transaction_id;
                                 $pending_payment_shipment->save();
 
-                                self::add_pending_payment_charges($pending_payment->id, $amount, $charges, $gst, $payable, $wht, NULL, $sms_charges);
+                                self::add_pending_payment_charges($pending_payment->id, $amount, $charges, $gst, $payable, $wht, NULL, $sms_charges, $cod_sst);
                             }
 
                             $pending_invoice_shipment = new PendingInvoiceShipment();
@@ -19974,8 +20074,9 @@ class AdminFinanceController extends Controller
                             $pending_invoice_shipment->charges = $charges;
                             $pending_invoice_shipment->gst = $gst;
                             $pending_invoice_shipment->wht = $wht;
+                            $pending_invoice_shipment->cod_sst = $cod_sst;
                             $pending_invoice_shipment->sms_charges = $sms_charges;
-                            $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges + $wht;
+                            $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges + $wht + $cod_sst;
                             $pending_invoice_shipment->transaction_id = $transaction_id;
                             $pending_invoice_shipment->save();
                         }
@@ -20007,8 +20108,9 @@ class AdminFinanceController extends Controller
                         $pending_invoice_shipment->charges = $charges;
                         $pending_invoice_shipment->gst = $gst;
                         $pending_invoice_shipment->wht = $wht;
+                        $pending_invoice_shipment->wht = $cod_sst;
                         $pending_invoice_shipment->sms_charges = $sms_charges;
-                        $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges + $wht;
+                        $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges + $wht + $cod_sst;
                         $pending_invoice_shipment->transaction_id = $transaction_id;
                         $pending_invoice_shipment->save();
                     }
@@ -21139,6 +21241,7 @@ class AdminFinanceController extends Controller
                             $done_payment_shipment->charges = $pending_payment_shipment->charges;
                             $done_payment_shipment->gst = $pending_payment_shipment->gst;
                             $done_payment_shipment->wht = $pending_payment_shipment->wht;
+                            $done_payment_shipment->cod_sst = $pending_payment_shipment->cod_sst;
                             $done_payment_shipment->payable = $pending_payment_shipment->payable;
                             $done_payment->company_bank_id = $company_bank;
 
@@ -21158,7 +21261,7 @@ class AdminFinanceController extends Controller
                                 }
                             }
 
-                            self::add_done_payment_charges($done_payment->id, $pending_payment_shipment->amount, $pending_payment_shipment->charges, $pending_payment_shipment->gst, $pending_payment_shipment->payable, $packaging_material_charges, $adjustment_amount, null, $pending_payment_shipment->wht, ($done_payment->ibft_charges ?? 0));
+                            self::add_done_payment_charges($done_payment->id, $pending_payment_shipment->amount, $pending_payment_shipment->charges, $pending_payment_shipment->gst, $pending_payment_shipment->payable, $packaging_material_charges, $adjustment_amount, null, $pending_payment_shipment->wht, ($done_payment->ibft_charges ?? 0) , $pending_payment_shipment->sms_charges , $pending_payment_shipment->cod_sst);
                             $pending_payment_shipment->delete();
 
                             self::adjustment_logs_done(1, $pending_payment_shipment_id, $done_payment_shipment->id);
@@ -21245,6 +21348,7 @@ class AdminFinanceController extends Controller
                             $done_payment_shipment->charges = $pending_payment_shipment->charges;
                             $done_payment_shipment->gst = $pending_payment_shipment->gst;
                             $done_payment_shipment->wht = $pending_payment_shipment->wht;
+                            $done_payment_shipment->cod_sst = $pending_payment_shipment->cod_sst;
                             $done_payment_shipment->payable = $pending_payment_shipment->payable;
                             $done_payment->company_bank_id = $company_bank;
 
@@ -21268,13 +21372,13 @@ class AdminFinanceController extends Controller
                                 $adjustment_amount = $pending_payment_shipment->amount;
                             }
 
-                            self::add_done_payment_charges($done_payment->id, $pending_payment_shipment->amount, $pending_payment_shipment->charges, $pending_payment_shipment->gst, $pending_payment_shipment->payable, $packaging_material_charges, $adjustment_amount, null, $pending_payment_shipment->wht, ($done_payment->ibft_charges ?? 0));
+                            self::add_done_payment_charges($done_payment->id, $pending_payment_shipment->amount, $pending_payment_shipment->charges, $pending_payment_shipment->gst, $pending_payment_shipment->payable, $packaging_material_charges, $adjustment_amount, null, $pending_payment_shipment->wht, ($done_payment->ibft_charges ?? 0) , $pending_payment_shipment->sms_charges , $pending_payment_shipment->cod_sst);
 
                             self::adjustment_logs_done(1, $pending_payment_shipment_id, $done_payment_shipment->id);
 
                             $pending_payment_shipment->delete();
 
-                            self::sub_pending_payment_charges($pending_payment_shipment->pending_payment_id, $pending_payment_shipment->amount, $pending_payment_shipment->charges, $pending_payment_shipment->gst, $pending_payment_shipment->payable, null, $pending_payment_shipment->wht);
+                            self::sub_pending_payment_charges($pending_payment_shipment->pending_payment_id, $pending_payment_shipment->amount, $pending_payment_shipment->charges, $pending_payment_shipment->gst, $pending_payment_shipment->payable, null, $pending_payment_shipment->wht, $pending_payment_shipment->sms_charges, $pending_payment_shipment->cod_sst );
 
                             if ($done_payment_shipment->type == 1) {
                                 $shipment = Shipment::find($pending_payment_shipment->shipment_id);
@@ -21376,12 +21480,14 @@ class AdminFinanceController extends Controller
                     //     $wht = 0;
                     // }
                     $wht = 0;
+                    $cod_sst = 0;
                     if(in_array($shipment->shipper_status_id, [14, 31, 36, 37]) && $shipment->amount > 0) {
 
-                        $wht = self::wht($shipment->user_id, $shipment->amount);
+                        $wht = self::wht($shipment->user_id, $shipment->amount, $shipment->packaging_material_request, $shipment->id);
+                        $cod_sst = self::cod_sst($shipment->user_id, $shipment->amount, $shipment->packaging_material_request, $shipment->id);
 
                     }
-                    $payable = $amount - ($charges + $gst + $wallet_charges + $wht);
+                    $payable = $amount - ($charges + $gst + $wallet_charges + $wht + $cod_sst);
                 } else if ($type == 3) {
                     $charges = $shipment->weight_charges + $shipment->fuel_surcharge + $faf_charges;
                     if ($shipment->business_category_id == 1) {
@@ -21396,7 +21502,8 @@ class AdminFinanceController extends Controller
                     //     $wht = 0;
                     // }
                     $wht = 0;
-                    $payable = 0 - ($charges + $gst + $wht);
+                    $cod_sst = 0;
+                    $payable = 0 - ($charges + $gst + $wht + $cod_sst);
                     $amount = 0;
                 } else {
                     $amount = 0;
@@ -21417,12 +21524,13 @@ class AdminFinanceController extends Controller
                     //     $wht = 0;
                     // }
                     $wht = 0;
+                    $cod_sst = 0;
                     // if(in_array($shipment->shipper_status_id, [14, 31, 36, 37,38]) && $shipment->amount > 0) {
 
-                    //     $wht = self::wht($shipment->user_id, $shipment->amount);
+                    //     $wht = self::wht($shipment->user_id, $shipment->amount, $shipment->packaging_material_request, $shipment->id);
 
                     // }
-                    $payable = 0 - ($charges + $gst + $wallet_charges + $wht);
+                    $payable = 0 - ($charges + $gst + $wallet_charges + $wht + $cod_sst);
                 }
             } else {
                 $charges = $shipment->packaging_material_charges;
@@ -21434,13 +21542,14 @@ class AdminFinanceController extends Controller
                 //     $wht = 0;
                 // }
                 $wht = 0;
+                $cod_sst = 0;
                 // if(in_array($shipment->shipper_status_id, [14, 31, 36, 37,38]) && $shipment->amount > 0) {
 
-                //     $wht = self::wht($shipment->user_id, $shipment->amount);
+                //     $wht = self::wht($shipment->user_id, $shipment->amount, $shipment->packaging_material_request, $shipment->id);
 
                 // }
 
-                $payable = $amount - ($charges + $gst + $wht);
+                $payable = $amount - ($charges + $gst + $wht + $cod_sst);
             }
 
             $account_type_id = $shipment->user->account_type_id;
@@ -21501,6 +21610,7 @@ class AdminFinanceController extends Controller
                                 $pending_payment_shipment->charges = $charges;
                                 $pending_payment_shipment->gst = $gst;
                                 $pending_payment_shipment->wht = $wht;
+                                $pending_payment_shipment->cod_sst = $cod_sst;
                                 $pending_payment_shipment->payable = $payable;
                                 $pending_payment_shipment->transaction_id = $transaction_id;
                                 $pending_payment_shipment->sms_charges = $sms_charges;
@@ -21520,12 +21630,14 @@ class AdminFinanceController extends Controller
                                         $pending_payment_shipment->charges = $charges;
                                         $pending_payment_shipment->gst = $gst;
                                         $pending_payment_shipment->wht = $wht;
+                                        $pending_payment_shipment->cod_sst = $cod_sst;
                                         $pending_payment_shipment->payable = $payable;
                                         $pending_payment_shipment->sms_charges = $sms_charges;
                                     } else {
                                         $pending_payment_shipment->charges = 0;
                                         $pending_payment_shipment->gst = 0;
                                         $pending_payment_shipment->wht = 0;
+                                        $pending_payment_shipment->cod_sst = 0;
                                         $pending_payment_shipment->payable = $amount;
                                         $pending_payment_shipment->sms_charges = 0;
                                     }
@@ -21543,9 +21655,10 @@ class AdminFinanceController extends Controller
                                         $pending_invoice_shipment->charges = $charges;
                                         $pending_invoice_shipment->gst = $gst;
                                         $pending_invoice_shipment->wht = $wht;
+                                        $pending_invoice_shipment->cod_sst = $cod_sst;
                                         $pending_invoice_shipment->transaction_id = $transaction_id;
                                         $pending_invoice_shipment->sms_charges = $sms_charges;
-                                        $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges + $wht;
+                                        $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges + $wht + $cod_sst;
                                         $pending_invoice_shipment->save();
                                     }
                                 } else {
@@ -21568,8 +21681,9 @@ class AdminFinanceController extends Controller
                                         $pending_invoice_shipment->charges = $charges;
                                         $pending_invoice_shipment->gst = $gst;
                                         $pending_invoice_shipment->wht = $wht;
+                                        $pending_invoice_shipment->cod_sst = $cod_sst;
                                         $pending_invoice_shipment->sms_charges = $sms_charges;
-                                        $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges + $wht;
+                                        $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges + $wht + $cod_sst ;
                                         $pending_invoice_shipment->transaction_id = $transaction_id;
                                         $pending_invoice_shipment->save();
                                     }
@@ -21592,8 +21706,9 @@ class AdminFinanceController extends Controller
                                     $pending_invoice_shipment->charges = $charges;
                                     $pending_invoice_shipment->gst = $gst;
                                     $pending_invoice_shipment->wht = $wht;
+                                    $pending_invoice_shipment->cod_sst = $cod_sst;
                                     $pending_invoice_shipment->sms_charges = $sms_charges;
-                                    $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges + $wht;
+                                    $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges + $wht + $cod_sst;
                                     $pending_invoice_shipment->transaction_id = $transaction_id;
                                     $pending_invoice_shipment->save();
                                 }
@@ -21608,8 +21723,9 @@ class AdminFinanceController extends Controller
                             $pending_invoice_shipment->charges = $charges;
                             $pending_invoice_shipment->gst = $gst;
                             $pending_invoice_shipment->wht = $wht;
+                            $pending_invoice_shipment->cod_sst = $cod_sst;
                             $pending_invoice_shipment->sms_charges = $sms_charges;
-                            $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges + $wht;
+                            $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges + $wht + $cod_sst;
                             $pending_invoice_shipment->transaction_id = $transaction_id;
                             $pending_invoice_shipment->save();
                         }
@@ -21741,11 +21857,13 @@ class AdminFinanceController extends Controller
                     //     $wht = 0;
                     // }
                     $wht = 0;
+                    $cod_sst = 0;
                     if(in_array($shipment->shipper_status_id, [14, 31, 36, 37]) && $shipment->amount > 0) {
 
-                        $wht += self::wht($shipment->user_id, $shipment->amount);
+                        $wht += self::wht($shipment->user_id, $shipment->amount, $shipment->packaging_material_request, $shipment->id);
+                        $cod_sst = self::cod_sst($shipment->user_id, $shipment->amount, $shipment->packaging_material_request, $shipment->id);
                     }
-                    $payable = $amount - ($charges + $gst + $wallet_charges + $wht);
+                    $payable = $amount - ($charges + $gst + $wallet_charges + $wht + $cod_sst);
                 } else if ($type == 3) {
                     $charges = $shipment->weight_charges + $shipment->fuel_surcharge + $faf_charges;
                     if ($shipment->business_category_id == 1) {
@@ -21755,7 +21873,8 @@ class AdminFinanceController extends Controller
                     }
 
                     $wht = 0;
-                    $payable = 0 - ($charges + $gst + $wht);
+                    $cod_sst = 0;
+                    $payable = 0 - ($charges + $gst + $wht + $cod_sst);
                     $amount = 0;
                 } else {
                     $amount = 0;
@@ -21776,11 +21895,12 @@ class AdminFinanceController extends Controller
                     //     $wht = 0;
                     // }
                     $wht = 0;
+                    $cod_sst = 0;
                     // if(in_array($shipment->shipper_status_id, [14, 31, 36, 37,38]) && $shipment->amount > 0) {
 
-                    //     $wht += self::wht($shipment->user_id, $shipment->amount);
+                    //     $wht += self::wht($shipment->user_id, $shipment->amount, $shipment->packaging_material_request, $shipment->id);
                     // }
-                    $payable = 0 - ($charges + $gst + $wallet_charges + $wht);
+                    $payable = 0 - ($charges + $gst + $wallet_charges + $wht + $cod_sst);
                 }
             } else {
                 $charges = $shipment->packaging_material_charges;
@@ -21792,11 +21912,12 @@ class AdminFinanceController extends Controller
                 //     $wht = 0;
                 // }
                 $wht = 0;
+                $cod_sst = 0;
                 // if(in_array($shipment->shipper_status_id, [14, 31, 36, 37,38]) && $shipment->amount > 0) {
 
-                //     $wht += self::wht($shipment->user_id, $shipment->amount);
+                //     $wht += self::wht($shipment->user_id, $shipment->amount, $shipment->packaging_material_request, $shipment->id);
                 // }
-                $payable = $amount - ($charges + $gst + $wht);
+                $payable = $amount - ($charges + $gst + $wht + $cod_sst);
             }
             $account_type_id = $shipment->user->account_type_id;
             $current_sms_charges = $shipment->user->sms_charges;
@@ -21856,6 +21977,7 @@ class AdminFinanceController extends Controller
                                 $done_payment_shipments->charges = $charges;
                                 $done_payment_shipments->gst = $gst;
                                 $done_payment_shipments->wht = $wht;
+                                $done_payment_shipments->cod_sst = $cod_sst;
                                 $done_payment_shipments->payable = $payable;
                                 $done_payment_shipments->sms_charges = $sms_charges;
                                 $done_payment_shipments->save();
@@ -21874,12 +21996,14 @@ class AdminFinanceController extends Controller
                                         $done_payment_shipments->charges = $charges;
                                         $done_payment_shipments->gst = $gst;
                                         $done_payment_shipments->wht = $wht;
+                                        $done_payment_shipments->cod_sst = $cod_sst;
                                         $done_payment_shipments->payable = $payable;
                                         $done_payment_shipments->sms_charges = $sms_charges;
                                     } else {
                                         $done_payment_shipments->charges = 0;
                                         $done_payment_shipments->gst = 0;
                                         $done_payment_shipments->wht = 0;
+                                        $done_payment_shipments->cod_sst = 0;
                                         $done_payment_shipments->payable = $amount;
                                         $done_payment_shipments->sms_charges = 0;
                                     }

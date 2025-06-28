@@ -180,6 +180,7 @@
 										<th class="border-primary border-darken-1">Total Charges</th>
 										<th class="border-primary border-darken-1">Total GST</th>
 										<th class="border-primary border-darken-1">Total WHT</th>
+										<th class="border-primary border-darken-1">Total COD SST</th>
 										<th class="border-primary border-darken-1">Total Per SMS Charges</th>
 										<th class="border-primary border-darken-1">Packing Charges</th>
 										<th class="border-primary border-darken-1">Total Deductible</th>
@@ -611,6 +612,7 @@
                             head.push('Total Charges');
                             head.push('Total GST');
                             head.push('Total WHT');
+							head.push('Total COD SST');
 							head.push('Total Per SMS Charges');
                             head.push('Packing Charges');
                             head.push('Total Deductable');
@@ -650,6 +652,7 @@
                                 row.push(values.total_charges);
                                 row.push(values.total_gst);
                                 row.push(values.total_wht);
+								row.push(values.total_cod_sst);
 								row.push(values.total_sms_charges);
                                 row.push(values.packaging_charges);
                                 row.push(values.total_deductable);
@@ -906,6 +909,7 @@
 					{data:'total_charges', name: 'dpc.charges', class: 'align-middle text-center total_charges', orderable: false},
 					{data:'total_gst', name: 'dpc.gst', class: 'align-middle text-center total_gst', orderable: false},
 					{data:'total_wht', name: 'dpc.wht', class: 'align-middle text-center total_wht', orderable: false},
+					{data:'total_cod_sst', name: 'dpc.cod_sst', class: 'align-middle text-center total_cod_sst', orderable: false},
 					{data:'total_sms_charges', name:'dpc.sms_charges', class: 'align-middle text-center total_sms_charges', orderable: false},
 					{data:'packaging_charges', name: 'dpc.packaging_charges', class: 'align-middle text-center packaging_charges', orderable: false},
 					{data:'total_deductable', name: 'total_deductable', class: 'align-middle text-center total_deductable', orderable: false},
@@ -964,7 +968,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.total_amount') || $(header).is('.total_charges') || $(header).is('.total_gst') || $(header).is('.total_deductable') || $(header).is('.total_payable') || $(header).is('.return_shipments_average_aging') || $(header).is('.action') || $(header).is('.packaging_charges') || $(header).is('.adjustment_charges') || $(header).is('.total_wht') || $(header).is('.total_sms_charges') || $(header).is('.wallet_error_logs') ) {
+						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.total_amount') || $(header).is('.total_charges') || $(header).is('.total_gst') || $(header).is('.total_deductable') || $(header).is('.total_payable') || $(header).is('.return_shipments_average_aging') || $(header).is('.action') || $(header).is('.packaging_charges') || $(header).is('.adjustment_charges') || $(header).is('.total_wht') || $(header).is('.total_sms_charges') || $(header).is('.wallet_error_logs') || $(header).is('.total_cod_sst') ) {
 							$(td).appendTo($(search));
 						}else if($(header).is('.bank')){
                             $(bank_select).appendTo($(search))

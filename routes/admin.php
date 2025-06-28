@@ -1753,7 +1753,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::prefix('invoices')->name('invoices.')->group(function () {
             Route::get('', 'Admins\AdminFinanceController@invoices_index')->name('index');
-            Route::get('list', 'Admins\AdminFinanceController@invoices_list')->name('list');
+            Route::post('list', 'Admins\AdminFinanceController@invoices_list')->name('list');
             Route::post('slip', 'Admins\AdminFinanceController@invoices_slip')->name('slip');
             Route::post('slip/view', 'Admins\AdminFinanceController@invoices_slip_view')->name('slip_view');
             Route::post('invoices_detail_print', 'Admins\AdminFinanceController@invoices_detail_print')->name('invoices_detail_print');

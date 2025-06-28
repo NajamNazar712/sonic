@@ -20,18 +20,21 @@ class ParentProductsSeeder extends Seeder
             [
                 'id' => 1,
                 'name' => 'Electronic Goods',
-                'tax_percentage' => 0.25
+                'tax_percentage' => 0.25,
+                'sst_percentage' => 2
                 
             ],
             [
                 'id' => 2,
                 'name' =>'Clothing Articles / Apparel / Garments',
-                'tax_percentage' => 2
+                'tax_percentage' => 2,
+                'sst_percentage' => 2
             ],
             [
                 'id' => 3,
                 'name' => 'Other',
-                'tax_percentage' => 1
+                'tax_percentage' => 1,
+                'sst_percentage' => 2
             ]
         ]);
     }
