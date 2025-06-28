@@ -17817,15 +17817,15 @@ class AdminReportsController extends Controller
             'pp.sst_percentage as sst_percentage'
         ])
         ->groupBy([
-            'dp.id',
-            'dp.created_at',
-            'users.ntn_no',
-            'users.cnic',
-            'users.name',
-            'c.name',
-            'users.brand_name',
-            'pp.tax_percentage',
-            'pp.sst_percentage'
+            'dp.id'
+            // 'dp.created_at',
+            // 'users.ntn_no',
+            // 'users.cnic',
+            // 'users.name',
+            // 'c.name',
+            // 'users.brand_name',
+            // 'pp.tax_percentage',
+            // 'pp.sst_percentage'
         ]);
         
         $total = DB::query()->fromSub($payments->union($invoices), 'total');

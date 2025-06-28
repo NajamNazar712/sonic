@@ -196,7 +196,7 @@ class AdminFinanceController extends Controller
     static public function wht($user_id, $amount, $packaging_request, $shipment_id){ 
 
         $parent_product_id = User::where('id', $user_id)->value('parent_product_id');
-        $arrival_date = ShipmentsJourney::where('shipment_id', $shipment_id)->where('shipper_status_id', 2)->whereDate('created_at', '>=', '2025-07-01');
+        $arrival_date = ShipmentsJourney::where('shipment_id', $shipment_id)->where('shipper_status_id', 2)->whereDate('created_at', '>=', '2025-06-01');
         if($parent_product_id  && $packaging_request == 0 && $arrival_date->exists()) {
 
             $tax_percentage  = ParentProduct::where('id', $parent_product_id)->value('tax_percentage');
@@ -211,7 +211,7 @@ class AdminFinanceController extends Controller
     static public function cod_sst($user_id, $amount, $packaging_request, $shipment_id){ 
 
         $parent_product_id = User::where('id', $user_id)->value('parent_product_id');
-        $arrival_date = ShipmentsJourney::where('shipment_id', $shipment_id)->where('shipper_status_id', 2)->whereDate('created_at', '>=', '2025-07-01');
+        $arrival_date = ShipmentsJourney::where('shipment_id', $shipment_id)->where('shipper_status_id', 2)->whereDate('created_at', '>=', '2025-06-01');
         if($parent_product_id && $packaging_request == 0 && $arrival_date->exists()) {
 
             $sst_percentage  = ParentProduct::where('id', $parent_product_id)->value('sst_percentage');
