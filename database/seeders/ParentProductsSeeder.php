@@ -16,6 +16,8 @@ class ParentProductsSeeder extends Seeder
      */
     public function run()
     {
+
+        DB::table('parent_products')->truncate();
         DB::table('parent_products')->insert([
             [
                 'id' => 1,
