@@ -23,18 +23,48 @@
                                         {{ csrf_field() }}
 
                                         @foreach($data as $d)
-                                        <div class="form-group">
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text" style="min-width: 450px;">{{$d->name}}</span>
-                                                </div>
-                                                <input type="text" name="percentage[{{ $d->id }}]" class="form-control class" placeholder="Percentage*" data-rule-required="true" data-msg-required="Value is required" value="{{ $d->tax_percentage }}">
-                                                <div class="input-group-append">
-                                                    <span class="input-group-text">%</span>
+                                            <div class="form-group">
+                                                <label style="font-weight: 600;">{{ $d->name }}</label>
+                                                <div class="row">
+                                                    {{-- Tax Percentage --}}
+                                                    <div class="col-md-6">
+                                                        <label>Tax Percentage</label>
+                                                        <div class="input-group mb-2">
+                                                            <input type="text"
+                                                                name="tax_percentage[{{ $d->id }}]"
+                                                                class="form-control text-center"
+                                                                placeholder="Tax %"
+                                                                data-rule-required="true"
+                                                                data-msg-required="Required"
+                                                                value="{{ $d->tax_percentage }}">
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text">%</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    {{-- SST Percentage --}}
+                                                    <div class="col-md-6">
+                                                        <label>SST Percentage</label>
+                                                        <div class="input-group mb-2">
+                                                            <input type="text"
+                                                                name="sst_percentage[{{ $d->id }}]"
+                                                                class="form-control text-center"
+                                                                placeholder="SST %"
+                                                                data-rule-required="true"
+                                                                data-msg-required="Required"
+                                                                value="{{ $d->sst_percentage }}">
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text">%</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
                                         @endforeach
+
+
+
                                         
                                         <button type="submit" class="btn btn-primary">Update</button>
                                     </form>
