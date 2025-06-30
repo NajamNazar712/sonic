@@ -9993,12 +9993,11 @@ class AdminFinanceController extends Controller
 
         $current_date = Carbon::now()->startOfDay();
         $current_date_string = $current_date->toDateString();
-        $billing_period_from_date = $current_date_string;
-        $users = User::where('id', 10454)->get();
+        $users = User::where('account_type_id', 2)->get();
 
         foreach ($users as $user) {
 
-            $generate = true;
+            $generate = false;
 
             $user_id = $user->id;
 
