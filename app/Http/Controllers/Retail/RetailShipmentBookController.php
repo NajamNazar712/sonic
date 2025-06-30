@@ -1198,8 +1198,17 @@ class RetailShipmentBookController extends Controller
                            ';
 
             $slip .= '
-                  <div class="col m-1 row justify-content-center"><div class="col"><hr></div><div class=""><p>Shipper Copy</p></div><div class="col"><hr></div>
-                  <div class=""><i class="la la-cut la-rotate-180 align-middle"></i></div></div>
+                <div class="col m-1 row justify-content-center">
+                    <div class="col"><hr></div>
+                    <div class=""><p>Sales and Income tax has been deducted from the total COD amount as per applicable tax laws.</p></div>
+                    <div class="col"><hr></div>
+                </div>
+                  <div class="col m-1 row justify-content-center">
+                    <div class="col"><hr></div>
+                    <div class=""><p>Shipper Copy</p></div>
+                    <div class="col"><hr></div>
+                    <div class=""><i class="la la-cut la-rotate-180 align-middle"></i></div>
+                  </div>
                 ';
             $shipment_details .= $slip;
 
