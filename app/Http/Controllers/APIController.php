@@ -11,6 +11,8 @@ use App\FafCharges;
 use App\FinjaSmsLog;
 use App\GuestApiToken;
 use App\Http\Models\City;
+use App\Http\Models\Admin\Retail\RetailShipperInfo;
+use App\Http\Models\Admin\Retail\RetailShippingMode;
 use App\Http\Models\Zone;
 use Vectorface\Whip\Whip;
 use App\Http\Models\Rider;
@@ -157,6 +159,16 @@ class APIController extends Controller
 
         'service_type_id' => 'Service Type ID',
         'pickup_address_id' => 'Pickup Address ID',
+
+        //for shipper app
+        'new_pickup_address' => 'New Pickup Address',
+        'new_pickup_person_of_contact' => 'New Pickup Person of Contact',
+        'new_pickup_vendor' => 'New Pickup Vendor',
+        'new_pickup_phone_number' => 'New Pickup Phone Number',
+        'new_pickup_email_address' => 'New Pickup Email Address',
+        'new_pickup_city_id' => 'New Pickup City',
+        'make_default_address' => 'Make Default Address',
+
         'information_display' => 'Information Display',
         'consignee_city_id' => 'Consignee City ID',
         'consignee_name' => 'Consignee Name',
@@ -248,9 +260,22 @@ class APIController extends Controller
 
         'pickup_address_id.exists' => 'Invalid Store ID',
         'phone_number' => ':attribute format is Invalid or must be integer, required Format is: (03000000000, +92-300-0000000, 300-0000000, 0300-0000000).',
+        'new_pickup_phone_number_regex' => ':attribute format is Invalid or must be integer, required Format is: (03000000000, +92-300-0000000, 300-0000000, 0300-0000000).',
         'origin_check' => 'Origin city not allowed, please contact your sales person!',
         'destination_check' => 'Destination city not allowed, please contact your sales person!',
         'destination_return_check' => 'Return city not allowed, please contact your sales person!',
+
+        //for shipper app
+        'new_pickup_address.required' => 'The new pickup address is required.',
+        'new_pickup_person_of_contact.required' => 'The new pickup person of contact is required.',
+        'new_pickup_vendor.required' => 'The new pickup vendor is required.',
+        'new_pickup_phone_number.regex' => ':attribute format is Invalid or must be integer, required Format is: (03000000000, +92-300-0000000, 300-0000000, 0300-0000000).',
+        'new_pickup_email_address.required' => 'The new pickup email address is required.',
+        'new_pickup_email_address.email' => 'The new pickup email address must be a valid email.',
+        'new_pickup_city_id.required' => 'The new pickup city is required.',
+        'new_pickup_city_id.exists' => 'The selected new pickup city is invalid.',
+        'make_default_address.boolean' => 'The make default address field must be 0 or 1.',
+
     ];
 
     public static function phone_number($phone_number)
@@ -550,6 +575,7 @@ class APIController extends Controller
             });
         }
 
+
         Validator::extend('origin_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
             $data = $validator->getData();
             if (isset($data['shipping_mode_id']) && isset($data['service_type_id'])) {
@@ -616,6 +642,7 @@ class APIController extends Controller
 
 
         if ($user_type['account_type_id'] == 1) {
+
             $rules = [
                 'service_type_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function ($query) {
                     $query->whereNotIn('id', [4]);
@@ -623,9 +650,7 @@ class APIController extends Controller
                 'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('rate_statuses', 'shipping_mode_id')->where(function ($query) use ($user_id) {
                     $query->where('user_id', $user_id)->where('status', 1);
                 })],
-                'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
-                    $query->where('user_id', $user_id)->where('hidden', 0);
-                }), 'origin_check'],
+                //pickup addres here
                 'return_address_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
                     $query->where('user_id', $user_id)->where('hidden', 0);
                 }), 'destination_return_check'],
@@ -693,6 +718,7 @@ class APIController extends Controller
                     },
                 ],
             ];
+
             $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
             if ($ccd_booking->exists()) {
                 $ccd_booking = $ccd_booking->first();
@@ -707,14 +733,15 @@ class APIController extends Controller
                     })];
                 }
             }
-        } else {
+        }
+        else {
+
             $rules = [
                 'service_type_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function ($query) {
                     $query->whereNotIn('id', [4]);
                 })],
-                'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
-                    $query->where('user_id', $user_id)->where('hidden', 0);
-                }), 'origin_check'],
+
+                //pickup addres here
                 'return_address_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
                     $query->where('user_id', $user_id)->where('hidden', 0);
                 }), 'destination_return_check'],
@@ -781,6 +808,7 @@ class APIController extends Controller
                         }
                     },
                 ],
+                'booked_by' => ['nullable','integer']
             ];
 
             $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
@@ -831,6 +859,57 @@ class APIController extends Controller
             } else {
                 $rules['order_id'] = ['nullable', 'filled', 'between:0,100'];
             }
+        }
+
+        //this is for shipper app
+        if($request->app_type==1 && (!$request->has('pickup_address_id') || is_null($request->pickup_address_id))) {
+
+            if (preg_match('/^(92|03)\d+/', $request->new_pickup_phone_number)) {
+                Validator::extend('new_pickup_phone_number_regex', function ($attribute, $value, $parameters) {
+                    if ($value) {
+                        $value = $this->phone_number($value);
+
+                        if (preg_match('/^((\+92)|(92)|(0092))-{0,1}\d{10}$|^03\d{9}$/', $value)) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+                });
+            } else {
+                Validator::extend('new_pickup_phone_number_regex', function ($attribute, $value, $parameters) {
+                    if ($value) {
+                        $value = $this->phone_number($value);
+
+                        if (preg_match('/^\d+$/', $value)) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+                });
+            }
+
+            $rules['new_pickup_address'] = ['required', 'string'];
+            $rules['new_pickup_person_of_contact'] = ['required', 'string', 'max:255'];
+            $rules['new_pickup_vendor'] = ['required', 'string'];
+            $rules['new_pickup_phone_number'] = ['required', 'new_pickup_phone_number_regex'];
+            $rules['new_pickup_email_address'] = ['required', 'email', 'max:255'];
+            $rules['make_default_address'] = ['required','integer','in:0,1'];
+            $rules['new_pickup_city_id'] = [
+                'required',
+                'integer',
+                'digits_between:1,10',
+                Rule::exists('cities', 'id')->where('business_category_id', 1)
+//                    'origin_check',
+            ];
+        }
+        else {
+            $rules ['pickup_address_id'] = [
+                'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
+                    $query->where('user_id', $user_id)->where('hidden', 0);
+                }), 'origin_check'],
+            ];
         }
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -930,9 +1009,21 @@ class APIController extends Controller
             else {
                 $shipment_pre_book = null;
             }
+
+            //if pickup address id is null or not set then create new pickup address this code only for shipper app
+            if($request->app_type==1 && (!$request->has('pickup_address_id') || is_null($request->pickup_address_id))) {
+                $pickup_address_id = ShipperShipmentBookController::add_pickup_address($user_id, $request->input('new_pickup_address'), $request->input('new_pickup_person_of_contact'), $request->input('new_pickup_vendor'), substr_replace($request->input('new_pickup_phone_number'), '-', 4, 0), $request->input('new_pickup_email_address'), $request->input('new_pickup_city_id'), $request->input('make_default_address'), false);
+                $request->merge([
+                    'pickup_address_id' => $pickup_address_id
+                ]);
+            }
+
             if ($service_type_id != 5) {
                 $user_shipping_info = UserShippingInfo::find($request->input('pickup_address_id'));
 
+                if(!$user_shipping_info) {
+                    return response()->json(['status' => 1, 'message' => 'Pickup Address not found!']);
+                }
                 if (!$user_shipping_info->status) {
                     return response()->json(['status' => 1, 'message' => 'Pickup Address ID #' . $request->input('pickup_address_id') . ' is disabled']);
                 }
@@ -1059,8 +1150,11 @@ class APIController extends Controller
 
                 $pickup_address_id_for_delivery = $request->input('pickup_address_id');
                 $pickup_address_for_delivery = UserShippingInfo::find($pickup_address_id_for_delivery);
-                $delivery_city = City::find($pickup_address_for_delivery->city_id);
+                if(!$pickup_address_for_delivery) {
+                    return response()->json(['status' => 1, 'message' => 'Pickup Address not found!']);
+                }
 
+                $delivery_city = City::find($pickup_address_for_delivery->city_id);
                 if (!$delivery_city->status) {
                     return response()->json(['status' => 1, 'message' => 'Consignee City ID #' . $request->input('consignee_city_id') . ' is deactivated']);
                 }
@@ -1248,15 +1342,17 @@ class APIController extends Controller
             }
 
 
+            $booked_by = $request->booked_by;
+            $channel_id = $request->channel_id;
             $business_category_id = 1;
             if ($user_type['account_type_id'] == 1) {
-                $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces_quantity, $self_collection, $business_category_id, $open_shipment, $return_address_id, $parcel_value);
+                $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces_quantity, $self_collection, $business_category_id, $open_shipment, $return_address_id, $parcel_value,$booked_by, $channel_id);
             } else {
 
                 if ($user_type['corporate_rate_type_id'] == 3) {
                     $delivery_type_id = 1;
                 }
-                $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment, $return_address_id, $parcel_value);
+                $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment, $return_address_id, $parcel_value,$booked_by,$channel_id);
             }
 
 
@@ -1995,6 +2091,143 @@ class APIController extends Controller
         }
     }
 
+    public function retail_shipment_track(Request $request)
+    {
+        $user_id = $request->retail_shipper_id;
+
+        $rules = [
+            'tracking_number' => ['required', 'integer', 'digits_between:10,20'],
+            'type' => ['required', 'boolean'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $tracking_number = $request->tracking_number;
+            $type = $request->type;
+
+            $shipment = Shipment::join('retail_shipments as rs','rs.shipment_id','shipments.id')
+                ->where('rs.shipper_account_no',$user_id)->where('shipments.tracking_number',$tracking_number)->first();
+           if($shipment) {
+               $tracking_number = $request->tracking_number;
+               $type = $request->type;
+               $retail_shipper = RetailShipperInfo::where('id',$user_id)->first();
+               $shipping_mode = RetailShippingMode::where('id',$shipment->shipping_mode)->first();
+//               $shipment = Shipment::whereIn('user_id', $user_ids)->where('tracking_number', $tracking_number)->first();
+
+               $sub_segment_name = '-';
+               $sub_segment = DB::table('shipper_segment_logs')
+                   ->leftJoin('sub_category_segments', 'sub_category_segments.id', 'shipper_segment_logs.sub_segment_id')
+                   ->where('shipment_id', $shipment->id)
+                   ->select('sub_category_segments.name')
+                   ->first();
+
+               if ($sub_segment && $sub_segment->name)
+               {
+                   $sub_segment_name = $sub_segment->name;
+               }
+
+               $details = array();
+               $details['shipment_id'] = $shipment->id;
+               $details['tracking_number'] = $tracking_number;
+
+               $details['order_id'] = $shipment->order_id;
+
+               $details['order_date'] = $shipment->pickup_date;
+               $details['booking_date'] = $shipment->created_at;
+
+               $shipper = $shipment->user;
+
+               $details['shipper']['name'] = $retail_shipper->shipper_name;
+
+               $pickup = $shipment->pickup_address;
+
+               $details['pickup']['origin'] = $pickup->city->name;
+
+               if ($type == 0) {
+                   $details['shipper']['account_number'] = $shipper->id;
+                   $details['shipper']['phone_number_1'] = $retail_shipper->shipper_phone_no;
+//                   $details['shipper']['phone_number_2'] = $shipper->phone2;
+//                   $details['shipper']['email'] = $shipper->email;
+                   $details['shipper']['city'] = $retail_shipper->retail_city->name;
+
+                   $details['pickup']['person_of_contact'] = $pickup->poc;
+                   $details['pickup']['phone_number'] = $pickup->phone;
+                   $details['pickup']['email'] = $pickup->email;
+                   $details['pickup']['address'] = $pickup->pickup_address;
+               }
+
+               $details['consignee']['name'] = $shipment->consignee_name;
+               $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
+               $details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
+               $details['consignee']['destination'] = $shipment->consignee_city->name;
+               $details['consignee']['address'] = $shipment->consignee_address;
+
+               foreach ($shipment->items as $item) {
+                   $item_details = array();
+
+                   $item_details['order_id'] = $shipment->order_id;
+                   $item_details['product_type'] = $item->product->product_name;
+                   $item_details['description'] = $item->description;
+                   $item_details['quantity'] = $item->quantity;
+
+                   $details['order_information']['items'][] = $item_details;
+               }
+               if ($type == 0) {
+                   $details['order_information']['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
+                   $details['order_information']['shipping_mode'] = $shipping_mode->name;
+                   $details['order_information']['amount'] = $shipment->amount;
+                   $details['order_information']['instructions'] = $shipment->special_instructions;
+               }
+
+               if ($type == 0) {
+                   foreach ($shipment->shipment_journey as $journey) {
+                       if ($journey->verification) {
+                           $journey_details = array();
+
+                           $journey_details['date_time'] = Carbon::parse($journey->created_at)->format('d/m/Y h:i A');
+                           $journey_details['timestamp'] = Carbon::parse($journey->created_at)->timestamp;
+                           $journey_details['status'] = $journey->shipment_status_shipper->name;
+
+                           $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : null;
+
+                           $details['tracking_history'][] = $journey_details;
+                       }
+                   }
+               } else {
+                   foreach ($shipment->shipment_journey as $journey) {
+                       if ($journey->consignee_status_id != null) {
+                           if ($journey->verification) {
+                               $journey_details = array();
+
+                               $journey_details['date_time'] = Carbon::parse($journey->created_at)->format('d/m/Y h:i A');
+                               $journey_details['timestamp'] = Carbon::parse($journey->created_at)->timestamp;
+                               $journey_details['status'] = $journey->shipment_status_consignee->name;
+
+                               $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : null;
+
+                               $details['tracking_history'][] = $journey_details;
+                           }
+                       }
+                   }
+               }
+
+               $details['order_information']['sub_segment'] = $sub_segment_name;
+
+               return response()->json(['status' => 0, 'message' => 'Tracking of Shipment #' . $tracking_number, 'details' => $details]);
+           }
+
+
+            return response()->json(['status' => 1, 'message' => 'Shipment not found!']);
+
+
+        }
+    }
+
     public function shipment_track(Request $request)
     {
         $user_id = $request->user_id;
@@ -2035,7 +2268,7 @@ class APIController extends Controller
             }
 
             $details = array();
-
+            $details['shipment_id'] = $shipment->id;
             $details['tracking_number'] = $tracking_number;
 
             $details['order_id'] = $shipment->order_id;
@@ -2320,8 +2553,8 @@ class APIController extends Controller
                 $current_payment_status = $shipment_payment_journey->first()->status->name;
                 $wallet_charges = ShipmentAdditionalCharges::fetch_wallet_charges($shipment->id);
                 return response()->json([
-                    'status' => 0, 
-                    'message' => 'Payment Status of Shipment #' . $tracking_number, 
+                    'status' => 0,
+                    'message' => 'Payment Status of Shipment #' . $tracking_number,
                     'current_payment_status' => $current_payment_status,
                     'wallet_charges' => $wallet_charges
                 ]);
@@ -2473,7 +2706,7 @@ class APIController extends Controller
     public function shipment_cancel(Request $request)
     {
         $user_id = $request->user_id;
-
+        $remarks = 'Cancelled by Shipper';
         $rules = [
             'tracking_number' => ['required', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function ($query) use ($user_id) {
                 $query->where('user_id', $user_id);
@@ -2500,10 +2733,12 @@ class APIController extends Controller
                     $shipment->consignee_status_id = 17;
 
                     $shipment->save();
-
+                    if($request->has('remarks')) {
+                        $remarks = $request->remarks;
+                    }
                     V2AdminPickupsController::cancel($shipment->id);
 
-                    ShipmentsJourneyController::add($shipment->id, 17, 17, null, 'Cancelled by Shipper', $user_id, null);
+                    ShipmentsJourneyController::add($shipment->id, 17, 17, null,$remarks , $user_id, null);
 
                     return response()->json(['status' => 0, 'message' => 'Shipment #' . $tracking_number . ' is Cancelled']);
                 } else {
@@ -3640,6 +3875,7 @@ class APIController extends Controller
                 $shipments = Shipment::where('user_id', $user_id)->where('order_id', $order_id)->get();
                 foreach ($shipments as $shipment) {
                     $detail = array();
+
 
                     $detail['tracking_number'] = $shipment->tracking_number;
 
@@ -4913,7 +5149,8 @@ class APIController extends Controller
                 } else {
                     return response()->json(['status' => 1, 'message' => 'case_nature_type_id not found!']);
                 }
-            } elseif ($nature_id == 4) {
+            }
+            elseif ($nature_id == 4) {
                 $crm_request_type = CrmRequestCaseNatureType::where('nature_id', $nature_id)->where('status_id', 1)->pluck('id')->toArray();
                 if (in_array($complaint_id, $crm_request_type)) {
                     if ($complaint_id == 26) {
@@ -5020,7 +5257,8 @@ class APIController extends Controller
                 } else {
                     return response()->json(['status' => 1, 'message' => 'case_nature_type_id not found!']);
                 }
-            } else if ($nature_id == 3) {
+            }
+            else if ($nature_id == 3) {
                 $rules = [
                     'description' => ['required'],
                 ];
@@ -5037,7 +5275,8 @@ class APIController extends Controller
                     // $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description);
                     return response()->json(['status' => 0, 'message' => 'CRM Request has been added', 'id' => $crm_request]);
                 }
-            } else {
+            }
+            else {
                 return response()->json(['status' => 1, 'message' => 'case_nature_id should be 1 (Complaints), 2 (Service Request) and 4 (Claims)']);
             }
         }
@@ -8150,7 +8389,7 @@ class APIController extends Controller
                     }
 
                     $transaction_amount = $amount;
-                    
+
                     $hbl_konnect_transaction_delivery_note = HblKonnectTransactionRetailNote::where('retail_note_id', $retail_note_id);
                     if ($hbl_konnect_transaction_delivery_note->exists()) {
                         $hbl_konnect_transaction_delivery_note = $hbl_konnect_transaction_delivery_note->first();
@@ -8160,7 +8399,7 @@ class APIController extends Controller
                         $hbl_konnect_transaction_delivery_note->retail_note_id = $retail_note_id;
                     }
                     $cash_amount = $this->customRound($retail_note->total_cash) - $transaction_amount;
-                    
+
                     if ($cash_amount < 0) {
                         $hbl_konnect_transaction_delivery_note = HblKonnectTransactionRetailNote::where('retail_note_id', $retail_note_id);
                         if ($hbl_konnect_transaction_delivery_note->exists()) {
@@ -10714,7 +10953,7 @@ class APIController extends Controller
             ], 500);
         }
     }
-    
+
 }
-    
+
 
