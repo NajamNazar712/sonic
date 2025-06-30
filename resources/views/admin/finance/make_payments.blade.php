@@ -170,6 +170,7 @@
                                         <th class="border-primary border-darken-1">S. No.</th>
                                         <th class="border-primary border-darken-1">Shipper</th>
                                         <th class="border-primary border-darken-1">City</th>
+                                        <th class="border-primary border-darken-1">Territory</th>
                                         <th class="border-primary border-darken-1">Phone No(s).</th>
                                         <th class="border-primary border-darken-1">Financing Product Type</th>
                                         <th class="border-primary border-darken-1">Address</th>
@@ -762,6 +763,7 @@
                             head.push('S.No');
                             head.push('Shipper');
                             head.push('City');
+                            head.push('Territory');
                             head.push('Phone No(s).');
                             head.push('Financing Product Type');
                             head.push('Address');
@@ -795,6 +797,7 @@
                                 row.push(index + 1);
                                 row.push(values.shipper);
                                 row.push(values.city);
+                                row.push(values.territory);
                                 row.push(values.phone_numbers);
                                 row.push(values.finova_account_type);
                                 row.push(values.address);
@@ -1069,10 +1072,16 @@
                         class: 'align-middle text-center city'
                     },
                     {
+                        data: 'territory',
+                        name: 't.name',
+                        class: 'align-middle text-center territory'
+                    },
+                    {
                         data: 'phone_numbers',
                         name: 'phone_numbers',
                         class: 'align-middle text-center phone_numbers'
                     },
+                    
                     {
                         data: 'finova_account_type',
                         name: 'finova_account_type',
