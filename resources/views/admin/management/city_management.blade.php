@@ -949,8 +949,27 @@
                                 html += '<thead><tr><th>Field</th><th>Old</th><th>New</th></tr></thead><tbody>';
                                 $.each(changes.city, function (key, value) {
                                     let label = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-                                    html += `<tr><td>${label}</td><td>${value.old}</td><td>${value.new}</td></tr>`;
+
+                                    let oldVal = value.old;
+                                    let newVal = value.new;
+
+                                    if (key === 'hub') {
+                                        oldVal = (oldVal == 1) ? 'Hub' : (oldVal == 0 ? 'City' : '-');
+                                        newVal = (newVal == 1) ? 'Hub' : (newVal == 0 ? 'City' : '-');
+                                    } else if (key === 'pickup') {
+                                        oldVal = (oldVal == 1) ? 'Pickup' : (oldVal == 0 ? 'Non-Pickup' : '-');
+                                        newVal = (newVal == 1) ? 'Pickup' : (newVal == 0 ? 'Non-Pickup' : '-');
+                                    } else if (key === 'gc_area') {
+                                        oldVal = (oldVal == 1) ? 'GC Area' : (oldVal == 0 ? 'Non-GC Area' : '-');
+                                        newVal = (newVal == 1) ? 'GC Area' : (newVal == 0 ? 'Non-GC Area' : '-');
+                                    } else {
+                                        oldVal = (oldVal === null || oldVal === undefined || oldVal === '') ? '-' : oldVal;
+                                        newVal = (newVal === null || newVal === undefined || newVal === '') ? '-' : newVal;
+                                    }
+
+                                    html += `<tr><td>${label}</td><td>${oldVal}</td><td>${newVal}</td></tr>`;
                                 });
+
                                 html += '</tbody></table>';
                             }
                             

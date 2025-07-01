@@ -230,51 +230,46 @@ class LeadManagementController extends Controller
         return Datatables::of($leads)
             ->filterColumn('status', function ($query, $keyword) {
                 $query->where(function ($q) use ($keyword) {
+                    $keywordInt = (int) $keyword;
 
-                    if ($keyword == '1') {
-                        $q->where('leads.status_id', 1)
-                        ->where(function ($check) {
-                            $check->whereExists(function ($subQuery) {
+                    if (!in_array($keywordInt, [11, 12])) {
+                       $q->where(function ($inner) use ($keywordInt) {
+                            $inner->where('leads.status_id', $keywordInt)
+                                ->whereExists(function ($subQuery) {
+                                    $subQuery->select(DB::raw(1))
+                                            ->from('users')
+                                            ->whereColumn('users.email', 'leads.email_address')
+                                            ->where('users.blacklist', '!=', 1)
+                                            ->where('users.status', '!=', 3);
+                                });
+                        });
+                    } 
+                    
+                    
+                    if ($keywordInt === 11) {
+                      $q->where(function ($check) {
+                            $check->where('leads.status_id', 11)
+                                ->orWhereExists(function ($subQuery) {
+                                    $subQuery->select(DB::raw(1))
+                                            ->from('users')
+                                            ->whereColumn('users.lead_id', 'leads.id')
+                                            ->where('users.blacklist', 1);
+                                });
+                        });
+                    } 
+                    
+                    if ($keywordInt === 12) {
+                        $q->where(function ($q) {
+                            $q->where('leads.status_id', 12)
+                            ->orWhereExists(function ($subQuery) {
                                 $subQuery->select(DB::raw(1))
-                                    ->from('users')
-                                    ->whereRaw('users.email = leads.email_address')
-                                    ->where('blacklist', '!=', '1')
-                                    ->where('status', '!=', '3');
-                            })
-                            ->orWhereNotExists(function ($notExists) {
-                                $notExists->select(DB::raw(1))
-                                    ->from('users')
-                                    ->whereRaw('users.email = leads.email_address');
+                                        ->from('users')
+                                        ->whereColumn('users.lead_id', 'leads.id')
+                                        ->where('users.status', 3);
                             });
                         });
-
-                    } elseif ($keyword == '11') {
-                        
-                        $q->where(function ($check) {
-                            $check->where('leads.status_id', 11)
-                                ->orWhere(function ($inner) {
-                                    $inner->whereExists(function ($subQuery) {
-                                        $subQuery->select(DB::raw(1))
-                                            ->from('users')
-                                            ->whereRaw('users.lead_id = leads.id')
-                                            ->where('blacklist', '1');
-                                    });
-                                });
-                        })->whereExists(function ($subQuery) {
-                            $subQuery->select(DB::raw(1))
-                                ->from('users')
-                                ->whereRaw('users.lead_id = leads.id');
-                        });
-
-                    } elseif ($keyword == '12') {
-                        $q->where('leads.status_id', 12)
-                        ->orWhereIn('leads.email_address', function ($subQuery) {
-                            $subQuery->select('email')
-                                ->from('users')
-                                ->where('status', '3');
-                        });
-
-                    } else {
+                    }               
+                    else {
                         $q->where('leads.status_id', $keyword);
                     }
 
@@ -408,18 +403,19 @@ class LeadManagementController extends Controller
             // })
 
             ->editColumn('status', function ($lead) {
+                $user = User::where('email', $lead->email_address)->first();
 
-                if($lead->status_id == 1 && $lead->blacklist != 1 && $lead->user_status != 3){
-                    return $lead->status; 
-                }else if(User::where(['email'=> $lead->email_address, 'blacklist' => 1])->exists()) {
+                if ($lead->status_id == 11 || ($user && $user->blacklist == 1)) {
                     return 'Blocked';
-                }else if(User::where('email', $lead->email_address)->where('status', '3')->exists()){
-                    return 'Account Activated';
-                }else{
-                    return $lead->status; 
                 }
-            
+
+                if ($lead->status_id == 12 || ($user && $user->status == 3)) {
+                    return 'Account Activated';
+                }
+
+                return $lead->status;
             })
+
 
             ->addColumn('lead_account_link', function ($lead) {
                 if (!empty($lead->lead_id) && !empty($lead->activation_code)) {

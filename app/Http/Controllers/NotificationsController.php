@@ -6988,7 +6988,7 @@ class NotificationsController extends Controller
                     }
 
                     self::email($subject, $body, $to);
-                } 
+                }
                 // else if ($id == 110) {
                 //     $date = $reference_1_id;
                 //     $file = $reference_2_id;
@@ -7000,7 +7000,7 @@ class NotificationsController extends Controller
                 //     $to = array();
 
                 //     self::email($subject, $body, $to, $cc);
-                // } 
+                // }
                 else if ($id == 111) {
                     $date = $reference_1_id;
                     $file = $reference_2_id;
@@ -11090,7 +11090,7 @@ class NotificationsController extends Controller
                     $html .= '</table>';
                     $body = str_replace('[preview]', $html, $notification->body);
                     self::email($subject, $body, $to, $cc);
-                } 
+                }
                 // else if ($id == 226) {
                 //     $file = $reference_1_id;
                 //     $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
@@ -11099,13 +11099,13 @@ class NotificationsController extends Controller
                 //         $body .= '<br/><br/><strong>Note: This link will expire after 7 days.</strong>';
                 //     }
                 //     $to = [
-                //             'tauseef.sarfaraz@trax.pk', 
-                //             'mansoor.ahmad@trax.pk', 
+                //             'tauseef.sarfaraz@trax.pk',
+                //             'mansoor.ahmad@trax.pk',
                 //             // 'shahbaz.abbasi@trax.pk'
                 //         ];
 
                 //     self::email($subject, $body, $to);
-                // } 
+                // }
                 else if ($id == 227) {
                     $file = $reference_1_id;
                     $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
@@ -11457,7 +11457,7 @@ class NotificationsController extends Controller
 
                     self::email($subject, $body, $to, NULL, $bcc);
                 } else if( $id == 244) {
-                    
+
                     $delivery_note = DeliveryNote::find($reference_1_id);
 
                     $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $reference_1_id)
@@ -11506,6 +11506,24 @@ class NotificationsController extends Controller
                         $body = str_replace('[tracking_number]', $shipment->tracking_number, $body);
                     }
                     self::sms($body, $to, null,$shipment->id,$id);
+                }
+
+                else if ($id == 243) {
+                    $retail = RetailShipperInfo::find($reference_1_id);
+                    if ($retail) {
+                        if (strpos($body, '[user_name]') !== FALSE) {
+                            $body = str_replace('[user_name]', $retail->shipper_name, $body);
+                        }
+                        if (strpos($body, '[otp]') !== FALSE) {
+                            $body = str_replace('[otp]', $retail->retail_otp, $body);
+                        }
+                        if (strpos($body, '[expire_at]') !== FALSE) {
+                            $body = str_replace('[expire_at]', $reference_2_id, $body);
+                        }
+                        $to = $retail->shipper_phone_no;
+                        self::sms_otp($body, $to, $retail->shipper_name, $retail->retail_otp, 1, NULL, $id);
+//                        self::sms($body, $to, 1, null,$id);
+                    }
                 }
             }
         }

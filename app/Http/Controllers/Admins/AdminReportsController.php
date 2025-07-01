@@ -17715,7 +17715,7 @@ class AdminReportsController extends Controller
         }); 
         
         $final_Array = array();
-        $specificValues = $shipments->select($select)->get()->toarray();
+        $specificValues = $shipments->select($select)->orderBy('remarks', 'desc')->get()->toarray();
         header('Content-Type: text/csv; charset=utf-8');  
         header('Content-Disposition: attachment; filename=data.csv');  
         $output = fopen("php://output", "w");  
@@ -17757,9 +17757,9 @@ class AdminReportsController extends Controller
                     $action_updated_by = $action_updated_by->name;
                 }
             }
-            else{
-                return '-';
-            }
+            // else{
+            //     return '-';
+            // }
 
             $delivery_attempt_count = ShipmentsJourney::where('shipment_id', $rowArray['shipment_id'])->where('shipper_status_id', 5)->count();
             $re_attempt_count = ShipmentsJourney::where('shipment_id', $rowArray['shipment_id'])->where('shipper_status_id', 13)->count();
