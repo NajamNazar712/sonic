@@ -8533,7 +8533,7 @@ class AdminFinanceController extends Controller
                 return $fntech_charges;
             })
             ->addColumn('total_deductable', function ($done_payment) {
-                return number_format(($done_payment->total_charges + $done_payment->total_gst + $done_payment->total_sms_charges + $done_payment->ibft_charges + $done_payment->total_wht), 2);
+                return number_format(($done_payment->total_charges + $done_payment->total_gst + $done_payment->total_sms_charges + $done_payment->ibft_charges + $done_payment->total_wht + $done_payment->total_cod_sst), 2);
             })
             ->editColumn('total_shipments', function ($done_payment) {
                return $done_payment->total_shipments+=$done_payment->arrival_shipment;
@@ -20027,9 +20027,9 @@ class AdminFinanceController extends Controller
                             } else {
                                 $pending_payment_shipment->charges = 0;
                                 $pending_payment_shipment->gst = 0;
-                                $pending_payment_shipment->wht = 0;
-                                $pending_payment_shipment->cod_sst = 0;
-                                $pending_payment_shipment->payable = $amount;
+                                $pending_payment_shipment->wht = $wht;
+                                $pending_payment_shipment->cod_sst = $cod_sst;
+                                $pending_payment_shipment->payable = $amount -  $wht - $cod_sst;
                                 $pending_payment_shipment->sms_charges = 0;
                             }
                             $pending_payment_shipment->transaction_id = $transaction_id;
@@ -20038,7 +20038,7 @@ class AdminFinanceController extends Controller
                             if ($crs) {
                                 self::add_pending_payment_charges($pending_payment->id, $amount, $charges, $gst, $payable, $wht, NULL ,$sms_charges, $cod_sst);
                             } else {
-                                self::add_pending_payment_charges($pending_payment->id, $amount, 0, 0, $amount, 0, NULL, 0, 0);
+                                self::add_pending_payment_charges($pending_payment->id, $amount, 0, 0, $amount, $wht, NULL, 0, $cod_sst);
                             }
 
                             $pending_invoice_shipment = new PendingInvoiceShipment();
@@ -20047,11 +20047,11 @@ class AdminFinanceController extends Controller
                             $pending_invoice_shipment->type = $type;
                             $pending_invoice_shipment->charges = $charges;
                             $pending_invoice_shipment->gst = $gst;
-                            $pending_invoice_shipment->wht = $wht;
-                            $pending_invoice_shipment->cod_sst = $cod_sst;
+                            $pending_invoice_shipment->wht = 0;
+                            $pending_invoice_shipment->cod_sst = 0;
                             $pending_invoice_shipment->transaction_id = $transaction_id;
                             $pending_invoice_shipment->sms_charges = $sms_charges;
-                            $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges + $wht + $cod_sst;
+                            $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges;
                             $pending_invoice_shipment->save();
                         } else {
                             if ($crs) {
@@ -20072,10 +20072,10 @@ class AdminFinanceController extends Controller
                             $pending_invoice_shipment->type = $type;
                             $pending_invoice_shipment->charges = $charges;
                             $pending_invoice_shipment->gst = $gst;
-                            $pending_invoice_shipment->wht = $wht;
-                            $pending_invoice_shipment->cod_sst = $cod_sst;
+                            $pending_invoice_shipment->wht = 0;
+                            $pending_invoice_shipment->cod_sst = 0;
                             $pending_invoice_shipment->sms_charges = $sms_charges;
-                            $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges + $wht + $cod_sst;
+                            $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges;
                             $pending_invoice_shipment->transaction_id = $transaction_id;
                             $pending_invoice_shipment->save();
                         }
@@ -20092,9 +20092,9 @@ class AdminFinanceController extends Controller
                                 $pending_invoice_shipment->type = $type;
                                 $pending_invoice_shipment->charges = $charges;
                                 $pending_invoice_shipment->gst = $gst;
-                                $pending_invoice_shipment->wht = $wht;
+                                $pending_invoice_shipment->wht = 0;
                                 $pending_invoice_shipment->sms_charges = $sms_charges;
-                                $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges + $wht;
+                                $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges;
                                 $pending_invoice_shipment->transaction_id = $transaction_id;
                                 $pending_invoice_shipment->save();
                             }
@@ -20106,10 +20106,10 @@ class AdminFinanceController extends Controller
                         $pending_invoice_shipment->type = $type;
                         $pending_invoice_shipment->charges = $charges;
                         $pending_invoice_shipment->gst = $gst;
-                        $pending_invoice_shipment->wht = $wht;
-                        $pending_invoice_shipment->wht = $cod_sst;
+                        $pending_invoice_shipment->wht = 0;
+                        $pending_invoice_shipment->wht = 0;
                         $pending_invoice_shipment->sms_charges = $sms_charges;
-                        $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges + $wht + $cod_sst;
+                        $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges;
                         $pending_invoice_shipment->transaction_id = $transaction_id;
                         $pending_invoice_shipment->save();
                     }
@@ -21638,9 +21638,9 @@ class AdminFinanceController extends Controller
                                     } else {
                                         $pending_payment_shipment->charges = 0;
                                         $pending_payment_shipment->gst = 0;
-                                        $pending_payment_shipment->wht = 0;
-                                        $pending_payment_shipment->cod_sst = 0;
-                                        $pending_payment_shipment->payable = $amount;
+                                        $pending_payment_shipment->wht = $wht;
+                                        $pending_payment_shipment->cod_sst = $cod_sst;
+                                        $pending_payment_shipment->payable = $amount -  $wht - $cod_sst;
                                         $pending_payment_shipment->sms_charges = 0;
                                     }
                                     $pending_payment_shipment->transaction_id = $transaction_id;
@@ -21656,11 +21656,11 @@ class AdminFinanceController extends Controller
                                         $pending_invoice_shipment->type = $type;
                                         $pending_invoice_shipment->charges = $charges;
                                         $pending_invoice_shipment->gst = $gst;
-                                        $pending_invoice_shipment->wht = $wht;
-                                        $pending_invoice_shipment->cod_sst = $cod_sst;
+                                        $pending_invoice_shipment->wht = 0;
+                                        $pending_invoice_shipment->cod_sst = 0;
                                         $pending_invoice_shipment->transaction_id = $transaction_id;
                                         $pending_invoice_shipment->sms_charges = $sms_charges;
-                                        $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges + $wht + $cod_sst;
+                                        $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges;
                                         $pending_invoice_shipment->save();
                                     }
                                 } else {
@@ -21681,11 +21681,11 @@ class AdminFinanceController extends Controller
                                         $pending_invoice_shipment->shipment_id = $shipment_id;
                                         $pending_invoice_shipment->type = $type;
                                         $pending_invoice_shipment->charges = $charges;
-                                        $pending_invoice_shipment->gst = $gst;
-                                        $pending_invoice_shipment->wht = $wht;
+                                        $pending_invoice_shipment->gst = 0;
+                                        $pending_invoice_shipment->wht = 0;
                                         $pending_invoice_shipment->cod_sst = $cod_sst;
                                         $pending_invoice_shipment->sms_charges = $sms_charges;
-                                        $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges + $wht + $cod_sst ;
+                                        $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges;
                                         $pending_invoice_shipment->transaction_id = $transaction_id;
                                         $pending_invoice_shipment->save();
                                     }
@@ -21707,10 +21707,10 @@ class AdminFinanceController extends Controller
                                     $pending_invoice_shipment->type = $type;
                                     $pending_invoice_shipment->charges = $charges;
                                     $pending_invoice_shipment->gst = $gst;
-                                    $pending_invoice_shipment->wht = $wht;
-                                    $pending_invoice_shipment->cod_sst = $cod_sst;
+                                    $pending_invoice_shipment->wht = 0;
+                                    $pending_invoice_shipment->cod_sst = 0;
                                     $pending_invoice_shipment->sms_charges = $sms_charges;
-                                    $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges + $wht + $cod_sst;
+                                    $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges;
                                     $pending_invoice_shipment->transaction_id = $transaction_id;
                                     $pending_invoice_shipment->save();
                                 }
@@ -21724,10 +21724,10 @@ class AdminFinanceController extends Controller
                             $pending_invoice_shipment->type = $type;
                             $pending_invoice_shipment->charges = $charges;
                             $pending_invoice_shipment->gst = $gst;
-                            $pending_invoice_shipment->wht = $wht;
-                            $pending_invoice_shipment->cod_sst = $cod_sst;
+                            $pending_invoice_shipment->wht = 0;
+                            $pending_invoice_shipment->cod_sst = 0;
                             $pending_invoice_shipment->sms_charges = $sms_charges;
-                            $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges + $wht + $cod_sst;
+                            $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges;
                             $pending_invoice_shipment->transaction_id = $transaction_id;
                             $pending_invoice_shipment->save();
                         }
@@ -22004,9 +22004,9 @@ class AdminFinanceController extends Controller
                                     } else {
                                         $done_payment_shipments->charges = 0;
                                         $done_payment_shipments->gst = 0;
-                                        $done_payment_shipments->wht = 0;
-                                        $done_payment_shipments->cod_sst = 0;
-                                        $done_payment_shipments->payable = $amount;
+                                        $done_payment_shipments->wht = $wht;
+                                        $done_payment_shipments->cod_sst = $cod_sst;
+                                        $done_payment_shipments->payable = $amount - $wht - $cod_sst;
                                         $done_payment_shipments->sms_charges = 0;
                                     }
                                     $done_payment_shipments->save();
