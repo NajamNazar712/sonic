@@ -20076,7 +20076,7 @@ class AdminFinanceController extends Controller
                                 $pending_payment_shipment->gst = 0;
                                 $pending_payment_shipment->wht = $wht;
                                 $pending_payment_shipment->cod_sst = $cod_sst;
-                                $pending_payment_shipment->payable = $amount -  $wht - $cod_sst;
+                                $pending_payment_shipment->payable = $amount - ($wht + $cod_sst);
                                 $pending_payment_shipment->sms_charges = 0;
                             }
                             $pending_payment_shipment->transaction_id = $transaction_id;
@@ -20140,6 +20140,7 @@ class AdminFinanceController extends Controller
                                 $pending_invoice_shipment->charges = $charges;
                                 $pending_invoice_shipment->gst = $gst;
                                 $pending_invoice_shipment->wht = 0;
+                                $pending_invoice_shipment->cod_sst = 0;
                                 $pending_invoice_shipment->sms_charges = $sms_charges;
                                 $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges;
                                 $pending_invoice_shipment->transaction_id = $transaction_id;
@@ -20154,7 +20155,7 @@ class AdminFinanceController extends Controller
                         $pending_invoice_shipment->charges = $charges;
                         $pending_invoice_shipment->gst = $gst;
                         $pending_invoice_shipment->wht = 0;
-                        $pending_invoice_shipment->wht = 0;
+                        $pending_invoice_shipment->cod_sst = 0;
                         $pending_invoice_shipment->sms_charges = $sms_charges;
                         $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges;
                         $pending_invoice_shipment->transaction_id = $transaction_id;
@@ -21687,7 +21688,7 @@ class AdminFinanceController extends Controller
                                         $pending_payment_shipment->gst = 0;
                                         $pending_payment_shipment->wht = $wht;
                                         $pending_payment_shipment->cod_sst = $cod_sst;
-                                        $pending_payment_shipment->payable = $amount -  $wht - $cod_sst;
+                                        $pending_payment_shipment->payable = $amount -  ($wht + $cod_sst);
                                         $pending_payment_shipment->sms_charges = 0;
                                     }
                                     $pending_payment_shipment->transaction_id = $transaction_id;
