@@ -945,6 +945,31 @@
                 });
             });
 
+            // $('#parent_product_id').select2({
+            //     placeholder: "Select Parent Product Type",
+            //     width:'100%',
+            // }).bind('change', function() {
+            //     var id = $(this).val();
+            //     $.ajax({
+            //         url: '{!! route('cod.get_products') !!}',
+            //         method: 'GET',
+            //         data: {
+            //             'parent_product_id': id,
+            //             '_token': '{{ csrf_token() }}'
+            //         }
+            //     }).done(function (data) {
+            //         console.log(data);
+            //        if (data.status == 0) {
+            //         // $('#sub_segment_id').prop("disabled", false);
+            //            $('#product_id').children().remove();
+            //                         $('#product_id').prepend('<option value="" selected="selected"></option>')
+            //                     $.each(data.products, function (index, products) {
+            //                         $('#product_id').append('<option value="'+products.id+'" id="trax_center">'+products.product_name+'</option>')
+            //                     });
+            //        }
+            //     });
+            // });
+
             $('#sub_segment_id').select2({
                 placeholder: "Select Sub Segment",
                 width:'100%',

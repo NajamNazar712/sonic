@@ -236,6 +236,7 @@ use App\Http\Models\Operataions\OperationsForecastLastUpdatedTime;
 use App\Http\Models\Operataions\OperationsOutgoingTopCustomersShipments;
 use App\Http\Models\Operataions\OperationsOutgoingPickupRequestShipments;
 use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
+use App\Models\ParentProduct;
 
 class AdminDashboardController extends Controller
 {   use RateReusableTrait;
@@ -11075,6 +11076,8 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         $payment_cycle_days = $this->user_payment_cycles_days($user);
         $products = Product::all();
         $banks = BanksList::all();
+        // $parent_products = ParentProduct::get();
+        // $parent_product = ParentProduct::find($user->parent_product_id);
         $invoicing_cycle = InvoicingCycle::all();
         $city_list = City::all();
         $emails = ShipperNotificationEmail::where('user_id', $user->id)->select('email')->get();

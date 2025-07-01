@@ -130,6 +130,7 @@ use Yajra\Datatables\Datatables;
 use App\Jobs\WalletSignUpLPendingRecordLogs;
 use Validator;
 //use Illuminate\Support\Facades\Auth;
+use App\Models\ParentProduct;
 
 class ShipperDashboardController extends Controller
 {
@@ -2498,6 +2499,7 @@ class ShipperDashboardController extends Controller
         $lead = Lead::find($user->lead_id);
         $account_type = AccountType::all();
         $products = Product::all();
+        $parentProducts = ParentProduct::get();
         $banks = BanksList::all();
         $city_list = City::where('status',1)->where('business_category_id' ,1)->where('id','!=',1244)->get();
         $pickup_city_list = City::where('pickup',1)->where('status',1)->get();
@@ -2597,7 +2599,7 @@ class ShipperDashboardController extends Controller
         if($user->on_board_status == 1){
             return view('client.access_denied');
         }else{
-            return view('client.wordpress_lead_registeration.index')->with(['payment_cycles'=>$payment_cycles,'products'=>$products,'cities'=>$city_list,'pickup_city_list'=>$pickup_city_list,'all_cities'=>$city_list,'banks'=>$banks,'account_types' => $account_type, 'references' => $references, 'average_shipment_durations' => $average_shipment_durations, 'segments' => $segments,'sub_segments' => $sub_segments, 'lead' => $lead,'invoicing_cycle' => $invoicing_cycle , 'user' => $user, 'riders_permanents'=>$riders_permanent,'shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'cities' => $cities,'admins'=>$admins, 'average_shipment_duration_weekly'=> $average_shipment_duration_weekly, 'lead_segment'=> $lead_segment, 'lead_sub_segment'=> $lead_sub_segment]);
+            return view('client.wordpress_lead_registeration.index')->with(['payment_cycles'=>$payment_cycles,'products'=>$products,'cities'=>$city_list,'pickup_city_list'=>$pickup_city_list,'all_cities'=>$city_list,'banks'=>$banks,'account_types' => $account_type, 'references' => $references, 'average_shipment_durations' => $average_shipment_durations, 'segments' => $segments,'sub_segments' => $sub_segments, 'lead' => $lead,'invoicing_cycle' => $invoicing_cycle , 'user' => $user, 'riders_permanents'=>$riders_permanent,'shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'cities' => $cities,'admins'=>$admins, 'average_shipment_duration_weekly'=> $average_shipment_duration_weekly, 'lead_segment'=> $lead_segment, 'lead_sub_segment'=> $lead_sub_segment, 'parentProducts'=>$parentProducts]);
         }
     }
 
