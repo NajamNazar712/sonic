@@ -16327,9 +16327,9 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
     {
         $cityId = $oldCity->id;
 
-        $oldHub = City::find($oldCity->hub_id);
-        $oldZone = Zone::find($oldCity->zone_id);
-        $oldProvince = Province::find($oldCity->province_id);
+        $oldHub = $oldCity->hub_id ? City::find($oldCity->hub_id) : null;
+        $oldZone = $oldCity->zone_id ? Zone::find($oldCity->zone_id) : null;
+        $oldProvince = $oldCity->province_id ? Province::find($oldCity->province_id) : null;
 
         $oldData = [
             'city' => array_merge(
@@ -16351,10 +16351,9 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                     'pickup_cut_off_time'
                 ]),
                 [
-                    'hub_name' => $oldHub ? $oldHub->name : null,
-                    'zone_name' => $oldZone ? $oldZone->name : null,
-                    'province_name' => $oldProvince ? $oldProvince->name : null,
-
+                    'hub_name' => optional($oldHub)->name,
+                    'zone_name' => optional($oldZone)->name,
+                    'province_name' => optional($oldProvince)->name,
                 ]
             ),
             'osa_rates' => $oldCity->osaRates->map(function ($r) {
@@ -16369,9 +16368,14 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         ];
 
         $newCity = City::with(['osaRates', 'deliveries', 'walkIns'])->find($cityId);
-        $newHub = City::find($newCity->hub_id);
-        $newZone = Zone::find($newCity->zone_id);
-        $newProvince = Province::find($newCity->province_id);
+
+        if (!$newCity) {
+            return;
+        }
+
+        $newHub = $newCity->hub_id ? City::find($newCity->hub_id) : null;
+        $newZone = $newCity->zone_id ? Zone::find($newCity->zone_id) : null;
+        $newProvince = $newCity->province_id ? Province::find($newCity->province_id) : null;
 
         $newData = [
             'city' => array_merge(
@@ -16393,9 +16397,9 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                     'pickup_cut_off_time'
                 ]),
                 [
-                    'hub_name' => $newHub ? $newHub->name : null,
-                    'zone_name' => $newZone ? $newZone->name : null,
-                    'province_name' => $newProvince ? $newProvince->name : null,
+                    'hub_name' => optional($newHub)->name,
+                    'zone_name' => optional($newZone)->name,
+                    'province_name' => optional($newProvince)->name,
                 ]
             ),
             'osa_rates' => $newCity->osaRates->map(function ($r) {
@@ -16410,7 +16414,6 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         ];
 
         if ($oldData !== $newData) {
-
             CityLog::create([
                 'city_id' => $cityId,
                 'old_data' => $oldData,
@@ -16419,7 +16422,6 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             ]);
         }
     }
-
 
     public static function getCityChanges(array $oldData, array $newData)
     {
