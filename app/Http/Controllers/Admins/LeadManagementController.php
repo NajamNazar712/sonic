@@ -269,9 +269,6 @@ class LeadManagementController extends Controller
                             });
                         });
                     }               
-                    else {
-                        $q->where('leads.status_id', $keyword);
-                    }
 
                 });
             })
