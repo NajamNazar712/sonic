@@ -16327,9 +16327,9 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
     {
         $cityId = $oldCity->id;
 
-        $oldHub = $oldCity->hub_id ? City::find($oldCity->hub_id) : null;
-        $oldZone = $oldCity->zone_id ? Zone::find($oldCity->zone_id) : null;
-        $oldProvince = $oldCity->province_id ? Province::find($oldCity->province_id) : null;
+        $oldHub = !empty($oldCity->hub_id) ? City::find($oldCity->hub_id) : null;
+        $oldZone = !empty($oldCity->zone_id) ? Zone::find($oldCity->zone_id) : null;
+        $oldProvince = !empty($oldCity->province_id) ? Province::find($oldCity->province_id) : null;
 
         $oldData = [
             'city' => array_merge(
@@ -16373,9 +16373,9 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             return;
         }
 
-        $newHub = $newCity->hub_id ? City::find($newCity->hub_id) : null;
-        $newZone = $newCity->zone_id ? Zone::find($newCity->zone_id) : null;
-        $newProvince = $newCity->province_id ? Province::find($newCity->province_id) : null;
+        $newHub = !empty($newCity->hub_id) ? City::find($newCity->hub_id) : null;
+        $newZone = !empty($newCity->zone_id) ? Zone::find($newCity->zone_id) : null;
+        $newProvince = !empty($newCity->province_id) ? Province::find($newCity->province_id) : null;
 
         $newData = [
             'city' => array_merge(
