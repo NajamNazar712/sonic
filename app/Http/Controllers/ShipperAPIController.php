@@ -1820,5 +1820,11 @@ class ShipperAPIController extends Controller
         }
 
     }
+
+    public function get_shipper_info(Request $request)
+    {
+        $user = User::where('id',$request->shipper_id)->first();
+        return response()->json(['status' => 0, 'shipper' => $user]);
+    }
     
 }
