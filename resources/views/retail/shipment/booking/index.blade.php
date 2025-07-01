@@ -21,6 +21,13 @@
                             <div class="row">
                                 <div id="consignment_info" class="col-3 border">
                                     <h4 id="shipper_header_info" class="form-section mb-2 text-center">Consignment Info</h4>
+                                    <!-- <div class="form-group">
+                                        <select name="parent_product_id" id="parent_product_id" class="select2 form-control" data-rule-required="true" data-msg-required="Parent Product is required">
+                                            @foreach($parent_products as $product)
+                                                <option value="{{$product->id}}">{{$product->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div> -->
                                     <div class="form-group">
                                         <select name="product" id="product" class="select2 form-control" data-rule-required="true" data-msg-required="Shipment is required">
                                             @foreach($products as $product)
@@ -140,7 +147,7 @@
                                         <input type="text" name="shipper_name" id="shipper_name" class="form-control shipper_name" placeholder="Shipper Name*" data-rule-required="true" data-msg-required="Shipper Name is required">
                                     </div>
                                     <div class="form-group col-6">
-                                        <input type="text" name="shipper_cnic" id="shipper_cnic" class="form-control cnic" placeholder="Shipper CNIC">
+                                        <input type="text" name="shipper_cnic" id="shipper_cnic" class="form-control cnic" placeholder="Shipper CNIC" data-rule-required="true"data-msg-required="Shipper CNIC is required">
                                     </div>
                                     <div class="form-group col">
                                         <textarea name="shipper_address" class="form-control address" id="shipper_address" rows="2" placeholder="Shipper Address*" data-rule-required="true" data-msg-required="Shipper Address is required" data-rule-maxlength="255" data-msg-maxlength="Shipper Address can be maximum 255 characters"></textarea>
@@ -166,7 +173,17 @@
                                             <div class="form-group col-6">
                                                 <input type="text" name="cod" id="cod" class="form-control rounded-right amount" placeholder="COD Amount*" data-rule-required="true" data-msg-required="COD Amount is required">
                                             </div>
+
+                                            <div class="form-group col-3">
+                                                <input type="text" name="wht" id="wht" class="form-control rounded-right wht" placeholder="WHT" readonly>
+                                            </div>
+
+                                            <div class="form-group col-3">
+                                                <input type="text" name="cod_sst" id="cod_sst" class="form-control rounded-right cod_sst" placeholder="COD SST" readonly>
+                                            </div>
+
                                         </div>
+                                        
                                         <div class="row">
                                             <div class="form-group col-6">
                                                 <select name="insurance_offered" id="insurance_offered" class="select2 form-control" data-rule-required="true" data-msg-required="Insurance Offered is required">
@@ -674,6 +691,30 @@
                 print({{ session('print') }});
             @endif
 
+            // $('#parent_product_id').prepend('<option value="" selected="selected"></option>').select2({
+            //     width:'100%',
+            //     placeholder:"Select Parent Product*",
+            //     allowClear:true
+            // }).bind('select2:select', function() {
+            //         var id = $(this).val();
+            //        $.ajax({
+            //         url: '{!! route('retail.shipment.book.get_products') !!}',
+            //         method: 'POST',
+            //         data: {
+            //             '_token': '{{ csrf_token() }}',
+            //             'parent_product_id': id
+            //         }
+            //         }).done(function(data) {
+            //             if (data.status == 0) {
+            //                 $('#product').children().remove();
+            //                 $('#product').prepend('<option value="" selected="selected"></option>')
+            //                 $.each(data.products, function(index, products) {
+            //                     $('#product').append('<option value="' + products.id +
+            //                         '" >' + products.product_name + '</option>')
+            //                 });
+            //             }
+            //         });
+            // });
             $('#product').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
                 placeholder:"Select Shipment*",
@@ -1281,6 +1322,9 @@
                 var shipping_mode_id = $('#shipping_mode').val();
                 var business_category = $('#business_category').val();
                 var retail_discount_code = $('#discount_code').val();
+                var product_id = $('#product').val();
+                var cod = $('#cod').val();
+
                 var retail_discount_percentage = 0;
                 var retail_discount_applied = ($('#discount_code').val() == '') ? 0 : 1;
 
@@ -1294,7 +1338,7 @@
                                 retail_discount_percentage = data.data.discount_percentage;
                                 $('#retail_discount_percentage').val(retail_discount_percentage);
 
-                                calculateRates(shipping_mode_id,business_category,destination,weight,trax_box,length,breadth, insurance, packaging, height, admin_discount, admin_discount_type, retail_discount_applied, retail_discount_percentage);
+                                calculateRates(shipping_mode_id,business_category,destination,weight,trax_box,length,breadth, insurance, packaging, height, admin_discount, admin_discount_type, retail_discount_applied, retail_discount_percentage,product_id , cod);
 
                                 toastr.success(retail_discount_percentage+'% Discount Applied', 'Success!', {
                                     positionClass: 'toast-top-center',
@@ -1315,12 +1359,12 @@
                 }
                 else
                 {
-                    calculateRates(shipping_mode_id,business_category,destination,weight,trax_box,length,breadth, insurance, packaging, height, admin_discount, admin_discount_type, retail_discount_applied, retail_discount_percentage);
+                    calculateRates(shipping_mode_id,business_category,destination,weight,trax_box,length,breadth, insurance, packaging, height, admin_discount, admin_discount_type, retail_discount_applied, retail_discount_percentage, product_id , cod);
                 }
 
             });
 
-            function calculateRates(shipping_mode_id,business_category,destination,weight,trax_box,length,breadth, insurance, packaging, height, admin_discount, admin_discount_type, retail_discount_applied, retail_discount_percentage)
+            function calculateRates(shipping_mode_id,business_category,destination,weight,trax_box,length,breadth, insurance, packaging, height, admin_discount, admin_discount_type, retail_discount_applied, retail_discount_percentage, product_id , cod)
             {
                 
                 if(business_category == 1){
@@ -1392,6 +1436,8 @@
                             'admin_discount_type1': admin_discount_type,
                             'retail_discount_applied': retail_discount_applied,
                             'retail_discount_percentage': retail_discount_percentage,
+                            'product_id' : product_id,
+                            'cod' : cod,
                             '_token': '{{ csrf_token() }}'
                         }
                     })
@@ -1408,6 +1454,8 @@
                                     $('#packaging_and_insurance_charges').val(data.details.packaging_and_insurance_charges);
                                     $('#retail_discount_amount').val(data.details.discount_amount);
                                     $('#total_charges').val(data.details.total_charges);
+                                    $('#wht').val(data.details.wht);
+                                    $('#cod_sst').val(data.details.cod_sst);
 
                             }
                             else
