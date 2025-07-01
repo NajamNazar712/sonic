@@ -166,23 +166,6 @@
                                         </div>
                                     </div>
                                 </div>
-
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="parent_product_id">Parent Product:
-                                            <span class="danger">*</span>
-                                        </label>
-                                        <div>
-                                            <select name="parent_product_id" id="parent_product_id" class="form-control select2" style="width: 100%">
-                                                @foreach ($parentProducts as $pp)
-                                                    <option value="{{ $pp->id }}">{{ $pp->name }}</option>
-                                                @endforeach
-
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                                
                                 <div class="col-md-6">
                                     <div class="form-group">
 
@@ -194,42 +177,32 @@
                                                 id="shipper_product_type"
                                                 class="select2 form-control required"
                                                 style="width: 100%">
-                                                
+                                                @foreach ($products as $product)
+                                                    <option value="{{ $product->id }}"
+                                                        {{ old('shipper_product_type') == $product->id ? 'selected' : '' }}>
+                                                        {{ $product->product_name }}</option>
+                                                @endforeach
                                             </select>
                                         </div>
                                     </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="brand_name">Brand Name:
-                                        </label>
-                                        <div>
-                                            <input type="text" class="form-control"
-                                                value="{{ $lead->brand }}" name="brand_name"
-                                                placeholder="Brand Name" {{ $lead->brand ? 'readonly' : '' }}>
+                                    <div class="row">
+                                        <div class="col-md-12 d-none" id="product_name_div">
+                                            <div class="form-group">
+                                                <label for="product_name">Product Name:
+                                                    <span class="danger">*</span>
+                                                </label>
+                                                <div>
+                                                    <input type="text" class="form-control"
+                                                        value="{{ old('product_name') }}"
+                                                        name="product_name"
+                                                        placeholder="Product Name">
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
 
                             </div>
-
-                            <div class="row">
-                                <div class="col-md-12 d-none" id="product_name_div">
-                                    <div class="form-group">
-                                        <label for="product_name">Product Name:
-                                            <span class="danger">*</span>
-                                        </label>
-                                        <div>
-                                            <input type="text" class="form-control"
-                                                value="{{ old('product_name') }}"
-                                                name="product_name"
-                                                placeholder="Product Name">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                                
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
@@ -311,7 +284,17 @@
                                 </div>
                             </div>
                             <div class="row">
-                                
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="brand_name">Brand Name:
+                                        </label>
+                                        <div>
+                                            <input type="text" class="form-control"
+                                                value="{{ $lead->brand }}" name="brand_name"
+                                                placeholder="Brand Name" {{ $lead->brand ? 'readonly' : '' }}>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="segments">Segments:
@@ -2434,29 +2417,6 @@
             placeholder: 'Select Product Type',
             // dropdownParent:$('#registership')
         });
-        $('select[name="parent_product_id"]').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder: 'Select Parent Product Type',
-                // dropdownParent:$('#registership')
-            }).bind('select2:select', function() {
-                    var id = $(this).val();
-                   $.ajax({
-                    url: '{!! route('cod.get_products') !!}',
-                    method: 'GET',
-                    data: {
-                        'parent_product_id': id,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                    }).done(function(data) {
-                        if (data.status == 0) {
-                            $('#shipper_product_type').children().remove();
-                            $('#shipper_product_type').prepend('<option value="" selected="selected"></option>')
-                            $.each(data.products, function(index, products) {
-                                $('#shipper_product_type').append('<option value="' + products.id +
-                                    '" >' + products.product_name + '</option>')
-                            });
-                        }
-                    });
-            });
         $('select[name="shipper_product_type"]').prepend('<option value="" selected="selected"></option>')
             .select2({
                 placeholder: 'Select Product Type',

@@ -549,7 +549,7 @@ class RegisterController extends Controller
                     'url' => $data['url'],
                     'city_id' => $data['shipper_city'],
                     'product_id' => $data['shipper_product_type'],
-                    'parent_product_id' => $data['parent_product_id'],
+                    //'parent_product_id' => $data['parent_product_id'],
                     'other_product_name' => (array_key_exists('product_name', $data)) ? $data['product_name'] : null,
                     'account_type_id' => $data['nature_of_account'],
                     'average_shipments' => $data['average_shipment'],
