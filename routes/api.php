@@ -642,8 +642,20 @@ use Illuminate\Http\Request;
 
     Route::prefix('shipper')->name('shipper.')->group(function () {
         Route::post('login', 'ShipperAPIController@login')->name('login');
+        Route::post('reset_password', 'ShipperAPIController@reset_password')->name('reset_password');
+        Route::post('send_otp', 'ShipperAPIController@sendOtp')->name('reset_password');
+        Route::post('verify_otp', 'ShipperAPIController@verifyOtp')->name('reset_password');
+        
+
         Route::post('test', 'ShipperAPIController@test')->name('test');
         Route::middleware('ShipperAPIToken')->group(function () {
+
+            Route::prefix('retail')->name('retail.')->group(function () {
+                Route::get('shipment_track', 'APIController@retail_shipment_track')->name('track');
+            });
+
+            Route::post('wallet_registration', 'ShipperAPIController@updateprofilewalletbulk')->name('wallet_registration');
+            Route::post('wallet_login', 'ShipperAPIController@wallet_login')->name('wallet_login');
             Route::post('pod_tracking', 'ShipperAPIController@shipment_pod_tracking')->name('pod_tracking');
             Route::post('shipment_history', 'ShipperAPIController@shipment_history')->name('shipment_history');
             Route::prefix('subscription')->name('subscription.')->group(function () {
@@ -682,6 +694,39 @@ use Illuminate\Http\Request;
                 Route::post('shipping_modes', 'ShipperAPIController@reimbursement_shipping_modes')->name('shipping_modes');
                 Route::post('submit', 'APIController@shipment_book')->name('submit');
             });
+
+            Route::get('profile', 'ShipperAppController@profile')->name('profile');
+
+            //Shipment Call History
+            Route::post('shipment_call_status_history', 'ShipperAppController@shipment_call_status_history')->name('profile');
+
+            //meta api for booking resources
+            Route::get('booking_resources','ShipperAppController@booking_resources')->name('booking_resources');
+
+            //shipper pickup addresss and return addresses
+            Route::get('pickup_address','ShipperAppController@pickup_address')->name('pickup_address');
+
+            //order management Api
+            Route::prefix('orders')->name('orders.')->group(function (){
+                Route::get('order_list', 'ShipperOrderManagementApiController@order_list')->name('order_list');
+                Route::post('cancel_all', 'ShipperOrderManagementApiController@order_cancel_all')->name('cancel_all');
+            });
+
+            //finance Apis
+            Route::prefix('finance')->name('finance.')->group(function (){
+                  Route::get('payments','ShipperFinanceApiController@payment_list')->name('payments');
+            });
+
+            // CRM Apis
+            Route::prefix('crm')->name('crm.')->group(function (){
+                Route::get('request_resources','ShipperCrmApiController@crm_request_resources')->name('request_resources');
+                Route::post('add_request', 'ShipperCrmApiController@add_crm_request')->name('add_request');
+                Route::get('request_summary', 'ShipperCrmApiController@crm_request_summary')->name('request_summary');
+                Route::get('request_list', 'ShipperCrmApiController@crm_request_list')->name('request_list');
+                Route::post('single_crm_request','ShipperCrmApiController@single_crm_request')->name('single_crm_request');
+                Route::post('receiving_sheet','ShipperCrmApiController@get_receving_sheet')->name('receiving_sheet');
+            });
+
 
         });
     });
