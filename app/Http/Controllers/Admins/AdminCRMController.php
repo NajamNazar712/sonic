@@ -4313,7 +4313,7 @@ class AdminCRMController extends Controller
                                                             
                         UAN# 021-111-11-8729
                         WhatsApp # 0348-111-8729
-                        info@trax.pk
+                        info@slgtrax.com
                         Live Chat Messenger
                                                             
                         Regards,
@@ -7386,7 +7386,7 @@ class AdminCRMController extends Controller
                                                             
                         UAN# 021-111-11-8729
                         WhatsApp # 0348-111-8729
-                        info@trax.pk
+                        info@slgtrax.com
                         Live Chat Messenger
                                                             
                         Regards,

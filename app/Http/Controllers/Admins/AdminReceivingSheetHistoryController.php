@@ -436,7 +436,7 @@ class AdminReceivingSheetHistoryController extends Controller
                         <div class="row">
                           <div class="col text-center mt-2">
                             <span class="d-block">Plot # 105, Mehran Town Sector 7 A Korangi, Karachi, Karachi City, Sindh 74900, Pakistan</span>
-                            <span class="d-block">Phone: 0304-11-11-232 | Email: info@trax.pk | URL: www.trax.pk</span>
+                            <span class="d-block">Phone: 0304-11-11-232 | Email: info@slgtrax.com | URL: www.trax.pk</span>
                           </div>
                         </div>
                       </div>

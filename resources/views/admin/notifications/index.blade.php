@@ -49,8 +49,8 @@
 													<div class="form-group">
 														<select name="notification_sender" class="select2 notification_sender" data-rule-required="true" data-msg-required="Sender is required">
 															<option value="" selected="selected"></option>
-															<option value="info@trax.pk">info@trax.pk</option>
-															<option value="marketing@trax.pk">marketing@trax.pk</option>
+															<option value="info@slgtrax.com">info@slgtrax.com</option>
+															<option value="marketing@slgtrax.com">marketing@slgtrax.com</option>
 														</select>
 													</div>
 													<div class="form-group">

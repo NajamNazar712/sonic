@@ -8950,8 +8950,8 @@ class DeliveryController extends Controller
                     $customer_details = Shipment::where('id', $shipment['id'])->first();
 
                     //Parameters
-                    $email = 'info@trax.pk';
-                    $recipient_email = 'info@trax.pk';
+                    $email = 'info@slgtrax.com';
+                    $recipient_email = 'info@slgtrax.com';
                     $Bill_cat = 'Bill';
                     $total_amount = $customer_details->amount + $customer_details->fintech_charges;
                     $billing_month = date('Y-m');
