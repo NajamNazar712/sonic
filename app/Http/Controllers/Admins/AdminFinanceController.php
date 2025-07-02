@@ -8362,7 +8362,7 @@ class AdminFinanceController extends Controller
             'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 'done_payments.ibft_charges', 
             'dpc.packaging_charges', 'dpc.adjustment as adjustment_charges', 'done_payments.status_updated_at as status_updated_at', 
             'dpc.wht as total_wht', 'done_payments.created_at as start_date', 'done_payments.updated_at as end_date', 'ad.name as admin_name', 
-            'done_payments.updated_at as updated_at','sts.status as star_status','u.payment_cycle_days as payment_cycle_days','pc.name as payment_cycle', 'pc.id as payment_cycle_id', 'dpc.sms_charges as total_sms_charges','done_payments.arrival_shipment as arrival_shipment_shipments_count','done_payments.arrival_shipment', 'sale_admin.name as sale_person_name','wu.id as wallet_user' , 'done_payments.is_wallet_payment', 'wu.finova_account_type as finova_account_type' ,'dpc.cod_sst as total_cod_sst','t.name as territory');
+            'done_payments.updated_at as updated_at','sts.status as star_status','u.payment_cycle_days as payment_cycle_days','pc.name as payment_cycle', 'pc.id as payment_cycle_id', 'dpc.sms_charges as total_sms_charges','done_payments.arrival_shipment as arrival_shipment_shipments_count','done_payments.arrival_shipment', 'sale_admin.name as sale_person_name','wu.id as wallet_user' , 'done_payments.is_wallet_payment', 'wu.finova_account_type as finova_account_type' ,'dpc.cod_sst as total_cod_sst','t.name as territory', 'done_payments.tax_status');
 
         if (session('department_id') == 7) {
             if (!in_array(session('id'), session('sale_users_bypass'))) {
@@ -17150,7 +17150,7 @@ class AdminFinanceController extends Controller
             ->leftJoin('retail_done_payment_shipments as rdps', 'rdps.retail_done_payment_id', '=', 'retail_done_payments.id')
             ->leftJoin('retail_shipments as rs', 'rs.shipment_id', '=', 'rdps.shipment_id')
             ->select('retail_done_payments.id as id', 'dpc.retail_done_payment_id as payment_done_id', 'retail_done_payments.id as payment_id', 'rsi.shipper_name as shipper', 'c.name as city', 'rsi.shipper_phone_no as shipper_phone', 'rsi.shipper_address', 'retail_done_payments.total_shipments', 'retail_done_payments.delivered_shipments', 'retail_done_payments.delivered_shipments as delivered_shipments_count', 'retail_done_payments.adjusted_shipments', 'retail_done_payments.adjusted_shipments as adjusted_shipments_count', 'dpc.amount as total_amount', 'dpc.payable as total_payable', 'ubi.name as bank', 'retail_done_payments.reference_number', 'retail_done_payments.created_at as done_at', 'b.name as company_bank', 'retail_done_payments.status', 'retail_done_payments.ibft_charges', 'dpc.adjustment as adjustment_charges', 'retail_done_payments.status_updated_at as status_updated_at',  DB::raw('SUM(rs.wht) as total_wht'),
-            DB::raw('SUM(rs.cod_sst) as total_cod_sst'))
+            DB::raw('SUM(rs.cod_sst) as total_cod_sst'), 'retail_done_payments.tax_status')
             ->groupBy([
             'retail_done_payments.id',
         ]);
@@ -22081,6 +22081,39 @@ class AdminFinanceController extends Controller
                 }
             }
         }
+    }
+
+    public function done_payments_tax_paid(Request $request)
+    {
+        if( $request->type == 1) {
+            foreach ($request->ids as $done_payment_id) {
+            
+            $done_payment = DonePayment::find($done_payment_id);
+
+                if ($done_payment->tax_status != 1) {
+                    $done_payment->tax_status = 1;
+                    $done_payment->tax_status_updated_at = Carbon::now();
+                    $done_payment->tax_status_updated_by = Auth::id();
+    
+                    $done_payment->save();
+                }
+            }
+        } elseif($request->type == 2) {
+
+            foreach ($request->ids as $done_payment_id) {
+            
+            $done_payment = RetailDonePayment::find($done_payment_id);
+
+                if ($done_payment->tax_status != 1) {
+                    $done_payment->tax_status = 1;
+                    $done_payment->tax_status_updated_at = Carbon::now();
+                    $done_payment->tax_status_updated_by = Auth::id();
+    
+                    $done_payment->save();
+                }
+            }
+        }
+        return ['status' => 0, 'success' => 'Payment(s) Tax marked Paid'];
     }
 
 }

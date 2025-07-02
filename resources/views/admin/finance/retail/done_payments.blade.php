@@ -572,6 +572,7 @@
 									selected_rows = [];
 
 									table.button('.paid').disable();
+									table.button('.tax_paid').disable();
 									table.button('.reverted').disable();
 
 									table.draw('false');
@@ -579,6 +580,45 @@
 							}
 						},
 					@endif
+					@if (session('role_id') == 1 || in_array(457, session('permissions')))
+							{
+							text: 'Tax Paid',
+							className: 'btn btn-primary tax_paid',
+							enabled: false,
+							action: function (e, dt, node, config) {
+								$.ajax({
+									url: '{!! route('admin.finance.done_payments.tax_paid') !!}',
+									method: 'PUT',
+									data: {
+										'_token': '{{ csrf_token() }}',
+										'ids': selected_rows,
+										'type' : 2
+									}
+								})
+								.done(function(data) {
+									if (data.status == 0) {
+										toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+									}
+									else {
+										toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+									}
+
+									table.rows().deselect();
+
+									selected_rows = [];
+
+									table.button('.paid').disable();
+									table.button('.tax_paid').disable();
+									table.button('.reverted').disable();
+
+									
+
+									table.draw('false');
+								});
+							}
+						},
+					@endif
+					
 
 					@if (session('role_id') == 1 || in_array(458, session('permissions')))
 						{
@@ -607,6 +647,7 @@
 									selected_rows = [];
 
 									table.button('.paid').disable();
+									table.button('.tax_paid').disable();
 									table.button('.reverted').disable();
 
 									table.draw('false');
@@ -641,6 +682,7 @@
 	                                }
 
 	                                table.button('.paid').enable();
+	                                table.button('.tax_paid').enable();
 	                                table.button('.reverted').enable();
 	                            }
 	                        });
@@ -668,6 +710,7 @@
 
 	                            if (selected_rows.length == 0) {
 	                                table.button('.paid').disable();
+	                                table.button('.tax_paid').disable();
 	                                table.button('.reverted').disable();
 	                            }
 	                          }
@@ -743,7 +786,7 @@
 
 					$('td:eq(1)', row).html(index + 1 + info.page * info.length);
 
-					if (data.status != 'Paid') {
+					if (data.status != 'Paid' || data.tax_status != 1 ) {
 						$('td:eq(0)', row).addClass('select-checkbox');
 
 						if ($.inArray(data.id, selected_rows) !== -1) {
@@ -886,10 +929,12 @@
 
 				if (selected_rows.length > 0) {
 					table.button('.paid').enable();
+					table.button('.tax_paid').enable();
 					table.button('.reverted').enable();
 				}
 				else {
 					table.button('.paid').disable();
+					table.button('.tax_paid').disable();
 					table.button('.reverted').disable();
 				}
 			});

@@ -51,8 +51,6 @@
 
                                 <th class="border-primary border-darken-1">S. No.</th>
                                 <th class="border-primary border-darken-1">Type</th>
-                                <th class="border-primary border-darken-1">Invoice Number</th>
-                                <th class="border-primary border-darken-1">Invoice Date</th>
                                 <th class="border-primary border-darken-1">Payment ID</th>
                                 <th class="border-primary border-darken-1">Payment Date</th>
                                 <th class="border-primary border-darken-1">NTN Number</th>
@@ -62,9 +60,8 @@
                                 <th class="border-primary border-darken-1">Business Name</th>
                                 <th class="border-primary border-darken-1">Taxable Amount</th>
                                 <th class="border-primary border-darken-1">Tax Amount</th>
-                                <th class="border-primary border-darken-1">Tax Rate</th>
                                 <th class="border-primary border-darken-1">COD SST Amount</th>
-                                <th class="border-primary border-darken-1">COD SST Rate</th>
+                                <th class="border-primary border-darken-1">Status</th>
                                 
                             </tr>
                         </thead>
@@ -219,8 +216,6 @@
 
                             head.push('S. No.');
                             head.push('Type');
-                            head.push('Invoice Number');
-                            head.push('Invoice Date');
                             head.push('Payment ID');
                             head.push('Payment Date');
                             head.push('NTN Number');
@@ -230,17 +225,14 @@
                             head.push('Business Name');
                             head.push('Taxable Amount');
                             head.push('Tax Amount');
-                            head.push('Tax Rate');
                             head.push('COD SST Amount');
-                            head.push('COD SST Rate');
+                            head.push('Status');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
 
                                 row.push(index + 1);
                                 row.push(values.account_type);
-                                row.push(values.invoice_id);
-                                row.push(values.invoice_date);
                                 row.push(values.payment_id);
                                 row.push(values.payment_date);
                                 row.push(values.ntn_no);
@@ -250,9 +242,8 @@
                                 row.push(values.brand_name);
                                 row.push(values.taxable_amount);
                                 row.push(values.tax_amount);
-                                row.push(values.tax_percentage);
                                 row.push(values.cod_sst);
-                                row.push(values.sst_percentage);
+                                row.push(values.status);
 
                                 body.push(row);
                             });
@@ -298,11 +289,10 @@
                     }
                 },
                 //order: [[1, 'desc'], [2, 'asc']], // Order by 'created_at' DESC and 'description' ASC
+                order: [[3, 'desc']],
                 columns: [
                     {name: 'serial_number', class: 'align-middle serial_number', orderable: false, searchable: false, targets: 0, render: function(data, type, row) {return '';}},
                     {data: 'account_type', name: 'account_type', class: 'text-center align-middle account_type', searchable: false},
-                    {data: 'invoice_number', name: 'invoice_number', class: 'text-center align-middle invoice_number', searchable: false},
-                    {data: 'invoice_date', name: 'invoice_date', class: 'text-center align-middle invoice_date', searchable: false},
                     {data: 'payment_id', name: 'payment_id', class: 'text-center align-middle payment_id', searchable: false},
                     {data: 'payment_date', name: 'payment_date', class: 'text-center align-middle payment_date', searchable: false},
                     {data: 'ntn_no', name: 'ntn_no', class: 'text-center align-middle ntn_no', searchable: false},
@@ -312,9 +302,8 @@
                     {data: 'brand_name', name: 'brand_name', class: 'text-center align-middle brand_name', searchable: false},
                     {data: 'taxable_amount', name: 'taxable_amount', class: 'text-center align-middle taxable_amount', searchable: false},
                     {data: 'tax_amount', name: 'tax_amount', class: 'text-center align-middle tax_amount', searchable: false},
-                    {data: 'tax_percentage', name: 'tax_percentage', class: 'text-center align-middle tax_percentage', searchable: false},
                     {data: 'cod_sst', name: 'cod_sst', class: 'text-center align-middle cod_sst', searchable: false},
-                    {data: 'sst_percentage', name: 'sst_percentage', class: 'text-center align-middle sst_percentage', searchable: false},
+                    {data: 'status', name: 'status', class: 'text-center align-middle status', searchable: false},
 
 
                 ],

@@ -17878,102 +17878,95 @@ class AdminReportsController extends Controller
         $search_date_from = $request->search_date_from;
         $search_date_to =  $request->search_date_to;
         
-        $invoices = User::join('invoices', 'invoices.user_id', 'users.id')
-        ->leftJoin('cities as c', 'c.id', 'users.city_id')
-        ->leftJoin('parent_products as pp', 'pp.id', 'users.parent_product_id')
-        ->where('users.account_type_id', 2)
-        ->whereBetween('invoices.invoicing_date', [$search_date_from, $search_date_to])
-        ->select([
-            'invoices.id as invoice_id',
-            DB::raw('2 as account_type'),
-            'invoices.invoice_number as invoice_number',
-            'invoices.invoicing_date as invoice_date',
-            DB::raw('NULL as payment_id'),
-            DB::raw('NULL as payment_date'),
-            'users.ntn_no as ntn_no',
-            'users.cnic as cnic',
-            'users.name as customer_name',
-            'c.name as city_name',
-            'users.brand_name as brand_name',
-            DB::raw('0 as taxable_amount'),
-            'invoices.total_wht as tax_amount',
-            'invoices.cod_sst as cod_sst',
-            'pp.tax_percentage as tax_percentage',
-            'pp.sst_percentage as sst_percentage'
-        ]);
+        // $invoices = User::join('invoices', 'invoices.user_id', 'users.id')
+        // ->leftJoin('cities as c', 'c.id', 'users.city_id')
+        // ->leftJoin('parent_products as pp', 'pp.id', 'users.parent_product_id')
+        // ->where('users.account_type_id', 2)
+        // ->whereBetween('invoices.invoicing_date', [$search_date_from, $search_date_to])
+        // ->select([
+        //     'invoices.id as invoice_id',
+        //     DB::raw('2 as account_type'),
+        //     'invoices.invoice_number as invoice_number',
+        //     'invoices.invoicing_date as invoice_date',
+        //     DB::raw('NULL as payment_id'),
+        //     DB::raw('NULL as payment_date'),
+        //     'users.ntn_no as ntn_no',
+        //     'users.cnic as cnic',
+        //     'users.name as customer_name',
+        //     'c.name as city_name',
+        //     'users.brand_name as brand_name',
+        //     DB::raw('0 as taxable_amount'),
+        //     'invoices.total_wht as tax_amount',
+        //     'invoices.cod_sst as cod_sst',
+        //     'pp.tax_percentage as tax_percentage',
+        //     'pp.sst_percentage as sst_percentage'
+        // ]);
 
-        $payments = User::join('done_payments as dp', 'dp.user_id', 'users.id')
-        ->join('done_payment_shipments as dps', 'dps.done_payment_id', 'dp.id')
-        ->leftJoin('parent_products as pp', 'pp.id', 'users.parent_product_id')
-        ->leftJoin('cities as c', 'c.id', 'users.city_id')
-        ->where('users.account_type_id', 1)
-        ->whereBetween('dp.created_at', [$search_date_from, $search_date_to])
-        ->select([
-            DB::raw('NULL as invoice_id'),
-            DB::raw('1 as account_type'),
-            DB::raw('NULL as invoice_number'),
-            DB::raw('NULL as invoice_date'),
-            'dp.id as payment_id',
-            'dp.created_at as payment_date',
-            'users.ntn_no as ntn_no',
-            'users.cnic as cnic',
-            'users.name as customer_name',
-            'c.name as city_name',
-            'users.brand_name as brand_name',
-            DB::raw('SUM(dps.amount) as taxable_amount'),
-            DB::raw('SUM(dps.wht) as tax_amount'),
-            DB::raw('SUM(dps.cod_sst) as cod_sst'),
-            'pp.tax_percentage as tax_percentage',
-            'pp.sst_percentage as sst_percentage'
-        ])
-        ->groupBy([
-            'dp.id'
-            // 'dp.created_at',
-            // 'users.ntn_no',
-            // 'users.cnic',
-            // 'users.name',
-            // 'c.name',
-            // 'users.brand_name',
-            // 'pp.tax_percentage',
-            // 'pp.sst_percentage'
-        ]);
+        $retail_payments = DB::table('retail_done_payments as rdp')
+            ->join('retail_shipper_infos as u', 'rdp.user_id', '=', 'u.id')
+            ->join('cities as c', 'u.city_id', '=', 'c.id')
+            ->leftjoin('retail_done_payment_calculations as dpc', 'dpc.retail_done_payment_id', '=', 'rdp.id')
+            ->leftJoin('retail_done_payment_shipments as rdps', 'rdps.retail_done_payment_id', '=', 'rdp.id')
+            ->leftJoin('retail_shipments as rs', 'rs.shipment_id', '=', 'rdps.shipment_id')
+            ->select([
+                'rdp.id as payment_id',
+                'rdp.created_at as payment_date',
+                DB::raw('NULL as ntn_no'),
+                'u.shipper_cnic as cnic',
+                'u.shipper_name as customer_name',
+                DB::raw('3 as account_type'),
+                'c.name as city_name',
+                DB::raw('NULL as brand_name'),
+                'dpc.amount as taxable_amount',
+                DB::raw('SUM(rs.wht) as tax_amount'),
+                DB::raw('SUM(rs.cod_sst) as cod_sst'),
+                'rdp.tax_status as status'
+            ])->groupBy([
+                'rdp.id'
+            ]);
+
+        $payments = DB::table('done_payments as dp')
+            ->join('users', 'dp.user_id', '=', 'users.id')
+            ->join('done_payment_shipments as dps', 'dps.done_payment_id', '=', 'dp.id')
+            ->leftJoin('cities as c', 'c.id', '=', 'users.city_id')
+            ->whereBetween('dp.created_at', [$search_date_from, $search_date_to])
+            ->select([
+                'dp.id as payment_id',
+                'dp.created_at as payment_date',
+                'users.ntn_no as ntn_no',
+                'users.cnic as cnic',
+                'users.name as customer_name',
+                'users.account_type_id as account_type',
+                'c.name as city_name',
+                'users.brand_name as brand_name',
+                DB::raw('SUM(dps.amount) as taxable_amount'),
+                DB::raw('SUM(dps.wht) as tax_amount'),
+                DB::raw('SUM(dps.cod_sst) as cod_sst'),
+                'dp.tax_status as status'
+            ])
+            ->groupBy([
+                'dp.id'
+            ]);
+
+        $total = DB::query()->fromSub($retail_payments->union($payments), 'total');
         
-        $total = DB::query()->fromSub($payments->union($invoices), 'total');
-
         $datatables = Datatables::of($total)
             ->editColumn('account_type', function ($total) {
                 if ($total->account_type == 1) {
                    return 'Reimbursement Account';
                 } elseif($total->account_type == 2) {
                     return 'Corporate Invoicing Account';
-                }
-            })
-            ->editColumn('tax_percentage', function ($total) {
-                if ($total->tax_amount != 0) {
-                   return $total->tax_percentage . '%';
-                } elseif($total->account_type == 2) {
-                    return '-';
-                }
-            })
-            ->editColumn('sst_percentage', function ($total) {
-                if ($total->cod_sst != 0) {
-                   return $total->sst_percentage . '%';
-                } 
-                return '-';
-                
-            })
-            ->editColumn('taxable_amount', function ($total) {
-                if ($total->account_type == 2) {
-                    $shipment_ids = InvoiceShipment::where('invoice_id', $total->invoice_id)
-                        ->distinct()
-                        ->pluck('shipment_id');
-                    $taxable_amount = Shipment::whereIn('id', $shipment_ids)
-                        ->sum('amount');
-                    return $taxable_amount;
-                } else{
-                    return $total->taxable_amount;
+                } elseif($total->account_type == 3) {
+                    return 'Retail Account';
                 }
                 
+            })
+            ->editColumn('status', function($total){
+                if($total->status == 0 ){
+                    return 'Un-Paid';
+                }elseif($total->status == 1){
+                    return 'Paid';
+                }
             });
             
         return $datatables->make(true);
