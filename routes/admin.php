@@ -1756,7 +1756,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::prefix('invoices')->name('invoices.')->group(function () {
             Route::get('', 'Admins\AdminFinanceController@invoices_index')->name('index');
-            Route::get('list', 'Admins\AdminFinanceController@invoices_list')->name('list');
+            Route::post('list', 'Admins\AdminFinanceController@invoices_list')->name('list');
             Route::post('slip', 'Admins\AdminFinanceController@invoices_slip')->name('slip');
             Route::post('slip/view', 'Admins\AdminFinanceController@invoices_slip_view')->name('slip_view');
             Route::post('invoices_detail_print', 'Admins\AdminFinanceController@invoices_detail_print')->name('invoices_detail_print');
@@ -2055,6 +2055,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('updated_shippers_list', 'Admins\AdminReportsController@updated_shippers_list')->name('updated_shippers_list');
         });
 
+        Route::prefix('wht')->name('wht.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@wht_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@wht_list')->name('list');
+        });
         Route::prefix('kam_and_poc_qsr')->name('kam_and_poc_qsr.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@kam_and_poc_qsr_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@kam_and_poc_qsr_list')->name('list');
@@ -2820,6 +2824,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@cod_cap_zones_update')->name('update');
         });
 
+        Route::prefix('product_tax')->name('product_tax.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@product_tax_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@product_tax_update')->name('update');
+        });
         Route::prefix('ibft_charges')->name('ibft_charges.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@ibft_charges_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@ibft_charges_store')->name('store');

@@ -178,6 +178,7 @@ use App\Models\WalletShipperSetting;
 use Illuminate\Support\Str;
 use App\Http\Traits\CommonTrait;
 use App\ChangeLogs;
+use App\Models\ParentProduct;
 
 class GlobalSettingsController extends Controller
 {
@@ -10755,6 +10756,30 @@ class GlobalSettingsController extends Controller
             }
         }
     
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+    public function product_tax_index()
+    {
+        $data = ParentProduct::get();
+        return view('admin.settings.product_percentage')->with(['data' => $data]);
+    }
+
+    public function product_tax_update(Request $request)
+    {
+
+        if($request->has('tax_percentage') && $request->has('sst_percentage') ) {
+            
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 831);
+            foreach($request->tax_percentage as $key => $value) {
+                ParentProduct::where('id', $key)->update(['tax_percentage' => $value]);
+            }
+
+            foreach($request->sst_percentage as $key => $value) {
+                ParentProduct::where('id', $key)->update(['sst_percentage' => $value]);
+            }
+        }
+      
         return redirect()->back()->with('success', 'Settings Updated!');
     }
     
