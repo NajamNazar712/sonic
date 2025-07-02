@@ -45,8 +45,8 @@ class SwichPaymentGatewayApi implements ShouldQueue
             $client_secret    = '3854b5d902f0fe5f7e9bca547aad92bc6bb8574ef1656e1788bbc41e41bc7834';
 
             //Parameters
-            $email              = 'info@trax.pk';
-            $recipient_email    = 'info@trax.pk';
+            $email              = 'info@slgtrax.com';
+            $recipient_email    = 'info@slgtrax.com';
             $Bill_cat           = 'Bill';
             $total_amount       =  $customer_details->amount + $customer_details->fintech_charges;
             $billing_month      =  date('Y-m');
