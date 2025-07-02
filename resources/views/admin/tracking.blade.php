@@ -1950,6 +1950,9 @@
                                 shipment += '<td>' + details.order_information.sub_segment + '</td>';
                                 shipment += '</tr>';
 
+                                shipment += '<td><strong>Booking Channel</strong></td>';
+                                shipment += '<td>' + details.order_information.channel + '</td>';
+                                shipment += '</tr>';
 
                                 shipment += '<tr>';
                                 shipment += length;

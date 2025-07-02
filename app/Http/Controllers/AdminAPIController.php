@@ -12930,4 +12930,12 @@ class AdminAPIController extends Controller
         }
     }
 
-}
+        public function get_shipper_info(Request $request)
+        {
+            $user = User::where('id',$request->shipper_id)->first();
+            if($user){
+                return response()->json(['status' => 0, 'shipper' => $user]);
+            }
+            return response()->json(['status' => 1, 'error' => 'Shipper not found!']);
+        }
+    }

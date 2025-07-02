@@ -16,7 +16,6 @@ use App\TerritoryTagHistory;
 use CreateCityOsaRatesTable;
 use Illuminate\Http\Request;
 use App\Http\Models\CityArea;
-use App\Http\Models\Province;
 use App\Http\Models\Shipment;
 use App\Http\Models\AdminLogs;
 use App\Http\Models\BanksList;
@@ -236,6 +235,8 @@ use App\Http\Models\Operataions\OperationsForecastLastUpdatedTime;
 use App\Http\Models\Operataions\OperationsOutgoingTopCustomersShipments;
 use App\Http\Models\Operataions\OperationsOutgoingPickupRequestShipments;
 use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
+use App\Http\Models\Province;
+use App\Models\CityLog;
 use App\Models\ParentProduct;
 
 class AdminDashboardController extends Controller
@@ -11273,7 +11274,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             ->leftjoin('business_categories as bc', 'bc.id', '=', 'cities.business_category_id')
             ->join('zones as z', 'cities.zone_id', '=', 'z.id')
             ->leftJoin('provinces', 'provinces.id', 'cities.province_id')
-            ->select(['cities.id as city_id', 'cities.city_code as city_code', 'cities.id as id', 'cities.name as name', 'h.name as hub', 'cities.hub_id', 'z.name as zone', 'cities.hub as isHub', 'cities.status as status', 'ch.created_at as updated', 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat', 'cities.location_latitude', 'cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category', 'cities.hub_location_latitude', 'cities.hub_location_longitude', 'cities.iata_code as iata_code','cities.booking_enable_status as booking_enable_status', 'c.name as created_by', 'cities.created_at as created_at', 'provinces.name as province_name', DB::raw('(SELECT COUNT(*) FROM city_status_change_logs WHERE city_status_change_logs.city_id = cities.id AND column_type = 2) as status_change_logs_count')
+            ->select(['cities.id as city_id', 'cities.city_code as city_code', 'cities.id as id', 'cities.name as name', 'h.name as hub', 'cities.hub_id', 'z.name as zone', 'cities.hub as isHub', 'cities.status as status', 'ch.created_at as updated', 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat', 'cities.location_latitude', 'cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category', 'cities.hub_location_latitude', 'cities.hub_location_longitude', 'cities.iata_code as iata_code','cities.booking_enable_status as booking_enable_status', 'c.name as created_by', 'cities.created_at as created_at', 'provinces.name as province_name', DB::raw('(SELECT COUNT(*) FROM city_logs WHERE city_logs.city_id = cities.id) as city_logs'), DB::raw('(SELECT COUNT(*) FROM city_status_change_logs WHERE city_status_change_logs.city_id = cities.id AND column_type = 2) as status_change_logs_count')
             ,DB::raw('(SELECT COUNT(*) FROM city_status_change_logs WHERE city_status_change_logs.city_id = cities.id AND column_type = 1) as booking_status_change_logs_count')])
             ->where('cities.permanent_disabled',0);
 
@@ -11339,6 +11340,13 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 $keyword = trim($keyword);
                 $query->whereRaw('(SELECT COUNT(*) FROM city_status_change_logs WHERE city_status_change_logs.city_id = cities.id AND column_type = 1) = ?', [(int) $keyword]);
             })
+            ->editColumn('city_logs', function ($cities) {
+                if ($cities->city_logs) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle city_logs" data-id="' . $cities->city_id . '" data-type="city">' . $cities->city_logs . '</button>';
+                }
+
+                return '-';
+            })
             ->addColumn("action", function ($result) {
                 if (session('role_id') == 1 || count(array_intersect([90, 91,850], session('permissions'))) !== 0) {
                     $dropdown = '
@@ -11403,7 +11411,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 return '-';
             })
 
-            ->rawColumns(['location','hub_location','osa_list','action', 'status_logs', 'booking_enable_disable_logs'])
+            ->rawColumns(['location','hub_location','osa_list','action','city_logs', 'status_logs', 'booking_enable_disable_logs'])
             ->make(true);
     }
 
@@ -11455,11 +11463,11 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
     public function updateCity(Request $request, $id)
     {
-        CityOsaRate::where('city_id', $id)->delete();
 
         $city_id = City::where('id', $id)->first();
         if ($city_id) {
             if ($request->has('updatedelivery') && count($request->updatedelivery) > 0) {
+                $oldCity = City::with(['osaRates', 'deliveries', 'walkIns'])->find($id);
                 if ($request->postType == 'city') {
                     City::where('id', $id)->update([
                         'name' => $request->cityName,
@@ -11506,6 +11514,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                     }
 
                     CityDelivery::where('city_id', $id)->delete();
+                    CityOsaRate::where('city_id', $id)->delete();
 
                     foreach ($request->updatedelivery as $booking_type_id => $shipping_modes) {
                         foreach ($shipping_modes as $shipping_mode_id => $shipping_mode_value) {
@@ -11516,8 +11525,8 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                             ]);
                         }
                     }
-                    if ($request->osa_name != null) {
 
+                    if ($request->osa_name != null) {
                         foreach ($request->osa_name as $key => $value) {
 
                             $osa_charges = new CityOsaRate();
@@ -11528,6 +11537,8 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                             $osa_charges->save();
                         }
                     }
+
+                    $this->logCityChangesAfterUpdate($oldCity);
                     return redirect()->back()->with('success', 'City updated successfully');
                 } elseif ($request->postType == 'hub') {
                     City::where('id', $id)->update([
@@ -11577,6 +11588,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                     }
 
                     CityDelivery::where('city_id', $id)->delete();
+                    CityOsaRate::where('city_id', $id)->delete();
 
                     foreach ($request->updatedelivery as $booking_type_id => $shipping_modes) {
                         foreach ($shipping_modes as $shipping_mode_id => $shipping_mode_value) {
@@ -11588,7 +11600,6 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                         }
                     }
                     if ($request->osa_name != null) {
-
                         foreach ($request->osa_name as $key => $value) {
 
                             $osa_charges = new CityOsaRate();
@@ -11631,6 +11642,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                         $this->makeDynamicHubsMapping($request->vehicles, $closestHubId, $city);
                     }
                 
+                    $this->logCityChangesAfterUpdate($oldCity);
                     return redirect()->back()->with('success', 'Hub/city updated successfully');
                 }
             } else {
@@ -16313,5 +16325,182 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
         return response()->json($logs);
     }
+    
+    public static function logCityChangesAfterUpdate($oldCity)
+    {
+        $cityId = $oldCity->id;
+
+        $oldHub = !empty($oldCity->hub_id) ? City::find($oldCity->hub_id) : null;
+        $oldZone = !empty($oldCity->zone_id) ? Zone::find($oldCity->zone_id) : null;
+        $oldProvince = !empty($oldCity->province_id) ? Province::find($oldCity->province_id) : null;
+
+        $oldData = [
+            'city' => array_merge(
+                $oldCity->only([
+                    'name',
+                    'city_code',
+                    'hub',
+                    'hub_id',
+                    'zone_id',
+                    'province_id',
+                    'pickup',
+                    'gc_area',
+                    'attempt_tat',
+                    'location_latitude',
+                    'location_longitude',
+                    'hub_location_latitude',
+                    'hub_location_longitude',
+                    'address',
+                    'pickup_cut_off_time'
+                ]),
+                [
+                    'hub_name' => optional($oldHub)->name,
+                    'zone_name' => optional($oldZone)->name,
+                    'province_name' => optional($oldProvince)->name,
+                ]
+            ),
+            'osa_rates' => $oldCity->osaRates->map(function ($r) {
+                return ['osa_name' => $r->osa_name, 'osa_rate' => $r->osa_rate];
+            })->toArray(),
+            'deliveries' => $oldCity->deliveries->map(function ($d) {
+                return ['booking_type_id' => $d->booking_type_id, 'shipping_mode_id' => $d->shipping_mode_id];
+            })->toArray(),
+            'walk_ins' => $oldCity->walkIns->map(function ($w) {
+                return ['pickup' => $w->pickup, 'delivery' => $w->delivery];
+            })->toArray(),
+        ];
+
+        $newCity = City::with(['osaRates', 'deliveries', 'walkIns'])->find($cityId);
+
+        if (!$newCity) {
+            return;
+        }
+
+        $newHub = !empty($newCity->hub_id) ? City::find($newCity->hub_id) : null;
+        $newZone = !empty($newCity->zone_id) ? Zone::find($newCity->zone_id) : null;
+        $newProvince = !empty($newCity->province_id) ? Province::find($newCity->province_id) : null;
+
+        $newData = [
+            'city' => array_merge(
+                $newCity->only([
+                    'name',
+                    'city_code',
+                    'hub',
+                    'hub_id',
+                    'zone_id',
+                    'province_id',
+                    'pickup',
+                    'gc_area',
+                    'attempt_tat',
+                    'location_latitude',
+                    'location_longitude',
+                    'hub_location_latitude',
+                    'hub_location_longitude',
+                    'address',
+                    'pickup_cut_off_time'
+                ]),
+                [
+                    'hub_name' => optional($newHub)->name,
+                    'zone_name' => optional($newZone)->name,
+                    'province_name' => optional($newProvince)->name,
+                ]
+            ),
+            'osa_rates' => $newCity->osaRates->map(function ($r) {
+                return ['osa_name' => $r->osa_name, 'osa_rate' => $r->osa_rate];
+            })->toArray(),
+            'deliveries' => $newCity->deliveries->map(function ($d) {
+                return ['booking_type_id' => $d->booking_type_id, 'shipping_mode_id' => $d->shipping_mode_id];
+            })->toArray(),
+            'walk_ins' => $newCity->walkIns->map(function ($w) {
+                return ['pickup' => $w->pickup, 'delivery' => $w->delivery];
+            })->toArray(),
+        ];
+
+        if ($oldData !== $newData) {
+            CityLog::create([
+                'city_id' => $cityId,
+                'old_data' => $oldData,
+                'new_data' => $newData,
+                'admin_id' => auth()->id(),
+            ]);
+        }
+    }
+
+    public static function getCityChanges(array $oldData, array $newData)
+    {
+        $changes = [];
+
+        $excludedFields = ['zone_id', 'hub_id', 'province_id'];
+
+
+        foreach ($oldData['city'] as $key => $oldValue) {
+
+            if (in_array($key, $excludedFields)) {
+                continue;
+            }
+
+            $newValue = $newData['city'][$key] ?? null;
+            if ($oldValue != $newValue) {
+                $changes['city'][$key] = [
+                    'old' => $oldValue,
+                    'new' => $newValue
+                ];
+            }
+        }
+
+        $compareList = function (array $oldList, array $newList) {
+            $old = collect($oldList)->map(fn($v) => json_encode($v))->toArray();
+            $new = collect($newList)->map(fn($v) => json_encode($v))->toArray();
+
+            return [
+                'removed' => array_values(array_map('json_decode', array_diff($old, $new))),
+                'added'   => array_values(array_map('json_decode', array_diff($new, $old))),
+            ];
+        };
+
+        $osaChanges = $compareList($oldData['osa_rates'], $newData['osa_rates']);
+        if (!empty($osaChanges['added']) || !empty($osaChanges['removed'])) {
+            $changes['osa_rates'] = $osaChanges;
+        }
+
+        $deliveryChanges = $compareList($oldData['deliveries'], $newData['deliveries']);
+        if (!empty($deliveryChanges['added']) || !empty($deliveryChanges['removed'])) {
+            $changes['deliveries'] = $deliveryChanges;
+        }
+
+        $walkInChanges = $compareList($oldData['walk_ins'], $newData['walk_ins']);
+        if (!empty($walkInChanges['added']) || !empty($walkInChanges['removed'])) {
+            $changes['walk_ins'] = $walkInChanges;
+        }
+
+        return $changes;
+    }
+
+    public function getAjaxCityChanges($id)
+    {
+        $logs = CityLog::with('admin')->where('city_id', $id)
+            ->orderByDesc('id')  
+            ->get();
+
+        if ($logs->isEmpty()) {
+            return response()->json([]);
+        }
+
+        $allChanges = [];
+
+        foreach ($logs as $log) {
+            $oldData = is_string($log->old_data) ? json_decode($log->old_data, true) : $log->old_data;
+            $newData = is_string($log->new_data) ? json_decode($log->new_data, true) : $log->new_data;
+
+            $allChanges[] = [
+                'timestamp' => $log->created_at->toDateTimeString(),
+                'changes' => $this->getCityChanges($oldData, $newData),
+                'admin' => $log->admin?->name . ' - ' . $log->admin?->trax_id
+            ];
+        }
+
+        return response()->json($allChanges);
+    }
+
 
 }
