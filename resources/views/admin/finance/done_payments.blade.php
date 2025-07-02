@@ -751,7 +751,7 @@
 						},
 					@endif
 
-					@if (session('role_id') == 1 || in_array(62, session('permissions')))
+					@if (session('role_id') == 1 || in_array(1038, session('permissions')))
 							{
 							text: 'Tax Paid',
 							className: 'btn btn-primary tax_paid',
