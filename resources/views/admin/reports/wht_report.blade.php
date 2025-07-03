@@ -61,7 +61,11 @@
                                 <th class="border-primary border-darken-1">Taxable Amount</th>
                                 <th class="border-primary border-darken-1">Tax Amount</th>
                                 <th class="border-primary border-darken-1">COD SST Amount</th>
-                                <th class="border-primary border-darken-1">Status</th>
+                                <th class="border-primary border-darken-1">Tax Status</th>
+                                <th class="border-primary border-darken-1">Tax Status Updated At</th>
+                                <th class="border-primary border-darken-1">Tax Status Updated By</th>
+
+
                                 
                             </tr>
                         </thead>
@@ -226,7 +230,10 @@
                             head.push('Taxable Amount');
                             head.push('Tax Amount');
                             head.push('COD SST Amount');
-                            head.push('Status');
+                            head.push('Tax Status');
+                            head.push('Tax Status Updated At');
+                            head.push('Tax Status Updated By');
+                            
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -244,6 +251,9 @@
                                 row.push(values.tax_amount);
                                 row.push(values.cod_sst);
                                 row.push(values.status);
+                                row.push(values.tax_paid_date);
+                                row.push(values.updated_by);
+
 
                                 body.push(row);
                             });
@@ -304,6 +314,9 @@
                     {data: 'tax_amount', name: 'tax_amount', class: 'text-center align-middle tax_amount', searchable: false},
                     {data: 'cod_sst', name: 'cod_sst', class: 'text-center align-middle cod_sst', searchable: false},
                     {data: 'status', name: 'status', class: 'text-center align-middle status', searchable: false},
+                    {data: 'tax_paid_date', name: 'tax_paid_date', class: 'text-center align-middle tax_paid_date', searchable: false},
+                    {data: 'updated_by', name: 'updated_by', class: 'text-center align-middle updated_by', searchable: false},
+                    
 
 
                 ],

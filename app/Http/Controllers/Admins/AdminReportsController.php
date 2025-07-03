@@ -17878,36 +17878,14 @@ class AdminReportsController extends Controller
         $search_date_from = $request->search_date_from;
         $search_date_to =  $request->search_date_to;
         
-        // $invoices = User::join('invoices', 'invoices.user_id', 'users.id')
-        // ->leftJoin('cities as c', 'c.id', 'users.city_id')
-        // ->leftJoin('parent_products as pp', 'pp.id', 'users.parent_product_id')
-        // ->where('users.account_type_id', 2)
-        // ->whereBetween('invoices.invoicing_date', [$search_date_from, $search_date_to])
-        // ->select([
-        //     'invoices.id as invoice_id',
-        //     DB::raw('2 as account_type'),
-        //     'invoices.invoice_number as invoice_number',
-        //     'invoices.invoicing_date as invoice_date',
-        //     DB::raw('NULL as payment_id'),
-        //     DB::raw('NULL as payment_date'),
-        //     'users.ntn_no as ntn_no',
-        //     'users.cnic as cnic',
-        //     'users.name as customer_name',
-        //     'c.name as city_name',
-        //     'users.brand_name as brand_name',
-        //     DB::raw('0 as taxable_amount'),
-        //     'invoices.total_wht as tax_amount',
-        //     'invoices.cod_sst as cod_sst',
-        //     'pp.tax_percentage as tax_percentage',
-        //     'pp.sst_percentage as sst_percentage'
-        // ]);
-
         $retail_payments = DB::table('retail_done_payments as rdp')
             ->join('retail_shipper_infos as u', 'rdp.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
             ->leftjoin('retail_done_payment_calculations as dpc', 'dpc.retail_done_payment_id', '=', 'rdp.id')
             ->leftJoin('retail_done_payment_shipments as rdps', 'rdps.retail_done_payment_id', '=', 'rdp.id')
             ->leftJoin('retail_shipments as rs', 'rs.shipment_id', '=', 'rdps.shipment_id')
+            ->leftJoin('admins', 'admins.id', '=' , 'rdp.tax_status_updated_by')
+            ->whereBetween('rdp.created_at', [$search_date_from, $search_date_to])
             ->select([
                 'rdp.id as payment_id',
                 'rdp.created_at as payment_date',
@@ -17920,7 +17898,9 @@ class AdminReportsController extends Controller
                 'dpc.amount as taxable_amount',
                 DB::raw('SUM(rs.wht) as tax_amount'),
                 DB::raw('SUM(rs.cod_sst) as cod_sst'),
-                'rdp.tax_status as status'
+                'rdp.tax_status as status',
+                'rdp.tax_status_updated_at as tax_paid_date',
+                'admins.name as updated_by'
             ])->groupBy([
                 'rdp.id'
             ]);
@@ -17929,6 +17909,7 @@ class AdminReportsController extends Controller
             ->join('users', 'dp.user_id', '=', 'users.id')
             ->join('done_payment_shipments as dps', 'dps.done_payment_id', '=', 'dp.id')
             ->leftJoin('cities as c', 'c.id', '=', 'users.city_id')
+            ->leftJoin('admins', 'admins.id', '=' , 'dp.tax_status_updated_by')
             ->whereBetween('dp.created_at', [$search_date_from, $search_date_to])
             ->select([
                 'dp.id as payment_id',
@@ -17942,7 +17923,9 @@ class AdminReportsController extends Controller
                 DB::raw('SUM(dps.amount) as taxable_amount'),
                 DB::raw('SUM(dps.wht) as tax_amount'),
                 DB::raw('SUM(dps.cod_sst) as cod_sst'),
-                'dp.tax_status as status'
+                'dp.tax_status as status',
+                'dp.tax_status_updated_at as tax_paid_date',
+                'admins.name as updated_by'
             ])
             ->groupBy([
                 'dp.id'
