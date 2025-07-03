@@ -1671,14 +1671,14 @@ class ShipperAPIController extends Controller
             'in' => ':attribute must be No or Yes.',
             'check_duplicate' => 'Phone Or Email Already Exists',
             'check_cnic' => 'Cnic Already Exists',
-            'phone' => 'Phone starts with 03 or 923 followed by 9 digits',
+            //'phone' => 'Phone starts with 03 or 923 followed by 9 digits',
             'name' => 'Only alphabetic characters and spaces',
         ];
 
         $rules = [
             'name' => ['required', 'max:255', 'regex:/^[a-zA-Z\s]+$/'],
             'email' => ['required', 'max:255', 'email', 'check_duplicate'],
-            'phone' => ['required', 'max:255', 'regex:/^(03|923)[0-9]{2,3}-?[0-9]{7}$/'],
+            'phone' => ['required', 'max:255'],
             'cnic' => ['required', 'max:255','check_cnic']
         ];
 
