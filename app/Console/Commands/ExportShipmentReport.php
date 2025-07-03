@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use DateInterval;
+use DatePeriod;
 use DateTime;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
