@@ -1737,6 +1737,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminFinanceController@done_payments_index')->name('index');
             Route::post('list', 'Admins\AdminFinanceController@done_payments_list')->name('list');
             Route::put('paid', 'Admins\AdminFinanceController@done_payments_paid')->name('paid');
+            Route::put('tax_paid', 'Admins\AdminFinanceController@done_payments_tax_paid')->name('tax_paid');
             Route::put('reverted', 'Admins\AdminFinanceController@done_payments_reverted')->name('reverted');
             Route::post('delivered_shipments', 'Admins\AdminFinanceController@done_payments_delivered_shipments')->name('delivered_shipments');
             Route::post('returned_shipments', 'Admins\AdminFinanceController@done_payments_returned_shipments')->name('returned_shipments');
