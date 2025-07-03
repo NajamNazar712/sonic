@@ -677,7 +677,7 @@ class Kernel extends ConsoleKernel
             $schedule->command('wallet_charges_update')->dailyAt($time)->runInBackground();
         }
         $schedule->command('export:shipment-report')
-            ->dailyAt('14:21')              
+            ->dailyAt('14:23')              
             ->withoutOverlapping()         // prevent simultaneous runs
             ->onOneServer()                // ensures single server execution
             ->runInBackground()            // runs non-blocking
