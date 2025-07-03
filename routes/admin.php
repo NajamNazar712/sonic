@@ -2829,6 +2829,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@product_tax_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@product_tax_update')->name('update');
         });
+        Route::prefix('product_tax_logs')->name('product_tax_logs.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@product_tax_logs_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@product_tax_logs')->name('list');
+        });
         Route::prefix('ibft_charges')->name('ibft_charges.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@ibft_charges_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@ibft_charges_store')->name('store');
