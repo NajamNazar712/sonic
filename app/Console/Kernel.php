@@ -282,13 +282,13 @@ class Kernel extends ConsoleKernel
         if($checkBot)
         {
             $schedule->command('agent:botcallunresponsive')->everyFifteenMinutes()->runInBackground();
-            $schedule->command('missingfirst:call')->hourly()->runInBackground();
-            $schedule->command('missingfirst:call', [
-                '--start' => Carbon::yesterday()->startOfDay()->toDateTimeString(), 
-                '--end' => Carbon::yesterday()->endOfDay()->toDateTimeString()      
-            ])
-                ->dailyAt('00:30') // runs at 12:30 AM every night
-                ->runInBackground();
+           $schedule->command('missingfirst:call')->hourly()->runInBackground();
+           $schedule->command('missingfirst:call', [
+               '--start' => Carbon::yesterday()->startOfDay()->toDateTimeString(),
+               '--end' => Carbon::yesterday()->endOfDay()->toDateTimeString()
+           ])
+               ->dailyAt('00:30') // runs at 12:30 AM every night
+               ->runInBackground();
         }
 
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');

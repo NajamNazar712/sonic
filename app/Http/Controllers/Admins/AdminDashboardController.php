@@ -237,6 +237,7 @@ use App\Http\Models\Operataions\OperationsOutgoingPickupRequestShipments;
 use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
 use App\Http\Models\Province;
 use App\Models\CityLog;
+use App\Models\ParentProduct;
 
 class AdminDashboardController extends Controller
 {   use RateReusableTrait;
@@ -11076,6 +11077,8 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         $payment_cycle_days = $this->user_payment_cycles_days($user);
         $products = Product::all();
         $banks = BanksList::all();
+        // $parent_products = ParentProduct::get();
+        // $parent_product = ParentProduct::find($user->parent_product_id);
         $invoicing_cycle = InvoicingCycle::all();
         $city_list = City::all();
         $emails = ShipperNotificationEmail::where('user_id', $user->id)->select('email')->get();
@@ -16327,8 +16330,9 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
     {
         $cityId = $oldCity->id;
 
-        $oldHub = City::find($oldCity->hub_id);
-        $oldZone = Zone::find($oldCity->zone_id);
+        $oldHub = !empty($oldCity->hub_id) ? City::find($oldCity->hub_id) : null;
+        $oldZone = !empty($oldCity->zone_id) ? Zone::find($oldCity->zone_id) : null;
+        $oldProvince = !empty($oldCity->province_id) ? Province::find($oldCity->province_id) : null;
 
         $oldData = [
             'city' => array_merge(
@@ -16338,6 +16342,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                     'hub',
                     'hub_id',
                     'zone_id',
+                    'province_id',
                     'pickup',
                     'gc_area',
                     'attempt_tat',
@@ -16349,8 +16354,9 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                     'pickup_cut_off_time'
                 ]),
                 [
-                    'hub_name' => $oldHub ? $oldHub->name : null,
-                    'zone_name' => $oldZone ? $oldZone->name : null,
+                    'hub_name' => optional($oldHub)->name,
+                    'zone_name' => optional($oldZone)->name,
+                    'province_name' => optional($oldProvince)->name,
                 ]
             ),
             'osa_rates' => $oldCity->osaRates->map(function ($r) {
@@ -16365,8 +16371,14 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         ];
 
         $newCity = City::with(['osaRates', 'deliveries', 'walkIns'])->find($cityId);
-        $newHub = City::find($newCity->hub_id);
-        $newZone = Zone::find($newCity->zone_id);
+
+        if (!$newCity) {
+            return;
+        }
+
+        $newHub = !empty($newCity->hub_id) ? City::find($newCity->hub_id) : null;
+        $newZone = !empty($newCity->zone_id) ? Zone::find($newCity->zone_id) : null;
+        $newProvince = !empty($newCity->province_id) ? Province::find($newCity->province_id) : null;
 
         $newData = [
             'city' => array_merge(
@@ -16376,6 +16388,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                     'hub',
                     'hub_id',
                     'zone_id',
+                    'province_id',
                     'pickup',
                     'gc_area',
                     'attempt_tat',
@@ -16387,8 +16400,9 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                     'pickup_cut_off_time'
                 ]),
                 [
-                    'hub_name' => $newHub ? $newHub->name : null,
-                    'zone_name' => $newZone ? $newZone->name : null,
+                    'hub_name' => optional($newHub)->name,
+                    'zone_name' => optional($newZone)->name,
+                    'province_name' => optional($newProvince)->name,
                 ]
             ),
             'osa_rates' => $newCity->osaRates->map(function ($r) {
@@ -16402,20 +16416,21 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             })->toArray(),
         ];
 
-        CityLog::create([
-            'city_id' => $cityId,
-            'old_data' => $oldData,
-            'new_data' => $newData,
-            'admin_id' => auth()->id(),
-        ]);
+        if ($oldData !== $newData) {
+            CityLog::create([
+                'city_id' => $cityId,
+                'old_data' => $oldData,
+                'new_data' => $newData,
+                'admin_id' => auth()->id(),
+            ]);
+        }
     }
-
 
     public static function getCityChanges(array $oldData, array $newData)
     {
         $changes = [];
 
-        $excludedFields = ['zone_id', 'hub_id'];
+        $excludedFields = ['zone_id', 'hub_id', 'province_id'];
 
 
         foreach ($oldData['city'] as $key => $oldValue) {

@@ -1543,6 +1543,9 @@ class Permission
             'logistic.cn.child_issue_to_rider.edit' => 971,
             'logistic.cn.child_issue_to_rider.update' => 971,
 
+            'reports.wht.index' => 1036,
+            'reports.wht.list' => 1036,
+
         ],
         'shipper' => [
             'shipment.book.index' => 1,

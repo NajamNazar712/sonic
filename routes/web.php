@@ -102,6 +102,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::post('/crf/update', 'Shippers\ShipperDashboardController@updateCrfSign')->name('updateSignOffCrf');;
 
     Route::post('get_sub_segment', 'Auth\RegisterController@get_sub_segment')->name('get_sub_segment');
+    Route::get('get_products', 'Auth\RegisterController@get_products')->name('get_products');
 
     Route::get('referral', 'Auth\RegisterController@referral_valid')->name('referral.valid');
     Route::get('check_email', 'Auth\RegisterController@check_email')->name('register.check_email');

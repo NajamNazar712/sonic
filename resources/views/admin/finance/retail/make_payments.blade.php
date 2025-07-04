@@ -82,6 +82,8 @@
 										<th class="border-primary border-darken-1">Delivered Shipments</th>
 										<th class="border-primary border-darken-1">Adjusted Shipments</th>
 										<th class="border-primary border-darken-1">Total Amount</th>
+										<th class="border-primary border-darken-1">WHT</th>
+										<th class="border-primary border-darken-1">COD SST</th>
 										<th class="border-primary border-darken-1">Fintech Charges</th>
 										<th class="border-primary border-darken-1">Total Payable</th>
 										<th class="border-primary border-darken-1">Bank</th>
@@ -175,6 +177,8 @@
 														<th class="border-primary border-darken-1">Aging</th>
 														<th class="border-primary border-darken-1">Amount</th>
 														<th class="border-primary border-darken-1">Fintech Charges</th>
+														<th class="border-primary border-darken-1">WHT</th>
+														<th class="border-primary border-darken-1">COD SST</th>
 														<th class="border-primary border-darken-1">Payable</th>
 													</tr>
 												</thead>
@@ -323,6 +327,8 @@
                             head.push('Delivered Shipments');
                             head.push('Adjusted Shipments');
                             head.push('Total Amount');
+							head.push('WHT');
+                            head.push('COD SST');
                             head.push('Total Payable');
                             head.push('Bank');
                             head.push('Account No.');
@@ -344,6 +350,8 @@
                                 row.push(values.delivered_shipments_count);
                                 row.push(values.adjusted_shipments_count);
                                 row.push(values.total_amount);
+								row.push(values.total_wht);
+                                row.push(values.total_cod_sst);
                                 row.push(values.total_payable);
                                 row.push(values.bank);
                                 row.push(values.account_number);
@@ -492,7 +500,8 @@
 					{data:'delivered_shipments', name: 'retail_pending_payments.delivered_shipments', class: 'align-middle text-center delivered_shipments'},
 					{data:'adjusted_shipments', name: 'retail_pending_payments.adjusted_shipments', class: 'align-middle text-center adjusted_shipments'},
 					{data:'total_amount', name: 'ppc.amount', class: 'align-middle text-center total_amount', orderable: false},
-					
+					{data:'total_wht', name: 'total_wht', class: 'align-middle text-center total_wht', orderable: false},
+					{data:'total_cod_sst', name: 'total_cod_sst', class: 'align-middle text-center total_cod_sst', orderable: false},
 					{data:'retail_fintech_charges', name: 'retail_fintech_charges', class: 'align-middle text-center retail_fintech_charges', orderable: false},
 					
 					{data:'total_payable', name: 'ppc.payable', class: 'align-middle text-center total_payable', orderable: false},
@@ -525,7 +534,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.total_amount') || $(header).is('.total_payable') || $(header).is('.total_adjustments') || $(header).is('.return_shipments_average_aging') || $(header).is('.action') || $(header).is('.total_pending_shipments')) {
+						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.total_amount') || $(header).is('.total_payable') || $(header).is('.total_adjustments') || $(header).is('.return_shipments_average_aging') || $(header).is('.action') || $(header).is('.total_pending_shipments') || $(header).is('.total_wht') || $(header).is('.total_cod_sst') ) {
 							$(td).appendTo($(search));
 						}else if($(header).is('.bank')){
                             $(bank_select).appendTo($(search))
@@ -676,6 +685,8 @@
 					{data:'amount', name: 'retail_pending_payment_shipments.amount', class: 'align-middle amount'},
 					
 					{data:'fintech_pending_payments', name: 'fintech_pending_payments', class: 'align-middle fintech_pending_payments'},
+					{data:'wht', name: 'rs.wht', class: 'align-middle wht'},
+					{data:'cod_sst', name: 'rs.cod_sst', class: 'align-middle cod_sst'},
 					
 
 					{data:'payable', name: 'retail_pending_payment_shipments.payable', class: 'align-middle payable'}
