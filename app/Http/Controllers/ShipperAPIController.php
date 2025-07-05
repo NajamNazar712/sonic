@@ -144,7 +144,7 @@ class ShipperAPIController extends Controller
 
             $app_type  = $request->has('phone_no') ? 2 : 1;
 
-            if($app_type == 2) {
+            if($app_type == 2 ) {
                 $retail_user = RetailShipperInfo::where('shipper_phone_no', $request->phone_no)->first();
                 if($retail_user) {
                     if (Hash::check($request->input('password'), $retail_user->password)) {
