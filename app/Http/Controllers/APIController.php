@@ -2586,7 +2586,10 @@ class APIController extends Controller
             $shipment = Shipment::where('tracking_number', $tracking_number)->first();
 
             $done_payment_shipments = $shipment->done_payment_shipments;
-
+            $wht_sst_charge = $done_payment_shipments
+                ->where('type', 0)
+                ->sortByDesc('created_at')
+                ->first();
             if (!$done_payment_shipments->isEmpty()) {
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->latest()->first();
 
@@ -2607,6 +2610,11 @@ class APIController extends Controller
                 if ($shipment->packaging_material_request) {
                     $charges['packaging_material_charges'] = $shipment->packaging_material_charges;
                 } else if (in_array($current_status_id, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46])) {
+
+                    if($wht_sst_charge) {
+                        $charges['wht'] = $wht_sst_charge->wht;
+                        $charges['cod_sst'] = $wht_sst_charge->cod_sst;
+                    }
                     if ($shipment->weight_charges) {
                         $charges['weight_charges'] = $shipment->weight_charges;
                     }
@@ -2691,6 +2699,8 @@ class APIController extends Controller
                     $payment['amount'] = $done_payment_shipment->amount;
                     $payment['charges'] = $done_payment_shipment->charges;
                     $payment['gst'] = $done_payment_shipment->gst;
+                    $payment['wht'] = $done_payment_shipment->wht;
+                    $payment['cod_sst'] = $done_payment_shipment->cod_sst;
                     $payment['payable'] = $done_payment_shipment->payable;
 
                     $payments[] = $payment;

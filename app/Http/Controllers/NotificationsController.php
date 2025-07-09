@@ -6015,11 +6015,11 @@ class NotificationsController extends Controller
                         }
 
                         $to = array();
-                        $bcc = ['anas.mazhar@trax.pk'];
+                        $bcc = ['anas.mazhar@logiserves.com'];
                         $to[] = 'syed.furqan@trax.pk';
                         $to[] = 'm.sohail@trax.pk';
                         $to[] = 'fawad.ahmed@trax.pk';
-                        $to[] = 'aftab.qidwai@trax.pk';
+                        $to[] = 'adil.afzal@genesisholdings.co'; 
                         $to[] = 'wajiha.majeed@trax.pk';
                         $to[] = 'huzaifa.aamir@trax.pk';
 
@@ -8367,11 +8367,11 @@ class NotificationsController extends Controller
                         }
 
                         $to = array();
-                        $bcc = ['anas.mazhar@trax.pk'];
+                        $bcc = ['anas.mazhar@logiserves.com'];
                         $to[] = 'syed.furqan@trax.pk';
                         $to[] = 'm.sohail@trax.pk';
                         $to[] = 'fawad.ahmed@trax.pk';
-                        $to[] = 'aftab.qidwai@trax.pk';
+                        $to[] = 'adil.afzal@genesisholdings.co'; 
                         $to[] = 'wajiha.majeed@trax.pk';
                         $to[] = 'huzaifa.aamir@trax.pk';
                         $to[] = 'mohsin.khan@trax.pk';

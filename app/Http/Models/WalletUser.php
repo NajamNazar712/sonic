@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class WalletUser extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     static function wallet_create($data = array())
     {

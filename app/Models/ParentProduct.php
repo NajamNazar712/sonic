@@ -8,4 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class ParentProduct extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'tax_percentage',
+        'sst_percentage'
+    ];
 }
