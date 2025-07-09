@@ -48,10 +48,10 @@ class WalletUserDisables extends Command
                 $wallet_user_disable->setTable('wallet_users_disables');
 
                     $user->delete();
-                // if ($wallet_user_disable->save()) {
-                //     WalletShipperSetting::where('user_id',$user->user_id)->delete();
-                //     $success_delete[] = $user->user_id;
-                // }
+                if ($wallet_user_disable->save()) {
+                    WalletShipperSetting::where('user_id',$user->user_id)->delete();
+                }
+                    $success_delete[] = $user->user_id;
             }
         }
 
