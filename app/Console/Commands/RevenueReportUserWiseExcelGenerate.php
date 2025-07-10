@@ -259,10 +259,14 @@ class RevenueReportUserWiseExcelGenerate extends Command
                 $writer = new Xlsx($spreadsheet);
                 $tempFile = tempnam(sys_get_temp_dir(), 'revenue_excel') . '.xlsx';
                 $writer->save($tempFile);
-                $filePath = 'revenue_excel/' . $u_id . '/revenue_excel_' . $year . 'xlsx'; // Public storage path
+
+                $filePath = 'revenue_excel/' . $u_id . '/revenue_excel_' . $year . '.xlsx'; // Fixed file name
                 Storage::disk('public')->put($filePath, file_get_contents($tempFile));
+
                 unlink($tempFile);
+
                 return $filePath;
+
             }
         }
 
