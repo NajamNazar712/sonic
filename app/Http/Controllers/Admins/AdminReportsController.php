@@ -5543,7 +5543,7 @@ class AdminReportsController extends Controller
         if (Auth::id() == 3) {
             $connection = 'mysql';
         } else {
-            $connection = 'reports_2';
+            $connection = 'reports';
         }
 
         $count = DB::connection($connection)->table('shipments')
