@@ -184,6 +184,13 @@ class AdminCRMController extends Controller
                     $payment_shipment = DonePaymentShipment::where('done_payment_id', $payment->id)->first();
                     $shipment = Shipment::where('id', $payment_shipment->shipment_id)->first();
                     $is_shipment = CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_id', $nature_id);
+
+                     $response = $this->canLockClaim($shipment, $is_shipment, $nature_id, $request);
+
+                    if ($response['status'] === 0) {
+                        return $response;
+                    }
+
                     if($is_shipment->exists()){
                         return ['status' => 0, 'error' => 'Request/Complaint already lodged for the Payment ID: ' . $payment_id_padded];
                     }
@@ -221,11 +228,21 @@ class AdminCRMController extends Controller
                                 return ['status' => 0, 'error' => 'Request cannot be catered at this status of the shipment.'];
                             }
 
+
+
                             $already_lodged = false;
                             $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
                             if($is_shipment){
                                 $already_lodged = true;
                                 $complain = $is_shipment->id;
+
+
+                                $response = $this->canLockClaim($shipment, $is_shipment, $nature_id, $request);
+
+                                if ($response['status'] === 0) {
+                                    return $response;
+                                }
+
                                 if($is_shipment->case_nature_id != $nature_id){
                                     if ($nature_id == 4) {
                                         if($complaint_id == 26){
@@ -7402,6 +7419,18 @@ class AdminCRMController extends Controller
             $crmRequest->case_nature_complainant = $caseNatureComplainant;
             $crmRequest->complainant_phone = $complainantPhone;
             $crmRequest->save();
+        }
+    }
+
+    public static function canLockClaim($shipment, $is_shipment, $nature_id, $request)
+    {
+        if ($shipment->shipper_status_id != 18 || $is_shipment->status_id != 4) {
+            if (($nature_id == 4 && $request->case_nature_claim != 26) && in_array($is_shipment->status_id, [1, 2])) {
+                return [
+                    'status' => 0,
+                    'error' => 'The claim cannot be locked directly. Please lock the complaint first from the complaint section.'
+                ];
+            }
         }
     }
 }
