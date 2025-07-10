@@ -5546,120 +5546,120 @@ class AdminReportsController extends Controller
             $connection = 'reports';
         }
 
-        $count = DB::connection($connection)->table('shipments')
-            ->join('users as u', 'u.id', '=', 'shipments.user_id')
-            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id');
-
-        if ($request->get('dr_search_date_from') && $request->get('dr_search_date_to')) {
-            $from = $request->get('dr_search_date_from');
-            $to = $request->get('dr_search_date_to');
-
-            $count = $count->join('shipments_journey as dr', function ($join) use ($from, $to, $connection) {
-                $join->on('dr.shipment_id', '=', 'shipments.id')
-                    ->whereIn('dr.shipper_status_id', [14, 20, 30, 36, 37])
-                    ->where(
-                        'dr.id',
-                        '=',
-                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37) and shipments_journey.verification = 1 and shipments_journey.created_at between "' . $from . '" and "' . $to . '")')
-                    );
-            })
-                ->whereBetween('dr.created_at', [$from, $to]);
-        }
-
-        if ($tracking = $request->get('search_tracking')) {
-            $count = $count->where('shipments.tracking_number', '=', $tracking);
-        }
-        if ($shipper = $request->get('search_shipper')) {
-            $count = $count->where('u.id', '=', $shipper);
-        }
-        if ($origin = $request->get('search_origin')) {
-            $count = $count->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-                ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-                ->where('oc.id', '=', $origin);
-        }
-        if ($destination = $request->get('search_destination')) {
-            $count = $count->where('dc.id', '=', $destination);
-        }
-        if ($mode = $request->get('search_shipping_mode')) {
-            $count = $count->where('shipments.booking_type_id', '=', $mode);
-        }
-        if ($hub = $request->get('search_hub')) {
-            $count = $count->join('cities as h', 'dc.hub_id', '=', 'h.id')
-                ->where('h.id', '=', $hub);
-        }
-        if ($status = $request->get('search_status')) {
-            $count = $count->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
-                ->where('ss.id', '=', $status);
-        }
-
-        $from_to_ids = FALSE;
-
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-
-            $count = $count->join('shipments_journey as sj', function ($join) use ($connection) {
-                $join->on('sj.shipment_id', '=', 'shipments.id')
-                    ->where('sj.shipper_status_id', 2)
-                    ->where(
-                        'sj.id',
-                        '=',
-                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)')
-                    );
-            })
-                ->whereBetween('sj.created_at', [$from, $to]);
-
-            $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
-            if ($from_id->exists()) {
-                $from_id = $from_id->first()->id;
-
-                $to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
-
-                if ($to_id->exists()) {
-                    $to_id = $to_id->first()->id;
-
-                    $from_to_ids = TRUE;
-
-                    $count->where('sj.id', '>=', $from_id)
-                        ->where('sj.id', '<=', $to_id);
-                }
-            }
-        }
-
-        if ($search_business_category = $request->get('search_business_category')) {
-            $count = $count->where('shipments.business_category_id', '=', $search_business_category);
-        }
-
-        if (!($request->get('search_date_from') && $request->get('search_date_to')) && !($request->get('dr_search_date_from') && $request->get('dr_search_date_to'))) {
-            $count = $count->whereRaw('false');
-        }
-
-        $count = $count->whereNotIn('shipments.shipper_status_id', [1, 17])
-            ->whereNotIn('u.id', [8761, 9358]);
-
-        if (session('role_id') != 1 && (!in_array(session('id'), session('sale_users_bypass')))) {
-            if (session('department_id') == 7) {
-                $count = $count->whereIn('u.id', session('tagged_shippers'));
-            } else {
-                $count = $count->whereIn('dc.hub_id', session('hubs'));
-            }
-        }
-        $count=  $count->whereNotNull('shipments.tracking_number');
-        $count = $count->count();
+//        $count = DB::connection($connection)->table('shipments')
+//            ->leftjoin('users as u', 'u.id', '=', 'shipments.user_id')
+//            ->leftjoin('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id');
+//
+//        if ($request->get('dr_search_date_from') && $request->get('dr_search_date_to')) {
+//            $from = $request->get('dr_search_date_from');
+//            $to = $request->get('dr_search_date_to');
+//
+//            $count = $count->join('shipments_journey as dr', function ($join) use ($from, $to, $connection) {
+//                $join->on('dr.shipment_id', '=', 'shipments.id')
+//                    ->whereIn('dr.shipper_status_id', [14, 20, 30, 36, 37])
+//                    ->where(
+//                        'dr.id',
+//                        '=',
+//                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37) and shipments_journey.verification = 1 and shipments_journey.created_at between "' . $from . '" and "' . $to . '")')
+//                    );
+//            })
+//                ->whereBetween('dr.created_at', [$from, $to]);
+//        }
+//
+//        if ($tracking = $request->get('search_tracking')) {
+//            $count = $count->where('shipments.tracking_number', '=', $tracking);
+//        }
+//        if ($shipper = $request->get('search_shipper')) {
+//            $count = $count->where('u.id', '=', $shipper);
+//        }
+//        if ($origin = $request->get('search_origin')) {
+//            $count = $count->leftjoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+//                ->leftjoin('cities AS oc', 'usi.city_id', '=', 'oc.id')
+//                ->where('oc.id', '=', $origin);
+//        }
+//        if ($destination = $request->get('search_destination')) {
+//            $count = $count->where('dc.id', '=', $destination);
+//        }
+//        if ($mode = $request->get('search_shipping_mode')) {
+//            $count = $count->where('shipments.booking_type_id', '=', $mode);
+//        }
+//        if ($hub = $request->get('search_hub')) {
+//            $count = $count->leftjoin('cities as h', 'dc.hub_id', '=', 'h.id')
+//                ->where('h.id', '=', $hub);
+//        }
+//        if ($status = $request->get('search_status')) {
+//            $count = $count->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
+//                ->where('ss.id', '=', $status);
+//        }
+//
+//        $from_to_ids = FALSE;
+//
+//        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+//            $from = $request->get('search_date_from');
+//            $to = $request->get('search_date_to');
+//
+//            $count = $count->join('shipments_journey as sj', function ($join) use ($connection) {
+//                $join->on('sj.shipment_id', '=', 'shipments.id')
+//                    ->where('sj.shipper_status_id', 2)
+//                    ->where(
+//                        'sj.id',
+//                        '=',
+//                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)')
+//                    );
+//            })
+//                ->whereBetween('sj.created_at', [$from, $to]);
+//
+//            $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
+//            if ($from_id->exists()) {
+//                $from_id = $from_id->first()->id;
+//
+//                $to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
+//
+//                if ($to_id->exists()) {
+//                    $to_id = $to_id->first()->id;
+//
+//                    $from_to_ids = TRUE;
+//
+//                    $count->where('sj.id', '>=', $from_id)
+//                        ->where('sj.id', '<=', $to_id);
+//                }
+//            }
+//        }
+//
+//        if ($search_business_category = $request->get('search_business_category')) {
+//            $count = $count->where('shipments.business_category_id', '=', $search_business_category);
+//        }
+//
+//        if (!($request->get('search_date_from') && $request->get('search_date_to')) && !($request->get('dr_search_date_from') && $request->get('dr_search_date_to'))) {
+//            $count = $count->whereRaw('false');
+//        }
+//
+//        $count = $count->whereNotIn('shipments.shipper_status_id', [1, 17])
+//            ->whereNotIn('u.id', [8761, 9358]);
+//
+//        if (session('role_id') != 1 && (!in_array(session('id'), session('sale_users_bypass')))) {
+//            if (session('department_id') == 7) {
+//                $count = $count->whereIn('u.id', session('tagged_shippers'));
+//            } else {
+//                $count = $count->whereIn('dc.hub_id', session('hubs'));
+//            }
+//        }
+//        $count=  $count->whereNotNull('shipments.tracking_number');
+//        $count = $count->count();
 
         $sales = DB::connection($connection)->table('shipments')
             ->leftJoin('shipment_services_charges as ss_charge', 'ss_charge.shipment_id', '=', 'shipments.id')
-            ->join('users as u', 'u.id', '=', 'shipments.user_id')
-            ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
+            ->leftjoin('users as u', 'u.id', '=', 'shipments.user_id')
+            ->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
             ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
-            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->leftjoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->leftjoin('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->leftjoin('zones as z', 'z.id', '=', 'oc.zone_id')
             ->leftjoin('user_shipping_infos as rsi', 'shipments.return_address_id', '=', 'rsi.id')
             ->leftjoin('cities as rc', 'rsi.city_id', '=', 'rc.id')
-            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
-            ->join('cities as h', 'dc.hub_id', '=', 'h.id')
-            ->join('business_categories as bc', 'shipments.business_category_id', '=', 'bc.id')
+            ->leftjoin('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->leftjoin('cities as h', 'dc.hub_id', '=', 'h.id')
+            ->leftjoin('business_categories as bc', 'shipments.business_category_id', '=', 'bc.id')
             ->leftjoin('zone_class_cities as zcc', function ($join) use ($connection) {
                 $join->on('z.id', '=', 'zcc.zone_id')
                     ->on('dc.id', '=', 'zcc.city_id')
@@ -5701,7 +5701,7 @@ class AdminReportsController extends Controller
                     $join->on('is.shipment_id', '=', 'shipments.id')
                         ->where('is.type', '!=',2 );
                 })
-                ->leftjoin('shipment_additional_charges as faf_charges', 'faf_charges.shipment_id', '=', 'shipments.id')
+            ->leftjoin('shipment_additional_charges as faf_charges', 'faf_charges.shipment_id', '=', 'shipments.id')
             ->leftJoin('invoices', 'is.invoice_id', '=', 'invoices.id')
             ->leftjoin('provinces', 'provinces.id', 'dc.province_id')
             ;
@@ -5750,9 +5750,7 @@ class AdminReportsController extends Controller
         }
         $sales = $sales->whereNotNull('shipments.tracking_number')->groupBy('shipments.id');
         $datatable = Datatables::of($sales)
-            ->setTotalRecords($count)
-
-
+//            ->setTotalRecords($count)
             ->editColumn('fintech_charges', function ($shipment) {
                 return number_format($shipment->fintech_amount, 2);
             })
