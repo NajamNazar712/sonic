@@ -265,7 +265,7 @@ class RevenueReportUserWiseExcelGenerate extends Command
 
                 unlink($tempFile);
 
-                return $filePath;
+                echo $filePath;
 
             }
         }
