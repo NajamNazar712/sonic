@@ -5647,6 +5647,12 @@ class AdminReportsController extends Controller
 //        $count=  $count->whereNotNull('shipments.tracking_number');
 //        $count = $count->count();
 
+        $from_to_ids = FALSE;
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+
             $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
             if ($from_id->exists()) {
                 $from_id = $from_id->first()->id;
@@ -5660,6 +5666,7 @@ class AdminReportsController extends Controller
 
                 }
             }
+        }
 
 
         $sales = DB::connection($connection)->table('shipments')
