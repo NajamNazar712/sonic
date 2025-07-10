@@ -5647,6 +5647,21 @@ class AdminReportsController extends Controller
 //        $count=  $count->whereNotNull('shipments.tracking_number');
 //        $count = $count->count();
 
+            $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
+            if ($from_id->exists()) {
+                $from_id = $from_id->first()->id;
+
+                $to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
+
+                if ($to_id->exists()) {
+                    $to_id = $to_id->first()->id;
+
+                    $from_to_ids = TRUE;
+
+                }
+            }
+
+
         $sales = DB::connection($connection)->table('shipments')
             ->leftJoin('shipment_services_charges as ss_charge', 'ss_charge.shipment_id', '=', 'shipments.id')
             ->leftjoin('users as u', 'u.id', '=', 'shipments.user_id')
@@ -5704,7 +5719,7 @@ class AdminReportsController extends Controller
             ->leftjoin('shipment_additional_charges as faf_charges', 'faf_charges.shipment_id', '=', 'shipments.id')
             ->leftJoin('invoices', 'is.invoice_id', '=', 'invoices.id')
             ->leftjoin('provinces', 'provinces.id', 'dc.province_id');
-        
+
         if ($request->get('dr_search_date_from') && $request->get('dr_search_date_to')) {
             $from = $request->get('dr_search_date_from');
             $to = $request->get('dr_search_date_to');
