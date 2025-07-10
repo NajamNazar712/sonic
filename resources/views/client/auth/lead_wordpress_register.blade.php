@@ -61,7 +61,7 @@
                 <div class="col-12 d-flex align-items-center justify-content-end">
                     <div class="col-md-4 col-10 p-0">
                         <div class="mb-2 text-center">
-                            <p class="bold" style="font-size: 17px !important;">For Help Dial : <a href="tel:021-111-118-729" style="text-decoration:underline;">021-111-118-729</a>  or email us <a href="mailto:info@trax.pk" style="text-decoration:underline;">info@trax.pk</a></p>
+                            <p class="bold" style="font-size: 17px !important;">For Help Dial : <a href="tel:021-111-118-729" style="text-decoration:underline;">021-111-118-729</a>  or email us <a href="mailto:info@slgtrax.com" style="text-decoration:underline;">info@slgtrax.com</a></p>
                         </div>
                         <div class="card box-shadow-1 border-grey border-lighten-3 px-1 py-1 m-0">
                             <div class="card-header border-0">

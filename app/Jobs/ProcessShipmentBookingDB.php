@@ -252,7 +252,7 @@ class ProcessShipmentBookingDB implements ShouldQueue
                 $order_date->save();
             }
 
-            if ($this->booking['shipper_reference_number_1'] != null || $this->booking['shipper_reference_number_2'] != null || $this->booking['shipper_reference_number_3'] != null || $this->booking['shipper_reference_number_4'] != null || $this->booking['shipper_reference_number_5'] != null) {
+            if (isset($this->booking['shipper_reference_number_1']) || isset($this->booking['shipper_reference_number_2']) || isset($this->booking['shipper_reference_number_3']) || isset($this->booking['shipper_reference_number_4']) || isset($this->booking['shipper_reference_number_5'])) {
                 $shipper_reference = new ShipmentShipperReference();
                 $shipper_reference->shipment_id = $shipment_id;
                 if ($this->booking['shipper_reference_number_1'] != null) {

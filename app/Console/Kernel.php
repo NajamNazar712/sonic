@@ -185,6 +185,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\PendingDeliveriesReportNew',
         'App\Console\Commands\WalletChargesUpdate',
         'App\Console\Commands\BulkStatusSharingWithWalletReplicate',
+        'App\Console\Commands\ExportShipmentReport',
         // 'App\Console\Commands\QsrEmail',
         // 'App\Console\Commands\PendingDeliveriesReport',
 
@@ -282,13 +283,13 @@ class Kernel extends ConsoleKernel
         if($checkBot)
         {
             $schedule->command('agent:botcallunresponsive')->everyFifteenMinutes()->runInBackground();
-            $schedule->command('missingfirst:call')->hourly()->runInBackground();
-            $schedule->command('missingfirst:call', [
-                '--start' => Carbon::yesterday()->startOfDay()->toDateTimeString(), 
-                '--end' => Carbon::yesterday()->endOfDay()->toDateTimeString()      
-            ])
-                ->dailyAt('00:30') // runs at 12:30 AM every night
-                ->runInBackground();
+           $schedule->command('missingfirst:call')->hourly()->runInBackground();
+           $schedule->command('missingfirst:call', [
+               '--start' => Carbon::yesterday()->startOfDay()->toDateTimeString(),
+               '--end' => Carbon::yesterday()->endOfDay()->toDateTimeString()
+           ])
+               ->dailyAt('00:30') // runs at 12:30 AM every night
+               ->runInBackground();
         }
 
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
@@ -675,6 +676,13 @@ class Kernel extends ConsoleKernel
             $time = $walletChargesUpdate->text; // e.g., '11:00'
             $schedule->command('wallet_charges_update')->dailyAt($time)->runInBackground();
         }
+        // $schedule->command('export:shipment-report')
+        //     ->dailyAt('14:23')              
+        //     ->withoutOverlapping()         // prevent simultaneous runs
+        //     ->onOneServer()                // ensures single server execution
+        //     ->runInBackground()            // runs non-blocking
+        //     ->sendOutputTo(storage_path('logs/shipment_report.log'))
+        //     ->emailOutputOnFailure('anas.mazhar@logiserves.com');
     }
     /**
      * Register the commands for the application.

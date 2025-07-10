@@ -113,4 +113,8 @@ class User extends Authenticatable
         return $this->hasMany('App\Http\Models\Shipper\SubstituteUser','user_id', 'id')->where('status',1);
     }
 
+    public function reference()
+    {
+        return $this->belongsTo('App\Http\Models\Reference', 'reference_id', 'id');
+    }
 }

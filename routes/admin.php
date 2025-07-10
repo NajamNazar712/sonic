@@ -321,6 +321,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('city/enable_booking_status', 'Admins\AdminDashboardController@enable_booking_status')->name('enable_booking_status');
         Route::get('city/status-logs/{cityId}', 'Admins\AdminDashboardController@get_city_status_logs')->name('get_city_status_logs');
 
+
+        Route::get('city/{id}/changes', 'Admins\AdminDashboardController@getAjaxCityChanges')->name('getAjaxCityChanges');
+
         //Route
         Route::prefix('route')->name('route.')->group(function () {
             Route::get('/', 'Admins\AdminDashboardController@routeView')->name('index');
@@ -1734,6 +1737,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminFinanceController@done_payments_index')->name('index');
             Route::post('list', 'Admins\AdminFinanceController@done_payments_list')->name('list');
             Route::put('paid', 'Admins\AdminFinanceController@done_payments_paid')->name('paid');
+            Route::put('tax_paid', 'Admins\AdminFinanceController@done_payments_tax_paid')->name('tax_paid');
             Route::put('reverted', 'Admins\AdminFinanceController@done_payments_reverted')->name('reverted');
             Route::post('delivered_shipments', 'Admins\AdminFinanceController@done_payments_delivered_shipments')->name('delivered_shipments');
             Route::post('returned_shipments', 'Admins\AdminFinanceController@done_payments_returned_shipments')->name('returned_shipments');
@@ -1753,7 +1757,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::prefix('invoices')->name('invoices.')->group(function () {
             Route::get('', 'Admins\AdminFinanceController@invoices_index')->name('index');
-            Route::get('list', 'Admins\AdminFinanceController@invoices_list')->name('list');
+            Route::post('list', 'Admins\AdminFinanceController@invoices_list')->name('list');
             Route::post('slip', 'Admins\AdminFinanceController@invoices_slip')->name('slip');
             Route::post('slip/view', 'Admins\AdminFinanceController@invoices_slip_view')->name('slip_view');
             Route::post('invoices_detail_print', 'Admins\AdminFinanceController@invoices_detail_print')->name('invoices_detail_print');
@@ -2052,6 +2056,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('updated_shippers_list', 'Admins\AdminReportsController@updated_shippers_list')->name('updated_shippers_list');
         });
 
+        Route::prefix('wht')->name('wht.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@wht_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@wht_list')->name('list');
+        });
         Route::prefix('kam_and_poc_qsr')->name('kam_and_poc_qsr.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@kam_and_poc_qsr_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@kam_and_poc_qsr_list')->name('list');
@@ -2817,6 +2825,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@cod_cap_zones_update')->name('update');
         });
 
+        Route::prefix('product_tax')->name('product_tax.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@product_tax_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@product_tax_update')->name('update');
+        });
+        Route::prefix('product_tax_logs')->name('product_tax_logs.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@product_tax_logs_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@product_tax_logs')->name('list');
+        });
         Route::prefix('ibft_charges')->name('ibft_charges.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@ibft_charges_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@ibft_charges_store')->name('store');

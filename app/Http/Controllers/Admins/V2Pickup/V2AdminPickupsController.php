@@ -2599,6 +2599,9 @@ class V2AdminPickupsController extends Controller
                     if ($booking_sms->exists()) {
                         NotificationsController::send(3, $shipment_id);
                     }
+                    if(in_array($shipment->user_id, [43066, 41969])) {
+                        NotificationsController::send(245, $shipment_id);
+                    }
                     if ($shipment->packaging_material_request == 0 && $shipment->shipment_type == 1) {
                         if ($shipment->booking_type_id == 4) {
                             ShipmentChargesController::walkin_weight($shipment_id);

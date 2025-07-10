@@ -178,6 +178,9 @@ use App\Models\WalletShipperSetting;
 use Illuminate\Support\Str;
 use App\Http\Traits\CommonTrait;
 use App\ChangeLogs;
+use App\Models\ParentProduct;
+use App\Models\ParentProductTaxLog;
+
 
 class GlobalSettingsController extends Controller
 {
@@ -10757,5 +10760,85 @@ class GlobalSettingsController extends Controller
     
         return redirect()->back()->with('success', 'Settings Updated!');
     }
-    
+
+    public function product_tax_index()
+    {
+        $data = ParentProduct::get();
+        return view('admin.settings.product_percentage')->with(['data' => $data]);
+    }
+
+    public function product_tax_update(Request $request)
+    {
+
+        if ($request->has('tax_percentage') && $request->has('sst_percentage')) {
+
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 831);
+
+            foreach ($request->tax_percentage as $id => $new_value) {
+                $product = ParentProduct::find($id);
+                if ($product && $product->tax_percentage != $new_value) {
+                    // Log the change
+                    ParentProductTaxLog::create([
+                        'parent_product_id' => $product->id,
+                        'field_changed' => 'Tax Percentage',
+                        'old_value' => $product->tax_percentage,
+                        'new_value' => $new_value,
+                        'updated_by' => Auth::id(),
+                    ]);
+
+                    // Update the product
+                    $product->update(['tax_percentage' => $new_value]);
+                }
+            }
+
+            foreach ($request->sst_percentage as $id => $new_value) {
+                $product = ParentProduct::find($id);
+                if ($product && $product->sst_percentage != $new_value) {
+
+                    // Log the change
+                    ParentProductTaxLog::create([
+                        'parent_product_id' => $product->id,
+                        'field_changed' => 'SST Percentage',
+                        'old_value' => $product->sst_percentage,
+                        'new_value' => $new_value,
+                        'updated_by' => Auth::id(),
+                    ]);
+
+                    // Update the product
+                    $product->update(['sst_percentage' => $new_value]);
+                }
+            }
+        }
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+    public function product_tax_logs_index(Request $request) 
+    {
+        
+        return view('admin.settings.product_percentage_logs');
+       
+    }
+
+    public function product_tax_logs(Request $request) 
+    {
+ 
+        $query = DB::table('parent_product_percentage_logs as pl')
+            ->join('parent_products as pp', 'pp.id', '=', 'pl.parent_product_id')
+            ->join('admins as u', 'u.id', '=', 'pl.updated_by')
+            ->select([
+                'pl.id',
+                'pp.name as parent_product_name',
+                'pl.field_changed',
+                'pl.old_value',
+                'pl.new_value',
+                'u.name as updated_by_name',
+                'pl.created_at',
+            ]);
+
+        return DataTables::of($query)
+            ->editColumn('created_at', function ($row) {
+                return $row->created_at ? \Carbon\Carbon::parse($row->created_at)->format('Y-m-d H:i') : '-';
+            })
+        ->make(true);
+    } 
 }

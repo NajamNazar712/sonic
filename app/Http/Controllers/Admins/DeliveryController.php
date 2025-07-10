@@ -1263,7 +1263,10 @@ class DeliveryController extends Controller
                         $otp = mt_rand(100000, 999999);
                         $shipment_otp->otp = $otp;
                         $shipment_otp->save();
-                        if ($shipment_obj->amount == 0) {
+                        if(in_array($shipment_obj->user_id, [43066, 41969])) {
+                            NotificationsController::send(244, $note->id, $shipment_id);
+                        }
+                        else if ($shipment_obj->amount == 0) {
                             //English
                             NotificationsController::send(132, $note->id, $shipment_id);
                             //Urdu
@@ -3976,15 +3979,17 @@ class DeliveryController extends Controller
                                 ShipmentsJourneyController::add($shipment, 20, 20, $status_reason_id, $journey->remarks ?? NULL, NULL, $globalAdminId, null, null, 1, null, null, null, null, null);
                                 
                             }else{
-                                    $rvshipments = RvShipmentAssignAgent::where('shipment_id', $shipment_details->id);
-                                    Shipment::where('id', $shipment)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);
-
-                                    ShipmentsJourneyController::add($shipment_details->id, 65, 65, $status_reason_id, NULL, $shipment_details->user_id, 346);
-
-                                    RvShipmentAssignAgent::where('shipment_id', $shipment_details->id)
-                                    // ->whereDate('created_at',$date)
-                                    ->update(['agent_id'=> 346,'rv_state_id'=>2, 'rv_assign_agent_status_id' => 7,'unresponsive_count' => 3, 'unresponsive_email_count' => 1, 'unresponsive_email_time' => date('Y-m-d h:i:s')]);                                    
-                                    NotificationsController::send(220, $rvshipments);
+                                    if($shipment_details->shipper_status_id == 12){
+                                        $rvshipments = RvShipmentAssignAgent::where('shipment_id', $shipment_details->id);
+                                        Shipment::where('id', $shipment)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);
+    
+                                        ShipmentsJourneyController::add($shipment_details->id, 65, 65, $status_reason_id, NULL, $shipment_details->user_id, Auth::id());
+    
+                                        RvShipmentAssignAgent::where('shipment_id', $shipment_details->id)
+                                        // ->whereDate('created_at',$date)
+                                        ->update(['agent_id'=> 346,'rv_state_id'=>2, 'rv_assign_agent_status_id' => 7,'unresponsive_count' => 3, 'unresponsive_email_count' => 1, 'unresponsive_email_time' => date('Y-m-d h:i:s')]);                                    
+                                        NotificationsController::send(220, $rvshipments);
+                                    }
                             }
 
 
@@ -8945,8 +8950,8 @@ class DeliveryController extends Controller
                     $customer_details = Shipment::where('id', $shipment['id'])->first();
 
                     //Parameters
-                    $email = 'info@trax.pk';
-                    $recipient_email = 'info@trax.pk';
+                    $email = 'info@slgtrax.com';
+                    $recipient_email = 'info@slgtrax.com';
                     $Bill_cat = 'Bill';
                     $total_amount = $customer_details->amount + $customer_details->fintech_charges;
                     $billing_month = date('Y-m');

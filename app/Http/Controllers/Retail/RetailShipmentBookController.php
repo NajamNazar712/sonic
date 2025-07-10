@@ -65,6 +65,7 @@ use App\RetailDiscountCode;
 use Illuminate\Support\Facades\Log;
 use App\Http\Models\ShipperSegmentLogs;
 use App\Http\Models\Shipper\User;
+use App\Models\ParentProduct;
 
 class RetailShipmentBookController extends Controller
 {
@@ -215,6 +216,7 @@ class RetailShipmentBookController extends Controller
 
     public function index(){
         $products = Product::all();
+        $parent_products = ParentProduct::get();
         $business_categories = BusinessCategory::all();
         $shipping_modes = RetailShippingMode::where('business_category_id',1)->get();
         $retail_international_shipping_modes =  RetailShippingMode::where('business_category_id',2)->get();
@@ -227,7 +229,7 @@ class RetailShipmentBookController extends Controller
         $banks = BanksList::all();
 
         $refs = ['Social Media','Website','Signages','Existing Customer','Others'];
-        return view('retail.shipment.booking.index')->with(['products' => $products, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'domestic_cities' => $domestic_cities, 'domestic_overland_cities' => $domestic_overland_cities,'international_cities'=>$international_cities, 'payment_modes' => $payment_modes, 'trax_boxes' => $trax_boxes, 'banks' => $banks, 'charges_modes' => $charges_modes, 'refs' => $refs,'retail_international_shipping_modes' => $retail_international_shipping_modes]);
+        return view('retail.shipment.booking.index')->with(['products' => $products, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'domestic_cities' => $domestic_cities, 'domestic_overland_cities' => $domestic_overland_cities,'international_cities'=>$international_cities, 'payment_modes' => $payment_modes, 'trax_boxes' => $trax_boxes, 'banks' => $banks, 'charges_modes' => $charges_modes, 'refs' => $refs,'retail_international_shipping_modes' => $retail_international_shipping_modes, 'parent_products' => $parent_products]);
     }
 
     public function store(Request $request){
@@ -324,7 +326,7 @@ class RetailShipmentBookController extends Controller
             $height = null;
         }
 
-        $rates = RetailRatesCalculationController::rates($shipping_mode_check, $business_category_id, $pickup_city_id, $consignee_city_id, $request->trax_box, $discount, $estimated_weight,$insurance_amount,$packaging);
+        $rates = RetailRatesCalculationController::rates($shipping_mode_check, $business_category_id, $pickup_city_id, $consignee_city_id, $request->trax_box, $discount, $estimated_weight,$insurance_amount,$packaging, $request->product, $request->cod);
 
 
         if($request->has('admin_discount'))
@@ -559,6 +561,8 @@ class RetailShipmentBookController extends Controller
         $retail_shipment->retail_user_id = Auth::id();
         $retail_shipment->category = $cat;
         $retail_shipment->category_id = $cat_id;
+        $retail_shipment->wht = $rates['wht'];
+        $retail_shipment->cod_sst = $rates['cod_sst'];
         if($request->has('admin_discount'))
         {
             $retail_shipment->admin_discount = $request->admin_discount;
@@ -727,7 +731,7 @@ class RetailShipmentBookController extends Controller
             $insurance_amount = round($insurance_amount * $insurance / 100,2);
         }
 
-        $details = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->consignee_city_id, $request->trax_box, $discount, $weight,$insurance_amount,$packaging);
+        $details = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->consignee_city_id, $request->trax_box, $discount, $weight,$insurance_amount,$packaging, $request->product_id, $request->cod);
 
         if($request->has('admin_discount'))
         {
@@ -1194,8 +1198,17 @@ class RetailShipmentBookController extends Controller
                            ';
 
             $slip .= '
-                  <div class="col m-1 row justify-content-center"><div class="col"><hr></div><div class=""><p>Shipper Copy</p></div><div class="col"><hr></div>
-                  <div class=""><i class="la la-cut la-rotate-180 align-middle"></i></div></div>
+                <div class="col m-1 row justify-content-center">
+                    <div class="col"><hr></div>
+                    <div class=""><p>Sales and Income tax has been deducted from the total COD amount as per applicable tax laws.</p></div>
+                    <div class="col"><hr></div>
+                </div>
+                  <div class="col m-1 row justify-content-center">
+                    <div class="col"><hr></div>
+                    <div class=""><p>Shipper Copy</p></div>
+                    <div class="col"><hr></div>
+                    <div class=""><i class="la la-cut la-rotate-180 align-middle"></i></div>
+                  </div>
                 ';
             $shipment_details .= $slip;
 
@@ -3113,5 +3126,15 @@ class RetailShipmentBookController extends Controller
         $html .= '</body>';
         $html .= '</html>';
         return $html;
+    }
+    
+    public function get_products(Request $request) {
+
+        $products = Product::where('parent_product_id', $request->parent_product_id)->get();
+        if ($products) {
+            return response()->json(['status' => 0, 'products' => $products]);
+        } else {
+            return response()->json(['status' => 1]);
+        }
     }
 }
