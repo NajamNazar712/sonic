@@ -5703,14 +5703,8 @@ class AdminReportsController extends Controller
                 })
             ->leftjoin('shipment_additional_charges as faf_charges', 'faf_charges.shipment_id', '=', 'shipments.id')
             ->leftJoin('invoices', 'is.invoice_id', '=', 'invoices.id')
-            ->leftjoin('provinces', 'provinces.id', 'dc.province_id')
-            ;
-        //        if (!$request->get('search_date_from') && !$request->get('search_date_to')) {
-        //            $now = Carbon::now();
-        //            $yesterday = Carbon::now()->subDays(3);
-        //            $sales = $sales->whereBetween('sj.created_at', [$yesterday,$now]);
-        //        }
-
+            ->leftjoin('provinces', 'provinces.id', 'dc.province_id');
+        
         if ($request->get('dr_search_date_from') && $request->get('dr_search_date_to')) {
             $from = $request->get('dr_search_date_from');
             $to = $request->get('dr_search_date_to');
