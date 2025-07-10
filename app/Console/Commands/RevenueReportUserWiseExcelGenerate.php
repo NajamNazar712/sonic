@@ -175,7 +175,7 @@ class RevenueReportUserWiseExcelGenerate extends Command
                     ->leftJoin('provinces', 'provinces.id', '=', 'dc.province_id')
                     ->whereNotIn('shipments.shipper_status_id', [1, 17])
                     ->whereBetween('shipments.created_at', [$start, $end])
-                    ->where('u.id', 15151)
+                    ->where('u.id', $u_id)
                     ->groupBy('shipments.id');
 
                 $sales = $query->get()->map(function ($shipment) {
@@ -422,7 +422,7 @@ class RevenueReportUserWiseExcelGenerate extends Command
                     ->leftJoin('provinces', 'provinces.id', '=', 'dc.province_id')
                     ->whereNotIn('shipments.shipper_status_id', [1, 17])
                     ->whereBetween('shipments.created_at', [$start, $end])
-                    ->where('u.id', 15151)
+                    ->where('u.id', $u_id)
                     ->groupBy('shipments.id');
 
                 $sales = $query->get()->map(function ($shipment) {
