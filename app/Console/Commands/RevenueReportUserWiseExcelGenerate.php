@@ -173,6 +173,15 @@ class RevenueReportUserWiseExcelGenerate extends Command
                     ->leftJoin('shipment_additional_charges AS faf_charges', 'faf_charges.shipment_id', '=', 'shipments.id')
                     ->leftJoin('invoices', 'inv_ship.invoice_id', '=', 'invoices.id')
                     ->leftJoin('provinces', 'provinces.id', '=', 'dc.province_id')
+                    ->leftJoin('shipments_journey as dr', function ($join) use ($start, $end, $connection) {
+                        $join->on('dr.shipment_id', '=', 'shipments.id')
+                            ->whereIn('dr.shipper_status_id', [14, 20, 30, 36, 37])
+                            ->where(
+                                'dr.id',
+                                '=',
+                                DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37) and shipments_journey.verification = 1 and shipments_journey.created_at between "' . $start . '" and "' . $end . '")')
+                            );
+                    })
                     ->whereNotIn('shipments.shipper_status_id', [1, 17])
                     ->whereBetween('shipments.created_at', [$start, $end])
                     ->where('u.id', $u_id)
@@ -420,6 +429,15 @@ class RevenueReportUserWiseExcelGenerate extends Command
                     ->leftJoin('shipment_additional_charges AS faf_charges', 'faf_charges.shipment_id', '=', 'shipments.id')
                     ->leftJoin('invoices', 'inv_ship.invoice_id', '=', 'invoices.id')
                     ->leftJoin('provinces', 'provinces.id', '=', 'dc.province_id')
+                    ->leftJoin('shipments_journey_archive as dr', function ($join) use ($start, $end, $connection) {
+                        $join->on('dr.shipment_id', '=', 'shipments.id')
+                            ->whereIn('dr.shipper_status_id', [14, 20, 30, 36, 37])
+                            ->where(
+                                'dr.id',
+                                '=',
+                                DB::connection($connection)->raw('(select max(id) from shipments_journey_archive where shipments_journey_archive.shipment_id = shipments.id and shipments_journey_archive.shipper_status_id In(14,20,30,36,37) and shipments_journey_archive.verification = 1 and shipments_journey_archive.created_at between "' . $start . '" and "' . $end . '")')
+                            );
+                    })
                     ->whereNotIn('shipments.shipper_status_id', [1, 17])
                     ->whereBetween('shipments.created_at', [$start, $end])
                     ->where('u.id', $u_id)
