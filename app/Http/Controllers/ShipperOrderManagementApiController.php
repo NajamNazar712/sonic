@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Shippers\ShipperShipmentBookController;
 use App\Http\Models\Shipment;
+use Barryvdh\Snappy\Facades\SnappyPdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class ShipperOrderManagementApiController extends Controller
 {
@@ -182,5 +185,27 @@ class ShipperOrderManagementApiController extends Controller
 
         return $shipment_summary;
     }
+
+
+    public function shipment_air_waybill(Request $request)
+    {
+
+            $encoded = $request->tracking_number;
+            $tracking_number = base64_decode($encoded);
+            $shipment = Shipment::where('tracking_number', $tracking_number)->first();
+
+            if($shipment && now()->diffInMinutes($shipment->created_at) <= 5) {
+                $air_waybill = ShipperShipmentBookController::air_waybill(4, $shipment->user_id, [$shipment->id]);
+                $pdf = SnappyPdf::loadHTML($air_waybill);
+
+                $filename = 'air_waybill' . '.pdf';
+
+                return $pdf->setOption('enable-local-file-access', true)->download($filename);
+            }
+
+            return response()->json(['status' => 1 , 'message' => 'Shipment not found!']);
+
+    }
+
 
 }
