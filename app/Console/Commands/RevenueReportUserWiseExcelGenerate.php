@@ -294,7 +294,7 @@ class RevenueReportUserWiseExcelGenerate extends Command
 //            }
 //        }
 
-        $years = [2018, 2019, 2020, 2021];
+        $years = [2022];
         foreach ($users as $u_id) {
 
             foreach ($years as $year) {
