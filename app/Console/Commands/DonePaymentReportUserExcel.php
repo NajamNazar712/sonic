@@ -42,7 +42,7 @@ class DonePaymentReportUserExcel extends Command
 
         $users = [15151, 15150];
 
-        $years = [2025];
+        $years = [2022,2023,2024,2025];
         foreach ($users as $u_id) {
 
             foreach ($years as $year) {
