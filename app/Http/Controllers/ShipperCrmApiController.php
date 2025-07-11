@@ -244,13 +244,15 @@ class ShipperCrmApiController extends Controller
     public function crm_request_list(Request $request)
     {
         $app_type = $request->app_type;
-        $reqeust_status = $request->status ? $request->status : 1;
+        $request_status = $request->status
+            ? ($request->status == 2 ? [4, 7] : [1, 2, 3, 5, 6])
+            : [1, 2, 3, 5, 6];
         $count = 0;
         if($app_type == 2) {
 
             $count = CrmRequest::leftJoin('retail_shipments as rs', 'rs.shipment_id', '=', 'crm_requests.shipment_id')
             ->leftJoin('retail_shipper_infos as rsi', 'rsi.id', '=', 'rs.shipper_account_no')
-            ->where('status_id',$reqeust_status)
+            ->whereIn('status_id',$request_status)
             ->where('rs.shipper_account_no', $request->retail_shipper_id)
             ->count();
 
@@ -267,7 +269,7 @@ class ShipperCrmApiController extends Controller
 //            ->count();
 
         } else {
-            $count = CrmRequest::where('status_id',$reqeust_status)
+            $count = CrmRequest::where('status_id',$request_status)
             ->where('shipper_id', $request->shipper_id)
             ->count();
 
@@ -337,7 +339,7 @@ class ShipperCrmApiController extends Controller
 
         // Final query
         $crm_requests = $crm_requests->select($selects)
-            ->where('crm_requests.status_id',$reqeust_status)
+            ->where('crm_requests.status_id',$request_status)
             ->orderBy('crm_requests.id', 'desc')
             ->cursorPaginate(20);
 
