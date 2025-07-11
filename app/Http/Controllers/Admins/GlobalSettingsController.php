@@ -3147,7 +3147,6 @@ class GlobalSettingsController extends Controller
 
     public function return_reason_list(Request $request)
     {
-        dd('data');
         $reason_ids = DB::table('shipment_status_shipment_status_reason')->where('shipment_status_id', 20)->pluck('shipment_status_reason_id')->toArray();
         $reasons = ShipmentStatusReason::whereIn('id', $reason_ids)->select('id', 'name');
         $datatable = Datatables::of($reasons)
