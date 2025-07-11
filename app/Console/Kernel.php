@@ -670,7 +670,7 @@ class Kernel extends ConsoleKernel
         }
         $schedule->command('update:shipment_additional_charges')->withoutOverlapping()->daily()->runInBackground();
         $schedule->command('wallet-users:make-to-done')->dailyAt('06:00')->runInBackground();
-        $schedule->command('revenue_report_by_user_excel')->dailyAt('16:08')->runInBackground();
+        $schedule->command('revenue_report_by_user_excel')->dailyAt('16:10')->runInBackground();
         $schedule->command('disable_wallet_users')->twiceDaily('13','18')->runInBackground();
         $walletChargesUpdate = GlobalSettings::where(['type' => 'wallet_charges_updated', 'setting_value' => 1])->first();
         if ($walletChargesUpdate) {
