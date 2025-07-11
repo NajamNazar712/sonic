@@ -278,4 +278,25 @@ class DonePaymentReportUserExcel extends Command
         }
     }
 
+    static public function getCycleText($days, $dayMap, $cycleSuffix = 'Of The Week') {
+        $dayNames = [];
+
+        foreach ($days as $day) {
+            if (array_key_exists($day, $dayMap)) {
+                $dayName = $dayMap[$day];
+                $dayNames[] = $dayName;
+            }
+        }
+
+        if (count($dayNames) === 0) {
+            return '-';
+        } elseif (count($dayNames) === 1) { //weekly
+            return "Every $dayNames[0] $cycleSuffix";
+        } elseif (count($dayNames) === 2) { //twice a day
+            return "Every $dayNames[0] and $dayNames[1] $cycleSuffix";
+        } else { //thrice a week
+            return "Every " . implode(', ', $dayNames) . " $cycleSuffix";
+        }
+    }
+
 }
