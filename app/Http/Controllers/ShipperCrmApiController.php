@@ -244,9 +244,19 @@ class ShipperCrmApiController extends Controller
     public function crm_request_list(Request $request)
     {
         $app_type = $request->app_type;
-        $request_status = $request->status
-            ? ($request->status == 2 ? [4, 7] : [1, 2, 3, 5, 6])
-            : [1, 2, 3, 5, 6];
+        if ($request->status && $request->status != 1) {
+            if ($request->status == 4) {
+                $request_status = [4, 7];
+            } else {
+                return response()->json([
+                    'status' => 1,
+                    'message' => 'CRM Complaints following status not found!'
+                ]);
+            }
+        } else {
+            $request_status = [1, 2, 3, 5, 6];
+        }
+
         $count = 0;
         if($app_type == 2) {
 
