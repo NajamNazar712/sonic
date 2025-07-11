@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Controllers\Admins\AdminDashboardController;
 use App\Http\Models\Admin\shipmentFintechCharges;
 use App\Http\Models\DonePayment;
 use App\Http\Models\DonePaymentShipment;
@@ -103,87 +104,73 @@ class DonePaymentReportUserExcel extends Command
                     ->whereBetween('done_payments.created_at', [$start, $end])
                     ->where('done_payments.user_id', $u_id);
 
-                $query = $done_payments->get()->map(function ($done_payment) {
+                $query = $done_payments->get()->map(function ($done_payment)  {
+
                     $req = 'done_payments';
                     $fintechCharges = $this->calculate_fintech_charges_bulk($done_payment, $req);
                     return [
-                        'payment_id' => $done_payment->payment_id,
-                        'company_bank' => $done_payment->company_bank,
-                        'bank' => $done_payment->bank,
-                        'shipper' => $done_payment->star_status == 1
+                        'Payment ID' => str_pad($done_payment->id, 6, '0', STR_PAD_LEFT),
+                        'Account ID' => str_pad($done_payment->user_id, 6, '0', STR_PAD_LEFT),
+                        'Shipper' => $done_payment->star_status == 1
                             ? '<p><i class="star_shippers_icon"></i>' . $done_payment->shipper . '</p>'
                             : $done_payment->shipper,
-
-                        'id_padded' => str_pad($done_payment->id, 6, '0', STR_PAD_LEFT),
-
-                        // user_id_padded column
-                        'user_id_padded' => str_pad($done_payment->user_id, 6, '0', STR_PAD_LEFT),
-
-
-                        // fintech charges column
-                        'done_fintech_charges' => $fintechCharges,
-
-                        // total deductable column
-                        'total_deductable' => number_format(
+                        'Sale Person' => $done_payment->sale_person_name,
+                        'City' => $done_payment->city,
+                        'Territory' => $done_payment->territory,
+                        'Phone No(s).' => !empty($done_payment->phone2)
+                            ? $done_payment->phone . ' - ' . $done_payment->phone2
+                            : $done_payment->phone,
+                        'Financing Product Type' => match ($done_payment->finova_account_type) {
+                            1, 2, 3, 4 => 'Arrival',
+                            5 => 'Delivered',
+                            0 => 'Basic',
+                            default => '-',
+                        },
+                        'Address' => $done_payment->address,
+                        'Total Shipments' => $done_payment->total_shipments + $done_payment->arrival_shipment,
+                        'Delivered Shipments' => $done_payment->delivered_shipments ?: 0,
+                        'Returned Shipments' => $done_payment->returned_shipments ?: 0,
+                        'Adjusted Shipments' => $done_payment->adjusted_shipments ?: 0,
+                        'Fintech Charges' => $fintechCharges,
+                        'Arrival Shipments' => $done_payment->arrival_shipment ?: 0,
+                        'Total Amount' => number_format($done_payment->total_amount, 2),
+                        'Total Charges' => number_format($done_payment->total_charges + $done_payment->ibft_charges, 2),
+                        'Total GST' => number_format($done_payment->total_gst, 2),
+                        'Total WHT' => number_format($done_payment->total_wht, 2),
+                        'Total COD SST' => number_format($done_payment->total_cod_sst, 2),
+                        'Total Per SMS Charges' => number_format($done_payment->total_sms_charges, 2),
+                        'Packing Charges' => number_format($done_payment->packaging_charges, 2),
+                        'Total Deductable' => number_format(
                             $done_payment->total_charges +
                             $done_payment->total_gst +
                             $done_payment->total_sms_charges +
                             $done_payment->ibft_charges +
                             $done_payment->total_wht +
-                            $done_payment->total_cod_sst, 2
+                            $done_payment->total_cod_sst,
+                            2
                         ),
-
-                        // total_shipments + arrival_shipment
-                        'total_shipments' => $done_payment->total_shipments + $done_payment->arrival_shipment,
-
-                        // delivered_shipments button
-                        'delivered_shipments' => $done_payment->delivered_shipments ?: 0,
-
-                        'returned_shipments' => $done_payment->returned_shipments ?: 0,
-
-                        'adjusted_shipments' => $done_payment->adjusted_shipments ?: 0,
-
-                        'arrival_shipment' => $done_payment->arrival_shipment ?: 0,
-
-
-                        // total_amount formatted
-                        'total_amount' => number_format($done_payment->total_amount, 2),
-
-                        'total_charges' => number_format($done_payment->total_charges + $done_payment->ibft_charges, 2),
-
-                        'total_gst' => number_format($done_payment->total_gst, 2),
-
-                        'total_sms_charges' => number_format($done_payment->total_sms_charges, 2),
-
-                        'packaging_charges' => number_format($done_payment->packaging_charges, 2),
-
-                        'adjustment_charges' => number_format($done_payment->adjustment_charges, 2),
-
-                        'total_payable' => number_format(round($done_payment->total_payable - $done_payment->ibft_charges, 0, PHP_ROUND_HALF_DOWN)),
-
-                        'phone_numbers' => !empty($done_payment->phone2)
-                            ? $done_payment->phone . ' - ' . $done_payment->phone2
-                            : $done_payment->phone,
-
-                        'status' => match ($done_payment->status) {
+                        'Ibft Charges' => number_format($done_payment->ibft_charges, 2),
+                        'Adjustment Charges' => number_format($done_payment->adjustment_charges, 2),
+                        'Total Payable' => number_format(round($done_payment->total_payable - $done_payment->ibft_charges, 0, PHP_ROUND_HALF_DOWN)),
+                        'Bank' => $done_payment->bank,
+                        'Reference No.' => $done_payment->reference_number,
+                        'Done Datetime' => $done_payment->done_at,
+                        'Company Bank' => $done_payment->company_bank,
+                        'Payment Cycle' => $done_payment->payment_cycle,
+                        'Payment Cycle Days' => $this->formatPaymentCycleDays($done_payment->payment_cycle_id, $done_payment->payment_cycle_days),
+                        'Status' => match ($done_payment->status) {
                             0 => 'Processed',
                             1 => 'Paid',
                             2 => 'Reverted',
                             3 => 'Settlement Requested',
                             default => 'Unknown',
                         },
-
-                        // paid_reverted_at
-                        'paid_reverted_at' => in_array($done_payment->status, [1, 2, 3]) ? $done_payment->status_updated_at : ($done_payment->status == 0 ? '-' : 'Unknown'),
-
-                        // updated_at
-                        'updated_at' => !empty($done_payment->status_updated_at) ? $done_payment->status_updated_at : '-',
-
-                        // updated_by
-                        'updated_by' => !empty($done_payment->admin_name) ? $done_payment->admin_name : '-',
-
+                        'Paid / Reverted Datetime' => !empty($done_payment->status_updated_at)
+                            ? $done_payment->status_updated_at
+                            : '-',
                     ];
                 });
+
 
                 if (count($query) > 0) {
                     $data = $query->toArray();  // Assuming $sales is your mapped collection
@@ -247,4 +234,48 @@ class DonePaymentReportUserExcel extends Command
         //     return 0;
         // }
     }
+
+    private function formatPaymentCycleDays($payment_cycle_id, $payment_cycle_days)
+    {
+        $dayMap = AdminDashboardController::$paymentCycleDays;
+
+        if (in_array($payment_cycle_id, [2, 4, 5])) { // Weekly, Twice a Week, Thrice a Week
+            $days = explode(',', $payment_cycle_days);
+            return $this->getCycleText($days, $dayMap);
+        }
+
+        if (in_array($payment_cycle_id, [3, 6]) && $payment_cycle_days !== '0') { // Monthly, Fortnightly
+            $days = explode(',', $payment_cycle_days);
+
+            if (count($days) === 1) {
+                return $this->getDayOfMonthText((int)$days[0]);
+            } elseif (count($days) === 2) {
+                return $this->getDayOfMonthText((int)$days[0]) . ' And ' . $this->getDayOfMonthText((int)$days[1]);
+            }
+        }
+
+        if ($payment_cycle_id == 1) { // Daily
+            return '-';
+        }
+
+        return '-';
+    }
+
+    static public function getDayOfMonthText($day) {
+        if ($day % 100 >= 11 && $day % 100 <= 13) {
+            return $day . 'th';
+        } else {
+            switch ($day % 10) {
+                case 1:
+                    return $day . 'st';
+                case 2:
+                    return $day . 'nd';
+                case 3:
+                    return $day . 'rd';
+                default:
+                    return $day . 'th';
+            }
+        }
+    }
+
 }
