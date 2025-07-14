@@ -533,7 +533,7 @@ class APIController extends Controller
         $flag = null;
         $user_type = User::where('id', $user_id)->first();
 
-        if ($request->input('amount') == 0 && Carbon::parse($user_type->activated_at)->lt(Carbon::now()->subDays(3)) && !PendingPayment::check_negative_payable($user_id, $user_type['account_type_id'])) {
+        if ($request->input('amount') == 0 && Carbon::parse($user_type->activated_at)->lt(Carbon::now()->subDays(7)) && !PendingPayment::check_negative_payable($user_id, $user_type['account_type_id'])) {
 
             return response()->json([
                 'status' => 1,
