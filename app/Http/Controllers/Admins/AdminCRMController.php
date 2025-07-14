@@ -7165,7 +7165,6 @@ class AdminCRMController extends Controller
 
                 if($request->inprocess){
                     $claimStatuses = CrmRequest::whereIn('id', $crm_request_ids)->pluck('case_nature_id')->toArray();
-                    dd($crm_request_ids);
 
                     if (!empty($claimStatuses) && count(array_unique($claimStatuses)) === 1 && $claimStatuses[0] == 4) {
                         return response()->json(['status' => 3]);
