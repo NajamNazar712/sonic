@@ -2,95 +2,97 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\Http\Controllers\CRM\CRMCommentController;
-use App\Http\Controllers\CRM\CRMController;
-use App\Http\Controllers\NotificationsController;
-use App\Http\Controllers\ShipmentsAirWaybillJourneyController;
-use App\Http\Models\Admin\Admin;
-use App\Http\Models\Admin\AdminDepartment;
-use App\Http\Models\Admin\AdminHub;
-use App\Http\Models\Admin\AdminRole;
-use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
-use App\Http\Models\Admin\ChangeShipmentAmountLog;
-use App\Http\Models\Admin\CrmSmsLog;
-use App\Http\Models\Admin\KeyAccountDailyShipmentCrm;
-use App\Http\Models\Admin\KeyAccountDailySummaryCrm;
-use App\Http\Models\Admin\KeyAccountPendingCrm;
-use App\Http\Models\Admin\KeyAccountPendingSummaryCrm;
-use App\Http\Models\Admin\Retail\RetailShipperInfo;
-use App\Http\Models\Admin\Retail\RetailUser;
-use App\Http\Models\Admin\RevertStatusRequest;
-use App\Http\Models\Admin\SalePersonTag;
-use App\Http\Models\City;
-use App\Http\Models\CityDelivery;
-use App\Http\Models\ConsigneeAddressArea;
-use App\Http\Models\CRM\CrmComments;
-use App\Http\Models\CRM\CrmConsigneeInfoPrint;
-use App\Http\Models\CRM\CrmPaymentShipment;
-use App\Http\Models\CRM\CrmRequest;
-use App\Http\Models\CRM\CrmRequestAgentHistory;
-use App\Http\Models\CRM\CrmRequestCaseNatureAndTypeHistory;
-use App\Http\Models\CRM\CrmRequestEscalationTagging;
-use App\Http\Models\CRM\CrmRequestImage;
-use App\Http\Models\CRM\CrmRequestRating;
-use App\Http\Models\CRM\CrmRequestStatus;
-use App\Http\Models\CRM\CrmRequestStatusHistory;
-use App\Http\Models\CRM\CrmRequestTagging;
-use App\Http\Models\CRM\CrmRequestTaggingHistory;
-use App\Http\Models\CRM\CrmRequestTaggingTypes;
-use App\Http\Models\CRM\CrmSettings;
-use App\Http\Models\CRM\CrmTatHolidays;
-use App\Http\Models\CRM\DelayInDeliveryShipment;
-use App\Http\Models\CRM\Escalation\CrmEscalationLevel;
-use App\Http\Models\CRM\Escalation\CrmEscalationTagging;
-use App\Http\Models\CRM\Escalation\CrmEscalationTaggingLevel;
-use App\Http\Models\CRM\Escalation\CrmRequestEscalationLog;
-use App\Http\Models\CRM\Escalation\CrmRequestEscalationStatus;
-use App\Http\Models\DonePayment;
-use App\Http\Models\DonePaymentShipment;
-use App\Http\Models\InterceptReBookRequestHistory;
-use App\Http\Models\SaleTierTag;
-use App\Http\Models\Shipment;
-use App\Http\Models\ShipmentInvoice;
-use App\Http\Models\ShipmentItem;
-use App\Http\Models\ShipmentsJourney;
-use App\Http\Models\ShipmentStatus;
-use App\Http\Models\Shipper\ShipperAirWaybillSettings;
-use App\Http\Models\Shipper\SubstituteUser;
-use App\Http\Models\Shipper\User;
-use App\Http\Models\Zone;
-use App\SpecialApprovalRequest;
-use App\SpecialApprovalRequestAdmin;
-use App\SpecialRequestReason;
-use App\SpecialRequestOption;
-use App\SpecialRequestReasonOption;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
+use App\Http\Models\City;
+use App\Http\Models\Zone;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
-use App\Http\Models\CRM\CrmRequestCaseNature;
-use App\Http\Models\CRM\CrmRequestCaseNatureType;
-use App\Http\Models\CRM\CrmRequestChannel;
-use App\Http\Models\Admin\AdminRoleModulePermission;
+use App\Http\Models\Shipment;
+use App\SpecialRequestOption;
+use App\SpecialRequestReason;
+use App\SpecialApprovalRequest;
+use App\Http\Models\Admin\Admin;
+use App\Http\Models\DonePayment;
+use App\Http\Models\SaleTierTag;
 use App\Http\Models\Admin\Module;
-use App\Http\Models\Admin\ModulePermission;
-
+use App\Http\Models\CityDelivery;
+use App\Http\Models\ShipmentItem;
+use App\Http\Models\Shipper\User;
+use App\Models\ClaimInvalidReason;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\MessageBag;
+use App\Http\Models\Admin\AdminHub;
+use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\ShipmentDetail;
+use App\Http\Models\ShipmentStatus;
+use App\SpecialRequestReasonOption;
+use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\Admin\CrmSmsLog;
+use App\Http\Models\CRM\CrmComments;
+use App\Http\Models\CRM\CrmSettings;
+use App\Http\Models\ShipmentInvoice;
+use App\SpecialApprovalRequestAdmin;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Models\ShipmentsJourney;
+use App\Http\Models\CRM\CrmTatHolidays;
+use App\Models\CrmInvalidReasonRequest;
 use Illuminate\Support\Facades\Storage;
-use phpDocumentor\Reflection\Types\Null_;
+use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\CRM\CrmClosedReason;
+use App\Http\Models\CRM\CrmRequestImage;
+use App\Http\Models\DonePaymentShipment;
 use Yajra\DataTables\Facades\DataTables;
-use App\Http\Controllers\Admins\ActivityTrailController;
-use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\CrmAutoTagUser;
 use App\Http\Models\Admin\GlobalSettings;
-use App\Http\Models\Admin\Retail\RetailFranchise;
-use App\Http\Models\Admin\Retail\RetailTraxCenter;
-use App\Http\Models\CRM\CrmClosedReason;
+use App\Http\Models\ConsigneeAddressArea;
+use App\Http\Models\CRM\CrmRequestRating;
+use App\Http\Models\CRM\CrmRequestStatus;
+use phpDocumentor\Reflection\Types\Null_;
+use App\Http\Models\Admin\AdminDepartment;
+use App\Http\Models\CRM\CrmRequestChannel;
+use App\Http\Models\CRM\CrmRequestTagging;
+use App\Http\Controllers\CRM\CRMController;
+use App\Http\Models\Admin\ModulePermission;
+use App\Http\Models\CRM\CrmPaymentShipment;
+use App\Http\Models\Shipper\SubstituteUser;
+use App\Http\Models\Admin\Retail\RetailUser;
+use App\Http\Models\CRM\CrmRequestCaseNature;
+use App\Http\Models\Admin\RevertStatusRequest;
 use App\Http\Models\CRM\CrmClosedReasonStatus;
-use App\Http\Models\ShipmentDetail;
-use Illuminate\Support\MessageBag;
+use App\Http\Models\CRM\CrmConsigneeInfoPrint;
+use App\Http\Models\Admin\KeyAccountPendingCrm;
+use App\Http\Models\CRM\CrmRequestAgentHistory;
+use App\Http\Models\CRM\CrmRequestTaggingTypes;
 use App\Http\Models\Admin\Retail\RetailShipment;
+use App\Http\Models\CRM\CrmRequestStatusHistory;
+use App\Http\Models\CRM\DelayInDeliveryShipment;
+use App\Http\Controllers\NotificationsController;
+use App\Http\Models\Admin\Retail\RetailFranchise;
+use App\Http\Models\CRM\CrmRequestCaseNatureType;
+use App\Http\Models\CRM\CrmRequestTaggingHistory;
+use App\Http\Controllers\CRM\CRMCommentController;
+use App\Http\Models\Admin\ChangeShipmentAmountLog;
+use App\Http\Models\Admin\Retail\RetailTraxCenter;
+use App\Http\Models\InterceptReBookRequestHistory;
+
+use App\Http\Models\Admin\Retail\RetailShipperInfo;
+use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Models\Admin\AdminRoleModulePermission;
+use App\Http\Models\Admin\KeyAccountDailySummaryCrm;
+use App\Http\Models\CRM\CrmRequestEscalationTagging;
+use App\Http\Models\Admin\KeyAccountDailyShipmentCrm;
+use App\Http\Models\Admin\KeyAccountPendingSummaryCrm;
+use App\Http\Models\CRM\Escalation\CrmEscalationLevel;
+use App\Http\Models\Shipper\ShipperAirWaybillSettings;
+use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\CRM\Escalation\CrmEscalationTagging;
+use App\Http\Models\CRM\CrmRequestCaseNatureAndTypeHistory;
+use App\Http\Models\CRM\Escalation\CrmRequestEscalationLog;
+use App\Http\Models\CRM\Escalation\CrmEscalationTaggingLevel;
+use App\Http\Controllers\ShipmentsAirWaybillJourneyController;
+use App\Http\Models\CRM\Escalation\CrmRequestEscalationStatus;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 
 class AdminCRMController extends Controller
 {
@@ -1229,6 +1231,11 @@ class AdminCRMController extends Controller
             $ratings = CrmRequestRating::all();
             $crm_sms_history = CrmSmsLog::where('crm_request_id',$crm_request->id)->get();
             $closed_reason_statuses  = CrmClosedReasonStatus::all();
+
+            $crm_status = $crm_request->status_id;
+            $crm_case_nature = $crm_request->case_nature_id;
+            $invalid_reasons = ClaimInvalidReason::select('id', 'reason')->get(); 
+
             return view('admin.crm.request_details')->with([
                 'tagged_kae_name' => $tagged_kae_name,
                 'tagged_operation_name' => $tagged_operation_name,
@@ -1279,6 +1286,9 @@ class AdminCRMController extends Controller
                 'special_request_editable' => $special_request_editable,
                 'special_request_agent_data' => $special_request_agent_data,
                 'special_request_percentage_exceed' => $special_request_percentage_exceed,
+                'crm_status' => $crm_status,
+                'crm_case_nature' => $crm_case_nature,
+                'invalid_reasons' => $invalid_reasons,
             ]);
         }else{
             return redirect()->back()->with('danger', 'CRM Request Not found!');
@@ -2070,7 +2080,9 @@ class AdminCRMController extends Controller
         $hubs = City::where('hub', 1)->get();
         $zones = Zone::where('status', 1)->get();
         $closed_reason_statuses  = CrmClosedReasonStatus::all();
-        return view('admin.crm.in_process')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'agents' => $agents, 'shipment_status' => $shipment_status, 'types' => $types, 'admins' => $admins, 'departments' => $departments, 'hubs' => $hubs, 'zones' => $zones, 'closed_reason_statuses' => $closed_reason_statuses]);
+        $invalid_reasons = ClaimInvalidReason::select('id', 'reason')->get(); 
+
+        return view('admin.crm.in_process')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'agents' => $agents, 'shipment_status' => $shipment_status, 'types' => $types, 'admins' => $admins, 'departments' => $departments, 'hubs' => $hubs, 'zones' => $zones, 'closed_reason_statuses' => $closed_reason_statuses, 'invalid_reasons' => $invalid_reasons]);
     }
 
     public function in_process_list(Request $request){
@@ -4510,6 +4522,9 @@ class AdminCRMController extends Controller
 
                 }
                 // Notification 191 end
+                
+                $this->storeInvalidReasons($request->claim_invalid_reasons, $request->req_id);
+                
                 return redirect()->back()->with(['success' => 'Request marked as Closed']);
             } else {
                 return redirect()->back()->with(['error' => 'Request is already marked as Closed']);
@@ -5201,6 +5216,7 @@ class AdminCRMController extends Controller
                             }
 
                             CrmRequestTagging::where('crm_request_id', $crm_request->id)->delete();
+                            $this->storeInvalidReasons($request->selected_invalid_reason_ids, $crm_request_id);
                         }
                     }
                 }
@@ -7141,10 +7157,27 @@ class AdminCRMController extends Controller
                     array_push($crm_ids,$crm_request_id);
                 }
             }
+            
             if(count($crm_ids) > 0){
                 return response()->json(['status'=>1,'crm_ids'=>$crm_ids]);
 
             }else{
+
+                if($request->inprocess){
+                    $claimStatuses = CrmRequest::whereIn('id', $crm_request_ids)->pluck('case_nature_id')->toArray();
+                    dd($crm_request_ids);
+
+                    if (!empty($claimStatuses) && count(array_unique($claimStatuses)) === 1 && $claimStatuses[0] == 4) {
+                        return response()->json(['status' => 3]);
+
+                    } else if (in_array(4, $claimStatuses)) {
+                        return response()->json(['status' => 2]);
+
+                    } else {
+                        return response()->json(['status' => 0]);
+                    }
+                }
+
                 return response()->json(['status'=>0]);
             }
         }
@@ -7433,4 +7466,23 @@ class AdminCRMController extends Controller
             }
         }
     }
+
+    public static function storeInvalidReasons(array $reasonIds, int $crmRequestId)
+    {
+        $insertData = [];
+
+        foreach ($reasonIds as $reasonId) {
+            $insertData[] = [
+                'crm_request_id' => $crmRequestId,
+                'claim_invalid_reason_id' => $reasonId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+
+        if (!empty($insertData)) {
+            CrmInvalidReasonRequest::insert($insertData); 
+        }
+    }
+    
 }

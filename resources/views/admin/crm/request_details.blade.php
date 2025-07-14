@@ -1349,6 +1349,31 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade text-left" id="claimInvalidModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="claimInvalidModal" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Claim Invalid Reason</h4>
+                </div>
+
+                <div class="modal-body">
+                    <select name="claim_invalid_reasons[]" id="claim_invalid_reasons" class="form-control select2" multiple>
+                        @foreach($invalid_reasons as $reason)
+                            <option value="{{ $reason->id }}">{{ $reason->reason }}</option>
+                        @endforeach
+                    </select>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="invalid_submit">Submit</button>
+                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
@@ -1490,6 +1515,36 @@
             font-size: 4rem;
         }
 
+        .selectize-control {
+            width: 500px !important;
+        }
+
+        .select-checkbox{
+            border-color: #64a0d2;
+        }
+
+        .select2-container--classic .select2-selection--multiple .select2-selection__choice, .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: #64a0d2 !important;
+            border-color: #5587b4 !important;
+            color: #FFFFFF;
+        }
+        tr.highalert_row{
+            background-color: #ff6326;
+            color: whitesmoke;
+        }
+        tr.highalert_row a{
+            color: whitesmoke;
+        }
+        .select2-search__field{
+            width: 140px !important;
+        }
+
+        .select2-container--default .select2-selection--multiple {
+            min-height: 48px !important;      
+            max-height: 100px !important;   
+            overflow-y: auto !important;   
+            padding-bottom: 5px;
+        }
       
     </style>
 @endsection
@@ -2469,6 +2524,8 @@
                 }
             });
 
+            let crm_status = @json($crm_status);
+            let crm_case_nature = @json($crm_case_nature);
 
             $('#valid_form').validate({
                 errorClass: 'danger',
@@ -2498,6 +2555,7 @@
                             }
                         });
                     }else{
+                        
                         form.submit();
                     }
                     
@@ -2521,6 +2579,9 @@
             //     blockPagePermanently();
             // });
 
+            let pendingForm = null;
+
+
 
             $('#invalid_form').validate({
                 errorClass: 'danger',
@@ -2534,7 +2595,8 @@
                 submitHandler: function(form) {
                     var close_reason = $('#close_reason').val();
                     var crm_request_id = $('#crm_request_id').val();
-                    if(close_reason == 1){
+                    var isClaimInvalid = (crm_status == 2 && crm_case_nature == 4)
+                    if(close_reason == 1 && !isClaimInvalid){
                         $.ajax({
                         url: '{!! route('admin.crm.close_reason') !!}',
                         method: 'POST',
@@ -2549,6 +2611,9 @@
                                 form.submit();
                             }
                         });
+                    }else if(isClaimInvalid){
+                        pendingForm = form; 
+                        $('#claimInvalidModal').modal('show');
                     }else{
                         form.submit();
                     }
@@ -2904,6 +2969,60 @@
                 //mark_close
                 $('#resolved_close_val').val("1");
                 form.submit();
+            });
+
+
+             let selected_invalid_reason_ids = [];
+
+            $('#claim_invalid_reasons').select2({
+                width: '100%',
+                placeholder: 'Select Invalid Reason(s)',
+                allowClear: true,
+                dropdownParent: $('#claimInvalidModal')
+            }).on('change', function () {
+                const currentSelection = $(this).val() || [];
+
+                currentSelection.forEach(id => {
+                    if (!selected_invalid_reason_ids.includes(id)) {
+                        selected_invalid_reason_ids.push(id);
+                    }
+                });
+
+                selected_invalid_reason_ids = selected_invalid_reason_ids.filter(id => currentSelection.includes(id));
+
+            });
+
+
+          $('#invalid_submit').on('click', function () {
+                var selectedReasons = $('#claim_invalid_reasons').val();
+
+                if (!selectedReasons || selectedReasons.length === 0) {
+                    alert('Please select at least one invalid reason.');
+                    return;
+                }
+
+                if (pendingForm) {
+                    $(pendingForm).find('input[name="claim_invalid_reasons[]"]').remove();
+
+                    selectedReasons.forEach(function(reason) {
+                        $('<input>').attr({
+                            type: 'hidden',
+                            name: 'claim_invalid_reasons[]',
+                            value: reason
+                        }).appendTo(pendingForm);
+                    });
+
+                    $('#claimInvalidModal').modal('hide'); 
+                    pendingForm.submit();                  
+                    pendingForm = null;                  
+                }
+            });
+
+
+
+            $('#claimInvalidModal').on('hide.bs.modal', function (e) {
+                selected_invalid_reason_ids = [];
+                $('#claim_invalid_reasons').val(null).trigger('change');
             });
 
         });

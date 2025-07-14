@@ -302,14 +302,66 @@
             </div>
         </div>
     </div>
+
+
+            <div class="modal fade text-left" id="CloseReasonModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="CloseReasonModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Who’s at Fault</h4>
+                </div>
+                <input type="hidden" name="close_reason_type" id="close_reason_type" value="">
+                <input type="hidden" name="close_reason_crm_ids" id="close_reason_crm_ids" value="0">
+                <div class="modal-body">
+                    <select name="closed_reason_status" id="closed_reason_status" class="form-control select2">
+                        @foreach($closed_reason_statuses as $closed_reason_status)
+                            <option value="{{ $closed_reason_status->id }}" > {{ $closed_reason_status->name }} </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="closed_reason_submit">Submit</button>
+                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<div class="modal fade text-left" id="claimInvalidModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="claimInvalidModal" aria-hidden="true">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Claim Invalid Reason</h4>
+            </div>
+
+            <div class="modal-body">
+                <select name="claim_invalid_reasons[]" id="claim_invalid_reasons" class="form-control select2" multiple>
+                    @foreach($invalid_reasons as $reason)
+                        <option value="{{ $reason->id }}">{{ $reason->reason }}</option>
+                    @endforeach
+                </select>
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="invalid_submit">Submit</button>
+                <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
+    
     <style type="text/css">
         .selectize-control {
-            width: 300px !important;
+            width: 500px !important;
         }
 
         .select-checkbox{
@@ -328,6 +380,17 @@
         tr.highalert_row a{
             color: whitesmoke;
         }
+        .select2-search__field{
+            width: 140px !important;
+        }
+
+        .select2-container--default .select2-selection--multiple {
+            min-height: 48px !important;      
+            max-height: 100px !important;   
+            overflow-y: auto !important;   
+            padding-bottom: 5px;
+        }
+
     </style>
 @endsection
 
@@ -560,6 +623,7 @@
                                 method: 'POST',
                                 data: {
                                     // 'closed_reason_status':closed_reason_status,
+                                    'inprocess': true,
                                     'crm_request_ids': selected_rows,
                                     '_token': '{{ csrf_token() }}'
                                 }
@@ -569,7 +633,17 @@
                                     $('#close_reason_crm_ids').val(data.crm_ids);
                                     $('#close_reason_type').val(1);
                                     $('#CloseReasonModal').modal('show');
-                                }else{
+                                }else if(data.status == 2){
+                                     swal({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: 'Kindly select all claim',
+                                        confirmButtonColor: '#d33'
+                                    });
+                                }else if(data.status == 3){                           
+                                    $('#claimInvalidModal').modal('show');
+                                } 
+                                else{
                                     mark_valid_invalid(0);
                                 }
                             });
@@ -1703,6 +1777,7 @@
                             'crm_request_ids[]': selected_rows,
                             'closed_reason_status': closed_reason_status,
                             'close_reason_crm_ids': close_reason_crm_ids,
+                            'selected_invalid_reason_ids': selected_invalid_reason_ids,
                             'valid': valid,
                             '_token': '{{ csrf_token() }}'
                         }
@@ -1726,6 +1801,7 @@
 
                             table.draw();
                             $('#CloseReasonModal').modal('hide');
+                            $('#claimInvalidModal').modal('hide');
 
                         });
                     }
@@ -1737,6 +1813,49 @@
                 table.draw(true);
                 $('#star_shippers_filter').val(0);
             });
+
+           let selected_invalid_reason_ids = [];
+
+            $('#claim_invalid_reasons').select2({
+                width: '100%',
+                placeholder: 'Select Invalid Reason(s)',
+                allowClear: true,
+                dropdownParent: $('#claimInvalidModal')
+            }).on('change', function () {
+                const currentSelection = $(this).val() || [];
+
+                currentSelection.forEach(id => {
+                    if (!selected_invalid_reason_ids.includes(id)) {
+                        selected_invalid_reason_ids.push(id);
+                    }
+                });
+
+                selected_invalid_reason_ids = selected_invalid_reason_ids.filter(id => currentSelection.includes(id));
+
+            });
+
+
+          $('#invalid_submit').on('click', function () {
+                if (selected_invalid_reason_ids.length === 0) {
+                    swal({
+                        icon: 'warning',
+                        title: 'Please select at least one reason!',
+                        text: 'You must select at least one claim invalid reason before submitting.',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#3085d6'
+                    });
+                    return;
+                }
+
+                mark_valid_invalid(0); 
+            });
+
+
+            $('#claimInvalidModal').on('hide.bs.modal', function (e) {
+                selected_invalid_reason_ids = [];
+                $('#claim_invalid_reasons').val(null).trigger('change');
+            });
+
         });
     </script>
 @endsection
