@@ -189,6 +189,7 @@ class ShipperAPIController extends Controller
                         $information['name'] = $shipper->name;
                         $information['shipper_id'] = $shipper->id;
                         $information['phone_number'] = $shipper->phone;
+                        $information['shipper_email'] = $shipper->email;
                         $information['app_type'] = 1;
                         $information['wallet_sign_up_allow'] = WalletShipperSetting::where('user_id', $shipper->id)->where('status', 1)->exists() ? 1 : 0;
                         $information['wallet_user'] = ($shipper->wallet) ? 1 : 0;

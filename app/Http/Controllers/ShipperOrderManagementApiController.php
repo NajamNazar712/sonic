@@ -109,8 +109,8 @@ class ShipperOrderManagementApiController extends Controller
 
         $startDate = Carbon::create(2025, 1, 1)->startOfDay();
         $endDate = Carbon::now()->endOfDay();
-        $last_start_day =  Carbon::yesterday()->startOfDay();
-        $last_end_day =  Carbon::yesterday()->endOfDay();
+        $last_start_day = Carbon::now()->subDays(6)->startOfDay();
+        $last_end_day = Carbon::now()->subDays(6)->endOfDay();
         $todayStart = Carbon::today()->startOfDay();
         $todayEnd = Carbon::today()->endOfDay();
 
