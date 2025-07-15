@@ -108,6 +108,9 @@ use App\Http\Models\Admin\OdrNature;
 use App\Http\Models\CRM\CrmSettings;
 use App\Http\Models\CRM\CrmTatHolidays;
 use App\Http\Models\InvoiceShipment;
+use App\Models\CrmInvalidReasonRequest;
+use App\Models\CrmRequestResolvedReason;
+
 class AdminReportsController extends Controller
 {
     use RvTrait;
@@ -7219,6 +7222,39 @@ class AdminReportsController extends Controller
                         return '-';
                     }
                 })
+               ->addColumn('claim_resolved_invalid_reason', function ($crm_request) {
+                    $invalidReasons = CrmInvalidReasonRequest::where('crm_request_id', $crm_request->request_number)
+                                        ->with('claimInvalidReason')
+                                        ->get();
+
+                    if ($invalidReasons->isNotEmpty()) {
+                        $names = $invalidReasons->pluck('claimInvalidReason.reason')->filter()->unique()->toArray();
+                        return implode(', ', $names);
+                    }
+
+                    $resolvedReasons = CrmRequestResolvedReason::where('crm_request_id', $crm_request->request_number)
+                                        ->with('resolvedReason')
+                                        ->get();
+
+                    if ($resolvedReasons->isNotEmpty()) {
+                        $names = $resolvedReasons->pluck('resolvedReason.name')->filter()->unique()->toArray();
+                        return implode(', ', $names);
+                    }
+
+                    return '-'; 
+                })
+                ->addColumn('claim_resolved_sub_reason', function ($crm_request) {
+                    $resolvedSubReasons = CrmRequestResolvedReason::where('crm_request_id', $crm_request->request_number)
+                        ->with('resolvedSubReason')
+                        ->get();
+
+                    if ($resolvedSubReasons->isNotEmpty()) {
+                        $names = $resolvedSubReasons->pluck('resolvedSubReason.name')->filter()->unique()->toArray();
+                        return implode(', ', $names);
+                    }
+
+                    return '-';
+                })
                 ->orderColumn('launched_by_name', DB::connection('reports')->raw('IF (crm_requests.launched_by = 0, a.name, IF (crm_requests.launched_by = 1, us.name, IF (crm_requests.launched_by = 2, su.name, "")))') . ' $1');
             if ($tracking = $request->get('search_tracking_no')) {
                 $tracking_numbers = explode(',', $tracking);
@@ -7513,6 +7549,38 @@ class AdminReportsController extends Controller
                     default:
                         $rowArray['launched_by_type'] = 'Shipper Substitute User';
                         break;
+                }
+                
+                
+                $invalidReasons = CrmInvalidReasonRequest::where('crm_request_id', $rowArray['request_number'])
+                    ->with('claimInvalidReason')
+                    ->get();
+
+                if ($invalidReasons->isNotEmpty()) {
+                    $names = $invalidReasons->pluck('claimInvalidReason.reason')->filter()->unique()->toArray();
+                    $rowArray['claim_resolved_invalid_reason'] = implode(', ', $names);
+                } else {
+                    $resolvedReasons = CrmRequestResolvedReason::where('crm_request_id', $rowArray['request_number'])
+                        ->with('resolvedReason')
+                        ->get();
+
+                    if ($resolvedReasons->isNotEmpty()) {
+                        $names = $resolvedReasons->pluck('resolvedReason.name')->filter()->unique()->toArray();
+                        $rowArray['claim_resolved_invalid_reason'] = implode(', ', $names);
+                    } else {
+                        $rowArray['claim_resolved_invalid_reason'] = '-';
+                    }
+                }
+
+                $resolvedSubReasons = CrmRequestResolvedReason::where('crm_request_id', $rowArray['request_number'])
+                    ->with('resolvedSubReason')
+                    ->get();
+
+                if ($resolvedSubReasons->isNotEmpty()) {
+                    $names = $resolvedSubReasons->pluck('resolvedSubReason.name')->filter()->unique()->toArray();
+                    $rowArray['claim_resolved_sub_reason'] = implode(', ', $names);
+                } else {
+                    $rowArray['claim_resolved_sub_reason'] = '-';
                 }
 
 
