@@ -1481,6 +1481,18 @@ class AdminCRMController extends Controller
             $launched_request->whereIn('s.tracking_number', explode(',', $tracking_numbers));
         }
 
+        if ($request_date = $request->get('request_date')) {
+
+            $privious_date = Carbon::parse($request_date)->subDay();
+            dd($privious_date);
+            $cut_off_time_from = CrmSettings::where('name','TAT Cut-Off Time From')->first();
+            $from_date = Carbon::parse($cut_off_time_from->setting_value)->addMinutes()->format('g:i A');
+
+            $cut_off_time_to = CrmSettings::where('name','TAT Cut-Off Time To')->first();
+            $to_date = Carbon::parse($cut_off_time_to->setting_value)->addMinutes()->format('g:i A');
+            $launched_request->whereIn('s.tracking_number', explode(',', $tracking_numbers));
+        }
+
         if($request->get('star_shipper_filter') == 1)
         {
             $launched_request->where('sts.status',1);

@@ -18,18 +18,33 @@
                             <div class="card-body">
                                 @include('admin.inc.messages')
 
-                                <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                                <div class="col mt-2">
+                                    <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
 
-                                    <div class="form-group">
-                                        <input type="text" name="tracking_numbers" class="dt_search tracking_numbers"
-                                               placeholder="Tracking Number(s)" data-tags-input-name="tracking_number">
-                                    </div>
-                                    <div class="form-group justify-content-center">
-                                        <button id="datatable_filter_btn" type="submit" class="ml-1 btn btn-outline-primary btn-min-width"><i
-                                                    class="la la-search"></i> Search
-                                        </button>
-                                    </div>
-                                </form>
+                                        <div class="form-group">
+                                            <input type="text" name="tracking_numbers" class="dt_search tracking_numbers"
+                                                   placeholder="Tracking Number(s)" data-tags-input-name="tracking_number">
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="form-group input-group">
+                                                <div class="input-group-prepend">
+                                                  <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                    <span class="la la-calendar-o small-calender-icon"></span>
+                                                  </span>
+                                                </div>
+                                                <input type="text" name="request_date"
+                                                       class="form-control bg-primary border-primary white rounded-right"  data-value="{{ \Carbon\Carbon::today()->subDays(31)->startOfDay() }}"
+                                                       id="request_date" placeholder="Request Date ">
+                                            </div>
+                                        </div>
+                                        <div class="form-group justify-content-center">
+                                            <button id="datatable_filter_btn" type="submit" class="ml-1 btn btn-outline-primary btn-min-width"><i
+                                                        class="la la-search"></i> Search
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+
 
                                 <div class="col justify-content-end">
                                     <div class="card-header">
@@ -304,6 +319,8 @@
     </div>
 @endsection
 @section('css')
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
@@ -321,6 +338,9 @@
 @endsection
 
 @section('js')
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
@@ -464,7 +484,7 @@
                         @endif
                         @if (session('role_id') == 1 || session('role_id') == 6 || in_array(787, session('permissions')))
                     {
-                        text: 'Valid',
+                        text: 'Accept Ticket',
                         className: 'btn btn-primary valid',
                         enabled: false,
                         action: function (e, dt, node, config) {
@@ -671,6 +691,7 @@
                     },
                     data: function (d) {
                         d.tracking_numbers = $('#track_form .tracking_numbers').val();
+                        d.request_date = $('#track_form #request_date').val();
                         d.star_shipper_filter = $('#star_shippers_filter').val();
                     }
                 },
@@ -1234,6 +1255,24 @@
                     $('#UpdateRequestBtn').addClass('d-none');
 
                 }
+            });
+             $('#request_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                // onOpen: function() {
+                //     $('#booking_from_date_root').css('top','40px');
+                // },
+                // onSet: function(context) {
+                //     if (context.select) {
+                //         $('#track_form #booking_to_date').pickadate('picker').set('min', $('#track_form #booking_from_date').pickadate('picker').get('select'));
+                //     }
+                // }
             });
             $('#case_nature_complaints').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
