@@ -7543,6 +7543,4 @@ class AdminCRMController extends Controller
             CrmRequestResolvedReason::insert($insertData); 
         }    
     }
-
-    
 }
