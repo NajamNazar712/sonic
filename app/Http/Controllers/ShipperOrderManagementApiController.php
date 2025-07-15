@@ -104,11 +104,10 @@ class ShipperOrderManagementApiController extends Controller
             ->cursorPaginate(20);
     }
 
-    private function shipments_summary($user_id,$app_type)
+    private function shipments_summary_od($user_id,$app_type)
     {
 
-        $startDate = Carbon::create(2025, 1, 1)->startOfDay();
-        $endDate = Carbon::now()->endOfDay();
+
         $last_start_day = Carbon::now()->subDays(6)->startOfDay();
         $last_end_day = Carbon::now()->subDays(6)->endOfDay();
         $todayStart = Carbon::today()->startOfDay();
@@ -184,6 +183,86 @@ class ShipperOrderManagementApiController extends Controller
         ];
 
         return $shipment_summary;
+    }
+
+    private function shipments_summary($user_id,$app_type)
+    {
+
+        $todayStart = Carbon::today()->startOfDay();
+        $todayEnd = Carbon::today()->endOfDay();
+
+        $shipment_status = [14,18,19,36,38,51,31,25,17];
+        if ($app_type == 1):
+            $shipment_status[] = 1;
+        endif;
+
+        // 1. Over all in process
+        $over_all_in_process = Shipment::whereNotIn('shipper_status_id', $shipment_status);
+//            ->whereBetween('pickup_date', [$startDate, $endDate]);
+
+        if ($app_type == 2) {
+            $over_all_in_process = $over_all_in_process
+                ->join('retail_shipments', 'retail_shipments.shipment_id', '=', 'shipments.id')
+                ->where('shipment_type', 2)
+                ->where('retail_shipments.shipper_account_no', $user_id);
+        } else {
+            $over_all_in_process = $over_all_in_process->where('shipment_type', 1)
+                ->where('user_id', $user_id);
+        }
+        $over_all_in_process = $over_all_in_process->count();
+
+        // 2. Today bookings
+        $today_bookings = Shipment::where('shipper_status_id', 1)
+            ->whereBetween('pickup_date', [$todayStart,$todayEnd]);
+
+        if($app_type == 2) {
+            $today_bookings = $today_bookings->join('retail_shipments', 'retail_shipments.shipment_id', '=', 'shipments.id')
+                ->where('shipment_type', 2)
+                ->where('retail_shipments.shipper_account_no', $user_id);
+        } else{
+            $today_bookings =  $today_bookings->where('shipment_type', 1)
+                ->where('user_id', $user_id);
+        }
+        $today_bookings = $today_bookings->count();
+
+        // 3. Last 6-day trend
+        $last_6_day_summary = [];
+
+        for ($i = 6; $i >= 0; $i--) {
+            $day = Carbon::now()->subDays($i);
+            $startOfDay = $day->copy()->startOfDay();
+            $endOfDay = $day->copy()->endOfDay();
+
+            $query = Shipment::join('shipments_journey', 'shipments.id', '=', 'shipments_journey.shipment_id')
+                ->whereBetween('shipments_journey.created_at', [$startOfDay, $endOfDay]);
+
+            if ($app_type == 2) {
+                $query->join('retail_shipments', 'retail_shipments.shipment_id', '=', 'shipments.id')
+                    ->where('shipment_type', 2)
+                    ->where('retail_shipments.shipper_account_no', $user_id);
+            } else {
+                $query->where('shipment_type', 1)
+                    ->where('shipments.user_id', $user_id);
+            }
+
+            $counts = $query->selectRaw("
+                    COUNT(CASE WHEN shipments_journey.shipper_status_id IN (2,4) THEN 1 END) as arrival,
+                    COUNT(CASE WHEN shipments_journey.shipper_status_id = 14 THEN 1 END) as delivered,
+                    COUNT(CASE WHEN shipments_journey.shipper_status_id = 25 THEN 1 END) as returns
+            ")->first();
+
+            $last_6_day_summary[$day->toDateString()] = [
+                'arrivals' => $counts->arrival,
+                'delivered' => $counts->delivered,
+                'returns' => $counts->returns,
+            ];
+        }
+
+        return [
+            'over_all_in_process' => $over_all_in_process,
+            'today_bookings' => $today_bookings,
+            'last_6_day_summary' => $last_6_day_summary,
+        ];
     }
 
 
