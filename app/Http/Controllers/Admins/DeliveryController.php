@@ -3866,7 +3866,7 @@ class DeliveryController extends Controller
                                             $zero_cod_shipments[] = $parcel->id;
                                         }
 
-                                        if(in_array($parcel->user_id, [43066, 41969, 10422])) {
+                                        if(in_array($parcel->user_id, [43066, 41969])) {
                                             NotificationsController::send(247, $shipment);
                                         }
                                     }

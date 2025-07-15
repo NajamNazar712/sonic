@@ -3772,7 +3772,7 @@ class ReturnController extends Controller
             foreach ($request->shipment_ids as $shipment) {
                 $parcel = Shipment::where('id', $shipment)->first();
 
-                if(in_array($parcel->user_id, [43066, 41969, 10422])) {
+                if(in_array($parcel->user_id, [43066, 41969])) {
                     NotificationsController::send(246, $shipment);
                 }
                 $shipment_remark = "remarks.$shipment";
