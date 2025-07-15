@@ -260,36 +260,60 @@ class ShipperCrmApiController extends Controller
         $count = 0;
         if($app_type == 2) {
 
-            $count = CrmRequest::leftJoin('retail_shipments as rs', 'rs.shipment_id', '=', 'crm_requests.shipment_id')
-            ->leftJoin('retail_shipper_infos as rsi', 'rsi.id', '=', 'rs.shipper_account_no')
-            ->whereIn('status_id',$request_status)
-            ->where('rs.shipper_account_no', $request->retail_shipper_id)
-            ->count();
-
-//            $in_process = CrmRequest::leftJoin('retail_shipments as rs', 'rs.shipment_id', '=', 'crm_requests.shipment_id')
+//            $launched_count = CrmRequest::leftJoin('retail_shipments as rs', 'rs.shipment_id', '=', 'crm_requests.shipment_id')
 //            ->leftJoin('retail_shipper_infos as rsi', 'rsi.id', '=', 'rs.shipper_account_no')
-//            ->where('status_id',2)
+//            ->whereIn('status_id',[1, 2, 3, 5, 6])
 //            ->where('rs.shipper_account_no', $request->retail_shipper_id)
 //            ->count();
 //
-//            $closed = CrmRequest::leftJoin('retail_shipments as rs', 'rs.shipment_id', '=', 'crm_requests.shipment_id')
+////            $in_process = CrmRequest::leftJoin('retail_shipments as rs', 'rs.shipment_id', '=', 'crm_requests.shipment_id')
+////            ->leftJoin('retail_shipper_infos as rsi', 'rsi.id', '=', 'rs.shipper_account_no')
+////            ->where('status_id',2)
+////            ->where('rs.shipper_account_no', $request->retail_shipper_id)
+////            ->count();
+////
+//            $closed_count = CrmRequest::leftJoin('retail_shipments as rs', 'rs.shipment_id', '=', 'crm_requests.shipment_id')
 //            ->leftJoin('retail_shipper_infos as rsi', 'rsi.id', '=', 'rs.shipper_account_no')
-//            ->where('status_id',4)
+//            ->whereIn('status_id',[4, 7])
 //            ->where('rs.shipper_account_no', $request->retail_shipper_id)
 //            ->count();
+            $baseQuery = CrmRequest::leftJoin('retail_shipments as rs', 'rs.shipment_id', '=', 'crm_requests.shipment_id')
+                ->leftJoin('retail_shipper_infos as rsi', 'rsi.id', '=', 'rs.shipper_account_no')
+                ->where('rs.shipper_account_no', $request->retail_shipper_id);
+
+            // Launched count
+            $launched_count = (clone $baseQuery)
+                ->whereIn('status_id', [1, 2, 3, 5, 6])
+                ->count();
+
+            // Closed count
+            $closed_count = (clone $baseQuery)
+                ->whereIn('status_id', [4, 7])
+                ->count();
 
         } else {
-            $count = CrmRequest::where('status_id',$request_status)
-            ->where('shipper_id', $request->shipper_id)
-            ->count();
-
-//            $in_process = CrmRequest::where('status_id',2)
-//                ->where('shipper_id', $request->shipper_id)
-//                ->count();
+//            $launched_count = CrmRequest::whereIn('status_id',[1, 2, 3, 5, 6])
+//            ->where('shipper_id', $request->shipper_id)
+//            ->count();
 //
-//            $closed = CrmRequest::where('status_id',4)
+////            $in_process = CrmRequest::where('status_id',2)
+////                ->where('shipper_id', $request->shipper_id)
+////                ->count();
+////
+//            $closed_count = CrmRequest::whereIn('status_id',[4, 7])
 //                ->where('shipper_id', $request->shipper_id)
 //                ->count();
+            $baseQuery = CrmRequest::where('shipper_id', $request->shipper_id);
+
+            // Launched count
+            $launched_count = (clone $baseQuery)
+                ->whereIn('status_id', [1, 2, 3, 5, 6])
+                ->count();
+
+            // Closed count
+            $closed_count = (clone $baseQuery)
+                ->whereIn('status_id', [4, 7])
+                ->count();
         }
 
 //        $request_count = [
@@ -355,7 +379,7 @@ class ShipperCrmApiController extends Controller
 
 
         if($crm_requests->isNotEmpty()) {
-            return response()->json(['status' => 0 , 'message' => 'Success' ,'crm_requests'=>$crm_requests, 'request_count' => $count]);
+            return response()->json(['status' => 0 , 'message' => 'Success' ,'crm_requests'=>$crm_requests, 'launched_count' => $launched_count,'closed_count' => $closed_count]);
         }
         return response()->json(['status' => 1 , 'message' => 'CRM Complaints not found!']);
 
