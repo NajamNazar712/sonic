@@ -255,7 +255,7 @@ class AgentSarNotification extends Command
                 ->where([
                     ['rv_shipment_tickets.disabled_shipper', 1],
                     ['rv_shipment_tickets.halt_shipper', 1],
-                    ['shipments.created_at', '<=', $nowSub48Hours]
+                    ['shipments.updated_at', '<=', $nowSub48Hours]
                 ])
                 ->groupBy('rv_shipment_tickets.id') // Group by primary key
                 ->havingRaw('COUNT(shipments_journey.id) > 1')

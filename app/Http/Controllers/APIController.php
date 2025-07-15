@@ -532,8 +532,13 @@ class APIController extends Controller
         $user_id = $request->user_id;
         $flag = null;
         $user_type = User::where('id', $user_id)->first();
-        if($request->input('amount') == 0 && !PendingPayment::check_negative_payable($user_id,$user_type['account_type_id'])){
-            return response()->json(['status' => 1, 'message' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."]);
+
+        if ($request->input('amount') == 0 && Carbon::parse($user_type->activated_at)->lt(Carbon::now()->subDays(7)) && !PendingPayment::check_negative_payable($user_id, $user_type['account_type_id'])) {
+
+            return response()->json([
+                'status' => 1,
+                'message' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."
+            ]);
         }
 
         // Validator::extend('phone_number', function ($attribute, $value, $parameters) {
@@ -2605,7 +2610,10 @@ class APIController extends Controller
             $shipment = Shipment::where('tracking_number', $tracking_number)->first();
 
             $done_payment_shipments = $shipment->done_payment_shipments;
-
+            $wht_sst_charge = $done_payment_shipments
+                ->where('type', 0)
+                ->sortByDesc('created_at')
+                ->first();
             if (!$done_payment_shipments->isEmpty()) {
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->latest()->first();
 
@@ -2626,6 +2634,11 @@ class APIController extends Controller
                 if ($shipment->packaging_material_request) {
                     $charges['packaging_material_charges'] = $shipment->packaging_material_charges;
                 } else if (in_array($current_status_id, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46])) {
+
+                    if($wht_sst_charge) {
+                        $charges['wht'] = $wht_sst_charge->wht;
+                        $charges['cod_sst'] = $wht_sst_charge->cod_sst;
+                    }
                     if ($shipment->weight_charges) {
                         $charges['weight_charges'] = $shipment->weight_charges;
                     }
@@ -2710,6 +2723,8 @@ class APIController extends Controller
                     $payment['amount'] = $done_payment_shipment->amount;
                     $payment['charges'] = $done_payment_shipment->charges;
                     $payment['gst'] = $done_payment_shipment->gst;
+                    $payment['wht'] = $done_payment_shipment->wht;
+                    $payment['cod_sst'] = $done_payment_shipment->cod_sst;
                     $payment['payable'] = $done_payment_shipment->payable;
 
                     $payments[] = $payment;

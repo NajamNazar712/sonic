@@ -20,7 +20,7 @@ class CreatePaymentsForMissingShipmentsSeeder extends Seeder
      */
     public function run()
     {
-        self::pushtoCron();
+//        self::pushtoCron();
         $tracking_number = CronDonePayment::where('status',1)->pluck('tracking_number')->toArray();
         $shipment_ids = Shipment::whereIn('tracking_number',$tracking_number)->select('id')->pluck('id')->toArray();
         if(count($shipment_ids) == 0){

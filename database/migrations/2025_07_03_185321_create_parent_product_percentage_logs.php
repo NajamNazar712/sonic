@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('parent_product_percentage_logs', function (Blueprint $table) {
             $table->id();
             $table->integer('parent_product_id')->nullable();
-            $table->string('field_changed'); // 'tax_percentage' or 'sst_percentage'
+            $table->string('field_changed', 20); // 'tax_percentage' or 'sst_percentage'
             $table->decimal('old_value', 10, 2)->nullable();
             $table->decimal('new_value', 10, 2)->nullable();
             $table->integer('updated_by')->nullable();
