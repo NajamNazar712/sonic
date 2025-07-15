@@ -11507,6 +11507,24 @@ class NotificationsController extends Controller
                     }
                     self::sms($body, $to, null,$shipment->id,$id);
                 }
+                else if($id == 246) {
+                    $shipment = Shipment::find($reference_1_id);
+                    $to = $shipment->consignee_phone_number_1;
+
+                    // if (strpos($body, '[tracking_number]') !== FALSE) {
+                    //     $body = str_replace('[tracking_number]', $shipment->tracking_number, $body);
+                    // }
+                    self::sms($body, $to, null,$shipment->id,$id);
+                }
+                else if($id == 247) {
+                    $shipment = Shipment::find($reference_1_id);
+                    $to = $shipment->consignee_phone_number_1;
+
+                    // if (strpos($body, '[tracking_number]') !== FALSE) {
+                    //     $body = str_replace('[tracking_number]', $shipment->tracking_number, $body);
+                    // }
+                    self::sms($body, $to, null,$shipment->id,$id);
+                }
 
                 else if ($id == 243) {
                     $retail = RetailShipperInfo::find($reference_1_id);
