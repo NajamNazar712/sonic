@@ -3666,7 +3666,9 @@ class DeliveryController extends Controller
                                                     if ($verification == 1) {
                                                         NotificationsController::send(15, 0, $shipment);
                                                         NotificationsController::send(16, 0, $shipment);
-
+                                                        if(in_array($parcel->user_id, [43066, 41969, 10422])) {
+                                                            NotificationsController::send(246, $shipment);
+                                                        }
                                                         if ($parcel->booking_type_id != 4) {
                                                             ShipmentChargesController::return($shipment);
 
@@ -3865,6 +3867,10 @@ class DeliveryController extends Controller
 
                                         if ($parcel->amount == 0) {
                                             $zero_cod_shipments[] = $parcel->id;
+                                        }
+
+                                        if(in_array($parcel->user_id, [43066, 41969, 10422])) {
+                                            NotificationsController::send(247, $shipment);
                                         }
                                     }
                                 }
