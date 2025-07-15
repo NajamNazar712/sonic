@@ -25,6 +25,7 @@ use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\ShipmentDetail;
 use App\Http\Models\ShipmentStatus;
+use App\Models\ClaimResolvedReason;
 use App\SpecialRequestReasonOption;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\AdminRole;
@@ -35,6 +36,7 @@ use App\Http\Models\ShipmentInvoice;
 use App\SpecialApprovalRequestAdmin;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Models\ShipmentsJourney;
+use App\Models\ClaimResolvedSubReason;
 use App\Http\Models\CRM\CrmTatHolidays;
 use App\Models\CrmInvalidReasonRequest;
 use Illuminate\Support\Facades\Storage;
@@ -73,9 +75,9 @@ use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\CRM\CrmRequestTaggingHistory;
 use App\Http\Controllers\CRM\CRMCommentController;
 use App\Http\Models\Admin\ChangeShipmentAmountLog;
+
 use App\Http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\InterceptReBookRequestHistory;
-
 use App\Http\Models\Admin\Retail\RetailShipperInfo;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\AdminRoleModulePermission;
@@ -93,6 +95,7 @@ use App\Http\Models\CRM\Escalation\CrmEscalationTaggingLevel;
 use App\Http\Controllers\ShipmentsAirWaybillJourneyController;
 use App\Http\Models\CRM\Escalation\CrmRequestEscalationStatus;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
+use App\Models\CrmRequestResolvedReason;
 
 class AdminCRMController extends Controller
 {
@@ -1236,6 +1239,8 @@ class AdminCRMController extends Controller
             $crm_case_nature = $crm_request->case_nature_id;
             $invalid_reasons = ClaimInvalidReason::select('id', 'reason')->get(); 
 
+            $resolved_reasons = ClaimResolvedReason::select('id', 'name')->get();
+            $resolved_sub_reasons = ClaimResolvedSubReason::select('id', 'name')->get();
             return view('admin.crm.request_details')->with([
                 'tagged_kae_name' => $tagged_kae_name,
                 'tagged_operation_name' => $tagged_operation_name,
@@ -1289,6 +1294,8 @@ class AdminCRMController extends Controller
                 'crm_status' => $crm_status,
                 'crm_case_nature' => $crm_case_nature,
                 'invalid_reasons' => $invalid_reasons,
+                'resolved_reasons' => $resolved_reasons,
+                'resolved_sub_reasons' => $resolved_sub_reasons,
             ]);
         }else{
             return redirect()->back()->with('danger', 'CRM Request Not found!');
@@ -2081,8 +2088,9 @@ class AdminCRMController extends Controller
         $zones = Zone::where('status', 1)->get();
         $closed_reason_statuses  = CrmClosedReasonStatus::all();
         $invalid_reasons = ClaimInvalidReason::select('id', 'reason')->get(); 
-
-        return view('admin.crm.in_process')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'agents' => $agents, 'shipment_status' => $shipment_status, 'types' => $types, 'admins' => $admins, 'departments' => $departments, 'hubs' => $hubs, 'zones' => $zones, 'closed_reason_statuses' => $closed_reason_statuses, 'invalid_reasons' => $invalid_reasons]);
+        $resolved_reasons = ClaimResolvedReason::select('id', 'name')->get();
+        $resolved_sub_reasons = ClaimResolvedSubReason::select('id', 'name')->get();
+        return view('admin.crm.in_process')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'agents' => $agents, 'shipment_status' => $shipment_status, 'types' => $types, 'admins' => $admins, 'departments' => $departments, 'hubs' => $hubs, 'zones' => $zones, 'closed_reason_statuses' => $closed_reason_statuses, 'invalid_reasons' => $invalid_reasons, 'resolved_reasons' => $resolved_reasons, 'resolved_sub_reasons' => $resolved_sub_reasons]);
     }
 
     public function in_process_list(Request $request){
@@ -4351,6 +4359,9 @@ class AdminCRMController extends Controller
                         CRMCommentController::add($crm_request->id, 306, 0, 0, $comment, 0, 0);
                     }
 
+                    if(!empty($request->claim_resolved_sub_reasons)){
+                        $this->storeResolvedReasons($request->req_id , $request->claim_resolved_reason, $request->claim_resolved_sub_reasons);
+                    }
                     return redirect()->back()->with(['success' => 'Request marked as Resolved']);
                 } else {
                     return redirect()->back()->with(['error' => 'Request is already marked as Resolved']);
@@ -4523,7 +4534,9 @@ class AdminCRMController extends Controller
                 }
                 // Notification 191 end
                 
-                $this->storeInvalidReasons($request->claim_invalid_reasons, $request->req_id);
+                if(!empty($request->claim_invalid_reasons)){
+                    $this->storeInvalidReasons($request->claim_invalid_reasons, $request->req_id);
+                }
                 
                 return redirect()->back()->with(['success' => 'Request marked as Closed']);
             } else {
@@ -5216,7 +5229,10 @@ class AdminCRMController extends Controller
                             }
 
                             CrmRequestTagging::where('crm_request_id', $crm_request->id)->delete();
-                            $this->storeInvalidReasons($request->selected_invalid_reason_ids, $crm_request_id);
+
+                            if(!empty($request->selected_invalid_reason_ids)){
+                                $this->storeInvalidReasons($request->selected_invalid_reason_ids, $crm_request_id);
+                            }
                         }
                     }
                 }
@@ -7249,7 +7265,29 @@ class AdminCRMController extends Controller
     {
         $crm_requests = CrmRequest::whereIn('id', $request->crm_request_ids)->get();
         $errors = [];
-    
+
+        foreach ($crm_requests as $crm_request) {
+            if (is_null($crm_request->agent_id) || $crm_request->agent_id == '') {
+                $errors[] = 'Agent is not assigned yet to CRM request number ' . $crm_request->id;
+            }
+        }
+
+        if (!empty($errors)) {
+            return ['status' => 1, 'errors' => new MessageBag($errors)];
+        }
+
+         if ($request->inprocess) {
+            $claimStatuses = $crm_requests->pluck('case_nature_id')->toArray();
+
+            if (!empty($claimStatuses) && count(array_unique($claimStatuses)) === 1 && $claimStatuses[0] == 4) {
+                return response()->json(['status' => 3]);
+            } elseif (in_array(4, $claimStatuses)) {
+                return response()->json(['status' => 2]);
+            } else {
+                return response()->json(['status' => 0]);
+            }
+        }
+
         foreach ($crm_requests as $crm_request) {
             if (is_null($crm_request->agent_id) || $crm_request->agent_id == '') {
                 $errors[] = 'Agent is not assigned yet to CRM request number ' . $crm_request->id;
@@ -7335,7 +7373,6 @@ class AdminCRMController extends Controller
                         }
     
                         CrmRequestTagging::where('crm_request_id', $crm_request->id)->delete();
-    
                         // Request marked as Closed
                     } else {
                         $errors[] = 'Request is already marked as Closed for CRM request number ' . $crm_request->id;
@@ -7360,6 +7397,10 @@ class AdminCRMController extends Controller
                 default:
                     $errors[] = 'Unhandled status for CRM request number ' . $crm_request->id;
                     break;
+            }
+
+            if(!empty($request->claim_resolved_reason)){
+                $this->storeResolvedReasons($crm_request->id, $request->claim_resolved_reason, $request->claim_resolved_sub_reasons);
             }
         }
     
@@ -7483,5 +7524,25 @@ class AdminCRMController extends Controller
             CrmInvalidReasonRequest::insert($insertData); 
         }
     }
+
+    public static function storeResolvedReasons($crmRequestId, $reasonId, $subReasonIds)
+    {
+        $insertData = [];
+
+        foreach ($subReasonIds as $subId) {
+            $insertData[] = [
+                'crm_request_id' => $crmRequestId,
+                'resolved_reason_id' => $reasonId,
+                'resolved_sub_reason_id' => $subId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+
+        if (!empty($insertData)) {
+            CrmRequestResolvedReason::insert($insertData); 
+        }    
+    }
+
     
 }

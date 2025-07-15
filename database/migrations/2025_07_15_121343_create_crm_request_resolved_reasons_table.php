@@ -13,10 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('crm_invalid_reason_requests', function (Blueprint $table) {
+        Schema::create('crm_request_resolved_reasons', function (Blueprint $table) {
             $table->id();
             $table->integer('crm_request_id')->nullable()->index();
-            $table->integer('claim_invalid_reason_id')->nullable()->index();
+            $table->integer('resolved_reason_id')->nullable()->index();
+            $table->integer('resolved_sub_reason_id')->nullable()->index();
             $table->timestamps();
         });
     }
@@ -28,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('crm_invalid_reason_requests');
+        Schema::dropIfExists('crm_request_resolved_reasons');
     }
 };
