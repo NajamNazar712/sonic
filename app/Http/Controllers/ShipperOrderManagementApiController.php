@@ -225,37 +225,53 @@ class ShipperOrderManagementApiController extends Controller
         }
         $today_bookings = $today_bookings->count();
 
-        // 3. Last 6-day trend
+        $statuses = [2, 14, 25];
         $last_6_day_summary = [];
-
         for ($i = 6; $i >= 0; $i--) {
             $day = Carbon::now()->subDays($i);
             $startOfDay = $day->copy()->startOfDay();
             $endOfDay = $day->copy()->endOfDay();
 
-            $query = Shipment::join('shipments_journey', 'shipments.id', '=', 'shipments_journey.shipment_id')
-                ->whereBetween('shipments_journey.created_at', [$startOfDay, $endOfDay]);
+            $summary = [
+                'arrivals' => 0,
+                'delivered' => 0,
+                'returns' => 0,
+            ];
 
-            if ($app_type == 2) {
-                $query->join('retail_shipments', 'retail_shipments.shipment_id', '=', 'shipments.id')
-                    ->where('shipment_type', 2)
-                    ->where('retail_shipments.shipper_account_no', $user_id);
-            } else {
-                $query->where('shipment_type', 1)
-                    ->where('shipments.user_id', $user_id);
+            foreach ($statuses as $status) {
+                $query = Shipment::query();
+
+                // Join based on app_type
+                if ($app_type == 2) {
+                    $query->join('retail_shipments', 'retail_shipments.shipment_id', '=', 'shipments.id')
+                        ->where('shipment_type', 2)
+                        ->where('retail_shipments.shipper_account_no', $user_id);
+                } else {
+                    $query->where('shipment_type', 1)
+                        ->where('shipments.user_id', $user_id);
+                }
+
+                if ($status == 2) {
+                    // Arrival check from shipments_journey table
+                    $query->join('shipments_journey', 'shipments.id', '=', 'shipments_journey.shipment_id')
+                        ->where('shipments_journey.shipper_status_id', $status)
+                        ->whereBetween('shipments_journey.created_at', [$startOfDay, $endOfDay]);
+
+                    $summary['arrivals'] = $query->count();
+                } elseif ($status == 14) {
+                    $query->where('shipments.shipper_status_id', $status)
+                        ->whereBetween('shipments.updated_at', [$startOfDay, $endOfDay]); // Optional if status updated same day
+
+                    $summary['delivered'] = $query->count();
+                } elseif ($status == 25) {
+                    $query->where('shipments.shipper_status_id', $status)
+                        ->whereBetween('shipments.updated_at', [$startOfDay, $endOfDay]); // Optional filter
+
+                    $summary['returns'] = $query->count();
+                }
             }
 
-            $counts = $query->selectRaw("
-                    COUNT(CASE WHEN shipments_journey.shipper_status_id IN (2,4) THEN 1 END) as arrival,
-                    COUNT(CASE WHEN shipments_journey.shipper_status_id = 14 THEN 1 END) as delivered,
-                    COUNT(CASE WHEN shipments_journey.shipper_status_id = 25 THEN 1 END) as returns
-            ")->first();
-
-            $last_6_day_summary[$day->toDateString()] = [
-                'arrivals' => $counts->arrival,
-                'delivered' => $counts->delivered,
-                'returns' => $counts->returns,
-            ];
+            $last_6_day_summary[$day->toDateString()] = $summary;
         }
 
         return [
