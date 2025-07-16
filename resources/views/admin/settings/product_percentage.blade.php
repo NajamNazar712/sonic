@@ -64,9 +64,22 @@
                                         @endforeach
                                 </div>
                             </div>
-                            <div class="row mt-5">
+                            <div class="row mt-4 text-center">
+                                <div class="col-6 form-group">
+                                    <label class="mr-2 font-medium-3"><b>Exclude Specific Shippers:</b></label>
+                                    <input type="checkbox" name="all_shipper_toggle_wht" id="all_shipper_toggle_wht" class="switchery all_shipper_toggle" data-size="sm" data-switchery="true">
+                                    <label class="ml-2 font-medium-3"><b>Include Specific Shippers:</b></label>
+                                </div>
+
+                                <div class="col-6 form-group">
+                                    <label class="mr-2 font-medium-3"><b>Exclude Specific Shippers:</b></label>
+                                    <input type="checkbox" name="all_shipper_toggle_sst" id="all_shipper_toggle_sst" class="switchery all_shipper_toggle" data-size="sm" data-switchery="true">
+                                    <label class="ml-2 font-medium-3"><b>Include Specific Shippers:</b></label>
+                                </div>
+                            </div>
+                            <div class="row mt-2">
                                 <div class="col-6 form-group" id="excluded_users_container_wht">
-                                    <label class="mr-2 font-medium-2"><b>Exclude Shipper(s) WHT </b></label>
+                                    <label class="mr-2 font-medium-2"><b>WHT</b></label>
                                     <select name="excluded_users_wht[]" id="excluded_users_wht" class="form-control select2" multiple="multiple">
                                        @foreach($shippers as $shipper)
                                             <option value="{{$shipper->id}}">{{$shipper->name}}</option>
@@ -74,7 +87,7 @@
                                     </select>
                                 </div>
                                 <div class="col-6 form-group" id="excluded_users_container_sst">
-                                    <label class="mr-2 font-medium-2"><b>Exclude Shipper(s) COD SST </b></label>
+                                    <label class="mr-2 font-medium-2"><b>COD SST </b></label>
                                     <select name="excluded_users_sst[]" id="excluded_users_sst" class="form-control select2" multiple="multiple">
                                         @foreach($shippers as $shipper)
                                             <option value="{{$shipper->id}}">{{$shipper->name}}</option>
