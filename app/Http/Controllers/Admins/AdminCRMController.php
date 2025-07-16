@@ -7506,7 +7506,7 @@ class AdminCRMController extends Controller
 
     public static function canLockClaim($shipment, $crm, $nature_id, $request)
     {
-        if ($shipment->shipper_status_id != 18 || $crm->status_id != 4) {
+        if ($shipment->shipper_status_id != 18 || !in_array($crm->status_id, [3, 4])) {
             if (($nature_id == 4 && $request->case_nature_claim != 26) && in_array($crm->status_id, [1, 2])) {
                 return [
                     'status' => 0,
