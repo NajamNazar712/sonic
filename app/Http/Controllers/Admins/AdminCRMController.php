@@ -1490,12 +1490,11 @@ class AdminCRMController extends Controller
             $cut_off_time_to = CrmSettings::where('name', 'TAT Cut-Off Time To')->value('setting_value');
 
             $from_time = Carbon::parse(trim($cut_off_time_from))->subMinute()->format('H:i');
-            $to_time   = Carbon::parse(trim($cut_off_time_to))->subMinute()->format('H:i');
+            $to_time   = Carbon::parse(trim($cut_off_time_to))->addMinute()->format('H:i');
 
             $from_datetime = Carbon::parse("{$current_date->toDateString()} $from_time")->toDateTimeString();
             $to_datetime   = Carbon::parse("{$previous_date->toDateString()} $to_time")->toDateTimeString();
 
-//            dd($to_datetime, $from_datetime);
             $launched_request->whereBetween('crm_requests.created_at',[$to_datetime, $from_datetime]);
         }
 

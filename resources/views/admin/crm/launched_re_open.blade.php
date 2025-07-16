@@ -33,7 +33,7 @@
                                                   </span>
                                                 </div>
                                                 <input type="text" name="request_date"
-                                                       class="form-control bg-primary border-primary white rounded-right"  data-value="{{ \Carbon\Carbon::today()->subDays(31)->startOfDay() }}"
+                                                       class="form-control bg-primary border-primary white rounded-right"
                                                        id="request_date" placeholder="Request Date ">
                                             </div>
                                         </div>
@@ -691,7 +691,7 @@
                     },
                     data: function (d) {
                         d.tracking_numbers = $('#track_form .tracking_numbers').val();
-                        d.request_date = $('#track_form #request_date').val();
+                        d.request_date = $('input[name="request_date_formatted"]').val()
                         d.star_shipper_filter = $('#star_shippers_filter').val();
                     }
                 },
