@@ -269,11 +269,11 @@ class ShipperOrderManagementApiController extends Controller
     public function shipment_air_waybill(Request $request)
     {
 
-            $encoded = $request->tracking_number;
-            $tracking_number = base64_decode($encoded);
-            $shipment = Shipment::where('tracking_number', $tracking_number)->first();
+            $tracking_number = $request->tracking_number;
+            $user_id = $request->shipper_id;
 
-            if($shipment && now()->diffInMinutes($shipment->created_at) <= 5) {
+            $shipment = Shipment::where('tracking_number', $tracking_number)->where('user_id',$user_id)->first();
+            if($shipment && $request->app_type == 1) {
                 $air_waybill = ShipperShipmentBookController::air_waybill(4, $shipment->user_id, [$shipment->id]);
                 $pdf = SnappyPdf::loadHTML($air_waybill);
 

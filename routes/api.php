@@ -647,11 +647,13 @@ use Illuminate\Http\Request;
         Route::post('send_otp', 'ShipperAPIController@sendOtp')->name('reset_password');
         Route::post('verify_otp', 'ShipperAPIController@verifyOtp')->name('reset_password');
 
-        //airwaybill
-        Route::get('shipment/air_waybill_pdf', 'ShipperOrderManagementApiController@shipment_air_waybill')->name('shipment.air_waybill');
+
 
         Route::post('test', 'ShipperAPIController@test')->name('test');
         Route::middleware('ShipperAPIToken')->group(function () {
+
+            //airwaybill
+            Route::post('shipment/air_waybill_pdf', 'ShipperOrderManagementApiController@shipment_air_waybill')->name('shipment.air_waybill');
 
             Route::prefix('retail')->name('retail.')->group(function () {
                 Route::get('shipment_track', 'APIController@retail_shipment_track')->name('track');

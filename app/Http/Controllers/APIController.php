@@ -1670,24 +1670,24 @@ class APIController extends Controller
                 Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
             }
 
-            if ($request->app_type == 1) {
-                if (app()->environment('production')) {
-                    $base_url = 'https://sonic.pk/api';
-                } elseif (app()->environment('staging')) {
-                    $base_url = 'https://app.sonic.pk/api';
-                } else {
-                    $base_url = rtrim(config('app.url'), '/') . '/api';
-                }
-                $encoded_tracking = base64_encode($tracking_number);
-                $airwaybill_url = $base_url . '/shipper/shipment/air_waybill_pdf?tracking_number=' . $encoded_tracking;
-
-                return response()->json([
-                    'status' => 0,
-                    'message' => 'Shipment has been Booked!',
-                    'tracking_number' => $tracking_number,
-                    'airwaybill_url' => $airwaybill_url
-                ]);
-            }
+//            if ($request->app_type == 1) {
+//                if (app()->environment('production')) {
+//                    $base_url = 'https://sonic.pk/api';
+//                } elseif (app()->environment('staging')) {
+//                    $base_url = 'https://app.sonic.pk/api';
+//                } else {
+//                    $base_url = rtrim(config('app.url'), '/') . '/api';
+//                }
+//                $encoded_tracking = base64_encode($tracking_number);
+//                $airwaybill_url = $base_url . '/shipper/shipment/air_waybill_pdf?tracking_number=' . $encoded_tracking;
+//
+//                return response()->json([
+//                    'status' => 0,
+//                    'message' => 'Shipment has been Booked!',
+//                    'tracking_number' => $tracking_number,
+//                    'airwaybill_url' => $airwaybill_url
+//                ]);
+//            }
             return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number]);
         }
     }
