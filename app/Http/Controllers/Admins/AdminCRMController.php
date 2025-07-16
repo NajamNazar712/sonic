@@ -1483,14 +1483,20 @@ class AdminCRMController extends Controller
 
         if ($request_date = $request->get('request_date')) {
 
-            $privious_date = Carbon::parse($request_date)->subDay();
-            dd($privious_date);
-            $cut_off_time_from = CrmSettings::where('name','TAT Cut-Off Time From')->first();
-            $from_date = Carbon::parse($cut_off_time_from->setting_value)->addMinutes()->format('g:i A');
+            $current_date = Carbon::parse($request_date);
+            $previous_date = $current_date->copy()->subDay();
 
-            $cut_off_time_to = CrmSettings::where('name','TAT Cut-Off Time To')->first();
-            $to_date = Carbon::parse($cut_off_time_to->setting_value)->addMinutes()->format('g:i A');
-            $launched_request->whereIn('s.tracking_number', explode(',', $tracking_numbers));
+            $cut_off_time_from = CrmSettings::where('name', 'TAT Cut-Off Time From')->value('setting_value');
+            $cut_off_time_to = CrmSettings::where('name', 'TAT Cut-Off Time To')->value('setting_value');
+
+            $from_time = Carbon::parse(trim($cut_off_time_from))->subMinute()->format('H:i');
+            $to_time   = Carbon::parse(trim($cut_off_time_to))->subMinute()->format('H:i');
+
+            $from_datetime = Carbon::parse("{$current_date->toDateString()} $from_time")->toDateTimeString();
+            $to_datetime   = Carbon::parse("{$previous_date->toDateString()} $to_time")->toDateTimeString();
+
+//            dd($to_datetime, $from_datetime);
+            $launched_request->whereBetween('crm_requests.created_at',[$to_datetime, $from_datetime]);
         }
 
         if($request->get('star_shipper_filter') == 1)
