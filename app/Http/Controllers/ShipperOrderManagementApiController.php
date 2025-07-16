@@ -227,6 +227,7 @@ class ShipperOrderManagementApiController extends Controller
 
         $statuses = [2, 14, 25];
         $last_6_day_summary = [];
+
         for ($i = 6; $i >= 0; $i--) {
             $day = Carbon::now()->subDays($i);
             $startOfDay = $day->copy()->startOfDay();
@@ -239,40 +240,55 @@ class ShipperOrderManagementApiController extends Controller
             ];
 
             foreach ($statuses as $status) {
-                $query = Shipment::query();
+                $baseQuery = DB::table('shipments as s');
 
-                // Join based on app_type
+                // Apply app_type filters
                 if ($app_type == 2) {
-                    $query->join('retail_shipments', 'retail_shipments.shipment_id', '=', 'shipments.id')
-                        ->where('shipment_type', 2)
-                        ->where('retail_shipments.shipper_account_no', $user_id);
+                    $baseQuery->join('retail_shipments as rs', 'rs.shipment_id', '=', 's.id')
+                        ->where('s.shipment_type', 2)
+                        ->where('rs.shipper_account_no', $user_id);
                 } else {
-                    $query->where('shipment_type', 1)
-                        ->where('shipments.user_id', $user_id);
+                    $baseQuery->where('s.shipment_type', 1)
+                        ->where('s.user_id', $user_id);
                 }
 
+                // Status-specific logic
                 if ($status == 2) {
-                    // Arrival check from shipments_journey table
-                    $query->join('shipments_journey', 'shipments.id', '=', 'shipments_journey.shipment_id')
-                        ->where('shipments_journey.shipper_status_id', $status)
-                        ->whereBetween('shipments_journey.created_at', [$startOfDay, $endOfDay]);
+                    // Arrival: just filter journey table with status and created_at
+                    $arrivalCount = $baseQuery
+                        ->join('shipments_journey as sj', 'sj.shipment_id', '=', 's.id')
+                        ->where('sj.shipper_status_id', $status)
+                        ->whereBetween('sj.created_at', [$startOfDay, $endOfDay])
+                        ->count();
 
-                    $summary['arrivals'] = $query->count();
-                } elseif ($status == 14) {
-                    $query->where('shipments.shipper_status_id', $status)
-                        ->whereBetween('shipments.updated_at', [$startOfDay, $endOfDay]); // Optional if status updated same day
+                    $summary['arrivals'] = $arrivalCount;
 
-                    $summary['delivered'] = $query->count();
-                } elseif ($status == 25) {
-                    $query->where('shipments.shipper_status_id', $status)
-                        ->whereBetween('shipments.updated_at', [$startOfDay, $endOfDay]); // Optional filter
+                } elseif (in_array($status, [14, 25])) {
+                    // Delivered / Returned — only count if last journey matches this status
+                    $subquery = DB::table('shipments_journey as sj1')
+                        ->select('sj1.shipment_id', DB::raw('MAX(sj1.id) as max_id'))
+                        ->groupBy('sj1.shipment_id');
 
-                    $summary['returns'] = $query->count();
+                    $query = $baseQuery
+                        ->joinSub($subquery, 'last_journeys', function ($join) {
+                            $join->on('s.id', '=', 'last_journeys.shipment_id');
+                        })
+                        ->join('shipments_journey as sj2', 'sj2.id', '=', 'last_journeys.max_id')
+                        ->where('sj2.shipper_status_id', $status)
+                        ->whereBetween('sj2.created_at', [$startOfDay, $endOfDay]);
+
+                    if ($status == 14) {
+                        $summary['delivered'] = $query->count();
+                    } else {
+                        $summary['returns'] = $query->count();
+                    }
                 }
             }
 
             $last_6_day_summary[$day->toDateString()] = $summary;
         }
+
+
 
         return [
             'over_all_in_process' => $over_all_in_process,
