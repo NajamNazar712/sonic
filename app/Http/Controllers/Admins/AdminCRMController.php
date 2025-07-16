@@ -91,6 +91,7 @@ use App\Http\Models\CRM\CrmClosedReasonStatus;
 use App\Http\Models\ShipmentDetail;
 use Illuminate\Support\MessageBag;
 use App\Http\Models\Admin\Retail\RetailShipment;
+use App\Http\Models\ShipmentsPaymentJourney;
 
 class AdminCRMController extends Controller
 {
@@ -475,6 +476,11 @@ class AdminCRMController extends Controller
                         if($is_shipment){
                             $already_lodged = true;
                             $complain = $is_shipment->id;
+
+                            if($nature_id == 1 && $request->complaint_id == 1){
+                                $canComplaintPaymentLocked = $this->canComplaintPaymentLocked($shipment_id);
+                            }
+
                             if($is_shipment->case_nature_id != $nature_id){
                                 if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
                                     if(in_array($complaint_id, [11, 13])){
@@ -7403,5 +7409,101 @@ class AdminCRMController extends Controller
             $crmRequest->complainant_phone = $complainantPhone;
             $crmRequest->save();
         }
+    }
+
+    public static function canComplaintPaymentLocked($id)
+    {
+        $shipmentPayment = ShipmentsPaymentJourney::with('shipment.user')
+            ->where([
+                'shipment_id' => $id,
+                'status_id' => 1 
+            ])
+            ->latest()
+            ->first();
+
+
+        if (!$shipmentPayment) {
+            return false; 
+        }
+
+        $user = $shipmentPayment->shipment->user;
+        $cycleId = $user->payment_cycle_id;
+        $cycleDays = explode(',', $user->payment_cycle_days ?? '');
+        $paymentDate = Carbon::parse($shipmentPayment->updated_at);
+        $now = Carbon::now();
+
+        $lockTime = null;
+
+        switch ($cycleId) {
+            case 1: 
+                $lockTime = $paymentDate->copy()->addHours(48);
+                break;
+
+            case 2: 
+                if (!empty($cycleDays[0])) {
+                    $lockDay = self::getDayName($cycleDays[0]);
+                    $nextWeekDay = Carbon::parse("next $lockDay")->setTimezone($paymentDate->timezone);
+
+                    $lockTime = $nextWeekDay->addWeek()->addHours(48);
+                }
+                break;
+
+            case 3: 
+                if (!empty($cycleDays[0])) {
+                    $cycleDay = intval($cycleDays[0]);
+                    $cycleDate = Carbon::create($paymentDate->year, $paymentDate->month, $cycleDay, 0, 0, 0);
+                    if ($paymentDate->greaterThan($cycleDate)) {
+                        $cycleDate->addMonth();
+                    }
+
+                    $lockTime = $cycleDate->copy()->addHours(48);
+                }
+                break;
+
+            case 4: 
+            case 5: 
+                foreach ($cycleDays as $dayNum) {
+                    $dayName = self::getDayName($dayNum);
+                    $cycleDate = $paymentDate->copy()->modify("next $dayName");
+
+                    if ($now->greaterThan($cycleDate->copy()->addHours(48))) {
+                        return true;
+                    }
+                }
+                return false;
+
+            case 6: 
+                foreach ($cycleDays as $dayOfMonth) {
+                    $day = intval($dayOfMonth);
+                    $cycleDate = Carbon::create($paymentDate->year, $paymentDate->month, $day, 0, 0, 0);
+
+                    if ($paymentDate->greaterThan($cycleDate)) {
+                        $cycleDate->addMonth();
+                    }
+
+                    if ($now->greaterThan($cycleDate->copy()->addHours(48))) {
+                        return true;
+                    }
+                }
+                return false;
+        }
+        
+        //lock time has passed, it's okay to lock
+        return $lockTime && $now->greaterThanOrEqualTo($lockTime);
+    }
+
+    public static function getDayName($dayNumber)
+    {
+        $days = [
+            1 => 'monday',
+            2 => 'tuesday',
+            3 => 'wednesday',
+            4 => 'thursday',
+            5 => 'friday',
+            6 => 'saturday',
+            7 => 'sunday'
+        ];
+
+        return $days[(int)$dayNumber] ?? 'monday';
     }
 }
