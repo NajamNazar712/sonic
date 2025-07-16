@@ -197,40 +197,53 @@ class AdminFinanceController extends Controller
 
     static public function wht($user_id, $amount, $packaging_request, $shipment_id){ 
 
-        $product_id = User::where('id', $user_id)->value('product_id');
-
-        if($product_id) {
-
-            $parent_product_id = Product::where('id', $product_id )->value('parent_product_id');
-            // $arrival_date = ShipmentsJourney::where('shipment_id', $shipment_id)->where('shipper_status_id', 2)->whereDate('created_at', '>=', '2025-06-01');
-            if($parent_product_id  && $packaging_request == 0) {
-
-                $tax_percentage  = ParentProduct::where('id', $parent_product_id)->value('tax_percentage');
-                if($tax_percentage != 0) {
-                    $tax_amount  = ($amount * floatval($tax_percentage)) / 100;
-                    return $tax_amount;
-                }
-            } 
+        $excluded_users_wht_record = [];
+        $excluded_users_wht = GlobalSettings::where('type', 'excluded_users_wht')->first();
+        if ($excluded_users_wht && $excluded_users_wht->text) {
+            $excluded_users_wht_record = array_map('strval', explode(',', $excluded_users_wht->text));
         }
-        
+
+        if (!in_array($user_id, $excluded_users_wht_record)) {
+            $product_id = User::where('id', $user_id)->value('product_id');
+            if($product_id) {
+
+                $parent_product_id = Product::where('id', $product_id )->value('parent_product_id');
+                // $arrival_date = ShipmentsJourney::where('shipment_id', $shipment_id)->where('shipper_status_id', 2)->whereDate('created_at', '>=', '2025-06-01');
+                if($parent_product_id  && $packaging_request == 0) {
+
+                    $tax_percentage  = ParentProduct::where('id', $parent_product_id)->value('tax_percentage');
+                    if($tax_percentage != 0) {
+                        $tax_amount  = ($amount * floatval($tax_percentage)) / 100;
+                        return $tax_amount;
+                    }
+                } 
+            }
+        }
         return 0;
     }
 
     static public function cod_sst($user_id, $amount, $packaging_request, $shipment_id){ 
 
-        $product_id = User::where('id', $user_id)->value('product_id');
+        $excluded_users_sst_record = [];
+        $excluded_users_sst = GlobalSettings::where('type', 'excluded_users_sst')->first();
+        if ($excluded_users_sst && $excluded_users_sst->text) {
+            $excluded_users_sst_record = array_map('strval', explode(',', $excluded_users_sst->text));
+        }
         
-        if($product_id) {
+        if (!in_array($user_id, $excluded_users_sst_record)) {
+            $product_id = User::where('id', $user_id)->value('product_id');
+            if($product_id) {
 
-            $parent_product_id = Product::where('id', $product_id )->value('parent_product_id');
-            if($parent_product_id && $packaging_request == 0) {
+                $parent_product_id = Product::where('id', $product_id )->value('parent_product_id');
+                if($parent_product_id && $packaging_request == 0) {
 
-                $sst_percentage  = ParentProduct::where('id', $parent_product_id)->value('sst_percentage');
-                if($sst_percentage != 0) {
-                    $cod_sst  = ($amount * floatval($sst_percentage)) / 100;
-                    return $cod_sst;
-                }
-            } 
+                    $sst_percentage  = ParentProduct::where('id', $parent_product_id)->value('sst_percentage');
+                    if($sst_percentage != 0) {
+                        $cod_sst  = ($amount * floatval($sst_percentage)) / 100;
+                        return $cod_sst;
+                    }
+                } 
+            }
         }
         return 0;
     }
