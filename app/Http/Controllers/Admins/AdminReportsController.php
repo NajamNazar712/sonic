@@ -6872,7 +6872,8 @@ class AdminReportsController extends Controller
 
             ];
 
-            $crm = DB::connection('reports')->table('crm_requests')->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+            $crm = DB::connection('reports')->table('crm_requests')
+                ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
                 ->leftjoin('shipment_status as ss', 'ss.id', '=', 's.shipper_status_id')
                 ->leftjoin('crm_request_statuses as crs', 'crs.id', '=', 'crm_requests.status_id')
                 ->leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_requests.case_nature_id')
@@ -7003,6 +7004,54 @@ class AdminReportsController extends Controller
             }
 
             $current_date = Carbon::now();
+
+            if ($tracking = $request->get('search_tracking_no')) {
+                $tracking_numbers = explode(',', $tracking);
+                $crm->whereIn('s.tracking_number', $tracking_numbers);
+            }
+            if ($rnumber = $request->get('search_request_number')) {
+                $rnumber = explode(',', $rnumber);
+                $crm->whereIn('crm_requests.id', $rnumber);
+            }
+            if ($shipper = $request->get('search_shipper')) {
+
+                $crm->whereIn('u.id', $shipper);
+            }
+            if ($destination = $request->get('search_destination')) {
+                $crm->where('dc.id', '=', $destination);
+            }
+            if ($hub = $request->get('search_hub')) {
+                $crm->where('h.id', '=', $hub);
+            }
+            if ($zone = $request->get('search_zone')) {
+                $crm->where('z.id', '=', $zone);
+            }
+            if ($case_nature = $request->get('search_case_nature')) {
+                $crm->where('crcn.id', '=', $case_nature);
+            }
+            if ($case_nature_type = $request->get('search_case_nature_type')) {
+                $crm->where('crcnt.id', '=', $case_nature_type);
+            }
+
+            if ($mode = $request->get('search_shipping_mode')) {
+                $crm->where('s.booking_type_id', '=', $mode);
+            }
+            if ($agent = $request->get('search_agent')) {
+                $crm->where('a.id', '=', $agent);
+            }
+            if ($status = $request->get('search_status')) {
+                $crm->whereIn('crs.id', $status);
+            }
+            if ($request->get('search_from') && $request->get('search_to')) {
+                $from = $request->get('search_from');
+                $to = $request->get('search_to');
+                $crm->whereBetween('crm_requests.created_at', [$from, $to]);
+            }
+
+            if ($service_type_select = $request->get('service_type_select')) {
+                $crm->where('bt.id', '=', $service_type_select);
+            }
+
             $datatable = Datatables::of($crm)
                 ->addColumn('tagged_to', function ($crm_request) {
                     if (in_array($crm_request->tagging_type, [2, 4, 5])) {
@@ -7244,55 +7293,7 @@ class AdminReportsController extends Controller
                     }
                 })
                 ->orderColumn('launched_by_name', DB::connection('reports')->raw('IF (crm_requests.launched_by = 0, a.name, IF (crm_requests.launched_by = 1, us.name, IF (crm_requests.launched_by = 2, su.name, "")))') . ' $1');
-            if ($tracking = $request->get('search_tracking_no')) {
-                $tracking_numbers = explode(',', $tracking);
-                $crm->whereIn('s.tracking_number', $tracking_numbers);
-            }
-            if ($rnumber = $request->get('search_request_number')) {
-                $rnumber = explode(',', $rnumber);
-                $crm->whereIn('crm_requests.id', $rnumber);
-            }
-            if ($shipper = $request->get('search_shipper')) {
 
-                $crm->whereIn('u.id', $shipper);
-            }
-            //        if($origin = $request->get('search_origin')){
-            //            $datatable->where('oc.id', '=', $origin);
-            //        }
-            if ($destination = $request->get('search_destination')) {
-                $crm->where('dc.id', '=', $destination);
-            }
-            if ($hub = $request->get('search_hub')) {
-                $crm->where('h.id', '=', $hub);
-            }
-            if ($zone = $request->get('search_zone')) {
-                $crm->where('z.id', '=', $zone);
-            }
-            if ($case_nature = $request->get('search_case_nature')) {
-                $crm->where('crcn.id', '=', $case_nature);
-            }
-            if ($case_nature_type = $request->get('search_case_nature_type')) {
-                $crm->where('crcnt.id', '=', $case_nature_type);
-            }
-
-            if ($mode = $request->get('search_shipping_mode')) {
-                $crm->where('s.booking_type_id', '=', $mode);
-            }
-            if ($agent = $request->get('search_agent')) {
-                $crm->where('a.id', '=', $agent);
-            }
-            if ($status = $request->get('search_status')) {
-                $crm->whereIn('crs.id', $status);
-            }
-            if ($request->get('search_from') && $request->get('search_to')) {
-                $from = $request->get('search_from');
-                $to = $request->get('search_to');
-                $crm->whereBetween('crm_requests.created_at', [$from, $to]);
-            }
-
-            if ($service_type_select = $request->get('service_type_select')) {
-                $crm->where('bt.id', '=', $service_type_select);
-            }
 
 
             if ($request->get('excel') && $request->get('excel') == true) {
