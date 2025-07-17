@@ -16616,7 +16616,7 @@ class AdminReportsController extends Controller
     }
 
     public function kam_and_poc_qsr_list(Request $request) {
-        $connection = 'reports_2';
+        $connection = 'reports';
 
         $select = [
             'shipments.id as shipment_id',
