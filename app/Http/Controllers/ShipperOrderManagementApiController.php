@@ -286,8 +286,8 @@ class ShipperOrderManagementApiController extends Controller
                     }
                 }
             }
-
-            $last_6_day_summary[$day->toDateString()] = $summary;
+            $date_format = $day->toDateString()->format('d-m-Y');
+            $last_6_day_summary[$date_format] = $summary;
         }
 
 
