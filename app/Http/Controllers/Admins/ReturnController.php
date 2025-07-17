@@ -4152,9 +4152,9 @@ class ReturnController extends Controller
                             ShipmentOpenBoxJourneyController::add($shipment_id, 7, Auth::id());
                         }
                     }
-                    // if(in_array($parcel->user_id, [43066, 41969, 10422])) {
-                    //     NotificationsController::send(246, $shipment_id);
-                    // }
+                    if(in_array($parcel->user_id, [43066, 41969])) {
+                        NotificationsController::send(246, $shipment_id);
+                    }
                     if (!ReturnNoteShipment::join('return_notes', 'return_notes.id', '=', 'return_note_shipments.return_note_id')->where('return_note_shipments.return_note_id', '>', $request->return_note_id)->where('shipment_id', $shipment_id)->exists()) {
 
                         if ($parcel->booking_type_id == 2) {
