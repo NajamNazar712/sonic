@@ -213,7 +213,7 @@ class ShipperOrderManagementApiController extends Controller
 
         // 2. Today bookings
         $today_bookings = Shipment::where('shipper_status_id', 1)
-            ->whereBetween('pickup_date', [$todayStart,$todayEnd]);
+            ->whereBetween('created_at', [$todayStart,$todayEnd]);
 
         if($app_type == 2) {
             $today_bookings = $today_bookings->join('retail_shipments', 'retail_shipments.shipment_id', '=', 'shipments.id')
@@ -257,7 +257,7 @@ class ShipperOrderManagementApiController extends Controller
                     // Arrival: just filter journey table with status and created_at
                     $arrivalCount = $baseQuery
                         ->join('shipments_journey as sj', 'sj.shipment_id', '=', 's.id')
-                        ->where('sj.shipper_status_id', $status)
+                        ->whereIn('sj.shipper_status_id', [2,4])
                         ->whereBetween('sj.created_at', [$startOfDay, $endOfDay])
                         ->count();
 
@@ -274,12 +274,14 @@ class ShipperOrderManagementApiController extends Controller
                             $join->on('s.id', '=', 'last_journeys.shipment_id');
                         })
                         ->join('shipments_journey as sj2', 'sj2.id', '=', 'last_journeys.max_id')
-                        ->where('sj2.shipper_status_id', $status)
+//                        ->where('sj2.shipper_status_id', $status)
                         ->whereBetween('sj2.created_at', [$startOfDay, $endOfDay]);
 
                     if ($status == 14) {
+                        $query->whereIn('sj2.shipper_status_id',[14,30,31,32,33,34,35,36,37]);
                         $summary['delivered'] = $query->count();
                     } else {
+                        $query->where('sj2.shipper_status_id',$status);
                         $summary['returns'] = $query->count();
                     }
                 }
