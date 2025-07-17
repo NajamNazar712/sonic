@@ -8702,11 +8702,17 @@ class AdminReportsController extends Controller
             $count = $count->where('r.operation_rider_id', $search_rider_cat);
         }
 
-        $count = $count->groupBy('r.id')->count();
+        $from = $request->get('search_from');
+        $to = $request->get('search_to');
+        if ($from == null || $to == null) {
+            $from = Carbon::now()->endOfDay();
+            $to = Carbon::now()->subDays(30)->startOfDay();
+        }
+        $count = $count->whereBetween('delivery_notes.created_at', [$from, $to])->groupBy('r.id')->count();
 
         $route_distribution_summary = DB::connection('reports')->table('delivery_notes')
-            ->join('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
-            ->join('rider_types as rt', 'r.rider_type_id', '=', 'rt.id')
+            ->leftjoin('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
+            ->leftjoin('rider_types as rt', 'r.rider_type_id', '=', 'rt.id')
             ->leftjoin('operation_riders_categories as rd', 'r.operation_rider_id', '=', 'rd.id')
             ->leftjoin('cities as c', 'c.id', '=', 'delivery_notes.hub_id')
             ->leftjoin('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_notes.id')
