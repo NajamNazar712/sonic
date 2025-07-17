@@ -379,16 +379,15 @@ class ShipperCRMController extends Controller
                     $shipment = Shipment::where('id', $payment_shipment->shipment_id)->first();
                     $is_shipment = CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_id', $nature_id);
 
-                    $response = AdminCRMController::canLockClaim($shipment, $is_shipment, $nature_id, $request);
-
-                    if ($response['status'] === 0) {
-                        return $response;
-                    }
-
                     if($is_shipment->exists()){
                         return ['status' => 0, 'error' => 'Request/Complaint already lodged for the Payment ID: ' . $payment_id_padded];
                     }
                     else{
+                        $response = AdminCRMController::canLockClaim($shipment, $is_shipment, $nature_id, $request);
+
+                        if ($response['status'] === 0) {
+                            return $response;
+                        }
                         CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment->id, session('user_id'), NULL, $description);
                     }
                     return ['status' => 1, 'success' => 'Request(s) successfully added'];
@@ -675,7 +674,7 @@ class ShipperCRMController extends Controller
                     $already_lodged = false;
                     if($is_shipment){    
                         $already_lodged = true;
-                        
+
                         $response = AdminCRMController::canLockClaim($shipment, $is_shipment, $nature_id, $request);
 
                         if ($response['status'] === 0) {
