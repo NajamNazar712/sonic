@@ -190,16 +190,14 @@ class AdminCRMController extends Controller
                     $shipment = Shipment::where('id', $payment_shipment->shipment_id)->first();
                     $is_shipment = CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_id', $nature_id);
 
-                     $response = $this->canLockClaim($shipment, $is_shipment, $nature_id, $request);
-
-                    if ($response['status'] === 0) {
-                        return $response;
-                    }
-
                     if($is_shipment->exists()){
                         return ['status' => 0, 'error' => 'Request/Complaint already lodged for the Payment ID: ' . $payment_id_padded];
                     }
                     else{
+                        $response = $this->canLockClaim($shipment, $is_shipment, $nature_id, $request);
+                        if ($response['status'] === 0) {
+                            return $response;
+                        }
                         $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment->id, $shipment->user_id, NULL ,$description);
                         if($request->has('key_account')){
                             $this->key_account_crm_summary_shipments($shipment->id, $crm_request_padded_id, Auth::id(), $channel_id, $complaint_id);
