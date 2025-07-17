@@ -2576,7 +2576,7 @@
                 submitHandler: function(form) {
                     var close_reason = $('#valid_close_reason').val();
                     var crm_request_id = $('#crm_request_id').val();
-                    if(close_reason == 1 && !isClaimInvalid){
+                    if(close_reason == 1){
                         $.ajax({
                         url: '{!! route('admin.crm.close_reason') !!}',
                         method: 'POST',
@@ -2634,7 +2634,7 @@
                 submitHandler: function(form) {
                     var close_reason = $('#close_reason').val();
                     var crm_request_id = $('#crm_request_id').val();
-                    if(close_reason == 1 && (!isClaimInvalid)){
+                    if(close_reason == 1){
                         $.ajax({
                         url: '{!! route('admin.crm.close_reason') !!}',
                         method: 'POST',
