@@ -7288,11 +7288,9 @@ class AdminCRMController extends Controller
 
             if (!empty($claimStatuses) && count(array_unique($claimStatuses)) === 1 && $claimStatuses[0] == 4) {
                 return response()->json(['status' => 3]);
-            } elseif (in_array(4, $claimStatuses)) {
+            }elseif (in_array(4, $claimStatuses)) {
                 return response()->json(['status' => 2]);
-            } else {
-                return response()->json(['status' => 0]);
-            }
+            } 
         }
 
         foreach ($crm_requests as $crm_request) {
