@@ -278,7 +278,7 @@ class ShipperOrderManagementApiController extends Controller
                         ->whereBetween('sj2.created_at', [$startOfDay, $endOfDay]);
 
                     if ($status == 14) {
-                        $query->whereIn('sj2.shipper_status_id',[14,30,31,32,33,34,35,36,37]);
+                        $query->whereIn('sj2.shipper_status_id',[14,30,37,36]);
                         $summary['delivered'] = $query->count();
                     } else {
                         $query->where('sj2.shipper_status_id',$status);
