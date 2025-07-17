@@ -34,7 +34,7 @@
                                                 </div>
                                                 <input type="text" name="request_date"
                                                        class="form-control bg-primary border-primary white rounded-right"
-                                                       id="request_date" placeholder="Request Date ">
+                                                       id="request_date" placeholder="By Cut-Off Date">
                                             </div>
                                         </div>
                                         <div class="form-group justify-content-center">
