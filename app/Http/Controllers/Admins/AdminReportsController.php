@@ -16682,7 +16682,7 @@ class AdminReportsController extends Controller
         
         $shipments = DB::connection($connection)
             ->table('shipments')
-            ->join('users', 'shipments.user_id', '=', 'users.id')
+            ->leftJoin('users', 'shipments.user_id', '=', 'users.id')
             ->leftJoin('sale_person_tags as spt', function($join){
                 $join->on('spt.user_id', '=', 'users.id')
                     ->where(
@@ -16723,7 +16723,7 @@ class AdminReportsController extends Controller
             })
             ->leftjoin('cities as intercept_approved', 'intercept_approved.id', '=', 'irb.old_consignee_city_id')
 
-            ->join('shipment_status', 'shipment_status.id', '=', 'shipments.shipper_status_id')
+            ->leftJoin('shipment_status', 'shipment_status.id', '=', 'shipments.shipper_status_id')
 
             ->leftJoin('shipments_journey as journey', function ($join) {
                 $join->on('journey.shipment_id', '=', 'shipments.id')
@@ -16825,10 +16825,10 @@ class AdminReportsController extends Controller
             })
 
             ->leftJoin('shipping_modes as shipping_mode', 'shipments.shipping_mode_id', '=', 'shipping_mode.id')
-            ->join('user_shipping_infos AS user_shipping_info', 'shipments.pickup_address_id', '=', 'user_shipping_info.id')
-            ->join('cities AS origin_city', 'user_shipping_info.city_id', '=', 'origin_city.id')
-            ->join('cities AS destination_city', 'shipments.consignee_city_id', '=', 'destination_city.id')
-            ->join('cities AS hub', 'destination_city.hub_id', '=', 'hub.id')
+            ->leftJoin('user_shipping_infos AS user_shipping_info', 'shipments.pickup_address_id', '=', 'user_shipping_info.id')
+            ->leftJoin('cities AS origin_city', 'user_shipping_info.city_id', '=', 'origin_city.id')
+            ->leftJoin('cities AS destination_city', 'shipments.consignee_city_id', '=', 'destination_city.id')
+            ->leftJoin('cities AS hub', 'destination_city.hub_id', '=', 'hub.id')
             ->leftjoin('consignee_address_areas as consignee_address_area', 'consignee_address_area.shipment_id', '=', 'shipments.id')
             ->leftjoin('city_areas as city_area', 'city_area.id', '=', 'consignee_address_area.city_area_id')
             ->leftjoin('cities as concerned_hub', 'concerned_hub.id', '=', 'cargo_bags.current_hub_id')
