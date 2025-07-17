@@ -7514,6 +7514,8 @@ class AdminCRMController extends Controller
                 ];
             }
         }
+
+        return ['status' => 1];
     }
 
     public static function storeInvalidReasons(array $reasonIds, int $crmRequestId)
