@@ -135,8 +135,7 @@ class ExportShipmentReport extends Command
 
     WHERE sj.created_at BETWEEN ? AND ?
       AND sj.shipper_status_id = 5
-      AND sj.city_id = 202
- limit 1 ", [
+      AND sj.city_id = 202", [
             $start->format('Y-m-d 00:00:00'),
             $end->format('Y-m-d 23:59:59'),
         ]);
