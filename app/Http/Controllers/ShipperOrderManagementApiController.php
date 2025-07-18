@@ -312,7 +312,7 @@ class ShipperOrderManagementApiController extends Controller
 
                 $filename = 'air_waybill' . '.pdf';
 
-                return $pdf->setOption('enable-local-file-access', false)->download($filename);
+                return $pdf->setOption('enable-local-file-access', true)->download($filename);
             }
 
             return response()->json(['status' => 1 , 'message' => 'Shipment not found!']);
