@@ -311,7 +311,6 @@ class ShipperOrderManagementApiController extends Controller
                 $pdf = SnappyPdf::loadHTML($air_waybill);
 
                 $filename = 'air_waybill' . '.pdf';
-
                 return $pdf->setOption('enable-local-file-access', true)->download($filename);
             }
 
