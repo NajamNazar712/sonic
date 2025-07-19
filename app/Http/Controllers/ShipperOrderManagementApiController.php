@@ -212,19 +212,18 @@ class ShipperOrderManagementApiController extends Controller
         $over_all_in_process = $over_all_in_process->count();
 
         // 2. Today bookings
-        $today_bookings = Shipment::where('shipper_status_id', 1)
-            ->whereBetween('created_at', [$todayStart,$todayEnd]);
+        $today_bookings = Shipment::where('shipments.shipper_status_id', 1)
+            ->whereBetween('shipments.created_at', [$todayStart,$todayEnd]);
 
         if($app_type == 2) {
             $today_bookings = $today_bookings->join('retail_shipments', 'retail_shipments.shipment_id', '=', 'shipments.id')
-                ->where('shipment_type', 2)
+                ->where('shipments.shipment_type', 2)
                 ->where('retail_shipments.shipper_account_no', $user_id);
         } else{
-            $today_bookings =  $today_bookings->where('shipment_type', 1)
-                ->where('user_id', $user_id);
+            $today_bookings =  $today_bookings->where('shipments.shipment_type', 1)
+                ->where('shipments.user_id', $user_id);
         }
         $today_bookings = $today_bookings->count();
-
         $statuses = [2, 14, 25];
         $last_6_day_summary = [];
 
