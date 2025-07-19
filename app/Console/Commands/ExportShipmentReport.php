@@ -160,12 +160,24 @@ class ExportShipmentReport extends Command
 
         $this->info("✔ Exported {$fileName}");
 
-        // Email CSV
-        Mail::raw("Rider shipment data from {$start->format('Y-m-d')} to {$end->format('Y-m-d')}", function ($msg) use ($filePath, $fileName) {
+        $zipPath = storage_path("app/exports/{$fileName}.zip");
+        $zip = new \ZipArchive();
+        if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) === true) {
+            $zip->addFile($filePath, $fileName); // file inside zip should have .csv name
+            $zip->close();
+            $this->info("✔ Compressed {$fileName} to ZIP");
+        } else {
+            $this->error("❌ Failed to create ZIP archive");
+            return;
+        }
+
+        // ✅ Email the zipped file
+        Mail::raw("Rider shipment data from {$start->format('Y-m-d')} to {$end->format('Y-m-d')}", function ($msg) use ($zipPath, $fileName) {
             $msg->to('anas.mazhar@logiserves.com')
                 ->subject("Shipment Export - {$fileName}")
-                ->attach($filePath, ['as' => $fileName, 'mime' => 'text/csv']);
+                ->attach($zipPath, ['as' => "{$fileName}.zip", 'mime' => 'application/zip']);
         });
+
 
         $this->info("📧 Email sent with attachment.");
     }
