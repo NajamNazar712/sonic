@@ -221,9 +221,7 @@ class ShipperCrmApiController extends Controller
 
     public function crm_request_resources(Request $request)
     {
-        $case_nature = $request->app_type == 2
-            ? CrmRequestCaseNature::all() :
-            CrmRequestCaseNature::where('id','!=',3)->get();
+        $case_nature =  CrmRequestCaseNature::where('id','!=',3)->get();
 
         $complaints = CrmRequestCaseNatureType::where('status_id',1)->where('nature_id',1)->get();
         $service_requests = CrmRequestCaseNatureType::where('status_id',1)->where('nature_id',2)->get();
@@ -375,7 +373,7 @@ class ShipperCrmApiController extends Controller
         $crm_requests = $crm_requests->select($selects)
             ->whereIn('crm_requests.status_id',$request_status)
             ->orderBy('crm_requests.id', 'desc')
-            ->cursorPaginate(150);
+            ->cursorPaginate(20);
 
 
         if($crm_requests->isNotEmpty()) {
