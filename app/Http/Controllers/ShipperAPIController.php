@@ -316,7 +316,7 @@ class ShipperAPIController extends Controller
                 $retail->save();
 
                 //send notification
-                NotificationsController::send(243, $retail->id, $minutes);
+//                NotificationsController::send(243, $retail->id, $minutes);
 
                 return response()->json([
                     'status' => 0,

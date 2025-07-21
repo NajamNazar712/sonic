@@ -2134,13 +2134,22 @@ class APIController extends Controller
             $tracking_number = $request->tracking_number;
             $type = $request->type;
 
-            $shipment = Shipment::join('retail_shipments as rs','rs.shipment_id','shipments.id')
-                ->where('rs.shipper_account_no',$user_id)->where('shipments.tracking_number',$tracking_number)->first();
+//            $shipment = Shipment::with('shipment_journey:id,shipment_id')->join('retail_shipments as rs','rs.shipment_id','shipments.id')
+//                ->where('rs.shipper_account_no',$user_id)->where('shipments.tracking_number',$tracking_number)
+//                ->select('shipments.*')
+//                ->first();
+            $shipment = Shipment::with(['shipment_journey', 'retail'])
+                ->whereHas('retail', function ($q) use ($user_id) {
+                    $q->where('shipper_account_no', $user_id);
+                })
+                ->where('tracking_number', $tracking_number)
+                ->first();
+
            if($shipment) {
                $tracking_number = $request->tracking_number;
                $type = $request->type;
                $retail_shipper = RetailShipperInfo::where('id',$user_id)->first();
-               $shipping_mode = RetailShippingMode::where('id',$shipment->shipping_mode)->first();
+               $shipping_mode = RetailShippingMode::where('id',$shipment->retail->shipping_mode)->first();
 //               $shipment = Shipment::whereIn('user_id', $user_ids)->where('tracking_number', $tracking_number)->first();
 
                $sub_segment_name = '-';
