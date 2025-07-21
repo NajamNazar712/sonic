@@ -57,6 +57,7 @@ class ShipperFinanceApiController extends Controller
 
     private function retail_payment_list($retail_id)
     {
+        dd(1);
         $retail_payments = DB::table('retail_done_payments')->join('retail_shipper_infos as rsi', 'retail_done_payments.user_id', '=', 'rsi.id')
             ->join('cities as c', 'rsi.city_id', '=', 'c.id')
             ->join('retail_done_payment_shipments as rdps', 'retail_done_payments.id', '=', 'rdps.retail_done_payment_id')
