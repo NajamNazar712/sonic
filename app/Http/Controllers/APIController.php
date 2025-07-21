@@ -857,6 +857,7 @@ class APIController extends Controller
             })];
         }
         else {
+            //this is for shipper app
             if ($user_type['restrict_order_id'] == 1) {
                 $rules['order_id'] = ['nullable', 'between:0,100', Rule::unique('shipments', 'order_id')->where(function ($query) use ($user_id) {
                     $query->where('user_id', $user_id);
@@ -866,7 +867,6 @@ class APIController extends Controller
             }
         }
 
-        //this is for shipper app
         if($request->app_type==1 && (!$request->has('pickup_address_id') || is_null($request->pickup_address_id))) {
 
             if (preg_match('/^(92|03)\d+/', $request->new_pickup_phone_number)) {
