@@ -1052,7 +1052,7 @@
                 },
                 rowId: 'id',
                 order: [
-                    [6, 'desc']
+                    [8, 'desc']
                 ],
                 columns: [{
                         data: 'id',
