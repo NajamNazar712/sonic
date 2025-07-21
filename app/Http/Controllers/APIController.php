@@ -2121,7 +2121,7 @@ class APIController extends Controller
 
         $rules = [
             'tracking_number' => ['required', 'integer', 'digits_between:10,20'],
-            'type' => ['required', 'boolean'],
+//            'type' => ['required', 'boolean'],
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -2138,7 +2138,7 @@ class APIController extends Controller
 //                ->where('rs.shipper_account_no',$user_id)->where('shipments.tracking_number',$tracking_number)
 //                ->select('shipments.*')
 //                ->first();
-            $shipment = Shipment::with(['shipment_journey', 'retail'])
+            $shipment = Shipment::with(['shipment_journey', 'retail','items','pickup_address'])
                 ->whereHas('retail', function ($q) use ($user_id) {
                     $q->where('shipper_account_no', $user_id);
                 })
@@ -2173,7 +2173,7 @@ class APIController extends Controller
                $details['order_date'] = $shipment->pickup_date;
                $details['booking_date'] = $shipment->created_at;
 
-               $shipper = $shipment->user;
+//               $shipper = $shipment->user;
 
                $details['shipper']['name'] = $retail_shipper->shipper_name;
 
@@ -2182,7 +2182,7 @@ class APIController extends Controller
                $details['pickup']['origin'] = $pickup->city->name;
 
                if ($type == 0) {
-                   $details['shipper']['account_number'] = $shipper->id;
+                   $details['shipper']['account_number'] = $retail_shipper->id;
                    $details['shipper']['phone_number_1'] = $retail_shipper->shipper_phone_no;
 //                   $details['shipper']['phone_number_2'] = $shipper->phone2;
 //                   $details['shipper']['email'] = $shipper->email;
