@@ -477,10 +477,6 @@ class AdminCRMController extends Controller
                             $already_lodged = true;
                             $complain = $is_shipment->id;
 
-                            if($nature_id == 1 && $request->complaint_id == 1){
-                                $canComplaintPaymentLocked = $this->canComplaintPaymentLocked($shipment_id);
-                            }
-
                             if($is_shipment->case_nature_id != $nature_id){
                                 if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
                                     if(in_array($complaint_id, [11, 13])){
@@ -7411,21 +7407,45 @@ class AdminCRMController extends Controller
         }
     }
 
-    public static function canComplaintPaymentLocked($id)
+    public static function canComplaintPaymentLocked($id, $crm_id = null)
     {
         $shipmentPayment = ShipmentsPaymentJourney::with('shipment.user')
-            ->where([
-                'shipment_id' => $id,
-                'status_id' => 1 
-            ])
-            ->latest()
-            ->first();
+                ->where('shipment_id', $id)
+                ->whereIn('status_id', [0, 1])
+                ->latest()
+                ->first();
 
 
         if (!$shipmentPayment) {
             return false; 
         }
 
+        // 0 processed
+        // 1 paid
+
+        if($shipmentPayment->status_id == 1){
+            
+            $comment = "Dear Customer Name
+
+            Your payment has been paid; therefore, the complaint has been closed.
+
+            Regards
+
+            CRM Team – SLGTRAX";
+            
+            $comment_by = 0;
+            $comment_type = 0;
+
+            $default_agent_setting = GlobalSettings::where('type', 'crm_default_agent');
+            if ($default_agent_setting->exists()) {
+                $default_agent_setting = $default_agent_setting->first();
+                $default_agent_id = $default_agent_setting->setting_value;
+            } else {
+                $default_agent_id = 306;
+            }
+            CRMCommentController::add($crm_id, $default_agent_id, $comment_by, $comment_type, $comment, 1);
+        }
+        
         $user = $shipmentPayment->shipment->user;
         $cycleId = $user->payment_cycle_id;
         $cycleDays = explode(',', $user->payment_cycle_days ?? '');
@@ -7486,10 +7506,9 @@ class AdminCRMController extends Controller
                     }
                 }
                 return false;
+            
+            return $lockTime && $now->greaterThanOrEqualTo($lockTime);
         }
-        
-        //lock time has passed, it's okay to lock
-        return $lockTime && $now->greaterThanOrEqualTo($lockTime);
     }
 
     public static function getDayName($dayNumber)
