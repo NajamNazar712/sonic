@@ -61,7 +61,7 @@ class ShipperFinanceApiController extends Controller
             ->join('cities as c', 'rsi.city_id', '=', 'c.id')
             ->join('retail_done_payment_shipments as rdps', 'retail_done_payments.id', '=', 'rdps.retail_done_payment_id')
             ->join('banks_lists as ub','ub.id','=','rsi.bank_id')
-             ->select('retail_done_payments.id', 'rsi.id as user_id', 'rsi.shipper_name as shipper', 'c.name as city', 'rsi.shipper_phone_no', 'rsi.shipper_address', 'retail_done_payments.total_shipments', 'retail_done_payments.delivered_shipments', 'retail_done_payments.adjusted_shipments', DB::raw('SUM(rdps.amount) as total_amount') , DB::raw('SUM(rdps.payable) as total_payable'), 'retail_done_payments.ibft_charges','ub.name as bank', 'retail_done_payments.reference_number', 'retail_done_payments.created_at as done_at', 'retail_done_payments.status')
+             ->select('retail_done_payments.id','retail_done_payments.id as payment_id', 'rsi.id as user_id', 'rsi.shipper_name as shipper', 'c.name as city', 'rsi.shipper_phone_no as phone', 'rsi.shipper_address as address', 'retail_done_payments.total_shipments', 'retail_done_payments.delivered_shipments', 'retail_done_payments.adjusted_shipments', DB::raw('SUM(rdps.amount) as total_amount') , DB::raw('SUM(rdps.payable) as total_payable'), 'retail_done_payments.ibft_charges','ub.name as company_bank', 'retail_done_payments.reference_number', 'retail_done_payments.created_at as done_at', 'retail_done_payments.status')
             ->where('retail_done_payments.user_id',$retail_id)
             ->groupBy('retail_done_payments.id')
             ->orderBy('retail_done_payments.id', 'desc')
