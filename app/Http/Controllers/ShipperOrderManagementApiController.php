@@ -53,7 +53,7 @@ class ShipperOrderManagementApiController extends Controller
             })
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sj.status_reason_id')
             ->leftJoin('booking_types as bt', 'shipments.booking_type_id', '=', 'bt.id')
-            ->whereBetween('shipments.created_at', [Carbon::now()->subMonths(6)->startOfMonth(), Carbon::now()->endOfDay()])
+            ->whereBetween('shipments.created_at', [Carbon::now()->subMonths(8)->startOfMonth(), Carbon::now()->endOfDay()])
             ->select([
                 'shipments.id as shipment_id',
                 'shipments.tracking_number',
