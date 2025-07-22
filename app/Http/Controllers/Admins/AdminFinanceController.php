@@ -4128,6 +4128,8 @@ class AdminFinanceController extends Controller
                             return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment is of retail it can not be reverted'];
 
                         }
+                    }else{
+                        return ['status' => 1, 'error' => 'Add Lost Admin first'];
                     }
 
                 } else {
