@@ -280,7 +280,7 @@ class ShipperOrderManagementApiController extends Controller
             })
             ->leftjoin('shipments_journey as sj2', 'sj2.id', '=', 'last_journeys.max_id')
             ->whereBetween('sj2.created_at', [Carbon::now()->subDays(6)->startOfDay(), Carbon::now()->endOfDay()])
-            ->whereIN('sj2.shipper_status_id', [14, 30, 36, 37])
+            ->whereIN('sj2.shipper_status_id', [14, 30, 36, 37,25])
             ->select(
                 DB::raw('DATE(sj2.created_at) as day'),
                 'sj2.shipper_status_id',
