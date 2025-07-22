@@ -533,13 +533,16 @@ class APIController extends Controller
         $flag = null;
         $user_type = User::where('id', $user_id)->first();
 
-        if ($request->input('amount') == 0 && Carbon::parse($user_type->activated_at)->lt(Carbon::now()->subDays(7)) && !PendingPayment::check_negative_payable($user_id, $user_type['account_type_id'])) {
+//
+            if ($request->input('amount') == 0 && Carbon::parse($user_type->activated_at)->lt(Carbon::now()->subDays(7)) && !PendingPayment::check_negative_payable($user_id, $user_type['account_type_id']) && !in_array($request->input('service_type_id',1), [3,5])) {
 
-            return response()->json([
-                'status' => 1,
-                'message' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."
-            ]);
-        }
+                return response()->json([
+                    'status' => 1,
+                    'message' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."
+                ]);
+            }
+
+
 
         // Validator::extend('phone_number', function ($attribute, $value, $parameters) {
         //     if ($value) {
