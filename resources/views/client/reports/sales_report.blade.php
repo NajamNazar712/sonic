@@ -165,6 +165,8 @@
                         <th class="border-primary border-darken-1">Cash Handling Charges</th>
                         <th class="border-primary border-darken-1">Insurance Charges</th>
                         <th class="border-primary border-darken-1">Packaging Charges</th>
+                        <th class="border-primary border-darken-1">FAF Charges</th>
+                        <th class="border-primary border-darken-1">Wallet Charges</th>
                         <th class="border-primary border-darken-1">Fuel Surcharge</th>
                         <th class="border-primary border-darken-1">Return Charges</th>
                         <th class="border-primary border-darken-1">Replacement Charges</th>
@@ -466,6 +468,8 @@
                             head.push('Cash Handling Charges');
                             head.push('Insurance Charges');
                             head.push('Packaging Charges');
+                            head.push('FAF Charges');
+                            head.push('Wallet Charges');
                             head.push('Fuel Surcharge');
                             head.push('Return Charges');
                             head.push('Replacement Charges');
@@ -524,6 +528,8 @@
                                 row.push(values.cash_handling_charges);
                                 row.push(values.insurance_charges);
                                 row.push(values.packaging_material_charges);
+                                row.push(values.faf_charges);
+                                row.push(values.wallet_charges);
                                 row.push(values.fuel_surcharge);
                                 row.push(values.return_charges);
                                 row.push(values.replacement_charges);
@@ -629,6 +635,8 @@
                     { data:'cash_handling_charges' ,name: 'shipments.cash_handling_charges', class: 'align-middle cash_handling_charges'},
                     { data:'insurance_charges' ,name: 'shipments.insurance_charges', class: 'align-middle insurance_charges'},
                     { data:'packaging_material_charges' ,name: 'shipments.packaging_material_charges', class: 'align-middle packaging_material_charges'},
+                    { data: 'faf_charges', name: 'sac.faf_charges', class: 'align-middle faf_charges'},
+                    { data: 'wallet_charges', name: 'sac.wallet_charges', class: 'align-middle wallet_charges'},
                     { data:'fuel_surcharge' ,name: 'shipments.fuel_surcharge', class: 'align-middle fuel_surcharge'},
                     { data:'return_charges' ,name: 'shipments.return_charges', class: 'align-middle return_charges'},
                     { data:'replacement_charges' ,name: 'shipments.replacement_charges', class: 'align-middle replacement_charges'},

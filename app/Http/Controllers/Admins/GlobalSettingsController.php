@@ -10763,39 +10763,44 @@ class GlobalSettingsController extends Controller
 
     public function product_tax_index()
     {
+        $excluded_users_sst_array =[];
+        $excluded_users_wht_array = [];
         $data = ParentProduct::get();
-        return view('admin.settings.product_percentage')->with(['data' => $data]);
+        $shippers = User::where('status', 3)->select('id', 'name')->get();
+        $excluded_users_wht = GlobalSettings::where('type', 'excluded_users_wht');
+        if ($excluded_users_wht->exists()) {
+            $excluded_users_wht = $excluded_users_wht->first();
+            $excluded_users_wht_array = array_map('strval', explode(',', $excluded_users_wht->text));
+        }
+        $excluded_users_sst = GlobalSettings::where('type', 'excluded_users_sst');
+        if ($excluded_users_sst->exists()) {
+            $excluded_users_sst = $excluded_users_sst->first();
+            $excluded_users_sst_array = array_map('strval', explode(',', $excluded_users_sst->text));
+        }
+        return view('admin.settings.product_percentage')->with(['data' => $data, 'shippers' => $shippers, 'excluded_users_wht' => $excluded_users_wht_array, 'excluded_users_sst' => $excluded_users_sst_array]);
     }
 
     public function product_tax_update(Request $request)
     {
-
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 831);
         if ($request->has('tax_percentage') && $request->has('sst_percentage')) {
-
-            ActivityTrailController::createActivityTrailLog(Auth::id(), 831);
-
             foreach ($request->tax_percentage as $id => $new_value) {
                 $product = ParentProduct::find($id);
                 if ($product && $product->tax_percentage != $new_value) {
-                    // Log the change
+                    
                     ParentProductTaxLog::create([
                         'parent_product_id' => $product->id,
                         'field_changed' => 'Tax Percentage',
                         'old_value' => $product->tax_percentage,
                         'new_value' => $new_value,
                         'updated_by' => Auth::id(),
-                    ]);
-
-                    // Update the product
+                    ]);    
                     $product->update(['tax_percentage' => $new_value]);
                 }
             }
-
             foreach ($request->sst_percentage as $id => $new_value) {
                 $product = ParentProduct::find($id);
                 if ($product && $product->sst_percentage != $new_value) {
-
-                    // Log the change
                     ParentProductTaxLog::create([
                         'parent_product_id' => $product->id,
                         'field_changed' => 'SST Percentage',
@@ -10804,11 +10809,78 @@ class GlobalSettingsController extends Controller
                         'updated_by' => Auth::id(),
                     ]);
 
-                    // Update the product
                     $product->update(['sst_percentage' => $new_value]);
                 }
             }
         }
+      
+        $previous_wht = GlobalSettings::where('type', 'excluded_users_wht')->value('text');
+        $previous_sst = GlobalSettings::where('type', 'excluded_users_sst')->value('text');
+
+        $previous_wht_array = $previous_wht ? explode(',', $previous_wht) : [];
+        $previous_sst_array = $previous_sst ? explode(',', $previous_sst) : [];
+
+        // Get current submitted shippers from request
+        $current_wht_array = $request->excluded_users_wht ?? [];
+        $current_sst_array = $request->excluded_users_sst ?? [];
+
+        // Find removed shippers for WHT
+        $removed_wht = array_diff($previous_wht_array, $current_wht_array);
+
+        // Find removed shippers for SST
+        $removed_sst = array_diff($previous_sst_array, $current_sst_array);
+
+        $excluded_users_wht = $request->excluded_users_wht ? implode(',', $request->excluded_users_wht) : '';
+        $settings = GlobalSettings::where('type', 'excluded_users_wht');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+        } else {
+            $settings = new GlobalSettings();
+            $settings->type = 'excluded_users_wht';
+            $settings->setting_value = 0;
+        }
+        $settings->text = $excluded_users_wht;
+        $settings->save();
+    
+    
+        $excluded_users_sst = $request->excluded_users_sst ? implode(',', $request->excluded_users_sst) : '';
+        $settings = GlobalSettings::where('type', 'excluded_users_sst');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+        } else {
+            $settings = new GlobalSettings();
+            $settings->type = 'excluded_users_sst';
+            $settings->setting_value = 0;
+        }
+        $settings->text = $excluded_users_sst;
+        $settings->save();
+
+        if(!empty($removed_wht)) {
+
+            $removed_wht_list = User::whereIn('id', $removed_wht)->pluck('name')->implode(', ');
+            ParentProductTaxLog::create([
+                'parent_product_id' => null,
+                'field_changed' => 'WHT Excluded Shippers',
+                'old_value' => null,
+                'new_value' => null,
+                'text' => $removed_wht_list,
+                'updated_by' => Auth::id(),
+            ]);
+        }
+
+        if(!empty($removed_sst)) {
+
+            $removed_sst_list = User::whereIn('id', $removed_sst)->pluck('name')->implode(', ');
+            ParentProductTaxLog::create([
+                'parent_product_id' => null,
+                'field_changed' => 'COD SST Excluded Shippers',
+                'old_value' => null,
+                'new_value' => null,
+                'text' => $removed_sst_list,
+                'updated_by' => Auth::id(),
+            ]);
+        }
+        
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
@@ -10823,8 +10895,8 @@ class GlobalSettingsController extends Controller
     {
  
         $query = DB::table('parent_product_percentage_logs as pl')
-            ->join('parent_products as pp', 'pp.id', '=', 'pl.parent_product_id')
-            ->join('admins as u', 'u.id', '=', 'pl.updated_by')
+            ->leftJoin('parent_products as pp', 'pp.id', '=', 'pl.parent_product_id')
+            ->leftJoin('admins as u', 'u.id', '=', 'pl.updated_by')
             ->select([
                 'pl.id',
                 'pp.name as parent_product_name',
@@ -10833,7 +10905,8 @@ class GlobalSettingsController extends Controller
                 'pl.new_value',
                 'u.name as updated_by_name',
                 'pl.created_at',
-            ]);
+                'pl.text as shippers'
+            ])->orderByDesc('pl.created_at');
 
         return DataTables::of($query)
             ->editColumn('created_at', function ($row) {
