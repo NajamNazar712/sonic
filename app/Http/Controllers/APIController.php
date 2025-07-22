@@ -2163,9 +2163,8 @@ class APIController extends Controller
                {
                    $sub_segment_name = $sub_segment->name;
                }
-
                $details = array();
-               $details['shipment_id'] = $shipment->shipment_id;
+               $details['shipment_id'] = $shipment->id;
                $details['tracking_number'] = $tracking_number;
 
                $details['order_id'] = $shipment->order_id;
