@@ -271,6 +271,7 @@ class ShipperOrderManagementApiController extends Controller
 // --- Delivered / Returned ---
         $subquery = DB::table('shipments_journey as sj1')
             ->select('sj1.shipment_id', DB::raw('MAX(sj1.id) as max_id'))
+            ->whereBetween('sj1.created_at', [Carbon::now()->subDays(6)->startOfDay(), Carbon::now()->endOfDay()])
             ->groupBy('sj1.shipment_id');
 
         $journeyQuery = $baseQuery->clone()
