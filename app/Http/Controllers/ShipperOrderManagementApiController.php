@@ -18,7 +18,7 @@ class ShipperOrderManagementApiController extends Controller
            $shipments_summary = $this->shipments_summary($request->retail_shipper_id,$request->app_type);
            $order_list = $this->retail_shipper_list($request->retail_shipper_id);
        } else {
-           $shipments_summary = $this->shipments_summary($request->shipper_id,$request->app_type);
+//           $shipments_summary = $this->shipments_summary($request->shipper_id,$request->app_type);
            $order_list = $this->shipper_order_list($request->shipper_id);
        }
 
@@ -27,7 +27,7 @@ class ShipperOrderManagementApiController extends Controller
                'status' => 0,
                'message' => 'Success',
                'order_list' => $order_list,
-               'shipments_summary' =>$shipments_summary
+               'shipments_summary' =>[]
            ]);
        }
 
