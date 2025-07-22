@@ -202,7 +202,7 @@ class ShipperOrderManagementApiController extends Controller
 
         if ($app_type == 2) {
             $over_all_in_process = $over_all_in_process
-                ->join('retail_shipments', 'retail_shipments.shipment_id', '=', 'shipments.id')
+                ->leftjoin('retail_shipments', 'retail_shipments.shipment_id', '=', 'shipments.id')
                 ->where('shipment_type', 2)
                 ->where('retail_shipments.shipper_account_no', $user_id);
         } else {
@@ -215,7 +215,7 @@ class ShipperOrderManagementApiController extends Controller
             ->whereBetween('shipments.created_at', [$todayStart,$todayEnd]);
 
         if($app_type == 2) {
-            $today_bookings = $today_bookings->join('retail_shipments', 'retail_shipments.shipment_id', '=', 'shipments.id')
+            $today_bookings = $today_bookings->leftjoin('retail_shipments', 'retail_shipments.shipment_id', '=', 'shipments.id')
                 ->where('shipments.shipment_type', 2)
                 ->where('retail_shipments.shipper_account_no', $user_id);
         } else{
@@ -242,7 +242,7 @@ class ShipperOrderManagementApiController extends Controller
         $baseQuery = DB::table('shipments as s');
 
         if ($app_type == 2) {
-            $baseQuery->join('retail_shipments as rs', 'rs.shipment_id', '=', 's.id')
+            $baseQuery->leftjoin('retail_shipments as rs', 'rs.shipment_id', '=', 's.id')
                 ->where('s.shipment_type', 2)
                 ->where('rs.shipper_account_no', $user_id);
         } else {
@@ -252,7 +252,7 @@ class ShipperOrderManagementApiController extends Controller
 
 // --- Arrivals ---
         $arrivals = $baseQuery->clone()
-            ->join('shipments_journey as sj', 'sj.shipment_id', '=', 's.id')
+            ->leftjoin('shipments_journey as sj', 'sj.shipment_id', '=', 's.id')
             ->whereIn('sj.shipper_status_id', [2, 4])
             ->whereBetween('sj.created_at', [Carbon::now()->subDays(6)->startOfDay(), Carbon::now()->endOfDay()])
             ->select(
@@ -275,11 +275,12 @@ class ShipperOrderManagementApiController extends Controller
             ->groupBy('sj1.shipment_id');
 
         $journeyQuery = $baseQuery->clone()
-            ->joinSub($subquery, 'last_journeys', function ($join) {
+            ->leftJoinSub($subquery, 'last_journeys', function ($join) {
                 $join->on('s.id', '=', 'last_journeys.shipment_id');
             })
-            ->join('shipments_journey as sj2', 'sj2.id', '=', 'last_journeys.max_id')
+            ->leftjoin('shipments_journey as sj2', 'sj2.id', '=', 'last_journeys.max_id')
             ->whereBetween('sj2.created_at', [Carbon::now()->subDays(6)->startOfDay(), Carbon::now()->endOfDay()])
+            ->whereIN('sj2.shipper_status_id', [14, 30, 36, 37])
             ->select(
                 DB::raw('DATE(sj2.created_at) as day'),
                 'sj2.shipper_status_id',
