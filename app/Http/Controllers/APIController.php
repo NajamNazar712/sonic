@@ -533,7 +533,7 @@ class APIController extends Controller
         $flag = null;
         $user_type = User::where('id', $user_id)->first();
 
-//
+        // sahban bhai said service type 3,5 then disabled this below condition
             if ($request->input('amount') == 0 && Carbon::parse($user_type->activated_at)->lt(Carbon::now()->subDays(7)) && !PendingPayment::check_negative_payable($user_id, $user_type['account_type_id']) && !in_array($request->input('service_type_id',1), [3,5])) {
 
                 return response()->json([
