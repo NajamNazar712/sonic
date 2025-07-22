@@ -19,7 +19,6 @@ class ShipperOrderManagementApiController extends Controller
            $order_list = $this->retail_shipper_list($request->retail_shipper_id);
        } else {
            $shipments_summary = $this->shipments_summary($request->shipper_id,$request->app_type);
-           dd($shipments_summary);
            $order_list = $this->shipper_order_list($request->shipper_id);
        }
 
