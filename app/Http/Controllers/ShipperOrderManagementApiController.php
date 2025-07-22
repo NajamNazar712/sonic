@@ -42,10 +42,10 @@ class ShipperOrderManagementApiController extends Controller
     private function commonShipmentQuery()
     {
 
-        return Shipment::join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
-            ->join('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
-            ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
-            ->join('cities as dc', 'shipments.consignee_city_id', '=', 'dc.id')
+        return Shipment::leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
+            ->leftjoin('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->leftjoin('cities as oc', 'usi.city_id', '=', 'oc.id')
+            ->leftjoin('cities as dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->leftJoin('shipment_payment_status as sps', 'sps.id', '=', 'shipments.payment_status_id')
             ->leftJoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
@@ -53,6 +53,7 @@ class ShipperOrderManagementApiController extends Controller
             })
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sj.status_reason_id')
             ->leftJoin('booking_types as bt', 'shipments.booking_type_id', '=', 'bt.id')
+            ->whereBetween('shipments.created_at', [Carbon::now()->subMonths(6)->startOfMonth(), Carbon::now()->endOfDay()])
             ->select([
                 'shipments.id as shipment_id',
                 'shipments.tracking_number',
@@ -85,7 +86,7 @@ class ShipperOrderManagementApiController extends Controller
     {
 
         return $this->commonShipmentQuery()
-            ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
+            ->leftjoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
             ->addSelect('sm.mode as service_type','shipments.id')
             ->where('shipments.user_id', $shipper_id)
             ->orderBy('shipments.id', 'desc')
@@ -95,9 +96,9 @@ class ShipperOrderManagementApiController extends Controller
     private function retail_shipper_list($retail_id)
     {
         return $this->commonShipmentQuery()
-            ->join('retail_shipments as rs', 'rs.shipment_id', '=', 'shipments.id')
-            ->join('retail_shipper_infos as rsi', 'rsi.id', '=', 'rs.shipper_account_no')
-            ->join('retail_shipping_modes as sm', 'sm.id', '=', 'rs.shipping_mode')
+            ->leftjoin('retail_shipments as rs', 'rs.shipment_id', '=', 'shipments.id')
+            ->leftjoin('retail_shipper_infos as rsi', 'rsi.id', '=', 'rs.shipper_account_no')
+            ->leftjoin('retail_shipping_modes as sm', 'sm.id', '=', 'rs.shipping_mode')
             ->addSelect('rs.id','sm.name as service_type')
             ->where('rsi.id', $retail_id)
             ->orderBy('rs.id', 'desc')
