@@ -29,26 +29,33 @@ class TestEmailCheck extends Command
      */
     public function handle()
     {
-//        $records = DB::table('done_payment_shipments_backup')
-//            ->where('done_payment_id', 1623393)
-//            ->select('id', 'wht', 'cod_sst')
-//            ->get();
-//
-//        foreach ($records as $record) {
+        $records = DB::table('done_payment_shipments')
+            ->whereIn('done_payment_id', [1624481,1624480])
+            ->select('id', 'wht', 'cod_sst','payable')
+            ->get();
+
+        foreach ($records as $record) {
 //            $currentPayable = DB::table('done_payment_shipments')
 //                ->where('id', $record->id)
 //                ->value('payable');
-//
-//            DB::table('done_payment_shipments')
-//                ->where('id', $record->id)
-//                ->update(['payable' => $currentPayable + $record->wht + $record->cod_sst]);
-//        }
 
-        Mail::mailer('huawei_email')->raw('This is a test email from Laravel.', function ($message) {
-            $message->to('uit.mohsin95@gmail.com')
-                ->from('return@slgtrax.com', 'SLG Trax') // optional name
-                ->subject('Laravel Test Email via Huawei');
-        });
+            if($record->wht > 0 || $record->cod_sst > 0) {
+                $currentPayable = $record->payable;
+                DB::table('done_payment_shipments')
+                    ->where('id', $record->id)
+                    ->update(['payable' => $currentPayable + $record->wht + $record->cod_sst, 'cod_sst' => 0, 'wht' => 0]);
+            }
+        }
+
+        DB::select('CALL update_done_payment_statistics(?)', [1624480]);
+        DB::select('CALL update_done_payment_statistics(?)', [1624481]);
+
+
+//        Mail::mailer('huawei_email')->raw('This is a test email from Laravel.', function ($message) {
+//            $message->to('uit.mohsin95@gmail.com')
+//                ->from('return@slgtrax.com', 'SLG Trax') // optional name
+//                ->subject('Laravel Test Email via Huawei');
+//        });
 
     }
 
