@@ -67,31 +67,44 @@
                             <div class="row mt-4 text-center">
                                 <div class="col-6 form-group">
                                     <label class="mr-2 font-medium-3"><b>Exclude Specific Shippers:</b></label>
-                                    <input type="checkbox" name="all_shipper_toggle_wht" id="all_shipper_toggle_wht" class="switchery all_shipper_toggle" data-size="sm" data-switchery="true">
+                                    <input type="checkbox" name="all_shipper_toggle_wht" id="all_shipper_toggle_wht" class="switchery all_shipper_toggle" data-size="sm" data-switchery="true" @if(isset($wht_setting_value) && $wht_setting_value == 1) checked @endif>
                                     <label class="ml-2 font-medium-3"><b>Include Specific Shippers:</b></label>
                                 </div>
 
                                 <div class="col-6 form-group">
                                     <label class="mr-2 font-medium-3"><b>Exclude Specific Shippers:</b></label>
-                                    <input type="checkbox" name="all_shipper_toggle_sst" id="all_shipper_toggle_sst" class="switchery all_shipper_toggle" data-size="sm" data-switchery="true">
+                                    <input type="checkbox" name="all_shipper_toggle_sst" id="all_shipper_toggle_sst" class="switchery all_shipper_toggle" data-size="sm" data-switchery="true" @if(isset($sst_setting_value) && $sst_setting_value == 1) checked @endif>
                                     <label class="ml-2 font-medium-3"><b>Include Specific Shippers:</b></label>
                                 </div>
                             </div>
                             <div class="row mt-2">
                                 <div class="col-6 form-group" id="excluded_users_container_wht">
-                                    <label class="mr-2 font-medium-2"><b>WHT</b></label>
-                                    <select name="excluded_users_wht[]" id="excluded_users_wht" class="form-control select2" multiple="multiple">
-                                       @foreach($shippers as $shipper)
-                                            <option value="{{$shipper->id}}">{{$shipper->name}}</option>
-                                        @endforeach
+
+                                    <label class="mr-2 font-medium-2">
+                                        <b>
+                                            @if(isset($wht_setting_value) && $wht_setting_value == 1)
+                                                Included Shippers WHT
+                                            @else
+                                                Excluded Shippers WHT
+                                            @endif
+                                        </b>
+                                    </label>
+
+                                    <select name="wht_users[]" id="excluded_users_wht" class="form-control select2" multiple="multiple">
                                     </select>
                                 </div>
                                 <div class="col-6 form-group" id="excluded_users_container_sst">
-                                    <label class="mr-2 font-medium-2"><b>COD SST </b></label>
-                                    <select name="excluded_users_sst[]" id="excluded_users_sst" class="form-control select2" multiple="multiple">
-                                        @foreach($shippers as $shipper)
-                                            <option value="{{$shipper->id}}">{{$shipper->name}}</option>
-                                        @endforeach
+
+                                <label class="mr-2 font-medium-2">
+                                    <b>
+                                        @if(isset($sst_setting_value) && $sst_setting_value == 1)
+                                            Included Shippers COD SST
+                                        @else
+                                            Excluded Shippers COD SST
+                                        @endif
+                                    </b>
+                                </label>
+                                <select name="cod_sst_users[]" id="excluded_users_sst" class="form-control select2" multiple="multiple">
                                     </select>
                                 </div>
                                 <div class="col-12 mt-3 mb-5 text-center">
@@ -116,15 +129,51 @@
 
     <script>
         $(document).ready(function() {
+            
             $('#excluded_users_wht').select2({
-                placeholder:'Select Only Shippers',
                 width:'100%',
-                allowClear:true
+                placeholder:"Select Shipper",
+                allowClear:true,
+                multiple: true,
+                minimumInputLength: 2,
+                ajax: {
+                    dataType: 'json',
+                    url:  '{!! route('admin.accounts.shipper_names.dropdown',['type'=>'active']) !!}',
+                        data: function (params) {
+                            return {
+                                search: params.term,
+                            }
+                        },
+                        processResults: function (data) {
+                            return {
+                                results: data
+                            };
+                        },
+                    delay: 700,
+                }
             });
+
             $('#excluded_users_sst').select2({
-                placeholder:'Select Only Shippers',
                 width:'100%',
-                allowClear:true
+                placeholder:"Select Shipper",
+                allowClear:true,
+                multiple: true,
+                minimumInputLength: 2,
+                ajax: {
+                    dataType: 'json',
+                    url:  '{!! route('admin.accounts.shipper_names.dropdown',['type'=>'active']) !!}',
+                        data: function (params) {
+                            return {
+                                search: params.term,
+                            }
+                        },
+                        processResults: function (data) {
+                            return {
+                                results: data
+                            };
+                        },
+                    delay: 700,
+                }
             });
             $('#settings_form .class').inputmask({
                 'alias': 'decimal',
@@ -139,13 +188,23 @@
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
                 }
             });
-            @if(count($excluded_users_wht) > 0)
-                var ids = @json($excluded_users_wht);
-                $('#excluded_users_wht').val(ids).trigger('change');
+            
+            @if (!empty($users_wht))
+                var preselectedUsers = @json($users_wht); 
+
+                preselectedUsers.forEach(function(user) {
+                    var option = new Option(user.text, user.id, true, true);
+                    $('#excluded_users_wht').append(option).trigger('change');
+                });
             @endif
-            @if(count($excluded_users_sst) > 0)
-                var ids = @json($excluded_users_sst);
-                $('#excluded_users_sst').val(ids).trigger('change');
+
+            @if (!empty($users_sst))
+                var preselectedUsers = @json($users_sst); 
+
+                preselectedUsers.forEach(function(user) {
+                    var option = new Option(user.text, user.id, true, true);
+                    $('#excluded_users_sst').append(option).trigger('change');
+                });
             @endif
         });
     </script>

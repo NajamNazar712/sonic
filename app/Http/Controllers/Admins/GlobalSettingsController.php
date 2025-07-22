@@ -10763,21 +10763,46 @@ class GlobalSettingsController extends Controller
 
     public function product_tax_index()
     {
-        $excluded_users_sst_array =[];
-        $excluded_users_wht_array = [];
+        $users_sst_array =[];
+        $users_wht_array = [];
+        $sst_setting_value = 0;
+        $wht_setting_value = 0;
         $data = ParentProduct::get();
-        $shippers = User::where('status', 3)->select('id', 'name')->get();
+        //$shippers = User::where('status', 3)->select('id', 'name')->get();
         $excluded_users_wht = GlobalSettings::where('type', 'excluded_users_wht');
         if ($excluded_users_wht->exists()) {
             $excluded_users_wht = $excluded_users_wht->first();
-            $excluded_users_wht_array = array_map('strval', explode(',', $excluded_users_wht->text));
+            $users_wht_array = array_map('strval', explode(',', $excluded_users_wht->text));
+            $users_wht_array = User::whereIn('status', [3, 4])
+            ->whereIn('id', $users_wht_array)
+            ->select('id', 'name')
+            ->get()
+            ->map(function($user) {
+                return [
+                    'id' => $user->id,
+                    'text' => $user->name, // "text" is expected by Select2
+                ];
+            });
+            $wht_setting_value = $excluded_users_wht->setting_value;
         }
         $excluded_users_sst = GlobalSettings::where('type', 'excluded_users_sst');
         if ($excluded_users_sst->exists()) {
             $excluded_users_sst = $excluded_users_sst->first();
-            $excluded_users_sst_array = array_map('strval', explode(',', $excluded_users_sst->text));
+            $users_sst_array = array_map('strval', explode(',', $excluded_users_sst->text));
+            $users_sst_array = User::whereIn('status', [3, 4])
+            ->whereIn('id', $users_sst_array)
+            ->select('id', 'name')
+            ->get()
+            ->map(function($user) {
+                return [
+                    'id' => $user->id,
+                    'text' => $user->name, // "text" is expected by Select2
+                ];
+            });
+            $sst_setting_value = $excluded_users_sst->setting_value;
         }
-        return view('admin.settings.product_percentage')->with(['data' => $data, 'shippers' => $shippers, 'excluded_users_wht' => $excluded_users_wht_array, 'excluded_users_sst' => $excluded_users_sst_array]);
+        //dd($users_wht_array);
+        return view('admin.settings.product_percentage')->with(['data' => $data, 'users_wht' => $users_wht_array, 'users_sst' => $users_sst_array, 'wht_setting_value' => $wht_setting_value, 'sst_setting_value' => $sst_setting_value]);
     }
 
     public function product_tax_update(Request $request)
@@ -10821,8 +10846,8 @@ class GlobalSettingsController extends Controller
         $previous_sst_array = $previous_sst ? explode(',', $previous_sst) : [];
 
         // Get current submitted shippers from request
-        $current_wht_array = $request->excluded_users_wht ?? [];
-        $current_sst_array = $request->excluded_users_sst ?? [];
+        $current_wht_array = $request->wht_users ?? [];
+        $current_sst_array = $request->cod_sst_users ?? [];
 
         // Find removed shippers for WHT
         $removed_wht = array_diff($previous_wht_array, $current_wht_array);
@@ -10830,29 +10855,30 @@ class GlobalSettingsController extends Controller
         // Find removed shippers for SST
         $removed_sst = array_diff($previous_sst_array, $current_sst_array);
 
-        $excluded_users_wht = $request->excluded_users_wht ? implode(',', $request->excluded_users_wht) : '';
+        $wht_users = $request->wht_users ? implode(',', $request->wht_users) : '';
         $settings = GlobalSettings::where('type', 'excluded_users_wht');
         if ($settings->exists()) {
             $settings = $settings->first();
         } else {
             $settings = new GlobalSettings();
             $settings->type = 'excluded_users_wht';
-            $settings->setting_value = 0;
         }
-        $settings->text = $excluded_users_wht;
+        
+        $settings->setting_value = $request->has('all_shipper_toggle_wht') ? 1 : 0;
+        $settings->text = $wht_users;
         $settings->save();
     
     
-        $excluded_users_sst = $request->excluded_users_sst ? implode(',', $request->excluded_users_sst) : '';
+        $cod_sst_users = $request->cod_sst_users ? implode(',', $request->cod_sst_users) : '';
         $settings = GlobalSettings::where('type', 'excluded_users_sst');
         if ($settings->exists()) {
             $settings = $settings->first();
         } else {
             $settings = new GlobalSettings();
             $settings->type = 'excluded_users_sst';
-            $settings->setting_value = 0;
         }
-        $settings->text = $excluded_users_sst;
+        $settings->setting_value = $request->has('all_shipper_toggle_sst') ? 1 : 0;
+        $settings->text = $cod_sst_users;
         $settings->save();
 
         if(!empty($removed_wht)) {
