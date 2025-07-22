@@ -17978,6 +17978,16 @@ class AdminReportsController extends Controller
                 }
                 
             })
+            ->editColumn('taxable_amount', function ($row) {
+                return number_format($row->taxable_amount, 2); // 2 decimal places
+            })
+            ->editColumn('tax_amount', function ($row) {
+                return number_format($row->tax_amount, 2);
+            })
+            ->editColumn('cod_sst', function ($row) {
+                return number_format($row->cod_sst, 2);
+            })
+
             ->editColumn('status', function($total){
                 if($total->status == 0 ){
                     return 'Un-Paid';
