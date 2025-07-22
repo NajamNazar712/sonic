@@ -39,12 +39,12 @@ class TestEmailCheck extends Command
 //                ->where('id', $record->id)
 //                ->value('payable');
 
-            if($record->wht > 0 || $record->cod_sst > 0) {
-                $currentPayable = $record->payable;
-                DB::table('done_payment_shipments')
-                    ->where('id', $record->id)
-                    ->update(['payable' => $currentPayable + $record->wht + $record->cod_sst, 'cod_sst' => 0, 'wht' => 0]);
-            }
+
+            $currentPayable = $record->payable;
+            DB::table('done_payment_shipments')
+                ->where('id', $record->id)
+                ->update(['payable' => $currentPayable + $record->wht + $record->cod_sst, 'cod_sst' => 0, 'wht' => 0]);
+
         }
 
         DB::select('CALL update_done_payment_statistics(?)', [1624480]);
