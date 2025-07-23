@@ -209,8 +209,8 @@ class ShipperOrderManagementApiController extends Controller
         endif;
 
         // 1. Over all in process
-        $over_all_in_process = Shipment::whereNotIn('shipper_status_id', $shipment_status);
-//            ->whereBetween('pickup_date', [$startDate, $endDate]);
+        $over_all_in_process = Shipment::whereNotIn('shipper_status_id', $shipment_status)
+            ->whereBetween('shipments.created_at', [Carbon::now()->subMonths(12)->startOfMonth(), Carbon::now()->endOfDay()]);
 
         if ($app_type == 2) {
             $over_all_in_process = $over_all_in_process
