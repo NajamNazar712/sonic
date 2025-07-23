@@ -28,6 +28,18 @@
                                     </fieldset>
                                 </div>
                                 <div class="col-2">
+                                    <form id="search_region_form" class="mb-1 justify-content-center"
+                                        novalidate="novalidate">
+                                        <div class="form-group">
+                                            <select name="search_region" id="search_region" class="search_region form-control select2">
+                                            @foreach($region as $r) 
+                                               <option value="{{ $r->id }}">{{ $r->name }}</option>
+                                            @endforeach
+                                        </select>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="col-2">
                                     <form id="payment_cycle_filter_form" class="mb-1 justify-content-center"
                                         novalidate="novalidate">
                                         <div class="form-group">
@@ -51,7 +63,7 @@
                                         </div>
                                     </form>
                                 </div>
-                                <div class="col-3">
+                                <div class="col-2">
                                     <form id="tracking_number_search_form" class="mb-1 justify-content-center"
                                         novalidate="novalidate">
                                         <div class="form-group">
@@ -62,7 +74,7 @@
                                     </form>
                                 </div>
 
-                                <div class="col-3">
+                                <div class="col-2">
                                     <form id="positive_negative_filter_form" class="mb-1 justify-content-center"
                                         novalidate="novalidate">
                                         <div class="form-group">
@@ -703,6 +715,14 @@
             }).bind('change', function() {
                 table.draw();
             });
+            $('#search_region_form select.search_region').prepend(
+                '<option value="" selected></option>').select2({
+                placeholder: 'Select By Region',
+                width: '100%',
+                allowClear: true
+            }).bind('change', function() {
+                table.draw();
+            });
 
             $('#shipper_status_form select.shipper_status').prepend(
                 '<option value="" selected="selected"></option>').select2({
@@ -1047,7 +1067,8 @@
                         d.star_shipper_filter = $('#star_shippers_filter').val();
                         d.wallet_filter = $(
                             '#wallet_filter_form select.wallet_filter').val();
-
+                        d.search_region = $(
+                            '#search_region_form select.search_region').val();
                     }
                 },
                 rowId: 'id',
