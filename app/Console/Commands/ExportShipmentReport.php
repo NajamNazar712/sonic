@@ -131,7 +131,7 @@ class ExportShipmentReport extends Command
     FROM shipments_journey AS sj
     JOIN shipments AS s ON s.id = sj.shipment_id
     JOIN riders AS r ON sj.reference_2_id = r.id
-    JOIN city_areas AS ca ON ca.city_id = r.city_id
+    left JOIN city_areas AS ca ON  ca.`id` = r.`area_id`
 
     WHERE sj.created_at BETWEEN ? AND ?
       AND sj.shipper_status_id = 5
