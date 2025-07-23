@@ -241,8 +241,10 @@ class ShipperCrmApiController extends Controller
 
     public function crm_request_list(Request $request)
     {
+        $tracking_number = $request->input('tracking_number');
         $app_type = $request->app_type;
-        if ($request->status && $request->status != 1) {
+
+        if ($request->filled('status') && $request->status != 1) {
             if ($request->status == 4) {
                 $request_status = [4, 7];
             } else {
@@ -371,10 +373,15 @@ class ShipperCrmApiController extends Controller
 
         // Final query
         $crm_requests = $crm_requests->select($selects)
-            ->whereIn('crm_requests.status_id',$request_status)
-            ->orderBy('crm_requests.id', 'desc')
-            ->cursorPaginate(20);
+            ->whereIn('crm_requests.status_id',$request_status);
 
+            if($tracking_number) {
+                $crm_requests = $crm_requests->where('s.tracking_number', $tracking_number)->get();
+            } else {
+
+                $crm_requests = $crm_requests->orderBy('crm_requests.id', 'desc')
+                    ->cursorPaginate(20);
+            }
 
         if($crm_requests->isNotEmpty()) {
             return response()->json(['status' => 0 , 'message' => 'Success' ,'crm_requests'=>$crm_requests, 'launched_count' => $launched_count,'closed_count' => $closed_count]);
