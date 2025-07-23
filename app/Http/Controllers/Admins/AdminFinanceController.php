@@ -146,6 +146,7 @@ use App\Jobs\CODAmountChangeSendToWallet;
 use App\Jobs\WalletBulkSettlementFromDonePayments;
 use App\Models\ParentProduct;
 use App\Http\Models\Product;
+use App\Http\Models\Region;
 
 class AdminFinanceController extends Controller
 {
@@ -6674,6 +6675,7 @@ class AdminFinanceController extends Controller
         $banks = BanksList::all();
         $payment_cycles = PaymentCycle::all();
         $company_banks = BanksList::where('affiliate', 1)->get();
+        $region = Region::get();
         if (session('department_id') == 7 && !in_array(session('id'), session('sale_users_bypass'))) {
             $shippers = User::whereIn('id', session('tagged_shippers'))->select('id', 'name')->get();
         } else {
@@ -6690,7 +6692,7 @@ class AdminFinanceController extends Controller
         } else {
             $shipper_cap = 0;
         }
-        return view('admin.finance.make_payments')->with(['banks' => $banks, 'shipper_status' => $shipper_status, 'total_amount' => $total_amount, 'company_banks' => $company_banks, 'total_charges' => $total_charges, 'total_payable' => $total_payable, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles, 'shipper_cap' => $shipper_cap]);
+        return view('admin.finance.make_payments')->with(['banks' => $banks, 'shipper_status' => $shipper_status, 'total_amount' => $total_amount, 'company_banks' => $company_banks, 'total_charges' => $total_charges, 'total_payable' => $total_payable, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles, 'shipper_cap' => $shipper_cap, 'region' => $region]);
     }
 
 
@@ -6711,6 +6713,9 @@ class AdminFinanceController extends Controller
                         '(select max(id) from user_bank_infos where user_id = pending_payments.user_id and default_bank = 1)'
                     ));
             })
+            ->join('zones as z', 'c.zone_id', 'z.id')
+            ->join('zone_regions as zr', 'z.id', 'zr.zone_id')
+            ->join('regions as r', 'zr.region_id', 'r.id')
             ->join('banks_lists as ub', 'ubi.bank_name', '=', 'ub.id')
             ->join('payment_cycles as pc', 'u.payment_cycle_id', '=', 'pc.id')
             ->leftjoin('cities as bc', 'ubi.city_id', '=', 'bc.id')
@@ -6725,7 +6730,7 @@ class AdminFinanceController extends Controller
                     ->where('wu.substitute_user_id', '0');
             })
             ->leftjoin('territories as t', 't.id', '=', 'u.territory_id')
-            ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', 'ppc.amount as total_amount', 'ppc.charges as total_charges','u.payment_cycle_days as payment_cycle_days', 'ppc.gst as total_gst', 'ppc.wht as total_wht', 'ppc.payable as total_payable', 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'pc.name as payment_cycle', 'pc.id as payment_cycle_id','u.documents_status', DB::raw('IFNULL(psfp.pending_shipments_count,0) as total_pending_shipments'),'sts.status as star_status', 'u.id as user_id', 'ppc.sms_charges as total_sms_charges', 'wu.id as wallet_user', 'wu.finova_account_type as wallet_finance','t.name as territory','ppc.cod_sst as total_cod_sst');
+            ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', 'ppc.amount as total_amount', 'ppc.charges as total_charges','u.payment_cycle_days as payment_cycle_days', 'ppc.gst as total_gst', 'ppc.wht as total_wht', 'ppc.payable as total_payable', 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'pc.name as payment_cycle', 'pc.id as payment_cycle_id','u.documents_status', DB::raw('IFNULL(psfp.pending_shipments_count,0) as total_pending_shipments'),'sts.status as star_status', 'u.id as user_id', 'ppc.sms_charges as total_sms_charges', 'wu.id as wallet_user', 'wu.finova_account_type as wallet_finance','t.name as territory','ppc.cod_sst as total_cod_sst','r.name as region');
             // ->groupBy('pending_payments.id'); // removed by the instruction of waqas bhai
 
         // dd($pending_payments);
@@ -6854,8 +6859,9 @@ class AdminFinanceController extends Controller
         } else {
             $pending_payments->whereNull('wu.id');
         }
-        
-
+        if ($region = $request->get('search_region')) {
+            $pending_payments->where('zr.region_id', '=', $region);
+        }
         $datatables = Datatables::of($pending_payments)
             ->setRowAttr([
                 'class' => function ($pending_payments) {
@@ -8308,7 +8314,7 @@ class AdminFinanceController extends Controller
         }
 
         $shipper_status = [1 => 'Active', 2 => 'Inactive'];
-
+        $region = Region::get();
         $banks = BanksList::all();
         $company_banks = BanksList::where('affiliate', 1)->get();
         $case_nature_channels = CrmRequestChannel::where('id', '!=', 1)->get();
@@ -8319,7 +8325,7 @@ class AdminFinanceController extends Controller
         $to = $date;
 
 
-        return view('admin.finance.done_payments')->with(['banks' => $banks, 'company_banks' => $company_banks, 'shippers' => $shippers, 'case_nature_channels' => $case_nature_channels, 'shipper_status' => $shipper_status, 'from' => $from, 'to' => $to]);
+        return view('admin.finance.done_payments')->with(['banks' => $banks, 'company_banks' => $company_banks, 'shippers' => $shippers, 'case_nature_channels' => $case_nature_channels, 'shipper_status' => $shipper_status, 'from' => $from, 'to' => $to,'region' => $region]);
     }
 
     public function done_payments_list(Request $request)
@@ -8383,6 +8389,9 @@ class AdminFinanceController extends Controller
 
         $done_payments = DonePayment::join('users as u', 'done_payments.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
+            ->join('zones as z', 'c.zone_id', 'z.id')
+            ->join('zone_regions as zr', 'z.id', 'zr.zone_id')
+            ->join('regions as r', 'zr.region_id', 'r.id')
             ->leftjoin('done_payment_calculations as dpc', 'dpc.done_payment_id', '=', 'done_payments.id')
             ->leftJoin('admins as ad', function ($join) {
                 $join->on('ad.id', '=', 'done_payments.status_updated_by');
@@ -8432,7 +8441,7 @@ class AdminFinanceController extends Controller
             'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 'done_payments.ibft_charges', 
             'dpc.packaging_charges', 'dpc.adjustment as adjustment_charges', 'done_payments.status_updated_at as status_updated_at', 
             'dpc.wht as total_wht', 'done_payments.created_at as start_date', 'done_payments.updated_at as end_date', 'ad.name as admin_name', 
-            'done_payments.updated_at as updated_at','sts.status as star_status','u.payment_cycle_days as payment_cycle_days','pc.name as payment_cycle', 'pc.id as payment_cycle_id', 'dpc.sms_charges as total_sms_charges','done_payments.arrival_shipment as arrival_shipment_shipments_count','done_payments.arrival_shipment', 'sale_admin.name as sale_person_name','wu.id as wallet_user' , 'done_payments.is_wallet_payment', 'wu.finova_account_type as finova_account_type' ,'dpc.cod_sst as total_cod_sst','t.name as territory', 'done_payments.tax_status');
+            'done_payments.updated_at as updated_at','sts.status as star_status','u.payment_cycle_days as payment_cycle_days','pc.name as payment_cycle', 'pc.id as payment_cycle_id', 'dpc.sms_charges as total_sms_charges','done_payments.arrival_shipment as arrival_shipment_shipments_count','done_payments.arrival_shipment', 'sale_admin.name as sale_person_name','wu.id as wallet_user' , 'done_payments.is_wallet_payment', 'wu.finova_account_type as finova_account_type' ,'dpc.cod_sst as total_cod_sst','t.name as territory', 'done_payments.tax_status', 'r.name as region');
 
         if (session('department_id') == 7) {
             if (!in_array(session('id'), session('sale_users_bypass'))) {
@@ -8547,6 +8556,9 @@ class AdminFinanceController extends Controller
             } else {
                 $done_payments->whereNull('wu.id');
             }
+        }
+        if ($region = $request->get('search_region')) {
+            $done_payments->where('zr.region_id', '=', $region);
         }
 
         $datatables = Datatables::of($done_payments)
