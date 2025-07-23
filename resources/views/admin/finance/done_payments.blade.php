@@ -19,7 +19,7 @@
 							<div class="row justify-content-center mb-1">
 								<div class="col-12">
 									<div class="row">
-										<div class="col-3">
+										<div class="col-2">
 											<fieldset class="form-group">
 												<select name="search_shipper" id="search_shipper" class="form-control select2">
 													{{--                                            @foreach ($shippers as $shipper)--}}
@@ -27,6 +27,15 @@
 													{{--                                            @endforeach--}}
 												</select>
 											</fieldset>
+										</div>
+										<div class="col-2">
+											<div class="form-group">
+												<select name="search_region" id="search_region" class="search_region form-control select2">
+													@foreach($region as $r) 
+													<option value="{{ $r->id }}">{{ $r->name }}</option>
+													@endforeach
+												</select>
+											</div>
 										</div>
 										<div class="col-2">
 											<fieldset class="form-group">
@@ -53,7 +62,7 @@
 												</div>
 											</form>
 										</div>
-										<div class="col-3 text-center">
+										<div class="col-2 text-center">
 											<form id="done_payment_id_form"
 												  class="form" novalidate="novalidate">
 												<div class="form-group">
@@ -507,6 +516,12 @@
                 width: '100%',
                 allowClear: true
             });
+			$('#search_region').prepend(
+                '<option value="" selected></option>').select2({
+                placeholder: 'Search By Region',
+                width: '100%',
+                allowClear: true
+            });
 
 			$('#update_details .company_bank').prepend('<option value="" selected="selected"></option>').select2({
 				width: '100%',
@@ -926,6 +941,7 @@
 						d.search_payment_ids = $('#done_payment_id_form .done_payment_ids').val();
 						d.star_shipper_filter = $('#star_shippers_filter').val();
 						d.wallet_filter = $('#wallet_filter').val();
+						d.search_region = $('#search_region').val();
 					}
 				},
 				rowId: 'id',
