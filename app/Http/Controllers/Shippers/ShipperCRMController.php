@@ -380,7 +380,10 @@ class ShipperCRMController extends Controller
                     $is_shipment = CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_id', $nature_id);
 
                     if($nature_id == 1 && $request->complaint_id == 1){
-                        $canComplaintPaymentLocked = AdminCRMController::canComplaintPaymentLocked($shipment_id, $is_shipment->id);
+                        $canComplaintPaymentLocked = AdminCRMController::canComplaintPaymentLocked($shipment_id);
+                        if ($canComplaintPaymentLocked['status'] === 0) {
+                            return $canComplaintPaymentLocked;
+                        }
                     }
                     if($is_shipment->exists()){
                         return ['status' => 0, 'error' => 'Request/Complaint already lodged for the Payment ID: ' . $payment_id_padded];
@@ -413,7 +416,10 @@ class ShipperCRMController extends Controller
                         $is_shipment = CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_id', $nature_id)->first();
 
                         if($nature_id == 1 && $request->complaint_id == 1){
-                            $canComplaintPaymentLocked = AdminCRMController::canComplaintPaymentLocked($shipment_id, $is_shipment->id);
+                            $canComplaintPaymentLocked = AdminCRMController::canComplaintPaymentLocked($shipment_id);
+                            if ($canComplaintPaymentLocked['status'] === 0) {
+                                return $canComplaintPaymentLocked;
+                            }
                         }
 
                         if($is_shipment){
@@ -470,7 +476,10 @@ class ShipperCRMController extends Controller
                         $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
 
                         if($nature_id == 1 && $request->complaint_id == 1){
-                            $canComplaintPaymentLocked = $this->canComplaintPaymentLocked($shipment_id, $is_shipment->id);
+                            $canComplaintPaymentLocked = AdminCRMController::canComplaintPaymentLocked($shipment_id);
+                            if ($canComplaintPaymentLocked['status'] === 0) {
+                                return $canComplaintPaymentLocked;
+                            }
                         }
 
                         $already_lodged = false;
