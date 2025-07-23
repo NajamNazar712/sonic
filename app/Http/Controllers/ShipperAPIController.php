@@ -144,7 +144,7 @@ class ShipperAPIController extends Controller
 
             $app_type  = $request->has('phone_no') ? 2 : 1;
 
-            if($app_type == 2) {
+            if($app_type == 2 ) {
                 $retail_user = RetailShipperInfo::where('shipper_phone_no', $request->phone_no)->first();
                 if($retail_user) {
                     if (Hash::check($request->input('password'), $retail_user->password)) {
@@ -189,6 +189,7 @@ class ShipperAPIController extends Controller
                         $information['name'] = $shipper->name;
                         $information['shipper_id'] = $shipper->id;
                         $information['phone_number'] = $shipper->phone;
+                        $information['shipper_email'] = $shipper->email;
                         $information['app_type'] = 1;
                         $information['wallet_sign_up_allow'] = WalletShipperSetting::where('user_id', $shipper->id)->where('status', 1)->exists() ? 1 : 0;
                         $information['wallet_user'] = ($shipper->wallet) ? 1 : 0;
@@ -315,7 +316,7 @@ class ShipperAPIController extends Controller
                 $retail->save();
 
                 //send notification
-                NotificationsController::send(243, $retail->id, $minutes);
+//                NotificationsController::send(243, $retail->id, $minutes);
 
                 return response()->json([
                     'status' => 0,
@@ -1671,14 +1672,14 @@ class ShipperAPIController extends Controller
             'in' => ':attribute must be No or Yes.',
             'check_duplicate' => 'Phone Or Email Already Exists',
             'check_cnic' => 'Cnic Already Exists',
-            'phone' => 'Phone starts with 03 or 923 followed by 9 digits',
+            //'phone' => 'Phone starts with 03 or 923 followed by 9 digits',
             'name' => 'Only alphabetic characters and spaces',
         ];
 
         $rules = [
             'name' => ['required', 'max:255', 'regex:/^[a-zA-Z\s]+$/'],
             'email' => ['required', 'max:255', 'email', 'check_duplicate'],
-            'phone' => ['required', 'max:255', 'regex:/^(03|923)[0-9]{2,3}-?[0-9]{7}$/'],
+            'phone' => ['required', 'max:255'],
             'cnic' => ['required', 'max:255','check_cnic']
         ];
 
