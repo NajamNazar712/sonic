@@ -203,10 +203,9 @@ class ShipperOrderManagementApiController extends Controller
         $startDate = Carbon::now()->subMonths(12)->startOfMonth();
         $endDate = Carbon::now()->endOfDay();
 
-        $process        = (int) $request->input('process', 1);         // default is 1
-        $total_booking = (int) $request->input('total_booking', 1);    // default is 1
+        $process_and_booking        = (int) $request->input('process_and_booking', 1);
 
-        if ($process === 1 || $total_booking === 1) {
+        if ($process_and_booking == 1) {
 
             $query = Shipment::query()
                 ->select('shipments.shipper_status_id', 'shipments.created_at')
