@@ -302,18 +302,18 @@ class ShipperAPIController extends Controller
             }
 
             // OTP rate limit logic
-            if ($retail->password_reset_at && $retail->password_reset_at->isToday()) {
-                if ($retail->password_reset_limit >= 3) {
-                    return response()->json([
-                        'status' => 1,
-                        'message' => 'OTP request limit exceeded for today. Please try again tomorrow.'
-                    ]);
-                }
-                $retail->password_reset_limit += 1;
-            } else {
-                $retail->password_reset_limit = 1;
-                $retail->password_reset_at = Carbon::now();
-            }
+//            if ($retail->password_reset_at && $retail->password_reset_at->isToday()) {
+//                if ($retail->password_reset_limit >= 3) {
+//                    return response()->json([
+//                        'status' => 1,
+//                        'message' => 'OTP request limit exceeded for today. Please try again tomorrow.'
+//                    ]);
+//                }
+//                $retail->password_reset_limit += 1;
+//            } else {
+//                $retail->password_reset_limit = 1;
+//                $retail->password_reset_at = Carbon::now();
+//            }
 
             $otp_setting = GlobalSettings::where('type', 'retail_shipper_mobile_otp')->first();
             if ($otp_setting && $otp_setting->setting_value == 1) {
