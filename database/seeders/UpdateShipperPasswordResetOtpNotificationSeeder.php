@@ -1,10 +1,13 @@
 <?php
 
 namespace Database\Seeders;
-use Illuminate\Support\Carbon;
+
+use Carbon\Carbon;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-class UpdateRetailShipperRegistrationOtpNotificationSeeder extends Seeder
+class UpdateShipperPasswordResetOtpNotificationSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -17,17 +20,16 @@ class UpdateRetailShipperRegistrationOtpNotificationSeeder extends Seeder
 
         DB::table('notifications')->insert([
             [
-                'id' => 243,
+                'id' => 248,
                 'created_at' => $timestamp,
                 'updated_at' => $timestamp,
-                'name' => 'Retail Shipper App registration OTP',
+                'name' => 'Shipper App password reset OTP',
                 'type_id' => 2,
                 'subject' => null,
-                'body' => 'Dear [user_name], your code for Trax Retail Shipper App is [otp]. It will expire in [expire_at] minutes. For help, contact Trax support.',
+                'body' => 'Dear [user_name], your password reset code for the Shipper App is [otp]. It will expire in [expire_at] minutes. For support, contact Trax.',
                 'updated_by' => 3495,
                 'status' => 0
             ]
         ]);
-
     }
 }
