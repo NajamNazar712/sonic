@@ -200,41 +200,51 @@ class ShipperOrderManagementApiController extends Controller
         $app_type = $request->app_type;
         $user_id = $app_type == 2 ? $request->retail_shipper_id : $request->shipper_id;
 
-        $todayStart = Carbon::today()->startOfDay();
-        $todayEnd = Carbon::today()->endOfDay();
+        $startDate = Carbon::now()->subMonths(12)->startOfMonth();
+        $endDate = Carbon::now()->endOfDay();
 
-        $shipment_status = [14,18,19,36,38,51,31,25,17];
-        if ($app_type == 1):
-            $shipment_status[] = 1;
-        endif;
+        $process_and_booking        = (int) $request->input('process_and_booking', 1);
 
-        // 1. Over all in process
-        $over_all_in_process = Shipment::whereNotIn('shipper_status_id', $shipment_status);
-//            ->whereBetween('pickup_date', [$startDate, $endDate]);
+        if ($process_and_booking == 1) {
 
-        if ($app_type == 2) {
-            $over_all_in_process = $over_all_in_process
-                ->leftjoin('retail_shipments', 'retail_shipments.shipment_id', '=', 'shipments.id')
-                ->where('shipment_type', 2)
-                ->where('retail_shipments.shipper_account_no', $user_id);
-        } else {
-            $over_all_in_process = $over_all_in_process->where('shipment_type', 1)
-                ->where('user_id', $user_id);
+            $query = Shipment::query()
+                ->select('shipments.shipper_status_id', 'shipments.created_at')
+                ->whereBetween('shipments.created_at', [$startDate, $endDate]);
+
+            if ($app_type == 2) {
+                $query->leftJoin('retail_shipments', 'retail_shipments.shipment_id', '=', 'shipments.id')
+                    ->where('shipment_type', 2)
+                    ->where('retail_shipments.shipper_account_no', $user_id);
+            } else {
+                $query->where('shipment_type', 1)
+                    ->where('user_id', $user_id);
+            }
+
+            $shipments = $query->get();
+
+// Shipper statuses to exclude from "in process"
+            $exclude_statuses = [14, 18, 19, 36, 38, 51, 31, 25, 17];
+            if ($app_type == 1) {
+                $exclude_statuses[] = 1;
+            }
+
+            $todayStart = Carbon::today()->startOfDay();
+            $todayEnd = Carbon::today()->endOfDay();
+
+
+            $today_bookings = $shipments->filter(function ($shipment) use ($todayStart, $todayEnd) {
+                return $shipment->shipper_status_id == 1 &&
+                    Carbon::parse($shipment->created_at)->between($todayStart, $todayEnd);
+            })->count();
+
+            $over_all_in_process = $shipments->filter(function ($shipment) use ($exclude_statuses) {
+                return !in_array($shipment->shipper_status_id, $exclude_statuses);
+            })->count();
+        }else{
+            $today_bookings = 0;
+            $over_all_in_process = 0;
         }
-        $over_all_in_process = $over_all_in_process->count();
-        // 2. Today bookings
-        $today_bookings = Shipment::where('shipments.shipper_status_id', 1)
-            ->whereBetween('shipments.created_at', [$todayStart,$todayEnd]);
 
-        if($app_type == 2) {
-            $today_bookings = $today_bookings->leftjoin('retail_shipments', 'retail_shipments.shipment_id', '=', 'shipments.id')
-                ->where('shipments.shipment_type', 2)
-                ->where('retail_shipments.shipper_account_no', $user_id);
-        } else{
-            $today_bookings =  $today_bookings->where('shipments.shipment_type', 1)
-                ->where('shipments.user_id', $user_id);
-        }
-        $today_bookings = $today_bookings->count();
 
         $last_6_day_summary = [];
         $dateRange = [];
