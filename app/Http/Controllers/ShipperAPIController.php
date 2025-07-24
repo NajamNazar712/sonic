@@ -49,12 +49,14 @@ use App\Http\Models\ShippingMode;
 use App\Http\Models\ShippingModeSameDayTiming;
 use App\Http\Models\V2Pickup\V2PickupRequest;
 use App\Http\Traits\RvTrait;
+use App\Models\UserOtp;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
-use Validator;
+use Symfony\Component\Finder\Glob;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use App\Http\Models\Admin\Retail\RetailShipperInfo;
 use App\Models\WalletShipperSetting;
@@ -71,7 +73,7 @@ class ShipperAPIController extends Controller
     private $names = [
         'email_address' => 'Email Address',
         'password' => 'Password',
-        'otp' => 'Retail Otp',
+        'otp' => 'Otp',
         'phone_no' => 'Phone Number',
 
         'rider_location_latitude' => 'Rider Location Latitude',
@@ -231,130 +233,358 @@ class ShipperAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         }
-        //said by mobile team disable condition becuase not send via 2
-//        $is_retail = $request->header('Via') == 2;
-//        if ($is_retail) {
+
             $retail_shipper = RetailShipperInfo::where('retail_otp', $request->otp)->first();
+            if($retail_shipper) {
+
+                if ($retail_shipper->otp_expire_at < now()) {
+                    return response()->json(['status' => 1, 'message' => 'OTP has expired']);
+                }
+
+                // Reset password & clear API token & otp
+                $retail_shipper->password = Hash::make($request->password);
+                $retail_shipper->api_token = null;
+                $retail_shipper->retail_otp = null;
+                $retail_shipper->otp_expire_at = null;
+                $retail_shipper->save();
+
+                return response()->json(['status' => 0, 'message' => 'Password reset successful']);
+
+            }
+
+            // fallback to main shipper OTP check
+            $shipper_otp = UserOtp::where('otp_code',$request->otp)->first();
+            if($shipper_otp) {
+                if($shipper_otp->otp_expire_at < now()) {
+                    return response()->json(['status' => 1, 'message' => 'OTP has expired']);
+                }
+
+                $shipper = User::where('id',$shipper_otp->user_id)->where('status',3)->first();
+                if($shipper){
+
+                    $shipper->password =  Hash::make($request->password);
+                    $shipper->save();
+                    $shipper_otp->delete();
+
+                    return response()->json(['status' => 0, 'message' => 'Password reset successful']);
+                }
+
+                return response()->json(['status' => 1, 'message' => 'Inactive Shipper']);
+
+            }
+
+            return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
+
+    }
+
+    public function sendOtp(Request $request)
+    {
+        $rules = [
+            'phone_no' => ['sometimes', 'required', 'regex:/^(03\d{2}-\d{7}|92\d{2}-\d{7})$/'],
+            'email' => ['sometimes', 'required', 'email'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+
+        $bypass_otp = 0;
+        $minutes = 10;
+        $otp_expire_at = null;
+
+        if ($request->has('phone_no')) {
+            $retail = RetailShipperInfo::where('shipper_phone_no', $request->phone_no)->where('status', 1)->first();
+            if (!$retail) {
+                return response()->json(['status' => 1, 'message' => 'Retail shipper does not exist.']);
+            }
+
+            // OTP rate limit logic
+            if ($retail->password_reset_at && $retail->password_reset_at->isToday()) {
+                if ($retail->password_reset_limit >= 3) {
+                    return response()->json([
+                        'status' => 1,
+                        'message' => 'OTP request limit exceeded for today. Please try again tomorrow.'
+                    ]);
+                }
+                $retail->password_reset_limit += 1;
+            } else {
+                $retail->password_reset_limit = 1;
+                $retail->password_reset_at = Carbon::now();
+            }
+
+            $otp_setting = GlobalSettings::where('type', 'retail_shipper_mobile_otp')->first();
+            if ($otp_setting && $otp_setting->setting_value == 1) {
+                $otp = mt_rand(100000, 999999);
+                $retail->retail_otp = $otp;
+                $otp_expire_at = Carbon::now()->addMinutes($minutes);
+                $retail->otp_expire_at = $otp_expire_at;
+                $retail->save();
+
+                 NotificationsController::send(243, $retail->id, $minutes);
+
+            } else {
+                $bypass_otp = 1;
+                $retail->save(); // still save updated limit
+            }
+        }
+
+        elseif ($request->has('email')) {
+            $shipper = User::where('email', $request->email)->where('status', 3)->first();
+            if (!$shipper) {
+                return response()->json(['status' => 1, 'message' => 'shipper does not exist.']);
+            }
+
+            $otp_setting = GlobalSettings::where('type', 'shipper_mobile_otp')->first();
+            if ($otp_setting && $otp_setting->setting_value == 1) {
+                $otp = mt_rand(100000, 999999);
+                UserOtp::where('user_id', $shipper->id)->delete();
+
+                $user_otp = new UserOtp();
+                $user_otp->user_id = $shipper->id;
+                $user_otp->otp_code = $otp;
+                $otp_expire_at = Carbon::now()->addMinutes($minutes);
+                $user_otp->otp_expire_at = $otp_expire_at;
+                $user_otp->save();
+
+                 NotificationsController::send(248, $shipper->id, $minutes);
+
+            } else {
+                $bypass_otp = 1;
+            }
+        } else {
+            return response()->json(['status' => 1, 'message' => 'Shipper not validate']);
+        }
+
+        return response()->json([
+            'status' => 0,
+            'bypass_otp' => $bypass_otp,
+            'message' => 'OTP sent successfully.',
+            'otp_expire_at' => $otp_expire_at ? $otp_expire_at->toDateTimeString() : null,
+        ]);
+    }
+
+    public function verifyOtp(Request $request)
+    {
+        $rules = [
+            'otp' => ['required', 'digits:6'],
+            'phone_no' => ['sometimes', 'required', 'regex:/^(03\d{2}-\d{7}|92\d{2}-\d{7})$/'],
+            'email' => ['sometimes', 'required', 'email'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+
+        if ($request->has('phone_no')) {
+            $retail_shipper = RetailShipperInfo::where('shipper_phone_no', $request->phone_no)
+                ->where('retail_otp', $request->otp)
+                ->first();
 
             if (!$retail_shipper) {
                 return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
             }
 
-            if ($retail_shipper->otp_expire_at < now()) {
+            if (!$retail_shipper->otp_expire_at || $retail_shipper->otp_expire_at < now()) {
                 return response()->json(['status' => 1, 'message' => 'OTP has expired']);
             }
 
-            // Check if password reset limit reached for today
-//            if ($retail_shipper->password_reset_limit_at && $retail_shipper->password_reset_limit_at->isToday()) {
-//                if ($retail_shipper->password_reset_limit >= 3) {
-//                    return response()->json([
-//                        'status' => 1,
-//                        'message' => 'Password reset limit exceeded for today. Please try again tomorrow.'
-//                    ]);
-//                } else {
-//                    // Increment count since still under limit
-//                    $retail_shipper->password_reset_limit++;
-//                }
-//            } else {
-//                // New day: reset count to 1 and update timestamp
-//                $retail_shipper->password_reset_limit = 1;
-//                $retail_shipper->password_reset_at = now();
-//            }
+            return response()->json(['status' => 0, 'message' => 'OTP verified successfully']);
+        }
 
-            // Reset password & clear API token & otp
-            $retail_shipper->password = Hash::make($request->password);
-            $retail_shipper->api_token = null;
-            $retail_shipper->retail_otp = null;
-            $retail_shipper->otp_expire_at = null;
-            $retail_shipper->save();
+        elseif ($request->has('email')) {
+            $shipper = User::join('users_otp', 'users_otp.user_id', 'users.id')
+                ->where('users.email', $request->email)
+                ->where('users_otp.otp_code', $request->otp)
+                ->select('users.id', 'users_otp.otp_expire_at')
+                ->first();
 
-            return response()->json(['status' => 0, 'message' => 'Password reset successful']);
+            if (!$shipper) {
+                return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
+            }
+
+            if (!$shipper->otp_expire_at || $shipper->otp_expire_at < now()) {
+                return response()->json(['status' => 1, 'message' => 'OTP has expired']);
+            }
+
+
+
+            return response()->json(['status' => 0, 'message' => 'OTP verified successfully']);
+        }
+
+        return response()->json(['status' => 1, 'message' => 'Shipper not verified.']);
+    }
+
+
+
+//    public function sendOtp(Request $request)
+//    {
+//
+//        $rules = [
+//            'phone_no' => ['sometimes','required', 'regex:/^(03\d{2}-\d{7}|92\d{2}-\d{7})$/'],
+//            'email' => ['sometimes', 'required', 'email'],
+//        ];
+//        $validate = Validator::make($request->all(), $rules, $this->messages);
+//        $validate->setAttributeNames($this->names);
+//
+//        if ($validate->fails()) {
+//            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
 //        }
-
-//        return response()->json(['status' => 1, 'message' => 'Unauthorized request']);
-    }
-
-    public function sendOtp(Request $request)
-    {
-
-        $rules = [
-            'phone_no' => ['required', 'regex:/^(03\d{2}-\d{7}|92\d{2}-\d{7})$/'],
-        ];
-        $validate = Validator::make($request->all(), $rules, $this->messages);
-        $validate->setAttributeNames($this->names);
-
-        if ($validate->fails()) {
-            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-        }
-
-        $retail = RetailShipperInfo::where('shipper_phone_no',$request->phone_no)->where('status',1)->first();
-        if($retail) {
-
-                if ($retail->password_reset_at && $retail->password_reset_at->isToday()) {
-                    if ($retail->password_reset_limit >= 3) {
-                        return response()->json([
-                            'status' => 1,
-                            'message' => 'OTP request limit exceeded for today. Please try again tomorrow.'
-                        ]);
-                    }
-
-                    // Same day: increment limit
-                    $retail->password_reset_limit += 1;
-
-                } else {
-                    // New day: start fresh
-                    $retail->password_reset_limit = 1;
-                    $retail->password_reset_at = Carbon::now();
-                }
-
-                // Generate and save OTP
-                $minutes = 10;
-                $otp = mt_rand(100000, 999999);
-
-                $retail->retail_otp = $otp;
-                $retail->otp_expire_at =  Carbon::now()->addMinutes($minutes);
-                $retail->save();
-
-                //send notification
-//                NotificationsController::send(243, $retail->id, $minutes);
-
-                return response()->json([
-                    'status' => 0,
-                    'message' => 'OTP sent successfully.',
-                    'otp_expire_at' => $retail->otp_expire_at->toDateTimeString()
-                ]);
-        }
-
-        return response()->json(['status' => 1, 'message' => 'Retail shipper does not exist.']);
-
-    }
-    public function verifyOtp(Request $request)
-    {
-        $rules = [
-            'otp' => ['required','digits:6'],
-            'phone_no' => ['required', 'regex:/^(03\d{2}-\d{7}|92\d{2}-\d{7})$/'],
-        ];
-        $validate = Validator::make($request->all(), $rules, $this->messages);
-        $validate->setAttributeNames($this->names);
-
-        if ($validate->fails()) {
-            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-        }
-
-        $retail_shipper = RetailShipperInfo::where('shipper_phone_no', $request->phone_no)
-            ->where('retail_otp', $request->otp)
-            ->first();
-
-        if (!$retail_shipper) {
-            return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
-        }
-
-        if (!$retail_shipper->otp_expire_at || $retail_shipper->otp_expire_at < now()) {
-            return response()->json(['status' => 1, 'message' => 'OTP has expired']);
-        }
-
-        return response()->json(['status' => 0, 'message' => 'OTP verified successfully']);
-    }
+//
+//        if($request->has('phone_no')) {
+//
+//            $retail = RetailShipperInfo::where('shipper_phone_no',$request->phone_no)->where('status',1)->first();
+//            if($retail) {
+//
+//                if ($retail->password_reset_at && $retail->password_reset_at->isToday()) {
+//                    if ($retail->password_reset_limit >= 3) {
+//                        return response()->json([
+//                            'status' => 1,
+//                            'message' => 'OTP request limit exceeded for today. Please try again tomorrow.'
+//                        ]);
+//                    }
+//
+//                    // Same day: increment limit
+//                    $retail->password_reset_limit += 1;
+//
+//                } else {
+//                    // New day: start fresh
+//                    $retail->password_reset_limit = 1;
+//                    $retail->password_reset_at = Carbon::now();
+//                }
+//
+//                $bypass_otp = 0;
+//                $retail_shipper_otp = GlobalSettings::where('type','retail_shipper_mobile_otp')->first();
+//                if($retail_shipper_otp && $retail_shipper_otp->setting_value == 1) {
+//
+//                    // Generate and save OTP
+//                    $minutes = 10;
+//                    $otp = mt_rand(100000, 999999);
+//
+//                    $retail->retail_otp = $otp;
+//                    $retail->otp_expire_at =  Carbon::now()->addMinutes($minutes);
+//                    $retail->save();
+//
+//                    //send notification
+////                  NotificationsController::send(243, $retail->id, $minutes);
+//
+//                } else {
+//                    $bypass_otp = 1;
+//                }
+//
+//
+//
+//                return response()->json([
+//                    'status' => 0,
+//                    'bypass_otp' => $bypass_otp,
+//                    'message' => 'OTP sent successfully.',
+//                    'otp_expire_at' => $bypass_otp ? null : $retail->otp_expire_at->toDateTimeString()
+//                ]);
+//            }
+//            return response()->json(['status' => 1, 'message' => 'Retail shipper does not exist.']);
+//
+//        }
+//        else if($request->has('email')) {
+//
+//            $shipper = User::where('email',$request->email)->where('status',3)->first();
+//            if($shipper) {
+//                $bypass_otp = 0;
+//                $shipper_otp = GlobalSettings::where('type','shipper_mobile_otp')->first();
+//                if($shipper_otp && $shipper_otp->setting_value == 1) {
+//                    $minutes = 10;
+//                    $otp = mt_rand(100000, 999999);
+//
+//                    $user_otp = UserOtp::where('user_id',$shipper->id)->delete();
+//
+//                    $user_otp = new UserOtp();
+//                    $user_otp->user_id = $shipper->id;
+//                    $user_otp->otp_code = $otp;
+//                    $user_otp->otp_expire_at = Carbon::now()->addMinutes($minutes);
+//                    $user_otp->save();
+//
+//                    //send notification
+////                NotificationsController::send(246, $shipper->id, $minutes);
+//
+//                } else {
+//                    $bypass_otp = 1;
+//                }
+//
+//                return response()->json([
+//                    'status' => 0,
+//                    'bypass_otp' => $bypass_otp,
+//                    'message' => 'OTP sent successfully.',
+//                    'otp_expire_at' => $bypass_otp ? null : $user_otp->otp_expire_at->toDateTimeString(),
+//                ]);
+//
+//            }
+//
+//            return response()->json(['status' => 1, 'message' => 'shipper does not exist.']);
+//
+//        }
+//        return response()->json(['status' => 1, 'message' => 'Shipper not validate']);
+//
+//    }
+//    public function verifyOtp(Request $request)
+//    {
+//        $rules = [
+//            'otp' => ['required','digits:6'],
+//            'phone_no' => ['sometimes','required', 'regex:/^(03\d{2}-\d{7}|92\d{2}-\d{7})$/'],
+//            'email' => ['sometimes', 'required', 'email'],
+//
+//        ];
+//        $validate = Validator::make($request->all(), $rules, $this->messages);
+//        $validate->setAttributeNames($this->names);
+//
+//        if ($validate->fails()) {
+//            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+//        }
+//
+//        $user = null;
+//        if($request->has('phone_no')) {
+//
+//            $retail_shipper = RetailShipperInfo::where('shipper_phone_no', $request->phone_no)
+//                ->where('retail_otp', $request->otp)
+//                ->first();
+//
+//            if (!$retail_shipper) {
+//                return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
+//            }
+//
+//            if (!$retail_shipper->otp_expire_at || $retail_shipper->otp_expire_at < now()) {
+//                return response()->json(['status' => 1, 'message' => 'OTP has expired']);
+//            }
+//
+//            return response()->json(['status' => 0, 'message' => 'OTP verified successfully']);
+//
+//
+//        } else if($request->has('email')) {
+//
+//            $shipper = User::join('users_otp','users_otp.user_id','users.id')
+//            ->where('users.email', $request->email)
+//                ->where('users_otp.otp_code', $request->otp)
+//                ->select('users.id', 'users_otp.otp_expire_at')
+//                ->first();
+//
+//            if (!$shipper) {
+//                return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
+//            }
+//
+//            if (!$shipper->otp_expire_at || $shipper->otp_expire_at < now()) {
+//                return response()->json(['status' => 1, 'message' => 'OTP has expired']);
+//            }
+//
+//            return response()->json(['status' => 0, 'message' => 'OTP verified successfully']);
+//        }
+//
+//        return response()->json(['status' => 1, 'message' => 'Shipper not validate']);
+//
+//
+//    }
     public function shipment_history(Request $request)
     {
         $rules = [
