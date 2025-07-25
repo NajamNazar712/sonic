@@ -62,14 +62,30 @@
                                                 </div>
                                             </div>
                                         @endforeach
-
-
-
-                                        
-                                        <button type="submit" class="btn btn-primary">Update</button>
-                                    </form>
                                 </div>
                             </div>
+                            <div class="row mt-5">
+                                <div class="col-6 form-group" id="excluded_users_container_wht">
+                                    <label class="mr-2 font-medium-2"><b>Exclude Shipper(s) WHT </b></label>
+                                    <select name="excluded_users_wht[]" id="excluded_users_wht" class="form-control select2" multiple="multiple">
+                                       @foreach($shippers as $shipper)
+                                            <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-6 form-group" id="excluded_users_container_sst">
+                                    <label class="mr-2 font-medium-2"><b>Exclude Shipper(s) COD SST </b></label>
+                                    <select name="excluded_users_sst[]" id="excluded_users_sst" class="form-control select2" multiple="multiple">
+                                        @foreach($shippers as $shipper)
+                                            <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-12 mt-3 mb-5 text-center">
+                                    <button type="submit" class="btn btn-primary btn-lg">Update</button>
+                                </div>
+                            </div>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -87,6 +103,16 @@
 
     <script>
         $(document).ready(function() {
+            $('#excluded_users_wht').select2({
+                placeholder:'Select Only Shippers',
+                width:'100%',
+                allowClear:true
+            });
+            $('#excluded_users_sst').select2({
+                placeholder:'Select Only Shippers',
+                width:'100%',
+                allowClear:true
+            });
             $('#settings_form .class').inputmask({
                 'alias': 'decimal',
                 'allowMinus': false,
@@ -100,6 +126,14 @@
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
                 }
             });
+            @if(count($excluded_users_wht) > 0)
+                var ids = @json($excluded_users_wht);
+                $('#excluded_users_wht').val(ids).trigger('change');
+            @endif
+            @if(count($excluded_users_sst) > 0)
+                var ids = @json($excluded_users_sst);
+                $('#excluded_users_sst').val(ids).trigger('change');
+            @endif
         });
     </script>
 @endsection
