@@ -208,7 +208,7 @@ class ShipperOrderManagementApiController extends Controller
         if ($process_and_booking == 1) {
 
             $minId2 = DB::table('shipments')
-                ->whereBetween('created_at', [$startDate,$endDate])
+                ->where('created_at','>=', $startDate)
                 ->min('id');
 
             // Excluded status IDs for in-process shipments
@@ -228,11 +228,9 @@ class ShipperOrderManagementApiController extends Controller
 
             if ($app_type == 2) {
                 $query->leftJoin('retail_shipments', 'retail_shipments.shipment_id', '=', 'shipments.id')
-                    ->where('shipments.shipment_type', 2)
                     ->where('retail_shipments.shipper_account_no', $user_id);
             } else {
-                $query->where('shipments.user_id', $user_id)
-                    ->where('shipments.shipment_type', 1);
+                $query->where('shipments.user_id', $user_id);
             }
 
             $query->where('shipments.id','>=', $minId2);
