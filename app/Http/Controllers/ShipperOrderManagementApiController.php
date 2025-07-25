@@ -211,37 +211,37 @@ class ShipperOrderManagementApiController extends Controller
                 ->whereBetween('created_at', [$startDate,$endDate])
                 ->min('id');
 
-            $query = Shipment::query()
-                ->select('shipments.shipper_status_id', 'shipments.created_at');
-
-            if ($app_type == 2) {
-                $query->leftJoin('retail_shipments', 'retail_shipments.shipment_id', '=', 'shipments.id')
-                    ->where('shipment_type', 2)
-                    ->where('retail_shipments.shipper_account_no', $user_id);
-            } else {
-                $query->where('user_id', $user_id)->where('shipment_type', 1);
-
-            }
-            $query->where('shipments.id','>=', $minId2);
-
-            $shipments = $query->get();
-
-            $todayStart = Carbon::today()->startOfDay();
-            $todayEnd = Carbon::today()->endOfDay();
-
-// Shipper statuses to exclude from "in process"
+            // Excluded status IDs for in-process shipments
             $exclude_statuses = [14, 18, 19, 36, 38, 51, 31, 25, 17];
             if ($app_type == 1) {
                 $exclude_statuses[] = 1;
             }
 
-            $today_bookings = $shipments->filter(function ($shipment) use ($todayStart, $todayEnd) {
-                return $shipment->shipper_status_id == 1 && Carbon::parse($shipment->created_at)->between($todayStart, $todayEnd);
-            })->count();
+            $todayStart = Carbon::today()->startOfDay();
+            $todayEnd = Carbon::today()->endOfDay();
 
-            $over_all_in_process = $shipments->filter(function ($shipment) use ($exclude_statuses) {
-                return !in_array($shipment->shipper_status_id, $exclude_statuses);
-            })->count();
+            $query = Shipment::query()
+                ->selectRaw("
+            SUM(CASE WHEN shipments.shipper_status_id = 1 AND DATE(shipments.created_at) = ? THEN 1 ELSE 0 END) as today_bookings,
+            SUM(CASE WHEN shipments.shipper_status_id NOT IN (" . implode(',', $exclude_statuses) . ") THEN 1 ELSE 0 END) as in_process_total
+        ", [$todayStart->toDateString()]);
+
+            if ($app_type == 2) {
+                $query->leftJoin('retail_shipments', 'retail_shipments.shipment_id', '=', 'shipments.id')
+                    ->where('shipments.shipment_type', 2)
+                    ->where('retail_shipments.shipper_account_no', $user_id);
+            } else {
+                $query->where('shipments.user_id', $user_id)
+                    ->where('shipments.shipment_type', 1);
+            }
+
+            $query->where('shipments.id','>=', $minId2);
+
+            $result = $query->first();
+
+            $today_bookings = (int)$result->today_bookings;
+            $over_all_in_process = (int)$result->in_process_total;
+
         } else {
             $today_bookings = 0;
             $over_all_in_process = 0;
@@ -269,6 +269,7 @@ class ShipperOrderManagementApiController extends Controller
         $statuses_delivered = [14, 30, 36, 37];
         $statuses_returned = [25];
 
+// Step 1: Prepare last 7 days data structure
         $grouped = [];
         $last7Days = [];
         for ($i = 6; $i >= 0; $i--) {
@@ -276,6 +277,8 @@ class ShipperOrderManagementApiController extends Controller
             $grouped[$day] = ['arrivals' => 0, 'delivered' => 0, 'returns' => 0];
             $last7Days[] = $day;
         }
+
+// Step 2: Get journey data
         $query = $baseQuery->clone()
             ->join('shipments_journey as sj2', function ($join) use ($minId, $request) {
                 $join->on('sj2.shipment_id', '=', 's.id');
@@ -283,6 +286,8 @@ class ShipperOrderManagementApiController extends Controller
                     $join->whereIn('sj2.shipper_status_id', [14, 30, 36, 37]);
                 } elseif ($request->status_id == 25) {
                     $join->whereIn('sj2.shipper_status_id', [25]);
+                }elseif ($request->status_id == 2) {
+                    $join->whereIn('sj2.shipper_status_id', [2,4]);
                 } elseif (!$request->has('status_id')) {
                     $join->whereIn('sj2.shipper_status_id', [2, 4, 14, 30, 36, 37, 25]);
                 }
@@ -296,49 +301,74 @@ class ShipperOrderManagementApiController extends Controller
             )
             ->get();
 
-        $latestJourneys = [];
-
+// Step 3: Group journey data by shipment and day
+        $journeysPerShipment = [];
         foreach ($query as $row) {
             $shipmentId = $row->shipment_id;
-            $journeyId = $row->journey_id;
-
-            if (!isset($latestJourneys[$shipmentId]) || $journeyId > $latestJourneys[$shipmentId]->journey_id) {
-                $latestJourneys[$shipmentId] = $row;
-            }
-        }
-
-        foreach ($latestJourneys as $data) {
-            $day = $data->day;
+            $day = $row->day;
 
             if (!in_array($day, $last7Days)) {
-                continue; // skip if out of the desired 7-day window
+                continue; // Skip dates not in the last 7 days
             }
 
-            $status_id = $data->shipper_status_id;
-
-            if (in_array($status_id, $statuses_arrival)) {
-                $status = 'arrivals';
-            } elseif (in_array($status_id, $statuses_delivered)) {
-                $status = 'delivered';
-            } elseif (in_array($status_id, $statuses_returned)) {
-                $status = 'returns';
-            } else {
-                continue;
+            if (!isset($journeysPerShipment[$shipmentId][$day])) {
+                $journeysPerShipment[$shipmentId][$day] = [];
             }
 
-            $grouped[$day][$status]++;
+            $journeysPerShipment[$shipmentId][$day][] = $row;
         }
 
+// Step 4: Process each shipment per day
+        foreach ($journeysPerShipment as $shipmentJourneysPerDay) {
+            foreach ($shipmentJourneysPerDay as $day => $journeys) {
+                $hasArrival = false;
+                $latestDeliveryOrReturn = null;
 
+                foreach ($journeys as $j) {
+                    $status_id = $j->shipper_status_id;
+
+                    // Check for arrival
+                    if (in_array($status_id, $statuses_arrival)) {
+                        $hasArrival = true;
+                    }
+
+                    // Check for latest delivery or return
+                    if (in_array($status_id, $statuses_delivered) || in_array($status_id, $statuses_returned)) {
+                        if (!$latestDeliveryOrReturn || $j->journey_id > $latestDeliveryOrReturn->journey_id) {
+                            $latestDeliveryOrReturn = $j;
+                        }
+                    }
+                }
+
+                // Count arrival if present
+                if ($hasArrival) {
+                    $grouped[$day]['arrivals']++;
+                }
+
+                // Count latest delivery or return
+                if ($latestDeliveryOrReturn) {
+                    $latestStatusId = $latestDeliveryOrReturn->shipper_status_id;
+
+                    if (in_array($latestStatusId, $statuses_returned)) {
+                        $grouped[$day]['returns']++;
+                    } else {
+                        $grouped[$day]['delivered']++;
+                    }
+                }
+            }
+        }
+
+// Step 5: Final Response
         $response = [
             'status' => 0,
             'message' => 'Success',
             'shipments_summary' => [
-                'over_all_in_process' => $over_all_in_process, // you can set this as needed
-                'today_bookings' => $today_bookings, // same here
+                'over_all_in_process' => $over_all_in_process,
+                'today_bookings' => $today_bookings,
                 'last_6_day_summary' => $grouped,
             ]
         ];
+
 
         return response()->json($response);
 
