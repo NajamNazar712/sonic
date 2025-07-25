@@ -377,7 +377,6 @@ class ShipperCrmApiController extends Controller
             ->whereIn('crm_requests.status_id',$request_status)
             ->whereBetween('crm_requests.created_at', [Carbon::now()->subMonths(12)->startOfMonth(), Carbon::now()->endOfDay()]);
 
-
             if($tracking_number) {
                 $crm_requests = $crm_requests->where('s.tracking_number', $tracking_number)->get();
             } else {
