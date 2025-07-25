@@ -258,8 +258,7 @@ class ShipperOrderManagementApiController extends Controller
                 ->where('s.shipment_type', 2)
                 ->where('rs.shipper_account_no', $user_id);
         } else {
-            $baseQuery->where('s.shipment_type', 1)
-                ->where('s.user_id', $user_id);
+            $baseQuery->where('s.user_id', $user_id);
         }
 
         $arrival_flag = !$request->has('status_id') || $request->status_id == 2;
