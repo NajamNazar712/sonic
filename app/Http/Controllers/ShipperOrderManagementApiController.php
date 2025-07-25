@@ -201,48 +201,36 @@ class ShipperOrderManagementApiController extends Controller
         $user_id = $app_type == 2 ? $request->retail_shipper_id : $request->shipper_id;
 
         $startDate = Carbon::now()->subMonths(12)->startOfMonth();
-        $endDate = Carbon::now()->endOfDay();
 
         $process_and_booking = (int)$request->input('process_and_booking', 1);
+        $today_bookings = 0;
+        $over_all_in_process = 0;
+        $exclude_statuses = [14, 18, 19, 36, 38, 51, 31, 25, 17];
 
-        if ($process_and_booking == 1) {
+        if ($process_and_booking === 1) {
+            // Common where clauses for both types
+            $conditions = function ($query) use ($user_id, $app_type) {
+                if ($app_type == 2) {
+                    $query->leftJoin('retail_shipments', 'retail_shipments.shipment_id', '=', 'shipments.id')
+                        ->where('retail_shipments.shipper_account_no', $user_id);
+                } else {
+                    $query->where('shipments.user_id', $user_id);
+                }
+            };
 
-            $minId2 = DB::table('shipments')
-                ->where('created_at','>=', $startDate)
-                ->min('id');
+            // Count of all in-process shipments (excluding certain statuses)
+            $over_all_in_process = DB::table('shipments', 's')
+                ->when(true, $conditions)
+                ->whereNotIn('shipments.shipper_status_id', $exclude_statuses)
+                ->where('shipments.created_at', '>=', $startDate)
+                ->count();
 
-            // Excluded status IDs for in-process shipments
-            $exclude_statuses = [14, 18, 19, 36, 38, 51, 31, 25, 17];
-            if ($app_type == 1) {
-                $exclude_statuses[] = 1;
-            }
-
-            $todayStart = Carbon::today()->startOfDay();
-            $todayEnd = Carbon::today()->endOfDay();
-
-            $query = Shipment::query()
-                ->selectRaw("
-            SUM(CASE WHEN shipments.shipper_status_id = 1 AND DATE(shipments.created_at) = ? THEN 1 ELSE 0 END) as today_bookings,
-            SUM(CASE WHEN shipments.shipper_status_id NOT IN (" . implode(',', $exclude_statuses) . ") THEN 1 ELSE 0 END) as in_process_total
-        ", [$todayStart->toDateString()]);
-
-            if ($app_type == 2) {
-                $query->leftJoin('retail_shipments', 'retail_shipments.shipment_id', '=', 'shipments.id')
-                    ->where('retail_shipments.shipper_account_no', $user_id);
-            } else {
-                $query->where('shipments.user_id', $user_id);
-            }
-
-            $query->where('shipments.id','>=', $minId2);
-
-            $result = $query->first();
-
-            $today_bookings = (int)$result->today_bookings;
-            $over_all_in_process = (int)$result->in_process_total;
-
-        } else {
-            $today_bookings = 0;
-            $over_all_in_process = 0;
+            // Count of bookings for today with shipper_status_id = 1
+            $today_bookings = DB::table('shipments', 's')
+                ->when(true, $conditions)
+                ->where('shipments.shipper_status_id', 1)
+                ->where('shipments.created_at', '>=', $startDate)
+                ->count();
         }
 
 
