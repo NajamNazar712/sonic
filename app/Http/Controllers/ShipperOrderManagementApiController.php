@@ -208,17 +208,17 @@ class ShipperOrderManagementApiController extends Controller
         if ($process_and_booking == 1) {
 
             $query = Shipment::query()
-                ->select('shipments.shipper_status_id', 'shipments.created_at')
-                ->whereBetween('shipments.created_at', [$startDate, $endDate]);
+                ->select('shipments.shipper_status_id', 'shipments.created_at');
 
             if ($app_type == 2) {
                 $query->leftJoin('retail_shipments', 'retail_shipments.shipment_id', '=', 'shipments.id')
                     ->where('shipment_type', 2)
                     ->where('retail_shipments.shipper_account_no', $user_id);
             } else {
-                $query->where('shipment_type', 1)
-                    ->where('user_id', $user_id);
+                $query->where('user_id', $user_id)->where('shipment_type', 1);
+
             }
+            $query->whereBetween('shipments.created_at', [$startDate, $endDate]);
 
             $shipments = $query->get();
 
