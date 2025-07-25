@@ -226,7 +226,7 @@ class ShipperOrderManagementApiController extends Controller
                 ->count();
 
             // Count of bookings for today with shipper_status_id = 1
-            $today_bookings = DB::table('shipments', 's')
+            $today_bookings = DB::table('shipments')
                 ->when(true, $conditions)
                 ->where('shipments.shipper_status_id', 1)
                 ->where('shipments.created_at', '>=', $startDate)
