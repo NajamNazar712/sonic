@@ -207,6 +207,10 @@ class ShipperOrderManagementApiController extends Controller
 
         if ($process_and_booking == 1) {
 
+            $minId2 = DB::table('shipments')
+                ->whereBetween('created_at', [$startDate,$endDate])
+                ->min('id');
+
             $query = Shipment::query()
                 ->select('shipments.shipper_status_id', 'shipments.created_at');
 
@@ -218,9 +222,12 @@ class ShipperOrderManagementApiController extends Controller
                 $query->where('user_id', $user_id)->where('shipment_type', 1);
 
             }
-            $query->whereBetween('shipments.created_at', [$startDate, $endDate]);
+            $query->where('shipments.id','>=', $minId2);
 
             $shipments = $query->get();
+
+            $todayStart = Carbon::today()->startOfDay();
+            $todayEnd = Carbon::today()->endOfDay();
 
 // Shipper statuses to exclude from "in process"
             $exclude_statuses = [14, 18, 19, 36, 38, 51, 31, 25, 17];
@@ -228,13 +235,8 @@ class ShipperOrderManagementApiController extends Controller
                 $exclude_statuses[] = 1;
             }
 
-            $todayStart = Carbon::today()->startOfDay();
-            $todayEnd = Carbon::today()->endOfDay();
-
-
             $today_bookings = $shipments->filter(function ($shipment) use ($todayStart, $todayEnd) {
-                return $shipment->shipper_status_id == 1 &&
-                    Carbon::parse($shipment->created_at)->between($todayStart, $todayEnd);
+                return $shipment->shipper_status_id == 1 && Carbon::parse($shipment->created_at)->between($todayStart, $todayEnd);
             })->count();
 
             $over_all_in_process = $shipments->filter(function ($shipment) use ($exclude_statuses) {
