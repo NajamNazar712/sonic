@@ -262,6 +262,9 @@ class ShipperOrderManagementApiController extends Controller
 
         // Determine base shipments
         $baseQuery = DB::table('shipments as s');
+        $minId = DB::table('shipments_journey')
+            ->where('created_at', '>=', Carbon::now()->subDays(6)->startOfDay())
+            ->min('id');
 
         if ($app_type == 2) {
             $baseQuery->leftjoin('retail_shipments as rs', 'rs.shipment_id', '=', 's.id')
@@ -277,9 +280,11 @@ class ShipperOrderManagementApiController extends Controller
         if($arrival_flag) {
             // --- Arrivals ---
             $arrivals = $baseQuery->clone()
-                ->leftjoin('shipments_journey as sj', 'sj.shipment_id', '=', 's.id')
-                ->whereIn('sj.shipper_status_id', [2, 4])
-                ->whereBetween('sj.created_at', [Carbon::now()->subDays(6)->startOfDay(), Carbon::now()->endOfDay()])
+                ->join('shipments_journey as sj', function ($join) use($minId){
+                    $join->on('sj.shipment_id', '=', 's.id')
+                        ->whereIn('sj.shipper_status_id', [2, 4])
+                        ->where('sj.id', '>=', $minId);
+                })
                 ->select(
                     DB::raw('DATE(sj.created_at) as day'),
                     DB::raw('COUNT(*) as total')
@@ -296,27 +301,30 @@ class ShipperOrderManagementApiController extends Controller
 
         $delivered_return_flag = !$request->has('status_id') || in_array($request->status_id,[14,25]);
 
+
         if($delivered_return_flag) {
             // --- Delivered / Returned ---
-            $subquery = DB::table('shipments_journey as sj1')
-                ->select('sj1.shipment_id', DB::raw('MAX(sj1.id) as max_id'))
-                ->whereBetween('sj1.created_at', [Carbon::now()->subDays(6)->startOfDay(), Carbon::now()->endOfDay()])
-                ->groupBy('sj1.shipment_id');
+//            $subquery = DB::table('shipments_journey as sj1')
+//                ->select('sj1.shipment_id', DB::raw('MAX(sj1.id) as max_id'))
+//                ->whereBetween('sj1.created_at', [Carbon::now()->subDays(6)->startOfDay(), Carbon::now()->endOfDay()])
+//                ->groupBy('sj1.shipment_id');
 
             $journeyQuery = $baseQuery->clone()
-                ->leftJoinSub($subquery, 'last_journeys', function ($join) {
-                    $join->on('s.id', '=', 'last_journeys.shipment_id');
-                })
-                ->leftjoin('shipments_journey as sj2', 'sj2.id', '=', 'last_journeys.max_id')
-                ->whereBetween('sj2.created_at', [Carbon::now()->subDays(6)->startOfDay(), Carbon::now()->endOfDay()]);
-
-                if ($request->status_id == 14) {
-                    $journeyQuery->whereIn('sj2.shipper_status_id', [14, 30, 36, 37]);
-                } elseif ($request->status_id == 25) {
-                    $journeyQuery->whereIn('sj2.shipper_status_id', [25]);
-                } elseif (!$request->has('status_id')) {
-                    $journeyQuery->whereIn('sj2.shipper_status_id', [14, 30, 36, 37, 25]);
-                }
+//                ->leftJoinSub($subquery, 'last_journeys', function ($join) {
+//                    $join->on('s.id', '=', 'last_journeys.shipment_id');
+//                })
+//                ->leftjoin('shipments_journey as sj2', 'sj2.id', '=', 'last_journeys.max_id')
+                ->join('shipments_journey as sj2', function ($join) use($minId,$request){
+                    $join->on('sj2.shipment_id', '=', 's.id');
+                    if ($request->status_id == 14) {
+                        $join->whereIn('sj2.shipper_status_id', [14, 30, 36, 37]);
+                    } elseif ($request->status_id == 25) {
+                        $join->whereIn('sj2.shipper_status_id', [25]);
+                    } elseif (!$request->has('status_id')) {
+                        $join->whereIn('sj2.shipper_status_id', [2,4,14, 30, 36, 37, 25]);
+                    }
+                    $join->where('sj2.id', '>=', $minId);
+                });
 
             $journeyQuery = $journeyQuery->select(
                     DB::raw('DATE(sj2.created_at) as day'),
@@ -333,6 +341,8 @@ class ShipperOrderManagementApiController extends Controller
                     $last_6_day_summary[$row->day]['delivered'] += $row->total;
                 } elseif ($row->shipper_status_id == 25) {
                     $last_6_day_summary[$row->day]['returns'] += $row->total;
+                }else if (in_array($row->shipper_status_id, [2,4])) {
+                    $last_6_day_summary[$row->day]['arrivals'] += $row->total;
                 }
             }
 
