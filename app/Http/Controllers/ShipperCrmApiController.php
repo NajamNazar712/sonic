@@ -16,6 +16,7 @@ use App\Http\Models\Shipment;
 
 use App\Http\Requests\AddCrmRequest;
 use App\Http\Requests\ValidateShipmentIdRequest;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -373,7 +374,9 @@ class ShipperCrmApiController extends Controller
 
         // Final query
         $crm_requests = $crm_requests->select($selects)
-            ->whereIn('crm_requests.status_id',$request_status);
+            ->whereIn('crm_requests.status_id',$request_status)
+            ->whereBetween('crm_requests.created_at', [Carbon::now()->subMonths(12)->startOfMonth(), Carbon::now()->endOfDay()]);
+
 
             if($tracking_number) {
                 $crm_requests = $crm_requests->where('s.tracking_number', $tracking_number)->get();
