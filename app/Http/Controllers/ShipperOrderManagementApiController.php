@@ -203,7 +203,7 @@ class ShipperOrderManagementApiController extends Controller
         $startDate = Carbon::now()->subMonths(12)->startOfMonth();
         $endDate = Carbon::now()->endOfDay();
 
-        $process_and_booking        = (int) $request->input('process_and_booking', 1);
+        $process_and_booking   = (int) $request->input('process_and_booking', 1);
 
         if ($process_and_booking == 1) {
 
