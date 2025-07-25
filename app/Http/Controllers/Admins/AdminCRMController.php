@@ -67,6 +67,7 @@ use App\Http\Models\Admin\KeyAccountPendingCrm;
 use App\Http\Models\CRM\CrmRequestAgentHistory;
 use App\Http\Models\CRM\CrmRequestTaggingTypes;
 use App\Http\Models\Admin\Retail\RetailShipment;
+use App\Http\Models\ShipmentsPaymentJourney;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\CRM\DelayInDeliveryShipment;
 use App\Http\Controllers\NotificationsController;
@@ -497,6 +498,7 @@ class AdminCRMController extends Controller
                         if($is_shipment){
                             $already_lodged = true;
                             $complain = $is_shipment->id;
+
 
                             $response = $this->canLockClaim($shipment, $is_shipment, $nature_id, $request);
 
@@ -1520,6 +1522,23 @@ class AdminCRMController extends Controller
         }
         if ($tracking_numbers = $request->get('tracking_numbers')) {
             $launched_request->whereIn('s.tracking_number', explode(',', $tracking_numbers));
+        }
+
+        if ($request_date = $request->get('request_date')) {
+
+            $current_date = Carbon::parse($request_date);
+            $previous_date = $current_date->copy()->subDay();
+
+            $cut_off_time_from = CrmSettings::where('name', 'TAT Cut-Off Time From')->value('setting_value');
+            $cut_off_time_to = CrmSettings::where('name', 'TAT Cut-Off Time To')->value('setting_value');
+
+            $from_time = Carbon::parse(trim($cut_off_time_from))->subMinute()->format('H:i');
+            $to_time   = Carbon::parse(trim($cut_off_time_to))->addMinute()->format('H:i');
+
+            $from_datetime = Carbon::parse("{$current_date->toDateString()} $from_time")->toDateTimeString();
+            $to_datetime   = Carbon::parse("{$previous_date->toDateString()} $to_time")->toDateTimeString();
+
+            $launched_request->whereBetween('crm_requests.created_at',[$to_datetime, $from_datetime]);
         }
 
         if($request->get('star_shipper_filter') == 1)
@@ -4389,6 +4408,7 @@ class AdminCRMController extends Controller
                         NotificationsController::send(117, $crm_request->id, 4);
                     }
                     CrmRequestTagging::where('crm_request_id', $request->id)->delete();
+                    $this->sendPaidInitialMessageToShipper($request->req_id);
                     return redirect()->back()->with(['success' => 'Request marked as Closed']);
                 } else {
                     return redirect()->back()->with(['error' => 'Request is already marked as Closed']);
@@ -4540,6 +4560,7 @@ class AdminCRMController extends Controller
 
                 }
                 // Notification 191 end
+                $this->sendPaidInitialMessageToShipper($request->req_id);
                 
                 if(!empty($request->claim_invalid_reasons)){
                     $this->storeInvalidReasons($request->claim_invalid_reasons, $request->req_id);
@@ -4628,6 +4649,7 @@ class AdminCRMController extends Controller
                 }
                 // Notification 191 end
             }
+            $this->sendPaidInitialMessageToShipper($request->req_id);
             return ['status' => 0, 'success' => 'Request marked as Closed'];
         }
         return ['status' => 1, 'error' => 'Requests does\'nt exists'];
@@ -7378,6 +7400,9 @@ class AdminCRMController extends Controller
                         }
     
                         CrmRequestTagging::where('crm_request_id', $crm_request->id)->delete();
+
+                        $this->sendPaidInitialMessageToShipper($request->req_id);
+
                         // Request marked as Closed
                     } else {
                         $errors[] = 'Request is already marked as Closed for CRM request number ' . $crm_request->id;

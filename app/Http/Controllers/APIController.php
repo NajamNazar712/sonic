@@ -532,9 +532,17 @@ class APIController extends Controller
         $user_id = $request->user_id;
         $flag = null;
         $user_type = User::where('id', $user_id)->first();
-        if($request->input('amount') == 0 && !PendingPayment::check_negative_payable($user_id,$user_type['account_type_id'])){
-            return response()->json(['status' => 1, 'message' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."]);
-        }
+
+        // sahban bhai said service type 3,5 then disabled this below condition
+            if ($request->input('amount') == 0 && Carbon::parse($user_type->activated_at)->lt(Carbon::now()->subDays(7)) && !PendingPayment::check_negative_payable($user_id, $user_type['account_type_id']) && !in_array($request->input('service_type_id',1), [3,5])) {
+
+                return response()->json([
+                    'status' => 1,
+                    'message' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."
+                ]);
+            }
+
+
 
         // Validator::extend('phone_number', function ($attribute, $value, $parameters) {
         //     if ($value) {
@@ -852,6 +860,7 @@ class APIController extends Controller
             })];
         }
         else {
+            //this is for shipper app
             if ($user_type['restrict_order_id'] == 1) {
                 $rules['order_id'] = ['nullable', 'between:0,100', Rule::unique('shipments', 'order_id')->where(function ($query) use ($user_id) {
                     $query->where('user_id', $user_id);
@@ -861,7 +870,6 @@ class APIController extends Controller
             }
         }
 
-        //this is for shipper app
         if($request->app_type==1 && (!$request->has('pickup_address_id') || is_null($request->pickup_address_id))) {
 
             if (preg_match('/^(92|03)\d+/', $request->new_pickup_phone_number)) {
@@ -1664,6 +1672,25 @@ class APIController extends Controller
             } catch (\Exception $e) {
                 Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
             }
+
+//            if ($request->app_type == 1) {
+//                if (app()->environment('production')) {
+//                    $base_url = 'https://sonic.pk/api';
+//                } elseif (app()->environment('staging')) {
+//                    $base_url = 'https://app.sonic.pk/api';
+//                } else {
+//                    $base_url = rtrim(config('app.url'), '/') . '/api';
+//                }
+//                $encoded_tracking = base64_encode($tracking_number);
+//                $airwaybill_url = $base_url . '/shipper/shipment/air_waybill_pdf?tracking_number=' . $encoded_tracking;
+//
+//                return response()->json([
+//                    'status' => 0,
+//                    'message' => 'Shipment has been Booked!',
+//                    'tracking_number' => $tracking_number,
+//                    'airwaybill_url' => $airwaybill_url
+//                ]);
+//            }
             return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number]);
         }
     }
@@ -2097,7 +2124,7 @@ class APIController extends Controller
 
         $rules = [
             'tracking_number' => ['required', 'integer', 'digits_between:10,20'],
-            'type' => ['required', 'boolean'],
+//            'type' => ['required', 'boolean'],
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -2110,13 +2137,22 @@ class APIController extends Controller
             $tracking_number = $request->tracking_number;
             $type = $request->type;
 
-            $shipment = Shipment::join('retail_shipments as rs','rs.shipment_id','shipments.id')
-                ->where('rs.shipper_account_no',$user_id)->where('shipments.tracking_number',$tracking_number)->first();
+//            $shipment = Shipment::with('shipment_journey:id,shipment_id')->join('retail_shipments as rs','rs.shipment_id','shipments.id')
+//                ->where('rs.shipper_account_no',$user_id)->where('shipments.tracking_number',$tracking_number)
+//                ->select('shipments.*')
+//                ->first();
+            $shipment = Shipment::with(['shipment_journey', 'retail','items','pickup_address'])
+                ->whereHas('retail', function ($q) use ($user_id) {
+                    $q->where('shipper_account_no', $user_id);
+                })
+                ->where('tracking_number', $tracking_number)
+                ->first();
+
            if($shipment) {
                $tracking_number = $request->tracking_number;
                $type = $request->type;
                $retail_shipper = RetailShipperInfo::where('id',$user_id)->first();
-               $shipping_mode = RetailShippingMode::where('id',$shipment->shipping_mode)->first();
+               $shipping_mode = RetailShippingMode::where('id',$shipment->retail->shipping_mode)->first();
 //               $shipment = Shipment::whereIn('user_id', $user_ids)->where('tracking_number', $tracking_number)->first();
 
                $sub_segment_name = '-';
@@ -2130,7 +2166,6 @@ class APIController extends Controller
                {
                    $sub_segment_name = $sub_segment->name;
                }
-
                $details = array();
                $details['shipment_id'] = $shipment->id;
                $details['tracking_number'] = $tracking_number;
@@ -2140,7 +2175,7 @@ class APIController extends Controller
                $details['order_date'] = $shipment->pickup_date;
                $details['booking_date'] = $shipment->created_at;
 
-               $shipper = $shipment->user;
+//               $shipper = $shipment->user;
 
                $details['shipper']['name'] = $retail_shipper->shipper_name;
 
@@ -2149,7 +2184,7 @@ class APIController extends Controller
                $details['pickup']['origin'] = $pickup->city->name;
 
                if ($type == 0) {
-                   $details['shipper']['account_number'] = $shipper->id;
+                   $details['shipper']['account_number'] = $retail_shipper->id;
                    $details['shipper']['phone_number_1'] = $retail_shipper->shipper_phone_no;
 //                   $details['shipper']['phone_number_2'] = $shipper->phone2;
 //                   $details['shipper']['email'] = $shipper->email;

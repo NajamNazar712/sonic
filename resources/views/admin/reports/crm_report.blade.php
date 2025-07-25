@@ -417,6 +417,19 @@
                 placeholder:"Select Service Type",
                 allowClear:true,
             });
+
+            function addMonths(date, months) {
+                let d = new Date(date);
+                d.setMonth(d.getMonth() + months);
+                return d;
+            }
+
+            function subtractMonths(date, months) {
+                let d = new Date(date);
+                d.setMonth(d.getMonth() - months);
+                return d;
+            }
+
             $('#from_date').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -426,10 +439,17 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        $('#to_date').pickadate('picker').set('min', $('#from_date').pickadate('picker').get('select'));
+                        let fromDate = new Date(context.select);
+                        let toMinDate = new Date(fromDate); // same as from date
+                        let toMaxDate = addMonths(fromDate, 3); // max 3 months later
+
+                        let toPicker = $('#to_date').pickadate('picker');
+                        toPicker.set('min', toMinDate);
+                        toPicker.set('max', toMaxDate);
                     }
                 }
             });
+
             $('#to_date').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -439,10 +459,18 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        $('#from_date').pickadate('picker').set('max', $('#to_date').pickadate('picker').get('select'));
+                        let toDate = new Date(context.select);
+                        let fromMaxDate = new Date(toDate); // same as to date
+                        let fromMinDate = subtractMonths(toDate, 3); // min 3 months earlier
+
+                        let fromPicker = $('#from_date').pickadate('picker');
+                        fromPicker.set('max', fromMaxDate);
+                        fromPicker.set('min', fromMinDate);
                     }
                 }
             });
+
+
             var index_column = 0;
             var table = $('#datatable').DataTable({
                 scrollX: true, scrollY: '500px',
