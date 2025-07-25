@@ -262,27 +262,18 @@ class ShipperOrderManagementApiController extends Controller
 
         $arrival_flag = !$request->has('status_id') || $request->status_id == 2;
         $delivered_return_flag = !$request->has('status_id') || in_array($request->status_id, [14, 25]);
+
         $statuses_arrival = [2, 4];
         $statuses_delivered = [14, 30, 36, 37];
         $statuses_returned = [25];
 
-        if ($app_type == 2) {
-            $baseQuery->leftjoin('retail_shipments as rs', 'rs.shipment_id', '=', 's.id')
-                ->where('s.shipment_type', 2)
-                ->where('rs.shipper_account_no', $user_id);
-        } else {
-            $baseQuery->where('s.shipment_type', 1)
-                ->where('s.user_id', $user_id);
-        }
         $grouped = [];
         $last7Days = [];
-
         for ($i = 6; $i >= 0; $i--) {
             $day = Carbon::now()->subDays($i)->toDateString();
             $grouped[$day] = ['arrivals' => 0, 'delivered' => 0, 'returns' => 0];
             $last7Days[] = $day;
         }
-
         $query = $baseQuery->clone()
             ->join('shipments_journey as sj2', function ($join) use ($minId, $request) {
                 $join->on('sj2.shipment_id', '=', 's.id');
@@ -290,9 +281,7 @@ class ShipperOrderManagementApiController extends Controller
                     $join->whereIn('sj2.shipper_status_id', [14, 30, 36, 37]);
                 } elseif ($request->status_id == 25) {
                     $join->whereIn('sj2.shipper_status_id', [25]);
-                }elseif($request->status_id == 2) {
-                    $join->whereIn('sj2.shipper_status_id', [2, 4]);
-                } elseif ($request->has('status_id')) {
+                } elseif (!$request->has('status_id')) {
                     $join->whereIn('sj2.shipper_status_id', [2, 4, 14, 30, 36, 37, 25]);
                 }
                 $join->where('sj2.id', '>=', $minId);
@@ -301,43 +290,41 @@ class ShipperOrderManagementApiController extends Controller
                 DB::raw('DATE(sj2.created_at) as day'),
                 'sj2.id as journey_id',
                 'sj2.shipper_status_id',
-                's.id as shipment_id',
-                DB::raw('sj2.created_at')
+                's.id as shipment_id'
             )
             ->get();
 
-        $allJourneysByShipment = [];
+        $latestJourneys = [];
 
         foreach ($query as $row) {
             $shipmentId = $row->shipment_id;
-            $allJourneysByShipment[$shipmentId][] = $row;
+            $journeyId = $row->journey_id;
+
+            if (!isset($latestJourneys[$shipmentId]) || $journeyId > $latestJourneys[$shipmentId]->journey_id) {
+                $latestJourneys[$shipmentId] = $row;
+            }
         }
 
-        foreach ($allJourneysByShipment as $shipmentId => $journeys) {
-            // Get latest journey
-            $latest = collect($journeys)->sortByDesc('journey_id')->first();
-            $day = Carbon::parse($latest->created_at)->toDateString();
+        foreach ($latestJourneys as $data) {
+            $day = $data->day;
 
-            if (!in_array($day, $last7Days)) continue;
-
-            $status_id = $latest->shipper_status_id;
-
-            // Check if any arrival (2 or 4) exists on same day
-            $arrivalExists = collect($journeys)->contains(function ($j) use ($statuses_arrival, $day) {
-                return in_array($j->shipper_status_id, $statuses_arrival)
-                    && Carbon::parse($j->created_at)->toDateString() == $day;
-            });
-
-            if ($arrivalExists) {
-                $grouped[$day]['arrivals']++;
+            if (!in_array($day, $last7Days)) {
+                continue; // skip if out of the desired 7-day window
             }
 
-            // Now check delivered or return from latest journey
-            if (in_array($status_id, $statuses_delivered)) {
-                $grouped[$day]['delivered']++;
+            $status_id = $data->shipper_status_id;
+
+            if (in_array($status_id, $statuses_arrival)) {
+                $status = 'arrivals';
+            } elseif (in_array($status_id, $statuses_delivered)) {
+                $status = 'delivered';
             } elseif (in_array($status_id, $statuses_returned)) {
-                $grouped[$day]['returns']++;
+                $status = 'returns';
+            } else {
+                continue;
             }
+
+            $grouped[$day][$status]++;
         }
 
 
