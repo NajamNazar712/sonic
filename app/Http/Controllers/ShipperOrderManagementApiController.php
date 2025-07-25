@@ -219,7 +219,7 @@ class ShipperOrderManagementApiController extends Controller
             };
 
             // Count of all in-process shipments (excluding certain statuses)
-            $over_all_in_process = DB::table('shipments', 's')
+            $over_all_in_process = DB::table('shipments')
                 ->when(true, $conditions)
                 ->whereNotIn('shipments.shipper_status_id', $exclude_statuses)
                 ->where('shipments.created_at', '>=', $startDate)
