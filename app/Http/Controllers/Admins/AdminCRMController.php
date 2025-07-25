@@ -7575,4 +7575,55 @@ class AdminCRMController extends Controller
             CrmRequestResolvedReason::insert($insertData); 
         }    
     }
+
+    public static function canComplaintPaymentLocked($id)
+    {
+        $shipmentPayment = ShipmentsPaymentJourney::with('shipment.user')
+            ->where('shipment_id', $id)
+            ->latest()
+            ->first();
+
+        // 1 = Processed, 3 = Paid
+        if (!empty($shipmentPayment->status_id) && $shipmentPayment->status_id == 1) {
+            return [
+                'status' => 0,
+                'error' => "Payment is being processed for shipment ID {$id} and will be paid soon."
+            ];
+        }
+
+        return ['status' => 1];
+    }
+
+    public static function sendPaidInitialMessageToShipper($crm_id)
+    {
+        $crm_request = CrmRequest::find($crm_id);
+
+        $shipmentPayment = ShipmentsPaymentJourney::with('shipment.user')
+        ->where('shipment_id', $crm_request->shipment_id)
+        ->latest()
+        ->first();
+
+        if (!empty($shipmentPayment->status_id) && $shipmentPayment->status_id == 3) {
+
+            $comment = "Dear Customer Name
+
+            Your payment has been paid; therefore, the complaint has been closed.
+
+            Regards
+
+            CRM Team – SLGTRAX";
+            
+            $comment_by = 0;
+            $comment_type = 0;
+
+            $default_agent_setting = GlobalSettings::where('type', 'crm_default_agent');
+            if ($default_agent_setting->exists()) {
+                $default_agent_setting = $default_agent_setting->first();
+                $default_agent_id = $default_agent_setting->setting_value;
+            } else {
+                $default_agent_id = 306;
+            }
+            CRMCommentController::add($crm_id, $default_agent_id, $comment_by, $comment_type, $comment, 1);
+        }
+    }
 }
