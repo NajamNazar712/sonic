@@ -91,6 +91,7 @@ use App\Http\Models\CRM\CrmClosedReasonStatus;
 use App\Http\Models\ShipmentDetail;
 use Illuminate\Support\MessageBag;
 use App\Http\Models\Admin\Retail\RetailShipment;
+use App\Http\Models\ShipmentsPaymentJourney;
 
 class AdminCRMController extends Controller
 {
@@ -475,6 +476,7 @@ class AdminCRMController extends Controller
                         if($is_shipment){
                             $already_lodged = true;
                             $complain = $is_shipment->id;
+
                             if($is_shipment->case_nature_id != $nature_id){
                                 if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
                                     if(in_array($complaint_id, [11, 13])){
@@ -4359,6 +4361,7 @@ class AdminCRMController extends Controller
                         NotificationsController::send(117, $crm_request->id, 4);
                     }
                     CrmRequestTagging::where('crm_request_id', $request->id)->delete();
+                    $this->sendPaidInitialMessageToShipper($request->req_id);
                     return redirect()->back()->with(['success' => 'Request marked as Closed']);
                 } else {
                     return redirect()->back()->with(['error' => 'Request is already marked as Closed']);
@@ -4510,6 +4513,7 @@ class AdminCRMController extends Controller
 
                 }
                 // Notification 191 end
+                $this->sendPaidInitialMessageToShipper($request->req_id);
                 return redirect()->back()->with(['success' => 'Request marked as Closed']);
             } else {
                 return redirect()->back()->with(['error' => 'Request is already marked as Closed']);
@@ -4593,6 +4597,7 @@ class AdminCRMController extends Controller
                 }
                 // Notification 191 end
             }
+            $this->sendPaidInitialMessageToShipper($request->req_id);
             return ['status' => 0, 'success' => 'Request marked as Closed'];
         }
         return ['status' => 1, 'error' => 'Requests does\'nt exists'];
@@ -7303,7 +7308,9 @@ class AdminCRMController extends Controller
                         }
     
                         CrmRequestTagging::where('crm_request_id', $crm_request->id)->delete();
-    
+
+                        $this->sendPaidInitialMessageToShipper($request->req_id);
+
                         // Request marked as Closed
                     } else {
                         $errors[] = 'Request is already marked as Closed for CRM request number ' . $crm_request->id;
@@ -7419,6 +7426,57 @@ class AdminCRMController extends Controller
             $crmRequest->case_nature_complainant = $caseNatureComplainant;
             $crmRequest->complainant_phone = $complainantPhone;
             $crmRequest->save();
+        }
+    }
+
+   public static function canComplaintPaymentLocked($id)
+    {
+        $shipmentPayment = ShipmentsPaymentJourney::with('shipment.user')
+            ->where('shipment_id', $id)
+            ->latest()
+            ->first();
+
+        // 1 = Processed, 3 = Paid
+        if (!empty($shipmentPayment->status_id) && $shipmentPayment->status_id == 1) {
+            return [
+                'status' => 0,
+                'error' => "Payment is being processed for shipment ID {$id} and will be paid soon."
+            ];
+        }
+
+        return ['status' => 1];
+    }
+
+    public static function sendPaidInitialMessageToShipper($crm_id)
+    {
+        $crm_request = CrmRequest::find($crm_id);
+
+        $shipmentPayment = ShipmentsPaymentJourney::with('shipment.user')
+        ->where('shipment_id', $crm_request->shipment_id)
+        ->latest()
+        ->first();
+
+        if (!empty($shipmentPayment->status_id) && $shipmentPayment->status_id == 3) {
+
+            $comment = "Dear Customer Name
+
+            Your payment has been paid; therefore, the complaint has been closed.
+
+            Regards
+
+            CRM Team – SLGTRAX";
+            
+            $comment_by = 0;
+            $comment_type = 0;
+
+            $default_agent_setting = GlobalSettings::where('type', 'crm_default_agent');
+            if ($default_agent_setting->exists()) {
+                $default_agent_setting = $default_agent_setting->first();
+                $default_agent_id = $default_agent_setting->setting_value;
+            } else {
+                $default_agent_id = 306;
+            }
+            CRMCommentController::add($crm_id, $default_agent_id, $comment_by, $comment_type, $comment, 1);
         }
     }
 }
