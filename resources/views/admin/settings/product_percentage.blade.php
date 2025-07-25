@@ -82,11 +82,8 @@
 
                                     <label class="mr-2 font-medium-2">
                                         <b>
-                                            @if(isset($wht_setting_value) && $wht_setting_value == 1)
-                                                Included Shippers WHT
-                                            @else
-                                                Excluded Shippers WHT
-                                            @endif
+                                            Shippers WHT
+                                        
                                         </b>
                                     </label>
 
@@ -97,11 +94,7 @@
 
                                 <label class="mr-2 font-medium-2">
                                     <b>
-                                        @if(isset($sst_setting_value) && $sst_setting_value == 1)
-                                            Included Shippers COD SST
-                                        @else
-                                            Excluded Shippers COD SST
-                                        @endif
+                                        Shippers COD SST
                                     </b>
                                 </label>
                                 <select name="cod_sst_users[]" id="excluded_users_sst" class="form-control select2" multiple="multiple">
