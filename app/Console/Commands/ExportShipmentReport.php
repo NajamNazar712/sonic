@@ -6,6 +6,7 @@ use DateInterval;
 use DatePeriod;
 use DateTime;
 use Illuminate\Console\Command;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
@@ -97,49 +98,72 @@ class ExportShipmentReport extends Command
         // // }
 
         // $this->info("✅ All 5‑day chunks processed!");
-        $start = new DateTime('2024-07-01');
-        $end   = new DateTime('2024-08-31');
+        //     $start = new DateTime('2024-07-01');
+        //     $end   = new DateTime('2024-08-31');
 
+        //     $rows = DB::select("
+        // SELECT 
+        //     s.id,
+        //     s.tracking_number, 
+        //     s.consignee_address AS Consignee_Address, 
+        //     s.consignee_phone_number_1 AS Phone, 
+        //     s.consignee_name AS NAME, 
+        //     s.`actual_weight` AS Weight, 
+
+        //     (
+        //         SELECT COUNT(*) 
+        //         FROM shipment_pieces sp 
+        //         WHERE sp.shipment_id = s.id
+        //     ) AS Pcs, 
+
+        //     s.amount AS COD, 
+
+        //     (
+        //         SELECT SUM(si.quantity) 
+        //         FROM shipment_items si 
+        //         WHERE si.shipment_id = sj.shipment_id
+        //     ) AS Quantity, 
+
+        //     sj.`reference_1_id` AS Delivery_Number, 
+        //     r.trax_id AS Rider_Employee_Id, 
+        //     sj.updated_at AS `Date`,
+        //     ca.name AS hub
+
+        // FROM shipments_journey AS sj
+        // JOIN shipments AS s ON s.id = sj.shipment_id
+        // JOIN riders AS r ON sj.reference_2_id = r.id
+        // left JOIN city_areas AS ca ON  ca.`id` = r.`area_id`
+
+        // WHERE sj.created_at BETWEEN ? AND ?
+        //   AND sj.shipper_status_id = 5
+        //   AND sj.city_id = 202", [
+        //         $start->format('Y-m-d 00:00:00'),
+        //         $end->format('Y-m-d 23:59:59'),
+        //     ]);
+        // Define date range
+        $start = Carbon::parse('2024-01-01');
+        $end = Carbon::parse('2025-07-26');
+
+        // Run query
         $rows = DB::select("
     SELECT 
-        s.id,
-        s.tracking_number, 
-        s.consignee_address AS Consignee_Address, 
-        s.consignee_phone_number_1 AS Phone, 
-        s.consignee_name AS NAME, 
-        s.`actual_weight` AS Weight, 
-
-        (
-            SELECT COUNT(*) 
-            FROM shipment_pieces sp 
-            WHERE sp.shipment_id = s.id
-        ) AS Pcs, 
-
-        s.amount AS COD, 
-
-        (
-            SELECT SUM(si.quantity) 
-            FROM shipment_items si 
-            WHERE si.shipment_id = sj.shipment_id
-        ) AS Quantity, 
-
-        sj.`reference_1_id` AS Delivery_Number, 
-        r.trax_id AS Rider_Employee_Id, 
-        sj.updated_at AS `Date`,
-        ca.name AS hub
-
-    FROM shipments_journey AS sj
-    JOIN shipments AS s ON s.id = sj.shipment_id
-    JOIN riders AS r ON sj.reference_2_id = r.id
-    left JOIN city_areas AS ca ON  ca.`id` = r.`area_id`
-
-    WHERE sj.created_at BETWEEN ? AND ?
-      AND sj.shipper_status_id = 5
-      AND sj.city_id = 202", [
-            $start->format('Y-m-d 00:00:00'),
-            $end->format('Y-m-d 23:59:59'),
-        ]);
-
+        u.id AS `Account ID`,
+        u.name AS `Account Name`,
+        u.address AS `Address`,
+        u.email AS `POC Email`,
+        u.poc AS `POC Name`,
+        u.phone AS `POC Phone Number`,
+        us.name AS `Status`,
+        DATE_FORMAT(s.created_at, '%Y-%m') AS `Month`,
+        COUNT(s.id) AS `Total Shipments`
+    FROM shipments AS s
+    JOIN users AS u ON u.id = s.user_id
+    JOIN cities AS c ON c.id = u.city_id AND c.name IN ('Quetta', 'Sukkur', 'Hyderabad', 'Karachi')
+    JOIN user_statuses AS us ON us.id = u.status
+    WHERE s.created_at BETWEEN ? AND ?
+    GROUP BY s.user_id, DATE_FORMAT(s.created_at, '%Y-%m')
+    ORDER BY u.name, `Month`
+", [$start, $end]);
         if (empty($rows)) {
             $this->info("❌ No records found.");
             return;
