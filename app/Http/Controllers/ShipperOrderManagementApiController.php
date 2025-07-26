@@ -8,18 +8,18 @@ use Barryvdh\Snappy\Facades\SnappyPdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
 class ShipperOrderManagementApiController extends Controller
 {
    public  function order_list(Request $request)
    {
+       $tracking_number = $request->input('tracking_number');
        if ($request->app_type == 2 ) {
-           $shipments_summary = $this->shipments_summary($request->retail_shipper_id,$request->app_type);
-           $order_list = $this->retail_shipper_list($request->retail_shipper_id);
+           $order_list = $this->retail_shipper_list($request->retail_shipper_id,$tracking_number);
        } else {
-           $shipments_summary = $this->shipments_summary($request->shipper_id,$request->app_type);
-           $order_list = $this->shipper_order_list($request->shipper_id);
+           $order_list = $this->shipper_order_list($request->shipper_id,$tracking_number);
        }
 
        if ($order_list && $order_list->count() > 0) {
@@ -27,14 +27,12 @@ class ShipperOrderManagementApiController extends Controller
                'status' => 0,
                'message' => 'Success',
                'order_list' => $order_list,
-               'shipments_summary' =>$shipments_summary
            ]);
        }
 
        return response()->json([
            'status' => 1,
            'message' => 'Shipments Order not found!',
-           'shipments_summary' =>$shipments_summary
        ]);
 
    }
@@ -82,27 +80,33 @@ class ShipperOrderManagementApiController extends Controller
     }
 
 
-    private function shipper_order_list($shipper_id)
+    private function shipper_order_list($shipper_id,$tracking_number)
     {
 
-        return $this->commonShipmentQuery()
+        $shipper_order_list = $this->commonShipmentQuery()
             ->leftjoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
             ->addSelect('sm.mode as service_type','shipments.id')
-            ->where('shipments.user_id', $shipper_id)
-            ->orderBy('shipments.id', 'desc')
-            ->cursorPaginate(20);
+            ->where('shipments.user_id', $shipper_id);
+
+        if($tracking_number) {
+            return $shipper_order_list->where('shipments.tracking_number', $tracking_number)->get();
+        }
+        return $shipper_order_list->orderBy('shipments.id', 'desc')->cursorPaginate(20);
     }
 
-    private function retail_shipper_list($retail_id)
+    private function retail_shipper_list($retail_id,$tracking_number)
     {
-        return $this->commonShipmentQuery()
+        $retail_shipper_list = $this->commonShipmentQuery()
             ->leftjoin('retail_shipments as rs', 'rs.shipment_id', '=', 'shipments.id')
             ->leftjoin('retail_shipper_infos as rsi', 'rsi.id', '=', 'rs.shipper_account_no')
             ->leftjoin('retail_shipping_modes as sm', 'sm.id', '=', 'rs.shipping_mode')
             ->addSelect('rs.id','sm.name as service_type')
-            ->where('rsi.id', $retail_id)
-            ->orderBy('rs.id', 'desc')
-            ->cursorPaginate(20);
+            ->where('rsi.id', $retail_id);
+
+            if($tracking_number) {
+               return  $retail_shipper_list->where('shipments.tracking_number', $tracking_number)->get();
+            }
+            return  $retail_shipper_list->orderBy('rs.id', 'desc')->cursorPaginate(20);
     }
 
     private function shipments_summary_od($user_id,$app_type)
@@ -186,126 +190,174 @@ class ShipperOrderManagementApiController extends Controller
         return $shipment_summary;
     }
 
-    private function shipments_summary($user_id,$app_type)
+    public function shipments_summary(Request $request)
     {
+        if ($request->has('status_id') && !in_array($request->status_id, [2, 14, 25])) {
 
-        $todayStart = Carbon::today()->startOfDay();
-        $todayEnd = Carbon::today()->endOfDay();
-
-        $shipment_status = [14,18,19,36,38,51,31,25,17];
-        if ($app_type == 1):
-            $shipment_status[] = 1;
-        endif;
-
-        // 1. Over all in process
-        $over_all_in_process = Shipment::whereNotIn('shipper_status_id', $shipment_status);
-//            ->whereBetween('pickup_date', [$startDate, $endDate]);
-
-        if ($app_type == 2) {
-            $over_all_in_process = $over_all_in_process
-                ->leftjoin('retail_shipments', 'retail_shipments.shipment_id', '=', 'shipments.id')
-                ->where('shipment_type', 2)
-                ->where('retail_shipments.shipper_account_no', $user_id);
-        } else {
-            $over_all_in_process = $over_all_in_process->where('shipment_type', 1)
-                ->where('user_id', $user_id);
-        }
-        $over_all_in_process = $over_all_in_process->count();
-        // 2. Today bookings
-        $today_bookings = Shipment::where('shipments.shipper_status_id', 1)
-            ->whereBetween('shipments.created_at', [$todayStart,$todayEnd]);
-
-        if($app_type == 2) {
-            $today_bookings = $today_bookings->leftjoin('retail_shipments', 'retail_shipments.shipment_id', '=', 'shipments.id')
-                ->where('shipments.shipment_type', 2)
-                ->where('retail_shipments.shipper_account_no', $user_id);
-        } else{
-            $today_bookings =  $today_bookings->where('shipments.shipment_type', 1)
-                ->where('shipments.user_id', $user_id);
-        }
-        $today_bookings = $today_bookings->count();
-
-        $last_6_day_summary = [];
-        $dateRange = [];
-
-        for ($i = 6; $i >= 0; $i--) {
-            $day = Carbon::now()->subDays($i);
-            $dateRange[] = $day->toDateString();
-
-            $last_6_day_summary[$day->toDateString()] = [
-                'arrivals' => 0,
-                'delivered' => 0,
-                'returns' => 0,
-            ];
+            return response()->json(['status' => 1, 'message' => 'status not found!']);
         }
 
-// Determine base shipments
+        $app_type = $request->app_type;
+        $user_id = $app_type == 2 ? $request->retail_shipper_id : $request->shipper_id;
+
+        $startDate = Carbon::now()->subMonths(12)->startOfMonth();
+
+        $process_and_booking = (int)$request->input('process_and_booking', 1);
+        $today_bookings = 0;
+        $over_all_in_process = 0;
+        $exclude_statuses = [14, 18, 19, 36, 38, 51, 31, 25, 17];
+
+        if ($process_and_booking === 1) {
+            // Common where clauses for both types
+            $conditions = function ($query) use ($user_id, $app_type) {
+                if ($app_type == 2) {
+                    $query->leftJoin('retail_shipments', 'retail_shipments.shipment_id', '=', 'shipments.id')
+                        ->where('retail_shipments.shipper_account_no', $user_id);
+                } else {
+                    $query->where('shipments.user_id', $user_id);
+                }
+            };
+
+            // Count of all in-process shipments (excluding certain statuses)
+            $over_all_in_process = DB::table('shipments')
+                ->when(true, $conditions)
+                ->whereNotIn('shipments.shipper_status_id', $exclude_statuses)
+                ->where('shipments.created_at', '>=', $startDate)
+                ->count();
+
+            // Count of bookings for today with shipper_status_id = 1
+            $today_bookings = DB::table('shipments')
+                ->when(true, $conditions)
+                ->where('shipments.shipper_status_id', 1)
+                ->where('shipments.created_at', '>=', $startDate)
+                ->count();
+        }
+
+
         $baseQuery = DB::table('shipments as s');
+        $minId = DB::table('shipments_journey')
+            ->where('created_at', '>=', Carbon::now()->subDays(6)->startOfDay())
+            ->min('id');
 
         if ($app_type == 2) {
             $baseQuery->leftjoin('retail_shipments as rs', 'rs.shipment_id', '=', 's.id')
                 ->where('s.shipment_type', 2)
                 ->where('rs.shipper_account_no', $user_id);
         } else {
-            $baseQuery->where('s.shipment_type', 1)
-                ->where('s.user_id', $user_id);
+            $baseQuery->where('s.user_id', $user_id);
         }
 
-// --- Arrivals ---
-        $arrivals = $baseQuery->clone()
-            ->leftjoin('shipments_journey as sj', 'sj.shipment_id', '=', 's.id')
-            ->whereIn('sj.shipper_status_id', [2, 4])
-            ->whereBetween('sj.created_at', [Carbon::now()->subDays(6)->startOfDay(), Carbon::now()->endOfDay()])
-            ->select(
-                DB::raw('DATE(sj.created_at) as day'),
-                DB::raw('COUNT(*) as total')
-            )
-            ->groupBy('day')
-            ->get();
+        $arrival_flag = !$request->has('status_id') || $request->status_id == 2;
+        $delivered_return_flag = !$request->has('status_id') || in_array($request->status_id, [14, 25]);
 
-        foreach ($arrivals as $row) {
-            if (isset($last_6_day_summary[$row->day])) {
-                $last_6_day_summary[$row->day]['arrivals'] = $row->total;
-            }
+        $statuses_arrival = [2, 4];
+        $statuses_delivered = [14, 30, 36, 37];
+        $statuses_returned = [25];
+
+// Step 1: Prepare last 7 days data structure
+        $grouped = [];
+        $last7Days = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $day = Carbon::now()->subDays($i)->toDateString();
+            $grouped[$day] = ['arrivals' => 0, 'delivered' => 0, 'returns' => 0];
+            $last7Days[] = $day;
         }
 
-// --- Delivered / Returned ---
-        $subquery = DB::table('shipments_journey as sj1')
-            ->select('sj1.shipment_id', DB::raw('MAX(sj1.id) as max_id'))
-            ->whereBetween('sj1.created_at', [Carbon::now()->subDays(6)->startOfDay(), Carbon::now()->endOfDay()])
-            ->groupBy('sj1.shipment_id');
-
-        $journeyQuery = $baseQuery->clone()
-            ->leftJoinSub($subquery, 'last_journeys', function ($join) {
-                $join->on('s.id', '=', 'last_journeys.shipment_id');
+// Step 2: Get journey data
+        $query = $baseQuery->clone()
+            ->join('shipments_journey as sj2', function ($join) use ($minId, $request) {
+                $join->on('sj2.shipment_id', '=', 's.id');
+                if ($request->status_id == 14) {
+                    $join->whereIn('sj2.shipper_status_id', [14, 30, 36, 37]);
+                } elseif ($request->status_id == 25) {
+                    $join->whereIn('sj2.shipper_status_id', [25]);
+                }elseif ($request->status_id == 2) {
+                    $join->whereIn('sj2.shipper_status_id', [2,4]);
+                } elseif (!$request->has('status_id')) {
+                    $join->whereIn('sj2.shipper_status_id', [2, 4, 14, 30, 36, 37, 25]);
+                }
+                $join->where('sj2.id', '>=', $minId);
             })
-            ->leftjoin('shipments_journey as sj2', 'sj2.id', '=', 'last_journeys.max_id')
-            ->whereBetween('sj2.created_at', [Carbon::now()->subDays(6)->startOfDay(), Carbon::now()->endOfDay()])
-            ->whereIN('sj2.shipper_status_id', [14, 30, 36, 37,25])
             ->select(
                 DB::raw('DATE(sj2.created_at) as day'),
+                'sj2.id as journey_id',
                 'sj2.shipper_status_id',
-                DB::raw('COUNT(*) as total')
+                's.id as shipment_id'
             )
-            ->groupBy('day', 'sj2.shipper_status_id')
             ->get();
 
-        foreach ($journeyQuery as $row) {
-            if (!isset($last_6_day_summary[$row->day])) continue;
+// Step 3: Group journey data by shipment and day
+        $journeysPerShipment = [];
+        foreach ($query as $row) {
+            $shipmentId = $row->shipment_id;
+            $day = $row->day;
 
-            if (in_array($row->shipper_status_id, [14, 30, 36, 37])) {
-                $last_6_day_summary[$row->day]['delivered'] += $row->total;
-            } elseif ($row->shipper_status_id == 25) {
-                $last_6_day_summary[$row->day]['returns'] += $row->total;
+            if (!in_array($day, $last7Days)) {
+                continue; // Skip dates not in the last 7 days
+            }
+
+            if (!isset($journeysPerShipment[$shipmentId][$day])) {
+                $journeysPerShipment[$shipmentId][$day] = [];
+            }
+
+            $journeysPerShipment[$shipmentId][$day][] = $row;
+        }
+
+// Step 4: Process each shipment per day
+        foreach ($journeysPerShipment as $shipmentJourneysPerDay) {
+            foreach ($shipmentJourneysPerDay as $day => $journeys) {
+                $hasArrival = false;
+                $latestDeliveryOrReturn = null;
+
+                foreach ($journeys as $j) {
+                    $status_id = $j->shipper_status_id;
+
+                    // Check for arrival
+                    if (in_array($status_id, $statuses_arrival)) {
+                        $hasArrival = true;
+                    }
+
+                    // Check for latest delivery or return
+                    if (in_array($status_id, $statuses_delivered) || in_array($status_id, $statuses_returned)) {
+                        if (!$latestDeliveryOrReturn || $j->journey_id > $latestDeliveryOrReturn->journey_id) {
+                            $latestDeliveryOrReturn = $j;
+                        }
+                    }
+                }
+
+                // Count arrival if present
+                if ($hasArrival) {
+                    $grouped[$day]['arrivals']++;
+                }
+
+                // Count latest delivery or return
+                if ($latestDeliveryOrReturn) {
+                    $latestStatusId = $latestDeliveryOrReturn->shipper_status_id;
+
+                    if (in_array($latestStatusId, $statuses_returned)) {
+                        $grouped[$day]['returns']++;
+                    } else {
+                        $grouped[$day]['delivered']++;
+                    }
+                }
             }
         }
 
-
-        return [
-            'over_all_in_process' => $over_all_in_process,
-            'today_bookings' => $today_bookings,
-            'last_6_day_summary' => $last_6_day_summary,
+// Step 5: Final Response
+        $response = [
+            'status' => 0,
+            'message' => 'Success',
+            'shipments_summary' => [
+                'over_all_in_process' => $over_all_in_process,
+                'today_bookings' => $today_bookings,
+                'last_6_day_summary' => $grouped,
+            ]
         ];
+
+
+        return response()->json($response);
+
+
     }
 
 
