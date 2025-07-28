@@ -145,43 +145,37 @@ class ExportShipmentReport extends Command
         $end = Carbon::parse('2025-07-26');
 
         // Run query
-        $rows = DB::select("
-                    SELECT 
-                    u.id AS `Account ID`,
-                    u.name AS `Account Name`,
-                    u.address AS `Address`,
-                    u.email AS `POC Email`,
-                    u.poc AS `POC Name`,
-                    u.phone AS `POC Phone Number`,
-                    us.name AS `Status`,
-                    a.name AS 'Sale Person',
-                    seg.name AS 'Segment',
-                    seg_sub.name AS 'Sub Segment',
-                        c.name AS 'Origin',
-                    usi.`pickup_address` AS 'PickUp Address', 
-                    DATE_FORMAT(s.created_at, '%Y-%m') AS `Month`,
-                    COUNT(s.id) AS `Total Shipments`,
-                    SUM(s.chargeable_weight) AS 'Total weight',
-                    SUM(s.weight_charges) AS 'Total weight charges'
-                FROM shipments AS s
-                JOIN users AS u ON u.id = s.user_id
-                JOIN cities AS c ON c.id = u.city_id AND  c.`zone_id` IN (1,17,19,20,21)
-                -- c.name IN ('Quetta', 'Sukkur', 'Hyderabad', 'Karachi')
-                JOIN user_statuses AS us ON us.id = u.status
-                JOIN `user_shipping_infos` AS usi ON usi.id = s.`pickup_address_id`
-                JOIN `sale_person_tags` AS spt ON spt.`user_id` = u.id
-                JOIN admins AS a ON a.id = spt.`admin_id`
-                LEFT JOIN segments AS seg ON seg.id = u.segment_id
-                LEFT JOIN sub_category_segments AS seg_sub ON seg_sub.id = u.sub_segment_id
-
-                WHERE 
-                    DATE(s.created_at) BETWEEN '2024-01-01' AND '2025-07-30'
-                --  AND c.name IN ('Quetta', 'Sukkur', 'Hyderabad', 'Karachi')
-                GROUP BY 
-                    s.user_id, DATE_FORMAT(s.created_at, '%Y-%m')
-                ORDER BY 
-                    u.name, `Month`
-            ", [$start, $end]);
+        $rows =  DB::select("
+                        SELECT 
+                            u.id AS `Account ID`,
+                            u.name AS `Account Name`,
+                            u.address AS `Address`,
+                            u.email AS `POC Email`,
+                            u.poc AS `POC Name`,
+                            u.phone AS `POC Phone Number`,
+                            us.name AS `Status`,
+                            a.name AS 'Sale Person',
+                            seg.name AS 'Segment',
+                            seg_sub.name AS 'Sub Segment',
+                            c.name AS 'Origin',
+                            usi.pickup_address AS 'PickUp Address',
+                            DATE_FORMAT(s.created_at, '%Y-%m') AS `Month`,
+                            COUNT(s.id) AS `Total Shipments`,
+                            SUM(s.chargeable_weight) AS 'Total weight',
+                            SUM(s.weight_charges) AS 'Total weight charges'
+                        FROM shipments AS s
+                        JOIN users AS u ON u.id = s.user_id
+                        JOIN cities AS c ON c.id = u.city_id AND c.zone_id IN (1,17,19,20,21)
+                        JOIN user_statuses AS us ON us.id = u.status
+                        JOIN user_shipping_infos AS usi ON usi.id = s.pickup_address_id
+                        JOIN sale_person_tags AS spt ON spt.user_id = u.id
+                        JOIN admins AS a ON a.id = spt.admin_id
+                        LEFT JOIN segments AS seg ON seg.id = u.segment_id
+                        LEFT JOIN sub_category_segments AS seg_sub ON seg_sub.id = u.sub_segment_id
+                        WHERE DATE(s.created_at) BETWEEN ? AND ?
+                        GROUP BY s.user_id, DATE_FORMAT(s.created_at, '%Y-%m')
+                        ORDER BY u.name, `Month`
+                    ", ['2024-01-01', '2025-07-30']);
         if (empty($rows)) {
             $this->info("❌ No records found.");
             return;
