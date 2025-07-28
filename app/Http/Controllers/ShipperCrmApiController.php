@@ -43,7 +43,7 @@ class ShipperCrmApiController extends Controller
 
         $channel_id=1;
         if($app_type == 2) {
-            $channel_id = $request->channel_id;
+            $channel_id = $request->input('channel_id',2);
         }
 
         if (!empty($shipment_ids)) {
