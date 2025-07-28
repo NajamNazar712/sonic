@@ -45,6 +45,9 @@ class ShipperCrmApiController extends Controller
         if($app_type == 2) {
             $channel_id = $request->input('channel_id',2);
         }
+        if(empty($channel_id)){
+            $channel_id = 2;
+        }
 
         if (!empty($shipment_ids)) {
             foreach ($shipment_ids as $shipment_id) {
