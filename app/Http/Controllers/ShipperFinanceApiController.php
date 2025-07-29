@@ -45,15 +45,34 @@ class ShipperFinanceApiController extends Controller
                 $join->on('ub.id', '=', DB::raw('COALESCE(ubi.bank_name, ubi_default.bank_name)'));
             })
             ->leftjoin('banks_lists as b', 'done_payments.company_bank_id', '=', 'b.id')
-            ->select('s.tracking_number','done_payments.id','done_payments.id as payment_id', 'u.id as user_id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.returned_shipments', 'done_payments.adjusted_shipments', 'done_payments.arrival_shipment as arrival_shipments', DB::raw('SUM(dps.amount) as total_amount'), DB::raw('SUM(dps.charges) as total_charges'), DB::raw('SUM(dps.gst) as total_gst'),DB::raw('SUM(dps.wht) as total_wht'),DB::raw('SUM(dps.cod_sst) as total_cod_sst'), DB::raw('SUM(dps.payable) as total_payable'), 'done_payments.ibft_charges', 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status')
+            ->select(
+                DB::raw('GROUP_CONCAT(CASE WHEN rdps.type = 0 THEN s.tracking_number END SEPARATOR ", ") as delivered_tracking_numbers'),
+                DB::raw('GROUP_CONCAT(CASE WHEN rdps.type = 1 THEN s.tracking_number END SEPARATOR ", ") as return_tracking_numbers'),
+                DB::raw('GROUP_CONCAT(CASE WHEN rdps.type = 2 THEN s.tracking_number END SEPARATOR ", ") as adjusted_tracking_numbers'),
+                'done_payments.id','done_payments.id as payment_id', 'u.id as user_id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.returned_shipments', 'done_payments.adjusted_shipments', 'done_payments.arrival_shipment as arrival_shipments', DB::raw('SUM(dps.amount) as total_amount'), DB::raw('SUM(dps.charges) as total_charges'), DB::raw('SUM(dps.gst) as total_gst'),DB::raw('SUM(dps.wht) as total_wht'),DB::raw('SUM(dps.cod_sst) as total_cod_sst'), DB::raw('SUM(dps.payable) as total_payable'), 'done_payments.ibft_charges', 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status')
             ->where('done_payments.user_id',$shipper_id)
             ->where('done_payments.created_at' ,'>=',Carbon::now()->subMonths(12)->startOfMonth())
              ->groupBy('done_payments.id');
 
-            if($payment_id) {
-                return $shipper_payments->where('done_payments.id', $payment_id)->get();
-            }
-                return $shipper_payments->orderBy('done_payments.id', 'desc')->cursorPaginate(20);
+        $results = $payment_id
+            ? $shipper_payments->where('done_payments.id', $payment_id)->get()
+            : $shipper_payments->orderBy('done_payments.id', 'desc')->cursorPaginate(20);
+
+// 💡 Convert tracking numbers to arrays
+        $results->getCollection()->transform(function ($item) {
+            $item->delivered_tracking_numbers = $item->delivered_tracking_numbers
+                ? explode(',', $item->delivered_tracking_numbers)
+                : [];
+            $item->return_tracking_numbers = $item->return_tracking_numbers
+                ? explode(',', $item->return_tracking_numbers)
+                : [];
+            $item->adjusted_tracking_numbers = $item->adjusted_tracking_numbers
+                ? explode(',', $item->adjusted_tracking_numbers)
+                : [];
+            return $item;
+        });
+
+        return $results;
     }
 
     private function retail_payment_list($retail_id,$payment_id)
