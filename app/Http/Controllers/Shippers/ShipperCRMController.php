@@ -390,7 +390,8 @@ class ShipperCRMController extends Controller
                         return ['status' => 0, 'error' => 'Request/Complaint already lodged for the Payment ID: ' . $payment_id_padded];
                     }
                     else{
-                        $response = AdminCRMController::canLockClaim($shipment, $is_shipment, $nature_id, $request);
+                        $check_claim_can_lock = CrmRequest::where('shipment_id',$shipment->id)->latest()->first();
+                        $response = AdminCRMController::canLockClaim($shipment, $is_shipment, $nature_id, $request, $check_claim_can_lock);
 
                         if ($response['status'] === 0) {
                             return $response;
@@ -420,7 +421,8 @@ class ShipperCRMController extends Controller
                         $shipment = Shipment::where('id', $pickup_request_shipment->shipment_id)->first();
                         $shipment_id = $shipment->id;
                         $is_shipment = CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_id', $nature_id)->first();
-                        $response = AdminCRMController::canLockClaim($shipment, $is_shipment, $nature_id, $request);
+                        $check_claim_can_lock = CrmRequest::where('shipment_id',$shipment->id)->latest()->first();
+                        $response = AdminCRMController::canLockClaim($shipment, $is_shipment, $nature_id, $request, $check_claim_can_lock);
 
                         if ($response['status'] === 0) {
                             return $response;
@@ -485,7 +487,9 @@ class ShipperCRMController extends Controller
                         }
 
                         $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
-                        $response = AdminCRMController::canLockClaim($shipment, $is_shipment, $nature_id, $request);
+                        $check_claim_can_lock = CrmRequest::where('shipment_id',$shipment_id)->latest()->first();
+
+                        $response = AdminCRMController::canLockClaim($shipment, $is_shipment, $nature_id, $request, $check_claim_can_lock);
 
                         if ($response['status'] === 0) {
                             return $response;
@@ -693,11 +697,13 @@ class ShipperCRMController extends Controller
                     }
 
                     $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
-                    $response = AdminCRMController::canLockClaim($shipment, $is_shipment, $nature_id, $request);
+                    $check_claim_can_lock = CrmRequest::where('shipment_id',$shipment_id)->latest()->first();
+                    $response = AdminCRMController::canLockClaim($shipment, $is_shipment, $nature_id, $request, $check_claim_can_lock);
 
                     if ($response['status'] === 0) {
                         return $response;
                     }
+                    
                     $already_lodged = false;
                     if($is_shipment){    
                         $already_lodged = true;
