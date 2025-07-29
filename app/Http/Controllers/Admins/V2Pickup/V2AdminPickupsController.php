@@ -4830,7 +4830,7 @@ class V2AdminPickupsController extends Controller
         $tracking_number = $request->tracking_number;
 
         $subSegmentId = DB::table('shipments')
-        ->join('users', 'users.id', '=', 'shipments.user_id')
+        ->leftjoin('users', 'users.id', '=', 'shipments.user_id')
         ->where('shipments.tracking_number', $tracking_number)
         ->value('users.sub_segment_id');
         return response()->json(['subSegment' => $subSegmentId]);
