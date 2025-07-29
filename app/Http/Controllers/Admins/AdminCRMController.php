@@ -7532,21 +7532,25 @@ class AdminCRMController extends Controller
             'error' => 'The claim cannot be locked directly. Please lock the complaint first from the complaint section.'
         ];
 
-        if (empty($shipment)) {
-            return ['status' => 1]; 
+        if(!empty($shipment)){
+            if(!$crm){
+                if ($shipment->shipper_status_id != 18 || !in_array($check_claim_can_lock?->status_id, [3, 4])) {
+                    if(($nature_id == 4 && $request->case_nature_claim != 26)) {
+                        return $error;
+                    }
+                }
+            }else{
+                if ($shipment->shipper_status_id != 18 || !in_array($crm->status_id, [3, 4])) {
+                    if (($nature_id == 4 && $request->case_nature_claim != 26) && in_array($crm->status_id, [1, 2])) {
+                        return $error;
+                    }   
+                }
+            }
         }
-
-        $statusId = $crm ? $crm->status_id : $check_claim_can_lock?->status_id;
-
-        $invalidStatus = $shipment->shipper_status_id != 18 || !in_array($statusId, [3, 4]);
-        $invalidNature = ($nature_id == 4 && $request->case_nature_claim != 26);
-
-        if ($invalidStatus && $invalidNature) {
-            return $error;
-        }
-
+        
         return ['status' => 1];
-    }
+    } 
+
 
     public static function storeInvalidReasons(array $reasonIds, int $crmRequestId)
     {
