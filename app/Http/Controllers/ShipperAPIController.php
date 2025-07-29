@@ -1419,7 +1419,7 @@ class ShipperAPIController extends Controller
         $user_shipping_address = UserShippingInfo::join('cities as c', 'c.id', '=', 'user_shipping_infos.city_id')
             ->where('user_shipping_infos.user_id', $user_id)->where('user_shipping_infos.status', 1)
             ->where('user_shipping_infos.hidden', 0)
-            ->select('user_shipping_infos.id','user_shipping_infos.pickup_address','user_shipping_infos.default_return_address','user_shipping_infos.city_id','c.name city_name')
+            ->select('user_shipping_infos.id','user_shipping_infos.pickup_address','user_shipping_infos.default_return_address','user_shipping_infos.city_id','c.name as  city_name')
             ->get();
         $multi_piece = $user->multipiece_status;
 //        $cities = City::where('pickup', 1)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
