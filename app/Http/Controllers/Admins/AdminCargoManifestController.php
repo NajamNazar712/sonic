@@ -1482,8 +1482,7 @@ class AdminCargoManifestController extends Controller
                                 $details['id'] = $shipment->id;
                                 $details['tracking_number'] = $shipment->tracking_number;
                                 $details['order_id'] = $shipment->order_id;
-//                                $details['service_type'] = $shipment->booking_type->booking_type;
-                                $details['service_type'] = '';
+                                $details['service_type'] = $shipment->booking_type->booking_type;
                                 $details['destination'] = $destination->name;
                                 $details['amount'] = number_format($shipment->amount);
                                 $hub = $destination->hub_city;
