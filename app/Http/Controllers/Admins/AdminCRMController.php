@@ -7527,27 +7527,27 @@ class AdminCRMController extends Controller
 
     public static function canLockClaim($shipment, $crm, $nature_id, $request, $check_claim_can_lock)
     {
-        $error = [
-            'status' => 0,
-            'error' => 'The claim cannot be locked directly. Please lock the complaint first from the complaint section.'
-        ];
-
         if(!empty($shipment)){
             if(!$crm){
-                if ($shipment->shipper_status_id != 18 || !in_array($check_claim_can_lock?->status_id, [3, 4])) {
-                    if(($nature_id == 4 && $request->case_nature_claim != 26)) {
-                        return $error;
+                if (!in_array($check_claim_can_lock->status_id, [3, 4])) {
+                    if(($nature_id == 4 && $request->case_nature_claim != 26) && $shipment->shipper_status_id != 18) {
+                        return [
+                            'status' => 0,
+                            'error' => 'The claim cannot be locked directly. Please lock the complaint first from the complaint section.'
+                        ];
                     }
                 }
             }else{
-                if ($shipment->shipper_status_id != 18 || !in_array($crm->status_id, [3, 4])) {
-                    if (($nature_id == 4 && $request->case_nature_claim != 26) && in_array($crm->status_id, [1, 2])) {
-                        return $error;
-                    }   
+                if (!in_array($crm->status_id, [3, 4])) {
+                    if (($nature_id == 4 && $request->case_nature_claim != 26) && $shipment->shipper_status_id != 18) {
+                        return [
+                            'status' => 0,
+                            'error' => 'The claim cannot be locked directly. Please lock the complaint first from the complaint section.'
+                        ];
+                    }
                 }
             }
         }
-        
         return ['status' => 1];
     } 
 
