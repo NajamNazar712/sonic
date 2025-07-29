@@ -67,9 +67,13 @@ class ShipperFinanceApiController extends Controller
             ->leftjoin('shipments as s', 's.id', '=', 'rs.shipment_id')
             ->leftjoin('banks_lists as ub','ub.id','=','rsi.bank_id')
              ->select(
-                 DB::raw('GROUP_CONCAT(CASE WHEN rdps.type = 0 THEN s.tracking_number END SEPARATOR ", ") as delivered_tracking_numbers'),
-                 DB::raw('GROUP_CONCAT(CASE WHEN rdps.type = 1 THEN s.tracking_number END SEPARATOR ", ") as return_tracking_numbers'),
-                 DB::raw('GROUP_CONCAT(CASE WHEN rdps.type = 2 THEN s.tracking_number END SEPARATOR ", ") as adjusted_tracking_numbers'),
+                 DB::raw("
+            JSON_OBJECT(
+                'delivered_tracking_numbers', GROUP_CONCAT(IF(rdps.type = 0, s.tracking_number, NULL)),
+                'return_tracking_numbers', GROUP_CONCAT(IF(rdps.type = 1, s.tracking_number, NULL)),
+                'adjusted_tracking_numbers', GROUP_CONCAT(IF(rdps.type = 2, s.tracking_number, NULL))
+            ) as tracking_numbers
+        "),
                  'retail_done_payments.id','retail_done_payments.id as payment_id', 'rsi.id as user_id', 'rsi.shipper_name as shipper', 'c.name as city', 'rsi.shipper_phone_no as phone', 'rsi.shipper_address as address', 'retail_done_payments.total_shipments', 'retail_done_payments.delivered_shipments', 'retail_done_payments.adjusted_shipments', DB::raw('SUM(rdps.amount) as total_amount') ,DB::raw('0.0 as total_gst'),DB::raw('SUM(rs.wht) as total_wht'),DB::raw('SUM(rs.cod_sst) as total_cod_sst'), DB::raw('SUM(rdps.payable) as total_payable'), 'retail_done_payments.ibft_charges','ub.name as company_bank', 'retail_done_payments.reference_number', 'retail_done_payments.created_at as done_at', 'retail_done_payments.status')
             ->where('retail_done_payments.user_id',$retail_id)
             ->where('retail_done_payments.created_at' ,'>=',Carbon::now()->subMonths(12)->startOfMonth())
