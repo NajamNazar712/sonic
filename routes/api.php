@@ -727,7 +727,7 @@ use Illuminate\Http\Request;
             // CRM Apis
             Route::prefix('crm')->name('crm.')->group(function (){
                 Route::get('request_resources','ShipperCrmApiController@crm_request_resources')->name('request_resources');
-                Route::post('add_request', 'ShipperCrmApiController@add_crm_request')->name('add_request');
+                Route::post('add_request', 'ShipperCrmApiController@add_crm_request')->name('shipper.crm.add_request');
                 Route::get('request_summary', 'ShipperCrmApiController@crm_request_summary')->name('request_summary');
 //                Route::get('request_list/{status?}', 'ShipperCrmApiController@crm_request_list')->name('request_list');
                 Route::get('request_list', 'ShipperCrmApiController@crm_request_list')->name('request_list');
