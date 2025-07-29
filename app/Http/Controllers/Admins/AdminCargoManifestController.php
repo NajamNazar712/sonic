@@ -1482,15 +1482,13 @@ class AdminCargoManifestController extends Controller
                                 $details['id'] = $shipment->id;
                                 $details['tracking_number'] = $shipment->tracking_number;
                                 $details['order_id'] = $shipment->order_id;
-//                                $details['service_type'] = $shipment->booking_type->booking_type;
-                                $details['service_type'] = '';
-//                                $details['destination'] = $destination->name;
-                                $details['destination'] = '';
+                                $details['service_type'] = $shipment->booking_type->booking_type;
+                                $details['destination'] = $destination->name;
                                 $details['amount'] = number_format($shipment->amount);
-//                                $hub = $destination->hub_city;
+                                $hub = $destination->hub_city;
 
-                                $details['hub']['id'] = '';
-                                $details['hub']['name'] = '';
+                                $details['hub']['id'] = $hub->id;
+                                $details['hub']['name'] = $hub->name;
 
                                 $shipping_mode_id = $request->shipping_mode_id;
 
@@ -1504,7 +1502,7 @@ class AdminCargoManifestController extends Controller
                                 if ($request->hub_id == 0) {
                                     $details['total'] = 0;
                                 }
-//                                ShipmentScanningJourneyController::add($shipment->id, 2, 1, Auth::id(), null, null, null, null, null, null, null,  $request->action);
+                                ShipmentScanningJourneyController::add($shipment->id, 2, 1, Auth::id(), null, null, null, null, null, null, null,  $request->action);
 
                                 return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
                                 /*}
