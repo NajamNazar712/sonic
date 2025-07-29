@@ -228,7 +228,7 @@ class ShipperOrderManagementApiController extends Controller
             $today_bookings = DB::table('shipments')
                 ->when(true, $conditions)
                 ->where('shipments.shipper_status_id', 1)
-                ->whereBetween('shipments.created_at', [Carbon::now()->startOfDay(),Carbon::now()->endOfDay()])
+                ->where('shipments.created_at','>=', Carbon::now()->startOfDay())
                 ->count();
         }
 
