@@ -1504,7 +1504,7 @@ class AdminCargoManifestController extends Controller
                                 if ($request->hub_id == 0) {
                                     $details['total'] = 0;
                                 }
-                                ShipmentScanningJourneyController::add($shipment->id, 2, 1, Auth::id(), null, null, null, null, null, null, null,  $request->action);
+//                                ShipmentScanningJourneyController::add($shipment->id, 2, 1, Auth::id(), null, null, null, null, null, null, null,  $request->action);
 
                                 return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
                                 /*}
