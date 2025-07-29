@@ -236,17 +236,16 @@ class AdminCRMController extends Controller
 
                             $already_lodged = false;
                             $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
+
+                            $response = $this->canLockClaim($shipment, $is_shipment, $nature_id, $request);
+
+                            if ($response['status'] === 0) {
+                                return $response;
+                            }
+
                             if($is_shipment){
                                 $already_lodged = true;
                                 $complain = $is_shipment->id;
-
-
-                                $response = $this->canLockClaim($shipment, $is_shipment, $nature_id, $request);
-
-                                if ($response['status'] === 0) {
-                                    return $response;
-                                }
-
                                 if($is_shipment->case_nature_id != $nature_id){
                                     if ($nature_id == 4) {
                                         if($complaint_id == 26){
@@ -495,16 +494,15 @@ class AdminCRMController extends Controller
 
                         $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
                         $already_lodged = false;
+
+                        $response = $this->canLockClaim($shipment, $is_shipment, $nature_id, $request);
+
+                        if ($response['status'] === 0) {
+                            return $response;
+                        }
                         if($is_shipment){
                             $already_lodged = true;
                             $complain = $is_shipment->id;
-
-
-                            $response = $this->canLockClaim($shipment, $is_shipment, $nature_id, $request);
-
-                            if ($response['status'] === 0) {
-                                return $response;
-                            }
 
                             if($is_shipment->case_nature_id != $nature_id){
                                 if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
@@ -7527,8 +7525,13 @@ class AdminCRMController extends Controller
 
     public static function canLockClaim($shipment, $crm, $nature_id, $request)
     {
-        if ($shipment->shipper_status_id != 18 || !in_array($crm->status_id, [3, 4])) {
-            if (($nature_id == 4 && $request->case_nature_claim != 26) && in_array($crm->status_id, [1, 2])) {
+        $isShipperStatusInvalid = $shipment->shipper_status_id != 18;
+        $isCrmStatusNotApproved = !$crm || !in_array($crm->status_id, [3, 4]);
+        $isNatureClaimMismatch = $nature_id == 4 && $request->case_nature_claim != 26;
+        $isCrmStatusPending = $crm && in_array($crm->status_id, [1, 2]);
+
+        if ($isShipperStatusInvalid || $isCrmStatusNotApproved) {
+            if ($isNatureClaimMismatch && (!$crm || $isCrmStatusPending)) {
                 return [
                     'status' => 0,
                     'error' => 'The claim cannot be locked directly. Please lock the complaint first from the complaint section.'
@@ -7538,6 +7541,7 @@ class AdminCRMController extends Controller
 
         return ['status' => 1];
     }
+
 
     public static function storeInvalidReasons(array $reasonIds, int $crmRequestId)
     {
