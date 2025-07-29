@@ -2028,12 +2028,12 @@ class V2AdminPickupsController extends Controller
 
                     $details['id'] = $shipment->id;
                     $details['tracking_number'] = $shipment->tracking_number;
-                    $details['city'] = $shipment->consignee_city->name;
+                    $details['city'] = '';
                     $details['hub'] = $shipment->consignee_city->hub_city->name;
                     $details['shipment_items'] = $shipment_items;
                     $details['shipment_items_count'] = $shipment_items_count;
-                    $details['city'] = $shipment->consignee_city->name;
-                    $details['hub'] = $shipment->consignee_city->hub_city->name;
+                    $details['city'] = '';
+                    $details['hub'] = '';
 
 
 
@@ -2049,10 +2049,10 @@ class V2AdminPickupsController extends Controller
                     $details['tracking_number'] = $shipment->tracking_number;
                     $details['pieces_count'] = $shipment->pieces;
                     $details['pieces_tracking_numbers'] = $shipment_pieces;
-                    $details['city'] = $shipment->consignee_city->name;
-                    $details['hub'] = $shipment->consignee_city->hub_city->name;
-                    $details['city'] = $shipment->consignee_city->name;
-                    $details['hub'] = $shipment->consignee_city->hub_city->name;
+                    $details['city'] = '';
+                    $details['hub'] ='';
+                    $details['city'] = '';
+                    $details['hub'] = '';
 
                     ShipmentScanningJourneyController::add($shipment->id ,1,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
 
@@ -2236,8 +2236,10 @@ class V2AdminPickupsController extends Controller
                     $details['pickup_request_id_unpadded'] = $pickup_request_id;
                     $details['rider_assigned'] = $rider_assigned_flag;
                     $details['rider_picked'] = $rider_picked;
-                    $details['city'] = $shipment->consignee_city->name;
-                    $details['hub'] = $shipment->consignee_city->hub_city->name;
+//                    $details['city'] = $shipment->consignee_city->name;
+                    $details['city'] = '';
+//                    $details['hub'] = $shipment->consignee_city->hub_city->name;
+                    $details['hub'] = '';
 
                     $id = Auth::user();
 
@@ -2262,8 +2264,8 @@ class V2AdminPickupsController extends Controller
                     $details['shipment_items'] = $shipment_items;
                     $details['shipment_items_count'] = $shipment_items_count;
                     $details['scanned_shipment_item'] = $shipment_item->id;
-                    $details['city'] = $shipment->consignee_city->name;
-                    $details['hub'] = $shipment->consignee_city->hub_city->name;
+                    $details['city'] = '';
+                    $details['hub'] = '';
 
 
                     ShipmentScanningJourneyController::add($shipment->id ,1,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
@@ -2285,8 +2287,8 @@ class V2AdminPickupsController extends Controller
                         $details['pieces'] = $shipment->pieces;
                         $details['pieces_tracking_numbers'] = $shipment_all_pieces;
                         $details['scanned_shipment_piece'] = $shipment_pieces->tracking_number;
-                        $details['city'] = $shipment->consignee_city->name;
-                        $details['hub'] = $shipment->consignee_city->hub_city->name;
+                        $details['city'] = '';
+                        $details['hub'] = '';
 
                         ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null, $shipment_pieces->id);
                         return ['status' => 3, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
