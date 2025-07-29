@@ -1487,10 +1487,10 @@ class AdminCargoManifestController extends Controller
 //                                $details['destination'] = $destination->name;
                                 $details['destination'] = '';
                                 $details['amount'] = number_format($shipment->amount);
-                                $hub = $destination->hub_city;
+//                                $hub = $destination->hub_city;
 
-                                $details['hub']['id'] = $hub->id;
-                                $details['hub']['name'] = $hub->name;
+                                $details['hub']['id'] = '';
+                                $details['hub']['name'] = '';
 
                                 $shipping_mode_id = $request->shipping_mode_id;
 
