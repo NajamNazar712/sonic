@@ -1415,21 +1415,21 @@ class ShipperAPIController extends Controller
         $user_id = $request->shipper_id;
         $date = Carbon::today();
         $user = User::find($user_id);
-        $booking_types = BookingType::where('id', '!=', 4)->get();
+//        $booking_types = BookingType::where('id', '!=', 4)->get();
         $user_shipping_address = UserShippingInfo::join('cities as c', 'c.id', '=', 'user_shipping_infos.city_id')
             ->where('user_shipping_infos.user_id', $user_id)->where('user_shipping_infos.status', 1)
             ->where('user_shipping_infos.hidden', 0)
-            ->select('user_shipping_infos.*', 'c.name as city_name')
+            ->select('user_shipping_infos.id','user_shipping_infos.pickup_address', 'c.name as city_name')
             ->get();
         $multi_piece = $user->multipiece_status;
-        $cities = City::where('pickup', 1)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+//        $cities = City::where('pickup', 1)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
         if (in_array($user_id, [5982, 3324, 10104, 14110, 16292])) {
             $consignee_cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
         } else {
             $consignee_cities = City::where('id', '!=', 1244)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
         }
         $products = Product::orderBy('product_name')->get();
-        $distribution_products = DistributionProduct::orderBy('name')->get();
+//        $distribution_products = DistributionProduct::orderBy('name')->get();
         $shipping_mode_same_day_timings = ShippingModeSameDayTiming::all();
 
         $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
@@ -1446,8 +1446,8 @@ class ShipperAPIController extends Controller
         }
         $user_delivery_types = CorporateDeliveryTypeStatus::where('user_id', $user_id)->pluck('shipping_mode_id')->toArray();
         $delivery_type = DeliveryType::orderBy('delivery_type')->get();
-        $charges_modes = ChargesModes::whereIn('id', [3])->get();
-        $check = NonServiceArea::pluck('name')->toArray();
+//        $charges_modes = ChargesModes::whereIn('id', [3])->get();
+//        $check = NonServiceArea::pluck('name')->toArray();
 //        $air_waybill = ShipperAirWaybillSettings::where('user_id', $user_id);
 //        if ($air_waybill->exists()) {
 //            $air_waybill = $air_waybill->first();
@@ -1478,8 +1478,8 @@ class ShipperAPIController extends Controller
                 }
             }
         }
-        $ftl_collection_type = [['id' => 1, 'type' => 'Invoice'], ['id' => 2, 'type' => 'Cash']];
-        return response()->json(['status' => 0, 'shipping_address' => $user_shipping_address, 'multi_piece' => $multi_piece, 'user' => $user, 'cities' => $cities, 'distribution_products' => $distribution_products, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'consignee_cities' => $consignee_cities, 'check' => $check, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes, 'date' => $date, 'air_waybill' => $air_waybill, 'user_delivery_types' => $user_delivery_types, 'approve_ftl_requests' => $approve_ftl_requests, 'omni_user' => $omni_user, 'booking_types' => $booking_types, 'ftl_collection_type' => $ftl_collection_type]);
+//        $ftl_collection_type = [['id' => 1, 'type' => 'Invoice'], ['id' => 2, 'type' => 'Cash']];
+        return response()->json(['status' => 0, 'shipping_address' => $user_shipping_address, 'multi_piece' => $multi_piece, 'user' => $user, 'cities' => [], 'distribution_products' => [], 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'consignee_cities' => $consignee_cities, 'check' => [], 'delivery_type' => $delivery_type, 'charges_modes' => [], 'date' => $date, 'air_waybill' => $air_waybill, 'user_delivery_types' => $user_delivery_types, 'approve_ftl_requests' => $approve_ftl_requests, 'omni_user' => $omni_user, 'booking_types' => [], 'ftl_collection_type' => []]);
     }
 
     public function corporate_shipping_modes(Request $request)
