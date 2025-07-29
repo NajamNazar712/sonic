@@ -1425,11 +1425,11 @@ class ShipperAPIController extends Controller
 //        $cities = City::where('pickup', 1)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
         if (in_array($user_id, [5982, 3324, 10104, 14110, 16292])) {
             $consignee_cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')
-                ->select('id','name','hub','hub_id','zone_id','province_id','pickup','status','business_category_id')
+                ->select('id','name','hub','hub_id')
                 ->get();
         } else {
             $consignee_cities = City::where('id', '!=', 1244)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')
-                ->select('id','name','hub','hub_id','zone_id','province_id','pickup','status','business_category_id')
+                ->select('id','name','hub','hub_id')
                 ->get();
         }
         $products = Product::orderBy('product_name')->get();
@@ -1582,11 +1582,11 @@ class ShipperAPIController extends Controller
             $consignee_cities = City::where('status', 1)->where('business_category_id', 1)
                 ->whereNotNull('zone_id')
                 ->orderBy('name')
-                ->select('id','name','hub','hub_id','zone_id','province_id','pickup','status','business_category_id')
+                ->select('id','name','hub','hub_id')
                 ->get();
         } else {
             $consignee_cities = City::where('id', '!=', 1244)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')
-                ->select('id','name','hub','hub_id','zone_id','province_id','pickup','status','business_category_id')
+                ->select('id','name','hub','hub_id')
                 ->get();
         }
         $products = Product::orderBy('product_name')->get();
