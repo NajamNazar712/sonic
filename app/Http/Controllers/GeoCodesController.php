@@ -11,22 +11,23 @@ use App\Http\Models\Region;
 use App\Http\Models\Segment;
 use App\Http\Models\Shipment;
 use App\Http\Models\SubCategorySegment;
+use App\Models\ShipmentGeoCode;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\DataTables;
 
 class GeoCodesController extends Controller
 {
 
-//    public function __construct()
-//    {
-//        $this->middleware('auth:admin');
-//
-//        $this->middleware('Permission');
-//    }
+    public function __construct()
+    {
+        $this->middleware('auth:admin');
+        $this->middleware('Permission');
+    }
     public function index()
     {
         $cities = City::where('status', 1)->get();
@@ -84,17 +85,23 @@ class GeoCodesController extends Controller
             ->addColumn('action', function ($data) {
 
                 $dropdown = '
-              <div class="btn-group">
-                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                <div class="dropdown-menu dropdown-menu-sm">
-            ';
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                ';
 
-                $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
-
-                if ($data->status == 1) {
-                    $dropdown .= '<button type="button" class="dropdown-item disable" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                if(!$data->latitude && !$data->longitude) {
+                    $dropdown .= '<button type="button" class="dropdown-item generate_geo_code_btn" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Generate Geo Codes</div></button>';
                 } else {
-                    $dropdown .= '<button type="button" class="dropdown-item enable" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                    $encodedCoord = base64_encode(json_encode([
+                        ['lat' => $data->latitude, 'lng' => $data->longitude]
+                    ]));
+                    $dropdown .= '<a href="' . route('admin.settings.geo_codes.view_tpl_map') . '?coords=' . $encodedCoord . '" target="_blank" class="dropdown-item view_geo_code_map">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col-2"><i class="fa fa-map-marker"></i></div>
+                            <div class="col-9 offset-1">View Map</div>
+                        </div>
+                    </a>';
                 }
 
                 return $dropdown;
@@ -107,148 +114,302 @@ class GeoCodesController extends Controller
     {
 
         $shipment_ids = $request->shipment_ids;
+        if(!is_array($shipment_ids)) {
+            return response()->json(['status' => 0,'error' => 'Shipment ids should be an array']);
+        }
+        $shipments = Shipment::leftJoin('cities as ds', 'ds.id', 'shipments.consignee_city_id')
+            ->select('shipments.user_id','shipments.id as shipment_id', 'shipments.consignee_address', 'ds.name as city')
+            ->whereIn('shipments.id', $shipment_ids)
+            ->get();
 
-        $shipments =  Shipment::leftjoin('cities as ds','ds.id','shipments.consignee_city_id')
-            ->select('shipments.id as shipment_id','shipments.consignee_address','ds.name as city')
-            ->whereIn('shipments.id',$shipment_ids)->get();
+        if($shipments->count() > 0) {
+            $unique_address = [];
+            foreach ($shipments as $shipment) {
+                $city = trim($shipment->city);
+                $address = trim($shipment->consignee_address);
 
-        $unique_address = [];
-        foreach ($shipments as $shipment) {
-            $city = $shipment->city;
-            $address = trim($shipment->consignee_address);
-
-            if(!isset($unique_address[$city])) {
-                $unique_address[$city] = [];
+                $unique_address[$city][$address]['shipment_ids'][$shipment->shipment_id] =  $shipment->user_id;
             }
 
-            $unique_address[$city][$address] = true;
+            // Step 2: Prepare HTTP Client
+            $client = new \GuzzleHttp\Client([
+                'base_uri' => 'https://api1.tplmaps.com:8888/',
+                'http_errors' => false,
+                'connect_timeout' => 60,
+                'timeout' => 60,
+            ]);
+
+            $insert_data = [];
+
+            $timestamp = Carbon::now();
+            // Step 3: Loop through each city/address
+            foreach ($unique_address as $city => $addresses) {
+                foreach ($addresses as $address => $info) {
+                    $response = $client->get('search', [
+                        'headers' => [
+                            'Accept' => 'application/json'
+                        ],
+                        'query' => [
+                            'name' => $address,
+                            'city' => $city,
+                            'output' => 'name,parent,parent1,parent2,parent3,country,compound_address_parents,id,lat,lng,subcat_name,cat_name',
+                            'apikey' => '$2a$10$ixuhTqrlyD8pJfDY8FjO9OovMcIrBXIp2sUSHaJqeIjcNrpCyvHJ2'
+                        ],
+                    ]);
+
+                    $json = (string) $response->getBody();
+                    $data = json_decode($json, true);
+                    Log::channel('code_test_log')->info($data);
+                    $lat = null;
+                    $lng = null;
+
+                    if (is_array($data) && !empty($data)) {
+                        // Match based on address similarity
+                        $bestMatch = null;
+                        $highestSimilarity = 0;
+                        foreach ($data as $unit) {
+                            $compound = $unit['compound_address_parents'] ?? '';
+                            similar_text(strtolower($address), strtolower($compound), $percent);
+                            if ($percent > $highestSimilarity) {
+                                $highestSimilarity = $percent;
+                                $bestMatch = $unit;
+                            }
+                        }
+
+                        // Use best match if found
+                        $target = ($highestSimilarity >= 80 && $bestMatch) ? $bestMatch : $data[0];
+
+                        // Fetch raw lat/lng using regex from raw JSON to avoid rounding
+                        $targetId = $target['id'] ?? null;
+                        $pattern = '/\{[^}]*"id"\s*:\s*' . preg_quote($targetId, '/') . '[^}]*\}/';
+
+                        if (preg_match($pattern, $json, $matchedObject)) {
+                            preg_match('/"lat"\s*:\s*([0-9\.\-eE+]+)/', $matchedObject[0], $latMatch);
+                            preg_match('/"lng"\s*:\s*([0-9\.\-eE+]+)/', $matchedObject[0], $lngMatch);
+                            $lat = $latMatch[1] ?? null;
+                            $lng = $lngMatch[1] ?? null;
+                        } else {
+                            // fallback
+                            $lat = $target['lat'] ?? null;
+                            $lng = $target['lng'] ?? null;
+                        }
+                    }
+
+                    if ($lat && $lng) {
+                        foreach ($info['shipment_ids'] as $shipment_id => $user_id) {
+                            $insert_data[] = [
+                               'user_id' => $user_id,
+                                'shipment_id' => $shipment_id,
+                                'latitude' => $lat,
+                                'longitude' => $lng,
+                                'created_at' => $timestamp,
+                                'updated_at' => $timestamp,
+                            ];
+                        }
+                    }
+                }
+            }
+            // Step 5: Bulk insert into DB
+            if (!empty($insert_data)) {
+                ShipmentGeoCode::insert($insert_data);
+                return response()->json([
+                    'status' => 1,
+                    'success' => 'Lat/Lng fetched and saved successfully.',
+                    'inserted_count' => count($insert_data),
+                ]);
+
+            } else {
+                return response()->json(['status' => 0,'error' => 'No data found.']);
+            }
+        } else {
+            return response()->json(['status' => 0,'error' => 'No data found.']);
         }
 
-        $client = new Client([
-            'base_uri' => 'https://api1.tplmaps.com:8888/',
-            'http_errors' => false,
-            'connect_timeout' => 60,
-            'timeout' => 60,
-        ]);
-        foreach ($unique_address as $city => $addresses) {
-
-              foreach ($addresses as $address => $value) {
-
-                  $response = $client->get('search', [
-                      'headers' => [
-                          'Accept' => 'application/json'
-                      ],
-                      'query' => [
-                          'name' => 'D2/276 Malir Saudabad Nashter Square Karachi',
-                          'city' => 'Karachi',
-                          'output' => 'name,parent,parent1,parent2,parent3,country,compound_address_parents,id,lat,lng,subcat_name,cat_name',
-                          'apikey' => '$2a$10$ixuhTqrlyD8pJfDY8FjO9OovMcIrBXIp2sUSHaJqeIjcNrpCyvHJ2'
-                      ],
-//                      'on_stats' => function (\GuzzleHttp\TransferStats $stats) {
-//                          dump((string) $stats->getEffectiveUri()); // <-- This gives full URL
-//                      }
-                  ]);
-
-                  $bestMatch = null;
-                  $highestSimilarity = 0;
-                  $json = (string) $response->getBody();
-                  $data = json_decode($json, true);
-//                  $data = json_decode($response->getBody(), true, 512, JSON_BIGINT_AS_STRING);
+    }
 
 
-
-                  if(is_array($data) && !empty($data)) {
-                      foreach ($data as $unit) {
-                             $compound = $unit['compound_address_parents'] ?? '';
-//                          $match_terms = implode(' ',$unit['matched_terms'] ?? []);
-
-                          // Combine both fields for broader match
-//                          $searchText = $compound . ' ' . $match_terms;
-                          $searchText = $compound;
-                          similar_text(strtolower($address), strtolower($searchText), $percent);
-
-//                          Log::info($percent.'-'.$highestSimilarity);
-                          if ($percent > $highestSimilarity) {
-                              $highestSimilarity = $percent;
-                              $bestMatch = $unit;
-                          }
-                      }
-
-//                      if ($highestSimilarity > 40 && $bestMatch) {
-//                          // Extract accurate lat/lng from original JSON string using bestMatch ID
-//                          $matchedId = $bestMatch['id'];
+//    public function get_shipment_lat_long(Request $request)
+//    {
 //
-//                          if (preg_match('/\{[^}]*"id":\s*' . $matchedId . '[^}]*\}/', $json, $match)) {
-//                              $entryJson = $match[0];
+//        $shipment_ids = $request->shipment_ids;
 //
-//                              preg_match('/"lat":\s*([0-9\.\-eE+]+)/', $entryJson, $latMatch);
-//                              preg_match('/"lng":\s*([0-9\.\-eE+]+)/', $entryJson, $lngMatch);
+//        $shipments =  Shipment::leftjoin('cities as ds','ds.id','shipments.consignee_city_id')
+//            ->select('shipments.id as shipment_id','shipments.consignee_address','ds.name as city')
+//            ->whereIn('shipments.id',$shipment_ids)->get();
 //
-//                              if (isset($latMatch[1]) && isset($lngMatch[1])) {
-//                                  $lat = $latMatch[1];
-//                                  $lng = $lngMatch[1];
-//                                  $unique_address[$city][$address] = $lat . ',' . $lng;
-//                              }
-//                          } else {
-//                              // fallback in case regex failed
-//                              $lat = $bestMatch['lat'];
-//                              $lng = $bestMatch['lng'];
-//                              $unique_address[$city][$address] = $lat . ',' . $lng;
-//                          }
+//        $unique_address = [];
+//        foreach ($shipments as $shipment) {
+//            $city = $shipment->city;
+//            $address = trim($shipment->consignee_address);
 //
-//                      }
-//                      else {
-//                          // fallback to first result if no best match found
-//                          $first = $data[0] ?? null;
+//            $unique_address[$address][$city]['shipment_id'][] = $shipment->shipment_id;
 //
-//                          if ($first && isset($first['id'])) {
-//                              $matchedId = $first['id'];
 //
-//                              if (preg_match('/\{[^}]*"id":\s*' . $matchedId . '[^}]*\}/', $json, $match)) {
-//                                  $entryJson = $match[0];
+////            if(!isset($unique_address[$city])) {
+////                $unique_address[$city]['address']['shipment_ids'][] = $shipment->id; ;
+////            }
 //
-//                                  preg_match('/"lat":\s*([0-9\.\-eE+]+)/', $entryJson, $latMatch);
-//                                  preg_match('/"lng":\s*([0-9\.\-eE+]+)/', $entryJson, $lngMatch);
+////            $unique_address[$city][$address] = true;
+//        }
 //
-//                                  if (isset($latMatch[1]) && isset($lngMatch[1])) {
-//                                      $lat = $latMatch[1];
-//                                      $lng = $lngMatch[1];
-//                                      $unique_address[$city][$address] = $lat . ',' . $lng;
-//                                  }
-//                              } else {
-//                                  // fallback to parsed float values if regex fails
-//                                  $lat = $first['lat'];
-//                                  $lng = $first['lng'];
-//                                  $unique_address[$city][$address] = $lat . ',' . $lng;
-//                              }
-//                          } else {
-//                              $unique_address[$city][$address] = null;
+//        $client = new Client([
+//            'base_uri' => 'https://api1.tplmaps.com:8888/',
+//            'http_errors' => false,
+//            'connect_timeout' => 60,
+//            'timeout' => 60,
+//        ]);
+//        $final_push = array();
+//        foreach ($unique_address as $address => $addresses) {
+//              foreach ($addresses as $city => $value) {
+//
+//
+//
+//                  $response = $client->get('search', [
+//                      'headers' => [
+//                          'Accept' => 'application/json'
+//                      ],
+//                      'query' => [
+//                          'name' => $address,
+//                          'city' => $city,
+//                          'output' => 'name,parent,parent1,parent2,parent3,country,compound_address_parents,id,lat,lng,subcat_name,cat_name',
+//                          'apikey' => '$2a$10$ixuhTqrlyD8pJfDY8FjO9OovMcIrBXIp2sUSHaJqeIjcNrpCyvHJ2'
+//                      ],
+//                  ]);
+//                  $json = (string) $response->getBody();
+//                  $data = json_decode($json, true);
+//                  $final_push[] = array('shipment_id'=>$value['shipment_id'],'lat'=>1,'lng'=>1);
+//                  continue;
+//                  $bestMatch = null;
+//                  $highestSimilarity = 0;
+//                  $final_push[$value] = true;
+//                  if(is_array($data) && !empty($data)) {
+//                      foreach ($data as $unit) {
+//                             $compound = $unit['compound_address_parents'] ?? '';
+////                          $match_terms = implode(' ',$unit['matched_terms'] ?? []);
+//
+//                          // Combine both fields for broader match
+////                          $searchText = $compound . ' ' . $match_terms;
+//                          $searchText = $compound;
+//                          similar_text(strtolower($address), strtolower($searchText), $percent);
+//
+//                          if ($percent > $highestSimilarity) {
+//                              $highestSimilarity = $percent;
+//                              $bestMatch = $unit;
 //                          }
 //                      }
-
-//                      if($highestSimilarity > 50 && $bestMatch) {
-//                          Log::info($data[0]);
-////                          $lat = number_format((float) $bestMatch['lat'], 7, '.', '');
-////                          $lng = number_format((float) $bestMatch['lng'], 7, '.', '');
-//                          $lat = $bestMatch['lat'];
-//                          $lng = $bestMatch['lng'];
+//
+////                      Log::info([$highestSimilarity , $bestMatch , isset($bestMatch['id'])]);
+////                      if ($highestSimilarity == 40 && $bestMatch && isset($bestMatch['id'])) {
+////                          dd(1);
+////                          // ID-based JSON block extraction
+////                          $matchedId = $bestMatch['id'];
+////
+////                          if (preg_match('/\{[^}]*"id"\s*:\s*' . $matchedId . '[^}]*\}/', $json, $match)) {
+////                              $entryJson = $match[0];
+////
+////                              preg_match('/"lat"\s*:\s*([0-9\.\-eE+]+)/', $entryJson, $latMatch);
+////                              preg_match('/"lng"\s*:\s*([0-9\.\-eE+]+)/', $entryJson, $lngMatch);
+////
+////                              $lat = $latMatch[1] ?? null;
+////                              $lng = $lngMatch[1] ?? null;
+////                          } else {
+////                              // fallback if ID block not found
+////                              $lat = $bestMatch['lat'];
+////                              $lng = $bestMatch['lng'];
+////                          }
+////
+////                          $unique_address[$city][$address] = $lat . ',' . $lng;
+////                      } else {
+////                          // fallback to first item
+////                          $first = $data[0] ?? null;
+////
+////                          if ($first && isset($first['id'])) {
+////                              $matchedId = $first['id'];
+////
+////                              if (preg_match('/\{[^}]*"id"\s*:\s*' . $matchedId . '[^}]*\}/', $json, $match)) {
+////                                  $entryJson = $match[0];
+////
+////                                  preg_match('/"lat"\s*:\s*([0-9\.\-eE+]+)/', $entryJson, $latMatch);
+////                                  preg_match('/"lng"\s*:\s*([0-9\.\-eE+]+)/', $entryJson, $lngMatch);
+////
+////                                  $lat = $latMatch[1] ?? null;
+////                                  $lng = $lngMatch[1] ?? null;
+////                              } else {
+////                                  $lat = $first['lat'];
+////                                  $lng = $first['lng'];
+////                              }
+////
+////                              $unique_address[$city][$address] = $lat . ',' . $lng;
+////                          } else {
+////                              $unique_address[$city][$address] = null;
+////                          }
+////                      }
+//                      Log::info($bestMatch);
+//                      // Default fallback to first
+//                      $targetId = $bestMatch && $highestSimilarity > 50 ? $bestMatch['id'] : $data[0]['id'];
+//
+//                      // Find exact object in original $json string by ID
+//                      $pattern = '/\{[^}]*"id"\s*:\s*' . preg_quote($targetId, '/') . '[^}]*\}/';
+//                      if (preg_match($pattern, $json, $matchedObject)) {
+//                          preg_match('/"lat"\s*:\s*([0-9\.\-eE+]+)/', $matchedObject[0], $latMatch);
+//                          preg_match('/"lng"\s*:\s*([0-9\.\-eE+]+)/', $matchedObject[0], $lngMatch);
+//
+//                          $lat = $latMatch[1] ?? null;
+//                          $lng = $lngMatch[1] ?? null;
 //                          $unique_address[$city][$address] = $lat . ',' . $lng;
 //                      } else {
-//
-//                          Log::info($data[0]);
-////                          $lat = number_format((float) $data[0]['lat'], 7, '.', '');
-////                          $lng = number_format((float) $data[0]['lng'], 7, '.', '');
-//                          $lat = $data[0]['lat'];
-//                          $lng = $data[0]['lng'];
-//                          $unique_address[$city][$address] = $lat . ',' . $lng;
+//                          $unique_address[$city][$address] = null; // fallback in case match fails
 //                      }
-                  } else {
-                      $unique_address[$city][$address] = null;
-                  }
-             }
+//
+//
+//
+////                      if ($highestSimilarity > 50 && $bestMatch) {
+////                        Log::info(1);
+////                          $encodedBestMatch = json_encode($bestMatch);
+////                          // Use raw lat/lng from original JSON string via regex
+////                          preg_match('/"lat"\s*:\s*([0-9\.\-eE+]+)/',$encodedBestMatch, $latMatch);
+////                          preg_match('/"lng"\s*:\s*([0-9\.\-eE+]+)/',$encodedBestMatch, $lngMatch);
+////
+//////                          $lat = $latMatch[1] ?? null;
+//////                          $lng = $lngMatch[1] ?? null;
+////                          $lat = isset($latMatch[1]) ? rtrim(rtrim(number_format((float) $latMatch[1], 14, '.', ''), '0'), '.') : null;
+////                          $lng = isset($lngMatch[1]) ? rtrim(rtrim(number_format((float) $lngMatch[1], 14, '.', ''), '0'), '.') : null;
+////
+////                          $unique_address[$city][$address] = $lat .','.$lng;
+////                      }
+////                      else {
+////                          preg_match('/"lat"\s*:\s*([0-9\.\-eE+]+)/', $json, $latMatch);
+////                          preg_match('/"lng"\s*:\s*([0-9\.\-eE+]+)/', $json, $lngMatch);
+////
+////                          $lat = $latMatch[1] ?? null;
+////                          $lng = $lngMatch[1] ?? null;
+////
+////                          $unique_address[$city][$address] = $lat .','.$lng;
+////                      }
+//
+//                  } else {
+//                      $unique_address[$city][$address] = null;
+//                  }
+//             }
+//
+//        }
+//
+//
+//
+//    }
 
+    public function view_tpl_map(Request $request)
+    {
+        $encodedCoords = $request->query('coords');
+        $decodedCoords = [];
+
+        if ($encodedCoords) {
+            $json = base64_decode($encodedCoords);
+            $decodedCoords = json_decode($json, true);
         }
-        dd($unique_address);
 
+        return view('admin.settings.geocodes.tpl_map', [
+            'coords' => $decodedCoords
+        ]);
     }
 }

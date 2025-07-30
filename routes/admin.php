@@ -2745,6 +2745,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'GeoCodesController@index')->name('index');
             Route::get('list', 'GeoCodesController@list')->name('list');
             Route::post('get_shipment_lat_long', 'GeoCodesController@get_shipment_lat_long')->name('get_shipment_lat_long');
+            Route::get('view_tpl_map', 'GeoCodesController@view_tpl_map')->name('view_tpl_map');
 
         });
 

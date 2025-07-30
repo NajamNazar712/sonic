@@ -159,6 +159,11 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <style type="text/css">
+        .geo-selected-row {
+            background-color: #d1f0d1 !important; /* light green for example */
+        }
+    </style>
 
 @endsection
 
@@ -254,16 +259,84 @@
 
             });
 
-            var selected_rows = [];
+            let selected_rows = [];
+            let geo_seleectd_rows = [];
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons:[
+                    {
+                        text: 'Select All Geo Codes',
+                        className: 'btn btn-success select_all_geo_codes',
+                        action: function () {
+                            // 🔁 Clear normal selection first
+                            selected_rows = [];
+                            table.rows().deselect();
+                            table.button('.generate_geo_codes').disable();
+
+                            // 🔁 Reset visual styles from normal checkboxes
+                            table.rows().every(function () {
+                                const rowNode = this.node();
+                                $(rowNode).removeClass('selected');
+                                $(rowNode).find('td.generate_select_checkbox').css({
+                                    pointerEvents: 'none'
+                                });
+
+                            });
+
+                            geo_selected_rows = [];
+
+                            table.rows().every(function () {
+                                const rowData = this.data();
+                                const rowNode = this.node();
+
+                                const hasLat = rowData.latitude !== null && rowData.latitude !== '';
+                                const hasLng = rowData.longitude !== null && rowData.longitude !== '';
+
+                                if (hasLat && hasLng) {
+                                    geo_selected_rows.push({
+                                        lat: rowData.latitude,
+                                        lng: rowData.longitude
+                                    });
+
+                                    $(rowNode).addClass('selected geo-selected-row');
+                                    $(rowNode).find('td.geo-select-check')
+                                        .css({ opacity: 1, pointerEvents: 'auto' })
+                                        .trigger('click');
+                                }
+                            });
+
+
+                            if (geo_selected_rows.length > 0) {
+                                table.button('.view_geo_map_btn').enable();
+                                table.button('.select_none').enable();
+                            } else {
+                                table.button('.view_geo_map_btn').disable();
+                            }
+                        }
+                    },
+                    {
+                        text: 'View Map',
+                        className: 'btn btn-primary view_geo_map_btn',
+                        enabled: false,
+                        action: function () {
+                            if (geo_selected_rows.length > 0) {
+                                const encoded = btoa(JSON.stringify(geo_selected_rows));
+                                window.open('/admin/settings/geo_codes/view_tpl_map?coords=' + encoded, '_blank');
+                            } else {
+                                toastr.error('No geo-coded shipments selected!');
+                            }
+                        }
+                    },
+
                     {
                         text: 'Generate Geo Codes',
                         className: 'btn btn-primary generate_geo_codes',
                         enabled: false,
                         action: function (e, dt, node, config) {
-                           get_shipments_lat_long();
+                            if(selected_rows.length > 0) {
+                                get_shipments_lat_long(selected_rows);
+                            }
+
                         }
                     },
                     {
@@ -273,53 +346,107 @@
                         action : function(e) {
                             e.preventDefault();
 
-                            table.rows().nodes().each(function(index) {
-                                var row = table.row(index);
-
-                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
-                                    row.select();
-
-                                    id = parseInt(row.id());
-
-                                    var index = $.inArray(id, selected_rows);
-
-                                    if (index === -1) {
-                                        selected_rows.push(id);
-                                    }
-
-                                    table.button('.generate_geo_codes').enable();
-
-                                }
+                            // 🔁 Clear Geo Code selection first
+                            geo_selected_rows = [];
+                            table.rows().every(function () {
+                                const rowNode = this.node();
+                                $(rowNode).removeClass('selected');
+                                $(rowNode).find('td.geo-select-check').css({
+                                    opacity: 0.5,
+                                    pointerEvents: 'none'
+                                });
                             });
-                        }
-                    }, {
-                        extend: 'selectNone',
-                        text: 'Select None',
-                        className: 'select_none',
-                        action : function(e) {
-                            e.preventDefault();
+                            table.button('.view_geo_map_btn').disable();
+
+                            selected_rows = [];
 
                             table.rows().nodes().each(function(index) {
                                 var row = table.row(index);
 
-                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
-                                    row.deselect();
+                                var latCell = $(row.node()).find('td.latitude').text().trim();
+                                var lngCell = $(row.node()).find('td.longitude').text().trim();
 
-                                    id = parseInt(row.id());
+                                if (!latCell && !lngCell) {
+                                    if ($(row.node().firstChild).hasClass('generate_select_checkbox')) {
+                                        row.select();
+                                        var id = parseInt(row.id());
+                                        var idx = $.inArray(id, selected_rows);
+                                        if (idx === -1) {
+                                            selected_rows.push(id);
+                                        }
 
-                                    var index = $.inArray(id, selected_rows);
-
-                                    if (index !== -1) {
-                                        selected_rows.splice(index, 1);
-                                    }
-
-                                    if (selected_rows.length == 0) {
-                                        table.button('.generate_geo_codes').disable();
+                                        if (selected_rows.length > 0) {
+                                            table.button('.generate_geo_codes').enable();
+                                            table.button('.select_none').enable();
+                                        }
                                     }
                                 }
                             });
                         }
                     },
+
+                    // {
+                    //     extend: 'selectNone',
+                    //     text: 'Select None',
+                    //     className: 'select_none',
+                    //     action : function(e) {
+                    //         e.preventDefault();
+                    //
+                    //         table.rows().nodes().each(function(index) {
+                    //             var row = table.row(index);
+                    //
+                    //             if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                    //                 row.deselect();
+                    //
+                    //                 id = parseInt(row.id());
+                    //
+                    //                 var index = $.inArray(id, selected_rows);
+                    //
+                    //                 if (index !== -1) {
+                    //                     selected_rows.splice(index, 1);
+                    //                 }
+                    //
+                    //                 if (selected_rows.length == 0) {
+                    //                     table.button('.generate_geo_codes').disable();
+                    //                 }
+                    //             }
+                    //         });
+                    //     }
+                    // },
+                    {
+                        extend: 'selectNone',
+                        text: 'Select None',
+                        className: 'select_none',
+                        action: function (e) {
+                            e.preventDefault();
+
+                            table.rows().every(function () {
+                                const rowNode = this.node();
+
+                                if ($(rowNode).find('td.generate_select_checkbox').length > 0) {
+                                    this.deselect();
+                                }
+
+                                const geoCell = $(rowNode).find('td.geo-select-check');
+                                if (geoCell.length > 0) {
+                                    this.deselect();
+                                    geoCell.css({
+                                        opacity: 0.5,
+                                        // pointerEvents: 'none'
+                                    });
+                                    $(rowNode).removeClass('geo-selected-row');
+                                }
+                            });
+
+                            selected_rows = [];
+                            geo_selected_rows = [];
+
+                            table.button('.view_geo_map_btn').disable();
+                            table.button('.generate_geo_codes').disable();
+                        }
+                    },
+
+
                     'reset'],
                 processing: true,
                 language: {
@@ -353,9 +480,27 @@
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
-
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
 
+                },
+                createdRow:function (row, data, dataIndex) {
+                    const $cell = $('td', row).eq(0); // first cell
+
+                    if (!data.latitude || !data.longitude) {
+                        // Selectable row
+                        $cell.addClass('generate_select_checkbox'); // used by DataTables to allow selection
+                    } else {
+                        // Non-selectable, visually similar
+                        $cell.addClass('geo-select-check'); // separate name
+                        $cell.css({ opacity: 0.5,}); // visually disabled
+                    }
+                    // if (data.latitude && data.longitude) {
+                    //     $cell.removeClass('select-checkbox'); // remove selectable behavior
+                    //     $cell.addClass('text-muted'); // optional: gray out
+                    //     $cell.html('&#10005;');       // optional: show X or dash
+                    // } else {
+                    //     $cell.addClass('select-checkbox'); // allow selection
+                    // }
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -395,9 +540,9 @@
                 }
             });
 
-            $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
-                var id = $(this).parent('tr').attr('id');
-                console.log(id);
+
+            $('.datatable tbody').on('click', 'tr td.generate_select_checkbox', function() {
+                var id = parseInt($(this).parent('tr').attr('id'));
 
                 var index = $.inArray(id, selected_rows);
 
@@ -415,78 +560,41 @@
                     table.button('.generate_geo_codes').disable();
                 }
             });
-            // $('body').on('click','#datatable button.edit',function () {
-            //     var id = parseInt($(this).parents('tr').attr('id'));
-            //     var status_name = $(this).parents('tr').find('td.name').text();
-            //     if(id){
-            //         $('#edit_closing_status_id').val(id);
-            //         $('#EditStatusModal').modal('show');
-            //         $('#edit_closing_type').val(status_name);
-            //     }else{
-            //         var error = 'Status ID Not Found, Please Try again!';
-            //         toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-            //     }
-            // });
-            // $('body').on('change','#StatusModal #status_name,#EditStatusModal #edit_closing_type',function() {
-            //     $(this).val($(this).val().trim());
-            // });
-            {{--$('body').on('click','#addStatus', function () {--}}
-            {{--    var status = $('#status_name').val();--}}
-            {{--    if(status != ''){--}}
-            {{--        $.ajax({--}}
-            {{--            url: '{!! route('admin.settings.month_closing.status.add') !!}',--}}
-            {{--            method: 'POST',--}}
-            {{--            data: {--}}
-            {{--                '_token': '{{ csrf_token() }}',--}}
-            {{--                'status': status--}}
-            {{--            }--}}
-            {{--        }).done(function(data){--}}
-            {{--            if(data.status){--}}
-            {{--                table.draw(true);--}}
-            {{--                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
-            {{--                $('#status_name').val('');--}}
-            {{--                $('#StatusModal').modal('hide');--}}
-            {{--            }else{--}}
-            {{--                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-            {{--            }--}}
-            {{--        });--}}
 
-            {{--    }else{--}}
-            {{--        var error = 'Month Closing Status is empty!';--}}
-            {{--        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-            {{--    }--}}
-            {{--});--}}
-            {{--$('body').on('click','#edit_type', function () {--}}
-            {{--    var status = $('#edit_closing_type').val();--}}
-            {{--    var id = parseInt($('#edit_closing_status_id').val());--}}
-            {{--    if(status != '' && id != ''){--}}
-            {{--        $.ajax({--}}
-            {{--            url: '{!! route('admin.settings.month_closing.status.edit') !!}',--}}
-            {{--            method: 'POST',--}}
-            {{--            data: {--}}
-            {{--                '_token': '{{ csrf_token() }}',--}}
-            {{--                'status_id': id,--}}
-            {{--                'status_name':status--}}
-            {{--            }--}}
-            {{--        }).done(function(data){--}}
-            {{--            if(data.status){--}}
-            {{--                table.draw(true);--}}
-            {{--                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
-            {{--                $('#edit_closing_type').val('');--}}
-            {{--                $('#EditStatusModal').modal('hide');--}}
-            {{--            }--}}
-            {{--        });--}}
 
-            {{--    }else{--}}
-            {{--        var error = 'Month Closing Status is empty!';--}}
-            {{--        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-            {{--    }--}}
-            {{--});--}}
+            $('body').on('click','#datatable tr .generate_geo_code_btn',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                if(id){
+                   get_shipments_lat_long([id]);
+                }
+                else{
+                    var error = 'Shipment ID Not Found, Please Try again!';
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+            });
+
+            function get_shipments_lat_long(shipment_ids) {
+                $.ajax({
+                    url: '{!! route('admin.settings.geo_codes.get_shipment_lat_long') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'shipment_ids': shipment_ids
+                    }
+                }).done(function(data){
+                    if(data.status){
+                        table.rows().deselect();
+                        table.draw(true);
+                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                    } else{
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                });
+
+            }
 
         });
 
-        function get_shipments_lat_long() {
-            alert(1);
-        }
+
     </script>
 @endsection
