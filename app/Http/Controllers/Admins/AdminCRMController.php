@@ -7537,7 +7537,7 @@ class AdminCRMController extends Controller
             if (
                 $nature_id != 4 ||
                 $request->complaint_id == 26 ||
-                $shipment->shipper_status_id == 18
+                in_array($shipment->shipper_status_id, [18, 51])
             ) {
                 return ['status' => 1];
             }
