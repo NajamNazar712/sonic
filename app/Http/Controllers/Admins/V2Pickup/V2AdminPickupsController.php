@@ -2414,43 +2414,23 @@ class V2AdminPickupsController extends Controller
         $shipment = Shipment::find($request->id);
 
         if ($shipment) {
-            if (in_array($shipment->shipper_status_id, [1, 17, 53, 61, 62, 64])) {
+            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62 || $shipment->shipper_status_id == 64) {
                 $shipment->actual_weight = null;
                 $shipment->length = null;
                 $shipment->breadth = null;
                 $shipment->height = null;
+
+
                 $shipment->save();
 
                 $end = microtime(true);
 
-                $response = response()->json([
-                    'status' => 0,
-                    'success' => 'Shipment has been removed',
-                    'test' => 'Execution Time: ' . ($end - $start) . ' seconds'
-                ]);
-
-                $response->send();
-
-                if (function_exists('fastcgi_finish_request')) {
-                    fastcgi_finish_request();
-                } else {
-                    @ob_flush();
-                    @flush();
-                }
-
-                exit; // Stop further PHP execution
-
+                return ['status' => 0, 'success' => 'Shipment has been removed', 'test' => 'Execution Time: ' . ($end - $start) . ' seconds'];
             } else {
-                return response()->json([
-                    'status' => 1,
-                    'error' => 'Given Shipment ID has already been modified'
-                ]);
+                return ['status' => 1, 'error' => 'Given Shipment ID has already been modified'];
             }
         } else {
-            return response()->json([
-                'status' => 1,
-                'error' => 'No Shipment with given ID is present'
-            ]);
+            return ['status' => 1, 'error' => 'No Shipment with given ID is present'];
         }
     }
 
