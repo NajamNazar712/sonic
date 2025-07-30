@@ -1482,7 +1482,8 @@
                             </ul>
                         </li>
                     @endif
-                
+
+
                 </ul>
 
             </li>
@@ -2892,6 +2893,10 @@
                                             <li><a class="menu-item"
                                                     href="{{ route('admin.settings.product_type.index') }}">Product Types</a></li>
                                         @endif
+                                        @if (session('role_id') == 1 || in_array(980, session('permissions')) )
+                                                <li><a class="menu-item"
+                                                       href="{{ route('admin.settings.geo_codes.index') }}">Geocodes Settings</a></li>
+                                            @endif
                                     @endif
                                 </ul>
                             </li>
