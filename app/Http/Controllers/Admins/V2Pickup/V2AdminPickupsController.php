@@ -2423,6 +2423,8 @@ class V2AdminPickupsController extends Controller
 
                 $shipment->save();
 
+                $end = microtime(true);
+
                 return ['status' => 0, 'success' => 'Shipment has been removed', 'test' => 'Execution Time: ' . ($end - $start) . ' seconds'];
             } else {
                 return ['status' => 1, 'error' => 'Given Shipment ID has already been modified'];
