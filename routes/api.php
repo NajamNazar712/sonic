@@ -160,7 +160,7 @@ use Illuminate\Http\Request;
 
         Route::prefix('register_request')->name('register_request.')->group(function () {
             //Obsoleted
-            Route::post('store', 'Rider\RiderAPIController@rider_signup_v2')->name('store');
+            Route::post('store', 'Rider\RiderAPIController@rider_signup_v2')->name('store2');
             Route::post('store_v2', 'Rider\RiderAPIController@rider_signup_v3')->name('store_v3');
             Route::post('attachment_store', 'Rider\RiderAPIController@rider_attachments_store')->name('attachment_store');
 
