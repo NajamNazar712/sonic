@@ -143,6 +143,8 @@
                         <th class="border-primary border-darken-1">Packaging Charges</th>
                         <th class="border-primary border-darken-1">GST</th>
                         <th class="border-primary border-darken-1">Fintech Charges</th>
+                        <th class="border-primary border-darken-1">WHT Charges</th>
+                        <th class="border-primary border-darken-1">SST Charges</th>
                         <th class="border-primary border-darken-1">Total Charges</th>
                         <th class="border-primary border-darken-1">Net Payable</th>
                         <th class="border-primary border-darken-1">Delivered Date</th>
@@ -344,6 +346,8 @@
                             head.push('Admin Discount Amount');
                             head.push('Packaging Charges');
                             head.push('GST');
+                            head.push('WHT');
+                            head.push('SST');
                             head.push('Total Charges');
                             head.push('Net Payable');
                             head.push('Delivered Date');
@@ -383,6 +387,8 @@
                                 row.push(values.admin_discount);
                                 row.push(values.packaging_charges);
                                 row.push(values.gst);
+                                row.push(values.wht);
+                                row.push(values.sst);
                                 row.push(values.total_charges);
                                 row.push(values.p_net_payable);
                                 row.push(values.delivered_or_returned);
@@ -471,6 +477,8 @@
                     { data:'packaging_charges' ,name: 'rs.packaging_charges', class: 'align-middle packaging_charges'},
                     { data:'gst' ,name: 'rs.gst', class: 'align-middle gst'},
                     { data:'fintech_charges' ,name: 'shipments.fintech_charges', class: 'align-middle fintech_charges'},
+                    { data:'wht' ,name: 'rs.wht', class: 'align-middle wht'},
+                    { data:'sst' ,name: 'rs.cod_sst', class: 'align-middle sst'},
                     { data:'total_charges' ,name: 'rs.total_charges', class: 'align-middle total_charges'},
                     { data: 'p_net_payable' ,name: 'pps.payable', class: 'align-middle net_payable'},
                     { data: 'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle delivered_or_returned'},
