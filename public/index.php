@@ -22,8 +22,7 @@ define('LARAVEL_START', microtime(true));
 */
 
 require __DIR__.'/../vendor/autoload.php';
-$start = microtime(true);
-error_log('🟡 Start index.php');
+
 /*
 |--------------------------------------------------------------------------
 | Turn On The Lights
@@ -37,7 +36,7 @@ error_log('🟡 Start index.php');
 */
 
 $app = require_once __DIR__.'/../bootstrap/app.php';
-error_log('🟢 After bootstrap');
+
 /*
 |--------------------------------------------------------------------------
 | Run The Application
@@ -55,12 +54,7 @@ $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
 $response = $kernel->handle(
     $request = Illuminate\Http\Request::capture()
 );
-error_log('🟠 After handle');
 
 $response->send();
-error_log('🔵 After send()');
 
 $kernel->terminate($request, $response);
-error_log('🔴 After terminate()');
-$end = microtime(true);
-error_log('⏱️ Total index.php time: ' . round(($end - $start) * 1000, 2) . ' ms');
