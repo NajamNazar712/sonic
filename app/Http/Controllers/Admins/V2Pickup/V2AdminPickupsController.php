@@ -2410,16 +2410,21 @@ class V2AdminPickupsController extends Controller
 
     public function arrival_individual_shipment_remove(Request $request)
     {
-        $shipment = Shipment::find($request->id);
+        $shipment = DB::table('shipments')->where('id', $request->id)->first();
 
         if ($shipment) {
-            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62 || $shipment->shipper_status_id == 64) {
-                $shipment->actual_weight = null;
-                $shipment->length = null;
-                $shipment->breadth = null;
-                $shipment->height = null;
+            $validStatuses = [1, 17, 53, 61, 62, 64];
 
-                $shipment->save();
+            if (in_array($shipment->shipper_status_id, $validStatuses)) {
+                DB::table('shipments')
+                    ->where('id', $request->id)
+                    ->update([
+                        'actual_weight' => null,
+                        'length' => null,
+                        'breadth' => null,
+                        'height' => null,
+                        'updated_at' => now(), // optional: only if your table uses timestamps
+                    ]);
 
                 return ['status' => 0, 'success' => 'Shipment has been removed'];
             } else {
