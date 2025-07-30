@@ -236,17 +236,16 @@ class AdminCRMController extends Controller
 
                             $already_lodged = false;
                             $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
+
+                            $response = $this->canLockClaim($shipment, $is_shipment, $nature_id, $request);
+
+                            if ($response['status'] === 0) {
+                                return $response;
+                            }
+
                             if($is_shipment){
                                 $already_lodged = true;
                                 $complain = $is_shipment->id;
-
-
-                                $response = $this->canLockClaim($shipment, $is_shipment, $nature_id, $request);
-
-                                if ($response['status'] === 0) {
-                                    return $response;
-                                }
-
                                 if($is_shipment->case_nature_id != $nature_id){
                                     if ($nature_id == 4) {
                                         if($complaint_id == 26){
@@ -495,16 +494,15 @@ class AdminCRMController extends Controller
 
                         $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
                         $already_lodged = false;
+
+                        $response = $this->canLockClaim($shipment, $is_shipment, $nature_id, $request);
+
+                        if ($response['status'] === 0) {
+                            return $response;
+                        }
                         if($is_shipment){
                             $already_lodged = true;
                             $complain = $is_shipment->id;
-
-
-                            $response = $this->canLockClaim($shipment, $is_shipment, $nature_id, $request);
-
-                            if ($response['status'] === 0) {
-                                return $response;
-                            }
 
                             if($is_shipment->case_nature_id != $nature_id){
                                 if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
@@ -7527,8 +7525,13 @@ class AdminCRMController extends Controller
 
     public static function canLockClaim($shipment, $crm, $nature_id, $request)
     {
-        if ($shipment->shipper_status_id != 18 || !in_array($crm->status_id, [3, 4])) {
-            if (($nature_id == 4 && $request->case_nature_claim != 26) && in_array($crm->status_id, [1, 2])) {
+        $isShipperStatusInvalid = $shipment->shipper_status_id != 18;
+        $isCrmStatusNotApproved = !$crm || !in_array($crm->status_id, [3, 4]);
+        $isNatureClaimMismatch = $nature_id == 4 && $request->case_nature_claim != 26;
+        $isCrmStatusPending = $crm && in_array($crm->status_id, [1, 2]);
+
+        if ($isShipperStatusInvalid || $isCrmStatusNotApproved) {
+            if ($isNatureClaimMismatch && (!$crm || $isCrmStatusPending)) {
                 return [
                     'status' => 0,
                     'error' => 'The claim cannot be locked directly. Please lock the complaint first from the complaint section.'
@@ -7538,6 +7541,7 @@ class AdminCRMController extends Controller
 
         return ['status' => 1];
     }
+
 
     public static function storeInvalidReasons(array $reasonIds, int $crmRequestId)
     {
@@ -7574,5 +7578,56 @@ class AdminCRMController extends Controller
         if (!empty($insertData)) {
             CrmRequestResolvedReason::insert($insertData); 
         }    
+    }
+
+    public static function canComplaintPaymentLocked($id)
+    {
+        $shipmentPayment = ShipmentsPaymentJourney::with('shipment.user')
+            ->where('shipment_id', $id)
+            ->latest()
+            ->first();
+
+        // 1 = Processed, 3 = Paid
+        if (!empty($shipmentPayment->status_id) && $shipmentPayment->status_id == 1) {
+            return [
+                'status' => 0,
+                'error' => "Payment is being processed for shipment ID {$id} and will be paid soon."
+            ];
+        }
+
+        return ['status' => 1];
+    }
+
+    public static function sendPaidInitialMessageToShipper($crm_id)
+    {
+        $crm_request = CrmRequest::find($crm_id);
+
+        $shipmentPayment = ShipmentsPaymentJourney::with('shipment.user')
+        ->where('shipment_id', $crm_request->shipment_id)
+        ->latest()
+        ->first();
+
+        if (!empty($shipmentPayment->status_id) && $shipmentPayment->status_id == 3) {
+
+            $comment = "Dear Customer Name
+
+            Your payment has been paid; therefore, the complaint has been closed.
+
+            Regards
+
+            CRM Team – SLGTRAX";
+            
+            $comment_by = 0;
+            $comment_type = 0;
+
+            $default_agent_setting = GlobalSettings::where('type', 'crm_default_agent');
+            if ($default_agent_setting->exists()) {
+                $default_agent_setting = $default_agent_setting->first();
+                $default_agent_id = $default_agent_setting->setting_value;
+            } else {
+                $default_agent_id = 306;
+            }
+            CRMCommentController::add($crm_id, $default_agent_id, $comment_by, $comment_type, $comment, 1);
+        }
     }
 }
