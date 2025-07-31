@@ -195,7 +195,8 @@ class AdminCRMController extends Controller
                         return ['status' => 0, 'error' => 'Request/Complaint already lodged for the Payment ID: ' . $payment_id_padded];
                     }
                     else{
-                        $response = $this->canLockClaim($shipment, $is_shipment, $nature_id, $request);
+                        $check_claim_can_lock = CrmRequest::where('shipment_id',$shipment->id)->latest()->first();
+                        $response = $this->canLockClaim($shipment, $is_shipment, $nature_id, $request, $check_claim_can_lock);
                         if ($response['status'] === 0) {
                             return $response;
                         }
@@ -242,8 +243,8 @@ class AdminCRMController extends Controller
 
                             $already_lodged = false;
                             $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
-
-                            $response = $this->canLockClaim($shipment, $is_shipment, $nature_id, $request);
+                            $check_claim_can_lock = CrmRequest::where('shipment_id',$shipment_id)->latest()->first();
+                            $response = $this->canLockClaim($shipment, $is_shipment, $nature_id, $request, $check_claim_can_lock);
 
                             if ($response['status'] === 0) {
                                 return $response;
@@ -507,7 +508,8 @@ class AdminCRMController extends Controller
                         $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
                         $already_lodged = false;
 
-                        $response = $this->canLockClaim($shipment, $is_shipment, $nature_id, $request);
+                        $check_claim_can_lock = CrmRequest::where('shipment_id',$shipment_id)->latest()->first();
+                        $response = $this->canLockClaim($shipment, $is_shipment, $nature_id, $request, $check_claim_can_lock);
 
                         if ($response['status'] === 0) {
                             return $response;
@@ -7541,25 +7543,31 @@ class AdminCRMController extends Controller
         }
     }
 
-    public static function canLockClaim($shipment, $crm, $nature_id, $request)
+    public static function canLockClaim($shipment, $crm, $nature_id, $request, $check_claim_can_lock)
     {
-        $isShipperStatusInvalid = $shipment->shipper_status_id != 18;
-        $isCrmStatusNotApproved = !$crm || !in_array($crm->status_id, [3, 4]);
-        $isNatureClaimMismatch = $nature_id == 4 && $request->case_nature_claim != 26;
-        $isCrmStatusPending = $crm && in_array($crm->status_id, [1, 2]);
+        if (empty($shipment)) {
+            return ['status' => 1];
+        }
 
-        if ($isShipperStatusInvalid || $isCrmStatusNotApproved) {
-            if ($isNatureClaimMismatch && (!$crm || $isCrmStatusPending)) {
-                return [
-                    'status' => 0,
-                    'error' => 'The claim cannot be locked directly. Please lock the complaint first from the complaint section.'
-                ];
+        $statusId = $crm?->status_id ?? $check_claim_can_lock?->status_id;
+
+        if (!in_array($statusId, [3, 4])) {
+            if (
+                $nature_id != 4 ||
+                $request->complaint_id == 26 ||
+                in_array($shipment->shipper_status_id, [18, 51])
+            ) {
+                return ['status' => 1];
             }
+
+            return [
+                'status' => 0,
+                'error' => 'The claim cannot be locked directly. Please lock the complaint first from the complaint section.'
+            ];
         }
 
         return ['status' => 1];
     }
-
 
     public static function storeInvalidReasons(array $reasonIds, int $crmRequestId)
     {
@@ -7606,7 +7614,7 @@ class AdminCRMController extends Controller
             ->first();
 
         // 1 = Processed, 3 = Paid
-        if (!empty($shipmentPayment->status_id) && $shipmentPayment->status_id == 1) {
+        if ($shipmentPayment?->status_id == 1){
             return [
                 'status' => 0,
                 'error' => "Payment is being processed for shipment ID {$id} and will be paid soon."
@@ -7625,7 +7633,7 @@ class AdminCRMController extends Controller
         ->latest()
         ->first();
 
-        if (!empty($shipmentPayment->status_id) && $shipmentPayment->status_id == 3) {
+        if ($shipmentPayment?->status_id == 3){
 
             $comment = "Dear Customer Name
 
