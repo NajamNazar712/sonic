@@ -21,7 +21,6 @@ class OptimizeTable extends Command
     {
         $this->info('🔧 Putting app into maintenance mode...');
         Artisan::call('down', [
-            '--message' => 'Optimizing shipment_scanning_journey table...',
             '--retry' => 60,
         ]);
 
