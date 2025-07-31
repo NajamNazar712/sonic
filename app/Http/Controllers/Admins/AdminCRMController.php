@@ -250,13 +250,14 @@ class AdminCRMController extends Controller
                                 return $response;
                             }
 
-                            if($is_shipment){
-                                if($nature_id == 1 && $request->complaint_id == 1){
-                                    $canComplaintPaymentLocked = $this->canComplaintPaymentLocked($shipment->id);
-                                    if ($canComplaintPaymentLocked['status'] === 0) {
-                                        return $canComplaintPaymentLocked;
-                                    }
+                            if($nature_id == 1 && $request->complaint_id == 1){
+                                $canComplaintPaymentLocked = $this->canComplaintPaymentLocked($shipment->id);
+                                if ($canComplaintPaymentLocked['status'] === 0) {
+                                    return $canComplaintPaymentLocked;
                                 }
+                            }
+
+                            if($is_shipment){
                                 $already_lodged = true;
                                 $complain = $is_shipment->id;
                                 if($is_shipment->case_nature_id != $nature_id){
@@ -514,13 +515,14 @@ class AdminCRMController extends Controller
                         if ($response['status'] === 0) {
                             return $response;
                         }
-                        if($is_shipment){
-                            if($nature_id == 1 && $request->complaint_id == 1){
-                                $canComplaintPaymentLocked = $this->canComplaintPaymentLocked($shipment->id);
-                                if ($canComplaintPaymentLocked['status'] === 0) {
-                                    return $canComplaintPaymentLocked;
-                                }
+
+                        if($nature_id == 1 && $request->complaint_id == 1){
+                            $canComplaintPaymentLocked = $this->canComplaintPaymentLocked($shipment->id);
+                            if ($canComplaintPaymentLocked['status'] === 0) {
+                                return $canComplaintPaymentLocked;
                             }
+                        }
+                        if($is_shipment){
                             $already_lodged = true;
                             $complain = $is_shipment->id;
 
