@@ -615,7 +615,7 @@
                     { data:'pps_cod_sst' ,name: 'pps_cod_sst', class: 'align-middle pps_cod_sst',sortable:false},
                     { data:'p_total_charges' ,name: 'pps.charges', class: 'align-middle total_charges'},
                     { data:'estimated_charges' ,name: 'estimated_charges', class: 'align-middle estimated_charges',sortable:false},
-                    { data: 'faf_charges' ,name: 'faf_charges', class: 'align-middle faf_charges'},
+                    { data: 'faf_charges' ,name: 'sac.faf_charges', class: 'align-middle faf_charges'},
                     { data: 'p_net_payable' ,name: 'pps.payable', class: 'align-middle net_payable'},
                     { data: 'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle delivered_or_returned'},   
                 ],

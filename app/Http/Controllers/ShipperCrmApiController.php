@@ -16,6 +16,7 @@ use App\Http\Models\Shipment;
 
 use App\Http\Requests\AddCrmRequest;
 use App\Http\Requests\ValidateShipmentIdRequest;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -42,7 +43,10 @@ class ShipperCrmApiController extends Controller
 
         $channel_id=1;
         if($app_type == 2) {
-            $channel_id = $request->channel_id;
+            $channel_id = $request->input('channel_id',2);
+        }
+        if(empty($channel_id)){
+            $channel_id = 2;
         }
 
         if (!empty($shipment_ids)) {
@@ -193,7 +197,8 @@ class ShipperCrmApiController extends Controller
                 'status' => 0,
                 'message' => 'CRM requests have been added successfully.',
                 'already_existed_shipments' => $present_shipments,
-                'not_found_shipments' => $not_found_shipments
+                'not_found_shipments' => $not_found_shipments,
+                'crm_request_id' => $crm_request_padded_id
             ]);
         }
     }
@@ -220,9 +225,7 @@ class ShipperCrmApiController extends Controller
 
     public function crm_request_resources(Request $request)
     {
-        $case_nature = $request->app_type == 2
-            ? CrmRequestCaseNature::all() :
-            CrmRequestCaseNature::where('id','!=',3)->get();
+        $case_nature =  CrmRequestCaseNature::where('id','!=',3)->get();
 
         $complaints = CrmRequestCaseNatureType::where('status_id',1)->where('nature_id',1)->get();
         $service_requests = CrmRequestCaseNatureType::where('status_id',1)->where('nature_id',2)->get();
@@ -242,47 +245,86 @@ class ShipperCrmApiController extends Controller
 
     public function crm_request_list(Request $request)
     {
+        $tracking_number = $request->input('tracking_number');
         $app_type = $request->app_type;
 
+        if ($request->filled('status') && $request->status != 1) {
+            if ($request->status == 4) {
+                $request_status = [4, 7];
+            } else {
+                return response()->json([
+                    'status' => 1,
+                    'message' => 'CRM Complaints following status not found!'
+                ]);
+            }
+        } else {
+            $request_status = [1, 2, 3, 5, 6];
+        }
+
+        $count = 0;
         if($app_type == 2) {
 
-            $launched = CrmRequest::leftJoin('retail_shipments as rs', 'rs.shipment_id', '=', 'crm_requests.shipment_id')
-            ->leftJoin('retail_shipper_infos as rsi', 'rsi.id', '=', 'rs.shipper_account_no')
-            ->where('status_id',1)
-            ->where('rs.shipper_account_no', $request->retail_shipper_id)
-            ->count();
+//            $launched_count = CrmRequest::leftJoin('retail_shipments as rs', 'rs.shipment_id', '=', 'crm_requests.shipment_id')
+//            ->leftJoin('retail_shipper_infos as rsi', 'rsi.id', '=', 'rs.shipper_account_no')
+//            ->whereIn('status_id',[1, 2, 3, 5, 6])
+//            ->where('rs.shipper_account_no', $request->retail_shipper_id)
+//            ->count();
+//
+////            $in_process = CrmRequest::leftJoin('retail_shipments as rs', 'rs.shipment_id', '=', 'crm_requests.shipment_id')
+////            ->leftJoin('retail_shipper_infos as rsi', 'rsi.id', '=', 'rs.shipper_account_no')
+////            ->where('status_id',2)
+////            ->where('rs.shipper_account_no', $request->retail_shipper_id)
+////            ->count();
+////
+//            $closed_count = CrmRequest::leftJoin('retail_shipments as rs', 'rs.shipment_id', '=', 'crm_requests.shipment_id')
+//            ->leftJoin('retail_shipper_infos as rsi', 'rsi.id', '=', 'rs.shipper_account_no')
+//            ->whereIn('status_id',[4, 7])
+//            ->where('rs.shipper_account_no', $request->retail_shipper_id)
+//            ->count();
+            $baseQuery = CrmRequest::leftJoin('retail_shipments as rs', 'rs.shipment_id', '=', 'crm_requests.shipment_id')
+                ->leftJoin('retail_shipper_infos as rsi', 'rsi.id', '=', 'rs.shipper_account_no')
+                ->where('rs.shipper_account_no', $request->retail_shipper_id);
 
-            $in_process = CrmRequest::leftJoin('retail_shipments as rs', 'rs.shipment_id', '=', 'crm_requests.shipment_id')
-            ->leftJoin('retail_shipper_infos as rsi', 'rsi.id', '=', 'rs.shipper_account_no')
-            ->where('status_id',2)
-            ->where('rs.shipper_account_no', $request->retail_shipper_id)
-            ->count();
-            
-            $closed = CrmRequest::leftJoin('retail_shipments as rs', 'rs.shipment_id', '=', 'crm_requests.shipment_id')
-            ->leftJoin('retail_shipper_infos as rsi', 'rsi.id', '=', 'rs.shipper_account_no')
-            ->where('status_id',4)
-            ->where('rs.shipper_account_no', $request->retail_shipper_id)
-            ->count();
-
-        } else {
-            $launched = CrmRequest::where('status_id',1)
-            ->where('shipper_id', $request->shipper_id)
-            ->count();
-
-            $in_process = CrmRequest::where('status_id',2)
-                ->where('shipper_id', $request->shipper_id)
+            // Launched count
+            $launched_count = (clone $baseQuery)
+                ->whereIn('status_id', [1, 2, 3, 5, 6])
                 ->count();
 
-            $closed = CrmRequest::where('status_id',4)
-                ->where('shipper_id', $request->shipper_id)
+            // Closed count
+            $closed_count = (clone $baseQuery)
+                ->whereIn('status_id', [4, 7])
+                ->count();
+
+        } else {
+//            $launched_count = CrmRequest::whereIn('status_id',[1, 2, 3, 5, 6])
+//            ->where('shipper_id', $request->shipper_id)
+//            ->count();
+//
+////            $in_process = CrmRequest::where('status_id',2)
+////                ->where('shipper_id', $request->shipper_id)
+////                ->count();
+////
+//            $closed_count = CrmRequest::whereIn('status_id',[4, 7])
+//                ->where('shipper_id', $request->shipper_id)
+//                ->count();
+            $baseQuery = CrmRequest::where('shipper_id', $request->shipper_id);
+
+            // Launched count
+            $launched_count = (clone $baseQuery)
+                ->whereIn('status_id', [1, 2, 3, 5, 6])
+                ->count();
+
+            // Closed count
+            $closed_count = (clone $baseQuery)
+                ->whereIn('status_id', [4, 7])
                 ->count();
         }
 
-        $request_count = [
-            'launched' => $launched,
-            'in_process' => $in_process,
-            'closed' => $closed
-        ];
+//        $request_count = [
+//            'launched' => $launched,
+//            'in_process' => $in_process,
+//            'closed' => $closed
+//        ];
         
         $selects = [
             'crm_requests.id as id',
@@ -335,12 +377,19 @@ class ShipperCrmApiController extends Controller
 
         // Final query
         $crm_requests = $crm_requests->select($selects)
-            ->orderBy('crm_requests.id', 'desc')
-            ->cursorPaginate(20);
+            ->whereIn('crm_requests.status_id',$request_status)
+            ->whereBetween('crm_requests.created_at', [Carbon::now()->subMonths(12)->startOfMonth(), Carbon::now()->endOfDay()]);
 
+            if($tracking_number) {
+                $crm_requests = $crm_requests->where('s.tracking_number', $tracking_number)->get();
+            } else {
+
+                $crm_requests = $crm_requests->orderBy('crm_requests.id', 'desc')
+                    ->cursorPaginate(20);
+            }
 
         if($crm_requests->isNotEmpty()) {
-            return response()->json(['status' => 0 , 'message' => 'Success' ,'crm_requests'=>$crm_requests, 'request_count' => $request_count]);
+            return response()->json(['status' => 0 , 'message' => 'Success' ,'crm_requests'=>$crm_requests, 'launched_count' => $launched_count,'closed_count' => $closed_count]);
         }
         return response()->json(['status' => 1 , 'message' => 'CRM Complaints not found!']);
 

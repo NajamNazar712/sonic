@@ -231,21 +231,27 @@ class LeadManagementController extends Controller
             ->filterColumn('status', function ($query, $keyword) {
                 $query->where(function ($q) use ($keyword) {
                     $keywordInt = (int) $keyword;
-
                     if (!in_array($keywordInt, [11, 12])) {
-                       $q->where(function ($inner) use ($keywordInt) {
-                            $inner->where('leads.status_id', $keywordInt)
-                                ->whereExists(function ($subQuery) {
-                                    $subQuery->select(DB::raw(1))
+                        $q->where(function ($inner) use ($keywordInt) {
+                            $inner->where(function ($query) use ($keywordInt) {
+                                $query->where('leads.status_id', $keywordInt)
+                                    ->whereNotExists(function ($subQuery) {
+                                        $subQuery->select(DB::raw(1))
+                                            ->from('users')
+                                            ->whereColumn('users.email', 'leads.email_address');
+                                    });
+                            })->orWhere(function ($query) use ($keywordInt) {
+                                $query->where('leads.status_id', $keywordInt)
+                                    ->whereExists(function ($subQuery) {
+                                        $subQuery->select(DB::raw(1))
                                             ->from('users')
                                             ->whereColumn('users.email', 'leads.email_address')
                                             ->where('users.blacklist', '!=', 1)
                                             ->where('users.status', '!=', 3);
-                                });
+                                    });
+                            });
                         });
-                    } 
-                    
-                    
+                    }
                     if ($keywordInt === 11) {
                       $q->where(function ($check) {
                             $check->where('leads.status_id', 11)

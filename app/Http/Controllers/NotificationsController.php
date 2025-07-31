@@ -11507,6 +11507,24 @@ class NotificationsController extends Controller
                     }
                     self::sms($body, $to, null,$shipment->id,$id);
                 }
+                else if($id == 246) {
+                    $shipment = Shipment::find($reference_1_id);
+                    $to = $shipment->consignee_phone_number_1;
+
+                    // if (strpos($body, '[tracking_number]') !== FALSE) {
+                    //     $body = str_replace('[tracking_number]', $shipment->tracking_number, $body);
+                    // }
+                    self::sms($body, $to, null,$shipment->id,$id);
+                }
+                else if($id == 247) {
+                    $shipment = Shipment::find($reference_1_id);
+                    $to = $shipment->consignee_phone_number_1;
+
+                    // if (strpos($body, '[tracking_number]') !== FALSE) {
+                    //     $body = str_replace('[tracking_number]', $shipment->tracking_number, $body);
+                    // }
+                    self::sms($body, $to, null,$shipment->id,$id);
+                }
 
                 else if ($id == 243) {
                     $retail = RetailShipperInfo::find($reference_1_id);
@@ -11522,6 +11540,26 @@ class NotificationsController extends Controller
                         }
                         $to = $retail->shipper_phone_no;
                         self::sms_otp($body, $to, $retail->shipper_name, $retail->retail_otp, 1, NULL, $id);
+//                        self::sms($body, $to, 1, null,$id);
+                    }
+                }
+
+                else if ($id == 248) {
+                    $shipper = User::join('users_otp','users_otp.user_id','users.id')->where('users.id',$reference_1_id)
+                        ->select('users.id','users.name','users.phone','users_otp.otp_code','users_otp.otp_expire_at')
+                        ->first();
+                    if ($shipper) {
+                        if (strpos($body, '[user_name]') !== FALSE) {
+                            $body = str_replace('[user_name]', $shipper->name, $body);
+                        }
+                        if (strpos($body, '[otp]') !== FALSE) {
+                            $body = str_replace('[otp]', $shipper->otp_code, $body);
+                        }
+                        if (strpos($body, '[expire_at]') !== FALSE) {
+                            $body = str_replace('[expire_at]', $reference_2_id, $body);
+                        }
+                        $to = $shipper->phone;
+                        self::sms_otp($body, $to, $shipper->name, $shipper->otp_code, 1, NULL, $id);
 //                        self::sms($body, $to, 1, null,$id);
                     }
                 }

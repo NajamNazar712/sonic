@@ -550,6 +550,7 @@ class Kernel extends ConsoleKernel
         //        }
 //        $schedule->command('crm:autoassign')->dailyAt('17:00')->runInBackground();
         $schedule->command('crm:autoassign_new')->dailyAt('17:00')->runInBackground();
+        $schedule->command('crm:autoassign_new')->dailyAt('08:00')->runInBackground();
 
         $schedule->command('sum:pendingpayments')->dailyAt('6:00')->runInBackground();
 
@@ -678,7 +679,7 @@ class Kernel extends ConsoleKernel
             $schedule->command('wallet_charges_update')->dailyAt($time)->runInBackground();
         }
         // $schedule->command('export:shipment-report')
-        //     ->dailyAt('14:23')              
+        //     ->dailyAt('14:46')              
         //     ->withoutOverlapping()         // prevent simultaneous runs
         //     ->onOneServer()                // ensures single server execution
         //     ->runInBackground()            // runs non-blocking

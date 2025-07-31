@@ -25,6 +25,7 @@
                                         <th class="border-primary border-darken-1">Field Changed</th>
                                         <th class="border-primary border-darken-1">Old Value</th>
                                         <th class="border-primary border-darken-1">New Value</th>
+                                        <th class="border-primary border-darken-1">Removed Shippers</th>
                                         <th class="border-primary border-darken-1">Changed By</th>
                                         <th class="border-primary border-darken-1">Changed At</th>
                                     </tr>
@@ -84,6 +85,7 @@
                             head.push('Field Changed');
                             head.push('Old Value');
                             head.push('New Value');
+                            head.push('Removed Shippers');
                             head.push('Changed By');
                             head.push('Changed At');
 
@@ -94,6 +96,7 @@
                                 row.push(values.field_changed);
                                 row.push(values.old_value);
                                 row.push(values.new_value);
+                                row.push(values.shippers);
                                 row.push(values.updated_by_name);
                                 row.push(values.created_at);
                                 body.push(row);
@@ -139,6 +142,7 @@
                     {data: 'field_changed', name: 'pl.field_changed', class: 'align-middle field_changed'},
                     {data: 'old_value', name: 'pl.old_value', class: 'align-middle old_value'},
                     {data: 'new_value', name: 'pl.new_value', class: 'align-middle new_value'},
+                    {data: 'shippers', name: 'pl.text', class: 'align-middle shippers'},
                     {data: 'updated_by_name', name: 'u.name as updated_by_name', class: 'align-middle updated_by_name'},
                     {data: 'created_at', name: 'pl.created_at', class: 'align-middle created_at'},
                 ],

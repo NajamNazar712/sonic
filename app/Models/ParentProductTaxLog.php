@@ -15,6 +15,7 @@ class ParentProductTaxLog extends Model
         'field_changed',
         'old_value',
         'new_value',
+        'text',
         'updated_by',
     ];
 }
