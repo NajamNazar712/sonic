@@ -5,7 +5,13 @@
     <h1 class="mb-1">
         Geocodes Settings
     </h1>
-
+    <!-- Geo Code Loader -->
+    <div id="geo-code-loader" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:9999; background:rgba(255,255,255,0.7); text-align:center;">
+        <div style="position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%);">
+            <span class="spinner-border text-primary" role="status"></span>
+            <div style="margin-top:10px;">Generating Geo Code...</div>
+        </div>
+    </div>
     <div class="card">
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
@@ -13,8 +19,14 @@
 {{--                <form id="geo_codes_search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">--}}
                     <div class="row w-100">
                         <div class="col-md-3 mt-2">
-                            <input type="text" name="tracking_numbers" class="form-control w-100 tracking_numbers"
+
+                        <div class="form-group">
+                            <input type="text" id="tracking_number" name="tracking_numbers" class="dt_search tracking_numbers form-inline mb-1 justify-content-center"
                                    placeholder="Tracking Number(s)" data-tags-input-name="tracking_number">
+                        </div>
+{{--                            <input type="text" name="tracking_numbers" class=" dt_search form-control w-100 tracking_numbers"--}}
+{{--                                   placeholder="Tracking Number(s)" data-tags-input-name="tracking_number">--}}
+{{--                            <input type="text" name="tracking_numbers" class="form-control tracking_numbers" placeholder="Tracking Number(s)" data-tags-input-name="tracking_number" tabindex="-1" >--}}
                         </div>
 
                         <div class="col-md-3 mt-2">
@@ -64,8 +76,6 @@
 
                         <div class="col-md-3 mt-2">
                             <select name="sub_segment_id" id="sub_segment_id" class="form-control select2 w-100">
-                                <option value="">Select Sub Segment</option>
-                                {{-- @foreach logic --}}
                             </select>
                         </div>
 
@@ -159,9 +169,14 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
+
     <style type="text/css">
         .geo-selected-row {
             background-color: #d1f0d1 !important; /* light green for example */
+        }
+        .selectize-control {
+            width:  100%  !important;
         }
     </style>
 
@@ -171,6 +186,8 @@
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
+
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -217,7 +234,7 @@
                 }).done(function (data) {
                     if(data.status == 1){
                         $('#sub_segment_id').removeAttr('disabled');
-                        let options = "";
+                        let options = `<option value="">Select Sub Segment</option>`;
                         $.each(data.sub_segment, function(index, field) {
                             options+=`<option value='${field.id}' >${field.name}</option>`;
                         });
@@ -235,10 +252,12 @@
             //     allowClear: true
             // });
 
-            $('#sub_segment_id').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder: 'Select Sub Segment',
-                width: '100%',
-                allowClear: true
+
+
+            $('#sub_segment_id').select2({
+                width:'100%',
+                placeholder:"Select Sub Segment",
+                allowClear: true,
             });
 
             $('#search_filter_btn').on('click',function () {
@@ -384,35 +403,6 @@
                             });
                         }
                     },
-
-                    // {
-                    //     extend: 'selectNone',
-                    //     text: 'Select None',
-                    //     className: 'select_none',
-                    //     action : function(e) {
-                    //         e.preventDefault();
-                    //
-                    //         table.rows().nodes().each(function(index) {
-                    //             var row = table.row(index);
-                    //
-                    //             if ($(row.node().firstChild).hasClass('select-checkbox')) {
-                    //                 row.deselect();
-                    //
-                    //                 id = parseInt(row.id());
-                    //
-                    //                 var index = $.inArray(id, selected_rows);
-                    //
-                    //                 if (index !== -1) {
-                    //                     selected_rows.splice(index, 1);
-                    //                 }
-                    //
-                    //                 if (selected_rows.length == 0) {
-                    //                     table.button('.generate_geo_codes').disable();
-                    //                 }
-                    //             }
-                    //         });
-                    //     }
-                    // },
                     {
                         extend: 'selectNone',
                         text: 'Select None',
@@ -453,6 +443,7 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
+                deferLoading: 0,
                 scrollY:'300px',
                 select: {
                     info: false,
@@ -463,7 +454,18 @@
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingStatus: 'full_numbers',
-                ajax: '{{ route('admin.settings.geo_codes.list') }}',
+                ajax: {
+                    url: '{{ route('admin.settings.geo_codes.list')}}',
+                    data: function (d) {
+                        d.tracking_number =  $("#tracking_number").val();
+                        d.origin_id =        $("#origin_id").val();
+                        d.destination_id =   $("#destination_id").val();
+                        d.account_type_id =  $("#account_type_id").val();
+                        d.region_id =        $('#region_id').val();
+                        d.segment_id =       $('#segment_id').val();
+                        d.sub_segment_id =   $('#sub_segment_id').val();
+                    }
+                },
                 rowId: 'id',
                 order: [1, 'desc'],
                 columns: [
@@ -574,6 +576,8 @@
             });
 
             function get_shipments_lat_long(shipment_ids) {
+                $('#geo-code-loader').show();
+                table.button('.generate_geo_codes').disable();
                 $.ajax({
                     url: '{!! route('admin.settings.geo_codes.get_shipment_lat_long') !!}',
                     method: 'POST',
@@ -589,10 +593,46 @@
                     } else{
                         toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
+                }).fail(function () {
+                    toastr.error('Something went wrong while contacting the server.', 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                }).always(function () {
+                    // Hide loader in both success and fail cases
+                    $('#geo-code-loader').hide();
                 });
 
             }
 
+            var select = $('.tracking_numbers').selectize({
+                placeholder: 'Tracking Number(s)',
+                delimiter: ',',
+                createOnBlur: true,
+                persist: false,
+                plugins: ['remove_button'],
+                onDropdownOpen: function(dropdown) {
+                    dropdown.remove();
+                },
+                onType: function(str) {
+                    var regex = /^[0-9,]+$/;
+
+                    if (!regex.test(str)) {
+                        select[0].selectize.setTextboxValue('');
+                    }
+                },
+                create: function(input) {
+                    if (input.length >= 6 && Math.floor(input) == input && $.isNumeric(input)) {
+                        return {
+                            value: input,
+                            text: input
+                        }
+                    }
+                    else {
+                        return false;
+                    }
+                },
+            });
         });
 
 

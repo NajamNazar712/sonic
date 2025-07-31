@@ -49,20 +49,16 @@ class GeoCodesController extends Controller
         ->where('shipments.created_at','>=' ,Carbon::now()->subMonths(12)->startOfMonth());
 
         if($request->get('tracking_number')) {
+
             $shipments = $shipments->where('shipments.tracking_number', '=', $request->get('tracking_number'));
         }
 
         if($request->get('origin_id')) {
             $shipments = $shipments->leftjoin('user_shipping_infos as usi','usi.id','shipments.pickup_address_id')
-            ->where('usi.id', '=', $request->get('origin_id'));
+            ->where('usi.city_id', '=', $request->get('origin_id'));
         }
         if($request->get('destination_id')) {
             $shipments = $shipments->where('consignee_city_id',$request->get('destination_id'));
-        }
-
-        if($request->get('account_type_id')) {
-            $shipments = $shipments->leftjoin('users as u','u.id','shipments.user_id')
-                ->where('u.account_type_id', '=', $request->get('account_type_id'));
         }
 
         if($request->get('region_id')) {
@@ -71,15 +67,27 @@ class GeoCodesController extends Controller
                 ->where('zr.region_id', '=', $request->get('region_id'));
         }
 
-        if($request->get('segment_id')) {
-            $shipments = $shipments->leftjoin('users as u','u.id','shipments.user_id')
-                ->where('u.segment_id', '=', $request->get('segment_id'));
+        if($request->get('account_type_id')) {
+            $shipments = $shipments->leftjoin('users','users.id','shipments.user_id')
+                ->where('users.account_type_id', '=', $request->get('account_type_id'));
         }
 
-        if($request->get('sub_segment_id')) {
-            $shipments = $shipments->leftjoin('users as u','u.id','shipments.user_id')
-                ->where('u.sub_segment_id', '=', $request->get('sub_segment_id'));
+        if ($request->get('segment_id') || $request->get('sub_segment_id') || $request->get('account_type_id')) {
+            $shipments = $shipments->leftJoin('users as u', 'u.id', '=', 'shipments.user_id');
+
+            if ($request->get('segment_id')) {
+                $shipments = $shipments->where('u.segment_id', '=', $request->get('segment_id'));
+            }
+
+            if ($request->get('sub_segment_id')) {
+                $shipments = $shipments->where('u.sub_segment_id', '=', $request->get('sub_segment_id'));
+            }
+
+            if ($request->get('account_type_id')) {
+                $shipments = $shipments->where('u.account_type_id', '=', $request->get('account_type_id'));
+            }
         }
+
 
         $datatable = Datatables::of($shipments)
             ->addColumn('action', function ($data) {
