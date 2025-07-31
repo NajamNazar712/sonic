@@ -7596,7 +7596,7 @@ class AdminCRMController extends Controller
             ->first();
 
         // 1 = Processed, 3 = Paid
-        if (!empty($shipmentPayment->status_id) && $shipmentPayment->status_id == 1) {
+        if ($shipmentPayment?->status_id == 1){
             return [
                 'status' => 0,
                 'error' => "Payment is being processed for shipment ID {$id} and will be paid soon."
@@ -7615,7 +7615,7 @@ class AdminCRMController extends Controller
         ->latest()
         ->first();
 
-        if (!empty($shipmentPayment->status_id) && $shipmentPayment->status_id == 3) {
+        if ($shipmentPayment?->status_id == 3){
 
             $comment = "Dear Customer Name
 
