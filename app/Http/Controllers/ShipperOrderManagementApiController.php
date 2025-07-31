@@ -199,7 +199,6 @@ class ShipperOrderManagementApiController extends Controller
 
         $app_type = $request->app_type;
         $user_id = $app_type == 2 ? $request->retail_shipper_id : $request->shipper_id;
-
         $startDate = Carbon::now()->subMonths(12)->startOfMonth();
 
         $process_and_booking = (int)$request->input('process_and_booking', 1);
@@ -229,7 +228,7 @@ class ShipperOrderManagementApiController extends Controller
             $today_bookings = DB::table('shipments')
                 ->when(true, $conditions)
                 ->where('shipments.shipper_status_id', 1)
-                ->where('shipments.created_at', '>=', $startDate)
+                ->where('shipments.created_at','>=', Carbon::now()->startOfDay())
                 ->count();
         }
 
