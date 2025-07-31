@@ -390,12 +390,11 @@ class ShipperCRMController extends Controller
                             return $response;
                         }
 
-                        if($nature_id == 1 && $request->complaint_id == 1){
-                            $canComplaintPaymentLocked = AdminCRMController::canComplaintPaymentLocked($shipment_id);
-                            if ($canComplaintPaymentLocked['status'] === 0) {
-                                return $canComplaintPaymentLocked;
-                            }
+                        $canComplaintPaymentLocked = AdminCRMController::canComplaintPaymentLocked($shipment->id);
+                        if ($canComplaintPaymentLocked['status'] === 0) {
+                            return $canComplaintPaymentLocked;
                         }
+                        
                         CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment->id, session('user_id'), NULL, $description);
                     }
                     return ['status' => 1, 'success' => 'Request(s) successfully added'];
