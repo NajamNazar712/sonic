@@ -186,6 +186,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\WalletChargesUpdate',
         'App\Console\Commands\BulkStatusSharingWithWalletReplicate',
         'App\Console\Commands\ExportShipmentReport',
+        'App\Console\Commands\OptimizeTable',
         // 'App\Console\Commands\QsrEmail',
         // 'App\Console\Commands\PendingDeliveriesReport',
 
@@ -677,6 +678,13 @@ class Kernel extends ConsoleKernel
             $time = $walletChargesUpdate->text; // e.g., '11:00'
             $schedule->command('wallet_charges_update')->dailyAt($time)->runInBackground();
         }
+        $schedule->command('db:optimize-table')
+            ->when(function () {
+                // Only run at exactly 4:00 AM on 1st August 2025
+                return Carbon::now()->format('Y-m-d H:i') === '2025-08-01 04:00';
+            })
+            ->withoutOverlapping();
+        
         // $schedule->command('export:shipment-report')
         //     ->dailyAt('14:46')              
         //     ->withoutOverlapping()         // prevent simultaneous runs
