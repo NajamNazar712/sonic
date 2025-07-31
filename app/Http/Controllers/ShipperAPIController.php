@@ -1652,7 +1652,9 @@ class ShipperAPIController extends Controller
 
     public function shipping_address(Request $request)
     {
-        if(!$request->has('address') && !$request->has('pickup_address_id'))
+        $user_id = $request->shipper_id;
+        $user_shipping_address = null;
+        if($request->has('address') && $request->has('pickup_address_id'))
         {
             $rules = [
                 'address' => ['required_without:pickup_address_id', 'min:4'],
@@ -1666,8 +1668,8 @@ class ShipperAPIController extends Controller
                 return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
             }
 
-            $user_id = $request->shipper_id;
-            $user_shipping_address = null;
+
+
             if($request->filled('address')) {
                 $searchAddress  = trim($request->address);
                 $user_shipping_address = UserShippingInfo::leftjoin('cities as c', 'c.id', '=', 'user_shipping_infos.city_id')
