@@ -681,7 +681,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('db:optimize-table')
             ->when(function () {
                 // Only run at exactly 4:00 AM on 1st August 2025
-                return Carbon::now()->format('Y-m-d H:i') === '2025-08-01 04:00';
+                return Carbon::now()->format('Y-m-d H:i') === '2025-08-02 06:00';
             })
             ->withoutOverlapping();
         
