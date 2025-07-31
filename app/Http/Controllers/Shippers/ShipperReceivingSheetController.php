@@ -146,7 +146,7 @@ class ShipperReceivingSheetController extends Controller
     }
 
     public function list() {
-        $shipments = Shipment::join('booking_types AS bt', 'shipments.booking_type_id', '=', 'bt.id')
+        $shipments = Shipment::leftjoin('booking_types AS bt', 'shipments.booking_type_id', '=', 'bt.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
