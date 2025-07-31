@@ -177,6 +177,7 @@ class GeoCodesController extends Controller
                         $highestSimilarity = 0;
                         foreach ($data as $unit) {
                             $compound = $unit['compound_address_parents'] ?? '';
+//                            $match_terms = implode(' ',$unit['matched_terms'] ?? []);
                             similar_text(strtolower($address), strtolower($compound), $percent);
                             if ($percent > $highestSimilarity) {
                                 $highestSimilarity = $percent;

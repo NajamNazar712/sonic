@@ -172,9 +172,9 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
 
     <style type="text/css">
-        .geo-selected-row {
-            background-color: #d1f0d1 !important; /* light green for example */
-        }
+        /*.geo-selected-row {*/
+        /*    background-color: #d1f0d1 !important; !* light green for example *!*/
+        /*}*/
         .selectize-control {
             width:  100%  !important;
         }
@@ -317,7 +317,7 @@
                                         lng: rowData.longitude
                                     });
 
-                                    $(rowNode).addClass('selected geo-selected-row');
+                                    $(rowNode).addClass('selected');
                                     $(rowNode).find('td.geo-select-check')
                                         .css({ opacity: 1, pointerEvents: 'auto' })
                                         .trigger('click');
@@ -367,6 +367,7 @@
 
                             // 🔁 Clear Geo Code selection first
                             geo_selected_rows = [];
+                            table.rows().deselect();
                             table.rows().every(function () {
                                 const rowNode = this.node();
                                 $(rowNode).removeClass('selected');
