@@ -1656,9 +1656,13 @@ class ShipperAPIController extends Controller
         $user_shipping_address = null;
         if($request->has('address') || $request->has('pickup_address_id'))
         {
+            $request->merge([
+                'address' => $request->address ?: null,
+                'pickup_address_id' => $request->pickup_address_id ?: null,
+            ]);
             $rules = [
-                'address' => ['required_without:pickup_address_id', 'min:4'],
-                'pickup_address_id' => ['required_without:address', 'integer', 'exists:user_shipping_infos,id'],
+                'address' => ['required_without:pickup_address_id','nullable', 'min:4'],
+                'pickup_address_id' => ['required_without:address', 'nullable', 'exists:user_shipping_infos,id'],
             ];
 
             $validate = Validator::make($request->all(), $rules, $this->messages);
