@@ -494,18 +494,16 @@ class ShipperCRMController extends Controller
                         if ($response['status'] === 0) {
                             return $response;
                         }
-                        
-                        if($nature_id == 1 && $request->complaint_id == 1){
-                            $canComplaintPaymentLocked = AdminCRMController::canComplaintPaymentLocked($shipment_id);
-                            if ($canComplaintPaymentLocked['status'] === 0) {
-                                return $canComplaintPaymentLocked;
-                            }
-                        }
 
                         $already_lodged = false;
 
-                      
                         if($is_shipment){
+                            if($nature_id == 1 && $request->complaint_id == 1){
+                                $canComplaintPaymentLocked = AdminCRMController::canComplaintPaymentLocked($shipment_id);
+                                if ($canComplaintPaymentLocked['status'] === 0) {
+                                    return $canComplaintPaymentLocked;
+                                }
+                            }
                             $already_lodged = true;
 
                             if($is_shipment->case_nature_id != $nature_id){
@@ -703,16 +701,16 @@ class ShipperCRMController extends Controller
                     if ($response['status'] === 0) {
                         return $response;
                     }
-                    if($nature_id == 1 && $request->complaint_id == 1){
-                        $canComplaintPaymentLocked = AdminCRMController::canComplaintPaymentLocked($shipment_id);
-                        if ($canComplaintPaymentLocked['status'] === 0) {
-                            return $canComplaintPaymentLocked;
-                        }
-                    }
 
                     
                     $already_lodged = false;
-                    if($is_shipment){    
+                    if($is_shipment){  
+                        if($nature_id == 1 && $request->complaint_id == 1){
+                            $canComplaintPaymentLocked = AdminCRMController::canComplaintPaymentLocked($shipment_id);
+                            if ($canComplaintPaymentLocked['status'] === 0) {
+                                return $canComplaintPaymentLocked;
+                            }
+                        }  
                         $already_lodged = true;
 
                         if($is_shipment->case_nature_id != $nature_id){
