@@ -1654,7 +1654,7 @@ class ShipperAPIController extends Controller
     {
         $user_id = $request->shipper_id;
         $user_shipping_address = null;
-        if($request->has('address') && $request->has('pickup_address_id'))
+        if($request->has('address') || $request->has('pickup_address_id'))
         {
             $rules = [
                 'address' => ['required_without:pickup_address_id', 'min:4'],
@@ -1684,6 +1684,7 @@ class ShipperAPIController extends Controller
                 if($user_shipping_address->isNotEmpty()) {
                     return response()->json([
                         'status' => 0,
+                        'message' => 'Addresses found!',
                         'shipping_address' => $user_shipping_address
                     ]);
                 } else {
@@ -1707,7 +1708,8 @@ class ShipperAPIController extends Controller
                     'message' => 'Default address updated successfully'
                 ]);
             }
-        } else {
+        }
+        else {
             $user_shipping_address = UserShippingInfo::join('cities as c', 'c.id', '=', 'user_shipping_infos.city_id')
                 ->where('user_shipping_infos.user_id', $user_id)
                 ->where('user_shipping_infos.status', 1)
@@ -1722,6 +1724,7 @@ class ShipperAPIController extends Controller
             if($user_shipping_address->isNotEmpty()) {
                 return response()->json([
                     'status' => 0,
+                    'message' => 'Default addresses found!',
                     'shipping_address' => $user_shipping_address
                 ]);
             } else {
