@@ -45,8 +45,9 @@ class GeoCodesController extends Controller
 //        }
 
         $shipments = Shipment::select('shipments.id','shipments.consignee_city_id','shipments.consignee_name','shipments.consignee_address','shipments.consignee_phone_number_1','shipments.tracking_number','sgc.latitude','sgc.longitude')
-            ->leftjoin('shipments_geo_codes as sgc','sgc.shipment_id','=','shipments.id')
-        ->where('shipments.created_at','>=' ,Carbon::now()->subMonths(12)->startOfMonth());
+            ->leftjoin('shipments_geo_codes as sgc',function ($qu){
+                $qu->on('sgc.shipment_id','=','shipments.id')->where('sgc.geo_code_type','=',1);
+            })->where('shipments.created_at','>=' ,Carbon::now()->subMonths(12)->startOfMonth());
 
         if($request->get('tracking_number')) {
 
@@ -125,9 +126,15 @@ class GeoCodesController extends Controller
         if(!is_array($shipment_ids)) {
             return response()->json(['status' => 0,'error' => 'Shipment ids should be an array']);
         }
+        $geo_shipment_ids = ShipmentGeoCode::where('geo_code_type', 1)
+            ->whereNotIn('shipment_id', $shipment_ids)
+            ->pluck('shipment_id')
+            ->toArray();
+        dd($geo_shipment_ids);
+
         $shipments = Shipment::leftJoin('cities as ds', 'ds.id', 'shipments.consignee_city_id')
             ->select('shipments.user_id','shipments.id as shipment_id', 'shipments.consignee_address', 'ds.name as city')
-            ->whereIn('shipments.id', $shipment_ids)
+            ->whereIn('shipments.id', $geo_shipment_ids)
             ->get();
 
         if($shipments->count() > 0) {

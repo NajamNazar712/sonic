@@ -414,8 +414,12 @@
                             table.rows().every(function () {
                                 const rowNode = this.node();
 
-                                if ($(rowNode).find('td.generate_select_checkbox').length > 0) {
+                                const generate = $(rowNode).find('td.generate_select_checkbox');
+                                if (generate.length > 0) {
                                     this.deselect();
+                                    generate.css({
+                                        pointerEvents: 'auto'
+                                    });
                                 }
 
                                 const geoCell = $(rowNode).find('td.geo-select-check');
@@ -452,7 +456,7 @@
                     selector: 'td.select-checkbox',
                     className: 'selected bg-primary bg-lighten-5 primary'
                 },
-                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                lengthMenu: [[50, 100, 500, 1000], [50, 100, 500, 1000]],
                 pageLength: 50,
                 pagingStatus: 'full_numbers',
                 ajax: {
@@ -543,6 +547,26 @@
                 }
             });
 
+
+            $('.datatable tbody').on('click', 'tr td.geo-select-check', function() {
+                var id = parseInt($(this).parent('tr').attr('id'));
+
+                var index = $.inArray(id, geo_seleectd_rows);
+
+                if (index === -1) {
+                    geo_seleectd_rows.push(id);
+                }
+                else {
+                    geo_seleectd_rows.splice(index, 1);
+                }
+
+                if (geo_seleectd_rows.length > 0) {
+                    table.button('.generate_geo_codes').disable();
+                }
+                else {
+                    table.button('.generate_geo_codes').enable();
+                }
+            });
 
             $('.datatable tbody').on('click', 'tr td.generate_select_checkbox', function() {
                 var id = parseInt($(this).parent('tr').attr('id'));
