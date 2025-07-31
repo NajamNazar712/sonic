@@ -675,6 +675,13 @@ class ShipperCRMController extends Controller
 
                     $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
                     
+                    if($nature_id == 1 && $request->complaint_id == 1){
+                        $canComplaintPaymentLocked = AdminCRMController::canComplaintPaymentLocked($shipment_id);
+                        if ($canComplaintPaymentLocked['status'] === 0) {
+                            return $canComplaintPaymentLocked;
+                        }
+                    }
+
                     $already_lodged = false;
                     if($is_shipment){    
                         $already_lodged = true;
