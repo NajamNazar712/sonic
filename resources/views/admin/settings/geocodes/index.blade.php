@@ -278,6 +278,48 @@
 
             });
 
+            jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
+                if (this.context.length) {
+                    var body = [];
+                    var head = [];
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.settings.geo_codes.list') }}',
+                        data: params,
+                        success: function (result) {
+                            head = [
+                                'S.No',
+                                'Tracking Number',
+                                'Consignee Name',
+                                'Consignee Address',
+                                'Consignee Number',
+                                'Latitude',
+                                'Longitude'
+                            ];
+
+                            $.each(result.data, function (index, values) {
+                                row = [];
+                                row.push(index + 1);
+                                row.push(values.tracking_number);
+                                row.push(values.consignee_name);
+                                row.push(values.consignee_address);
+                                row.push(values.consignee_phone_number_1);
+                                row.push(values.latitude);
+                                row.push(values.longitude);
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            });
+
+
+
             let selected_rows = [];
             let geo_seleectd_rows = [];
             var table = $('#datatable').DataTable({
@@ -347,17 +389,21 @@
                         }
                     },
 
-                    {
-                        text: 'Generate Geo Codes',
-                        className: 'btn btn-primary generate_geo_codes',
-                        enabled: false,
-                        action: function (e, dt, node, config) {
-                            if(selected_rows.length > 0) {
-                                get_shipments_lat_long(selected_rows);
-                            }
+                        @if (session('role_id') == 1 || in_array(1041, session('permissions')))
+                             {
+                                text: 'Generate Geo Codes',
+                                className: 'btn btn-primary generate_geo_codes',
+                                enabled: false,
+                                action: function (e, dt, node, config) {
+                                    if(selected_rows.length > 0) {
+                                        get_shipments_lat_long(selected_rows);
+                                    }
 
-                        }
-                    },
+                                }
+                             },
+
+                        @endif
+
                     {
                         extend: 'selectAll',
                         text: 'Select All',
@@ -441,7 +487,12 @@
                         }
                     },
 
-
+                    {
+                        extend: 'excel',
+                        title: 'Shipment Goecodes',
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    },
                     'reset'],
                 processing: true,
                 language: {

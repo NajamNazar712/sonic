@@ -40,9 +40,9 @@ class GeoCodesController extends Controller
 
     public function list(Request $request)
     {
-//        if ($request->get('excel') && $request->get('excel') == true) {
-//            ActivityTrailController::createActivityTrailLog(Auth::id(), 367);
-//        }
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 832);
+        }
 
         $shipments = Shipment::select('shipments.id','shipments.consignee_city_id','shipments.consignee_name','shipments.consignee_address','shipments.consignee_phone_number_1','shipments.tracking_number','sgc.latitude','sgc.longitude')
             ->leftjoin('shipments_geo_codes as sgc',function ($qu){
@@ -126,15 +126,14 @@ class GeoCodesController extends Controller
         if(!is_array($shipment_ids)) {
             return response()->json(['status' => 0,'error' => 'Shipment ids should be an array']);
         }
-        $geo_shipment_ids = ShipmentGeoCode::where('geo_code_type', 1)
-            ->whereNotIn('shipment_id', $shipment_ids)
-            ->pluck('shipment_id')
-            ->toArray();
-        dd($geo_shipment_ids);
+//        $geo_shipment_ids = ShipmentGeoCode::where('geo_code_type', 1)
+//            ->where('shipment_id', $shipment_ids)
+//            ->pluck('shipment_id')
+//            ->toArray();
 
         $shipments = Shipment::leftJoin('cities as ds', 'ds.id', 'shipments.consignee_city_id')
             ->select('shipments.user_id','shipments.id as shipment_id', 'shipments.consignee_address', 'ds.name as city')
-            ->whereIn('shipments.id', $geo_shipment_ids)
+            ->whereIn('shipments.id', $shipment_ids)
             ->get();
 
         if($shipments->count() > 0) {
@@ -172,8 +171,7 @@ class GeoCodesController extends Controller
                         ],
                     ]);
 
-                    $json = (string) $response->getBody();
-                    $data = json_decode($json, true);
+                    $data = json_decode($response->getBody(), true);
                     Log::channel('code_test_log')->info($data);
                     $lat = null;
                     $lng = null;
@@ -186,6 +184,7 @@ class GeoCodesController extends Controller
                             $compound = $unit['compound_address_parents'] ?? '';
 //                            $match_terms = implode(' ',$unit['matched_terms'] ?? []);
                             similar_text(strtolower($address), strtolower($compound), $percent);
+
                             if ($percent > $highestSimilarity) {
                                 $highestSimilarity = $percent;
                                 $bestMatch = $unit;
@@ -194,21 +193,30 @@ class GeoCodesController extends Controller
 
                         // Use best match if found
                         $target = ($highestSimilarity >= 80 && $bestMatch) ? $bestMatch : $data[0];
+                        $encodedTarget = json_encode($target);
+
+                        // Extract lat/lng from raw JSON string to avoid float rounding issues
+                        preg_match('/"lat"\s*:\s*([0-9\.\-eE+-]+)/', $encodedTarget, $latMatch);
+                        preg_match('/"lng"\s*:\s*([0-9\.\-eE+-]+)/', $encodedTarget, $lngMatch);
+
+
+                        $lat = $latMatch[1] ?? ($target['lat'] ?? null);
+                        $lng = $lngMatch[1] ?? ($target['lng'] ?? null);
 
                         // Fetch raw lat/lng using regex from raw JSON to avoid rounding
-                        $targetId = $target['id'] ?? null;
-                        $pattern = '/\{[^}]*"id"\s*:\s*' . preg_quote($targetId, '/') . '[^}]*\}/';
-
-                        if (preg_match($pattern, $json, $matchedObject)) {
-                            preg_match('/"lat"\s*:\s*([0-9\.\-eE+]+)/', $matchedObject[0], $latMatch);
-                            preg_match('/"lng"\s*:\s*([0-9\.\-eE+]+)/', $matchedObject[0], $lngMatch);
-                            $lat = $latMatch[1] ?? null;
-                            $lng = $lngMatch[1] ?? null;
-                        } else {
-                            // fallback
-                            $lat = $target['lat'] ?? null;
-                            $lng = $target['lng'] ?? null;
-                        }
+//                        $targetId = $target['id'] ?? null;
+//                        $pattern = '/\{[^}]*"id"\s*:\s*' . preg_quote($targetId, '/') . '[^}]*\}/';
+//
+//                        if (preg_match($pattern, $json, $matchedObject)) {
+//                            preg_match('/"lat"\s*:\s*([0-9\.\-eE+]+)/', $matchedObject[0], $latMatch);
+//                            preg_match('/"lng"\s*:\s*([0-9\.\-eE+]+)/', $matchedObject[0], $lngMatch);
+//                            $lat = $latMatch[1] ?? null;
+//                            $lng = $lngMatch[1] ?? null;
+//                        } else {
+//                            // fallback
+//                            $lat = $target['lat'] ?? null;
+//                            $lng = $target['lng'] ?? null;
+//                        }
                     }
 
                     if ($lat && $lng) {
