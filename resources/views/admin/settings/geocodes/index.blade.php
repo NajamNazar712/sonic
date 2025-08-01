@@ -5,9 +5,11 @@
     <style>
         /* Dim the row slightly to show it's geocoded */
         td.select-checkbox.geo-checkbox-disabled {
-            cursor: not-allowed;
-            opacity: 0.5;
+            pointer-events: none;         /* 🔒 Prevents clicks */
+            opacity: 0.5;                 /* Optional: faded look */
+            cursor: not-allowed;          /* Show disabled cursor */
         }
+
 
 
     </style>
