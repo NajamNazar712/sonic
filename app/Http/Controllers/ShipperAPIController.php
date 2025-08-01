@@ -111,6 +111,7 @@ class ShipperAPIController extends Controller
         'from_date' => 'From Date',
         'address' => 'Address',
         'pickup_address_id' => 'Pickup Address ID',
+        'return_address_id' => 'Retrun Address ID',
     ];
 
     private $messages = [
@@ -1418,16 +1419,16 @@ class ShipperAPIController extends Controller
         $date = Carbon::today();
         $user = User::find($user_id);
 //        $booking_types = BookingType::where('id', '!=', 4)->get();
-        $user_shipping_address = UserShippingInfo::join('cities as c', 'c.id', '=', 'user_shipping_infos.city_id')
-            ->where('user_shipping_infos.user_id', $user_id)
-             ->where('user_shipping_infos.status', 1)
-            ->where('user_shipping_infos.hidden', 0)
-            ->where(function ($q){
-                $q->where('user_shipping_infos.default_address', 1)
-                    ->orWhere('user_shipping_infos.default_return_address', 1);
-            })
-            ->select('user_shipping_infos.id','user_shipping_infos.pickup_address','user_shipping_infos.default_return_address','user_shipping_infos.city_id','c.name as  city_name','user_shipping_infos.default_address')
-            ->get();
+//        $user_shipping_address = UserShippingInfo::join('cities as c', 'c.id', '=', 'user_shipping_infos.city_id')
+//            ->where('user_shipping_infos.user_id', $user_id)
+//             ->where('user_shipping_infos.status', 1)
+//            ->where('user_shipping_infos.hidden', 0)
+//            ->where(function ($q){
+//                $q->where('user_shipping_infos.default_address', 1)
+//                    ->orWhere('user_shipping_infos.default_return_address', 1);
+//            })
+//            ->select('user_shipping_infos.id','user_shipping_infos.pickup_address','user_shipping_infos.default_return_address','user_shipping_infos.city_id','c.name as  city_name','user_shipping_infos.default_address')
+//            ->get();
 
         $multi_piece = $user->multipiece_status;
 //        $cities = City::where('pickup', 1)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
@@ -1491,7 +1492,7 @@ class ShipperAPIController extends Controller
             }
         }
 //        $ftl_collection_type = [['id' => 1, 'type' => 'Invoice'], ['id' => 2, 'type' => 'Cash']];
-        return response()->json(['status' => 0, 'shipping_address' => $user_shipping_address, 'multi_piece' => $multi_piece, 'user' => [], 'cities' => [], 'distribution_products' => [], 'products' => [], 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'consignee_cities' => [], 'check' => [], 'delivery_type' => $delivery_type, 'charges_modes' => [], 'date' => $date, 'air_waybill' => $air_waybill, 'user_delivery_types' => $user_delivery_types, 'approve_ftl_requests' => $approve_ftl_requests, 'omni_user' => $omni_user, 'booking_types' => [], 'ftl_collection_type' => []]);
+        return response()->json(['status' => 0, 'shipping_address' => [], 'multi_piece' => $multi_piece, 'user' => [], 'cities' => [], 'distribution_products' => [], 'products' => [], 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'consignee_cities' => [], 'check' => [], 'delivery_type' => $delivery_type, 'charges_modes' => [], 'date' => $date, 'air_waybill' => $air_waybill, 'user_delivery_types' => $user_delivery_types, 'approve_ftl_requests' => $approve_ftl_requests, 'omni_user' => $omni_user, 'booking_types' => [], 'ftl_collection_type' => []]);
     }
 
     public function corporate_shipping_modes(Request $request)
@@ -1579,16 +1580,16 @@ class ShipperAPIController extends Controller
         $user_id = $request->shipper_id;
         $user = User::find($user_id);
 //        $booking_types = BookingType::whereNotIn('id', [4, 6])->get();
-        $user_shipping_address = UserShippingInfo::join('cities as c', 'c.id', '=', 'user_shipping_infos.city_id')
-            ->where('user_shipping_infos.user_id', $user_id)
-            ->where('user_shipping_infos.status', 1)
-            ->where('user_shipping_infos.hidden', 0)
-            ->where(function ($q){
-                $q->where('user_shipping_infos.default_address', 1)
-                    ->orWhere('user_shipping_infos.default_return_address', 1);
-            })
-            ->select('user_shipping_infos.id','user_shipping_infos.pickup_address','user_shipping_infos.default_return_address','user_shipping_infos.city_id','c.name as city_name','user_shipping_infos.default_address')
-            ->get();
+//        $user_shipping_address = UserShippingInfo::join('cities as c', 'c.id', '=', 'user_shipping_infos.city_id')
+//            ->where('user_shipping_infos.user_id', $user_id)
+//            ->where('user_shipping_infos.status', 1)
+//            ->where('user_shipping_infos.hidden', 0)
+//            ->where(function ($q){
+//                $q->where('user_shipping_infos.default_address', 1)
+//                    ->orWhere('user_shipping_infos.default_return_address', 1);
+//            })
+//            ->select('user_shipping_infos.id','user_shipping_infos.pickup_address','user_shipping_infos.default_return_address','user_shipping_infos.city_id','c.name as city_name','user_shipping_infos.default_address')
+//            ->get();
         $multi_piece = $user->multipiece_status;
 //        $cities = City::where('pickup', 1)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
 //        if (in_array($user_id, [5982, 3324, 10104, 14110, 16292])) {
@@ -1647,97 +1648,110 @@ class ShipperAPIController extends Controller
             }
         }
 
-        return response()->json(['status' => 0, 'shipping_address' => $user_shipping_address, 'user' => [], 'multi_piece' => $multi_piece, 'cities' => [], 'products' => [], 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'consignee_cities' => [], 'check' => [], 'charges_modes' => [], 'date' => $date, 'air_waybill' => $air_waybill, 'omni_user' => $omni_user, 'booking_types' => []]);
+        return response()->json(['status' => 0, 'shipping_address' => [], 'user' => [], 'multi_piece' => $multi_piece, 'cities' => [], 'products' => [], 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'consignee_cities' => [], 'check' => [], 'charges_modes' => [], 'date' => $date, 'air_waybill' => $air_waybill, 'omni_user' => $omni_user, 'booking_types' => []]);
     }
 
     public function shipping_address(Request $request)
     {
-        $user_id = $request->shipper_id;
-        $user_shipping_address = null;
-        if($request->has('address') || $request->has('pickup_address_id'))
-        {
-            $request->merge([
-                'address' => $request->address ?: null,
-                'pickup_address_id' => $request->pickup_address_id ?: null,
-            ]);
-            $rules = [
-                'address' => ['required_without:pickup_address_id','nullable', 'min:4'],
-                'pickup_address_id' => ['required_without:address', 'nullable', 'exists:user_shipping_infos,id'],
-            ];
+                $user_id = $request->shipper_id;
+                $user_shipping_address = null;
 
-            $validate = Validator::make($request->all(), $rules, $this->messages);
-            $validate->setAttributeNames($this->names);
+                $request->merge([
+                    'address' => $request->address ?: null,
+                    'pickup_address_id' => $request->pickup_address_id ?: null,
+                    'return_address_id' => $request->return_address_id ?: null
+                ]);
+                $rules = [
+                    'address' => ['nullable', 'min:4'],
+                    'pickup_address_id' => ['nullable', 'exists:user_shipping_infos,id'],
+                    'return_address_id' => ['nullable', 'exists:user_shipping_infos,id'],
+                ];
 
-            if ($validate->fails()) {
-                return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-            }
+                $validate = Validator::make($request->all(), $rules, $this->messages);
+                $validate->setAttributeNames($this->names);
+
+                if ($validate->fails()) {
+                    return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+                }
 
 
 
-            if($request->filled('address')) {
-                $searchAddress  = trim($request->address);
-                $user_shipping_address = UserShippingInfo::leftjoin('cities as c', 'c.id', '=', 'user_shipping_infos.city_id')
-                    ->where('user_shipping_infos.user_id', $user_id)
-                    ->where('user_shipping_infos.status', 1)
-                    ->where('user_shipping_infos.hidden', 0)
-                    ->where('user_shipping_infos.pickup_address', 'like', '%' . $request->address . '%')
-                    ->select('user_shipping_infos.id','user_shipping_infos.pickup_address','user_shipping_infos.default_return_address','user_shipping_infos.city_id','c.name as city_name','user_shipping_infos.default_address')
-                    ->limit(5)
-                    ->get();
+                if($request->filled('address')) {
+                    $searchAddress  = trim($request->address);
+                    $user_shipping_address = UserShippingInfo::leftjoin('cities as c', 'c.id', '=', 'user_shipping_infos.city_id')
+                        ->where('user_shipping_infos.user_id', $user_id)
+                        ->where('user_shipping_infos.status', 1)
+                        ->where('user_shipping_infos.hidden', 0)
+                        ->where('user_shipping_infos.pickup_address', 'like', '%' . $request->address . '%')
+                        ->select('user_shipping_infos.id','user_shipping_infos.pickup_address','user_shipping_infos.default_return_address','user_shipping_infos.city_id','c.name as city_name','user_shipping_infos.default_address')
+                        ->limit(5)
+                        ->get();
 
-                if($user_shipping_address->isNotEmpty()) {
+                    if($user_shipping_address->isNotEmpty()) {
+                        return response()->json([
+                            'status' => 0,
+                            'message' => 'Addresses found!',
+                            'shipping_address' => $user_shipping_address
+                        ]);
+                    } else {
+                        return response()->json([
+                            'status' => 1,
+                            'message' => 'Matching addresses not found!',
+                        ]);
+                    }
+
+                }
+                elseif ($request->filled('pickup_address_id') || $request->filled('return_address_id')) {
+
+                    $updates = [
+                        'pickup_address_id' => 'default_address',
+                        'return_address_id' => 'default_return_address',
+                    ];
+
+                    foreach ($updates as $requestKey => $field) {
+                        if ($addressId = $request->input($requestKey)) {
+                            // Reset all previous defaults
+                            UserShippingInfo::where('user_id', $user_id)->update([$field => 0]);
+
+                            // Set the selected address as default
+                            UserShippingInfo::where('id', $addressId)->update([$field => 1]);
+                        }
+                    }
+
                     return response()->json([
                         'status' => 0,
-                        'message' => 'Addresses found!',
-                        'shipping_address' => $user_shipping_address
-                    ]);
-                } else {
-                    return response()->json([
-                        'status' => 1,
-                        'message' => 'Matching addresses not found!',
+                        'message' => 'Default Shipper address updated successfully'
                     ]);
                 }
 
-            }
-            elseif ($request->has('pickup_address_id')) {
+                else {
+                    $user_shipping_address = UserShippingInfo::join('cities as c', 'c.id', '=', 'user_shipping_infos.city_id')
+                        ->where('user_shipping_infos.user_id', $user_id)
+                        ->where('user_shipping_infos.status', 1)
+                        ->where('user_shipping_infos.hidden', 0)
+                        ->where(function ($q) {
+                            $q->where('user_shipping_infos.default_address', 1)
+                                ->orWhere('user_shipping_infos.default_return_address', 1);
+                        })
+                        ->select('user_shipping_infos.id', 'user_shipping_infos.pickup_address', 'user_shipping_infos.default_return_address', 'user_shipping_infos.city_id', 'c.name as city_name', 'user_shipping_infos.default_address')
+                        ->get();
 
-                // First reset all addresses of this user to default_address = 0
-                UserShippingInfo::where('user_id', $user_id)->update(['default_address' => 0]);
+                    if ($user_shipping_address->isNotEmpty()) {
+                        return response()->json([
+                            'status' => 0,
+                            'message' => 'Default addresses found!',
+                            'shipping_address' => $user_shipping_address
+                        ]);
+                    } else {
+                        return response()->json([
+                            'status' => 1,
+                            'message' => 'Default addresses not found!',
+                        ]);
+                    }
 
-                // Then set only the selected address to default_address = 1
-                UserShippingInfo::where('id', $request->pickup_address_id)->update(['default_address' => 1]);
+                }
 
-                return response()->json([
-                    'status' => 0,
-                    'message' => 'Default address updated successfully'
-                ]);
-            }
-        }
-        else {
-            $user_shipping_address = UserShippingInfo::join('cities as c', 'c.id', '=', 'user_shipping_infos.city_id')
-                ->where('user_shipping_infos.user_id', $user_id)
-                ->where('user_shipping_infos.status', 1)
-                ->where('user_shipping_infos.hidden', 0)
-                ->where(function ($q){
-                    $q->where('user_shipping_infos.default_address', 1)
-                        ->orWhere('user_shipping_infos.default_return_address', 1);
-                })
-                ->select('user_shipping_infos.id','user_shipping_infos.pickup_address','user_shipping_infos.default_return_address','user_shipping_infos.city_id','c.name as city_name','user_shipping_infos.default_address')
-                ->get();
 
-            if($user_shipping_address->isNotEmpty()) {
-                return response()->json([
-                    'status' => 0,
-                    'message' => 'Default addresses found!',
-                    'shipping_address' => $user_shipping_address
-                ]);
-            } else {
-                return response()->json([
-                    'status' => 1,
-                    'message' => 'Default addresses not found!',
-                ]);
-            }
-        }
 
     }
     public function reimbursement_shipping_modes(Request $request)
