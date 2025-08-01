@@ -2,6 +2,15 @@
 @section('title','Geocodes Settings')
 
 @section('content')
+    <style>
+        /* Dim the row slightly to show it's geocoded */
+        td.select-checkbox.geo-checkbox-disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+
+    </style>
     <h1 class="mb-1">
         Geocodes Settings
     </h1>
@@ -486,7 +495,17 @@
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
 
                 },
-                // createdRow:function (row, data, dataIndex) {
+                createdRow:function (row, data, dataIndex) {
+
+
+                    var lat = $(row).find('td.latitude').text().trim();
+                    var lng = $(row).find('td.longitude').text().trim();
+
+                    // Add a marker class if lat/lng exists
+                    if (lat && lng) {
+                        // Add a marker class only to the checkbox cell
+                        $(row).find('td.select-checkbox').addClass('geo-checkbox-disabled');
+                    }
                 //     // const $cell = $('td', row).eq(0); // first cell
                 //     //
                 //     // if (!data.latitude || !data.longitude) {
@@ -505,7 +524,7 @@
                 //     // // } else {
                 //     // //     $cell.addClass('select-checkbox'); // allow selection
                 //     // // }
-                // },
+                },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
