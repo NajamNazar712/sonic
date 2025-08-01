@@ -146,7 +146,30 @@ class ShipperReceivingSheetController extends Controller
     }
 
     public function list() {
-        $shipments = Shipment::join('booking_types AS bt', 'shipments.booking_type_id', '=', 'bt.id')
+        $count = Shipment::leftjoin('receiving_sheet_shipments as rss', 'shipments.id', '=', 'rss.shipment_id')
+            ->leftjoin('receiving_sheets AS rs', 'rss.receiving_sheet_id', '=', 'rs.id')
+            ->whereIn('shipments.shipper_status_id', [1,64])
+            ->where('shipments.packaging_material_request', 0)
+            ->where(function ($query) {
+                $query->whereNull('rs.status')->orWhere('rs.status', 0);
+            })
+            ->where(function ($query) {
+                $query->where('shipments.user_id', session('user_id'))
+                ->orwhereIn('shipments.user_id', session('sister_users'));
+            });
+
+            if(session('user_type') == 2){
+                if(session('restriction') == 1){
+                    $count = $count->join('substitute_user_shipments as sus', function($join){
+                        $join->on('sus.shipment_id', '=', 'shipments.id')
+                            ->where('sus.substitute_user_id', '=', Auth::id());
+                    });
+                }
+            }
+        
+        $count = $count->count();
+
+        $shipments = Shipment::leftjoin('booking_types AS bt', 'shipments.booking_type_id', '=', 'bt.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
@@ -175,6 +198,7 @@ class ShipperReceivingSheetController extends Controller
             }
 
         return Datatables::of($shipments)
+            ->setTotalRecords($count)
             ->editColumn('receiving_sheet', function($shipment) {
                 if ($shipment->receiving_sheet) {
                     return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle id">' . str_pad($shipment->receiving_sheet, 6, "0", STR_PAD_LEFT) . '</span></button>';
