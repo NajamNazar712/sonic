@@ -126,23 +126,46 @@ class GeoCodesController extends Controller
         if(!is_array($shipment_ids)) {
             return response()->json(['status' => 0,'error' => 'Shipment ids should be an array']);
         }
-//        $geo_shipment_ids = ShipmentGeoCode::where('geo_code_type', 1)
-//            ->where('shipment_id', $shipment_ids)
-//            ->pluck('shipment_id')
-//            ->toArray();
 
         $shipments = Shipment::leftJoin('cities as ds', 'ds.id', 'shipments.consignee_city_id')
-            ->select('shipments.user_id','shipments.id as shipment_id', 'shipments.consignee_address', 'ds.name as city')
+            ->select(
+                'shipments.id as shipment_id',
+                'shipments.user_id',
+                'shipments.consignee_address',
+                'ds.name as city'
+            )
             ->whereIn('shipments.id', $shipment_ids)
-            ->get();
+            ->get()
+            ->keyBy('shipment_id'); // index by shipment_id
 
+        $consignee_addresses = $shipments->pluck('consignee_address')->unique()->values()->toArray();
+
+        $geoCoded = Shipment::whereIn('shipments.consignee_address', $consignee_addresses)
+            ->join('shipments_geo_codes as sgo', 'sgo.shipment_id', '=', 'shipments.id')
+            ->select('shipments.id as shipment_id', 'sgo.latitude', 'sgo.longitude')
+            ->get()
+            ->keyBy('shipment_id');
+
+        $insert_data = [];
         if($shipments->count() > 0) {
             $unique_address = [];
-            foreach ($shipments as $shipment) {
-                $city = trim($shipment->city);
-                $address = trim($shipment->consignee_address);
+            foreach ($shipments as $shipment_id => $shipment) {
+                $geo = $geoCoded->get($shipment_id); // try to get geo data for this shipment
+               if(!$geo){
+                    $city = trim($shipment->city);
+                    $address = trim($shipment->consignee_address);
 
-                $unique_address[$city][$address]['shipment_ids'][$shipment->shipment_id] =  $shipment->user_id;
+                    $unique_address[$city][$address]['shipment_ids'][$shipment->shipment_id] = $shipment->user_id;
+                }else{
+                   $insert_data[] = [
+                       'user_id' => $shipment->user_id,
+                       'shipment_id' => $shipment_id,
+                       'latitude' => $geo->latitude,
+                       'longitude' => $geo->longitude,
+                       'created_at' => now(),
+                       'updated_at' => now(),
+                   ];
+                }
             }
 
             // Step 2: Prepare HTTP Client
@@ -152,9 +175,6 @@ class GeoCodesController extends Controller
                 'connect_timeout' => 60,
                 'timeout' => 60,
             ]);
-
-            $insert_data = [];
-
             $timestamp = Carbon::now();
             // Step 3: Loop through each city/address
             foreach ($unique_address as $city => $addresses) {
@@ -203,20 +223,6 @@ class GeoCodesController extends Controller
                         $lat = $latMatch[1] ?? ($target['lat'] ?? null);
                         $lng = $lngMatch[1] ?? ($target['lng'] ?? null);
 
-                        // Fetch raw lat/lng using regex from raw JSON to avoid rounding
-//                        $targetId = $target['id'] ?? null;
-//                        $pattern = '/\{[^}]*"id"\s*:\s*' . preg_quote($targetId, '/') . '[^}]*\}/';
-//
-//                        if (preg_match($pattern, $json, $matchedObject)) {
-//                            preg_match('/"lat"\s*:\s*([0-9\.\-eE+]+)/', $matchedObject[0], $latMatch);
-//                            preg_match('/"lng"\s*:\s*([0-9\.\-eE+]+)/', $matchedObject[0], $lngMatch);
-//                            $lat = $latMatch[1] ?? null;
-//                            $lng = $lngMatch[1] ?? null;
-//                        } else {
-//                            // fallback
-//                            $lat = $target['lat'] ?? null;
-//                            $lng = $target['lng'] ?? null;
-//                        }
                     }
 
                     if ($lat && $lng) {
