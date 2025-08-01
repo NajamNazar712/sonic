@@ -142,19 +142,18 @@ class GeoCodesController extends Controller
 
         $geoCoded = Shipment::whereIn('shipments.consignee_address', $consignee_addresses)
             ->join('shipments_geo_codes as sgo', 'sgo.shipment_id', '=', 'shipments.id')
-            ->select('shipments.id as shipment_id', 'sgo.latitude', 'sgo.longitude')
+            ->select('shipments.id as shipment_id', 'sgo.latitude', 'sgo.longitude','shipments.consignee_address')
             ->get()
-            ->keyBy('shipment_id');
+            ->keyBy('consignee_address');
 
         $insert_data = [];
         if($shipments->count() > 0) {
             $unique_address = [];
             foreach ($shipments as $shipment_id => $shipment) {
-                $geo = $geoCoded->get($shipment_id); // try to get geo data for this shipment
+                $city = trim($shipment->city);
+                $address = trim($shipment->consignee_address);
+                $geo = $geoCoded->get($address);
                if(!$geo){
-                    $city = trim($shipment->city);
-                    $address = trim($shipment->consignee_address);
-
                     $unique_address[$city][$address]['shipment_ids'][$shipment->shipment_id] = $shipment->user_id;
                 }else{
                    $insert_data[] = [
@@ -168,78 +167,84 @@ class GeoCodesController extends Controller
                 }
             }
 
-            // Step 2: Prepare HTTP Client
-            $client = new \GuzzleHttp\Client([
-                'base_uri' => 'https://api1.tplmaps.com:8888/',
-                'http_errors' => false,
-                'connect_timeout' => 60,
-                'timeout' => 60,
-            ]);
-            $timestamp = Carbon::now();
-            // Step 3: Loop through each city/address
-            foreach ($unique_address as $city => $addresses) {
-                foreach ($addresses as $address => $info) {
-                    $response = $client->get('search', [
-                        'headers' => [
-                            'Accept' => 'application/json'
-                        ],
-                        'query' => [
-                            'name' => $address,
-                            'city' => $city,
-                            'output' => 'name,parent,parent1,parent2,parent3,country,compound_address_parents,id,lat,lng,subcat_name,cat_name',
-                            'apikey' => '$2a$10$ixuhTqrlyD8pJfDY8FjO9OovMcIrBXIp2sUSHaJqeIjcNrpCyvHJ2'
-                        ],
-                    ]);
+            if(!empty($unique_address)) {
 
-                    $data = json_decode($response->getBody(), true);
-                    Log::channel('code_test_log')->info($data);
-                    $lat = null;
-                    $lng = null;
+                // Step 2: Prepare HTTP Client
+                $client = new \GuzzleHttp\Client([
+                    'base_uri' => 'https://api1.tplmaps.com:8888/',
+                    'http_errors' => false,
+                    'connect_timeout' => 60,
+                    'timeout' => 60,
+                ]);
+                $timestamp = Carbon::now();
+                // Step 3: Loop through each city/address
+                foreach ($unique_address as $city => $addresses) {
+                    foreach ($addresses as $address => $info) {
+                        $response = $client->get('search', [
+                            'headers' => [
+                                'Accept' => 'application/json'
+                            ],
+                            'query' => [
+                                'name' => $address,
+                                'city' => $city,
+                                'output' => 'name,parent,parent1,parent2,parent3,country,compound_address_parents,id,lat,lng,subcat_name,cat_name',
+                                'apikey' => '$2a$10$ixuhTqrlyD8pJfDY8FjO9OovMcIrBXIp2sUSHaJqeIjcNrpCyvHJ2'
+                            ],
+                        ]);
 
-                    if (is_array($data) && !empty($data)) {
-                        // Match based on address similarity
-                        $bestMatch = null;
-                        $highestSimilarity = 0;
-                        foreach ($data as $unit) {
-                            $compound = $unit['compound_address_parents'] ?? '';
+                        $data = json_decode($response->getBody(), true);
+                        Log::channel('code_test_log')->info($data);
+                        Log::info(1);
+                        $lat = null;
+                        $lng = null;
+
+                        if (is_array($data) && !empty($data)) {
+                            // Match based on address similarity
+                            $bestMatch = null;
+                            $highestSimilarity = 0;
+                            foreach ($data as $unit) {
+                                $compound = $unit['compound_address_parents'] ?? '';
 //                            $match_terms = implode(' ',$unit['matched_terms'] ?? []);
-                            similar_text(strtolower($address), strtolower($compound), $percent);
+                                similar_text(strtolower($address), strtolower($compound), $percent);
 
-                            if ($percent > $highestSimilarity) {
-                                $highestSimilarity = $percent;
-                                $bestMatch = $unit;
+                                if ($percent > $highestSimilarity) {
+                                    $highestSimilarity = $percent;
+                                    $bestMatch = $unit;
+                                }
                             }
+
+                            // Use best match if found
+                            $target = ($highestSimilarity >= 80 && $bestMatch) ? $bestMatch : $data[0];
+                            $encodedTarget = json_encode($target);
+
+                            // Extract lat/lng from raw JSON string to avoid float rounding issues
+                            preg_match('/"lat"\s*:\s*([0-9\.\-eE+-]+)/', $encodedTarget, $latMatch);
+                            preg_match('/"lng"\s*:\s*([0-9\.\-eE+-]+)/', $encodedTarget, $lngMatch);
+
+
+                            $lat = $latMatch[1] ?? ($target['lat'] ?? null);
+                            $lng = $lngMatch[1] ?? ($target['lng'] ?? null);
+
                         }
 
-                        // Use best match if found
-                        $target = ($highestSimilarity >= 80 && $bestMatch) ? $bestMatch : $data[0];
-                        $encodedTarget = json_encode($target);
-
-                        // Extract lat/lng from raw JSON string to avoid float rounding issues
-                        preg_match('/"lat"\s*:\s*([0-9\.\-eE+-]+)/', $encodedTarget, $latMatch);
-                        preg_match('/"lng"\s*:\s*([0-9\.\-eE+-]+)/', $encodedTarget, $lngMatch);
-
-
-                        $lat = $latMatch[1] ?? ($target['lat'] ?? null);
-                        $lng = $lngMatch[1] ?? ($target['lng'] ?? null);
-
-                    }
-
-                    if ($lat && $lng) {
-                        foreach ($info['shipment_ids'] as $shipment_id => $user_id) {
-                            $insert_data[] = [
-                               'user_id' => $user_id,
-                                'shipment_id' => $shipment_id,
-                                'latitude' => $lat,
-                                'longitude' => $lng,
-                                'created_at' => $timestamp,
-                                'updated_at' => $timestamp,
-                            ];
+                        if ($lat && $lng) {
+                            foreach ($info['shipment_ids'] as $shipment_id => $user_id) {
+                                $insert_data[] = [
+                                    'user_id' => $user_id,
+                                    'shipment_id' => $shipment_id,
+                                    'latitude' => $lat,
+                                    'longitude' => $lng,
+                                    'created_at' => $timestamp,
+                                    'updated_at' => $timestamp,
+                                ];
+                            }
                         }
                     }
                 }
+                // Step 5: Bulk insert into DB
+
             }
-            // Step 5: Bulk insert into DB
+
             if (!empty($insert_data)) {
                 ShipmentGeoCode::insert($insert_data);
                 return response()->json([
