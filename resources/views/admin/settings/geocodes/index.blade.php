@@ -481,14 +481,14 @@
                 rowId: 'id',
                 order: [1, 'desc'],
                 columns: [
-                    {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
-                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'tracking_number', name: 'tracking_number', class: 'align-middle tracking_number'},
-                    {data: 'consignee_name', name: 'consignee_name', class: 'align-middle consignee_name',searchable:true},
-                    {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address',searchable:true},
-                    {data: 'consignee_phone_number_1', name: 'shipments.consignee_phone_number_1', class: 'align-middle consignee_phone_number_1',searchable:true},
-                    {data: 'latitude', name: 'sgc.latitude', class: 'align-middle latitude',searchable:true},
-                    {data: 'longitude', name: 'sgc.longitude', class: 'align-middle longitude',searchable:true},
+                    {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0,orderable: false, render: function (data, type, row) {return '';}},
+                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0,orderable: false,render: function (data, type, row) {return '';}},
+                    {data: 'tracking_number', name: 'tracking_number', class: 'align-middle tracking_number',orderable: false},
+                    {data: 'consignee_name', name: 'consignee_name', class: 'align-middle consignee_name',searchable:true,orderable: false},
+                    {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address',searchable:true,orderable: false},
+                    {data: 'consignee_phone_number_1', name: 'shipments.consignee_phone_number_1', class: 'align-middle consignee_phone_number_1',searchable:true,orderable: false},
+                    {data: 'latitude', name: 'sgc.latitude', class: 'align-middle latitude',searchable:true,orderable: false},
+                    {data: 'longitude', name: 'sgc.longitude', class: 'align-middle longitude',searchable:true,orderable: false},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
