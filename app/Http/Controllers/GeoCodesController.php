@@ -102,9 +102,7 @@ class GeoCodesController extends Controller
                 if(!$data->latitude && !$data->longitude) {
                     $dropdown .= '<button type="button" class="dropdown-item generate_geo_code_btn" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Generate Geo Codes</div></button>';
                 } else {
-                    $encodedCoord = base64_encode(json_encode([
-                        [$data->id]
-                    ]));
+                    $encodedCoord = base64_encode(json_encode([$data->id]));
                     $dropdown .= '<a href="' . route('admin.settings.geo_codes.view_tpl_map') . '?coords=' . $encodedCoord . '" target="_blank" class="dropdown-item view_geo_code_map">
                         <div class="row no-gutters align-items-center">
                             <div class="col-2"><i class="fa fa-map-marker"></i></div>
