@@ -442,6 +442,7 @@ class GeoCodesController extends Controller
             $json = base64_decode($encodedCoords);
             $decodedCoords = json_decode($json, true);
         }
+        $decodedCoords = ShipmentGeoCode::whereIn('shipment_id',$decodedCoords)->select('latitude as lat','longitude as lng')->get();
 
         return view('admin.settings.geocodes.tpl_map', [
             'coords' => $decodedCoords
