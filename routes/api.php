@@ -701,6 +701,8 @@ use Illuminate\Http\Request;
                 Route::post('submit', 'APIController@shipment_book')->name('submit');
             });
 
+            Route::post('shipping_address','ShipperAPIController@shipping_address')->name('shipping_address');
+
             Route::get('profile', 'ShipperAppController@profile')->name('profile');
 
             //Shipment Call History
