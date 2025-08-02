@@ -19,17 +19,24 @@ class OptimizeTable extends Command
 
     public function handle()
     {
-        $this->info('🔧 Putting app into maintenance mode...');
-        Artisan::call('down', [
-            '--retry' => 60,
-        ]);
+        $start = now();
+        $this->info("Started at: $start");
+
+        // Artisan::call('down');
 
         $this->info('Running OPTIMIZE TABLE...');
-        DB::statement('OPTIMIZE TABLE shipment_scanning_journey');
+        $result = DB::select('OPTIMIZE TABLE orders');
 
-        $this->info('Optimization complete. Bringing app back online...');
-        Artisan::call('up');
+        foreach ($result as $row) {
+            $this->line(json_encode($row));
+        }
 
-        $this->info('Done.');
+        // Artisan::call('up');
+
+        $end = now();
+        $this->info("Completed at: $end");
+        $this->info('Execution time: ' . $start->diffInSeconds($end) . ' seconds');
+
+        \Log::info('OPTIMIZE completed in ' . $start->diffInSeconds($end) . ' seconds');
     }
 }
