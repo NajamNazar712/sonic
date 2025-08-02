@@ -20,23 +20,43 @@ class OptimizeTable extends Command
     public function handle()
     {
         $start = now();
-        $this->info("Started at: $start");
+        $logLines = [];
 
-        // Artisan::call('down');
+        $logLines[] = "🚀 Optimize Command Started at: $start";
 
-        $this->info('Running OPTIMIZE TABLE...');
-        $result = DB::select('OPTIMIZE TABLE orders');
+        try {
+            // Put the app into maintenance mode
+            Artisan::call('down');
+            $logLines[] = "✅ App is now in maintenance mode.";
 
-        foreach ($result as $row) {
-            $this->line(json_encode($row));
+            // Run the OPTIMIZE TABLE command
+            $logLines[] = '📦 Running OPTIMIZE TABLE shipment_scanning_journeys...';
+            $result = DB::select('OPTIMIZE TABLE shipment_scanning_journeys');
+
+            foreach ($result as $row) {
+                $jsonRow = json_encode($row);
+                $this->line($jsonRow); // Output to console
+                $logLines[] = "📝 Result: $jsonRow"; // Append to log
+            }
+
+            // Bring the app back online
+            Artisan::call('up');
+            $logLines[] = "✅ App is back online.";
+
+            $end = now();
+            $duration = $start->diffInSeconds($end);
+
+            $logLines[] = "⏱ Completed at: $end";
+            $logLines[] = "⏱ Execution time: {$duration} seconds";
+        } catch (\Throwable $th) {
+            $logLines[] = "❌ Exception occurred: " . $th->getMessage();
+            // Always try to bring the app back up if something failed
+            Artisan::call('up');
         }
 
-        // Artisan::call('up');
-
-        $end = now();
-        $this->info("Completed at: $end");
-        $this->info('Execution time: ' . $start->diffInSeconds($end) . ' seconds');
-
-        \Log::info('OPTIMIZE completed in ' . $start->diffInSeconds($end) . ' seconds');
+        // Write all lines to the custom cronJobLog channel
+        foreach ($logLines as $line) {
+            Log::channel('cronJobLog')->info($line);
+        }
     }
 }
