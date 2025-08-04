@@ -174,7 +174,7 @@
         const map = TPLMaps.map.initMap({
             lat: coords[0].lat,
             lng: coords[0].lng,
-            zoom: 13,
+            zoom: 5,
             divID: "map",
             gestureHandling: true
         });
