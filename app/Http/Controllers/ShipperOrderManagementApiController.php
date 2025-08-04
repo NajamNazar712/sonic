@@ -19,16 +19,24 @@ class ShipperOrderManagementApiController extends Controller
        $shipper_statuses = [];
        if(in_array($request->status_id,[1,2,3,14,25])) {
 
-           if($request->status_id == 3) {
-               $shipper_statuses=[14, 18, 19, 36, 38, 51, 31, 25, 17];
-           } else if($request->status_id == 1) {
-               $shipper_statuses=[1];
-           } else if($request->status_id == 2) {
-               $shipper_statuses=[2, 4];
+            if($request->status_id == 1) {
+               //booked
+               $shipper_statuses=[1,19];
+           }
+            else if($request->status_id == 3) {
+               //in process
+               $shipper_statuses=[2,3,4,5,6,7,8,9,10,11,12,13,15,44,49,50,52,53,54,55,58,59,61,62,63,64,65,66,67,68,151,152];
            } else if($request->status_id == 14) {
-               $shipper_statuses=[14, 30, 36, 37];
-           } else if($request->status_id == 25) {
-               $shipper_statuses=[25];
+               //delivered
+               $shipper_statuses=[14,26,27,28,29,30,31,32,33,34,35,36,37,38,45,46,56,69,70,71,72,73,74 ];
+           }
+           else if($request->status_id == 17) {
+               //cancelled
+               $shipper_statuses=[17,18,51];
+           }
+           else if($request->status_id == 25) {
+               //return
+               $shipper_statuses=[20,21,22,23,24,25,47,48,57,60,75,76,77];
            }
        }
 
