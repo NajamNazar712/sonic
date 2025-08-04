@@ -50,8 +50,7 @@ class GeoCodesController extends Controller
             })->where('shipments.created_at','>=' ,Carbon::now()->subMonths(12)->startOfMonth());
 
         if($request->get('tracking_number')) {
-
-            $shipments = $shipments->where('shipments.tracking_number', '=', $request->get('tracking_number'));
+            $shipments->whereIn('shipments.tracking_number', explode(',', $request->get('tracking_number')));
         }
 
         if($request->get('origin_id')) {
