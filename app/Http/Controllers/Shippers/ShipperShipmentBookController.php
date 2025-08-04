@@ -1155,6 +1155,18 @@ class ShipperShipmentBookController extends Controller
     public function shipment_check(Request $request)
     {
         $shipment_ids = array();
+
+        if (!$request->has('ids') && $request->filled(['fromDate', 'toDate'])) {
+            $fromDate = $request->fromDate;
+            $toDate = $request->toDate;
+
+            $shipments = Shipment::whereBetween('created_at', [$fromDate, $toDate])
+                ->pluck('id')
+                ->toArray();
+
+            $request->merge(['ids' => $shipments]);
+        }
+
         if ($request->ids) {
             $i = 0;
             $sticker = TRUE;
@@ -2854,7 +2866,6 @@ class ShipperShipmentBookController extends Controller
 
     public function print_air_waybill(Request $request)
     {
-
         $ids = GlobalSettings::where('type','cn_print_rights')->first();
         if($ids->text != null)
         {
@@ -2866,6 +2877,16 @@ class ShipperShipmentBookController extends Controller
             }
         }
 
+         if (!$request->has('ids') && $request->filled(['fromDate', 'toDate'])) {
+            $fromDate = $request->fromDate;
+            $toDate = $request->toDate;
+
+            $shipments = Shipment::whereBetween('created_at', [$fromDate, $toDate])
+                ->pluck('id')
+                ->toArray();
+
+            $request->merge(['ids' => $shipments]);
+        }
 
         $user_type = NULL;
         $user_id = NULL;

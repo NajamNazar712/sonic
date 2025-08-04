@@ -59,6 +59,47 @@
                                             </fieldset>
                                         </div>
 
+                                        <!-- Print Filter -->
+                                       <div class="col-3">
+                                            <div class="form-group input-group">
+                                                <div class="input-group-prepend">
+                                                <span
+                                                    class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left"
+                                                >
+                                                    <span class="la la-calendar-o small-calender-icon"></span>
+                                                </span>
+                                                </div>
+                                                <input
+                                                type="text"
+                                                name="print_from_date"
+                                                class="form-control bg-primary border-primary white rounded-right"
+                                                id="print_from_date"
+                                                placeholder="Print Date From"
+                                                
+                                                />
+                                            </div>
+                                            </div>
+                                            <div class="col-3">
+                                            <div class="form-group input-group">
+                                                <div class="input-group-prepend">
+                                                <span
+                                                    class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left"
+                                                >
+                                                    <span class="la la-calendar-o small-calender-icon"></span>
+                                                </span>
+                                                </div>
+                                                <input
+                                                type="text"
+                                                name="print_to_date"
+                                                class="form-control bg-primary border-primary white rounded-right"
+                                                id="print_to_date"
+                                                placeholder="Print Date To"
+                                                
+                                                />
+                                            </div>
+                                        </div>
+                                        <!-- END -->
+
                                         <div class="form-group col-md-3 mt-2 justify-content-center">
                                             <button type="submit" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                                         </div>
@@ -707,6 +748,47 @@
                 }
             });
 
+
+             var print_from_date = $('#print_from_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+
+                    var old_date_formatted = $('input[name="print_from_date_formatted"]').val();
+                    var contractMoment = moment(old_date_formatted);
+                    var current = moment(contractMoment).add(31, 'days');
+                    var current_max = moment(contractMoment).add(1, 'days');
+                    booking_to_date.pickadate('picker').set('min', new Date(old_date_formatted),{muted:true});
+                    booking_to_date.pickadate('picker').set('max', new Date(current.toDate()),{muted:true});
+                    booking_to_date.pickadate('picker').set('select', new Date(current.toDate()),{muted:true});
+                    shouldEnablePrint();
+                }
+            });
+
+            var print_to_date = $('#print_to_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    shouldEnablePrint();
+
+                    // if (context.select) {
+                    //     $('#track_form #booking_from_date').pickadate('picker').set('max', $('#track_form #booking_to_date').pickadate('picker').get('select'));
+                    // }
+                }
+            });
+
             function print(selected_rows) {
 
                 $.ajax({
@@ -714,6 +796,8 @@
                     method: 'POST',
                     data: {
                         'ids[]': selected_rows,
+                        'fromDate': $('input[name="print_from_date_formatted"]').val(),
+                        'toDate': $('input[name="print_to_date_formatted"]').val(),
                         '_token': '{{ csrf_token() }}'
                     }
                 })
@@ -728,6 +812,8 @@
                                     method: 'POST',
                                     data: {
                                         'ids[]': data.ids,
+                                        'fromDate': $('input[name="print_from_date_formatted"]').val(),
+                                        'toDate': $('input[name="print_to_date_formatted"]').val(),
                                         'sticker': 1,
                                         '_token': '{{ csrf_token() }}'
                                     }
@@ -738,6 +824,9 @@
                                         link.href = window.URL.createObjectURL(blob);
                                         link.download = 'air_waybills.pdf';
                                         link.click();
+                                        $('#print_from_date').val('');
+                                        $('#print_to_date').val('');
+                                        table.button('.print').disable();
                                     });
                             }
                             else {
@@ -746,6 +835,8 @@
                                     method: 'POST',
                                     data: {
                                         'ids[]': data.ids,
+                                        'fromDate': $('#print_from_date').val(),
+                                        'toDate': $('#print_to_date').val(),
                                         'sticker': 0,
                                         '_token': '{{ csrf_token() }}'
                                     }
@@ -766,6 +857,10 @@
                                             tab.document.write(data);
                                             tab.document.close();
                                             tab.focus();
+                                            $('#print_from_date').val('');
+                                            $('#print_to_date').val('');
+                                            table.button('.print').disable();
+
                                         }
                                     });
                             }
@@ -1016,6 +1111,7 @@
                                         selected_rows.push(id);
                                     }
 
+                                    shouldEnablePrint()
                                     table.button('.print').enable();
                                     table.button('.cancel').enable();
                                     table.button('.consolidate').enable();
@@ -1051,6 +1147,7 @@
                                         table.button('.print').disable();
                                         table.button('.cancel').disable();
                                         table.button('.consolidate').disable();
+                                        shouldEnablePrint()
 
                                     }
                                 }
@@ -1470,7 +1567,8 @@
                 else {
                     selected_rows.splice(index, 1);
                 }
-
+                
+                shouldEnablePrint()
                 if (selected_rows.length > 0) {
                     table.button(0).enable();
                     table.button(1).enable();
@@ -1482,6 +1580,7 @@
                     table.button(1).disable();
                     table.button(2).disable();
                 }
+                
             });
 
             //Dispute
@@ -2628,6 +2727,19 @@
                 }
 
             });
+
+            function shouldEnablePrint() {
+                const fromInput = $('#print_from_date');
+                const toInput = $('#print_to_date');
+
+                if (selected_rows.length > 0) {
+                    fromInput.prop('disabled', true);
+                    toInput.prop('disabled', true);
+                } else {
+                    fromInput.prop('disabled', false);
+                    toInput.prop('disabled', false);
+                }
+            }
 
         });
     </script>
