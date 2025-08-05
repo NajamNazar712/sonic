@@ -395,21 +395,31 @@ class RetailAdminAccounts extends Controller
                       </tr>
                 ';
             $fuel_and_gst = $shipment->retail->fuel_surcharge + $shipment->retail->gst;
+            $packaging_and_insurance = $shipment->retail->packaging_charges + $shipment->retail->insurance_charges;
+            $r_t = ($shipment->retail->admin_discount_type == 1) ? ' %' : (($shipment->retail->admin_discount_type == 0) ? ' Flat' : ' -');
             $slip .= '
                               <tr>
-                                <td colspan="2" class="color primary border twice-left"><strong>Product</strong></td>
-                                <td colspan="2" class="color primary"><strong>Pieces</strong></td>
-                                <td colspan="2" class="color primary"><strong>Weight</strong></td>
-                                <td colspan="2" class="color primary"><strong>Service Charges</strong></td>
+                                <td colspan="1" class="color primary border twice-left"><strong>Product</strong></td>
+                                <td colspan="1" class="color primary"><strong>Pieces</strong></td>
+                                <td colspan="1" class="color primary"><strong>Weight</strong></td>
+                                <td colspan="1" class="color primary"><strong>Service Charges</strong></td>
+                                <td colspan="1" class="color primary"><strong>Discount(Trax Center)</strong></td>
+                                <td colspan="1" class="color primary"><strong>Discount(Consumer)</strong></td>
+                                <td colspan="1" class="color primary"><strong>Charges With Discount</strong></td>
                                 <td colspan="2" class="color primary border"><strong>Fuel and GST</strong></td>
+                                <td colspan="1" class="color primary border"><strong>Packaging & Insurance </strong></td>
                                 <td colspan="2" class="color primary border twice-right"><strong>Total Charges</strong></td>
                             </tr>
                               <tr>
-                                <td colspan="2" class="border twice-bottom twice-left">' . $shipment->retail->shipping_modes->name . '</td>
-                                <td colspan="2" class="border twice-bottom">' . $shipment->pieces . '</td>
-                                <td colspan="2" class="border twice-bottom">' . number_format($shipment->estimated_weight) . '</td>
-                                <td colspan="2" class="border twice-bottom">' . number_format(ROUND($shipment->retail->weight_charges, 0, PHP_ROUND_HALF_DOWN)) . '</td>
+                                <td colspan="1" class="border twice-bottom twice-left">' . $shipment->retail->shipping_modes->name . '</td>
+                                <td colspan="1" class="border twice-bottom">' . $shipment->pieces . '</td>
+                                <td colspan="1" class="border twice-bottom">' . number_format($shipment->estimated_weight) . '</td>
+                                <td colspan="1" class="border twice-bottom">' . number_format(ROUND($shipment->retail->weight_charges, 0, PHP_ROUND_HALF_DOWN)) . '</td>
+                                <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->discount,2) . '</td>
+                                <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->admin_discount,2) .$r_t.'</td>
+                                <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->charges_with_discount,2) . '</td>
                                 <td colspan="2" class="border twice-bottom">' . number_format(ROUND($fuel_and_gst, 0, PHP_ROUND_HALF_DOWN)) . '</td>
+                                <td colspan="1" class="border twice-bottom">' . number_format($packaging_and_insurance,2) . '</td>
                                 <td colspan="2" class="border twice-bottom twice-right">' . number_format(ROUND($shipment->retail->total_charges, 0, PHP_ROUND_HALF_DOWN)) . '</td>
                               </tr>';
 
@@ -456,10 +466,36 @@ class RetailAdminAccounts extends Controller
                                 <td colspan="2" class="color primary border twice-left"><strong>Date</strong></td>
                                 <td colspan="4" class="color border twice-bottom twice-right">' . $shipment->created_at . '</td>
                             </tr>
-                            </tbody>
-                            </table>
-                            </div>
                            ';
+              if ($shipment->charges_mode_id != 2) {
+                  $slip .= '
+                      <td colspan="2" class="color primary border twice-top twice-bottom twice-left"><strong>Payment Mode</strong></td>
+                      <td colspan="2" class="border twice-top twice-bottom twice-left"><strong>' . $shipment->retail->payment_mode->name . '</strong></td>
+                ';
+              }
+              if ($shipment->booking_type_id != 5 && $shipment->booking_type_id != 3) {
+                $slip .= '
+                      </tr>
+                      <tr>
+                        <td colspan="2" class="align-middle color primary border twice-top twice-bottom twice-left"><strong>Collection Amount</strong></td>
+                ';
+                $amount = $shipment->amount;
+
+                if ($shipment->booking_type_id == 4 && $shipment->charges_mode_id == 1) {
+                    $slip .= '
+                        <td colspan="2" class="align-middle border twice-top twice-bottom twice-left"><strong>Rs '. $amount .'</strong></td>
+                ';
+                } else {
+                    $slip .= '
+                        <td colspan="2" class="align-middle border twice-top twice-bottom twice-left"><strong>Rs '. $amount .'</strong></td>
+                ';
+                }
+              }
+              $slip .= '</tr>
+                        </tbody>
+                        </table>
+                        </div>
+                        ';
 
             // $slip .= '
             //       <div class="col m-1 row justify-content-center"><div class="col"><hr></div><div class=""><p>Shipper Copy</p></div><div class="col"><hr></div>
