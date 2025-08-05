@@ -1381,7 +1381,7 @@ class RetailShipmentBookController extends Controller
 
                     $table_start .= '
                     <td class="color secondary border twice-bottom"><strong>Phone Number(s)</strong></td>
-                    <td colspan="2" class="border twice-bottom twice-right">' . $shipment->retail->shipper_phone_no . '</td>
+                    <td colspan="3" class="border twice-bottom twice-right">' . $shipment->retail->shipper_phone_no . '</td>
                 ';
 
                     $table_start .= '
