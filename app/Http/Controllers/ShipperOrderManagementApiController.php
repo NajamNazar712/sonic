@@ -17,7 +17,7 @@ class ShipperOrderManagementApiController extends Controller
    {
        $tracking_number = $request->input('tracking_number');
        $shipper_statuses = [];
-       if(in_array($request->status_id,[1,2,3,14,25])) {
+       if(in_array($request->status_id,[1,3,14,25,17])) {
 
             if($request->status_id == 1) {
                //booked
