@@ -151,6 +151,7 @@
 										<th class="border-primary border-darken-1">Reference No.</th>
 										<th class="border-primary border-darken-1">Done Datetime</th>
 										<th class="border-primary border-darken-1">Company Bank</th>
+										<th class="border-primary border-darken-1">Paid/Reverted Datetime</th>
 										<th class="border-primary border-darken-1">Status</th>
 										<th class="border-primary border-darken-1"></th>
 									</tr>
@@ -477,6 +478,7 @@
                             head.push('Reference No.');
                             head.push('Done Datetime');
                             head.push('Company Bank');
+                            head.push('Paid / Reverted Datetime');
                             head.push('Status');
 
                             $.each(result.data, function(index, values) {
@@ -501,6 +503,7 @@
                                 row.push(values.reference_number);
                                 row.push(values.done_at);
                                 row.push(values.company_bank);
+                                row.push(values.paid_reverted_at);
                                 row.push(values.status);
 
 
@@ -778,6 +781,7 @@
 					{data:'reference_number', name: 'retail_done_payments.reference_number', class: 'align-middle text-center reference_number'},
 					{data:'done_at', name: 'retail_done_payments.created_at', class: 'align-middle text-center done_at'},
 					{data:'company_bank', name: 'company_bank', class: 'align-middle text-center company_bank'},
+					{data:'paid_reverted_at', name: 'paid_reverted_at', class: 'align-middle text-center paid_reverted_at'},
 					{data:'status', name: 'status', class: 'align-middle text-center status'},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],

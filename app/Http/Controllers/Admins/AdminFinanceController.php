@@ -17367,6 +17367,15 @@ class AdminFinanceController extends Controller
                     $query->whereRaw('false');
                 }
             })
+            ->addColumn('paid_reverted_at', function ($done_payment) {
+                if ($done_payment->status == 0) {
+                    return '-';
+                } else if ($done_payment->status == 1) {
+                    return $done_payment->status_updated_at;
+                } else if ($done_payment->status == 2) {
+                    return $done_payment->status_updated_at;
+                }
+            })
             ->rawColumns(['payment_id','delivered_shipments','adjusted_shipments', 'action']);
 
 
