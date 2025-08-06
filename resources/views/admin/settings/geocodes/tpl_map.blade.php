@@ -164,7 +164,7 @@
         // ];
 
         const coords = @json($coords);
-
+        console.log(coords);
         if (!coords.length) {
             alert('No coordinates found');
             return;

@@ -11,6 +11,7 @@ use App\Http\Models\Region;
 use App\Http\Models\Segment;
 use App\Http\Models\Shipment;
 use App\Http\Models\SubCategorySegment;
+use App\Http\Traits\GeoCodeApiCountTrait;
 use App\Models\ShipmentGeoCode;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
@@ -22,6 +23,7 @@ use Yajra\DataTables\DataTables;
 
 class GeoCodesController extends Controller
 {
+    use GeoCodeApiCountTrait;
 
     public function __construct()
     {
@@ -191,7 +193,7 @@ class GeoCodesController extends Controller
 
                         $data = json_decode($response->getBody(), true);
                         Log::channel('code_test_log')->info($data);
-                        Log::info(1);
+                        $this->geo_code_api_count(1);
                         $lat = null;
                         $lng = null;
 
@@ -438,11 +440,18 @@ class GeoCodesController extends Controller
         if ($encodedCoords) {
             $json = base64_decode($encodedCoords);
             $decodedCoords = json_decode($json, true);
-        }
-        $decodedCoords = ShipmentGeoCode::whereIn('shipment_id',$decodedCoords)->select('latitude as lat','longitude as lng')->get();
 
-        return view('admin.settings.geocodes.tpl_map', [
-            'coords' => $decodedCoords
-        ]);
+            $shipment_geo_codes = ShipmentGeoCode::whereIn('shipment_id',$decodedCoords)->select('latitude as lat','longitude as lng')->get();
+
+            if($shipment_geo_codes->isNotEmpty()){
+                $this->geo_code_api_count(1);
+                return view('admin.settings.geocodes.tpl_map', [
+                    'coords' => $shipment_geo_codes
+                ]);
+            }
+        }
+
+        return redirect()->back();
+
     }
 }
