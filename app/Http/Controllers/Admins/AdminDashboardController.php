@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Traits\FilterTrait;
 use Exception;
 use Carbon\Carbon;
 use App\FafCharges;
@@ -240,7 +241,7 @@ use App\Models\CityLog;
 use App\Models\ParentProduct;
 
 class AdminDashboardController extends Controller
-{   use RateReusableTrait;
+{   use RateReusableTrait,FilterTrait;
 
     public function __construct()
     {   $this->middleware('auth:admin');
@@ -1360,6 +1361,12 @@ class AdminDashboardController extends Controller
         if($account_tye_id){
             $shippers = $shippers->whereIn('users.account_type_id', $account_tye_id);
         }
+        $shippers = $shippers->where(function($query){
+            $idsToExclude = FilterTrait::class::getFilteredIds(auth()->user()->id);
+            if (!empty($idsToExclude)) {
+                $query->whereNotIn('users.id', $idsToExclude);
+            }
+        });
 
         $shippers = $shippers->select('users.id','name as text')->take(10)->get()->toArray();
 
@@ -1376,6 +1383,13 @@ class AdminDashboardController extends Controller
         } else {
             $shippers = $shippers->whereIn('status', [3, 4]);
         }
+
+        $shippers = $shippers->where(function($query){
+            $idsToExclude = FilterTrait::class::getFilteredIds(auth()->user()->id);
+            if (!empty($idsToExclude)) {
+                $query->whereNotIn('users.id', $idsToExclude);
+            }
+        });
 
         $shippers = $shippers->select('id','name as text')->take(10)->get()->toArray();
 
@@ -9699,8 +9713,12 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 'faf_charges.status as fc_status',
                 'wallet_users.user_id as wallet_shippers'
             ])
-            
-            
+            ->where(function($query){
+                $idsToExclude = FilterTrait::class::getFilteredIds(auth()->user()->id);
+                if (!empty($idsToExclude)) {
+                    $query->whereNotIn('users.id', $idsToExclude);
+                }
+            })
             ->whereIn('users.status', [3, 4, 6])
             ->where('users.blacklist', 0)
             ->groupBy('users.id');
@@ -10379,8 +10397,14 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 $join->on('faf_charges.user_id', '=', 'users.id')->where('faf_charges.status', '=', 1);
             })
             ->leftjoin('territories as t', 't.id', '=', 'users.territory_id')
-            ->select(['users.ntn_no','rrb.name as rates_rejected_by', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.rate_status as rate_status', 'users.rejected_reason as rejected_reason', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'users.cnic', 'users.status', 'users.created_at', 'products.product_name as product_type', 'users.blacklist', 'rab.name as rates_added_by', 'rabb.name as rates_authorized_by', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'p.name as tagged_poc', 'k.name as kam', 'r.name as ref','r.trax_id as rider_id', 'users.corporate_rate_type_id', 'users.email', 't.name as territory', 'users.address as address', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso', 'users.status as status_id', 'users.lead_id','scun.name as search','scun_r.name as search_user_type' , 'users.sms_charges', 'users.on_board_status', 'users.request_custom_quotation', 'faf_charges.status as fc_status'])->whereIn('users.status', [0, 1, 2, 5])->where('users.blacklist', 0)->where('users.email_verified', 1)->groupBy('users.id');
-
+            ->select(['users.ntn_no','rrb.name as rates_rejected_by', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.rate_status as rate_status', 'users.rejected_reason as rejected_reason', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'users.cnic', 'users.status', 'users.created_at', 'products.product_name as product_type', 'users.blacklist', 'rab.name as rates_added_by', 'rabb.name as rates_authorized_by', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'p.name as tagged_poc', 'k.name as kam', 'r.name as ref','r.trax_id as rider_id', 'users.corporate_rate_type_id', 'users.email', 't.name as territory', 'users.address as address', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso', 'users.status as status_id', 'users.lead_id','scun.name as search','scun_r.name as search_user_type' , 'users.sms_charges', 'users.on_board_status', 'users.request_custom_quotation', 'faf_charges.status as fc_status'])->whereIn('users.status', [0, 1, 2, 5])->where('users.blacklist', 0)->where('users.email_verified', 1)
+            ->where(function($query){
+                $idsToExclude = FilterTrait::class::getFilteredIds(auth()->user()->id);
+                if (!empty($idsToExclude)) {
+                    $query->whereNotIn('users.id', $idsToExclude);
+                }
+            })
+            ->groupBy('users.id');
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
         }
