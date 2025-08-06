@@ -15,7 +15,6 @@ use Illuminate\Http\Request;
 
 
     Route::name('api.')->group(function () {
-    Route::post('get_shipment_lat_long','GeoCodesController@get_shipment_lat_long');
     Route::get('fetch_complaints', 'APIController@fetch_complaints')->name('fetch_complaints');
     Route::post('shipment/track/public/crm/request', 'APIController@add_request')->name('crm.track.public');
     Route::post('login', 'APIController@login')->name('login');
