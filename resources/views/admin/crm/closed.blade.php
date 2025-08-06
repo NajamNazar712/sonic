@@ -444,7 +444,10 @@
                         '<option value="0">Admin</option>' +
                         '<option value="1">Shipper</option>' +
                         '<option value="2">Shipper Substitute User</option>' +
-                        '<option value="3">Consignee</option>' +
+                        '<option value="3">Retail</option>' +
+                        '<option value="4">Consignee</option>' +
+                        // '<option value="4">External</option>' +
+                        '<option value="5">Retail App</option>'+
                         '</select>';
 
                     this.api().columns().every(function(column_id) {
