@@ -118,7 +118,7 @@ class GeoCodesController extends Controller
         return $datatable->make(true);
     }
 
-    public function get_shipment_lat_long(Request $request)
+    public function get_shipment_lat_long_old(Request $request)
     {
 
         $shipment_ids = $request->shipment_ids;
@@ -260,6 +260,162 @@ class GeoCodesController extends Controller
         }
 
     }
+
+    public function get_shipment_lat_long(Request $request)
+    {
+        $shipment_ids = $request->shipment_ids;
+        if (!is_array($shipment_ids)) {
+            return response()->json(['status' => 0, 'error' => 'Shipment ids should be an array']);
+        }
+
+        $shipments = Shipment::leftJoin('cities as ds', 'ds.id', 'shipments.consignee_city_id')
+            ->select(
+                'shipments.id as shipment_id',
+                'shipments.user_id',
+                'shipments.consignee_address',
+                'ds.name as city'
+            )
+            ->whereIn('shipments.id', $shipment_ids)
+            ->get()
+            ->keyBy('shipment_id');
+
+        $consignee_addresses = $shipments->pluck('consignee_address')->unique()->values()->toArray();
+
+        $geoCoded = Shipment::whereIn('shipments.consignee_address', $consignee_addresses)
+            ->join('shipments_geo_codes as sgo', 'sgo.shipment_id', '=', 'shipments.id')
+            ->select('shipments.id as shipment_id', 'sgo.latitude', 'sgo.longitude', 'shipments.consignee_address')
+            ->get()
+            ->keyBy('consignee_address');
+
+        $insert_data = [];
+
+        if ($shipments->count() > 0) {
+            $unique_address = [];
+
+            foreach ($shipments as $shipment_id => $shipment) {
+                $city = trim($shipment->city);
+                $address = trim($shipment->consignee_address);
+                $geo = $geoCoded->get($address);
+
+                if (!$geo) {
+                    $unique_address[$city][$address]['shipment_ids'][$shipment->shipment_id] = $shipment->user_id;
+                } else {
+                    $insert_data[] = [
+                        'user_id' => $shipment->user_id,
+                        'shipment_id' => $shipment_id,
+                        'latitude' => $geo->latitude,
+                        'longitude' => $geo->longitude,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                }
+            }
+
+            if (!empty($unique_address)) {
+                $client = new \GuzzleHttp\Client([
+                    'base_uri' => 'https://api1.tplmaps.com:8888/',
+                    'http_errors' => false,
+                    'connect_timeout' => 60,
+                    'timeout' => 60,
+                ]);
+
+                $timestamp = Carbon::now();
+
+                foreach ($unique_address as $city => $addresses) {
+                    foreach ($addresses as $address => $info) {
+                        $response = $client->get('search', [
+                            'headers' => [
+                                'Accept' => 'application/json'
+                            ],
+                            'query' => [
+                                'name' => $address,
+                                'city' => $city,
+                                'output' => 'name,parent,parent1,parent2,parent3,country,compound_address_parents,id,lat,lng,subcat_name,cat_name',
+                                'apikey' => '$2a$10$ixuhTqrlyD8pJfDY8FjO9OovMcIrBXIp2sUSHaJqeIjcNrpCyvHJ2'
+                            ],
+                        ]);
+
+                        $data = json_decode($response->getBody(), true);
+                        Log::channel('code_test_log')->info($data);
+                        $this->geo_code_api_count(1);
+
+                        $lat = null;
+                        $lng = null;
+
+                        if (is_array($data) && !empty($data)) {
+                            // Normalize a string (remove special chars, lowercase, trim)
+                            $normalize = function ($string) {
+                                $string = strtolower($string);
+                                $string = preg_replace('/[^a-z0-9\s]/i', ' ', $string); // remove special characters
+                                $string = preg_replace('/\s+/', ' ', $string); // collapse multiple spaces
+                                return trim($string);
+                            };
+
+                            // Tokenize address
+                            $address_terms = explode(' ', $normalize($address));
+
+                            $bestMatch = null;
+                            $highestScore = 0;
+
+                            foreach ($data as $unit) {
+                                $compound = $normalize($unit['compound_address_parents'] ?? '');
+                                $score = 0;
+
+                                foreach ($address_terms as $term) {
+                                    if (strpos($compound, $term) !== false) {
+                                        $score++;
+                                    }
+                                }
+
+                                if ($score > $highestScore) {
+                                    $highestScore = $score;
+                                    $bestMatch = $unit;
+                                }
+                            }
+
+                            $target = $bestMatch ?? $data[0];
+
+                            // Extract lat/lng via regex to preserve formatting
+                            $encodedTarget = json_encode($target);
+                            preg_match('/"lat"\s*:\s*([0-9\.\-eE+]+)/', $encodedTarget, $latMatch);
+                            preg_match('/"lng"\s*:\s*([0-9\.\-eE+]+)/', $encodedTarget, $lngMatch);
+
+                            $lat = $latMatch[1] ?? ($target['lat'] ?? null);
+                            $lng = $lngMatch[1] ?? ($target['lng'] ?? null);
+                        }
+
+                        if ($lat && $lng) {
+                            foreach ($info['shipment_ids'] as $shipment_id => $user_id) {
+                                $insert_data[] = [
+                                    'user_id' => $user_id,
+                                    'shipment_id' => $shipment_id,
+                                    'latitude' => $lat,
+                                    'longitude' => $lng,
+                                    'created_at' => $timestamp,
+                                    'updated_at' => $timestamp,
+                                ];
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!empty($insert_data)) {
+                ShipmentGeoCode::insert($insert_data);
+                return response()->json([
+                    'status' => 1,
+                    'success' => 'Lat/Lng fetched and saved successfully.',
+                    'inserted_count' => count($insert_data),
+                ]);
+            } else {
+                return response()->json(['status' => 0, 'error' => 'No data found.']);
+            }
+        } else {
+            return response()->json(['status' => 0, 'error' => 'No data found.']);
+        }
+    }
+
+
 
 
 //    public function get_shipment_lat_long(Request $request)
