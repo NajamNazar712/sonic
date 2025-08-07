@@ -49,12 +49,14 @@ use App\Http\Models\ShippingMode;
 use App\Http\Models\ShippingModeSameDayTiming;
 use App\Http\Models\V2Pickup\V2PickupRequest;
 use App\Http\Traits\RvTrait;
+use App\Models\UserOtp;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
-use Validator;
+use Symfony\Component\Finder\Glob;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use App\Http\Models\Admin\Retail\RetailShipperInfo;
 use App\Models\WalletShipperSetting;
@@ -71,7 +73,7 @@ class ShipperAPIController extends Controller
     private $names = [
         'email_address' => 'Email Address',
         'password' => 'Password',
-        'otp' => 'Retail Otp',
+        'otp' => 'Otp',
         'phone_no' => 'Phone Number',
 
         'rider_location_latitude' => 'Rider Location Latitude',
@@ -106,7 +108,10 @@ class ShipperAPIController extends Controller
         'actions.*.pickup_note_id' => 'Pickup Note ID',
         'actions.*.pickup_request_id' => 'Pickup Request ID',
 
-        'from_date' => 'From Date'
+        'from_date' => 'From Date',
+        'address' => 'Address',
+        'pickup_address_id' => 'Pickup Address ID',
+        'return_address_id' => 'Retrun Address ID',
     ];
 
     private $messages = [
@@ -231,130 +236,358 @@ class ShipperAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         }
-        //said by mobile team disable condition becuase not send via 2
-//        $is_retail = $request->header('Via') == 2;
-//        if ($is_retail) {
+
             $retail_shipper = RetailShipperInfo::where('retail_otp', $request->otp)->first();
+            if($retail_shipper) {
+
+                if ($retail_shipper->otp_expire_at < now()) {
+                    return response()->json(['status' => 1, 'message' => 'OTP has expired']);
+                }
+
+                // Reset password & clear API token & otp
+                $retail_shipper->password = Hash::make($request->password);
+                $retail_shipper->api_token = null;
+                $retail_shipper->retail_otp = null;
+                $retail_shipper->otp_expire_at = null;
+                $retail_shipper->save();
+
+                return response()->json(['status' => 0, 'message' => 'Password reset successful']);
+
+            }
+
+            // fallback to main shipper OTP check
+            $shipper_otp = UserOtp::where('otp_code',$request->otp)->first();
+            if($shipper_otp) {
+                if($shipper_otp->otp_expire_at < now()) {
+                    return response()->json(['status' => 1, 'message' => 'OTP has expired']);
+                }
+
+                $shipper = User::where('id',$shipper_otp->user_id)->where('status',3)->first();
+                if($shipper){
+
+                    $shipper->password =  Hash::make($request->password);
+                    $shipper->save();
+                    $shipper_otp->delete();
+
+                    return response()->json(['status' => 0, 'message' => 'Password reset successful']);
+                }
+
+                return response()->json(['status' => 1, 'message' => 'Inactive Shipper']);
+
+            }
+
+            return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
+
+    }
+
+    public function sendOtp(Request $request)
+    {
+        $rules = [
+            'phone_no' => ['sometimes', 'required', 'regex:/^(03\d{2}-\d{7}|92\d{2}-\d{7})$/'],
+            'email' => ['sometimes', 'required', 'email'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+
+        $bypass_otp = 0;
+        $minutes = 10;
+        $otp_expire_at = null;
+
+        if ($request->has('phone_no')) {
+            $retail = RetailShipperInfo::where('shipper_phone_no', $request->phone_no)->where('status', 1)->first();
+            if (!$retail) {
+                return response()->json(['status' => 1, 'message' => 'Retail shipper does not exist.']);
+            }
+
+            // OTP rate limit logic
+//            if ($retail->password_reset_at && $retail->password_reset_at->isToday()) {
+//                if ($retail->password_reset_limit >= 3) {
+//                    return response()->json([
+//                        'status' => 1,
+//                        'message' => 'OTP request limit exceeded for today. Please try again tomorrow.'
+//                    ]);
+//                }
+//                $retail->password_reset_limit += 1;
+//            } else {
+//                $retail->password_reset_limit = 1;
+//                $retail->password_reset_at = Carbon::now();
+//            }
+
+            $otp_setting = GlobalSettings::where('type', 'retail_shipper_mobile_otp')->first();
+            if ($otp_setting && $otp_setting->setting_value == 1) {
+                $otp = mt_rand(100000, 999999);
+                $retail->retail_otp = $otp;
+                $otp_expire_at = Carbon::now()->addMinutes($minutes);
+                $retail->otp_expire_at = $otp_expire_at;
+                $retail->save();
+
+                 NotificationsController::send(243, $retail->id, $minutes);
+
+            } else {
+                $bypass_otp = 1;
+                $retail->save(); // still save updated limit
+            }
+        }
+
+        elseif ($request->has('email')) {
+            $shipper = User::where('email', $request->email)->where('status', 3)->first();
+            if (!$shipper) {
+                return response()->json(['status' => 1, 'message' => 'shipper does not exist.']);
+            }
+
+            $otp_setting = GlobalSettings::where('type', 'shipper_mobile_otp')->first();
+            if ($otp_setting && $otp_setting->setting_value == 1) {
+                $otp = mt_rand(100000, 999999);
+                UserOtp::where('user_id', $shipper->id)->delete();
+
+                $user_otp = new UserOtp();
+                $user_otp->user_id = $shipper->id;
+                $user_otp->otp_code = $otp;
+                $otp_expire_at = Carbon::now()->addMinutes($minutes);
+                $user_otp->otp_expire_at = $otp_expire_at;
+                $user_otp->save();
+
+                 NotificationsController::send(248, $shipper->id, $minutes);
+
+            } else {
+                $bypass_otp = 1;
+            }
+        } else {
+            return response()->json(['status' => 1, 'message' => 'Shipper not validate']);
+        }
+
+        return response()->json([
+            'status' => 0,
+            'bypass_otp' => $bypass_otp,
+            'message' => 'OTP sent successfully.',
+            'otp_expire_at' => $otp_expire_at ? $otp_expire_at->toDateTimeString() : null,
+        ]);
+    }
+
+    public function verifyOtp(Request $request)
+    {
+        $rules = [
+            'otp' => ['required', 'digits:6'],
+            'phone_no' => ['sometimes', 'required', 'regex:/^(03\d{2}-\d{7}|92\d{2}-\d{7})$/'],
+            'email' => ['sometimes', 'required', 'email'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+
+        if ($request->has('phone_no')) {
+            $retail_shipper = RetailShipperInfo::where('shipper_phone_no', $request->phone_no)
+                ->where('retail_otp', $request->otp)
+                ->first();
 
             if (!$retail_shipper) {
                 return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
             }
 
-            if ($retail_shipper->otp_expire_at < now()) {
+            if (!$retail_shipper->otp_expire_at || $retail_shipper->otp_expire_at < now()) {
                 return response()->json(['status' => 1, 'message' => 'OTP has expired']);
             }
 
-            // Check if password reset limit reached for today
-//            if ($retail_shipper->password_reset_limit_at && $retail_shipper->password_reset_limit_at->isToday()) {
-//                if ($retail_shipper->password_reset_limit >= 3) {
-//                    return response()->json([
-//                        'status' => 1,
-//                        'message' => 'Password reset limit exceeded for today. Please try again tomorrow.'
-//                    ]);
-//                } else {
-//                    // Increment count since still under limit
-//                    $retail_shipper->password_reset_limit++;
-//                }
-//            } else {
-//                // New day: reset count to 1 and update timestamp
-//                $retail_shipper->password_reset_limit = 1;
-//                $retail_shipper->password_reset_at = now();
-//            }
+            return response()->json(['status' => 0, 'message' => 'OTP verified successfully']);
+        }
 
-            // Reset password & clear API token & otp
-            $retail_shipper->password = Hash::make($request->password);
-            $retail_shipper->api_token = null;
-            $retail_shipper->retail_otp = null;
-            $retail_shipper->otp_expire_at = null;
-            $retail_shipper->save();
+        elseif ($request->has('email')) {
+            $shipper = User::join('users_otp', 'users_otp.user_id', 'users.id')
+                ->where('users.email', $request->email)
+                ->where('users_otp.otp_code', $request->otp)
+                ->select('users.id', 'users_otp.otp_expire_at')
+                ->first();
 
-            return response()->json(['status' => 0, 'message' => 'Password reset successful']);
+            if (!$shipper) {
+                return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
+            }
+
+            if (!$shipper->otp_expire_at || $shipper->otp_expire_at < now()) {
+                return response()->json(['status' => 1, 'message' => 'OTP has expired']);
+            }
+
+
+
+            return response()->json(['status' => 0, 'message' => 'OTP verified successfully']);
+        }
+
+        return response()->json(['status' => 1, 'message' => 'Shipper not verified.']);
+    }
+
+
+
+//    public function sendOtp(Request $request)
+//    {
+//
+//        $rules = [
+//            'phone_no' => ['sometimes','required', 'regex:/^(03\d{2}-\d{7}|92\d{2}-\d{7})$/'],
+//            'email' => ['sometimes', 'required', 'email'],
+//        ];
+//        $validate = Validator::make($request->all(), $rules, $this->messages);
+//        $validate->setAttributeNames($this->names);
+//
+//        if ($validate->fails()) {
+//            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
 //        }
-
-//        return response()->json(['status' => 1, 'message' => 'Unauthorized request']);
-    }
-
-    public function sendOtp(Request $request)
-    {
-
-        $rules = [
-            'phone_no' => ['required', 'regex:/^(03\d{2}-\d{7}|92\d{2}-\d{7})$/'],
-        ];
-        $validate = Validator::make($request->all(), $rules, $this->messages);
-        $validate->setAttributeNames($this->names);
-
-        if ($validate->fails()) {
-            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-        }
-
-        $retail = RetailShipperInfo::where('shipper_phone_no',$request->phone_no)->where('status',1)->first();
-        if($retail) {
-
-                if ($retail->password_reset_at && $retail->password_reset_at->isToday()) {
-                    if ($retail->password_reset_limit >= 3) {
-                        return response()->json([
-                            'status' => 1,
-                            'message' => 'OTP request limit exceeded for today. Please try again tomorrow.'
-                        ]);
-                    }
-
-                    // Same day: increment limit
-                    $retail->password_reset_limit += 1;
-
-                } else {
-                    // New day: start fresh
-                    $retail->password_reset_limit = 1;
-                    $retail->password_reset_at = Carbon::now();
-                }
-
-                // Generate and save OTP
-                $minutes = 10;
-                $otp = mt_rand(100000, 999999);
-
-                $retail->retail_otp = $otp;
-                $retail->otp_expire_at =  Carbon::now()->addMinutes($minutes);
-                $retail->save();
-
-                //send notification
-//                NotificationsController::send(243, $retail->id, $minutes);
-
-                return response()->json([
-                    'status' => 0,
-                    'message' => 'OTP sent successfully.',
-                    'otp_expire_at' => $retail->otp_expire_at->toDateTimeString()
-                ]);
-        }
-
-        return response()->json(['status' => 1, 'message' => 'Retail shipper does not exist.']);
-
-    }
-    public function verifyOtp(Request $request)
-    {
-        $rules = [
-            'otp' => ['required','digits:6'],
-            'phone_no' => ['required', 'regex:/^(03\d{2}-\d{7}|92\d{2}-\d{7})$/'],
-        ];
-        $validate = Validator::make($request->all(), $rules, $this->messages);
-        $validate->setAttributeNames($this->names);
-
-        if ($validate->fails()) {
-            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-        }
-
-        $retail_shipper = RetailShipperInfo::where('shipper_phone_no', $request->phone_no)
-            ->where('retail_otp', $request->otp)
-            ->first();
-
-        if (!$retail_shipper) {
-            return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
-        }
-
-        if (!$retail_shipper->otp_expire_at || $retail_shipper->otp_expire_at < now()) {
-            return response()->json(['status' => 1, 'message' => 'OTP has expired']);
-        }
-
-        return response()->json(['status' => 0, 'message' => 'OTP verified successfully']);
-    }
+//
+//        if($request->has('phone_no')) {
+//
+//            $retail = RetailShipperInfo::where('shipper_phone_no',$request->phone_no)->where('status',1)->first();
+//            if($retail) {
+//
+//                if ($retail->password_reset_at && $retail->password_reset_at->isToday()) {
+//                    if ($retail->password_reset_limit >= 3) {
+//                        return response()->json([
+//                            'status' => 1,
+//                            'message' => 'OTP request limit exceeded for today. Please try again tomorrow.'
+//                        ]);
+//                    }
+//
+//                    // Same day: increment limit
+//                    $retail->password_reset_limit += 1;
+//
+//                } else {
+//                    // New day: start fresh
+//                    $retail->password_reset_limit = 1;
+//                    $retail->password_reset_at = Carbon::now();
+//                }
+//
+//                $bypass_otp = 0;
+//                $retail_shipper_otp = GlobalSettings::where('type','retail_shipper_mobile_otp')->first();
+//                if($retail_shipper_otp && $retail_shipper_otp->setting_value == 1) {
+//
+//                    // Generate and save OTP
+//                    $minutes = 10;
+//                    $otp = mt_rand(100000, 999999);
+//
+//                    $retail->retail_otp = $otp;
+//                    $retail->otp_expire_at =  Carbon::now()->addMinutes($minutes);
+//                    $retail->save();
+//
+//                    //send notification
+////                  NotificationsController::send(243, $retail->id, $minutes);
+//
+//                } else {
+//                    $bypass_otp = 1;
+//                }
+//
+//
+//
+//                return response()->json([
+//                    'status' => 0,
+//                    'bypass_otp' => $bypass_otp,
+//                    'message' => 'OTP sent successfully.',
+//                    'otp_expire_at' => $bypass_otp ? null : $retail->otp_expire_at->toDateTimeString()
+//                ]);
+//            }
+//            return response()->json(['status' => 1, 'message' => 'Retail shipper does not exist.']);
+//
+//        }
+//        else if($request->has('email')) {
+//
+//            $shipper = User::where('email',$request->email)->where('status',3)->first();
+//            if($shipper) {
+//                $bypass_otp = 0;
+//                $shipper_otp = GlobalSettings::where('type','shipper_mobile_otp')->first();
+//                if($shipper_otp && $shipper_otp->setting_value == 1) {
+//                    $minutes = 10;
+//                    $otp = mt_rand(100000, 999999);
+//
+//                    $user_otp = UserOtp::where('user_id',$shipper->id)->delete();
+//
+//                    $user_otp = new UserOtp();
+//                    $user_otp->user_id = $shipper->id;
+//                    $user_otp->otp_code = $otp;
+//                    $user_otp->otp_expire_at = Carbon::now()->addMinutes($minutes);
+//                    $user_otp->save();
+//
+//                    //send notification
+////                NotificationsController::send(246, $shipper->id, $minutes);
+//
+//                } else {
+//                    $bypass_otp = 1;
+//                }
+//
+//                return response()->json([
+//                    'status' => 0,
+//                    'bypass_otp' => $bypass_otp,
+//                    'message' => 'OTP sent successfully.',
+//                    'otp_expire_at' => $bypass_otp ? null : $user_otp->otp_expire_at->toDateTimeString(),
+//                ]);
+//
+//            }
+//
+//            return response()->json(['status' => 1, 'message' => 'shipper does not exist.']);
+//
+//        }
+//        return response()->json(['status' => 1, 'message' => 'Shipper not validate']);
+//
+//    }
+//    public function verifyOtp(Request $request)
+//    {
+//        $rules = [
+//            'otp' => ['required','digits:6'],
+//            'phone_no' => ['sometimes','required', 'regex:/^(03\d{2}-\d{7}|92\d{2}-\d{7})$/'],
+//            'email' => ['sometimes', 'required', 'email'],
+//
+//        ];
+//        $validate = Validator::make($request->all(), $rules, $this->messages);
+//        $validate->setAttributeNames($this->names);
+//
+//        if ($validate->fails()) {
+//            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+//        }
+//
+//        $user = null;
+//        if($request->has('phone_no')) {
+//
+//            $retail_shipper = RetailShipperInfo::where('shipper_phone_no', $request->phone_no)
+//                ->where('retail_otp', $request->otp)
+//                ->first();
+//
+//            if (!$retail_shipper) {
+//                return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
+//            }
+//
+//            if (!$retail_shipper->otp_expire_at || $retail_shipper->otp_expire_at < now()) {
+//                return response()->json(['status' => 1, 'message' => 'OTP has expired']);
+//            }
+//
+//            return response()->json(['status' => 0, 'message' => 'OTP verified successfully']);
+//
+//
+//        } else if($request->has('email')) {
+//
+//            $shipper = User::join('users_otp','users_otp.user_id','users.id')
+//            ->where('users.email', $request->email)
+//                ->where('users_otp.otp_code', $request->otp)
+//                ->select('users.id', 'users_otp.otp_expire_at')
+//                ->first();
+//
+//            if (!$shipper) {
+//                return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
+//            }
+//
+//            if (!$shipper->otp_expire_at || $shipper->otp_expire_at < now()) {
+//                return response()->json(['status' => 1, 'message' => 'OTP has expired']);
+//            }
+//
+//            return response()->json(['status' => 0, 'message' => 'OTP verified successfully']);
+//        }
+//
+//        return response()->json(['status' => 1, 'message' => 'Shipper not validate']);
+//
+//
+//    }
     public function shipment_history(Request $request)
     {
         $rules = [
@@ -1185,21 +1418,31 @@ class ShipperAPIController extends Controller
         $user_id = $request->shipper_id;
         $date = Carbon::today();
         $user = User::find($user_id);
-        $booking_types = BookingType::where('id', '!=', 4)->get();
-        $user_shipping_address = UserShippingInfo::join('cities as c', 'c.id', '=', 'user_shipping_infos.city_id')
-            ->where('user_shipping_infos.user_id', $user_id)->where('user_shipping_infos.status', 1)
-            ->where('user_shipping_infos.hidden', 0)
-            ->select('user_shipping_infos.*', 'c.name as city_name')
-            ->get();
+//        $booking_types = BookingType::where('id', '!=', 4)->get();
+//        $user_shipping_address = UserShippingInfo::join('cities as c', 'c.id', '=', 'user_shipping_infos.city_id')
+//            ->where('user_shipping_infos.user_id', $user_id)
+//             ->where('user_shipping_infos.status', 1)
+//            ->where('user_shipping_infos.hidden', 0)
+//            ->where(function ($q){
+//                $q->where('user_shipping_infos.default_address', 1)
+//                    ->orWhere('user_shipping_infos.default_return_address', 1);
+//            })
+//            ->select('user_shipping_infos.id','user_shipping_infos.pickup_address','user_shipping_infos.default_return_address','user_shipping_infos.city_id','c.name as  city_name','user_shipping_infos.default_address')
+//            ->get();
+
         $multi_piece = $user->multipiece_status;
-        $cities = City::where('pickup', 1)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
-        if (in_array($user_id, [5982, 3324, 10104, 14110, 16292])) {
-            $consignee_cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
-        } else {
-            $consignee_cities = City::where('id', '!=', 1244)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
-        }
-        $products = Product::orderBy('product_name')->get();
-        $distribution_products = DistributionProduct::orderBy('name')->get();
+//        $cities = City::where('pickup', 1)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+//        if (in_array($user_id, [5982, 3324, 10104, 14110, 16292])) {
+//            $consignee_cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')
+//                ->select('id','name','hub','hub_id')
+//                ->get();
+//        } else {
+//            $consignee_cities = City::where('id', '!=', 1244)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')
+//                ->select('id','name','hub','hub_id')
+//                ->get();
+//        }
+//        $products = Product::orderBy('product_name')->get();
+//        $distribution_products = DistributionProduct::orderBy('name')->get();
         $shipping_mode_same_day_timings = ShippingModeSameDayTiming::all();
 
         $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
@@ -1216,8 +1459,8 @@ class ShipperAPIController extends Controller
         }
         $user_delivery_types = CorporateDeliveryTypeStatus::where('user_id', $user_id)->pluck('shipping_mode_id')->toArray();
         $delivery_type = DeliveryType::orderBy('delivery_type')->get();
-        $charges_modes = ChargesModes::whereIn('id', [3])->get();
-        $check = NonServiceArea::pluck('name')->toArray();
+//        $charges_modes = ChargesModes::whereIn('id', [3])->get();
+//        $check = NonServiceArea::pluck('name')->toArray();
 //        $air_waybill = ShipperAirWaybillSettings::where('user_id', $user_id);
 //        if ($air_waybill->exists()) {
 //            $air_waybill = $air_waybill->first();
@@ -1248,8 +1491,8 @@ class ShipperAPIController extends Controller
                 }
             }
         }
-        $ftl_collection_type = [['id' => 1, 'type' => 'Invoice'], ['id' => 2, 'type' => 'Cash']];
-        return response()->json(['status' => 0, 'shipping_address' => $user_shipping_address, 'multi_piece' => $multi_piece, 'user' => $user, 'cities' => $cities, 'distribution_products' => $distribution_products, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'consignee_cities' => $consignee_cities, 'check' => $check, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes, 'date' => $date, 'air_waybill' => $air_waybill, 'user_delivery_types' => $user_delivery_types, 'approve_ftl_requests' => $approve_ftl_requests, 'omni_user' => $omni_user, 'booking_types' => $booking_types, 'ftl_collection_type' => $ftl_collection_type]);
+//        $ftl_collection_type = [['id' => 1, 'type' => 'Invoice'], ['id' => 2, 'type' => 'Cash']];
+        return response()->json(['status' => 0, 'shipping_address' => [], 'multi_piece' => $multi_piece, 'user' => [], 'cities' => [], 'distribution_products' => [], 'products' => [], 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'consignee_cities' => [], 'check' => [], 'delivery_type' => $delivery_type, 'charges_modes' => [], 'date' => $date, 'air_waybill' => $air_waybill, 'user_delivery_types' => $user_delivery_types, 'approve_ftl_requests' => $approve_ftl_requests, 'omni_user' => $omni_user, 'booking_types' => [], 'ftl_collection_type' => []]);
     }
 
     public function corporate_shipping_modes(Request $request)
@@ -1336,20 +1579,31 @@ class ShipperAPIController extends Controller
         $date = Carbon::today();
         $user_id = $request->shipper_id;
         $user = User::find($user_id);
-        $booking_types = BookingType::whereNotIn('id', [4, 6])->get();
-        $user_shipping_address = UserShippingInfo::join('cities as c', 'c.id', '=', 'user_shipping_infos.city_id')
-            ->where('user_shipping_infos.user_id', $user_id)->where('user_shipping_infos.status', 1)
-            ->where('user_shipping_infos.hidden', 0)
-            ->select('user_shipping_infos.*', 'c.name as city_name')
-            ->get();
+//        $booking_types = BookingType::whereNotIn('id', [4, 6])->get();
+//        $user_shipping_address = UserShippingInfo::join('cities as c', 'c.id', '=', 'user_shipping_infos.city_id')
+//            ->where('user_shipping_infos.user_id', $user_id)
+//            ->where('user_shipping_infos.status', 1)
+//            ->where('user_shipping_infos.hidden', 0)
+//            ->where(function ($q){
+//                $q->where('user_shipping_infos.default_address', 1)
+//                    ->orWhere('user_shipping_infos.default_return_address', 1);
+//            })
+//            ->select('user_shipping_infos.id','user_shipping_infos.pickup_address','user_shipping_infos.default_return_address','user_shipping_infos.city_id','c.name as city_name','user_shipping_infos.default_address')
+//            ->get();
         $multi_piece = $user->multipiece_status;
-        $cities = City::where('pickup', 1)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
-        if (in_array($user_id, [5982, 3324, 10104, 14110, 16292])) {
-            $consignee_cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
-        } else {
-            $consignee_cities = City::where('id', '!=', 1244)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
-        }
-        $products = Product::orderBy('product_name')->get();
+//        $cities = City::where('pickup', 1)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+//        if (in_array($user_id, [5982, 3324, 10104, 14110, 16292])) {
+//            $consignee_cities = City::where('status', 1)->where('business_category_id', 1)
+//                ->whereNotNull('zone_id')
+//                ->orderBy('name')
+//                ->select('id','name','hub','hub_id')
+//                ->get();
+//        } else {
+//            $consignee_cities = City::where('id', '!=', 1244)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')
+//                ->select('id','name','hub','hub_id')
+//                ->get();
+//        }
+//        $products = Product::orderBy('product_name')->get();
         $shipping_mode_same_day_timings = ShippingModeSameDayTiming::all();
         $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
         if ($ccd_booking->exists()) {
@@ -1363,8 +1617,8 @@ class ShipperAPIController extends Controller
         } else {
             $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
         }
-        $check = NonServiceArea::pluck('name')->toArray();
-        $charges_modes = ChargesModes::whereIn('id', [4])->get();
+//        $check = NonServiceArea::pluck('name')->toArray();
+//        $charges_modes = ChargesModes::whereIn('id', [4])->get();
 //        $air_waybill = ShipperAirWaybillSettings::where('user_id', $user_id);
 //        if ($air_waybill->exists()) {
 //            $air_waybill = $air_waybill->first();
@@ -1394,9 +1648,112 @@ class ShipperAPIController extends Controller
             }
         }
 
-        return response()->json(['status' => 0, 'shipping_address' => $user_shipping_address, 'user' => $user, 'multi_piece' => $multi_piece, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'consignee_cities' => $consignee_cities, 'check' => $check, 'charges_modes' => $charges_modes, 'date' => $date, 'air_waybill' => $air_waybill, 'omni_user' => $omni_user, 'booking_types' => $booking_types]);
+        return response()->json(['status' => 0, 'shipping_address' => [], 'user' => [], 'multi_piece' => $multi_piece, 'cities' => [], 'products' => [], 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'consignee_cities' => [], 'check' => [], 'charges_modes' => [], 'date' => $date, 'air_waybill' => $air_waybill, 'omni_user' => $omni_user, 'booking_types' => []]);
     }
 
+    public function shipping_address(Request $request)
+    {
+                $user_id = $request->shipper_id;
+                $user_shipping_address = null;
+
+                $request->merge([
+                    'address' => $request->address ?: null,
+                    'pickup_address_id' => $request->pickup_address_id ?: null,
+                    'return_address_id' => $request->return_address_id ?: null
+                ]);
+                $rules = [
+                    'address' => ['nullable', 'min:4'],
+                    'pickup_address_id' => ['nullable', 'exists:user_shipping_infos,id'],
+                    'return_address_id' => ['nullable', 'exists:user_shipping_infos,id'],
+                ];
+
+                $validate = Validator::make($request->all(), $rules, $this->messages);
+                $validate->setAttributeNames($this->names);
+
+                if ($validate->fails()) {
+                    return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+                }
+
+
+
+                if($request->filled('address')) {
+                    $searchAddress  = trim($request->address);
+                    $user_shipping_address = UserShippingInfo::leftjoin('cities as c', 'c.id', '=', 'user_shipping_infos.city_id')
+                        ->where('user_shipping_infos.user_id', $user_id)
+                        ->where('user_shipping_infos.status', 1)
+                        ->where('user_shipping_infos.hidden', 0)
+                        ->where('user_shipping_infos.pickup_address', 'like', '%' . $request->address . '%')
+                        ->select('user_shipping_infos.id','user_shipping_infos.pickup_address','user_shipping_infos.default_return_address','user_shipping_infos.city_id','c.name as city_name','user_shipping_infos.default_address')
+                        ->limit(5)
+                        ->get();
+
+                    if($user_shipping_address->isNotEmpty()) {
+                        return response()->json([
+                            'status' => 0,
+                            'message' => 'Addresses found!',
+                            'shipping_address' => $user_shipping_address
+                        ]);
+                    } else {
+                        return response()->json([
+                            'status' => 1,
+                            'message' => 'Matching addresses not found!',
+                        ]);
+                    }
+
+                }
+                elseif ($request->filled('pickup_address_id') || $request->filled('return_address_id')) {
+
+                    $updates = [
+                        'pickup_address_id' => 'default_address',
+                        'return_address_id' => 'default_return_address',
+                    ];
+
+                    foreach ($updates as $requestKey => $field) {
+                        if ($addressId = $request->input($requestKey)) {
+                            // Reset all previous defaults
+                            UserShippingInfo::where('user_id', $user_id)->update([$field => 0]);
+
+                            // Set the selected address as default
+                            UserShippingInfo::where('id', $addressId)->update([$field => 1]);
+                        }
+                    }
+
+                    return response()->json([
+                        'status' => 0,
+                        'message' => 'Default Shipper address updated successfully'
+                    ]);
+                }
+
+                else {
+                    $user_shipping_address = UserShippingInfo::join('cities as c', 'c.id', '=', 'user_shipping_infos.city_id')
+                        ->where('user_shipping_infos.user_id', $user_id)
+                        ->where('user_shipping_infos.status', 1)
+                        ->where('user_shipping_infos.hidden', 0)
+                        ->where(function ($q) {
+                            $q->where('user_shipping_infos.default_address', 1)
+                                ->orWhere('user_shipping_infos.default_return_address', 1);
+                        })
+                        ->select('user_shipping_infos.id', 'user_shipping_infos.pickup_address', 'user_shipping_infos.default_return_address', 'user_shipping_infos.city_id', 'c.name as city_name', 'user_shipping_infos.default_address')
+                        ->get();
+
+                    if ($user_shipping_address->isNotEmpty()) {
+                        return response()->json([
+                            'status' => 0,
+                            'message' => 'Default addresses found!',
+                            'shipping_address' => $user_shipping_address
+                        ]);
+                    } else {
+                        return response()->json([
+                            'status' => 1,
+                            'message' => 'Default addresses not found!',
+                        ]);
+                    }
+
+                }
+
+
+
+    }
     public function reimbursement_shipping_modes(Request $request)
     {
         $rules = [

@@ -108,6 +108,9 @@ use App\Http\Models\Admin\OdrNature;
 use App\Http\Models\CRM\CrmSettings;
 use App\Http\Models\CRM\CrmTatHolidays;
 use App\Http\Models\InvoiceShipment;
+use App\Models\CrmInvalidReasonRequest;
+use App\Models\CrmRequestResolvedReason;
+
 class AdminReportsController extends Controller
 {
     use RvTrait;
@@ -6821,6 +6824,8 @@ class AdminReportsController extends Controller
                 'al.name as name',
                 'us.name as shipper',
                 'su.name as sub_shipper',
+                'rsi.shipper_name as retail_shipper',
+                'ru.name as retail_user',
                 'crm_requests.launched_by as launched_by_type',
                 'crm_requests.created_at as launched_date',
                 'crah.created_at as assigned_date',
@@ -6904,6 +6909,14 @@ class AdminReportsController extends Controller
                 ->leftJoin('substitute_users as su', function ($join) {
                     $join->on('su.id', '=', 'crm_requests.launched_by_id')
                         ->where('crm_requests.launched_by', '=', DB::raw(2));
+                })
+                ->leftjoin('retail_users as ru', function ($join) {
+                    $join->on('ru.id', '=', 'crm_requests.launched_by_id')
+                        ->where('crm_requests.launched_by', '=', DB::raw(3));
+                })
+                ->leftjoin('retail_shipper_infos as rsi', function ($join) {
+                    $join->on('rsi.id', '=', 'crm_requests.launched_by_id')
+                        ->where('crm_requests.launched_by', '=', DB::raw(5));
                 })
                 ->leftjoin('crm_request_agent_histories as crah', function ($join) {
                     $join->on('crah.crm_request_id', '=', 'crm_requests.id')
@@ -7096,7 +7109,13 @@ class AdminReportsController extends Controller
                         $name = $requests->name;
                     } else if ($requests->launched_by_type == 1) {
                         $name = $requests->shipper;
-                    } else {
+                    } else if ($requests->launched_by_type == 3) {
+                        $name = $requests->retail_user;
+                    }
+                    else if ($requests->launched_by_type == 5) {
+                        $name = $requests->retail_shipper;
+                    }
+                    else {
                         $name = $requests->sub_shipper;
                     }
                     return $name;
@@ -7115,7 +7134,13 @@ class AdminReportsController extends Controller
                         return 'Admin';
                     } else if ($requests->launched_by_type == 1) {
                         return 'Shipper';
-                    } else {
+                    } else if ($requests->launched_by_type == 3) {
+                        return 'Retail';
+                    }
+                    else if ($requests->launched_by_type == 5) {
+                        return 'Retail App';
+                    }
+                    else {
                         return 'Shipper Substitute User';
                     }
                 })
@@ -7291,6 +7316,39 @@ class AdminReportsController extends Controller
                     }else{
                         return '-';
                     }
+                })
+               ->addColumn('claim_resolved_invalid_reason', function ($crm_request) {
+                    $invalidReasons = CrmInvalidReasonRequest::where('crm_request_id', $crm_request->request_number)
+                                        ->with('claimInvalidReason')
+                                        ->get();
+
+                    if ($invalidReasons->isNotEmpty()) {
+                        $names = $invalidReasons->pluck('claimInvalidReason.reason')->filter()->unique()->toArray();
+                        return implode(', ', $names);
+                    }
+
+                    $resolvedReasons = CrmRequestResolvedReason::where('crm_request_id', $crm_request->request_number)
+                                        ->with('resolvedReason')
+                                        ->get();
+
+                    if ($resolvedReasons->isNotEmpty()) {
+                        $names = $resolvedReasons->pluck('resolvedReason.name')->filter()->unique()->toArray();
+                        return implode(', ', $names);
+                    }
+
+                    return '-'; 
+                })
+                ->addColumn('claim_resolved_sub_reason', function ($crm_request) {
+                    $resolvedSubReasons = CrmRequestResolvedReason::where('crm_request_id', $crm_request->request_number)
+                        ->with('resolvedSubReason')
+                        ->get();
+
+                    if ($resolvedSubReasons->isNotEmpty()) {
+                        $names = $resolvedSubReasons->pluck('resolvedSubReason.name')->filter()->unique()->toArray();
+                        return implode(', ', $names);
+                    }
+
+                    return '-';
                 })
                 ->orderColumn('launched_by_name', DB::connection('reports')->raw('IF (crm_requests.launched_by = 0, a.name, IF (crm_requests.launched_by = 1, us.name, IF (crm_requests.launched_by = 2, su.name, "")))') . ' $1');
 
@@ -7538,6 +7596,38 @@ class AdminReportsController extends Controller
                     default:
                         $rowArray['launched_by_type'] = 'Shipper Substitute User';
                         break;
+                }
+                
+                
+                $invalidReasons = CrmInvalidReasonRequest::where('crm_request_id', $rowArray['request_number'])
+                    ->with('claimInvalidReason')
+                    ->get();
+
+                if ($invalidReasons->isNotEmpty()) {
+                    $names = $invalidReasons->pluck('claimInvalidReason.reason')->filter()->unique()->toArray();
+                    $rowArray['claim_resolved_invalid_reason'] = implode(', ', $names);
+                } else {
+                    $resolvedReasons = CrmRequestResolvedReason::where('crm_request_id', $rowArray['request_number'])
+                        ->with('resolvedReason')
+                        ->get();
+
+                    if ($resolvedReasons->isNotEmpty()) {
+                        $names = $resolvedReasons->pluck('resolvedReason.name')->filter()->unique()->toArray();
+                        $rowArray['claim_resolved_invalid_reason'] = implode(', ', $names);
+                    } else {
+                        $rowArray['claim_resolved_invalid_reason'] = '-';
+                    }
+                }
+
+                $resolvedSubReasons = CrmRequestResolvedReason::where('crm_request_id', $rowArray['request_number'])
+                    ->with('resolvedSubReason')
+                    ->get();
+
+                if ($resolvedSubReasons->isNotEmpty()) {
+                    $names = $resolvedSubReasons->pluck('resolvedSubReason.name')->filter()->unique()->toArray();
+                    $rowArray['claim_resolved_sub_reason'] = implode(', ', $names);
+                } else {
+                    $rowArray['claim_resolved_sub_reason'] = '-';
                 }
 
 

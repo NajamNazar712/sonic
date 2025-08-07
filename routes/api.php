@@ -15,7 +15,6 @@ use Illuminate\Http\Request;
 
 
     Route::name('api.')->group(function () {
-
     Route::get('fetch_complaints', 'APIController@fetch_complaints')->name('fetch_complaints');
     Route::post('shipment/track/public/crm/request', 'APIController@add_request')->name('crm.track.public');
     Route::post('login', 'APIController@login')->name('login');
@@ -160,7 +159,7 @@ use Illuminate\Http\Request;
 
         Route::prefix('register_request')->name('register_request.')->group(function () {
             //Obsoleted
-            Route::post('store', 'Rider\RiderAPIController@rider_signup_v2')->name('store');
+            Route::post('store', 'Rider\RiderAPIController@rider_signup_v2')->name('store2');
             Route::post('store_v2', 'Rider\RiderAPIController@rider_signup_v3')->name('store_v3');
             Route::post('attachment_store', 'Rider\RiderAPIController@rider_attachments_store')->name('attachment_store');
 
@@ -701,6 +700,8 @@ use Illuminate\Http\Request;
                 Route::post('submit', 'APIController@shipment_book')->name('submit');
             });
 
+            Route::post('shipping_address','ShipperAPIController@shipping_address')->name('shipping_address');
+
             Route::get('profile', 'ShipperAppController@profile')->name('profile');
 
             //Shipment Call History
@@ -714,21 +715,24 @@ use Illuminate\Http\Request;
 
             //order management Api
             Route::prefix('orders')->name('orders.')->group(function (){
-                Route::get('order_list', 'ShipperOrderManagementApiController@order_list')->name('order_list');
+                Route::get('order_list/{tracking_number?}', 'ShipperOrderManagementApiController@order_list')->name('order_list');
+                Route::post('shipment_chart_summary','ShipperOrderManagementApiController@shipments_summary')->name('shipment_chart_summary');
                 Route::post('cancel_all', 'ShipperOrderManagementApiController@order_cancel_all')->name('cancel_all');
             });
 
             //finance Apis
             Route::prefix('finance')->name('finance.')->group(function (){
-                  Route::get('payments','ShipperFinanceApiController@payment_list')->name('payments');
+                  Route::get('payments/{id?}','ShipperFinanceApiController@payment_list')->name('payments');
             });
 
             // CRM Apis
             Route::prefix('crm')->name('crm.')->group(function (){
                 Route::get('request_resources','ShipperCrmApiController@crm_request_resources')->name('request_resources');
-                Route::post('add_request', 'ShipperCrmApiController@add_crm_request')->name('add_request');
+                Route::post('add_request', 'ShipperCrmApiController@add_crm_request')->name('shipper.crm.add_request');
                 Route::get('request_summary', 'ShipperCrmApiController@crm_request_summary')->name('request_summary');
-                Route::get('request_list/{status?}', 'ShipperCrmApiController@crm_request_list')->name('request_list');
+//                Route::get('request_list/{status?}', 'ShipperCrmApiController@crm_request_list')->name('request_list');
+                Route::get('request_list', 'ShipperCrmApiController@crm_request_list')->name('request_list');
+
                 Route::post('single_crm_request','ShipperCrmApiController@single_crm_request')->name('single_crm_request');
                 Route::post('receiving_sheet','ShipperCrmApiController@get_receving_sheet')->name('receiving_sheet');
             });
