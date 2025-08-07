@@ -5682,76 +5682,76 @@ class ShipperShipmentBookController extends Controller
                         }
 
                         if (!$request->excel_nsa) {
-                            $con_nsa = array();
-                            $msg_string = '';
-                            $str_arr = null;
-                            $str_arr = preg_split("/[ ,]+/", $row['consignee_address']);
-                            foreach ($check as $nsa) {
-                                foreach ($str_arr as $arr_value) {
-                                    if (strtolower($nsa) == strtolower($arr_value)) {
-                                        $con_nsa[$row_id] = $arr_value;
-                                        if ($msg_string != null) {
-                                            $msg_string = $msg_string . ', ' . $arr_value;
-                                        } else {
-                                            $msg_string = $arr_value;
-                                        }
-                                    }
-                                }
-                            }
-                            if (isset($con_nsa[$row_id])) {
-                                // $nsa_error[$row_id]['msg'] = "A Possible Address Anomaly: " . $msg_string . " Detected!";
-                            }
+//                            $con_nsa = array();
+//                            $msg_string = '';
+//                            $str_arr = null;
+//                            $str_arr = preg_split("/[ ,]+/", $row['consignee_address']);
+//                            foreach ($check as $nsa) {
+//                                foreach ($str_arr as $arr_value) {
+//                                    if (strtolower($nsa) == strtolower($arr_value)) {
+//                                        $con_nsa[$row_id] = $arr_value;
+//                                        if ($msg_string != null) {
+//                                            $msg_string = $msg_string . ', ' . $arr_value;
+//                                        } else {
+//                                            $msg_string = $arr_value;
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                            if (isset($con_nsa[$row_id])) {
+//                                // $nsa_error[$row_id]['msg'] = "A Possible Address Anomaly: " . $msg_string . " Detected!";
+//                            }
                         }
 
                         if(!$request->excel_bdmk) {
-                            $bdmk_result[$row_id] = $this->check_bdmk($consignee_city->id, $row['consignee_address'], $check_bdmk);
-                            if (isset($bdmk_result[$row_id]['invalid_cities'])) {
-                                $bdmk_error[$row_id]['msg'] = $bdmk_result[$row_id]['invalid_cities'];
-                            }
+//                            $bdmk_result[$row_id] = $this->check_bdmk($consignee_city->id, $row['consignee_address'], $check_bdmk);
+//                            if (isset($bdmk_result[$row_id]['invalid_cities'])) {
+//                                $bdmk_error[$row_id]['msg'] = $bdmk_result[$row_id]['invalid_cities'];
+//                            }
                         }
                         $shipping_mode = $request->shipping_mode ?? $row['shipping_mode_id'];
                         if (!CityDelivery::where('city_id', $consignee_city->id)->where('booking_type_id', 1)->where('shipping_mode_id', $shipping_mode)->exists()) {
                             $errors[$row_id]['consignee_city_name'] = 'Delivery is not allowed for City: ' . $consignee_city->name . ' with Service Type ID #' . 1 . ' and Shipping Mode ID #' . $shipping_mode;
                         }
                         if (!$request->excel_blacklist) {
-                            $consignee_phone_number_1 = substr_replace($row['consignee_phone_number_1'], '-', 4, 0);
-                            $consignee_information = ConsigneeInformation::where('phone', $consignee_phone_number_1);
-                            if ($consignee_information->exists()) {
-                                $consignee_information = $consignee_information->first();
-                                $manual_blacklist = BlacklistedConsigneeManuallyBlacklisted::where('consignee_information_id', $consignee_information->id);
-                                if ($manual_blacklist->exists()) {
-                                    $manual_blacklist = $manual_blacklist->first();
-                                    $blacklist_setting_id = $manual_blacklist->blacklist_setting_id;
-                                    $blacklist_setting = BlacklistSetting::find($blacklist_setting_id);
-                                    if ($blacklist_setting) {
-                                        if (!array_key_exists($blacklist_setting_id, $blacklist_found_categories)) {
-                                            $blacklist_found_categories[$blacklist_setting_id]['message'] = $blacklist_setting->message;
-                                            $blacklist_found_categories[$blacklist_setting_id]['color'] = $blacklist_setting->color;
-                                        }
-                                    }
-                                    $blacklist = BlacklistedConsignee::where('consignee_information_id', $consignee_information->id);
-                                    if ($blacklist->exists()) {
-                                        $blacklist = $blacklist->first();
-                                        $blacklist_errors[$row_id]['msg'] = 'Total Shipments: ' . $blacklist->shipments . ', Delivered: ' . $blacklist->delivered . '(' . $blacklist->delivered_ratio . '), Undelivered: ' . $blacklist->undelivered . '(' . $blacklist->undelivered_ratio . '), Return Confirmed: ' . $blacklist->return . '(' . $blacklist->return_ratio . ')';
-                                    } else {
-                                        $blacklist_errors[$row_id]['msg'] = 'Total Shipments: 0, Delivered: 0, Undelivered: 0, Return Confirmed: 0';
-                                    }
-                                } else {
-                                    $blacklist = BlacklistedConsignee::where('consignee_information_id', $consignee_information->id);
-                                    if ($blacklist->exists()) {
-                                        $blacklist = $blacklist->first();
-                                        $blacklist_setting_id = $blacklist->blacklist_setting_id;
-                                        $blacklist_setting = BlacklistSetting::find($blacklist_setting_id);
-                                        if ($blacklist_setting) {
-                                            if (!array_key_exists($blacklist_setting_id, $blacklist_found_categories)) {
-                                                $blacklist_found_categories[$blacklist_setting_id]['message'] = $blacklist_setting->message;
-                                                $blacklist_found_categories[$blacklist_setting_id]['color'] = $blacklist_setting->color;
-                                            }
-                                        }
-                                        $blacklist_errors[$row_id]['msg'] = 'Total Shipments: ' . $blacklist->shipments . ', Delivered: ' . $blacklist->delivered . '(' . $blacklist->delivered_ratio . '), Undelivered: ' . $blacklist->undelivered . '(' . $blacklist->undelivered_ratio . '), Return Confirmed: ' . $blacklist->return . '(' . $blacklist->return_ratio . ')';
-                                    }
-                                }
-                            }
+//                            $consignee_phone_number_1 = substr_replace($row['consignee_phone_number_1'], '-', 4, 0);
+//                            $consignee_information = ConsigneeInformation::where('phone', $consignee_phone_number_1);
+//                            if ($consignee_information->exists()) {
+//                                $consignee_information = $consignee_information->first();
+//                                $manual_blacklist = BlacklistedConsigneeManuallyBlacklisted::where('consignee_information_id', $consignee_information->id);
+//                                if ($manual_blacklist->exists()) {
+//                                    $manual_blacklist = $manual_blacklist->first();
+//                                    $blacklist_setting_id = $manual_blacklist->blacklist_setting_id;
+//                                    $blacklist_setting = BlacklistSetting::find($blacklist_setting_id);
+//                                    if ($blacklist_setting) {
+//                                        if (!array_key_exists($blacklist_setting_id, $blacklist_found_categories)) {
+//                                            $blacklist_found_categories[$blacklist_setting_id]['message'] = $blacklist_setting->message;
+//                                            $blacklist_found_categories[$blacklist_setting_id]['color'] = $blacklist_setting->color;
+//                                        }
+//                                    }
+//                                    $blacklist = BlacklistedConsignee::where('consignee_information_id', $consignee_information->id);
+//                                    if ($blacklist->exists()) {
+//                                        $blacklist = $blacklist->first();
+//                                        $blacklist_errors[$row_id]['msg'] = 'Total Shipments: ' . $blacklist->shipments . ', Delivered: ' . $blacklist->delivered . '(' . $blacklist->delivered_ratio . '), Undelivered: ' . $blacklist->undelivered . '(' . $blacklist->undelivered_ratio . '), Return Confirmed: ' . $blacklist->return . '(' . $blacklist->return_ratio . ')';
+//                                    } else {
+//                                        $blacklist_errors[$row_id]['msg'] = 'Total Shipments: 0, Delivered: 0, Undelivered: 0, Return Confirmed: 0';
+//                                    }
+//                                } else {
+//                                    $blacklist = BlacklistedConsignee::where('consignee_information_id', $consignee_information->id);
+//                                    if ($blacklist->exists()) {
+//                                        $blacklist = $blacklist->first();
+//                                        $blacklist_setting_id = $blacklist->blacklist_setting_id;
+//                                        $blacklist_setting = BlacklistSetting::find($blacklist_setting_id);
+//                                        if ($blacklist_setting) {
+//                                            if (!array_key_exists($blacklist_setting_id, $blacklist_found_categories)) {
+//                                                $blacklist_found_categories[$blacklist_setting_id]['message'] = $blacklist_setting->message;
+//                                                $blacklist_found_categories[$blacklist_setting_id]['color'] = $blacklist_setting->color;
+//                                            }
+//                                        }
+//                                        $blacklist_errors[$row_id]['msg'] = 'Total Shipments: ' . $blacklist->shipments . ', Delivered: ' . $blacklist->delivered . '(' . $blacklist->delivered_ratio . '), Undelivered: ' . $blacklist->undelivered . '(' . $blacklist->undelivered_ratio . '), Return Confirmed: ' . $blacklist->return . '(' . $blacklist->return_ratio . ')';
+//                                    }
+//                                }
+//                            }
                         }
                     } else { // below one is for revserve pickup no need here
                         $pickup_consignee_city = City::where('name', $row['consignee_city_name'])->first();
