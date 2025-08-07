@@ -366,6 +366,10 @@ class GeoCodesController extends Controller
                                         $score++;
                                     }
                                 }
+                                Log::channel('code_test_log')->info('Geo match unit', [
+                                    'unit' => $unit,
+                                    'score' => $score
+                                ]);
 
                                 if ($score > $highestScore) {
                                     $highestScore = $score;
