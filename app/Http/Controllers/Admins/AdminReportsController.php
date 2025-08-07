@@ -6821,6 +6821,8 @@ class AdminReportsController extends Controller
                 'al.name as name',
                 'us.name as shipper',
                 'su.name as sub_shipper',
+                'rsi.shipper_name as retail_shipper',
+                'ru.name as retail_user',
                 'crm_requests.launched_by as launched_by_type',
                 'crm_requests.created_at as launched_date',
                 'crah.created_at as assigned_date',
@@ -6904,6 +6906,14 @@ class AdminReportsController extends Controller
                 ->leftJoin('substitute_users as su', function ($join) {
                     $join->on('su.id', '=', 'crm_requests.launched_by_id')
                         ->where('crm_requests.launched_by', '=', DB::raw(2));
+                })
+                ->leftjoin('retail_users as ru', function ($join) {
+                    $join->on('ru.id', '=', 'crm_requests.launched_by_id')
+                        ->where('crm_requests.launched_by', '=', DB::raw(3));
+                })
+                ->leftjoin('retail_shipper_infos as rsi', function ($join) {
+                    $join->on('rsi.id', '=', 'crm_requests.launched_by_id')
+                        ->where('crm_requests.launched_by', '=', DB::raw(5));
                 })
                 ->leftjoin('crm_request_agent_histories as crah', function ($join) {
                     $join->on('crah.crm_request_id', '=', 'crm_requests.id')
@@ -7096,7 +7106,13 @@ class AdminReportsController extends Controller
                         $name = $requests->name;
                     } else if ($requests->launched_by_type == 1) {
                         $name = $requests->shipper;
-                    } else {
+                    } else if ($requests->launched_by_type == 3) {
+                        $name = $requests->retail_user;
+                    }
+                    else if ($requests->launched_by_type == 5) {
+                        $name = $requests->retail_shipper;
+                    }
+                    else {
                         $name = $requests->sub_shipper;
                     }
                     return $name;
@@ -7115,7 +7131,13 @@ class AdminReportsController extends Controller
                         return 'Admin';
                     } else if ($requests->launched_by_type == 1) {
                         return 'Shipper';
-                    } else {
+                    } else if ($requests->launched_by_type == 3) {
+                        return 'Retail';
+                    }
+                    else if ($requests->launched_by_type == 5) {
+                        return 'Retail App';
+                    }
+                    else {
                         return 'Shipper Substitute User';
                     }
                 })
