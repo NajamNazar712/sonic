@@ -341,7 +341,6 @@ class GeoCodesController extends Controller
                         $lng = null;
 
                         if (is_array($data) && !empty($data)) {
-                            // Normalize function
                             $normalize = function ($string) {
                                 $string = strtolower($string);
                                 $string = preg_replace('/[^a-z0-9\s]/i', ' ', $string);
@@ -349,46 +348,51 @@ class GeoCodesController extends Controller
                                 return trim($string);
                             };
 
-                            $address_terms = explode(' ', $normalize($address));
-                            $specific_terms = [
-                                'apartment', 'flat', 'block', 'floor', 'road', 'sector', 'phase', 'house',
-                                'street', 'lane', 'town', 'colony', 'society', 'scheme', 'area', 'zone',
-                                'building', 'plot', 'boulevard', 'avenue', 'extension', 'near', 'opposite',
-                                'behind', 'beside', 'market', 'commercial', 'residential', 'garden',
-                                'residency', 'township', 'line', 'circle', 'quarters', 'number', 'no',
-                                'stop', 'station', 'bazar', 'mohallah', 'gali', 'chowk', 'chowrangi',
-                                'gate', 'cantt', 'shahrah', 'model', 'industrial', 'katchi abadi', 'new',
-                                'old', 'main', 'service', 'underpass', 'flyover', 'nearby', 'link', 'corner',
-                                'oppo', 'ground', 'hall', 'unit', 'tower', 'building', 'wing', 'level',
-                                'mezzanine', 'penthouse', 'villa', 'duplex', 'suite', 'row', 'park',
-                                'view', 'cooperative', 'society', 'drive', 'enclave', 'hill', 'heights',
-                                'cliff', 'ridge', 'bridge', 'compound', 'lane', 'yard', 'bay', 'sector',
-                                'height', 'terrace', 'court', 'pura', 'abad', 'pind', 'nagri', 'shahr'
-                            ];
+                            $normalizedAddress = $normalize($address);
+                            $address_terms = explode(' ', $normalizedAddress);
 
+                            $high_weight_terms = ['apartment', 'flat', 'block', 'floor', 'road', 'sector', 'phase', 'house', 'street', 'lane', 'colony', 'society', 'scheme', 'building', 'plot', 'avenue', 'extension', 'villa', 'duplex', 'suite', 'row', 'view', 'park', 'compound'];
+                            $medium_weight_terms = ['no', 'number', 'unit', 'tower', 'drive', 'court', 'line', 'circle'];
+                            $low_weight_terms = ['town', 'city', 'market', 'commercial', 'residential', 'garden', 'hospital', 'school', 'company', 'office', 'service', 'underpass', 'station', 'chowk', 'gate'];
+
+                            $weighted_terms = [
+                                ['terms' => $high_weight_terms, 'weight' => 3],
+                                ['terms' => $medium_weight_terms, 'weight' => 2],
+                                ['terms' => $low_weight_terms, 'weight' => 1],
+                            ];
 
                             $bestMatch = null;
                             $highestScore = 0;
 
                             foreach ($data as $unit) {
                                 $compound = $normalize($unit['compound_address_parents'] ?? '');
+                                $compound_terms = explode(' ', $compound);
                                 $score = 0;
 
-                                foreach ($address_terms as $term) {
-                                    if (strpos($compound, $term) !== false) {
-                                        $score++;
+                                foreach ($weighted_terms as $group) {
+                                    foreach ($group['terms'] as $term) {
+                                        if (strpos($compound, $term) !== false) {
+                                            $score += $group['weight'];
+                                        } else {
+                                            foreach ($compound_terms as $compound_term) {
+                                                if (levenshtein($term, $compound_term) <= 1) {
+                                                    $score += $group['weight'] - 1;
+                                                    break;
+                                                }
+                                            }
+                                        }
                                     }
                                 }
 
-                                foreach ($specific_terms as $term) {
-                                    if (strpos($compound, $term) !== false) {
-                                        $score += 2;
-                                    }
+                                similar_text($normalizedAddress, $compound, $percent);
+                                if ($percent > 60) {
+                                    $score += round($percent / 10);
                                 }
 
                                 Log::channel('code_test_log')->info('Geo match unit', [
                                     'unit' => $unit,
-                                    'score' => $score
+                                    'score' => $score,
+                                    'similarity' => $percent
                                 ]);
 
                                 if ($score > $highestScore) {
@@ -399,10 +403,9 @@ class GeoCodesController extends Controller
 
                             $target = $bestMatch ?? $data[0];
 
-                            // Extract lat/lng
                             $encodedTarget = json_encode($target);
-                            preg_match('/"lat"\s*:\s*([0-9\.\-eE+]+)/', $encodedTarget, $latMatch);
-                            preg_match('/"lng"\s*:\s*([0-9\.\-eE+]+)/', $encodedTarget, $lngMatch);
+                            preg_match('/"lat"\s*:\s*([0-9\.\-eE\+]+)/', $encodedTarget, $latMatch);
+                            preg_match('/"lng"\s*:\s*([0-9\.\-eE\+]+)/', $encodedTarget, $lngMatch);
 
                             $lat = $latMatch[1] ?? ($target['lat'] ?? null);
                             $lng = $lngMatch[1] ?? ($target['lng'] ?? null);
@@ -438,6 +441,7 @@ class GeoCodesController extends Controller
             return response()->json(['status' => 0, 'error' => 'No data found.']);
         }
     }
+
 
 
 
