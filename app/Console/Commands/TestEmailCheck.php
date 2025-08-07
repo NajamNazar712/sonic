@@ -33,7 +33,7 @@ class TestEmailCheck extends Command
     //    revenue_report_by_user_excel
     //    mark_arrival
         $records = DB::table('done_payment_shipments')
-            ->whereIn('done_payment_id', [1625971,1625990])
+            ->whereIn('done_payment_id', [1627585])
             ->select('id', 'wht', 'cod_sst','payable')
             ->get();
 
@@ -50,8 +50,8 @@ class TestEmailCheck extends Command
 
         }
 
-        DB::select('CALL update_done_payment_statistics(?)', [1625971]);
-        DB::select('CALL update_done_payment_statistics(?)', [1625990]);
+        DB::select('CALL update_done_payment_statistics(?)', [1627585]);
+        // DB::select('CALL update_done_payment_statistics(?)', [1629765]);
 //        DB::select('CALL update_done_payment_statistics(?)', [1624481]);
 
 

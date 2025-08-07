@@ -15,7 +15,6 @@ use Illuminate\Http\Request;
 
 
     Route::name('api.')->group(function () {
-
     Route::get('fetch_complaints', 'APIController@fetch_complaints')->name('fetch_complaints');
     Route::post('shipment/track/public/crm/request', 'APIController@add_request')->name('crm.track.public');
     Route::post('login', 'APIController@login')->name('login');
@@ -160,7 +159,7 @@ use Illuminate\Http\Request;
 
         Route::prefix('register_request')->name('register_request.')->group(function () {
             //Obsoleted
-            Route::post('store', 'Rider\RiderAPIController@rider_signup_v2')->name('store');
+            Route::post('store', 'Rider\RiderAPIController@rider_signup_v2')->name('store2');
             Route::post('store_v2', 'Rider\RiderAPIController@rider_signup_v3')->name('store_v3');
             Route::post('attachment_store', 'Rider\RiderAPIController@rider_attachments_store')->name('attachment_store');
 
@@ -700,6 +699,8 @@ use Illuminate\Http\Request;
                 Route::post('shipping_modes', 'ShipperAPIController@reimbursement_shipping_modes')->name('shipping_modes');
                 Route::post('submit', 'APIController@shipment_book')->name('submit');
             });
+
+            Route::post('shipping_address','ShipperAPIController@shipping_address')->name('shipping_address');
 
             Route::get('profile', 'ShipperAppController@profile')->name('profile');
 

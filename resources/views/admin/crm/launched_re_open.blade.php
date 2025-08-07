@@ -442,10 +442,10 @@
                                     row.push(values.shipper_category); // {data: 'shipper_category', name: 'shipper_category'}
                                     row.push(values.kae); // {data: 'kae', name: 'ad2.name'}
                                     row.push(values.launched_by_name); // {data: 'launched_by_name', name: 'launched_by_name'}
-                                    row.push(values.tagged); // {data: 'tagged'}
+                                    row.push(values.added_by);  // {data: 'added_by'}
                                     row.push(values.tagged_to_operation); // {data: 'tagged_to_operation', name: 'tagged_to_operation'}
                                     row.push(values.manual_tagged_to); // {data: 'tagged_to_manual', name: 'tagged_to_manual'}
-                                    row.push(values.added_by); // {data: 'added_by'}
+                                    row.push(values.tagged); // {data: 'tagged'}
                                     row.push(values.last_comment_name); // {data: 'last_comment_name', name: 'last_comment_name'}
                                     row.push(values.last_comment.replace(/<br>/gi, '\n')); // {data: 'last_comment', name: 'ccs.comment'}
                                     body.push(row);
@@ -732,10 +732,10 @@
                     {data: 'shipper_category', name: 'shipper_category', class: 'align-middle shipper_category'}, // Key account category
                     {data: 'kae', name: 'ad2.name', class: 'align-middle kae'}, // KAE
                     {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'}, // Launched By
-                    {data: 'tagged', name: 'crt.crm_request_tagging_type_id', class: 'align-middle tagged'},
+                    {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'}, // Launched By Type
                     {data: 'tagged_to_operation', name: 'tagged_to_operation', class: 'align-middle tagged_to_operation'},
                     {data: 'tagged_to_manual', name: 'tagged_to_manual', class: 'align-middle tagged_to_manual'}, // Manual Tagged To
-                    {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'}, // Launched By Type
+                    {data: 'tagged', name: 'crt.crm_request_tagging_type_id', class: 'align-middle tagged'},
                     {data: 'last_comment_name', name: 'last_comment_name', class: 'align-middle last_comment_name'}, // Last Comment By
                     {data: 'last_comment', name: 'ccs.comment', class: 'align-middle last_comment'}, // Last Comment
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
@@ -769,8 +769,10 @@
                         '<option value="0">Admin</option>' +
                         '<option value="1">Shipper</option>' +
                         '<option value="2">Shipper Substitute User</option>' +
-                        '<option value="3">Consignee</option>' +
-                        '<option value="4">External</option>' +
+                        '<option value="3">Retail</option>' +
+                        '<option value="4">Consignee</option>' +
+                        // '<option value="4">External</option>' +
+                        '<option value="5">Retail App</option>'+
                         '</select>';
 
                     var tagging_type = '<select name="tagging_type" id="tagging_type" class="select2 form-control">' +
