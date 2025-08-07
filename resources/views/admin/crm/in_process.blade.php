@@ -1905,17 +1905,6 @@
 
 
           $('#invalid_submit').on('click', function () {
-                if (selected_invalid_reason_ids.length === 0) {
-                    swal({
-                        icon: 'warning',
-                        title: 'Please select at least one reason!',
-                        text: 'You must select at least one claim invalid reason before submitting.',
-                        confirmButtonText: 'OK',
-                        confirmButtonColor: '#3085d6'
-                    });
-                    return;
-                }
-
                 mark_valid_invalid(0); 
             });
 
@@ -1956,24 +1945,6 @@
             $('#resolved_submit').on('click', function () {
                 var selectedReason = $('#claim_resolved_reason').val();
                 var selectedSubReasons = $('#claim_resolved_sub_reasons').val();
-
-                if (!selectedReason) {
-                    swal({
-                        icon: 'warning',
-                        title: 'Missing Reason',
-                        text: 'Please select a resolved reason.',
-                    });
-                    return;
-                }
-
-                if (!selectedSubReasons || selectedSubReasons.length < 1) {
-                    swal({
-                        icon: 'warning',
-                        title: 'Missing Sub Reason(s)',
-                        text: 'Please select at least one sub reason.',
-                    });
-                    return;
-                }
 
                 if (pendingForm) {
                     $(pendingForm).find('input[name="claim_resolved_reason"]').remove();

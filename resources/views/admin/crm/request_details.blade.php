@@ -2587,6 +2587,9 @@
                         }).done(function (data) {
                             if(data.status == 1){
                                 $('#CloseReasonModal').modal('show');
+                            }else if(isClaimInvalid){
+                                pendingForm = form;     
+                                $('#claimResolvedModal').modal('show');
                             }else{
                                 form.submit();
                             }
@@ -2645,6 +2648,10 @@
                         }).done(function (data) {
                             if(data.status == 1){
                                 $('#CloseReasonModal').modal('show');
+                            }
+                            else if(isClaimInvalid){
+                                pendingForm = form; 
+                                $('#claimInvalidModal').modal('show');
                             }else{
                                 form.submit();
                             }
@@ -3036,16 +3043,6 @@
             $('#invalid_submit').on('click', function () {
                 var selectedReasons = $('#claim_invalid_reasons').val();
 
-                if (!selectedReasons || selectedReasons.length === 0) {
-                    swal({
-                        icon: 'warning',
-                        title: 'Missing Selection',
-                        text: 'Please select at least one invalid reason.',
-                    });
-                    return;
-                }
-
-
                 if (pendingForm) {
                     $(pendingForm).find('input[name="claim_invalid_reasons[]"]').remove();
 
@@ -3098,24 +3095,6 @@
             $('#resolved_submit').on('click', function () {
                 var selectedReason = $('#claim_resolved_reason').val();
                 var selectedSubReasons = $('#claim_resolved_sub_reasons').val();
-
-                if (!selectedReason) {
-                    swal({
-                        icon: 'warning',
-                        title: 'Missing Reason',
-                        text: 'Please select a resolved reason.',
-                    });
-                    return;
-                }
-
-                if (!selectedSubReasons || selectedSubReasons.length < 1) {
-                    swal({
-                        icon: 'warning',
-                        title: 'Missing Sub Reason(s)',
-                        text: 'Please select at least one sub reason.',
-                    });
-                    return;
-                }
 
                 if (pendingForm) {
                     $(pendingForm).find('input[name="claim_resolved_reason"]').remove();
