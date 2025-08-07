@@ -402,10 +402,10 @@
                                 row.push(values.shipper_category); // Key Account Category
                                 row.push(values.kae); // KAE
                                 row.push(values.launched_by_name); // Launched By
-                                row.push(values.tagged); // Launched By Type
+                                row.push(values.added_by);// Launched By Type
                                 row.push(values.tagged_to_operation); // Auto Tagged to Operation
                                 row.push(values.tagged_to_manual); // Manual Tagged To
-                                row.push(values.added_by); // Tagged (Admin/Department)
+                                row.push(values.tagged);    // Tagged (Admin/Department)
                                 row.push(values.last_comment_by); // Last Comment By
                                 row.push(values.last_comment); // Last Comment
                                 row.push(values.resolved_date); // Resolved Date
@@ -774,10 +774,10 @@
                     {data: 'shipper_category', name: 'shipper_category', class: 'align-middle shipper_category'}, // Key account category
                     {data: 'kae', name: 'kae', class: 'align-middle kae'}, // KAE
                     {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'},                      // Launched By
-                    {data: 'tagged', name: 'crt.crm_request_tagging_type_id', class: 'align-middle tagged'},
+                    {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},                  // Launched By Type
                     {data: 'tagged_to_operation', name: 'tagged_to_operation', class: 'align-middle tagged_to_operation'}, // Tagged To Operation
                     {data: 'tagged_to_manual', name: 'tagged_to_manual', class: 'align-middle tagged_to_manual'}, // Manual Tagged To
-                    {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},                  // Launched By Type
+                    {data: 'tagged', name: 'crt.crm_request_tagging_type_id', class: 'align-middle tagged'},
                     {data: 'last_comment_by', name: 'last_comment_by', class: 'align-middle last_comment_by'}, // Last Comment By
                     {data: 'last_comment', name: 'ccs.comment', class: 'align-middle last_comment'}, // Last Comment
                     {data: 'resolved_date', name: 'crm_requests.created_at', class: 'align-middle resolved_date'}, // Resolved Date
@@ -811,7 +811,11 @@
                         '<option value="0">Admin</option>' +
                         '<option value="1">Shipper</option>' +
                         '<option value="2">Shipper Substitute User</option>' +
-                        '<option value="3">Consignee</option>' +
+                        '<option value="3">Retail</option>' +
+                        '<option value="4">Consignee</option>' +
+                        // '<option value="4">External</option>' +
+                        '<option value="5">Retail App</option>'+
+
                         '</select>';
                     var tagging_type = '<select name="tagging_type" id="tagging_type" class="select2 form-control">' +
                         '<option value="1">Department</option>' +
