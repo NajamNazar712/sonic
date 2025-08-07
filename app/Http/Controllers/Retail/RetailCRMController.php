@@ -437,7 +437,7 @@ class RetailCRMController extends Controller
             } else {
                 $crm_request_ids[] = $id;
             }
-            $crm_status_history = CrmRequestStatusHistory::whereIn('crm_request_id', $crm_request_ids)->get();
+            $crm_status_history = CrmRequestStatusHistory::whereIn('crm_request_id', $crm_request_ids)->where('status_id','!=',6)->get();
             $crm_tagging_history = CrmRequestTaggingHistory::where('crm_request_id', $id)->get();
             $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->get();
             $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id', 1)->get();

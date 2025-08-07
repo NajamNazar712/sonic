@@ -200,6 +200,12 @@ class AdminCRMController extends Controller
                         if ($response['status'] === 0) {
                             return $response;
                         }
+
+                        $canComplaintPaymentLocked = $this->canComplaintPaymentLocked($shipment->id);
+                        if ($canComplaintPaymentLocked['status'] === 0) {
+                            return $canComplaintPaymentLocked;
+                        }
+                        
                         $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment->id, $shipment->user_id, NULL ,$description);
                         if($request->has('key_account')){
                             $this->key_account_crm_summary_shipments($shipment->id, $crm_request_padded_id, Auth::id(), $channel_id, $complaint_id);
@@ -242,6 +248,13 @@ class AdminCRMController extends Controller
 
                             if ($response['status'] === 0) {
                                 return $response;
+                            }
+
+                            if($nature_id == 1 && $request->complaint_id == 1){
+                                $canComplaintPaymentLocked = $this->canComplaintPaymentLocked($shipment->id);
+                                if ($canComplaintPaymentLocked['status'] === 0) {
+                                    return $canComplaintPaymentLocked;
+                                }
                             }
 
                             if($is_shipment){
@@ -501,6 +514,13 @@ class AdminCRMController extends Controller
 
                         if ($response['status'] === 0) {
                             return $response;
+                        }
+
+                        if($nature_id == 1 && $request->complaint_id == 1){
+                            $canComplaintPaymentLocked = $this->canComplaintPaymentLocked($shipment->id);
+                            if ($canComplaintPaymentLocked['status'] === 0) {
+                                return $canComplaintPaymentLocked;
+                            }
                         }
                         if($is_shipment){
                             $already_lodged = true;
@@ -1138,7 +1158,7 @@ class AdminCRMController extends Controller
             }else{
                 $crm_request_ids[] = $id;
             }
-            $crm_status_history = CrmRequestStatusHistory::whereIn('crm_request_id', $crm_request_ids)->get();
+            $crm_status_history = CrmRequestStatusHistory::whereIn('crm_request_id', $crm_request_ids)->where('status_id','!=',6)->get();
             $crm_tagging_history = CrmRequestTaggingHistory::where('crm_request_id', $id)->get();
             $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->get();
             $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id',1)->get();
@@ -4408,7 +4428,6 @@ class AdminCRMController extends Controller
                         NotificationsController::send(117, $crm_request->id, 4);
                     }
                     CrmRequestTagging::where('crm_request_id', $request->id)->delete();
-                    $this->sendPaidInitialMessageToShipper($request->req_id);
                     return redirect()->back()->with(['success' => 'Request marked as Closed']);
                 } else {
                     return redirect()->back()->with(['error' => 'Request is already marked as Closed']);
@@ -4560,7 +4579,6 @@ class AdminCRMController extends Controller
 
                 }
                 // Notification 191 end
-                $this->sendPaidInitialMessageToShipper($request->req_id);
                 
                 if(!empty($request->claim_invalid_reasons)){
                     $this->storeInvalidReasons($request->claim_invalid_reasons, $request->req_id);
@@ -4649,7 +4667,6 @@ class AdminCRMController extends Controller
                 }
                 // Notification 191 end
             }
-            $this->sendPaidInitialMessageToShipper($request->req_id);
             return ['status' => 0, 'success' => 'Request marked as Closed'];
         }
         return ['status' => 1, 'error' => 'Requests does\'nt exists'];
@@ -7400,9 +7417,6 @@ class AdminCRMController extends Controller
                         }
     
                         CrmRequestTagging::where('crm_request_id', $crm_request->id)->delete();
-
-                        $this->sendPaidInitialMessageToShipper($request->req_id);
-
                         // Request marked as Closed
                     } else {
                         $errors[] = 'Request is already marked as Closed for CRM request number ' . $crm_request->id;
@@ -7531,11 +7545,14 @@ class AdminCRMController extends Controller
             return ['status' => 1];
         }
 
+        if ($nature_id != 4) {
+            return ['status' => 1];
+        }
+
         $statusId = $crm?->status_id ?? $check_claim_can_lock?->status_id;
 
         if (!in_array($statusId, [3, 4])) {
             if (
-                $nature_id != 4 ||
                 $request->complaint_id == 26 ||
                 in_array($shipment->shipper_status_id, [18, 51])
             ) {
@@ -7544,12 +7561,13 @@ class AdminCRMController extends Controller
 
             return [
                 'status' => 0,
-                'error' => 'The claim cannot be locked directly. Please lock the complaint first from the complaint section.'
+                'error' => 'The claim cannot be locked directly. Please lock the complaint first from the complaint section.',
             ];
         }
 
         return ['status' => 1];
     }
+
 
     public static function storeInvalidReasons(array $reasonIds, int $crmRequestId)
     {
@@ -7592,7 +7610,7 @@ class AdminCRMController extends Controller
     {
         $shipmentPayment = ShipmentsPaymentJourney::with('shipment.user')
             ->where('shipment_id', $id)
-            ->latest()
+            ->latest('id')
             ->first();
 
         // 1 = Processed, 3 = Paid
@@ -7604,38 +7622,5 @@ class AdminCRMController extends Controller
         }
 
         return ['status' => 1];
-    }
-
-    public static function sendPaidInitialMessageToShipper($crm_id)
-    {
-        $crm_request = CrmRequest::find($crm_id);
-
-        $shipmentPayment = ShipmentsPaymentJourney::with('shipment.user')
-        ->where('shipment_id', $crm_request->shipment_id)
-        ->latest()
-        ->first();
-
-        if ($shipmentPayment?->status_id == 3){
-
-            $comment = "Dear Customer Name
-
-            Your payment has been paid; therefore, the complaint has been closed.
-
-            Regards
-
-            CRM Team – SLGTRAX";
-            
-            $comment_by = 0;
-            $comment_type = 0;
-
-            $default_agent_setting = GlobalSettings::where('type', 'crm_default_agent');
-            if ($default_agent_setting->exists()) {
-                $default_agent_setting = $default_agent_setting->first();
-                $default_agent_id = $default_agent_setting->setting_value;
-            } else {
-                $default_agent_id = 306;
-            }
-            CRMCommentController::add($crm_id, $default_agent_id, $comment_by, $comment_type, $comment, 1);
-        }
     }
 }
