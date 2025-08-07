@@ -324,9 +324,7 @@ class GeoCodesController extends Controller
                 foreach ($unique_address as $city => $addresses) {
                     foreach ($addresses as $address => $info) {
                         $response = $client->get('search', [
-                            'headers' => [
-                                'Accept' => 'application/json'
-                            ],
+                            'headers' => ['Accept' => 'application/json'],
                             'query' => [
                                 'name' => $address,
                                 'city' => $city,
@@ -343,16 +341,31 @@ class GeoCodesController extends Controller
                         $lng = null;
 
                         if (is_array($data) && !empty($data)) {
-                            // Normalize a string (remove special chars, lowercase, trim)
+                            // Normalize function
                             $normalize = function ($string) {
                                 $string = strtolower($string);
-                                $string = preg_replace('/[^a-z0-9\s]/i', ' ', $string); // remove special characters
-                                $string = preg_replace('/\s+/', ' ', $string); // collapse multiple spaces
+                                $string = preg_replace('/[^a-z0-9\s]/i', ' ', $string);
+                                $string = preg_replace('/\s+/', ' ', $string);
                                 return trim($string);
                             };
 
-                            // Tokenize address
                             $address_terms = explode(' ', $normalize($address));
+                            $specific_terms = [
+                                'apartment', 'flat', 'block', 'floor', 'road', 'sector', 'phase', 'house',
+                                'street', 'lane', 'town', 'colony', 'society', 'scheme', 'area', 'zone',
+                                'building', 'plot', 'boulevard', 'avenue', 'extension', 'near', 'opposite',
+                                'behind', 'beside', 'market', 'commercial', 'residential', 'garden',
+                                'residency', 'township', 'line', 'circle', 'quarters', 'number', 'no',
+                                'stop', 'station', 'bazar', 'mohallah', 'gali', 'chowk', 'chowrangi',
+                                'gate', 'cantt', 'shahrah', 'model', 'industrial', 'katchi abadi', 'new',
+                                'old', 'main', 'service', 'underpass', 'flyover', 'nearby', 'link', 'corner',
+                                'oppo', 'ground', 'hall', 'unit', 'tower', 'building', 'wing', 'level',
+                                'mezzanine', 'penthouse', 'villa', 'duplex', 'suite', 'row', 'park',
+                                'view', 'cooperative', 'society', 'drive', 'enclave', 'hill', 'heights',
+                                'cliff', 'ridge', 'bridge', 'compound', 'lane', 'yard', 'bay', 'sector',
+                                'height', 'terrace', 'court', 'pura', 'abad', 'pind', 'nagri', 'shahr'
+                            ];
+
 
                             $bestMatch = null;
                             $highestScore = 0;
@@ -366,6 +379,13 @@ class GeoCodesController extends Controller
                                         $score++;
                                     }
                                 }
+
+                                foreach ($specific_terms as $term) {
+                                    if (strpos($compound, $term) !== false) {
+                                        $score += 2;
+                                    }
+                                }
+
                                 Log::channel('code_test_log')->info('Geo match unit', [
                                     'unit' => $unit,
                                     'score' => $score
@@ -379,7 +399,7 @@ class GeoCodesController extends Controller
 
                             $target = $bestMatch ?? $data[0];
 
-                            // Extract lat/lng via regex to preserve formatting
+                            // Extract lat/lng
                             $encodedTarget = json_encode($target);
                             preg_match('/"lat"\s*:\s*([0-9\.\-eE+]+)/', $encodedTarget, $latMatch);
                             preg_match('/"lng"\s*:\s*([0-9\.\-eE+]+)/', $encodedTarget, $lngMatch);
@@ -418,6 +438,7 @@ class GeoCodesController extends Controller
             return response()->json(['status' => 0, 'error' => 'No data found.']);
         }
     }
+
 
 
 
