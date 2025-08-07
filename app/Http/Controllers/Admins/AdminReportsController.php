@@ -4168,7 +4168,7 @@ class AdminReportsController extends Controller
                                 $gst += $shipment->pis_gst ?? 0;
                                 $gst += $shipment->is_gst ?? 0;
                             }
-                            $row[$field] = number_format((float) $gst, 2);
+                            $row[$field] = number_format((float)$gst, 2);
                             break;
 
                         case 'pps_wht':
@@ -4180,7 +4180,7 @@ class AdminReportsController extends Controller
                                 $wht += $shipment->pis_wht ?? 0;
                                 $wht += $shipment->is_wht ?? 0;
                             }
-                            $row[$field] = number_format((float) $wht, 2);
+                            $row[$field] = number_format((float)$wht, 2);
                             break;
 
                         case 'pps_cod_sst':
@@ -4192,7 +4192,7 @@ class AdminReportsController extends Controller
                                 $cod_sst += $shipment->pis_cod_sst ?? 0;
                                 $cod_sst += $shipment->is_cod_sst ?? 0;
                             }
-                            $row[$field] = number_format((float) $cod_sst, 2);
+                            $row[$field] = number_format((float)$cod_sst, 2);
                             break;
 
                         case 'pps_sms_charges':
@@ -4204,19 +4204,19 @@ class AdminReportsController extends Controller
                                 $sms_charges += $shipment->pis_sms_charges ?? 0;
                                 $sms_charges += $shipment->is_sms_charges ?? 0;
                             }
-                            $row[$field] = number_format((float) $sms_charges, 2);
+                            $row[$field] = number_format((float)$sms_charges, 2);
                             break;
 
                         case 'p_total_charges':
                             $total = ($shipment->p_total_charges ?? 0) + ($shipment->d_total_charges ?? 0) + ($shipment->fintech_charges ?? 0);
-                            $row[$field] = number_format((float) $total, 2);
+                            $row[$field] = number_format((float)$total, 2);
                             break;
 
                         case 'estimated_charges':
                             $estimated = (
                                 ($shipment->weight_charges ?? 0) +
                                 ($shipment->cash_handling_charges ?? 0) +
-                                2 * ($shipment->insurance_charges ?? 0) + 
+                                2 * ($shipment->insurance_charges ?? 0) +
                                 ($shipment->return_charges ?? 0) +
                                 ($shipment->replacement_charges ?? 0) +
                                 ($shipment->fuel_surcharge ?? 0) +
@@ -4224,7 +4224,7 @@ class AdminReportsController extends Controller
                                 ($shipment->packaging_material_charges ?? 0) +
                                 ($shipment->intercept_charges ?? 0)
                             );
-                            $row[$field] = number_format((float) $estimated, 2);
+                            $row[$field] = number_format((float)$estimated, 2);
                             break;
 
                         case 'class':
@@ -4249,62 +4249,68 @@ class AdminReportsController extends Controller
                             break;
 
                         case 'total_attempt':
-                        $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment->shipment_id);
-                        if ($delivery_note_shipment->exists()) {
-                            $delivery_note_ids = $delivery_note_shipment->pluck('delivery_note_id')->toArray();
-                            $delivery_notes = DeliveryNote::whereIn('id', $delivery_note_ids)
-                                ->whereHas('rider', fn($q) => $q->where('operation_rider_id', 1))
-                                ->count();
-                            $row[$field] = $delivery_notes;
-                        } else {
-                            $row[$field] = '-';
-                        }
-                        break;
+                            $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment->shipment_id);
+                            if ($delivery_note_shipment->exists()) {
+                                $delivery_note_ids = $delivery_note_shipment->pluck('delivery_note_id')->toArray();
+                                $delivery_notes = DeliveryNote::whereIn('id', $delivery_note_ids)
+                                    ->whereHas('rider', fn($q) => $q->where('operation_rider_id', 1))
+                                    ->count();
+                                $row[$field] = $delivery_notes;
+                            } else {
+                                $row[$field] = '-';
+                            }
+                            break;
 
-                    case 'ref':
-                        $sales_tiers = DB::table('sales_tiers')
-                            ->where('tier_name', 'LIKE', '%REF%')
-                            ->orWhere('tier_name', 'LIKE', '%ref%')
-                            ->first();
+                        case 'ref':
+                            $sales_tiers = DB::table('sales_tiers')
+                                ->where('tier_name', 'LIKE', '%REF%')
+                                ->orWhere('tier_name', 'LIKE', '%ref%')
+                                ->first();
 
-                        $sales_tier_id = $sales_tiers->id ?? null;
-                        $shipper = DB::table('sales_commissions')
-                            ->where('shipper_id', $shipment->account_no)
-                            ->first();
+                            $sales_tier_id = $sales_tiers->id ?? null;
+                            $shipper = DB::table('sales_commissions')
+                                ->where('shipper_id', $shipment->account_no)
+                                ->first();
 
-                        if (isset($shipper, $sales_tier_id)) {
-                            $sales_commission_users = DB::table('sales_commission_users')
-                                ->where([
-                                    'tier_id' => $sales_tier_id,
-                                    'sales_commission_id' => $shipper->id,
-                                ])->get();
+                            if (isset($shipper, $sales_tier_id)) {
+                                $sales_commission_users = DB::table('sales_commission_users')
+                                    ->where([
+                                        'tier_id' => $sales_tier_id,
+                                        'sales_commission_id' => $shipper->id,
+                                    ])->get();
 
-                            if ($sales_commission_users->isNotEmpty()) {
-                                $names = [];
-                                foreach ($sales_commission_users as $user) {
-                                    $admin = $user->user_type == 1
-                                        ? Admin::find($user->user_id)
-                                        : Rider::find($user->user_id);
-                                    if ($admin) $names[] = $admin->name;
+                                if ($sales_commission_users->isNotEmpty()) {
+                                    $names = [];
+                                    foreach ($sales_commission_users as $user) {
+                                        $admin = $user->user_type == 1
+                                            ? Admin::find($user->user_id)
+                                            : Rider::find($user->user_id);
+                                        if ($admin) $names[] = $admin->name;
+                                    }
+                                    $row[$field] = implode(', ', array_unique($names));
+                                } else {
+                                    $row[$field] = $shipment->ref;
                                 }
-                                $row[$field] = implode(', ', array_unique($names));
                             } else {
                                 $row[$field] = $shipment->ref;
                             }
-                        } else {
-                            $row[$field] = $shipment->ref;
-                        }
-                        break;
+                            break;
+
                         default:
                             $row[$field] = $shipment->$field ?? '';
                             break;
                     }
                 }
-                fputcsv($output, $row);
+
+                $orderedRow = [];
+                foreach ($fieldsToRetrieve as $field) {
+                    $orderedRow[] = $row[$field] ?? '';
+                }
+
+                fputcsv($output, $orderedRow);
             }
 
             fclose($output);
-
         } catch (\Throwable $th) {
             Log::channel('code_test_log')->error(
                 "CRM Report Error: " . $th->getMessage(),
@@ -4315,6 +4321,7 @@ class AdminReportsController extends Controller
             );
         }
     }
+
     
     public function sales_person_performance_index()
     {
