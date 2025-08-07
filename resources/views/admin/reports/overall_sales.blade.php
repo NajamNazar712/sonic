@@ -671,26 +671,26 @@
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
                     data: function (d) {
-                        search_tracking = $('#search_tracking_no').val();
-                        search_sales_person =  $('#sales_person_select').val();
-                        search_shipper = $('#search_shipper').val();
-                        search_shippers = $('#search_shippers').val();
-                        search_origin = $('#search_origin').val();
-                        search_destination = $('#search_destination').val();
-                        search_hub = $('#search_hub').val();
-                        search_status = $('#search_status').val();
-                        sub_segment = $('#sub_segment_select').val();
-                        ref = $('#ref_name_select').val();
-                        search_date_from = $('input[name="search_date_from_formatted"]').val();
-                        search_date_to = $('input[name="search_date_to_formatted"]').val();
-                        search_business_category = $('#search_business_category').val();
-                        arrival_time_from= $('input[name="arrival_time_from"]').val();
-                        arrival_time_to= $('input[name="arrival_time_to"]').val();
-                        search_shipping_mode = $('#search_shipping_mode').val();
-                        search_origin_hub = $('#search_origin_hub').val();
-                        search_origin_zone = $('#search_origin_zone').val();
-                        service_type_select = $('#service_type_select').val()
-                        rider_type_referral = $('#rider_types_referral').val();
+                        d.search_tracking = $('#search_tracking_no').val();
+                        d.search_sales_person =  $('#sales_person_select').val();
+                        d.search_shipper = $('#search_shipper').val();
+                        d.search_shippers = $('#search_shippers').val();
+                        d.search_origin = $('#search_origin').val();
+                        d.search_destination = $('#search_destination').val();
+                        d.search_hub = $('#search_hub').val();
+                        d.search_status = $('#search_status').val();
+                        d.sub_segment = $('#sub_segment_select').val();
+                        d.ref = $('#ref_name_select').val();
+                        d.search_date_from = $('input[name="search_date_from_formatted"]').val();
+                        d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                        d.search_business_category = $('#search_business_category').val();
+                        d.arrival_time_from= $('input[name="arrival_time_from"]').val();
+                        d.arrival_time_to= $('input[name="arrival_time_to"]').val();
+                        d.search_shipping_mode = $('#search_shipping_mode').val();
+                        d.search_origin_hub = $('#search_origin_hub').val();
+                        d.search_origin_zone = $('#search_origin_zone').val();
+                        d.service_type_select = $('#service_type_select').val()
+                        d.rider_type_referral = $('#rider_types_referral').val();
                     }
                 },
                 order: [[1, 'desc']],
