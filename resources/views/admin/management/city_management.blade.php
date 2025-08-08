@@ -477,7 +477,7 @@
                     {data: 'address', name: 'cities.address', class: 'align-middle address'},
                     {data: 'booking_enable_status', name: 'cities.booking_enable_status', class: 'align-middle booking_enable_status'},                   
                     {data: 'status_logs', name: 'status_logs', class: 'align-middle status_logs'},
-                    {data: 'booking_enable_disable_logs', name: 'booking_enable_disable_logs', class: 'align-middle booking_enable_disable_logs'},                    {data: 'city_logs', name: 'city_logs', class: 'align-middle city_logs'},
+                    {data: 'booking_enable_disable_logs', name: 'booking_enable_disable_logs', class: 'align-middle booking_enable_disable_logs'},                    {data: 'city_logs', name: 'city_logs', class: 'align-middle city_logs', orderable: false, searchable: false},
 
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
@@ -514,7 +514,7 @@
                        var column = this;
                        var header = column.header();
              
-                       if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.location')  || $(header).is('.hub_location') || $(header).is('.latitude') || $(header).is('.longitude')) {
+                       if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.location')  || $(header).is('.hub_location') || $(header).is('.latitude') || $(header).is('.longitude') || $(header).is('.city_logs')) {
                            $(td).appendTo($(search));
                        }else if($(header).is('.status')){
                            $(status_select).appendTo($(search))
