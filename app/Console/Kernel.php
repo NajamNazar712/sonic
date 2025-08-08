@@ -551,6 +551,7 @@ class Kernel extends ConsoleKernel
         //        }
 //        $schedule->command('crm:autoassign')->dailyAt('17:00')->runInBackground();
         $schedule->command('crm:autoassign_new')->dailyAt('17:00')->runInBackground();
+        $schedule->command('crm:autoassign_new')->dailyAt('08:00')->runInBackground();
 
         $schedule->command('sum:pendingpayments')->dailyAt('6:00')->runInBackground();
 
@@ -596,10 +597,10 @@ class Kernel extends ConsoleKernel
 //        $schedule->command('logistic:shipper-bookings')->dailyAt('06:00')->runInBackground();
 //        $schedule->command('hourly-logistic:shipper-bookings')->hourly()->runInBackground();
         $schedule->command('delete:short-url-data')->dailyAt('01:00')->runInBackground();
-//        $schedule->command('supervisord:restart')
-//        // ->cron('0 9,13,16 * * *')
-//            ->everyThirtyMinutes()
-//            ->runInBackground();
+        $schedule->command('supervisord:restart')
+//         ->cron('0 9,13,16 * * *')
+            ->hourly()
+            ->runInBackground();
 
         $schedule->command('update:zero_arrival_charges')->hourly()->runInBackground();
         $schedule->command('delete:duplicate_arrival')->hourly()->runInBackground();
@@ -681,7 +682,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('db:optimize-table')
             ->when(function () {
                 // Only run at exactly 6:00 AM on 2nd August 2025
-                return Carbon::now()->format('Y-m-d H:i') === '2025-08-02 06:00';
+                return Carbon::now()->format('Y-m-d H:i') === '2025-08-03 04:25';
             })
             ->withoutOverlapping();
         

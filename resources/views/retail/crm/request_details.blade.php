@@ -233,7 +233,7 @@
                                                                 @if($crm_details['status_id'] == 1 ||$crm_details['status_id'] == 5)
                                                                     <button id="valid" type="submit"class="btn btn-success mr-1">
                                                                         <span class="d-none d-lg-block">
-                                                                            Valid
+                                                                            Accept Ticket
                                                                         </span>
                                                                     </button>
                                                                 @elseif($crm_details['status_id'] == 2)

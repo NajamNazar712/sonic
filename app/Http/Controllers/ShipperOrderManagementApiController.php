@@ -16,10 +16,34 @@ class ShipperOrderManagementApiController extends Controller
    public  function order_list(Request $request)
    {
        $tracking_number = $request->input('tracking_number');
+       $shipper_statuses = [];
+       if(in_array($request->status_id,[1,3,14,25,17])) {
+
+            if($request->status_id == 1) {
+               //booked
+               $shipper_statuses=[1,19];
+           }
+            else if($request->status_id == 3) {
+               //in process
+               $shipper_statuses=[2,3,4,5,6,7,8,9,10,11,12,13,15,44,49,50,52,53,54,55,58,59,61,62,63,64,65,66,67,68,151,152];
+           } else if($request->status_id == 14) {
+               //delivered
+               $shipper_statuses=[14,26,27,28,29,30,31,32,33,34,35,36,37,38,45,46,56,69,70,71,72,73,74 ];
+           }
+           else if($request->status_id == 17) {
+               //cancelled
+               $shipper_statuses=[17,18,51];
+           }
+           else if($request->status_id == 25) {
+               //return
+               $shipper_statuses=[20,21,22,23,24,25,47,48,57,60,75,76,77];
+           }
+       }
+
        if ($request->app_type == 2 ) {
-           $order_list = $this->retail_shipper_list($request->retail_shipper_id,$tracking_number);
+           $order_list = $this->retail_shipper_list($request->retail_shipper_id,$tracking_number,$shipper_statuses);
        } else {
-           $order_list = $this->shipper_order_list($request->shipper_id,$tracking_number);
+           $order_list = $this->shipper_order_list($request->shipper_id,$tracking_number,$shipper_statuses);
        }
 
        if ($order_list && $order_list->count() > 0) {
@@ -80,7 +104,7 @@ class ShipperOrderManagementApiController extends Controller
     }
 
 
-    private function shipper_order_list($shipper_id,$tracking_number)
+    private function shipper_order_list($shipper_id,$tracking_number,$shipper_statuses)
     {
 
         $shipper_order_list = $this->commonShipmentQuery()
@@ -88,13 +112,19 @@ class ShipperOrderManagementApiController extends Controller
             ->addSelect('sm.mode as service_type','shipments.id')
             ->where('shipments.user_id', $shipper_id);
 
-        if($tracking_number) {
-            return $shipper_order_list->where('shipments.tracking_number', $tracking_number)->get();
+        if ($tracking_number) {
+            $shipper_order_list->where('shipments.tracking_number', $tracking_number);
         }
+
+        if (!empty($shipper_statuses)) {
+            $shipper_order_list->whereIn('shipments.shipper_status_id', $shipper_statuses);
+        }
+
         return $shipper_order_list->orderBy('shipments.id', 'desc')->cursorPaginate(20);
+
     }
 
-    private function retail_shipper_list($retail_id,$tracking_number)
+    private function retail_shipper_list($retail_id,$tracking_number,$shipper_statuses)
     {
         $retail_shipper_list = $this->commonShipmentQuery()
             ->leftjoin('retail_shipments as rs', 'rs.shipment_id', '=', 'shipments.id')
@@ -103,10 +133,15 @@ class ShipperOrderManagementApiController extends Controller
             ->addSelect('rs.id','sm.name as service_type')
             ->where('rsi.id', $retail_id);
 
-            if($tracking_number) {
-               return  $retail_shipper_list->where('shipments.tracking_number', $tracking_number)->get();
+            if ($tracking_number) {
+                $retail_shipper_list->where('shipments.tracking_number', $tracking_number);
             }
-            return  $retail_shipper_list->orderBy('rs.id', 'desc')->cursorPaginate(20);
+
+            if (!empty($shipper_statuses)) {
+                $retail_shipper_list->whereIn('shipments.shipper_status_id', $shipper_statuses);
+            }
+
+            return $retail_shipper_list->orderBy('rs.id', 'desc')->cursorPaginate(20);
     }
 
     private function shipments_summary_od($user_id,$app_type)

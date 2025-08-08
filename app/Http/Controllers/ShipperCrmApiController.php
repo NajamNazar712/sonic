@@ -32,6 +32,7 @@ class ShipperCrmApiController extends Controller
         $app_type = $request->app_type; // if app_type=1 shipper else app_type=2 retail
         $description = $request->description;
         $user_id = $request->shipper_id;
+        $launched_by_id =  $request->shipper_id;
 //        if($app_type == 2) {
 //            $setting = GlobalSettings::where('type', 'retail_store')->first();
 //            $user_id = $setting->setting_value;
@@ -54,9 +55,9 @@ class ShipperCrmApiController extends Controller
 
                 if ($app_type == 2) {
                     $user_id = GlobalSettings::where('type', 'retail_store')->value('setting_value') ?? 1126;
-//                    $user_id = $request->retail_shipper_id;
-                    $shipment = Shipment::whereHas('retail', function ($query) use ($user_id,$request) {
-                        $query->where('shipper_account_no', $request->retail_shipper_id);
+                    $launched_by_id = $request->retail_shipper_id;
+                    $shipment = Shipment::whereHas('retail', function ($query) use ($user_id,$request,$launched_by_id) {
+                        $query->where('shipper_account_no', $launched_by_id);
                     })->where('id',$shipment_id)->first();
                 }else {
                     $shipment = Shipment::where('id',$shipment_id)->where('user_id',$user_id)->first();
@@ -107,7 +108,7 @@ class ShipperCrmApiController extends Controller
                             $claim_content_product_cost = $request->claim_content_product_cost;
                         }
 
-                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, $user_id, $launched_by, $shipment_id, $user_id, NULL, $description, $product_cost,$product_picture, $invoice_picture,$damage_product_picture, $product_packaging_picture,$actual_product_picture,$damage_claim_product_cost,$missing_product_picture,$product_packaging_picture_content_short, $actual_product_picture_content_short, $claim_content_product_cost);
+                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, $launched_by_id, $launched_by, $shipment_id, $user_id, NULL, $description, $product_cost,$product_picture, $invoice_picture,$damage_product_picture, $product_packaging_picture,$actual_product_picture,$damage_claim_product_cost,$missing_product_picture,$product_packaging_picture_content_short, $actual_product_picture_content_short, $claim_content_product_cost);
                     }
                     else {
                         if ($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1) {
@@ -120,13 +121,13 @@ class ShipperCrmApiController extends Controller
                         if ($complaint_id == 12 && $app_type == 1) {
                             if ($shipment->shipper_status_id == 5) {
                                 $description = $description . " (change old amouunt $shipment->amount to new amount $request->cod_new_amount )";
-                                $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, $user_id, $launched_by, $shipment_id, $user_id, NULL, $description);
+                                $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, $launched_by_id, $launched_by, $shipment_id, $user_id, NULL, $description);
 
                             } else {
-                                $crm_request_padded_id =  CRMController::add($nature_id, $complaint_id, $channel_id, 1, $user_id, $launched_by, $shipment_id, $user_id, NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1);
+                                $crm_request_padded_id =  CRMController::add($nature_id, $complaint_id, $channel_id, 1, $launched_by_id, $launched_by, $shipment_id, $user_id, NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1);
                             }
                         } else {
-                            $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, $user_id, $launched_by, $shipment_id,$user_id, NULL, $description);
+                            $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, $launched_by_id, $launched_by, $shipment_id,$user_id, NULL, $description);
                         }
                     }
                     if ($nature_id == 2 && $app_type == 1) {
