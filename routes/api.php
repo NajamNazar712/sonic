@@ -15,7 +15,6 @@ use Illuminate\Http\Request;
 
 
     Route::name('api.')->group(function () {
-
     Route::get('fetch_complaints', 'APIController@fetch_complaints')->name('fetch_complaints');
     Route::post('shipment/track/public/crm/request', 'APIController@add_request')->name('crm.track.public');
     Route::post('login', 'APIController@login')->name('login');
@@ -701,6 +700,8 @@ use Illuminate\Http\Request;
                 Route::post('submit', 'APIController@shipment_book')->name('submit');
             });
 
+            Route::post('shipping_address','ShipperAPIController@shipping_address')->name('shipping_address');
+
             Route::get('profile', 'ShipperAppController@profile')->name('profile');
 
             //Shipment Call History
@@ -721,8 +722,8 @@ use Illuminate\Http\Request;
 
             //finance Apis
             Route::prefix('finance')->name('finance.')->group(function (){
-                  Route::get('payments/{id?}','ShipperFinanceApiController@payment_list')->name('payments');
-            });
+                  Route::get('v2/payments/{id?}','ShipperFinanceApiController@payment_list')->name('payments');
+                  Route::get('v2/GetPaymentShipments','ShipperFinanceApiController@GetPaymentShipments')->name('getPaymentShipments');});
 
             // CRM Apis
             Route::prefix('crm')->name('crm.')->group(function (){
