@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class OptimizeTable extends Command
 {
@@ -19,17 +20,44 @@ class OptimizeTable extends Command
 
     public function handle()
     {
-        $this->info('🔧 Putting app into maintenance mode...');
-        Artisan::call('down', [
-            '--retry' => 60,
-        ]);
+        $start = now();
+        $logLines = [];
 
-        $this->info('Running OPTIMIZE TABLE...');
-        DB::statement('OPTIMIZE TABLE shipment_scanning_journey');
+        $logLines[] = "🚀 Optimize Command Started at: $start";
 
-        $this->info('Optimization complete. Bringing app back online...');
-        Artisan::call('up');
+        try {
+            // Put the app into maintenance mode
+            Artisan::call('down');
+            $logLines[] = "✅ App is now in maintenance mode.";
 
-        $this->info('Done.');
+            // Run the OPTIMIZE TABLE command
+            $logLines[] = '📦 Running OPTIMIZE TABLE shipment_scanning_journeys...';
+            $result = DB::select('OPTIMIZE TABLE shipment_scanning_journeys');
+
+            foreach ($result as $row) {
+                $jsonRow = json_encode($row);
+                $this->line($jsonRow); // Output to console
+                $logLines[] = "📝 Result: $jsonRow"; // Append to log
+            }
+
+            // Bring the app back online
+            Artisan::call('up');
+            $logLines[] = "✅ App is back online.";
+
+            $end = now();
+            $duration = $start->diffInSeconds($end);
+
+            $logLines[] = "⏱ Completed at: $end";
+            $logLines[] = "⏱ Execution time: {$duration} seconds";
+        } catch (\Throwable $th) {
+            $logLines[] = "❌ Exception occurred: " . $th->getMessage();
+            // Always try to bring the app back up if something failed
+            Artisan::call('up');
+        }
+
+        // Write all lines to the custom cronJobLog channel
+        foreach ($logLines as $line) {
+            Log::channel('cronJobLog')->info($line);
+        }
     }
 }

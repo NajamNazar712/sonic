@@ -67,6 +67,7 @@ use App\Http\Models\ShippingMode;
 use App\Http\Models\ShippingModeSameDayTiming;
 use App\Http\Models\SubstituteUserShipment;
 use App\Http\Models\ZoneClassCity;
+use App\Http\Traits\FilterTrait;
 use App\Jobs\ProcessShipmentBookingDB;
 use App\Jobs\ProcessShipmentBookingDBPriority;
 use App\Jobs\ProcessShipmentBookingDistributionDB;
@@ -88,6 +89,7 @@ use App\Models\BookingChannel;
 
 class ShipperShipmentBookController extends Controller
 {
+    use FilterTrait;
 
     // private function unique_order_id($order_id)
     // {
@@ -1205,6 +1207,12 @@ class ShipperShipmentBookController extends Controller
             <div class="small mt-1">Printed By: ' . $user_name . '</div>
         ';
 
+        $remove_logo = '';
+        $exclude_logo = FilterTrait::class::getFilteredShipperIds($user_id);
+        if($exclude_logo){
+            $remove_logo = 'd-none-logo';
+        }
+
         $html = '';
 
         if (!$body_only) {
@@ -1219,12 +1227,22 @@ class ShipperShipmentBookController extends Controller
 
             if ($user_type != 4 && $type != 'pdf') {
                 $html .= '
-                    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
-                ';
+    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+    <style>
+        .d-none-logo { display: none !important; }
+    </style>
+';
+
             } else {
                 $html .= '
-                    <style>' . file_get_contents(public_path('app-assets/css/bootstrap.min.css')) . '</style>
-                ';
+    <style>'
+                    . file_get_contents(public_path('app-assets/css/bootstrap.min.css')) .
+                    '</style>
+    <style>
+        .d-none-logo{ display: none !important; }
+    </style>
+';
+
             }
 
             $html .= '
@@ -1529,16 +1547,16 @@ class ShipperShipmentBookController extends Controller
 
                         if ($user_type != 4 && $type != 'pdf') {
                             $table_start .= '
-                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto  ' . $remove_logo . '">' . $print_details . '</td>
                     ';
                         } else {
                             if ($type != 'pdf') {
                                 $table_start .= '
-                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto  ' . $remove_logo . '">' . $print_details . '</td>
                         ';
                             } else {
                                 $table_start .= '
-                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="75" class="d-block mx-auto">' . $print_details . '</td>
+                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="75" class="d-block mx-auto  ' . $remove_logo . '">' . $print_details . '</td>
                         ';
                             }
                         }
@@ -1640,28 +1658,28 @@ class ShipperShipmentBookController extends Controller
 
                     if ($user_type != 4 && $type != 'pdf') {
                         $table_start .= '
-                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto  ' . $remove_logo . '">' . $print_details . '</td>
                     ';
 
                         $distribution_logo = '
-                                <td rowspan="3" colspan="3"  class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                                <td rowspan="3" colspan="3"  class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto  ' . $remove_logo . '">' . $print_details . '</td>
                     ';
                     } else {
                         if ($type != 'pdf') {
                             $table_start .= '
-                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto  ' . $remove_logo . '">' . $print_details . '</td>
                         ';
 
                             $distribution_logo = '
-                               <td rowspan="3" colspan="3"  class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                               <td rowspan="3" colspan="3"  class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto  ' . $remove_logo . '">' . $print_details . '</td>
                     ';
                         } else {
                             $table_start .= '
-                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="75" class="d-block mx-auto">' . $print_details . '</td>
+                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="75" class="d-block mx-auto  ' . $remove_logo . '">' . $print_details . '</td>
                         ';
 
                             $distribution_logo = '
-                                <td rowspan="3" colspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="75" class="d-block mx-auto">' . $print_details . '</td>
+                                <td rowspan="3" colspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="75" class="d-block mx-auto  ' . $remove_logo . '">' . $print_details . '</td>
                     ';
                         }
                     }
@@ -2231,7 +2249,7 @@ class ShipperShipmentBookController extends Controller
                         foreach ($shipment->shipment_pieces as $piece) {
                             $shipment_pieces .= '<table class="table table-sm table-bordered border twice">
                         <tbody><tr>';
-                            $shipment_pieces .= '<td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>';
+                            $shipment_pieces .= '<td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto  ' . $remove_logo . '">' . $print_details . '</td>';
                             $shipment_pieces .= '<td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                                   <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($piece->tracking_number, $generator::TYPE_CODE_128, 1.5, 45)) . '" class="d-block mx-auto">
                                   <span><strong>' . $piece->tracking_number . '</strong></span>
@@ -2286,7 +2304,7 @@ class ShipperShipmentBookController extends Controller
                         <div class="row"><div class="col-3"><h2>Invoice ' . $invoice_id . '</h2></div></div>
                         <div class="row"><div class="col-6 text-center">
                         ' . $shipper_logo . '
-    </div><div class="col-6 text-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mb-1" style="margin: 0 auto;"></div></div>
+    </div><div class="col-6 text-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mb-1  ' . $remove_logo . '" style="margin: 0 auto;"></div></div>
                         
                         <div class="row align-items-start justify-content-between p-2">
                             <div class="col-12">
@@ -2526,16 +2544,16 @@ class ShipperShipmentBookController extends Controller
 
                                 if ($user_type != 4 && $type != 'pdf') {
                                     $table_start .= '
-                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto  ' . $remove_logo . '">' . $print_details . '</td>
                     ';
                                 } else {
                                     if ($type != 'pdf') {
                                         $table_start .= '
-                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto  ' . $remove_logo . '">' . $print_details . '</td>
                         ';
                                     } else {
                                         $table_start .= '
-                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="75" class="d-block mx-auto">' . $print_details . '</td>
+                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="75" class="d-block mx-auto  ' . $remove_logo . '">' . $print_details . '</td>
                         ';
                                     }
                                 }
@@ -5520,7 +5538,7 @@ class ShipperShipmentBookController extends Controller
             $bdmk_result = array();
 
             if (Session::has('prefix')) {
-                $rules['order_id'] = ['required', 'integer', 'between:0,1000000000000', Rule::unique('shipments', 'order_id')->where(function ($query) use ($user_id) {
+                $rules['order_id'] = ['required', 'integer', 'between:0,1000000000000', Rule::unique('shipments', 'tracking_number')->where(function ($query) use ($user_id) {
                     $query->where('user_id', $user_id);
                 })];
             } else {
@@ -5682,76 +5700,76 @@ class ShipperShipmentBookController extends Controller
                         }
 
                         if (!$request->excel_nsa) {
-                            $con_nsa = array();
-                            $msg_string = '';
-                            $str_arr = null;
-                            $str_arr = preg_split("/[ ,]+/", $row['consignee_address']);
-                            foreach ($check as $nsa) {
-                                foreach ($str_arr as $arr_value) {
-                                    if (strtolower($nsa) == strtolower($arr_value)) {
-                                        $con_nsa[$row_id] = $arr_value;
-                                        if ($msg_string != null) {
-                                            $msg_string = $msg_string . ', ' . $arr_value;
-                                        } else {
-                                            $msg_string = $arr_value;
-                                        }
-                                    }
-                                }
-                            }
-                            if (isset($con_nsa[$row_id])) {
-                                // $nsa_error[$row_id]['msg'] = "A Possible Address Anomaly: " . $msg_string . " Detected!";
-                            }
+//                            $con_nsa = array();
+//                            $msg_string = '';
+//                            $str_arr = null;
+//                            $str_arr = preg_split("/[ ,]+/", $row['consignee_address']);
+//                            foreach ($check as $nsa) {
+//                                foreach ($str_arr as $arr_value) {
+//                                    if (strtolower($nsa) == strtolower($arr_value)) {
+//                                        $con_nsa[$row_id] = $arr_value;
+//                                        if ($msg_string != null) {
+//                                            $msg_string = $msg_string . ', ' . $arr_value;
+//                                        } else {
+//                                            $msg_string = $arr_value;
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                            if (isset($con_nsa[$row_id])) {
+//                                // $nsa_error[$row_id]['msg'] = "A Possible Address Anomaly: " . $msg_string . " Detected!";
+//                            }
                         }
 
                         if(!$request->excel_bdmk) {
-                            $bdmk_result[$row_id] = $this->check_bdmk($consignee_city->id, $row['consignee_address'], $check_bdmk);
-                            if (isset($bdmk_result[$row_id]['invalid_cities'])) {
-                                $bdmk_error[$row_id]['msg'] = $bdmk_result[$row_id]['invalid_cities'];
-                            }
+//                            $bdmk_result[$row_id] = $this->check_bdmk($consignee_city->id, $row['consignee_address'], $check_bdmk);
+//                            if (isset($bdmk_result[$row_id]['invalid_cities'])) {
+//                                $bdmk_error[$row_id]['msg'] = $bdmk_result[$row_id]['invalid_cities'];
+//                            }
                         }
                         $shipping_mode = $request->shipping_mode ?? $row['shipping_mode_id'];
                         if (!CityDelivery::where('city_id', $consignee_city->id)->where('booking_type_id', 1)->where('shipping_mode_id', $shipping_mode)->exists()) {
                             $errors[$row_id]['consignee_city_name'] = 'Delivery is not allowed for City: ' . $consignee_city->name . ' with Service Type ID #' . 1 . ' and Shipping Mode ID #' . $shipping_mode;
                         }
                         if (!$request->excel_blacklist) {
-                            $consignee_phone_number_1 = substr_replace($row['consignee_phone_number_1'], '-', 4, 0);
-                            $consignee_information = ConsigneeInformation::where('phone', $consignee_phone_number_1);
-                            if ($consignee_information->exists()) {
-                                $consignee_information = $consignee_information->first();
-                                $manual_blacklist = BlacklistedConsigneeManuallyBlacklisted::where('consignee_information_id', $consignee_information->id);
-                                if ($manual_blacklist->exists()) {
-                                    $manual_blacklist = $manual_blacklist->first();
-                                    $blacklist_setting_id = $manual_blacklist->blacklist_setting_id;
-                                    $blacklist_setting = BlacklistSetting::find($blacklist_setting_id);
-                                    if ($blacklist_setting) {
-                                        if (!array_key_exists($blacklist_setting_id, $blacklist_found_categories)) {
-                                            $blacklist_found_categories[$blacklist_setting_id]['message'] = $blacklist_setting->message;
-                                            $blacklist_found_categories[$blacklist_setting_id]['color'] = $blacklist_setting->color;
-                                        }
-                                    }
-                                    $blacklist = BlacklistedConsignee::where('consignee_information_id', $consignee_information->id);
-                                    if ($blacklist->exists()) {
-                                        $blacklist = $blacklist->first();
-                                        $blacklist_errors[$row_id]['msg'] = 'Total Shipments: ' . $blacklist->shipments . ', Delivered: ' . $blacklist->delivered . '(' . $blacklist->delivered_ratio . '), Undelivered: ' . $blacklist->undelivered . '(' . $blacklist->undelivered_ratio . '), Return Confirmed: ' . $blacklist->return . '(' . $blacklist->return_ratio . ')';
-                                    } else {
-                                        $blacklist_errors[$row_id]['msg'] = 'Total Shipments: 0, Delivered: 0, Undelivered: 0, Return Confirmed: 0';
-                                    }
-                                } else {
-                                    $blacklist = BlacklistedConsignee::where('consignee_information_id', $consignee_information->id);
-                                    if ($blacklist->exists()) {
-                                        $blacklist = $blacklist->first();
-                                        $blacklist_setting_id = $blacklist->blacklist_setting_id;
-                                        $blacklist_setting = BlacklistSetting::find($blacklist_setting_id);
-                                        if ($blacklist_setting) {
-                                            if (!array_key_exists($blacklist_setting_id, $blacklist_found_categories)) {
-                                                $blacklist_found_categories[$blacklist_setting_id]['message'] = $blacklist_setting->message;
-                                                $blacklist_found_categories[$blacklist_setting_id]['color'] = $blacklist_setting->color;
-                                            }
-                                        }
-                                        $blacklist_errors[$row_id]['msg'] = 'Total Shipments: ' . $blacklist->shipments . ', Delivered: ' . $blacklist->delivered . '(' . $blacklist->delivered_ratio . '), Undelivered: ' . $blacklist->undelivered . '(' . $blacklist->undelivered_ratio . '), Return Confirmed: ' . $blacklist->return . '(' . $blacklist->return_ratio . ')';
-                                    }
-                                }
-                            }
+//                            $consignee_phone_number_1 = substr_replace($row['consignee_phone_number_1'], '-', 4, 0);
+//                            $consignee_information = ConsigneeInformation::where('phone', $consignee_phone_number_1);
+//                            if ($consignee_information->exists()) {
+//                                $consignee_information = $consignee_information->first();
+//                                $manual_blacklist = BlacklistedConsigneeManuallyBlacklisted::where('consignee_information_id', $consignee_information->id);
+//                                if ($manual_blacklist->exists()) {
+//                                    $manual_blacklist = $manual_blacklist->first();
+//                                    $blacklist_setting_id = $manual_blacklist->blacklist_setting_id;
+//                                    $blacklist_setting = BlacklistSetting::find($blacklist_setting_id);
+//                                    if ($blacklist_setting) {
+//                                        if (!array_key_exists($blacklist_setting_id, $blacklist_found_categories)) {
+//                                            $blacklist_found_categories[$blacklist_setting_id]['message'] = $blacklist_setting->message;
+//                                            $blacklist_found_categories[$blacklist_setting_id]['color'] = $blacklist_setting->color;
+//                                        }
+//                                    }
+//                                    $blacklist = BlacklistedConsignee::where('consignee_information_id', $consignee_information->id);
+//                                    if ($blacklist->exists()) {
+//                                        $blacklist = $blacklist->first();
+//                                        $blacklist_errors[$row_id]['msg'] = 'Total Shipments: ' . $blacklist->shipments . ', Delivered: ' . $blacklist->delivered . '(' . $blacklist->delivered_ratio . '), Undelivered: ' . $blacklist->undelivered . '(' . $blacklist->undelivered_ratio . '), Return Confirmed: ' . $blacklist->return . '(' . $blacklist->return_ratio . ')';
+//                                    } else {
+//                                        $blacklist_errors[$row_id]['msg'] = 'Total Shipments: 0, Delivered: 0, Undelivered: 0, Return Confirmed: 0';
+//                                    }
+//                                } else {
+//                                    $blacklist = BlacklistedConsignee::where('consignee_information_id', $consignee_information->id);
+//                                    if ($blacklist->exists()) {
+//                                        $blacklist = $blacklist->first();
+//                                        $blacklist_setting_id = $blacklist->blacklist_setting_id;
+//                                        $blacklist_setting = BlacklistSetting::find($blacklist_setting_id);
+//                                        if ($blacklist_setting) {
+//                                            if (!array_key_exists($blacklist_setting_id, $blacklist_found_categories)) {
+//                                                $blacklist_found_categories[$blacklist_setting_id]['message'] = $blacklist_setting->message;
+//                                                $blacklist_found_categories[$blacklist_setting_id]['color'] = $blacklist_setting->color;
+//                                            }
+//                                        }
+//                                        $blacklist_errors[$row_id]['msg'] = 'Total Shipments: ' . $blacklist->shipments . ', Delivered: ' . $blacklist->delivered . '(' . $blacklist->delivered_ratio . '), Undelivered: ' . $blacklist->undelivered . '(' . $blacklist->undelivered_ratio . '), Return Confirmed: ' . $blacklist->return . '(' . $blacklist->return_ratio . ')';
+//                                    }
+//                                }
+//                            }
                         }
                     } else { // below one is for revserve pickup no need here
                         $pickup_consignee_city = City::where('name', $row['consignee_city_name'])->first();

@@ -2741,6 +2741,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\Settings\GeneralSettingController@ticker_store')->name('store');
         });
 
+        Route::prefix('geo_codes')->name('geo_codes.')->group(function () {
+            Route::get('', 'GeoCodesController@index')->name('index');
+            Route::get('list', 'GeoCodesController@list')->name('list');
+            Route::post('get_shipment_lat_long', 'GeoCodesController@get_shipment_lat_long')->name('get_shipment_lat_long');
+            Route::get('view_tpl_map', 'GeoCodesController@view_tpl_map')->name('view_tpl_map');
+
+        });
+
         // //test
         // Route::prefix('shipper')->name('shipper.')->group(function () {
         //     Route::prefix('cap')->name('cap.')->group(function () {
@@ -3777,6 +3785,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('print_barcodes', 'BarcodeGeneratorController@print_barcodes')->name('print_barcodes');
 
     });
+
+
 
     Route::prefix('coordinates')->name('coordinates.')->group(function () {
         Route::prefix('add')->name('add.')->group(function () {
