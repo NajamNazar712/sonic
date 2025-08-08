@@ -636,7 +636,7 @@
                                 success: function(response, status, xhr) {
                                     var disposition = xhr.getResponseHeader('Content-Disposition');
                                     if (disposition && disposition.indexOf('attachment') !== -1) {
-                                        var filename = 'CRM_Report.csv';
+                                        var filename = 'OverallSales_Report.csv';
                                         var blob = new Blob([response], { type: 'text/csv' });
                                         var link = document.createElement('a');
                                         var url = window.URL.createObjectURL(blob);
