@@ -38,7 +38,18 @@
                                        id="booking_from_date" placeholder="Booking Date From">
                             </div>
                         </div>
-
+                        <div class="col-3">
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
+                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                            <span class="la la-calendar-o small-calender-icon"></span>
+                                        </span>
+                                </div>
+                                <input type="text" name="booking_to_date"
+                                       class="form-control bg-primary border-primary white rounded-right" data-value="{{ \Carbon\Carbon::now() }}"
+                                       id="booking_to_date" placeholder="Booking Date To">
+                            </div>
+                        </div>
 
                         <div class="form-group col-md-5 mt-2 justify-content-center">
                             <button id="datatable_filter_btn" type="submit" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i
