@@ -30,4 +30,25 @@ trait FilterTrait
 
        }
     }
+
+    public static function getFilteredShipperIds($shipper_id)
+    {
+        $excludedIds = GlobalSettings::whereIn('type', ['excluded_users_sst', 'excluded_users_wht'])
+            ->pluck('text') // get only the 'text' column
+            ->flatMap(function ($value) {
+                return explode(',', $value); // split comma-separated values
+            })
+            ->map(fn($id) => (int) trim($id)) // clean and cast to integer
+            ->unique() // remove duplicates
+            ->values() // reset array keys
+            ->toArray();
+
+        if(count($excludedIds) > 0){
+            if(in_array($shipper_id,$excludedIds)) {
+                return true;
+            }
+        }else{
+            return false;
+        }
+    }
 }
