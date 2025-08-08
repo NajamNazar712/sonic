@@ -28,13 +28,13 @@
                         </fieldset>
                     </div>
                     <div class="col-4">
-                        <!-- <fieldset class="form-group">
+                        <fieldset class="form-group">
                             <select name="search_shippers[]" id="search_shippers" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
                                 @foreach($shippers as $shipper)
                                     <option value="{{$shipper->id}}">{{$shipper->name}}</option>
                                 @endforeach
                             </select>
-                        </fieldset> -->
+                        </fieldset>
                     </div>
                     @if (session('role_id') == 1 || in_array(261, session('permissions')))
                     <div class="col-4">

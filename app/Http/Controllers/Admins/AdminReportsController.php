@@ -6,6 +6,7 @@ use App\Http\Models\HR\Employee;
 use App\Http\Models\RvShipmentAssignAgentDetails;
 use App\Http\Models\Segment;
 use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Traits\FilterTrait;
 use Carbon\Carbon;
 use App\DailyVisit;
 use Illuminate\Support\Facades\Log;
@@ -108,9 +109,12 @@ use App\Http\Models\Admin\OdrNature;
 use App\Http\Models\CRM\CrmSettings;
 use App\Http\Models\CRM\CrmTatHolidays;
 use App\Http\Models\InvoiceShipment;
+use App\Models\CrmInvalidReasonRequest;
+use App\Models\CrmRequestResolvedReason;
+
 class AdminReportsController extends Controller
 {
-    use RvTrait;
+    use RvTrait,FilterTrait;
     public function __construct()
     {
         $this->middleware('auth:admin');
@@ -3344,10 +3348,19 @@ class AdminReportsController extends Controller
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 149);
         if (session('department_id') == 7 && (!in_array(session('id'), session('sale_users_bypass')))) {
-            $shippers = DB::connection('reports')->table('users')->whereIn('id', session('tagged_shippers'))->whereIn('status', [3, 4])->select('id', 'name')->get();
+            $shippers = DB::connection('reports')->table('users')->whereIn('id', session('tagged_shippers'))->whereIn('status', [3, 4])->select('id', 'name');
         } else {
-            $shippers = DB::connection('reports')->table('users')->whereIn('status', [3, 4])->select('id', 'name')->get();
+            $shippers = DB::connection('reports')->table('users')->whereIn('status', [3, 4])
+                ->select('id', 'name');
         }
+
+        $shippers =  $shippers->where(function($query){
+            $idsToExclude = FilterTrait::class::getFilteredIds(auth()->user()->id);
+            if (!empty($idsToExclude)) {
+                $query->whereNotIn('users.id', $idsToExclude);
+            }
+        })->get();
+
 
         $cities = DB::connection('reports')->table('cities')->select('id', 'name')->get();
         $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
@@ -3545,6 +3558,12 @@ class AdminReportsController extends Controller
             ->whereNotIn('shipments.shipper_status_id', [1, 17])
             ->whereNotIn('u.id', [8761, 9358])
             //    ->whereBetween('sj.created_at', [$from, $to])
+            ->where(function($query){
+                $idsToExclude = FilterTrait::class::getFilteredIds(auth()->user()->id);
+                if (!empty($idsToExclude)) {
+                    $query->whereNotIn('shipments.user_id', $idsToExclude);
+                }
+            })
             ->groupBy('shipments.id');
         $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
 
@@ -5533,7 +5552,15 @@ class AdminReportsController extends Controller
     public function revenue_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 169);
-        $shippers = DB::connection('reports')->table('users')->whereIn('status', [3, 4])->select('id', 'name')->get();
+        $shippers = DB::connection('reports')->table('users')->whereIn('status', [3, 4])
+            ->select('id', 'name')
+            ->where(function($query){
+                $idsToExclude = FilterTrait::class::getFilteredIds(auth()->user()->id);
+                if (!empty($idsToExclude)) {
+                    $query->whereNotIn('id', $idsToExclude);
+                }
+            })
+            ->get();
         $cities = DB::connection('reports')->table('cities')->select('id', 'name')->get();
         $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
         $statuses = DB::connection('reports')->table('shipment_status')->whereNotIn('id', [1, 17])->get();
@@ -5765,7 +5792,14 @@ class AdminReportsController extends Controller
 
         $sales->select('shipments.id as shipment_id','shipments.tracking_number','shipments.fintech_charges as fintech_amount','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges',DB::raw('SUM(DISTINCT pps.charges) as p_total_charges'),DB::raw('SUM(DISTINCT pps.amount) as p_collection_amount'),DB::raw('SUM(DISTINCT pps.payable) as p_net_payable'),DB::raw('SUM(DISTINCT pps.gst) as p_gst'),DB::raw('SUM(DISTINCT dps.amount) as d_collection_amount'),DB::raw('SUM(DISTINCT dps.charges) as d_total_charges'),DB::raw('SUM(DISTINCT dps.payable) as d_net_payable'),DB::raw('SUM(DISTINCT dps.gst) as d_gst'),'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class','oc.id as origin_city_id','dc.id as destination_city_id','dnsdn.station_deposit_note_id as sdn_id','dps.done_payment_id as payment_id','shipments.booking_type_id','usi.poc','shipments.shipper_status_id as shipment_status','shipments.nsa_osa_charges','u.account_type_id as account_type_id',DB::raw('SUM(DISTINCT pis.gst) as pis_gst'),DB::raw('SUM(DISTINCT is.gst) as is_gst'),'shipments.packaging_charges','shipments.intercept_charges','bc.name','dr.shipper_status_id as dr_status_id','shipments.shipment_type','invoices.invoice_number','rc.name as return_city',DB::raw('SUM(DISTINCT ss_charge.reverse_pickup_charges) as reverse_pickup_charges'),DB::raw('SUM(DISTINCT pps.sms_charges) as pps_sms_charges'),DB::raw('SUM(DISTINCT dps.sms_charges) as dps_sms_charges'),DB::raw('SUM(DISTINCT pis.sms_charges) as pis_sms_charges'),DB::raw('SUM(DISTINCT is.sms_charges) as is_sms_charges'), 'sac.faf_charges', 'provinces.name as province_name', DB::raw('SUM(DISTINCT dps.wht) as dps_wht'),DB::raw('SUM(DISTINCT pps.wht) as pps_wht'), DB::raw('SUM(DISTINCT pis.wht) as pis_wht'), DB::raw('SUM(DISTINCT is.wht) as is_wht'), DB::raw('SUM(DISTINCT dps.cod_sst) as dps_cod_sst'),DB::raw('SUM(DISTINCT pps.cod_sst) as pps_cod_sst'), DB::raw('SUM(DISTINCT pis.cod_sst) as pis_cod_sst'), DB::raw('SUM(DISTINCT is.cod_sst) as is_cod_sst') )
             ->whereNotIn('shipments.shipper_status_id', [1, 17])
-            ->whereNotIn('u.id', [8761, 9358]);
+            ->whereNotIn('u.id', [8761, 9358])
+            ->where(function($query){
+                $idsToExclude = FilterTrait::class::getFilteredIds(auth()->user()->id);
+                if (!empty($idsToExclude)) {
+                    $query->whereNotIn('u.id', $idsToExclude);
+                }
+            })
+        ;
 
         if (session('role_id') != 1 && (!in_array(session('id'), session('sale_users_bypass')))) {
             if (session('department_id') == 7) {
@@ -6821,6 +6855,8 @@ class AdminReportsController extends Controller
                 'al.name as name',
                 'us.name as shipper',
                 'su.name as sub_shipper',
+                'rsi.shipper_name as retail_shipper',
+                'ru.name as retail_user',
                 'crm_requests.launched_by as launched_by_type',
                 'crm_requests.created_at as launched_date',
                 'crah.created_at as assigned_date',
@@ -6904,6 +6940,14 @@ class AdminReportsController extends Controller
                 ->leftJoin('substitute_users as su', function ($join) {
                     $join->on('su.id', '=', 'crm_requests.launched_by_id')
                         ->where('crm_requests.launched_by', '=', DB::raw(2));
+                })
+                ->leftjoin('retail_users as ru', function ($join) {
+                    $join->on('ru.id', '=', 'crm_requests.launched_by_id')
+                        ->where('crm_requests.launched_by', '=', DB::raw(3));
+                })
+                ->leftjoin('retail_shipper_infos as rsi', function ($join) {
+                    $join->on('rsi.id', '=', 'crm_requests.launched_by_id')
+                        ->where('crm_requests.launched_by', '=', DB::raw(5));
                 })
                 ->leftjoin('crm_request_agent_histories as crah', function ($join) {
                     $join->on('crah.crm_request_id', '=', 'crm_requests.id')
@@ -7096,7 +7140,13 @@ class AdminReportsController extends Controller
                         $name = $requests->name;
                     } else if ($requests->launched_by_type == 1) {
                         $name = $requests->shipper;
-                    } else {
+                    } else if ($requests->launched_by_type == 3) {
+                        $name = $requests->retail_user;
+                    }
+                    else if ($requests->launched_by_type == 5) {
+                        $name = $requests->retail_shipper;
+                    }
+                    else {
                         $name = $requests->sub_shipper;
                     }
                     return $name;
@@ -7115,7 +7165,13 @@ class AdminReportsController extends Controller
                         return 'Admin';
                     } else if ($requests->launched_by_type == 1) {
                         return 'Shipper';
-                    } else {
+                    } else if ($requests->launched_by_type == 3) {
+                        return 'Retail';
+                    }
+                    else if ($requests->launched_by_type == 5) {
+                        return 'Retail App';
+                    }
+                    else {
                         return 'Shipper Substitute User';
                     }
                 })
@@ -7291,6 +7347,39 @@ class AdminReportsController extends Controller
                     }else{
                         return '-';
                     }
+                })
+               ->addColumn('claim_resolved_invalid_reason', function ($crm_request) {
+                    $invalidReasons = CrmInvalidReasonRequest::where('crm_request_id', $crm_request->request_number)
+                                        ->with('claimInvalidReason')
+                                        ->get();
+
+                    if ($invalidReasons->isNotEmpty()) {
+                        $names = $invalidReasons->pluck('claimInvalidReason.reason')->filter()->unique()->toArray();
+                        return implode(', ', $names);
+                    }
+
+                    $resolvedReasons = CrmRequestResolvedReason::where('crm_request_id', $crm_request->request_number)
+                                        ->with('resolvedReason')
+                                        ->get();
+
+                    if ($resolvedReasons->isNotEmpty()) {
+                        $names = $resolvedReasons->pluck('resolvedReason.name')->filter()->unique()->toArray();
+                        return implode(', ', $names);
+                    }
+
+                    return '-'; 
+                })
+                ->addColumn('claim_resolved_sub_reason', function ($crm_request) {
+                    $resolvedSubReasons = CrmRequestResolvedReason::where('crm_request_id', $crm_request->request_number)
+                        ->with('resolvedSubReason')
+                        ->get();
+
+                    if ($resolvedSubReasons->isNotEmpty()) {
+                        $names = $resolvedSubReasons->pluck('resolvedSubReason.name')->filter()->unique()->toArray();
+                        return implode(', ', $names);
+                    }
+
+                    return '-';
                 })
                 ->orderColumn('launched_by_name', DB::connection('reports')->raw('IF (crm_requests.launched_by = 0, a.name, IF (crm_requests.launched_by = 1, us.name, IF (crm_requests.launched_by = 2, su.name, "")))') . ' $1');
 
@@ -7539,6 +7628,38 @@ class AdminReportsController extends Controller
                         $rowArray['launched_by_type'] = 'Shipper Substitute User';
                         break;
                 }
+                
+                
+                $invalidReasons = CrmInvalidReasonRequest::where('crm_request_id', $rowArray['request_number'])
+                    ->with('claimInvalidReason')
+                    ->get();
+
+                if ($invalidReasons->isNotEmpty()) {
+                    $names = $invalidReasons->pluck('claimInvalidReason.reason')->filter()->unique()->toArray();
+                    $rowArray['claim_resolved_invalid_reason'] = implode(', ', $names);
+                } else {
+                    $resolvedReasons = CrmRequestResolvedReason::where('crm_request_id', $rowArray['request_number'])
+                        ->with('resolvedReason')
+                        ->get();
+
+                    if ($resolvedReasons->isNotEmpty()) {
+                        $names = $resolvedReasons->pluck('resolvedReason.name')->filter()->unique()->toArray();
+                        $rowArray['claim_resolved_invalid_reason'] = implode(', ', $names);
+                    } else {
+                        $rowArray['claim_resolved_invalid_reason'] = '-';
+                    }
+                }
+
+                $resolvedSubReasons = CrmRequestResolvedReason::where('crm_request_id', $rowArray['request_number'])
+                    ->with('resolvedSubReason')
+                    ->get();
+
+                if ($resolvedSubReasons->isNotEmpty()) {
+                    $names = $resolvedSubReasons->pluck('resolvedSubReason.name')->filter()->unique()->toArray();
+                    $rowArray['claim_resolved_sub_reason'] = implode(', ', $names);
+                } else {
+                    $rowArray['claim_resolved_sub_reason'] = '-';
+                }
 
 
                 $filteredArray = [];
@@ -7571,7 +7692,13 @@ class AdminReportsController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(), 175);
         $today = Carbon::now()->endOfDay();
         $thirtyDays = Carbon::now()->subDays(30)->startOfDay();
-        $shippers = DB::connection('reports')->table('users')->where('status', '=', 3)->get();
+        $shippers = DB::connection('reports')->table('users')->where('status', '=', 3)->where(function($query){
+            $idsToExclude = FilterTrait::class::getFilteredIds(auth()->user()->id);
+            if (!empty($idsToExclude)) {
+                $query->whereNotIn('users.id', $idsToExclude);
+            }
+        })->get();
+
         $sales_persons=DB::connection('reports')->table('admins as ad')->join('admin_roles as ar','ad.role_id','=','ar.id')->where('ar.department_id',7)->get(['ad.id','ad.name']);
         $hubs = DB::connection('reports')->table('cities')->select('id', 'name')->get();
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id', 'mode']);
@@ -7822,7 +7949,12 @@ class AdminReportsController extends Controller
                 $join->on('siq.shipment_id', '=', 'shipments.id')
                     ->where('siq.type', '=', 0);
             })
-
+            ->where(function($query){
+                $idsToExclude = FilterTrait::class::getFilteredIds(auth()->user()->id);
+                if (!empty($idsToExclude)) {
+                    $query->whereNotIn('shipments.user_id', $idsToExclude);
+                }
+            })
             ->select(['ssr.name as reason', 'sjr.remarks as remark', 'shipments.id as shipment_id', 'shipments.order_id', 'shipments.tracking_number', 'shipments.amount as collection_amount', 'ss.name as current_status', 'sps.name as payment_status', 'bt.booking_type as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper','u.id as shipper_id', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone1', 'shipments.consignee_phone_number_2 as phone2', 'shipments.consignee_address', 'shipments.created_at as booking_date', 'usi.vendor', DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'), 'h.name as hub', 'sju.created_at as last_status_date', 'sjfa.created_at as first_attempt_date', 'sjrp.created_at as rider_picked_status_date', 'u.sub_segment_id as sub_segment','shipments.pieces','shipments.actual_weight','sm.mode as shipping_mode','sd.name as sales_person_name','siq.quantity as shipment_quantity']);
         /*  if( $request->get('search_shipper')){
               $shipments->where('shipments.user_id', '=',$request->get('search_shipper'));
