@@ -722,8 +722,8 @@ use Illuminate\Http\Request;
 
             //finance Apis
             Route::prefix('finance')->name('finance.')->group(function (){
-                  Route::get('payments/{id?}','ShipperFinanceApiController@payment_list')->name('payments');
-            });
+                  Route::get('v2/payments/{id?}','ShipperFinanceApiController@payment_list')->name('payments');
+                  Route::get('v2/GetPaymentShipments','ShipperFinanceApiController@GetPaymentShipments')->name('getPaymentShipments');});
 
             // CRM Apis
             Route::prefix('crm')->name('crm.')->group(function (){
