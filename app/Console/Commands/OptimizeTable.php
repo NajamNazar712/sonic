@@ -39,14 +39,14 @@ class OptimizeTable extends Command
                 $this->line($jsonRow); // Output to console
                 $logLines[] = "📝 Result: $jsonRow"; // Append to log
             }
-            $logLines[] = '📦 Running OPTIMIZE TABLE shipments...';
-            $result = DB::select('OPTIMIZE TABLE shipments');
+            // $logLines[] = '📦 Running OPTIMIZE TABLE shipments...';
+            // $result = DB::select('OPTIMIZE TABLE shipments');
 
-            foreach ($result as $row) {
-                $jsonRow = json_encode($row);
-                $this->line($jsonRow); // Output to console
-                $logLines[] = "📝 Result: $jsonRow"; // Append to log
-            }
+            // foreach ($result as $row) {
+            //     $jsonRow = json_encode($row);
+            //     $this->line($jsonRow); // Output to console
+            //     $logLines[] = "📝 Result: $jsonRow"; // Append to log
+            // }
             // Bring the app back online
             Artisan::call('up');
             $logLines[] = "✅ App is back online.";
