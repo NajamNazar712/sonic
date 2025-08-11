@@ -3329,7 +3329,7 @@ class RetailShipmentBookController extends Controller
                     'cnic' => $row['cnic'],
                     'phone' => $row['phone'],
                     'email' => $row['email'],
-                    'user_id' => $request->wallet_user_id,
+                    'user_id' => $row['wallet_user_id'],
                     'status' => 1,
                     'substitute_user_id' => isset($row['substitute_user_id']) ? $row['substitute_user_id'] : 0
                 ];
@@ -3369,7 +3369,7 @@ class RetailShipmentBookController extends Controller
             $token = FingaIntegrationController::getToken($api);
             $login_data = collect($data)->first();
             $url = FingaIntegrationController::getLoginUrl($api, $token, $login_data['phone'], $login_data['cnic'], $login_data['email']);
-            $finja = FingaIntegrationController::RetailSignUp($data);
+            $finja = FingaIntegrationController::RetailSignUp($data,$login_data['user_id']);
 
             if (isset($finja['error'])) {
                 $finjaArray = json_decode(json_encode($finja), true);
