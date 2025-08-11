@@ -18,14 +18,18 @@
                                     <div class="badge badge-success pull-right">Corporate Default Account</div>
                                 </h2>--}}
                                 <div class="row">
-                                    <div class="col-4">
+                                    <div class="col-3">
                                         <h2 class="font-large-1">{{$shipper->name}} </h2>
                                     </div>
-                                    <div class="col-4 text-right mt-1">
+                                    <div class="col-3 mt-1">
                                         <input type="checkbox" id="packaging_invoice_toggle" class="switchery packaging_invoice_toggle" data-size="xs" data-switchery="true" @if(isset($packaging_invoice->status) && $packaging_invoice->status == 1) checked @endif disabled>
                                         <label class="display-inline ml-1 font-medium-1">Generate Packaging Invoice</label>
                                     </div>
-                                    <div class="col-4">
+                                    <div class="col-3 mt-1">
+                                        <input type="checkbox" id="delivered_invoice_toggle" class="switchery delivered_invoice_toggle" data-size="xs" data-switchery="true" @if(isset($delivered_invoice->status) && $delivered_invoice->status == 1) checked @endif disabled>
+                                        <label class="display-inline ml-1 font-medium-1">Enable Invoicing on Delivered Only</label>
+                                    </div>
+                                    <div class="col-3">
                                         <div class="badge badge-success pull-right"><h2 class="text-white">Corporate Default Account</h2></div>
                                     </div>
                                 </div>

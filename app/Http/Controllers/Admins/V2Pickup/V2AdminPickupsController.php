@@ -70,6 +70,8 @@ use App\Http\Controllers\Admins\CheckDisputeShipmentsController;
 use App\Http\Controllers\Webhook\InitialChargesWebhookController;
 use App\Http\Models\Admin\WalkInInternationalStandardWeightCharge;
 use App\Http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
+use App\Models\CorporateUserOnDeliveredInvoice;
+
 
 class V2AdminPickupsController extends Controller
 {
@@ -1016,6 +1018,7 @@ class V2AdminPickupsController extends Controller
 
         $walkin_shipment_ids = array();
         $arrival_charges_shipment = [];
+        $arrival_charges_shipment_0_bid = [];
         foreach ($shipment_ids as $key => $shipment_id) {
             $shipment = Shipment::find($shipment_id);
             if ($shipment) {
@@ -1291,9 +1294,17 @@ class V2AdminPickupsController extends Controller
                 }
                 //shipment calculate arrival charges
                 $shipment->refresh();
+                $delivered_invoice_users = CorporateUserOnDeliveredInvoice::where('status', 1)
+                ->pluck('user_id')
+                ->toArray();
                 if(in_array($shipment->shipper_status_id,[2,15])){
-                    if(!in_array($shipment_id,$arrival_charges_shipment)) {
+                    if(!in_array($shipment_id,$arrival_charges_shipment) && !in_array($shipment->user_id, $delivered_invoice_users)) {
                         array_push($arrival_charges_shipment, $shipment_id);
+                        self::arrival_chagres($request, $shipment);
+                    }
+
+                    if(!in_array($shipment_id,$arrival_charges_shipment_0_bid) && in_array($shipment->user_id, $delivered_invoice_users)) {
+                        array_push($arrival_charges_shipment_0_bid, $shipment_id);
                         self::arrival_chagres($request, $shipment);
                     }
                 }
@@ -1303,6 +1314,10 @@ class V2AdminPickupsController extends Controller
         }
         if(count($arrival_charges_shipment) > 0){
             ShipmentAdditionalCharges::additional_charges_apply($arrival_charges_shipment,true);
+        }
+
+        if(count($arrival_charges_shipment_0_bid) > 0){
+            ShipmentAdditionalCharges::additional_charges_apply_0_bid($arrival_charges_shipment_0_bid,false);
         }
 
         foreach ($shipment_ids as $shipment_id) {
@@ -1421,6 +1436,7 @@ class V2AdminPickupsController extends Controller
             $unassigned_pickup_requests;
         }
         $arrival_charges_shipment = [];
+        $arrival_charges_shipment_0_bid = [];
         foreach ($shipments as $key => $shipment_id) {
             $shipment = Shipment::find($shipment_id);
             if ($shipment) {
@@ -1681,10 +1697,22 @@ class V2AdminPickupsController extends Controller
                         $walkin_shipment_ids[] = $shipment->id;
                     }
                 }
+                $delivered_invoice_users = CorporateUserOnDeliveredInvoice::where('status', 1)
+                ->pluck('user_id')
+                ->toArray();
                 $shipment->refresh();
                 if(in_array($shipment->shipper_status_id,[2,15])){
-                    if(!in_array($shipment_id,$arrival_charges_shipment)) {
+                    // if(!in_array($shipment_id,$arrival_charges_shipment)) {
+                    //     array_push($arrival_charges_shipment, $shipment_id);
+                    //     self::arrival_chagres($request, $shipment);
+                    // }
+                    if(!in_array($shipment_id,$arrival_charges_shipment) && !in_array($shipment->user_id, $delivered_invoice_users)) {
                         array_push($arrival_charges_shipment, $shipment_id);
+                        self::arrival_chagres($request, $shipment);
+                    }
+
+                    if(!in_array($shipment_id,$arrival_charges_shipment_0_bid) && in_array($shipment->user_id, $delivered_invoice_users)) {
+                        array_push($arrival_charges_shipment_0_bid, $shipment_id);
                         self::arrival_chagres($request, $shipment);
                     }
                 }
@@ -1694,6 +1722,9 @@ class V2AdminPickupsController extends Controller
         }
         if(count($arrival_charges_shipment) > 0){
             ShipmentAdditionalCharges::additional_charges_apply($arrival_charges_shipment,true);
+        }
+        if(count($arrival_charges_shipment_0_bid) > 0){
+            ShipmentAdditionalCharges::additional_charges_apply_0_bid($arrival_charges_shipment_0_bid,false);
         }
 
         foreach ($shipments as $shipment_id) {
@@ -2452,6 +2483,7 @@ class V2AdminPickupsController extends Controller
             $unassigned_pickup_requests = explode(',', $request->pickup_request_ids);
         }
         $arrival_charges_shipment = [];
+        $arrival_charges_shipment_0_bid = [];
         foreach ($shipment_ids as $key => $shipment_id) {
             $shipment = Shipment::find($shipment_id);
             if ($shipment) {
@@ -2648,11 +2680,24 @@ class V2AdminPickupsController extends Controller
                         NotificationsController::send(85, $shipment_ids, Auth::id());
                     }
                 }
+                $delivered_invoice_users = CorporateUserOnDeliveredInvoice::where('status', 1)
+                ->pluck('user_id')
+                ->toArray();
                 //shipment calculate arrival charges
                 $shipment->refresh();
                 if(in_array($shipment->shipper_status_id,[2,15])){
-                    if(!in_array($shipment_id,$arrival_charges_shipment)) {
+                    // if(!in_array($shipment_id,$arrival_charges_shipment)) {
+                    //     array_push($arrival_charges_shipment, $shipment_id);
+                    //     self::arrival_chagres($request, $shipment);
+                    // }
+
+                    if(!in_array($shipment_id,$arrival_charges_shipment) && !in_array($shipment->user_id, $delivered_invoice_users)) {
                         array_push($arrival_charges_shipment, $shipment_id);
+                        self::arrival_chagres($request, $shipment);
+                    }
+
+                    if(!in_array($shipment_id,$arrival_charges_shipment_0_bid) && in_array($shipment->user_id, $delivered_invoice_users)) {
+                        array_push($arrival_charges_shipment_0_bid, $shipment_id);
                         self::arrival_chagres($request, $shipment);
                     }
                 }
@@ -2662,6 +2707,10 @@ class V2AdminPickupsController extends Controller
         }
         if(count($arrival_charges_shipment) > 0){
             ShipmentAdditionalCharges::additional_charges_apply($arrival_charges_shipment,true);
+        }
+
+        if(count($arrival_charges_shipment_0_bid) > 0){
+            ShipmentAdditionalCharges::additional_charges_apply_0_bid($arrival_charges_shipment_0_bid,false);
         }
         $pickup_note_ids = array();
         foreach ($pickup_request_ids as $pickup_request_id) {
