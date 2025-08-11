@@ -360,7 +360,7 @@ class ShipperFinanceApiController extends Controller
                 DB::raw('SUM(CASE WHEN rdps.type = 2 THEN 1 ELSE 0 END) as adjusted_shipments'),
                 DB::raw('SUM(CASE WHEN rdps.type = 3 THEN 1 ELSE 0 END) as arrival_shipments'),
                 DB::raw('ROUND(SUM(rdps.amount), 2) as total_amount'),
-                DB::raw('ROUND(SUM(rs.gst), 2) as total_gst'),
+                DB::raw('0 as total_gst'),
                 DB::raw('ROUND(SUM(rs.wht), 2) as total_wht'),
                 DB::raw('ROUND(SUM(rs.cod_sst), 2) as total_cod_sst'),
                 DB::raw('ROUND(SUM(rdps.payable), 2) as total_payable')
