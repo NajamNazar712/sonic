@@ -3086,12 +3086,15 @@ class ShipperShipmentBookController extends Controller
         Validator::extend('pieces_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
             $data = $validator->getData();
             $shipping_mode_id = $data['shipping_mode_id'];
-            $pieces_quantity = $data['pieces_quantity'];
+
+            $user = User::find($user_id);
+            $inLimit = in_array($user->sub_segment_id, [1, 6]) ? 100 : 10;
+
             if ($value) {
                 if ($shipping_mode_id == 2 && ($value < 1 || $value > 500)) {
                     return false;
                 }
-                elseif($shipping_mode_id != 2 && ($value < 1 || $value > 10)) {
+                elseif($shipping_mode_id != 2 && ($value < 1 || $value > $inLimit)) {
                     return false;
                 }
                 else
@@ -6086,12 +6089,15 @@ class ShipperShipmentBookController extends Controller
         Validator::extend('pieces_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
             $data = $validator->getData();
             $shipping_mode_id = $data['shipping_mode_id'];
-            $pieces_quantity = $data['pieces_quantity'];
+
+            $user = User::find($user_id);
+            $inLimit = in_array($user->sub_segment_id, [1, 6]) ? 100 : 10;
+
             if ($value) {
                 if ($shipping_mode_id == 2 && ($value < 1 || $value > 500)) {
                     return false;
                 }
-                elseif($shipping_mode_id != 2 && ($value < 1 || $value > 10)) {
+                elseif($shipping_mode_id != 2 && ($value < 1 || $value > $inLimit)) {
                     return false;
                 }
                 else
