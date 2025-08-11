@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Models\Admin\Retail\RetailShipperInfo;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\UserDocumentAttachment;
 use App\Http\Models\WalletUser;
@@ -104,6 +105,98 @@ class FingaIntegrationController extends Controller
             $requestPayload = [
                 "client_id" => $parent_user->id,
                 "client_name" => $parent_user->name,
+            ];
+            foreach ($user as $key2=> $data){
+                $requestPayload['users'][] =  [
+                    "cnic" => $data['cnic'],
+                    "email" => $data['email'],
+                    "mobile_no" => $data['phone'],
+                    "name" => $data['name'],
+                    "cnic_front_image_url" => $cnic_front,
+                    "cnic_back_image_url" => $cnic_back
+                ];
+            }
+
+
+            $response = Http::withHeaders(['accept' => 'application/json','Authorization' => "Bearer " . $token,])->post($api . 'wallet/onboard-users/', $requestPayload);
+            FingaApiLog::create(['nature_id' => 1,'status' => 1,'details' => json_encode($requestPayload, JSON_PRETTY_PRINT)]);
+
+            if ($response->successful()) {
+                $body = $response->getBody();
+                $body = json_decode($body);
+
+                self::apiLog(2, 'success', $body, null);
+
+
+                // Ensure the error structure is an array
+                $success = [
+                    'status' => $body->status ?? 'success',
+                    'wallet_id' => $body->wallet_id ?? null,
+                    'users' => []
+                ];
+
+                if (!empty($body->users)) {
+                    foreach ($body->users as $user) {
+                        $success['users'][] = [
+                            'mobile_no' => $user->mobile_no ?? null,
+                            'email' => $user->email ?? null,
+                            'cnic' => $user->cnic ?? null,
+                            'id' => $user->id ?? null,
+                        ];
+                    }
+                }
+                $result = $success;
+
+
+            } else {
+                $body = $response->getBody();
+                $body = json_decode($body);
+
+                // Ensure the error structure is an array
+                $errorData = [
+                    'status' => $body->status ?? 'error',
+                    'wallet_id' => $body->wallet_id ?? null,
+                    'users' => []
+                ];
+
+                if (!empty($body->users)) {
+                    foreach ($body->users as $user) {
+                        $errorData['users'][] = [
+                            'mobile_no' => $user->mobile_no ?? null,
+                            'status' => $user->status ?? 'error',
+                            'message' => (array)($user->message ?? []),
+                        ];
+                    }
+                }
+
+                self::apiLog(2, 'error', $body, null);
+                $result['error'] = $errorData;
+            }
+            return $result;
+        }
+
+    }
+
+    public static function RetailSignUp($user = array(), $shipper_id = null) {
+
+        $api = config('app.FINGA_URL');
+        $token = self::getToken($api);
+        $cnic_front = '';
+        $cnic_back = '';
+        $user_id = $shipper_id;
+        $parent_user = RetailShipperInfo::find($user_id);
+
+        if($token) {
+            $result = array();
+            $cnic_front_path = 'retail_shipper_' . $shipper_id . '_cnic_front_image.png';
+            $cnic_back_path = 'retail_shipper_' . $shipper_id . '_cnic_back_image.png';
+
+            $cnic_front = Storage::url('retail_shipper_cnic/' . $cnic_front_path);
+            $cnic_back = Storage::url('retail_shipper_cnic/' . $cnic_back_path);
+
+            $requestPayload = [
+                "client_id" => $parent_user->id,
+                "client_name" => $parent_user->shipper_name,
             ];
             foreach ($user as $key2=> $data){
                 $requestPayload['users'][] =  [

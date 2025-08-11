@@ -33,6 +33,8 @@ Route::prefix('retail')->name('retail.')->group(function () {
 
         });
         Route::post('/shipper_info', 'Retail\RetailShipmentBookController@shipper_info')->name('shipper_info');
+        Route::post('updateprofilewalletbulk', 'Retail\RetailShipmentBookController@updateprofilewalletbulk')->name('profile_wallet');
+        Route::post('/shipper_add', 'Retail\RetailShipmentBookController@RetailAddShipper')->name('RetailAddShipper');
         Route::prefix('tracking_slip')->name('tracking_slip.')->group(function () {
             Route::get('', 'Retail\RetailShipmentBookController@tracking_slip_index')->name('index');
             Route::get('/list', 'Retail\RetailShipmentBookController@tracking_slip_list')->name('list');

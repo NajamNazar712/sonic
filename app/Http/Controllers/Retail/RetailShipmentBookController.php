@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Retail;
 
 use App\Http\Controllers\Admins\AdminPickupsController;
+use App\Http\Controllers\FingaIntegrationController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\Admin;
@@ -29,9 +30,13 @@ use App\Http\Models\RetailInternationalShippingMode;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentPiece;
+use App\Http\Models\Shipper\UserBankInfo;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\ShippingMode;
+use App\Http\Models\WalletUser;
 use App\Jobs\ProcessRetailShipmentBookingDB;
+use App\Jobs\WalletSignUpLPendingRecordLogs;
+use App\Models\RetailWalletUser;
 use App\RetailShipperNameVerification;
 use Barryvdh\Snappy\Facades\SnappyImage;
 use Barryvdh\Snappy\Facades\SnappyPdf;
@@ -462,7 +467,7 @@ class RetailShipmentBookController extends Controller
                     return redirect()->back()->with(['error' => 'Please provide the cheque image']);
                 }
             }
-           
+
             if ($request->iban_no != null && $request->account_no != null && $request->bank != null) {
                 $shipper_info->bank_id = $request->bank;
                 $shipper_info->iban = $request->iban_no;
@@ -491,16 +496,16 @@ class RetailShipmentBookController extends Controller
             if($shipping_mode_check == 3 ){
                 if ($request->iban_no == null || $request->iban_no == ''){
                     return redirect()->back()->with(['error' => 'Please provide the IBAN number']);
-                } 
+                }
                 if ($request->account_no == null || $request->account_no == '') {
                     return redirect()->back()->with(['error' => 'Please provide the account number']);
-                } 
+                }
                 if ($request->bank == null || $request->bank == ''){
                     return redirect()->back()->with(['error' => 'Please choose a bank']);
-                } 
+                }
                 if (!$request->hasFile('cheque_image')){
                     return redirect()->back()->with(['error' => 'Please provide the cheque image']);
-                } 
+                }
             }
 
             if ($request->hasFile('cheque_image') && $request->iban_no != null && $request->account_no != null && $request->bank != null) {
@@ -3137,4 +3142,266 @@ class RetailShipmentBookController extends Controller
             return response()->json(['status' => 1]);
         }
     }
+
+    public function RetailAddShipper(Request $request)
+    {
+        if ($request->complete_shipper_info == 0) {
+            $request->validate([
+                'shipper_name' => 'required|string|max:255',
+                'shipper_phone_no' => 'required|string|max:20',
+                'shipper_cnic' => 'required|string|max:20',
+                'shipper_address' => 'required|string|max:500',
+                'shipping_mode' => 'required|integer',
+                'iban_no' => 'required|string|max:50',
+                'account_no' => 'required|string|max:50',
+                'bank' => 'required|string|max:100',
+                'cheque_image' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5048'
+            ]);
+        }else{
+            $request->validate([
+                'shipper_phone_no' => 'required|string|max:20',
+                'complete_shipper_info' => 'required|in:0,1'
+            ]);
+
+            $shipper =  RetailShipperInfo::where('shipper_phone_no',$request->shipper_phone_no)->latest()->first();
+            if(!empty($shipper)) {
+                return response()->json([
+                    'status' => 1,
+                    'message' => 'Shipper info saved successfully',
+                    'shipper' => $shipper
+                ]);
+            }
+        }
+
+        $setting = GlobalSettings::where('type', 'retail_store')->first();
+        $shipper_user_id = $setting->setting_value;
+        $user_id = $shipper_user_id;
+        $pickup_address_id = Auth::user()->store->pickup_address_id;
+        $user_shipping_info = UserShippingInfo::find($pickup_address_id);
+        $pickup_city_id = $user_shipping_info->city_id;
+        $information_display = TRUE;
+
+        $shipper_info = RetailShipperInfo::where('shipper_phone_no', $request->shipper_phone_no);
+        if($shipper_info->exists()){
+            $shipper_info = $shipper_info->first();
+            $shipper_info->shipper_phone_no = $request->shipper_phone_no;
+            $shipper_info->shipper_name = $request->shipper_name;
+            $shipper_info->shipper_cnic = $request->shipper_cnic;
+            $shipper_info->shipper_address = $request->shipper_address;
+            $shipper_info->city_id = $pickup_city_id;
+
+            if ($request->iban_no != null && $request->account_no != null && $request->bank != null) {
+                $shipper_info->bank_id = $request->bank;
+                $shipper_info->iban = $request->iban_no;
+                $shipper_info->account_number = $request->account_no;
+                if ($request->hasFile('cheque_image')){
+                    $filename = 'retail_shipper_' . $shipper_info->id . '_cheque_image.png';
+
+                    $file = $request->file('cheque_image');
+
+                    Storage::disk('public')->putFileAs('retail_shipper_cheque', $file, $filename);
+                    $shipper_info->cheque_image = $filename;
+                    $shipper_info->completed_status = 1;
+                }
+            }
+            $shipper_info->save();
+        }
+        else{
+            $shipper_info = new RetailShipperInfo();
+            $shipper_info->shipper_phone_no = $request->shipper_phone_no;
+            $shipper_info->shipper_name = $request->shipper_name;
+            $shipper_info->shipper_cnic = $request->shipper_cnic;
+            $shipper_info->shipper_address = $request->shipper_address;
+            $shipper_info->city_id = $pickup_city_id;
+            $shipper_info->save();
+
+            if ($request->hasFile('cheque_image') && $request->iban_no != null && $request->account_no != null && $request->bank != null) {
+                $shipper_info->bank_id = $request->bank;
+                $shipper_info->iban = $request->iban_no;
+                $shipper_info->account_number = $request->account_no;
+                if ($request->hasFile('cheque_image')) {
+                    $filename = 'retail_shipper_' . $shipper_info->id . '_cheque_image.png';
+
+                    $file = $request->file('cheque_image');
+
+                    Storage::disk('public')->putFileAs('retail_shipper_cheque', $file, $filename);
+                    $shipper_info->cheque_image = $filename;
+                    $shipper_info->completed_status = 1;
+                }
+            }
+            $shipper_info->save();
+        }
+
+        return response()->json([
+            'status' => 1,
+            'message' => 'Shipper info saved successfully',
+            'shipper' => $shipper_info
+        ]);
+
+    }
+
+    public function updateprofilewalletbulk(Request $request)
+    {
+        $names = [
+            'name' => 'Name ',
+            'phone' => 'Phone',
+            'cnic' => 'CNIC',
+            'email' => 'Email',
+            'cnic_front' => 'CNIC Front',
+            'cnic_back' => 'CNIC Back',
+        ];
+
+        $messages = [
+            'required' => ':attribute is Required.',
+            'required_if' => ':attribute is Required when :other is :value.',
+            'filled' => ':attribute is Optional but cannot be Empty if Present.',
+            'integer' => ':attribute must be an Integer.',
+            'numeric' => ':attribute must be a Number.',
+            'boolean' => ':attribute must be 0 or 1.',
+            'digits_between' => ':attribute must be between :min and :max Digits.',
+            'email' => ':attribute must be a Valid Email Address.',
+            'exists' => 'Given :attribute is of Invalid ID.',
+            'unique' => ':attribute is already Present.',
+            'date_format' => ':attribute must be of valid Format, required Format is: YYYY-MM-DD.',
+            'in' => ':attribute must be No or Yes.',
+            'check_duplicate' => 'Phone Or Email Already Exists',
+            'check_cnic' => 'Cnic Already Exists',
+            'phone' => 'Phone starts with 03 or 923 followed by 9 digits',
+            'name' => 'Only alphabetic characters and spaces',
+        ];
+
+        $rules = [
+            'name' => ['required', 'max:255', 'regex:/^[a-zA-Z\s]+$/'],
+            'email' => ['required', 'max:255', 'email', 'check_duplicate'],
+            'phone' => ['required', 'max:255', 'regex:/^(03|923)[0-9]{2,3}-?[0-9]{7}$/'],
+            'cnic' => ['required', 'max:255', 'check_cnic'],
+            'cnic_front' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5048',
+            'cnic_back' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5048'
+        ];
+
+
+
+        Validator::extend('check_duplicate', function ($attribute, $value, $parameters, $validator)  {
+            $data = $validator->getData();
+            $phone = $data['phone'];
+            $email = $data['email'];
+
+            $user = RetailWalletUser::where('email', $email)->orWhere('phone', $phone);
+            if($user->exists()) {
+                return FALSE;
+            } else{
+                return true;
+            }
+        });
+
+        Validator::extend('check_cnic', function ($attribute, $value, $parameters, $validator)  {
+            $data = $validator->getData();
+            $cnic = $data['cnic'];;
+
+            $user = RetailWalletUser::where('cnic', $cnic);
+            if($user->exists()) {
+                return FALSE;
+            } else{
+                return true;
+            }
+        });
+        $errors = array();
+        $data = array();
+
+        $bank = 0;
+        foreach ($request->users as $key => $row) {
+            $row_id = $row['id'];
+            $validate = Validator::make($row, $rules, $messages);
+            $validate->setAttributeNames($names);
+
+            if ($validate->fails()) {
+                foreach ($validate->errors()->toArray() as $errorKey => $error_array) {
+                    foreach ($error_array as $error) {
+                        if (!isset($errors[$row_id][$errorKey])) {
+                            $errors[$row_id][$errorKey] = $error;
+                        }
+                    }
+                }
+            } else {
+                // Keep your old variable data
+                $data[$key] = [
+                    'name' => $row['name'],
+                    'cnic' => $row['cnic'],
+                    'phone' => $row['phone'],
+                    'email' => $row['email'],
+                    'user_id' => $request->wallet_user_id,
+                    'status' => 1,
+                    'substitute_user_id' => isset($row['substitute_user_id']) ? $row['substitute_user_id'] : 0
+                ];
+
+                // Find shipper info
+                $shipper_info = RetailShipperInfo::find($row['wallet_user_id']);
+                if (!$shipper_info) {
+                    continue; // Skip if not found
+                }
+
+                // Handle CNIC front file
+                if (isset($row['cnic_front']) && $request->hasFile("users.$key.cnic_front")) {
+                    $filename = 'retail_shipper_' . $shipper_info->id . '_cnic_front_image.png';
+                    $file = $request->file("users.$key.cnic_front");
+                    Storage::disk('public')->putFileAs('retail_shipper_cnic', $file, $filename);
+                    $shipper_info->cnic_front = $filename;
+                }
+
+                // Handle CNIC back file
+                if (isset($row['cnic_back']) && $request->hasFile("users.$key.cnic_back")) {
+                    $filename = 'retail_shipper_' . $shipper_info->id . '_cnic_back_image.png';
+                    $file = $request->file("users.$key.cnic_back");
+                    Storage::disk('public')->putFileAs('retail_shipper_cnic', $file, $filename);
+                    $shipper_info->cnic_back = $filename;
+                }
+
+                // Save only changed fields
+                $shipper_info->save();
+            }
+        }
+
+        if(!empty($errors)){
+            return response()->json(['status' => 0, 'error' => $errors]);
+        }else{
+
+            $api = config('app.FINGA_URL');
+            $token = FingaIntegrationController::getToken($api);
+            $login_data = collect($data)->first();
+            $url = FingaIntegrationController::getLoginUrl($api, $token, $login_data['phone'], $login_data['cnic'], $login_data['email']);
+            $finja = FingaIntegrationController::RetailSignUp($data);
+
+            if (isset($finja['error'])) {
+                $finjaArray = json_decode(json_encode($finja), true);
+
+                $errorMessages = collect($finjaArray['error']['users']);
+
+                foreach ($errorMessages as $error_val){
+                    $key = array_key_first(array_filter($data, function ($row) use ($error_val) {
+                        return $row['phone'] === $error_val['mobile_no'];
+                    }));
+
+                    $data[$key]['message'] = $error_val['message'];
+
+                }
+                return response()->json(['status' => 0, 'error_2' => $data]);
+            } else {
+
+                $final['url'] = $url;
+                foreach ($data as $key=>$value) {
+                    $data[$key]['wallet_id'] = $finja['wallet_id'];
+                    $data[$key]['created_at'] = Carbon::now();
+                    $data[$key]['updated_at'] = Carbon::now();
+                }
+                RetailWalletUser::wallet_create($data);
+
+                return response()->json(['status' => 1, 'output' => $final]);
+
+            }
+        }
+
+        return response()->json(['status' => 1, 'success'=>'Profile Information Successfully Updated"']);
+    }
+
+
 }

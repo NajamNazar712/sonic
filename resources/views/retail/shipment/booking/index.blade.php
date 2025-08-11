@@ -3,6 +3,12 @@
 @section('title', 'Booking Form')
 
 @section('content')
+    <style>
+        /* Custom bigger modal size */
+        .modal-xl-custom {
+            max-width: 95% !important; /* or any width you like */
+        }
+    </style>
     <div class="app-content content">
         <div class="content-wrapper">
             <div class="content-header row">
@@ -152,6 +158,14 @@
                                     <div class="form-group col">
                                         <textarea name="shipper_address" class="form-control address" id="shipper_address" rows="2" placeholder="Shipper Address*" data-rule-required="true" data-msg-required="Shipper Address is required" data-rule-maxlength="255" data-msg-maxlength="Shipper Address can be maximum 255 characters"></textarea>
                                     </div>
+                                    <div class="form-group col-6" id="wallet_id_div">
+                                        <input type="hidden" name="wallet_id" id="wallet_id">
+                                        <input type="hidden" name="complete_shipper_info" id="complete_shipper_info" value="0">
+                                        <div class="form-group text-center p-1 border border-light rounded">
+                                            <label class="d-block">Wallet Shipment</label>
+                                            <input type="checkbox" name="is_wallet" class="switch hidden is_wallet" id="is_wallet" disabled>
+                                        </div>
+                                    </div>
                                     <div class="form-group col-6">
                                         <input type="text" name="consignee_phone_no" id="consignee_phone_no" class="form-control" placeholder="Consignee Cell Number*" data-rule-required="true" data-msg-required="Consignee Cell Number is required">
                                     </div>
@@ -244,6 +258,7 @@
                                             <input type="checkbox" name="bulk_shipment" class="switch hidden bulk_shipment">
                                         </div>
                                     </div>
+
 {{--                                    <div class="col pt-2">--}}
 {{--                                        <div class="form-group text-center p-1 border border-light rounded" style="background-color: black">--}}
 {{--                                            <div id='tiles'>--}}
@@ -369,137 +384,251 @@
             </div>
         </div>
     </div>
-    <div class="modal fade text-left" id="AddCityReqModal" data-backdrop="static" role="dialog" aria-labelledby="AddCityReqModal"
-    aria-hidden="true">
-   <div class="modal-dialog modal-sm" role="document">
-       <div class="modal-content">
-           <div class="modal-header bg-primary white">
-               <h4 class="modal-title white">Add City Request</h4>
-               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                   <span aria-hidden="true">&times;</span>
-               </button>
-           </div>
-           <form id="add_city_req_form" class="form-horizontal" novalidate="novalidate">
-               @csrf
-               <div class="modal-body">
-                   <div class="row justify-content-center">
-                       <div class="col-12 form-group">
-                        <select name="city_shipping_mode" id="city_shipping_mode" class="select2 form-control" data-rule-required="true" data-msg-required="Service Type is required">
-                            @foreach($shipping_modes as $shipping_mode)
-                                <option value="{{$shipping_mode->id}}">{{$shipping_mode->name}}</option>
-                            @endforeach
-                        </select>
-                       </div>
-
-                       <div class="col-12 form-group">
-                            <select name="city_business_category" id="city_business_category" class="select2 form-control" data-rule-required="true" data-msg-required="City Category is required">
-                                @foreach($business_categories as $business_category)
-                                    <option value="{{$business_category->id}}">{{$business_category->name}}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-12 form-group d-none" id="cities_domestic">
-                            <select name="city_domestic" id="city_domestic" class="select2 form-control" data-rule-required="true" data-msg-required="City is required">
-                                <option value="other">Other</option>
-                                @foreach($domestic_cities as $domestic_city)
-                                    <option value="{{$domestic_city->name}}">{{$domestic_city->name}}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-12 d-none" id="other_city_domestics">
-                            <div class="form-group">
-                                <input type="text" name="other_city_domestic" id="other_city_domestic" class="form-control" placeholder="New City" data-rule-required="true" data-msg-required="City is required">
+    <div class="modal fade text-left" id="AddCityReqModal" data-backdrop="static" role="dialog"
+         aria-labelledby="AddCityReqModal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Add City Request</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="add_city_req_form" class="form-horizontal" novalidate="novalidate">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="row justify-content-center">
+                            <div class="col-12 form-group">
+                                <select name="city_shipping_mode" id="city_shipping_mode" class="select2 form-control"
+                                        data-rule-required="true" data-msg-required="Service Type is required">
+                                    @foreach($shipping_modes as $shipping_mode)
+                                        <option value="{{$shipping_mode->id}}">{{$shipping_mode->name}}</option>
+                                    @endforeach
+                                </select>
                             </div>
-                        </div>
-                        <div class="col-12 form-group d-none" id="cities_international">
-                            <select name="city_international" id="city_international" class="select2 form-control" data-rule-required="true" data-msg-required="City is required">
-                                <option value="other">Other</option>
-                                @foreach($international_cities as $international_city)
-                                    <option value="{{$international_city->name}}">{{$international_city->name}}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-12 d-none" id="other_cities_internationals">
-                            <div class="form-group">
-                                <input type="text" name="other_cities_international" id="other_cities_international" class="form-control" placeholder="New City Type" data-rule-required="true" data-msg-required="City is required">
+
+                            <div class="col-12 form-group">
+                                <select name="city_business_category" id="city_business_category"
+                                        class="select2 form-control" data-rule-required="true"
+                                        data-msg-required="City Category is required">
+                                    @foreach($business_categories as $business_category)
+                                        <option value="{{$business_category->id}}">{{$business_category->name}}</option>
+                                    @endforeach
+                                </select>
                             </div>
-                        </div>
-                        <div class="col-12 form-group d-none" id="cities_phone_number">
-                            <input type="text" class="form-control" id="city_phone_number" name="city_phone_number" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone # is required">
-                        </div>
-                   </div>
-                   
-                   
-               </div>
-               <div class="modal-footer">
-                   <button class="btn btn-secondary" data-dismiss="modal">Close</button>
-                   <button id="AddFleetBtn" type="submit" class="btn btn-info">Add</button>
-               </div>
-           </form>
-       </div>
-   </div>
-</div>
-
-
-<div class="modal fade text-left" id="AutoFetchConsignee" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AutoFetchConsignee"
-    aria-hidden="true">
-   <div class="modal-dialog modal-lg" role="document">
-       <div class="modal-content">
-           <div class="modal-header bg-primary white">
-               <h4 class="modal-title white">Consignee Details</h4>
-               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                   <span aria-hidden="true">&times;</span>
-               </button>
-           </div>
-           <form id="auto_fetch_consignee" class="form-horizontal" novalidate="novalidate">
-               @csrf
-               <div class="modal-body">
-                   <div class="row justify-content-center">
-                    <div class="col-12 form-group">
-                        <h3 class="text-danger text-center" id="black_listed_employee">Employee is Blacklisted</h3>
-                    </div>
-                       <div class="col-12 form-group">
-                            <table class="table" id="consignee_table">
-
-                            </table>
-                       </div>
-                   </div>
-               </div>
-           </form>
-       </div>
-   </div>
-</div>
-
-<div class="modal fade text-left" id="AutoFetchShipper" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AutoFetchShipper"
-    aria-hidden="true">
-   <div class="modal-dialog modal-lg" role="document">
-       <div class="modal-content">
-           <div class="modal-header bg-primary white">
-               <h4 class="modal-title white">Shipper Details</h4>
-               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                   <span aria-hidden="true">&times;</span>
-               </button>
-           </div>
-           <form id="auto_fetch_shipper_form" class="form-horizontal" novalidate="novalidate">
-               @csrf
-               <div class="modal-body">
-                   <div class="row justify-content-center">
-                    {{-- <div class="col-12 form-group">
-                        <h3 class="text-danger text-center" id="black_listed_employee">Employee is Blacklisted</h3>
-                    </div> --}}
-                       <div class="col-12 form-group">
-                            <table class="table" id="shipper_table">
-                                <div id="no_info_div" class="d-none">
-                                    <span id="no_info_text"></span>
+                            <div class="col-12 form-group d-none" id="cities_domestic">
+                                <select name="city_domestic" id="city_domestic" class="select2 form-control"
+                                        data-rule-required="true" data-msg-required="City is required">
+                                    <option value="other">Other</option>
+                                    @foreach($domestic_cities as $domestic_city)
+                                        <option value="{{$domestic_city->name}}">{{$domestic_city->name}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-12 d-none" id="other_city_domestics">
+                                <div class="form-group">
+                                    <input type="text" name="other_city_domestic" id="other_city_domestic"
+                                           class="form-control" placeholder="New City" data-rule-required="true"
+                                           data-msg-required="City is required">
                                 </div>
-                            </table>
-                       </div>
-                   </div>
-               </div>
-           </form>
-       </div>
-   </div>
-</div>
+                            </div>
+                            <div class="col-12 form-group d-none" id="cities_international">
+                                <select name="city_international" id="city_international" class="select2 form-control"
+                                        data-rule-required="true" data-msg-required="City is required">
+                                    <option value="other">Other</option>
+                                    @foreach($international_cities as $international_city)
+                                        <option value="{{$international_city->name}}">{{$international_city->name}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-12 d-none" id="other_cities_internationals">
+                                <div class="form-group">
+                                    <input type="text" name="other_cities_international" id="other_cities_international"
+                                           class="form-control" placeholder="New City Type" data-rule-required="true"
+                                           data-msg-required="City is required">
+                                </div>
+                            </div>
+                            <div class="col-12 form-group d-none" id="cities_phone_number">
+                                <input type="text" class="form-control" id="city_phone_number" name="city_phone_number"
+                                       placeholder="Phone Number*" data-rule-required="true"
+                                       data-msg-required="Phone # is required">
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button id="AddFleetBtn" type="submit" class="btn btn-info">Add</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade text-left" id="AutoFetchConsignee" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="AutoFetchConsignee"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Consignee Details</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="auto_fetch_consignee" class="form-horizontal" novalidate="novalidate">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="row justify-content-center">
+                            <div class="col-12 form-group">
+                                <h3 class="text-danger text-center" id="black_listed_employee">Employee is
+                                    Blacklisted</h3>
+                            </div>
+                            <div class="col-12 form-group">
+                                <table class="table" id="consignee_table">
+
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade text-left" id="AutoFetchShipper" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="AutoFetchShipper"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Shipper Details</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="auto_fetch_shipper_form" class="form-horizontal" novalidate="novalidate">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="row justify-content-center">
+                            {{-- <div class="col-12 form-group">
+                                <h3 class="text-danger text-center" id="black_listed_employee">Employee is Blacklisted</h3>
+                            </div> --}}
+                            <div class="col-12 form-group">
+                                <table class="table" id="shipper_table">
+                                    <div id="no_info_div" class="d-none">
+                                        <span id="no_info_text"></span>
+                                    </div>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="walletSignupModal" tabindex="-1" role="dialog" aria-labelledby="walletSignupLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-xl-custom" role="document"> <!-- changed class -->
+            <div class="modal-content border-primary">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="walletSignupLabel">
+                        Wallet Signup for <strong id="wallet_user_text"></strong>
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+
+                    <!-- Wallet Signup Form -->
+                    <form id="main-form" class="form-horizontal" method="POST"  novalidate="novalidate" enctype="multipart/form-data">
+                        @csrf
+                        <input type="hidden" name="wallet_user_id" id="wallet_user_id">
+                        <div class="form-body">
+                            <h4 class="form-section">
+                                Profile Information (Please verify your profile information before sign up to wallet)
+                            </h4>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group col-md-9">
+                                        <label>Enter Name (As per CNIC OR Bank Account Title)</label>
+                                        <span class="danger">*</span>
+                                        <input type="text" id="name" class="form-control border-primary"
+                                               name="name" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group col-md-9">
+                                        <label>Phone Number 1:</label>
+                                        <span class="danger">*</span>
+                                        <input type="text" id="phone" class="form-control border-primary"
+                                               name="phone" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group col-md-9">
+                                        <label>CNIC:</label>
+                                        <input type="text" id="cnic" class="form-control border-primary" name="cnic">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group col-md-9">
+                                        <label>Email Address:</label>
+                                        <span class="danger">*</span>
+                                        <input type="email" id="email" class="form-control border-primary" name="email"
+                                               required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group col-md-9">
+                                        <label>Cnic Front:</label>
+                                        <span class="danger">*</span>
+                                        <input class="form-control form-control-sm" type="file" name="cnic_front" id="cnic_front" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
+
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group col-md-9">
+                                        <label>Cnic Back:</label>
+                                        <span class="danger">*</span>
+                                        <input class="form-control form-control-sm" type="file" name="cnic_back" id="cnic_back" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group col-md-9">
+                                        <input type="checkbox" id="confirm" name="confirm">
+                                        <span>
+                                        By signing up for the wallet, all your payments will be credited directly to your wallet.
+                                        Please check this box to agree.
+                                    </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-actions right">
+                                <button type="submit" id="signup_button" class="btn btn-primary" disabled>
+                                    Signup to Wallet
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    <!-- End Wallet Signup Form -->
+
+                </div>
+            </div>
+        </div>
+    </div>
 
 @endsection
 @section('css')
@@ -580,6 +709,8 @@
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
 
+
+
     <script type="text/javascript">
 
         function bdmk(){
@@ -617,6 +748,7 @@
         }
 
         $(document).ready(function () {
+            $('#wallet_id_div').hide();
             $('#admin_discount').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
@@ -1031,6 +1163,8 @@
             var first_shipment = false;
 
             $('#shipper_phone_no').on('change', function () {
+                $('#is_wallet').prop('disabled', true).prop('checked', false);
+                $('#complete_shipper_info').val(0);
                 if(this.value !== '' && this.value != null){
                     $.ajax({
                         url: '{!! route('retail.shipment.shipper_info') !!}',
@@ -1042,6 +1176,7 @@
                     })
                         .done(function (data) {
                             var cod = data.cod;
+
                             if(data.status == 1){
                                 $('#shipper_phone_no').val(data.details.shipper_phone_no);
                                 /*$('#shipper_name').val(data.details.shipper_name);
@@ -1097,7 +1232,16 @@
                                     $('#bank').addClass('required');
                                 }
                             }
+
+                            if(complete_shipper_info) {
+                                $('#complete_shipper_info').val(1);
+                            }else{
+                                $('#complete_shipper_info').val(0);
+                            }
+                            $('#is_wallet').prop('disabled', false);
                         });
+
+
                 }
             });
 
@@ -1841,6 +1985,298 @@
 
             $('#account_no').attr('autocomplete', 'off');
 
+            $('#shipping_mode').on('change', function () {
+                if(this.value == 3){
+                    $('#wallet_id_div').show();
+                }else{
+                    $('#wallet_id_div').hide();
+                }
+            });
+
+            $(document).on('change', '#is_wallet', function () {
+                if ($(this).is(':checked')) {
+                    let shipperName = $('#shipper_name').val().trim();
+                    let shipperCnic = $('#shipper_cnic').val().trim();
+                    let shipperAddress = $('#shipper_address').val().trim();
+                    let shipper_phone_no = $('#shipper_phone_no').val().trim();
+                    let shipping_mode_check = $('#shipping_mode').val();
+                    let ibanNo = $('#iban_no').val().trim();
+                    let accountNo = $('#account_no').val().trim();
+                    let bank = $('#bank').val().trim();
+                    let chequeImage = $('#cheque_image').val();
+                    let complete_shipper_info = parseInt($('#complete_shipper_info').val());
+
+                    // Always validate base fields
+                    if (!shipperName || !shipperCnic || !shipperAddress || !shipper_phone_no) {
+                        swal({
+                            title: 'Missing Information',
+                            text: 'Please fill shipper phone, shipper name, CNIC, and address before proceeding.',
+                            icon: 'error'
+                        });
+                        $(this).prop('checked', false);
+                        return;
+                    }
+
+                    // Extra check for mode 3 if info not already complete
+                    if (shipping_mode_check == 3 && complete_shipper_info === 0) {
+                        if (!ibanNo || !accountNo || !bank || !chequeImage) {
+                            swal({
+                                title: 'Missing Bank Details',
+                                text: 'Please fill IBAN, Account No, Bank, and upload Cheque Image.',
+                                icon: 'error'
+                            });
+                            $(this).prop('checked', false);
+                            return;
+                        }
+                    }
+
+                    // Confirmation
+                    swal({
+                        title: "Continue?",
+                        text: "Do you want to Continue with this Shipper?",
+                        icon: "warning",
+                        buttons: true,
+                        dangerMode: false
+                    }).then((willContinue) => {
+                        if (willContinue) {
+                            let formData = new FormData();
+
+                            // If info already complete → only send phone
+                            if (complete_shipper_info === 1) {
+                                formData.append('shipper_phone_no', shipper_phone_no);
+                                formData.append('complete_shipper_info', 1);
+                            }
+                            // Else send all details
+                            else {
+                                formData.append('shipper_phone_no', shipper_phone_no);
+                                formData.append('shipper_name', shipperName);
+                                formData.append('shipper_cnic', shipperCnic);
+                                formData.append('shipper_address', shipperAddress);
+                                formData.append('shipping_mode', shipping_mode_check);
+                                formData.append('iban_no', ibanNo);
+                                formData.append('account_no', accountNo);
+                                formData.append('bank', bank);
+                                formData.append('complete_shipper_info', 0);
+
+                                let chequeFile = $('#cheque_image')[0].files[0];
+                                if (chequeFile) {
+                                    formData.append('cheque_image', chequeFile);
+                                }
+                            }
+
+                            $.ajax({
+                                url: '{{ route('retail.shipment.RetailAddShipper') }}',
+                                method: 'POST',
+                                data: formData,
+                                processData: false,
+                                contentType: false,
+                                headers: {
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                }
+                            }).done(function (data) {
+                                if (data.status == 1 && data.shipper.id) {
+                                    $('#wallet_user_id').val(data.shipper.id);
+                                    $('#wallet_user_text').text(data.shipper.shipper_name+`(${data.shipper.shipper_phone_no})`);
+                                    $('#walletSignupModal').modal('show');
+                                } else {
+                                    swal({
+                                        title: 'Something Went Wrong',
+                                        text: 'Contact Admin',
+                                        icon: 'error'
+                                    });
+                                }
+                            });
+
+                        } else {
+                            $('#is_wallet').prop('checked', false);
+                        }
+                    });
+
+                }
+            });
+
         });
+
+        $(document).ready(function () {
+            $( "#main-form" ).validate({
+                errorClass: "danger",
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $('#signup_button').prop('disabled',true);
+                    swal({
+                        title: "Processing...",
+                        text: "Please wait while we process your request.",
+                        content: (() => {
+                            // Create a container for the spinner
+                            let content = document.createElement("div");
+                            content.innerHTML = `
+                            <div style="display: flex; justify-content: center; align-items: center;">
+                                <div class="spinner" style="width: 30px; height: 30px; border: 4px solid rgba(0,0,0,0.2); border-top: 4px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                            </div>
+                        `;
+                            return content;
+                        })(),
+                        buttons: false, // Disable buttons
+                        closeOnClickOutside: false, // Disable outside click
+                        closeOnEsc: false // Disable escape key
+                    });
+
+                    const style = document.createElement("style");
+                    style.textContent = `
+                    @keyframes spin {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
+                    }`;
+                    document.head.appendChild(style);
+
+
+                    var formData = new FormData();
+
+                    // Add CSRF token
+                    formData.append('_token', '{{ csrf_token() }}');
+
+
+                    var rowId = 0;
+
+                    formData.append(`users[${rowId}][id]`, rowId);
+                    formData.append(`users[${rowId}][wallet_user_id]`, $('#wallet_user_id').val());
+                    formData.append(`users[${rowId}][name]`, $('#name').val());
+                    formData.append(`users[${rowId}][phone]`, $('#phone').val());
+                    formData.append(`users[${rowId}][cnic]`, $('#cnic').val());
+                    formData.append(`users[${rowId}][email]`, $('#email').val());
+
+                    let cnic_front = $('#cnic_front')[0].files[0];
+                    let cnic_back = $('#cnic_back')[0].files[0];
+
+                    if (cnic_front && cnic_back) {
+                        formData.append(`users[${rowId}][cnic_front]`,cnic_front);
+                        formData.append(`users[${rowId}][cnic_back]`, cnic_back);
+                    }
+
+
+                    $.ajax({
+                        url: '{{ route('retail.shipment.profile_wallet') }}',
+                        method: 'POST',
+                        processData: false,
+                        contentType: false,
+                        data: formData,
+                        success: function (data) {
+
+                            swal.close();
+
+                            if (data.status === 0) {
+
+                                if (data.error) {
+                                    var summaryErrorMessages = '<ul style="color: #e56464;">';
+                                    $.each(data.error, function (rowId, errors) {
+
+                                        var errorMessages = '<ul>';
+                                        summaryErrorMessages += `<li><strong>Row ${rowId}:</strong></li><ul>`;
+
+                                        // Iterate over errors for the row
+                                        $.each(errors, function (field, message) {
+                                            // Append individual field errors to the row and summary
+                                            errorMessages += `<li><strong>${field}:</strong> ${message}</li>`;
+                                            summaryErrorMessages += `<li><strong>${field}:</strong> ${message}</li>`;
+                                        });
+
+                                        errorMessages += '</ul>';
+                                        summaryErrorMessages += '</ul>';
+                                    });
+                                }
+                                summaryErrorMessages += '</ul>';
+
+                                swal({
+                                    content: (() => {
+                                        let content = document.createElement('div');
+                                        content.innerHTML = summaryErrorMessages;
+                                        return content;
+                                    })(),
+                                    title: 'Errors Found!',
+                                    icon: 'warning',
+                                    className: 'custom-swal-width' // Optional: Use custom class for wider modal
+                                });
+
+
+                                if (data.error_2) {
+                                    let summaryErrorMessages = '<ul style="color: #e56464;">';
+
+                                    // Iterate through the rows in error_2
+                                    $.each(data.error_2, function (rowId, rowData) {
+
+
+                                        summaryErrorMessages += `<li>Row ID: ${rowId}</li><ul>`;
+
+                                        // Display the specific errors for each field in the row
+                                        if (rowData.message) {
+                                            $.each(rowData.message, function (field, messages) {
+                                                $.each(messages, function (index, message) {
+                                                    summaryErrorMessages += `<li>${field}: ${message}</li>`;
+                                                });
+                                            });
+                                        }
+
+                                        summaryErrorMessages += '</ul>';
+                                    });
+
+                                    let scrollableContent = document.createElement('div');
+                                    scrollableContent.style.maxHeight = '400px'; // Adjust the height as needed
+                                    scrollableContent.style.overflowY = 'auto';  // Add vertical scrolling
+                                    scrollableContent.style.padding = '10px';   // Optional: Add padding for readability
+                                    scrollableContent.innerHTML = summaryErrorMessages;
+
+                                    swal({
+                                        content: scrollableContent,
+                                        title: 'Error!',
+                                        className: 'custom-swal-width',
+                                        text: 'Errors occurred in the following rows.',
+                                        icon: 'warning',
+                                    });
+                                }
+
+
+
+
+                            } else {
+                                swal({
+                                    title: 'Success',
+                                    text: 'Success',
+                                    icon: 'success',
+                                });
+                                var rdUrl = data.output.url ;
+                                window.location.href = `{{ url('cod/wallet/finja_dashboard') }}?url=${rdUrl}`;
+                            }
+                            $('#signup_button').prop('disabled',false);
+                        },
+                        error: function (xhr) {
+                            $('#signup_button').prop('disabled',false);
+                            swal.close();
+
+                            console.error(xhr.responseText);
+                        }
+                    });
+                }
+            });
+
+
+        });
+
+        $(document).ready(function () {
+            // Monitor checkbox state
+            $('#confirm').on('change', function () {
+                // Enable or disable the button based on the checkbox state
+                if ($(this).is(':checked')) {
+                    $('#signup_button').prop('disabled', false); // Enable button
+                } else {
+                    $('#signup_button').prop('disabled', true); // Disable button
+                }
+            });
+        });
+
     </script>
 @endsection
