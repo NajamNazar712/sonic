@@ -17457,7 +17457,7 @@ class AdminReportsController extends Controller
             $query->whereNotNull('sale_tier_tags.poc')
                  ->orWhereNotNull('sale_tier_tags.kam');
         })
-
+        ->whereNotIn('shipments.shipper_status_id', [14, 25])
         ->select($select)
         ->groupBy('shipments.id');
 
