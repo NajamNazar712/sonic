@@ -13,9 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('retail_shipper_infos', function (Blueprint $table) {
-            $table->string('cnic_front',191)->after('otp_expire_at')->nullable();
-            $table->string('cnic_back',191)->after('otp_expire_at')->nullable();
+        Schema::table('retail_shipments', function (Blueprint $table) {
+            $table->tinyInteger('is_wallet')->default(0);
+         
         });
     }
 
@@ -26,8 +26,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('retail_shipper_infos', function (Blueprint $table) {
-            $table->dropColumn(['cnic_front', 'cnic_back']);
+        Schema::table('retail_shipments', function (Blueprint $table) {
+            $table->dropColumn(['is_wallet']);
         });
     }
 };
