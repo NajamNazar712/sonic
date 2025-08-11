@@ -147,6 +147,8 @@ use App\Jobs\WalletBulkSettlementFromDonePayments;
 use App\Models\ParentProduct;
 use App\Http\Models\Product;
 use App\Http\Models\Region;
+use App\Models\CorporateUserOnDeliveredInvoice;
+
 
 class AdminFinanceController extends Controller
 {
@@ -19862,6 +19864,14 @@ class AdminFinanceController extends Controller
 
     static public function add_payment($shipment_id, $type, $shipment = array())
     {
+
+        $delivered_invoice_users = CorporateUserOnDeliveredInvoice::where('status', 1)
+        ->pluck('user_id')
+        ->toArray();
+
+        if(in_array($type, [3,1]) && in_array($shipment->user_id , $delivered_invoice_users)) {
+            return;
+        }
         if (empty($shipment)) {
             $shipment = Shipment::find($shipment_id);
         }
