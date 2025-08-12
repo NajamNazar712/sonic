@@ -32,7 +32,8 @@ class shipmentInTransitjourney extends Command
     public function handle()
     {
         $shipmentId = [
-            14428353882639
+            14428353905669,
+            14428353905672
         ];
         if ($shipmentId) {
             $shipmentId = Shipment::whereIn('tracking_number', $shipmentId)->get();
