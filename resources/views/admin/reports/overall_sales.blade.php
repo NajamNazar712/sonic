@@ -417,7 +417,7 @@
             });
             $('#search_shippers').select2({
                 width:'100%',
-                placeholder:"Select Shipper",
+                placeholder:"Select Multiple Shippers",
                 allowClear:true,
                 multiple: true,
                 minimumInputLength: 2,
