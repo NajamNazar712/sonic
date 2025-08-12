@@ -104,7 +104,8 @@ class DeleteDuplicateArrival extends Command
                     DB::raw('SUM(pending_payment_shipments.gst) as total_gst'),
                     DB::raw('SUM(pending_payment_shipments.sms_charges) as total_sms_charges'),
                     DB::raw('SUM(pending_payment_shipments.payable) as total_payable'),
-                    DB::raw('SUM(pending_payment_shipments.wht) as total_wht')
+                    DB::raw('SUM(pending_payment_shipments.wht) as total_wht'),
+                    DB::raw('SUM(pending_payment_shipments.cod_sst) as total_cod_sst')
                 )
                 ->join('pending_payment_calculations', 'pending_payment_shipments.pending_payment_id', '=', 'pending_payment_calculations.pending_payment_id')
                 ->join('pending_payments', 'pending_payment_calculations.pending_payment_id', '=', 'pending_payments.id')
@@ -124,6 +125,7 @@ class DeleteDuplicateArrival extends Command
                         'sms_charges' => $payment->total_sms_charges,
                         'payable' => $payment->total_payable,
                         'wht' => $payment->total_wht,
+                        'cod_sst' => $payment->total_cod_sst,
                     ]);
             }
 
