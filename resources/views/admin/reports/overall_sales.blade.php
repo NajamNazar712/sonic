@@ -215,6 +215,18 @@
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                     </div>
                 </div>
+
+                 <div class="row justify-content-end">
+                    <div class="col-4">
+                        <h4 for="export" class="font">Excel Column(s):</h4>
+
+                        <fieldset class="form-group">
+                            <select name="export[]" id="export" class="form-control select2" multiple="multiple">
+                                <option value="selectAll">Select All</option>
+                            </select>
+                        </fieldset>
+                    </div>
+                </div>
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
@@ -300,6 +312,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
 
     <style>
         table.dataTable {
@@ -363,6 +376,8 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.time.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
+
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -545,177 +560,100 @@
                     }
                 }
             });
-            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
-                if ( this.context.length ) {
-                    blockPagePermanently();
-                    body = [];
-                    var params = table.ajax.params();
-                    params.start = 0;
-                    params.length = -1;
-                    params.excel = true;
-                    var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.overall_sales.list') }}',
-                        method:'post',
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        },
-                        data: params,
-                        success: function (result) {
-                            head = [];
 
-                            head.push('S. No.');
-                            head.push('Tracking No.');
-                            head.push('Account No.');
-                            head.push('Shipper');
-                            head.push('Sub Segment');
-                            head.push('Vendor');
-                            head.push('Order ID');
-                            head.push('First Attempt Date');
-                            head.push('Item Quantity');
-                            head.push('Pieces');
-                            head.push('Status');
-                            head.push('Reason');
-                            head.push('Remark');
-                            head.push('Total Attempt');
-                            head.push('Payment Status');
-                            head.push('Invoice No.');
-                            head.push('Payment ID');
-                            head.push('Processed Date');
-                            head.push('Paid Date');
-                            head.push('Service Type');
-                            head.push('Arrival Date');
-                            head.push('Rider');
-                            head.push('Origin');
-                            head.push('Origin Hub');
-                            head.push('Destination');
-                            head.push('Destination Hub');
-                            head.push('Return City');
-                            head.push('Origin Zone');
-                            head.push('Class');
-                            head.push('Attempts');
-                            head.push('Shipping Mode');
-                            head.push('Category');
-                            head.push('Description');
-                            head.push('International Tracking No.');
-                            head.push('Collection Amount');
-                            head.push('Actual Weight');
-                            head.push('Chargeable Weight');
-                            head.push('Weight Charges');
-                            head.push('Cash Handling Charges');
-                            head.push('Insurance Charges');
-                            head.push('Packaging Charges');
-                            head.push('FAF Charges');
-                            head.push('Wallet Charges');
-                            head.push('Fuel Surcharge');
-                            head.push('Return Charges');
-                            head.push('Replacement Charges');
-                            head.push('Try & Buy Charges');
-                            head.push('Reverse Pickup Charges');
-                            head.push('NSA/OSA Charges');
-                            head.push('GST');
-                            head.push('SMS Charges');
-                            head.push('WHT');
-                            head.push('COD SST');
-                            head.push('Intercept Charges');
-                            head.push('Total Charges');
-                            head.push('Estimated Charges');
-                            head.push('Packing Charges');
-                            head.push('Net Payable');
-                            head.push('Delivered/Returned Date');
-                            head.push('Received/Refused By');
-                            head.push('Sales Person');
-                            head.push('Referral Name');
-                            head.push('Reason');
-                            head.push('Special Instructions');
-                            head.push('Cost');
-                            $.each(result.data, function(index, values) {
-                                row = [];
-
-                                row.push(index + 1);
-                                row.push(values.tracking_number_excel);
-                                row.push(values.account_no);
-                                row.push(values.shipper);
-                                row.push(values.sub_segment);
-                                row.push(values.vendor);
-                                row.push(values.order_id);
-                                row.push(values.first_attempt_date);
-                                row.push(values.item_quantity);
-                                row.push(values.pieces);
-                                row.push(values.current_status);
-                                row.push(values.reason);
-                                row.push(values.remark);
-                                row.push(values.total_attempt);
-                                row.push(values.payment_status);
-                                row.push(values.invoice_number);
-                                row.push(values.payment_id);
-                                row.push(values.processed_date);
-                                row.push(values.paid_date);
-                                row.push(values.service_type);
-                                row.push(values.arrival_date);
-                                row.push(values.ridername);
-                                row.push(values.origin);
-                                row.push(values.origin_hub);
-                                row.push(values.destination);
-                                row.push(values.hub);
-                                row.push(values.return_city);
-                                row.push(values.zone);
-                                row.push(values.class);
-                                row.push(values.attempts);
-                                row.push(values.shipping_mode);
-                                row.push(values.category);
-                                row.push(values.description);
-                                row.push(values.international_tracking_number);
-                                row.push(values.p_collection_amount);
-                                row.push(values.actual_weight);
-                                row.push(values.chargeable_weight);
-                                row.push(values.weight_charges);
-                                row.push(values.cash_handling_charges);
-                                row.push(values.insurance_charges);
-                                row.push(values.packaging_material_charges);
-                                row.push(values.faf_charges);
-                                row.push(values.wallet_charges);
-                                row.push(values.fuel_surcharge);
-                                row.push(values.return_charges);
-                                row.push(values.replacement_charges);
-                                row.push(values.try_and_buy_charges);
-                                row.push(values.reverse_pickup_charges);
-                                row.push(values.nsa_osa_charges);
-                                row.push(values.p_gst);
-                                row.push(values.pps_sms_charges);
-                                row.push(values.pps_wht);
-                                row.push(values.pps_cod_sst);
-                                row.push(values.intercept_charges);
-                                row.push(values.p_total_charges);
-                                row.push(values.estimated_charges);
-                                row.push(values.packaging_charges);
-                                row.push(values.p_net_payable);
-                                row.push(values.delivered_or_returned);
-                                row.push(values.received_or_refused_by);
-                                row.push(values.sales_person);
-                                row.push(values.ref);
-                                row.push(values.reason);
-                                row.push(values.special_instructions);
-                                row.push(values.cost);
-
-                                body.push(row);
-                            });
-                        },
-                        async: false
-                    });
-                    UnblockPagePermanently();
-
-                    return {body: body, header:head};
-                }
-            } );
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
-                buttons: [
+               buttons: [
                     {
-                        extend: 'excelHtml5',
+                        extend: 'excel',
                         title: 'Overall Sales Report',
-                        text:'<i class="la la-file-excel-o"></i> Excel',
-                    },
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                        action: function(e, dt, node, config) {
+                            if ($('#export').val().length === 0) {
+                                swal({
+                                    text: 'At least 1 column should be selected for export!',
+                                    title: 'Please select excel column(s)',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'OK',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        }
+                                    },
+                                    dangerMode: true
+                                });
+                                return;
+                            }
+
+                            $.ajax({
+                                url: '{{ route('admin.reports.overall_sales.list') }}',
+                                method: "POST",
+                                data: {
+                                    excel: true,
+                                    search_tracking: $('#search_tracking_no').val(),
+                                    search_sales_person: $('#sales_person_select').val(),
+                                    search_shipper: $('#search_shipper').val(),
+                                    search_shippers: $('#search_shippers').val(),
+                                    search_origin: $('#search_origin').val(),
+                                    search_destination: $('#search_destination').val(),
+                                    search_hub: $('#search_hub').val(),
+                                    search_status: $('#search_status').val(),
+                                    sub_segment: $('#sub_segment_select').val(),
+                                    ref: $('#ref_name_select').val(),
+                                    search_date_from: $('input[name="search_date_from_formatted"]').val(),
+                                    search_date_to: $('input[name="search_date_to_formatted"]').val(),
+                                    search_business_category: $('#search_business_category').val(),
+                                    arrival_time_from: $('input[name="arrival_time_from"]').val(),
+                                    arrival_time_to: $('input[name="arrival_time_to"]').val(),
+                                    search_shipping_mode: $('#search_shipping_mode').val(),
+                                    search_origin_hub: $('#search_origin_hub').val(),
+                                    search_origin_zone: $('#search_origin_zone').val(),
+                                    service_type_select: $('#service_type_select').val(),
+                                    rider_type_referral: $('#rider_types_referral').val(),
+                                    selectedValue: $('#export').val(),
+                                    selectedTexts: $('#export option:selected').map(function () {
+                                        return $(this).text();
+                                    }).get(),
+                                    _token: $('meta[name="csrf-token"]').attr('content'),
+                                },
+                                beforeSend: function() {
+                                    swal({
+                                        title: 'Please Wait!',
+                                        text: 'Downloading is in progress',
+                                        icon: 'info',
+                                        buttons: false,
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false
+                                    });
+                                },
+                                complete: function() {
+                                    swal.close();
+                                },
+                                success: function(response, status, xhr) {
+                                    var disposition = xhr.getResponseHeader('Content-Disposition');
+                                    if (disposition && disposition.indexOf('attachment') !== -1) {
+                                        var filename = 'OverallSales_Report.csv';
+                                        var blob = new Blob([response], { type: 'text/csv' });
+                                        var link = document.createElement('a');
+                                        var url = window.URL.createObjectURL(blob);
+                                        link.href = url;
+                                        link.download = filename;
+                                        document.body.appendChild(link);
+                                        link.click();
+                                        window.URL.revokeObjectURL(url);
+                                        document.body.removeChild(link);
+                                    }
+                                },
+                                error: function(xhr, status, error) {
+                                    console.error('Failed to fetch CSV data:', status, error);
+                                }
+                            });
+                        }
+                    }
                 ],
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
@@ -751,81 +689,85 @@
                         d.search_shipping_mode = $('#search_shipping_mode').val();
                         d.search_origin_hub = $('#search_origin_hub').val();
                         d.search_origin_zone = $('#search_origin_zone').val();
-
                         d.service_type_select = $('#service_type_select').val()
                         d.rider_type_referral = $('#rider_types_referral').val();
-
                     }
                 },
                 order: [[1, 'desc']],
                 columns: [
-                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'shipment_id', name: 'shipments.id', orderable: true, searchable: false, visible: false},
-                    { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number_link'},
-                    { data:'account_no' ,name: 'u.id', class: 'align-middle account_no'},
-                    { data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},
-                    { data:'sub_segment' ,name: 'scs.name', class: 'align-middle sub_segment'},
-                    { data:'vendor' ,name: 'usi.vendor', class: 'align-middle vendor'},
-                    { data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},
-                    { data:'first_attempt_date' ,name: 'first_attempt_date', class: 'align-middle first_attempt_date'},
-                    { data:'item_quantity' ,name: 'item_quantity', class: 'align-middle item_quantity'},
-                    { data:'pieces' ,name: 'pieces', class: 'align-middle pieces'},
-                    { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
-                    { data: 'reason' ,name:'reason', class: 'align-middle reason'},
-                    { data: 'remark' ,name:'remark', class: 'align-middle remark'},
-                    { data:'total_attempt' ,name: 'total_attempt', class: 'align-middle total_attempt'},
-                    { data:'payment_status' ,name: 'sps.name', class: 'align-middle payment_status'},
-                    { data:'invoice_number' ,name: 'invoices.invoice_number', class: 'align-middle text-center invoice_number'},
-                    { data:'payment_id' ,name: 'dps.id', class: 'align-middle payment_id'},
-                    { data:'processed_date' ,name: 'spjproceed_date.created_at', class: 'align-middle processed_date'},
-                    { data:'paid_date' ,name: 'spjpaid_date.created_at', class: 'align-middle paid_date'},
-                    { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},
-                    { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle arrival_date'},
-                    { data:'ridername' ,name: 'r.name', class: 'align-middle ridername'},
-                    { data:'origin' ,name: 'oc.name', class: 'align-middle origin'},
-                    { data:'origin_hub' ,name: 'och.name', class: 'align-middle origin_hub'},
-                    { data:'destination' ,name: 'dc.name', class: 'align-middle destination'},
-                    // { data:'consignee_address' ,name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
-                    { data:'hub' ,name: 'h.name', class: 'align-middle hub'},
-                    { data:'return_city', name: 'return_city', class: 'align-middle return_city'},
-                    { data:'zone' ,name: 'z.name', class: 'align-middle zone'},
-                    { data:'class' ,name: 'zcc.class', class: 'align-middle class'},
-                    { data:'attempts' ,name: 'attempts', class: 'align-middle attempts',sortable:false},
-                    { data:'shipping_mode' ,name: 'sm.mode', class: 'align-middle shipping_mode'},
-                    { data:'category' ,name: 'p.product_name', class: 'align-middle category'},
-                    { data:'description' ,name: 'si.description', class: 'align-middle description'},
-                    { data:'international_tracking_number' ,name: 'ibs.international_tracking_number', class: 'align-middle international_tracking_number'},
-                    { data:'p_collection_amount' ,name: 'pps.amount', class: 'align-middle collection_amount'},
-                    { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle actual_weight'},
-                    { data:'chargeable_weight' ,name: 'shipments.chargeable_weight', class: 'align-middle chargeable_weight'},
-                    { data:'weight_charges' ,name: 'shipments.weight_charges', class: 'align-middle weight_charges'},
-                    { data:'cash_handling_charges' ,name: 'shipments.cash_handling_charges', class: 'align-middle cash_handling_charges'},
-                    { data:'insurance_charges' ,name: 'shipments.insurance_charges', class: 'align-middle insurance_charges'},
-                    { data:'packaging_material_charges' ,name: 'shipments.packaging_material_charges', class: 'align-middle packaging_material_charges'},
-                    { data: 'faf_charges', name: 'sac.faf_charges', class: 'align-middle faf_charges'},
-                    { data: 'wallet_charges', name: 'sac.wallet_charges', class: 'align-middle wallet_charges'},
-                    { data:'fuel_surcharge' ,name: 'shipments.fuel_surcharge', class: 'align-middle fuel_surcharge'},
-                    { data:'return_charges' ,name: 'shipments.return_charges', class: 'align-middle return_charges'},
-                    { data:'replacement_charges' ,name: 'shipments.replacement_charges', class: 'align-middle replacement_charges'},
-                    { data:'try_and_buy_charges' ,name: 'shipments.try_and_buy_charges', class: 'align-middle try_and_buy_charges'},
-                    { data:'reverse_pickup_charges' ,name: 'ss_charge.reverse_pickup_charges', class: 'align-middle reverse_pickup_charges'},
-                    { data:'nsa_osa_charges' ,name: 'shipments.nsa_osa_charges', class: 'align-middle nsa_osa_charges'},
-                    { data:'p_gst' ,name: 'pps.p_gst', class: 'align-middle p_gst',sortable:false},
-                    { data:'pps_sms_charges' ,name: 'pps.pps_sms_charges', class: 'align-middle pps_sms_charges',sortable:false},
-                    { data:'pps_wht' ,name: 'pps_wht', class: 'align-middle pps_wht',sortable:false},
-                    { data:'pps_cod_sst' ,name: 'pps_cod_sst', class: 'align-middle pps_cod_sst',sortable:false},
-                    { data:'intercept_charges' ,name: 'shipments.intercept_charges', class: 'align-middle intercept_charges'},
-                    { data:'fintech_charges' ,name: 'shipments.fintech_charges', class: 'align-middle fintech_charges'},
-                    { data:'p_total_charges' ,name: 'pps.charges', class: 'align-middle total_charges'},
-                    { data:'estimated_charges' ,name: 'estimated_charges', class: 'align-middle estimated_charges',sortable:false},
-                    { data:'packaging_charges' ,name: 'shipments.packaging_charges', class: 'align-middle packaging_charges',sortable:false},
-                    { data: 'p_net_payable' ,name: 'pps.payable', class: 'align-middle net_payable'},
-                    { data: 'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle delivered_or_returned'},
-                    { data: 'received_or_refused_by' ,name: 'dr.received_or_refused_by', class: 'align-middle received_or_refused_by'},
-                    { data: 'sales_person' ,name: 'adsp.name', class: 'align-middle sales_person'},
-                    { data: 'ref', name: 'r.name', class: 'align-middle ref'},
-                    { data: 'special_instructions' ,name: 'shipments.special_instructions', class: 'align-middle special_instructions'},
-                    { data: 'cost' ,name: 'ibs.cost', class: 'align-middle cost'}
+                    {
+                        orderable: false,
+                        searchable: false,
+                        name: 'serial_number',
+                        class: 'align-middle serial_number',
+                        targets: 0,
+                        render: function (data, type, row) { return ''; }
+                    },
+                    { data: 'shipment_id', name: 'shipments.id', orderable: true, searchable: false, visible: false, value: 'shipment_id', text: 'Shipment ID', download: true },
+                    { data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number_link', value: 'tracking_number_link', text: 'Tracking Number', download: true },
+                    { data: 'account_no', name: 'u.id', class: 'align-middle account_no', value: 'account_no', text: 'Account Number', download: true },
+                    { data: 'shipper', name: 'u.name', class: 'align-middle shipper', value: 'shipper', text: 'Shipper Name', download: true },
+                    { data: 'sub_segment', name: 'scs.name', class: 'align-middle sub_segment', value: 'sub_segment', text: 'Sub Segment', download: true },
+                    { data: 'vendor', name: 'usi.vendor', class: 'align-middle vendor', value: 'vendor', text: 'Vendor', download: true },
+                    { data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id', value: 'order_id', text: 'Order ID', download: true },
+                    { data: 'first_attempt_date', name: 'first_attempt_date', class: 'align-middle first_attempt_date', value: 'first_attempt_date', text: 'First Attempt Date', download: true },
+                    { data: 'item_quantity', name: 'item_quantity', class: 'align-middle item_quantity', value: 'item_quantity', text: 'Item Quantity', download: true },
+                    { data: 'pieces', name: 'pieces', class: 'align-middle pieces', value: 'pieces', text: 'Pieces', download: true },
+                    { data: 'current_status', name: 'ss.name', class: 'align-middle current_status', value: 'current_status', text: 'Current Status', download: true },
+                    { data: 'reason', name: 'reason', class: 'align-middle reason', value: 'reason', text: 'Reason', download: true },
+                    { data: 'remark', name: 'remark', class: 'align-middle remark', value: 'remark', text: 'Remark', download: true },
+                    { data: 'total_attempt', name: 'total_attempt', class: 'align-middle total_attempt', value: 'total_attempt', text: 'Total Attempts', download: true },
+                    { data: 'payment_status', name: 'sps.name', class: 'align-middle payment_status', value: 'payment_status', text: 'Payment Status', download: true },
+                    { data: 'invoice_number', name: 'invoices.invoice_number', class: 'align-middle text-center invoice_number', value: 'invoice_number', text: 'Invoice Number', download: true },
+                    { data: 'payment_id', name: 'dps.id', class: 'align-middle payment_id', value: 'payment_id', text: 'Payment ID', download: true },
+                    { data: 'processed_date', name: 'spjproceed_date.created_at', class: 'align-middle processed_date', value: 'processed_date', text: 'Processed Date', download: true },
+                    { data: 'paid_date', name: 'spjpaid_date.created_at', class: 'align-middle paid_date', value: 'paid_date', text: 'Paid Date', download: true },
+                    { data: 'service_type', name: 'bt.booking_type', class: 'align-middle service_type', value: 'service_type', text: 'Service Type', download: true },
+                    { data: 'arrival_date', name: 'sj.created_at', class: 'align-middle arrival_date', value: 'arrival_date', text: 'Arrival Date', download: true },
+                    { data: 'ridername', name: 'r.name', class: 'align-middle ridername', value: 'ridername', text: 'Rider Name', download: true },
+                    { data: 'origin', name: 'oc.name', class: 'align-middle origin', value: 'origin', text: 'Origin', download: true },
+                    { data: 'origin_hub', name: 'och.name', class: 'align-middle origin_hub', value: 'origin_hub', text: 'Origin Hub', download: true },
+                    { data: 'destination', name: 'dc.name', class: 'align-middle destination', value: 'destination', text: 'Destination', download: true },
+                    { data: 'hub', name: 'h.name', class: 'align-middle hub', value: 'hub', text: 'Hub', download: true },
+                    { data: 'return_city', name: 'return_city', class: 'align-middle return_city', value: 'return_city', text: 'Return City', download: true },
+                    { data: 'zone', name: 'z.name', class: 'align-middle zone', value: 'zone', text: 'Zone', download: true },
+                    { data: 'class', name: 'zcc.class', class: 'align-middle class', value: 'class', text: 'Class', download: true },
+                    { data: 'attempts', name: 'attempts', class: 'align-middle attempts', sortable: false, value: 'attempts', text: 'Attempts', download: true },
+                    { data: 'shipping_mode', name: 'sm.mode', class: 'align-middle shipping_mode', value: 'shipping_mode', text: 'Shipping Mode', download: true },
+                    { data: 'category', name: 'p.product_name', class: 'align-middle category', value: 'category', text: 'Category', download: true },
+                    { data: 'description', name: 'si.description', class: 'align-middle description', value: 'description', text: 'Description', download: true },
+                    { data: 'international_tracking_number', name: 'ibs.international_tracking_number', class: 'align-middle international_tracking_number', value: 'international_tracking_number', text: 'International Tracking Number', download: true },
+                    { data: 'p_collection_amount', name: 'pps.amount', class: 'align-middle collection_amount', value: 'p_collection_amount', text: 'Collection Amount', download: true },
+                    { data: 'actual_weight', name: 'shipments.actual_weight', class: 'align-middle actual_weight', value: 'actual_weight', text: 'Actual Weight', download: true },
+                    { data: 'chargeable_weight', name: 'shipments.chargeable_weight', class: 'align-middle chargeable_weight', value: 'chargeable_weight', text: 'Chargeable Weight', download: true },
+                    { data: 'weight_charges', name: 'shipments.weight_charges', class: 'align-middle weight_charges', value: 'weight_charges', text: 'Weight Charges', download: true },
+                    { data: 'cash_handling_charges', name: 'shipments.cash_handling_charges', class: 'align-middle cash_handling_charges', value: 'cash_handling_charges', text: 'Cash Handling Charges', download: true },
+                    { data: 'insurance_charges', name: 'shipments.insurance_charges', class: 'align-middle insurance_charges', value: 'insurance_charges', text: 'Insurance Charges', download: true },
+                    { data: 'packaging_material_charges', name: 'shipments.packaging_material_charges', class: 'align-middle packaging_material_charges', value: 'packaging_material_charges', text: 'Packaging Material Charges', download: true },
+                    { data: 'faf_charges', name: 'sac.faf_charges', class: 'align-middle faf_charges', value: 'faf_charges', text: 'FAF Charges', download: true },
+                    { data: 'wallet_charges', name: 'sac.wallet_charges', class: 'align-middle wallet_charges', value: 'wallet_charges', text: 'Wallet Charges', download: true },
+                    { data: 'fuel_surcharge', name: 'shipments.fuel_surcharge', class: 'align-middle fuel_surcharge', value: 'fuel_surcharge', text: 'Fuel Surcharge', download: true },
+                    { data: 'return_charges', name: 'shipments.return_charges', class: 'align-middle return_charges', value: 'return_charges', text: 'Return Charges', download: true },
+                    { data: 'replacement_charges', name: 'shipments.replacement_charges', class: 'align-middle replacement_charges', value: 'replacement_charges', text: 'Replacement Charges', download: true },
+                    { data: 'try_and_buy_charges', name: 'shipments.try_and_buy_charges', class: 'align-middle try_and_buy_charges', value: 'try_and_buy_charges', text: 'Try & Buy Charges', download: true },
+                    { data: 'reverse_pickup_charges', name: 'ss_charge.reverse_pickup_charges', class: 'align-middle reverse_pickup_charges', value: 'reverse_pickup_charges', text: 'Reverse Pickup Charges', download: true },
+                    { data: 'nsa_osa_charges', name: 'shipments.nsa_osa_charges', class: 'align-middle nsa_osa_charges', value: 'nsa_osa_charges', text: 'NSA/OSA Charges', download: true },
+                    { data: 'p_gst', name: 'pps.p_gst', class: 'align-middle p_gst', sortable: false, value: 'p_gst', text: 'GST', download: true },
+                    { data: 'pps_sms_charges', name: 'pps.pps_sms_charges', class: 'align-middle pps_sms_charges', sortable: false, value: 'pps_sms_charges', text: 'SMS Charges', download: true },
+                    { data: 'pps_wht', name: 'pps_wht', class: 'align-middle pps_wht', sortable: false, value: 'pps_wht', text: 'WHT', download: true },
+                    { data: 'pps_cod_sst', name: 'pps_cod_sst', class: 'align-middle pps_cod_sst', sortable: false, value: 'pps_cod_sst', text: 'COD SST', download: true },
+                    { data: 'intercept_charges', name: 'shipments.intercept_charges', class: 'align-middle intercept_charges', value: 'intercept_charges', text: 'Intercept Charges', download: true },
+                    { data: 'fintech_charges', name: 'shipments.fintech_charges', class: 'align-middle fintech_charges', value: 'fintech_charges', text: 'Fintech Charges', download: true },
+                    { data: 'p_total_charges', name: 'pps.charges', class: 'align-middle total_charges', value: 'p_total_charges', text: 'Total Charges', download: true },
+                    { data: 'estimated_charges', name: 'estimated_charges', class: 'align-middle estimated_charges', sortable: false, value: 'estimated_charges', text: 'Estimated Charges', download: true },
+                    { data: 'packaging_charges', name: 'shipments.packaging_charges', class: 'align-middle packaging_charges', sortable: false, value: 'packaging_charges', text: 'Packaging Charges', download: true },
+                    { data: 'p_net_payable', name: 'pps.payable', class: 'align-middle net_payable', value: 'p_net_payable', text: 'Net Payable', download: true },
+                    { data: 'delivered_or_returned', name: 'dr.created_at', class: 'align-middle delivered_or_returned', value: 'delivered_or_returned', text: 'Delivered/Returned Date', download: true },
+                    { data: 'received_or_refused_by', name: 'dr.received_or_refused_by', class: 'align-middle received_or_refused_by', value: 'received_or_refused_by', text: 'Received/Refused By', download: true },
+                    { data: 'sales_person', name: 'adsp.name', class: 'align-middle sales_person', value: 'sales_person', text: 'Sales Person', download: true },
+                    { data: 'ref', name: 'r.name', class: 'align-middle ref', value: 'ref', text: 'Reference', download: true },
+                    { data: 'special_instructions', name: 'shipments.special_instructions', class: 'align-middle special_instructions', value: 'special_instructions', text: 'Special Instructions', download: true },
+                    { data: 'cost', name: 'ibs.cost', class: 'align-middle cost', value: 'cost', text: 'Cost', download: true }
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -839,6 +781,49 @@
                 table.draw();
             });
 
+            let option = '';
+            var columnNames2 = table.settings().init().columns.map(function (column) {
+                if(column.download){
+                    let col_name = column.value;
+                    let col_text = column.text;
+
+                    // if(column.as){
+                    //     col_name+= ' as ' +column.as;
+                    // }
+                    if (col_name && col_text) {
+                        option += `<option value="${col_name}">${col_text}</option>`;
+                    }
+                }
+            });
+            $('#export').append(option).select2({
+                columns: 1,
+                placeholder: 'Excel Column(s)',
+                search: true,
+                selectAll: true
+            });
+
+            $('#export').select2({
+                width:'100%',
+                placeholder:"Excel Column(s)",
+                allowClear:true,
+            });
+            $('#export').on('select2:select', function(e) {
+                var selectAll = $('#export').find('option[value="selectAll"]');
+                var firstOption = $('#export option').first();
+                if (e.params.data.id === 'selectAll') {
+                    firstOption.data().data.text = 'Un Select All';
+                    $('#export').find('option').not(selectAll).prop('selected', true).trigger('change');
+
+                }
+            });
+            $('#export').on('select2:unselect', function(e) {
+                var selectAll = $('#export').find('option[value="selectAll"]');
+                var firstOption = $('#export option').first();
+                if (e.params.data.id === 'selectAll') {
+                    firstOption.data().data.text = 'Select All';
+                    $('#export').find('option').not(selectAll).prop('selected', false).trigger('change');
+                }
+            });
         });
     </script>
 @endsection
