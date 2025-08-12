@@ -1,4 +1,4 @@
-@extends('admin.layout.master')
+    @extends('admin.layout.master')
 
 @section('title', 'Overall Sales Report')
 
@@ -18,27 +18,16 @@
                             <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
                         </fieldset>
                     </div>
+
                     <div class="col-4">
                         <fieldset class="form-group">
-                            <select name="search_shipper" id="search_shipper" class="form-control select2">
-                                @foreach($shippers as $shipper)
-                                    <option value="{{$shipper->id}}">{{$shipper->name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>
-                    <div class="col-4">
-                        <fieldset class="form-group">
-                            <select name="search_shippers[]" id="search_shippers" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
-                                @foreach($shippers as $shipper)
-                                    <option value="{{$shipper->id}}">{{$shipper->name}}</option>
-                                @endforeach
+                            <select name="search_shippers[]" id="search_shippers" class="form-control select2" multiple>
                             </select>
                         </fieldset>
                     </div>
                     @if (session('role_id') == 1 || in_array(261, session('permissions')))
                     <div class="col-4">
-                        <div class="form-group">
+                            <div class="form-group">
                             <select name="search_sales_person" class="select2" id="sales_person_select">
                                 @foreach($sales_persons as $sales)
                                     <option value="{{ $sales->id }}">{{ $sales->name }}</option>
@@ -428,8 +417,25 @@
             });
             $('#search_shippers').select2({
                 width:'100%',
-                placeholder:"Select Multiple Shippers",
+                placeholder:"Select Shipper",
                 allowClear:true,
+                multiple: true,
+                minimumInputLength: 2,
+                ajax: {
+                    dataType: 'json',
+                    url:  '{!! route('admin.accounts.shipper_names.dropdown',['type'=>'active']) !!}',
+                        data: function (params) {
+                            return {
+                                search: params.term,
+                            }
+                        },
+                        processResults: function (data) {
+                            return {
+                                results: data
+                            };
+                        },
+                    delay: 700,
+                }
             });
             $('#sub_segment_select').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
