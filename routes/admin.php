@@ -211,10 +211,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('invoice_log', 'Admins\AdminDashboardController@packaging_invoice_log')->name('invoice.log');
         });
 
-        Route::prefix('on_delivered')->name('on_delivered.')->group(function () {
-            Route::post('delivered_invoice_log', 'Admins\AdminDashboardController@delivered_invoice_log')->name('invoice.log');
-        });
-
         Route::prefix('disable_account_intimation_survey')->name('disable.account.intimation.survey.')->group(function () {
             Route::get('', 'Admins\AdminDashboardController@disable_account_intimation_survey_index')->name('index');
             Route::get('list', 'Admins\AdminDashboardController@disable_account_intimation_survey_list')->name('list');
