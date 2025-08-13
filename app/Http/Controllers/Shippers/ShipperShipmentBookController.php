@@ -1157,6 +1157,18 @@ class ShipperShipmentBookController extends Controller
     public function shipment_check(Request $request)
     {
         $shipment_ids = array();
+
+        if (!$request->has('ids') && $request->filled(['fromDate', 'toDate'])) {
+            $fromDate = $request->fromDate;
+            $toDate = $request->toDate;
+
+            $shipments = Shipment::whereBetween('created_at', [$fromDate, $toDate])
+                ->pluck('id')
+                ->toArray();
+
+            $request->merge(['ids' => $shipments]);
+        }
+
         if ($request->ids) {
             $i = 0;
             $sticker = TRUE;
@@ -2063,10 +2075,10 @@ class ShipperShipmentBookController extends Controller
                         $table_end .= '
                               </tr>
                               <tr>
-                                <td colspan="8" class="text-center border twice-top urdu h5" dir="rtl"><em>برائے مہربانی رائڈر / کورئیر کو کوئی اضافی پیسہ نہ دیں۔ اگر پارسل / پیکٹ خراب یا خراب حالت میں ہے تو ، براہ کرم اسے وصول نہ کریں۔</em></td>
+                                <td colspan="8" class="text-center border twice-top urdu h5 ' . $remove_logo . '" dir="rtl"><em>برائے مہربانی رائڈر / کورئیر کو کوئی اضافی پیسہ نہ دیں۔ اگر پارسل / پیکٹ خراب یا خراب حالت میں ہے تو ، براہ کرم اسے وصول نہ کریں۔</em></td>
                               </tr>
                               <tr>
-                                <td colspan="8" class="text-center border twice-top urdu h5" dir="rtl"><em>ٹریکس لاجسٹک کا اس پارسل / پیکٹ میں موجود کسی آئٹم یا مواد سے کوئی تعلق نہیں ہے۔ ہم سامان ایک جگہ سے دوسری جگہ بھیجتے ہیں۔ اگر آپ کو اس بارے میں کوئی شکایت ہے تو ، براہ کرم متعلقہ آن لائن اسٹور سے رابطہ کریں۔</em></td>
+                                <td colspan="8" class="text-center border twice-top urdu h5 ' . $remove_logo . '" dir="rtl"><em>ٹریکس لاجسٹک کا اس پارسل / پیکٹ میں موجود کسی آئٹم یا مواد سے کوئی تعلق نہیں ہے۔ ہم سامان ایک جگہ سے دوسری جگہ بھیجتے ہیں۔ اگر آپ کو اس بارے میں کوئی شکایت ہے تو ، براہ کرم متعلقہ آن لائن اسٹور سے رابطہ کریں۔</em></td>
                               </tr>
                             </tbody>
                         </table>
@@ -2872,7 +2884,6 @@ class ShipperShipmentBookController extends Controller
 
     public function print_air_waybill(Request $request)
     {
-
         $ids = GlobalSettings::where('type','cn_print_rights')->first();
         if($ids->text != null)
         {
@@ -2884,6 +2895,16 @@ class ShipperShipmentBookController extends Controller
             }
         }
 
+         if (!$request->has('ids') && $request->filled(['fromDate', 'toDate'])) {
+            $fromDate = $request->fromDate;
+            $toDate = $request->toDate;
+
+            $shipments = Shipment::whereBetween('created_at', [$fromDate, $toDate])
+                ->pluck('id')
+                ->toArray();
+
+            $request->merge(['ids' => $shipments]);
+        }
 
         $user_type = NULL;
         $user_id = NULL;
@@ -3086,12 +3107,15 @@ class ShipperShipmentBookController extends Controller
         Validator::extend('pieces_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
             $data = $validator->getData();
             $shipping_mode_id = $data['shipping_mode_id'];
-            $pieces_quantity = $data['pieces_quantity'];
+
+            $user = User::find($user_id);
+            $inLimit = in_array($user->sub_segment_id, [1, 6]) ? 100 : 10;
+
             if ($value) {
                 if ($shipping_mode_id == 2 && ($value < 1 || $value > 500)) {
                     return false;
                 }
-                elseif($shipping_mode_id != 2 && ($value < 1 || $value > 10)) {
+                elseif($shipping_mode_id != 2 && ($value < 1 || $value > $inLimit)) {
                     return false;
                 }
                 else
@@ -6086,12 +6110,15 @@ class ShipperShipmentBookController extends Controller
         Validator::extend('pieces_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
             $data = $validator->getData();
             $shipping_mode_id = $data['shipping_mode_id'];
-            $pieces_quantity = $data['pieces_quantity'];
+
+            $user = User::find($user_id);
+            $inLimit = in_array($user->sub_segment_id, [1, 6]) ? 100 : 10;
+
             if ($value) {
                 if ($shipping_mode_id == 2 && ($value < 1 || $value > 500)) {
                     return false;
                 }
-                elseif($shipping_mode_id != 2 && ($value < 1 || $value > 10)) {
+                elseif($shipping_mode_id != 2 && ($value < 1 || $value > $inLimit)) {
                     return false;
                 }
                 else

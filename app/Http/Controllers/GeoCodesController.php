@@ -46,7 +46,7 @@ class GeoCodesController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 832);
         }
 
-        $shipments = Shipment::select('shipments.id','shipments.consignee_city_id','shipments.consignee_name','shipments.consignee_address','shipments.consignee_phone_number_1','shipments.tracking_number','sgc.latitude','sgc.longitude')
+        $shipments = Shipment::select('shipments.id','shipments.consignee_city_id','shipments.consignee_name','shipments.consignee_address','shipments.consignee_phone_number_1','shipments.tracking_number','sgc.latitude','sgc.longitude','sgc.compound_address')
             ->leftjoin('shipments_geo_codes as sgc',function ($qu){
                 $qu->on('sgc.shipment_id','=','shipments.id')->where('sgc.geo_code_type','=',1);
             })->where('shipments.created_at','>=' ,Carbon::now()->subMonths(12)->startOfMonth());
@@ -196,6 +196,7 @@ class GeoCodesController extends Controller
                         $this->geo_code_api_count(1);
                         $lat = null;
                         $lng = null;
+                        $compound_address = null;
 
                         if (is_array($data) && !empty($data)) {
                             // Match based on address similarity
@@ -219,10 +220,12 @@ class GeoCodesController extends Controller
                             // Extract lat/lng from raw JSON string to avoid float rounding issues
                             preg_match('/"lat"\s*:\s*([0-9\.\-eE+-]+)/', $encodedTarget, $latMatch);
                             preg_match('/"lng"\s*:\s*([0-9\.\-eE+-]+)/', $encodedTarget, $lngMatch);
+                            preg_match('/"compound_address_parents"\s*:\s*([0-9\.\-eE+-]+)/', $encodedTarget, $compMatch);
 
 
                             $lat = $latMatch[1] ?? ($target['lat'] ?? null);
                             $lng = $lngMatch[1] ?? ($target['lng'] ?? null);
+                            $compound_address = $compMatch[1] ?? ($target['compound_address_parents'] ?? null);
 
                         }
 
@@ -233,6 +236,7 @@ class GeoCodesController extends Controller
                                     'shipment_id' => $shipment_id,
                                     'latitude' => $lat,
                                     'longitude' => $lng,
+                                    'compound_address' => $compound_address,
                                     'created_at' => $timestamp,
                                     'updated_at' => $timestamp,
                                 ];
@@ -339,6 +343,7 @@ class GeoCodesController extends Controller
 
                         $lat = null;
                         $lng = null;
+                        $compound_final = null;
 
                         if (is_array($data) && !empty($data)) {
                             $normalize = function ($string) {
@@ -406,9 +411,11 @@ class GeoCodesController extends Controller
                             $encodedTarget = json_encode($target);
                             preg_match('/"lat"\s*:\s*([0-9\.\-eE\+]+)/', $encodedTarget, $latMatch);
                             preg_match('/"lng"\s*:\s*([0-9\.\-eE\+]+)/', $encodedTarget, $lngMatch);
+                            preg_match('/"compound_address_parents"\s*:\s*"([^"]*)"/', $encodedTarget, $compMatch);
 
                             $lat = $latMatch[1] ?? ($target['lat'] ?? null);
                             $lng = $lngMatch[1] ?? ($target['lng'] ?? null);
+                            $compound_final = $compMatch[1] ?? ($target['compound_address_parents'] ?? null);
                         }
 
                         if ($lat && $lng) {
@@ -418,6 +425,7 @@ class GeoCodesController extends Controller
                                     'shipment_id' => $shipment_id,
                                     'latitude' => $lat,
                                     'longitude' => $lng,
+                                    'compound_address' => $compound_final,
                                     'created_at' => $timestamp,
                                     'updated_at' => $timestamp,
                                 ];
