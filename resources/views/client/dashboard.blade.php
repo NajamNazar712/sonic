@@ -847,8 +847,8 @@
                                     method: 'POST',
                                     data: {
                                         'ids[]': data.ids,
-                                        'fromDate': $('input[name="print_from_date_formatted"]').val(),
-                                        'toDate': $('input[name="print_to_date_formatted"]').val(),
+                                        'fromDate': $('#print_from_date').val(),
+                                        'toDate': $('#print_to_date').val(),
                                         'sticker': 1,
                                         '_token': '{{ csrf_token() }}'
                                     }

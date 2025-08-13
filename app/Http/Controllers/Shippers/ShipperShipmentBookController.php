@@ -2900,8 +2900,8 @@ class ShipperShipmentBookController extends Controller
         }
 
          if (!$request->has('ids') && $request->filled(['fromDate', 'toDate'])) {
-            $fromDate = $request->fromDate;
-            $toDate = $request->toDate;
+            $fromDate = Carbon::parse($request->fromDate)->startOfDay();
+            $toDate   = Carbon::parse($request->toDate)->endOfDay();
 
             $shipments = Shipment::whereBetween('created_at', [$fromDate, $toDate])
                 ->pluck('id')
