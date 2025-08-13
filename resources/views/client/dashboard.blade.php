@@ -764,10 +764,10 @@
                     var contractMoment = moment(old_date_formatted);
                     var current = moment(contractMoment).add(31, 'days');
                     var current_max = moment(contractMoment).add(1, 'days');
-                    booking_to_date.pickadate('picker').set('min', new Date(old_date_formatted),{muted:true});
-                    booking_to_date.pickadate('picker').set('max', new Date(current.toDate()),{muted:true});
-                    booking_to_date.pickadate('picker').set('select', new Date(current.toDate()),{muted:true});
-                    shouldEnablePrint();
+
+                    table.button('.print').enable();
+                    table.rows().deselect();
+                    selected_rows = [];
                 }
             });
 
@@ -781,8 +781,9 @@
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
-                    shouldEnablePrint();
-
+                    table.button('.print').enable();
+                    table.rows().deselect();
+                    selected_rows = [];
                     // if (context.select) {
                     //     $('#track_form #booking_from_date').pickadate('picker').set('max', $('#track_form #booking_to_date').pickadate('picker').get('select'));
                     // }
@@ -796,12 +797,46 @@
                     method: 'POST',
                     data: {
                         'ids[]': selected_rows,
-                        'fromDate': $('input[name="print_from_date_formatted"]').val(),
-                        'toDate': $('input[name="print_to_date_formatted"]').val(),
+                        'fromDate': $('#print_from_date').val(),
+                        'toDate': $('#print_to_date').val(),
                         '_token': '{{ csrf_token() }}'
                     }
                 })
                     .done(function (data) {
+
+                        if(data.status == 3){
+                            swal({
+                                title: 'Error',
+                                text: 'Select Print From And To Dates',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+
+                        if (data.status == 3) {
+                            swal({
+                                title: 'Error',
+                                text: 'Select Print From And To Dates',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+
+                        if (data.status == 2) {
+                            swal({
+                                title: 'Error',
+                                text: 'No shipment found for print',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+
+                            $('#print_from_date').val('');
+                            $('#print_to_date').val('');
+                        }
+
                         if(data.status === 1) {
                             if (data.sticker) {
                                 $.ajax({
@@ -1110,8 +1145,8 @@
                                     if (index === -1) {
                                         selected_rows.push(id);
                                     }
-
-                                    shouldEnablePrint()
+                                    $('#print_from_date').val('');
+                                    $('#print_to_date').val('');                  
                                     table.button('.print').enable();
                                     table.button('.cancel').enable();
                                     table.button('.consolidate').enable();
@@ -1147,7 +1182,7 @@
                                         table.button('.print').disable();
                                         table.button('.cancel').disable();
                                         table.button('.consolidate').disable();
-                                        shouldEnablePrint()
+                                        
 
                                     }
                                 }
@@ -1568,18 +1603,21 @@
                     selected_rows.splice(index, 1);
                 }
                 
-                shouldEnablePrint()
+                
                 if (selected_rows.length > 0) {
                     table.button(0).enable();
                     table.button(1).enable();
                     table.button(2).enable();
-
+  
                 }
                 else {
                     // table.button(0).disable();
                     table.button(1).disable();
                     table.button(2).disable();
                 }
+
+                $('#print_from_date').val('');
+                $('#print_to_date').val('');
                 
             });
 
@@ -2728,18 +2766,7 @@
 
             });
 
-            function shouldEnablePrint() {
-                const fromInput = $('#print_from_date');
-                const toInput = $('#print_to_date');
-
-                if (selected_rows.length > 0) {
-                    fromInput.prop('disabled', true);
-                    toInput.prop('disabled', true);
-                } else {
-                    fromInput.prop('disabled', false);
-                    toInput.prop('disabled', false);
-                }
-            }
+           
 
         });
     </script>
