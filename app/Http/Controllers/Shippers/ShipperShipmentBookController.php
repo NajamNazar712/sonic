@@ -1159,8 +1159,8 @@ class ShipperShipmentBookController extends Controller
         $shipment_ids = array();
 
         if (!$request->has('ids') && $request->filled(['fromDate', 'toDate'])) {
-            $fromDate = $request->fromDate;
-            $toDate = $request->toDate;
+            $fromDate = Carbon::parse($request->fromDate)->startOfDay();
+            $toDate   = Carbon::parse($request->toDate)->endOfDay();
 
             $shipments = Shipment::whereBetween('created_at', [$fromDate, $toDate])
                 ->pluck('id')
@@ -1169,6 +1169,10 @@ class ShipperShipmentBookController extends Controller
             $request->merge(['ids' => $shipments]);
         }
 
+        if (!$request->has('ids') && (empty($request->fromDate) || empty($request->toDate))) {
+            return ['status' => 3];
+        }
+        
         if ($request->ids) {
             $i = 0;
             $sticker = TRUE;
@@ -2896,8 +2900,8 @@ class ShipperShipmentBookController extends Controller
         }
 
          if (!$request->has('ids') && $request->filled(['fromDate', 'toDate'])) {
-            $fromDate = $request->fromDate;
-            $toDate = $request->toDate;
+            $fromDate = Carbon::parse($request->fromDate)->startOfDay();
+            $toDate   = Carbon::parse($request->toDate)->endOfDay();
 
             $shipments = Shipment::whereBetween('created_at', [$fromDate, $toDate])
                 ->pluck('id')
