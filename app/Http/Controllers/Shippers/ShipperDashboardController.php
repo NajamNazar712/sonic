@@ -1312,7 +1312,7 @@ class ShipperDashboardController extends Controller
         $pickups = UserShippingInfo::join('cities as c', 'user_shipping_infos.city_id', '=', 'c.id')
         ->leftjoin('city_areas as ca', 'user_shipping_infos.city_area_id', '=', 'ca.id')
         ->leftjoin('user_shipping_info_store_addresses as usisa', 'user_shipping_infos.id', '=', 'usisa.user_shipping_infos_id')
-        ->select(['user_shipping_infos.id as id','user_shipping_infos.pickup_brand_name as pickup_brand_name','user_shipping_infos.pickup_address as pickup_address','user_shipping_infos.poc as poc','user_shipping_infos.phone as phone','user_shipping_infos.email as email','user_shipping_infos.status as status','user_shipping_infos.default_address as default_address','user_shipping_infos.user_id as user_id','c.name as city_name','c.id as city_id', 'user_shipping_infos.vendor','ca.name as city_area_name', 'user_shipping_infos.default_return_address', 'usisa.shipper_store_id as shipper_store_id',])
+        ->select(['user_shipping_infos.id as id','user_shipping_infos.pickup_brand_name as pickup_brand_name','user_shipping_infos.pickup_address as pickup_address','user_shipping_infos.poc as poc','user_shipping_infos.phone as phone','user_shipping_infos.email as email','user_shipping_infos.status as status','user_shipping_infos.default_address as default_address','user_shipping_infos.user_id as user_id','c.name as city_name','c.id as city_id', 'user_shipping_infos.vendor','ca.name as city_area_name', 'user_shipping_infos.default_return_address', 'usisa.shipper_store_id as shipper_store_id','user_shipping_infos.latitude','user_shipping_infos.longitude'])
         // ->where('user_id', session('user_id'))
         ->where('user_shipping_infos.user_id', session('user_id'))
         ->where('hidden', 0);
@@ -1559,12 +1559,14 @@ class ShipperDashboardController extends Controller
         $vendor = $request->vendor;
         $email = $request->email;
         $city_id = $request->city_id;
+        $latitude = $request->latitude;
+        $longitude = $request->longitude;
         $user_id = session('user_id');
 
-        if($pickup_address != null && $phone != null && $poc != null && $email != null && $city_id != null)
+        if($pickup_address != null && $phone != null && $poc != null && $email != null && $city_id != null && $latitude != null && $longitude != null)
         {
           $usi =  UserShippingInfo::insertGetId(['user_id'=>$user_id,'pickup_address'=>$pickup_address,'pickup_brand_name'=>$pickup_brand_name,'poc'=>$poc,
-                'email'=>$email,'city_id'=>$city_id,'phone'=>$phone, 'vendor' => $vendor,'created_at'=>Carbon::now()]);
+                'email'=>$email,'city_id'=>$city_id,'phone'=>$phone, 'vendor' => $vendor,'created_at'=>Carbon::now(),'latitude'=>$latitude,'longitude'=>$longitude]);
             ShipperShipmentBookController::shipper_address_area($city_id,$pickup_address,$usi);
             return redirect()->back()->with('success','Pickup Address added successfully!');
 
@@ -1580,8 +1582,10 @@ class ShipperDashboardController extends Controller
         $vendor = $request->vendor;
         $email = $request->email;
         $city_id = $request->city_id;
+        $latitude = $request->latitude;
+        $longitude = $request->longitude;
 
-        if($pickup_address != null && $phone != null && $poc != null && $email != null && $city_id != null && $id != null)
+        if($pickup_address != null && $phone != null && $poc != null && $email != null && $city_id != null && $id != null  && $latitude != null && $longitude != null)
         {
             $user_shipping_info = UserShippingInfo::find($id);
             if($user_shipping_info){
@@ -1592,6 +1596,8 @@ class ShipperDashboardController extends Controller
                 $user_shipping_info->city_id = $city_id;
                 $user_shipping_info->phone = $phone;
                 $user_shipping_info->vendor = $vendor;
+                $user_shipping_info->latitude = $latitude;
+                $user_shipping_info->longitude = $longitude;
                 $user_shipping_info->save();
                 return redirect()->back()->with('success','Pickup Address updated successfully!');
             }

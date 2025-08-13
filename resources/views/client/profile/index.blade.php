@@ -203,6 +203,8 @@
                                                 <th class="border-primary border-darken-1">City Area</th>
                                                 <th class="border-primary border-darken-1">Email Address</th>
                                                 <th class="border-primary border-darken-1">Brand Name</th>
+                                                <th class="border-primary border-darken-1">Latitude</th>
+                                                <th class="border-primary border-darken-1">Longitude</th>
                                                 <th class="border-primary border-darken-1">Status</th>
                                                 <th class="border-primary border-darken-1"></th>
                                             </tr>
@@ -446,6 +448,12 @@
                                         @endforeach
                                     </select>
                                 </div>
+                                <div class="col-6 form-group">
+                                    <input type="text" name="latitude" id="latitude" class="form-control"  placeholder="Latitude">
+                                </div>
+                                <div class="col-6 form-group">
+                                    <input type="text" name="longitude" id="longitude" class="form-control" placeholder="Longitude">
+                                </div>
                             </div>
                             <div class="row justify-content-center">
                                 <div class="col-3">
@@ -499,6 +507,12 @@
                                             <option value="{{$city->id}}">{{$city->name}}</option>
                                         @endforeach
                                     </select>
+                                </div>
+                                <div class="col-6 form-group">
+                                    <input type="text" name="latitude" id="edit_latitude" class="form-control"  placeholder="Latitude">
+                                </div>
+                                <div class="col-6 form-group">
+                                    <input type="text" name="longitude" id="edit_longitude" class="form-control "  placeholder="Longitude">
                                 </div>
                             </div>
                             <div class="row justify-content-center">
@@ -914,6 +928,8 @@
                     {data: 'city_area_name', name: 'ca.name'},
                     {data: 'email', name: 'email'},
                     {data: 'pickup_brand_name', name: 'pickup_brand_name'},
+                    {data: 'latitude', name: 'latitude'},
+                    {data: 'longitude', name: 'longitude'},
                     {data: 'status',orderable: false, name: 'status',class:'status'},
                     {data: 'action',orderable: false, name: 'action',class:'action'}
                 ],
@@ -1129,6 +1145,8 @@
                     var vendor = table.row($(this).parents('tr')).data().vendor;
                     var email_address = table.row($(this).parents('tr')).data().email;
                     var city_id = table.row($(this).parents('tr')).data().city_id;
+                    var latitude = table.row($(this).parents('tr')).data().latitude;
+                    var longitude = table.row($(this).parents('tr')).data().longitude;
 
                     $('#edit_user_shipping_info_id').val(id);
                     $('#edit_pickup_address').val(pickup_address);
@@ -1139,6 +1157,8 @@
                     $('#edit_vendor').val(vendor);
                     $('#edit_email').val(email_address);
                     $('#edit_city_id').val(city_id).trigger('change');
+                    $('#edit_latitude').val(latitude);
+                    $('#edit_longitude').val(longitude);
                     $('#EditPickup').modal('show');
                     
                 }
