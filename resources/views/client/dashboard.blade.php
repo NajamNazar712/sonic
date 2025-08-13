@@ -814,16 +814,6 @@
                             });
                         }
 
-                        if (data.status == 3) {
-                            swal({
-                                title: 'Error',
-                                text: 'Select Print From And To Dates',
-                                icon: 'error',
-                                closeOnClickOutside: false,
-                                closeOnEsc: false
-                            });
-                        }
-
                         if (data.status == 2) {
                             swal({
                                 title: 'Error',
