@@ -72,7 +72,7 @@
                         <fieldset class="form-group">
                             <select name="search_shipment_status" id="search_shipment_status" class="form-control select2">
                                 @foreach($shipment_status as $status)
-                                    @if(!in_array($status->id, [14, 25]))
+                                    @if(!in_array($status->id, [14, 25, 36, 38, 31]))
                                         <option value="{{ $status->id }}">{{ $status->name }}</option>
                                     @endif
                                 @endforeach
