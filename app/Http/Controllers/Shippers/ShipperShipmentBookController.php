@@ -1162,20 +1162,29 @@ class ShipperShipmentBookController extends Controller
     {
         $shipment_ids = array();
 
-        if ($request->filled(['fromDate', 'toDate'])) {
+       if ($request->filled(['fromDate', 'toDate'])) {
             $fromDate = Carbon::parse($request->fromDate)->startOfDay();
             $toDate   = Carbon::parse($request->toDate)->endOfDay();
 
-           $shipments = Shipment::whereBetween('created_at', [$fromDate, $toDate])
-            ->where('user_id', session('user_id'))
-            ->orWhereIn('user_id', session('sister_users'))
-            ->where('shipper_status_id', 1)
-            ->pluck('id')
-            ->toArray();
+            $shipments = Shipment::whereBetween('created_at', [$fromDate, $toDate])
+                ->where(function ($query) {
+                    $query->where('user_id', session('user_id'))
+                        ->orWhereIn('user_id', session('sister_users') ?? []);
+                })
+                ->where('shipper_status_id', 1);
 
+            if (session('user_type') == 2 && session('restriction') == 1) {
+                $shipments->join('substitute_user_shipments as sus', function ($join) {
+                    $join->on('sus.shipment_id', '=', 'shipments.id')
+                        ->where('sus.substitute_user_id', '=', Auth::id());
+                });
+            }
+
+            $shipments = $shipments->pluck('shipments.id')->toArray();
 
             $request->merge(['ids' => $shipments]);
         }
+
         
         if ($request->ids) {
             $i = 0;
@@ -2903,19 +2912,29 @@ class ShipperShipmentBookController extends Controller
             }
         }
 
-         if ($request->filled(['fromDate', 'toDate'])) {
+        if ($request->filled(['fromDate', 'toDate'])) {
             $fromDate = Carbon::parse($request->fromDate)->startOfDay();
             $toDate   = Carbon::parse($request->toDate)->endOfDay();
 
             $shipments = Shipment::whereBetween('created_at', [$fromDate, $toDate])
-                ->where('user_id', session('user_id'))
-                ->orWhereIn('user_id', session('sister_users'))
-                ->where('shipper_status_id', 1)
-                ->pluck('id')
-                ->toArray();
+                ->where(function ($query) {
+                    $query->where('user_id', session('user_id'))
+                        ->orWhereIn('user_id', session('sister_users') ?? []);
+                })
+                ->where('shipper_status_id', 1);
+
+            if (session('user_type') == 2 && session('restriction') == 1) {
+                $shipments->join('substitute_user_shipments as sus', function ($join) {
+                    $join->on('sus.shipment_id', '=', 'shipments.id')
+                        ->where('sus.substitute_user_id', '=', Auth::id());
+                });
+            }
+
+            $shipments = $shipments->pluck('shipments.id')->toArray();
 
             $request->merge(['ids' => $shipments]);
         }
+
 
         $user_type = NULL;
         $user_id = NULL;
