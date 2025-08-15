@@ -488,7 +488,8 @@ class ShipperShipmentBookController extends Controller
             'air_waybill' => $air_waybill,
             'omni_user' => $omni_user,
             'airway_bill_address_visibility_users' => $airway_bill_address_visibility_users,
-            'parcel_bypass' => $parcel_bypass
+            'parcel_bypass' => $parcel_bypass,
+            'is_logistic' => in_array($user->sub_segment_id, [1, 6]),
         ];
         
         $substitute_account = null;
@@ -597,9 +598,12 @@ class ShipperShipmentBookController extends Controller
             return back()->with(['error' => "Invalid File Format Of Replacement Parcel Image"]);
         }
         else {
-            if ($request->input('shipping_mode') != 2 && $request->input('pieces_quantity') > 10)
+            $userOld = User::find($user_id);
+            $inLimit = in_array($userOld?->sub_segment_id, [1, 6]) ? 100 : 10;
+
+            if ($request->input('shipping_mode') != 2 && (int) $request->input('pieces_quantity') > $inLimit)
             {
-                return back()->with(['error' => "Pieces quantity should be less then and equal to 10 if shipping mode is not saver plus !"]);
+                return back()->with(['error' => "Pieces quantity should be less than and equal to $inLimit if shipping mode is not saver plus !"]);
             }
             if (BookingType::where('id', '!=', 4)->where('id', $request->input('selected_service_type'))->exists()) {
 
@@ -4142,6 +4146,7 @@ class ShipperShipmentBookController extends Controller
             'user_delivery_types' => $user_delivery_types,
             'approve_ftl_requests' => $approve_ftl_requests,
             'omni_user' => $omni_user,
+            'is_logistic' => in_array($user->sub_segment_id, [1, 6]),
         ];
 
         $substitute_account = null;
@@ -4174,10 +4179,12 @@ class ShipperShipmentBookController extends Controller
         if ($validate->fails()) {
             return back()->with(['error' => "Invalid File Format Of Replacement Parcel Image"]);
         } else {
-        if ($request->input('shipping_mode') != 2 && $request->input('pieces_quantity') > 10)
-            {
-                return back()->with(['error' => "Pieces quantity should be less then and equal to 10 if shipping mode is not saver plus !"]);
-            }
+            $userOld = User::find(session('user_id'));
+            $inLimit = in_array($userOld?->sub_segment_id, [1, 6]) ? 100 : 10;
+        if ($request->input('shipping_mode') != 2 && (int) $request->input('pieces_quantity') > $inLimit)
+        {
+            return back()->with(['error' => "Pieces quantity should be less than and equal to $inLimit if shipping mode is not saver plus !"]);
+        }
         if ($request->open_shipment == 'on') {
             $open_shipment = 1;
         } else {
