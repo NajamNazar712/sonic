@@ -45,6 +45,12 @@ class deleteShipmentsJourney extends Command
             ->whereIn('tracking_number', $trackingNumbers)
             ->pluck('id')
             ->toArray();
+        // Safety check — prevent empty array from affecting entire table
+        if (empty($shipmentIds)) {
+            echo "No matching shipments found — exiting.\n";
+            return;
+        }
+
 
         // Step 2: Process in small chunks to avoid locks
         foreach (array_chunk($shipmentIds, 100) as $idsChunk) {

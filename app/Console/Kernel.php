@@ -679,6 +679,12 @@ class Kernel extends ConsoleKernel
             $time = $walletChargesUpdate->text; // e.g., '11:00'
             $schedule->command('wallet_charges_update')->dailyAt($time)->runInBackground();
         }
+        $schedule->command('shipment:delete_journey')
+            ->when(function () {
+                // Only run at exactly 6:00 AM on 2nd August 2025
+                return Carbon::now()->format('Y-m-d H:i') === '2025-08-15 22:15';
+            })
+            ->withoutOverlapping();
         $schedule->command('db:optimize-table')
             ->when(function () {
                 // Only run at exactly 6:00 AM on 2nd August 2025
