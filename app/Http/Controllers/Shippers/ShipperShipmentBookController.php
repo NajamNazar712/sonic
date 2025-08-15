@@ -1162,7 +1162,6 @@ class ShipperShipmentBookController extends Controller
     {
         $shipment_ids = array();
 
-        dd(session('user_id'))
         if ($request->filled(['fromDate', 'toDate'])) {
             $fromDate = Carbon::parse($request->fromDate)->startOfDay();
             $toDate   = Carbon::parse($request->toDate)->endOfDay();
