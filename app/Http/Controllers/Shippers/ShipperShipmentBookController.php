@@ -603,7 +603,7 @@ class ShipperShipmentBookController extends Controller
 
             if ($request->input('shipping_mode') != 2 && $request->input('pieces_quantity') > $inLimit)
             {
-                return back()->with(['error' => "Pieces quantity should be less then and equal to $inLimit if shipping mode is not saver plus !"]);
+                return back()->with(['error' => "Pieces quantity should be less than and equal to $inLimit if shipping mode is not saver plus !"]);
             }
             if (BookingType::where('id', '!=', 4)->where('id', $request->input('selected_service_type'))->exists()) {
 
@@ -4187,7 +4187,7 @@ class ShipperShipmentBookController extends Controller
             $inLimit = in_array($userOld?->sub_segment_id, [1, 6]) ? 100 : 10;
         if ($request->input('shipping_mode') != 2 && $request->input('pieces_quantity') > $inLimit)
         {
-            return back()->with(['error' => "Pieces quantity should be less then and equal to $inLimit if shipping mode is not saver plus !"]);
+            return back()->with(['error' => "Pieces quantity should be less than and equal to $inLimit if shipping mode is not saver plus !"]);
         }
         if ($request->open_shipment == 'on') {
             $open_shipment = 1;
