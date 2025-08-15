@@ -717,13 +717,15 @@ class APIController extends Controller
                 'pieces_quantity' => [
                     'nullable',
                     'integer',
-                    function ($attribute, $value, $fail) use ($request) {
+                    function ($attribute, $value, $fail) use ($request, $user_type) {
+                        $inLimit = in_array($user_type->sub_segment_id, [1, 6]) ? 100 : 10;
+
                         if ($request->input('shipping_mode_id') == 2 && ($value < 1 || $value > 500)) {
                             $fail('The pieces quantity must be between 1 and 500 when shipping mode is Saver Plus.');
-                        } elseif ($request->input('shipping_mode_id') != 2 && ($value < 1 || $value > 10)) {
-                            $fail('Pieces quantity must be between 1 and 10 if shipping mode are Rush,Swift or Sameday.');
+                        } elseif ($request->input('shipping_mode_id') != 2 && ($value < 1 || $value > $inLimit)) {
+                            $fail("Pieces quantity must be between 1 and {$inLimit} if shipping mode is Rush, Swift, or Sameday.");
                         }
-                    },
+                    }
                 ],
             ];
 
@@ -808,11 +810,13 @@ class APIController extends Controller
                 'pieces_quantity' => [
                     'nullable',
                     'integer',
-                    function ($attribute, $value, $fail) use ($request) {
+                    function ($attribute, $value, $fail) use ($request, $user_type) {
+                        $inLimit = in_array($user_type->sub_segment_id, [1, 6]) ? 100 : 10;
+
                         if ($request->input('shipping_mode_id') == 2 && ($value < 1 || $value > 500)) {
                             $fail('The pieces quantity must be between 1 and 500 when shipping mode is Saver Plus.');
-                        } elseif ($request->input('shipping_mode_id') != 2 && ($value < 1 || $value > 10)) {
-                            $fail('Pieces quantity must be between 1 and 10 if shipping mode are Rush,Swift or Sameday.');
+                        } elseif ($request->input('shipping_mode_id') != 2 && ($value < 1 || $value > $inLimit)) {
+                            $fail("Pieces quantity must be between 1 and {$inLimit} if shipping mode is Rush, Swift, or Sameday.");
                         }
                     },
                 ],
