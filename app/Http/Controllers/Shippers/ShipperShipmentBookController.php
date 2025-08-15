@@ -1162,6 +1162,7 @@ class ShipperShipmentBookController extends Controller
     {
         $shipment_ids = array();
 
+        dd(session('user_id'))
         if ($request->filled(['fromDate', 'toDate'])) {
             $fromDate = Carbon::parse($request->fromDate)->startOfDay();
             $toDate   = Carbon::parse($request->toDate)->endOfDay();
@@ -2905,6 +2906,7 @@ class ShipperShipmentBookController extends Controller
             $toDate   = Carbon::parse($request->toDate)->endOfDay();
 
             $shipments = Shipment::whereBetween('created_at', [$fromDate, $toDate])
+                ->where('user_id', session('user_id'))
                 ->pluck('id')
                 ->toArray();
 
