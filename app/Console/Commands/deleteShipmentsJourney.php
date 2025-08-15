@@ -112,7 +112,7 @@ class deleteShipmentsJourney extends Command
                 // 3. Update shipments.status_id to latest journey status
                 DB::table('shipments')
                     ->join(DB::raw('(
-                        SELECT shipment_id, shipper_status_id
+                        SELECT shipment_id, shipper_status_id,consignee_status_id
                         FROM shipments_journey
                         WHERE id IN (
                             SELECT MAX(id) 
@@ -122,7 +122,8 @@ class deleteShipmentsJourney extends Command
                     ) as latest'), 'shipments.id', '=', 'latest.shipment_id')
                     ->whereIn('shipments.tracking_number', $chunk)
                     ->update([
-                        'shipments.status_id' => DB::raw('latest.shipper_status_id')
+                    'shipments.shipper_status_id' => DB::raw('latest.shipper_status_id'),
+                    'shipments.consignee_status_id' => DB::raw('latest.consignee_status_id')
                     ]);
             });
         }
