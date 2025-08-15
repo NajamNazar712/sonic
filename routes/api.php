@@ -125,8 +125,11 @@ use Illuminate\Http\Request;
                 Route::get('return_shipments_list', 'APIController@return_shipments_list')->name('return_shipments_list');
             });
         });
+        Route::prefix('partner')->name('partner.')->group(function () {
+            Route::post('mark-prepaid', 'APIController@can_specific_user_change_amount')->name('can_specific_user_change_amount');
+        });
 
-        Route::post('change-amount', 'APIController@can_specific_user_change_amount')->name('can_specific_user_change_amount');
+
 
     });
 

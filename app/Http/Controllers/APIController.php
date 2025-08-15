@@ -11007,16 +11007,12 @@ class APIController extends Controller
             $request->all(),
             [
                 'tracking_number' => 'required',
-                'amount'          => 'required|integer|min:0',
             ],
             [
                 'tracking_number.required' => 'Tracking number is required.',
-                'amount.required'          => 'Amount is required.',
-                'amount.min'               => 'Amount must be at least 0.',
             ],
             [
                 'tracking_number' => 'Tracking Number',
-                'amount'          => 'Shipment Amount',
             ]
         );
 
@@ -11053,7 +11049,7 @@ class APIController extends Controller
         $check = $financeController->change_shipment_amount_shipment_details($request);
         if (!empty($check) && isset($check['status']) && $check['status'] == 0) {
             if ($shipment = Shipment::where('tracking_number', $request->tracking_number)->first()) {
-                $request->merge(['shipment_id' => $shipment->id]);
+                $request->merge(['shipment_id' => $shipment->id,'amount'=>0]);
             }
 
             $changeResult = $financeController->change_shipment_amount_store($request);
