@@ -17,7 +17,7 @@
                                 <div class="col mt-2">
                                     <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
 
-                                        <div class="col-md-2">
+                                        <div class="col-md-4">
                                             <div class="form-group">
                                                 <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
                                             </div>
@@ -28,7 +28,7 @@
                                                 <input type="text" name="phone_number" class="form-control phone_number" placeholder="Phone Number (Full)">
                                             </div>
                                         </div>
-                                        <div class="col-md-2">
+                                        <div class="col-md-4">
                                             <div class="form-group input-group">
                                                 <div class="input-group-prepend">
                                       <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -38,7 +38,7 @@
                                                 <input type="text" name="booking_from_date" class="form-control bg-primary border-primary white rounded-right" id="booking_from_date" placeholder="Booking Date From"  data-value="{{ \Carbon\Carbon::today()->subDays(31)->startOfDay() }}">
                                             </div>
                                         </div>
-                                        <div class="col-md-2">
+                                        <div class="col-md-4">
                                             <div class="form-group input-group">
                                                 <div class="input-group-prepend">
                                         <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -48,7 +48,7 @@
                                                 <input type="text" name="booking_to_date" class="form-control bg-primary border-primary white rounded-right" id="booking_to_date" placeholder="Booking Date To" data-value="{{ \Carbon\Carbon::now() }}">
                                             </div>
                                         </div>
-                                        <div class="col-md-2">
+                                        <div class="col-md-4">
                                             <fieldset class="form-group">
                                                 <select name="search_account_type[]" id="search_account_type" class="form-control select2" multiple>
                                                     <option value="" disabled ></option> <!-- added this line -->
