@@ -31,15 +31,22 @@ class OptimizeTable extends Command
             $logLines[] = "✅ App is now in maintenance mode.";
 
             // Run the OPTIMIZE TABLE command
-            $logLines[] = '📦 Running OPTIMIZE TABLE shipment_scanning_journeys...';
-            $result = DB::select('OPTIMIZE TABLE shipment_scanning_journeys');
+            $logLines[] = '📦 Running OPTIMIZE TABLE shipments_journey...';
+            $result = DB::select('OPTIMIZE TABLE shipments_journey');
 
             foreach ($result as $row) {
                 $jsonRow = json_encode($row);
                 $this->line($jsonRow); // Output to console
                 $logLines[] = "📝 Result: $jsonRow"; // Append to log
             }
+            // $logLines[] = '📦 Running OPTIMIZE TABLE shipments...';
+            // $result = DB::select('OPTIMIZE TABLE shipments');
 
+            // foreach ($result as $row) {
+            //     $jsonRow = json_encode($row);
+            //     $this->line($jsonRow); // Output to console
+            //     $logLines[] = "📝 Result: $jsonRow"; // Append to log
+            // }
             // Bring the app back online
             Artisan::call('up');
             $logLines[] = "✅ App is back online.";

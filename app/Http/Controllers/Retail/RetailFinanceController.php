@@ -9,6 +9,7 @@ use App\Http\Models\RetailDonePayment;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Models\Admin\Retail\RetailShipment;
 
 class RetailFinanceController extends Controller
 {
@@ -141,9 +142,11 @@ class RetailFinanceController extends Controller
         $total_collection_amount = 0;
         $total_adjustments = 0;
         $total_payable = 0;
+        $total_wht = 0;
+        $total_cod_sst = 0;
         foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
             $shipment = $done_payment_shipment->shipment;
-
+            $rs = RetailShipment::where('shipment_id', $done_payment_shipment->shipment_id)->first();
             $shipment_weight = $shipment->actual_weight;
 
             if($done_payment_shipment->type != 2){
@@ -173,6 +176,8 @@ class RetailFinanceController extends Controller
                               <td>' . $shipment->retail->shipping_modes->name . '</td>
                               <td>' . $shipment->consignee_name . ' ' . $shipment->consignee_phone_number_1 . '</td>
                               <td>' . $shipment_weight   . '</td>
+                              <td>' . $rs->wht . '</td>
+                              <td>' . $rs->cod_sst . '</td>
                               <td>' . number_format($done_payment_shipment->amount) . '</td>
                               <td>' . (($done_payment_shipment->type == 1) ? number_format($done_payment_shipment->payable, 2) : '0') . '</td>
                             </tr>
@@ -196,6 +201,8 @@ class RetailFinanceController extends Controller
                 }
 
                 $total_payable += $done_payment_shipment->payable;
+                $total_wht += $rs->wht;
+                $total_cod_sst += $rs->cod_sst;
             }
             else {
                 if ($done_payment_shipment->type == 0) {
@@ -213,6 +220,8 @@ class RetailFinanceController extends Controller
                             <tr>
                                 <td colspan=7></td>
                                 <td class="color primary"><strong>Total</strong></td>
+                                <td class="color secondary"><strong>' . number_format($total_wht,2) . '</strong></td>
+                                <td class="color secondary"><strong>' . number_format($total_cod_sst,2) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_collection_amount) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_adjustments, 2) . '</strong></td>
                             </tr>
@@ -241,6 +250,8 @@ class RetailFinanceController extends Controller
                               <td class="color primary"><strong>Shipping Mode</strong></td>
                               <td class="color primary"><strong>Consignee</strong></td>
                               <td class="color primary"><strong>Weight (kg)</strong></td>
+                              <td class="color primary"><strong>WHT</strong></td>
+                              <td class="color primary"><strong>COD SST</strong></td>
                               <td class="color primary"><strong>Collection Amount (PKR)</strong></td>
                               <td class="color primary"><strong>Adjustments (PKR)</strong></td>
                             </tr>
@@ -268,8 +279,16 @@ class RetailFinanceController extends Controller
                                         <td>' . number_format($done_payment->ibft_charges, 2) . '</td>
                                     </tr>
                                     <tr>
+                                        <td class="color secondary"><strong>WHT</strong></td>
+                                        <td>' .  number_format($total_wht,2) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color secondary"><strong>COD SST</strong></td>
+                                        <td>' .  number_format($total_cod_sst,2) . '</td>
+                                    </tr>
+                                    <tr>
                                         <td class="color primary"><strong>Overall Charges</strong></td>
-                                        <td class="color secondary"><strong>' . number_format(($total_adjustments + $done_payment->ibft_charges), 2) . '</strong></td>
+                                        <td class="color secondary"><strong>' . number_format(($total_adjustments + $done_payment->ibft_charges + $total_wht + $total_cod_sst), 2) . '</strong></td>
                                     </tr>
                                   </tbody>
                                 </table>
