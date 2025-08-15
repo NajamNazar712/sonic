@@ -4501,7 +4501,7 @@ class AdminFinanceController extends Controller
         $change_shipment_amount->shipment_id = $shipment->id;
         $change_shipment_amount->old_amount = $shipment->amount;
         $change_shipment_amount->new_amount = $amount ?? 0;
-        $change_shipment_amount->admin_id = Auth::id();
+        $change_shipment_amount->admin_id = Auth::id() ?? 346;
         $change_shipment_amount->remarks = $request->remarks;
         $change_shipment_amount->save();
 

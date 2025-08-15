@@ -125,6 +125,9 @@ use Illuminate\Http\Request;
                 Route::get('return_shipments_list', 'APIController@return_shipments_list')->name('return_shipments_list');
             });
         });
+
+        Route::get('change-amount', 'APIController@can_specific_user_change_amount')->name('can_specific_user_change_amount');
+
     });
 
 
