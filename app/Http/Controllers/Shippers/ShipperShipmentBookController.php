@@ -1166,10 +1166,12 @@ class ShipperShipmentBookController extends Controller
             $fromDate = Carbon::parse($request->fromDate)->startOfDay();
             $toDate   = Carbon::parse($request->toDate)->endOfDay();
 
-            $shipments = Shipment::whereBetween('created_at', [$fromDate, $toDate])
-                ->where('user_id', session('user_id'))
-                ->pluck('id')
-                ->toArray();
+           $shipments = Shipment::whereBetween('created_at', [$fromDate, $toDate])
+            ->where('user_id', session('user_id'))
+            ->where('shipper_status_id', 1)
+            ->pluck('id')
+            ->toArray();
+
 
             $request->merge(['ids' => $shipments]);
         }
@@ -1178,7 +1180,7 @@ class ShipperShipmentBookController extends Controller
             $i = 0;
             $sticker = TRUE;
 
-            foreach ($request->ids as $id) {
+            foreach ($request->ids as $id) {    
                 $shipment = Shipment::find($id);
                 if ($shipment) {
                     if ($shipment->shipper_status_id == 1) {
@@ -2906,6 +2908,7 @@ class ShipperShipmentBookController extends Controller
 
             $shipments = Shipment::whereBetween('created_at', [$fromDate, $toDate])
                 ->where('user_id', session('user_id'))
+                ->where('shipper_status_id', 1)
                 ->pluck('id')
                 ->toArray();
 
