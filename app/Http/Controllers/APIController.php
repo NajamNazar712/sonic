@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use DB;
+use Exception;
 use SnappyPDF;
 use Validator;
 use SnappyImage;
@@ -11,8 +12,6 @@ use App\FafCharges;
 use App\FinjaSmsLog;
 use App\GuestApiToken;
 use App\Http\Models\City;
-use App\Http\Models\Admin\Retail\RetailShipperInfo;
-use App\Http\Models\Admin\Retail\RetailShippingMode;
 use App\Http\Models\Zone;
 use Vectorface\Whip\Whip;
 use App\Http\Models\Rider;
@@ -52,6 +51,7 @@ use App\Http\Models\ShipmentsJourney;
 use App\Jobs\ProcessRvShipmentTicket;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\ShipmentOrderDate;
+use App\Models\AmountChangePermission;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\Lead\LeadLog;
 use App\Http\Models\ShipperSegmentLogs;
@@ -115,14 +115,17 @@ use App\Http\Models\Admin\ShipperInterceptExclude;
 use App\Http\Models\Shopify\ShopifyInvoiceSetting;
 use App\Http\Controllers\Admins\AdminCRMController;
 use App\Http\Models\Admin\Retail\RetailCashDeposit;
+use App\Http\Models\Admin\Retail\RetailShipperInfo;
 use App\Http\Models\Admin\standard_fintech_charges;
 use App\Http\Models\Blacklist\BlacklistedConsignee;
 use App\Http\Models\Blacklist\ConsigneeInformation;
 use App\Http\Models\ShipmentReplacementParcelImage;
 use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Models\Admin\Retail\RetailShippingMode;
 use App\Http\Models\Admin\WalkinShipmentWeightCharges;
 use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
 use App\Http\Controllers\Admins\AdminFinanceController;
+use App\Http\Controllers\Admins\AdminFnfController;
 use App\Http\Models\Admin\UserShippingInfoStoreAddress;
 use App\Http\Models\TelenorShipmentStatusEstimatedTime;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
@@ -143,7 +146,6 @@ use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransaction;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionDeliveryNote;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransactionRetail;
-use Exception;
 
 class APIController extends Controller
 {
@@ -10997,6 +10999,73 @@ class APIController extends Controller
                 'trace' => $e->getTraceAsString(),
             ], 500);
         }
+    }
+
+    public function can_specific_user_change_amount(Request $request)
+    {
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'tracking_number' => 'required',
+            ],
+            [
+                'tracking_number.required' => 'Tracking number is required.',
+            ],
+            [
+                'tracking_number' => 'Tracking Number',
+            ]
+        );
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status'  => 0,
+                'message' => 'Error(s) in Input',
+                'errors'  => $validator->errors(),
+            ], 422);
+        }
+
+        if (!AmountChangePermission::where('user_id', $request->input('user_id'))->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not allowed to change amount.',
+            ], 403);
+        }
+
+        $allowedIps = [];
+        if (config('app.env') === 'staging') {
+            $allowedIps = ['164.90.252.105'];
+        } elseif (config('app.env') === 'production') {
+            $allowedIps = ['3.23.216.198', '18.118.233.146'];
+        }
+
+        if ($allowedIps && !in_array($request->ip(), $allowedIps)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized IP address.',
+            ], 403);
+        }
+
+        $financeController = new AdminFinanceController();
+        $check = $financeController->change_shipment_amount_shipment_details($request);
+        if (!empty($check) && isset($check['status']) && $check['status'] == 0) {
+            if ($shipment = Shipment::where('tracking_number', $request->tracking_number)->first()) {
+                $request->merge(['shipment_id' => $shipment->id,'amount'=>0]);
+            }
+
+            $changeResult = $financeController->change_shipment_amount_store($request);
+
+            return $changeResult->getTargetUrl()
+                ? response()->json([
+                    'success' => true,
+                    'message' => "Shipment's amount has been changed",
+                ])
+                : response()->json([
+                    'success' => false,
+                    'message' => "Something Went Wrong",
+                ]);
+        }
+
+        return response()->json($check);
     }
 
 }
