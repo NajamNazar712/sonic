@@ -126,7 +126,7 @@ use Illuminate\Http\Request;
             });
         });
 
-        Route::get('change-amount', 'APIController@can_specific_user_change_amount')->name('can_specific_user_change_amount');
+        Route::post('change-amount', 'APIController@can_specific_user_change_amount')->name('can_specific_user_change_amount');
 
     });
 

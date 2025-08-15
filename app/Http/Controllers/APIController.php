@@ -11051,7 +11051,6 @@ class APIController extends Controller
 
         $financeController = new AdminFinanceController();
         $check = $financeController->change_shipment_amount_shipment_details($request);
-
         if (!empty($check) && isset($check['status']) && $check['status'] == 0) {
             if ($shipment = Shipment::where('tracking_number', $request->tracking_number)->first()) {
                 $request->merge(['shipment_id' => $shipment->id]);

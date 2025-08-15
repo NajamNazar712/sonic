@@ -4473,7 +4473,7 @@ class AdminFinanceController extends Controller
                         $details['consignee']['destination'] = $shipment->consignee_city->name;
                         $details['consignee']['address'] = $shipment->consignee_address;
 
-                        ShipmentScanningJourneyController::add($shipment->id, 13, 1, Auth::id(), NULL, NULL, NULL, NULL, session('latitude'), session('longitude'), NULL);
+                        ShipmentScanningJourneyController::add($shipment->id, 13, 1, Auth::id() ?? 346, NULL, NULL, NULL, NULL, session('latitude'), session('longitude'), NULL);
                         return ['status' => 0, 'success' => 'Shipment\'s amount can be changed', 'details' => $details];
                     } else {
                         return ['status' => 1, 'error' => 'A Payment of given Shipment has already been Processed'];
