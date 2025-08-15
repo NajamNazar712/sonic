@@ -601,7 +601,7 @@ class ShipperShipmentBookController extends Controller
             $userOld = User::find($user_id);
             $inLimit = in_array($userOld?->sub_segment_id, [1, 6]) ? 100 : 10;
 
-            if ($request->input('shipping_mode') != 2 && $request->input('pieces_quantity') > $inLimit)
+            if ($request->input('shipping_mode') != 2 && (int) $request->input('pieces_quantity') > $inLimit)
             {
                 return back()->with(['error' => "Pieces quantity should be less than and equal to $inLimit if shipping mode is not saver plus !"]);
             }
@@ -4185,7 +4185,7 @@ class ShipperShipmentBookController extends Controller
         } else {
             $userOld = User::find(session('user_id'));
             $inLimit = in_array($userOld?->sub_segment_id, [1, 6]) ? 100 : 10;
-        if ($request->input('shipping_mode') != 2 && $request->input('pieces_quantity') > $inLimit)
+        if ($request->input('shipping_mode') != 2 && (int) $request->input('pieces_quantity') > $inLimit)
         {
             return back()->with(['error' => "Pieces quantity should be less than and equal to $inLimit if shipping mode is not saver plus !"]);
         }
