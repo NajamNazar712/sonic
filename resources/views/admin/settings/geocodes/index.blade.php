@@ -110,6 +110,7 @@
                         <th class="border-primary border-darken-1">Consignee Number</th>
                         <th class="border-primary border-darken-1">Latitude</th>
                         <th class="border-primary border-darken-1">Longitude</th>
+                        <th class="border-primary border-darken-1">Compound Address</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
@@ -307,7 +308,8 @@
                                 'Consignee Address',
                                 'Consignee Number',
                                 'Latitude',
-                                'Longitude'
+                                'Longitude',
+                                'Compound Address'
                             ];
 
                             $.each(result.data, function (index, values) {
@@ -319,6 +321,7 @@
                                 row.push(values.consignee_phone_number_1);
                                 row.push(values.latitude);
                                 row.push(values.longitude);
+                                row.push(values.compound_address);
                                 body.push(row);
                             });
                         },
@@ -489,6 +492,7 @@
                     {data: 'consignee_phone_number_1', name: 'shipments.consignee_phone_number_1', class: 'align-middle consignee_phone_number_1',searchable:true,orderable: false},
                     {data: 'latitude', name: 'sgc.latitude', class: 'align-middle latitude',searchable:true,orderable: false},
                     {data: 'longitude', name: 'sgc.longitude', class: 'align-middle longitude',searchable:true,orderable: false},
+                    {data: 'compound_address', name: 'sgc.compound_address', class: 'align-middle compound_address',searchable:true,orderable: false},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
