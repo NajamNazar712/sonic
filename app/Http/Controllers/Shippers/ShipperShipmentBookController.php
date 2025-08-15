@@ -1168,6 +1168,7 @@ class ShipperShipmentBookController extends Controller
 
            $shipments = Shipment::whereBetween('created_at', [$fromDate, $toDate])
             ->where('user_id', session('user_id'))
+            ->orWhereIn('user_id', session('sister_users'))
             ->where('shipper_status_id', 1)
             ->pluck('id')
             ->toArray();
@@ -2908,6 +2909,7 @@ class ShipperShipmentBookController extends Controller
 
             $shipments = Shipment::whereBetween('created_at', [$fromDate, $toDate])
                 ->where('user_id', session('user_id'))
+                ->orWhereIn('user_id', session('sister_users'))
                 ->where('shipper_status_id', 1)
                 ->pluck('id')
                 ->toArray();
