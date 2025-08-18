@@ -1344,7 +1344,11 @@ class AdminDashboardController extends Controller
             ->where('users.name', 'like', '%' . $keyword . '%');
 
         } else {
-            $shippers = User::where('name', 'like', '%' . $keyword . '%')->orWhere('id', 'like', '%' . $keyword . '%');
+            $shippers = User::where(function($q) use ($keyword) {
+                $q->where('name', 'like', '%' . $keyword . '%')
+                    ->orWhere('id', 'like', '%' . $keyword . '%');
+            });
+
         }
         
         if($type == 'active')

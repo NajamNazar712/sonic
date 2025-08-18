@@ -488,7 +488,8 @@ class ShipperShipmentBookController extends Controller
             'air_waybill' => $air_waybill,
             'omni_user' => $omni_user,
             'airway_bill_address_visibility_users' => $airway_bill_address_visibility_users,
-            'parcel_bypass' => $parcel_bypass
+            'parcel_bypass' => $parcel_bypass,
+            'is_logistic' => in_array($user->sub_segment_id, [1, 6]),
         ];
         
         $substitute_account = null;
@@ -597,9 +598,12 @@ class ShipperShipmentBookController extends Controller
             return back()->with(['error' => "Invalid File Format Of Replacement Parcel Image"]);
         }
         else {
-            if ($request->input('shipping_mode') != 2 && $request->input('pieces_quantity') > 10)
+            $userOld = User::find($user_id);
+            $inLimit = in_array($userOld?->sub_segment_id, [1, 6]) ? 100 : 10;
+
+            if ($request->input('shipping_mode') != 2 && (int) $request->input('pieces_quantity') > $inLimit)
             {
-                return back()->with(['error' => "Pieces quantity should be less then and equal to 10 if shipping mode is not saver plus !"]);
+                return back()->with(['error' => "Pieces quantity should be less than and equal to $inLimit if shipping mode is not saver plus !"]);
             }
             if (BookingType::where('id', '!=', 4)->where('id', $request->input('selected_service_type'))->exists()) {
 
@@ -1158,22 +1162,35 @@ class ShipperShipmentBookController extends Controller
     {
         $shipment_ids = array();
 
-        if (!$request->has('ids') && $request->filled(['fromDate', 'toDate'])) {
-            $fromDate = $request->fromDate;
-            $toDate = $request->toDate;
+       if ($request->filled(['fromDate', 'toDate'])) {
+            $fromDate = Carbon::parse($request->fromDate)->startOfDay();
+            $toDate   = Carbon::parse($request->toDate)->endOfDay();
 
             $shipments = Shipment::whereBetween('created_at', [$fromDate, $toDate])
-                ->pluck('id')
-                ->toArray();
+                ->where(function ($query) {
+                    $query->where('user_id', session('user_id'))
+                        ->orWhereIn('user_id', session('sister_users') ?? []);
+                })
+                ->where('shipper_status_id', 1);
+
+            if (session('user_type') == 2 && session('restriction') == 1) {
+                $shipments->join('substitute_user_shipments as sus', function ($join) {
+                    $join->on('sus.shipment_id', '=', 'shipments.id')
+                        ->where('sus.substitute_user_id', '=', Auth::id());
+                });
+            }
+
+            $shipments = $shipments->pluck('shipments.id')->toArray();
 
             $request->merge(['ids' => $shipments]);
         }
 
+        
         if ($request->ids) {
             $i = 0;
             $sticker = TRUE;
 
-            foreach ($request->ids as $id) {
+            foreach ($request->ids as $id) {    
                 $shipment = Shipment::find($id);
                 if ($shipment) {
                     if ($shipment->shipper_status_id == 1) {
@@ -2075,10 +2092,10 @@ class ShipperShipmentBookController extends Controller
                         $table_end .= '
                               </tr>
                               <tr>
-                                <td colspan="8" class="text-center border twice-top urdu h5" dir="rtl"><em>برائے مہربانی رائڈر / کورئیر کو کوئی اضافی پیسہ نہ دیں۔ اگر پارسل / پیکٹ خراب یا خراب حالت میں ہے تو ، براہ کرم اسے وصول نہ کریں۔</em></td>
+                                <td colspan="8" class="text-center border twice-top urdu h5 ' . $remove_logo . '" dir="rtl"><em>برائے مہربانی رائڈر / کورئیر کو کوئی اضافی پیسہ نہ دیں۔ اگر پارسل / پیکٹ خراب یا خراب حالت میں ہے تو ، براہ کرم اسے وصول نہ کریں۔</em></td>
                               </tr>
                               <tr>
-                                <td colspan="8" class="text-center border twice-top urdu h5" dir="rtl"><em>ٹریکس لاجسٹک کا اس پارسل / پیکٹ میں موجود کسی آئٹم یا مواد سے کوئی تعلق نہیں ہے۔ ہم سامان ایک جگہ سے دوسری جگہ بھیجتے ہیں۔ اگر آپ کو اس بارے میں کوئی شکایت ہے تو ، براہ کرم متعلقہ آن لائن اسٹور سے رابطہ کریں۔</em></td>
+                                <td colspan="8" class="text-center border twice-top urdu h5 ' . $remove_logo . '" dir="rtl"><em>ٹریکس لاجسٹک کا اس پارسل / پیکٹ میں موجود کسی آئٹم یا مواد سے کوئی تعلق نہیں ہے۔ ہم سامان ایک جگہ سے دوسری جگہ بھیجتے ہیں۔ اگر آپ کو اس بارے میں کوئی شکایت ہے تو ، براہ کرم متعلقہ آن لائن اسٹور سے رابطہ کریں۔</em></td>
                               </tr>
                             </tbody>
                         </table>
@@ -2895,16 +2912,29 @@ class ShipperShipmentBookController extends Controller
             }
         }
 
-         if (!$request->has('ids') && $request->filled(['fromDate', 'toDate'])) {
-            $fromDate = $request->fromDate;
-            $toDate = $request->toDate;
+        if ($request->filled(['fromDate', 'toDate'])) {
+            $fromDate = Carbon::parse($request->fromDate)->startOfDay();
+            $toDate   = Carbon::parse($request->toDate)->endOfDay();
 
             $shipments = Shipment::whereBetween('created_at', [$fromDate, $toDate])
-                ->pluck('id')
-                ->toArray();
+                ->where(function ($query) {
+                    $query->where('user_id', session('user_id'))
+                        ->orWhereIn('user_id', session('sister_users') ?? []);
+                })
+                ->where('shipper_status_id', 1);
+
+            if (session('user_type') == 2 && session('restriction') == 1) {
+                $shipments->join('substitute_user_shipments as sus', function ($join) {
+                    $join->on('sus.shipment_id', '=', 'shipments.id')
+                        ->where('sus.substitute_user_id', '=', Auth::id());
+                });
+            }
+
+            $shipments = $shipments->pluck('shipments.id')->toArray();
 
             $request->merge(['ids' => $shipments]);
         }
+
 
         $user_type = NULL;
         $user_id = NULL;
@@ -4142,6 +4172,7 @@ class ShipperShipmentBookController extends Controller
             'user_delivery_types' => $user_delivery_types,
             'approve_ftl_requests' => $approve_ftl_requests,
             'omni_user' => $omni_user,
+            'is_logistic' => in_array($user->sub_segment_id, [1, 6]),
         ];
 
         $substitute_account = null;
@@ -4174,10 +4205,12 @@ class ShipperShipmentBookController extends Controller
         if ($validate->fails()) {
             return back()->with(['error' => "Invalid File Format Of Replacement Parcel Image"]);
         } else {
-        if ($request->input('shipping_mode') != 2 && $request->input('pieces_quantity') > 10)
-            {
-                return back()->with(['error' => "Pieces quantity should be less then and equal to 10 if shipping mode is not saver plus !"]);
-            }
+            $userOld = User::find(session('user_id'));
+            $inLimit = in_array($userOld?->sub_segment_id, [1, 6]) ? 100 : 10;
+        if ($request->input('shipping_mode') != 2 && (int) $request->input('pieces_quantity') > $inLimit)
+        {
+            return back()->with(['error' => "Pieces quantity should be less than and equal to $inLimit if shipping mode is not saver plus !"]);
+        }
         if ($request->open_shipment == 'on') {
             $open_shipment = 1;
         } else {
