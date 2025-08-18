@@ -8942,7 +8942,7 @@ class AdminFinanceController extends Controller
     
                             //---------x-----------x-------------
                             // Start Auto Close Complaints
-                            $crm_request = CrmRequest::where('shipment_id', $shipment->id)->where('status_id', 2)->first();
+                            $crm_request = CrmRequest::where('shipment_id', $shipment->id)->where('status_id', 2)->where('case_nature_type_id', '!=', 42)->first();
                             
                             if ($crm_request) { 
                                 $shipperName = User::find(Shipment::where('id', $shipment->id)->select('user_id')->first()->user_id)->name;
