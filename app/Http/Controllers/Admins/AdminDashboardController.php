@@ -239,6 +239,8 @@ use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAcco
 use App\Http\Models\Province;
 use App\Models\CityLog;
 use App\Models\ParentProduct;
+use App\Models\CorporateUserOnDeliveredInvoiceLog;
+use App\Models\CorporateUserOnDeliveredInvoice;
 
 class AdminDashboardController extends Controller
 {   use RateReusableTrait,FilterTrait;
@@ -10221,7 +10223,10 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                             $dropdown .= '<button type="button" class="dropdown-item view_invoice_log" rel="block"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-x "></i></div><div class="col-9 offset-1">View Packaging Invoice Log</div></button>';
                         }
                     }
-
+                    if (CorporateUserOnDeliveredInvoiceLog::where('user_id', $result->id)->exists()) {
+                            $dropdown .= '<button type="button" class="dropdown-item view_delivered_setting_log" rel="block"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-x "></i></div><div class="col-9 offset-1">View Delivered Invoice Setting Logs</div></button>';
+                    }
+                    
                     if ($result->blacklist == 0 && (session('role_id') == 1 || in_array(14, session('permissions')))) {
                         $dropdown .= '<button type="button" class="dropdown-item blacklist" data-id="' . $result->id . '" rel="block"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-x"></i></div><div class="col-9 offset-1">Block</div></div></button>';
                     }
@@ -14439,6 +14444,20 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         $logs = CorporateUserPackagingInvoiceLog::join('admins as a', 'a.id', '=', 'corporate_user_packaging_invoice_logs.admin_id')
             ->select('a.name as admin', 'corporate_user_packaging_invoice_logs.created_at as time', 'corporate_user_packaging_invoice_logs.status as status')
             ->where('corporate_user_packaging_invoice_logs.user_id', $request->user_id);
+        if ($logs->exists()) {
+            $logs = $logs->get();
+            return response()->json(['status' => 0, 'details' => $logs]);
+        } else {
+            return response()->json(['status' => 1, 'error' => 'No Log found!']);
+        }
+
+    }
+
+    public function delivered_invoice_log(Request $request)
+    {
+        $logs = CorporateUserOnDeliveredInvoiceLog::join('admins as a', 'a.id', '=', 'corporate_user_on_delivered_invoice_logs.admin_id')
+            ->select('a.name as admin', 'corporate_user_on_delivered_invoice_logs.created_at as time', 'corporate_user_on_delivered_invoice_logs.status as status')
+            ->where('corporate_user_on_delivered_invoice_logs.user_id', $request->user_id);
         if ($logs->exists()) {
             $logs = $logs->get();
             return response()->json(['status' => 0, 'details' => $logs]);
