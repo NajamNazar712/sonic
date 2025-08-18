@@ -67,6 +67,7 @@ use App\Http\Models\ShippingMode;
 use App\Http\Models\ShippingModeSameDayTiming;
 use App\Http\Models\SubstituteUserShipment;
 use App\Http\Models\ZoneClassCity;
+use App\Http\Traits\FilterTrait;
 use App\Jobs\ProcessShipmentBookingDB;
 use App\Jobs\ProcessShipmentBookingDBPriority;
 use App\Jobs\ProcessShipmentBookingDistributionDB;
@@ -88,6 +89,7 @@ use App\Models\BookingChannel;
 
 class ShipperShipmentBookController extends Controller
 {
+    use FilterTrait;
 
     // private function unique_order_id($order_id)
     // {
@@ -486,7 +488,8 @@ class ShipperShipmentBookController extends Controller
             'air_waybill' => $air_waybill,
             'omni_user' => $omni_user,
             'airway_bill_address_visibility_users' => $airway_bill_address_visibility_users,
-            'parcel_bypass' => $parcel_bypass
+            'parcel_bypass' => $parcel_bypass,
+            'is_logistic' => in_array($user->sub_segment_id, [1, 6]),
         ];
         
         $substitute_account = null;
@@ -595,9 +598,12 @@ class ShipperShipmentBookController extends Controller
             return back()->with(['error' => "Invalid File Format Of Replacement Parcel Image"]);
         }
         else {
-            if ($request->input('shipping_mode') != 2 && $request->input('pieces_quantity') > 10)
+            $userOld = User::find($user_id);
+            $inLimit = in_array($userOld?->sub_segment_id, [1, 6]) ? 100 : 10;
+
+            if ($request->input('shipping_mode') != 2 && (int) $request->input('pieces_quantity') > $inLimit)
             {
-                return back()->with(['error' => "Pieces quantity should be less then and equal to 10 if shipping mode is not saver plus !"]);
+                return back()->with(['error' => "Pieces quantity should be less than and equal to $inLimit if shipping mode is not saver plus !"]);
             }
             if (BookingType::where('id', '!=', 4)->where('id', $request->input('selected_service_type'))->exists()) {
 
@@ -1155,11 +1161,36 @@ class ShipperShipmentBookController extends Controller
     public function shipment_check(Request $request)
     {
         $shipment_ids = array();
+
+       if ($request->filled(['fromDate', 'toDate'])) {
+            $fromDate = Carbon::parse($request->fromDate)->startOfDay();
+            $toDate   = Carbon::parse($request->toDate)->endOfDay();
+
+            $shipments = Shipment::whereBetween('created_at', [$fromDate, $toDate])
+                ->where(function ($query) {
+                    $query->where('user_id', session('user_id'))
+                        ->orWhereIn('user_id', session('sister_users') ?? []);
+                })
+                ->where('shipper_status_id', 1);
+
+            if (session('user_type') == 2 && session('restriction') == 1) {
+                $shipments->join('substitute_user_shipments as sus', function ($join) {
+                    $join->on('sus.shipment_id', '=', 'shipments.id')
+                        ->where('sus.substitute_user_id', '=', Auth::id());
+                });
+            }
+
+            $shipments = $shipments->pluck('shipments.id')->toArray();
+
+            $request->merge(['ids' => $shipments]);
+        }
+
+        
         if ($request->ids) {
             $i = 0;
             $sticker = TRUE;
 
-            foreach ($request->ids as $id) {
+            foreach ($request->ids as $id) {    
                 $shipment = Shipment::find($id);
                 if ($shipment) {
                     if ($shipment->shipper_status_id == 1) {
@@ -1205,6 +1236,12 @@ class ShipperShipmentBookController extends Controller
             <div class="small mt-1">Printed By: ' . $user_name . '</div>
         ';
 
+        $remove_logo = '';
+        $exclude_logo = FilterTrait::class::getFilteredShipperIds($user_id);
+        if($exclude_logo){
+            $remove_logo = 'd-none-logo';
+        }
+
         $html = '';
 
         if (!$body_only) {
@@ -1219,12 +1256,22 @@ class ShipperShipmentBookController extends Controller
 
             if ($user_type != 4 && $type != 'pdf') {
                 $html .= '
-                    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
-                ';
+    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+    <style>
+        .d-none-logo { display: none !important; }
+    </style>
+';
+
             } else {
                 $html .= '
-                    <style>' . file_get_contents(public_path('app-assets/css/bootstrap.min.css')) . '</style>
-                ';
+    <style>'
+                    . file_get_contents(public_path('app-assets/css/bootstrap.min.css')) .
+                    '</style>
+    <style>
+        .d-none-logo{ display: none !important; }
+    </style>
+';
+
             }
 
             $html .= '
@@ -1529,16 +1576,16 @@ class ShipperShipmentBookController extends Controller
 
                         if ($user_type != 4 && $type != 'pdf') {
                             $table_start .= '
-                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto  ' . $remove_logo . '">' . $print_details . '</td>
                     ';
                         } else {
                             if ($type != 'pdf') {
                                 $table_start .= '
-                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto  ' . $remove_logo . '">' . $print_details . '</td>
                         ';
                             } else {
                                 $table_start .= '
-                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="75" class="d-block mx-auto">' . $print_details . '</td>
+                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="75" class="d-block mx-auto  ' . $remove_logo . '">' . $print_details . '</td>
                         ';
                             }
                         }
@@ -1640,28 +1687,28 @@ class ShipperShipmentBookController extends Controller
 
                     if ($user_type != 4 && $type != 'pdf') {
                         $table_start .= '
-                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto  ' . $remove_logo . '">' . $print_details . '</td>
                     ';
 
                         $distribution_logo = '
-                                <td rowspan="3" colspan="3"  class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                                <td rowspan="3" colspan="3"  class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto  ' . $remove_logo . '">' . $print_details . '</td>
                     ';
                     } else {
                         if ($type != 'pdf') {
                             $table_start .= '
-                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto  ' . $remove_logo . '">' . $print_details . '</td>
                         ';
 
                             $distribution_logo = '
-                               <td rowspan="3" colspan="3"  class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                               <td rowspan="3" colspan="3"  class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto  ' . $remove_logo . '">' . $print_details . '</td>
                     ';
                         } else {
                             $table_start .= '
-                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="75" class="d-block mx-auto">' . $print_details . '</td>
+                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="75" class="d-block mx-auto  ' . $remove_logo . '">' . $print_details . '</td>
                         ';
 
                             $distribution_logo = '
-                                <td rowspan="3" colspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="75" class="d-block mx-auto">' . $print_details . '</td>
+                                <td rowspan="3" colspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="75" class="d-block mx-auto  ' . $remove_logo . '">' . $print_details . '</td>
                     ';
                         }
                     }
@@ -2045,10 +2092,10 @@ class ShipperShipmentBookController extends Controller
                         $table_end .= '
                               </tr>
                               <tr>
-                                <td colspan="8" class="text-center border twice-top urdu h5" dir="rtl"><em>برائے مہربانی رائڈر / کورئیر کو کوئی اضافی پیسہ نہ دیں۔ اگر پارسل / پیکٹ خراب یا خراب حالت میں ہے تو ، براہ کرم اسے وصول نہ کریں۔</em></td>
+                                <td colspan="8" class="text-center border twice-top urdu h5 ' . $remove_logo . '" dir="rtl"><em>برائے مہربانی رائڈر / کورئیر کو کوئی اضافی پیسہ نہ دیں۔ اگر پارسل / پیکٹ خراب یا خراب حالت میں ہے تو ، براہ کرم اسے وصول نہ کریں۔</em></td>
                               </tr>
                               <tr>
-                                <td colspan="8" class="text-center border twice-top urdu h5" dir="rtl"><em>ٹریکس لاجسٹک کا اس پارسل / پیکٹ میں موجود کسی آئٹم یا مواد سے کوئی تعلق نہیں ہے۔ ہم سامان ایک جگہ سے دوسری جگہ بھیجتے ہیں۔ اگر آپ کو اس بارے میں کوئی شکایت ہے تو ، براہ کرم متعلقہ آن لائن اسٹور سے رابطہ کریں۔</em></td>
+                                <td colspan="8" class="text-center border twice-top urdu h5 ' . $remove_logo . '" dir="rtl"><em>ٹریکس لاجسٹک کا اس پارسل / پیکٹ میں موجود کسی آئٹم یا مواد سے کوئی تعلق نہیں ہے۔ ہم سامان ایک جگہ سے دوسری جگہ بھیجتے ہیں۔ اگر آپ کو اس بارے میں کوئی شکایت ہے تو ، براہ کرم متعلقہ آن لائن اسٹور سے رابطہ کریں۔</em></td>
                               </tr>
                             </tbody>
                         </table>
@@ -2231,7 +2278,7 @@ class ShipperShipmentBookController extends Controller
                         foreach ($shipment->shipment_pieces as $piece) {
                             $shipment_pieces .= '<table class="table table-sm table-bordered border twice">
                         <tbody><tr>';
-                            $shipment_pieces .= '<td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>';
+                            $shipment_pieces .= '<td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto  ' . $remove_logo . '">' . $print_details . '</td>';
                             $shipment_pieces .= '<td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                                   <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($piece->tracking_number, $generator::TYPE_CODE_128, 1.5, 45)) . '" class="d-block mx-auto">
                                   <span><strong>' . $piece->tracking_number . '</strong></span>
@@ -2286,7 +2333,7 @@ class ShipperShipmentBookController extends Controller
                         <div class="row"><div class="col-3"><h2>Invoice ' . $invoice_id . '</h2></div></div>
                         <div class="row"><div class="col-6 text-center">
                         ' . $shipper_logo . '
-    </div><div class="col-6 text-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mb-1" style="margin: 0 auto;"></div></div>
+    </div><div class="col-6 text-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mb-1  ' . $remove_logo . '" style="margin: 0 auto;"></div></div>
                         
                         <div class="row align-items-start justify-content-between p-2">
                             <div class="col-12">
@@ -2526,16 +2573,16 @@ class ShipperShipmentBookController extends Controller
 
                                 if ($user_type != 4 && $type != 'pdf') {
                                     $table_start .= '
-                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto  ' . $remove_logo . '">' . $print_details . '</td>
                     ';
                                 } else {
                                     if ($type != 'pdf') {
                                         $table_start .= '
-                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto  ' . $remove_logo . '">' . $print_details . '</td>
                         ';
                                     } else {
                                         $table_start .= '
-                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="75" class="d-block mx-auto">' . $print_details . '</td>
+                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="75" class="d-block mx-auto  ' . $remove_logo . '">' . $print_details . '</td>
                         ';
                                     }
                                 }
@@ -2854,7 +2901,6 @@ class ShipperShipmentBookController extends Controller
 
     public function print_air_waybill(Request $request)
     {
-
         $ids = GlobalSettings::where('type','cn_print_rights')->first();
         if($ids->text != null)
         {
@@ -2864,6 +2910,29 @@ class ShipperShipmentBookController extends Controller
             if (in_array(session('role_id'),$role_ids)) {
                 return response()->json(['status' => '2', 'error' => 'You are restricted from printing duplicate airway bill(s). Please contact your line manager.']);
             }
+        }
+
+        if ($request->filled(['fromDate', 'toDate'])) {
+            $fromDate = Carbon::parse($request->fromDate)->startOfDay();
+            $toDate   = Carbon::parse($request->toDate)->endOfDay();
+
+            $shipments = Shipment::whereBetween('created_at', [$fromDate, $toDate])
+                ->where(function ($query) {
+                    $query->where('user_id', session('user_id'))
+                        ->orWhereIn('user_id', session('sister_users') ?? []);
+                })
+                ->where('shipper_status_id', 1);
+
+            if (session('user_type') == 2 && session('restriction') == 1) {
+                $shipments->join('substitute_user_shipments as sus', function ($join) {
+                    $join->on('sus.shipment_id', '=', 'shipments.id')
+                        ->where('sus.substitute_user_id', '=', Auth::id());
+                });
+            }
+
+            $shipments = $shipments->pluck('shipments.id')->toArray();
+
+            $request->merge(['ids' => $shipments]);
         }
 
 
@@ -3068,12 +3137,15 @@ class ShipperShipmentBookController extends Controller
         Validator::extend('pieces_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
             $data = $validator->getData();
             $shipping_mode_id = $data['shipping_mode_id'];
-            $pieces_quantity = $data['pieces_quantity'];
+
+            $user = User::find($user_id);
+            $inLimit = in_array($user->sub_segment_id, [1, 6]) ? 100 : 10;
+
             if ($value) {
                 if ($shipping_mode_id == 2 && ($value < 1 || $value > 500)) {
                     return false;
                 }
-                elseif($shipping_mode_id != 2 && ($value < 1 || $value > 10)) {
+                elseif($shipping_mode_id != 2 && ($value < 1 || $value > $inLimit)) {
                     return false;
                 }
                 else
@@ -4100,6 +4172,7 @@ class ShipperShipmentBookController extends Controller
             'user_delivery_types' => $user_delivery_types,
             'approve_ftl_requests' => $approve_ftl_requests,
             'omni_user' => $omni_user,
+            'is_logistic' => in_array($user->sub_segment_id, [1, 6]),
         ];
 
         $substitute_account = null;
@@ -4132,10 +4205,12 @@ class ShipperShipmentBookController extends Controller
         if ($validate->fails()) {
             return back()->with(['error' => "Invalid File Format Of Replacement Parcel Image"]);
         } else {
-        if ($request->input('shipping_mode') != 2 && $request->input('pieces_quantity') > 10)
-            {
-                return back()->with(['error' => "Pieces quantity should be less then and equal to 10 if shipping mode is not saver plus !"]);
-            }
+            $userOld = User::find(session('user_id'));
+            $inLimit = in_array($userOld?->sub_segment_id, [1, 6]) ? 100 : 10;
+        if ($request->input('shipping_mode') != 2 && (int) $request->input('pieces_quantity') > $inLimit)
+        {
+            return back()->with(['error' => "Pieces quantity should be less than and equal to $inLimit if shipping mode is not saver plus !"]);
+        }
         if ($request->open_shipment == 'on') {
             $open_shipment = 1;
         } else {
@@ -6068,12 +6143,15 @@ class ShipperShipmentBookController extends Controller
         Validator::extend('pieces_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
             $data = $validator->getData();
             $shipping_mode_id = $data['shipping_mode_id'];
-            $pieces_quantity = $data['pieces_quantity'];
+
+            $user = User::find($user_id);
+            $inLimit = in_array($user->sub_segment_id, [1, 6]) ? 100 : 10;
+
             if ($value) {
                 if ($shipping_mode_id == 2 && ($value < 1 || $value > 500)) {
                     return false;
                 }
-                elseif($shipping_mode_id != 2 && ($value < 1 || $value > 10)) {
+                elseif($shipping_mode_id != 2 && ($value < 1 || $value > $inLimit)) {
                     return false;
                 }
                 else

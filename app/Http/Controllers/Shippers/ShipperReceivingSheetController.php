@@ -16,6 +16,7 @@ use App\Http\Models\ShippingMode;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use App\Http\Models\SubstituteUserReceivingSheet;
 use App\Http\Models\SubstituteUserShipment;
+use App\Http\Traits\FilterTrait;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Shippers\ShipperShipmentBookController;
@@ -38,6 +39,7 @@ use App\Jobs\ProcessGulAhmedShipmentConfirmation;
 
 class ShipperReceivingSheetController extends Controller
 {
+    use FilterTrait;
     public function __construct() {
         $this->middleware('auth:web,substitute_users');
 
@@ -387,8 +389,13 @@ class ShipperReceivingSheetController extends Controller
     }
 
     static public function view($id, $user_type, $body_only = FALSE) {
-        $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
+        $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();;
 
+        $remove_logo = '';
+        $exclude_logo = FilterTrait::class::getFilteredShipperIds(auth()->user()->id);
+        if($exclude_logo){
+            $remove_logo = 'd-none-logo';
+        }
         $html = '';
 
         if (!$body_only) {
@@ -402,14 +409,20 @@ class ShipperReceivingSheetController extends Controller
 
             if ($user_type != 4) {
                 $html .= '
-                    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
-                ';
-            }
-            else {
+        <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+        <style>
+            .d-none-logo { display: none !important; }
+        </style>
+    ';
+            } else {
                 $html .= '
-                    <style>' . file_get_contents(public_path('app-assets/css/bootstrap.min.css')) . '</style>
-                ';
+        <style>' . file_get_contents(public_path('app-assets/css/bootstrap.min.css')) . '</style>
+        <style>
+            .d-none-logo { display: none !important; }
+        </style>
+    ';
             }
+
 
             $html .= '
                     <title>Receiving Sheet</title>
@@ -667,12 +680,12 @@ class ShipperReceivingSheetController extends Controller
 
             if ($user_type != 4) {
                 $main_details .= '
-                            <td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>
+                            <td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto ' . $remove_logo . '"></td>
                 ';
             }
             else {
                 $main_details .= '
-                            <td class="text-center align-middle"><img src="' . public_path('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>
+                            <td class="text-center align-middle"><img src="' . public_path('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto ' . $remove_logo . '"></td>
                 ';
             }
 
@@ -814,8 +827,8 @@ class ShipperReceivingSheetController extends Controller
 
                         <div class="row">
                           <div class="col text-center mt-2">
-                            <span class="d-block">Plot 105, Mehran Town Sector 7 A Korangi Karachi, Karachi, Karachi City, Sindh, Pakistan</span>
-                            <span class="d-block">Phone: 0304-11-11-232 | Email: info@slgtrax.com | URL: www.trax.pk</span>
+                            <span class="d-block ' . $remove_logo . '">Plot 105, Mehran Town Sector 7 A Korangi Karachi, Karachi, Karachi City, Sindh, Pakistan</span>
+                            <span class="d-block ' . $remove_logo . '">Phone: 0304-11-11-232 | Email: info@slgtrax.com | URL: www.trax.pk</span>
                           </div>
                         </div>
                       </div>
