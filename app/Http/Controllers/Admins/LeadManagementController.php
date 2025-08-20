@@ -184,7 +184,7 @@ class LeadManagementController extends Controller
             ->leftjoin('admins as ub', 'ub.id', '=', 'leads.updated_by')
             ->leftjoin('service_list as sl', 'sl.id', '=', 'leads.service_id')
             ->leftjoin('lead_reasons as lsr', 'lsr.id', '=', 'leads.reason')
-            ->select('leads.id as lead_id', 'leads.id as leadid', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'rp.trax_id as rider_id', 'c.name as city', 't.name as territory', 'at.name as area', 'leads.sale_person_updated_at', 'lr.name as lead_reference', 'leads.updated_at as updated', 'sl.name as service', 'leads.brand as brand', 'leads.company as company', 'lsr.name as reason_id', 'leads.sale_person_updated_at as sale_person_tagged_time', 'leads.call_status as call_status_name', 'leads.expected_shipments as expected_shipments', 'u.brand_name as brand_name', 'leads.via_channel as via_channel', 'u.status as user_status', 'u.id as user_id', 'leads.activation_code as activation_code');
+            ->select('leads.id as lead_id', 'leads.id as leadid', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'rp.trax_id as rider_id', 'c.name as city', 't.name as territory', 'at.name as area', 'leads.sale_person_updated_at', 'lr.name as lead_reference', 'leads.updated_at as updated', 'sl.name as service', 'leads.brand as brand', 'leads.company as company', 'lsr.name as reason_id', 'leads.sale_person_updated_at as sale_person_tagged_time', 'leads.call_status as call_status_name', 'leads.expected_shipments as expected_shipments', 'u.brand_name as brand_name', 'leads.via_channel as via_channel', 'u.status as user_status', 'u.id as user_id', 'leads.activation_code as activation_code', 'u.blacklist as blacklist', 'u.status as user_status');
         // ->OrderByDesc('leads.requested_date');
         if (session('role_id') != 1) {
             $leads = $leads->whereIn('c.hub_id', session('hubs'));
@@ -230,24 +230,55 @@ class LeadManagementController extends Controller
         return Datatables::of($leads)
             ->filterColumn('status', function ($query, $keyword) {
                 $query->where(function ($q) use ($keyword) {
-                    if ($keyword == '12') {
-                        $q->where('leads.status_id', 12)
-                          ->orWhereIn('leads.email_address', function ($subQuery) {
-                              $subQuery->select('email')
-                                       ->from('users')
-                                       ->where('status', '3');
-                          });
-                    } else {
-                        $q->where('leads.status_id', $keyword)
-                          ->whereNotIn('leads.email_address', function ($subQuery) {
-                              $subQuery->select('email')
-                                       ->from('users')
-                                       ->where('status', '3');
-                          });
+                    $keywordInt = (int) $keyword;
+                    if (!in_array($keywordInt, [11, 12])) {
+                        $q->where(function ($inner) use ($keywordInt) {
+                            $inner->where(function ($query) use ($keywordInt) {
+                                $query->where('leads.status_id', $keywordInt)
+                                    ->whereNotExists(function ($subQuery) {
+                                        $subQuery->select(DB::raw(1))
+                                            ->from('users')
+                                            ->whereColumn('users.email', 'leads.email_address');
+                                    });
+                            })->orWhere(function ($query) use ($keywordInt) {
+                                $query->where('leads.status_id', $keywordInt)
+                                    ->whereExists(function ($subQuery) {
+                                        $subQuery->select(DB::raw(1))
+                                            ->from('users')
+                                            ->whereColumn('users.email', 'leads.email_address')
+                                            ->where('users.blacklist', '!=', 1)
+                                            ->where('users.status', '!=', 3);
+                                    });
+                            });
+                        });
                     }
+                    if ($keywordInt === 11) {
+                      $q->where(function ($check) {
+                            $check->where('leads.status_id', 11)
+                                ->orWhereExists(function ($subQuery) {
+                                    $subQuery->select(DB::raw(1))
+                                            ->from('users')
+                                            ->whereColumn('users.lead_id', 'leads.id')
+                                            ->where('users.blacklist', 1);
+                                });
+                        });
+                    } 
+                    
+                    if ($keywordInt === 12) {
+                        $q->where(function ($q) {
+                            $q->where('leads.status_id', 12)
+                            ->orWhereExists(function ($subQuery) {
+                                $subQuery->select(DB::raw(1))
+                                        ->from('users')
+                                        ->whereColumn('users.lead_id', 'leads.id')
+                                        ->where('users.status', 3);
+                            });
+                        });
+                    }               
+
                 });
-                
             })
+
             ->editColumn('reference_person', function ($query) {
                 if ($query->rider_id) {
                     return $query->rider_id . '-' . $query->reference_person;
@@ -375,10 +406,19 @@ class LeadManagementController extends Controller
             // })
 
             ->editColumn('status', function ($lead) {
-                $userExists = User::where('email', $lead->email_address)->where('status', '3')->exists();
-            
-                return $userExists ? 'Account Activated' : $lead->status;
+                $user = User::where('email', $lead->email_address)->first();
+
+                if ($lead->status_id == 11 || ($user && $user->blacklist == 1)) {
+                    return 'Blocked';
+                }
+
+                if ($lead->status_id == 12 || ($user && $user->status == 3)) {
+                    return 'Account Activated';
+                }
+
+                return $lead->status;
             })
+
 
             ->addColumn('lead_account_link', function ($lead) {
                 if (!empty($lead->lead_id) && !empty($lead->activation_code)) {

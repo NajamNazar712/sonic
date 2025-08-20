@@ -352,6 +352,7 @@ class ShipperTrackingController extends Controller
                         $details['order_information']['business_category'] = $shipment->business_category->name;
 
                         $details['order_information']['sub_segment'] = $sub_segment_name;
+                        $details['order_information']['channel'] = optional(optional($shipment->bookingChannel)->channel)->name ?? '-';
 
                         foreach ($shipment->shipment_journey as $journey) {
                             if($journey->shipper_status_id != '67'){

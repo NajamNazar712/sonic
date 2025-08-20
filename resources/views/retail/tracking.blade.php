@@ -990,22 +990,25 @@
                                     shipment += '<tbody>';
                                     $count = 0;
                                     $.each(details.crm_requests, function (index, crm_request) {
-                                        $count = $count + 1;
-                                        shipment += '<tr>';
-                                        shipment += '<td>' + $count + '</td>';
-                                        if (crm_request.status_id === 1 || crm_request
-                                            .status_id === 5) {
-                                            shipment += '<td>' + crm_request.status +
-                                                '(<a class="btn btn-sm btn-outline-info align-middle" href="' +
-                                                complain_route + crm_request.id +
-                                                '" target="_blank">(' + crm_request.id +
-                                                ')</a>)</td>';
-                                        } else {
-                                            shipment += '<td>' + crm_request.status + '</td>';
+                                        if(crm_request.status_id!=6){
+                                            $count = $count + 1;
+                                            shipment += '<tr>';
+                                            shipment += '<td>' + $count + '</td>';
+                                            if (crm_request.status_id === 1 || crm_request
+                                                .status_id === 5) {
+                                                shipment += '<td>' + crm_request.status +
+                                                    '(<a class="btn btn-sm btn-outline-info align-middle" href="' +
+                                                    complain_route + crm_request.id +
+                                                    '" target="_blank">(' + crm_request.id +
+                                                    ')</a>)</td>';
+                                            } else {
+                                                shipment += '<td>' + crm_request.status + '</td>';
+                                            }
+                                            shipment += '<td>' + crm_request.created_at + '</td>';
+                                            shipment += '<td>' + crm_request.created_by + '</td>';
+                                            shipment += '</tr>';
                                         }
-                                        shipment += '<td>' + crm_request.created_at + '</td>';
-                                        shipment += '<td>' + crm_request.created_by + '</td>';
-                                        shipment += '</tr>';
+
                                     });
 
                                     shipment += '</tbody>';

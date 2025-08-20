@@ -17,7 +17,7 @@
                                 <div class="col mt-2">
                                     <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
 
-                                        <div class="col-3">
+                                        <div class="col-md-4">
                                             <div class="form-group">
                                                 <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
                                             </div>
@@ -28,7 +28,7 @@
                                                 <input type="text" name="phone_number" class="form-control phone_number" placeholder="Phone Number (Full)">
                                             </div>
                                         </div>
-                                        <div class="col-3">
+                                        <div class="col-md-4">
                                             <div class="form-group input-group">
                                                 <div class="input-group-prepend">
                                       <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -38,7 +38,7 @@
                                                 <input type="text" name="booking_from_date" class="form-control bg-primary border-primary white rounded-right" id="booking_from_date" placeholder="Booking Date From"  data-value="{{ \Carbon\Carbon::today()->subDays(31)->startOfDay() }}">
                                             </div>
                                         </div>
-                                        <div class="col-3">
+                                        <div class="col-md-4">
                                             <div class="form-group input-group">
                                                 <div class="input-group-prepend">
                                         <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -48,7 +48,7 @@
                                                 <input type="text" name="booking_to_date" class="form-control bg-primary border-primary white rounded-right" id="booking_to_date" placeholder="Booking Date To" data-value="{{ \Carbon\Carbon::now() }}">
                                             </div>
                                         </div>
-                                        <div class="col-3">
+                                        <div class="col-md-4">
                                             <fieldset class="form-group">
                                                 <select name="search_account_type[]" id="search_account_type" class="form-control select2" multiple>
                                                     <option value="" disabled ></option> <!-- added this line -->
@@ -59,9 +59,45 @@
                                             </fieldset>
                                         </div>
 
-                                        <div class="form-group col-md-3 mt-2 justify-content-center">
+                                         <div class="form-group col-md-2 mt-2 justify-content-center">
                                             <button type="submit" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                                         </div>
+
+                                        <!-- Print Filter -->
+                                        
+                                            <div class="col-4">
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white">
+                                                            <span class="la la-calendar-o small-calender-icon"></span>
+                                                        </span>
+                                                    </div>
+                                                    <input type="text" name="print_from_date" class="form-control bg-primary border-primary white"
+                                                        id="print_from_date" placeholder="Print Date From">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-4">
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white">
+                                                            <span class="la la-calendar-o small-calender-icon"></span>
+                                                        </span>
+                                                    </div>
+                                                    <input type="text" name="print_to_date" class="form-control bg-primary border-primary white"
+                                                        id="print_to_date" placeholder="Print Date To">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <button type="button" id="print_search_btn" class="btn btn-outline-primary btn-block">
+                                                    <i class="la la-print"></i> Print
+                                                </button>
+                                            </div>
+                                        <!-- END -->
+
+
+                                       
                                     </form>
                                 </div>
                                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
@@ -76,6 +112,7 @@
                                         <th class="border-primary border-darken-1">Shipper</th>
                                         <th class="border-primary border-darken-1">Booked By</th>
                                         <th class="border-primary border-darken-1">Service Type</th>
+                                        <th class="border-primary border-darken-1">Booking Channel</th>
                                         <th class="border-primary border-darken-1">Status</th>
                                         <th class="border-primary border-darken-1">Reason</th>
                                         <th class="border-primary border-darken-1">Payment Status</th>
@@ -706,6 +743,41 @@
                 }
             });
 
+
+            var print_from_date = $('#print_from_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+
+                    var old_date_formatted = $('input[name="print_from_date_formatted"]').val();
+                    var contractMoment = moment(old_date_formatted);
+                    var current = moment(contractMoment).add(31, 'days');
+                    var current_max = moment(contractMoment).add(1, 'days');
+                }
+            });
+
+            var print_to_date = $('#print_to_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    // if (context.select) {
+                    //     $('#track_form #booking_from_date').pickadate('picker').set('max', $('#track_form #booking_to_date').pickadate('picker').get('select'));
+                    // }
+                }
+            });
+
             function print(selected_rows) {
 
                 $.ajax({
@@ -793,6 +865,7 @@
                             head.push('Shipper');
                             head.push('Booked By');
                             head.push('Service Type');
+                            head.push('Booking Channel');
                             head.push('Status');
                             head.push('Reason');
                             head.push('Payment Status');
@@ -815,6 +888,7 @@
                                 row.push(values.user_name);
                                 row.push(values.booked_by);
                                 row.push(values.service_type);
+                                row.push(values.channel_name);
                                 row.push(values.status);
                                 row.push(values.reason);
                                 row.push(values.payment_status);
@@ -1112,6 +1186,7 @@
                     {data: 'user_name', name: 'u.name', class: 'align-middle user_name'},
                     {data: 'booked_by', name: 'shipments.booked_by', class: 'align-middle booked_by'},
                     {data: 'service_type', name: 'bt.id', class: 'align-middle service_type'},
+                    {data: 'channel_name', name: 'channels.name', class: 'align-middle channel_name'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
                     {data: 'payment_status', name: 'payment_status', class: 'align-middle payment_status'},
@@ -2625,6 +2700,100 @@
 
             });
 
+
+            function printByDate(from, to) {
+                $.ajax({
+                    url: '{!! route('cod.shipment.book.shipment_check') !!}',
+                    method: 'POST',
+                    data: {
+                        'fromDate': from,
+                        'toDate': to,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                .done(function (data) {
+
+                    if (data.status == 2) {
+                        swal({
+                            title: 'Error',
+                            text: 'No shipments found for print',
+                            icon: 'error',
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+                    }
+
+                    if (data.status === 1) {
+                        let requestData = {
+                            'fromDate': from,
+                            'toDate': to,
+                            '_token': '{{ csrf_token() }}'
+                        };
+
+                        if (data.sticker) {
+                            requestData.sticker = 1;
+
+                            $.ajax({
+                                url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
+                                method: 'POST',
+                                xhrFields: { responseType: 'blob' },
+                                data: requestData
+                            })
+                            .done(function (pdfData) {
+                                let blob = new Blob([pdfData], { type: 'application/pdf' });
+                                let link = document.createElement('a');
+                                link.href = URL.createObjectURL(blob);
+                                link.download = 'air_waybills.pdf';
+                                link.click();
+                            });
+
+                        } else {
+                            requestData.sticker = 0;
+
+                            $.ajax({
+                                url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
+                                method: 'POST',
+                                data: requestData
+                            })
+                            .done(function (htmlData) {
+                                let tab = window.open('', '_blank');
+                                if (!tab) {
+                                    swal({
+                                        title: 'Popup Blocker Enabled!',
+                                        text: 'Please add this site to your exception list.',
+                                        icon: 'error',
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false
+                                    });
+                                } else {
+                                    tab.document.write(htmlData);
+                                    tab.document.close();
+                                    tab.focus();
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+
+            $(document).on('click', '#print_search_btn', function () {
+                let fromDate = $('#print_from_date').val().trim();
+                let toDate   = $('#print_to_date').val().trim();
+
+                if (fromDate === '' || toDate === '') {
+                    swal({
+                        title: 'Error',
+                        text: 'Select Print From And To Dates',
+                        icon: 'error',
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });     
+                    return false; 
+                }
+
+                printByDate(fromDate, toDate)
+
+            });
         });
     </script>
 

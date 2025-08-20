@@ -60,4 +60,15 @@ class City extends Model
     {
         return $this->hasMany('App\Http\Models\RvAgentAssignHub');
     }
+
+    public function osaRates()
+    {
+        return $this->hasMany(CityOsaRate::class, 'city_id');
+    }
+
+    public function walkIns()
+    {
+        return $this->hasMany(WalkInCities::class, 'city_id');
+    }
+
 }

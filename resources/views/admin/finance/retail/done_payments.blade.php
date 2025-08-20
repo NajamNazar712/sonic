@@ -141,6 +141,8 @@
 										<th class="border-primary border-darken-1">Delivered Shipments</th>
 										<th class="border-primary border-darken-1">Adjusted Shipments</th>
 										<th class="border-primary border-darken-1">Total Amount</th>
+										<th class="border-primary border-darken-1">WHT</th>
+										<th class="border-primary border-darken-1">COD SST</th>
 										<th class="border-primary border-darken-1">Total Deductable</th>
 										<th class="border-primary border-darken-1">Adjustment Charges</th>
 										<th class="border-primary border-darken-1">Fintech Charges</th>
@@ -466,6 +468,8 @@
                             head.push('Delivered Shipments');
                             head.push('Adjusted Shipments');
                             head.push('Total Amount');
+                            head.push('WHT');
+                            head.push('COD SST');
                             head.push('Total Deductable');
 							head.push('Adjustment Charges');
                             head.push('Total Payable');
@@ -488,6 +492,8 @@
                                 row.push(values.delivered_shipments_count);
                                 row.push(values.adjusted_shipments_count);
                                 row.push(values.total_amount);
+                                row.push(values.total_wht);
+                                row.push(values.total_cod_sst);
                                 row.push(values.total_deductable);
 								row.push(values.adjustment_charges);
                                 row.push(values.total_payable);
@@ -566,6 +572,7 @@
 									selected_rows = [];
 
 									table.button('.paid').disable();
+									table.button('.tax_paid').disable();
 									table.button('.reverted').disable();
 
 									table.draw('false');
@@ -573,6 +580,45 @@
 							}
 						},
 					@endif
+					@if (session('role_id') == 1 || in_array(1038, session('permissions')))
+							{
+							text: 'Tax Paid',
+							className: 'btn btn-primary tax_paid',
+							enabled: false,
+							action: function (e, dt, node, config) {
+								$.ajax({
+									url: '{!! route('admin.finance.done_payments.tax_paid') !!}',
+									method: 'PUT',
+									data: {
+										'_token': '{{ csrf_token() }}',
+										'ids': selected_rows,
+										'type' : 2
+									}
+								})
+								.done(function(data) {
+									if (data.status == 0) {
+										toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+									}
+									else {
+										toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+									}
+
+									table.rows().deselect();
+
+									selected_rows = [];
+
+									table.button('.paid').disable();
+									table.button('.tax_paid').disable();
+									table.button('.reverted').disable();
+
+									
+
+									table.draw('false');
+								});
+							}
+						},
+					@endif
+					
 
 					@if (session('role_id') == 1 || in_array(458, session('permissions')))
 						{
@@ -601,6 +647,7 @@
 									selected_rows = [];
 
 									table.button('.paid').disable();
+									table.button('.tax_paid').disable();
 									table.button('.reverted').disable();
 
 									table.draw('false');
@@ -635,6 +682,7 @@
 	                                }
 
 	                                table.button('.paid').enable();
+	                                table.button('.tax_paid').enable();
 	                                table.button('.reverted').enable();
 	                            }
 	                        });
@@ -662,6 +710,7 @@
 
 	                            if (selected_rows.length == 0) {
 	                                table.button('.paid').disable();
+	                                table.button('.tax_paid').disable();
 	                                table.button('.reverted').disable();
 	                            }
 	                          }
@@ -719,6 +768,8 @@
 					{data:'delivered_shipments', name: 'retail_done_payments.delivered_shipments', class: 'align-middle text-center delivered_shipments'},
 					{data:'adjusted_shipments', name: 'retail_done_payments.adjusted_shipments', class: 'align-middle text-center adjusted_shipments'},
 					{data:'total_amount', name: 'dpc.amount', class: 'align-middle text-center total_amount', orderable: false},
+					{data:'total_wht', name: 'total_wht', class: 'align-middle text-center total_wht', orderable: false},
+					{data:'total_cod_sst', name: 'total_cod_sst', class: 'align-middle text-center total_cod_sst', orderable: false},
 					{data:'total_deductable', name: 'total_deductable', class: 'align-middle text-center total_deductable', orderable: false},
 					{data:'adjustment_charges', name: 'dpc.adjustment', class: 'align-middle text-center adjustment_charges', orderable: false},
 					{data:'fintech_charges', name: 'fintech_charges', class: 'align-middle text-center fintech_charges', orderable: false},
@@ -735,7 +786,7 @@
 
 					$('td:eq(1)', row).html(index + 1 + info.page * info.length);
 
-					if (data.status != 'Paid') {
+					if (data.status != 'Paid' || data.tax_status != 1 ) {
 						$('td:eq(0)', row).addClass('select-checkbox');
 
 						if ($.inArray(data.id, selected_rows) !== -1) {
@@ -760,7 +811,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.total_amount') || $(header).is('.total_deductable') || $(header).is('.total_payable') || $(header).is('.return_shipments_average_aging') || $(header).is('.action') || $(header).is('.adjustment_charges')) {
+						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.total_amount') || $(header).is('.total_deductable') || $(header).is('.total_payable') || $(header).is('.return_shipments_average_aging') || $(header).is('.action') || $(header).is('.adjustment_charges') ||$(header).is('.total_wht') || $(header).is('.total_cod_sst') ) {
 							$(td).appendTo($(search));
 						}else if($(header).is('.bank')){
                             $(bank_select).appendTo($(search))
@@ -878,10 +929,12 @@
 
 				if (selected_rows.length > 0) {
 					table.button('.paid').enable();
+					table.button('.tax_paid').enable();
 					table.button('.reverted').enable();
 				}
 				else {
 					table.button('.paid').disable();
+					table.button('.tax_paid').disable();
 					table.button('.reverted').disable();
 				}
 			});

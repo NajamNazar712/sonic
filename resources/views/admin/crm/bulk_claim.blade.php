@@ -154,7 +154,7 @@
                                 'tracking_number': tracking_number,
                                 '_token': '{{ csrf_token() }}'
                             },
-                            timeout: 5000,
+                            timeout: 10000,
                             error: function (data) {
                                 form.reset();
 

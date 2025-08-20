@@ -28,6 +28,18 @@
                                     </fieldset>
                                 </div>
                                 <div class="col-2">
+                                    <form id="search_region_form" class="mb-1 justify-content-center"
+                                        novalidate="novalidate">
+                                        <div class="form-group">
+                                            <select name="search_region" id="search_region" class="search_region form-control select2">
+                                            @foreach($region as $r) 
+                                               <option value="{{ $r->id }}">{{ $r->name }}</option>
+                                            @endforeach
+                                        </select>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="col-2">
                                     <form id="payment_cycle_filter_form" class="mb-1 justify-content-center"
                                         novalidate="novalidate">
                                         <div class="form-group">
@@ -51,7 +63,7 @@
                                         </div>
                                     </form>
                                 </div>
-                                <div class="col-3">
+                                <div class="col-2">
                                     <form id="tracking_number_search_form" class="mb-1 justify-content-center"
                                         novalidate="novalidate">
                                         <div class="form-group">
@@ -62,7 +74,7 @@
                                     </form>
                                 </div>
 
-                                <div class="col-3">
+                                <div class="col-2">
                                     <form id="positive_negative_filter_form" class="mb-1 justify-content-center"
                                         novalidate="novalidate">
                                         <div class="form-group">
@@ -170,6 +182,7 @@
                                         <th class="border-primary border-darken-1">S. No.</th>
                                         <th class="border-primary border-darken-1">Shipper</th>
                                         <th class="border-primary border-darken-1">City</th>
+                                        <th class="border-primary border-darken-1">Territory</th>
                                         <th class="border-primary border-darken-1">Phone No(s).</th>
                                         <th class="border-primary border-darken-1">Financing Product Type</th>
                                         <th class="border-primary border-darken-1">Address</th>
@@ -183,6 +196,7 @@
                                         <th class="border-primary border-darken-1">Total Charges</th>
                                         <th class="border-primary border-darken-1">Total GST</th>
                                         <th class="border-primary border-darken-1">Total WHT</th>
+                                        <th class="border-primary border-darken-1">Total COD SST</th>
                                         {{--										<th class="border-primary border-darken-1">Packing Charges</th> --}}
                                         {{--										<th class="border-primary border-darken-1">Fintech Charges</th> --}}
                                         <th class="border-primary border-darken-1">Total Per SMS Charges</th>
@@ -395,6 +409,7 @@
                                                         <th class="border-primary border-darken-1">Charges</th>
                                                         <th class="border-primary border-darken-1">GST</th>
                                                         <th class="border-primary border-darken-1">WHT</th>
+                                                        <th class="border-primary border-darken-1">COD SST</th>
                                                         <th class="border-primary border-darken-1">SMS Charges</th>
                                                         <th class="border-primary border-darken-1">Fintech Charges</th>
                                                         <th class="border-primary border-darken-1">Packing Charges</th>
@@ -470,10 +485,18 @@
 
                                                 <div class="col-2">
                                                     <div class="form-group">
-                                                        <label class="mx-auto">WHT(3%)</label>
+                                                        <label class="mx-auto">WHT</label>
                                                         <input type="text" name="wht"
                                                             class="form-control text-center wht"
                                                             placeholder="With Holding Tax" readonly="readonly">
+                                                    </div>
+                                                </div>
+                                                <div class="col-2">
+                                                    <div class="form-group">
+                                                        <label class="mx-auto">COD SST</label>
+                                                        <input type="text" name="cod_sst"
+                                                            class="form-control text-center cod_sst"
+                                                            placeholder="COD SST" readonly="readonly">
                                                     </div>
                                                 </div>
 
@@ -692,6 +715,14 @@
             }).bind('change', function() {
                 table.draw();
             });
+            $('#search_region_form select.search_region').prepend(
+                '<option value="" selected></option>').select2({
+                placeholder: 'Select By Region',
+                width: '100%',
+                allowClear: true
+            }).bind('change', function() {
+                table.draw();
+            });
 
             $('#shipper_status_form select.shipper_status').prepend(
                 '<option value="" selected="selected"></option>').select2({
@@ -762,6 +793,7 @@
                             head.push('S.No');
                             head.push('Shipper');
                             head.push('City');
+                            head.push('Territory');
                             head.push('Phone No(s).');
                             head.push('Financing Product Type');
                             head.push('Address');
@@ -775,6 +807,7 @@
                             head.push('Total Charges');
                             head.push('Total GST');
                             head.push('Total WHT');
+                            head.push('Total COD SST');
                             head.push('Total Per SMS Charges');
                             // head.push('Packing Charges');
                             head.push('Total Deductable');
@@ -795,6 +828,7 @@
                                 row.push(index + 1);
                                 row.push(values.shipper);
                                 row.push(values.city);
+                                row.push(values.territory);
                                 row.push(values.phone_numbers);
                                 row.push(values.finova_account_type);
                                 row.push(values.address);
@@ -808,6 +842,7 @@
                                 row.push(values.total_charges);
                                 row.push(values.total_gst);
                                 row.push(values.total_wht);
+                                row.push(values.total_cod_sst);
                                 row.push(values.total_sms_charges);
                                 // row.push(values.packaging_charges);
                                 row.push(values.total_deductable);
@@ -853,6 +888,8 @@
                                 $('#make_payments #make_payments_form .total_payable').val(0);
                                 $('#make_payments #make_payments_form .total_hold').val(0);
                                 $('#make_payments #make_payments_form .wht').val(0);
+                                $('#make_payments #make_payments_form .cod_sst').val(0);
+
 
 
                                 $('#make_payments #make_payments_form button.make').prop('disabled', true);
@@ -1030,12 +1067,13 @@
                         d.star_shipper_filter = $('#star_shippers_filter').val();
                         d.wallet_filter = $(
                             '#wallet_filter_form select.wallet_filter').val();
-
+                        d.search_region = $(
+                            '#search_region_form select.search_region').val();
                     }
                 },
                 rowId: 'id',
                 order: [
-                    [6, 'desc']
+                    [8, 'desc']
                 ],
                 columns: [{
                         data: 'id',
@@ -1069,10 +1107,16 @@
                         class: 'align-middle text-center city'
                     },
                     {
+                        data: 'territory',
+                        name: 't.name',
+                        class: 'align-middle text-center territory'
+                    },
+                    {
                         data: 'phone_numbers',
                         name: 'phone_numbers',
                         class: 'align-middle text-center phone_numbers'
                     },
+                    
                     {
                         data: 'finova_account_type',
                         name: 'finova_account_type',
@@ -1136,6 +1180,12 @@
                         data: 'total_wht',
                         name: 'ppc.wht',
                         class: 'align-middle text-center total_wht',
+                        orderable: false
+                    },
+                    {
+                        data: 'total_cod_sst',
+                        name: 'ppc.cod_sst',
+                        class: 'align-middle text-center total_cod_sst',
                         orderable: false
                     },
                     // {data:'packaging_charges', name: 's.packaging_charges', class: 'align-middle text-center packaging_charges', orderable: false},
@@ -1264,7 +1314,7 @@
                             '.total_adjustments') || $(header).is(
                                 '.return_shipments_average_aging') || $(header).is('.action') ||
                             $(header).is('.total_pending_shipments') || $(header).is(
-                                '.packaging_charges') || $(header).is('.total_wht') || $(header).is('.total_sms_charges') ) {
+                                '.packaging_charges') || $(header).is('.total_wht') || $(header).is('.total_sms_charges') |  $(header).is('.total_cod_sst') ) {
                             $(td).appendTo($(search));
                         } else if ($(header).is('.bank')) {
                             $(bank_select).appendTo($(search))
@@ -1344,6 +1394,7 @@
                 $('#make_payments #make_payments_form .total_payable').val(0);
                 $('#make_payments #make_payments_form .total_hold').val(0);
                 $('#make_payments #make_payments_form .wht').val(0);
+                $('#make_payments #make_payments_form .cod_sst').val(0);
                 
                 $('#make_payments #make_payments_form button.make').prop('disabled', true);
                 $('#make_payments #make_payments_form button.make_invoice').prop('disabled', true);
@@ -1594,6 +1645,11 @@
                         data: 'wht',
                         name: 'pending_payment_shipments.wht',
                         class: 'align-middle wht'
+                    },
+                      {
+                        data: 'cod_sst',
+                        name: 'pending_payment_shipments.cod_sst',
+                        class: 'align-middle cod_sst'
                     },
                     {
                         data: 'sms_charges',
@@ -1934,7 +1990,7 @@
                         })
                         .done(function(data) {
                             var details =
-                                '<table class="table table-sm table-bordered"><thead><tr role="row" class="bg-primary white"><th class="border-primary border-darken-1 align-middle text-center">Shipment</th><th class="border-primary border-darken-1 align-middle text-center">Type</th><th class="border-primary border-darken-1 align-middle text-center">Amount</th><th class="border-primary border-darken-1 align-middle text-center">Charges</th><th class="border-primary border-darken-1 align-middle text-center">GST</th><th class="border-primary border-darken-1 align-middle text-center">SMS Charges</th><th class="border-primary border-darken-1 align-middle text-center">Fintech Charges</th> <th class="border-primary border-darken-1 align-middle text-center">Packing Charges</th> <th class="border-primary border-darken-1 align-middle text-center">Deductable</th><th class="border-primary border-darken-1 align-middle text-center">Payable</th><th class="border-primary border-darken-1 align-middle text-center">Faf Charges</th></tr></thead><tbody>';
+                                '<table class="table table-sm table-bordered"><thead><tr role="row" class="bg-primary white"><th class="border-primary border-darken-1 align-middle text-center">Shipment</th><th class="border-primary border-darken-1 align-middle text-center">Type</th><th class="border-primary border-darken-1 align-middle text-center">Amount</th><th class="border-primary border-darken-1 align-middle text-center">Charges</th><th class="border-primary border-darken-1 align-middle text-center">GST</th><th class="border-primary border-darken-1 align-middle text-center">SMS Charges</th><th class="border-primary border-darken-1 align-middle text-center">WHT</th><th class="border-primary border-darken-1 align-middle text-center">COD SST</th><th class="border-primary border-darken-1 align-middle text-center">Fintech Charges</th> <th class="border-primary border-darken-1 align-middle text-center">Packing Charges</th> <th class="border-primary border-darken-1 align-middle text-center">Deductable</th><th class="border-primary border-darken-1 align-middle text-center">Payable</th><th class="border-primary border-darken-1 align-middle text-center">Faf Charges</th></tr></thead><tbody>';
 
                             $.each(data, function(index, detail) {
                                 details += '<tr>';
@@ -1950,6 +2006,10 @@
                                     .gst + '</td>';
                                 details += '<td class="align-middle text-center">' + detail
                                     .sms_charges + '</td>';
+                                details += '<td class="align-middle text-center">' + detail
+                                    .wht + '</td>';
+                                details += '<td class="align-middle text-center">' + detail
+                                    .cod_sst + '</td>';
                                 details += '<td class="align-middle text-center">' + detail
                                     .fintech_charges + '</td>';
                                 details += '<td class="align-middle text-center">' + detail
@@ -1985,6 +2045,8 @@
                     $('#make_payments #make_payments_form .total_payable').val(0);
                     $('#make_payments #make_payments_form .total_hold').val(0);
                     $('#make_payments #make_payments_form .wht').val(0);
+                    $('#make_payments #make_payments_form .cod_sst').val(0);
+
 
                     $('#make_payments #make_payments_form button.make').prop('disabled', true);
                     $('#make_payments #make_payments_form button.make_invoice').prop('disabled', true);
@@ -2042,6 +2104,7 @@
                 var total_payable_selector = $('#make_payments #make_payments_form .total_payable');
                 var total_hold_selector = $('#make_payments #make_payments_form .total_hold');
                 var total_wht_selector = $('#make_payments #make_payments_form .wht');
+                var total_cod_sst_selector = $('#make_payments #make_payments_form .cod_sst');
 
                 // Row Selected
                 if (index === -1) {
@@ -2065,6 +2128,10 @@
                         '') ? parseFloat(parent.children('td.deductable').html().replace(/,/g, '')) : 0);
                     var total_wht = ((total_wht_selector.val() != '') ? parseFloat(total_wht_selector.val()) : 0) +
                         ((parent.children('td.wht').html() != '') ? parseFloat(parent.children('td.wht').html()
+                            .replace(/,/g, '')) : 0);
+
+                    var total_cod_sst = ((total_cod_sst_selector.val() != '') ? parseFloat(total_cod_sst_selector.val()) : 0) +
+                        ((parent.children('td.cod_sst').html() != '') ? parseFloat(parent.children('td.cod_sst').html()
                             .replace(/,/g, '')) : 0);
                     var total_payable = ((total_payable_selector.val() != '') ? parseFloat(total_payable_selector
                         .val()) : 0) + ((parent.children('td.payable').html() != '') ? parseFloat(parent
@@ -2134,6 +2201,13 @@
                     var total_hold = ((total_hold_selector.val() != '') ? parseFloat(total_hold_selector.val()) :
                         0) + ((parent.children('td.payable').html() != '') ? parseFloat(parent.children(
                             'td.payable').html().replace(/,/g, '')) : 0);
+                     var total_wht = ((total_wht_selector.val() != '') ? parseFloat(total_wht_selector.val()) : 0) -
+                        ((parent.children('td.wht').html() != '') ? parseFloat(parent.children('td.wht').html()
+                            .replace(/,/g, '')) : 0);
+
+                    var total_cod_sst = ((total_cod_sst_selector.val() != '') ? parseFloat(total_cod_sst_selector.val()) : 0) -
+                        ((parent.children('td.cod_sst').html() != '') ? parseFloat(parent.children('td.cod_sst').html()
+                            .replace(/,/g, '')) : 0);
                 }
                
                 if (selected_rows_shipments.length > 0) {
@@ -2143,6 +2217,7 @@
                     total_gst_selector.val(parseFloat(total_gst).toFixed(2));
                     total_deductable_selector.val(parseFloat(total_deductable).toFixed(2));
                     total_wht_selector.val(parseFloat(total_wht).toFixed(2));
+                    total_cod_sst_selector.val(parseFloat(total_cod_sst).toFixed(2));
                     total_payable_selector.val(parseFloat(total_payable).toFixed(2));
                     total_hold_selector.val(parseFloat(total_hold).toFixed(2));
 
@@ -2180,6 +2255,8 @@
                     total_deductable_selector.val(0);
                     total_wht_selector.val(0);
                     total_payable_selector.val(0);
+                    total_wht_selector.val(0);
+                    total_cod_sst_selector.val(0);
                     total_hold_selector.val(parseFloat(initial_total_hold).toFixed(2));
 
                     $('#make_payments #make_payments_form button.make').prop('disabled', true);

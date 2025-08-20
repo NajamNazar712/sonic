@@ -192,6 +192,8 @@
                         <th class="border-primary border-darken-1">Intercept Charges</th>
                         <th class="border-primary border-darken-1">GST</th>
                         <th class="border-primary border-darken-1">SMS Charges</th>
+                        <th class="border-primary border-darken-1">WHT</th>
+                        <th class="border-primary border-darken-1">COD SST</th>
                         <th class="border-primary border-darken-1">Total Charges</th>
                         <th class="border-primary border-darken-1">Estimated Charges</th>
                         <th class="border-primary border-darken-1">FAF Charges</th>
@@ -454,6 +456,8 @@
                             head.push('Intercept Charges');
                             head.push('GST');
                             head.push('SMS Charges');
+                            head.push('WHT');
+                            head.push('COD SST');
                             head.push('Total Charges');
                             head.push('Estimated Charges');
                             head.push('FAF Charges');
@@ -503,6 +507,8 @@
                                 row.push(values.intercept_charges);
                                 row.push(values.p_gst);
                                 row.push(values.pps_sms_charges);
+                                row.push(values.pps_wht);
+                                row.push(values.pps_cod_sst);
                                 row.push(values.p_total_charges);
                                 row.push(values.estimated_charges);
                                 row.push(values.faf_charges);
@@ -605,9 +611,11 @@
                     { data:'intercept_charges' ,name: 'shipments.intercept_charges', class: 'align-middle intercept_charges'},
                     { data:'p_gst' ,name: 'pps.p_gst', class: 'align-middle p_gst',sortable:false},
                     { data:'pps_sms_charges' ,name: 'pps.pps_sms_charges', class: 'align-middle pps_sms_charges',sortable:false},
+                    { data:'pps_wht' ,name: 'pps_wht', class: 'align-middle pps_wht',sortable:false},
+                    { data:'pps_cod_sst' ,name: 'pps_cod_sst', class: 'align-middle pps_cod_sst',sortable:false},
                     { data:'p_total_charges' ,name: 'pps.charges', class: 'align-middle total_charges'},
                     { data:'estimated_charges' ,name: 'estimated_charges', class: 'align-middle estimated_charges',sortable:false},
-                    { data: 'faf_charges' ,name: 'faf_charges', class: 'align-middle faf_charges'},
+                    { data: 'faf_charges' ,name: 'sac.faf_charges', class: 'align-middle faf_charges'},
                     { data: 'p_net_payable' ,name: 'pps.payable', class: 'align-middle net_payable'},
                     { data: 'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle delivered_or_returned'},   
                 ],

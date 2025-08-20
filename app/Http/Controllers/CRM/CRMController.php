@@ -502,7 +502,7 @@ class CRMController extends Controller
                         Thank you for reaching out to us!
                         We want to inform you that your service request has been successfully received and processed. please dont hesitate to contact us. You can reach us at:
                         UAN # 021-111-11-8729 
-                        Email:Info@trax.pk";
+                        Email:info@slgtrax.com";
             }
 
             $comment_by = 0;

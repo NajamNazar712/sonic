@@ -206,6 +206,7 @@ class AgentSarNotification extends Command
                 })
                 ->where('disabled_shipper',1)
                 ->where('halt_shipper',0)
+                ->where('call_count',0)
                 ->whereNotIn('shipment_status_reason_id',[27,35])
                 ->where('rv_shipment_tickets.updated_at','>=',$date.' 00:00:00')
                 ->where('rv_shipment_tickets.updated_at','<=', date('Y-m-d').' 23:59:59')
@@ -234,7 +235,46 @@ class AgentSarNotification extends Command
                     // ->whereDate('created_at',$date)
                     ->update(['unresponsive_count' => 3, 'unresponsive_email_count'=>1, 'unresponsive_email_time' => date('Y-m-d h:i:s')]);
                 }
-//            Log::channel('cronJobLog')->info('s ' .'agent:sarnotification Completedagent:sarnotification Completed');
+
+                /**
+                 * Automatically updates eligible shipments as return-confirmed
+                 * based on specific business criteria:
+                 * - Shipment has >1 journey records with status 12
+                 * - Associated ticket has disabled_shipper=1 and halt_shipper=1
+                 * - Shipment is older than 48 hours
+                 */
+                $haltShipperReturn = RvShipmentTicket::select('rv_shipment_tickets.*')
+                ->join('shipments', function ($join) {
+                    $join->on('rv_shipment_tickets.shipment_id', '=', 'shipments.id')
+                        ->where('shipments.shipper_status_id', 12);
+                })
+                ->join('shipments_journey', function ($join) {
+                    $join->on('shipments.id', '=', 'shipments_journey.shipment_id')
+                        ->where('shipments_journey.shipper_status_id', 12);
+                })
+                ->where([
+                    ['rv_shipment_tickets.disabled_shipper', 1],
+                    ['rv_shipment_tickets.halt_shipper', 1],
+                    ['shipments.updated_at', '<=', $nowSub48Hours]
+                ])
+                ->groupBy('rv_shipment_tickets.id') // Group by primary key
+                ->havingRaw('COUNT(shipments_journey.id) > 1')
+                ->get();
+                if($haltShipperReturn->isNotEmpty()){
+
+                    foreach ($haltShipperReturn as $haltReturns) {
+ 
+                        $request = (object) [
+                            'shipment_id' => $haltReturns->shipment_id,
+                            'remarks' => 'The shipment is automatically updated as return confirm',
+                            'rv_assign_agent_sub_status_id' => Null,
+                            'consignee_refused_reasons' => Null,
+                        ];
+                        $globalAdminId = 346;
+                        $this->return_confirm($request, $globalAdminId);
+                    }
+                }
+                
 
         } catch (\Throwable $th) {
             Log::channel('cronJobLog')->info('s ' .'agent:sarnotification Failed'. $th->getMessage());

@@ -8,7 +8,10 @@ pipelines:
           deployment: staging
           script:
             - echo "Deploying to staging branch VM..."
-            - ssh -o StrictHostKeyChecking=no $SPRINT_132_HOST "cd /var/www/html/sonic && ./deploy.sh"
+            - ssh -o StrictHostKeyChecking=no $SPRINT_132_HOST << EOF
+              cd /var/www/html/sonic && ./deploy.sh
+              cd /var/www/html/sonic3 && ./deploy.sh
+              EOF
 
     master:
       - step:

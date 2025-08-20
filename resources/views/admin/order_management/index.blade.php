@@ -68,6 +68,7 @@
                         <th class="border-primary border-darken-1">Order ID</th>
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Service Type</th>
+                        <th class="border-primary border-darken-1">Booking Channel</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Payment Status</th>
                         <th class="border-primary border-darken-1">Origin</th>
@@ -1048,7 +1049,7 @@
                     selector: 'td.select-checkbox',
                     className: 'selected bg-primary bg-lighten-5 primary'
                 },
-                lengthMenu: [[10, 50], [10, 50]],
+                lengthMenu: [[10, 50,100], [10, 50,100]],
                 pageLength: 10,
                 pagingType: 'full_numbers',
                 processing: true,
@@ -1076,6 +1077,7 @@
                     {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                     {data: 'service_type', name: 'service_type', class: 'align-middle service_type'},
+                    {data: 'channel_name', name: 'channels.name', class: 'align-middle channel_name'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'payment_status', name: 'payment_status', class: 'align-middle payment_status'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},

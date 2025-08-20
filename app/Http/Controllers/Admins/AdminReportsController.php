@@ -6,6 +6,7 @@ use App\Http\Models\HR\Employee;
 use App\Http\Models\RvShipmentAssignAgentDetails;
 use App\Http\Models\Segment;
 use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Traits\FilterTrait;
 use Carbon\Carbon;
 use App\DailyVisit;
 use Illuminate\Support\Facades\Log;
@@ -107,10 +108,13 @@ use App\Http\Models\Notification;
 use App\Http\Models\Admin\OdrNature;
 use App\Http\Models\CRM\CrmSettings;
 use App\Http\Models\CRM\CrmTatHolidays;
+use App\Http\Models\InvoiceShipment;
+use App\Models\CrmInvalidReasonRequest;
+use App\Models\CrmRequestResolvedReason;
 
 class AdminReportsController extends Controller
 {
-    use RvTrait;
+    use RvTrait,FilterTrait;
     public function __construct()
     {
         $this->middleware('auth:admin');
@@ -3344,10 +3348,19 @@ class AdminReportsController extends Controller
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 149);
         if (session('department_id') == 7 && (!in_array(session('id'), session('sale_users_bypass')))) {
-            $shippers = DB::connection('reports')->table('users')->whereIn('id', session('tagged_shippers'))->whereIn('status', [3, 4])->select('id', 'name')->get();
+            $shippers = DB::connection('reports')->table('users')->whereIn('id', session('tagged_shippers'))->whereIn('status', [3, 4])->select('id', 'name');
         } else {
-            $shippers = DB::connection('reports')->table('users')->whereIn('status', [3, 4])->select('id', 'name')->get();
+            $shippers = DB::connection('reports')->table('users')->whereIn('status', [3, 4])
+                ->select('id', 'name');
         }
+
+        $shippers =  $shippers->where(function($query){
+            $idsToExclude = FilterTrait::class::getFilteredIds(auth()->user()->id);
+            if (!empty($idsToExclude)) {
+                $query->whereNotIn('users.id', $idsToExclude);
+            }
+        })->get();
+
 
         $cities = DB::connection('reports')->table('cities')->select('id', 'name')->get();
         $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
@@ -3387,7 +3400,7 @@ class AdminReportsController extends Controller
     }
     public function overall_sales_list(Request $request)
     {
-        $connection = 'reports_2';
+        $connection = 'reports';
 
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 150);
@@ -3406,8 +3419,109 @@ class AdminReportsController extends Controller
         $from = str_replace('00:00:00', $arrival_from, $from);
         $to = str_replace('00:00:00', $arrival_to, $to);
 
+        $select = [
+            'invoices.invoice_number',
+            'r.name as ridername',
+            'ssr.name as reason',
+            'sjr.remarks as remark',
+            'p.product_name as category',
+            'si.description as description',
+            'shipments.id as shipment_id',
+            'shipments.fintech_charges as fintech_charges',
+            'shipments.order_id as order_id',
+            'shipments.tracking_number as tracking_number_link',
+            'u.id as account_no',
+            'u.name as shipper',
+            'usi.pickup_address as shipper_address',
+            'ss.name as current_status',
+            'bt.booking_type as service_type',
+            'sj.created_at as arrival_date',
+            'oc.name as origin',
+            'dc.name as destination',
+            'h.name as hub',
+            'shipments.amount as s_collection_amount',
+            'sps.name as payment_status',
+            'shipments.actual_weight',
+            'shipments.weight_charges',
+            'shipments.cash_handling_charges',
+            'shipments.insurance_charges',
+            'shipments.return_charges',
+            'shipments.replacement_charges',
+            'shipments.fuel_surcharge',
+            'shipments.try_and_buy_charges',
+            'shipments.packaging_material_charges',
+            DB::raw('SUM(pps.charges) as p_total_charges'),
+            DB::raw('SUM(DISTINCT pps.amount) as p_collection_amount'),
+            DB::raw('SUM(DISTINCT pps.payable) as p_net_payable'),
+            DB::raw('SUM(DISTINCT pps.gst) as p_gst'),
+            DB::raw('SUM(DISTINCT dps.amount) as d_collection_amount'),
+            DB::raw('SUM(DISTINCT dps.charges) as d_total_charges'),
+            DB::raw('SUM(DISTINCT dps.payable) as d_net_payable'),
+            DB::raw('SUM(DISTINCT dps.gst) as d_gst'),
+            'sm.mode as shipping_mode',
+            'sm.id as shipping_mode_id',
+            'shipments.chargeable_weight',
+            'dr.created_at as delivered_or_returned',
+            'z.name as zone',
+            'zcc.class',
+            'oc.id as origin_city_id',
+            'dc.id as destination_city_id',
+            DB::raw('MAX(dps.done_payment_id) as payment_id'),
+            'shipments.booking_type_id',
+            'usi.poc',
+            'adsp.id',
+            'adsp.name as sales_person',
+            'shipments.shipper_status_id as shipment_status',
+            'shipments.nsa_osa_charges',
+            'u.account_type_id as account_type_id',
+            DB::raw('SUM(DISTINCT is.gst) as is_gst'),
+            DB::raw('SUM(DISTINCT pis.gst) as pis_gst'),
+            'shipments.packaging_charges',
+            'dr.received_or_refused_by',
+            'shipments.special_instructions',
+            'shipments.intercept_charges',
+            'bc.name as business_shipment_type',
+            'ibs.international_tracking_number',
+            'usi.vendor',
+            'dr.shipper_status_id as dr_status_id',
+            'shipments.shipment_type',
+            'rc.name as return_city',
+            'dr.cnic as dr_cnic',
+            'dr.relation as dr_relation',
+            'shipments.consignee_address as consignee_address',
+            'scs.name as sub_segment',
+            'sjfa.created_at as first_attempt_date',
+            'spjpaid_date.created_at as paid_date',
+            'spjproceed_date.created_at as processed_date',
+            'si.quantity as item_quantity',
+            'shipments.pieces as pieces',
+            'scun.id as scun_id',
+            'rf.id as ref_id',
+            'rf.name as ref',
+            'och.name as origin_hub',
+            'shipments.tracking_number as tracking_number_excel',
+            DB::raw('SUM(DISTINCT pps.sms_charges) as pps_sms_charges'),
+            DB::raw('SUM(DISTINCT dps.sms_charges) as dps_sms_charges'),
+            DB::raw('SUM(DISTINCT pis.sms_charges) as pis_sms_charges'),
+            DB::raw('SUM(DISTINCT is.sms_charges) as is_sms_charges'),
+            DB::raw('SUM(DISTINCT ss_charge.reverse_pickup_charges) as reverse_pickup_charges'),
+            'ibs.cost',
+            DB::raw('SUM(DISTINCT dps.wht) as dps_wht'),
+            DB::raw('SUM(DISTINCT pps.wht) as pps_wht'),
+            DB::raw('SUM(DISTINCT pis.wht) as pis_wht'),
+            DB::raw('SUM(DISTINCT is.wht) as is_wht'),
+            DB::raw('SUM(DISTINCT dps.cod_sst) as dps_cod_sst'),
+            DB::raw('SUM(DISTINCT pps.cod_sst) as pps_cod_sst'),
+            DB::raw('SUM(DISTINCT pis.cod_sst) as pis_cod_sst'),
+            DB::raw('SUM(DISTINCT is.cod_sst) as is_cod_sst'),
+            'flsc.wallet_charges_finova_settled',
+            'sac.wallet_charges',
+            'sac.faf_charges',
+        ];
 
-        $sales = DB::connection($connection)->table('shipments')->join('users as u', 'u.id', '=', 'shipments.user_id')
+
+
+        $sales = DB::connection($connection)->table('shipments')->leftJoin('users as u', 'u.id', '=', 'shipments.user_id')
             ->leftJoin('shipment_services_charges as ss_charge', 'ss_charge.shipment_id', '=', 'shipments.id')
             ->leftJoin('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
             ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
@@ -3537,12 +3651,18 @@ class AdminReportsController extends Controller
             ->leftJoin('admins as scun', 'scun.id', '=', 'scu.user_id')
             ->leftJoin('sale_tier_tags as st', 'st.user_id', '=', 'u.id')
             ->leftJoin('admins as rf', 'rf.id', '=', 'st.ref')
-            ->leftjoin('shipment_additional_charges as faf_charges', 'faf_charges.shipment_id', '=', 'shipments.id')
-            ->select( 'invoices.invoice_number', 'r.name as ridername', 'ssr.name as reason', 'sjr.remarks as remark', 'p.product_name as category', 'si.description as description', 'shipments.id as shipment_id', 'shipments.fintech_charges as fintech_charges', 'shipments.order_id as order_id', 'shipments.tracking_number as tracking_number_link', 'u.id as account_no', 'u.name as shipper', 'usi.pickup_address as shipper_address', 'ss.name as current_status', 'bt.booking_type as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.amount as s_collection_amount', 'sps.name as payment_status', 'shipments.actual_weight', 'shipments.weight_charges', 'shipments.cash_handling_charges', 'shipments.insurance_charges', 'shipments.return_charges', 'shipments.replacement_charges', 'shipments.fuel_surcharge', 'shipments.try_and_buy_charges', 'shipments.packaging_material_charges', DB::raw('SUM(pps.charges) as p_total_charges'), DB::raw('SUM(pps.amount) as p_collection_amount'), DB::raw('SUM(pps.payable) as p_net_payable'), DB::raw('SUM(pps.gst) as p_gst'), DB::raw('SUM(dps.amount) as d_collection_amount'), DB::raw('SUM(dps.charges) as d_total_charges'), DB::raw('SUM(dps.payable) as d_net_payable'), DB::raw('SUM(dps.gst) as d_gst'), 'sm.mode as shipping_mode', 'sm.id as shipping_mode_id', 'shipments.chargeable_weight', 'dr.created_at as delivered_or_returned', 'z.name as zone', 'zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', DB::raw('MAX(dps.done_payment_id) as payment_id'),
-            'shipments.booking_type_id', 'usi.poc', 'adsp.id', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges', 'u.account_type_id as account_type_id', DB::raw('SUM(is.gst) as is_gst'), DB::raw('SUM(pis.gst) as pis_gst'), 'shipments.packaging_charges', 'dr.received_or_refused_by', 'shipments.special_instructions', 'shipments.intercept_charges', 'bc.name as business_shipment_type', 'ibs.international_tracking_number', 'usi.vendor', 'dr.shipper_status_id as dr_status_id', 'shipments.shipment_type', 'rc.name as return_city', 'dr.cnic as dr_cnic', 'dr.relation as dr_relation', 'shipments.consignee_address as consignee_address', 'scs.name as sub_segment', 'sjfa.created_at as first_attempt_date', 'spjpaid_date.created_at as paid_date', 'spjproceed_date.created_at as processed_date', 'si.quantity as item_quantity', 'shipments.pieces as pieces', 'scun.id as scun_id', 'rf.id as ref_id', 'rf.name as ref', 'och.name as origin_hub', 'shipments.tracking_number as tracking_number_excel', DB::raw('SUM(pps.sms_charges) as pps_sms_charges'), DB::raw('SUM(dps.sms_charges) as dps_sms_charges'), DB::raw('SUM(pis.sms_charges) as pis_sms_charges'), DB::raw('SUM(is.sms_charges) as is_sms_charges'), DB::raw('SUM(faf_charges.faf_charges) as faf_charges'), DB::raw('SUM(ss_charge.reverse_pickup_charges) as reverse_pickup_charges'), 'ibs.cost')
+            ->leftjoin('shipment_additional_charges as sac', 'sac.shipment_id', '=', 'shipments.id')
+            ->leftjoin('finja_log_settlement_records as flsc', 'flsc.shipment_id', '=', 'shipments.id')
+            ->select($select)
             ->whereNotIn('shipments.shipper_status_id', [1, 17])
             ->whereNotIn('u.id', [8761, 9358])
             //    ->whereBetween('sj.created_at', [$from, $to])
+            ->where(function($query){
+                $idsToExclude = FilterTrait::class::getFilteredIds(auth()->user()->id);
+                if (!empty($idsToExclude)) {
+                    $query->whereNotIn('shipments.user_id', $idsToExclude);
+                }
+            })
             ->groupBy('shipments.id');
         $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
 
@@ -3720,6 +3840,15 @@ class AdminReportsController extends Controller
             ->editColumn('faf_charges', function ($shipment) {
                 return number_format($shipment->faf_charges, 2);
             })
+            ->editColumn('wallet_charges', function ($shipment) {
+                if (!is_null($shipment->wallet_charges_finova_settled)) {
+                    return number_format($shipment->wallet_charges, 2);
+                } else {
+                    return number_format(0, 2);
+                }
+
+
+            })
             ->editColumn('intercept_charges', function ($shipment) {
                 return number_format($shipment->intercept_charges, 2);
             })
@@ -3766,6 +3895,44 @@ class AdminReportsController extends Controller
                     }
                 }
                 return number_format((float) $gst, 2);
+            })
+            ->editColumn('pps_wht', function ($sale) {
+                $wht = 0;
+                if ($sale->account_type_id == 1) {
+                    if ($sale->pps_wht != null) {
+                        $wht+= $sale->pps_wht;
+                    }
+                    if ($sale->dps_wht != null) {
+                        $wht+= $sale->dps_wht;
+                    }
+                } else {
+                    if ($sale->pis_wht != null) {
+                        $wht+= $sale->pis_wht;
+                    }
+                    if ($sale->is_wht != null) {
+                        $wht+= $sale->is_wht;
+                    }
+                }
+                return number_format((float) $wht, 2);
+            })
+            ->editColumn('pps_cod_sst', function ($sale) {
+                $cod_sst = 0;
+                if ($sale->account_type_id == 1) {
+                    if ($sale->pps_cod_sst != null) {
+                        $cod_sst+= $sale->pps_cod_sst;
+                    }
+                    if ($sale->dps_cod_sst != null) {
+                        $cod_sst+= $sale->dps_cod_sst;
+                    }
+                } else {
+                    if ($sale->pis_cod_sst != null) {
+                        $cod_sst+= $sale->pis_cod_sst;
+                    }
+                    if ($sale->is_cod_sst != null) {
+                        $cod_sst+= $sale->is_cod_sst;
+                    }
+                }
+                return number_format((float) $cod_sst, 2);
             })
             ->editColumn('pps_sms_charges', function ($sale) {
                 $sms_charges = 0;
@@ -3908,11 +4075,273 @@ class AdminReportsController extends Controller
                 return '-';
             })->rawColumns(['tracking_number_link']);
 
+        if ($request->get('excel') && $request->get('excel') == true) {
+            $fieldsToRetrieve = $request->input('selectedValue', []);
+            $headers = $request->input('selectedTexts',[]);
 
-
-        return $datatable->make(true);
+            $this->fetchCsvOverallSales($headers,$fieldsToRetrieve,$sales,$select);
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 174);
+        }else{
+            return $datatable
+                ->rawColumns(['tracking_number_link'])
+                ->make(true);
+        }
     }
 
+    public function fetchCsvOverallSales($headers, $fieldsToRetrieve, $crm, $select)
+    {
+        try {
+            $headers = array_filter($headers, fn($value) => $value !== 'Select All');
+            $fieldsToRetrieve = array_filter($fieldsToRetrieve, fn($value) => $value !== 'selectAll');
+
+            $shipments = $crm->select($select)->get();
+
+            header('Content-Type: text/csv; charset=utf-8');
+            header('Content-Disposition: attachment; filename=data.csv');
+            $output = fopen("php://output", "w");
+            fputcsv($output, $headers);
+
+            foreach ($shipments as $shipment) {
+                $row = [];
+
+                foreach ($fieldsToRetrieve as $field) {
+                    switch ($field) {
+                        case 'attempts':
+                            $row[$field] = DB::connection('reports')->table('shipments_journey')
+                                ->where('shipment_id', $shipment->shipment_id)
+                                ->where('shipper_status_id', 5)
+                                ->count();
+                            break;
+
+                        case 'account_no':
+                            $row[$field] = str_pad($shipment->account_no, 6, '0', STR_PAD_LEFT);
+                            break;
+
+                        case 'fintech_charges':
+                        case 'insurance_charges':
+                        case 'reverse_pickup_charges':
+                        case 'nsa_osa_charges':
+                        case 'packaging_material_charges':
+                        case 'd_total_charges':
+                        case 'p_net_payable':
+                        case 'd_net_payable':
+                        case 'd_gst':
+                        case 'packaging_charges':
+                        case 'faf_charges':
+                        case 'intercept_charges':
+                            $row[$field] = number_format($shipment->$field, 2);
+                            break;
+
+                        case 'cash_handling_charges':
+                            $row[$field] = ($shipment->dr_status_id == 20 || $shipment->cash_handling_charges === null)
+                                ? "-"
+                                : number_format($shipment->cash_handling_charges, 2);
+                            break;
+
+                        case 'return_charges':
+                            $row[$field] = ($shipment->dr_status_id != 20)
+                                ? "-"
+                                : number_format($shipment->return_charges, 2);
+                            break;
+
+                        case 'replacement_charges':
+                        case 'try_and_buy_charges':
+                            $row[$field] = ($shipment->dr_status_id == 20)
+                                ? "-"
+                                : number_format($shipment->$field, 2);
+                            break;
+
+                        case 'wallet_charges':
+                            $row[$field] = !is_null($shipment->wallet_charges_finova_settled)
+                                ? number_format($shipment->wallet_charges, 2)
+                                : number_format(0, 2);
+                            break;
+
+                        case 'tracking_number_link':
+                            $row[$field] = $shipment->tracking_number_link;
+                            break;
+
+                        case 'd_collection_amount':
+                            $row[$field] = number_format($shipment->d_collection_amount);
+                            break;
+
+                        case 'shipper':
+                            $row[$field] = ($shipment->booking_type_id == 4)
+                                ? "{$shipment->shipper} ({$shipment->poc})"
+                                : $shipment->shipper;
+                            break;
+
+                        case 'p_collection_amount':
+                            $amount = $shipment->p_collection_amount
+                                ?? $shipment->d_collection_amount
+                                ?? $shipment->s_collection_amount;
+                            $row[$field] = number_format($amount);
+                            break;
+
+                        case 'p_gst':
+                            $gst = 0;
+                            if ($shipment->account_type_id == 1) {
+                                $gst += $shipment->p_gst ?? 0;
+                                $gst += $shipment->d_gst ?? 0;
+                            } else {
+                                $gst += $shipment->pis_gst ?? 0;
+                                $gst += $shipment->is_gst ?? 0;
+                            }
+                            $row[$field] = number_format((float)$gst, 2);
+                            break;
+
+                        case 'pps_wht':
+                            $wht = 0;
+                            if ($shipment->account_type_id == 1) {
+                                $wht += $shipment->pps_wht ?? 0;
+                                $wht += $shipment->dps_wht ?? 0;
+                            } else {
+                                $wht += $shipment->pis_wht ?? 0;
+                                $wht += $shipment->is_wht ?? 0;
+                            }
+                            $row[$field] = number_format((float)$wht, 2);
+                            break;
+
+                        case 'pps_cod_sst':
+                            $cod_sst = 0;
+                            if ($shipment->account_type_id == 1) {
+                                $cod_sst += $shipment->pps_cod_sst ?? 0;
+                                $cod_sst += $shipment->dps_cod_sst ?? 0;
+                            } else {
+                                $cod_sst += $shipment->pis_cod_sst ?? 0;
+                                $cod_sst += $shipment->is_cod_sst ?? 0;
+                            }
+                            $row[$field] = number_format((float)$cod_sst, 2);
+                            break;
+
+                        case 'pps_sms_charges':
+                            $sms_charges = 0;
+                            if ($shipment->account_type_id == 1) {
+                                $sms_charges += $shipment->pps_sms_charges ?? 0;
+                                $sms_charges += $shipment->dps_sms_charges ?? 0;
+                            } else {
+                                $sms_charges += $shipment->pis_sms_charges ?? 0;
+                                $sms_charges += $shipment->is_sms_charges ?? 0;
+                            }
+                            $row[$field] = number_format((float)$sms_charges, 2);
+                            break;
+
+                        case 'p_total_charges':
+                            $total = ($shipment->p_total_charges ?? 0) + ($shipment->d_total_charges ?? 0) + ($shipment->fintech_charges ?? 0);
+                            $row[$field] = number_format((float)$total, 2);
+                            break;
+
+                        case 'estimated_charges':
+                            $estimated = (
+                                ($shipment->weight_charges ?? 0) +
+                                ($shipment->cash_handling_charges ?? 0) +
+                                2 * ($shipment->insurance_charges ?? 0) +
+                                ($shipment->return_charges ?? 0) +
+                                ($shipment->replacement_charges ?? 0) +
+                                ($shipment->fuel_surcharge ?? 0) +
+                                ($shipment->try_and_buy_charges ?? 0) +
+                                ($shipment->packaging_material_charges ?? 0) +
+                                ($shipment->intercept_charges ?? 0)
+                            );
+                            $row[$field] = number_format((float)$estimated, 2);
+                            break;
+
+                        case 'class':
+                            if ($shipment->origin_city_id != $shipment->destination_city_id) {
+                                $row[$field] = match ($shipment->class) {
+                                    0 => 'Class A',
+                                    1 => 'Class B',
+                                    2 => 'Class C',
+                                    3 => 'Class D',
+                                    default => '',
+                                };
+                            } else {
+                                $row[$field] = 'Local';
+                            }
+                            break;
+
+                        case 'delivered_or_returned':
+                            $status_array = [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46, 25];
+                            $row[$field] = in_array($shipment->shipment_status, $status_array)
+                                ? $shipment->delivered_or_returned
+                                : '';
+                            break;
+
+                        case 'total_attempt':
+                            $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment->shipment_id);
+                            if ($delivery_note_shipment->exists()) {
+                                $delivery_note_ids = $delivery_note_shipment->pluck('delivery_note_id')->toArray();
+                                $delivery_notes = DeliveryNote::whereIn('id', $delivery_note_ids)
+                                    ->whereHas('rider', fn($q) => $q->where('operation_rider_id', 1))
+                                    ->count();
+                                $row[$field] = $delivery_notes;
+                            } else {
+                                $row[$field] = '-';
+                            }
+                            break;
+
+                        case 'ref':
+                            $sales_tiers = DB::table('sales_tiers')
+                                ->where('tier_name', 'LIKE', '%REF%')
+                                ->orWhere('tier_name', 'LIKE', '%ref%')
+                                ->first();
+
+                            $sales_tier_id = $sales_tiers->id ?? null;
+                            $shipper = DB::table('sales_commissions')
+                                ->where('shipper_id', $shipment->account_no)
+                                ->first();
+
+                            if (isset($shipper, $sales_tier_id)) {
+                                $sales_commission_users = DB::table('sales_commission_users')
+                                    ->where([
+                                        'tier_id' => $sales_tier_id,
+                                        'sales_commission_id' => $shipper->id,
+                                    ])->get();
+
+                                if ($sales_commission_users->isNotEmpty()) {
+                                    $names = [];
+                                    foreach ($sales_commission_users as $user) {
+                                        $admin = $user->user_type == 1
+                                            ? Admin::find($user->user_id)
+                                            : Rider::find($user->user_id);
+                                        if ($admin) $names[] = $admin->name;
+                                    }
+                                    $row[$field] = implode(', ', array_unique($names));
+                                } else {
+                                    $row[$field] = $shipment->ref;
+                                }
+                            } else {
+                                $row[$field] = $shipment->ref;
+                            }
+                            break;
+
+                        default:
+                            $row[$field] = $shipment->$field ?? '';
+                            break;
+                    }
+                }
+
+                $orderedRow = [];
+                foreach ($fieldsToRetrieve as $field) {
+                    $orderedRow[] = $row[$field] ?? '';
+                }
+
+                fputcsv($output, $orderedRow);
+            }
+
+            fclose($output);
+        } catch (\Throwable $th) {
+            Log::channel('code_test_log')->error(
+                "CRM Report Error: " . $th->getMessage(),
+                [
+                    'trace' => json_encode($th->getTraceAsString()),
+                    'line'  => $th->getLine()
+                ]
+            );
+        }
+    }
+
+    
     public function sales_person_performance_index()
     {
 
@@ -5484,7 +5913,15 @@ class AdminReportsController extends Controller
     public function revenue_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 169);
-        $shippers = DB::connection('reports')->table('users')->whereIn('status', [3, 4])->select('id', 'name')->get();
+        $shippers = DB::connection('reports')->table('users')->whereIn('status', [3, 4])
+            ->select('id', 'name')
+            ->where(function($query){
+                $idsToExclude = FilterTrait::class::getFilteredIds(auth()->user()->id);
+                if (!empty($idsToExclude)) {
+                    $query->whereNotIn('id', $idsToExclude);
+                }
+            })
+            ->get();
         $cities = DB::connection('reports')->table('cities')->select('id', 'name')->get();
         $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
         $statuses = DB::connection('reports')->table('shipment_status')->whereNotIn('id', [1, 17])->get();
@@ -5507,68 +5944,112 @@ class AdminReportsController extends Controller
             $connection = 'reports';
         }
 
-        $count = DB::connection($connection)->table('shipments')
-            ->join('users as u', 'u.id', '=', 'shipments.user_id')
-            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id');
-
-        if ($request->get('dr_search_date_from') && $request->get('dr_search_date_to')) {
-            $from = $request->get('dr_search_date_from');
-            $to = $request->get('dr_search_date_to');
-
-            $count = $count->join('shipments_journey as dr', function ($join) use ($from, $to, $connection) {
-                $join->on('dr.shipment_id', '=', 'shipments.id')
-                    ->whereIn('dr.shipper_status_id', [14, 20, 30, 36, 37])
-                    ->where(
-                        'dr.id',
-                        '=',
-                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37) and shipments_journey.verification = 1 and shipments_journey.created_at between "' . $from . '" and "' . $to . '")')
-                    );
-            })
-                ->whereBetween('dr.created_at', [$from, $to]);
-        }
-
-        if ($tracking = $request->get('search_tracking')) {
-            $count = $count->where('shipments.tracking_number', '=', $tracking);
-        }
-        if ($shipper = $request->get('search_shipper')) {
-            $count = $count->where('u.id', '=', $shipper);
-        }
-        if ($origin = $request->get('search_origin')) {
-            $count = $count->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-                ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-                ->where('oc.id', '=', $origin);
-        }
-        if ($destination = $request->get('search_destination')) {
-            $count = $count->where('dc.id', '=', $destination);
-        }
-        if ($mode = $request->get('search_shipping_mode')) {
-            $count = $count->where('shipments.booking_type_id', '=', $mode);
-        }
-        if ($hub = $request->get('search_hub')) {
-            $count = $count->join('cities as h', 'dc.hub_id', '=', 'h.id')
-                ->where('h.id', '=', $hub);
-        }
-        if ($status = $request->get('search_status')) {
-            $count = $count->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
-                ->where('ss.id', '=', $status);
-        }
+//        $count = DB::connection($connection)->table('shipments')
+//            ->leftjoin('users as u', 'u.id', '=', 'shipments.user_id')
+//            ->leftjoin('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id');
+//
+//        if ($request->get('dr_search_date_from') && $request->get('dr_search_date_to')) {
+//            $from = $request->get('dr_search_date_from');
+//            $to = $request->get('dr_search_date_to');
+//
+//            $count = $count->join('shipments_journey as dr', function ($join) use ($from, $to, $connection) {
+//                $join->on('dr.shipment_id', '=', 'shipments.id')
+//                    ->whereIn('dr.shipper_status_id', [14, 20, 30, 36, 37])
+//                    ->where(
+//                        'dr.id',
+//                        '=',
+//                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37) and shipments_journey.verification = 1 and shipments_journey.created_at between "' . $from . '" and "' . $to . '")')
+//                    );
+//            })
+//                ->whereBetween('dr.created_at', [$from, $to]);
+//        }
+//
+//        if ($tracking = $request->get('search_tracking')) {
+//            $count = $count->where('shipments.tracking_number', '=', $tracking);
+//        }
+//        if ($shipper = $request->get('search_shipper')) {
+//            $count = $count->where('u.id', '=', $shipper);
+//        }
+//        if ($origin = $request->get('search_origin')) {
+//            $count = $count->leftjoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+//                ->leftjoin('cities AS oc', 'usi.city_id', '=', 'oc.id')
+//                ->where('oc.id', '=', $origin);
+//        }
+//        if ($destination = $request->get('search_destination')) {
+//            $count = $count->where('dc.id', '=', $destination);
+//        }
+//        if ($mode = $request->get('search_shipping_mode')) {
+//            $count = $count->where('shipments.booking_type_id', '=', $mode);
+//        }
+//        if ($hub = $request->get('search_hub')) {
+//            $count = $count->leftjoin('cities as h', 'dc.hub_id', '=', 'h.id')
+//                ->where('h.id', '=', $hub);
+//        }
+//        if ($status = $request->get('search_status')) {
+//            $count = $count->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
+//                ->where('ss.id', '=', $status);
+//        }
+//
+//        $from_to_ids = FALSE;
+//
+//        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+//            $from = $request->get('search_date_from');
+//            $to = $request->get('search_date_to');
+//
+//            $count = $count->join('shipments_journey as sj', function ($join) use ($connection) {
+//                $join->on('sj.shipment_id', '=', 'shipments.id')
+//                    ->where('sj.shipper_status_id', 2)
+//                    ->where(
+//                        'sj.id',
+//                        '=',
+//                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)')
+//                    );
+//            })
+//                ->whereBetween('sj.created_at', [$from, $to]);
+//
+//            $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
+//            if ($from_id->exists()) {
+//                $from_id = $from_id->first()->id;
+//
+//                $to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
+//
+//                if ($to_id->exists()) {
+//                    $to_id = $to_id->first()->id;
+//
+//                    $from_to_ids = TRUE;
+//
+//                    $count->where('sj.id', '>=', $from_id)
+//                        ->where('sj.id', '<=', $to_id);
+//                }
+//            }
+//        }
+//
+//        if ($search_business_category = $request->get('search_business_category')) {
+//            $count = $count->where('shipments.business_category_id', '=', $search_business_category);
+//        }
+//
+//        if (!($request->get('search_date_from') && $request->get('search_date_to')) && !($request->get('dr_search_date_from') && $request->get('dr_search_date_to'))) {
+//            $count = $count->whereRaw('false');
+//        }
+//
+//        $count = $count->whereNotIn('shipments.shipper_status_id', [1, 17])
+//            ->whereNotIn('u.id', [8761, 9358]);
+//
+//        if (session('role_id') != 1 && (!in_array(session('id'), session('sale_users_bypass')))) {
+//            if (session('department_id') == 7) {
+//                $count = $count->whereIn('u.id', session('tagged_shippers'));
+//            } else {
+//                $count = $count->whereIn('dc.hub_id', session('hubs'));
+//            }
+//        }
+//        $count=  $count->whereNotNull('shipments.tracking_number');
+//        $count = $count->count();
 
         $from_to_ids = FALSE;
 
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-
-            $count = $count->join('shipments_journey as sj', function ($join) use ($connection) {
-                $join->on('sj.shipment_id', '=', 'shipments.id')
-                    ->where('sj.shipper_status_id', 2)
-                    ->where(
-                        'sj.id',
-                        '=',
-                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)')
-                    );
-            })
-                ->whereBetween('sj.created_at', [$from, $to]);
 
             $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
             if ($from_id->exists()) {
@@ -5581,46 +6062,24 @@ class AdminReportsController extends Controller
 
                     $from_to_ids = TRUE;
 
-                    $count->where('sj.id', '>=', $from_id)
-                        ->where('sj.id', '<=', $to_id);
                 }
             }
         }
 
-        if ($search_business_category = $request->get('search_business_category')) {
-            $count = $count->where('shipments.business_category_id', '=', $search_business_category);
-        }
-
-        if (!($request->get('search_date_from') && $request->get('search_date_to')) && !($request->get('dr_search_date_from') && $request->get('dr_search_date_to'))) {
-            $count = $count->whereRaw('false');
-        }
-
-        $count = $count->whereNotIn('shipments.shipper_status_id', [1, 17])
-            ->whereNotIn('u.id', [8761, 9358]);
-
-        if (session('role_id') != 1 && (!in_array(session('id'), session('sale_users_bypass')))) {
-            if (session('department_id') == 7) {
-                $count = $count->whereIn('u.id', session('tagged_shippers'));
-            } else {
-                $count = $count->whereIn('dc.hub_id', session('hubs'));
-            }
-        }
-        $count=  $count->whereNotNull('shipments.tracking_number');
-        $count = $count->count();
 
         $sales = DB::connection($connection)->table('shipments')
             ->leftJoin('shipment_services_charges as ss_charge', 'ss_charge.shipment_id', '=', 'shipments.id')
-            ->join('users as u', 'u.id', '=', 'shipments.user_id')
-            ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
+            ->leftjoin('users as u', 'u.id', '=', 'shipments.user_id')
+            ->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
             ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
-            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->leftjoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->leftjoin('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->leftjoin('zones as z', 'z.id', '=', 'oc.zone_id')
             ->leftjoin('user_shipping_infos as rsi', 'shipments.return_address_id', '=', 'rsi.id')
             ->leftjoin('cities as rc', 'rsi.city_id', '=', 'rc.id')
-            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
-            ->join('cities as h', 'dc.hub_id', '=', 'h.id')
-            ->join('business_categories as bc', 'shipments.business_category_id', '=', 'bc.id')
+            ->leftjoin('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->leftjoin('cities as h', 'dc.hub_id', '=', 'h.id')
+            ->leftjoin('business_categories as bc', 'shipments.business_category_id', '=', 'bc.id')
             ->leftjoin('zone_class_cities as zcc', function ($join) use ($connection) {
                 $join->on('z.id', '=', 'zcc.zone_id')
                     ->on('dc.id', '=', 'zcc.city_id')
@@ -5662,15 +6121,9 @@ class AdminReportsController extends Controller
                     $join->on('is.shipment_id', '=', 'shipments.id')
                         ->where('is.type', '!=',2 );
                 })
-                ->leftjoin('shipment_additional_charges as faf_charges', 'faf_charges.shipment_id', '=', 'shipments.id')
+            ->leftjoin('shipment_additional_charges as sac', 'sac.shipment_id', '=', 'shipments.id')
             ->leftJoin('invoices', 'is.invoice_id', '=', 'invoices.id')
-            ->leftjoin('provinces', 'provinces.id', 'dc.province_id')
-            ;
-        //        if (!$request->get('search_date_from') && !$request->get('search_date_to')) {
-        //            $now = Carbon::now();
-        //            $yesterday = Carbon::now()->subDays(3);
-        //            $sales = $sales->whereBetween('sj.created_at', [$yesterday,$now]);
-        //        }
+            ->leftjoin('provinces', 'provinces.id', 'dc.province_id');
 
         if ($request->get('dr_search_date_from') && $request->get('dr_search_date_to')) {
             $from = $request->get('dr_search_date_from');
@@ -5698,9 +6151,16 @@ class AdminReportsController extends Controller
             });
         }
 
-        $sales->select('shipments.id as shipment_id','shipments.tracking_number','shipments.fintech_charges as fintech_amount','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges',DB::raw('SUM(DISTINCT pps.charges) as p_total_charges'),DB::raw('SUM(DISTINCT pps.amount) as p_collection_amount'),DB::raw('SUM(DISTINCT pps.payable) as p_net_payable'),DB::raw('SUM(DISTINCT pps.gst) as p_gst'),DB::raw('SUM(DISTINCT dps.amount) as d_collection_amount'),DB::raw('SUM(DISTINCT dps.charges) as d_total_charges'),DB::raw('SUM(DISTINCT dps.payable) as d_net_payable'),DB::raw('SUM(DISTINCT dps.gst) as d_gst'),'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class','oc.id as origin_city_id','dc.id as destination_city_id','dnsdn.station_deposit_note_id as sdn_id','dps.done_payment_id as payment_id','shipments.booking_type_id','usi.poc','shipments.shipper_status_id as shipment_status','shipments.nsa_osa_charges','u.account_type_id as account_type_id',DB::raw('SUM(DISTINCT pis.gst) as pis_gst'),DB::raw('SUM(DISTINCT is.gst) as is_gst'),'shipments.packaging_charges','shipments.intercept_charges','bc.name','dr.shipper_status_id as dr_status_id','shipments.shipment_type','invoices.invoice_number','rc.name as return_city',DB::raw('SUM(DISTINCT ss_charge.reverse_pickup_charges) as reverse_pickup_charges'),DB::raw('SUM(DISTINCT pps.sms_charges) as pps_sms_charges'),DB::raw('SUM(DISTINCT dps.sms_charges) as dps_sms_charges'),DB::raw('SUM(DISTINCT pis.sms_charges) as pis_sms_charges'),DB::raw('SUM(DISTINCT is.sms_charges) as is_sms_charges'), 'faf_charges.faf_charges', 'provinces.name as province_name')
+        $sales->select('shipments.id as shipment_id','shipments.tracking_number','shipments.fintech_charges as fintech_amount','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges',DB::raw('SUM(DISTINCT pps.charges) as p_total_charges'),DB::raw('SUM(DISTINCT pps.amount) as p_collection_amount'),DB::raw('SUM(DISTINCT pps.payable) as p_net_payable'),DB::raw('SUM(DISTINCT pps.gst) as p_gst'),DB::raw('SUM(DISTINCT dps.amount) as d_collection_amount'),DB::raw('SUM(DISTINCT dps.charges) as d_total_charges'),DB::raw('SUM(DISTINCT dps.payable) as d_net_payable'),DB::raw('SUM(DISTINCT dps.gst) as d_gst'),'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class','oc.id as origin_city_id','dc.id as destination_city_id','dnsdn.station_deposit_note_id as sdn_id','dps.done_payment_id as payment_id','shipments.booking_type_id','usi.poc','shipments.shipper_status_id as shipment_status','shipments.nsa_osa_charges','u.account_type_id as account_type_id',DB::raw('SUM(DISTINCT pis.gst) as pis_gst'),DB::raw('SUM(DISTINCT is.gst) as is_gst'),'shipments.packaging_charges','shipments.intercept_charges','bc.name','dr.shipper_status_id as dr_status_id','shipments.shipment_type','invoices.invoice_number','rc.name as return_city',DB::raw('SUM(DISTINCT ss_charge.reverse_pickup_charges) as reverse_pickup_charges'),DB::raw('SUM(DISTINCT pps.sms_charges) as pps_sms_charges'),DB::raw('SUM(DISTINCT dps.sms_charges) as dps_sms_charges'),DB::raw('SUM(DISTINCT pis.sms_charges) as pis_sms_charges'),DB::raw('SUM(DISTINCT is.sms_charges) as is_sms_charges'), 'sac.faf_charges', 'provinces.name as province_name', DB::raw('SUM(DISTINCT dps.wht) as dps_wht'),DB::raw('SUM(DISTINCT pps.wht) as pps_wht'), DB::raw('SUM(DISTINCT pis.wht) as pis_wht'), DB::raw('SUM(DISTINCT is.wht) as is_wht'), DB::raw('SUM(DISTINCT dps.cod_sst) as dps_cod_sst'),DB::raw('SUM(DISTINCT pps.cod_sst) as pps_cod_sst'), DB::raw('SUM(DISTINCT pis.cod_sst) as pis_cod_sst'), DB::raw('SUM(DISTINCT is.cod_sst) as is_cod_sst') )
             ->whereNotIn('shipments.shipper_status_id', [1, 17])
-            ->whereNotIn('u.id', [8761, 9358]);
+            ->whereNotIn('u.id', [8761, 9358])
+            ->where(function($query){
+                $idsToExclude = FilterTrait::class::getFilteredIds(auth()->user()->id);
+                if (!empty($idsToExclude)) {
+                    $query->whereNotIn('u.id', $idsToExclude);
+                }
+            })
+        ;
 
         if (session('role_id') != 1 && (!in_array(session('id'), session('sale_users_bypass')))) {
             if (session('department_id') == 7) {
@@ -5711,9 +6171,7 @@ class AdminReportsController extends Controller
         }
         $sales = $sales->whereNotNull('shipments.tracking_number')->groupBy('shipments.id');
         $datatable = Datatables::of($sales)
-            ->setTotalRecords($count)
-
-
+//            ->setTotalRecords($count)
             ->editColumn('fintech_charges', function ($shipment) {
                 return number_format($shipment->fintech_amount, 2);
             })
@@ -5872,6 +6330,44 @@ class AdminReportsController extends Controller
                     }
                 }
                 return number_format((float) $sms_charges, 2);
+            })
+            ->editColumn('pps_wht', function ($sale) {
+                $wht = 0;
+                if ($sale->account_type_id == 1) {
+                    if ($sale->pps_wht != null) {
+                        $wht+= $sale->pps_wht;
+                    }
+                    if ($sale->dps_wht != null) {
+                        $wht+= $sale->dps_wht;
+                    }
+                } else {
+                    if ($sale->pis_wht != null) {
+                        $wht+= $sale->pis_wht;
+                    }
+                    if ($sale->is_wht != null) {
+                        $wht+= $sale->is_wht;
+                    }
+                }
+                return number_format((float) $wht, 2);
+            })
+            ->editColumn('pps_cod_sst', function ($sale) {
+                $cod_sst = 0;
+                if ($sale->account_type_id == 1) {
+                    if ($sale->pps_cod_sst != null) {
+                        $cod_sst+= $sale->pps_cod_sst;
+                    }
+                    if ($sale->dps_cod_sst != null) {
+                        $cod_sst+= $sale->dps_cod_sst;
+                    }
+                } else {
+                    if ($sale->pis_cod_sst != null) {
+                        $cod_sst+= $sale->pis_cod_sst;
+                    }
+                    if ($sale->is_cod_sst != null) {
+                        $cod_sst+= $sale->is_cod_sst;
+                    }
+                }
+                return number_format((float) $cod_sst, 2);
             })
             ->editColumn('p_total_charges', function ($sale) {
                 $total = 0;
@@ -6059,7 +6555,7 @@ class AdminReportsController extends Controller
                 $join->on('is.shipment_id', '=', 'shipments.id')
                     ->where('is.type', '!=',2 );
             })
-            ->leftjoin('shipment_additional_charges as faf_charges', 'faf_charges.shipment_id', '=', 'shipments.id')
+            ->leftjoin('shipment_additional_charges as sac', 'sac.shipment_id', '=', 'shipments.id')
             ->leftJoin('invoices', 'is.invoice_id', '=', 'invoices.id');
         //        if (!$request->get('search_date_from') && !$request->get('search_date_to')) {
         //            $now = Carbon::now();
@@ -6093,7 +6589,7 @@ class AdminReportsController extends Controller
             });
         }
 
-        $sales->select('shipments.id as shipment_id','shipments.tracking_number','shipments.fintech_charges as fintech_amount','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges',DB::raw('SUM(DISTINCT pps.charges) as p_total_charges'),DB::raw('SUM(DISTINCT pps.amount) as p_collection_amount'),DB::raw('SUM(DISTINCT pps.payable) as p_net_payable'),DB::raw('SUM(DISTINCT pps.gst) as p_gst'),DB::raw('SUM(DISTINCT dps.amount) as d_collection_amount'),DB::raw('SUM(DISTINCT dps.charges) as d_total_charges'),DB::raw('SUM(DISTINCT dps.payable) as d_net_payable'),DB::raw('SUM(DISTINCT dps.gst) as d_gst'),'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class','oc.id as origin_city_id','dc.id as destination_city_id','dnsdn.station_deposit_note_id as sdn_id','dps.done_payment_id as payment_id','shipments.booking_type_id','usi.poc','shipments.shipper_status_id as shipment_status','shipments.nsa_osa_charges','u.account_type_id as account_type_id',DB::raw('SUM(DISTINCT pis.gst) as pis_gst'),DB::raw('SUM(DISTINCT is.gst) as is_gst'),'shipments.packaging_charges','shipments.intercept_charges','bc.name','dr.shipper_status_id as dr_status_id','shipments.shipment_type','invoices.invoice_number','rc.name as return_city',DB::raw('SUM(DISTINCT ss_charge.reverse_pickup_charges) as reverse_pickup_charges'),DB::raw('SUM(DISTINCT pps.sms_charges) as pps_sms_charges'),DB::raw('SUM(DISTINCT dps.sms_charges) as dps_sms_charges'),DB::raw('SUM(DISTINCT pis.sms_charges) as pis_sms_charges'),DB::raw('SUM(DISTINCT is.sms_charges) as is_sms_charges'), 'faf_charges.faf_charges')
+        $sales->select('shipments.id as shipment_id','shipments.tracking_number','shipments.fintech_charges as fintech_amount','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges',DB::raw('SUM(DISTINCT pps.charges) as p_total_charges'),DB::raw('SUM(DISTINCT pps.amount) as p_collection_amount'),DB::raw('SUM(DISTINCT pps.payable) as p_net_payable'),DB::raw('SUM(DISTINCT pps.gst) as p_gst'),DB::raw('SUM(DISTINCT dps.amount) as d_collection_amount'),DB::raw('SUM(DISTINCT dps.charges) as d_total_charges'),DB::raw('SUM(DISTINCT dps.payable) as d_net_payable'),DB::raw('SUM(DISTINCT dps.gst) as d_gst'),'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class','oc.id as origin_city_id','dc.id as destination_city_id','dnsdn.station_deposit_note_id as sdn_id','dps.done_payment_id as payment_id','shipments.booking_type_id','usi.poc','shipments.shipper_status_id as shipment_status','shipments.nsa_osa_charges','u.account_type_id as account_type_id',DB::raw('SUM(DISTINCT pis.gst) as pis_gst'),DB::raw('SUM(DISTINCT is.gst) as is_gst'),'shipments.packaging_charges','shipments.intercept_charges','bc.name','dr.shipper_status_id as dr_status_id','shipments.shipment_type','invoices.invoice_number','rc.name as return_city',DB::raw('SUM(DISTINCT ss_charge.reverse_pickup_charges) as reverse_pickup_charges'),DB::raw('SUM(DISTINCT pps.sms_charges) as pps_sms_charges'),DB::raw('SUM(DISTINCT dps.sms_charges) as dps_sms_charges'),DB::raw('SUM(DISTINCT pis.sms_charges) as pis_sms_charges'),DB::raw('SUM(DISTINCT is.sms_charges) as is_sms_charges'), 'sac.faf_charges')
             ->whereNotIn('shipments.shipper_status_id', [1, 17])
             ->whereNotIn('u.id', [8761, 9358]);
 
@@ -6720,6 +7216,8 @@ class AdminReportsController extends Controller
                 'al.name as name',
                 'us.name as shipper',
                 'su.name as sub_shipper',
+                'rsi.shipper_name as retail_shipper',
+                'ru.name as retail_user',
                 'crm_requests.launched_by as launched_by_type',
                 'crm_requests.created_at as launched_date',
                 'crah.created_at as assigned_date',
@@ -6771,7 +7269,8 @@ class AdminReportsController extends Controller
 
             ];
 
-            $crm = DB::connection('reports')->table('crm_requests')->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+            $crm = DB::connection('reports')->table('crm_requests')
+                ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
                 ->leftjoin('shipment_status as ss', 'ss.id', '=', 's.shipper_status_id')
                 ->leftjoin('crm_request_statuses as crs', 'crs.id', '=', 'crm_requests.status_id')
                 ->leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_requests.case_nature_id')
@@ -6802,6 +7301,14 @@ class AdminReportsController extends Controller
                 ->leftJoin('substitute_users as su', function ($join) {
                     $join->on('su.id', '=', 'crm_requests.launched_by_id')
                         ->where('crm_requests.launched_by', '=', DB::raw(2));
+                })
+                ->leftjoin('retail_users as ru', function ($join) {
+                    $join->on('ru.id', '=', 'crm_requests.launched_by_id')
+                        ->where('crm_requests.launched_by', '=', DB::raw(3));
+                })
+                ->leftjoin('retail_shipper_infos as rsi', function ($join) {
+                    $join->on('rsi.id', '=', 'crm_requests.launched_by_id')
+                        ->where('crm_requests.launched_by', '=', DB::raw(5));
                 })
                 ->leftjoin('crm_request_agent_histories as crah', function ($join) {
                     $join->on('crah.crm_request_id', '=', 'crm_requests.id')
@@ -6902,6 +7409,53 @@ class AdminReportsController extends Controller
             }
 
             $current_date = Carbon::now();
+            if ($tracking = $request->get('search_tracking_no')) {
+                $tracking_numbers = explode(',', $tracking);
+                $crm->whereIn('s.tracking_number', $tracking_numbers);
+            }
+            if ($rnumber = $request->get('search_request_number')) {
+                $rnumber = explode(',', $rnumber);
+                $crm->whereIn('crm_requests.id', $rnumber);
+            }
+            if ($shipper = $request->get('search_shipper')) {
+
+                $crm->whereIn('u.id', $shipper);
+            }
+            if ($destination = $request->get('search_destination')) {
+                $crm->where('dc.id', '=', $destination);
+            }
+            if ($hub = $request->get('search_hub')) {
+                $crm->where('h.id', '=', $hub);
+            }
+            if ($zone = $request->get('search_zone')) {
+                $crm->where('z.id', '=', $zone);
+            }
+            if ($case_nature = $request->get('search_case_nature')) {
+                $crm->where('crcn.id', '=', $case_nature);
+            }
+            if ($case_nature_type = $request->get('search_case_nature_type')) {
+                $crm->where('crcnt.id', '=', $case_nature_type);
+            }
+
+            if ($mode = $request->get('search_shipping_mode')) {
+                $crm->where('s.booking_type_id', '=', $mode);
+            }
+            if ($agent = $request->get('search_agent')) {
+                $crm->where('a.id', '=', $agent);
+            }
+            if ($status = $request->get('search_status')) {
+                $crm->whereIn('crs.id', $status);
+            }
+            if ($request->get('search_from') && $request->get('search_to')) {
+                $from = $request->get('search_from');
+                $to = $request->get('search_to');
+                $crm->whereBetween('crm_requests.created_at', [$from, $to]);
+            }
+
+            if ($service_type_select = $request->get('service_type_select')) {
+                $crm->where('bt.id', '=', $service_type_select);
+            }
+
             $datatable = Datatables::of($crm)
                 ->addColumn('tagged_to', function ($crm_request) {
                     if (in_array($crm_request->tagging_type, [2, 4, 5])) {
@@ -6946,7 +7500,13 @@ class AdminReportsController extends Controller
                         $name = $requests->name;
                     } else if ($requests->launched_by_type == 1) {
                         $name = $requests->shipper;
-                    } else {
+                    } else if ($requests->launched_by_type == 3) {
+                        $name = $requests->retail_user;
+                    }
+                    else if ($requests->launched_by_type == 5) {
+                        $name = $requests->retail_shipper;
+                    }
+                    else {
                         $name = $requests->sub_shipper;
                     }
                     return $name;
@@ -6965,7 +7525,13 @@ class AdminReportsController extends Controller
                         return 'Admin';
                     } else if ($requests->launched_by_type == 1) {
                         return 'Shipper';
-                    } else {
+                    } else if ($requests->launched_by_type == 3) {
+                        return 'Retail';
+                    }
+                    else if ($requests->launched_by_type == 5) {
+                        return 'Retail App';
+                    }
+                    else {
                         return 'Shipper Substitute User';
                     }
                 })
@@ -7142,56 +7708,41 @@ class AdminReportsController extends Controller
                         return '-';
                     }
                 })
+               ->addColumn('claim_resolved_invalid_reason', function ($crm_request) {
+                    $invalidReasons = CrmInvalidReasonRequest::where('crm_request_id', $crm_request->request_number)
+                                        ->with('claimInvalidReason')
+                                        ->get();
+
+                    if ($invalidReasons->isNotEmpty()) {
+                        $names = $invalidReasons->pluck('claimInvalidReason.reason')->filter()->unique()->toArray();
+                        return implode(', ', $names);
+                    }
+
+                    $resolvedReasons = CrmRequestResolvedReason::where('crm_request_id', $crm_request->request_number)
+                                        ->with('resolvedReason')
+                                        ->get();
+
+                    if ($resolvedReasons->isNotEmpty()) {
+                        $names = $resolvedReasons->pluck('resolvedReason.name')->filter()->unique()->toArray();
+                        return implode(', ', $names);
+                    }
+
+                    return '-'; 
+                })
+                ->addColumn('claim_resolved_sub_reason', function ($crm_request) {
+                    $resolvedSubReasons = CrmRequestResolvedReason::where('crm_request_id', $crm_request->request_number)
+                        ->with('resolvedSubReason')
+                        ->get();
+
+                    if ($resolvedSubReasons->isNotEmpty()) {
+                        $names = $resolvedSubReasons->pluck('resolvedSubReason.name')->filter()->unique()->toArray();
+                        return implode(', ', $names);
+                    }
+
+                    return '-';
+                })
                 ->orderColumn('launched_by_name', DB::connection('reports')->raw('IF (crm_requests.launched_by = 0, a.name, IF (crm_requests.launched_by = 1, us.name, IF (crm_requests.launched_by = 2, su.name, "")))') . ' $1');
-            if ($tracking = $request->get('search_tracking_no')) {
-                $tracking_numbers = explode(',', $tracking);
-                $crm->whereIn('s.tracking_number', $tracking_numbers);
-            }
-            if ($rnumber = $request->get('search_request_number')) {
-                $rnumber = explode(',', $rnumber);
-                $crm->whereIn('crm_requests.id', $rnumber);
-            }
-            if ($shipper = $request->get('search_shipper')) {
 
-                $crm->whereIn('u.id', $shipper);
-            }
-            //        if($origin = $request->get('search_origin')){
-            //            $datatable->where('oc.id', '=', $origin);
-            //        }
-            if ($destination = $request->get('search_destination')) {
-                $crm->where('dc.id', '=', $destination);
-            }
-            if ($hub = $request->get('search_hub')) {
-                $crm->where('h.id', '=', $hub);
-            }
-            if ($zone = $request->get('search_zone')) {
-                $crm->where('z.id', '=', $zone);
-            }
-            if ($case_nature = $request->get('search_case_nature')) {
-                $crm->where('crcn.id', '=', $case_nature);
-            }
-            if ($case_nature_type = $request->get('search_case_nature_type')) {
-                $crm->where('crcnt.id', '=', $case_nature_type);
-            }
-
-            if ($mode = $request->get('search_shipping_mode')) {
-                $crm->where('s.booking_type_id', '=', $mode);
-            }
-            if ($agent = $request->get('search_agent')) {
-                $crm->where('a.id', '=', $agent);
-            }
-            if ($status = $request->get('search_status')) {
-                $crm->whereIn('crs.id', $status);
-            }
-            if ($request->get('search_from') && $request->get('search_to')) {
-                $from = $request->get('search_from');
-                $to = $request->get('search_to');
-                $crm->whereBetween('crm_requests.created_at', [$from, $to]);
-            }
-
-            if ($service_type_select = $request->get('service_type_select')) {
-                $crm->where('bt.id', '=', $service_type_select);
-            }
 
 
             if ($request->get('excel') && $request->get('excel') == true) {
@@ -7437,6 +7988,38 @@ class AdminReportsController extends Controller
                         $rowArray['launched_by_type'] = 'Shipper Substitute User';
                         break;
                 }
+                
+                
+                $invalidReasons = CrmInvalidReasonRequest::where('crm_request_id', $rowArray['request_number'])
+                    ->with('claimInvalidReason')
+                    ->get();
+
+                if ($invalidReasons->isNotEmpty()) {
+                    $names = $invalidReasons->pluck('claimInvalidReason.reason')->filter()->unique()->toArray();
+                    $rowArray['claim_resolved_invalid_reason'] = implode(', ', $names);
+                } else {
+                    $resolvedReasons = CrmRequestResolvedReason::where('crm_request_id', $rowArray['request_number'])
+                        ->with('resolvedReason')
+                        ->get();
+
+                    if ($resolvedReasons->isNotEmpty()) {
+                        $names = $resolvedReasons->pluck('resolvedReason.name')->filter()->unique()->toArray();
+                        $rowArray['claim_resolved_invalid_reason'] = implode(', ', $names);
+                    } else {
+                        $rowArray['claim_resolved_invalid_reason'] = '-';
+                    }
+                }
+
+                $resolvedSubReasons = CrmRequestResolvedReason::where('crm_request_id', $rowArray['request_number'])
+                    ->with('resolvedSubReason')
+                    ->get();
+
+                if ($resolvedSubReasons->isNotEmpty()) {
+                    $names = $resolvedSubReasons->pluck('resolvedSubReason.name')->filter()->unique()->toArray();
+                    $rowArray['claim_resolved_sub_reason'] = implode(', ', $names);
+                } else {
+                    $rowArray['claim_resolved_sub_reason'] = '-';
+                }
 
 
                 $filteredArray = [];
@@ -7469,7 +8052,13 @@ class AdminReportsController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(), 175);
         $today = Carbon::now()->endOfDay();
         $thirtyDays = Carbon::now()->subDays(30)->startOfDay();
-        $shippers = DB::connection('reports')->table('users')->where('status', '=', 3)->get();
+        $shippers = DB::connection('reports')->table('users')->where('status', '=', 3)->where(function($query){
+            $idsToExclude = FilterTrait::class::getFilteredIds(auth()->user()->id);
+            if (!empty($idsToExclude)) {
+                $query->whereNotIn('users.id', $idsToExclude);
+            }
+        })->get();
+
         $sales_persons=DB::connection('reports')->table('admins as ad')->join('admin_roles as ar','ad.role_id','=','ar.id')->where('ar.department_id',7)->get(['ad.id','ad.name']);
         $hubs = DB::connection('reports')->table('cities')->select('id', 'name')->get();
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id', 'mode']);
@@ -7716,8 +8305,16 @@ class AdminReportsController extends Controller
             })->leftJoin('sale_person_tags as st', function ($join) {
                 $join->on('st.user_id', '=', 'shipments.user_id')->where('st.status', 0);
             })->leftJoin('admins as sd', 'sd.id', '=', 'st.admin_id')
-            ->join('shipment_items as siq', 'siq.shipment_id', '=', 'shipments.id')
-
+            ->leftjoin('shipment_items as siq', function ($join) {
+                $join->on('siq.shipment_id', '=', 'shipments.id')
+                    ->where('siq.type', '=', 0);
+            })
+            ->where(function($query){
+                $idsToExclude = FilterTrait::class::getFilteredIds(auth()->user()->id);
+                if (!empty($idsToExclude)) {
+                    $query->whereNotIn('shipments.user_id', $idsToExclude);
+                }
+            })
             ->select(['ssr.name as reason', 'sjr.remarks as remark', 'shipments.id as shipment_id', 'shipments.order_id', 'shipments.tracking_number', 'shipments.amount as collection_amount', 'ss.name as current_status', 'sps.name as payment_status', 'bt.booking_type as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper','u.id as shipper_id', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone1', 'shipments.consignee_phone_number_2 as phone2', 'shipments.consignee_address', 'shipments.created_at as booking_date', 'usi.vendor', DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'), 'h.name as hub', 'sju.created_at as last_status_date', 'sjfa.created_at as first_attempt_date', 'sjrp.created_at as rider_picked_status_date', 'u.sub_segment_id as sub_segment','shipments.pieces','shipments.actual_weight','sm.mode as shipping_mode','sd.name as sales_person_name','siq.quantity as shipment_quantity']);
         /*  if( $request->get('search_shipper')){
               $shipments->where('shipments.user_id', '=',$request->get('search_shipper'));
@@ -8597,11 +9194,17 @@ class AdminReportsController extends Controller
             $count = $count->where('r.operation_rider_id', $search_rider_cat);
         }
 
-        $count = $count->groupBy('r.id')->count();
+        $from = $request->get('search_from');
+        $to = $request->get('search_to');
+        if ($from == null || $to == null) {
+            $from = Carbon::now()->endOfDay();
+            $to = Carbon::now()->subDays(30)->startOfDay();
+        }
+        $count = $count->whereBetween('delivery_notes.created_at', [$from, $to])->groupBy('r.id')->count();
 
         $route_distribution_summary = DB::connection('reports')->table('delivery_notes')
-            ->join('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
-            ->join('rider_types as rt', 'r.rider_type_id', '=', 'rt.id')
+            ->leftjoin('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
+            ->leftjoin('rider_types as rt', 'r.rider_type_id', '=', 'rt.id')
             ->leftjoin('operation_riders_categories as rd', 'r.operation_rider_id', '=', 'rd.id')
             ->leftjoin('cities as c', 'c.id', '=', 'delivery_notes.hub_id')
             ->leftjoin('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_notes.id')
@@ -13000,10 +13603,36 @@ class AdminReportsController extends Controller
 
     public function rv_report_list(Request $request)
     {
-        if ($request->get('excel') && $request->get('excel') == true) {
-            ActivityTrailController::createActivityTrailLog(Auth::id(), 705);
-        }
-
+        
+        $select =    [
+            'shipments.id as shipment_id',
+            'sjj.created_at as arrival_date', 
+            'shipments.tracking_number as tracking_number',
+            'users.name as shipper_name', 
+            'origin_city.name as origin', 
+            'area.name as area', 
+            'destination_city.name as destination',
+            'hub.name as hub',
+            'shipments.amount as cod_amount', 
+            'shipping_modes.mode as shipping_mode', 
+            'booking_types.booking_type as service_type', 
+            'rv_aas.name as action', 'rv_aass.name as reason',
+            'rv_shipment_assign_agent_details.remarks as remarks', 
+            'rv_shipment_assign_agent_details.created_at as action_date',
+            'rv_shipment_assign_agent_details.updated_type_id as updated_type_id',
+            'rv_shipment_assign_agent_details.updated_by_id as updated_by_id',
+            'rv_fakes.name as fake_status', 
+            's_status.name as current_status', 
+            'shipments.updated_at as current_status_date',
+            'rv_shipment_assign_agents.unresponsive_count as call_count',
+            'rv_status.name as rv_status_name',
+            'sj.updated_at as rv_status_date',
+            'rv_shipment_assign_agent_details.rv_state_id as rv_state_id', 
+            'add.id as agent_id', 
+            'rv_reason.name as rv_reason',
+            'rach.call_status as call_status', 
+            'rc_reason.name as rc_reason_name'
+        ];
         $rv_report = RvShipmentAssignAgentDetails::join('shipments', 'rv_shipment_assign_agent_details.shipment_id','shipments.id')
         ->join('rv_shipment_assign_agents', 'rv_shipment_assign_agents.id', 'rv_shipment_assign_agent_details.rv_shipment_assign_agent_id')
         ->leftjoin('users', 'shipments.user_id', 'users.id')
@@ -13046,19 +13675,41 @@ class AdminReportsController extends Controller
                 ->where('sjrc.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 20)'));
         })
         ->leftjoin('shipment_status_reason as rc_reason', 'sjrc.status_reason_id', 'rc_reason.id')
-        ->select('shipments.id as shipment_id','sjj.created_at as arrival_date', 'shipments.tracking_number as tracking_number',
-        'users.name as shipper_name', 'origin_city.name as origin', 'area.name as area', 'destination_city.name as destination', 'hub.name as hub',
-        'shipments.amount as cod_amount', 'shipping_modes.mode as shipping_mode', 'booking_types.booking_type as service_type', 'rv_aas.name as action', 'rv_aass.name as reason',
-        'rv_shipment_assign_agent_details.remarks as remarks', 'rv_shipment_assign_agent_details.created_at as action_date',
-        'rv_shipment_assign_agent_details.updated_type_id as updated_type_id','rv_shipment_assign_agent_details.updated_by_id as updated_by_id',
-        'rv_fakes.name as fake_status', 's_status.name as current_status', 'shipments.updated_at as current_status_date',
-        'rv_shipment_assign_agents.unresponsive_count as call_count','rv_status.name as rv_status_name','sj.updated_at as rv_status_date','rv_shipment_assign_agent_details.rv_state_id as rv_state_id', 'add.id as agent_id', 'rv_reason.name as rv_reason','rach.call_status as call_status', 'rc_reason.name as rc_reason_name')
+        ->select($select)
         ->where('rv_shipment_assign_agent_details.rv_state_id', '!=', 1)
         ->where('rv_shipment_assign_agent_details.rv_assign_agent_status_id', '!=', '')
         ->whereColumn('rv_shipment_assign_agent_details.agent_id', 'rv_shipment_assign_agent_details.updated_by_id')
         ->groupBy('rv_shipment_assign_agent_details.created_at','rv_shipment_assign_agent_details.shipment_id');
 
-        $datatable = Datatables::of($rv_report)
+        if ($tracking_num = $request->get('search_tracking_no')) {
+            $rv_report->where('shipments.tracking_number', '=', $tracking_num);
+        }
+        if ($shipper_id = $request->get('search_shipper_name')) {
+            $shipper_name = User::where('id', $shipper_id)->value('name');
+            $rv_report->where('users.name', '=', $shipper_name);
+        }
+        if ($agent_id = $request->get('search_agent_name')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $rv_report->where('add.id', '=', $agent_id);
+            // $rv_report->where('rv_shipment_assign_agent_details.agent_id', '=', $agent_id);
+            $rv_report->where('rv_shipment_assign_agent_details.updated_type_id',2);
+
+        }
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $rv_report->whereBetween('rv_shipment_assign_agent_details.created_at', [$from, $to]);
+        }
+
+        if($request->get('excel') && $request->get('excel') == true) {
+            $fieldsToRetrieve = $request->input('selectedValue', []); 
+            $headers = $request->input('selectedTexts',[]);
+            //dd($fieldsToRetrieve);
+            $this->rv_report_csv_export($headers,$fieldsToRetrieve, $rv_report,$select);
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 705);
+        } else{
+             $datatable = Datatables::of($rv_report)
                     ->editColumn('tracking_number', function($rv_report) {
                         $route = route('admin.tracking.index');
                         return "<u><a href='{$route}?tracking_number=$rv_report->tracking_number' class='tracking' target='_blank'>$rv_report->tracking_number</a></u>";
@@ -13167,30 +13818,11 @@ class AdminReportsController extends Controller
                         }
                     });
 
-        if ($tracking_num = $request->get('search_tracking_no')) {
-            $rv_report->where('shipments.tracking_number', '=', $tracking_num);
+            return $datatable
+            ->rawColumns(['tracking_number', 'unresponsive_count'])
+            ->make(true);
         }
-        if ($shipper_id = $request->get('search_shipper_name')) {
-            $shipper_name = User::where('id', $shipper_id)->value('name');
-            $rv_report->where('users.name', '=', $shipper_name);
-        }
-        if ($agent_id = $request->get('search_agent_name')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $rv_report->where('add.id', '=', $agent_id);
-            // $rv_report->where('rv_shipment_assign_agent_details.agent_id', '=', $agent_id);
-            $rv_report->where('rv_shipment_assign_agent_details.updated_type_id',2);
-
-        }
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $rv_report->whereBetween('rv_shipment_assign_agent_details.created_at', [$from, $to]);
-        }
-
-        return $datatable
-        ->rawColumns(['tracking_number', 'unresponsive_count'])
-        ->make(true);
+       
     }
 
     public function rv_call_history(Request $request)
@@ -16483,7 +17115,7 @@ class AdminReportsController extends Controller
     }
 
     public function kam_and_poc_qsr_list(Request $request) {
-        $connection = 'reports_2';
+        $connection = 'reports';
 
         $select = [
             'shipments.id as shipment_id',
@@ -16549,13 +17181,13 @@ class AdminReportsController extends Controller
         
         $shipments = DB::connection($connection)
             ->table('shipments')
-            ->join('users', 'shipments.user_id', '=', 'users.id')
+            ->leftJoin('users', 'shipments.user_id', '=', 'users.id')
             ->leftJoin('sale_person_tags as spt', function($join){
                 $join->on('spt.user_id', '=', 'users.id')
                     ->where(
                         'spt.id',
                         '=',
-                        DB::connection('reports_2')->raw('(select max(id) from sale_person_tags where sale_person_tags.user_id = users.id and sale_person_tags.status = 0)')
+                        DB::connection('reports')->raw('(select max(id) from sale_person_tags where sale_person_tags.user_id = users.id and sale_person_tags.status = 0)')
                     );
             })
             ->leftJoin('admins as admin_sale_person', 'admin_sale_person.id', '=', 'spt.admin_id' )
@@ -16590,14 +17222,14 @@ class AdminReportsController extends Controller
             })
             ->leftjoin('cities as intercept_approved', 'intercept_approved.id', '=', 'irb.old_consignee_city_id')
 
-            ->join('shipment_status', 'shipment_status.id', '=', 'shipments.shipper_status_id')
+            ->leftJoin('shipment_status', 'shipment_status.id', '=', 'shipments.shipper_status_id')
 
             ->leftJoin('shipments_journey as journey', function ($join) {
                 $join->on('journey.shipment_id', '=', 'shipments.id')
                     ->where(
                         'journey.id',
                         '=',
-                        DB::connection('reports_2')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)')
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)')
                     );
             })
 
@@ -16655,7 +17287,7 @@ class AdminReportsController extends Controller
                     ->where(
                         'cargo_bag_shipments.id',
                         '=',
-                        DB::connection('reports_2')->raw('(select max(id) from cargo_manifest_bag_shipments where cargo_manifest_bag_shipments.shipment_id = shipments.id)')
+                        DB::connection('reports')->raw('(select max(id) from cargo_manifest_bag_shipments where cargo_manifest_bag_shipments.shipment_id = shipments.id)')
                     );
             })
 
@@ -16679,7 +17311,7 @@ class AdminReportsController extends Controller
                                             });
                                     });
                         })
-                ->where('destination_shipment_journey.id', '=', DB::connection('reports_2')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id in (4, 2))'));
+                ->where('destination_shipment_journey.id', '=', DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id in (4, 2))'));
             })
 
             ->leftJoin('shipments_journey as shipment_arival_journey', function ($join) {
@@ -16687,15 +17319,15 @@ class AdminReportsController extends Controller
                     ->where(
                         'shipment_arival_journey.id',
                         '=',
-                        DB::connection('reports_2')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)')
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)')
                     );
             })
 
             ->leftJoin('shipping_modes as shipping_mode', 'shipments.shipping_mode_id', '=', 'shipping_mode.id')
-            ->join('user_shipping_infos AS user_shipping_info', 'shipments.pickup_address_id', '=', 'user_shipping_info.id')
-            ->join('cities AS origin_city', 'user_shipping_info.city_id', '=', 'origin_city.id')
-            ->join('cities AS destination_city', 'shipments.consignee_city_id', '=', 'destination_city.id')
-            ->join('cities AS hub', 'destination_city.hub_id', '=', 'hub.id')
+            ->leftJoin('user_shipping_infos AS user_shipping_info', 'shipments.pickup_address_id', '=', 'user_shipping_info.id')
+            ->leftJoin('cities AS origin_city', 'user_shipping_info.city_id', '=', 'origin_city.id')
+            ->leftJoin('cities AS destination_city', 'shipments.consignee_city_id', '=', 'destination_city.id')
+            ->leftJoin('cities AS hub', 'destination_city.hub_id', '=', 'hub.id')
             ->leftjoin('consignee_address_areas as consignee_address_area', 'consignee_address_area.shipment_id', '=', 'shipments.id')
             ->leftjoin('city_areas as city_area', 'city_area.id', '=', 'consignee_address_area.city_area_id')
             ->leftjoin('cities as concerned_hub', 'concerned_hub.id', '=', 'cargo_bags.current_hub_id')
@@ -16712,7 +17344,7 @@ class AdminReportsController extends Controller
                     ->where(
                         'request_number.id',
                         '=',
-                        DB::connection('reports_2')->raw('(select max(id) from crm_requests where crm_requests.shipment_id = shipments.id)')
+                        DB::connection('reports')->raw('(select max(id) from crm_requests where crm_requests.shipment_id = shipments.id)')
                     );
             })
 
@@ -16749,7 +17381,7 @@ class AdminReportsController extends Controller
             //         ->where(
             //             'request_in_process_created_at.id',
             //             '=',
-            //             DB::connection('reports_2')->raw('(
+            //             DB::connection('reports')->raw('(
             //                 select max(id) 
             //                 from crm_requests 
             //                 where crm_requests.shipment_id = shipments.id 
@@ -16762,7 +17394,7 @@ class AdminReportsController extends Controller
             //         ->where(
             //             'request_closed_created_at.id',
             //             '=',
-            //             DB::connection('reports_2')->raw('(
+            //             DB::connection('reports')->raw('(
             //                 select max(id) 
             //                 from crm_requests 
             //                 where crm_requests.shipment_id = shipments.id 
@@ -16825,7 +17457,7 @@ class AdminReportsController extends Controller
             $query->whereNotNull('sale_tier_tags.poc')
                  ->orWhereNotNull('sale_tier_tags.kam');
         })
-
+        ->whereNotIn('shipments.shipper_status_id', [14, 25, 36, 38, 31])
         ->select($select)
         ->groupBy('shipments.id');
 
@@ -17674,5 +18306,189 @@ class AdminReportsController extends Controller
             fputcsv($output, $filteredArray);
         }
         fclose($output);   
+    }
+
+    public function rv_report_csv_export($headers ,$fieldsToRetrieve, $shipments,$select) {
+
+        $headers = array_filter($headers, function($value) {
+            return $value !== 'Select All';
+        });            
+        $fieldsToRetrieve = array_filter($fieldsToRetrieve, function($value) {
+            return $value !== 'selectAll';
+        }); 
+        
+        $final_Array = array();
+        $specificValues = $shipments->select($select)->orderBy('remarks', 'desc')->get()->toarray();
+        header('Content-Type: text/csv; charset=utf-8');  
+        header('Content-Disposition: attachment; filename=data.csv');  
+        $output = fopen("php://output", "w");  
+        $serialNumber = 1;
+        fputcsv($output, $headers);
+
+        foreach ($specificValues as $key => $row) {
+            // Convert the row to an associative array
+            $rowArray = (array) $row;
+
+            $agent = '-';
+            $action_updated_by = "-";
+            if ($rowArray['rv_state_id'] != 1 && $rowArray['updated_type_id'] == 2) {
+                $agent = Admin::where('id', $rowArray['agent_id'])->select('name')->first();
+                if ($agent) {
+                    $agent = $agent->name;
+                }
+            }
+
+            if (($rowArray['updated_type_id'] == 1) && ($rowArray['rv_state_id'] != 1) && ($rowArray['updated_by_id'] != NULL)) {
+                $action_updated_by = Admin::where('id', $rowArray['updated_by_id'])->select('name')->first();
+                if ($action_updated_by) {
+                    $action_updated_by = $action_updated_by->name;
+                }
+            }
+            //shipper or retail user
+            else if(($rowArray['updated_type_id'] == 3) || ($rowArray['updated_type_id'] == 5) && ($rowArray['updated_by_id'] != NULL)){
+                
+                $action_updated_by = User::where('id', $rowArray['updated_by_id'])->select('name')->first();
+                if ($action_updated_by) {
+                    $action_updated_by = $action_updated_by->name;
+                }
+            }
+            //substitute user
+            else if($rowArray['updated_type_id'] == 4){
+            
+                $action_updated_by = SubstituteUser::where('id', $rowArray['updated_by_id'])->select('name')->first();
+                if ($action_updated_by) {
+                    $action_updated_by = $action_updated_by->name;
+                }
+            }
+            // else{
+            //     return '-';
+            // }
+
+            $delivery_attempt_count = ShipmentsJourney::where('shipment_id', $rowArray['shipment_id'])->where('shipper_status_id', 5)->count();
+            $re_attempt_count = ShipmentsJourney::where('shipment_id', $rowArray['shipment_id'])->where('shipper_status_id', 13)->count();
+           
+            $rowArray['rcp_agent_updated_by'] = $agent;
+            $rowArray['action_updated_by'] = $action_updated_by;
+            $rowArray['delivery_attempt_count'] = $delivery_attempt_count;
+            $rowArray['re_attempt_count'] = $re_attempt_count;
+
+            $filteredArray = [];// Iterate over $fieldsToRetrieve to maintain sequence
+            
+            foreach ($fieldsToRetrieve as $field) {
+                // Check if the field exists in the row array
+                if (array_key_exists($field, $rowArray)) {
+                    // Add the field to the filtered array
+                    $filteredArray[$field] = $rowArray[$field];
+                }
+            }
+
+            $final_Array[] = $rowArray;
+            fputcsv($output, $filteredArray);
+        }
+        fclose($output);
+    }
+
+
+    public function wht_index() {
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 829);
+        return view('admin.reports.wht_report');
+    }
+
+    public function wht_list(Request $request) {
+
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 830);
+        }
+ 
+        $search_date_from = $request->search_date_from;
+        $search_date_to =  $request->search_date_to;
+        
+        $retail_payments = DB::table('retail_done_payments as rdp')
+            ->join('retail_shipper_infos as u', 'rdp.user_id', '=', 'u.id')
+            ->join('cities as c', 'u.city_id', '=', 'c.id')
+            ->leftjoin('retail_done_payment_calculations as dpc', 'dpc.retail_done_payment_id', '=', 'rdp.id')
+            ->leftJoin('retail_done_payment_shipments as rdps', 'rdps.retail_done_payment_id', '=', 'rdp.id')
+            ->leftJoin('retail_shipments as rs', 'rs.shipment_id', '=', 'rdps.shipment_id')
+            ->leftJoin('admins', 'admins.id', '=' , 'rdp.tax_status_updated_by')
+            ->whereBetween('rdp.created_at', [$search_date_from, $search_date_to])
+            ->select([
+                'rdp.id as payment_id',
+                'rdp.created_at as payment_date',
+                DB::raw('NULL as ntn_no'),
+                'u.shipper_cnic as cnic',
+                'u.shipper_name as customer_name',
+                DB::raw('3 as account_type'),
+                'c.name as city_name',
+                DB::raw('NULL as brand_name'),
+                'dpc.amount as taxable_amount',
+                DB::raw('SUM(rs.wht) as tax_amount'),
+                DB::raw('SUM(rs.cod_sst) as cod_sst'),
+                'rdp.tax_status as status',
+                'rdp.tax_status_updated_at as tax_paid_date',
+                'admins.name as updated_by'
+            ])->groupBy([
+                'rdp.id'
+            ]);
+
+        $payments = DB::table('done_payments as dp')
+            ->join('users', 'dp.user_id', '=', 'users.id')
+            ->join('done_payment_shipments as dps', 'dps.done_payment_id', '=', 'dp.id')
+            ->leftJoin('cities as c', 'c.id', '=', 'users.city_id')
+            ->leftJoin('admins', 'admins.id', '=' , 'dp.tax_status_updated_by')
+            ->whereBetween('dp.created_at', [$search_date_from, $search_date_to])
+            ->select([
+                'dp.id as payment_id',
+                'dp.created_at as payment_date',
+                'users.ntn_no as ntn_no',
+                'users.cnic as cnic',
+                'users.name as customer_name',
+                'users.account_type_id as account_type',
+                'c.name as city_name',
+                'users.brand_name as brand_name',
+                DB::raw('SUM(dps.amount) as taxable_amount'),
+                DB::raw('SUM(dps.wht) as tax_amount'),
+                DB::raw('SUM(dps.cod_sst) as cod_sst'),
+                'dp.tax_status as status',
+                'dp.tax_status_updated_at as tax_paid_date',
+                'admins.name as updated_by'
+            ])
+            ->groupBy([
+                'dp.id'
+            ]);
+
+        $total = DB::query()->fromSub($retail_payments->union($payments), 'total');
+        
+        $datatables = Datatables::of($total)
+            ->editColumn('account_type', function ($total) {
+                if ($total->account_type == 1) {
+                   return 'Reimbursement Account';
+                } elseif($total->account_type == 2) {
+                    return 'Corporate Invoicing Account';
+                } elseif($total->account_type == 3) {
+                    return 'Retail Account';
+                }
+                
+            })
+            ->editColumn('taxable_amount', function ($row) {
+                return number_format($row->taxable_amount, 2); // 2 decimal places
+            })
+            ->editColumn('tax_amount', function ($row) {
+                return number_format($row->tax_amount, 2);
+            })
+            ->editColumn('cod_sst', function ($row) {
+                return number_format($row->cod_sst, 2);
+            })
+
+            ->editColumn('status', function($total){
+                if($total->status == 0 ){
+                    return 'Un-Paid';
+                }elseif($total->status == 1){
+                    return 'Paid';
+                }
+            });
+            
+        return $datatables->make(true);
+
     }
 }

@@ -58,7 +58,7 @@ class RetailReturnController extends Controller
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
             ->join('shipping_modes as sm','sm.id','=','shipments.shipping_mode_id')
-            ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
+            ->leftJoin('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
             ->leftJoin('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
@@ -327,7 +327,7 @@ class RetailReturnController extends Controller
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 's.consignee_city_id', '=', 'dc.id')
             ->join('shipping_modes as sm','sm.id','=','s.shipping_mode_id')
-            ->join('booking_types as bt','bt.id','=','s.booking_type_id')
+            ->leftJoin('booking_types as bt','bt.id','=','s.booking_type_id')
             ->join('shipment_status as ss','ss.id','=','s.shipper_status_id')
             ->leftJoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 's.id')

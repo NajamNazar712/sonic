@@ -56,6 +56,7 @@ class ProcessRvShipmentTicket implements ShouldQueue
                 ->get(['setting_value', 'type', 'text']);
             $isShipperDisabled = 0;
             $botcallenable = 0;
+            $haltShipper = 0;
             $excludedShippers = [];
             $botCallStatus = [];
             $onlyShippers = [];
@@ -92,7 +93,8 @@ class ProcessRvShipmentTicket implements ShouldQueue
                 $rvShipmentTicket  = DB::table('rv_shipment_tickets')
                 ->where('shipment_id', $this->shipment['shipment_id'])
                 ->first();
-                if(isset($rvShipmentTicket->halt_shipper) && isset($rvShipmentAgent->call_count)){     
+                if(isset($rvShipmentTicket->halt_shipper,$rvShipmentTicket->call_count) && ($rvShipmentTicket->call_count == 0) && isset($rvShipmentAgent->call_count)){   
+                    $haltShipper = 1;
                     if($rvShipmentAgent->call_count <= 0){
                         $rvShipmentAgent->unresponsive_count = 0;
                         $rvShipmentAgent->unresponsive_email_count = 0;
@@ -103,11 +105,11 @@ class ProcessRvShipmentTicket implements ShouldQueue
                     $rvShipmentAgent->rv_state_id = 2;
                     $rvShipmentAgent->save();
                 }
-                if (isset($rvShipmentAgent) && $rvShipmentAgent->call_count > 0) {
-                    $isShipperDisabled = 0;
-                    $rvShipmentAgent->rv_state_id = 2;
-                    $rvShipmentAgent->save();
-                }
+                // if (isset($rvShipmentAgent) && $rvShipmentAgent->call_count > 0) {
+                //     $isShipperDisabled = 0;
+                //     $rvShipmentAgent->rv_state_id = 2;
+                //     $rvShipmentAgent->save();
+                // }
                 
             }
             // $userId = [2234, 23825, 13060, 1049];
@@ -124,7 +126,7 @@ class ProcessRvShipmentTicket implements ShouldQueue
                     'in_progress' => 0,
                     'is_completed' => 0,
                     'deleted_at' => (($shipment_status == 65) ? Carbon::now()->format('Y-m-d H:i:s') : null),
-                    'halt_shipper' => 0,
+                    'halt_shipper' => $haltShipper,
                     'disabled_shipper' => $isShipperDisabled,
                     'delete_reason' => null,
                     'created_at' => Carbon::now()->format('Y-m-d H:i:s')

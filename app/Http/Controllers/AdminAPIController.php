@@ -12960,7 +12960,15 @@ class AdminAPIController extends Controller
         }
     }
 
-    public function shipmentTrack(Request $request)
+        public function get_shipper_info(Request $request)
+        {
+            $user = User::where('id',$request->shipper_id)->first();
+            if($user){
+                return response()->json(['status' => 0, 'shipper' => $user]);
+            }
+            return response()->json(['status' => 1, 'error' => 'Shipper not found!']);
+        }
+        public function shipmentTrack(Request $request)
     {
         $rules = [
             'tracking_number' => ['required', 'integer', 'digits_between:10,20', 'exists:shipments,tracking_number'],

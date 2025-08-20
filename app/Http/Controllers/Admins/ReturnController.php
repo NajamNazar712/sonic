@@ -3706,6 +3706,9 @@ class ReturnController extends Controller
             foreach ($shipments as $shipment) {
                 $reasonId = "reason_drop.$shipment";
                 $parcel = Shipment::where('id', $shipment)->first();
+                // if(in_array($parcel->user_id, [43066, 41969, 10419])) {
+                //     NotificationsController::send(246, $shipment);
+                // }
                 if (!ReturnNoteShipment::join('return_notes', 'return_notes.id', '=', 'return_note_shipments.return_note_id')->where('return_note_shipments.return_note_id', '>', $return_note_id)->where('shipment_id', $shipment)->exists()) {
                     if (count($open_box_ids) > 0) {
                         if (in_array($shipment, $open_box_ids)) {
@@ -3768,6 +3771,10 @@ class ReturnController extends Controller
             $return_note_details = ReturnNote::find($request->return_note_id);
             foreach ($request->shipment_ids as $shipment) {
                 $parcel = Shipment::where('id', $shipment)->first();
+
+                if(in_array($parcel->user_id, [43066, 41969])) {
+                    NotificationsController::send(246, $shipment);
+                }
                 $shipment_remark = "remarks.$shipment";
                 $received_or_refused_by = "received_or_refused_by.$shipment";
                 if (!ReturnNoteShipment::join('return_notes', 'return_notes.id', '=', 'return_note_shipments.return_note_id')->where('return_note_shipments.return_note_id', '>', $request->return_note_id)->where('shipment_id', $shipment)->exists()) {
@@ -4144,6 +4151,9 @@ class ReturnController extends Controller
                             $parcel->save();
                             ShipmentOpenBoxJourneyController::add($shipment_id, 7, Auth::id());
                         }
+                    }
+                    if(in_array($parcel->user_id, [43066, 41969])) {
+                        NotificationsController::send(246, $shipment_id);
                     }
                     if (!ReturnNoteShipment::join('return_notes', 'return_notes.id', '=', 'return_note_shipments.return_note_id')->where('return_note_shipments.return_note_id', '>', $request->return_note_id)->where('shipment_id', $shipment_id)->exists()) {
 

@@ -113,6 +113,8 @@
 						<th class="border-primary border-darken-1">Total Charges</th>
 						<th class="border-primary border-darken-1">Total GST</th>
 						<th class="border-primary border-darken-1">SMS Charges</th>
+						<th class="border-primary border-darken-1">Total WHT</th>
+						<th class="border-primary border-darken-1">Total COD SST</th>
 						<th class="border-primary border-darken-1">Total Invoice Amount</th>
 						<th class="border-primary border-darken-1">Balance Amount</th>
 						<th class="border-primary border-darken-1">Generation Date</th>
@@ -531,7 +533,9 @@
 							params.excel = true;
 							var jsonResult = $.ajax({
 								url: '{{ route('admin.finance.invoices.list') }}',
+								method: 'POST',
 								data: function (d) {
+									d._token = '{{ csrf_token() }}'; 
 									d.invoice_from = $('#invoice_from').val();
 									d.invoice_to = $('#invoice_to').val();
 									d.generation_from = $('#generation_from').val();
@@ -553,6 +557,8 @@
 									head.push('Total Charges');
 									head.push('Total GST');
 									head.push('SMS Charges');
+									head.push('Total WHT');
+									head.push('Total COD SST');
 									head.push('Total Invoice Amount');
 									head.push('Balance Amount');
 									head.push('Generation Date');
@@ -587,6 +593,8 @@
 										row.push(values.total_charges);
 										row.push(values.total_gst);
 										row.push(values.sms_charges);
+										row.push(values.total_wht);
+										row.push(values.total_cod_sst);
 										row.push(values.total_invoice_amount);
 										row.push(values.balance_amount);
 										row.push(values.created_at);
@@ -769,7 +777,9 @@
 						serverSide: true,
 						ajax:{
 							url: '{{ route('admin.finance.invoices.list') }}',
+							method: 'POST',
 							data: function (d) {
+								d._token = '{{ csrf_token() }}'; 
 								d.invoice_from = $('#invoice_from').val();
 								d.invoice_to = $('#invoice_to').val();
 								d.generation_from = $('#generation_from').val();
@@ -779,7 +789,7 @@
 							}
 						},
 						rowId: 'id',
-						order: [[12	, 'desc']],
+						order: [[3	, 'desc']],
 						"preDrawCallback": function(settings) {
 							if (isInitialLoad) {
 								isInitialLoad = false;
@@ -815,6 +825,8 @@
 							{data:'total_charges', name: 'total_charges', class: 'align-middle text-center total_charges'},
 							{data:'total_gst', name: 'total_gst', class: 'align-middle text-center total_gst'},
 							{data:'sms_charges', name: 'sms_charges', class: 'align-middle text-center sms_charges'},
+							{data:'total_wht', name: 'total_wht', class: 'align-middle text-center total_wht'},
+							{data:'total_cod_sst', name: 'total_cod_sst', class: 'align-middle text-center total_cod_sst'},
 							{data:'total_invoice_amount', name: 'total_invoice_amount', class: 'align-middle text-center total_invoice_amount'},
 							{data:'balance_amount', name: 'balance_amount', class: 'align-middle text-center balance_amount',orderable: false, searchable: false},
 							{data:'created_at', name: 'created_at', class: 'align-middle text-center created_at'},

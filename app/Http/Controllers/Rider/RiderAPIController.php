@@ -11911,12 +11911,14 @@ class RiderAPIController extends Controller
         $shipment_status_reason = BoltUndeliveredReasonMap::join('shipment_status_reason as ssr','ssr.id','bolt_undelivered_reason_maps.reason_id')
         ->leftjoin('sub_reasons as sr','sr.reason_id', 'ssr.id')
         ->select('ssr.id', 'ssr.name', 'ssr.audio', 'sr.id as sub_id', 'sr.name as sub_name')
+        ->whereNot('ssr.id',35)
         ->get();
         
         // return response()->json(['status' => 0, 'message' => $shipment_status_reason]);
         $results = DB::table('bolt_undelivered_reason_against_booking_types as btbk')
         ->join('shipment_status_reason as ssr', 'ssr.id', '=', 'btbk.reason_id')
         ->select('btbk.reason_id','btbk.booking_type_id', 'ssr.name as reason_name')
+        ->whereNot('ssr.id', 35)
         ->get();
         // $reasons_against_booking_types = BoltUndeliveredReasonAgainstBookingType::join('shipment_status_reason as ssr','ssr.id','bolt_undelivered_reason_against_booking_types.reason_id')
         // ->select(['ssr.name','ssr.id','bolt_undelivered_reason_against_booking_types.booking_type_id'])

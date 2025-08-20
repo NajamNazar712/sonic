@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Traits\FilterTrait;
 use DB;
 use Auth;
 use Carbon\Carbon;
@@ -83,6 +84,7 @@ use App\Http\Models\Shipper\UserShippingInfo;
 
 class AdminTrackingController extends Controller
 {
+    use FilterTrait;
     public function __construct()
     {
         $this->middleware('auth:admin');
@@ -1062,7 +1064,14 @@ class AdminTrackingController extends Controller
 
         foreach ($tracking_numbers as $tracking_number) {
             $details = array();
-            $shipment = Shipment::where('tracking_number', $tracking_number);
+            $shipment = Shipment::where('tracking_number', $tracking_number)
+                ->where(function($query){
+                    $idsToExclude = FilterTrait::class::getFilteredIds(auth()->user()->id);
+                    if (!empty($idsToExclude)) {
+                        $query->whereNotIn('shipments.user_id', $idsToExclude);
+                    }
+                })
+            ;
             if ($shipment->exists()) {
                 $shipment = $shipment->first();
 
@@ -1370,6 +1379,7 @@ class AdminTrackingController extends Controller
                         if ($sub_segment && $sub_segment->name){
                             $details['order_information']['sub_segment'] = $sub_segment->name;
                         }
+                        $details['order_information']['channel'] = optional(optional($shipment->bookingChannel)->channel)->name ?? '-';
 
                         $details['order_information']['instructions'] = $shipment->special_instructions;
                         $details['order_information']['pieces'] = $shipment->pieces;

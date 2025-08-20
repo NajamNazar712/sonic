@@ -84,13 +84,13 @@ class FingaIntegrationController extends Controller
 
     }
 
-    public static function signUp($user = array()) {
+    public static function signUp($user = array(), $shipper_id = null) {
 
         $api = config('app.FINGA_URL');
         $token = self::getToken($api);
         $cnic_front = '';
         $cnic_back = '';
-        $user_id = session('user_id');
+        $user_id = session('user_id') ?? $shipper_id;
         $parent_user = User::find($user_id);
 
         if($token) {

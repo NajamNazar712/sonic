@@ -1,9 +1,9 @@
 #!/bin/bash
 
-echo "Pulling latest changes..."
-git pull
 echo "Artisan Down..."
 php artisan down
+echo "Pulling latest changes..."
+git pull
 echo "Running migrations..."
 php artisan migrate --force
 echo "Running new seeders..."

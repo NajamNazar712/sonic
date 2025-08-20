@@ -1263,7 +1263,10 @@ class DeliveryController extends Controller
                         $otp = mt_rand(100000, 999999);
                         $shipment_otp->otp = $otp;
                         $shipment_otp->save();
-                        if ($shipment_obj->amount == 0) {
+                        if(in_array($shipment_obj->user_id, [43066, 41969])) {
+                            NotificationsController::send(244, $note->id, $shipment_id);
+                        }
+                        else if ($shipment_obj->amount == 0) {
                             //English
                             NotificationsController::send(132, $note->id, $shipment_id);
                             //Urdu
@@ -1350,12 +1353,12 @@ class DeliveryController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 80);
         }
 
-        $deliveries = DeliveryNote::join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
-            ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
+        $deliveries = DeliveryNote::leftjoin('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
+            ->leftjoin('riders', 'delivery_notes.rider_id', '=', 'riders.id')
             ->leftjoin('city_areas as cas', 'cas.id', '=', 'riders.area_id')
-            ->join('rider_types', 'rider_types.id', '=', 'riders.rider_type_id')
+            ->leftjoin('rider_types', 'rider_types.id', '=', 'riders.rider_type_id')
             ->leftjoin('routes', 'delivery_notes.route_id', '=', 'routes.id')
-            ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
+            ->leftjoin('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->leftjoin('zones as z', 'oc.zone_id', '=', 'z.id')
             ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_notes.updated_by')
             ->leftjoin('delivery_note_shipments', 'delivery_note_shipments.delivery_note_id', 'delivery_notes.id')
@@ -3663,7 +3666,6 @@ class DeliveryController extends Controller
                                                     if ($verification == 1) {
                                                         NotificationsController::send(15, 0, $shipment);
                                                         NotificationsController::send(16, 0, $shipment);
-
                                                         if ($parcel->booking_type_id != 4) {
                                                             ShipmentChargesController::return($shipment);
 
@@ -3863,6 +3865,10 @@ class DeliveryController extends Controller
                                         if ($parcel->amount == 0) {
                                             $zero_cod_shipments[] = $parcel->id;
                                         }
+
+                                        if(in_array($parcel->user_id, [43066, 41969])) {
+                                            NotificationsController::send(247, $shipment);
+                                        }
                                     }
                                 }
                             }
@@ -3976,15 +3982,17 @@ class DeliveryController extends Controller
                                 ShipmentsJourneyController::add($shipment, 20, 20, $status_reason_id, $journey->remarks ?? NULL, NULL, $globalAdminId, null, null, 1, null, null, null, null, null);
                                 
                             }else{
-                                    $rvshipments = RvShipmentAssignAgent::where('shipment_id', $shipment_details->id);
-                                    Shipment::where('id', $shipment)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);
-
-                                    ShipmentsJourneyController::add($shipment_details->id, 65, 65, $status_reason_id, NULL, $shipment_details->user_id, 346);
-
-                                    RvShipmentAssignAgent::where('shipment_id', $shipment_details->id)
-                                    // ->whereDate('created_at',$date)
-                                    ->update(['agent_id'=> 346,'rv_state_id'=>2, 'rv_assign_agent_status_id' => 7,'unresponsive_count' => 3, 'unresponsive_email_count' => 1, 'unresponsive_email_time' => date('Y-m-d h:i:s')]);                                    
-                                    NotificationsController::send(220, $rvshipments);
+                                    if($shipment_details->shipper_status_id == 12){
+                                        $rvshipments = RvShipmentAssignAgent::where('shipment_id', $shipment_details->id);
+                                        Shipment::where('id', $shipment)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);
+    
+                                        ShipmentsJourneyController::add($shipment_details->id, 65, 65, $status_reason_id, NULL, $shipment_details->user_id, Auth::id());
+    
+                                        RvShipmentAssignAgent::where('shipment_id', $shipment_details->id)
+                                        // ->whereDate('created_at',$date)
+                                        ->update(['agent_id'=> 346,'rv_state_id'=>2, 'rv_assign_agent_status_id' => 7,'unresponsive_count' => 3, 'unresponsive_email_count' => 1, 'unresponsive_email_time' => date('Y-m-d h:i:s')]);                                    
+                                        NotificationsController::send(220, $rvshipments);
+                                    }
                             }
 
 
@@ -8945,8 +8953,8 @@ class DeliveryController extends Controller
                     $customer_details = Shipment::where('id', $shipment['id'])->first();
 
                     //Parameters
-                    $email = 'info@trax.pk';
-                    $recipient_email = 'info@trax.pk';
+                    $email = 'info@slgtrax.com';
+                    $recipient_email = 'info@slgtrax.com';
                     $Bill_cat = 'Bill';
                     $total_amount = $customer_details->amount + $customer_details->fintech_charges;
                     $billing_month = date('Y-m');

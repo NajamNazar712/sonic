@@ -2125,10 +2125,10 @@ class AdminPackagingMaterialController extends Controller
                 $pickup = $pickup->first();
                 $pickup_address_id = $pickup->id;
             } else {
-                $pickup_address_id = ShipperShipmentBookController::add_pickup_address($settings->setting_value, 'Trax Office', 'TRAX', null, '0213-8772222', 'info@trax.pk', $pickup_hub_id, 0, 1);
+                $pickup_address_id = ShipperShipmentBookController::add_pickup_address($settings->setting_value, 'Trax Office', 'TRAX', null, '0213-8772222', 'info@slgtrax.com', $pickup_hub_id, 0, 1);
             }
 
-            $shipment = $this->book($settings->setting_value, 1, $pickup_address_id, 1, $consignee_hub_id, 'TRAX', 'Trax Office', '0213-8772222', NULL, 'info@trax.pk', NULL, 0, Carbon::now(), NULL, 1, 1, NULL, 0, 1, 2, 2);
+            $shipment = $this->book($settings->setting_value, 1, $pickup_address_id, 1, $consignee_hub_id, 'TRAX', 'Trax Office', '0213-8772222', NULL, 'info@slgtrax.com', NULL, 0, Carbon::now(), NULL, 1, 1, NULL, 0, 1, 2, 2);
 
             $tracking_number = $this->generate_tracking_number($shipment->id, $pickup_hub_id, $consignee_hub_id);
             $stock_request = WarehouseStockRequest::find($request_id);

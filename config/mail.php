@@ -26,6 +26,15 @@ return [
             'password' => env('MAIL2_PASSWORD'),
             'timeout' => null,
         ],
+        'huawei_email' => [
+            'transport' => 'smtp',
+            'host' => env('MAIL_HUAWEI_HOST'),
+            'port' => env('MAIL_HUAWEI_PORT'),
+            'encryption' => env('MAIL_HUAWEI_ENCRYPTION'),
+            'username' => env('MAIL_HUAWEI_USERNAME'),
+            'password' => env('MAIL_HUAWEI_PASSWORD'),
+            'timeout' => null,
+        ],
 
         'log' => [
             'transport' => 'log',

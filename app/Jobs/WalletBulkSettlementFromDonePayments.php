@@ -143,6 +143,8 @@ class WalletBulkSettlementFromDonePayments implements ShouldQueue
                                     'gst_charges' => floatval($dps->gst),
                                     'sms_charges' => floatval($dps->sms_charges),
                                     'reverse_pickup_charges' => floatval($service_charges),
+                                    'with_holding_tax' => floatval($dps->wht),
+                                    'cod_sst' => floatval($dps->cod_sst)
                                 ];
                             } elseif ($dps->type == 1) {
                                 $charges = [

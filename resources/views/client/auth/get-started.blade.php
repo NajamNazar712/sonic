@@ -49,7 +49,7 @@
                 <div class="col-12 d-flex align-items-center justify-content-center">
                     <div class="col-md-8 col-10 p-0">
                         <div class="mb-2 text-center">
-                            <p class="white bold" style="font-size: 17px !important;">For Help Dial : <a href="tel:021-111-118-729" style="color:#ffffff;text-decoration:underline;">021-111-118-729</a>  or email us <a href="mailto:info@trax.pk" style="color:#ffffff;text-decoration:underline;">info@trax.pk</a></p>
+                            <p class="white bold" style="font-size: 17px !important;">For Help Dial : <a href="tel:021-111-118-729" style="color:#ffffff;text-decoration:underline;">021-111-118-729</a>  or email us <a href="mailto:info@slgtrax.com" style="color:#ffffff;text-decoration:underline;">info@slgtrax.com</a></p>
                         </div>
                         <div class="card box-shadow-1 border-grey border-lighten-3 px-1 py-1 m-0">
                             <div class="card-header border-0">

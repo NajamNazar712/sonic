@@ -42,6 +42,7 @@
                                     <th class="border-primary border-darken-1" >Status Logs</th>
                                     <th class="border-primary border-darken-1" >Booking Enable/Disable Logs</th>
 
+                                    <th class="border-primary border-darken-1" >City Log</th>
                                     <th class="border-primary border-darken-1" ></th>
                                 </tr>
                                 </thead>
@@ -128,6 +129,28 @@
             </div>
         </div>
 
+
+        {{-- City Logs --}}
+        <!-- View Changes Modal -->
+        <div class="modal fade" id="viewChangesModal" tabindex="-1" aria-labelledby="viewChangesLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><strong>City Changes</strong></h5>
+                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="changedDataContent">
+
+                </div>
+            </div>
+            </div>
+        </div>
+        </div>
+
+        {{-- End --}}
     </section>
 @endsection
 
@@ -454,7 +477,8 @@
                     {data: 'address', name: 'cities.address', class: 'align-middle address'},
                     {data: 'booking_enable_status', name: 'cities.booking_enable_status', class: 'align-middle booking_enable_status'},                   
                     {data: 'status_logs', name: 'status_logs', class: 'align-middle status_logs'},
-                    {data: 'booking_enable_disable_logs', name: 'booking_enable_disable_logs', class: 'align-middle booking_enable_disable_logs'},
+                    {data: 'booking_enable_disable_logs', name: 'booking_enable_disable_logs', class: 'align-middle booking_enable_disable_logs'},                    {data: 'city_logs', name: 'city_logs', class: 'align-middle city_logs', orderable: false, searchable: false},
+
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
                rowCallback: function(row, data, index) {
@@ -490,7 +514,7 @@
                        var column = this;
                        var header = column.header();
              
-                       if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.location')  || $(header).is('.hub_location') || $(header).is('.latitude') || $(header).is('.longitude')) {
+                       if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.location')  || $(header).is('.hub_location') || $(header).is('.latitude') || $(header).is('.longitude') || $(header).is('.city_logs')) {
                            $(td).appendTo($(search));
                        }else if($(header).is('.status')){
                            $(status_select).appendTo($(search))
@@ -873,6 +897,134 @@
                 });
             }
         });
+    function mapShippingMode(id) {
+        return {
+            1: 'Rush',
+            2: 'Saver Plus',
+            3: 'Swift',
+            4: 'Same Day'
+        }[id] || '-';
+    }
+
+    function mapBookingType(id) {
+        return {
+            1: 'Regular',
+            2: 'Replacement',
+            3: 'Try and Buy',
+            5: 'Reverse Pickup',
+            6: 'FTL'
+        }[id] || '-';
+    }
+
+    function mapWalkInType(id) {
+        return {
+            1: 'Rush',
+            2: 'Saver Plus',
+            3: 'Swift'
+        }[id] || '-';
+    }
+    $(document).on('click', '.city_logs', function () {
+        let cityId = $(this).data('id');
+
+        if (cityId) {
+            $.ajax({
+                url: '/admin/management/city/' + cityId + '/changes',
+                type: 'GET',
+                success: function (response) {
+                    let html = '';
+
+                    if (response.length === 0) {
+                        html = '<p>No changes found.</p>';
+                    } else {
+                        response.forEach(entry => {
+                            const changes = entry.changes;
+                            
+                            if(Object.keys(changes).length){
+                                html += `<div class="mb-4"><h5 class="fw-bold text-center">Changes on <strong>${entry.timestamp} (${entry.admin})</strong></h5>`;
+                            }
+
+                            // City Fields
+                            if (changes.city) {
+                                html += '<h6 class="fw-bold text-center">City Fields</h6><table class="table table-bordered">';
+                                html += '<thead><tr><th>Field</th><th>Old</th><th>New</th></tr></thead><tbody>';
+                                $.each(changes.city, function (key, value) {
+                                    let label = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+
+                                    let oldVal = value.old;
+                                    let newVal = value.new;
+
+                                    if (key === 'hub') {
+                                        oldVal = (oldVal == 1) ? 'Hub' : (oldVal == 0 ? 'City' : '-');
+                                        newVal = (newVal == 1) ? 'Hub' : (newVal == 0 ? 'City' : '-');
+                                    } else if (key === 'pickup') {
+                                        oldVal = (oldVal == 1) ? 'Pickup' : (oldVal == 0 ? 'Non-Pickup' : '-');
+                                        newVal = (newVal == 1) ? 'Pickup' : (newVal == 0 ? 'Non-Pickup' : '-');
+                                    } else if (key === 'gc_area') {
+                                        oldVal = (oldVal == 1) ? 'GC Area' : (oldVal == 0 ? 'Non-GC Area' : '-');
+                                        newVal = (newVal == 1) ? 'GC Area' : (newVal == 0 ? 'Non-GC Area' : '-');
+                                    } else {
+                                        oldVal = (oldVal === null || oldVal === undefined || oldVal === '') ? '-' : oldVal;
+                                        newVal = (newVal === null || newVal === undefined || newVal === '') ? '-' : newVal;
+                                    }
+
+                                    html += `<tr><td>${label}</td><td>${oldVal}</td><td>${newVal}</td></tr>`;
+                                });
+
+                                html += '</tbody></table>';
+                            }
+                            
+                            // OSA Rates
+                            if (changes.osa_rates) {
+                                html += '<h6 class="fw-bold text-center">OSA Rates</h6>';
+                                html += '<table class="table table-bordered"><thead><tr><th>Action</th><th>OSA Name</th><th>Rate</th></tr></thead><tbody>';
+                                changes.osa_rates.removed.forEach(item => {
+                                    html += `<tr><td>Removed</td><td>${item.osa_name}</td><td>${item.osa_rate}</td></tr>`;
+                                });
+                                changes.osa_rates.added.forEach(item => {
+                                    html += `<tr><td>Added</td><td>${item.osa_name}</td><td>${item.osa_rate}</td></tr>`;
+                                });
+                                html += '</tbody></table>';
+                            }
+
+                            // Deliveries
+                            if (changes.deliveries) {
+                                html += '<h6 class="fw-bold text-center">City Deliveries</h6>';
+                                html += '<table class="table table-bordered"><thead><tr><th>Action</th><th>Booking Type</th><th>Shipping Mode</th></tr></thead><tbody>';
+                                changes.deliveries.removed.forEach(item => {
+                                    html += `<tr><td>Removed</td><td>${mapBookingType(item.booking_type_id)}</td><td>${mapShippingMode(item.shipping_mode_id)}</td></tr>`;
+                                });
+                                changes.deliveries.added.forEach(item => {
+                                    html += `<tr><td>Added</td><td>${mapBookingType(item.booking_type_id)}</td><td>${mapShippingMode(item.shipping_mode_id)}</td></tr>`;
+                                });
+                                html += '</tbody></table>';
+                            }
+
+                            // Walk-In Cities
+                            if (changes.walk_ins) {
+                                html += '<h6 class="fw-bold text-center">Walk-In Cities</h6>';
+                                html += '<table class="table table-bordered"><thead><tr><th>Action</th><th>Walk-in Info</th></tr></thead><tbody>';
+                                changes.walk_ins.removed.forEach(item => {
+                                    html += `<tr><td>Removed</td><td>${mapWalkInType(item.delivery)}</td></tr>`;
+                                });
+                                changes.walk_ins.added.forEach(item => {
+                                    html += `<tr><td>Added</td><td>${mapWalkInType(item.delivery)}</td></tr>`;
+                                });
+                                html += '</tbody></table>';
+                            }
+
+                            html += '</div>'; 
+                        });
+                    }
+
+                    $('#changedDataContent').html(html);
+                    $('#viewChangesModal').modal('show');
+                },
+                error: function () {
+                    alert('Failed to load changes.');
+                }
+            });
+        }
+    });
 
     </script>
 

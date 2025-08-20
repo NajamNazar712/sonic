@@ -41,15 +41,19 @@ class ShipmentScanningJourneyController extends Controller
             
             $add_scanning_history->save();
             if($admin_id != NULL){
-                self::shipment_scanning_area_logs($shipment_id, $admin_id, $via);
+                self::shipment_scanning_area_logs($shipment_id, $admin_id, $via,$add_scanning_history->id);
             }
          }
     }
     
-    static public function shipment_scanning_area_logs($shipment_id, $auth_id, $via)
+    static public function shipment_scanning_area_logs($shipment_id, $auth_id, $via,$latestShipmentScanningId2 = null)
     {
         $employee = ($via == 'rider') ? Rider::find($auth_id) : Admin::find($auth_id);
-        $latestShipmentScanningId = ShipmentScanningJourney::latest('id')->first()->id;
+        if($latestShipmentScanningId2){
+            $latestShipmentScanningId =  $latestShipmentScanningId2;
+        }else {
+            $latestShipmentScanningId = ShipmentScanningJourney::latest('id')->first()->id;
+        }
 
         if(!$employee){
             $employee = Rider::find($auth_id);

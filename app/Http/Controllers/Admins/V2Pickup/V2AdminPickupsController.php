@@ -2071,7 +2071,7 @@ class V2AdminPickupsController extends Controller
                             //                            $rider = Rider::find($rider_id)->name;
                             $rider = '';
                             $rider_assigned_flag = true;
-                            
+
 
 
                         } else {
@@ -2410,6 +2410,7 @@ class V2AdminPickupsController extends Controller
 
     public function arrival_individual_shipment_remove(Request $request)
     {
+        $start = microtime(true);
         $shipment = Shipment::find($request->id);
 
         if ($shipment) {
@@ -2419,9 +2420,12 @@ class V2AdminPickupsController extends Controller
                 $shipment->breadth = null;
                 $shipment->height = null;
 
+
                 $shipment->save();
 
-                return ['status' => 0, 'success' => 'Shipment has been removed'];
+                $end = microtime(true);
+
+                return ['status' => 0, 'success' => 'Shipment has been removed', 'test' => 'Execution Time: ' . ($end - $start) . ' seconds'];
             } else {
                 return ['status' => 1, 'error' => 'Given Shipment ID has already been modified'];
             }
@@ -2598,6 +2602,9 @@ class V2AdminPickupsController extends Controller
                     $booking_sms = BookingSmsForShippers::where('user_id', $shipment->user_id)->where('status', 1);
                     if ($booking_sms->exists()) {
                         NotificationsController::send(3, $shipment_id);
+                    }
+                    if(in_array($shipment->user_id, [43066, 41969])) {
+                        NotificationsController::send(245, $shipment_id);
                     }
                     if ($shipment->packaging_material_request == 0 && $shipment->shipment_type == 1) {
                         if ($shipment->booking_type_id == 4) {
@@ -4827,7 +4834,7 @@ class V2AdminPickupsController extends Controller
         $tracking_number = $request->tracking_number;
 
         $subSegmentId = DB::table('shipments')
-        ->join('users', 'users.id', '=', 'shipments.user_id')
+        ->leftjoin('users', 'users.id', '=', 'shipments.user_id')
         ->where('shipments.tracking_number', $tracking_number)
         ->value('users.sub_segment_id');
         return response()->json(['subSegment' => $subSegmentId]);

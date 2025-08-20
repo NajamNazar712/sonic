@@ -49,6 +49,10 @@ class Shipment extends Model
 		return $this->hasOne('App\Http\Models\ReceivingSheetShipment');
 	}
 
+    public function retail_shipment()
+    {
+        return $this->hasOne(RetailShipment::class, 'shipment_id');
+    }
 	public function shipment_journey(){
 	    return $this->hasMany('App\Http\Models\ShipmentsJourney')->orderBy('id', 'DESC');
     }
@@ -185,4 +189,10 @@ class Shipment extends Model
     {
         return $this->hasOne(CRMCrmRequest::class);
     }
+    public function bookingChannel()
+    {
+        return $this->hasOne('App\Models\BookingChannel');
+    }
+
+
 }

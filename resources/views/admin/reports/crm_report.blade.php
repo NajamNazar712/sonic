@@ -220,6 +220,9 @@
                         <th class="border-primary border-darken-1">Complainant</th>
                         <th class="border-primary border-darken-1">Complainant Contact Number</th>
 
+                        <th class="border-primary border-darken-1">Claim Resolved/Invalid Reason</th>
+                        <th class="border-primary border-darken-1">Claim Resolved Sub Reason</th>
+
                     </tr>
                     </thead>
                 </table>
@@ -414,6 +417,19 @@
                 placeholder:"Select Service Type",
                 allowClear:true,
             });
+
+            function addMonths(date, months) {
+                let d = new Date(date);
+                d.setMonth(d.getMonth() + months);
+                return d;
+            }
+
+            function subtractMonths(date, months) {
+                let d = new Date(date);
+                d.setMonth(d.getMonth() - months);
+                return d;
+            }
+
             $('#from_date').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -423,10 +439,17 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        $('#to_date').pickadate('picker').set('min', $('#from_date').pickadate('picker').get('select'));
+                        let fromDate = new Date(context.select);
+                        let toMinDate = new Date(fromDate); // same as from date
+                        let toMaxDate = addMonths(fromDate, 3); // max 3 months later
+
+                        let toPicker = $('#to_date').pickadate('picker');
+                        toPicker.set('min', toMinDate);
+                        toPicker.set('max', toMaxDate);
                     }
                 }
             });
+
             $('#to_date').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -436,10 +459,18 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        $('#from_date').pickadate('picker').set('max', $('#to_date').pickadate('picker').get('select'));
+                        let toDate = new Date(context.select);
+                        let fromMaxDate = new Date(toDate); // same as to date
+                        let fromMinDate = subtractMonths(toDate, 3); // min 3 months earlier
+
+                        let fromPicker = $('#from_date').pickadate('picker');
+                        fromPicker.set('max', fromMaxDate);
+                        fromPicker.set('min', fromMinDate);
                     }
                 }
             });
+
+
             var index_column = 0;
             var table = $('#datatable').DataTable({
                 scrollX: true, scrollY: '500px',
@@ -647,7 +678,9 @@
                     {data: 'resolved_date', name: 'crshr.created_at', class: 'align-middle resolved_date', text: 'Resolved Date', value: 'resolved_date', download: true},
                     {data: 'case_closed_remark', name: 'sjcc.remarks', class: 'align-middle case_closed_remark', text: 'Case Closed Remark', value: 'case_closed_remark', download: true},
                     {data: 'case_nature_complainant', name: 'crm_requests.case_nature_complainant', class: 'align-middle case_nature_complainant', text: 'Complainant', value: 'case_nature_complainant', download: true},
-                    {data: 'complainant_phone', name: 'crm_requests.complainant_phone', class: 'align-middle complainant_phone', text: 'Complainant Contact Number', value: 'complainant_phone', download: true}
+                    {data: 'complainant_phone', name: 'crm_requests.complainant_phone', class: 'align-middle complainant_phone', text: 'Complainant Contact Number', value: 'complainant_phone', download: true},
+                    {data: 'claim_resolved_invalid_reason', name: 'claim_resolved_invalid_reason', class: 'align-middle claim_resolved_invalid_reason', text: 'Claim Resolved/Invalid Reason', value: 'claim_resolved_invalid_reason', download: true},
+                    {data: 'claim_resolved_sub_reason', name: 'claim_resolved_sub_reason', class: 'align-middle claim_resolved_sub_reason', text: 'Claim Resolved Sub Reason', value: 'claim_resolved_sub_reason', download: true}
 
                 ],
                 rowCallback: function(row, data, index) {
