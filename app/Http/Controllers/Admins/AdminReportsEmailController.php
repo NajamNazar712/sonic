@@ -1404,8 +1404,8 @@ class AdminReportsEmailController extends Controller
             $writer->save($file_name);
             $bcc = ['anas.mazhar@logiserves.com'];
 
-            $to = ['syed.furqan@trax.pk', 'fawad.ahmed@trax.pk', 'adil.afzal@genesisholdings.co', 'wajiha.majeed@trax.pk', 'huzaifa.aamir@trax.pk'];
-
+            // $to = ['syed.furqan@trax.pk', 'fawad.ahmed@trax.pk', 'adil.afzal@genesisholdings.co', 'wajiha.majeed@trax.pk', 'huzaifa.aamir@trax.pk'];
+            $to = ['anas.mazhar@logiserves.com'];
             $mail = Mail::to($to)->bcc($bcc);
             $link = '<a href="' .  url('/') . '/' .$file_name_without_path . '" target="_blank">Report</a>';
             $mail->send(new ReportsEmail("Done Payment",'Done Payment Report Link '.' '.$link,null));
@@ -1629,7 +1629,8 @@ class AdminReportsEmailController extends Controller
                 $writer->save($file_name);
                 $bcc = ['anas.mazhar@logiserves.com'];
 
-                $to = ['syed.furqan@trax.pk', 'fawad.ahmed@trax.pk', 'adil.afzal@genesisholdings.co', 'wajiha.majeed@trax.pk', 'huzaifa.aamir@trax.pk'];
+                // $to = ['syed.furqan@trax.pk', 'fawad.ahmed@trax.pk', 'adil.afzal@genesisholdings.co', 'wajiha.majeed@trax.pk', 'huzaifa.aamir@trax.pk'];
+                $to = ['anas.mazhar@logiserves.com'];
                 $mail = Mail::to($to)->bcc($bcc);
                 $link = '<a href="' .  url('/') . '/' . $file_name_without_path . '" target="_blank">Report</a>';
                 $mail->send(new ReportsEmail("Retail Payment", 'Retail Payment Report Link ' . ' ' . $link, null));

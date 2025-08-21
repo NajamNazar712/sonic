@@ -41,7 +41,7 @@ class DonePaymentReport extends Command
      */
     public function handle()
     {
-        $date = Carbon::today()->format('Y-m-d');
+        $date = Carbon::today()->subDays(1)->format('Y-m-d');
         AdminReportsEmailController::done_payment($date . ' 00:00:00');
         //Log::channel('cronJobLog')->info('s ' .'report:donepayment Running');
     }

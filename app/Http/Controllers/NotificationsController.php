@@ -6016,13 +6016,13 @@ class NotificationsController extends Controller
 
                         $to = array();
                         $bcc = ['anas.mazhar@logiserves.com'];
-                        $to[] = 'syed.furqan@trax.pk';
-                        $to[] = 'm.sohail@trax.pk';
-                        $to[] = 'fawad.ahmed@trax.pk';
-                        $to[] = 'adil.afzal@genesisholdings.co'; 
-                        $to[] = 'wajiha.majeed@trax.pk';
-                        $to[] = 'huzaifa.aamir@trax.pk';
-
+                        // $to[] = 'syed.furqan@trax.pk';
+                        // $to[] = 'm.sohail@trax.pk';
+                        // $to[] = 'fawad.ahmed@trax.pk';
+                        // $to[] = 'adil.afzal@genesisholdings.co'; 
+                        // $to[] = 'wajiha.majeed@trax.pk';
+                        // $to[] = 'huzaifa.aamir@trax.pk';
+                        $to[] = 'anas.mazhar@logiserves.com';
                         self::email($subject, $body, $to, NULL, $bcc);
                     }
                 } else if ($id == 83) {
@@ -8368,13 +8368,14 @@ class NotificationsController extends Controller
 
                         $to = array();
                         $bcc = ['anas.mazhar@logiserves.com'];
-                        $to[] = 'syed.furqan@trax.pk';
-                        $to[] = 'm.sohail@trax.pk';
-                        $to[] = 'fawad.ahmed@trax.pk';
-                        $to[] = 'adil.afzal@genesisholdings.co'; 
-                        $to[] = 'wajiha.majeed@trax.pk';
-                        $to[] = 'huzaifa.aamir@trax.pk';
-                        $to[] = 'mohsin.khan@trax.pk';
+                        // $to[] = 'syed.furqan@trax.pk';
+                        // $to[] = 'm.sohail@trax.pk';
+                        // $to[] = 'fawad.ahmed@trax.pk';
+                        // $to[] = 'adil.afzal@genesisholdings.co'; 
+                        // $to[] = 'wajiha.majeed@trax.pk';
+                        // $to[] = 'huzaifa.aamir@trax.pk';
+                        // $to[] = 'mohsin.khan@trax.pk';
+                        $to[] = 'anas.mazhar@logiserves.com';
 
                         self::email($subject, $body, $to, NULL, $bcc);
                     }
