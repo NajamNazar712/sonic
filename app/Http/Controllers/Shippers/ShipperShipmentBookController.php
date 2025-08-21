@@ -162,6 +162,12 @@ class ShipperShipmentBookController extends Controller
         if ($hidden) {
             $user_shipping_info->hidden = 2;
         }
+        if($latitude) {
+            $user_shipping_info->latitude = $latitude;
+        }
+        if($longitude) {
+            $user_shipping_info->longitude = $longitude;
+        }
 
         $user_shipping_info->save();
         return $user_shipping_info->id;
@@ -640,7 +646,7 @@ class ShipperShipmentBookController extends Controller
                         }
                         UserShippingInfo::where('user_id', $user_id)->update(['default_address' => 0]);
 
-                        $pickup_address_id = $this->add_pickup_address($user_id, $request->input('new_pickup_address'), $request->input('new_pickup_person_of_contact'), $request->input('new_pickup_vendor'), $request->input('new_pickup_phone_number'), $request->input('new_pickup_email_address'), $pickup_city_id, $default,false,$request->input('latitude'),$request->input('longitude'));
+                        $pickup_address_id = $this->add_pickup_address($user_id, $request->input('new_pickup_address'), $request->input('new_pickup_person_of_contact'), $request->input('new_pickup_vendor'), $request->input('new_pickup_phone_number'), $request->input('new_pickup_email_address'), $pickup_city_id, $default,false,$request->input('new_pickup_latitude'),$request->input('new_pickup_longitude'));
                     } else {
                         if ($service_type_id != 5) {
                             $pickup_address_id = $request->input('pickup_address');
@@ -652,7 +658,7 @@ class ShipperShipmentBookController extends Controller
 
                             $pickup_city_id = $user_shipping_info->city_id;
                         } else {
-                            $pickup_address_id = $this->add_pickup_address($user_id, $request->input('consignee_address'), $request->input('consignee_name'), NULL, $request->input('consignee_phone_number_1'), $user_email_id, $request->input('consignee_city'), 0, TRUE,$request->input('latitude'),$request->input('longitude'));
+                            $pickup_address_id = $this->add_pickup_address($user_id, $request->input('consignee_address'), $request->input('consignee_name'), NULL, $request->input('consignee_phone_number_1'), $user_email_id, $request->input('consignee_city'), 0, TRUE,$request->input('consignee_latitude'),$request->input('consignee_longitude'));
 
                             $pickup_city_id = $request->input('consignee_city');
 

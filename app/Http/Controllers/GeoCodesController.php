@@ -19,6 +19,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\DataTables;
 
 class GeoCodesController extends Controller
@@ -646,5 +647,65 @@ class GeoCodesController extends Controller
 
         return redirect()->back();
 
+    }
+
+    public  function get_manual_shipment_geo_codes(Request $request)
+    {
+
+        $shipment_geo_code = ShipmentGeoCode::where('shipment_id',$request->shipment_id)->where('geo_code_type',2)
+            ->select('latitude','longitude')->first();
+
+        $lat = null;
+        $long = null;
+        if($shipment_geo_code){
+            $shipment_id = $shipment_geo_code->shipment_id;
+            $lat = $shipment_geo_code->latitude;
+            $long = $shipment_geo_code->longitude;
+        }
+
+        return response()->json(['status'=>0,'lat'=>$lat,'long'=>$long]);
+    }
+
+    public function update_manual_geo_codes(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'shipment_id' => 'required|integer|exists:shipments,id',
+            'lat'         => 'required|numeric',
+            'long'        => 'required|numeric',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 1,
+                'error'  => $validator->errors()->first()
+            ]);
+        }
+
+
+        // Check existing record
+        $geoCode = ShipmentGeoCode::where('shipment_id', $request->shipment_id)
+            ->where('geo_code_type', 2)
+            ->first();
+
+        if ($geoCode) {
+            // Update existing
+            $geoCode->latitude  = $request->lat;
+            $geoCode->longitude = $request->long;
+        } else {
+            // New insert
+            $geoCode = new ShipmentGeoCode();
+            $geoCode->shipment_id = $request->shipment_id;
+            $geoCode->latitude    = $request->lat;
+            $geoCode->longitude   = $request->long;
+            $geoCode->geo_code_type        = 2;
+
+        }
+        $geoCode->save();
+
+
+        return response()->json([
+            'status'  => 0,
+            'message' => 'Geo code saved successfully!'
+        ]);
     }
 }

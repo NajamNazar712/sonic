@@ -153,10 +153,10 @@
 												<input type="email" name="new_pickup_email_address" class="form-control" placeholder="Email Address*" data-rule-required="true" data-msg-required="Email Address is required">
 											</div>
 											<div class="form-group">
-												<input type="text" name="latitude" class="form-control" placeholder="Latitude">
+												<input type="text" name="new_pickup_latitude" class="form-control" placeholder="Latitude">
 											</div>
 											<div class="form-group">
-												<input type="text" name="longitude" class="form-control" placeholder="Longitude">
+												<input type="text" name="new_pickup_longitude" class="form-control" placeholder="Longitude">
 											</div>
 
 											<div class="form-group">
@@ -990,8 +990,11 @@
 
 					var latitude = $('#pickup_address').find(':selected').data('latitude');
 					var longitude = $('#pickup_address').find(':selected').data('longitude');
-					$("#pickup_latitude").val(latitude);
-					$("#pickup_longitude").val(longitude);
+					if (latitude !== undefined && latitude !== '' && longitude !== undefined && longitude !== '') {
+						$("#pickup_latitude").val(latitude);
+						$("#pickup_longitude").val(longitude);
+					}
+
 				}
 
 				consignee_city_id = $('#consignee_city').val();

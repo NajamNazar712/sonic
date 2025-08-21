@@ -271,6 +271,9 @@ Route::prefix('cod')->name('cod.')->group(function () {
 
         Route::post('shipper_visibility', 'Shippers\ShipperTrackingController@shipper_visibility')->name('shipper_visibility');
         Route::post('rider_information', 'Shippers\ShipperTrackingController@rider_information')->name('rider_information');
+        Route::post('get_shipment_geo_codes', 'Shippers\ShipperTrackingController@get_shipment_geo_codes')->name('get_shipment_geo_codes');
+        Route::post('update_geo_codes', 'Shippers\ShipperTrackingController@update_geo_codes')->name('update_geo_codes');
+
     });
     Route::prefix('order')->name('order.')->group(function () {
         Route::get('{order_id?}', 'Shippers\ShipperTrackingController@order_index')->name('index');

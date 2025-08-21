@@ -168,6 +168,8 @@ class APIController extends Controller
         'new_pickup_email_address' => 'New Pickup Email Address',
         'new_pickup_city_id' => 'New Pickup City',
         'make_default_address' => 'Make Default Address',
+        'new_pickup_address_latitude' => 'New Pickup Address Latitude',
+        'new_pickup_address_longitude' => 'New Pickup Address Longitude',
 
         'information_display' => 'Information Display',
         'consignee_city_id' => 'Consignee City ID',
@@ -275,6 +277,8 @@ class APIController extends Controller
         'new_pickup_city_id.required' => 'The new pickup city is required.',
         'new_pickup_city_id.exists' => 'The selected new pickup city is invalid.',
         'make_default_address.boolean' => 'The make default address field must be 0 or 1.',
+        'new_pickup_address_latitude.required' => 'The new pickup address Latitude is required.',
+        'new_pickup_address_longitude.required' => 'The new pickup address Longitude is required.',
 
     ];
 
@@ -915,6 +919,9 @@ class APIController extends Controller
                 Rule::exists('cities', 'id')->where('business_category_id', 1)
 //                    'origin_check',
             ];
+
+            $rules['new_pickup_address_latitude'] = ['required', 'integer'];
+            $rules['new_pickup_address_longitude'] = ['required', 'integer'];
         }
         else {
             $rules ['pickup_address_id'] = [
@@ -1024,7 +1031,7 @@ class APIController extends Controller
 
             //if pickup address id is null or not set then create new pickup address this code only for shipper app
             if($request->app_type==1 && (!$request->has('pickup_address_id') || is_null($request->pickup_address_id))) {
-                $pickup_address_id = ShipperShipmentBookController::add_pickup_address($user_id, $request->input('new_pickup_address'), $request->input('new_pickup_person_of_contact'), $request->input('new_pickup_vendor'), substr_replace($request->input('new_pickup_phone_number'), '-', 4, 0), $request->input('new_pickup_email_address'), $request->input('new_pickup_city_id'), $request->input('make_default_address'), false);
+                $pickup_address_id = ShipperShipmentBookController::add_pickup_address($user_id, $request->input('new_pickup_address'), $request->input('new_pickup_person_of_contact'), $request->input('new_pickup_vendor'), substr_replace($request->input('new_pickup_phone_number'), '-', 4, 0), $request->input('new_pickup_email_address'), $request->input('new_pickup_city_id'), $request->input('make_default_address'), false,$request->input('new_pickup_address_latitude'),$request->input('new_pickup_address_longitude'));
                 $request->merge([
                     'pickup_address_id' => $pickup_address_id
                 ]);
@@ -1049,6 +1056,14 @@ class APIController extends Controller
 
                 if (!$user_shipping_info->city->pickup) {
                     return response()->json(['status' => 1, 'message' => 'Pickup is not allowed for City ID #' . $user_shipping_info->city_id]);
+                }
+
+                //update geocodes existing pickup address if exist
+                if($request->filled('pickup_address_latitude') && $request->filled('pickup_address_longitude'))
+                {
+                    $user_shipping_info->latitude = $request->input('pickup_address_latitude');
+                    $user_shipping_info->longitude = $request->input('pickup_address_longitude');
+                    $user_shipping_info->save();
                 }
 
                 if ($service_type_id == 1) {
@@ -1214,6 +1229,14 @@ class APIController extends Controller
 
                 $pickup_delivery_address_id = $request->input('pickup_address_id');
                 $pickup_delivery_address = UserShippingInfo::find($pickup_delivery_address_id);
+
+                //update geocodes existing pickup address if exist
+                if($request->filled('pickup_address_latitude') && $request->filled('pickup_address_longitude'))
+                {
+                    $pickup_delivery_address->latitude = $request->input('pickup_address_latitude');
+                    $pickup_delivery_address->longitude = $request->input('pickup_address_longitude');
+                    $pickup_delivery_address->save();
+                }
 
                 $consignee_city_id = $pickup_delivery_address->city_id;
                 $consignee_name = $pickup_delivery_address->poc;
