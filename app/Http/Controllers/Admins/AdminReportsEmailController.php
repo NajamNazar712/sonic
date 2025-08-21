@@ -1404,7 +1404,7 @@ class AdminReportsEmailController extends Controller
             $writer->save($file_name);
             $bcc = ['anas.mazhar@logiserves.com'];
 
-            $to = ['syed.furqan@trax.pk', 'fawad.ahmed@trax.pk', 'adil.afzal@genesisholdings.co', 'wajiha.majeed@trax.pk', 'huzaifa.aamir@trax.pk'];
+            $to = ['syed.furqan@trax.pk', 'fawad.ahmed@trax.pk', 'adil.afzal@genesisholdings.co', 'wajiha.majeed@trax.pk', 'huzaifa.aamir@trax.pk', 'sahban.ghani@logiserves.com'];
             // $to = ['anas.mazhar@logiserves.com'];
             $mail = Mail::to($to)->bcc($bcc);
             $link = '<a href="' .  url('/') . '/' .$file_name_without_path . '" target="_blank">Report</a>';
@@ -1629,7 +1629,7 @@ class AdminReportsEmailController extends Controller
                 $writer->save($file_name);
                 $bcc = ['anas.mazhar@logiserves.com'];
 
-                $to = ['syed.furqan@trax.pk', 'fawad.ahmed@trax.pk', 'adil.afzal@genesisholdings.co', 'wajiha.majeed@trax.pk', 'huzaifa.aamir@trax.pk'];
+                $to = ['syed.furqan@trax.pk', 'fawad.ahmed@trax.pk', 'adil.afzal@genesisholdings.co', 'wajiha.majeed@trax.pk', 'huzaifa.aamir@trax.pk', 'sahban.ghani@logiserves.com'];
                 // $to = ['anas.mazhar@logiserves.com'];
                 $mail = Mail::to($to)->bcc($bcc);
                 $link = '<a href="' .  url('/') . '/' . $file_name_without_path . '" target="_blank">Report</a>';
