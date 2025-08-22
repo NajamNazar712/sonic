@@ -4172,9 +4172,13 @@ class AdminReportsController extends Controller
                             break;
 
                         case 'p_collection_amount':
-                            $amount = $shipment->p_collection_amount
-                                ?? $shipment->d_collection_amount
-                                ?? $shipment->s_collection_amount;
+                            if ($shipment->p_collection_amount != null && !empty($shipment->p_collection_amount)) {
+                                $amount = $shipment->p_collection_amount;
+                            } else if ($shipment->d_collection_amount != null && !empty($shipment->d_collection_amount)) {
+                                $amount = $shipment->d_collection_amount;
+                            } else {
+                                $amount = $shipment->s_collection_amount;
+                            }
                             $row[$field] = number_format($amount);
                             break;
 
