@@ -16046,7 +16046,7 @@ class AdminReportsController extends Controller
 // 4) Your original builder, with only the subqueries swapped to windowed versions
 // ------------------------------
         $shipments = DB::connection('reports')->table('shipments')
-            ->join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->leftJoin('users as u', 'shipments.user_id', '=', 'u.id')
 
             ->leftJoin('sale_person_tags as spt', function($join){
                 $join->on('spt.user_id','u.id')
@@ -16068,23 +16068,23 @@ class AdminReportsController extends Controller
             ->leftjoin('admins as scun', 'scun.id', '=', 'scu.user_id')
 
             ->leftJoin('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
-            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->leftJoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->leftJoin('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->leftJoin('cities as och', 'oc.hub_id', 'och.id') // origin city hub
-            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
-            ->join('cities as h', 'dc.hub_id', '=', 'h.id')
+            ->leftJoin('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->leftJoin('cities as h', 'dc.hub_id', '=', 'h.id')
             ->leftjoin('user_shipping_infos AS rsi', 'shipments.return_address_id', '=', 'rsi.id')
             ->leftjoin('cities AS rc', 'rsi.city_id', '=', 'rc.id')
             ->leftjoin('zones as z', 'z.id', '=', 'h.zone_id')
             ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
-            ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
+            ->leftJoin('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
 
             // second-latest status (windowed)
-            ->join('shipment_status as hss', function($join) use ($secondLatestStatusSql) {
+            ->leftJoin('shipment_status as hss', function($join) use ($secondLatestStatusSql) {
                 $join->on('hss.id', '=', DB::raw($secondLatestStatusSql));
             })
 
-            ->join('sub_category_segments as scs', 'u.sub_segment_id', '=', 'scs.id')
+            ->leftJoin('sub_category_segments as scs', 'u.sub_segment_id', '=', 'scs.id')
 
             // latest status=2 at origin (windowed)
             ->leftJoin('shipments_journey as sj', function ($join) use ($latestAtOriginSql) {
