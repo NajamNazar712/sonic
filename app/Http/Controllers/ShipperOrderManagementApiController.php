@@ -56,7 +56,7 @@ class ShipperOrderManagementApiController extends Controller
 
        return response()->json([
            'status' => 1,
-           'message' => 'Shipments Order not found!',
+           'message' => 'Orders not found!',
        ]);
 
    }

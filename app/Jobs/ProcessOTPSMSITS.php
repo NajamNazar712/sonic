@@ -47,7 +47,7 @@ class ProcessOTPSMSITS implements ShouldQueue
             }
         }
         catch(Exception $exception) {
-            $to = ['asad.ahsan@trax.pk'];
+            $to = ['mohsin.sajjad@logiserves.com'];
             $subject = '[Error] SMS API';
             $body = 'Error Exception.<br/>' . json_encode($exception->getMessage());
 

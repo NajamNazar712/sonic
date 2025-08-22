@@ -125,6 +125,12 @@ use Illuminate\Http\Request;
                 Route::get('return_shipments_list', 'APIController@return_shipments_list')->name('return_shipments_list');
             });
         });
+        Route::prefix('partner')->name('partner.')->group(function () {
+            Route::post('mark-prepaid', 'APIController@can_specific_user_change_amount')->name('can_specific_user_change_amount');
+        });
+
+
+
     });
 
 
@@ -722,8 +728,8 @@ use Illuminate\Http\Request;
 
             //finance Apis
             Route::prefix('finance')->name('finance.')->group(function (){
-                  Route::get('payments/{id?}','ShipperFinanceApiController@payment_list')->name('payments');
-            });
+                  Route::get('v2/payments/{id?}','ShipperFinanceApiController@payment_list')->name('payments');
+                  Route::get('v2/GetPaymentShipments','ShipperFinanceApiController@GetPaymentShipments')->name('getPaymentShipments');});
 
             // CRM Apis
             Route::prefix('crm')->name('crm.')->group(function (){
