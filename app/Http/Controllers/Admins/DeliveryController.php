@@ -7210,11 +7210,11 @@ class DeliveryController extends Controller
         $deliveryNoteNumbers= explode(',',$request->get('delivery_note_numbers'));
         $connection = 'reports_2';
         $deliveries = DB::connection($connection)->table('delivery_notes')
-            ->leftjoin('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
-            ->leftjoin('riders', 'delivery_notes.rider_id', '=', 'riders.id')
+            ->join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
+            ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
             ->leftjoin('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->leftjoin('admins as ccb', 'delivery_notes.cash_collected_by', '=', 'ccb.id')
-            ->leftjoin('admins', 'admins.id', '=', 'delivery_notes.admin_id')
+            ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
             ->leftjoin('rider_delivery_note_statuses as rdns', 'rdns.delivery_note_id', '=', 'delivery_notes.id')
             //commenting this as it has no issue now and also it is effecting sum of actual weights
