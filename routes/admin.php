@@ -324,10 +324,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('city/{id}/changes', 'Admins\AdminDashboardController@getAjaxCityChanges')->name('getAjaxCityChanges');
 
-       Route::prefix('cx_city_list')->name('cx_city_list.')->group(function () {
-            Route::get('', 'Admins\AdminDashboardController@CxCityView')->name('index');
+    //    Route::prefix('cx_city_list')->name('cx_city_list.')->group(function () {
+            Route::get('/cx_city', 'Admins\AdminDashboardController@CxCityView')->name('cx_city_list');
             // Route::get('list', 'Admins\AdminDashboardController@cx_city_list')->name('list');
-        });
+        // });
         //Route
         Route::prefix('route')->name('route.')->group(function () {
             Route::get('/', 'Admins\AdminDashboardController@routeView')->name('index');

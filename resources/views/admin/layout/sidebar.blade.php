@@ -2402,6 +2402,11 @@
                                                             href="{{ route('admin.management.city.index') }}">City</a>
                                                     </li>
                                                 @endif
+                                                @if (session('role_id') == 1 || in_array(1034, session('permissions')))
+                                                    <li><a class="menu-item"
+                                                            href="{{ route('admin.management.cx_city_list') }}">City</a>
+                                                    </li>
+                                                @endif
 
                                                 @if (session('role_id') == 1 || in_array(92, session('permissions')))
                                                     <li><a class="menu-item"

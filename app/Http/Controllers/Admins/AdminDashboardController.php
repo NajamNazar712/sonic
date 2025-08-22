@@ -11398,7 +11398,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 ';
                     if($cxListAction == 0 ){
 
-                        if (session('role_id') == 1 || in_array(90, session('permissions')) &&$cxListAction == 0) {
+                        if (session('role_id') == 1 || in_array(90, session('permissions')) && $cxListAction == 0) {
                             
                             if ($result->business_category_id == 1) {
                                 $dropdown .= '<button type="button" class="dropdown-item" data-target-id=' . $result->city_id . ' rel="editcity" data-toggle="modal" data-target="#editCity"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update City Status</div></button>';
