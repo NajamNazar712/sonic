@@ -3361,7 +3361,7 @@ class AdminReportsEmailController extends Controller
             ->select($select)
             ->groupBy('shipments.id')
             ->get();
-        
+
         // $receive_deliveries_report_array[] = ['Quality of Service Report'];
         $sales_array['header'] = 
         [
