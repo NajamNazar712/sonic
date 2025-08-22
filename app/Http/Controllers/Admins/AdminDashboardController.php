@@ -15387,7 +15387,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                                 Auth::id(),             
                                 $old_kam_id,                 
                                 $sales_commission_user->user_id, 
-                                $sales_tier->id                
+                                3                
                             );
                         }
                         }
@@ -15439,7 +15439,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                                     Auth::id(),             
                                     null,                 
                                     $sales_commission_user->user_id, 
-                                    $sales_tier->id                   
+                                    3                   
                                 );
                             }
                         }
