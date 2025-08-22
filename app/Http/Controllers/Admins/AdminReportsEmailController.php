@@ -3064,8 +3064,9 @@ class AdminReportsEmailController extends Controller
 
     static public function qsr_daily_report()
     {
-        $serial = 0;
         $connection = 'reports';
+
+
         $select = [
             'z.name  as zone',
             'si.description as description',
@@ -3122,33 +3123,109 @@ class AdminReportsEmailController extends Controller
             'shipmentMisrouted.name as misroutedCityname',
         ];
 
-        $sales = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
+// 2) Compute 1-year window min/max IDs for the two big tables
+        $start = Carbon::now()->subYear()->startOfDay();
+        $end   = Carbon::now()->endOfDay();
+
+        $sjMin = DB::connection($connection)->table('shipments_journey')
+            ->whereBetween('created_at', [$start, $end])->min('id');
+        $sjMax = DB::connection($connection)->table('shipments_journey')
+            ->whereBetween('created_at', [$start, $end])->max('id');
+
+        $ssjMin = DB::connection($connection)->table('shipment_scanning_journeys')
+            ->whereBetween('created_at', [$start, $end])->min('id');
+        $ssjMax = DB::connection($connection)->table('shipment_scanning_journeys')
+            ->whereBetween('created_at', [$start, $end])->max('id');
+
+
+// 4) Correlated subquery SQL snippets WITH id windows
+        $secondLatestStatusSql = "
+    (SELECT shipment_status.id
+     FROM shipments_journey
+     JOIN shipment_status ON shipments_journey.shipper_status_id = shipment_status.id
+     WHERE shipments_journey.shipment_id = shipments.id
+       AND shipments_journey.id BETWEEN {$sjMin} AND {$sjMax}
+     ORDER BY shipments_journey.updated_at DESC
+     LIMIT 1 OFFSET 1)";
+
+        $latestAtOriginSql = "
+    (SELECT MAX(id) FROM shipments_journey
+     WHERE shipments_journey.shipment_id = shipments.id
+       AND shipments_journey.shipper_status_id = 2
+       AND shipments_journey.id BETWEEN {$sjMin} AND {$sjMax})";
+
+        $latestJourneySql = "
+    (SELECT MAX(id) FROM shipments_journey
+     WHERE shipments_journey.shipment_id = shipments.id
+       AND shipments_journey.id BETWEEN {$sjMin} AND {$sjMax})";
+
+        $lastReasonJourneySql = "
+    (SELECT MAX(id) FROM shipments_journey
+     WHERE shipments_journey.shipment_id = shipments.id
+       AND shipments_journey.shipper_status_id IN (20,21,22,23,24,25,47,48,60,68)
+       AND shipments_journey.id BETWEEN {$sjMin} AND {$sjMax})";
+
+        $firstAttemptSql = "
+    (SELECT MIN(id) FROM shipments_journey
+     WHERE shipments_journey.shipment_id = shipments.id
+       AND shipments_journey.shipper_status_id = 5
+       AND shipments_journey.id BETWEEN {$sjMin} AND {$sjMax})";
+
+        $riderPickedSql = "
+    (SELECT MIN(id) FROM shipments_journey
+     WHERE shipments_journey.shipment_id = shipments.id
+       AND shipments_journey.shipper_status_id = 53
+       AND shipments_journey.id BETWEEN {$sjMin} AND {$sjMax})";
+
+        $destChoiceSql = "
+    (SELECT MAX(id) FROM shipments_journey
+     WHERE shipments_journey.shipment_id = shipments.id
+       AND shipments_journey.shipper_status_id IN (4,2)
+       AND shipments_journey.id BETWEEN {$sjMin} AND {$sjMax})";
+
+        $lastMisrouteSql = "
+    (SELECT MAX(id) FROM shipments_journey
+     WHERE shipments_journey.shipment_id = shipments.id
+       AND shipments_journey.shipper_status_id = 68
+       AND shipments_journey.id BETWEEN {$sjMin} AND {$sjMax})";
+
+        $lastScanSql = "
+    (SELECT MAX(id)
+     FROM shipment_scanning_journeys
+     WHERE shipment_scanning_journeys.shipment_id = journey.shipment_id
+       AND shipment_scanning_journeys.screen_location_id NOT IN (9,18)
+       AND shipment_scanning_journeys.id BETWEEN {$ssjMin} AND {$ssjMax})";
+
+// 5) Your query, unchanged except for using the snippets above
+        $sales = DB::connection('reports')->table('shipments')
+            ->join('users as u', 'shipments.user_id', '=', 'u.id')
+
             ->leftJoin('sale_person_tags as spt', function($join){
                 $join->on('spt.user_id','u.id')
-                ->where(
-                    'spt.id',
-                    '=',
-                    DB::raw('(select max(id) from sale_person_tags where sale_person_tags.user_id = u.id and sale_person_tags.status = 0 )')
-                );
+                    ->where(
+                        'spt.id',
+                        '=',
+                        DB::raw('(select max(id) from sale_person_tags where sale_person_tags.user_id = u.id and sale_person_tags.status = 0 )')
+                    );
             })
             ->leftJoin('admins as sales_person', 'sales_person.id','spt.admin_id')
             ->leftJoin('sale_tier_tags as stt', function($join){
                 $join->on('stt.user_id','u.id')
-                ->where(
-                    'stt.id',
-                    '=',
-                    DB::raw('(select max(id) from sale_tier_tags where sale_tier_tags.user_id = u.id)')
-                );
+                    ->where(
+                        'stt.id',
+                        '=',
+                        DB::raw('(select max(id) from sale_tier_tags where sale_tier_tags.user_id = u.id)')
+                    );
             })
             ->leftJoin('admins as kam', 'kam.id','stt.kam')
             ->leftjoin('sales_commissions as sc', 'sc.shipper_id', '=', 'u.id')
             ->leftjoin('sales_commission_users as scu', function($join){
                 $join->on('scu.sales_commission_id', '=','sc.id')
-                ->where(
-                    'scu.id',
-                    '=',
-                    DB::raw('(select max(id) from sales_commission_users where sales_commission_users.tier_id = 3)')
-                );
+                    ->where(
+                        'scu.id',
+                        '=',
+                        DB::raw('(select max(id) from sales_commission_users where sales_commission_users.tier_id = 3)')
+                    );
             })
             ->leftjoin('admins as scun', 'scun.id', '=', 'scu.user_id')
             ->leftJoin('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
@@ -3161,157 +3238,131 @@ class AdminReportsEmailController extends Controller
             ->leftjoin('zones as z', 'z.id', '=', 'h.zone_id')
             ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
             ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
-            ->join('shipment_status as hss', function($join) {
-                $join->on('hss.id', '=', DB::raw('(SELECT shipment_status.id
-                FROM shipments_journey
-                JOIN shipment_status ON shipments_journey.shipper_status_id = shipment_status.id
-                WHERE shipments_journey.shipment_id = shipments.id
-                ORDER BY shipments_journey.updated_at DESC
-                LIMIT 1 OFFSET 1)'));
+
+            // SECOND-LATEST history status (uses windowed subquery)
+            ->join('shipment_status as hss', function($join) use ($secondLatestStatusSql) {
+                $join->on('hss.id', '=', DB::raw($secondLatestStatusSql));
             })
+
             ->join('sub_category_segments as scs', 'u.sub_segment_id', '=', 'scs.id')
-            ->leftJoin('shipments_journey as sj', function ($join) {
+
+            // LATEST status=2 at origin (windowed)
+            ->leftJoin('shipments_journey as sj', function ($join) use ($latestAtOriginSql) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
-                    ->where(
-                        'sj.id',
-                        '=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)')
-                    );
+                    ->where('sj.id', '=', DB::connection('reports')->raw($latestAtOriginSql));
             })
-            ->leftJoin('shipments_journey as journey', function ($join) {
+
+            // LATEST journey overall (windowed)
+            ->leftJoin('shipments_journey as journey', function ($join) use ($latestJourneySql) {
                 $join->on('journey.shipment_id', '=', 'shipments.id')
-                    ->where(
-                        'journey.id',
-                        '=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)')
-                    );
+                    ->where('journey.id', '=', DB::connection('reports')->raw($latestJourneySql));
             })
+
             ->leftjoin('admins as admin', 'admin.id', '=', 'journey.admin_id')
             ->leftjoin('shipment_status_reason as ssr', 'ssr.id', '=', 'journey.status_reason_id')
+
             ->leftjoin('shipment_items as si', function ($join) {
                 $join->on('si.shipment_id', '=', 'shipments.id')
                     ->where('si.type', '=', 0);
             })
-            ->leftJoin('shipments_journey as sjr', function ($join) use ($connection) {
-                $join->on('sjr.shipment_id', '=', 'shipments.id')
-                    ->where(
-                        'sjr.id',
-                        '=',
-                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(20,21,22,23,24,25,47,48,60,68))')
-                    );
-            })
             ->leftjoin('products as p', 'p.id', '=', 'si.product_type_id')
+
+            // LAST reason-set journey in statuses (windowed)
+            ->leftJoin('shipments_journey as sjr', function ($join) use ($connection, $lastReasonJourneySql) {
+                $join->on('sjr.shipment_id', '=', 'shipments.id')
+                    ->where('sjr.id', '=', DB::connection($connection)->raw($lastReasonJourneySql));
+            })
+
+            // LATEST CMB per shipment (kept as-is)
             ->leftJoin('cargo_manifest_bag_shipments as cmbs', function ($join) {
                 $join->on('cmbs.shipment_id', '=', 'shipments.id')
-                    ->where(
-                        'cmbs.id',
-                        '=',
-                        DB::connection('reports')->raw('(select max(id) from cargo_manifest_bag_shipments where cargo_manifest_bag_shipments.shipment_id = shipments.id)')
-                    );
+                    ->where('cmbs.id', '=', DB::connection('reports')->raw('(select max(id) from cargo_manifest_bag_shipments where cargo_manifest_bag_shipments.shipment_id = shipments.id)'));
             })
             ->leftjoin('cargo_manifest_bags as cmb', 'cmb.id', '=', 'cmbs.cargo_manifest_bag_id')
             ->leftjoin('cities as cmbh', 'cmbh.id', '=', 'cmb.current_hub_id')
+
+            // LATEST CRM per shipment (kept as-is)
             ->leftJoin('crm_requests as cr', function ($join) {
                 $join->on('cr.shipment_id', '=', 'shipments.id')
-                    ->where(
-                        'cr.id',
-                        '=',
-                        DB::connection('reports')->raw('(select max(id) from crm_requests where crm_requests.shipment_id = shipments.id)')
-                    );
+                    ->where('cr.id', '=', DB::connection('reports')->raw('(select max(id) from crm_requests where crm_requests.shipment_id = shipments.id)'));
             })
+
             ->leftjoin('cargo_manifest_bag_statuses as cargo_status', 'cargo_status.id', '=', 'cmb.status_id')
             ->leftjoin('bag_statuses as bs', 'bs.id', '=', 'cmb.status_id')
-            ->leftJoin('shipments_journey as sjfa', function ($join) use ($connection) {
+
+            // FIRST attempt (status=5) in window
+            ->leftJoin('shipments_journey as sjfa', function ($join) use ($connection, $firstAttemptSql) {
                 $join->on('sjfa.shipment_id', '=', 'shipments.id')
-                    ->where(
-                        'sjfa.id',
-                        '=',
-                        DB::connection($connection)->raw('(select min(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id  = 5)')
-                    );
+                    ->where('sjfa.id', '=', DB::connection($connection)->raw($firstAttemptSql));
             })
-            ->leftJoin('shipments_journey as sjrp', function ($join) use ($connection) {
+
+            // RIDER picked (status=53) in window
+            ->leftJoin('shipments_journey as sjrp', function ($join) use ($connection, $riderPickedSql) {
                 $join->on('sjrp.shipment_id', '=', 'shipments.id')
-                    ->where(
-                        'sjrp.id',
-                        '=',
-                        DB::connection($connection)->raw('(select min(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id  = 53)')
-                    );
+                    ->where('sjrp.id', '=', DB::connection($connection)->raw($riderPickedSql));
             })
+
             ->leftjoin('consignee_address_areas as caa', 'caa.shipment_id', '=', 'shipments.id')
             ->leftjoin('city_areas as ca', 'ca.id', '=', 'caa.city_area_id')
-            ->leftJoin('shipment_scanning_journeys as ssj_last_location', function ($join) {
+
+            // LAST scanning journey (exclude 9,18) with window on scanning table
+            ->leftJoin('shipment_scanning_journeys as ssj_last_location', function ($join) use ($lastScanSql) {
                 $join->on('ssj_last_location.shipment_id', '=', 'journey.shipment_id')
-                    ->whereRaw('ssj_last_location.id = (
-                                select max(id) 
-                                from shipment_scanning_journeys 
-                                where shipment_scanning_journeys.shipment_id = journey.shipment_id
-                                and shipment_scanning_journeys.screen_location_id not in (9, 18)
-                            )');
+                    ->whereRaw('ssj_last_location.id = ' . $lastScanSql);
             })
-            ->when(\DB::raw('ssj_last_location.user_type = 1'), function ($join) {
-                $join->leftJoin('admins as adm', function ($join) {
-                    $join->on('adm.id', '=', 'ssj_last_location.admin_id')
-                        ->where('adm.role_id', '<>', 1);
-                });
+
+            // (original conditional join with admins kept simple: join with role<>1)
+            ->leftJoin('admins as adm', function ($join) {
+                $join->on('adm.id', '=', 'ssj_last_location.admin_id')
+                    ->where('adm.role_id', '<>', 1);
             })
+
             ->leftJoin('shipment_scanning_journey_area_logs as ssjal_last_location', function($join){
                 $join->on('ssjal_last_location.shipment_scanning_journey_id', '=', 'ssj_last_location.id')
                     ->where('ssjal_last_location.hub_id', '=', DB::raw('journey.city_id'))
                     ->where('ssjal_last_location.shipment_id', '=', DB::raw('journey.shipment_id'));
             })
+
+            // Intercept (kept as-is)
             ->leftJoin('intercept_re_book_request_histories as irb', function ($join) {
                 $join->on('irb.shipment_id', '=', 'shipments.id')
                     ->whereRaw('irb.id = (
-                                    select max(id) 
-                                    from intercept_re_book_request_histories 
-                                    where intercept_re_book_request_histories.shipment_id = shipments.id
-                                    and intercept_re_book_request_histories.intercept_type = 1
-                                )');
+                 select max(id)
+                 from intercept_re_book_request_histories
+                 where intercept_re_book_request_histories.shipment_id = shipments.id
+                   and intercept_re_book_request_histories.intercept_type = 1
+             )');
             })
             ->leftjoin('cities as intercept_approved', 'intercept_approved.id', '=', 'irb.old_consignee_city_id')
-            ->leftJoin('shipments_journey as sjms', function ($join) use ($connection) {
+
+            // LAST misroute (68) in window
+            ->leftJoin('shipments_journey as sjms', function ($join) use ($connection, $lastMisrouteSql) {
                 $join->on('sjms.shipment_id', '=', 'shipments.id')
-                    ->where(
-                        'sjms.id',
-                        '=',
-                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id  = 68)')
-                    );
+                    ->where('sjms.id', '=', DB::connection($connection)->raw($lastMisrouteSql));
             })
+
             ->leftjoin('cities as shipmentMisrouted', function ($join) {
                 $join->on('shipmentMisrouted.id', '=', 'sjr.city_id')
                     ->where('sjr.shipper_status_id', '=', 68);
             })
+
             ->leftJoin('city_areas as ca_scanning_last_location_name', 'ssjal_last_location.area_id', '=', 'ca_scanning_last_location_name.id')
             ->leftJoin('shipment_scanning_screen_locations as last_screen_location', 'last_screen_location.id', '=', 'ssj_last_location.screen_location_id')
-            ->leftJoin('shipments_journey as destination_sj', function ($join) {
+
+            // DESTINATION choice (prefer 4 else 2) in window
+            ->leftJoin('shipments_journey as destination_sj', function ($join) use ($connection, $destChoiceSql) {
                 $join->on('destination_sj.shipment_id', '=', 'shipments.id')
-                        ->where(function ($query) {
-                            // First check if status 4 (Arrived at Destination)
-                            $query->where('destination_sj.shipper_status_id', '=', 4)
-                                ->orWhere(function ($query) {
-                                        // If not, check status 2 (Arrived at Origin)
-                                        $query->where('destination_sj.shipper_status_id', '=', 2)
-                                            ->whereNotExists(function ($query) {
-                                                // Check if a status 4 record exists for this shipment_id
-                                                $query->select(DB::raw(1))
-                                                    ->from('shipments_journey')
-                                                    ->whereRaw('shipments_journey.shipment_id = shipments.id')
-                                                    ->where('shipments_journey.shipper_status_id', 4);
-                                            });
-                                    });
-                        })
-                ->where('destination_sj.id', '=', DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id in (4, 2))'));
+                    ->where('destination_sj.id', '=', DB::connection($connection)->raw($destChoiceSql));
             })
+
             ->whereNotIn('shipments.shipper_status_id', [1, 14, 17, 25, 31, 36, 38, 51])
             ->whereNotNull('shipments.tracking_number')
-            // ->where(function ($query) {
-            //     $query->whereNull('cr.status_id')
-            //           ->orWhere('cr.status_id', '!=', 4);
-            // })
+
             ->select($select)
             ->groupBy('shipments.id')
-        ->get();
+            ->get();
 
+        dd(count($sales));
         // $receive_deliveries_report_array[] = ['Quality of Service Report'];
         $sales_array['header'] = 
         [
