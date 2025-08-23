@@ -15130,18 +15130,33 @@ class AdminReportsController extends Controller
     {
 
 
-            $from = '';
-            $to = '';
+        // Build time window (21:00 three months before -> 08:59:59 on $search_date)
+        $fromTs = Carbon::parse($search_date)->subMonths(3)->setTime(21, 0, 0);
+        $toTs   = Carbon::parse($search_date)->setTime(8, 59, 59);
 
-            $from = Carbon::parse($search_date)->subMonths(3)->setTime(21, 00, 00)->toDateTimeString();
-            $to = Carbon::parse($search_date)->setTime(8, 59, 59)->toDateTimeString();
+// Always use the same connection
+            $regions = DB::connection('reports_2')
+                ->table('regions')->select('id','name')->pluck('name','id')->toArray();
 
-            $regions = DB::connection('reports_2')->table('regions')->select('id','name')->pluck('name','id')->toArray();
             $ops_data = [];
 
-            $shipment_journey_min_id = DB::table('shipments_journey')->whereDate('created_at', DB::raw('DATE("' . $from . '")'))->min('id');
-            $shipmentJourneyMaxId = DB::table('shipments_journey')->whereDate('created_at', DB::raw('DATE("' . $to . '")'))->max('id');
+// Fast min id at/after $fromTs
+            $shipmentJourneyMinId = DB::connection('reports_2')
+                ->table('shipments_journey')
+                ->where('created_at', '>=', $fromTs)
+                ->orderBy('created_at', 'asc')
+                ->orderBy('id', 'asc')
+                ->limit(1)
+                ->value('id');
 
+// Fast max id up to $toTs within the same window
+            $shipmentJourneyMaxId = DB::connection('reports_2')
+                ->table('shipments_journey')
+                ->whereBetween('created_at', [$fromTs, $toTs])
+                ->orderBy('created_at', 'desc')
+                ->orderBy('id', 'desc')
+                ->limit(1)
+                ->value('id');
 
             $shipments = DB::connection('reports')->table('shipments')
                 ->leftJoin('shipments_journey as sj', function ($join) use ($shipment_journey_min_id,$shipmentJourneyMaxId) {
