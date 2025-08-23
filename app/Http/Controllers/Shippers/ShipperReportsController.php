@@ -624,98 +624,171 @@ class ShipperReportsController extends Controller
         $connection = 'reports';
 
         $from = $request->get('search_date_from');
-        $to = $request->get('search_date_to');
-        $from_id = null;
-        $to_id = null;
-        $sj_from_id = 168982787;
-        if ($from != null && $to != null) {
+        $to   = $request->get('search_date_to');
 
-            $from_id = DB::connection('reports')->table('shipments')->select('id')->where('created_at', '>=', $from);
-            if ($from_id->exists()) {
-                $from_id = $from_id->first()->id;
+        $fromId = null;
+        $toId   = null;
+        $sjFromId = null;
 
-                $to_id = DB::connection('reports')->table('shipments')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
+        if ($from && $to) {
+            // Single scan to get both MIN(id), MAX(id) for shipments in the window
+            $bounds = DB::connection($connection)
+                ->table('shipments')
+                ->whereBetween('created_at', [$from, $to])
+                ->selectRaw('MIN(id) AS min_id, MAX(id) AS max_id')
+                ->first();
 
-                if ($to_id->exists()) {
-                    $to_id = $to_id->first()->id;
-                }
+            $fromId = $bounds?->min_id;
+            $toId   = $bounds?->max_id;
+
+            // Single call to get the earliest SJ id at/after $from
+            $sjFromId = DB::connection($connection)
+                ->table('shipments_journey')
+                ->where('created_at', '>=', $from)
+                ->min('id');
+
+            // Fallback only if null (no rows >= $from)
+            if (!$sjFromId) {
+                $sjFromId = DB::connection($connection)
+                    ->table('shipments_journey')
+                    ->where('created_at', '>=', \Carbon\Carbon::today()->startOfYear())
+                    ->min('id');
             }
-            $sj_from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
-            if ($sj_from_id->exists()) {
-                $sj_from_id = $sj_from_id->first()->id;
-            }
-            else{
-                $sj_from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', Carbon::today()->startOfYear());
-                if($sj_from_id->exists()){
-                    $sj_from_id = $sj_from_id->first()->id;
-                }
-            }
 
+            // Hard fallback if still null (empty table)
+            if (!$sjFromId) {
+                $sjFromId = 0;
+            }
+        } else {
+            // If no date provided, use a safe default for sjFromId
+            $sjFromId = 0;
         }
-        $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'u.id', '=', 'shipments.user_id')
-            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+
+        $shipments = DB::connection($connection)->table('shipments')
+            ->leftJoin('users as u', 'u.id', '=', 'shipments.user_id')
+            ->leftJoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->leftJoin('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->leftJoin('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
-            ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=', 'sps.id')
-            ->leftJoin('shipments_journey as sj', function ($join) use ($connection, $sj_from_id) {
+            ->leftJoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=', 'sps.id')
+
+            // Arrived at Origin (status_id = 2), verified, and bounded by sjFromId
+            ->leftJoin('shipments_journey as sj', function ($join) use ($connection, $sjFromId) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.id', '=',
-                        DB::connection($connection)->raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2 and shipments_journey.verification = 1 and shipments_journey.id >= $sj_from_id)"));
-            })
-            ->leftJoin('shipments_journey as cj', function ($join) use ($connection , $sj_from_id) {
-                $join->on('cj.shipment_id', '=', 'shipments.id')
-                    ->where('cj.id', '=',
-                        DB::connection($connection)->raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.verification = 1 and shipments_journey.id >= $sj_from_id)"));
-            })
-            ->leftjoin('shipment_status as ss', 'ss.id', '=', 'cj.shipper_status_id')
-            ->leftjoin('shipment_items as si', function ($join) {
-                $join->on('si.shipment_id', '=', 'shipments.id')
-                    ->where('si.type', '=', 0);
-            })
-            ->leftjoin('products as p', 'p.id', '=', 'si.product_type_id')
-            ->leftJoin('shipments_journey as sjrr', function ($join) use ($connection, $sj_from_id) {
-                $join->on('sjrr.shipment_id', '=', 'shipments.id')
-                    ->whereIn('shipments.shipper_status_id', [20, 21, 22, 23, 24, 25, 44, 47, 48, 57, 60])
-                    ->where('sjrr.id', '=',
-                        DB::connection($connection)->raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id IN (12, 20) and shipments_journey.verification = 1 and shipments_journey.status_reason_id is not null and shipments_journey.id >= $sj_from_id)"));
-            })
-            ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sjrr.status_reason_id')
-            ->leftJoin('shipments_journey as sjrp', function ($join) use($connection, $sj_from_id) {
-                $join->on('sjrp.shipment_id', '=', 'shipments.id')
-                    ->where(
-                        'sjrp.id',
-                        '=',
-                        DB::connection($connection)->raw("(select min(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id  = 53 and shipments_journey.id >= $sj_from_id)")
+                        DB::connection($connection)->raw(
+                            "(SELECT MAX(id)
+                           FROM shipments_journey
+                          WHERE shipments_journey.shipment_id = shipments.id
+                            AND shipments_journey.shipper_status_id = 2
+                            AND shipments_journey.verification = 1
+                            AND shipments_journey.id >= {$sjFromId})"
+                        )
                     );
             })
-            ->select(['u.name as user_name', 'shipments.id as shipment_id', 'shipments.order_id', 'shipments.tracking_number', 'shipments.amount as collection_amount', 'shipments.actual_weight', 
-            'shipments.weight_charges', 'shipments.cash_handling_charges', 'ss.name as current_status', 'cj.updated_at as current_status_date', 'sps.name as payment_status', 'bt.booking_type as service_type', 
-            'p.product_name', 'si.description', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'shipments.consignee_name as consignee_name', 
-            'shipments.consignee_phone_number_1 as consignee_phone', 'ssr.name as return_reason', 'shipments.created_at as booking_date','sjrp.created_at as rider_picked_status_date']);
 
-        if (session('user_type') == 2) {
-            if (session('restriction') == 1) {
-                $shipments = $shipments->join('substitute_user_shipments as sus', function ($join) {
-                    $join->on('sus.shipment_id', '=', 'shipments.id')
-                        ->where('sus.substitute_user_id', '=', Auth::id());
-                });
+            // Current journey row (latest verified), bounded by sjFromId
+            ->leftJoin('shipments_journey as cj', function ($join) use ($connection, $sjFromId) {
+                $join->on('cj.shipment_id', '=', 'shipments.id')
+                    ->where('cj.id', '=',
+                        DB::connection($connection)->raw(
+                            "(SELECT MAX(id)
+                           FROM shipments_journey
+                          WHERE shipments_journey.shipment_id = shipments.id
+                            AND shipments_journey.verification = 1
+                            AND shipments_journey.id >= {$sjFromId})"
+                        )
+                    );
+            })
+            ->leftJoin('shipment_status as ss', 'ss.id', '=', 'cj.shipper_status_id')
+
+            // Items / product
+            ->leftJoin('shipment_items as si', function ($join) {
+                $join->on('si.shipment_id', '=', 'shipments.id')
+                    ->where('si.type', 0);
+            })
+            ->leftJoin('products as p', 'p.id', '=', 'si.product_type_id')
+
+            // Return reason (latest of specific statuses), bounded by sjFromId
+            ->leftJoin('shipments_journey as sjrr', function ($join) use ($connection, $sjFromId) {
+                $join->on('sjrr.shipment_id', '=', 'shipments.id')
+                    ->where('sjrr.id', '=',
+                        DB::connection($connection)->raw(
+                            "(SELECT MAX(id)
+                           FROM shipments_journey
+                          WHERE shipments_journey.shipment_id = shipments.id
+                            AND shipments_journey.shipper_status_id IN (12, 20)
+                            AND shipments_journey.verification = 1
+                            AND shipments_journey.status_reason_id IS NOT NULL
+                            AND shipments_journey.id >= {$sjFromId})"
+                        )
+                    );
+            })
+            ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sjrr.status_reason_id')
+
+            // First Rider Picked (53), bounded by sjFromId
+            ->leftJoin('shipments_journey as sjrp', function ($join) use ($connection, $sjFromId) {
+                $join->on('sjrp.shipment_id', '=', 'shipments.id')
+                    ->where('sjrp.id', '=',
+                        DB::connection($connection)->raw(
+                            "(SELECT MIN(id)
+                           FROM shipments_journey
+                          WHERE shipments_journey.shipment_id = shipments.id
+                            AND shipments_journey.shipper_status_id = 53
+                            AND shipments_journey.id >= {$sjFromId})"
+                        )
+                    );
+            })
+
+            ->select([
+                'u.name as user_name',
+                'shipments.id as shipment_id',
+                'shipments.order_id',
+                'shipments.tracking_number',
+                'shipments.amount as collection_amount',
+                'shipments.actual_weight',
+                'shipments.weight_charges',
+                'shipments.cash_handling_charges',
+                'ss.name as current_status',
+                'cj.updated_at as current_status_date',
+                'sps.name as payment_status',
+                'bt.booking_type as service_type',
+                'p.product_name',
+                'si.description',
+                'sj.created_at as arrival_date',
+                'oc.name as origin',
+                'dc.name as destination',
+                'shipments.consignee_name as consignee_name',
+                'shipments.consignee_phone_number_1 as consignee_phone',
+                'ssr.name as return_reason',
+                'shipments.created_at as booking_date',
+                'sjrp.created_at as rider_picked_status_date',
+            ]);
+
+        // Substitute users logic (unchanged)
+        if (session('user_type') == 2 && session('restriction') == 1) {
+            $shipments->join('substitute_user_shipments as sus', function ($join) {
+                $join->on('sus.shipment_id', '=', 'shipments.id')
+                    ->where('sus.substitute_user_id', '=', Auth::id());
+            });
+        }
+
+        // Date filter on shipments (use both time and id bounds if we have them)
+        if ($from && $to) {
+            $shipments->whereBetween('shipments.created_at', [$from, $to]);
+            if ($fromId && $toId) {
+                $shipments->whereBetween('shipments.id', [$fromId, $toId]);
             }
         }
-        if($from != null && $to != null){
-            $shipments = $shipments->whereBetween('shipments.created_at', [$from, $to]);
 
-            if($from_id != null && $to_id != null){
-                $shipments->where('shipments.id', '>=', $from_id)
-                    ->where('shipments.id', '<=', $to_id);
-            }
-        }
-
+        // User filter
         if ($user = $request->get('search_user')) {
             $shipments->where('shipments.user_id', $user);
         } else {
             $shipments->where('shipments.user_id', session('user_id'));
         }
+
+        // Optional filters
         if ($origin = $request->get('search_origin')) {
             $shipments->where('oc.id', '=', $origin);
         }
@@ -723,10 +796,11 @@ class ShipperReportsController extends Controller
             $shipments->where('dc.id', '=', $destination);
         }
 
+        // Cards filter (unchanged)
         if ($card = $request->get('cards_filter')) {
             switch ($card) {
                 case 'total':
-                    $shipments->whereIn('shipments.shipper_status_id', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19, 49, 52, 14, 16, 30, 36, 37, 39, 40, 41, 47, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 42, 43, 44, 45, 46, 50, 17]);
+                    $shipments->whereIn('shipments.shipper_status_id', [1,2,3,4,5,6,7,8,9,10,11,12,13,15,18,19,49,52,14,16,30,36,37,39,40,41,47,20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46,50,17]);
                     break;
                 case 'booked':
                     $shipments->where('shipments.shipper_status_id', 1);
@@ -735,34 +809,33 @@ class ShipperReportsController extends Controller
                     $shipments->whereIn('shipments.shipper_status_id', [2, 3, 4]);
                     break;
                 case 'delivered':
-                    $shipments->whereIn('shipments.shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
+                    $shipments->whereIn('shipments.shipper_status_id', [14,16,30,36,37,39,40,41,47]);
                     break;
                 case 'returned':
-                    $shipments->whereIn('shipments.shipper_status_id', [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 42, 43, 44, 45, 46, 50]);
+                    $shipments->whereIn('shipments.shipper_status_id', [20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46,50]);
                     break;
                 case 'in_process':
-                    $shipments->whereIn('shipments.shipper_status_id', [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19, 49, 52]);
+                    $shipments->whereIn('shipments.shipper_status_id', [5,6,7,8,9,10,11,12,13,15,18,19,49,52]);
                     break;
                 case 'cancelled':
                     $shipments->where('shipments.shipper_status_id', 17);
                     break;
             }
-
         }
 
-        $datatable = Datatables::of($shipments)
-            ->addColumn('tracking_number_link', function ($shipments) {
+        $datatable = \DataTables::of($shipments)
+            ->addColumn('tracking_number_link', function ($row) {
                 $route = route('cod.tracking.index');
-                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+                return "<u><a href='{$route}?tracking_number={$row->tracking_number}' class='tracking' target='_blank'>{$row->tracking_number}</a></u>";
             })
-            ->editColumn('collection_amount', function ($shipments) {
-                return number_format($shipments->collection_amount);
-            })->rawColumns(['tracking_number_link']);
-
+            ->editColumn('collection_amount', function ($row) {
+                return number_format($row->collection_amount);
+            })
+            ->rawColumns(['tracking_number_link']);
 
         return $datatable->make(true);
-
     }
+
 
     public function adjustments_index()
     {
