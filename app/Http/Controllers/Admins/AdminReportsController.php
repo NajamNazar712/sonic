@@ -15955,33 +15955,44 @@ class AdminReportsController extends Controller
             'shipmentMisrouted.name as misroutedCityname',
         ];
 
-// ------------------------------
-// 1) Resolve date window
-//    Use journey.created_at filter if present, else last 12 months
-// ------------------------------
+// 1) Date window (exclusive end)
         $search_from = $request->get('search_from');
         $search_to   = $request->get('search_to');
 
         if ($search_from && $search_to) {
             $start = Carbon::parse($search_from)->startOfDay();
-            $end   = Carbon::parse($search_to)->endOfDay();
+            $end   = Carbon::parse($search_to)->addDay()->startOfDay(); // exclusive
         } else {
             $start = Carbon::now()->subMonths(12)->startOfDay();
-            $end   = Carbon::now()->endOfDay();
+            $end   = Carbon::now()->addDay()->startOfDay(); // exclusive
         }
 
-// ------------------------------
-// 2) Compute min/max id windows per big table
-// ------------------------------
+// 2) Min/Max IDs for shipments_journey
         $sjMin = DB::connection($connection)->table('shipments_journey')
-            ->whereBetween('created_at', [$start, $end])->min('id');
-        $sjMax = DB::connection($connection)->table('shipments_journey')
-            ->whereBetween('created_at', [$start, $end])->max('id');
+            ->where('created_at', '>=', $start)
+            ->where('created_at', '<',  $end)
+            ->orderBy('created_at', 'asc')->orderBy('id', 'asc')
+            ->limit(1)->value('id');
 
+        $sjMax = DB::connection($connection)->table('shipments_journey')
+            ->where('created_at', '>=', $start)
+            ->where('created_at', '<',  $end)
+            ->orderBy('created_at', 'desc')->orderBy('id', 'desc')
+            ->limit(1)->value('id');
+
+// 3) Min/Max IDs for shipment_scanning_journeys
         $ssjMin = DB::connection($connection)->table('shipment_scanning_journeys')
-            ->whereBetween('created_at', [$start, $end])->min('id');
+            ->where('created_at', '>=', $start)
+            ->where('created_at', '<',  $end)
+            ->orderBy('created_at', 'asc')->orderBy('id', 'asc')
+            ->limit(1)->value('id');
+
         $ssjMax = DB::connection($connection)->table('shipment_scanning_journeys')
-            ->whereBetween('created_at', [$start, $end])->max('id');
+            ->where('created_at', '>=', $start)
+            ->where('created_at', '<',  $end)
+            ->orderBy('created_at', 'desc')->orderBy('id', 'desc')
+            ->limit(1)->value('id');
+
 
 
 
