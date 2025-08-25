@@ -517,7 +517,7 @@ class ShipperReceivingSheetController extends Controller
                             <td class="color primary"><strong>Destination</strong></td>
                             <td class="color primary"><strong>Estimated Weight</strong></td>
                             ';
-            if(in_array(session('user_id'),[6693,12412])){
+            if(in_array(session('user_id'),[6693,12412, 49251])){
                 $shipment_details .=
                     ' <td class="color primary"><strong>Actual Weight</strong></td> ';
             }
