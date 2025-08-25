@@ -55,6 +55,18 @@
                     </div>
                 </div>
 
+                <div class="row mb-2">
+                    <div class="col-4"></div>
+                    <div class="col-4">
+                        <div class="form-group">
+                            <input type="text" name="delivery_note_numbers" class="delivery_note_numbers form-control" placeholder="Delivery Note Number(s)" data-tags-input-name="delivery_note_number">
+                        </div>
+                    </div>
+                    <div class="col-2">
+                        <button type="button" id="search_filter_btn" class="mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                    </div>
+                </div>
+
                 <div class="col justify-content-end mb-3">
                     <div class="card-header">
                         <div class="heading-elements">
@@ -204,8 +216,14 @@
     <script type="text/javascript">
 
 
+
+
         $(document).ready(function () {
 
+
+            $('#search_filter_btn').on('click',function () {
+                table.draw();
+            });
             $('#search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -410,6 +428,7 @@
                     d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                 }
             },
+            deferLoading: 0,
             rowId: 'shId',
             order: [[25, 'desc']],
             columns: [
