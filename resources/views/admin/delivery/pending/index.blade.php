@@ -26,10 +26,30 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-3" style="margin-top: 30px;">
+                    <div class="col-4">
+                        <div class="form-group input-group ml">
+                            <div class="input-group-prepend">
+                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="la la-calendar-o"></span>
+                                            </span>
+                            </div>
+                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" data-value="{{ Carbon\Carbon::now()->subMonth(6) }}" placeholder="Search Date (From)">
+                        </div>
+                    </div>
+                    <div class="col-4 ">
+                        <div class="form-group input-group ml">
+                            <div class="input-group-prepend">
+                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="la la-calendar-o"></span>
+                                            </span>
+                            </div>
+                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" data-value="{{ Carbon\Carbon::today() }}" placeholder="Search Date (To)">
+                        </div>
+                    </div>
+                    <div class="col-3" >
                         <div class="form-group">
                             <select name="area" id="search_area" class="select2 form-control " style="width: 100%; margin-top: 50px;">
-                                
+
                             </select>
                         </div>
                     </div>
@@ -71,7 +91,7 @@
                         <th class="border-primary border-darken-1">Shipping Mode</th>
                         <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Status</th>
-                        
+
                         <th class="border-primary border-darken-1">Last Location Screen Name</th>
                         <th class="border-primary border-darken-1">Entry Method</th>
                         <th class="border-primary border-darken-1">Sub Hub</th>
@@ -100,6 +120,8 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
 
 
     <style>
@@ -159,7 +181,7 @@
         .selectize-control .selectize-input .item {
             word-break: break-all;
         }
-        
+
         .green-row {
             background-color: #90ee90;
         }
@@ -169,6 +191,9 @@
 @endsection
 
 @section('js')
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
@@ -177,6 +202,39 @@
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
+
+
+        $(document).ready(function () {
+
+            $('#search_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_date_to').pickadate('picker').set('min', $('#search_date_from').pickadate('picker').get('select'));
+                    }
+                }
+            });
+            $('#search_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_date_from').pickadate('picker').set('max', $('#search_date_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
+        });
+
+
         $('#search_shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
             width: '100%',
             placeholder: 'Shipping Mode',
@@ -205,7 +263,7 @@
                 url: '{{ route('admin.v2_pickups.action_log.get_city_areas') }}'
                 , type: 'GET'
                 , data: {
-                    city_id: cityId
+                    city_id: cityId,
                 }
                 , dataType: 'json'
                 , success: function(response) {
@@ -226,7 +284,7 @@
         }).bind('change', function() {
             table.draw();
         });
-        
+
         jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
             if ( this.context.length ) {
                 body = [];
@@ -348,6 +406,8 @@
                     d.search_hub = $('#search_hub').val();
                     d.star_shipper_filter = $('#star_shippers_filter').val();
                     d.search_area = $('#search_area').val();
+                    d.search_date_from = $('input[name="search_date_from_formatted"]').val();
+                    d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                 }
             },
             rowId: 'shId',
@@ -373,7 +433,7 @@
                 {data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode'},
                 {data: 'service_type', name: 'service_type', class: 'align-middle service_type'},
                 {data: 'status', name: 'status', class: 'align-middle status'},
-                
+
 
                 {data: 'last_location_screen_location_name', name: 'last_screen_location.name', as:'last_location_screen_location_name', class: 'align-middle last_location_screen_location_name'},
                 {data: 'entry_method', name: 'ssj_last_location.entry_method', as:'entry_method', class: 'align-middle entry_method'},
@@ -396,7 +456,7 @@
                 var info = table.page.info();
                 $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                       if(data.status == "Shipment - Re-Attempt"){
-                    $(row).addClass('green-row');                
+                    $(row).addClass('green-row');
                 }
             },
             initComplete: function() {
