@@ -12,23 +12,43 @@
                 @include('admin.inc.messages')
                 <form id="track_form" class="mb-1" novalidate="novalidate">
                     <div class="row justify-content-center">
-                    <div class="col-3">
-                        <div class="form-group">
-                            <input type="text" name="tracking_numbers" id="tracking_number" class="dt_search tracking_numbers"
-                                   placeholder="Tracking Number(s)" data-tags-input-name="tracking_number">
+                        <div class="col-3">
+                            <div class="form-group">
+                                <input type="text" name="tracking_numbers" id="tracking_number" class="dt_search tracking_numbers"
+                                       placeholder="Tracking Number(s)" data-tags-input-name="tracking_number">
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
+                                @foreach($shipping_mode as $mode)
+                                    <option value="{{$mode->id}}">{{$mode->mode}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group input-group ml">
+                                <div class="input-group-prepend">
+                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                            <span class="la la-calendar-o"></span>
+                                        </span>
+                                </div>
+                                <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" data-value="{{ Carbon\Carbon::now()->subMonth(12) }}" placeholder="Search Date (From)">
+                            </div>
+                        </div>
+                        <div class="col-3 ">
+                            <div class="form-group input-group ml">
+                                <div class="input-group-prepend">
+                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                            <span class="la la-calendar-o"></span>
+                                        </span>
+                                </div>
+                                <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" data-value="{{ Carbon\Carbon::today() }}" placeholder="Search Date (To)">
+                            </div>
+                        </div>
+                        <div class="form-group ml-1">
+                            <button type="submit" class="btn btn-primary">Search</button>
                         </div>
                     </div>
-                    <div class="col-3">
-                        <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
-                            @foreach($shipping_mode as $mode)
-                                <option value="{{$mode->id}}">{{$mode->mode}}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="form-group ml-1">
-                        <button type="submit" class="btn btn-primary">Search</button>
-                    </div>
-                </div>
                 </form>
 
                 <div class="col justify-content-end mb-3">
@@ -160,6 +180,8 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <style>
         table.dataTable {
             font-size: 12px;
@@ -216,6 +238,8 @@
 @endsection
 
 @section('js')
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
@@ -229,6 +253,35 @@
         var selected_rows = [];
         var restricted_rows = [];
         $(document).ready(function () {
+
+            $('#search_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_date_to').pickadate('picker').set('min', $('#search_date_from').pickadate('picker').get('select'));
+                    }
+                }
+            });
+            $('#search_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_date_from').pickadate('picker').set('max', $('#search_date_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
+
             $('#search_shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Shipping Mode',
@@ -281,7 +334,7 @@
                                 row.push(index + 1);
                                 row.push(values.tracking);
                                 row.push(values.order_id);
-                                row.push(values.shipper); 
+                                row.push(values.shipper);
                                 row.push(values.shipper_phone); // to be changed
                                 row.push(values.shipper_return_address); // to be changed
                                 row.push(values.total_attempt);
@@ -319,7 +372,7 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
                 buttons: [
-                    @if ( session('role_id') == 1 || in_array(109, session('permissions')) )
+                        @if ( session('role_id') == 1 || in_array(109, session('permissions')) )
                     {
                         text: 'Revert',
                         className: 'btn btn-primary revert',
@@ -345,38 +398,38 @@
                                         var remarks = $('#add_remarks').val();
 
                                         swal({
-                                                title: 'Are You Sure?',
-                                                text: 'Are you sure, you want to revert this Shipment?',
-                                                icon: 'warning',
-                                                buttons: {
-                                                    cancel: {
-                                                        text: 'No',
-                                                        value: null,
-                                                        visible: true,
-                                                        closeModal: true,
-                                                    },
-                                                    confirm: {
-                                                        text: 'Yes',
-                                                        value: true,
-                                                        visible: true,
-                                                        closeModal: true
-                                                    }
+                                            title: 'Are You Sure?',
+                                            text: 'Are you sure, you want to revert this Shipment?',
+                                            icon: 'warning',
+                                            buttons: {
+                                                cancel: {
+                                                    text: 'No',
+                                                    value: null,
+                                                    visible: true,
+                                                    closeModal: true,
                                                 },
-                                                closeOnClickOutside: false,
-                                                closeOnEsc: false,
-                                                dangerMode: true
-                                            }).then(function (confirm) {
-                                                if (confirm) {
-                                                    blockPagePermanently();
-                                                    table.rows().nodes().each(function(index) {
-                                                        var row = table.row(index);
+                                                confirm: {
+                                                    text: 'Yes',
+                                                    value: true,
+                                                    visible: true,
+                                                    closeModal: true
+                                                }
+                                            },
+                                            closeOnClickOutside: false,
+                                            closeOnEsc: false,
+                                            dangerMode: true
+                                        }).then(function (confirm) {
+                                            if (confirm) {
+                                                blockPagePermanently();
+                                                table.rows().nodes().each(function(index) {
+                                                    var row = table.row(index);
 
-                                                        if ($(row.node()).hasClass('selected')) {
-                                                            var id = parseInt(row.id());
-                                                            shipment_remarks[id] = remarks;
-                                                        }
-                                                    });
-                                                    //alert(selected_rows);
+                                                    if ($(row.node()).hasClass('selected')) {
+                                                        var id = parseInt(row.id());
+                                                        shipment_remarks[id] = remarks;
+                                                    }
+                                                });
+                                                //alert(selected_rows);
                                                 $.ajax({
                                                     url:"{{route('admin.return.confirmed.revert.status')}}",
                                                     method:'POST',
@@ -387,27 +440,27 @@
                                                         'remark': shipment_remarks
                                                     }
                                                 })
-                                                .done(function (data) {
-                                                    UnblockPagePermanently();
-                                                    $('#add_remarks_modal').modal('hide');
-                                                    table.draw(false);
+                                                    .done(function (data) {
+                                                        UnblockPagePermanently();
+                                                        $('#add_remarks_modal').modal('hide');
+                                                        table.draw(false);
 
-                                                    if (data.status == 0) {
-                                                        toastr.success(data.success, 'Success!', {
-                                                            positionClass: 'toast-bottom-center',
-                                                            containerId: 'toast-bottom-center'
-                                                        });
-                                                    }
-                                                    else {
-                                                        toastr.error(data.error, 'Error!', {
-                                                            positionClass: 'toast-top-center',
-                                                            containerId: 'toast-top-center'
-                                                        });
-                                                    }
+                                                        if (data.status == 0) {
+                                                            toastr.success(data.success, 'Success!', {
+                                                                positionClass: 'toast-bottom-center',
+                                                                containerId: 'toast-bottom-center'
+                                                            });
+                                                        }
+                                                        else {
+                                                            toastr.error(data.error, 'Error!', {
+                                                                positionClass: 'toast-top-center',
+                                                                containerId: 'toast-top-center'
+                                                            });
+                                                        }
                                                         table.button('.revert').disable();
-                                                });
-                                                }
-                                            });
+                                                    });
+                                            }
+                                        });
 
                                     }
                                 });
@@ -418,7 +471,7 @@
                             }
                         }
                     },
-                    @endif
+                        @endif
                     {
                         extend: 'excel',
                         title: 'Return Confirmed',
@@ -531,6 +584,7 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
+                deferLoading: 0,
                 ajax:{
                     url:'{{ route('admin.return.confirmed.list') }}',
                     data: function (d) {
@@ -538,6 +592,8 @@
                         d.search_shipping_mode = $('#search_shipping_mode').val();
                         d.tracking_numbers = $('#tracking_number').val();
                         d.star_shipper_filter = $('#star_shippers_filter').val();
+                        d.search_date_from = $('input[name="search_date_from_formatted"]').val();
+                        d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
                 },
                 rowId: 'shId',
@@ -582,7 +638,7 @@
                     if ($.inArray(data.shId, selected_rows) !== -1) {
                         table.row(row).select();
                     }
-                   
+
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -670,36 +726,59 @@
             });
             var hub_ids = [];
             $('#return_status_form').validate({
-				errorClass: 'danger',
-				successClass: 'success',
-				normalizer: function(value) {
-					return $.trim(value);
-				},
-				errorPlacement: function(error, element) {
-					error.addClass('w-100').appendTo(element.parent('.form-group'));
-				},
-				submitHandler: function(form) {
-					$(form).find('button[type=submit]').attr('disabled', 'disabled');
+                errorClass: 'danger',
+                successClass: 'success',
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
 
-					swal({
-						title: 'Please Wait!',
-						text: 'Transaction(s) are being updated!',
-						icon: 'info',
-						buttons: false,
-						closeOnClickOutside: false,
-						closeOnEsc: false
-					});
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Transaction(s) are being updated!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
 
-					form.submit();
-				}
-			});
+                    form.submit();
+                }
+            });
             $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
                 var id = parseInt($(this).parent('tr').attr('id'));
                 var con_id = parseInt($(this).parent('tr').attr('tracking_number'));
                 var hub_id = $(this).parents('tr').data('hub');
-                
-                    if(hub_ids.length == 0){
-                        hub_ids.push(hub_id);
+
+                if(hub_ids.length == 0){
+                    hub_ids.push(hub_id);
+                    var index = $.inArray(id, selected_rows);
+
+                    if (index === -1) {
+                        selected_rows.push(id);
+                    }
+                    else {
+                        selected_rows.splice(index, 1);
+                    }
+
+                    if (selected_rows.length > 0) {
+                        if(restricted_rows.length == 0)
+                        {
+                            table.button('.revert').enable();
+                        }
+                        else{
+                            table.button('.revert').disable();
+                        }
+                    }
+                    else {
+                        table.button('.revert').disable();
+                    }
+                }else{
+                    if(hub_ids[0] == hub_id){
                         var index = $.inArray(id, selected_rows);
 
                         if (index === -1) {
@@ -722,98 +801,75 @@
                             table.button('.revert').disable();
                         }
                     }else{
-                        if(hub_ids[0] == hub_id){
-                            var index = $.inArray(id, selected_rows);
-
-                            if (index === -1) {
-                                selected_rows.push(id);
-                            }
-                            else {
-                                selected_rows.splice(index, 1);
-                            }
-
-                            if (selected_rows.length > 0) {
-                                if(restricted_rows.length == 0)
-                                {
-                                    table.button('.revert').enable();
-                                }
-                                else{
-                                    table.button('.revert').disable();
-                                }
-                            }
-                            else {
-                                table.button('.revert').disable();
-                            }
-                        }else{
-                            var error = "Selected hubs should be the same!";
-                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                            return false;
-                        }
-
+                        var error = "Selected hubs should be the same!";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        return false;
                     }
-               
+
+                }
+
 
             });
-                $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
-                    var id = parseInt($(this).parents('tr').attr('id'));
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+                var id = parseInt($(this).parents('tr').attr('id'));
 
-                    if ($(this).hasClass('revert')) {
-                        swal({
-                            text: 'Are you sure, you want to revert this Shipment?',
-                            icon: 'warning',
-                            buttons: {
-                                cancel: {
-                                    text: 'No',
-                                    value: null,
-                                    visible: true,
-                                    closeModal: true,
-                                },
-                                confirm: {
-                                    text: 'Yes',
-                                    value: true,
-                                    visible: true,
-                                    closeModal: true
-                                }
+                if ($(this).hasClass('revert')) {
+                    swal({
+                        text: 'Are you sure, you want to revert this Shipment?',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
                             },
-                            closeOnClickOutside: false,
-                            closeOnEsc: false,
-                            dangerMode: true
-                        }).then(function(confirm) {
-                            if (confirm) {
-                                if(id) {
-                                    var remark = $.trim($('tr#' + id).find('td.remarks input').val());
-                                    $.ajax({
-                                        url: '{!! route('admin.return.confirmed.revert') !!}',
-                                        method: 'POST',
-                                        data: {
-                                            '_token': '{{ csrf_token() }}',
-                                            'id': id,
-                                            'remarks':remark
-                                        }
-                                    })
-                                        .done(function (data) {
-                                            table.draw(false);
-
-                                            if (data.status == 0) {
-                                                toastr.success(data.success, 'Success!', {
-                                                    positionClass: 'toast-bottom-center',
-                                                    containerId: 'toast-bottom-center'
-                                                });
-                                            }
-                                            else {
-                                                toastr.error(data.error, 'Error!', {
-                                                    positionClass: 'toast-top-center',
-                                                    containerId: 'toast-top-center'
-                                                });
-                                            }
-                                        });
-                                }
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
                             }
-                        });
-                    }
-                });
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function(confirm) {
+                        if (confirm) {
+                            if(id) {
+                                var remark = $.trim($('tr#' + id).find('td.remarks input').val());
+                                $.ajax({
+                                    url: '{!! route('admin.return.confirmed.revert') !!}',
+                                    method: 'POST',
+                                    data: {
+                                        '_token': '{{ csrf_token() }}',
+                                        'id': id,
+                                        'remarks':remark
+                                    }
+                                })
+                                    .done(function (data) {
+                                        table.draw(false);
 
-                
+                                        if (data.status == 0) {
+                                            toastr.success(data.success, 'Success!', {
+                                                positionClass: 'toast-bottom-center',
+                                                containerId: 'toast-bottom-center'
+                                            });
+                                        }
+                                        else {
+                                            toastr.error(data.error, 'Error!', {
+                                                positionClass: 'toast-top-center',
+                                                containerId: 'toast-top-center'
+                                            });
+                                        }
+                                    });
+                            }
+                        }
+                    });
+                }
+            });
+
+
 
             //Selectize
             var select = $('#tracking_number').selectize({
