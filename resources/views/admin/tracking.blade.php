@@ -1635,10 +1635,13 @@
                                     id + ' data-tracking=' + details.tracking_number +
                                     '>Get Support</button>';
 
-                                shipment +=
+                                @if(session('role_id') == 1 || in_array(1042, session('permissions')))
+                                    shipment +=
                                     '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 geo_codes" id=' +
                                     id + ' data-tracking=' + details.tracking_number +
                                     '>Provide Geocodes</button>';
+                                @endif
+
 
                                 shipment +=
                                         '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 view_odr" id=' +

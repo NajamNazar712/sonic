@@ -972,7 +972,10 @@ class ReturnController extends Controller
                         if (session('role_id') == 1 || in_array(700, session('permissions'))) {
                             $dropdown .= $manual_sms_btn;
                         }
-                        $dropdown.=$provide_geo_code;
+
+                        if (session('role_id') == 1 || in_array(1042, session('permissions'))) {
+                            $dropdown.=$provide_geo_code;
+                        }
 
                         $dropdown .= "
                             </div>
