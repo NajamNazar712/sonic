@@ -906,11 +906,7 @@
                 var tracking_numbers = $('#track_form .tracking_numbers').val();
                 var search_shipping_mode = $('#track_form #search_shipping_mode').val();
 
-                if (tracking_numbers != '' || search_shipping_mode != '') {
-                    table.draw();
-                }else{
-                    alert('Fill Tracking First');
-                }
+                table.draw();
 
                 e.preventDefault();
 
