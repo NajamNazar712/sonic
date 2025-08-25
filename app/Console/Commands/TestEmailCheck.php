@@ -33,8 +33,9 @@ class TestEmailCheck extends Command
         //    revenue_report_by_user_excel
         //    mark_arrival
         if ($this->hasArgument('payment_id')){
+            $paymentId = explode(',', $this->argument('payment_id'));
             $records = DB::table('done_payment_shipments')
-                ->whereIn('done_payment_id', [$this->hasArgument('payment_id')])
+                ->whereIn('done_payment_id', $paymentId)
                 ->select('id', 'wht', 'cod_sst', 'payable')
                 ->get();
 
@@ -50,7 +51,7 @@ class TestEmailCheck extends Command
                     ->update(['payable' => $currentPayable + $record->wht + $record->cod_sst, 'cod_sst' => 0, 'wht' => 0]);
             }
 
-            DB::select('CALL update_done_payment_statistics(?)', [$this->hasArgument('payment_id')]);
+            DB::select('CALL update_done_payment_statistics(?)', $paymentId);
         }
 //         $records = DB::table('done_payment_shipments')
 //             ->whereIn('done_payment_id', [1641598])
