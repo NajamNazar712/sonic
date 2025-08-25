@@ -27,9 +27,7 @@
                                 <div class="col-4">
                                     <fieldset class="form-group pb-1">
                                         <select name="search_shipper[]" id="search_shipper" class="form-control select2" required multiple>
-                                            @foreach($shippers as $shipper)
-                                                <option value="{{$shipper->id}}">{{$shipper->name}}</option>
-                                            @endforeach
+                                        
                                         </select>
                                     </fieldset>
                                 </div>
@@ -274,6 +272,8 @@
                             <th class="border-primary border-darken-1">Sub Segment</th>
                             <th class="border-primary border-darken-1">Vendor</th>
                             <th class="border-primary border-darken-1">First Attempt Date</th>
+                            <th class="border-primary border-darken-1">Second Attempt Date</th>
+                            <th class="border-primary border-darken-1">Third Attempt Date</th>
                             <th class="border-primary border-darken-1">Rider Picked Status Date</th>
                             <th class="border-primary border-darken-1">Quantity</th>
                             <th class="border-primary border-darken-1">Pieces</th>
@@ -373,11 +373,34 @@
                 allowClear:true
             });
          // Prepend an empty option to the select element
+            // $('#search_shipper').select2({
+            //     width: '100%',
+            //     placeholder: "Select Shipper",
+            //     allowClear: true,
+            //     multiple: true
+            // });
+
             $('#search_shipper').select2({
-                width: '100%',
-                placeholder: "Select Shipper",
-                allowClear: true,
-                multiple: true
+            width:'100%',
+            placeholder:"Select Shipper",
+            allowClear:true,
+            multiple: true,
+            minimumInputLength: 2,
+            ajax: {
+                dataType: 'json',
+                url:  '{!! route('admin.accounts.shipper_names.dropdown',['type'=>'active']) !!}',
+                    data: function (params) {
+                        return {
+                            search: params.term,
+                        }
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+                    },
+                delay: 700,
+            }
             });
             $('#search_sales_person').select2({
                 width: '100%',
@@ -522,6 +545,8 @@
                             head.push('Sub Segment');
                             head.push('Vendor');
                             head.push('First Attempt Date');
+                            head.push('Second Attempt Date');
+                            head.push('Third Attempt Date');
                             head.push('Rider Picked Status Date');
                             head.push('Quantity');
                             head.push('Pieces');
@@ -558,6 +583,8 @@
                                 row.push(values.sub_segment);
                                 row.push(values.vendor);
                                 row.push(values.first_attempt_date);
+                                row.push(values.second_attempt_date);
+                                row.push(values.third_attempt_date);
                                 row.push(values.rider_picked_status_date);
                                 row.push(values.shipment_quantity);
                                 row.push(values.pieces);
@@ -627,7 +654,7 @@
 
                     }
                 },
-                order: [[14, 'desc']],
+                order: [[16, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},
@@ -638,6 +665,8 @@
                     { data:'sub_segment' ,name: 'u.sub_segment_id', class: 'align-middle shipper'},
                     { data:'vendor' ,name: 'u.name', class: 'align-middle shipper'},
                     { data:'first_attempt_date' ,name: 'first_attempt_date', class: 'align-middle first_attempt_date'},
+                    { data:'second_attempt_date' ,name: 'second_attempt_date', class: 'align-middle second_attempt_date'},
+                    { data:'third_attempt_date' ,name: 'third_attempt_date', class: 'align-middle third_attempt_date'},
                     { data:'rider_picked_status_date' ,name: 'rider_picked_status_date', class: 'align-middle rider_picked_status_date'},
                     { data:'shipment_quantity' ,name: 'shipment_quantity', class: 'align-middle shipment_quantity'},
                     { data:'pieces' ,name: 'pieces', class: 'align-middle pieces'},
