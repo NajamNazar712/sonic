@@ -168,17 +168,17 @@ class DeliveryController extends Controller
             ->leftJoin('sub_category_segments as scs', 'scs.id' , 'u.sub_segment_id')
 //        $shipments = DB::connection('reports')->table('shipments')
 //            ->join('users as u', 'shipments.user_id', '=', 'u.id')
-            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
-            ->join('cities as h', 'dc.hub_id', '=', 'h.id')
+            ->leftJoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->leftJoin('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->leftJoin('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->leftJoin('cities as h', 'dc.hub_id', '=', 'h.id')
             ->leftJoin('zones as z', 'z.id', '=', 'dc.zone_id')
             ->leftJoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
             ->leftJoin('consignee_address_areas as caa', 'caa.shipment_id', '=', 'shipments.id')
             ->leftJoin('city_areas as ca', 'ca.id', '=', 'caa.city_area_id')
             ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
-            ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
-            ->join('shipments_journey', function ($join) {
+            ->leftJoin('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
+            ->leftJoin('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
                     ->where(
                         'shipments_journey.id',
@@ -195,7 +195,7 @@ class DeliveryController extends Controller
                     );
             })
             ->leftjoin('admins as agent', 'agent.id', '=', 'ras.admin_id')
-            ->join('shipments_journey as sj', function ($join) {
+            ->leftJoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where(
                         'sj.id',
@@ -326,11 +326,18 @@ class DeliveryController extends Controller
                 'last_screen_location.name as last_location_screen_location_name',
                 'ssj_last_location.entry_method as entry_method'
             )
-
+            ->when(
+                $request->get('search_date_from') && $request->get('search_date_to'),
+                function ($query) use ($request) {
+                    $from = $request->get('search_date_from');
+                    $to   = $request->get('search_date_to');
+                    $query->whereBetween('shipments.created_at', [$from, $to]);
+                }
+             )
+            ->whereIn('shipments.shipper_status_id', $status)
             ->whereRaw('IF (shipments.shipper_status_id IN (2, 49), (oc.hub_id = dc.hub_id), TRUE)')
             ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
             ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
-            ->whereIn('shipments.shipper_status_id', $status)
             ->whereNotNull('shipments.tracking_number')
             ->groupBy('shipments.id');
 
