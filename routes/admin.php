@@ -323,6 +323,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 
         Route::get('city/{id}/changes', 'Admins\AdminDashboardController@getAjaxCityChanges')->name('getAjaxCityChanges');
+        Route::get('/{id}/tagging-history', 'Admins\AdminDashboardController@taggingHistory')->name('taggingHistory');
 
         //Route
         Route::prefix('route')->name('route.')->group(function () {

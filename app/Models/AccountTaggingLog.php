@@ -9,6 +9,7 @@ class AccountTaggingLog extends Model
 {
     use HasFactory;
 
+
     protected $fillable = [
         'account_id',
         'changed_by_id',
@@ -39,14 +40,14 @@ class AccountTaggingLog extends Model
 
     public static function logTagging($accountId, $changedById, $prevSalesId, $newSalesId, $type = 1)
     {
-        return self::create([
-            'account_id'        => $accountId,
-            'changed_by_id'     => $changedById,
-            'prev_sales_user_id'=> $prevSalesId,
-            'new_sales_user_id' => $newSalesId,
-            'type'              => $type,
-        ]);
+        if (!empty($accountId)) {
+            return self::create([
+                'account_id'        => $accountId,
+                'changed_by_id'     => $changedById,
+                'prev_sales_user_id' => $prevSalesId,
+                'new_sales_user_id' => $newSalesId,
+                'type'              => $type,
+            ]);
+        }
     }
 }
-
-

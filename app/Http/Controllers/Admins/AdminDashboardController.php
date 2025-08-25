@@ -10350,6 +10350,13 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 $dropdown .= '<button type="button" class="dropdown-item add_shipper_exclude_intercept_type"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add shipper exclude/Intercept 
                 Type </div></button>';
 
+                $dropdown .= '<button type="button" class="dropdown-item account_tagging_history" data-id="' . $result->id . '" data-toggle="modal" data-target="#AccountTaggingHistoryModal">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col-2"><i class="ft-activity"></i></div>
+                        <div class="col-9 offset-1">Account Tagging History</div>
+                    </div>
+                </button>';
+
                     $dropdown .= '
                     </div>
                   </div>
@@ -10780,7 +10787,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 }
             })
             ->addColumn("lead_progress", function ($user) {
-                if(isset($user->lead_id)){
+                if(isset($user->lead_id) && !empty($lead_progress_setting->percent)){
                     $weight_charges = WeightCharge::where('user_id' , $user->id);
 
                     $description = '-';
@@ -10990,6 +10997,13 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 if (session('role_id') == 1 || in_array(856, session('permissions'))) {
                     $dropdown .= '<button type="button" class="dropdown-item add_fintech_charges"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Fintech Charges</div></button>';
                 }
+
+                $dropdown .= '<button type="button" class="dropdown-item account_tagging_history" data-id="' . $result->id . '" data-toggle="modal" data-target="#AccountTaggingHistoryModal">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col-2"><i class="ft-activity"></i></div>
+                        <div class="col-9 offset-1">Account Tagging History</div>
+                    </div>
+                </button>';
 
                 $dropdown .= '
                     </div>
@@ -16574,5 +16588,16 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         return response()->json($allChanges);
     }
 
+    public function taggingHistory($id)
+    {
+        $logs = AccountTaggingLog::with(['changedBy', 'newSalesAdmin', 'prevSalesAdmin'])
+            ->where('account_id', $id)
+            ->orderByDesc('created_at')
+            ->get()
+            ->groupBy(function ($log) {
+                return $log->created_at->format('Y-m-d H:i:s');
+            });
 
+        return response()->json($logs);
+    }
 }
