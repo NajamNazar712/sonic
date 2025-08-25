@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Models\ShipmentGeoCode;
 use DB;
 use DateTime;
 use Exception;
@@ -519,7 +520,6 @@ class ReturnController extends Controller
     public function return_marked_list(Request $request)
     { //status 12 shipments
 
-
         $shipments = $this->shipments();
 
         if (session('department_id') == 7) {
@@ -928,6 +928,7 @@ class ReturnController extends Controller
                 $self_collection_button = '<a href="javascript:void(0);" class="dropdown-item selfCollection" data-action="selfCollection"><i class="ft-plus-circle primary"></i> Mark for Self Collection</a>';
                 $edit_estimate_charges = '<a href="javascript:void(0);" class="dropdown-item editEstimateCharges" data-action="editEstimateCharges"><i class="ft-plus-circle primary"></i> Edit Estimate Charges</a>';
                 $manual_sms_btn = '<a href="javascript:void(0);" class="dropdown-item rcp_sms"><i class="ft-mail primary"></i> Send SMS</a>';
+                $provide_geo_code = '<a href="javascript:void(0);" class="dropdown-item geo_codes"><i class="ft-plus-circle primary"></i> Provide Geo Codes</a>';
 
                 $diff_days = self::check_tat($result->last_status_date, $result->tat_value);
                 $rv_shipment_assign_agents = RvShipmentAssignAgent::where('shipment_id', $result->shId)->where('rv_state_id', 1)->where('agent_id', '!=', Auth::id())->first();
@@ -971,6 +972,7 @@ class ReturnController extends Controller
                         if (session('role_id') == 1 || in_array(700, session('permissions'))) {
                             $dropdown .= $manual_sms_btn;
                         }
+                        $dropdown.=$provide_geo_code;
 
                         $dropdown .= "
                             </div>
@@ -8659,5 +8661,65 @@ class ReturnController extends Controller
             ->where('verification', 1)
             ->pluck('shipment_id')
             ->toArray();
+    }
+
+    public  function get_manual_shipment_geo_codes(Request $request)
+    {
+
+        $shipment_geo_code = ShipmentGeoCode::where('shipment_id',$request->shipment_id)->where('geo_code_type',2)
+            ->select('latitude','longitude')->first();
+
+        $lat = null;
+        $long = null;
+        if($shipment_geo_code){
+            $shipment_id = $shipment_geo_code->shipment_id;
+            $lat = $shipment_geo_code->latitude;
+            $long = $shipment_geo_code->longitude;
+        }
+
+        return response()->json(['status'=>0,'lat'=>$lat,'long'=>$long]);
+    }
+
+    public function update_manual_geo_codes(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'shipment_id' => 'required|integer|exists:shipments,id',
+            'lat'         => 'required|numeric',
+            'long'        => 'required|numeric',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 1,
+                'error'  => $validator->errors()->first()
+            ]);
+        }
+
+
+        // Check existing record
+        $geoCode = ShipmentGeoCode::where('shipment_id', $request->shipment_id)
+            ->where('geo_code_type', 2)
+            ->first();
+
+        if ($geoCode) {
+            // Update existing
+            $geoCode->latitude  = $request->lat;
+            $geoCode->longitude = $request->long;
+        } else {
+            // New insert
+            $geoCode = new ShipmentGeoCode();
+            $geoCode->shipment_id = $request->shipment_id;
+            $geoCode->latitude    = $request->lat;
+            $geoCode->longitude   = $request->long;
+            $geoCode->geo_code_type        = 2;
+
+        }
+        $geoCode->save();
+
+
+        return response()->json([
+            'status'  => 0,
+            'message' => 'Geo code saved successfully!'
+        ]);
     }
 }
