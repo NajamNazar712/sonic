@@ -908,7 +908,8 @@
 
                 if (tracking_numbers != '' || search_shipping_mode != '') {
                     table.draw();
-                    console.log(tracking_numbers)
+                }else{
+                    alert('Fill Tracking First');
                 }
 
                 e.preventDefault();
