@@ -44,9 +44,8 @@ class UpdateArrivalChargesIssue extends Command
      */
     public function handle()
     {
-        $startDate =  Carbon::now()->subHour(1)->format('Y-m-d 00:00:00');
+        $startDate =  Carbon::now()->subMonth(12)->format('Y-m-d 00:00:00');
         $endDate = Carbon::now()->format('Y-m-d 23:59:59');
-
 
         $query = DB::table('pending_payment_shipments')
             ->select(

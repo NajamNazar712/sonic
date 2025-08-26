@@ -602,7 +602,7 @@ class Kernel extends ConsoleKernel
             ->hourly()
             ->runInBackground();
 
-        $schedule->command('update:zero_arrival_charges')->hourly()->runInBackground();
+        $schedule->command('update:zero_arrival_charges')->everyTwoHours()->runInBackground();
         $schedule->command('delete:duplicate_arrival')->hourly()->runInBackground();
         $schedule->command('update_corporate_invoice_charges_issue')->hourly()->runInBackground();
         $schedule->command('update:pending_payment_shipment_arrival_charges')->hourly()->runInBackground();
