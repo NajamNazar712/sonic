@@ -4290,6 +4290,25 @@ class AdminReportsController extends Controller
                             }
                             break;
 
+                        case 'received_or_refused_by':
+                            $status_array = [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46, 25, 22, 23, 24, 44, 47, 48, 57, 60];
+                            if (in_array($shipment->shipment_status, $status_array)) {
+                                $received_or_refused_by = '';
+                                if ($shipment->received_or_refused_by) {
+                                    $received_or_refused_by = $shipment->received_or_refused_by;
+                                }
+                                if ($shipment->dr_cnic) {
+                                    $received_or_refused_by .= "|" . $shipment->dr_cnic;
+                                }
+                                if ($shipment->dr_relation) {
+                                    $received_or_refused_by .= "|" . $shipment->dr_relation;
+                                }
+                                $row[$field] = $received_or_refused_by;
+                            } else {
+                                $row[$field] = '';
+                            }
+                            break;
+
                         case 'ref':
                             $sales_tiers = DB::table('sales_tiers')
                                 ->where('tier_name', 'LIKE', '%REF%')
