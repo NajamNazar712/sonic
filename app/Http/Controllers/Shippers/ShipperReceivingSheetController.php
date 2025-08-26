@@ -544,7 +544,7 @@ class ShipperReceivingSheetController extends Controller
                         $shipment_details_row_end = '
                             <td>' . $shipment->consignee_city->name . '</td>
                             <td>' . $shipment->estimated_weight . '</td> ';
-                        if(in_array(session('user_id'),[6693,12412])) {
+                        if(in_array(session('user_id'),[6693,12412, 49251])) {
                             $shipment_details_row_end .= '<td>' . $shipment->actual_weight . '</td> ';
                         }
                         $shipment_details_row_end .= '<td>' . $shipment->pieces . '</td>
