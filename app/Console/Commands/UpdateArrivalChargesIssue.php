@@ -88,7 +88,7 @@ class UpdateArrivalChargesIssue extends Command
             ->having('new_charges', '!=', DB::raw('invoice_charges'))
             ->groupBy('pending_payment_shipments.shipment_id')
             ->get();
-
+        
 //        $query2 = DB::table('pending_payment_shipments')
 //            ->select(
 //                'shipments.tracking_number',
