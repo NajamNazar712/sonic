@@ -4123,7 +4123,6 @@ class AdminReportsController extends Controller
                         case 'nsa_osa_charges':
                         case 'packaging_material_charges':
                         case 'd_total_charges':
-                        case 'p_net_payable':
                         case 'd_net_payable':
                         case 'd_gst':
                         case 'packaging_charges':
@@ -4250,6 +4249,13 @@ class AdminReportsController extends Controller
                             $row[$field] = number_format((float)$estimated, 2);
                             break;
 
+                        case 'p_net_payable':
+                            $payable = 0;
+                            $payable += $shipment->p_net_payable ?? 0;
+                            $payable += $shipment->d_net_payable ?? 0;
+                            $row[$field] = number_format((float)$payable, 2);
+                            break;
+
                         case 'class':
                             if ($shipment->origin_city_id != $shipment->destination_city_id) {
                                 $row[$field] = match ($shipment->class) {
@@ -4344,6 +4350,7 @@ class AdminReportsController extends Controller
             );
         }
     }
+
 
     
     public function sales_person_performance_index()
