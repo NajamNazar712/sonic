@@ -27,7 +27,7 @@ class outForDeliveryJourney extends Seeder
     public function run(Request $request)
     {
         //
-        $shipmentId = [22314446468977, 27114446413572, 19514446412700, 485243431617, 14422346413845, 22314446402099, 15814446466130, 17414446418619, 17414446419658, 19514446451651, 20214446438897, 22314446400292, 22314446409657, 22314446411586, 22314446413612, 22314446468255, 22314446475657, 25114446436239, 28814446415152, 28814446416660, 29314446414670, 38314446485787, 14414446463423, 14414446471380];
+        $shipmentId = [25116954591747];
         if ($shipmentId) {
             $shipmentId = Shipment::whereIn('tracking_number', $shipmentId)
             ->where('shipper_status_id', 5)
@@ -40,7 +40,7 @@ class outForDeliveryJourney extends Seeder
                 $deliveryNoteId = DeliveryNoteShipment::where('shipment_id', $shipment->id)->latest()->first();
                 if (!$deliveryNoteId) {
                     $deliveryNoteId =  new DeliveryNoteShipment();
-                    $deliveryNoteId->delivery_note_id = 2590709;
+                    $deliveryNoteId->delivery_note_id = 3083476;
                     $deliveryNoteId->status = 1;
                     $deliveryNoteId->shipment_id = $shipment->id;
                     $deliveryNoteId->notification = 1;
