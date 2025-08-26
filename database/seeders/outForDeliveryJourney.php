@@ -40,7 +40,7 @@ class outForDeliveryJourney extends Seeder
                 $deliveryNoteId = DeliveryNoteShipment::where('shipment_id', $shipment->id)->latest()->first();
                 if (!$deliveryNoteId) {
                     $deliveryNoteId =  new DeliveryNoteShipment();
-                    $deliveryNoteId->delivery_note_id = 3083476;
+                    $deliveryNoteId->delivery_note_id = 2590709;
                     $deliveryNoteId->status = 1;
                     $deliveryNoteId->shipment_id = $shipment->id;
                     $deliveryNoteId->notification = 1;
@@ -54,7 +54,7 @@ class outForDeliveryJourney extends Seeder
                 if ($delivertNote->request_note_id) {
                     $rider_for_delivery = RiderDeliveryNoteRequest::find($delivertNote->request_note_id);
                 }
-                ShipmentsJourneyController::add($shipment->id, 5, 5, null, null, null, 346, $deliveryNoteId->delivery_note_id, $delivertNote->rider_id);
+                ShipmentsJourneyController::add($shipment->id, 5, 5, null, null, null, 346, $deliveryNoteId->delivery_note_id, $rider_for_delivery->rider_id);
             }
         }
     }
