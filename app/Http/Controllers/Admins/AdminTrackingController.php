@@ -938,7 +938,7 @@ class AdminTrackingController extends Controller
 //            ->whereBetween('shipments.created_at',[$start_date,$end_date]);
         if ($request->has('search_tracking') || $request->has('search_shipper') || $request->has('search_phone_no') || $request->has('search_order_id' || $request->has('crm_request_id') || $request->has('search_shipment_status'))) {
             if ($tracking = $request->get('search_tracking')) {
-                $quick_tracking->where('shipments.tracking_number', $tracking);
+                $quick_tracking->whereIn('shipments.tracking_number', $tracking);
             }
             if ($shipper = $request->get('search_shipper')) {
                 $quick_tracking->whereIn('u.id', $shipper);
