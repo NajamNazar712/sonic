@@ -1,6 +1,6 @@
 
 @extends('admin.layout.master')
-@section('title','Admin OTP')
+@section('title','Retail Shipper OTP')
 
 @section('content')
     <h1 class="mb-1">
