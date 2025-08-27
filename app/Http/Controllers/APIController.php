@@ -919,11 +919,17 @@ class APIController extends Controller
             ];
         }
         else {
-            $rules ['pickup_address_id'] = [
-                'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
-                    $query->where('user_id', $user_id)->where('hidden', 0);
-                }), 'origin_check'],
+            $rules = [
+                'pickup_address_id' => [
+                    'required',
+                    'integer',
+                    'digits_between:1,10',
+                    Rule::exists('user_shipping_infos', 'id')
+                        ->where(fn ($q) => $q->where('user_id', $user_id)->where('hidden', 0)),
+                    'origin_check', // or new OriginCheck if it's a class
+                ],
             ];
+
         }
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
