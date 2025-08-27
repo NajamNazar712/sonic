@@ -1320,9 +1320,9 @@
                 });
 
                 return inst;
-                }
+            }
 
-                function initAnySelectize(selector, minLength = 1, placeholder = '') {
+            function initAnySelectize(selector, minLength = 1, placeholder = '') {
                 var $el = $(selector);
                 if ($el.length === 0) return null;
 
@@ -1351,12 +1351,12 @@
                 });
 
                 return inst;
-                }
+            }
 
-                trackingSelect = initNumericOnlySelectize('#search_tracking_number', 6, 'Tracking Number(s)*');
-                requestSelect  = initNumericOnlySelectize('#crm_request_id', 1, 'Request ID(s)*');
+            trackingSelect = initNumericOnlySelectize('#search_tracking_number', 6, 'Tracking Number(s)*');
+            requestSelect  = initNumericOnlySelectize('#crm_request_id', 1, 'Request ID(s)*');
 
-                orderSelect    = initAnySelectize('#search_order_id', 1, 'Order ID(s)*');
+            orderSelect    = initAnySelectize('#search_order_id', 1, 'Order ID(s)*');
             });
     </script>
 @endsection
