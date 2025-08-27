@@ -1388,6 +1388,10 @@
                         <li><a class="menu-item" href="{{ route('admin.admin_otp.index') }}">Admin OTP</a></li>
                     @endif
 
+                    @if (session('role_id') == 1 || in_array(527, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.retail_otp.index') }}">Retail Shipper OTP</a></li>
+                    @endif
+
                     @if (session('role_id') == 1 || in_array(563, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.rider_otp.index') }}">Rider OTP (Login &
                                 Delivery Note)</a></li>
