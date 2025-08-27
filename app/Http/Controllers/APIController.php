@@ -657,9 +657,11 @@ class APIController extends Controller
                 'service_type_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function ($query) {
                     $query->whereNotIn('id', [4]);
                 })],
-                'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('rate_statuses', 'shipping_mode_id')->where(function ($query) use ($user_id) {
-                    $query->where('user_id', $user_id)->where('status', 1);
-                })],
+                'shipping_mode_id' => ['required','integer','digits_between:1,10',
+                    'exists:shipping_modes,id',
+                    Rule::exists('rate_statuses','shipping_mode_id')
+                        ->where(fn($q)=>$q->where('user_id',$user_id)->where('status',1)),
+                ],
                 //pickup addres here
                 'return_address_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
                     $query->where('user_id', $user_id)->where('hidden', 0);
