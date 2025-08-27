@@ -38,7 +38,7 @@
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Name</th>
                         <th class="border-primary border-darken-1">City</th>
-                        <th class="border-primary border-darken-1">Login OTP</th>
+                        <th class="border-primary border-darken-1">OTP</th>
                         <th class="border-primary border-darken-1">Expire OTP</th>
                     </tr>
                     </thead>
@@ -141,7 +141,7 @@
                         head.push('S.No');
                         head.push('Name');
                         head.push('City');
-                        head.push('Login OTP');
+                        head.push('OTP');
                         head.push('Expire OTP');
                         $.each(result.data, function(index, values) {
                             row = [];
