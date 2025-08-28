@@ -11562,6 +11562,41 @@ class NotificationsController extends Controller
                         self::sms_otp($body, $to, $shipper->name, $shipper->otp_code, 1, NULL, $id);
 //                        self::sms($body, $to, 1, null,$id);
                     }
+                } else if ($id == 249) {
+                    
+                    $rider_id = $reference_1_id;
+                    $shipment_id = $reference_2_id;
+                    $name = '';
+                    $rider = Rider::find($rider_id);
+                    $shipment = Shipment::find($shipment_id);
+                    $shipment_otp = ShipmentOtp::where('shipment_id', $shipment_id)->where('rider_id', $rider_id)->whereDate('updated_at', Carbon::today())->first();
+                    
+                    if (strpos($body, '[consignee_name]') !== FALSE) {
+                        $body = str_replace('[consignee_name]', $shipment->consignee_name, $body);
+                        $name = $shipment->consignee_name;
+                    }
+                    if (strpos($body, '[rider_name]') !== FALSE) {
+                        $body = str_replace('[rider_name]', $rider->name, $body);
+                        $name = $rider->name;
+                    }
+
+                    if (strpos($body, '[tracking_number]') !== FALSE) {
+                        $body = str_replace('[tracking_number]', $shipment->tracking_number, $body);
+                    }
+
+                    if (strpos($body, '[otp]') !== FALSE) {
+                        $body = str_replace('[otp]', $shipment_otp->otp, $body);
+                    }
+
+                    $to = $shipment->consignee_phone_number_1;
+                    // self::sms($body, $to, 1);
+                    self::sms_otp($body, $to, $name, $shipment_otp->otp, 2, null, $id);
+                    // self::sms_otp($body, $to, $name, 21323, 3);
+                    if ($shipment->consignee_phone_number_2 != NULL) {
+                        $to = $shipment->consignee_phone_number_2;
+                        // self::sms($body, $to, 1);
+                        self::sms_otp($body, $to, $name, $shipment_otp->otp, 2, null, $id);
+                    }
                 }
             }
         }

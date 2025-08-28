@@ -170,6 +170,7 @@ use App\Http\Models\HR\EducationList;
 use App\Http\Models\NotificationSetting;
 use App\RvShipmentTicket;
 use App\Http\Traits\RvTrait;
+use App\Models\AddressMissingShipment;
 use Illuminate\Support\Str;
 
 class RiderAPIController extends Controller
@@ -11702,7 +11703,6 @@ class RiderAPIController extends Controller
                         if (!RiderDelivery::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('delivered_status', 1)->exists()) {
                             if (!Shipment::where('id', $request->shipment_id)->whereIn('shipper_status_id', [14, 30, 36, 37, 20, 52, 13])->exists()) {
                                 if (DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', 'dn.id')->where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('dn.rider_id', $rider_id)->exists()) {
-                                 
                                         $shipment = Shipment::find($request->shipment_id);
                                         $shipper_status_id = UndeliveredReasonController::add($request->shipment_id, $request->delivery_note_id, $request->status_reason_id);
                                         $destination = $request->actual_location_latitude . ',' . $request->actual_location_longitude;
@@ -11788,8 +11788,8 @@ class RiderAPIController extends Controller
 
                                         if (DeliveryNote::where('id', $request->delivery_note_id)->where('pending_status', 0)->exists()) {
 
-                                            $shipment->shipper_status_id = $shipper_status_id;
-                                            $shipment->consignee_status_id = $shipper_status_id;
+                                            $shipment->shipper_status_id = 5;
+                                            $shipment->consignee_status_id = 5;
                                             $shipment->delivery_in_route = 0;
 
                                             if (in_array($request->open_box, [1, 2])) {
@@ -11823,8 +11823,7 @@ class RiderAPIController extends Controller
                                             }
                                             ShipmentsJourneyController::add($shipment->id, $shipper_status_id, $shipper_status_id, $request->status_reason_id, $remarks, NULL, NULL, $request->delivery_note_id, NULL, 0, NULL, $rider_id, NULL, NULL, $remarks_id);
                                             DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 1, 'update_type' => 1]);
-
-                                            if($shipper_status_id == 12) //if Shipper Status Id = 12 (Shipment - Reason Validation Required) Then fetch Those Shipments in Get Ticket
+                                            if(!in_array($request->status_reason_id, [19, 8]) && $shipper_status_id == 12) //if Shipper Status Id = 12 (Shipment - Reason Validation Required) Then fetch Those Shipments in Get Ticket
                                             {
                                                 // $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->whereIn('status_reason_id', [27, 35])->count();
                                                 // if(in_array($request->status_reason_id,[27,35]) && $journey > 0){
@@ -12694,7 +12693,6 @@ class RiderAPIController extends Controller
         $rider_id = $request->rider_id;
 
         $delivery_notes = DeliveryNote::where('rider_id', $rider_id)->where('status', 0)->where('pending_status', 0);
-
         if ($delivery_notes->exists()) {
             $delivery_notes = $delivery_notes->get();
             $delivery_otp = 0;
@@ -14809,6 +14807,56 @@ class RiderAPIController extends Controller
             $delivery_note_data->save();
 
             return response()->json(['status' => 0, 'message' => 'Delivery Note is ready for verification!', 'delivery_note_id' => $request->delivery_note_id]);
+        }
+    }
+
+    public function shipmentUndeliveredRvrSubReason(Request $request){
+        $rules = [
+            'shipment_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipments,id'],
+            'status_reason_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:shipment_status_reason,id'],
+            'rvr_subreason_otp' => ['nullable', 'integer', 'digits_between:1,10', 'exists:shipment_otps,otp'],
+            'type' => ['required', 'integer', 'digits_between:1,10'],
+            'type_name_id' => 'required_if:type,2|nullable|integer|exists:address_missing_shipment_types,id',
+
+        ];
+        $message = '';
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $rider_id = $request->rider_id;
+            $shipper_status_id = BoltUndeliveredReasonMap::where('reason_id', $request->status_reason_id)->first();
+            
+            if (in_array($request->status_reason_id, [19, 8]) && $shipper_status_id->status_attempt_count_1 == 12) //if Shipper Status Id = 12 (Shipment - Reason Validation Required) Then fetch Those Shipments in Get Ticket
+            {
+                $rvr_verification = 1;
+                NotificationsController::send(249, $rider_id, $request->shipment_id);
+                // $this->rvshipmentticketInsert($shipment->id, $shipper_status_id, $request->status_reason_id, $shipment->user_id);
+            }
+            if(!$request->rvr_subreason_otp){
+                $rvr_verification = 0;
+                $shipment = Shipment::find($request->shipment_id);
+                $this->rvshipmentticketInsert($shipment->id, $shipper_status_id, $request->status_reason_id, $shipment->user_id);
+
+            }
+            if($request->type == 1){
+                $verification = new ShipmentOtpVerification();
+                $verification->shipment_id = $request->shipment_id;
+                $verification->via_dbf_otp = 0;
+                $verification->via_rvrsub_reason = $rvr_verification;
+                $verification->rider_id = $rider_id;
+                $verification->save();
+            }elseif($request->type == 2){
+                AddressMissingShipment::create([
+                    'shipment_id' => $request->shipment_id,
+                    'type_name_id' => $request->type_name_id, // House/Flat number
+                    'status' => 0,
+                ]);
+            }
         }
     }
 }

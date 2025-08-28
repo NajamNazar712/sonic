@@ -1260,7 +1260,7 @@ class DeliveryController extends Controller
                         $shipment_otp->shipment_id = $shipment_id;
                     }
                     $shipment_otp->dbf_otp = $dbf_otp;
-                    $shipment_otp->rider_id = null;
+                    $shipment_otp->rider_id = $request->selected_rider_id;
                     $shipment_otp->latitude = null;
                     $shipment_otp->longitude = null;
 
@@ -9989,7 +9989,7 @@ class DeliveryController extends Controller
                             }
                             $shipment_otp->otp = $otp;
                             $shipment_otp->dbf_otp = $dbf_otp;
-                            $shipment_otp->rider_id = null;
+                            $shipment_otp->rider_id = $note->rider_id;
                             $shipment_otp->latitude = null;
                             $shipment_otp->longitude = null;
                             $shipment_otp->save();
