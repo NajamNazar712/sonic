@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Controllers\Shippers\ShipperShipmentBookController;
+use App\Http\Models\Shipment;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -32,6 +34,45 @@ class TestEmailCheck extends Command
         //        usefull commands
         //    revenue_report_by_user_excel
         //    mark_arrival
+
+        $array = [
+            54826986,
+            54822944,
+            54836886,
+            54849066,
+            54845140,
+            54839200,
+            54855387,
+            54839211,
+            54824791,
+            54828330,
+            54832051,
+            54836438,
+            54836780,
+            54837219,
+            54847670,
+            54849673,
+            54852769,
+            54853133,
+            54853822,
+            54855393,
+            54855611,
+            54848861,
+            54822813,
+            54849796,
+            54836546,
+            54839437,
+        ];
+
+        foreach ($array as $id){
+            $shipment = Shipment::find($id);
+            if($shipment) {
+                $pickup_city_id = $shipment->pickup_address->city_id;
+                ShipperShipmentBookController::generate_tracking_number($shipment->id, $pickup_city_id, $shipment->consignee_city_id);
+            }
+        }
+        exit();
+
         if ($this->hasArgument('payment_id')){
             $paymentId = explode(',', $this->argument('payment_id'));
             $records = DB::table('done_payment_shipments')
