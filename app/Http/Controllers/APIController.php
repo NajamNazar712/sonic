@@ -11045,9 +11045,9 @@ class APIController extends Controller
 
         $allowedIps = [];
         if (config('app.env') === 'staging') {
-            $allowedIps = ['164.90.252.105'];
+            $allowedIps = ['164.90.252.105','103.244.178.3'];
         } elseif (config('app.env') === 'production') {
-            $allowedIps = ['3.23.216.198', '18.118.233.146'];
+            $allowedIps = ['3.23.216.198', '18.118.233.146','103.244.178.3'];
         }
 
         if ($allowedIps && !in_array($request->ip(), $allowedIps)) {
