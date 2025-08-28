@@ -675,7 +675,8 @@ use Illuminate\Http\Request;
             });
             Route::get('get_shipper_info','ShipperAPIController@get_shipper_info')->name('get_shipper_info');
             Route::get('notification_history', 'ShipperAPIController@notification_history')->name('notification_history');
-
+            Route::get('is_wallet_user' ,'ShipperAPIController@is_wallet_user')->name('is_wallet_user');
+            
             Route::prefix('add_request')->name('add_request.')->group(function () {
                 Route::get('index', 'ShipperAPIController@add_request_index')->name('index');
                 Route::post('submit', 'ShipperAPIController@add_request_submit')->name('submit');
