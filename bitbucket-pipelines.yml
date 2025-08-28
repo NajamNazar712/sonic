@@ -2,15 +2,14 @@ image: atlassian/default-image:3
 
 pipelines:
   branches:
-    staging:
+    TO-7165:
       - step:
           name: 'Deploy to staging VM'
           deployment: staging
           script:
             - echo "Deploying to staging branch VM..."
             - ssh -o StrictHostKeyChecking=no $SPRINT_132_HOST << EOF
-              cd /var/www/html/sonic && ./deploy.sh
-              cd /var/www/html/sonic3 && ./deploy.sh
+              cd /var/www/html/sonic6 && ./deploy.sh
               EOF
 
     master:
