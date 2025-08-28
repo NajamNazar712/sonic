@@ -11788,8 +11788,8 @@ class RiderAPIController extends Controller
 
                                         if (DeliveryNote::where('id', $request->delivery_note_id)->where('pending_status', 0)->exists()) {
 
-                                            $shipment->shipper_status_id = 5;
-                                            $shipment->consignee_status_id = 5;
+                                            $shipment->shipper_status_id = $shipper_status_id;
+                                            $shipment->consignee_status_id = $shipper_status_id;
                                             $shipment->delivery_in_route = 0;
 
                                             if (in_array($request->open_box, [1, 2])) {
