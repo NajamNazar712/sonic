@@ -101,7 +101,7 @@ class AutoDeliveryNoteVerify extends Command
                             foreach ($shipments as $shipment) {
                                 $journey =  $shipment->latest_shipment_journey;
                                 ShipmentsJourneyController::add($journey->shipment_id, $journey->shipper_status_id, $journey->consignee_status_id, $journey->status_reason_id, $journey->remarks, $journey->user_id, 346, $journey->reference_1_id, $journey->reference_2_id, 1, $journey->received_or_refused_by, $journey->rider_id, $journey->cnic, $journey->relation);
-                                dd($shipment->shipper_status_id,$journey->status_reason_id);
+
                                 if ($shipment->shipper_status_id == 14) {
                                    
                                     if ($shipment->booking_type_id == 1) {
@@ -151,7 +151,7 @@ class AutoDeliveryNoteVerify extends Command
                                     //Remove Shipment from RV Shipment Ticket
                                     RvShipmentTicket::where('shipment_id', $shipment->id)->delete();
                                 }elseif ($shipment->shipper_status_id == 12 && in_array($journey->status_reason_id, [19,8])) {
-                                    $shipmetOtpRvRAdd = ShipmentOtpVerification::where(['shipment_id' =>$shipment->id, 'via_rvrsub_reason'=>1])->latest->first();
+                                    $shipmetOtpRvRAdd = ShipmentOtpVerification::where(['shipment_id' =>$shipment->id, 'via_rvrsub_reason'=>1])->latest()->first();
                                     if ($shipmetOtpRvRAdd) {
                                         Shipment::where('id', $shipment->id)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
                                         if ($shipment->shipment_type == 1) {

@@ -14816,7 +14816,7 @@ class RiderAPIController extends Controller
             'status_reason_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:shipment_status_reason,id'],
             'rvr_subreason_otp' => ['nullable', 'integer', 'digits_between:1,10', 'exists:shipment_otps,otp'],
             'type' => ['required', 'integer', 'digits_between:1,10'],
-            'type_name_id' => 'required_if:type,2|nullable|integer|exists:address_missing_shipment_types,id',
+            'type_name_id' => 'required_if:type,3|nullable|integer|exists:address_missing_shipment_types,id',
 
         ];
         $message = '';
@@ -14831,31 +14831,56 @@ class RiderAPIController extends Controller
             $rider_id = $request->rider_id;
             $shipper_status_id = BoltUndeliveredReasonMap::where('reason_id', $request->status_reason_id)->first();
             
-            if (in_array($request->status_reason_id, [19, 8]) && $shipper_status_id->status_attempt_count_1 == 12) //if Shipper Status Id = 12 (Shipment - Reason Validation Required) Then fetch Those Shipments in Get Ticket
+            if ($request->type == 1 && in_array($request->status_reason_id, [19, 8]) && $shipper_status_id->status_attempt_count_1 == 12) //if Shipper Status Id = 12 (Shipment - Reason Validation Required) Then fetch Those Shipments in Get Ticket
             {
+                $shipment_otp = ShipmentOtp::where('shipment_id', $request->shipment_id);
+                $otp = mt_rand(100000, 999999);
+                if ($shipment_otp->exists()) {
+                    $shipment_otp = $shipment_otp->first();
+                } else {
+                    $shipment_otp = new ShipmentOtp();
+                    $shipment_otp->shipment_id = $request->shipment_id;
+                }
+                $shipment_otp->otp = $otp;
+                $shipment_otp->rider_id = $rider_id;
+                $shipment_otp->latitude = $request->actual_location_latitude;
+                $shipment_otp->longitude = $request->actual_location_longitude;
+                $shipment_otp->save();
                 $rvr_verification = 1;
-                NotificationsController::send(249, $rider_id, $request->shipment_id);
+                NotificationsController::send(249, $rider_id, $request->shipment_id, $otp);
+                return response()->json(['status' => 0, 'message' => 'Your Otp Code is generated.!']);
                 // $this->rvshipmentticketInsert($shipment->id, $shipper_status_id, $request->status_reason_id, $shipment->user_id);
             }
-            if(!$request->rvr_subreason_otp){
-                $rvr_verification = 0;
-                $shipment = Shipment::find($request->shipment_id);
-                $this->rvshipmentticketInsert($shipment->id, $shipper_status_id, $request->status_reason_id, $shipment->user_id);
-
+            if($request->type == 2){
+                if($request->rvr_subreason_otp){
+                    $otp_check = ShipmentOtp::where(['shipment_id'=>$request->shipment_id,'otp'=>$request->rvr_subreason_otp])->whereDate('created_at',Carbon::now())->exists();
+                    if($otp_check){
+                        $rvr_verification = 1;
+                    }else{
+                        return response()->json(['status' => 1, 'message' => 'Invalid Otp Code.!']);
+                    }
+                }
+                if(!$request->rvr_subreason_otp){
+                    $rvr_verification = 0;
+                    $shipment = Shipment::find($request->shipment_id);
+                    $this->rvshipmentticketInsert($shipment->id, $shipper_status_id, $request->status_reason_id, $shipment->user_id);
+                }
             }
-            if($request->type == 1){
+            if($rvr_verification == 0 || $rvr_verification == 1){
                 $verification = new ShipmentOtpVerification();
                 $verification->shipment_id = $request->shipment_id;
                 $verification->via_dbf_otp = 0;
                 $verification->via_rvrsub_reason = $rvr_verification;
                 $verification->rider_id = $rider_id;
                 $verification->save();
+                return response()->json(['status' => 0, 'message' => 'Successfull.!']);
             }elseif($request->type == 2){
                 AddressMissingShipment::create([
                     'shipment_id' => $request->shipment_id,
                     'type_name_id' => $request->type_name_id, // House/Flat number
                     'status' => 0,
                 ]);
+                return response()->json(['status' => 0, 'message' => 'Successfull.!']);
             }
         }
     }

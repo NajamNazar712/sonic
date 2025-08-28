@@ -190,6 +190,7 @@ class NotificationsController extends Controller
 
     static private function sms_otp($body, $to, $name, $otp, $type, $shipment_id = NULL, $notification_id = NULL)
     {
+        
         if ($type == 1) {
             $sms = new SMS();
 
@@ -207,6 +208,7 @@ class NotificationsController extends Controller
 
             dispatch(new ProcessOTPSMSITS($sms, $name, $otp));
         } else if ($type == 2) {
+           
             $sms = new DeliveryNoteOtpSms();
 
             $sms->to = str_replace('-', '', $to);
@@ -11566,10 +11568,10 @@ class NotificationsController extends Controller
                     
                     $rider_id = $reference_1_id;
                     $shipment_id = $reference_2_id;
+                    $otp = $reference_3_id;
                     $name = '';
                     $rider = Rider::find($rider_id);
                     $shipment = Shipment::find($shipment_id);
-                    $shipment_otp = ShipmentOtp::where('shipment_id', $shipment_id)->where('rider_id', $rider_id)->whereDate('updated_at', Carbon::today())->first();
                     
                     if (strpos($body, '[consignee_name]') !== FALSE) {
                         $body = str_replace('[consignee_name]', $shipment->consignee_name, $body);
@@ -11585,17 +11587,17 @@ class NotificationsController extends Controller
                     }
 
                     if (strpos($body, '[otp]') !== FALSE) {
-                        $body = str_replace('[otp]', $shipment_otp->otp, $body);
+                        $body = str_replace('[otp]', $otp, $body);
                     }
 
                     $to = $shipment->consignee_phone_number_1;
                     // self::sms($body, $to, 1);
-                    self::sms_otp($body, $to, $name, $shipment_otp->otp, 2, null, $id);
+                    self::sms_otp($body, $to, $name, $otp, 3, null, $id);
                     // self::sms_otp($body, $to, $name, 21323, 3);
                     if ($shipment->consignee_phone_number_2 != NULL) {
                         $to = $shipment->consignee_phone_number_2;
                         // self::sms($body, $to, 1);
-                        self::sms_otp($body, $to, $name, $shipment_otp->otp, 2, null, $id);
+                        self::sms_otp($body, $to, $name, $otp, 3, null, $id);
                     }
                 }
             }
