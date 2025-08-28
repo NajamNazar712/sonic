@@ -8238,39 +8238,46 @@ class AdminReportsController extends Controller
         $sj_to_id = 908982787;
         $arrived_sj_to_id = 908982787;
 
-
-
-        if ($from && $to) {
-            $from = Carbon::parse($from)->startOfDay();
-            $to  = Carbon::parse($to)->addDay()->startOfDay(); // exclusive
-        } else {
-            $from = Carbon::now()->subMonths(12)->startOfDay();
-            $to   = Carbon::now()->addDay()->startOfDay(); // exclusive
-        }
-
-        $from_id = null;
-        $to_id = null;
-
-
         if ($from != null && $to != null) {
 
-            $from_id = DB::connection($connection)->table('shipments_journey')
-                ->where('created_at', '>=', $from)
-                ->where('created_at', '<',  $to)
-                ->orderBy('created_at', 'asc')->orderBy('id', 'asc')
-                ->limit(1)->value('id');
+            $from_id = DB::connection($connection)->table('shipments')->select('id')->where('created_at', '>=', $from);
+            if ($from_id->exists()) {
+                $from_id = $from_id->first()->id;
 
-            $sj_from_id = $from_id;
+                $to_id = DB::connection($connection)->table('shipments')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
 
-            $to_id = DB::connection($connection)->table('shipments_journey')
-                ->where('created_at', '>=', $from)
-                ->where('created_at', '<',  $to)
-                ->orderBy('created_at', 'desc')->orderBy('id', 'desc')
-                ->limit(1)->value('id');
+                if ($to_id->exists()) {
+                    $to_id = $to_id->first()->id;
+                }
+            }
 
-            $sj_to_id = $to_id;
-            $arrived_sj_to_id = $to_id;
+            $sj_from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
+
+
+            if ($sj_from_id->exists()) {
+                $sj_from_id = $sj_from_id->first()->id ?? 0;
+
+
+                $sj_to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
+                $arrived_sj_to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to)->orWhere('created_at', '>=', $to);
+
+                if ($sj_to_id->exists()) {
+                    $sj_to_id = $sj_to_id->first()->id ?? 0;
+                    $arrived_sj_to_id = $arrived_sj_to_id->first()->id ?? 0;
+
+                }
+            }else{
+                $sj_from_id=0;
+                $sj_to_id=0;
+                $arrived_sj_to_id=0;
+            }
         }
+        // if(!is_int($sj_from_id)){
+        //     dd($sj_from_id);
+
+        //     $shipments = DB::connection($connection)->table('shipments')->whereRaw('false');
+        //     return $shipments;
+        // }
 
         $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'u.id', '=', 'shipments.user_id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
