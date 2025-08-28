@@ -129,6 +129,7 @@ use App\Jobs\ProcessRvShipmentTicket;
 use App\RvShipmentTicket;
 use GuzzleHttp\Client;
 use App\Http\Models\Admin\NonCodShipmentLog;
+use App\Http\Models\ShipmentOtpVerification;
 
 class DeliveryController extends Controller
 {
@@ -4006,8 +4007,28 @@ class DeliveryController extends Controller
                             //Remove Shipment from RV Shipment Ticket
                             RvShipmentTicket::where('shipment_id', $shipment)->delete();
 
+                        } elseif ($shipper_status_id == 12 && in_array($status_reason_id, [19, 8])) {
+                            $journey =  $shipment_details->latest_shipment_journey;   
+                            $shipmetOtpRvRAdd = ShipmentOtpVerification::where(['shipment_id' => $shipment_details->id, 'via_rvrsub_reason' => 1])->latest()->first();
+                                if ($shipmetOtpRvRAdd) {
+                                    Shipment::where('id', $shipment_details->id)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
+                                    if ($shipment_details->shipment_type == 1) {
+                                        if ($shipment_details->booking_type_id != 4) {
+                                            ShipmentChargesController::return($shipment_details->id);
+                                            if ($shipment_details->packaging_material_request != 1) {
+                                                AdminFinanceController::add_payment($shipment_details->id, 1);
+                                            }
+                                        } else {
+                                            ShipmentChargesController::walk_in_return($shipment_details->id);
+                                            $shipment_details->walk_in_status = 2;
+                                            $shipment_details->save();
+                                            AdminFinanceController::done_payment($shipment_details->id, 1);
+                                        }
+                                    }
+                                    ShipmentsJourneyController::add($shipment_details->id, 20, 20, $status_reason_id, $journey->remarks ?? NULL, NULL, 346, null, null, 1, null, null, null, null, null);
+                                }
+                            }
                         }
-                    }
 
                     if ($verification == 1) {
                         if (!empty($dispute_shipments)) {
