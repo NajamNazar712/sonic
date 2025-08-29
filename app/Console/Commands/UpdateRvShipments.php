@@ -41,7 +41,7 @@ class UpdateRvShipments extends Command
             $shipments = Shipment::whereIn('tracking_number', $trackingNumbers)->get();
 
             if ($shipments->isEmpty()) {
-                $this->error("❌ No shipments found for given tracking number(s): {$trackingInput}");
+                $this->info("❌ No shipments found for given tracking number(s): {$trackingInput}");
                 return;
             }
 
