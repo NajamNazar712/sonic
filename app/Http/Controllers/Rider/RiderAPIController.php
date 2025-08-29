@@ -12925,19 +12925,19 @@ class RiderAPIController extends Controller
                     $latitude = 0;
                     $longitude = 0;
 
-                    $query = ShipmentGeoCode::where('shipment_id', $shipment_data->id);
+                    $geo_code = ShipmentGeoCode::where('shipment_id', $shipment_data->id)
+                        ->where('geo_code_type', 1)
+                        ->first();
 
-                    if ($query->exists()) {
-                        $geo_code = $query->where('geo_code_type', 1)->first();
+                    if (!$geo_code) {
+                        $geo_code = ShipmentGeoCode::where('shipment_id', $shipment_data->id)
+                            ->where('geo_code_type', 2)
+                            ->first();
+                    }
 
-                        if (!$geo_code) {
-                            $geo_code = $query->where('geo_code_type', 2)->first();
-                        }
-
-                        if ($geo_code) {
-                            $latitude  = $geo_code->latitude;
-                            $longitude = $geo_code->longitude;
-                        }
+                    if ($geo_code) {
+                        $latitude  = $geo_code->latitude;
+                        $longitude = $geo_code->longitude;
                     }
 
                     $deliveries['consignee_name'] = $consignee_name;
