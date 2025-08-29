@@ -1338,6 +1338,7 @@ class AdminDashboardController extends Controller
         $subSegment = $request->input('sub_segment_select', null);
         $account_tye_id = $request->input('account_type_id', null);
         $report_type = $request->report_type; //1 => for kam & poc qsr report
+        $exclude_shipper =  $request->exclude_shipper;
         if($report_type == 1) {
             $shippers = User::leftJoin('sale_tier_tags', 'sale_tier_tags.user_id', '=', 'users.id')
             ->where(function($query) {
@@ -1368,13 +1369,14 @@ class AdminDashboardController extends Controller
         if($account_tye_id){
             $shippers = $shippers->whereIn('users.account_type_id', $account_tye_id);
         }
-        $shippers = $shippers->where(function($query){
-            $idsToExclude = FilterTrait::class::getFilteredIds(auth()->user()->id);
-            if (!empty($idsToExclude)) {
-                $query->whereNotIn('users.id', $idsToExclude);
-            }
-        });
-
+        if($exclude_shipper == null) {
+            $shippers = $shippers->where(function($query){
+                $idsToExclude = FilterTrait::class::getFilteredIds(auth()->user()->id);
+                if (!empty($idsToExclude)) {
+                    $query->whereNotIn('users.id', $idsToExclude);
+                }
+            });
+        }
         $shippers = $shippers->select('users.id','name as text')->take(10)->get()->toArray();
 
         return response()->json($shippers);
@@ -1401,6 +1403,19 @@ class AdminDashboardController extends Controller
         $shippers = $shippers->select('id','name as text')->take(10)->get()->toArray();
 
         return response()->json($shippers);
+    }
+
+    public function data_for_dropdown(Request $request, $type)
+    {
+        $keyword = $request->search;
+
+        if($type == 'hub') {
+            $data = DB::connection('reports')->table('cities')->where('hub', 1)->where('name', 'like', '%' . $keyword . '%')->select('id','name as text')->take(10)->get()->toArray();
+        } elseif($type == 'nature') {
+            $data = DB::connection('reports')->table('crm_request_case_nature_types')->where('type', 'like', '%' . $keyword . '%')->select('id','type as text')->take(10)->get()->toArray();
+        } 
+        
+        return response()->json($data);
     }
 
     public function shipperExclude(Request $request)

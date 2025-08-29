@@ -2055,6 +2055,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     //Reports start
     Route::prefix('reports')->name('reports.')->group(function () {
+        Route::get('data_for_dropdown/{type}','Admins\AdminDashboardController@data_for_dropdown')->name('data_for_dropdown');
         Route::prefix('qsr')->name('qsr.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@qsr_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@qsr_list')->name('list');
