@@ -147,6 +147,8 @@ use App\Jobs\WalletBulkSettlementFromDonePayments;
 use App\Models\ParentProduct;
 use App\Http\Models\Product;
 use App\Http\Models\Region;
+use App\Models\CorporateUserOnDeliveredInvoice;
+
 
 class AdminFinanceController extends Controller
 {
@@ -8956,7 +8958,7 @@ class AdminFinanceController extends Controller
     
                             //---------x-----------x-------------
                             // Start Auto Close Complaints
-                            $crm_request = CrmRequest::where('shipment_id', $shipment->id)->where('status_id', 2)->whereNotIn('case_nature_type_id', [42,40])->first();
+                            $crm_request = CrmRequest::where('shipment_id', $shipment->id)->whereNotIn('status_id', [4])->whereIn('case_nature_type_id', [1])->first();
                             
                             if ($crm_request) { 
                                 $shipperName = User::find(Shipment::where('id', $shipment->id)->select('user_id')->first()->user_id)->name;
@@ -19877,6 +19879,14 @@ class AdminFinanceController extends Controller
 
     static public function add_payment($shipment_id, $type, $shipment = array())
     {
+
+        $delivered_invoice_users = CorporateUserOnDeliveredInvoice::where('status', 1)
+        ->pluck('user_id')
+        ->toArray();
+
+        if(in_array($type, [3,1]) && in_array($shipment->user_id , $delivered_invoice_users)) {
+            return;
+        }
         if (empty($shipment)) {
             $shipment = Shipment::find($shipment_id);
         }

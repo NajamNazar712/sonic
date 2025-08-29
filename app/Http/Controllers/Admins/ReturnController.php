@@ -2306,11 +2306,11 @@ class ReturnController extends Controller
         }
 
         $status_return = array(20, 22, 24, 27, 29, 30, 33, 35, 37, 44, 45, 46, 47, 48);
-        $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
-            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
-            ->join('cities as h', 'dc.hub_id', '=', 'h.id')
+        $shipments = Shipment::leftjoin('users as u', 'shipments.user_id', '=', 'u.id')
+            ->leftjoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->leftjoin('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->leftjoin('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->leftjoin('cities as h', 'dc.hub_id', '=', 'h.id')
             ->leftjoin('user_shipping_infos AS rsi', 'shipments.return_address_id', '=', 'rsi.id')
             ->leftjoin('city_areas AS ca', 'ca.id', '=', 'rsi.city_area_id')
             ->leftjoin('city_areas AS ca2', 'ca2.id', '=', 'usi.city_area_id')
@@ -2318,7 +2318,7 @@ class ReturnController extends Controller
             ->leftjoin('cities as rch', 'rc.hub_id', '=', 'rch.id')
             ->leftJoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
             ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
-            ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
+            ->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
             ->leftJoin('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
                     ->where(
@@ -2426,6 +2426,12 @@ class ReturnController extends Controller
                 'rch.id as return_hub_id'
             )
             ->whereIn('shipments.shipper_status_id', $status_return);
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $shipments->whereBetween('shipments.created_at', [$from, $to]);
+        }
         if (session('department_id') == 7) {
             if (!in_array(session('id'), session('sale_users_bypass'))) {
                 $shipments = $shipments->where(function ($query) {

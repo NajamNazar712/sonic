@@ -12,14 +12,19 @@
 
                     <div class="card-header">
                         <div class="row">
-                            <div class="col-4">
+                            <div class="col-3">
                                 <h2 class="font-large-1">{{$shipper->name}} </h2>
                             </div>
-                             <div class="col-4 text-right mt-1">
+                             <div class="col-3 mt-1">
                                  <input type="checkbox" id="packaging_invoice_toggle" class="switchery packaging_invoice_toggle" data-size="xs" data-switchery="true">
                                  <label class="display-inline ml-1 font-medium-1">Generate Packaging Invoice</label>
                              </div>
-                            <div class="col-4">
+
+                             <div class="col-3 mt-1">
+                                 <input type="checkbox" id="delivered_invoice_toggle" class="switchery delivered_invoice_toggle" data-size="xs" data-switchery="true">
+                                 <label class="display-inline ml-1 font-medium-1">Enable Invoicing on Delivered Only</label>
+                             </div>
+                            <div class="col-3">
                                 <div class="badge badge-success pull-right"><h2 class="text-white">Corporate Invoicing Account</h2></div>
                             </div>
                         </div>
@@ -34,6 +39,7 @@
 
                                 <input type="hidden" id="corporate_type_id" value="{{$corporate_rate_type_id}}" name="corporate_rate_type_id">
                                 <input type="hidden" id="packaging_invoice" name="packaging_invoice">
+                                <input type="hidden" id="delivered_invoice" name="delivered_invoice">
 
                             </div>
                             <div class="card-header border-success">
@@ -4655,6 +4661,14 @@
                 $('#packaging_invoice').val('on');
             }else{
                 $('#packaging_invoice').val('off');
+            }
+        });
+
+        $("#delivered_invoice_toggle").on('change', function(){
+            if($("#delivered_invoice_toggle").is(":checked")){
+                $('#delivered_invoice').val('on');
+            }else{
+                $('#delivered_invoice').val('off');
             }
         });
     </script>

@@ -116,15 +116,33 @@ class AdminRetailReportController extends Controller
             }
             // $sales->groupBy('pns.retail_pickup_note_id');
 
-            $from_id = DB::connection('reports')->table('shipments_journey')->where('created_at', '>=', $from)->min('id');
-             if (!empty($from_id)) {
-                $to_id = DB::connection('reports')->table('shipments_journey')->whereBetween('created_at', [$from, $to])->max('id');
+        // Assume $from, $to are Carbon or datetimes
+        $connection = 'reports';
 
-                if (!empty($to_id)) {
-                    $sales->where('sj.id', '>=', $from_id)->where('sj.id', '<=', $to_id);
-                }
-            }
 
+        $fromId = DB::connection($connection)
+            ->table('shipments_journey')
+            ->where('created_at', '>=', $from)
+            ->orderBy('created_at', 'asc')
+            ->orderBy('id', 'asc')
+            ->limit(1)
+            ->value('id');
+
+
+        $toId = null;
+        if ($fromId) {
+            $toId = DB::connection($connection)
+                ->table('shipments_journey')
+                ->whereBetween('created_at', [$from, $to])
+                ->orderBy('created_at', 'desc')
+                ->orderBy('id', 'desc')
+                ->limit(1)
+                ->value('id');
+        }
+
+        if ($fromId && $toId) {
+            $sales->whereBetween('sj.id', [$fromId, $toId]);
+        }
 
         if($tracking = $request->get('search_tracking')){
             $sales->where('shipments.tracking_number', '=', $tracking);

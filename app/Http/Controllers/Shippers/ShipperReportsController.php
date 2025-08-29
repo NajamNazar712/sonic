@@ -624,38 +624,51 @@ class ShipperReportsController extends Controller
         $connection = 'reports';
 
         $from = $request->get('search_date_from');
-        $to = $request->get('search_date_to');
-        $from_id = null;
-        $to_id = null;
-        $sj_from_id = 168982787;
-        if ($from != null && $to != null) {
+        $to   = $request->get('search_date_to');
 
-            $from_id = DB::connection('reports')->table('shipments')->select('id')->where('created_at', '>=', $from);
-            if ($from_id->exists()) {
-                $from_id = $from_id->first()->id;
+        $from_id   = null;
+        $to_id     = null;
+        $sj_from_id = 168982787; // default fallback
 
-                $to_id = DB::connection('reports')->table('shipments')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
+        if ($from && $to) {
+            // Normalize dates (exclusive upper bound)
+            $fromTs = Carbon::parse($from)->startOfDay();
+            $toTsEx = Carbon::parse($to)->addDay()->startOfDay();
 
-                if ($to_id->exists()) {
-                    $to_id = $to_id->first()->id;
-                }
+            // ---------- Shipments: min/max id in window ----------
+            // min id at/after $from
+            $from_id = DB::connection('reports')->table('shipments')
+                ->where('created_at', '>=', $fromTs)
+                ->orderBy('created_at', 'asc')->orderBy('id', 'asc')
+                ->limit(1)->value('id');
+
+            // max id before $to (exclusive)
+            $to_id = DB::connection('reports')->table('shipments')
+                ->where('created_at', '>=', $fromTs)
+                ->where('created_at', '<',  $toTsEx)
+                ->orderBy('created_at', 'desc')->orderBy('id', 'desc')
+                ->limit(1)->value('id');
+
+            // ---------- Shipments Journey: first id at/after $from ----------
+            $sj_from_id = DB::connection($connection)->table('shipments_journey')
+                ->where('created_at', '>=', $fromTs)
+                ->orderBy('created_at', 'asc')->orderBy('id', 'asc')
+                ->limit(1)->value('id');
+
+            // Fallback if nothing found from $from: start of current year
+            if (empty($sj_from_id)) {
+                $yearStart = Carbon::today()->startOfYear();
+                $sj_from_id = DB::connection($connection)->table('shipments_journey')
+                    ->where('created_at', '>=', $yearStart)
+                    ->orderBy('created_at', 'asc')->orderBy('id', 'asc')
+                    ->limit(1)->value('id');
             }
-            $sj_from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
-            if ($sj_from_id->exists()) {
-                $sj_from_id = $sj_from_id->first()->id;
-            }
-            else{
-                $sj_from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', Carbon::today()->startOfYear());
-                if($sj_from_id->exists()){
-                    $sj_from_id = $sj_from_id->first()->id;
-                }
-            }
-
         }
-        $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'u.id', '=', 'shipments.user_id')
-            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+
+        $shipments = DB::connection('reports')->table('shipments')->leftJoin('users as u', 'u.id', '=', 'shipments.user_id')
+            ->leftJoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->leftJoin('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->leftJoin('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
             ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=', 'sps.id')
             ->leftJoin('shipments_journey as sj', function ($join) use ($connection, $sj_from_id) {
@@ -689,9 +702,9 @@ class ShipperReportsController extends Controller
                         DB::connection($connection)->raw("(select min(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id  = 53 and shipments_journey.id >= $sj_from_id)")
                     );
             })
-            ->select(['u.name as user_name', 'shipments.id as shipment_id', 'shipments.order_id', 'shipments.tracking_number', 'shipments.amount as collection_amount', 'shipments.actual_weight', 
-            'shipments.weight_charges', 'shipments.cash_handling_charges', 'ss.name as current_status', 'cj.updated_at as current_status_date', 'sps.name as payment_status', 'bt.booking_type as service_type', 
-            'p.product_name', 'si.description', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'shipments.consignee_name as consignee_name', 
+            ->select(['u.name as user_name', 'shipments.id as shipment_id', 'shipments.order_id', 'shipments.tracking_number', 'shipments.amount as collection_amount', 'shipments.actual_weight',
+            'shipments.weight_charges', 'shipments.cash_handling_charges', 'ss.name as current_status', 'cj.updated_at as current_status_date', 'sps.name as payment_status', 'bt.booking_type as service_type',
+            'p.product_name', 'si.description', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'shipments.consignee_name as consignee_name',
             'shipments.consignee_phone_number_1 as consignee_phone', 'ssr.name as return_reason', 'shipments.created_at as booking_date','sjrp.created_at as rider_picked_status_date']);
 
         if (session('user_type') == 2) {
