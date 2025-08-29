@@ -7163,9 +7163,7 @@ class AdminReportsController extends Controller
     public function crm_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 173);
-        $shippers = DB::connection('reports')->table('users')->whereIn('status', [3, 4])->select('id', 'name')->get();
         $cities = DB::connection('reports')->table('cities')->select('id', 'name')->get();
-        $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
         $zones = DB::connection('reports')->table('zones')->get();
         $agents = AdminRole::leftJoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
         ->whereIn('admin_roles.department_id', [3, 7])
@@ -7181,12 +7179,11 @@ class AdminReportsController extends Controller
         })
         ->get();
         $case_natures = DB::connection('reports')->table('crm_request_case_nature')->select('id', 'name')->get();
-        $case_nature_types = DB::connection('reports')->table('crm_request_case_nature_types')->select('id', 'type')->get();
         $statuses = DB::connection('reports')->table('crm_request_statuses')->select('id', 'name')->whereNotIn('id', [6, 7])->get();
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id', 'mode']);
         $service_types = DB::connection('reports')->table('booking_types')->get();
 
-        return view('admin.reports.crm_report')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'agents' => $agents, 'case_natures' => $case_natures, 'case_nature_types' => $case_nature_types, 'statuses' => $statuses, 'shipping_modes' => $shipping_modes, 'zones' => $zones, 'service_types'=> $service_types ]);
+        return view('admin.reports.crm_report')->with([ 'cities' => $cities, 'agents' => $agents, 'case_natures' => $case_natures, 'statuses' => $statuses, 'shipping_modes' => $shipping_modes, 'zones' => $zones, 'service_types'=> $service_types ]);
     }
 
     public function crm_list(Request $request)
