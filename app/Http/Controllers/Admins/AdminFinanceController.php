@@ -19880,16 +19880,18 @@ class AdminFinanceController extends Controller
     static public function add_payment($shipment_id, $type, $shipment = array())
     {
 
-        $delivered_invoice_users = CorporateUserOnDeliveredInvoice::where('status', 1)
-        ->pluck('user_id')
-        ->toArray(); 
-        dd($shipment['user_id'],$shipment->user_id);
-        if(in_array($type, [3,1]) && !empty($delivered_invoice_users) && in_array($shipment->user_id , $delivered_invoice_users)) {
-            return;
-        }
         if (empty($shipment)) {
             $shipment = Shipment::find($shipment_id);
         }
+
+        $delivered_invoice_users = CorporateUserOnDeliveredInvoice::where('status', 1)
+        ->pluck('user_id')
+        ->toArray(); 
+
+        if(in_array($type, [3,1]) && in_array($shipment->user_id , $delivered_invoice_users)) {
+            return;
+        }
+       
         $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment_id);
         $check_arrival = ShipmentAdditionalCharges::check_additional_charges($shipment_id,true);
         $service_charges = ShipmentServicesCharges::where('shipment_id', $shipment_id);
