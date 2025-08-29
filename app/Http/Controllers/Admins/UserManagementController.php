@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\Admin\Retail\RetailShipperInfo;
 use LDAP\Result;
 use Carbon\Carbon;
 use App\Http\Models\City;
@@ -1448,5 +1449,38 @@ class UserManagementController extends Controller
         return $hubsNames->implode(', ');
     }
 
+
+    public function retail_otp_index()
+    {
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 833);
+        $settings = GlobalSettings::where('type', 'admin_otp');
+        if ($settings->doesntExist()) {
+            $settings = new GlobalSettings();
+            $settings->setting_value = 1;
+            $settings->type = "admin_otp";
+            $settings->save();
+        } else {
+            $settings = $settings->first();
+        }
+
+        return view('admin.otp.retail_otp')->with(['setting' => $settings]);
+    }
+
+    public function retail_otp_list(Request $request)
+    {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 834);
+        }
+        $retail = RetailShipperInfo::select('cities.name as city', 'retail_shipper_infos.id as id', 'retail_shipper_infos.shipper_name as name', 'retail_shipper_infos.retail_otp as otp', 'retail_shipper_infos.otp_expire_at')
+            ->where('retail_shipper_infos.status', 1)
+            ->join('cities', 'retail_shipper_infos.city_id', '=', 'cities.id')
+            ->whereNotNull('retail_shipper_infos.retail_otp');
+        if (!in_array(session('role_id'), [1, 58, 61, 56, 71, 70, 63, 104])) {
+            $retail = $retail->join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->where('ar.department_id', session('department_id'));
+        }
+        $datatable = Datatables::of($retail);
+        return $datatable->make(true);
+    }
     
 }
