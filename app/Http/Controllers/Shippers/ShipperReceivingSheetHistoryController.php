@@ -163,7 +163,10 @@ class ShipperReceivingSheetHistoryController extends Controller
         $receiving_sheet_received = ReceivingSheetReceived::where('receiving_sheet_id', $request->receiving_sheet_id)->where('user_id', session('user_id'))->get();
       }
       else {
-        $receiving_sheet_received = ReceivingSheetReceived::whereNull('receiving_sheet_id')->where('pickup_address_id', $request->pickup_address_id)->get();
+        $receiving_sheet_received = ReceivingSheetReceived::whereNull('receiving_sheet_id')
+            ->where('pickup_address_id', $request->pickup_address_id)
+             ->where('user_id', session('user_id'))
+            ->get();
       }
 
       $tracking_numbers = array();

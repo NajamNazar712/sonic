@@ -657,9 +657,11 @@ class APIController extends Controller
                 'service_type_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function ($query) {
                     $query->whereNotIn('id', [4]);
                 })],
-                'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('rate_statuses', 'shipping_mode_id')->where(function ($query) use ($user_id) {
-                    $query->where('user_id', $user_id)->where('status', 1);
-                })],
+                'shipping_mode_id' => ['required','integer','digits_between:1,10',
+                    'exists:shipping_modes,id',
+                    Rule::exists('rate_statuses','shipping_mode_id')
+                        ->where(fn($q)=>$q->where('user_id',$user_id)->where('status',1)),
+                ],
                 //pickup addres here
                 'return_address_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
                     $query->where('user_id', $user_id)->where('hidden', 0);
@@ -919,11 +921,17 @@ class APIController extends Controller
             ];
         }
         else {
-            $rules ['pickup_address_id'] = [
-                'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
-                    $query->where('user_id', $user_id)->where('hidden', 0);
-                }), 'origin_check'],
+            $rules = [
+                'pickup_address_id' => [
+                    'required',
+                    'integer',
+                    'digits_between:1,10',
+                    Rule::exists('user_shipping_infos', 'id')
+                        ->where(fn ($q) => $q->where('user_id', $user_id)->where('hidden', 0)),
+                    'origin_check', // or new OriginCheck if it's a class
+                ],
             ];
+
         }
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -11037,9 +11045,9 @@ class APIController extends Controller
 
         $allowedIps = [];
         if (config('app.env') === 'staging') {
-            $allowedIps = ['164.90.252.105'];
+            $allowedIps = ['164.90.252.105','103.244.178.3'];
         } elseif (config('app.env') === 'production') {
-            $allowedIps = ['3.23.216.198', '18.118.233.146'];
+            $allowedIps = ['3.23.216.198', '18.118.233.146','103.244.178.3'];
         }
 
         if ($allowedIps && !in_array($request->ip(), $allowedIps)) {

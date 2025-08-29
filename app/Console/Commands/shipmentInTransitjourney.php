@@ -15,7 +15,7 @@ class shipmentInTransitjourney extends Command
      *
      * @var string
      */
-    protected $signature = 'journey:insertIntoTransit';
+    protected $signature = 'journey:insertIntoTransit {tracking_number?}';
 
     /**
      * The console command description.
@@ -31,39 +31,58 @@ class shipmentInTransitjourney extends Command
      */
     public function handle()
     {
-        $shipmentId = [
-            14428353905669,
-            14428353905672
-        ];
-        if ($shipmentId) {
-            $shipmentId = Shipment::whereIn('tracking_number', $shipmentId)->get();
-            echo count($shipmentId);
-            foreach($shipmentId as $shipment){
-                $cargo = CargoManifestBagShipments::where('shipment_id',$shipment->id)->first();
-                $shipment->shipper_status_id = 3;
-                $shipment->consignee_status_id = 3;
-                $shipment->save();
-                $shipment_journey = new ShipmentsJourney();
-                $shipment_journey->shipment_id = $shipment->id;
-                $shipment_journey->verification = 1;
-                $shipment_journey->created_at = $cargo->bag->updated_at;
-                $shipment_journey->updated_at = $cargo->bag->updated_at;
-                $shipment_journey->shipper_status_id = 3;
-                $shipment_journey->consignee_status_id = 3;
-                $shipment_journey->status_reason_id = null;
-                $shipment_journey->city_id =  $cargo->bag->origin_hub_id;
-                $shipment_journey->remarks =  null;
-                $shipment_journey->user_id = null;
-                $shipment_journey->admin_id = 346;
-                $shipment_journey->rider_id = null;
-                $shipment_journey->reference_1_id = $cargo->bag->id;
-                $shipment_journey->reference_2_id = null;
-                $shipment_journey->received_or_refused_by = null;
-                $shipment_journey->relation = null;
-                $shipment_journey->cnic = null;
-                $shipment_journey->save();
+        $trackingNumbers = $this->argument('tracking_number')
+            ? explode(',', $this->argument('tracking_number'))
+            : [];
+
+        if (!empty($trackingNumbers)) {
+            $shipments = Shipment::whereIn('tracking_number', $trackingNumbers)->get();
+
+            if ($shipments->isNotEmpty()) {
+                echo "Found {$shipments->count()} shipment(s)." . PHP_EOL;
+
+                foreach ($shipments as $shipment) {
+                    $cargo = CargoManifestBagShipments::where('shipment_id', $shipment->id)->first();
+
+                    if (!$cargo || !$cargo->bag) {
+                        echo "⚠️ Skipped shipment ID {$shipment->id}, cargo/bag missing." . PHP_EOL;
+                        continue;
+                    }
+
+                    // Update shipment
+                    $shipment->update([
+                        'shipper_status_id'   => 3,
+                        'consignee_status_id' => 3,
+                    ]);
+
+                    // Create journey
+                    ShipmentsJourney::create([
+                        'shipment_id'         => $shipment->id,
+                        'verification'        => 1,
+                        'created_at'          => $cargo->bag->updated_at,
+                        'updated_at'          => $cargo->bag->updated_at,
+                        'shipper_status_id'   => 3,
+                        'consignee_status_id' => 3,
+                        'status_reason_id'    => null,
+                        'city_id'             => $cargo->bag->origin_hub_id,
+                        'remarks'             => null,
+                        'user_id'             => null,
+                        'admin_id'            => 346,
+                        'rider_id'            => null,
+                        'reference_1_id'      => $cargo->bag->id,
+                        'reference_2_id'      => null,
+                        'received_or_refused_by' => null,
+                        'relation'            => null,
+                        'cnic'                => null,
+                    ]);
+
+                    echo "✅ Shipment ID {$shipment->id} updated and journey created." . PHP_EOL;
+                }
+            } else {
+                echo "❌ No shipments found for provided tracking numbers." . PHP_EOL;
             }
-            
+        } else {
+            echo "❌ No tracking number(s) provided. Please pass at least one." . PHP_EOL;
         }
     }
 }

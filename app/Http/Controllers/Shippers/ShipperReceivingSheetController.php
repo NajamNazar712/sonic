@@ -392,7 +392,7 @@ class ShipperReceivingSheetController extends Controller
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();;
 
         $remove_logo = '';
-        $exclude_logo = FilterTrait::class::getFilteredShipperIds(auth()->user()->id);
+        $exclude_logo = FilterTrait::class::getFilteredShipperIds(session('user_id'));
         if($exclude_logo){
             $remove_logo = 'd-none-logo';
         }
@@ -517,7 +517,7 @@ class ShipperReceivingSheetController extends Controller
                             <td class="color primary"><strong>Destination</strong></td>
                             <td class="color primary"><strong>Estimated Weight</strong></td>
                             ';
-            if(in_array(session('user_id'),[6693,12412])){
+            if(in_array(session('user_id'),[6693,12412, 49251])){
                 $shipment_details .=
                     ' <td class="color primary"><strong>Actual Weight</strong></td> ';
             }
@@ -544,7 +544,7 @@ class ShipperReceivingSheetController extends Controller
                         $shipment_details_row_end = '
                             <td>' . $shipment->consignee_city->name . '</td>
                             <td>' . $shipment->estimated_weight . '</td> ';
-                        if(in_array(session('user_id'),[6693,12412])) {
+                        if(in_array(session('user_id'),[6693,12412, 49251])) {
                             $shipment_details_row_end .= '<td>' . $shipment->actual_weight . '</td> ';
                         }
                         $shipment_details_row_end .= '<td>' . $shipment->pieces . '</td>
