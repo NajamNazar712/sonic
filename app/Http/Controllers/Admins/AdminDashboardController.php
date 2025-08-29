@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\Http\Traits\FilterTrait;
 use Exception;
 use Carbon\Carbon;
 use App\FafCharges;
+use App\Models\CityLog;
 use App\RouteLocations;
 use App\Http\Models\City;
 use App\Http\Models\Zone;
@@ -17,7 +17,9 @@ use App\TerritoryTagHistory;
 use CreateCityOsaRatesTable;
 use Illuminate\Http\Request;
 use App\Http\Models\CityArea;
+use App\Http\Models\Province;
 use App\Http\Models\Shipment;
+use App\Models\ParentProduct;
 use App\Http\Models\AdminLogs;
 use App\Http\Models\BanksList;
 use App\Http\Models\Reference;
@@ -34,6 +36,7 @@ use App\Http\Models\CityHistory;
 use App\Http\Models\CityOsaRate;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\SaleTierTag;
+use App\Http\Traits\FilterTrait;
 use Yajra\DataTables\DataTables;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\DeliveryType;
@@ -44,6 +47,7 @@ use App\Http\Models\ShippingMode;
 use App\Http\Models\WalkInCities;
 use App\Http\Models\WeightCharge;
 use App\Jobs\CountFintechCharges;
+use App\Models\AccountTaggingLog;
 use App\Http\Models\Admin\Segment;
 use App\Http\Models\DuplicateUser;
 use App\Http\Models\EmployeeShift;
@@ -203,11 +207,11 @@ use App\Http\Models\Sister_account\MergedAccountHead;
 use App\Http\Models\CorporateDefaultHistoryRateStatus;
 use App\Http\Models\PendingCorporateDefaultRateStatus;
 use App\Http\Models\WMS\WmsHistoryPerSquareFootCharge;
+
 use App\Http\Models\WMS\WmsPendingPerSquareFootCharge;
 use App\PendingCorporateShipmentReturnDiscountCharges;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Models\Rates\HistoryCorporateWeightCharge;
-
 use App\Http\Models\Sister_account\MergedSisterAccount;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\CorporateDefaultHistoryWeightCharge;
@@ -236,9 +240,6 @@ use App\Http\Models\Operataions\OperationsForecastLastUpdatedTime;
 use App\Http\Models\Operataions\OperationsOutgoingTopCustomersShipments;
 use App\Http\Models\Operataions\OperationsOutgoingPickupRequestShipments;
 use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
-use App\Http\Models\Province;
-use App\Models\CityLog;
-use App\Models\ParentProduct;
 
 class AdminDashboardController extends Controller
 {   use RateReusableTrait,FilterTrait;
@@ -1530,6 +1531,14 @@ class AdminDashboardController extends Controller
                 $sale_person_tag->user_id = $shipper_id;
                 $sale_person_tag->save();
 
+                AccountTaggingLog::logTagging(
+                    $shipper_id,       
+                    Auth::id(),         
+                    $old_sale_person?->id, 
+                    $tag_id,            
+                    1                    
+                );
+
                 $shipper_zone_id = $user->city->zone_id; 
                 $zone = Zone::where('status', 1)->where('id', $shipper_zone_id)->first();
 
@@ -1571,6 +1580,14 @@ class AdminDashboardController extends Controller
                             $old_sale_person_data = $old_sale_person->sales_person;
                         }
                         $new_sale_person = Admin::find($tag_id);
+
+                        AccountTaggingLog::logTagging(
+                            $shipper_id,       
+                            Auth::id(),         
+                            $old_sale_person_data?->id, 
+                            $tag_id,            
+                            1                    
+                        );
 
                         $sale_person_tag = new SalePersonTag();
                         $sale_person_tag->admin_id = $tag_id;
@@ -10333,6 +10350,13 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 $dropdown .= '<button type="button" class="dropdown-item add_shipper_exclude_intercept_type"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add shipper exclude/Intercept 
                 Type </div></button>';
 
+                $dropdown .= '<button type="button" class="dropdown-item account_tagging_history" data-id="' . $result->id . '" data-toggle="modal" data-target="#AccountTaggingHistoryModal">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col-2"><i class="ft-activity"></i></div>
+                        <div class="col-9 offset-1">Account Tagging History</div>
+                    </div>
+                </button>';
+
                     $dropdown .= '
                     </div>
                   </div>
@@ -10763,7 +10787,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 }
             })
             ->addColumn("lead_progress", function ($user) {
-                if(isset($user->lead_id)){
+                if(isset($user->lead_id) && !empty($lead_progress_setting->percent)){
                     $weight_charges = WeightCharge::where('user_id' , $user->id);
 
                     $description = '-';
@@ -10973,6 +10997,13 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 if (session('role_id') == 1 || in_array(856, session('permissions'))) {
                     $dropdown .= '<button type="button" class="dropdown-item add_fintech_charges"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Fintech Charges</div></button>';
                 }
+
+                $dropdown .= '<button type="button" class="dropdown-item account_tagging_history" data-id="' . $result->id . '" data-toggle="modal" data-target="#AccountTaggingHistoryModal">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col-2"><i class="ft-activity"></i></div>
+                        <div class="col-9 offset-1">Account Tagging History</div>
+                    </div>
+                </button>';
 
                 $dropdown .= '
                     </div>
@@ -15318,7 +15349,11 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
                     foreach($request->tier_id as $row_id => $tier){
                         $sales_tier = SalesTier::find($tier);
+                        $old_kam_id = null; 
+
                         if(isset($request->user_id[$row_id])){
+                            $old_kam_id = SalesCommissionUser::where('sales_commission_id', $sales_commission_id)->latest()->first()->tier_id == 3 ? SalesCommissionUser::where('sales_commission_id', $sales_commission_id)->latest()->first()->user_id : null;
+
                             if (strpos($request->user_id[$row_id], 'riders') !== false) {
                                 preg_match('/\d+/', $request->user_id[$row_id], $matches);
                                 $rider_id = isset($matches[0]) ? $matches[0] : null;
@@ -15359,11 +15394,21 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                             $sales_commission_user->commission = $request->commission_percentage[$row_id];
                             $actual_commission += $request->commission_percentage[$row_id];
                             $sales_commission_user->save();
+
+                        if($tier == 3){
+                            AccountTaggingLog::logTagging(
+                                $shipper_id,        
+                                Auth::id(),             
+                                $old_kam_id,                 
+                                $sales_commission_user->user_id, 
+                                3                
+                            );
+                        }
                         }
                     }
+
                     $sales_commission->commission = $total_commission;
                     $sales_commission->save();
-
                 }else{
                     $sales_commission = new SalesCommission();
                     $sales_commission->shipper_id = $shipper_id;
@@ -15401,6 +15446,16 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                             $sales_commission_user->commission = $request->commission_percentage[$row_id];
                             $actual_commission += $request->commission_percentage[$row_id];
                             $sales_commission_user->save();
+
+                            if($tier == 3){
+                                AccountTaggingLog::logTagging(
+                                    $shipper_id,        
+                                    Auth::id(),             
+                                    null,                 
+                                    $sales_commission_user->user_id, 
+                                    3                   
+                                );
+                            }
                         }
                     }
                     $sales_commission->commission = $actual_commission;
@@ -15431,7 +15486,10 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                     $sale_tier_object->kam = $request->user_id[$row_id];
                     $sale_tier_object->save();
                 }
+
+               
             }
+
         }
 
         return back()->with('success', 'Commission Has Been Added !!');
@@ -16530,5 +16588,16 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         return response()->json($allChanges);
     }
 
+    public function taggingHistory($id)
+    {
+        $logs = AccountTaggingLog::with(['changedBy', 'newSalesAdmin', 'prevSalesAdmin'])
+            ->where('account_id', $id)
+            ->orderByDesc('created_at')
+            ->get()
+            ->groupBy(function ($log) {
+                return $log->created_at->format('Y-m-d H:i:s');
+            });
 
+        return response()->json($logs);
+    }
 }
