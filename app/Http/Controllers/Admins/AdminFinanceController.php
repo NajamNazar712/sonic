@@ -19883,7 +19883,7 @@ class AdminFinanceController extends Controller
         $delivered_invoice_users = CorporateUserOnDeliveredInvoice::where('status', 1)
         ->pluck('user_id')
         ->toArray();
-
+        dd($shipment['user_id'],$shipment->user_id);
         if(in_array($type, [3,1]) && !empty($delivered_invoice_users) && in_array($shipment->user_id , $delivered_invoice_users)) {
             return;
         }
