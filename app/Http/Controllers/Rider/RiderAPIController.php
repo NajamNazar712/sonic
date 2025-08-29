@@ -14828,6 +14828,9 @@ class RiderAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
+            if(Shipment::find($request->shipment_id)->shipper_status_id != 12){
+                return response()->json(['status' => 1, 'message' => 'Shipment is not on Reason Validation Required status']);
+            }
             $rider_id = $request->rider_id;
             $shipper_status_id = BoltUndeliveredReasonMap::where('reason_id', $request->status_reason_id)->first();
             
