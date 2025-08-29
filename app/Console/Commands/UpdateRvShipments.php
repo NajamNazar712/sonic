@@ -53,6 +53,7 @@ class UpdateRvShipments extends Command
 
     protected function processShipment($shipment)
     {
+        dd('data');
         $rvshipments = RvShipmentAssignAgent::where('shipment_id', $shipment->id);
 
         Shipment::where('id', $shipment->id)->update([
