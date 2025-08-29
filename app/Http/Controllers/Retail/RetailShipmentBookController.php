@@ -7,6 +7,7 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\NonServiceArea;
 use App\Http\Models\Admin\Retail\RetailCashDeposit;
 use App\Http\Models\Admin\Retail\RetailCashDepositShipment;
 use App\Http\Models\Admin\Retail\RetailFranchise;
@@ -227,9 +228,10 @@ class RetailShipmentBookController extends Controller
         $charges_modes = ChargesMode::whereIn('id', [1, 2])->get();
         $trax_boxes = RetailTraxBox::all();
         $banks = BanksList::all();
+        $check_nsa = NonServiceArea::pluck('name')->toArray();
 
         $refs = ['Social Media','Website','Signages','Existing Customer','Others'];
-        return view('retail.shipment.booking.index')->with(['products' => $products, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'domestic_cities' => $domestic_cities, 'domestic_overland_cities' => $domestic_overland_cities,'international_cities'=>$international_cities, 'payment_modes' => $payment_modes, 'trax_boxes' => $trax_boxes, 'banks' => $banks, 'charges_modes' => $charges_modes, 'refs' => $refs,'retail_international_shipping_modes' => $retail_international_shipping_modes, 'parent_products' => $parent_products]);
+        return view('retail.shipment.booking.index')->with(['products' => $products, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'domestic_cities' => $domestic_cities, 'domestic_overland_cities' => $domestic_overland_cities,'international_cities'=>$international_cities, 'payment_modes' => $payment_modes, 'trax_boxes' => $trax_boxes, 'banks' => $banks, 'charges_modes' => $charges_modes, 'refs' => $refs,'retail_international_shipping_modes' => $retail_international_shipping_modes, 'parent_products' => $parent_products,'check_nsa'=>$check_nsa]);
     }
 
     public function store(Request $request){
@@ -2218,6 +2220,8 @@ class RetailShipmentBookController extends Controller
             }
 
             $errors = array();
+            $check = NonServiceArea::pluck('name')->toArray();
+            $nsa_error = array();
 
             foreach ($rows as $key => $row) {
                 $row_id = $key + 2;
@@ -2295,19 +2299,46 @@ class RetailShipmentBookController extends Controller
                         $rows[$key]['height'] = $row['height'];
                     }
                 }
+
+                if (!$request->excel_nsa) {
+                    $con_nsa = array();
+                    $msg_string = '';
+                    $str_arr = null;
+                    $str_arr = preg_split("/[ ,]+/", $row['consignee_address']);
+                    foreach ($check as $nsa) {
+                        foreach ($str_arr as $arr_value) {
+                            if (strtolower($nsa) == strtolower($arr_value)) {
+                                $con_nsa[$row_id] = $arr_value;
+                                if ($msg_string != null) {
+                                    $msg_string = $msg_string . ', ' . $arr_value;
+                                } else {
+                                    $msg_string = $arr_value;
+                                }
+                            }
+                        }
+                    }
+                    if (isset($con_nsa[$row_id])) {
+                        $nsa_error[$row_id]['msg'] = "A Possible Address Anomaly: " . $msg_string . " Detected!";
+                    }
+                };
             }
 
             if (empty($errors)) {
-                foreach ($rows as $key => $row) {
-                    $row['user_id'] = $user_id;
-                    $row['retail_user_id'] = $retail_user_id;
-                    $row['pickup_address_id'] = $pickup_address_id;
-                    $row['category'] = $category;
-                    $row['category_id'] = $category_id;
-                    dispatch(new ProcessRetailShipmentBookingDB($row));
+                if (empty($nsa_error)) {
+                    foreach ($rows as $key => $row) {
+                        $row['user_id'] = $user_id;
+                        $row['retail_user_id'] = $retail_user_id;
+                        $row['pickup_address_id'] = $pickup_address_id;
+                        $row['category'] = $category;
+                        $row['category_id'] = $category_id;
+                        dispatch(new ProcessRetailShipmentBookingDB($row));
+                    }
+
+                    return redirect()->route('retail.shipment.book.excel')->with(['success' => 'Booking of ' . count($rows) . ' Shipment(s) is being Processed']);
+                } else{
+                    return view('retail.shipment.booking.nsa')->with(['data' => $rows, 'nsa_error' => $nsa_error]);
                 }
 
-                return redirect()->route('retail.shipment.book.excel')->with(['success' => 'Booking of ' . count($rows) . ' Shipment(s) is being Processed']);
             }
             else {
                 $products = Product::pluck('product_name', 'id');
