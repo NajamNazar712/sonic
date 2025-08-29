@@ -33,7 +33,6 @@ class UpdateRvShipments extends Command
     public function handle()
     {
         $trackingInput = $this->argument('tracking_number');
-        dd('data');
         if ($trackingInput) {
             // Split comma-separated tracking numbers into an array
             $trackingNumbers = array_map('trim', explode(',', $trackingInput));
@@ -53,7 +52,7 @@ class UpdateRvShipments extends Command
 
     protected function processShipment($shipment)
     {
-        dd('data');
+
         $rvshipments = RvShipmentAssignAgent::where('shipment_id', $shipment->id);
 
         Shipment::where('id', $shipment->id)->update([
