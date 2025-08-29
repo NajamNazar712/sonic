@@ -19884,7 +19884,7 @@ class AdminFinanceController extends Controller
         ->pluck('user_id')
         ->toArray();
 
-        if(in_array($type, [3,1]) && in_array($shipment->user_id , $delivered_invoice_users)) {
+        if(in_array($type, [3,1]) && !empty($delivered_invoice_users) && in_array($shipment->user_id , $delivered_invoice_users)) {
             return;
         }
         if (empty($shipment)) {
