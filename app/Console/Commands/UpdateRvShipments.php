@@ -8,6 +8,7 @@ use App\Http\Models\RvShipmentAssignAgent;
 use App\Http\Models\Shipment;
 use App\RvShipmentAgent;
 use Illuminate\Console\Command;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class UpdateRvShipments extends Command
 {
@@ -16,7 +17,7 @@ class UpdateRvShipments extends Command
      *
      * @var string
      */
-    protected $signature = 'shipments:update-rv-sar {tracking_number?}';
+    protected $signature = 'shipments:update-rv-sar {tracking_number?} {--file= : Path to Excel file containing tracking numbers}';
 
     /**
      * The console command description.
@@ -47,6 +48,57 @@ class UpdateRvShipments extends Command
             foreach ($shipments as $shipment) {
                 $this->processShipment($shipment);
             }
+        }
+        $filePath = base_path($this->option('file'));
+
+        if (!file_exists($filePath)) {
+            $this->error("❌ File not found: {$filePath}");
+            return;
+        }
+
+        try {
+            $spreadsheet = IOFactory::load($filePath);
+            $sheet = $spreadsheet->getActiveSheet();
+            $rows = $sheet->toArray();
+
+            $trackingNumbers = [];
+            foreach ($rows as $row) {
+                if (!empty($row[0]) && strtolower($row[0]) !== 'tracking_number') {
+                    $trackingNumbers[] = trim($row[0]);
+                }
+            }
+
+            $totalRecords = count($trackingNumbers);
+            $this->info("📊 Total tracking numbers found in Excel: {$totalRecords}");
+
+            if ($totalRecords === 0) {
+                $this->error("❌ No valid tracking numbers found in Excel file. Execution stopped.");
+                return;
+            }
+
+            // ✅ Process in chunks of 500
+            $chunks = array_chunk($trackingNumbers, 500);
+            foreach ($chunks as $index => $chunk) {
+                $this->info("🚀 Processing chunk " . ($index + 1) . " of " . count($chunks) . " (Records: " . count($chunk) . ")");
+
+                $shipments = Shipment::whereIn('tracking_number', $chunk)->get();
+
+                if ($shipments->isEmpty()) {
+                    $this->warn("⚠️ No shipments found for chunk " . ($index + 1));
+                    continue;
+                }
+
+                foreach ($shipments as $shipment) {
+                    $this->processShipment($shipment);
+                }
+
+                $this->info("✅ Finished chunk " . ($index + 1));
+            }
+
+            $this->info("🎉 All {$totalRecords} records processed successfully!");
+        } catch (\Exception $e) {
+            $this->error("❌ Failed to read Excel file: " . $e->getMessage());
+            return;
         }
     }
 
