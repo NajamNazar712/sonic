@@ -33,6 +33,7 @@ use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\ReattemptShipmentStatusRemarks;
+use App\Models\AddressMissingShipment;
 use App\RvShipmentTicket;
 use Illuminate\Support\Facades\DB;
 
@@ -91,7 +92,8 @@ class ReturnV2Controller extends Controller
         $reasons = RvAssignAgentSubStatus::where('rv_assign_agent_status_id', $request->id)->where('id', '<=', 32)->where('is_active', 1)->get();
         // $unresponsive_reasons = SubStatusCallFinding::get();
         $unresponsive_reasons = RvAssignAgentSubStatus::where('rv_assign_agent_status_id', 6)->where('id','<=',32)->where('is_active', 1)->get();
-        return response()->json(['reasons' => $reasons, 'unresponsive_reasons' => $unresponsive_reasons, 'status' => 1]);
+        $addressMissingType = AddressMissingShipment::where(['shipment_id'=>$request->shipment_id,'status'=>0])->latest()->first();
+        return response()->json(['reasons' => $reasons, 'unresponsive_reasons' => $unresponsive_reasons, 'addressMissingType'  => $addressMissingType?->type?->type_name ?? null, 'status' => 1]);
     }
 
 
@@ -246,7 +248,10 @@ class ReturnV2Controller extends Controller
                                     // $rider_details['reason'] = $rider_details['reason']['name'] ? $rider_details['reason']['name'] : '-';
                                     // $rider_details['reason'] =ShipmentStatusReason::where('id', ShipmentsJourney::where('shipper_status_id',12)->where('shipment_id', $shipment->id)->latest()->first()->status_reason_id)->first();
                                     $rider_details['reason'] =ShipmentStatusReason::where('id', $latest_shipments_journey->status_reason_id)->first();
-                                    $rider_details['reason'] = $rider_details['reason'] ? $rider_details['reason']['name'] : '-';
+                                    $rider_details['reason'] = [
+                                        'id'   => isset($rider_details['reason']['id']) ? $rider_details['reason']['id'] : '-',
+                                        'name' => isset($rider_details['reason']['name']) ? $rider_details['reason']['name'] : '-',
+                                    ];
                                     $rider_details['attempted_time'] = (isset($latest_shipments_journey->created_at)) ? ($latest_shipments_journey->created_at)->format('Y/m/d H:i:s') : '-';
                                     $rider_details['remarks'] = $latest_shipments_journey;
                                     $rider_details['remarks'] = $rider_details['remarks']->remarks ?? '-';
@@ -364,6 +369,11 @@ class ReturnV2Controller extends Controller
                 return $request->rv_assign_agent_status_id == 6 && $request->rv_assign_agent_sub_status_id == 1 || $request->rv_assign_agent_status_id == 5;
             }), //if unresponsive and other is selected remark is required
         ];
+        
+        // Conditional validation
+        if ($request->input('rv_assign_agent_status_id') == 2 && in_array($request->input('reasonId'), [3, 5, 7])) {
+            $validations['consignee_address_1'] = 'required|string|max:255';
+        }
 
         $data = [
             'rv_assign_agent_status_id' => $request->input('rv_assign_agent_status_id'),
@@ -371,8 +381,8 @@ class ReturnV2Controller extends Controller
             'is_fake_status' => $request->input('is_fake_status'),
             'rv_fake_status_id' => $request->input('rv_fake_status_id') ?? null,
             'remarks' => $request->input('remarks') ?? null,
+            'consignee_address_1' => $request->input('consignee_address_1') ?? null,
         ];
-
         $validate = Validator::make($data, $validations);
 
         if ($validate->fails()) {
@@ -380,6 +390,7 @@ class ReturnV2Controller extends Controller
         } 
         else 
         {
+           
             $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->where('rv_state_id', 1)->latest()->first();
             if($shipment_assign_agent){
                 $assign_agent = RvShipmentAgent::where('agent_id', $shipment_assign_agent->agent_id)->whereDate('created_at', date('Y-m-d'))->first();
@@ -391,6 +402,10 @@ class ReturnV2Controller extends Controller
                 // Check Employee Shift Time
                     try{
                         DB::beginTransaction();
+                    if ($request->input('rv_assign_agent_status_id') == 2 && in_array($request->input('reasonId'), [3,4])) {
+                        Shipment::where('id', $request->shipment_id)->update(['consignee_address'=>$request->consigneeAddress]);
+                        AddressMissingShipment::where(['shipment_id'=>$request->shipment_id,'status'=>0])->update(['status'=>1,'updated_by'=>Auth::id()]);
+                    }
                     //if agent already exists on same date update row
                         if ($request->is_fake_status > 0) {
                             $this->fakeStatusMarkedDeliveries($request);

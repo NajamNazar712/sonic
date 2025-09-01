@@ -13,7 +13,8 @@ class AddressMissingShipment extends Model
     protected $fillable = [
         'shipment_id',
         'type_name_id',
-        'value',
+        'rider_id',
+        'updated_by',
         'status',
     ];
 

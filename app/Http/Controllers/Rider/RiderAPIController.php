@@ -14816,11 +14816,11 @@ class RiderAPIController extends Controller
             'status_reason_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:shipment_status_reason,id'],
             'rvr_subreason_otp' => ['nullable', 'integer', 'digits_between:1,10', 'exists:shipment_otps,otp'],
             'type' => ['required', 'integer', 'digits_between:1,10'],
-            'type_name_id' => 'required_if:type,3|nullable|integer|exists:address_missing_shipment_types,id',
+            'type_name_id' => 'required_if:type,3|nullable|integer|exists:address_missing_shipment_type,id',
 
         ];
         $message = '';
-
+        $rvr_verification = '';
         $validate = Validator::make($request->all(), $rules, $this->messages);
 
         $validate->setAttributeNames($this->names);
@@ -14869,7 +14869,7 @@ class RiderAPIController extends Controller
                     $this->rvshipmentticketInsert($shipment->id, $shipper_status_id, $request->status_reason_id, $shipment->user_id);
                 }
             }
-            if($rvr_verification == 0 || $rvr_verification == 1){
+            if($request->type == 2){
                 $verification = new ShipmentOtpVerification();
                 $verification->shipment_id = $request->shipment_id;
                 $verification->via_dbf_otp = 0;
@@ -14877,12 +14877,20 @@ class RiderAPIController extends Controller
                 $verification->rider_id = $rider_id;
                 $verification->save();
                 return response()->json(['status' => 0, 'message' => 'Successfull.!']);
-            }elseif($request->type == 2){
-                AddressMissingShipment::create([
-                    'shipment_id' => $request->shipment_id,
-                    'type_name_id' => $request->type_name_id, // House/Flat number
-                    'status' => 0,
-                ]);
+            }elseif($request->type == 3){
+                $exists = AddressMissingShipment::where('shipment_id', $request->shipment_id)
+                    ->where('type_name_id', $request->type_name_id)
+                    ->where('created_at', '>=', now()->subHour()) // only check last 1 hour
+                    ->exists();
+
+                if (!$exists) {
+                    AddressMissingShipment::create([
+                        'shipment_id'  => $request->shipment_id,
+                        'type_name_id' => $request->type_name_id, // House/Flat number
+                        'rider_id'     => $rider_id,
+                        'status'       => 0,
+                    ]);
+                }
                 return response()->json(['status' => 0, 'message' => 'Successfull.!']);
             }
         }

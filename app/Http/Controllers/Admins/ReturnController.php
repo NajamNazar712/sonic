@@ -106,6 +106,7 @@ use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
 use App\RvShipmentTicket;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
+use App\Models\AddressMissingShipment;
 
 class ReturnController extends Controller
 {
@@ -1550,7 +1551,10 @@ class ReturnController extends Controller
                             ShipmentChargesController::nsa_osa_charges($request->shipment_id);
                         }
                     }
-
+                    if($request->consigneeaddress){
+                        $parcel->consignee_address = $request->consigneeaddress;
+                        AddressMissingShipment::where(['shipment_id' => $request->shipment_id, 'status' => 0])->update(['status' => 1, 'updated_by' => Auth::id()]);
+                    }
                     $parcel->shipper_status_id = 13;
                     $parcel->consignee_status_id = 13;
                     $parcel->save();
