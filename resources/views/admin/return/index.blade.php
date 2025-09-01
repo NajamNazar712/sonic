@@ -37,7 +37,7 @@
                             </span>
                             </div>
 
-                            <input type="text"  data-value="{{ Carbon\Carbon::now()->subYear() }}" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right height-5-per" id="search_date_from" placeholder="Search Date (From)">
+                            <input type="text"  data-value="{{ Carbon\Carbon::now()->subMonth(9) }}" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right height-5-per" id="search_date_from" placeholder="Search Date (From)">
                         </div>
 
 
