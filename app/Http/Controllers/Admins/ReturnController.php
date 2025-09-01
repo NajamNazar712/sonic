@@ -123,6 +123,10 @@ class ReturnController extends Controller
 
         $from = request()->get('search_date_from');
         $to = request()->get('search_date_to');
+        if (empty($from) || empty($to)) {
+            $from = Carbon::now()->subYear()->startOfDay(); // 1 year ago from today
+            $to   = Carbon::now()->endOfDay();              // today until 23:59:59
+        }
         $from_id = null;
         $to_id = null;
 
