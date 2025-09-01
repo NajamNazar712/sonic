@@ -15,9 +15,32 @@
                     <th class="border-primary border-darken-1 align-middle text-center">Breadth</th>
                     <th class="border-primary border-darken-1 align-middle text-center">Height</th>
                 @endif
-                <th class="border-primary border-darken-1 align-middle text-center">Charges</th>
-                @if (($shipment->shipment_type == 1 && $shipment->fuel_surcharge != null) || ($shipment->shipment_type == 2 && $retail_shipment->fuel_surcharge != null ))
-                    <th class="border-primary border-darken-1 align-middle text-center">Fuel Surcharge</th>
+
+                @if ($shipment->shipment_type == 1)
+                    @if (
+                        ($exists && !in_array($shipment->shipper_status_id, [20,21,22,23,24,25]))
+                        || 
+                        (!$exists)
+                    )
+                        <th class="border-primary border-darken-1 align-middle text-center">Charges</th>
+                    @endif
+                @else
+                    <th class="border-primary border-darken-1 align-middle text-center">Charges</th>
+                @endif
+
+                @if($shipment->shipment_type == 1)
+                    @if (
+                        ($exists && !in_array($shipment->shipper_status_id, [20,21,22,23,24,25]) &&  $shipment->fuel_surcharge != null ) 
+                        || 
+                        (!$exists &&  $shipment->fuel_surcharge != null )
+                    )
+                        <th class="border-primary border-darken-1 align-middle text-center">Fuel Surcharge</th>
+
+                    @endif
+                @else
+                    @if ($retail_shipment->fuel_surcharge != null)
+                        <th class="border-primary border-darken-1 align-middle text-center">Fuel Surcharge</th>
+                    @endif
                 @endif
             </tr>
             </thead>
@@ -40,12 +63,23 @@
                         <td class="align-middle text-center"> {{ $shipment->height }}</td>
                     @endif
                     @if($shipment->shipment_type == 1)
-                        <td class="align-middle text-center">Rs. {{ floatval($shipment->weight_charges) }}</td>
+                        @if  (
+                            ($exists && !in_array($shipment->shipper_status_id, [20,21,22,23,24,25]) ) 
+                            || 
+                            (!$exists)
+                        )
+                            <td class="align-middle text-center">Rs. {{ floatval($shipment->weight_charges) }}</td>
+                        @endif
+
                     @else
                         <td class="align-middle text-center">Rs. {{ floatval($retail_shipment->weight_charges) }}</td>
                     @endif
                     @if($shipment->shipment_type == 1)
-                        @if ($shipment->fuel_surcharge != null)
+                        @if (
+                            ($exists && !in_array($shipment->shipper_status_id, [20,21,22,23,24,25]) &&  $shipment->fuel_surcharge != null ) 
+                            || 
+                            (!$exists &&  $shipment->fuel_surcharge != null )
+                        )
                             <td class="align-middle text-center">Rs. {{ floatval($shipment->fuel_surcharge) }}</td>
                         @endif
                     @else
@@ -109,7 +143,11 @@
             </div>
         @endif
     @endif
-    @if ($shipment->return_charges != null)
+    @if (
+            ($exists && !in_array($shipment->shipper_status_id, [20,21,22,23,24,25]) && $shipment->return_charges !== null) 
+            || 
+            (!$exists && $shipment->return_charges !== null)
+        )
         <div style="margin-top:15px">
         <h6 style="text-align: left"><b>Return</b></h6>
         <table class="table table-sm table-bordered">
