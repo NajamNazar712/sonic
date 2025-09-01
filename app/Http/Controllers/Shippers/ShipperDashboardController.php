@@ -155,7 +155,7 @@ class ShipperDashboardController extends Controller
             $shippers = GlobalSettings::where('type','mms_setting')->select('text')->first();
             $special_shippers = explode(',', $shippers->text);
 
-            if(!session('special_dashboard_user') && in_array(session('user_id'),$special_shippers))
+            if(session('special_dashboard_user') && in_array(session('user_id'),$special_shippers))
             {
                 $stats = array();
                 $today = Carbon::now()->subDays(2)->endOfDay();
