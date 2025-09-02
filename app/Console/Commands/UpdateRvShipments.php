@@ -104,38 +104,38 @@ class UpdateRvShipments extends Command
 
     protected function processShipment($shipment)
     {
-        $shipmentsJourney = ShipmentsJourney::where(['shipment_id'=>$shipment->id,'shipper_status_id'=>65])->latest()->first();
-        $shipmentsJourney->status_reason_id = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 12)->latest()->first()->status_reason_id;
-        $shipmentsJourney->save();
+        // $shipmentsJourney = ShipmentsJourney::where(['shipment_id'=>$shipment->id,'shipper_status_id'=>65])->latest()->first();
+        // $shipmentsJourney->status_reason_id = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 12)->latest()->first()->status_reason_id;
+        // $shipmentsJourney->save();
         // dd($shipmentsJourney);
-        // $rvshipments = RvShipmentAssignAgent::where('shipment_id', $shipment->id);
+        $rvshipments = RvShipmentAssignAgent::where('shipment_id', $shipment->id);
 
-        // Shipment::where('id', $shipment->id)->update([
-        //     'shipper_status_id'   => 65,
-        //     'consignee_status_id' => 65,
-        // ]);
+        Shipment::where('id', $shipment->id)->update([
+            'shipper_status_id'   => 65,
+            'consignee_status_id' => 65,
+        ]);
 
-        // ShipmentsJourneyController::add(
-        //     $shipment->id,
-        //     65,
-        //     65,
-        //     ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 12)->latest()->first()->status_reason_id,
-        //     null,
-        //     $shipment->user_id,
-        //     346
-        // );
+        ShipmentsJourneyController::add(
+            $shipment->id,
+            65,
+            65,
+            ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 12)->latest()->first()->status_reason_id,
+            null,
+            $shipment->user_id,
+            346
+        );
 
-        // NotificationsController::send(220, $rvshipments);
+        NotificationsController::send(220, $rvshipments);
 
-        // RvShipmentAssignAgent::where('shipment_id', $shipment->id)
-        //     ->update([
-        //         'agent_id'                  => 346,
-        //         'rv_state_id'               => 2,
-        //         'rv_assign_agent_status_id' => 7,
-        //         'unresponsive_count'        => 3,
-        //         'unresponsive_email_count'  => 1,
-        //         'unresponsive_email_time'   => now(),
-        //     ]);
+        RvShipmentAssignAgent::where('shipment_id', $shipment->id)
+            ->update([
+                'agent_id'                  => 346,
+                'rv_state_id'               => 2,
+                'rv_assign_agent_status_id' => 7,
+                'unresponsive_count'        => 3,
+                'unresponsive_email_count'  => 1,
+                'unresponsive_email_time'   => now(),
+            ]);
 
         $this->info("✅ Shipment {$shipment->tracking_number} (ID: {$shipment->id}) updated successfully.");
     }
