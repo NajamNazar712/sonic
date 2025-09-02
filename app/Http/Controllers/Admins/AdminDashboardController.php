@@ -15386,8 +15386,13 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                         $old_kam_id = null; 
 
                         if(isset($request->user_id[$row_id])){
-                            $old_kam_id = SalesCommissionUser::where('sales_commission_id', $sales_commission_id)->latest()->first()->tier_id == 3 ? SalesCommissionUser::where('sales_commission_id', $sales_commission_id)->latest()->first()->user_id : null;
+                            $latestRecord = SalesCommissionUser::where('sales_commission_id', $sales_commission_id)
+                                ->latest()
+                                ->first();
 
+                            $old_kam_id = ($latestRecord && $latestRecord->tier_id == 3)
+                                ? $latestRecord->user_id
+                                : null;
                             if (strpos($request->user_id[$row_id], 'riders') !== false) {
                                 preg_match('/\d+/', $request->user_id[$row_id], $matches);
                                 $rider_id = isset($matches[0]) ? $matches[0] : null;
@@ -15464,6 +15469,13 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                                     $sales_commission_user->user_type = "2";
                                 }
 
+                                $latestRecord = SalesCommissionUser::where('sales_commission_id', $sales_commission_id)
+                                    ->latest()
+                                    ->first();
+
+                                $old_kam_id = ($latestRecord && $latestRecord->tier_id == 3)
+                                    ? $latestRecord->user_id
+                                    : null;
 
                                 if(isset($user_type[$row_id]) && $user_type[$row_id] == "2"){
                                     $sales_commission_user->user_type = "2";
@@ -15485,7 +15497,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                                 AccountTaggingLog::logTagging(
                                     $shipper_id,        
                                     Auth::id(),             
-                                    null,                 
+                                    $old_kam_id,                 
                                     $sales_commission_user->user_id, 
                                     3                   
                                 );
