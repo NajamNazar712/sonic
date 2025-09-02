@@ -35,43 +35,81 @@ class TestEmailCheck extends Command
         //    revenue_report_by_user_excel
         //    mark_arrival
 
-        // $array = [
-        //     54826986,
-        //     54822944,
-        //     54836886,
-        //     54849066,
-        //     54845140,
-        //     54839200,
-        //     54855387,
-        //     54839211,
-        //     54824791,
-        //     54828330,
-        //     54832051,
-        //     54836438,
-        //     54836780,
-        //     54837219,
-        //     54847670,
-        //     54849673,
-        //     54852769,
-        //     54853133,
-        //     54853822,
-        //     54855393,
-        //     54855611,
-        //     54848861,
-        //     54822813,
-        //     54849796,
-        //     54836546,
-        //     54839437,
-        // ];
+        $array = [
+            54967535,
+            54967539,
+            54967536,
+            54967560,
+            54967558,
+            54967538,
+            54967570,
+            54967542,
+            54967540,
+            54967545,
+            54967548,
+            54967550,
+            54967546,
+            54967566,
+            54967569,
+            54967557,
+            54967561,
+            54967543,
+            54967555,
+            54967537,
+            54967554,
+            54967551,
+            54967552,
+            54967547,
+            54967568,
+            54954402,
+            54954630,
+            54962167,
+            54954638,
+            54962490,
+            54962471,
+            54918379,
+            54967535,
+            54967539,
+            54967536,
+            54967560,
+            54967558,
+            54967538,
+            54967570,
+            54967542,
+            54967540,
+            54967545,
+            54967548,
+            54967550,
+            54967546,
+            54967566,
+            54967569,
+            54967557,
+            54967561,
+            54967543,
+            54967555,
+            54967537,
+            54967554,
+            54967551,
+            54967552,
+            54967547,
+            54967568,
+            54954402,
+            54954630,
+            54962167,
+            54954638,
+            54962490,
+            54962471,
+            54918379,
+        ];
 
-        // foreach ($array as $id){
-        //     $shipment = Shipment::find($id);
-        //     if($shipment) {
-        //         $pickup_city_id = $shipment->pickup_address->city_id;
-        //         ShipperShipmentBookController::generate_tracking_number($shipment->id, $pickup_city_id, $shipment->consignee_city_id);
-        //     }
-        // }
-        // exit();
+        foreach ($array as $id){
+            $shipment = Shipment::find($id);
+            if($shipment) {
+                $pickup_city_id = $shipment->pickup_address->city_id;
+                ShipperShipmentBookController::generate_tracking_number($shipment->id, $pickup_city_id, $shipment->consignee_city_id);
+            }
+        }
+        exit();
 
         if ($this->hasArgument('payment_id')){
             $paymentId = explode(',', $this->argument('payment_id'));
