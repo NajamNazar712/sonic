@@ -15106,7 +15106,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                     return '';
                 }
             })
-            ->make(true);
+            ->rawColumns(['location', 'action'])->make(true);
 
     }
 
