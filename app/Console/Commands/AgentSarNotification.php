@@ -106,6 +106,7 @@ class AgentSarNotification extends Command
                 $join->on('rv_shipment_assign_agents.shipment_id', '=', 'shipments.id')
                     ->where('shipments.shipper_status_id','=' , 65);
                 })
+                ->whereNotIn('shipments.user_id', [49248, 49334])
                 ->where('rv_shipment_assign_agents.rv_assign_agent_status_id', 7)
                 ->where('rv_shipment_assign_agents.rv_state_id', 2)
                 ->where('rv_shipment_assign_agents.unresponsive_count', 3)
@@ -158,6 +159,7 @@ class AgentSarNotification extends Command
                 $join->on('rv_shipment_assign_agents.shipment_id', '=', 'shipments.id')
                     ->where('shipments.shipper_status_id', '=', 65);
                 })
+                ->whereNotIn('shipments.user_id', [49248, 49334])
                 ->where('rv_assign_agent_status_id', 8)
                 ->where('rv_state_id', 2)
                 ->where('rv_shipment_assign_agents.updated_at', '<=', $nowSub24Hours)
