@@ -860,6 +860,39 @@ aria-hidden="true">
     </div>
 </div>
 
+
+<div class="modal fade" id="AccountTaggingHistoryModal" tabindex="-1" role="dialog" aria-labelledby="AccountTaggingHistoryLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      
+      <div class="modal-header">
+        <h5 class="modal-title">Account Tagging History</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+          <table class="table table-bordered table-striped" id="taggingHistoryTable">
+              <thead>
+                  <tr>
+                      <th>#</th>
+                      <th>Changed By</th>
+                      <th>Previous Sales/KAM</th>
+                      <th>New Sales/KAM</th>
+                      <th>Type</th>
+                      <th>Changed At</th>
+                  </tr>
+              </thead>
+              <tbody>
+              </tbody>
+          </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 @endsection
 
 @section('css')
@@ -4014,6 +4047,44 @@ var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
             return $result;
         }
+
+        $(document).on("click", ".account_tagging_history", function () {
+            let accountId = $(this).data("id");
+            let tableBody = $("#taggingHistoryTable tbody");
+            tableBody.html("<tr><td colspan='6' class='text-center'>Loading...</td></tr>");
+
+            $.get("/admin/management/" + accountId + "/tagging-history", function (groups) {
+                tableBody.empty();
+
+                if ($.isEmptyObject(groups)) {
+                    tableBody.html("<tr><td colspan='6' class='text-center'>No history found</td></tr>");
+                } else {
+                    let groupIndex = 1;
+                    $.each(groups, function (timestamp, logs) {
+                        let first = true;
+                        logs.forEach((log, index) => {
+                            let type = log.type == 1 ? "Sales" : (log.type == 3 ? "KAM" : "Other");
+
+                            tableBody.append(`
+                                <tr>
+                                    <td>${first ? groupIndex : ''}</td>
+                                    <td>${log.changed_by ? log.changed_by.name : '-'}</td>
+                                    <td>${log.prev_sales_admin ? log.prev_sales_admin.name : '-'}</td>
+                                    <td>${log.new_sales_admin ? log.new_sales_admin.name : '-'}</td>
+                                    <td>${type}</td>
+                                    <td>${first ? timestamp : ''}</td>
+                                </tr>
+                            `);
+
+                            first = false;
+                        });
+                        groupIndex++;
+                    });
+                }
+            });
+        });
+
+
 
     </script>
 

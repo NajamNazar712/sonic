@@ -407,7 +407,7 @@ class RetailAdminAccounts extends Controller
                               <tr>
                                 <td colspan="2" class="border twice-bottom twice-left">' . $shipment->retail->shipping_modes->name . '</td>
                                 <td colspan="2" class="border twice-bottom">' . $shipment->pieces . '</td>
-                                <td colspan="2" class="border twice-bottom">' . number_format($shipment->estimated_weight) . '</td>
+                                <td colspan="2" class="border twice-bottom">' . floatval($shipment->estimated_weight) . '</td>
                                 <td colspan="2" class="border twice-bottom">' . number_format(ROUND($shipment->retail->weight_charges, 0, PHP_ROUND_HALF_DOWN)) . '</td>
                                 <td colspan="2" class="border twice-bottom">' . number_format(ROUND($fuel_and_gst, 0, PHP_ROUND_HALF_DOWN)) . '</td>
                                 <td colspan="2" class="border twice-bottom twice-right">' . number_format(ROUND($shipment->retail->total_charges, 0, PHP_ROUND_HALF_DOWN)) . '</td>

@@ -327,6 +327,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 
         Route::get('city/{id}/changes', 'Admins\AdminDashboardController@getAjaxCityChanges')->name('getAjaxCityChanges');
+        Route::get('/{id}/tagging-history', 'Admins\AdminDashboardController@taggingHistory')->name('taggingHistory');
 
         //Route
         Route::prefix('route')->name('route.')->group(function () {
@@ -2054,6 +2055,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     //Reports start
     Route::prefix('reports')->name('reports.')->group(function () {
+        Route::get('data_for_dropdown/{type}','Admins\AdminDashboardController@data_for_dropdown')->name('data_for_dropdown');
         Route::prefix('qsr')->name('qsr.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@qsr_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@qsr_list')->name('list');
@@ -4417,11 +4419,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('list', 'Admins\UserManagementController@admin_otp_list')->name('list');
         Route::post('update', 'Admins\UserManagementController@admin_otp_update')->name('update');
     });
+
+    Route::prefix('retail_otp')->name('retail_otp.')->group(function () {
+        Route::get('', 'Admins\UserManagementController@retail_otp_index')->name('index');
+        Route::get('list', 'Admins\UserManagementController@retail_otp_list')->name('list');
+//        Route::post('update', 'Admins\UserManagementController@admin_otp_update')->name('update');
+    });
+
     Route::prefix('rider_otp')->name('rider_otp.')->group(function () {
         Route::get('', 'Admins\RiderManagementController@rider_otp_index')->name('index');
         Route::get('list', 'Admins\RiderManagementController@rider_otp_list')->name('list');
         Route::post('update', 'Admins\RiderManagementController@rider_otp_update')->name('update');
     });
+
+
 
     Route::prefix('shipment_otp')->name('shipment_otp.')->group(function () {
         Route::get('', 'Admins\DeliveryController@shipment_otp_index')->name('index');
