@@ -771,6 +771,35 @@ class ShipperReportsController extends Controller
                     ->where('sj.id', '=',
                         DB::connection($connection)->raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2 and shipments_journey.verification = 1 and shipments_journey.id >= $sj_from_id)"));
             })
+
+            ->leftJoin('shipments_journey as sjfa', function ($join) use ($connection, $sj_from_id) {
+                $join->on('sjfa.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'sjfa.id',
+                        '=',
+                        DB::connection($connection)->raw("(select id from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id  = 5 and shipments_journey.id >= $sj_from_id ORDER BY id ASC 
+              LIMIT 1 OFFSET 0)")
+                    );
+            })
+            
+            ->leftJoin('shipments_journey as sjf2', function ($join) use ($connection, $sj_from_id) {
+                $join->on('sjf2.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'sjf2.id',
+                        '=',
+                        DB::connection($connection)->raw("(select id from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id  = 5 and shipments_journey.id >= $sj_from_id  ORDER BY id ASC 
+              LIMIT 1 OFFSET 1)")
+                    );
+            })
+            ->leftJoin('shipments_journey as sjf3', function ($join) use ($connection, $sj_from_id) {
+                $join->on('sjf3.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'sjf3.id',
+                        '=',
+                        DB::connection($connection)->raw("(select id from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id  = 5 and shipments_journey.id >= $sj_from_id  ORDER BY id ASC 
+              LIMIT 1 OFFSET 2)")
+                    );
+            })
             ->leftJoin('shipments_journey as cj', function ($join) use ($connection , $sj_from_id) {
                 $join->on('cj.shipment_id', '=', 'shipments.id')
                     ->where('cj.id', '=',
@@ -800,7 +829,7 @@ class ShipperReportsController extends Controller
             ->select(['u.name as user_name', 'shipments.id as shipment_id', 'shipments.order_id', 'shipments.tracking_number', 'shipments.amount as collection_amount', 'shipments.actual_weight',
             'shipments.weight_charges', 'shipments.cash_handling_charges', 'ss.name as current_status', 'cj.updated_at as current_status_date', 'sps.name as payment_status', 'bt.booking_type as service_type',
             'p.product_name', 'si.description', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'shipments.consignee_name as consignee_name',
-            'shipments.consignee_phone_number_1 as consignee_phone', 'ssr.name as return_reason', 'shipments.created_at as booking_date','sjrp.created_at as rider_picked_status_date']);
+            'shipments.consignee_phone_number_1 as consignee_phone', 'ssr.name as return_reason', 'shipments.created_at as booking_date','sjrp.created_at as rider_picked_status_date', 'sjf2.created_at as second_attempt_date', 'sjf3.created_at as third_attempt_date', 'sjfa.created_at as first_attempt_date']);
 
         if (session('user_type') == 2) {
             if (session('restriction') == 1) {
