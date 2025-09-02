@@ -6,6 +6,7 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\RvShipmentAssignAgent;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentsJourney;
 use App\RvShipmentAgent;
 use Illuminate\Console\Command;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -116,7 +117,7 @@ class UpdateRvShipments extends Command
             $shipment->id,
             65,
             65,
-            null,
+            ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 12)->latest()->first()->status_reason_id,
             null,
             $shipment->user_id,
             346
