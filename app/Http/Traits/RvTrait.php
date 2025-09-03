@@ -2177,7 +2177,7 @@ trait RvTrait
             $rvshipments = RvShipmentAssignAgent::where('shipment_id', $shipment->id);
             Shipment::where('id', $shipment->id)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);   
             ShipmentsJourneyController::add($shipment->id, 65, 65, $statusReasonId,null, $shipment->user_id, Auth::id() ?? 346);
-            $updateField = (($type == 1) ? ['agent_id' => 346, 'rv_state_id' => 2, 'rv_assign_agent_status_id' => 7, 'unresponsive_count' => 3, 'unresponsive_email_count' => 1, 'unresponsive_email_time' => date('Y-m-d h:i:s')] : ['agent_id' => 346, 'rv_state_id' => 1, 'rv_assign_agent_status_id' => 7]);
+            $updateField = (($type == 1) ? ['agent_id' => 346, 'rv_state_id' => 2, 'rv_assign_agent_status_id' => 7, 'unresponsive_count' => 3, 'unresponsive_email_count' => 1, 'unresponsive_email_time' => date('Y-m-d h:i:s')] : ['agent_id' => 346, 'rv_state_id' => 3, 'rv_assign_agent_status_id' => 2]);
             RvShipmentAssignAgent::where('shipment_id', $shipment->id)
             // ->whereDate('created_at',$date)
             ->update($updateField);                                    
