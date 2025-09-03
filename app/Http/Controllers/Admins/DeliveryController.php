@@ -3970,7 +3970,7 @@ class DeliveryController extends Controller
                         // Mark Return Confirm if $shipper_status_id == 12 And $status_reason_id == (27 or 35)
                         // 27 = Shipment Damaged
                         // 35 = Delivery Stopped
-                        if ($shipper_status_id == 12 && in_array($status_reason_id, [27, 35]) && $verification) {
+                        if ($shipper_status_id == 12 && in_array($status_reason_id, [27, 35]) && $verification && RvShipmentTicket::where(['shipment_id' => $shipment_details->id, 'permanent_disable' => '0'])->exists()) {
                             $globalAdminId = 346;
                             $journey = ShipmentsJourney::where('shipment_id', $shipment_details->id)->whereIn('status_reason_id', [27, 35])->count();
                             if($journey > 2){
