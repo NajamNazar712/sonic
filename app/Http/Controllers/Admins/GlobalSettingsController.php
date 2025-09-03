@@ -9653,6 +9653,7 @@ class GlobalSettingsController extends Controller
         }
         if ($permanentDisableShipper->exists()) {
             $permanentDisabled = $permanentDisableShipper->first();
+            $permanentDisabledIds = explode(',', $permanentDisabled->text);
         } else {
             $all_shipper = new GlobalSettings();
             $all_shipper->setting_value = 1;
@@ -9661,10 +9662,9 @@ class GlobalSettingsController extends Controller
         }
         $shippers = User::select('id', 'name')->where('status', 3)->get();
         $permanent_disable = $shippers->whereNotIn('id', $only_shippers)->values();
-        $shippers = $shippers->whereNotIn('id',array_map('intval', explode(',', $permanentDisabled->text)))->values();
-       
+        $shippers = $shippers->whereNotIn('id',$permanentDisabledIds)->values();
 
-        return view('admin.settings.rv_disable_shippers.index')->with(['shippers' => $shippers, 'excluded_shippers' => $excluded_shippers, 'only_shippers' => $only_shippers, 'all_shippers' => $all_shipper, 'permanentDisabled'=> $permanentDisabled, 'permanent_disable'=> $permanent_disable]);
+        return view('admin.settings.rv_disable_shippers.index')->with(['shippers' => $shippers, 'excluded_shippers' => $excluded_shippers, 'only_shippers' => $only_shippers, 'all_shippers' => $all_shipper, 'permanentDisabledIds'=> $permanentDisabledIds, 'permanent_disable'=> $permanent_disable]);
     }
 
 
