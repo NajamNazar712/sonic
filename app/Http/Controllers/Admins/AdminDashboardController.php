@@ -15400,15 +15400,15 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                             $actual_commission += $request->commission_percentage[$row_id];
                             $sales_commission_user->save();
 
-                        if($tier == 3){
-                            AccountTaggingLog::logTagging(
-                                $shipper_id,        
-                                Auth::id(),             
-                                $old_kam_id,                 
-                                $sales_commission_user->user_id, 
-                                3                
-                            );
-                        }
+                            if($tier == 3){
+                                AccountTaggingLog::logTagging(
+                                    $shipper_id,        
+                                    Auth::id(),             
+                                    $old_kam_id,                 
+                                    $sales_commission_user->user_id, 
+                                    3                
+                                );
+                            }
                         }
                     }
 
