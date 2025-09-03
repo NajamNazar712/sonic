@@ -141,8 +141,8 @@ class AutoDeliveryNoteVerify extends Command
                                         }
                                         ShipmentsJourneyController::add($shipment->id, 20, 20, $journey->status_reason_id, $journey->remarks ?? NULL, NULL, 346, null, null, 1, null, null, null, null, null);
                                     } else {
-                                        if ($shipment->shipper_status_id == 12) {
-                                            $this->conditionalRvSarUpdate($shipment, $journey->status_reason_id, 1);
+                                        if ($shipment->shipper_status_id == 12 && RvShipmentTicket::where(['shipment_id' => $shipment->id, 'permanent_disable' => '0'])->exists()) {
+                                                $this->conditionalRvSarUpdate($shipment, $journey->status_reason_id, 1);
                                         }
                                     }
                                     //Remove Shipment from RV Shipment Ticket

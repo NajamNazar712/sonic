@@ -3991,7 +3991,7 @@ class DeliveryController extends Controller
                                 ShipmentsJourneyController::add($shipment, 20, 20, $status_reason_id, $journey->remarks ?? NULL, NULL, $globalAdminId, null, null, 1, null, null, null, null, null);
                                 
                             }else{
-                                    if($shipment_details->shipper_status_id == 12){
+                                    if($shipment_details->shipper_status_id == 12 && RvShipmentTicket::where(['shipment_id' => $shipment_details->id, 'permanent_disable' => '0'])->exists()){
                                         $this->conditionalRvSarUpdate($shipment_details,$status_reason_id,1);
                                     }
                             }
