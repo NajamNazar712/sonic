@@ -118,10 +118,9 @@
                 var ids = @json($only_shippers);
                 $('#only_users').val(ids).trigger('change');
             @endif
-            @if($permanentDisabled && $permanentDisabled->text)
-                var ids = @json(explode(',', $permanentDisabled->text));
-                $('#permanent_users').val(ids.map(Number)).trigger('change');
-
+            @if(count($permanentDisabledIds) > 0)
+                var ids = @json($permanentDisabledIds);
+                $('#permanent_users').val(ids).trigger('change');
             @endif
 
             $('#settings_form').validate({
