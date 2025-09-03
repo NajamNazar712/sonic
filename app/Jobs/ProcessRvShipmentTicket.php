@@ -51,7 +51,8 @@ class ProcessRvShipmentTicket implements ShouldQueue
                     'rv_disable_shippers_excluded_shippers',
                     'rv_disable_shippers_only_shippers',
                     'rv_disable_shippers_all_shippers',
-                    'bot_call_enable_disable'
+                    'bot_call_enable_disable',
+                    'rv_permanent_disable_shippers',
                 ])
                 ->get(['setting_value', 'type', 'text']);
             $isShipperDisabled = 0;
@@ -60,7 +61,8 @@ class ProcessRvShipmentTicket implements ShouldQueue
             $excludedShippers = [];
             $botCallStatus = [];
             $onlyShippers = [];
-
+            $disableShipper = [];
+            $permenantDisableShipper = 0;
             foreach ($globalSettings as $globalSetting) {
                 switch ($globalSetting->type) {
                     case 'rv_disable_shippers_all_shippers':
@@ -75,6 +77,9 @@ class ProcessRvShipmentTicket implements ShouldQueue
                     case 'bot_call_enable_disable':
                         $botCallStatus = array_merge($onlyShippers, explode(',', $globalSetting->text));
                         $botcallenable = 1;
+                        break;
+                    case 'rv_permanent_disable_shippers':
+                        $disableShipper = array_merge($disableShipper, explode(',', $globalSetting->text));
                         break;
                 }
             }
@@ -112,9 +117,12 @@ class ProcessRvShipmentTicket implements ShouldQueue
                 // }
                 
             }
+            if (in_array($this->shipment['shipment_user_id'], $disableShipper)) {
+                $permenantDisableShipper = 1;
+            }
             // $userId = [2234, 23825, 13060, 1049];
             // Log::channel('cronJobLog')->info('s ' . 'rv_shipment_ticket Saved');
-            $isBot = ((in_array($this->shipment['status_reason_id'], $botCallStatus) && $botcallenable && $isShipperDisabled == 0) ? 1 : 0);
+            $isBot = ((in_array($this->shipment['status_reason_id'], $botCallStatus) && $botcallenable && $isShipperDisabled == 0 && $permenantDisableShipper == 0) ? 1 : 0);
             RvShipmentTicket::withTrashed()->updateOrCreate(
                 ['shipment_id' => $this->shipment['shipment_id']],
                 [
@@ -128,6 +136,7 @@ class ProcessRvShipmentTicket implements ShouldQueue
                     'deleted_at' => (($shipment_status == 65) ? Carbon::now()->format('Y-m-d H:i:s') : null),
                     'halt_shipper' => $haltShipper,
                     'disabled_shipper' => $isShipperDisabled,
+                    'permanent_disable' => $permenantDisableShipper,
                     'delete_reason' => null,
                     'created_at' => Carbon::now()->format('Y-m-d H:i:s')
                 ]

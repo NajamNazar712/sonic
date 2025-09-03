@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\RvShipmentAssignAgent;
 use App\Http\Models\Shipment;
 use App\Http\Traits\RvTrait;
@@ -68,9 +69,10 @@ class AgentSarNotification extends Command
             // $dateTime = Carbon::createFromFormat('Y-m-d H:i:s', '2025-01-29 23:15:00');
             // $nowSub48Hours = $dateTime->subHours(48)->toDateTimeString();
             // $nowSub24Hours = $dateTime->subHours(24)->toDateTimeString();
-
+            $globalSetting = GlobalSettings::where(['type'=> 'rv_permanent_disable_shippers', 'setting_value' => 1])->first();
+            $shippers = explode(',', $globalSetting->text);
+           
             $nowSub48Hours = Carbon::parse($nowSub48Hours)->addMinutes(44)->format('Y-m-d H:i:s');
-            
             // rv_assign_agent_status_id' 7 (Shipper Advised Request) and Check If State Is 2 (Unassign Assigned)
             $sendEmails = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 7)
                 ->where('rv_state_id', 2)
@@ -106,7 +108,7 @@ class AgentSarNotification extends Command
                 $join->on('rv_shipment_assign_agents.shipment_id', '=', 'shipments.id')
                     ->where('shipments.shipper_status_id','=' , 65);
                 })
-                ->whereNotIn('shipments.user_id', [49248, 49334])
+                ->whereNotIn('shipments.user_id',  $shippers)
                 ->where('rv_shipment_assign_agents.rv_assign_agent_status_id', 7)
                 ->where('rv_shipment_assign_agents.rv_state_id', 2)
                 ->where('rv_shipment_assign_agents.unresponsive_count', 3)
@@ -159,7 +161,7 @@ class AgentSarNotification extends Command
                 $join->on('rv_shipment_assign_agents.shipment_id', '=', 'shipments.id')
                     ->where('shipments.shipper_status_id', '=', 65);
                 })
-                ->whereNotIn('shipments.user_id', [49248, 49334])
+                ->whereNotIn('shipments.user_id',  $shippers)
                 ->where('rv_assign_agent_status_id', 8)
                 ->where('rv_state_id', 2)
                 ->where('rv_shipment_assign_agents.updated_at', '<=', $nowSub24Hours)
@@ -207,6 +209,7 @@ class AgentSarNotification extends Command
                     ->where('shipments_journey.updated_at','<=',date('Y-m-d').' 23:59:59');
                 })
                 ->where('disabled_shipper',1)
+                ->where('permanent_disable',0)
                 ->where('halt_shipper',0)
                 ->where('call_count',0)
                 ->whereNotIn('shipment_status_reason_id',[27,35])
@@ -257,6 +260,7 @@ class AgentSarNotification extends Command
                 ->where([
                     ['rv_shipment_tickets.disabled_shipper', 1],
                     ['rv_shipment_tickets.halt_shipper', 1],
+                    ['rv_shipment_tickets.permanent_disable', 0],
                     ['shipments.updated_at', '<=', $nowSub48Hours]
                 ])
                 ->groupBy('rv_shipment_tickets.id') // Group by primary key

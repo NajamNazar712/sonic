@@ -3948,11 +3948,13 @@ class DeliveryController extends Controller
                                 }
                             }
                         }
-
+                        if ($shipment_details->shipper_status_id == 12 && RvShipmentTicket::where(['shipment_id' => $shipment_details->id, 'permanent_disable' => '1'])->exists()) {
+                                $this->conditionalRvSarUpdate($shipment_details, $status_reason_id);
+                        }
                         // Mark Return Confirm if $shipper_status_id == 12 And $status_reason_id == (27 or 35)
                         // 27 = Shipment Damaged
                         // 35 = Delivery Stopped
-                        if ($shipper_status_id == 12 && in_array($status_reason_id, [27, 35]) && $verification) {
+                        if ($shipper_status_id == 12 && in_array($status_reason_id, [27, 35]) && $verification && RvShipmentTicket::where(['shipment_id' => $shipment_details->id, 'permanent_disable' => '0'])->exists()) {
                             $globalAdminId = 346;
                             $journey = ShipmentsJourney::where('shipment_id', $shipment_details->id)->whereIn('status_reason_id', [27, 35])->count();
                             if($journey > 2){
@@ -3973,16 +3975,8 @@ class DeliveryController extends Controller
                                 ShipmentsJourneyController::add($shipment, 20, 20, $status_reason_id, $journey->remarks ?? NULL, NULL, $globalAdminId, null, null, 1, null, null, null, null, null);
                                 
                             }else{
-                                    if($shipment_details->shipper_status_id == 12){
-                                        $rvshipments = RvShipmentAssignAgent::where('shipment_id', $shipment_details->id);
-                                        Shipment::where('id', $shipment)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);
-    
-                                        ShipmentsJourneyController::add($shipment_details->id, 65, 65, $status_reason_id, NULL, $shipment_details->user_id, Auth::id());
-    
-                                        RvShipmentAssignAgent::where('shipment_id', $shipment_details->id)
-                                        // ->whereDate('created_at',$date)
-                                        ->update(['agent_id'=> 346,'rv_state_id'=>2, 'rv_assign_agent_status_id' => 7,'unresponsive_count' => 3, 'unresponsive_email_count' => 1, 'unresponsive_email_time' => date('Y-m-d h:i:s')]);                                    
-                                        NotificationsController::send(220, $rvshipments);
+                                    if($shipment_details->shipper_status_id == 12 && RvShipmentTicket::where(['shipment_id' => $shipment_details->id, 'permanent_disable' => '0'])->exists()){
+                                        $this->conditionalRvSarUpdate($shipment_details,$status_reason_id,1);
                                     }
                             }
 
