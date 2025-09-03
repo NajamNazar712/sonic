@@ -70,7 +70,6 @@ class AgentSarNotification extends Command
             // $nowSub24Hours = $dateTime->subHours(24)->toDateTimeString();
 
             $nowSub48Hours = Carbon::parse($nowSub48Hours)->addMinutes(44)->format('Y-m-d H:i:s');
-            
             // rv_assign_agent_status_id' 7 (Shipper Advised Request) and Check If State Is 2 (Unassign Assigned)
             $sendEmails = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 7)
                 ->where('rv_state_id', 2)
@@ -207,6 +206,7 @@ class AgentSarNotification extends Command
                     ->where('shipments_journey.updated_at','<=',date('Y-m-d').' 23:59:59');
                 })
                 ->where('disabled_shipper',1)
+                ->where('permanent_disable',0)
                 ->where('halt_shipper',0)
                 ->where('call_count',0)
                 ->whereNotIn('shipment_status_reason_id',[27,35])
@@ -257,6 +257,7 @@ class AgentSarNotification extends Command
                 ->where([
                     ['rv_shipment_tickets.disabled_shipper', 1],
                     ['rv_shipment_tickets.halt_shipper', 1],
+                    ['rv_shipment_tickets.permanent_disable', 0],
                     ['shipments.updated_at', '<=', $nowSub48Hours]
                 ])
                 ->groupBy('rv_shipment_tickets.id') // Group by primary key
