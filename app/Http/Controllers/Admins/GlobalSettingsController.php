@@ -9621,6 +9621,7 @@ class GlobalSettingsController extends Controller
         $excluded_shipper = GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers');
         $only_shipper = GlobalSettings::where('type', 'rv_disable_shippers_only_shippers');
         $all_shipper = GlobalSettings::where('type', 'rv_disable_shippers_all_shippers');
+        $permanentDisableShipper = GlobalSettings::where('type', 'rv_permanent_disable_shippers');
 
         if ($excluded_shipper->exists()) {
             $excluded_shipper = $excluded_shipper->first();
@@ -9650,16 +9651,25 @@ class GlobalSettingsController extends Controller
             $all_shipper->type = "rv_disable_shippers_all_shippers";
             $all_shipper->save();
         }
-
+        if ($permanentDisableShipper->exists()) {
+            $permanentDisabled = $permanentDisableShipper->first();
+        } else {
+            $all_shipper = new GlobalSettings();
+            $all_shipper->setting_value = 1;
+            $all_shipper->type = "rv_disable_shippers_all_shippers";
+            $all_shipper->save();
+        }
         $shippers = User::select('id', 'name')->where('status', 3)->get();
+        $permanent_disable = $shippers->whereNotIn('id', $only_shippers)->values();
+        $shippers = $shippers->whereNotIn('id',array_map('intval', explode(',', $permanentDisabled->text)))->values();
+       
 
-        return view('admin.settings.rv_disable_shippers.index')->with(['shippers' => $shippers, 'excluded_shippers' => $excluded_shippers, 'only_shippers' => $only_shippers, 'all_shippers' => $all_shipper]);
+        return view('admin.settings.rv_disable_shippers.index')->with(['shippers' => $shippers, 'excluded_shippers' => $excluded_shippers, 'only_shippers' => $only_shippers, 'all_shippers' => $all_shipper, 'permanentDisabled'=> $permanentDisabled, 'permanent_disable'=> $permanent_disable]);
     }
 
 
     public function rv_disable_shippers_store(Request $request)
     {
-
         ActivityTrailController::createActivityTrailLog(Auth::id(), 682);
 
         $all_shipper_settings = GlobalSettings::where('type', 'rv_disable_shippers_all_shippers');
@@ -9713,9 +9723,30 @@ class GlobalSettingsController extends Controller
 
             // Update disabled users in RV shipment tickets (Set disable_shipper to 1 of given shippers)
             $shippers = explode(',', $only_users);
-            // $this->updateDisabledUserInRvShipmentTickets($shippers, 1);
+            $this->updateDisabledUserInRvShipmentTickets($shippers, 1);
         } else {
             GlobalSettings::where('type', 'rv_disable_shippers_only_shippers')->update(['setting_value' => 0, 'text' => NULL]);
+        }
+        if ($request->has('rv_disable_shippers_all_permanat_shippers')) {
+            $only_users = implode(',', $request->rv_disable_shippers_all_permanat_shippers);
+            $settings = GlobalSettings::where('type', 'rv_permanent_disable_shippers');
+
+            if ($settings->exists()) {
+                $settings = $settings->first();
+            } else {
+                $settings = new GlobalSettings();
+                $settings->type = 'rv_permanent_disable_shippers';
+            }
+            $settings->setting_value = 1;
+            $settings->text = $only_users;
+            $settings->save();
+            $changes = $settings;
+
+            // Update disabled users in RV shipment tickets (Set disable_shipper to 1 of given shippers)
+            $shippers = explode(',', $only_users);
+            // $this->updateDisabledUserInRvShipmentTickets($shippers, 1);
+        } else {
+            GlobalSettings::where('type', 'rv_permanent_disable_shippers')->update(['setting_value' => 0, 'text' => NULL]);
         }
 
         if (!($request->has('all_shipper_toggle') && $request->has('excluded_users')) && !(!$request->has('all_shipper_toggle') && $request->has('only_users'))) {
