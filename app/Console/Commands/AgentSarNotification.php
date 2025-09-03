@@ -70,7 +70,7 @@ class AgentSarNotification extends Command
             // $nowSub48Hours = $dateTime->subHours(48)->toDateTimeString();
             // $nowSub24Hours = $dateTime->subHours(24)->toDateTimeString();
             $globalSetting = GlobalSettings::where(['type'=> 'rv_permanent_disable_shippers', 'setting_value' => 1])->first();
-            $shippers = array_merge([49248, 49334],explode(',', $globalSetting->text));
+            $shippers = explode(',', $globalSetting->text);
            
             $nowSub48Hours = Carbon::parse($nowSub48Hours)->addMinutes(44)->format('Y-m-d H:i:s');
             // rv_assign_agent_status_id' 7 (Shipper Advised Request) and Check If State Is 2 (Unassign Assigned)
