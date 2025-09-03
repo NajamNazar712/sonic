@@ -123,7 +123,6 @@ class KAMBulkTaggingController extends Controller
                 $admin_id = (!$de_tag && isset($adminIds[$trax_id])) ? $adminIds[$trax_id] : null;
 
                 $old_kam_id = SaleTierTag::where('user_id', $shipper_id)
-                ->where('tier_id', 3)
                 ->latest('id')
                 ->value('kam');
 
