@@ -2172,7 +2172,7 @@ trait RvTrait
         }
     }
 
-    public function conditionalRvSarUpdate($shipment,$statusReasonId,$type=null){
+    public function conditionalRvSarUpdate($shipment,$statusReasonId,$type=2){
         if($shipment->shipper_status_id == 12){
             $rvshipments = RvShipmentAssignAgent::where('shipment_id', $shipment->id);
             Shipment::where('id', $shipment->id)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);   
