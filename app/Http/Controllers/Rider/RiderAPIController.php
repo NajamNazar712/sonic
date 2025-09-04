@@ -14840,7 +14840,6 @@ class RiderAPIController extends Controller
         foreach ($request->shipments as $shipmentData) {
            
             $shipment_id = $shipmentData['shipment_id'];
-            $rider_id    = $shipmentData['rider_id'];
             $type        = $shipmentData['type'];
             $status_reason_id = $shipmentData['status_reason_id'] ?? null;
     
