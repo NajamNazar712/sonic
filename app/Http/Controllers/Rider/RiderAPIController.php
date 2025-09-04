@@ -14838,13 +14838,13 @@ class RiderAPIController extends Controller
         $responses = [];
         $rider_id =  $request->rider_id;
         foreach ($request->shipments as $shipmentData) {
+           
             $shipment_id = $shipmentData['shipment_id'];
             $rider_id    = $shipmentData['rider_id'];
             $type        = $shipmentData['type'];
             $status_reason_id = $shipmentData['status_reason_id'] ?? null;
     
             $shipment = Shipment::find($shipment_id);
-    
             if (!$shipment || $shipment->shipper_status_id != 12) {
                 $responses[] = [
                     'shipment_id' => $shipment_id,
@@ -14886,11 +14886,11 @@ class RiderAPIController extends Controller
                         'shipment_id' => $shipment_id,
                         'otp'         => $shipmentData['rvr_subreason_otp']
                     ])->whereDate('created_at', Carbon::now())->exists();
-    
+                        
                     if ($otp_check) {
                         $rvr_verification = 1;
                     } else {
-                        $responses[] = [
+                        $responses = [
                             'shipment_id' => $shipment_id,
                             'status'      => 1,
                             'message'     => 'Invalid OTP Code'
@@ -14917,21 +14917,21 @@ class RiderAPIController extends Controller
     
             // === Type 3: Address Missing ===
             if ($type == 3 && !empty($shipmentData['type_name_id'])) {
-                foreach ($shipmentData['type_name_id'] as $typeNameId) {
+                // foreach ($shipmentData['type_name_id'] as $typeNameId) {
                     $exists = AddressMissingShipment::where('shipment_id', $shipment_id)
-                        ->where('type_name_id', $typeNameId)
+                        ->where('type_name_id', $shipmentData['type_name_id'])
                         ->where('created_at', '>=', now()->subHour())
                         ->exists();
     
                     if (!$exists) {
                         AddressMissingShipment::create([
                             'shipment_id'  => $shipment_id,
-                            'type_name_id' => $typeNameId,
+                            'type_name_id' => $shipmentData['type_name_id'],
                             'rider_id'     => $request->rider_id,
                             'status'       => 0,
                         ]);
                     }
-                }
+                // }
     
                 $responses[] = [
                     'shipment_id' => $shipment_id,
