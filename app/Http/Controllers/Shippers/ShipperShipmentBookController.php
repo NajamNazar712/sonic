@@ -4683,7 +4683,7 @@ class ShipperShipmentBookController extends Controller
                 if(!empty($shipment_id) && is_numeric($lat) && $lat > 0 && is_numeric($lng) && $lng > 0) {
 
                     $shipment_geo_code = new ShipmentGeoCode();
-                    $shipment_geo_code->user_id = $user->id;
+                    $shipment_geo_code->user_id = $user_id;
                     $shipment_geo_code->shipment_id= $shipment_id;
                     $shipment_geo_code->geo_code_type = 2;
                     $shipment_geo_code->latitude= $lat;
