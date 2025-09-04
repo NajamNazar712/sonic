@@ -1359,6 +1359,8 @@ class DeliveryController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 80);
         }
+        $isExcel = $request->get('excel') && $request->get('excel') == true;
+
 
         $deliveries = DeliveryNote::leftjoin('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->leftjoin('riders', 'delivery_notes.rider_id', '=', 'riders.id')
@@ -1403,7 +1405,73 @@ class DeliveryController extends Controller
 
             )
             ->where('delivery_notes.status', 0)
-            ->groupBy('delivery_notes.id'); // Group by delivery_note_id to calculate SUM
+            ->groupBy('delivery_notes.id');
+
+
+        if ($isExcel) {
+            $deliveries
+                ->leftJoin('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_notes.id')
+                ->leftJoin('shipments as s', 's.id', '=', 'dns.shipment_id')
+                ->leftJoin('users as uu', 'uu.id', '=', 's.user_id')
+                ->addSelect([
+
+                DB::raw("
+  COUNT(DISTINCT CASE
+    WHEN uu.segment_id = 2 AND uu.sub_segment_id = 5
+    THEN shipments.id END
+) AS excel_ecom_cod"),
+                DB::raw("
+  COUNT(DISTINCT CASE
+    WHEN uu.segment_id = 1 AND uu.sub_segment_id = 12
+    THEN shipments.id END
+) AS excel_general_retail"),
+                DB::raw("
+  COUNT(DISTINCT CASE
+    WHEN (uu.segment_id = 1 AND uu.sub_segment_id IN (1,2))
+      OR (uu.segment_id = 2 AND uu.sub_segment_id = 7)
+    THEN shipments.id END
+) AS excel_general_ecom_express"),
+                DB::raw("
+  COUNT(DISTINCT CASE
+    WHEN uu.segment_id IN (1,2) AND uu.sub_segment_id IN (1,3,4,6,8,9,10,11)
+    THEN shipments.id END
+) AS excel_others"),
+// --- Delivered (same logic as your helpers) ---
+                DB::raw("
+  COUNT(DISTINCT CASE
+    WHEN delivery_note_shipments.status > 1
+     AND delivery_note_shipments.status NOT IN (8,10,11)
+     AND shipments.shipper_status_id IN (14,26,27,28,29,30,31,32,33,34,35,36,37,38)
+     AND uu.segment_id = 2 AND uu.sub_segment_id = 5
+    THEN shipments.id END
+) AS delivered_excel_ecom_cod"),
+                DB::raw("
+  COUNT(DISTINCT CASE
+    WHEN delivery_note_shipments.status > 1
+     AND delivery_note_shipments.status NOT IN (8,10,11)
+     AND shipments.shipper_status_id IN (14,26,27,28,29,30,31,32,33,34,35,36,37,38)
+     AND uu.segment_id = 1 AND uu.sub_segment_id = 12
+    THEN shipments.id END
+) AS delivered_excel_general_retail"),
+                DB::raw("
+  COUNT(DISTINCT CASE
+    WHEN delivery_note_shipments.status > 1
+     AND delivery_note_shipments.status NOT IN (8,10,11)
+     AND shipments.shipper_status_id IN (14,26,27,28,29,30,31,32,33,34,35,36,37,38)
+     AND ((uu.segment_id = 1 AND uu.sub_segment_id IN (1,2)) OR (uu.segment_id = 2 AND uu.sub_segment_id = 7))
+    THEN shipments.id END
+) AS delivered_excel_general_ecom_express"),
+                DB::raw("
+  COUNT(DISTINCT CASE
+    WHEN delivery_note_shipments.status > 1
+     AND delivery_note_shipments.status NOT IN (8,10,11)
+     AND shipments.shipper_status_id IN (14,26,27,28,29,30,31,32,33,34,35,36,37,38)
+     AND uu.segment_id IN (1,2) AND uu.sub_segment_id IN (1,3,4,6,8,9,10,11)
+    THEN shipments.id END
+) AS delivered_excel_others"),
+
+            ]);
+        }
 
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
@@ -1526,65 +1594,31 @@ class DeliveryController extends Controller
                     $query->whereRaw('false');
                 }
             })
-            ->addColumn('excel_ecom_cod', function($result){
-                $count = 0;
-                $count = $this->get_segment_type('delivery_note_shipments',[$result->delivery_note], 2, 5, null,'delivery_note_id');
-                return $count > 0 ? $count : '-';
+            ->editColumn('excel_ecom_cod', function ($row) use ($isExcel) {
+                return $isExcel ? ($row->excel_ecom_cod ?: '-') : '-';
             })
-            ->addColumn('excel_general_retail', function($result){
-                $count = 0;
-                $count = $this->get_segment_type('delivery_note_shipments',[$result->delivery_note], 1, 12, null, 'delivery_note_id');
-                return $count > 0 ? $count : '-';
+            ->editColumn('excel_general_retail', function ($row) use ($isExcel) {
+                return $isExcel ? ($row->excel_general_retail ?: '-') : '-';
             })
-            ->addColumn('excel_general_ecom_express', function($result){
-                $count_general = 0;
-                $count_ecomm = 0;
-                $count_general = $this->get_segment_type('delivery_note_shipments',[$result->delivery_note], 1, 2, null,'delivery_note_id');
-                $count_ecomm = $this->get_segment_type('delivery_note_shipments',[$result->delivery_note], 2, 7, null,'delivery_note_id');
-                $total_count = $count_general + $count_ecomm;
-                return $total_count > 0 ? $total_count : '-';
+            ->editColumn('excel_general_ecom_express', function ($row) use ($isExcel) {
+                return $isExcel ? ($row->excel_general_ecom_express ?: '-') : '-';
             })
-            ->addColumn('excel_others', function($result){
-                $count = 0;
-                $count = $this->get_segment_type('delivery_note_shipments',[$result->delivery_note], [1,2], [1,3,4,6,8,9,10,11], null, 'delivery_note_id');
-                return $count > 0 ? $count : '-';
+            ->editColumn('excel_others', function ($row) use ($isExcel) {
+                return $isExcel ? ($row->excel_others ?: '-') : '-';
+            })
+            ->editColumn('delivered_excel_ecom_cod', function ($row) use ($isExcel) {
+                return $isExcel ? ($row->delivered_excel_ecom_cod ?: '-') : '-';
+            })
+            ->editColumn('delivered_excel_general_retail', function ($row) use ($isExcel) {
+                return $isExcel ? ($row->delivered_excel_general_retail ?: '-') : '-';
+            })
+            ->editColumn('delivered_excel_general_ecom_express', function ($row) use ($isExcel) {
+                return $isExcel ? ($row->delivered_excel_general_ecom_express ?: '-') : '-';
+            })
+            ->editColumn('delivered_excel_others', function ($row) use ($isExcel) {
+                return $isExcel ? ($row->delivered_excel_others ?: '-') : '-';
             })
 
-            ->addColumn('delivered_excel_ecom_cod', function($result){
-                $count = 0;
-                $delivered_shipments = $this->get_delivered_shipments([$result->delivery_note]);
-                if (!empty($delivered_shipments)) {
-                    $count = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, 2, 5, 'delivered', 'delivery_note_id');
-                }
-                return $count > 0 ? $count : '-';
-            })
-            ->addColumn('delivered_excel_general_retail', function($result){
-                $count = 0;
-                $delivered_shipments = $this->get_delivered_shipments([$result->delivery_note]);
-                if (!empty($delivered_shipments)) {
-                    $count = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, 1, 12, 'delivered', 'delivery_note_id');
-                }
-                return $count > 0 ? $count : '-';
-            })
-            ->addColumn('delivered_excel_general_ecom_express', function($result){
-                $count_general = 0;
-                $count_ecomm = 0;
-                $delivered_shipments = $this->get_delivered_shipments([$result->delivery_note]);
-                if (!empty($delivered_shipments)) {
-                    $count_general = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, 1, 2, 'delivered', 'delivery_note_id');
-                    $count_ecomm = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, 2, 7, 'delivered', 'delivery_note_id');
-                }
-                $total_count = $count_general + $count_ecomm;
-                return $total_count > 0 ? $total_count : '-';
-            })
-            ->addColumn('delivered_excel_others', function($result){
-                $count = 0;
-                $delivered_shipments = $this->get_delivered_shipments([$result->delivery_note]);
-                if (!empty($delivered_shipments)) {
-                    $count = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, [1,2], [1,3,4,6,8,9,10,11], 'delivered', 'delivery_note_id');
-                }
-                return $count > 0 ? $count : '-';
-            })
             ->addColumn("action", function ($result) {
                 $statusUpdate = route('admin.delivery.receive.status', ['id' => $result->delivery_note]);
                 $route = route('admin.delivery.receive.update', ['id' => $result->delivery_note]);
