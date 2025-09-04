@@ -14811,13 +14811,14 @@ class RiderAPIController extends Controller
     }
 
     public function shipmentUndeliveredRvrSubReason(Request $request){
+
         $rules = [
             'shipments'                        => 'required|array',
             'shipments.*.shipment_id'          => ['required', 'integer',  'exists:shipments,id'],
             'shipments.*.status_reason_id'     => ['nullable', 'integer',  'exists:shipment_status_reason,id'],
             'shipments.*.rvr_subreason_otp'    => ['nullable', 'integer'],
             'shipments.*.type'                 => ['required', 'integer', 'digits_between:1,10'],
-            'shipments.*.type_name_id'         => 'required_if:shipments.*.type,3|array',
+            'shipments.*.type_name_id'         => 'required_if:shipments.*.type,3"',
             'shipments.*.type_name_id.*'       => 'integer|exists:address_missing_shipment_types,id',
         ];
 
@@ -14835,7 +14836,7 @@ class RiderAPIController extends Controller
         }
 
         $responses = [];
-
+        $rider_id =  $request->rider_id;
         foreach ($request->shipments as $shipmentData) {
             $shipment_id = $shipmentData['shipment_id'];
             $rider_id    = $shipmentData['rider_id'];
