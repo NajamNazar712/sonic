@@ -119,7 +119,7 @@ class ReturnController extends Controller
     private function shipments($type = 1)
     {
 
-        $connection = 'mysql';
+        $connection = 'reports';
 
         $from = request()->get('search_date_from');
         $to = request()->get('search_date_to');
