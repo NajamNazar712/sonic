@@ -14904,7 +14904,7 @@ class RiderAPIController extends Controller
                 $verification->shipment_id = $shipment_id;
                 $verification->via_dbf_otp = 0;
                 $verification->via_rvrsub_reason = $rvr_verification;
-                $verification->rider_id = $rider_id;
+                $verification->rider_id = $request->rider_id;
                 $verification->save();
     
                 $responses[] = [
@@ -14926,7 +14926,7 @@ class RiderAPIController extends Controller
                         AddressMissingShipment::create([
                             'shipment_id'  => $shipment_id,
                             'type_name_id' => $typeNameId,
-                            'rider_id'     => $rider_id,
+                            'rider_id'     => $request->rider_id,
                             'status'       => 0,
                         ]);
                     }
