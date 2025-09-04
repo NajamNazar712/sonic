@@ -1356,9 +1356,7 @@ class DeliveryController extends Controller
 
     public function receive_deliveries_list(Request $request)
     {
-        $isExcel = $request->get('excel') && $request->get('excel') == true;
-
-        if ($isExcel) {
+        if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 80);
         }
 
@@ -1370,9 +1368,8 @@ class DeliveryController extends Controller
             ->leftjoin('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->leftjoin('zones as z', 'oc.zone_id', '=', 'z.id')
             ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_notes.updated_by')
-            // Keep these joins for total_weight
             ->leftjoin('delivery_note_shipments', 'delivery_note_shipments.delivery_note_id', 'delivery_notes.id')
-            ->leftjoin('shipments', 'delivery_note_shipments.shipment_id', '=', 'shipments.id')
+            ->leftjoin('shipments', 'delivery_note_shipments.shipment_id', '=', 'shipments.id') // Join with shipments table
             ->select(
                 'delivery_notes.id as delivery_note',
                 'delivery_notes.id as delivery_note_id',
@@ -1402,13 +1399,14 @@ class DeliveryController extends Controller
                 'delivery_notes.created_via_app as created_via',
                 'riders.trax_id as rider_trax_id',
                 'cas.name as city_area_name',
-                DB::raw('SUM(shipments.actual_weight) as total_weight')
+                DB::raw('SUM(shipments.actual_weight) as total_weight') // Calculate total weight
+
             )
             ->where('delivery_notes.status', 0)
-            ->groupBy('delivery_notes.id');
+            ->groupBy('delivery_notes.id'); // Group by delivery_note_id to calculate SUM
 
         if (session('role_id') != 1) {
-            $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
+            $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
         }
 
         if ($tracking_number = $request->get('search_tracking')) {
@@ -1416,58 +1414,8 @@ class DeliveryController extends Controller
                 ->join('shipments as s', 'dns.shipment_id', '=', 's.id')
                 ->where('s.tracking_number', '=', $tracking_number);
         }
-
         if ($delivery_note_number = $request->get('delivery_note_number')) {
             $deliveries->where('delivery_notes.id', '=', $delivery_note_number);
-        }
-
-        // ========== Excel-only aggregates (no N+1; no helper calls) ==========
-        if ($isExcel) {
-            // add users for segment/sub-segment classification
-            $deliveries
-                ->leftJoin('users as u_excel', 'u_excel.id', '=', 'shipments.user_id')
-                ->addSelect([
-                    // All shipments buckets
-                    DB::raw("SUM(CASE WHEN u_excel.segment_id = 2 AND u_excel.sub_segment_id = 5 THEN 1 ELSE 0 END) AS excel_ecom_cod"),
-                    DB::raw("SUM(CASE WHEN u_excel.segment_id = 1 AND u_excel.sub_segment_id = 12 THEN 1 ELSE 0 END) AS excel_general_retail"),
-                    DB::raw("
-                    SUM(
-                        CASE WHEN (u_excel.segment_id = 1 AND u_excel.sub_segment_id = 2)
-                               OR (u_excel.segment_id = 2 AND u_excel.sub_segment_id = 7)
-                        THEN 1 ELSE 0 END
-                    ) AS excel_general_ecom_express
-                "),
-                    DB::raw("
-                    SUM(
-                        CASE WHEN u_excel.segment_id IN (1,2)
-                              AND u_excel.sub_segment_id IN (1,3,4,6,8,9,10,11)
-                        THEN 1 ELSE 0 END
-                    ) AS excel_others
-                "),
-
-                    // Delivered-only buckets (assumes delivery_note_shipments.status = 3 means delivered)
-                    DB::raw("SUM(CASE WHEN delivery_note_shipments.status = 3 AND u_excel.segment_id = 2 AND u_excel.sub_segment_id = 5 THEN 1 ELSE 0 END) AS delivered_excel_ecom_cod"),
-                    DB::raw("SUM(CASE WHEN delivery_note_shipments.status = 3 AND u_excel.segment_id = 1 AND u_excel.sub_segment_id = 12 THEN 1 ELSE 0 END) AS delivered_excel_general_retail"),
-                    DB::raw("
-                    SUM(
-                        CASE WHEN delivery_note_shipments.status = 3 AND
-                              (
-                                  (u_excel.segment_id = 1 AND u_excel.sub_segment_id = 2) OR
-                                  (u_excel.segment_id = 2 AND u_excel.sub_segment_id = 7)
-                              )
-                        THEN 1 ELSE 0 END
-                    ) AS delivered_excel_general_ecom_express
-                "),
-                    DB::raw("
-                    SUM(
-                        CASE WHEN delivery_note_shipments.status = 3 AND
-                              u_excel.segment_id IN (1,2) AND
-                              u_excel.sub_segment_id IN (1,3,4,6,8,9,10,11)
-                        THEN 1 ELSE 0 END
-                    ) AS delivered_excel_others
-                "),
-                ])
-                ->groupBy('delivery_notes.id');
         }
 
         $datatables = Datatables::of($deliveries)
@@ -1491,7 +1439,11 @@ class DeliveryController extends Controller
                 }
             })
             ->editColumn('operation_rider_id', function ($deliveries) {
-                return $deliveries->operation_rider_id == 1 ? 'Field In Operations' : 'Hold In Operations';
+                if ($deliveries->operation_rider_id == 1) {
+                    return 'Field In Operations';
+                } else {
+                    return 'Hold In Operations';
+                }
             })
             ->filterColumn('riders.operation_rider_id', function ($query, $keyword) {
                 if ($keyword == 'Field In Operations' || $keyword == 'field') {
@@ -1501,10 +1453,18 @@ class DeliveryController extends Controller
                 }
             })
             ->editColumn('shipments_unverified_link', function ($deliveries) {
-                return $deliveries->shipments_unverified_count != 0 ? $deliveries->shipments_unverified_count : 0;
+                if ($deliveries->shipments_unverified_count != 0) {
+                    return $deliveries->shipments_unverified_count;
+                } else {
+                    return 0;
+                }
             })
             ->editColumn('rider', function ($rider) {
-                return $rider->special_rider ? $rider->rider . ' (' . $rider->special_rider_name . ')' : $rider->rider;
+                if ($rider->special_rider) {
+                    return $rider->rider . ' (' . $rider->special_rider_name . ')';
+                } else {
+                    return $rider->rider;
+                }
             })
             ->editColumn('route', function ($rider) {
                 return $rider->route . ' (' . $rider->start . ' to ' . $rider->end . ')';
@@ -1512,15 +1472,17 @@ class DeliveryController extends Controller
             ->filterColumn('route', function ($query, $keyword) {
                 $keyword = strtolower($keyword);
                 if ($keyword != '') {
-                    $query->where('routes.code', 'like', '%' . $keyword . '%')
-                        ->orWhere('routes.start', 'like', '%' . $keyword . '%')
-                        ->orWhere('routes.end', 'like', '%' . $keyword . '%');
+                    $query->where('routes.code', 'like', '%' . $keyword . '%')->orWhere('routes.start', 'like', '%' . $keyword . '%')->orWhere('routes.end', 'like', '%' . $keyword . '%');
                 } else {
                     $query->whereRaw('false');
                 }
             })
             ->editColumn('created_via', function ($delivery) {
-                return $delivery->created_via == 0 ? 'Sonic' : 'App';
+                if ($delivery->created_via == 0) {
+                    return 'Sonic';
+                } else {
+                    return 'App';
+                }
             })
             ->filterColumn('delivery_notes.created_via_app', function ($query, $keyword) {
                 $keyword = strtolower($keyword);
@@ -1535,10 +1497,18 @@ class DeliveryController extends Controller
                 }
             })
             ->editColumn('pending_status', function ($result) {
-                return $result->pending_status == 0 ? 'Pending for Update' : 'Pending for Verification';
+                if ($result->pending_status == 0) {
+                    return 'Pending for Update';
+                } else {
+                    return 'Pending for Verification';
+                }
             })
             ->editColumn('business_category', function ($result) {
-                return $result->business_category == 1 ? 'Domestic' : 'International';
+                if ($result->business_category == 1) {
+                    return 'Domestic';
+                } else {
+                    return 'International';
+                }
             })
             ->filterColumn('pending_status', function ($query, $keyword) {
                 $keyword = strtolower($keyword);
@@ -1555,91 +1525,137 @@ class DeliveryController extends Controller
                 } else {
                     $query->whereRaw('false');
                 }
-            });
+            })
+            ->addColumn('excel_ecom_cod', function($result){
+                $count = 0;
+                $count = $this->get_segment_type('delivery_note_shipments',[$result->delivery_note], 2, 5, null,'delivery_note_id');
+                return $count > 0 ? $count : '-';
+            })
+            ->addColumn('excel_general_retail', function($result){
+                $count = 0;
+                $count = $this->get_segment_type('delivery_note_shipments',[$result->delivery_note], 1, 12, null, 'delivery_note_id');
+                return $count > 0 ? $count : '-';
+            })
+            ->addColumn('excel_general_ecom_express', function($result){
+                $count_general = 0;
+                $count_ecomm = 0;
+                $count_general = $this->get_segment_type('delivery_note_shipments',[$result->delivery_note], 1, 2, null,'delivery_note_id');
+                $count_ecomm = $this->get_segment_type('delivery_note_shipments',[$result->delivery_note], 2, 7, null,'delivery_note_id');
+                $total_count = $count_general + $count_ecomm;
+                return $total_count > 0 ? $total_count : '-';
+            })
+            ->addColumn('excel_others', function($result){
+                $count = 0;
+                $count = $this->get_segment_type('delivery_note_shipments',[$result->delivery_note], [1,2], [1,3,4,6,8,9,10,11], null, 'delivery_note_id');
+                return $count > 0 ? $count : '-';
+            })
 
-        // Show the pre-aggregated columns when excel=true; hide otherwise
-        if ($isExcel) {
-            $datatables
-                ->editColumn('excel_ecom_cod', fn($r) => isset($r->excel_ecom_cod) ? ($r->excel_ecom_cod > 0 ? $r->excel_ecom_cod : '-') : '-')
-                ->editColumn('excel_general_retail', fn($r) => isset($r->excel_general_retail) ? ($r->excel_general_retail > 0 ? $r->excel_general_retail : '-') : '-')
-                ->editColumn('excel_general_ecom_express', fn($r) => isset($r->excel_general_ecom_express) ? ($r->excel_general_ecom_express > 0 ? $r->excel_general_ecom_express : '-') : '-')
-                ->editColumn('excel_others', fn($r) => isset($r->excel_others) ? ($r->excel_others > 0 ? $r->excel_others : '-') : '-')
-                ->editColumn('delivered_excel_ecom_cod', fn($r) => isset($r->delivered_excel_ecom_cod) ? ($r->delivered_excel_ecom_cod > 0 ? $r->delivered_excel_ecom_cod : '-') : '-')
-                ->editColumn('delivered_excel_general_retail', fn($r) => isset($r->delivered_excel_general_retail) ? ($r->delivered_excel_general_retail > 0 ? $r->delivered_excel_general_retail : '-') : '-')
-                ->editColumn('delivered_excel_general_ecom_express', fn($r) => isset($r->delivered_excel_general_ecom_express) ? ($r->delivered_excel_general_ecom_express > 0 ? $r->delivered_excel_general_ecom_express : '-') : '-')
-                ->editColumn('delivered_excel_others', fn($r) => isset($r->delivered_excel_others) ? ($r->delivered_excel_others > 0 ? $r->delivered_excel_others : '-') : '-');
-        }
+            ->addColumn('delivered_excel_ecom_cod', function($result){
+                $count = 0;
+                $delivered_shipments = $this->get_delivered_shipments([$result->delivery_note]);
+                if (!empty($delivered_shipments)) {
+                    $count = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, 2, 5, 'delivered', 'delivery_note_id');
+                }
+                return $count > 0 ? $count : '-';
+            })
+            ->addColumn('delivered_excel_general_retail', function($result){
+                $count = 0;
+                $delivered_shipments = $this->get_delivered_shipments([$result->delivery_note]);
+                if (!empty($delivered_shipments)) {
+                    $count = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, 1, 12, 'delivered', 'delivery_note_id');
+                }
+                return $count > 0 ? $count : '-';
+            })
+            ->addColumn('delivered_excel_general_ecom_express', function($result){
+                $count_general = 0;
+                $count_ecomm = 0;
+                $delivered_shipments = $this->get_delivered_shipments([$result->delivery_note]);
+                if (!empty($delivered_shipments)) {
+                    $count_general = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, 1, 2, 'delivered', 'delivery_note_id');
+                    $count_ecomm = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, 2, 7, 'delivered', 'delivery_note_id');
+                }
+                $total_count = $count_general + $count_ecomm;
+                return $total_count > 0 ? $total_count : '-';
+            })
+            ->addColumn('delivered_excel_others', function($result){
+                $count = 0;
+                $delivered_shipments = $this->get_delivered_shipments([$result->delivery_note]);
+                if (!empty($delivered_shipments)) {
+                    $count = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, [1,2], [1,3,4,6,8,9,10,11], 'delivered', 'delivery_note_id');
+                }
+                return $count > 0 ? $count : '-';
+            })
+            ->addColumn("action", function ($result) {
+                $statusUpdate = route('admin.delivery.receive.status', ['id' => $result->delivery_note]);
+                $route = route('admin.delivery.receive.update', ['id' => $result->delivery_note]);
+                $verifyStatus = route('admin.delivery.receive.status.verify', ['id' => $result->delivery_note]);
 
-        // Actions (unchanged)
-        $datatables->addColumn("action", function ($result) {
-            $statusUpdate = route('admin.delivery.receive.status', ['id' => $result->delivery_note]);
-            $route = route('admin.delivery.receive.update', ['id' => $result->delivery_note]);
-            $verifyStatus = route('admin.delivery.receive.status.verify', ['id' => $result->delivery_note]);
+                $receive_button = '<a href="' . $statusUpdate . '" class="dropdown-item" data-target-id="' . $result->delivery_note . '" class=""><i class="ft-plus-circle primary"></i> Receive</a>';
+                $shift_shipment_button = '<a href="' . $route . '" class="dropdown-item deliverynoteupdate" data-target-id="' . $result->delivery_note . '"><i class="ft-plus-circle primary"></i> Edit Shipment</a>';
+                $verify_statuses_button = '<a href="' . $verifyStatus . '" class="dropdown-item" data-target-id="' . $result->id . '"><i class="ft-plus-circle primary"></i> Verify Statuses</a>';
+                $print_temporary_dncc_button = '<a class="dropdown-item printTempDNCC"><i class="ft-printer primary"></i> Print Temporary DNCC</a>';
+                $print_undelivered_performa_button = '<a class="dropdown-item printUndeliveredDNCC"><i class="ft-printer primary"></i> Print Undelivered Performa</a>';
+                $reassign_rider_button = '<a class="dropdown-item reassign_rider"><i class="la la-edit primary"></i> Reassign Rider</a>';
 
-            $receive_button = '<a href="' . $statusUpdate . '" class="dropdown-item" data-target-id="' . $result->delivery_note . '" class=""><i class="ft-plus-circle primary"></i> Receive</a>';
-            $shift_shipment_button = '<a href="' . $route . '" class="dropdown-item deliverynoteupdate" data-target-id="' . $result->delivery_note . '"><i class="ft-plus-circle primary"></i> Edit Shipment</a>';
-            $verify_statuses_button = '<a href="' . $verifyStatus . '" class="dropdown-item" data-target-id="' . $result->id . '"><i class="ft-plus-circle primary"></i> Verify Statuses</a>';
-            $print_temporary_dncc_button = '<a class="dropdown-item printTempDNCC"><i class="ft-printer primary"></i> Print Temporary DNCC</a>';
-            $print_undelivered_performa_button = '<a class="dropdown-item printUndeliveredDNCC"><i class="ft-printer primary"></i> Print Undelivered Performa</a>';
-            $reassign_rider_button = '<a class="dropdown-item reassign_rider"><i class="la la-edit primary"></i> Reassign Rider</a>';
+                if (session('role_id') == 1 || count(array_intersect([37, 38, 39], session('permissions'))) !== 0) {
+                    $dropdown = '
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
+                    ';
+                    $statusCheck = DeliveryNoteShipment::where(['delivery_note_id' => $result->delivery_note, 'status' => 0])->get();
+                    $updatedstatusCheck = DeliveryNoteShipment::where('delivery_note_id', $result->delivery_note)->where('status', '>', 0)->exists();
 
-            if (session('role_id') == 1 || count(array_intersect([37, 38, 39], session('permissions'))) !== 0) {
-                $dropdown = '
-              <div class="btn-group">
-                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                <div class="dropdown-menu dropdown-menu-sm">
-            ';
-                $statusCheck = DeliveryNoteShipment::where(['delivery_note_id' => $result->delivery_note, 'status' => 0])->get();
-                $updatedstatusCheck = DeliveryNoteShipment::where('delivery_note_id', $result->delivery_note)->where('status', '>', 0)->exists();
 
-                if (($result->pending_status == 0) && (session('role_id') == 1 || in_array(37, session('permissions')))) {
-                    if (session('role_id') == 1 || !($result->operation_rider_id == 1 && $result->rider_type_id == 1)) {
-                        $dropdown .= $receive_button;
+                    if (($result->pending_status == 0) && (session('role_id') == 1 || in_array(37, session('permissions')))) {
+                        if (session('role_id') == 1 || !($result->operation_rider_id == 1 && $result->rider_type_id == 1)) {
+                            $dropdown .= $receive_button;
+                        }
                     }
-                }
-                $rider_check = true;
-                if ($result->operation_rider_id == 1) {
-                    if ($result->rider_type_id == 1) {
-                        $rider_check = false;
+                    $rider_check = true;
+                    if ($result->operation_rider_id == 1) {
+                        if ($result->rider_type_id == 1) {
+                            $rider_check = false;
+                        }
                     }
-                }
-                if (($result->created_at->diffInMinutes(Carbon::now()) <= 60) && (session('role_id') == 1 || in_array(38, session('permissions'))) && $rider_check) {
-                    if (!$updatedstatusCheck) {
-                        $dropdown .= $shift_shipment_button;
+                    if (($result->created_at->diffInMinutes(Carbon::now()) <= 60) && (session('role_id') == 1 || in_array(38, session('permissions'))) && $rider_check) {
+                        if (!$updatedstatusCheck) {
+
+                            $dropdown .= $shift_shipment_button;
+                        }
                     }
-                }
 
-                if (($result->pending_status == 1) && (session('role_id') == 1 || in_array(39, session('permissions')))) {
-                    $dropdown .= $verify_statuses_button;
-                }
 
-                if (($result->pending_status == 1) && (session('role_id') == 1 || in_array(37, session('permissions')))) {
-                    $dropdown .= $print_temporary_dncc_button;
-                    $dropdown .= $print_undelivered_performa_button;
-                }
-                if (($result->created_at->diffInMinutes(Carbon::now()) <= 15) && (session('role_id') == 1 || in_array(304, session('permissions')))) {
-                    if (!$updatedstatusCheck) {
-                        $dropdown .= $reassign_rider_button;
+                    if (($result->pending_status == 1) && (session('role_id') == 1 || in_array(39, session('permissions')))) {
+                        $dropdown .= $verify_statuses_button;
                     }
+
+                    if (($result->pending_status == 1) && (session('role_id') == 1 || in_array(37, session('permissions')))) {
+                        $dropdown .= $print_temporary_dncc_button;
+
+                        $dropdown .= $print_undelivered_performa_button;
+                    }
+                    if (($result->created_at->diffInMinutes(Carbon::now()) <= 15) && (session('role_id') == 1 || in_array(304, session('permissions')))) {
+                        if (!$updatedstatusCheck) {
+                            $dropdown .= $reassign_rider_button;
+                        }
+                    }
+
+                    $dropdown .= '
+                        </div>
+                      </div>
+                    ';
+
+                    return $dropdown;
+                } else {
+                    return '';
                 }
+            })->rawColumns(['delivery_note','shipments_count_link','action']);
 
-                $dropdown .= '
-                </div>
-              </div>
-            ';
 
-                return $dropdown;
-            } else {
-                return '';
-            }
-        });
-
-        $datatables->rawColumns(['delivery_note','shipments_count_link','action']);
 
         return $datatables->make(true);
     }
-
-
 
     public function receive_delivery_search(Request $request)
     {
@@ -2459,7 +2475,7 @@ class DeliveryController extends Controller
                     if($selected_status == 12) //if Shipper Status Id = 12 (Shipment - Reason Validation Required) Then fetch Those Shipments in Get Ticket
                     {
                         $this->rvshipmentticketInsert($shipment, $selected_status, $selected_reason, $shipment_details->user_id);
-                    
+
                     }
                 }
             }
@@ -2603,16 +2619,16 @@ class DeliveryController extends Controller
                         } else {
                             $remarks = null;
                             if ($request->status_drop[$shipment] == 12) {
-                               
+
                                 // $journey = ShipmentsJourney::where('shipment_id',$shipment)->whereIn('status_reason_id',[27,35])->count();
-                                
+
                                 if(in_array($request->reason_drop[$shipment],[12,34])){
                                     $remarks = $this->remarksNSAOSAJourneyRVR($delivery_note_id,$shipment_details->user_id);
                                 }
-                                
-                                
+
+
                                 //if Shipper Status Id = 12 (Shipment - Reason Validation Required) Then fetch Those Shipments in Get Ticket
-                               
+
                                 $this->rvshipmentticketInsert($shipment, $request->status_drop[$shipment], $request->reason_drop[$shipment], $shipment_status->user_id);
 
                             }
@@ -3948,13 +3964,11 @@ class DeliveryController extends Controller
                                 }
                             }
                         }
-                        if ($shipment_details->shipper_status_id == 12 && RvShipmentTicket::where(['shipment_id' => $shipment_details->id, 'permanent_disable' => '1'])->exists()) {
-                                $this->conditionalRvSarUpdate($shipment_details, $status_reason_id);
-                        }
+
                         // Mark Return Confirm if $shipper_status_id == 12 And $status_reason_id == (27 or 35)
                         // 27 = Shipment Damaged
                         // 35 = Delivery Stopped
-                        if ($shipper_status_id == 12 && in_array($status_reason_id, [27, 35]) && $verification && RvShipmentTicket::where(['shipment_id' => $shipment_details->id, 'permanent_disable' => '0'])->exists()) {
+                        if ($shipper_status_id == 12 && in_array($status_reason_id, [27, 35]) && $verification) {
                             $globalAdminId = 346;
                             $journey = ShipmentsJourney::where('shipment_id', $shipment_details->id)->whereIn('status_reason_id', [27, 35])->count();
                             if($journey > 2){
@@ -3973,10 +3987,18 @@ class DeliveryController extends Controller
                                     }
                                 }
                                 ShipmentsJourneyController::add($shipment, 20, 20, $status_reason_id, $journey->remarks ?? NULL, NULL, $globalAdminId, null, null, 1, null, null, null, null, null);
-                                
+
                             }else{
-                                    if($shipment_details->shipper_status_id == 12 && RvShipmentTicket::where(['shipment_id' => $shipment_details->id, 'permanent_disable' => '0'])->exists()){
-                                        $this->conditionalRvSarUpdate($shipment_details,$status_reason_id,1);
+                                    if($shipment_details->shipper_status_id == 12){
+                                        $rvshipments = RvShipmentAssignAgent::where('shipment_id', $shipment_details->id);
+                                        Shipment::where('id', $shipment)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);
+
+                                        ShipmentsJourneyController::add($shipment_details->id, 65, 65, $status_reason_id, NULL, $shipment_details->user_id, Auth::id());
+
+                                        RvShipmentAssignAgent::where('shipment_id', $shipment_details->id)
+                                        // ->whereDate('created_at',$date)
+                                        ->update(['agent_id'=> 346,'rv_state_id'=>2, 'rv_assign_agent_status_id' => 7,'unresponsive_count' => 3, 'unresponsive_email_count' => 1, 'unresponsive_email_time' => date('Y-m-d h:i:s')]);
+                                        NotificationsController::send(220, $rvshipments);
                                     }
                             }
 
@@ -4336,20 +4358,20 @@ class DeliveryController extends Controller
                             <td class="text-center align-middle"><strong>No. of Delivered Shipments</strong></td>
                             <td class="text-center align-middle"><strong>COD Amount</strong></td>
                         </tr>';
-    
+
                 foreach ($sub_seg_shipments as $sub_seg) {
                     $main_details .= '<tr>
                         <td class="color secondary"><strong>' . $sub_seg->sub_segment . '</strong></td>
                         <td class="text-center align-middle">' . $sub_seg->no_of_delivered_shipments . '</td>
                         <td class="text-center align-middle">' . $sub_seg->cod_amount . '</td>
-                    </tr>';          
+                    </tr>';
                 }
-    
+
                 $main_details .= '</tbody>
                     </table>
                     <hr>';
             }
-            
+
             $html .= $main_details;
             $html .= $main_details;
             //            $html .= '<div class="row justify-content-end mt-2">
@@ -5027,115 +5049,42 @@ class DeliveryController extends Controller
 
     public function completed_receive_deliveries_list(Request $request)
     {
-        $isExcel = $request->get('excel') && $request->get('excel') == true;
-
-        if ($isExcel) {
+        if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 83);
         }
 
-        $deliveries = DeliveryNote::leftJoin('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
-            ->leftJoin('riders', 'delivery_notes.rider_id', '=', 'riders.id')
-            ->leftJoin('routes', 'delivery_notes.route_id', '=', 'routes.id')
-            ->leftJoin('admins', 'admins.id', '=', 'delivery_notes.admin_id')
-            ->leftJoin('admins as ccb', 'ccb.id', '=', 'delivery_notes.cash_collected_by')
-            ->leftJoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
-            ->leftJoin('rider_types as rt', 'rt.id', '=', 'riders.rider_type_id')
-            ->leftJoin('cities as c', 'c.id', '=', 'riders.city_id')
-            ->leftJoin('city_areas as ca', 'ca.id', '=', 'riders.area_id')
-            ->leftJoin('zones as zn', 'zn.id', '=', 'c.zone_id')
-            ->leftJoin('delivery_cash_collections as dcc', 'dcc.delivery_note_id', '=', 'delivery_notes.id')
-            ->leftJoin('hbl_konnect_transaction_delivery_notes as hktdn', 'hktdn.delivery_note_id', '=', 'delivery_notes.id')
-            ->leftJoin('one_link_out_for_delivery_shipment_payments as one_link_cash', 'delivery_notes.id', '=', 'one_link_cash.delivery_note_id')
-            ->select([
-                // If ONLY_FULL_GROUP_BY is ON, wrap these with DB::raw('MAX(...) as alias') in the excel branch.
-                'delivery_notes.id as delivery_note',
-                'delivery_notes.cash_collection_status as cash_collect_status',
-                'delivery_notes.id as delivery_note_id',
-                'oc.id as hub_id',
-                'oc.name as hub',
-                'riders.name as rider',
-                'routes.code as route',
-                'routes.start',
-                'routes.end',
-                'admins.name as assignee',
-                'ub.name as updated_by',
-                'delivery_notes.updated_at as updated_at',
-                'delivery_notes.delivered_shipments',
-                'delivery_notes.delivered_shipments as delivered_shipments_link',
-                'delivery_notes.created_at',
-                'delivery_notes.received_cod_amount as amount',
-                'delivery_notes.shipments_count',
-                'delivery_notes.shipments_count as shipments_count_link',
-                'delivery_notes.cash_collected_by',
-                'ccb.name as cash_collected',
-                'delivery_notes.cash_collected_at',
-                'delivery_notes.special_rider',
-                'delivery_notes.special_rider_name',
-                'delivery_notes.special_rider_phone',
-                'delivery_notes.status',
-                'rt.name as rider_type',
-                'zn.name as zone_name',
-                'hktdn.transactions_amount as transactions_amount',
-                'hktdn.cash_amount as cash_amount',
-                'delivery_notes.one_link_payment_count',
-                'delivery_notes.cash_collection_status',
-                'dcc.amount as deposit_amount',
-                'dcc.remarks',
-                'dcc.deposit_slip',
-                'ca.name as area',
-                'one_link_cash.transaction_amount as one_link_amount',
-            ])
+        $deliveries = DeliveryNote::join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
+            ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
+            ->leftjoin('routes', 'delivery_notes.route_id', '=', 'routes.id')
+            ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
+            ->leftjoin('admins as ccb', 'ccb.id', '=', 'delivery_notes.cash_collected_by')
+            ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
+            ->leftjoin('rider_types as rt', 'rt.id', '=', 'riders.rider_type_id')
+            ->leftjoin('cities as c', 'c.id', '=', 'riders.city_id')
+            ->leftjoin('city_areas as ca', 'ca.id', '=', 'riders.area_id')
+            ->leftjoin('zones as zn', 'zn.id', '=', 'c.zone_id')
+            ->leftjoin('delivery_cash_collections as dcc', 'dcc.delivery_note_id', '=', 'delivery_notes.id')
+            ->leftjoin('hbl_konnect_transaction_delivery_notes as hktdn', 'hktdn.delivery_note_id', '=', 'delivery_notes.id')
+            ->leftjoin('one_link_out_for_delivery_shipment_payments as one_link_cash', 'delivery_notes.id', '=', 'one_link_cash.delivery_note_id')
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.cash_collection_status as cash_collect_status', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.cash_collected_by', 'ccb.name as cash_collected', 'delivery_notes.cash_collected_at', 'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone', 'delivery_notes.status', 'rt.name as rider_type', 'zn.name as zone_name', 'hktdn.transactions_amount as transactions_amount', 'hktdn.cash_amount as cash_amount', 'delivery_notes.one_link_payment_count', 'delivery_notes.cash_collection_status', 'dcc.amount as deposit_amount', 'dcc.remarks', 'dcc.deposit_slip', 'ca.name as area','one_link_cash.transaction_amount as one_link_amount'])
             ->whereIn('delivery_notes.cash_collection_status', [1, 2, 3])
             ->where('delivery_notes.dncc_status', 0);
 
         if (session('role_id') != 1) {
-            $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
+            $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
         }
 
-        // Join DNS/Shipments only when needed by a filter
         if ($tracking_number = $request->get('tracking_numbers')) {
             $deliveries->join('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
                 ->join('shipments as s', 'dns.shipment_id', '=', 's.id')
                 ->whereIn('s.tracking_number', explode(',', $tracking_number))
                 ->groupBy('delivery_notes.id');
         }
-
         if ($dncc = $request->get('dncc')) {
             $deliveries->whereIn('delivery_notes.id', explode(',', $dncc));
         }
-
-        if ($request->get('legend_filter')) {
+        if ($legend_id = $request->get('legend_filter')) {
             $deliveries->whereIn('delivery_notes.cash_collection_status', [2, 3]);
-        }
-
-        // ---- Excel-only: add a single join to DNS→Shipments→Users and compute the 4 buckets with CASE ----
-        if ($isExcel) {
-            // NOTE: If these 3 tables live on another connection ('reports'), switch to fully-qualified tables
-            // or move this controller to that connection. We’re avoiding subqueries as you requested.
-            $deliveries
-                ->leftJoin('delivery_note_shipments as dns_excel', 'delivery_notes.id', '=', 'dns_excel.delivery_note_id')
-                ->leftJoin('shipments as s_excel', 's_excel.id', '=', 'dns_excel.shipment_id')
-                ->leftJoin('users as u_excel', 'u_excel.id', '=', 's_excel.user_id')
-                ->addSelect([
-                    DB::raw("SUM(CASE WHEN u_excel.segment_id = 2 AND u_excel.sub_segment_id = 5 THEN 1 ELSE 0 END) AS excel_ecom_cod"),
-                    DB::raw("SUM(CASE WHEN u_excel.segment_id = 1 AND u_excel.sub_segment_id = 12 THEN 1 ELSE 0 END) AS excel_general_retail"),
-                    DB::raw("
-                    SUM(
-                        CASE WHEN (u_excel.segment_id = 1 AND u_excel.sub_segment_id = 2)
-                               OR (u_excel.segment_id = 2 AND u_excel.sub_segment_id = 7)
-                        THEN 1 ELSE 0 END
-                    ) AS excel_general_ecom_express
-                "),
-                    DB::raw("
-                    SUM(
-                        CASE WHEN u_excel.segment_id IN (1,2)
-                              AND u_excel.sub_segment_id IN (1,3,4,6,8,9,10,11)
-                        THEN 1 ELSE 0 END
-                    ) AS excel_others
-                "),
-                ])
-                // Group by once only when excel=true (so the aggregates work)
-                ->groupBy('delivery_notes.id');
         }
 
         $datatable = Datatables::of($deliveries)
@@ -5146,12 +5095,19 @@ class DeliveryController extends Controller
                 $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $deliveries->delivery_note)->pluck('shipment_id')->toArray();
                 $amount = TraxPayTransaction::join('fintech_payment_details as fpd', 'fpd.trax_pay_id', '=', 'trax_pay_transactions.id')->whereIn('trax_pay_transactions.shipment_id', $delivery_note_shipment)->sum('fpd.cod_amount');
 
-                if ($amount > 0) {
+                if($amount > 0)
+                {
                     return (['link' => '<button id="myButton" class="btn btn-sm btn-outline-info align-middle" onclick="fintechshipmentsshowfintech(event,' . $deliveries->delivery_note . ')" >' . $amount . '</button>', 'sum' => $amount]);
-                } else {
-                    return (['link' => '<span id="myButton">' . $amount . '</span>', 'sum' => $amount]);
+
                 }
+                else
+                {
+                    return (['link' => '<span id="myButton">' . $amount . '</span>', 'sum' => $amount]);
+
+                }
+
             })
+
             ->editColumn('amount', function ($shipment) {
                 return number_format($shipment->amount);
             })
@@ -5162,66 +5118,157 @@ class DeliveryController extends Controller
                 return $query->where('delivery_notes.id', '=', $keyword);
             })
             ->setRowAttr([
-                'data-hub' => fn($deliveries) => $deliveries->hub_id,
-                'class' => fn($deliveries) => in_array($deliveries->cash_collection_status, [2, 3]) ? 'pcc_snatch_deduction' : '',
+                'data-hub' => function ($deliveries) {
+                    return $deliveries->hub_id;
+                },
+                'class' => function ($deliveries) {
+                    if (in_array($deliveries->cash_collection_status, [2, 3])) {
+                        return 'pcc_snatch_deduction';
+                    } else {
+                        return '';
+                    }
+                },
             ])
-            ->editColumn('shipments_count_link', fn($r) => $r->shipments_count != 0 ? '<button class="btn btn-sm btn-outline-info align-middle">' . $r->shipments_count . '</button>' : 0)
-            ->editColumn('delivered_shipments_link', fn($r) => $r->delivered_shipments != 0 ? '<button class="btn btn-sm btn-outline-info align-middle">' . $r->delivered_shipments . '</button>' : 0)
-            ->editColumn('rider', fn($r) => $r->special_rider ? $r->rider . ' (' . $r->special_rider_name . ')' : $r->rider)
-            ->editColumn('route', fn($r) => $r->route . ' (' . $r->start . ' to ' . $r->end . ')')
-            ->editColumn('one_link_payment_count_button', fn($r) => $r->one_link_payment_count !== null ? '<button class="btn btn-sm btn-outline-info align-middle">' . $r->one_link_payment_count . '</button>' : '-')
-            ->addColumn('transactions_amount_link', fn($r) => $r->transactions_amount !== null ? '<button class="btn btn-sm btn-outline-info align-middle">' . $r->transactions_amount . '</button>' : '-')
+            ->editColumn('shipments_count_link', function ($deliveries) {
+                if ($deliveries->shipments_count != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->shipments_count . '</button>';
+                } else {
+                    return 0;
+                }
+            })
+            ->editColumn('delivered_shipments_link', function ($deliveries) {
+                if ($deliveries->delivered_shipments != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->delivered_shipments . '</button>';
+                } else {
+                    return 0;
+                }
+            })
+            ->editColumn('rider', function ($rider) {
+                if ($rider->special_rider) {
+                    return $rider->rider . ' (' . $rider->special_rider_name . ')';
+                } else {
+                    return $rider->rider;
+                }
+            })
+            ->editColumn('route', function ($rider) {
+                return $rider->route . ' (' . $rider->start . ' to ' . $rider->end . ')';
+            })
+            ->editColumn('one_link_payment_count_button', function ($deliveries) {
+                if ($deliveries->one_link_payment_count != null) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->one_link_payment_count . '</button>';
+                } else {
+                    return '-';
+                }
+            })
+            ->addColumn('transactions_amount_link', function ($shipment) {
+                if ($shipment->transactions_amount != null) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $shipment->transactions_amount . '</button>';
+                } else {
+                    return '-';
+                }
+            })
             ->editColumn('cash_amount', function ($shipment) {
                 $dncc_amount = $shipment->amount;
                 $hbl_connect_amount = $shipment->transactions_amount;
                 $cash_amount = $dncc_amount - $hbl_connect_amount;
+
                 return number_format($cash_amount);
+                // if ($shipment->cash_amount != null) {
+                //     return number_format($shipment->cash_amount);
+                // } else {
+                //     return number_format($shipment->amount);
+                // }
             })
-            ->editColumn('deposit_amount', fn($r) => $r->deposit_amount !== null ? number_format($r->deposit_amount) : '-')
-            ->addColumn('deposit_slip_view', function ($r) {
-                if ($r->deposit_slip != null && in_array($r->cash_collection_status, [2, 3])) {
-                    $path = Storage::disk('public')->url('cash_collection_slips/' . $r->deposit_slip);
-                    return '<a class="btn btn-sm btn-outline-info align-middle deposit_slip_view" href="' . asset($path) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+            ->editColumn('deposit_amount', function ($deliveries) {
+                if ($deliveries->deposit_amount != null) {
+                    return number_format($deliveries->deposit_amount);
+                } else {
+                    return '-';
                 }
-                return '-';
+            })
+            ->addColumn('deposit_slip_view', function ($deliveries) {
+                if ($deliveries->deposit_slip != null && in_array($deliveries->cash_collection_status, [2, 3])) {
+                    $path = Storage::disk('public')->url('cash_collection_slips/' . $deliveries->deposit_slip);
+                    return '<a class="btn btn-sm btn-outline-info align-middle deposit_slip_view" href="' . asset($path) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                } else {
+                    return '-';
+                }
             })
             ->filterColumn('route', function ($query, $keyword) {
                 $keyword = strtolower($keyword);
                 if ($keyword != '') {
-                    $query->where('routes.code', 'like', '%' . $keyword . '%')
-                        ->orWhere('routes.start', 'like', '%' . $keyword . '%')
-                        ->orWhere('routes.end', 'like', '%' . $keyword . '%');
+                    $query->where('routes.code', 'like', '%' . $keyword . '%')->orWhere('routes.start', 'like', '%' . $keyword . '%')->orWhere('routes.end', 'like', '%' . $keyword . '%');
                 } else {
                     $query->whereRaw('false');
                 }
-            });
+            })
+            ->addColumn('excel_ecom_cod', function($result){
+                $count = 0;
+                $count = $this->get_segment_type('delivery_note_shipments',[$result->delivery_note], 2, 5, null,'delivery_note_id');
+                return $count > 0 ? $count : '-';
+            })
+            ->addColumn('excel_general_retail', function($result){
+                $count = 0;
+                $count = $this->get_segment_type('delivery_note_shipments',[$result->delivery_note], 1, 12, null, 'delivery_note_id');
+                return $count > 0 ? $count : '-';
+            })
+            ->addColumn('excel_general_ecom_express', function($result){
+                $count_general = 0;
+                $count_ecomm = 0;
+                $count_general = $this->get_segment_type('delivery_note_shipments',[$result->delivery_note], 1, 2, null,'delivery_note_id');
+                $count_ecomm = $this->get_segment_type('delivery_note_shipments',[$result->delivery_note], 2, 7, null,'delivery_note_id');
+                $total_count = $count_general + $count_ecomm;
+                return $total_count > 0 ? $total_count : '-';
+            })
+            ->addColumn('excel_others', function($result){
+                $count = 0;
+                $count = $this->get_segment_type('delivery_note_shipments',[$result->delivery_note], [1,2], [1,3,4,6,8,9,10,11], null, 'delivery_note_id');
+                return $count > 0 ? $count : '-';
+            })
 
-        // Excel columns: fill from aggregates (no per-row helper calls)
-        if ($isExcel) {
-            $datatable
-                ->editColumn('excel_ecom_cod', fn($r) => isset($r->excel_ecom_cod) ? ($r->excel_ecom_cod > 0 ? $r->excel_ecom_cod : '-') : '-')
-                ->editColumn('excel_general_retail', fn($r) => isset($r->excel_general_retail) ? ($r->excel_general_retail > 0 ? $r->excel_general_retail : '-') : '-')
-                ->editColumn('excel_general_ecom_express', fn($r) => isset($r->excel_general_ecom_express) ? ($r->excel_general_ecom_express > 0 ? $r->excel_general_ecom_express : '-') : '-')
-                ->editColumn('excel_others', fn($r) => isset($r->excel_others) ? ($r->excel_others > 0 ? $r->excel_others : '-') : '-');
-        } else {
-            // When NOT excel, do NOT compute or expose these heavy counts
-            // (leaving your delivered_* helpers out, as per earlier requirement to only compute excel buckets on excel=true)
-        }
-
-        $datatable->rawColumns([
-            'delivery_note',
-            'fintech_charges.link',
-            'shipments_count_link',
-            'one_link_payment_count_button',
-            'deposit_slip_view',
-            'transactions_amount_link',
-            'action',
-            'delivered_shipments_link'
-        ]);
+            ->addColumn('delivered_excel_ecom_cod', function($result){
+                $count = 0;
+                $delivered_shipments = $this->get_delivered_shipments([$result->delivery_note]);
+                if (!empty($delivered_shipments)) {
+                    $count = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, 2, 5, 'delivered', 'delivery_note_id');
+                }
+                return $count > 0 ? $count : '-';
+            })
+            ->addColumn('delivered_excel_general_retail', function($result){
+                $count = 0;
+                $delivered_shipments = $this->get_delivered_shipments([$result->delivery_note]);
+                if (!empty($delivered_shipments)) {
+                    $count = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, 1, 12, 'delivered', 'delivery_note_id');
+                }
+                return $count > 0 ? $count : '-';
+            })
+            ->addColumn('delivered_excel_general_ecom_express', function($result){
+                $count_general = 0;
+                $count_ecomm = 0;
+                $delivered_shipments = $this->get_delivered_shipments([$result->delivery_note]);
+                if (!empty($delivered_shipments)) {
+                    $count_general = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, 1, 2, 'delivered', 'delivery_note_id');
+                    $count_ecomm = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, 2, 7, 'delivered', 'delivery_note_id');
+                }
+                $total_count = $count_general + $count_ecomm;
+                return $total_count > 0 ? $total_count : '-';
+            })
+            ->addColumn('delivered_excel_others', function($result){
+                $count = 0;
+                $delivered_shipments = $this->get_delivered_shipments([$result->delivery_note]);
+                if (!empty($delivered_shipments)) {
+                    $count = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, [1,2], [1,3,4,6,8,9,10,11], 'delivered', 'delivery_note_id');
+                }
+                return $count > 0 ? $count : '-';
+            })->rawColumns(['delivery_note', 'fintech_charges.link', 'shipments_count_link', 'one_link_payment_count_button','deposit_slip_view','transactions_amount_link','action' ,'delivered_shipments_link']);
+        //        if ($tracking_number = $request->get('search_tracking')) {
+        //            $datatable->join('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
+        //                ->join('shipments as s', 'dns.shipment_id', '=', 's.id')
+        //                ->where('s.tracking_number', '=', $tracking_number);
+        //        }
 
         return $datatable->make(true);
     }
-
 
     public function get_dncc_to_add(Request $request)
     {
@@ -6111,7 +6158,7 @@ class DeliveryController extends Controller
         //         $query->whereRaw('false');
         //     }
         // });
-        
+
         return $datatable->make(true);
     }
 
@@ -7163,187 +7210,160 @@ class DeliveryController extends Controller
 
     public function history_list(Request $request)
     {
+
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 304);
         }
         $isExcel = $request->get('excel') && $request->get('excel') == true;
 
-        $deliveryNoteNumbers = $request->get('delivery_note_numbers')
-            ? explode(',', $request->get('delivery_note_numbers'))
-            : [];
-
+        $deliveryNoteNumbers= explode(',',$request->get('delivery_note_numbers'));
         $connection = 'reports_2';
-
         $deliveries = DB::connection($connection)->table('delivery_notes')
-            ->leftJoin('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
-            ->leftJoin('riders', 'delivery_notes.rider_id', '=', 'riders.id')
-            ->leftJoin('routes', 'delivery_notes.route_id', '=', 'routes.id')
-            ->leftJoin('admins as ccb', 'delivery_notes.cash_collected_by', '=', 'ccb.id')
-            ->leftJoin('admins', 'admins.id', '=', 'delivery_notes.admin_id')
-            ->leftJoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
-            ->leftJoin('rider_delivery_note_statuses as rdns', 'rdns.delivery_note_id', '=', 'delivery_notes.id')
-            // ->leftJoin('rider_deliveries as rd', 'rd.delivery_note_id', '=', 'delivery_notes.id') // (kept commented)
-            ->leftJoin('rider_types as rt', 'rt.id', '=', 'riders.rider_type_id')
-            ->leftJoin('cities as c', 'c.id', '=', 'riders.city_id')
+            ->leftjoin('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
+            ->leftjoin('riders', 'delivery_notes.rider_id', '=', 'riders.id')
+            ->leftjoin('routes', 'delivery_notes.route_id', '=', 'routes.id')
+            ->leftjoin('admins as ccb', 'delivery_notes.cash_collected_by', '=', 'ccb.id')
+            ->leftjoin('admins', 'admins.id', '=', 'delivery_notes.admin_id')
+            ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
+            ->leftjoin('rider_delivery_note_statuses as rdns', 'rdns.delivery_note_id', '=', 'delivery_notes.id')
+            //commenting this as it has no issue now and also it is effecting sum of actual weights
+            //->leftjoin('rider_deliveries as rd', 'rd.delivery_note_id', '=', 'delivery_notes.id')
+            ->leftjoin('rider_types as rt', 'rt.id', '=', 'riders.rider_type_id')
+            ->leftjoin('cities as c', 'c.id', '=', 'riders.city_id')
             ->leftJoin('city_areas as ca', function ($join) {
                 $join->on('ca.id', '=', DB::raw("
-                CASE 
-                    WHEN (riders.operation_rider_id = 2 AND riders.status = 1) THEN admins.area_id
-                    ELSE riders.area_id
-                END
-            "));
+                    CASE 
+                        WHEN (riders.operation_rider_id = 2 AND riders.status = 1) THEN admins.area_id
+                        ELSE riders.area_id
+                    END
+                "));
             })
             ->leftJoin('zones as zn', function ($join) {
                 $join->on('zn.id', '=', DB::raw("CASE 
-                WHEN (riders.operation_rider_id = 2 and riders.status = 1) THEN oc.zone_id
-                ELSE c.zone_id 
-            END"));
+                    WHEN (riders.operation_rider_id = 2 and riders.status = 1) THEN oc.zone_id
+                    ELSE c.zone_id 
+                END"));
             })
-            ->leftJoin('hbl_konnect_transaction_delivery_notes as hktdn', 'hktdn.delivery_note_id', '=', 'delivery_notes.id')
-            ->leftJoin('one_link_out_for_delivery_shipment_payments as one_link_cash', 'delivery_notes.id', '=', 'one_link_cash.delivery_note_id')
-            ->leftJoin('delivery_note_shipments', 'delivery_note_shipments.delivery_note_id', '=', 'delivery_notes.id')
-            ->leftJoin('shipments', 'delivery_note_shipments.shipment_id', '=', 'shipments.id')
-            ->select([
-                'delivery_notes.id as delivery_note',
-                'delivery_notes.id as delivery_note_id',
-                'oc.id as hub_id',
-                'oc.name as hub',
-                'riders.trax_id as rider_trax_id',
-                'riders.name as rider',
-                'routes.code as route',
-                'routes.start',
-                'routes.end',
-                'admins.name as assignee',
-                'ub.name as updated_by',
-                'delivery_notes.updated_at as updated_at',
-                'delivery_notes.delivered_shipments',
-                'delivery_notes.delivered_shipments as delivered_shipments_link',
-                'delivery_notes.created_at',
-                'delivery_notes.received_cod_amount as amount',
-                'delivery_notes.shipments_count',
-                'delivery_notes.shipments_count as shipments_count_link',
-                'delivery_notes.status',
-                'delivery_notes.pending_status',
-                'delivery_notes.cash_collection_status',
-                'delivery_notes.dncc_status',
-                'delivery_notes.last_updated_at',
-                'delivery_notes.cash_collected_by',
-                'ccb.name as cash_collected',
-                'delivery_notes.cash_collected_at',
-                'delivery_notes.special_rider',
-                'delivery_notes.special_rider_name',
-                'delivery_notes.special_rider_phone',
-                'rdns.status as updated_via_app',
-                'rt.name as rider_type',
-                'zn.name as zone_name',
-                'hktdn.transactions_amount as transactions_amount',
-                'hktdn.cash_amount as cash_amount',
-                'delivery_notes.one_link_payment_count',
-                'delivery_notes.created_via_app as created_via',
-                'riders.operation_rider_id',
-                'ca.name as area',
-                'one_link_cash.transaction_amount as one_link_amount',
-                DB::raw('SUM(shipments.actual_weight) as total_weight'),
-            ])
+            ->leftjoin('hbl_konnect_transaction_delivery_notes as hktdn', 'hktdn.delivery_note_id', '=', 'delivery_notes.id')
+            ->leftjoin('one_link_out_for_delivery_shipment_payments as one_link_cash', 'delivery_notes.id', '=', 'one_link_cash.delivery_note_id')
+            ->leftjoin('delivery_note_shipments', 'delivery_note_shipments.delivery_note_id', 'delivery_notes.id')
+            ->leftjoin('shipments', 'delivery_note_shipments.shipment_id', '=', 'shipments.id') // Join with shipments table
+
+
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.trax_id as rider_trax_id','riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at','delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount','delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.status', 'delivery_notes.pending_status','delivery_notes.cash_collection_status', 'delivery_notes.dncc_status', 'delivery_notes.last_updated_at', 'delivery_notes.cash_collected_by','ccb.name as cash_collected', 'delivery_notes.cash_collected_at', 'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone','rdns.status as updated_via_app', 'rt.name as rider_type','zn.name as zone_name', 'hktdn.transactions_amount as transactions_amount', 'hktdn.cash_amount as cash_amount', 'delivery_notes.one_link_payment_count','delivery_notes.created_via_app as created_via', 'riders.operation_rider_id', 'ca.name as area','one_link_cash.transaction_amount as one_link_amount', DB::raw('SUM(shipments.actual_weight) as total_weight')])
+
             ->where('riders.operation_rider_id', $request->get('operation_rider_id'))
-            ->when(!empty($deliveryNoteNumbers), function ($q) use ($deliveryNoteNumbers) {
-                return $q->whereIn('delivery_notes.id', $deliveryNoteNumbers);
+            ->when($request->get('delivery_note_numbers'),function($data) use ($deliveryNoteNumbers){
+                return $data->whereIn('delivery_notes.id',$deliveryNoteNumbers);
             })
             ->groupBy('delivery_notes.id');
 
-        if (session('role_id') != 1) {
-            $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
+        if ($isExcel) {
+            $dnccStatuses = [14,26,27,28,29,30,31,32,33,34,35,36,37,38];
+
+            $deliveries
+                ->leftJoin('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_notes.id')
+                ->leftJoin('shipments as s', 's.id', '=', 'dns.shipment_id')
+                ->leftJoin('users as uu', 'uu.id', '=', 's.user_id')
+
+                ->addSelect([
+                    // ---------- Non-delivered ----------
+                    // e-comm COD: segment=2, sub_segment=5
+                    DB::raw("SUM(CASE WHEN uu.segment_id = 2 AND uu.sub_segment_id = 5 THEN 1 ELSE 0 END) as excel_ecom_cod"),
+
+                    // general retail: segment=1, sub_segment=12
+                    DB::raw("SUM(CASE WHEN uu.segment_id = 1 AND uu.sub_segment_id = 12 THEN 1 ELSE 0 END) as excel_general_retail"),
+
+                    // general ecom express: (1,2) + (2,7)
+                    DB::raw("SUM(CASE WHEN (uu.segment_id = 1 AND uu.sub_segment_id IN (1,2)) THEN 1 ELSE 0 END) 
+                         + SUM(CASE WHEN (uu.segment_id = 2 AND uu.sub_segment_id = 7) THEN 1 ELSE 0 END) 
+                         as excel_general_ecom_express"),
+
+                    // others: segment in (1,2) and sub_segment in (1,3,4,6,8,9,10,11)
+                    DB::raw("SUM(CASE WHEN uu.segment_id IN (1,2) AND uu.sub_segment_id IN (1,3,4,6,8,9,10,11) THEN 1 ELSE 0 END) as excel_others"),
+
+                    // ---------- Delivered ----------
+                    // delivered filter: dns.status > 1 AND dns.status NOT IN (8,10,11) AND s.shipper_status_id IN dncc
+                    DB::raw("
+                    SUM(CASE 
+                        WHEN (dns.status > 1 AND dns.status NOT IN (8,10,11) AND s.shipper_status_id IN (" . implode(',', $dnccStatuses) . "))
+                             AND uu.segment_id = 2 AND uu.sub_segment_id = 5
+                        THEN 1 ELSE 0 END
+                    ) as delivered_excel_ecom_cod"),
+
+                    DB::raw("
+                    SUM(CASE 
+                        WHEN (dns.status > 1 AND dns.status NOT IN (8,10,11) AND s.shipper_status_id IN (" . implode(',', $dnccStatuses) . "))
+                             AND uu.segment_id = 1 AND uu.sub_segment_id = 12
+                        THEN 1 ELSE 0 END
+                    ) as delivered_excel_general_retail"),
+
+                    DB::raw("
+                    SUM(CASE 
+                        WHEN (dns.status > 1 AND dns.status NOT IN (8,10,11) AND s.shipper_status_id IN (" . implode(',', $dnccStatuses) . "))
+                             AND ((uu.segment_id = 1 AND uu.sub_segment_id IN (1,2)) OR (uu.segment_id = 2 AND uu.sub_segment_id = 7))
+                        THEN 1 ELSE 0 END
+                    ) as delivered_excel_general_ecom_express"),
+
+                    DB::raw("
+                    SUM(CASE 
+                        WHEN (dns.status > 1 AND dns.status NOT IN (8,10,11) AND s.shipper_status_id IN (" . implode(',', $dnccStatuses) . "))
+                             AND uu.segment_id IN (1,2) AND uu.sub_segment_id IN (1,3,4,6,8,9,10,11)
+                        THEN 1 ELSE 0 END
+                    ) as delivered_excel_others"),
+                ]);
         }
 
+
+        if (session('role_id') != 1) {
+            $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
+        }
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
-            $to   = $request->get('search_date_to');
+            $to = $request->get('search_date_to');
             $deliveries->whereBetween('delivery_notes.created_at', [$from, $to]);
-        }
-
-        // ===== Excel-only: compute excel_* and delivered_excel_* in one pass (no get_segment_type) =====
-        if ($isExcel) {
-            // Join users to classify segment / sub_segment
-            $deliveries
-                ->leftJoin('users as u_excel', 'u_excel.id', '=', 'shipments.user_id')
-                ->addSelect([
-                    // All shipments buckets
-                    DB::raw("SUM(CASE WHEN u_excel.segment_id = 2 AND u_excel.sub_segment_id = 5 THEN 1 ELSE 0 END) AS excel_ecom_cod"),
-                    DB::raw("SUM(CASE WHEN u_excel.segment_id = 1 AND u_excel.sub_segment_id = 12 THEN 1 ELSE 0 END) AS excel_general_retail"),
-                    DB::raw("
-                    SUM(
-                        CASE WHEN (u_excel.segment_id = 1 AND u_excel.sub_segment_id = 2)
-                               OR (u_excel.segment_id = 2 AND u_excel.sub_segment_id = 7)
-                        THEN 1 ELSE 0 END
-                    ) AS excel_general_ecom_express
-                "),
-                    DB::raw("
-                    SUM(
-                        CASE WHEN u_excel.segment_id IN (1,2)
-                              AND u_excel.sub_segment_id IN (1,3,4,6,8,9,10,11)
-                        THEN 1 ELSE 0 END
-                    ) AS excel_others
-                "),
-
-                    // Delivered-only buckets
-                    // (Adjust the delivered flag if different from delivery_note_shipments.status = 3)
-                    DB::raw("SUM(CASE WHEN delivery_note_shipments.status = 3 AND u_excel.segment_id = 2 AND u_excel.sub_segment_id = 5 THEN 1 ELSE 0 END) AS delivered_excel_ecom_cod"),
-                    DB::raw("SUM(CASE WHEN delivery_note_shipments.status = 3 AND u_excel.segment_id = 1 AND u_excel.sub_segment_id = 12 THEN 1 ELSE 0 END) AS delivered_excel_general_retail"),
-                    DB::raw("
-                    SUM(
-                        CASE WHEN delivery_note_shipments.status = 3 AND
-                              (
-                                  (u_excel.segment_id = 1 AND u_excel.sub_segment_id = 2) OR
-                                  (u_excel.segment_id = 2 AND u_excel.sub_segment_id = 7)
-                              )
-                        THEN 1 ELSE 0 END
-                    ) AS delivered_excel_general_ecom_express
-                "),
-                    DB::raw("
-                    SUM(
-                        CASE WHEN delivery_note_shipments.status = 3 AND
-                              u_excel.segment_id IN (1,2) AND
-                              u_excel.sub_segment_id IN (1,3,4,6,8,9,10,11)
-                        THEN 1 ELSE 0 END
-                    ) AS delivered_excel_others
-                "),
-                ])
-                ->groupBy('delivery_notes.id');
         }
 
         $datatable = Datatables::of($deliveries)
 
             ->editColumn('fintech_shipments_charges', function ($deliveries) {
                 $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $deliveries->delivery_note)->pluck('shipment_id')->toArray();
-                $amount = TraxPayTransaction::join('fintech_payment_details as fpd', 'fpd.trax_pay_id', '=', 'trax_pay_transactions.id')
-                    ->whereIn('trax_pay_transactions.shipment_id', $delivery_note_shipment)
-                    ->sum('fpd.cod_amount');
-                if ($amount > 0) {
+                $amount = TraxPayTransaction::join('fintech_payment_details as fpd', 'fpd.trax_pay_id', '=', 'trax_pay_transactions.id')->whereIn('trax_pay_transactions.shipment_id', $delivery_note_shipment)->sum('fpd.cod_amount');
+                if($amount > 0)
+                {
                     return (['link' => '<button id="myButton" class="btn btn-sm btn-outline-info align-middle" onclick="fintechshipmentsshowfintech(event,' . $deliveries->delivery_note . ')" >' . $amount . '</button>', 'sum' => $amount]);
-                } else {
+                }
+                else
+                {
                     return (['link' => '<span id="myButton">' . $amount . '</span>', 'sum' => $amount]);
                 }
             })
             ->editColumn('fintech_amount_percent', function ($deliveries) {
                 $dncc_amount = $deliveries->amount;
                 $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $deliveries->delivery_note)->pluck('shipment_id')->toArray();
-                $fintech_amount = TraxPayTransaction::join('fintech_payment_details as fpd', 'fpd.trax_pay_id', '=', 'trax_pay_transactions.id')
-                    ->whereIn('trax_pay_transactions.shipment_id', $delivery_note_shipment)
-                    ->sum('fpd.cod_amount');
-                if ($fintech_amount > 0 && $dncc_amount > 0) {
-                    $fintech_amount_percent = $fintech_amount / $dncc_amount * 100;
+                $fintech_amount = TraxPayTransaction::join('fintech_payment_details as fpd', 'fpd.trax_pay_id', '=', 'trax_pay_transactions.id')->whereIn('trax_pay_transactions.shipment_id', $delivery_note_shipment)->sum('fpd.cod_amount');
+                if($fintech_amount > 0 && $dncc_amount > 0 )
+                {
+                    $fintech_amount_percent = $fintech_amount / $dncc_amount *100;
                     return $fintech_amount_percent;
-                } else {
+                    // return number_format($fintech_amount_percent);
+                }
+                else
+                {
                     return '-';
                 }
             })
             ->editColumn('hbl_konnect_amount_percent', function ($deliveries) {
                 $dncc_amount = $deliveries->amount;
                 $hbl_konnect_amount = $deliveries->transactions_amount;
-                if ($hbl_konnect_amount > 0 && $dncc_amount > 0) {
-                    $hbl_konnect_amount_percent = $hbl_konnect_amount / $dncc_amount * 100;
+                if($hbl_konnect_amount > 0 && $dncc_amount > 0 )
+                {
+                    $hbl_konnect_amount_percent = $hbl_konnect_amount / $dncc_amount *100;
                     return $hbl_konnect_amount_percent;
-                } else {
+                    // return number_format($fintech_amount_percent);
+                }
+                else
+                {
                     return '-';
                 }
             })
@@ -7425,9 +7445,7 @@ class DeliveryController extends Controller
             ->filterColumn('route', function ($query, $keyword) {
                 $keyword = strtolower($keyword);
                 if ($keyword != '') {
-                    $query->where('routes.code', 'like', '%' . $keyword . '%')
-                        ->orWhere('routes.start', 'like', '%' . $keyword . '%')
-                        ->orWhere('routes.end', 'like', '%' . $keyword . '%');
+                    $query->where('routes.code', 'like', '%' . $keyword . '%')->orWhere('routes.start', 'like', '%' . $keyword . '%')->orWhere('routes.end', 'like', '%' . $keyword . '%');
                 } else {
                     $query->whereRaw('false');
                 }
@@ -7458,14 +7476,26 @@ class DeliveryController extends Controller
                 }
             })
             ->addColumn('transactions_amount_link', function ($shipment) {
+                // if ($shipment->transactions_amount != null) {
+                //     $dncc_amount = $shipment->amount ?? 0; //3000
+                //     $hbl_connect_amount = $shipment->transactions_amount ?? 0; //2020
+                //     $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $shipment->delivery_note)->pluck('shipment_id')->toArray();
+                //     $amount = TraxPayTransaction::join('fintech_payment_details as fpd', 'fpd.trax_pay_id', '=', 'trax_pay_transactions.id')
+                //     ->whereIn('trax_pay_transactions.shipment_id', $delivery_note_shipment)->sum('fpd.cod_amount') ?? 0; //3000
+                //     $one_link_amount = $shipment->one_link_amount ?? 0; //0
+                //     $total_amount = $dncc_amount - ($hbl_connect_amount + $amount + $one_link_amount);
+                //     return '<button class="btn btn-sm btn-outline-info align-middle">' . $total_amount . '</button>';
+                // } else {
+                //     return '-';
+                // }
                 if ($shipment->transactions_amount != null) {
                     $hbl_konnect_transactions = HblKonnectTransaction::where('delivery_note_id', $shipment->delivery_note)
-                        ->selectRaw('SUM(amount) as total_amount')
-                        ->groupBy('delivery_note_id')
-                        ->first();
-                    if ($hbl_konnect_transactions) {
+                    ->selectRaw('SUM(amount) as total_amount')
+                    ->groupBy('delivery_note_id')
+                    ->first();
+                    if($hbl_konnect_transactions){
                         return '<button class="btn btn-sm btn-outline-info align-middle">' . $hbl_konnect_transactions->total_amount . '</button>';
-                    } else {
+                    } else{
                         return '-';
                     }
                 } else {
@@ -7476,10 +7506,15 @@ class DeliveryController extends Controller
                 $dncc_amount = $shipment->amount;
                 $hbl_connect_amount = $shipment->transactions_amount;
                 $cash_amount = $dncc_amount - $hbl_connect_amount;
+
                 return number_format($cash_amount);
             })
             ->editColumn('created_via', function ($delivery) {
-                return $delivery->created_via == 0 ? 'Sonic' : 'App';
+                if ($delivery->created_via == 0) {
+                    return 'Sonic';
+                } else {
+                    return 'App';
+                }
             })
             ->filterColumn('delivery_notes.created_via_app', function ($query, $keyword) {
                 $keyword = strtolower($keyword);
@@ -7492,7 +7527,11 @@ class DeliveryController extends Controller
                 }
             })
             ->editColumn('operation_rider_id', function ($deliveries) {
-                return $deliveries->operation_rider_id == 1 ? 'Field In Operations' : 'Hold In Operations';
+                if ($deliveries->operation_rider_id == 1) {
+                    return 'Field In Operations';
+                } else {
+                    return 'Hold In Operations';
+                }
             })
             ->filterColumn('riders.operation_rider_id', function ($query, $keyword) {
                 if ($keyword == 'Field In Operations' || $keyword == 'field') {
@@ -7502,54 +7541,59 @@ class DeliveryController extends Controller
                 }
             })
             ->editColumn('location_status', function ($shipment) {
-                if (isset($shipment->location_status)) {
+                if(isset($shipment->location_status)){
                     return ($shipment->location_status == 1) ? 'On-site' : 'Off-site';
-                } else {
+                }else{
                     return '-';
                 }
             })
+
             ->editColumn('latitude', function ($shipment) {
-                if (isset($shipment->shipment_scanning_journey_id)) {
-                    $lat = ShipmentScanningJourney::where('id', $shipment->shipment_scanning_journey_id)->first()->latitude;
+                if(isset($shipment->shipment_scanning_journey_id)){
+                    $lat = ShipmentScanningJourney::where('id',$shipment->shipment_scanning_journey_id)->first()->latitude;
                     return $lat;
-                } else {
+                }else{
                     return '-';
                 }
             })
+
             ->editColumn('longitude', function ($shipment) {
-                if (isset($shipment->shipment_scanning_journey_id)) {
-                    $long = ShipmentScanningJourney::where('id', $shipment->shipment_scanning_journey_id)->first()->longitude;
+                if(isset($shipment->shipment_scanning_journey_id)){
+                    $long = ShipmentScanningJourney::where('id',$shipment->shipment_scanning_journey_id)->first()->longitude;
                     return $long;
-                } else {
+                }else{
                     return '-';
                 }
-            });
+            })
+            ->addColumn('excel_ecom_cod', function ($row) use ($isExcel) {
+                return $isExcel ? ($row->excel_ecom_cod ?: '-') : '-';
+            })
+            ->addColumn('excel_general_retail', function ($row) use ($isExcel) {
+                return $isExcel ? ($row->excel_general_retail ?: '-') : '-';
+            })
+            ->addColumn('excel_general_ecom_express', function ($row) use ($isExcel) {
+                return $isExcel ? ($row->excel_general_ecom_express ?: '-') : '-';
+            })
+            ->addColumn('excel_others', function ($row) use ($isExcel) {
+                return $isExcel ? ($row->excel_others ?: '-') : '-';
+            })
+            ->addColumn('delivered_excel_ecom_cod', function ($row) use ($isExcel) {
+                return $isExcel ? ($row->delivered_excel_ecom_cod ?: '-') : '-';
+            })
+            ->addColumn('delivered_excel_general_retail', function ($row) use ($isExcel) {
+                return $isExcel ? ($row->delivered_excel_general_retail ?: '-') : '-';
+            })
+            ->addColumn('delivered_excel_general_ecom_express', function ($row) use ($isExcel) {
+                return $isExcel ? ($row->delivered_excel_general_ecom_express ?: '-') : '-';
+            })
+            ->addColumn('delivered_excel_others', function ($row) use ($isExcel) {
+                return $isExcel ? ($row->delivered_excel_others ?: '-') : '-';
+            })
 
-        // ===== Show excel buckets only when excel=true (no helper calls anywhere) =====
-        if ($isExcel) {
-            $datatable
-                ->editColumn('excel_ecom_cod', fn($r) => isset($r->excel_ecom_cod) ? ($r->excel_ecom_cod > 0 ? $r->excel_ecom_cod : '-') : '-')
-                ->editColumn('excel_general_retail', fn($r) => isset($r->excel_general_retail) ? ($r->excel_general_retail > 0 ? $r->excel_general_retail : '-') : '-')
-                ->editColumn('excel_general_ecom_express', fn($r) => isset($r->excel_general_ecom_express) ? ($r->excel_general_ecom_express > 0 ? $r->excel_general_ecom_express : '-') : '-')
-                ->editColumn('excel_others', fn($r) => isset($r->excel_others) ? ($r->excel_others > 0 ? $r->excel_others : '-') : '-')
-                ->editColumn('delivered_excel_ecom_cod', fn($r) => isset($r->delivered_excel_ecom_cod) ? ($r->delivered_excel_ecom_cod > 0 ? $r->delivered_excel_ecom_cod : '-') : '-')
-                ->editColumn('delivered_excel_general_retail', fn($r) => isset($r->delivered_excel_general_retail) ? ($r->delivered_excel_general_retail > 0 ? $r->delivered_excel_general_retail : '-') : '-')
-                ->editColumn('delivered_excel_general_ecom_express', fn($r) => isset($r->delivered_excel_general_ecom_express) ? ($r->delivered_excel_general_ecom_express > 0 ? $r->delivered_excel_general_ecom_express : '-') : '-')
-                ->editColumn('delivered_excel_others', fn($r) => isset($r->delivered_excel_others) ? ($r->delivered_excel_others > 0 ? $r->delivered_excel_others : '-') : '-');
-        }
-
-        $datatable->rawColumns([
-            'transactions_amount_link',
-            'one_link_payment_count_button',
-            'delivered_shipments_link',
-            'shipments_count_link',
-            'delivery_note',
-            'fintech_shipments_charges.link'
-        ]);
+            ->rawColumns(['transactions_amount_link','one_link_payment_count_button','delivered_shipments_link','shipments_count_link','delivery_note','fintech_shipments_charges.link']);
 
         return $datatable->make(true);
     }
-
 
     public function signature_index()
     {
