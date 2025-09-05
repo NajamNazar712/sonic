@@ -14837,6 +14837,7 @@ class RiderAPIController extends Controller
 
         $responses = [];
         $rider_id =  $request->rider_id;
+
         foreach ($request->shipments as $shipmentData) {
            
             $shipment_id = $shipmentData['shipment_id'];
@@ -14955,9 +14956,8 @@ class RiderAPIController extends Controller
         }
     
         return response()->json([
-            'status'   => 0,
-            'message'  => 'Processed Shipments',
-            'results'  => $responses
+            'status'   => 1,
+            'message'  => 'Not Processed Shipments',
         ]);
     }   
 }
