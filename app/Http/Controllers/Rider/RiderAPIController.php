@@ -14834,12 +14834,11 @@ class RiderAPIController extends Controller
                 'errors'  => $validate->errors()
             ]);
         }
-
+        
         $responses = [];
         $rider_id =  $request->rider_id;
 
         foreach ($request->shipments as $shipmentData) {
-           
             $shipment_id = $shipmentData['shipment_id'];
             $type        = $shipmentData['type'];
             $status_reason_id = $shipmentData['status_reason_id'] ?? null;
@@ -14878,6 +14877,7 @@ class RiderAPIController extends Controller
                 ];
                 continue;
             }
+            
             if($shipper_status_id->status_attempt_count_1 == 12){
                 // === Type 2: Validate OTP or Ticket ===
                 if ($type == 2) {
@@ -14923,7 +14923,7 @@ class RiderAPIController extends Controller
                         $exists = AddressMissingShipment::where('shipment_id', $shipment_id)
                             ->where('type_name_id', $shipmentData['type_name_id'])
                             ->whereDate('created_at', date('Y-m-d'))->first();
-        
+                    
                         if ($exists) {
                             $exists->shipment_id = $shipment_id;
                             $exists->type_name_id = $shipmentData['type_name_id'];
@@ -14956,8 +14956,8 @@ class RiderAPIController extends Controller
         }
     
         return response()->json([
-            'status'   => 1,
-            'message'  => 'Not Processed Shipments',
+            'status'   => 0,
+            'message'  => $responses,
         ]);
     }   
 }
