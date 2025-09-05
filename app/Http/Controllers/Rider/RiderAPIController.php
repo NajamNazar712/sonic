@@ -14842,13 +14842,12 @@ class RiderAPIController extends Controller
             $shipment_id = $shipmentData['shipment_id'];
             $type        = $shipmentData['type'];
             $status_reason_id = $shipmentData['status_reason_id'] ?? null;
-    
             $shipment = Shipment::find($shipment_id);
-            if (!$shipment || $shipment->shipper_status_id != 12) {
+            if ($type == 1 && !$shipment && $shipment->shipper_status_id != 5) {
                 $responses[] = [
                     'shipment_id' => $shipment_id,
                     'status'      => 1,
-                    'message'     => 'Shipment not on Reason Validation Required status'
+                    'message'     => 'Shipment not on Out for Delivery status'
                 ];
                 continue;
             }
@@ -14856,17 +14855,20 @@ class RiderAPIController extends Controller
             $shipper_status_id = BoltUndeliveredReasonMap::where('reason_id', $status_reason_id)->first();
     
             // === Type 1: Generate OTP ===
-            if ($type == 1 && in_array($status_reason_id, [19, 8]) && $shipper_status_id->status_attempt_count_1 == 12) {
-                $shipment_otp = ShipmentOtp::firstOrNew(['shipment_id' => $shipment_id]);
-                $otp = mt_rand(100000, 999999);
-    
-                $shipment_otp->otp = $otp;
-                $shipment_otp->rider_id = $rider_id;
+            if ($type == 1 && in_array($status_reason_id, [19, 8]) && $shipment->shipper_status_id == 5) {
+                // $shipment_otp = ShipmentOtp::firstOrNew(['shipment_id' => $shipment_id]);
+                // $otp = mt_rand(100000, 999999);
+
+                // $shipment_otp->otp = $otp;
+                // $shipment_otp->rider_id = $rider_id;
+                // $shipment_otp->latitude = $shipmentData['actual_location_latitude'] ?? null;
+                // $shipment_otp->longitude = $shipmentData['actual_location_longitude'] ?? null;
+                // $shipment_otp->save();
+                $shipment_otp =  ShipmentOtp::where('shipment_id', $shipment_id)->where('rider_id', $rider_id)->whereDate('updated_at', Carbon::today())->first();
                 $shipment_otp->latitude = $shipmentData['actual_location_latitude'] ?? null;
                 $shipment_otp->longitude = $shipmentData['actual_location_longitude'] ?? null;
                 $shipment_otp->save();
-    
-                NotificationsController::send(249, $rider_id, $shipment_id, $otp);
+                NotificationsController::send(249, $rider_id, $shipment_id, $shipment_otp->dbf_otp);
     
                 $responses[] = [
                     'shipment_id' => $shipment_id,
@@ -14875,67 +14877,74 @@ class RiderAPIController extends Controller
                 ];
                 continue;
             }
-    
-            // === Type 2: Validate OTP or Ticket ===
-            if ($type == 2) {
-                $rvr_verification = 0;
-    
-                if (!empty($shipmentData['rvr_subreason_otp'])) {
-                    $otp_check = ShipmentOtp::where([
-                        'shipment_id' => $shipment_id,
-                        'otp'         => $shipmentData['rvr_subreason_otp']
-                    ])->whereDate('created_at', Carbon::now())->exists();
-                        
-                    if ($otp_check) {
-                        $rvr_verification = 1;
-                    } else {
-                        $responses = [
+            if($shipper_status_id->status_attempt_count_1 == 12){
+                // === Type 2: Validate OTP or Ticket ===
+                if ($type == 2) {
+                    $rvr_verification = 0;
+        
+                    if (!empty($shipmentData['rvr_subreason_otp'])) {
+                        $otp_check = ShipmentOtp::where([
                             'shipment_id' => $shipment_id,
-                            'status'      => 1,
-                            'message'     => 'Invalid OTP Code'
-                        ];
-                        continue;
+                            'dbf_otp'         => $shipmentData['rvr_subreason_otp']
+                        ])->whereDate('created_at', Carbon::now())->exists();
+                            
+                        if ($otp_check) {
+                            $rvr_verification = 1;
+                        } else {
+                            $responses = [
+                                'shipment_id' => $shipment_id,
+                                'status'      => 1,
+                                'message'     => 'Invalid OTP Code'
+                            ];
+                            continue;
+                        }
+                    } else {
+                        $this->rvshipmentticketInsert($shipment->id, $shipper_status_id, $status_reason_id, $shipment->user_id);
                     }
-                } else {
-                    $this->rvshipmentticketInsert($shipment->id, $shipper_status_id, $status_reason_id, $shipment->user_id);
+        
+                    $verification = new ShipmentOtpVerification();
+                    $verification->shipment_id = $shipment_id;
+                    $verification->via_dbf_otp = 0;
+                    $verification->via_rvrsub_reason = $rvr_verification;
+                    $verification->rider_id = $request->rider_id;
+                    $verification->save();
+        
+                    $responses[] = [
+                        'shipment_id' => $shipment_id,
+                        'status'      => 0,
+                        'message'     => 'Verification Successful'
+                    ];
                 }
-    
-                $verification = new ShipmentOtpVerification();
-                $verification->shipment_id = $shipment_id;
-                $verification->via_dbf_otp = 0;
-                $verification->via_rvrsub_reason = $rvr_verification;
-                $verification->rider_id = $request->rider_id;
-                $verification->save();
-    
+        
+                // === Type 3: Address Missing ===
+                if ($type == 3 && !empty($shipmentData['type_name_id'])) {
+                    // foreach ($shipmentData['type_name_id'] as $typeNameId) {
+                        $exists = AddressMissingShipment::where('shipment_id', $shipment_id)
+                            ->where('type_name_id', $shipmentData['type_name_id'])
+                            ->where('created_at', '>=', now()->subHour())
+                            ->exists();
+        
+                        if (!$exists) {
+                            AddressMissingShipment::create([
+                                'shipment_id'  => $shipment_id,
+                                'type_name_id' => $shipmentData['type_name_id'],
+                                'rider_id'     => $request->rider_id,
+                                'status'       => 0,
+                            ]);
+                        }
+                    // }
+        
+                    $responses[] = [
+                        'shipment_id' => $shipment_id,
+                        'status'      => 0,
+                        'message'     => 'Address Missing Recorded'
+                    ];
+                }
+            }else{
                 $responses[] = [
                     'shipment_id' => $shipment_id,
-                    'status'      => 0,
-                    'message'     => 'Verification Successful'
-                ];
-            }
-    
-            // === Type 3: Address Missing ===
-            if ($type == 3 && !empty($shipmentData['type_name_id'])) {
-                // foreach ($shipmentData['type_name_id'] as $typeNameId) {
-                    $exists = AddressMissingShipment::where('shipment_id', $shipment_id)
-                        ->where('type_name_id', $shipmentData['type_name_id'])
-                        ->where('created_at', '>=', now()->subHour())
-                        ->exists();
-    
-                    if (!$exists) {
-                        AddressMissingShipment::create([
-                            'shipment_id'  => $shipment_id,
-                            'type_name_id' => $shipmentData['type_name_id'],
-                            'rider_id'     => $request->rider_id,
-                            'status'       => 0,
-                        ]);
-                    }
-                // }
-    
-                $responses[] = [
-                    'shipment_id' => $shipment_id,
-                    'status'      => 0,
-                    'message'     => 'Address Missing Recorded'
+                    'status' => 1,
+                    'message' => 'Shipment not on Reason Validation Required status'
                 ];
             }
         }
