@@ -16,7 +16,7 @@ class AddressMissingTypeSeeder extends Seeder
     public function run()
     {
         //
-        DB::table('address_missing_shipment_type')->insert([
+        DB::table('address_missing_shipment_types')->insert([
             ['type_name' => 'House/Flat number', 'created_at' => now(), 'updated_at' => now()],
             ['type_name' => 'Floor number', 'created_at' => now(), 'updated_at' => now()],
             ['type_name' => 'Street/Block #', 'created_at' => now(), 'updated_at' => now()],
