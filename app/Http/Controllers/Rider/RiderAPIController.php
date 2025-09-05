@@ -14930,19 +14930,19 @@ class RiderAPIController extends Controller
                             $exists->status = 0;
                            
                         }else{
-                        AddressMissingShipment::create([
-                            'shipment_id'  => $shipment_id,
-                            'type_name_id' => $shipmentData['type_name_id'],
-                            'rider_id'     => $request->rider_id,
-                            'status'       => 0,
-                        ]);
+                            AddressMissingShipment::create([
+                                'shipment_id'  => $shipment_id,
+                                'type_name_id' => $shipmentData['type_name_id'],
+                                'rider_id'     => $request->rider_id,
+                                'status'       => 0,
+                            ]);
                         }
                     // }
         
                     $responses[] = [
                         'shipment_id' => $shipment_id,
                         'status'      => 0,
-                        'message'     => 'Address Missing Recorded'
+                        'message'     => 'Missing Address Are Created Successfully.!'
                     ];
                 }
             }else{
