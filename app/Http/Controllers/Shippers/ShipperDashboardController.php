@@ -2793,8 +2793,12 @@ class ShipperDashboardController extends Controller
 
                 if (isset($finja['error'])) {
                     $finjaArray = json_decode(json_encode($finja), true);
+                    Log::channel('cronJobLog')->info('s ' . 'finjaArray' . json_encode($finjaArray));
+                    // Log::channel('cronJobLog')->info('s ' . 'Api Does Not exists' . json_encode(ApiZongLog::where(['shipment_id' => $findShipmentId, 'call_date_time' => $request->start_date])->doesntExist()));
+                    // Log::channel('cronJobLog')->info('s ' . 'OPS LOG' . ApiZongLog::where(['shipment_id' => $findShipmentId, 'call_date_time' => $request->start_date])->doesntExist());
 
                     $errorMessages = collect($finjaArray['error']['users']);
+                    Log::channel('cronJobLog')->info('s ' . 'errorMessages' . json_encode($errorMessages));
 
                     foreach ($errorMessages as $error_val){
                         $key = array_key_first(array_filter($data, function ($row) use ($error_val) {
