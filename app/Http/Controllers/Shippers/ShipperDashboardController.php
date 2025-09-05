@@ -2790,15 +2790,13 @@ class ShipperDashboardController extends Controller
                 $login_data = collect($data)->first();
                 $url = FingaIntegrationController::getLoginUrl($api, $token, $login_data['phone'], $login_data['cnic'], $login_data['email']);
                 $finja = FingaIntegrationController::signUp($data);
-
+                Log::channel('cronJobLog')->info('s ' . 'finja' . json_encode($finja));
                 if (isset($finja['error'])) {
                     $finjaArray = json_decode(json_encode($finja), true);
-                    Log::channel('cronJobLog')->info('s ' . 'finjaArray' . json_encode($finjaArray));
-                    // Log::channel('cronJobLog')->info('s ' . 'Api Does Not exists' . json_encode(ApiZongLog::where(['shipment_id' => $findShipmentId, 'call_date_time' => $request->start_date])->doesntExist()));
-                    // Log::channel('cronJobLog')->info('s ' . 'OPS LOG' . ApiZongLog::where(['shipment_id' => $findShipmentId, 'call_date_time' => $request->start_date])->doesntExist());
+                    // Log::channel('cronJobLog')->info('s ' . 'finjaArray' . json_encode($finjaArray));
 
                     $errorMessages = collect($finjaArray['error']['users']);
-                    Log::channel('cronJobLog')->info('s ' . 'errorMessages' . json_encode($errorMessages));
+                    // Log::channel('cronJobLog')->info('s ' . 'errorMessages' . json_encode($errorMessages));
 
                     foreach ($errorMessages as $error_val){
                         $key = array_key_first(array_filter($data, function ($row) use ($error_val) {
