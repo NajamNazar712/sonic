@@ -2790,7 +2790,7 @@ class ShipperDashboardController extends Controller
                 $login_data = collect($data)->first();
                 $url = FingaIntegrationController::getLoginUrl($api, $token, $login_data['phone'], $login_data['cnic'], $login_data['email']);
                 $finja = FingaIntegrationController::signUp($data);
-                Log::channel('cronJobLog')->info('s ' . 'finja' . json_encode($finja));
+
                 if (isset($finja['error'])) {
                     $finjaArray = json_decode(json_encode($finja), true);
                     // Log::channel('cronJobLog')->info('s ' . 'finjaArray' . json_encode($finjaArray));
