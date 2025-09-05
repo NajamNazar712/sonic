@@ -14921,7 +14921,6 @@ class RiderAPIController extends Controller
                 if ($type == 3 && !empty($shipmentData['type_name_id'])) {
                     // foreach ($shipmentData['type_name_id'] as $typeNameId) {
                         $exists = AddressMissingShipment::where('shipment_id', $shipment_id)
-                            ->where('type_name_id', $shipmentData['type_name_id'])
                             ->whereDate('created_at', date('Y-m-d'))->first();
                     
                         if ($exists) {
