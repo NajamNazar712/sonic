@@ -14921,16 +14921,21 @@ class RiderAPIController extends Controller
                     // foreach ($shipmentData['type_name_id'] as $typeNameId) {
                         $exists = AddressMissingShipment::where('shipment_id', $shipment_id)
                             ->where('type_name_id', $shipmentData['type_name_id'])
-                            ->where('created_at', '>=', now()->subHour())
-                            ->exists();
+                            ->whereDate('created_at', date('Y-m-d'))->first();
         
-                        if (!$exists) {
-                            AddressMissingShipment::create([
-                                'shipment_id'  => $shipment_id,
-                                'type_name_id' => $shipmentData['type_name_id'],
-                                'rider_id'     => $request->rider_id,
-                                'status'       => 0,
-                            ]);
+                        if ($exists) {
+                            $exists->shipment_id = $shipment_id;
+                            $exists->type_name_id = $shipmentData['type_name_id'];
+                            $exists->rider_id = $request->rider_id;
+                            $exists->status = 0;
+                           
+                        }else{
+                        AddressMissingShipment::create([
+                            'shipment_id'  => $shipment_id,
+                            'type_name_id' => $shipmentData['type_name_id'],
+                            'rider_id'     => $request->rider_id,
+                            'status'       => 0,
+                        ]);
                         }
                     // }
         
