@@ -14867,6 +14867,7 @@ class RiderAPIController extends Controller
                 $shipment_otp =  ShipmentOtp::where('shipment_id', $shipment_id)->where('rider_id', $rider_id)->whereDate('updated_at', Carbon::today())->first();
                 $shipment_otp->latitude = $shipmentData['actual_location_latitude'] ?? null;
                 $shipment_otp->longitude = $shipmentData['actual_location_longitude'] ?? null;
+                $shipment_otp->rider_id = $rider_id;
                 $shipment_otp->save();
                 NotificationsController::send(249, $rider_id, $shipment_id, $shipment_otp->dbf_otp);
     
@@ -14887,7 +14888,7 @@ class RiderAPIController extends Controller
                         $otp_check = ShipmentOtp::where([
                             'shipment_id' => $shipment_id,
                             'dbf_otp'         => $shipmentData['rvr_subreason_otp']
-                        ])->whereDate('created_at', Carbon::now())->exists();
+                        ])->whereDate('updated_at', Carbon::now())->exists();
                             
                         if ($otp_check) {
                             $rvr_verification = 1;
