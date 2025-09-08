@@ -2858,7 +2858,6 @@
                         if (data.contains == 1) {
                             $('#reattempt_charges').removeClass('d-none');
                         }else if(data.addressMissingType){
-                            alert(data.addressMissingType)
                             $('#address_1').val(ConsigneeAddress + " " + data.addressMissingType);                         
                             $('#missingAddress').removeClass('d-none'); 
                         }

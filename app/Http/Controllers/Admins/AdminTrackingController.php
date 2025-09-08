@@ -2351,8 +2351,10 @@ class AdminTrackingController extends Controller
             $contains = 1;
         }elseif(in_array($journey->status_reason_id,[3,4]) && $journey->shipper_status_id == 12){
             $addressMissingType = AddressMissingShipment::where(['shipment_id' => $request->shipment_id, 'status' => 0])->latest()->first();
+            return response()->json(['contains' => $contains, 'addressMissingType'  => $addressMissingType?->type?->type_name ??  null]);
         }
-        return response()->json(['contains' => $contains, 'addressMissingType'  => $addressMissingType?->type?->type_name ??  null]);
+        return response()->json(['contains' => $contains]);
+
     }
 
     public function shipment_position_index()
