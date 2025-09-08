@@ -1472,7 +1472,7 @@ class UserManagementController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 834);
         }
-        $retail = RetailShipperInfo::select('cities.name as city', 'retail_shipper_infos.id as id', 'retail_shipper_infos.shipper_name as name', 'retail_shipper_infos.retail_otp as otp', 'retail_shipper_infos.otp_expire_at')
+        $retail = RetailShipperInfo::select('cities.name as city', 'retail_shipper_infos.id as id', 'retail_shipper_infos.shipper_name as name','retail_shipper_infos.shipper_phone_no', 'retail_shipper_infos.retail_otp as otp', 'retail_shipper_infos.otp_expire_at')
             ->where('retail_shipper_infos.status', 1)
             ->join('cities', 'retail_shipper_infos.city_id', '=', 'cities.id')
             ->whereNotNull('retail_shipper_infos.retail_otp');

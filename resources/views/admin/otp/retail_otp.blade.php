@@ -37,6 +37,7 @@
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Name</th>
+                        <th class="border-primary border-darken-1">Retail Shipper Phone</th>
                         <th class="border-primary border-darken-1">City</th>
                         <th class="border-primary border-darken-1">OTP</th>
                         <th class="border-primary border-darken-1">Expire OTP</th>
@@ -148,6 +149,7 @@
 
                             row.push(index + 1);
                             row.push(values.name);
+                            row.push(values.shipper_phone_no);
                             row.push(values.city);
                             row.push(values.otp);
                             row.push(values.otp_expire_at);
@@ -190,6 +192,7 @@
             columns: [
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                 {data: 'name', name: 'retail_shipper_infos.shipper_name', class: 'align-middle name'},
+                {data: 'shipper_phone_no', name: 'retail_shipper_infos.shipper_phone_no', class: 'align-middle shipper_phone_no'},
                 {data: 'city', name: 'cities.name', class: 'align-middle city'},
                 {data: 'otp', name: 'retail_shipper_infos.retail_otp', class: 'align-middle otp'},
                 {data: 'otp_expire_at', name: 'retail_shipper_infos.otp_expire_at', class: 'align-middle reset_pin_otp'},
