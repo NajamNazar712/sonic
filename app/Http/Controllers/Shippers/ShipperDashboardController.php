@@ -131,6 +131,8 @@ use App\Jobs\WalletSignUpLPendingRecordLogs;
 use Validator;
 //use Illuminate\Support\Facades\Auth;
 use App\Models\ParentProduct;
+use App\Models\CorporateUserOnDeliveredInvoice;
+
 
 class ShipperDashboardController extends Controller
 {
@@ -1130,8 +1132,10 @@ class ShipperDashboardController extends Controller
         ->leftJoin('invoice_shipments as is','shipments.id','=','is.shipment_id')
         ->leftJoin('users as users','shipments.user_id' ,'=','users.id')
         ->where('shipments.id', $shipment_id)
-        ->select(['shipments.packaging_material_request','shipments.cash_handling_charges', 'shipments.return_charges', 'shipments.insurance_charges', 'shipments.fuel_surcharge', 'shipments.replacement_charges', 'shipments.try_and_buy_charges', 'shipments.intercept_charges', 'shipments.nsa_osa_charges', 'shipments.weight_charges','pps.sms_charges as pps_sms_charge' , 'dps.sms_charges as dps_sms_charge','pis.sms_charges as pis_sms_charge', 'is.sms_charges as is_sms_charge','users.account_type_id as account_type'])->first();
-        $returnHTML = view('client/components/shipment_charges')->with(['shipment'=>$shipment])->render();
+        ->select(['shipments.packaging_material_request','shipments.cash_handling_charges', 'shipments.return_charges', 'shipments.insurance_charges', 'shipments.fuel_surcharge', 'shipments.replacement_charges', 'shipments.try_and_buy_charges', 'shipments.intercept_charges', 'shipments.nsa_osa_charges', 'shipments.weight_charges','pps.sms_charges as pps_sms_charge' , 'dps.sms_charges as dps_sms_charge','pis.sms_charges as pis_sms_charge', 'is.sms_charges as is_sms_charge','users.account_type_id as account_type', 'users.id as user_id', 'shipments.shipper_status_id as current_status'])->first();
+       
+        $exists = CorporateUserOnDeliveredInvoice::where('user_id', $shipment->user_id )->where('status', 1)->exists();
+        $returnHTML = view('client/components/shipment_charges')->with(['shipment'=>$shipment, 'exists' => $exists])->render();
         return response()->json($returnHTML);
     }
     public function ecommerce() {

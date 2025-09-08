@@ -2,7 +2,11 @@
     <thead>
         <tr role="row" class="bg-primary white">
             @if (!$shipment->packaging_material_request)
-                @if ($shipment->weight_charges != null)
+                @if (
+                    ($exists && !in_array($shipment->current_status, [20,21,22,23,24,25]) && $shipment->weight_charges !== null) 
+                    || 
+                    (!$exists && $shipment->weight_charges !== null)
+                )
                     <th class="border-primary border-darken-1 align-middle text-center">Weight</th>
                 @endif
 
@@ -14,11 +18,17 @@
                 <th class="border-primary border-darken-1 align-middle text-center">Insurance</th>
                 @endif
 
-                @if ($shipment->return_charges != null)
+                @if (($exists && !in_array($shipment->current_status, [20,21,22,23,24,25]) && $shipment->return_charges != null) 
+                    || 
+                    (!$exists && $shipment->return_charges != null)
+                )
                 <th class="border-primary border-darken-1 align-middle text-center">Return</th>
                 @endif
 
-                @if ($shipment->fuel_surcharge != null)
+                @if (($exists && !in_array($shipment->current_status, [20,21,22,23,24,25]) && $shipment->fuel_surcharge != null)
+                    ||
+                    (!$exists && $shipment->fuel_surcharge != null)
+                )
                 <th class="border-primary border-darken-1 align-middle text-center">Fuel</th>
                 @endif
 
@@ -62,7 +72,11 @@
             </tr>
         @else
             <tr>
-                @if ($shipment->weight_charges != null)
+                @if  (
+                    ($exists && !in_array($shipment->current_status, [20,21,22,23,24,25]) && $shipment->weight_charges !== null) 
+                    || 
+                    (!$exists && $shipment->weight_charges !== null)
+                )
                     <td class="align-middle text-center">Rs. {{ floatval($shipment->weight_charges) }}</td>
                 @endif
 
@@ -74,11 +88,17 @@
                     <td class="align-middle text-center">Rs. {{ floatval($shipment->insurance_charges) }}</td>
                 @endif
 
-                @if ($shipment->return_charges != null)
+                @if (($exists && !in_array($shipment->current_status, [20,21,22,23,24,25]) && $shipment->return_charges != null) 
+                    || 
+                    (!$exists && $shipment->return_charges != null)
+                )
                     <td class="align-middle text-center">Rs. {{ floatval($shipment->return_charges) }}</td>
                 @endif
 
-                @if ($shipment->fuel_surcharge != null)
+                @if(($exists && !in_array($shipment->current_status, [20,21,22,23,24,25]) && $shipment->fuel_surcharge != null)
+                    ||
+                    (!$exists && $shipment->fuel_surcharge != null)
+                )
                     <td class="align-middle text-center">Rs. {{ floatval($shipment->fuel_surcharge) }}</td>
                 @endif
 
