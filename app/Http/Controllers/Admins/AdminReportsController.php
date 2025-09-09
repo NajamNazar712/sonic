@@ -18542,7 +18542,9 @@ class AdminReportsController extends Controller
                 }
             });
             
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['customer_name','brand_name'])
+        ->make(true);
 
     }
 }
