@@ -769,7 +769,7 @@ class LostShipmentsController extends Controller
             }
     }
     public function add_lost_shipments(Request $request){
-    
+        dd($request->all());
         $passing_status_array = array(1,14,17,18,25,31,38);
         $shipment_status_for_bags = array(3,21,26,32,49);
         $shipments = explode(',', $request->shipment_ids);
@@ -1052,7 +1052,13 @@ class LostShipmentsController extends Controller
                         $data[$shipment->id]['amount'] = number_format($shipment->amount);
                         $data[$shipment->id]['parcel_value'] = number_format($shipment->parcel_value);
                         $data[$shipment->id]['mode'] = $shipment->shipping_mode->mode;
-                        $data[$shipment->id]['remarks'] = '<input class="form-control form-control-sm" name="remarks[' . $shipment->id. ']" placeholder="Enter Remarks">';
+$data[$shipment->id]['remarks'] = '
+    <div class="remarks-cell" data-shipment-id="'.$shipment->id.'">
+        <input class="form-control form-control-sm remarks" 
+               data-shipment-id="'.$shipment->id.'" 
+               name="remarks['.$shipment->id.']" 
+               placeholder="Enter Remarks">
+    </div>';
 
                         $data[$shipment->id]['service_type'] = $shipment->booking_type->booking_type;
                         $data[$shipment->id]['service_type'] = $shipment->booking_type->booking_type;
