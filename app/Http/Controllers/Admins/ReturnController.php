@@ -3297,10 +3297,10 @@ class ReturnController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 309);
         }
-        $deliveries = ReturnNote::join('cities AS oc', 'return_notes.hub_id', '=', 'oc.id')
-            ->join('riders', 'return_notes.rider_id', '=', 'riders.id')
+        $deliveries = ReturnNote::leftjoin('cities AS oc', 'return_notes.hub_id', '=', 'oc.id')
+            ->leftjoin('riders', 'return_notes.rider_id', '=', 'riders.id')
             ->leftjoin('city_areas as ca', 'ca.id', '=', 'riders.area_id')
-            ->join('admins', 'admins.id', '=', 'return_notes.admin_id')
+            ->leftjoin('admins', 'admins.id', '=', 'return_notes.admin_id')
             ->select([
                 'return_notes.id as return_note', 'return_notes.id', 'return_notes.id as return_note_id', 'oc.name as hub', 'riders.name as rider',
                 'admins.name as assignee', 'return_notes.created_at', 'return_notes.shipments_count', 'return_notes.shipments_count as shipments_count_link',
@@ -3312,8 +3312,8 @@ class ReturnController extends Controller
             $deliveries = $deliveries->whereIn('oc.hub_id', session('hubs'));
         }
         if ($tracking_number = $request->get('search_tracking')) {
-            $deliveries->join('return_note_shipments as rns', 'return_notes.id', '=', 'rns.return_note_id')
-                ->join('shipments as s', 'rns.shipment_id', '=', 's.id')
+            $deliveries->leftjoin('return_note_shipments as rns', 'return_notes.id', '=', 'rns.return_note_id')
+                ->leftjoin('shipments as s', 'rns.shipment_id', '=', 's.id')
                 ->where('s.tracking_number', '=', $tracking_number);
         }
         if ($return_note_number = $request->get('return_note_number')) {
