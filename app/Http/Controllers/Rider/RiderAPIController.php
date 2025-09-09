@@ -11935,7 +11935,7 @@ class RiderAPIController extends Controller
             $subReasonId = $reason->sub_id;
             $subReasonName = $reason->sub_name;
         
-            if (!isset($reasons[$reasonId]) && $reasonId != 3) {
+            if (!isset($reasons[$reasonId])) {
                 $reasons[$reasonId] = [
                     'id' => $reasonId,
                     'name' => $reasonName,
