@@ -3299,6 +3299,28 @@ class ReturnController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 309);
         }
+
+        // ---- 6 months window ----
+        $from = Carbon::now()->subMonths(6)->startOfDay();
+        $to   = Carbon::now()->endOfDay();
+
+        $connection = 'reports'; // <- set the correct connection name you use for shipments_journey
+
+        // First and last shipments_journey IDs within the window
+        $sj_from_id = DB::connection($connection)
+            ->table('shipments_journey')
+            ->whereBetween('created_at', [$from, $to])
+            ->orderBy('created_at', 'asc')->orderBy('id', 'asc')
+            ->limit(1)->value('id');
+
+        $sj_to_id = DB::connection($connection)
+            ->table('shipments_journey')
+            ->whereBetween('created_at', [$from, $to])
+            ->orderBy('created_at', 'desc')->orderBy('id', 'desc')
+            ->limit(1)->value('id');
+
+
+
         $deliveries = ReturnNote::leftjoin('cities AS oc', 'return_notes.hub_id', '=', 'oc.id')
             ->leftjoin('riders', 'return_notes.rider_id', '=', 'riders.id')
             ->leftjoin('city_areas as ca', 'ca.id', '=', 'riders.area_id')
@@ -3319,11 +3341,22 @@ class ReturnController extends Controller
                 'return_notes.status',
                 'riders.trax_id as rider_trax_id',
                 DB::raw('(SELECT COUNT(shipment_id) FROM return_note_shipments WHERE return_note_id = return_notes.id AND status = 0) AS shipments_unverified_count'),
-                DB::raw('(SELECT COUNT(id) FROM shipments_journey where shipper_status_id in (25, 31, 38) and reference_1_id = return_notes.id and verification = 1 ) as delivered_to_shipper_count'),
+
+                DB::raw(sprintf(
+                    '(SELECT COUNT(id)
+      FROM shipments_journey
+      WHERE shipper_status_id IN (25,31,38)
+        AND reference_1_id = return_notes.id
+        AND verification = 1
+        AND id BETWEEN %d AND %d
+    ) AS delivered_to_shipper_count',
+                    $sj_from_id,
+                    $sj_to_id
+                )),
+
                 'ca.name as area',
                 'return_notes.created_at as created'
             ])
-            ->where('return_notes.created_at', '>=', Carbon::now()->subMonths(6))
             ->whereIn('return_notes.status', [0, 3])
             ->groupBy('return_notes.id');
 
