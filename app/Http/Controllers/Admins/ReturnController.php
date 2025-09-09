@@ -3323,6 +3323,7 @@ class ReturnController extends Controller
                 'ca.name as area',
                 'return_notes.created_at as created'
             ])
+            ->where('return_notes.created_at', '>=', Carbon::now()->subMonths(6))
             ->whereIn('return_notes.status', [0, 3])
             ->groupBy('return_notes.id');
 
