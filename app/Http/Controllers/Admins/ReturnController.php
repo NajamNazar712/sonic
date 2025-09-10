@@ -245,10 +245,10 @@ class ReturnController extends Controller
                     ->where('rvsaad.id', '=', DB::connection($connection)->raw('(select max(id) from rv_shipment_assign_agent_details where rv_shipment_assign_agent_details.shipment_id = shipments.id and rv_shipment_assign_agent_details.rv_state_id IN (2, 3) and (rv_shipment_assign_agent_details.rv_assign_agent_status_id != 7 or  rv_shipment_assign_agent_details.rv_assign_agent_status_id is null))'));
             })
 
-            ->join('employee_attendances as ea', function ($join) use ($connection) {
-                $join->on('ea.employee_id', '=', 'assigned_agent.employee_id')
-                    ->where('ea.id', '=', DB::raw('(select max(id) from employee_attendances where employee_attendances.employee_id = assigned_agent.employee_id)'));
-            })
+//            ->leftjoin('employee_attendances as ea', function ($join) use ($connection) {
+//                $join->on('ea.employee_id', '=', 'assigned_agent.employee_id')
+//                    ->where('ea.id', '=', DB::raw('(select max(id) from employee_attendances where employee_attendances.employee_id = assigned_agent.employee_id)'));
+//            })
 
             ->leftjoin('admins as asadby', 'asadby.id', '=', 'new_ras.assigned_by')
             ->leftJoin('rv_agent_call_histories as rach', 'rach.rv_shipment_assign_agent_id', '=', 'rvsaa.id')
@@ -273,7 +273,7 @@ class ReturnController extends Controller
             ->leftjoin('star_shippers as sts', 'sts.user_id', '=', 'u.id');
         if ($type == 1) {
             $shipments = $shipments->select(
-                'ea.attendance_date as attendance_date',
+//                'ea.attendance_date as attendance_date',
                 'shipments.id as shId',
                 'shipments.tracking_number',
                 'shipments.tracking_number as tracking',
