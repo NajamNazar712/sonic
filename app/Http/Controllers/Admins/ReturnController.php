@@ -245,7 +245,7 @@ class ReturnController extends Controller
                     ->where('rvsaad.id', '=', DB::connection($connection)->raw('(select max(id) from rv_shipment_assign_agent_details where rv_shipment_assign_agent_details.shipment_id = shipments.id and rv_shipment_assign_agent_details.rv_state_id IN (2, 3) and (rv_shipment_assign_agent_details.rv_assign_agent_status_id != 7 or  rv_shipment_assign_agent_details.rv_assign_agent_status_id is null))'));
             })
 
-            ->leftjoin('employee_attendances as ea', function ($join) use ($connection) {
+            ->join('employee_attendances as ea', function ($join) use ($connection) {
                 $join->on('ea.employee_id', '=', 'assigned_agent.employee_id')
                     ->where('ea.id', '=', DB::raw('(select max(id) from employee_attendances where employee_attendances.employee_id = assigned_agent.employee_id)'));
             })
