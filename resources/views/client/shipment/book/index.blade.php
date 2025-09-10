@@ -979,6 +979,7 @@
 				if ($('#pickup_address').val() == 0) {
 					var pickup_city_id = $('#new_pickup_city').val();
 					$('#pickup_city_name').addClass('d-none');
+					$("#pickup_latitude, #pickup_longitude").removeAttr("readonly");
 					$("#pickup_latitude").val('');
 					$("#pickup_longitude").val('');
 				}
@@ -993,6 +994,11 @@
 					if (latitude !== undefined && latitude !== '' && longitude !== undefined && longitude !== '') {
 						$("#pickup_latitude").val(latitude);
 						$("#pickup_longitude").val(longitude);
+						$("#pickup_latitude, #pickup_longitude").prop("readonly", true);
+					}else{
+						$("#pickup_latitude, #pickup_longitude").removeAttr("readonly");
+						$("#pickup_latitude").val('');
+						$("#pickup_longitude").val('');
 					}
 
 				}
