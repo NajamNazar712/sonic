@@ -1536,8 +1536,8 @@ class RiderAPIController extends Controller
                 $pickup['address'] = $pickup_address->pickup_address;
                 $pickup['location_latitude'] = $pickup_address->location_latitude;
                 $pickup['location_longitude'] = $pickup_address->location_longitude;
-                $pickup['geo_latitude'] = $pickup_address->latitude;
-                $pickup['geo_longitude'] = $pickup_address->longitude;
+                $pickup['geo_latitude'] = $pickup_address->latitude ?? 0;
+                $pickup['geo_longitude'] = $pickup_address->longitude ?? 0;
 
                 $information['pickups'][] = $pickup;
             }
