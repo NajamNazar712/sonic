@@ -37,6 +37,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
+use App\Models\CorporateUserOnDeliveredInvoice;
 
 class OrderManagementController extends Controller
 {
@@ -237,7 +238,9 @@ class OrderManagementController extends Controller
         if($shipment->shipment_type == 2){
             $retail_shipment = RetailShipment::where('shipment_id',$shipment_id)->first();
         }
-        $returnHTML = view('admin/components/shipment_charges')->with(['shipment'=>$shipment,'retail_shipment' => $retail_shipment])->render();
+
+        $exists = CorporateUserOnDeliveredInvoice::where('user_id', $shipment->user_id )->where('status', 1)->exists();
+        $returnHTML = view('admin/components/shipment_charges')->with(['shipment'=>$shipment,'retail_shipment' => $retail_shipment, 'exists' => $exists])->render();
         return response()->json($returnHTML);
     }
     public function shipper_recall(Request $request) {
