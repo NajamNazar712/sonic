@@ -23,7 +23,7 @@ class RebookDuplicateShipments extends Command
 
         // 1) get payload-ready rows from your SP (no INSERT text, just data)
         $rows = DB::select('CALL sp_preview_user_duplicate_shipments_inserts(?)', [$userId]);
-
+        dd($rows);
         // handle “info” row when no dupes
         if (empty($rows) || (count($rows) === 1 && isset($rows[0]->info))) {
             $this->info('No duplicate shipments payload for user: '.$userId);
