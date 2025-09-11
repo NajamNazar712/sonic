@@ -204,7 +204,7 @@
 										<th class="border-primary border-darken-1">Payment Cycle</th>
                                         <th class="border-primary border-darken-1">Payment Cycle Days</th>
 										<th class="border-primary border-darken-1">Status</th>
-										<th class="border-primary border-darken-1">Paid / Reverted Datetime</th>
+										<th class="border-primary border-darken-1">Paid / Reverted / Hold Datetime</th>
 										{{--										<th class="border-primary border-darken-1">Aging</th>--}}
 										<th class="border-primary border-darken-1"></th>
 									</tr>
@@ -747,6 +747,16 @@
 								.done(function(data) {
 									if (data.status == 0) {
 										toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+										// Show list of already paid IDs, if any
+											if (data.hold_payments_ids && data.hold_payments_ids.length > 0) {
+												let paidIdsText = data.hold_payments_ids.join(', ');
+												toastr.error('The following payment IDs should not be marked as Paid: ' + paidIdsText, 'Info', {
+													positionClass: 'toast-top-center',
+													containerId: 'toast-top-center',
+													timeOut: 8000
+												});
+											}
 									}
 									else {
 										toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -759,6 +769,7 @@
 									table.button('.paid').disable();
 									table.button('.tax_paid').disable();
 									table.button('.reverted').disable();
+									table.button('.hold').disable();
 
 									table.draw('false');
 								});
@@ -796,6 +807,7 @@
 									table.button('.paid').disable();
 									table.button('.tax_paid').disable();
 									table.button('.reverted').disable();
+									table.button('.hold').disable();
 
 									table.draw('false');
 								});
@@ -832,11 +844,61 @@
 									table.button('.paid').disable();
 									table.button('.tax_paid').disable();
 									table.button('.reverted').disable();
+									table.button('.hold').disable();
 
 									table.draw('false');
 								});
 							}
 						},
+						@endif
+					@if (session('role_id') == 1 || in_array(63, session('permissions')))
+					{
+						text: 'Hold',
+						className: 'btn btn-primary hold',
+						enabled: false,
+						action: function (e, dt, node, config) {
+							$.ajax({
+								url: '{!! route('admin.finance.done_payments.hold') !!}',
+								method: 'PUT',
+								data: {
+									'_token': '{{ csrf_token() }}',
+									'ids': selected_rows,
+									'is_hold' :1
+								},
+								beforeSend: function () {
+									node.prop('disabled', true);
+								}
+							}).done(function(data) {
+										if (data.status == 0) {
+											toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+											// Show list of already paid IDs, if any
+											if (data.paid_payment_ids && data.paid_payment_ids.length > 0) {
+												let paidIdsText = data.paid_payment_ids.join(', ');
+												toastr.info('The following payment IDs were already paid and skipped: ' + paidIdsText, 'Info', {
+													positionClass: 'toast-top-center',
+													containerId: 'toast-top-center',
+													timeOut: 8000
+												});
+											}
+										}
+										else {
+											toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+										}
+
+										table.rows().deselect();
+
+										selected_rows = [];
+
+										table.button('.paid').disable();
+										table.button('.tax_paid').disable();
+										table.button('.reverted').disable();
+										table.button('.hold').disable();
+
+										table.draw('false');
+									});
+						}
+					},
 					@endif
                     {
                         extend: 'excel',
@@ -867,6 +929,7 @@
 	                                table.button('.paid').enable();
 	                                table.button('.tax_paid').enable();
 	                                table.button('.reverted').enable();
+									table.button('.hold').enable();
 	                            }
 	                        });
 	                    }
@@ -895,6 +958,7 @@
 	                                table.button('.paid').disable();
 									table.button('.tax_paid').disable();
 	                                table.button('.reverted').disable();
+									table.button('.hold').disable();
 	                            }
 	                          }
 	                        });
@@ -1013,6 +1077,7 @@
                         '<option value="0">Processed</option>' +
                         '<option value="1">Paid</option>' +
                         '<option value="2">Reverted</option>' +
+						'<option value="4">Hold</option>' +
                         '</select>';
 					var payment_cycle_select =
                         '<select name="payment_cycle_select" id="payment_cycle_select" class="select2 form-control">' +
@@ -1174,11 +1239,13 @@
 					table.button('.paid').enable();
 					table.button('.tax_paid').enable();
 					table.button('.reverted').enable();
+					table.button('.hold').enable();
 				}
 				else {
 					table.button('.paid').disable();
 					table.button('.tax_paid').disable();
 					table.button('.reverted').disable();
+					table.button('.hold').disable();
 				}
 			});
             var route = '{!! route('admin.tracking.index') !!}';
