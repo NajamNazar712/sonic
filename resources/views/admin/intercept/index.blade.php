@@ -123,13 +123,19 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
-            $('#consignee_address').on('input', function() {
-                reset_lat_lng();
-            });
             function reset_lat_lng() {
                 $('#consignee_latitude').val('');
                 $('#consignee_longitude').val('');
             }
+
+            $('#consignee_address').on('input', function() {
+                reset_lat_lng();
+            });
+
+            $('#consignee_city').on('change', function() {
+                reset_lat_lng();
+            });
+
             var consignee_name = @json($shipment['consignee_name']);
             var city = @json($shipment['consignee_city_id']);
             var email = @json($shipment['consignee_email']);
@@ -169,7 +175,6 @@
                       .prop({name : 'consignee_city' , disabled : false}); //restore the name and enable
                   $("#replacement_parcel_image_div").addClass("d-none");
               }
-              reset_lat_lng();
             });
 
             $('.amount').inputmask({
