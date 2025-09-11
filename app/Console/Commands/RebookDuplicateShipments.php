@@ -86,6 +86,7 @@ class RebookDuplicateShipments extends Command
         $arr = [
             // booking form fields returned by your SP
             'service_type_id'          => $r->service_type_id ?? null,
+            'parcel_value'          => $r->parcel_value ?? null,
             'pickup_address_id'        => $r->pickup_address_id ?? null,
             'consignee_city_id'        => $r->consignee_city_id ?? null,
             'consignee_name'           => $r->consignee_name ?? null,
