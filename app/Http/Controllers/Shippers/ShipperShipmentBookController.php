@@ -4230,12 +4230,15 @@ class ShipperShipmentBookController extends Controller
 
                 $pickup_city_id = $request->input('new_pickup_city');
 
-                $pickup_address_id = $this->add_pickup_address($user_id, $request->input('new_pickup_address'), $request->input('new_pickup_person_of_contact'), $request->input('new_pickup_vendor'), $request->input('new_pickup_phone_number'), $request->input('new_pickup_email_address'), $pickup_city_id, 0,false,$request->input('latitude'),$request->input('longitude'));
+                $pickup_address_id = $this->add_pickup_address($user_id, $request->input('new_pickup_address'), $request->input('new_pickup_person_of_contact'), $request->input('new_pickup_vendor'), $request->input('new_pickup_phone_number'), $request->input('new_pickup_email_address'), $pickup_city_id, 0,false,$request->input('new_pickup_latitude'),$request->input('new_pickup_longitude'));
             } else {
                 if ($service_type_id != 5) {
                     $pickup_address_id = $request->input('pickup_address');
 
                     $user_shipping_info = UserShippingInfo::find($pickup_address_id);
+                    $user_shipping_info->latitude= $request->input('latitude');
+                    $user_shipping_info->longitude= $request->input('longitude');
+                    $user_shipping_info->save();
 
                     $pickup_city_id = $user_shipping_info->city_id;
                 } else {

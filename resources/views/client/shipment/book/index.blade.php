@@ -144,7 +144,6 @@
 											<div class="form-group">
 												<input type="text" name="new_pickup_vendor" class="form-control" placeholder="Vendor" data-rule-maxlength="100" data-msg-maxlength="Vendor can be maximum 100 characters">
 											</div>
-
 											<div class="form-group">
 												<input type="text" name="new_pickup_phone_number" class="form-control phone_number" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required">
 											</div>
@@ -975,18 +974,18 @@
 			});
 
 			function shipping_modes() {
-
 				if ($('#pickup_address').val() == 0) {
+
 					var pickup_city_id = $('#new_pickup_city').val();
 					$('#pickup_city_name').addClass('d-none');
-					$("#pickup_latitude, #pickup_longitude").removeAttr("readonly");
-					$("#pickup_latitude").val('');
-					$("#pickup_longitude").val('');
+					$("#pickup_latitude, #pickup_longitude").addClass('d-none')
+					$("#pickup_latitude,#pickup_longitude").val('');
 				}
 				else {
 					var pickup_city_id = $('#pickup_address').find(':selected').data('city-id');
 					var pickup_city_name = $('#pickup_address').find(':selected').data('city-name');
 					$('#pickup_city_name').removeClass('d-none');
+					$("#pickup_latitude, #pickup_longitude").removeClass('d-none')
 					$('#pickup_city_name').html('City : ' + pickup_city_name);
 
 					var latitude = $('#pickup_address').find(':selected').data('latitude');

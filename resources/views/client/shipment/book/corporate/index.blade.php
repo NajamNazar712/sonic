@@ -156,10 +156,10 @@
                                                 <input type="email" name="new_pickup_email_address" class="form-control" placeholder="Email Address*" data-rule-required="true" data-msg-required="Email Address is required">
                                             </div>
                                             <div class="form-group">
-                                                <input type="text" name="latitude" class="form-control" placeholder="Latitude">
+                                                <input type="text" name="new_pickup_latitude" class="form-control" placeholder="Latitude">
                                             </div>
                                             <div class="form-group">
-                                                <input type="text" name="longitude" class="form-control" placeholder="Longitude">
+                                                <input type="text" name="new_pickup_longitude" class="form-control" placeholder="Longitude">
                                             </div>
                                         </div>
 
@@ -984,20 +984,28 @@
                 if ($('#pickup_address').val() == 0) {
                     var pickup_city_id = $('#new_pickup_city').val();
                     $('#pickup_city_name').addClass('d-none');
-                    $("#pickup_latitude").val('');
-                    $("#pickup_longitude").val('');
+                    $("#pickup_latitude, #pickup_longitude").addClass('d-none')
+                    $("#pickup_latitude,#pickup_longitude").val('');
 
                 }
                 else {
                     var pickup_city_id = $('#pickup_address').find(':selected').data('city-id');
                     var pickup_city_name = $('#pickup_address').find(':selected').data('city-name');
                     $('#pickup_city_name').removeClass('d-none');
+                    $("#pickup_latitude, #pickup_longitude").removeClass('d-none')
                     $('#pickup_city_name').html('City : ' + pickup_city_name);
 
                     var latitude = $('#pickup_address').find(':selected').data('latitude');
                     var longitude = $('#pickup_address').find(':selected').data('longitude');
-                    $("#pickup_latitude").val(latitude);
-                    $("#pickup_longitude").val(longitude);
+                    if (latitude !== undefined && latitude !== '' && longitude !== undefined && longitude !== '') {
+                        $("#pickup_latitude").val(latitude);
+                        $("#pickup_longitude").val(longitude);
+                        $("#pickup_latitude, #pickup_longitude").prop("readonly", true);
+                    }else{
+                        $("#pickup_latitude, #pickup_longitude").removeAttr("readonly");
+                        $("#pickup_latitude").val('');
+                        $("#pickup_longitude").val('');
+                    }
                 }
 
                 consignee_city_id = $('#consignee_city').val();
