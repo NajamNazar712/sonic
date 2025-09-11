@@ -405,7 +405,7 @@ class ShipperFinanceApiController extends Controller
                 ->when($search, function ($q) use ($search) {
                     $q->where('s.tracking_number', 'like', "%{$search}%");
                 })
-                ->select('s.id', 's.tracking_number')
+                ->select('s.id', 's.tracking_number','rdps.total_charges as total_charges' )
                 ->orderBy('s.id', 'desc')
                 ->cursorPaginate(500, ['*'], 'cursor');
         } else {
@@ -417,7 +417,7 @@ class ShipperFinanceApiController extends Controller
                 ->when($search, function ($q) use ($search) {
                     $q->where('s.tracking_number', 'like', "%{$search}%");
                 })
-                ->select('s.id', 's.tracking_number')
+                ->select('s.id', 's.tracking_number', 'dps.charges as total_charges'  )
                 ->orderBy('s.id', 'desc')
                 ->cursorPaginate(500, ['*'], 'cursor');
         }
