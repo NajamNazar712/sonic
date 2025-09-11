@@ -23,7 +23,7 @@ class RebookDuplicateShipments extends Command
 
         // 1) get payload-ready rows from your SP (no INSERT text, just data)
         $rows = DB::select('CALL sp_preview_user_duplicate_shipments_inserts(?)', [$userId]);
- 
+
         // handle “info” row when no dupes
         if (empty($rows) || (count($rows) === 1 && isset($rows[0]->info))) {
             $this->info('No duplicate shipments payload for user: '.$userId);
@@ -65,7 +65,7 @@ class RebookDuplicateShipments extends Command
                     $failed++;
                     $this->error('booking failed | HTTP '.$statusCode.' | '.json_encode($data));
                 }
-                dd('here');
+
 //            } catch (\Throwable $e) {
 //                $failed++;
 //                $this->error('Exception: '.$e->getMessage());
