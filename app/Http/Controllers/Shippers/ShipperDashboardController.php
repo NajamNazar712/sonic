@@ -2797,8 +2797,10 @@ class ShipperDashboardController extends Controller
 
                 if (isset($finja['error'])) {
                     $finjaArray = json_decode(json_encode($finja), true);
+                    // Log::channel('cronJobLog')->info('s ' . 'finjaArray' . json_encode($finjaArray));
 
                     $errorMessages = collect($finjaArray['error']['users']);
+                    // Log::channel('cronJobLog')->info('s ' . 'errorMessages' . json_encode($errorMessages));
 
                     foreach ($errorMessages as $error_val){
                         $key = array_key_first(array_filter($data, function ($row) use ($error_val) {

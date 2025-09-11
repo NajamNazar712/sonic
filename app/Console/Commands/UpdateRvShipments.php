@@ -6,6 +6,7 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\RvShipmentAssignAgent;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentsJourney;
 use App\RvShipmentAgent;
 use Illuminate\Console\Command;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -60,7 +61,6 @@ class UpdateRvShipments extends Command
             $spreadsheet = IOFactory::load($filePath);
             $sheet = $spreadsheet->getActiveSheet();
             $rows = $sheet->toArray();
-
             $trackingNumbers = [];
             foreach ($rows as $row) {
                 if (!empty($row[0]) && strtolower($row[0]) !== 'tracking_number') {
@@ -104,7 +104,10 @@ class UpdateRvShipments extends Command
 
     protected function processShipment($shipment)
     {
-
+        // $shipmentsJourney = ShipmentsJourney::where(['shipment_id'=>$shipment->id,'shipper_status_id'=>65])->latest()->first();
+        // $shipmentsJourney->status_reason_id = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 12)->latest()->first()->status_reason_id;
+        // $shipmentsJourney->save();
+        // dd($shipmentsJourney);
         $rvshipments = RvShipmentAssignAgent::where('shipment_id', $shipment->id);
 
         Shipment::where('id', $shipment->id)->update([
@@ -116,7 +119,7 @@ class UpdateRvShipments extends Command
             $shipment->id,
             65,
             65,
-            null,
+            ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 12)->latest()->first()->status_reason_id,
             null,
             $shipment->user_id,
             346
