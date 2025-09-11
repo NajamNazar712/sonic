@@ -11,7 +11,7 @@ class RebookDuplicateShipments extends Command
 {
     protected $signature = 'shipments:rebook-via-controller
                             {user_id : The user id}
-                            {--controller=App\Http\Controllers\ApiController : FQCN that defines shipment_book()}
+                            {--controller=app\Http\Controllers\ApiController : FQCN that defines shipment_book()}
                             {--dry-run : Log the requests, don\'t call or delete}';
 
     protected $description = 'Fetch dup shipment payloads via SP, call shipment_book() controller, then delete old shipments on success';
