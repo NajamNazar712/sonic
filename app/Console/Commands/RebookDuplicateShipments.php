@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Controllers\APIController;
 use Illuminate\Console\Command;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -9,24 +10,16 @@ use Illuminate\Support\Facades\Log;
 
 class RebookDuplicateShipments extends Command
 {
-    protected $signature = 'shipments:rebook-via-controller
-                            {user_id : The user id}
-                            {--controller=app\Http\Controllers\ApiController : FQCN that defines shipment_book()}
-                            {--dry-run : Log the requests, don\'t call or delete}';
+    protected $signature = 'shipments:rebook-via-controller {user_id : The user id}';
 
     protected $description = 'Fetch dup shipment payloads via SP, call shipment_book() controller, then delete old shipments on success';
 
     public function handle(): int
     {
         $userId     = (int) $this->argument('user_id');
-        $controller = (string) $this->option('controller');
-        $dryRun     = (bool) $this->option('dry-run');
 
-        if (!class_exists($controller)) {
-            $this->error("Controller class not found: {$controller}");
-            return self::FAILURE;
-        }
-        $controllerInstance = app($controller);
+        $apicontroller = new  APIController();
+        $controllerInstance = $apicontroller;
 
         // 1) get payload-ready rows from your SP (no INSERT text, just data)
         $rows = DB::select('CALL sp_preview_user_duplicate_shipments_inserts(?)', [$userId]);
@@ -44,12 +37,6 @@ class RebookDuplicateShipments extends Command
             $payload = $this->rowToPayloadArray($row);
             $payload['user_id'] = $userId;
             $payload['app_type'] = 1;
-            if ($dryRun) {
-                $this->line("DRY-RUN: would call shipment_book for old_shipment_id={$row->old_shipment_id}");
-                Log::info('DRY-RUN shipment_book payload', ['user_id'=>$userId, 'payload'=>$payload]);
-                $processed++;
-                continue;
-            }
 
 //            try {
                 // create a Request and merge payload (as you asked)
