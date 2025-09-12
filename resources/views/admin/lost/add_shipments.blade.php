@@ -522,7 +522,6 @@ label.error {
         });
 
         var shipment_id;
-        var modalButton
         $('body').on('click', '.add_lost_responsible', function () {
             shipment_id = $(this).attr('data-id');
             var modalId = 'addLostResponsibleModal_' + shipment_id;
