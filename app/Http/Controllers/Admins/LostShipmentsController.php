@@ -18,6 +18,7 @@ use App\Http\Models\ShippingMode;
 use Illuminate\Support\Facades\DB;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Controllers\Controller;
+use App\Models\LostCategoryShipment;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\ShipmentsJourney;
@@ -769,7 +770,6 @@ class LostShipmentsController extends Controller
             }
     }
     public function add_lost_shipments(Request $request){
-        dd($request->all());
         $passing_status_array = array(1,14,17,18,25,31,38);
         $shipment_status_for_bags = array(3,21,26,32,49);
         $shipments = explode(',', $request->shipment_ids);
@@ -893,6 +893,33 @@ class LostShipmentsController extends Controller
                     $this->LostShipmentResponsible($LostShipmentResponsible, $lostShipmentsTime);
                 }
             }
+
+            $remarks_category = $request->remarks_category ?? [];
+
+            if (!empty($remarks_category)) {
+                $categoryIds = array_values($remarks_category);
+                $categories = DB::table('lost_categories')
+                    ->whereIn('id', $categoryIds)
+                    ->pluck('name', 'id'); 
+
+                $insertData = [];
+                $now = now();
+                foreach ($remarks_category as $shipmentId => $categoryId) {
+                    if (isset($categories[$categoryId])) {
+                        $insertData[] = [
+                            'shipment_id' => $shipmentId,
+                            'type'        => $categories[$categoryId],
+                            'created_at'  => $now,
+                            'updated_at'  => $now,
+                        ];
+                    }
+                }
+
+                if (!empty($insertData)) {
+                    LostCategoryShipment::insert($insertData);
+                }
+            }
+
 
             return redirect()->back()->with(['success' => 'Shipment(s) has been added to Lost!']);
 

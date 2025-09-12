@@ -503,24 +503,43 @@ label.error {
         });
 
 
-        $('body').on('click','.action a.removerow',function () {
-            var rid = parseInt($(this).parents('tr').attr('id'));
-            var index = $.inArray(rid, shipment_ids);
+    $('body').on('click', '.action a.removerow', function (e) {
+        e.preventDefault();
 
-            if (index !== -1) {
-                shipment_ids.splice(index, 1);
+        var $btn = $(this);
+        var $tr = $btn.closest('tr');
+        var trIdAttr = $tr.data('id') !== undefined ? $tr.data('id') : $tr.attr('id');
+        if (trIdAttr == null) return;
+
+        var rid = parseInt(String(trIdAttr).replace(/[^\d]/g, ''), 10);
+        if (Number.isNaN(rid)) return;
+
+        var index = shipment_ids.indexOf(rid);
+        if (index !== -1) shipment_ids.splice(index, 1);
+
+        if (table && typeof table.row === 'function') {
+            table.row($tr).remove().draw(false);
+        } else {
+            $tr.remove();
+        }
+
+        $('#update_lost_form button[type="submit"]').prop('disabled', shipment_ids.length === 0);
+
+        var shipment_id_remove = $btn.data('shipmentId') ?? $btn.attr('data-shipment_id') ?? $btn.attr('data-shipment-id');
+        if (shipment_id_remove != null) {
+            var selector = '#addLostResponsibleTable_' + shipment_id_remove;
+            if ($.fn.dataTable.isDataTable(selector)) {
+                var existing_table = $(selector).DataTable();
+                existing_table.rows().remove().draw(false); 
+            } else {
+                $(selector + ' tbody').empty(); 
             }
-            table.row( $(this).parents('tr') ).remove().draw();
-            if(shipment_ids.length == 0){
-                $('#update_lost_form button[type="submit"]').attr('disabled', 'disabled');
-            }
-            var shipment_id_remove = $(this).attr('data-shipment_id');
-            var existing_table = $('#addLostResponsibleTable_' + shipment_id_remove).DataTable();
-            existing_table.clear().draw();
+            delete change[String(shipment_id_remove)];
+        }
 
-            delete change[shipment_id_remove];
+        $btn.prop('disabled', true);
+    });
 
-        });
 
         var shipment_id;
         $('body').on('click', '.add_lost_responsible', function () {
