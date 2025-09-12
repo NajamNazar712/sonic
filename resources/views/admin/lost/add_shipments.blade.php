@@ -523,10 +523,11 @@ label.error {
         });
 
         var shipment_id;
+        var modalButton;
         $('body').on('click', '.add_lost_responsible', function () {
             shipment_id = $(this).attr('data-id');
             var modalId = 'addLostResponsibleModal_' + shipment_id;
-            var modalButton = 'addLostResponsibleModalBtn_' + shipment_id;
+            modalButton = 'addLostResponsibleModalBtn_' + shipment_id;
             var closeModalButton = 'addLostResponsibleCloseModalBtn';
 
             var modalContent = '<div class="modal fade text-left addLostResponsible" id="' + modalId + '" data-backdrop="static" tabindex="-1" role="dialog">' +
