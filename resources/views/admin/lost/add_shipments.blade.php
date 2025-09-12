@@ -164,6 +164,7 @@ label.error {
                     {name: 'amount', class: 'align-middle amount', orderable: false},
                     {name: 'parcel_value', class: 'align-middle parcel_value', orderable: false},
                     {name: 'remarks', class: 'align-middle remarks', orderable: false},
+                    {name: 'lost_category', class: 'align-middle lost_category', orderable: false},
                     {name: 'mode', class: 'align-middle mode', orderable: false},
                     {name: 'service_type', class: 'align-middle service_type', orderable: false},
                     {name: 'action_button', class: 'align-middle action_button', orderable: false},
@@ -879,7 +880,7 @@ label.error {
                 </select>`;
         }
         function updateRemarksCategory(shipment_id) {
-            if (manualRemarkMode[shipment_id]) return; // stop auto if manual mode
+            if (manualRemarkMode[shipment_id]) return;
 
             let types = change[shipment_id]?.map(item => item.computedType) || [];
             if (types.length === 0) return;
@@ -905,15 +906,13 @@ label.error {
 
         $(document).on('keypress', '.remarks', function () {
             let shipment_id = $(this).data('shipment-id');
-            manualRemarkMode[shipment_id] = true; // Manual mode on
+            manualRemarkMode[shipment_id] = true; 
 
             let remarksField = $('#remarks_category_' + shipment_id);
 
-            // Remove readonly class and unlock
             remarksField.removeClass('readonly-select')
                         .prop('readonly', false);
 
-            // Reset dropdown with only manual options (1,2)
             remarksField.html(`
                 <option value="">-- Select Remark --</option>
                 ${REMARK_OPTIONS.map(o =>
