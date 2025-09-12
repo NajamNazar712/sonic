@@ -164,7 +164,6 @@ label.error {
                     {name: 'amount', class: 'align-middle amount', orderable: false},
                     {name: 'parcel_value', class: 'align-middle parcel_value', orderable: false},
                     {name: 'remarks', class: 'align-middle remarks', orderable: false},
-                    {name: 'lost_category', class: 'align-middle lost_category', orderable: false},
                     {name: 'mode', class: 'align-middle mode', orderable: false},
                     {name: 'service_type', class: 'align-middle service_type', orderable: false},
                     {name: 'action_button', class: 'align-middle action_button', orderable: false},
@@ -503,366 +502,359 @@ label.error {
         });
 
 
-    $('body').on('click', '.action a.removerow', function (e) {
-        e.preventDefault();
+        $('body').on('click','.action a.removerow',function () {
+            var rid = parseInt($(this).parents('tr').attr('id'));
+            var index = $.inArray(rid, shipment_ids);
 
-        var $btn = $(this);
-        var $tr = $btn.closest('tr');
-        var trIdAttr = $tr.data('id') !== undefined ? $tr.data('id') : $tr.attr('id');
-        if (trIdAttr == null) return;
-
-        var rid = parseInt(String(trIdAttr).replace(/[^\d]/g, ''), 10);
-        if (Number.isNaN(rid)) return;
-
-        var index = shipment_ids.indexOf(rid);
-        if (index !== -1) shipment_ids.splice(index, 1);
-
-        if (table && typeof table.row === 'function') {
-            table.row($tr).remove().draw(false);
-        } else {
-            $tr.remove();
-        }
-
-        $('#update_lost_form button[type="submit"]').prop('disabled', shipment_ids.length === 0);
-
-        var shipment_id_remove = $btn.data('shipmentId') ?? $btn.attr('data-shipment_id') ?? $btn.attr('data-shipment-id');
-        if (shipment_id_remove != null) {
-            var selector = '#addLostResponsibleTable_' + shipment_id_remove;
-            if ($.fn.dataTable.isDataTable(selector)) {
-                var existing_table = $(selector).DataTable();
-                existing_table.rows().remove().draw(false); 
-            } else {
-                $(selector + ' tbody').empty(); 
+            if (index !== -1) {
+                shipment_ids.splice(index, 1);
             }
-            delete change[String(shipment_id_remove)];
+            table.row( $(this).parents('tr') ).remove().draw();
+            if(shipment_ids.length == 0){
+                $('#update_lost_form button[type="submit"]').attr('disabled', 'disabled');
+            }
+            var shipment_id_remove = $(this).attr('data-shipment_id');
+            var existing_table = $('#addLostResponsibleTable_' + shipment_id_remove).DataTable();
+            existing_table.clear().draw();
+
+            delete change[shipment_id_remove];
+
+        });
+
+        var shipment_id;
+        var modalButton
+        $('body').on('click', '.add_lost_responsible', function () {
+            shipment_id = $(this).attr('data-id');
+            var modalId = 'addLostResponsibleModal_' + shipment_id;
+            var modalButton = 'addLostResponsibleModalBtn_' + shipment_id;
+            var closeModalButton = 'addLostResponsibleCloseModalBtn';
+
+            var modalContent = '<div class="modal fade text-left addLostResponsible" id="' + modalId + '" data-backdrop="static" tabindex="-1" role="dialog">' +
+                '<div class="modal-dialog modal-xl" role="document">' +
+                '<div class="modal-content">' +
+                '<div class="modal-header bg-primary white">' +
+                '<h4 class="modal-title white">Add Lost Responsible for Shipment ID: ' + shipment_id + '</h4>' +
+                '<button type="button" class="close" aria-label="Close" id = "' + closeModalButton + '">' +
+                '<span aria-hidden="true">&times;</span>' +
+                '</button>' +
+                '</div>' +
+                '<div class="modal-body text-center">' +
+                '<form id="addLostResponsibleForm_' + shipment_id + '" class="form" method="post" enctype="multipart/form-data">' +
+                '<input type="hidden" name="_token" value="{{ csrf_token() }}">' +
+                '<input type="hidden" id="shipment_id" name="shipment_id" value="' + shipment_id + '">' +
+                '<table class="table table-bordered datatable" id="addLostResponsibleTable_' + shipment_id + '">' +
+                '<thead>' +
+                '<tr role="row" class="bg-primary white">' +
+                '<th class="border-primary border-darken-1">S. No.</th>' +
+                '<th class="border-primary border-darken-1">Employee ID</th>' +
+                '<th class="border-primary border-darken-1">Employee Name</th>' +
+                '<th class="border-primary border-darken-1">Employee Type</th>' +
+                '<th class="border-primary border-darken-1">Employee Status</th>' +
+                '<th class="border-primary border-darken-1"></th>' +
+                '</tr>' +
+                '</thead>' +
+                '</table>' +              
+                '</form>' +
+                '<div class="row justify-content-center mt-3">'+
+                        '<div class="col-">'+
+                            '<button class="btn btn-info btn-block" class="close close_btn" id="' + modalButton + '" data-dismiss="modal" aria-label="Close" disabled>Save</button>'+
+                        '</div>'+
+                '</div>'+
+              
+                '</div>' +
+                '</div>' +
+                '</div>' +
+                '</div>';
+
+
+            $('.addLostResponsibleModal').append(modalContent);
+            $('#' + modalId).modal('show');
+            $('#' + modalId).on('shown.bs.modal', function (event) {
+                if (!$.fn.DataTable.isDataTable('#addLostResponsibleTable_' + shipment_id)) { 
+                    addLostResponsible = $('#addLostResponsibleTable_' + shipment_id).DataTable({
+                        dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                        buttons: [{
+                            title: 'Add Row',
+                            className: 'btn btn-primary mb-1 add_row',
+                            text: '<i class="la la-plus"></i> Add Row',
+                            action: function (e) {
+                                add_row(shipment_id);                                
+                                
+                                if(flag_new || addLostResponsible.length === 0){
+                                    addLostResponsible.button(0).disable();
+                                }else{
+                                    addLostResponsible.button(0).enable();
+                                    flag_new = true;
+                                }
+                            }
+                        }],
+                        ordering: false,
+                        paging: false,
+                        columns: [
+                            { orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) { return ''; }},
+                            { name: 'user', class: 'align-middle user form-group', width: '40%' },
+                            { name: 'user_name', class: 'align-middle user_name form-group', width: '20%' },
+                            { name: 'user_type', class: 'align-middle user_type form-group', width: '20%' },
+                            { name: 'user_status', class: 'align-middle user_type form-group', width: '20%' },
+                            {name: 'action', class: 'align-middle action'},
+                        ],
+                        rowCallback: function (row, data, index) {
+                            var info = addLostResponsible.page.info();
+                            $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                        },
+                        initComplete: function () {
+                            // this.api().table().columns.adjust();
+                        }
+                    });
+                }
+            });
+           
+        });
+        var rows_count = 0;
+        var rows_count_1 = 0;
+        var selected_rows = [];
+        var change = {};
+        var new_array = [];
+        var selected_trax_id = [];
+        var trax_index;
+        function add_row(shipment_id) {
+            rows_count++;
+            rows_count_1++;
+            var user_input = '<input class="form-control user-input" placeholder="Enter TraxID (s)" data-shipment_id="' + shipment_id + '" data-row="' + rows_count + '">';
+            var user_name = '<input class="form-control user-name" data-shipment_id="' + shipment_id + '" data-row="' + rows_count + '" readonly>';
+            var user_type = '<input class="form-control user-type" data-shipment_id="' + shipment_id + '" data-row="' + rows_count + '" readonly>';
+            var user_status = '<input class="form-control user-status" data-shipment_id="' + shipment_id + '" data-row="' + rows_count + '" readonly>';
+
+            var remove = '<a href="javascript:void(0);" data-shipment_id="' + shipment_id + '" class="btn btn-icon btn-sm btn-danger remove_row ' + rows_count + '" data-trax_id=""><i class="la la-close"></i></a>';
+        
+            addLostResponsible.row.add([0, user_input, user_name, user_type, user_status, remove]).node().id = rows_count;
+            addLostResponsible.draw(true);
+            selected_rows.push(rows_count);
+
+            if (!new_array[shipment_id]) {
+                new_array[shipment_id] = [];
+            }   
+            new_array[shipment_id].push({
+                value: rows_count_1,
+            });
+            $('.user-input[data-shipment_id="' + shipment_id + '"][data-row="' + rows_count + '"]').on('keypress', function(event) {
+                if (event.which === 13 || event.keyCode === 13) {
+                    var inputValue = $(this).val();
+                    
+                    if(change[shipment_id]){
+                        trax_index = change[shipment_id].findIndex(function(item) {
+                            return item.value === inputValue;
+                        });
+                    }
+
+                    console.log(trax_index)
+                    if (trax_index == -1 || trax_index === undefined || change.length === 0 ) {
+                        $('.remove_row.' + rows_count).attr('data-trax_id', inputValue);
+                        $.ajax({
+                            url: '{!! route('admin.human_resource.employee_confirmation.get_employee_info_name_type') !!}',
+                            method: 'POST',
+                            data: 
+                            {   trax_id: inputValue,
+                                '_token': '{{ csrf_token() }}'
+                            },
+                            success: function(response) {
+                                if(response.status == 1){
+                                    flag_new = true;
+                                    addLostResponsible.button(0).enable();
+
+                                    $('.user-name[data-shipment_id="' + shipment_id + '"][data-row="' + rows_count + '"]').val(response.details.name)
+                                    $('.user-type[data-shipment_id="' + shipment_id + '"][data-row="' + rows_count + '"]').val(response.details.type)
+                                    $('.user-status[data-shipment_id="' + shipment_id + '"][data-row="' + rows_count + '"]').val(response.details.status)
+
+                                    if (!change[shipment_id]) {
+                                        change[shipment_id] = [];
+                                    }
+                                    var existingChangeIndex = change[shipment_id].findIndex(function(item) {
+                                        return item.value === inputValue;
+                                    });
+
+                                    if (existingChangeIndex === -1) {
+                                        change[shipment_id].push({
+                                            value: inputValue,
+                                            computedType: response.details.computedType 
+
+                                        });
+                                    }
+
+                                    if(change[shipment_id].length > 0){
+                                        $('#addLostResponsibleModalBtn_' + shipment_id).prop('disabled', false);
+                                    }
+
+                                    $('#update_lost_form input#trax_id').val(JSON.stringify(change));
+                                    // $('#addLostResponsibleModalBtn_' + shipment_id).prop('disabled', false);
+
+                                }else{
+                                    toastr.error('Employee Doesnt Exists !!', 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                }
+
+                            },
+                            error: function(xhr, status, error) {
+                                toastr.error('Employee Doesnt Exists !!', 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                            }
+                        });
+                    }else{
+                        toastr.error('Already Added !!', 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                    }
+                }
+            });
         }
+        $('body').on('click', 'a.remove_row', function () {
+            
+            var index = $.inArray(rid, selected_rows);
+            var rid = parseInt($(this).parents('tr').attr('id'));
+            var shipment_id_remove = $(this).attr('data-shipment_id');
+            var trax_id = $(this).attr('data-trax_id');
 
-        $btn.prop('disabled', true);
-    });
+            var saveBtnId = 'addLostResponsibleModalBtn_' + shipment_id_remove
+            
+            rows_count_1 = rows_count_1;
 
+            if (index !== -1) {
+                selected_rows.splice(index, 1);
+            }
+            addLostResponsible.row($(this).parents('tr')).remove().draw();
+            if (change[shipment_id_remove] && change[shipment_id_remove] !== undefined && typeof change[shipment_id_remove] === 'object') {
+                change[shipment_id_remove] = change[shipment_id_remove].filter(function(item) {
+                    return item.value !== trax_id;
+                });
 
- /***************
- * LOST RESPONSIBLE MODAL – ROBUST VERSION
- * (jQuery + DataTables)
- ***************/
+                if (change[shipment_id_remove].length === 0) {
+                    $('#' + saveBtnId).prop('disabled', true);
+                    change[shipment_id_remove] = [];
+                    delete change[shipment_id_remove];
+                }
 
-// ---- Global registries (per shipment) ----
-const tables = {};     // { [sid]: DataTable instance }
-const new_array = {};  // { [sid]: number[] } // rowIds added (pending/total)
-const change = {};     // { [sid]: Array<{ value: string, computedType: string }> } // confirmed entries
+            }
 
-// (Kept for your other code if used somewhere else)
-let rows_count = 0;           // global row id generator across modals
-const selected_rows = [];     // flat list of rowIds (for your lookup; optional)
+            var indexToRemove = new_array[shipment_id_remove].findIndex(function(item) {
+                return item.value !== rows_count_1;
+            });
 
-// ---- Helpers ----
-const ensureArrays = (sid) => {
-  if (!new_array[sid]) new_array[sid] = [];
-  if (!change[sid]) change[sid] = [];
-};
+            if (indexToRemove !== -1) {
+                new_array[shipment_id_remove].splice(indexToRemove, 1);
+            }
 
-const dt = (sid) => tables[sid];
+            if(addLostResponsible.row().length === 0){
+                new_array[shipment_id_remove] = [];
+            }
 
-const countRows = (sid) => (dt(sid) ? dt(sid).rows().count() : 0);
+            
+            if (new_array[shipment_id] && change[shipment_id]) {
+                var truee = new_array[shipment_id].length === change[shipment_id].length;
+                var falsee = new_array[shipment_id].length !== change[shipment_id].length;
+            } else {
+                console.error("One or both of the arrays are undefined for shipment_id:", shipment_id);
+            }
 
-const filledCount = (sid) => (Array.isArray(change[sid]) ? change[sid].length : 0);
-
-const setSaveEnabled = (sid) => {
-  const total = countRows(sid);
-  const filled = filledCount(sid);
-  const canSave = total > 0 && filled === total;
-  $('#addLostResponsibleModalBtn_' + sid).prop('disabled', !canSave);
-};
-
-// Keep the hidden input in sync (server expects the whole `change` object)
-const syncHidden = () => {
-  $('#update_lost_form input#trax_id').val(JSON.stringify(change));
-};
-
-// ---- Row add ----
-function add_row(shipment_id) {
-  if (!dt(shipment_id)) return;
-
-  rows_count++;
-  const rid = rows_count;
-
-  const user_input = `
-    <input class="form-control user-input"
-           placeholder="Enter TraxID (s)"
-           data-shipment_id="${shipment_id}"
-           data-row="${rid}">
-  `;
-
-  const user_name   = `<input class="form-control user-name"   data-shipment_id="${shipment_id}" data-row="${rid}" readonly>`;
-  const user_type   = `<input class="form-control user-type"   data-shipment_id="${shipment_id}" data-row="${rid}" readonly>`;
-  const user_status = `<input class="form-control user-status" data-shipment_id="${shipment_id}" data-row="${rid}" readonly>`;
-
-  const remove = `
-    <a href="javascript:void(0);"
-       data-shipment_id="${shipment_id}"
-       class="btn btn-icon btn-sm btn-danger remove_row ${rid}"
-       data-trax_id="">
-      <i class="la la-close"></i>
-    </a>
-  `;
-
-  const node = dt(shipment_id).row.add([0, user_input, user_name, user_type, user_status, remove]).draw(true).node();
-  node.id = rid;
-
-  // track new row for this shipment
-  ensureArrays(shipment_id);
-  new_array[shipment_id].push(rid);
-  selected_rows.push(rid);
-
-  // attach Enter handler for this specific input
-  $(`.user-input[data-shipment_id="${shipment_id}"][data-row="${rid}"]`).on('keypress', function (event) {
-    if (event.which !== 13 && event.keyCode !== 13) return;
-
-    const $input = $(this);
-    const inputValue = ($input.val() || '').trim();
-
-    if (!inputValue) {
-      toastr.error('Please enter a TraxID first.', 'Error!', { positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center' });
-      return;
-    }
-
-    // prevent duplicate for this shipment
-    ensureArrays(shipment_id);
-    const ix = change[shipment_id].findIndex((item) => String(item.value) === String(inputValue));
-    if (ix !== -1) {
-      toastr.error('Already added !!', 'Error!', { positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center' });
-      return;
-    }
-
-    // set trax id onto the remove button for this row
-    $(`.remove_row.${rid}`).attr('data-trax_id', inputValue);
-
-    $.ajax({
-      url: '{!! route('admin.human_resource.employee_confirmation.get_employee_info_name_type') !!}',
-      method: 'POST',
-      data: { trax_id: inputValue, '_token': '{{ csrf_token() }}' },
-      success: function (response) {
-        if (response && +response.status === 1 && response.details) {
-          // fill readonly fields
-          $(`.user-name[data-shipment_id="${shipment_id}"][data-row="${rid}"]`).val(response.details.name || '');
-          $(`.user-type[data-shipment_id="${shipment_id}"][data-row="${rid}"]`).val(response.details.type || '');
-          $(`.user-status[data-shipment_id="${shipment_id}"][data-row="${rid}"]`).val(response.details.status || '');
-
-          // record confirmed entry
-          change[shipment_id].push({
-            value: String(inputValue),
-            computedType: response.details.computedType || ''
-          });
-
-          // update UI/state
-          updateRemarksCategory(shipment_id);
-          setSaveEnabled(shipment_id);
-          syncHidden();
-        } else {
-          toastr.error('Employee Doesn\'t Exist !!', 'Error!', { positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center' });
-        }
-      },
-      error: function () {
-        toastr.error('Employee Doesn\'t Exist !!', 'Error!', { positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center' });
-      }
-    });
-  });
-}
-
-// ---- Remove row (delegated) ----
-$('body').on('click', 'a.remove_row', function () {
-  const $btn = $(this);
-  const tr = $btn.closest('tr');
-  const rid = parseInt(tr.attr('id'), 10);
-  const shipment_id_remove = String($btn.attr('data-shipment_id'));
-  const trax_id = $btn.attr('data-trax_id');
-
-  // remove from selected_rows (optional book-keeping)
-  const idx = $.inArray(rid, selected_rows);
-  if (idx !== -1) selected_rows.splice(idx, 1);
-
-  // remove row from the DataTable
-  if (dt(shipment_id_remove)) {
-    dt(shipment_id_remove).row(tr).remove().draw(false);
-  }
-
-  // remove rid from new_array
-  if (Array.isArray(new_array[shipment_id_remove])) {
-    const i = new_array[shipment_id_remove].findIndex((val) => val === rid);
-    if (i !== -1) new_array[shipment_id_remove].splice(i, 1);
-    if (new_array[shipment_id_remove].length === 0) delete new_array[shipment_id_remove];
-  }
-
-  // remove the confirmed entry (by trax_id) from change
-  if (Array.isArray(change[shipment_id_remove]) && trax_id) {
-    change[shipment_id_remove] = change[shipment_id_remove].filter((item) => String(item.value) !== String(trax_id));
-    if (change[shipment_id_remove].length === 0) delete change[shipment_id_remove];
-  }
-
-  setSaveEnabled(shipment_id_remove);
-  syncHidden();
-  recalcRemarksCategory(shipment_id_remove);
-});
-
-// ---- Open modal ----
-let modalBootedFor = {}; // prevent double init per shipment
-
-$('body').on('click', '.add_lost_responsible', function () {
-  const shipment_id = String($(this).attr('data-id'));
-  const modalId = 'addLostResponsibleModal_' + shipment_id;
-  const saveBtnId = 'addLostResponsibleModalBtn_' + shipment_id;
-  const closeBtnId = 'addLostResponsibleCloseModalBtn_' + shipment_id;
-
-  if (!modalBootedFor[shipment_id]) {
-    const modalContent = `
-      <div class="modal fade text-left addLostResponsible" id="${modalId}" data-backdrop="static" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-xl" role="document">
-          <div class="modal-content">
-            <div class="modal-header bg-primary white">
-              <h4 class="modal-title white">Add Lost Responsible for Shipment ID: ${shipment_id}</h4>
-              <button type="button" class="close" aria-label="Close" id="${closeBtnId}">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body text-center">
-              <form id="addLostResponsibleForm_${shipment_id}" class="form" method="post" enctype="multipart/form-data">
-                <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                <input type="hidden" id="shipment_id" name="shipment_id" value="${shipment_id}">
-                <table class="table table-bordered datatable" id="addLostResponsibleTable_${shipment_id}">
-                  <thead>
-                    <tr role="row" class="bg-primary white">
-                      <th class="border-primary border-darken-1">S. No.</th>
-                      <th class="border-primary border-darken-1">Employee ID</th>
-                      <th class="border-primary border-darken-1">Employee Name</th>
-                      <th class="border-primary border-darken-1">Employee Type</th>
-                      <th class="border-primary border-darken-1">Employee Status</th>
-                      <th class="border-primary border-darken-1"></th>
-                    </tr>
-                  </thead>
-                </table>
-              </form>
-              <div class="row justify-content-center mt-3">
-                <div class="col-">
-                  <button class="btn btn-info btn-block" id="${saveBtnId}" data-dismiss="modal" aria-label="Close" disabled>Save</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>`;
-    $('.addLostResponsibleModal').append(modalContent);
-    modalBootedFor[shipment_id] = true;
-  }
-
-  // Show modal
-  $('#' + modalId).modal('show');
-
-  // Initialize DataTable once (on first show)
-  $('#' + modalId).one('shown.bs.modal', function () {
-    if (!$.fn.DataTable.isDataTable('#addLostResponsibleTable_' + shipment_id)) {
-      tables[shipment_id] = $('#addLostResponsibleTable_' + shipment_id).DataTable({
-        dom: '<"d-inline-block"l><"pull-right"B>tipr',
-        buttons: [{
-          title: 'Add Row',
-          className: 'btn btn-primary mb-1 add_row',
-          text: '<i class="la la-plus"></i> Add Row',
-          action: function () {
-            add_row(shipment_id);
-          }
-        }],
-        ordering: false,
-        paging: false,
-        columns: [
-          { orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0,
-            render: function () { return ''; } },
-          { name: 'user',        class: 'align-middle user form-group',        width: '40%' },
-          { name: 'user_name',   class: 'align-middle user_name form-group',   width: '20%' },
-          { name: 'user_type',   class: 'align-middle user_type form-group',   width: '20%' },
-          { name: 'user_status', class: 'align-middle user_type form-group',   width: '20%' },
-          { name: 'action',      class: 'align-middle action' }
-        ],
-        rowCallback: function (row, data, index) {
-          const info = dt(shipment_id).page.info();
-          $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-        }
-      });
-    }
-
-    // fresh state each open (optional — comment out if you want persistence)
-    // ensureArrays(shipment_id);
-    setSaveEnabled(shipment_id);
-    syncHidden();
-  });
-
-  // Guard close via header “X” button: confirm if there is filled == total (work done)
-  $(document).off('click', '#' + closeBtnId).on('click', '#' + closeBtnId, function () {
-    const total = countRows(shipment_id);
-    const filled = filledCount(shipment_id);
-
-    if (filled > 0 && filled === total) {
-      swal({
-        title: 'Are you sure?',
-        text: 'Are you sure you want to cancel? Your changes will not be saved. Or click Save to keep your work.',
-        icon: 'warning',
-        buttons: {
-          cancel: { text: "Cancel", value: null, visible: true, className: "", closeModal: true },
-          confirm:{ text: "OK",     value: true,  visible: true, className: "", closeModal: true }
-        }
-      }).then((willProceed) => {
-        if (willProceed) {
-          $('#' + modalId).modal('hide');
-          // wipe table + state
-          const table = dt(shipment_id);
-          if (table) { table.clear().draw(); table.destroy(); delete tables[shipment_id]; }
-          delete change[shipment_id];
-          delete new_array[shipment_id];
-          setSaveEnabled(shipment_id);
-          syncHidden();
-          $('#'+modalId).remove();
-          modalBootedFor[shipment_id] = false;
-        }
-      });
-    } else {
-      // Just close
-      $('#' + modalId).modal('hide');
-    }
-  });
-
-  // Prevent closing the modal if there are unfilled rows
-  $('#' + modalId).off('hide.bs.modal.guard').on('hide.bs.modal.guard', function (e) {
-    const total = countRows(shipment_id);
-    const filled = filledCount(shipment_id);
-
-    if (total > 0 && filled !== total) {
-      e.preventDefault();
-      toastr.error('Please fill all rows before closing !!', 'Error!', { positionClass: 'toast-top-center', containerId: 'toast-top-center' });
-      return false;
-    }
-
-    // If closing (Save or X confirmed) — clean up DataTable instance to avoid stale refs
-    const table = dt(shipment_id);
-    if (table) {
-      table.clear().draw();
-      table.destroy();
-      delete tables[shipment_id];
-    }
-
-    // Optional: clear state on close
-    delete change[shipment_id];
-    delete new_array[shipment_id];
-    setSaveEnabled(shipment_id);
-    syncHidden();
-
-    // Remove DOM to allow fresh boot next time
-    $('#'+modalId).remove();
-    modalBootedFor[shipment_id] = false;
-    return true;
-  });
-});
+            if(addLostResponsible.row().length >= 0 && change[shipment_id_remove] !== undefined){
+                if(truee === true){
+                    addLostResponsible.button(0).enable();
+                }else if(falsee !== false){
+                    addLostResponsible.button(0).disable();
+                }
+            }else if (addLostResponsible.row().length == 0){
+                addLostResponsible.button(0).enable();
+            }else{
+                addLostResponsible.button(0).disable();
+            }
 
 
+        });  
 
-         const REMARK_OPTIONS = [
+        $(document).on('hide.bs.modal','.addLostResponsible', function (e) {        
+            if (!new_array[shipment_id]) {
+                new_array[shipment_id] = [];
+            }   
+
+            if (!change[shipment_id]) {
+                change[shipment_id] = [];
+            }
+            if(new_array[shipment_id] != undefined || change[shipment_id] != undefined || addLostResponsible.row().length === 0){
+                var truee = new_array[shipment_id].length === change[shipment_id].length;
+                var falsee = new_array[shipment_id].length !== change[shipment_id].length;
+
+                if(addLostResponsible.row().length === 0){
+                    delete change[shipment_id];
+                    if ($.fn.DataTable.isDataTable('#addLostResponsibleTable_' + shipment_id)) {
+                        $('#addLostResponsibleTable_' + shipment_id).DataTable().destroy(); 
+                    }                                       
+                    return;
+                }else if (truee === true){
+                    if ($.fn.DataTable.isDataTable('#addLostResponsibleTable_' + shipment_id)) {
+                        $('#addLostResponsibleTable_' + shipment_id).DataTable().destroy(); 
+                    }
+                    return;
+                }else if (falsee !== false){
+                    e.preventDefault();
+                    toastr.error('Please Fill The Field !!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+            }else{                
+                e.preventDefault();
+                toastr.error('Please Fill The Field !!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+            }
+
+            
+        });
+
+        $(document).on('click', '.addLostResponsible #addLostResponsibleCloseModalBtn', function (e) {                        
+            if (change[shipment_id] && change[shipment_id].length != 0 && change[shipment_id].length === new_array[shipment_id].length){
+                
+                swal({
+                    title: 'Are you sure?',
+                    text: 'Are you sure you want to cancel? Your changes will not be saved. Or click Save to keep your work.',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: "Cancel",
+                            value: null,
+                            visible: true,
+                            className: "",
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: "OK",
+                            value: true,
+                            visible: true,
+                            className: "",
+                            closeModal: true
+                        }
+                    }
+                }).then((willProceed) => {
+                    if (willProceed) {
+                        $('.addLostResponsible').modal('hide')
+                        var existing_table = $('#addLostResponsibleTable_' + shipment_id).DataTable();
+
+                        if (existing_table) {
+                            existing_table.clear().draw();
+                            existing_table.destroy();
+                            delete change[shipment_id];
+                            delete new_array[shipment_id];
+                        }
+                        $('#addLostResponsibleModalBtn_' + shipment_id).prop('disabled', true);
+
+                        return;
+                    }
+                      
+                });
+            }else{
+                $('.addLostResponsible').modal('hide')
+
+            }
+        });
+
+        $(document).on('click', '[id^="addLostResponsibleModalBtn_"]', function() {
+            updateRemarksCategory(shipment_id)
+        });
+        
+
+        const REMARK_OPTIONS = [
             { id: 1, text: 'Transit Lost' },
             { id: 2, text: 'Snatching/Theft/Stolen' }
         ];
@@ -887,9 +879,8 @@ $('body').on('click', '.add_lost_responsible', function () {
                     ${opts}
                 </select>`;
         }
-
         function updateRemarksCategory(shipment_id) {
-            if (manualRemarkMode[shipment_id]) return; 
+            if (manualRemarkMode[shipment_id]) return; // stop auto if manual mode
 
             let types = change[shipment_id]?.map(item => item.computedType) || [];
             if (types.length === 0) return;
@@ -912,35 +903,30 @@ $('body').on('click', '.add_lost_responsible', function () {
             }
         }
         let manualRemarkMode = {}; 
-        
-        function recalcRemarksCategory(shipment_id) {
+
+        $(document).on('keypress', '.remarks', function () {
+            let shipment_id = $(this).data('shipment-id');
+            manualRemarkMode[shipment_id] = true; // Manual mode on
+
             let remarksField = $('#remarks_category_' + shipment_id);
 
-            if (!change[shipment_id] || change[shipment_id].length === 0) {
-                // Reset category if no rows
-                remarksField.val('').prop('readonly', false).removeClass('readonly-select');
-                return;
-            }
+            // Remove readonly class and unlock
+            remarksField.removeClass('readonly-select')
+                        .prop('readonly', false);
 
-            // Recalculate based on remaining rows
-            let types = change[shipment_id].map(item => item.computedType);
-            let allRider = types.every(t => t === 'Rider');
-            let allAdmin = types.every(t => t === 'Operation Staff');
-            let mixed = !allRider && !allAdmin;
+            // Reset dropdown with only manual options (1,2)
+            remarksField.html(`
+                <option value="">-- Select Remark --</option>
+                ${REMARK_OPTIONS.map(o =>
+                    `<option value="${o.id}">${o.text}</option>`
+                ).join('')}
+            `);
+        });
 
-            let categoryId = null;
-            if (allAdmin) categoryId = 3;
-            else if (allRider) categoryId = 4;
-            else if (mixed) categoryId = 5;
 
-            if (categoryId) {
-                if (!remarksField.find(`option[value="${categoryId}"]`).length) {
-                    remarksField.append(`<option value="${categoryId}">${AUTO_REMARKS[categoryId]}</option>`);
-                }
-                remarksField.val(categoryId).prop('readonly', true).addClass('readonly-select');
-            }
-        }
-
+        $(document).off('click', '#' + modalButton).on('click', '#' + modalButton, function () {
+           updateRemarksCategory(shipment_id)
+        });
 
     });
     </script>
