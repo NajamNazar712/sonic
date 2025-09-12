@@ -851,77 +851,57 @@ label.error {
         });
 
 
-     const REMARK_OPTIONS = [
-    { id: 1, text: 'Transit Lost' },
-    { id: 2, text: 'Snatching/Theft/Stolen' }
-];
+         const REMARK_OPTIONS = [
+            { id: 1, text: 'Transit Lost' },
+            { id: 2, text: 'Snatching/Theft/Stolen' }
+        ];
 
-const AUTO_REMARKS = {
-    3: 'Lost by Operation Staff',
-    4: 'Lost by Rider',
-    5: 'Lost by Rider & Operation Staff'
-};
+        const AUTO_REMARKS = {
+            3: 'Lost by Operation Staff',
+            4: 'Lost by Rider',
+            5: 'Lost by Rider & Operation Staff'
+        };
 
-// Render select with only manual options (1,2)
-function renderRemarkSelect(shipmentId, selectedVal) {
-    let opts = REMARK_OPTIONS.map(o =>
-        `<option value="${o.id}" ${String(selectedVal)===String(o.id) ? 'selected' : ''}>${o.text}</option>`
-    ).join('');
+        function renderRemarkSelect(shipmentId, selectedVal) {
+            let opts = REMARK_OPTIONS.map(o =>
+                `<option value="${o.id}" ${String(selectedVal)===String(o.id) ? 'selected' : ''}>${o.text}</option>`
+            ).join('');
 
-    return `
-        <select name="remarks_category[${shipmentId}]" 
-                id="remarks_category_${shipmentId}"
-                class="form-control remark-select" 
-                data-shipment-id="${shipmentId}" required>
-            <option value="">-- Select Remark --</option>
-            ${opts}
-        </select>`;
-}
-
-// Auto-select category for 3,4,5
-function updateRemarksCategory(shipment_id) {
-    if (manualRemarkMode[shipment_id]) return; // stop auto if manual mode
-
-    let types = change[shipment_id]?.map(item => item.computedType) || [];
-    if (types.length === 0) return;
-
-    let allRider = types.every(t => t === 'Rider');
-    let allAdmin = types.every(t => t === 'Operation Staff');
-    let mixed = !allRider && !allAdmin;
-
-    let categoryId = null;
-    if (allAdmin) categoryId = 3;
-    else if (allRider) categoryId = 4;
-    else if (mixed) categoryId = 5;
-
-    let remarksField = $('#remarks_category_' + shipment_id);
-    if (remarksField.length && categoryId) {
-        if (!remarksField.find(`option[value="${categoryId}"]`).length) {
-            remarksField.append(`<option value="${categoryId}">${AUTO_REMARKS[categoryId]}</option>`);
+            return `
+                <select name="remarks_category[${shipmentId}]" 
+                        id="remarks_category_${shipmentId}"
+                        class="form-control remark-select" 
+                        data-shipment-id="${shipmentId}" required>
+                    <option value="">-- Select Remark --</option>
+                    ${opts}
+                </select>`;
         }
-        remarksField.val(categoryId).prop('readonly', true).addClass('readonly-select');
-    }
-}
-let manualRemarkMode = {}; // track per shipment
 
-$(document).on('keypress', '.remarks', function () {
-    let shipment_id = $(this).data('shipment-id');
-    manualRemarkMode[shipment_id] = true; // Manual mode on
+        function updateRemarksCategory(shipment_id) {
+            if (manualRemarkMode[shipment_id]) return; 
 
-    let remarksField = $('#remarks_category_' + shipment_id);
+            let types = change[shipment_id]?.map(item => item.computedType) || [];
+            if (types.length === 0) return;
 
-    // Remove readonly class and unlock
-    remarksField.removeClass('readonly-select')
-                .prop('readonly', false);
+            let allRider = types.every(t => t === 'Rider');
+            let allAdmin = types.every(t => t === 'Operation Staff');
+            let mixed = !allRider && !allAdmin;
 
-    // Reset dropdown with only manual options (1,2)
-    remarksField.html(`
-        <option value="">-- Select Remark --</option>
-        ${REMARK_OPTIONS.map(o =>
-            `<option value="${o.id}">${o.text}</option>`
-        ).join('')}
-    `);
-});
+            let categoryId = null;
+            if (allAdmin) categoryId = 3;
+            else if (allRider) categoryId = 4;
+            else if (mixed) categoryId = 5;
+
+            let remarksField = $('#remarks_category_' + shipment_id);
+            if (remarksField.length && categoryId) {
+                if (!remarksField.find(`option[value="${categoryId}"]`).length) {
+                    remarksField.append(`<option value="${categoryId}">${AUTO_REMARKS[categoryId]}</option>`);
+                }
+                remarksField.val(categoryId).prop('readonly', true).addClass('readonly-select');
+            }
+        }
+        let manualRemarkMode = {}; // track per shipment
+
 
     });
     </script>
