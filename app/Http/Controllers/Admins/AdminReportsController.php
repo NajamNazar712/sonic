@@ -8242,25 +8242,25 @@ class AdminReportsController extends Controller
 
             $from_id = DB::connection($connection)->table('shipments')
                 ->where('created_at', '>=', $from)
-                ->where('created_at', '<',  $to)
+                ->where('created_at', '<=',  $to)
                 ->orderBy('created_at', 'asc')->orderBy('id', 'asc')
                 ->limit(1)->value('id');
 
             $to_id = DB::connection($connection)->table('shipments')
                 ->where('created_at', '>=', $from)
-                ->where('created_at', '<',  $to)
+                ->where('created_at', '<=',  $to)
                 ->orderBy('created_at', 'desc')->orderBy('id', 'desc')
                 ->limit(1)->value('id');
 
             $sj_from_id = DB::connection($connection)->table('shipments_journey')
                 ->where('created_at', '>=', $from)
-                ->where('created_at', '<',  $to)
+                ->where('created_at', '<=',  $to)
                 ->orderBy('created_at', 'asc')->orderBy('id', 'asc')
                 ->limit(1)->value('id');
 
             $sj_to_id = DB::connection($connection)->table('shipments_journey')
                 ->where('created_at', '>=', $from)
-                ->where('created_at', '<',  $to)
+                ->where('created_at', '<=',  $to)
                 ->orderBy('created_at', 'desc')->orderBy('id', 'desc')
                 ->limit(1)->value('id');
 
