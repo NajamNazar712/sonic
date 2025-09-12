@@ -167,6 +167,7 @@
                         <th class="border-primary border-darken-1">Collection Amount</th>
                         <th class="border-primary border-darken-1">Shipping Mode</th>
                         <th class="border-primary border-darken-1">Service Type</th>
+                        <th class="border-primary border-darken-1">Lost Category</th>
                         <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">Reference</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
@@ -175,7 +176,6 @@
                         <th class="border-primary border-darken-1">Marked By</th>
                         <th class="border-primary border-darken-1">Marked At</th>
                         <th class="border-primary border-darken-1">Action</th>
-
                     </tr>
                     </thead>
                 </table>
@@ -369,6 +369,7 @@
                         head.push('Parcel Value');
                         head.push('Shipping Mode');
                         head.push('Service Type');
+                        head.push('Lost Category');
                         head.push('Remarks');
                         head.push('Reference');
                         head.push('Arrival Date');
@@ -400,6 +401,7 @@
                             row.push(parcel_value);
                             row.push(values.shipping_mode);
                             row.push(values.service_type);
+                            row.push($('<textarea/>').html(values.lost_category).text());
                             row.push(values.remarks);
                             row.push(values.reference);
                             row.push(values.arrival);
@@ -803,6 +805,7 @@
                 {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                 {data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode'},
                 {data: 'service_type', name: 'service_type', class: 'align-middle service_type'},
+                {data: 'lost_category', name: 'lcs.type', class: 'align-middle lost_category'},
                 {data: 'remarks', name: 'shipments_journey.remarks', class: 'align-middle remarks'},
                 {data: 'reference', name: 'shipments_journey.reference_1_id', class: 'align-middle reference'},
                 {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
