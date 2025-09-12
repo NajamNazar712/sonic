@@ -1052,13 +1052,13 @@ class LostShipmentsController extends Controller
                         $data[$shipment->id]['amount'] = number_format($shipment->amount);
                         $data[$shipment->id]['parcel_value'] = number_format($shipment->parcel_value);
                         $data[$shipment->id]['mode'] = $shipment->shipping_mode->mode;
-$data[$shipment->id]['remarks'] = '
-    <div class="remarks-cell" data-shipment-id="'.$shipment->id.'">
-        <input class="form-control form-control-sm remarks" 
-               data-shipment-id="'.$shipment->id.'" 
-               name="remarks['.$shipment->id.']" 
-               placeholder="Enter Remarks">
-    </div>';
+                        $data[$shipment->id]['remarks'] = '
+                            <div class="remarks-cell" data-shipment-id="'.$shipment->id.'">
+                                <input class="form-control form-control-sm remarks" 
+                                    data-shipment-id="'.$shipment->id.'" 
+                                    name="remarks['.$shipment->id.']" 
+                                    placeholder="Enter Remarks">
+                            </div>';
 
                         $data[$shipment->id]['service_type'] = $shipment->booking_type->booking_type;
                         $data[$shipment->id]['service_type'] = $shipment->booking_type->booking_type;

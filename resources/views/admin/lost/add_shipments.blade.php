@@ -164,6 +164,7 @@ label.error {
                     {name: 'amount', class: 'align-middle amount', orderable: false},
                     {name: 'parcel_value', class: 'align-middle parcel_value', orderable: false},
                     {name: 'remarks', class: 'align-middle remarks', orderable: false},
+                    {name: 'lost_category', class: 'align-middle lost_category', orderable: false},
                     {name: 'mode', class: 'align-middle mode', orderable: false},
                     {name: 'service_type', class: 'align-middle service_type', orderable: false},
                     {name: 'action_button', class: 'align-middle action_button', orderable: false},
