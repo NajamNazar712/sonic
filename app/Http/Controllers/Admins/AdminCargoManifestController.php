@@ -336,7 +336,8 @@ class AdminCargoManifestController extends Controller
         }
         $today = Carbon::today();
         $on_hold_shipments = ShipmentOnHold::whereDate('dispatch_date', '>', $today)->where('status', 1)->pluck('shipment_id')->toArray();
-        $shipments = DB::connection('reports_2')->table('shipments')
+        $shipments = DB::connection('reports_2')
+            ->table('shipments')
             ->leftjoin('booking_types as bt', 'shipments.booking_type_id', '=', 'bt.id')
             ->leftjoin('shipment_status as ss', 'shipments.shipper_status_id', '=', 'ss.id')
             ->leftjoin('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -400,7 +401,7 @@ class AdminCargoManifestController extends Controller
             ->leftjoin('cities as olddci', 'olddci.id', '=', 'irbrh.old_consignee_city_id')
             ->leftjoin('cities as olddhci', 'olddci.hub_id', '=', 'olddhci.id')
             ->leftjoin('zones as olddhciz', 'olddhci.zone_id', '=', 'olddhciz.id')
-            ->join('cities as dc', function ($join) {
+            ->leftjoin('cities as dc', function ($join) {
                 $join->on('shipments.consignee_city_id', '=', 'dc.id')
                     ->where(function ($query) {
                         $query->where(function ($sub_query) {
@@ -476,15 +477,25 @@ class AdminCargoManifestController extends Controller
                             });
                     });
             })
-            ->join('cities as dhc', 'dc.hub_id', '=', 'dhc.id')
-            ->join('zones as dest_zone', 'dhc.zone_id', '=', 'dest_zone.id')
+            ->leftjoin('cities as dhc', 'dc.hub_id', '=', 'dhc.id')
+            ->leftjoin('zones as dest_zone', 'dhc.zone_id', '=', 'dest_zone.id')
             ->leftjoin('crm_requests as crm', function ($join) {
                 $join->on('crm.shipment_id', '=', 'shipments.id')
                     ->whereIn('crm.status_id', [2, 3, 5])
                     ->where('crm.case_nature_id', 1);
             })
             ->leftjoin('star_shippers as sts', 'sts.user_id', '=', 'u.id')
-            ->select('z.name as zone_name', 'shipments.shipper_status_id', 'shipments.tracking_number', 'shipments.tracking_number as tracking', 'shipments.order_id', 'bt.booking_type as service_type', 'ss.name as status', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper', 'shipments.amount', 'sm.mode as shipping_mode', 'shipments.created_at as booked_at', 'shipments_journey.created_at as arrival_at', 'shipments.booking_type_id', 'usi.poc', 'csj.created_at as current_status', 'olddc.name as old_destination', 'olddci.name as old_destination_intercept', 'crm.id as complaint', 'shipments.return_address_id', 'rc.name as return_city_name', 'ohc.name as origin_hub', 'dhc.name as destination_hub', 'olddhci.name as old_destination_intercept_hub', 'olddhc.name as old_destination_hub', 'shipments.consignee_address', 'dc.id as destination_city_id', 'sts.status as star_status', 'rcz.name as return_zone_name', 'dest_zone.name as dest_zone', 'olddhcz.name as old_destination_hub_zone','olddhciz.name as old_destination_intercept_hub_zone')
+            ->leftJoin(DB::raw("
+                    (
+                      SELECT
+                        dlm.city_id,
+                        JSON_ARRAYAGG(JSON_OBJECT('k', LOWER(dlk.keyword), 'a', dlm.area_name)) AS city_kw
+                      FROM delivery_location_mapping_keywords AS dlk
+                      JOIN delivery_location_mappings AS dlm ON dlk.mapping_id = dlm.id
+                      WHERE dlm.status = 1
+                      GROUP BY dlm.city_id
+                    ) AS citykw"), 'citykw.city_id', '=', 'dc.id')
+            ->select('z.name as zone_name', 'shipments.shipper_status_id', 'shipments.tracking_number', 'shipments.tracking_number as tracking', 'shipments.order_id', 'bt.booking_type as service_type', 'ss.name as status', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper', 'shipments.amount', 'sm.mode as shipping_mode', 'shipments.created_at as booked_at', 'shipments_journey.created_at as arrival_at', 'shipments.booking_type_id', 'usi.poc', 'csj.created_at as current_status', 'olddc.name as old_destination', 'olddci.name as old_destination_intercept', 'crm.id as complaint', 'shipments.return_address_id', 'rc.name as return_city_name', 'ohc.name as origin_hub', 'dhc.name as destination_hub', 'olddhci.name as old_destination_intercept_hub', 'olddhc.name as old_destination_hub', 'shipments.consignee_address', 'dc.id as destination_city_id', 'sts.status as star_status', 'rcz.name as return_zone_name', 'dest_zone.name as dest_zone', 'olddhcz.name as old_destination_hub_zone','olddhciz.name as old_destination_intercept_hub_zone', DB::raw('citykw.city_kw as city_kw'))
             ->whereNotIn('shipments.id', $on_hold_shipments)
             ->whereNotNull('shipments.tracking_number');
 
@@ -534,13 +545,6 @@ class AdminCargoManifestController extends Controller
                 $shipments->whereDate('csj.created_at', $from);
             }
         }
-        $destination_city_id = $shipments->pluck('destination_city_id')->toArray();
-        $deliveryKeywords = DeliveryLocationMappingKeyword::join('delivery_location_mappings as dlm', 'delivery_location_mapping_keywords.mapping_id', '=', 'dlm.id')
-            ->whereIn('dlm.city_id', $destination_city_id)
-            ->select('dlm.city_id', 'delivery_location_mapping_keywords.keyword', 'dlm.area_name as area_name')
-            ->get()
-            ->groupBy('city_id'); // Group by city_id for easy access later
-
         if ($shipment_type = $request->get('shipment_type')) {
             if ($shipment_type == 0) {
                 $shipments->whereIn('shipments.shipper_status_id', [2, 20, 30, 37, 49, 55,11,68,69,70,72,73,75,76]);
@@ -561,7 +565,6 @@ class AdminCargoManifestController extends Controller
         }
 
         $datatables = Datatables::of($shipments)
-            ->setTotalRecords(count($destination_city_id))
             ->setRowAttr([
                 'class' => function ($shipments) {
                     if ($shipments->complaint != null) {
@@ -573,29 +576,45 @@ class AdminCargoManifestController extends Controller
                     }
                 },
             ])
-            ->addColumn('sub_station', function ($shipments) use($deliveryKeywords) {
-                $delivery_area = null;
+            ->addColumn('sub_station', function ($row) {
+                // No keywords for this city? bail.
+                if (empty($row->city_kw)) {
+                    return '-';
+                }
 
-                // Check if delivery keywords exist for the shipment's destination city
-                if (isset($deliveryKeywords[$shipments->destination_city_id])) {
-                    $consignee_address = strtolower($shipments->consignee_address);
+                // Decode once per row: [ {'k': 'keyword-lc', 'a': 'Area Name'}, ... ]
+                $pairs = json_decode($row->city_kw, true);
+                if (!is_array($pairs) || empty($pairs)) {
+                    return '-';
+                }
 
-                    // Split the consignee address into words
-                    $str_arr = preg_split('/[\s.,\-_*?<>,!?@#$%^&()]+/', $consignee_address);
+                // Build a quick hash: keyword(lower) => area_name
+                $kwMap = [];
+                foreach ($pairs as $p) {
+                    // guard against malformed rows
+                    if (isset($p['k'], $p['a'])) {
+                        $kwMap[$p['k']] = $p['a'];
+                    }
+                }
+                if (empty($kwMap)) {
+                    return '-';
+                }
 
-                    // Get the keywords for the specific city
-                    $keywordsForCity = $deliveryKeywords[$shipments->destination_city_id];
+                // Tokenize consignee address (lowercase, unicode-aware)
+                $tokens = preg_split('/[^\p{L}\p{N}]+/u', mb_strtolower($row->consignee_address ?? ''));
+                if (!$tokens) {
+                    return '-';
+                }
 
-                    foreach ($keywordsForCity as $nsa) {
-                        if (in_array(strtolower($nsa->keyword), $str_arr)) {
-                            $delivery_area = $nsa->area_name;
-                            break; // Stop once the first matching keyword is found
-                        }
+                // Return the first matching area
+                foreach ($tokens as $t) {
+                    if ($t === '') continue;
+                    if (isset($kwMap[$t])) {
+                        return $kwMap[$t];
                     }
                 }
 
-                // Return the delivery area or a default value if no match is found
-                return $delivery_area ?? '-';
+                return '-';
             })
             ->editColumn('tracking_number', function ($shipments) {
                 $route = route('admin.tracking.index');
