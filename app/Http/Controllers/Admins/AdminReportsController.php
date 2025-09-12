@@ -8254,13 +8254,13 @@ class AdminReportsController extends Controller
 
             $sj_from_id = DB::connection($connection)->table('shipments_journey')
                 ->where('created_at', '>=',   Carbon::parse($from)->subDay(10)->startOfDay())
-                ->where('created_at', '<=',    Carbon::parse($from)->addDay(10)->startOfDay())
+                ->where('created_at', '<=',    Carbon::parse($to)->addDay(10)->startOfDay())
                 ->orderBy('created_at', 'asc')->orderBy('id', 'asc')
                 ->limit(1)->value('id');
 
             $sj_to_id = DB::connection($connection)->table('shipments_journey')
                 ->where('created_at', '>=',   Carbon::parse($from)->subDay(10)->startOfDay())
-                ->where('created_at', '<=',    Carbon::parse($from)->addDay(10)->startOfDay())
+                ->where('created_at', '<=',    Carbon::parse($to)->addDay(10)->startOfDay())
                 ->orderBy('created_at', 'desc')->orderBy('id', 'desc')
                 ->limit(1)->value('id');
 
