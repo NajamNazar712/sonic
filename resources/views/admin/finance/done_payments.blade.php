@@ -770,7 +770,7 @@
 									table.button('.tax_paid').disable();
 									table.button('.reverted').disable();
 									table.button('.hold').disable();
-
+                                    table.button('.un_hold').disable();
 									table.draw('false');
 								});
 							}
@@ -808,7 +808,7 @@
 									table.button('.tax_paid').disable();
 									table.button('.reverted').disable();
 									table.button('.hold').disable();
-
+                                    table.button('.un_hold').disable();
 									table.draw('false');
 								});
 							}
@@ -845,7 +845,7 @@
 									table.button('.tax_paid').disable();
 									table.button('.reverted').disable();
 									table.button('.hold').disable();
-
+                                    table.button('.un_hold').disable();
 									table.draw('false');
 								});
 							}
@@ -863,7 +863,6 @@
 								data: {
 									'_token': '{{ csrf_token() }}',
 									'ids': selected_rows,
-									'is_hold' :1
 								},
 								beforeSend: function () {
 									node.prop('disabled', true);
@@ -894,12 +893,61 @@
 										table.button('.tax_paid').disable();
 										table.button('.reverted').disable();
 										table.button('.hold').disable();
-
+                                        table.button('.un_hold').disable();
 										table.draw('false');
 									});
 						}
 					},
 					@endif
+                     @if (session('role_id') == 1 || in_array(63, session('permissions')))
+                    {
+                        text: 'UnHold',
+                        className: 'btn btn-primary un_hold',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            $.ajax({
+                                url: '{!! route('admin.finance.done_payments.un_hold') !!}',
+                                method: 'PUT',
+                                data: {
+                                    '_token': '{{ csrf_token() }}',
+                                    'ids': selected_rows,
+                                },
+                                beforeSend: function () {
+                                    node.prop('disabled', true);
+                                }
+                            }).done(function(data) {
+                                if (data.status == 0) {
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                                    // Show list of already paid IDs, if any
+                                    if (data.payment_ids && data.payment_ids.length > 0) {
+                                        let paidIdsText = data.payment_ids.join(', ');
+                                        toastr.info('The following payment IDs are not in "Hold" status and were skipped: ' + paidIdsText, 'Info', {
+                                            positionClass: 'toast-top-center',
+                                            containerId: 'toast-top-center',
+                                            timeOut: 8000
+                                        });
+                                    }
+                                }
+                                else {
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }
+
+                                table.rows().deselect();
+
+                                selected_rows = [];
+
+                                table.button('.paid').disable();
+                                table.button('.tax_paid').disable();
+                                table.button('.reverted').disable();
+                                table.button('.hold').disable();
+                                table.button('.un_hold').disable();
+
+                                table.draw('false');
+                            });
+                        }
+                    },
+                        @endif
                     {
                         extend: 'excel',
                         title: 'Done Payments',
@@ -930,6 +978,7 @@
 	                                table.button('.tax_paid').enable();
 	                                table.button('.reverted').enable();
 									table.button('.hold').enable();
+                                    table.button('.un_hold').enable();
 	                            }
 	                        });
 	                    }
@@ -959,6 +1008,7 @@
 									table.button('.tax_paid').disable();
 	                                table.button('.reverted').disable();
 									table.button('.hold').disable();
+                                    table.button('.un_hold').disable();
 	                            }
 	                          }
 	                        });
@@ -1240,12 +1290,14 @@
 					table.button('.tax_paid').enable();
 					table.button('.reverted').enable();
 					table.button('.hold').enable();
+                    table.button('.un_hold').enable();
 				}
 				else {
 					table.button('.paid').disable();
 					table.button('.tax_paid').disable();
 					table.button('.reverted').disable();
 					table.button('.hold').disable();
+                    table.button('.un_hold').disable();
 				}
 			});
             var route = '{!! route('admin.tracking.index') !!}';

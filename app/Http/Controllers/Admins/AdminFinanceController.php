@@ -9059,7 +9059,7 @@ class AdminFinanceController extends Controller
         return ['status' => 0, 'success' => 'Payment(s) marked Reverted'];
     }
 
-     public function done_payments_hold(Request $request)
+    public function done_payments_hold(Request $request)
     {
         $paid_payment_ids = [];
         $markedHold = false;
@@ -9106,6 +9106,51 @@ class AdminFinanceController extends Controller
         ]);
     }
 
+    public function done_payments_un_hold(Request $request)
+    {
+        $payment_ids = [];
+        $markedunHold = false;
+        foreach ($request->ids as $done_payment_id) {
+            $done_payment = DonePayment::find($done_payment_id);
+
+            if (!$done_payment && $done_payment->is_wallet_payment == 0) {
+                continue;
+            }
+
+            if ($done_payment->status == 4) {
+                    $done_payment->status = 0;
+                    $done_payment->status_updated_at = Carbon::now();
+                    $done_payment->status_updated_by = Auth::id();
+                    $done_payment->save();
+
+                    foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
+                        $shipment = $done_payment_shipment->shipment;
+                        $shipment->payment_status_id = 1;
+                        $shipment->save();
+
+                        ShipmentsPaymentJourneyController::add($shipment->id, 1, Auth::id(), '', $done_payment->id);
+                    }
+
+                $markedunHold = true;
+
+            } else{
+                $payment_ids[]=$done_payment->id;
+            }
+        }
+
+        if ($markedunHold) {
+            return response()->json([
+                'status' => 0,
+                'success' => 'Payment(s) successfully taken off hold',
+                'payment_ids' => $payment_ids
+            ]);
+        }
+        return response()->json([
+            'status' => 1,
+            'error' => 'No payments remaining to unhold',
+            'payment_ids' => []
+        ]);
+    }
 
 
     public function done_payments_excel_store(Request $request)
