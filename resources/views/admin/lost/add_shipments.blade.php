@@ -135,6 +135,9 @@ label.error {
     cursor: not-allowed;     
 }
 
+.remark-select {
+    min-width: 260px; 
+}
 </style>
 @endsection
 
