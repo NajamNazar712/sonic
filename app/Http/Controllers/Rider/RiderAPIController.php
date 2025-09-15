@@ -14879,7 +14879,7 @@ class RiderAPIController extends Controller
                 continue;
             }
             
-            if($shipper_status_id->status_attempt_count_1 == 12){
+            if($shipper_status_id->status_attempt_count_1 == 12 || $shipper_status_id->status_attempt_count_2 == 12){
                 // === Type 2: Validate OTP or Ticket ===
                 if ($type == 2) {
                     $rvr_verification = 0;
