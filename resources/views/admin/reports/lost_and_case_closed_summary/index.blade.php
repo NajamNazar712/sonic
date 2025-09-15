@@ -65,6 +65,7 @@
                             <th class="border-primary border-darken-1">Active or Inactive Status</th>
                             <th class="border-primary border-darken-1">Responsible City</th>
                             <th class="border-primary border-darken-1">Shipment Last Status</th>
+                            <th class="border-primary border-darken-1">Lost Category</th>
                             <th class="border-primary border-darken-1">Lost Requested By</th>
                             <th class="border-primary border-darken-1">Lost requested date/time</th>
                             <th class="border-primary border-darken-1">Approved By</th>
@@ -228,6 +229,7 @@
                         head.push('Active or Inactive Status');
                         head.push('Responsible City');
                         head.push('Shipment Last Status');
+                        head.push('Lost Category');
                         head.push('Lost Requested By');
                         head.push('Approved requested date/time');
                         head.push('Approved By');
@@ -248,6 +250,7 @@
                             row.push(values.employee_status);
                             row.push(values.responsible_city);
                             row.push(values.latest_shipment_status);
+                            row.push($('<textarea/>').html(values.lost_category).text());
                             row.push(values.requested_admin_name);
                             row.push(values.requested_date_time);
                             row.push(values.request_approved_admin);
@@ -366,6 +369,7 @@
                     data: 'latest_shipment_status',
                     name: 'latest_shipment_status'
                 },
+                {data: 'lost_category', name: 'lcs.type', class: 'align-middle lost_category'},
                 {
                     orderable: true,
                     searchable: true,
