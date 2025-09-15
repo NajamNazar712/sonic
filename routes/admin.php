@@ -12,7 +12,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 
     Route::get('/login', 'Auth\AdminLoginController@showLoginForm')->name('login');
-    Route::post('/login', 'Auth\AdminLoginController@login')->name('login.submit');
+    Route::post('/login', 'Auth\AdminLoginController@login')->middleware('login.check')->name('login.submit');
     Route::post('/credentials', 'Auth\AdminLoginController@credentials')->name('login.credentials');
     Route::post('/verify_otp', 'Auth\AdminLoginController@verify_otp')->name('login.verify_otp');
     Route::get('access_denied', 'Admins\AdminController@access_denied')->name('access_denied');

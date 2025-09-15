@@ -75,6 +75,8 @@ class Kernel extends HttpKernel
         'ShipperAPIToken' => \App\Http\Middleware\ShipperAPIToken::class,
         'PauseShipperBooking' => \App\Http\Middleware\PauseBookingMiddleware::class,
         'no.cache' => \App\Http\Middleware\NoCache::class,
+        'login.check' => \App\Http\Middleware\CodLoginCheck::class,
+
 
     ];
 }
