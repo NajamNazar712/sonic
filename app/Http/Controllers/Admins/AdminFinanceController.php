@@ -17299,8 +17299,12 @@ class AdminFinanceController extends Controller
             ->leftjoin('banks_lists as b', 'retail_done_payments.company_bank_id', '=', 'b.id')
             ->leftJoin('retail_done_payment_shipments as rdps', 'rdps.retail_done_payment_id', '=', 'retail_done_payments.id')
             ->leftJoin('retail_shipments as rs', 'rs.shipment_id', '=', 'rdps.shipment_id')
+            ->leftJoin('retail_done_payments as rdp', function ($query) {
+                $query->on('rdp.id', '=', 'retail_done_payments.id')
+                    ->where('rdp.status', 1);
+            })
             ->select('retail_done_payments.id as id', 'dpc.retail_done_payment_id as payment_done_id', 'retail_done_payments.id as payment_id', 'rsi.shipper_name as shipper', 'c.name as city', 'rsi.shipper_phone_no as shipper_phone', 'rsi.shipper_address', 'retail_done_payments.total_shipments', 'retail_done_payments.delivered_shipments', 'retail_done_payments.delivered_shipments as delivered_shipments_count', 'retail_done_payments.adjusted_shipments', 'retail_done_payments.adjusted_shipments as adjusted_shipments_count', 'dpc.amount as total_amount', 'dpc.payable as total_payable', 'ubi.name as bank', 'retail_done_payments.reference_number', 'retail_done_payments.created_at as done_at', 'b.name as company_bank', 'retail_done_payments.status', 'retail_done_payments.ibft_charges', 'dpc.adjustment as adjustment_charges', 'retail_done_payments.status_updated_at as status_updated_at',  DB::raw('SUM(rs.wht) as total_wht'),
-            DB::raw('SUM(rs.cod_sst) as total_cod_sst'), 'retail_done_payments.tax_status')
+            DB::raw('SUM(rs.cod_sst) as total_cod_sst'), 'retail_done_payments.tax_status',DB::raw('rdp.status_updated_at as paid_at'))
             ->groupBy([
             'retail_done_payments.id',
         ]);
