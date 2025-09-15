@@ -27,9 +27,6 @@
                     <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_shipper" id="search_shipper" class="form-control select2" multiple="multiple">
-                                @foreach($shippers as $shipper)
-                                    <option value="{{$shipper->id}}">{{$shipper->name}}</option>
-                                @endforeach
                             </select>
                         </fieldset>
                     </div>
@@ -38,9 +35,6 @@
                     <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_hub" id="search_hub" class="form-control select2">
-                                @foreach($hubs as $hub)
-                                    <option value="{{$hub->id}}">{{$hub->name}}</option>
-                                @endforeach
                             </select>
                         </fieldset>
                     </div>
@@ -68,9 +62,6 @@
                     <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_case_nature_type" id="search_case_nature_type" class="form-control select2">
-                                @foreach($case_nature_types as $case_nature_type)
-                                    <option value="{{$case_nature_type->id}}">{{$case_nature_type->type}}</option>
-                                @endforeach
                             </select>
                         </fieldset>
                     </div>
@@ -376,10 +367,27 @@
                 width:'100%',
                 allowClear:true
             });
-            $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Search Hub',
+            $('#search_hub').select2({
                 width:'100%',
-                allowClear:true
+                placeholder:"Select Hub",
+                allowClear:true,
+                multiple: true,
+                minimumInputLength: 2,
+                ajax: {
+                    dataType: 'json',
+                    url:  '{!! route('admin.reports.data_for_dropdown', ['type'=>'hub']) !!}',
+                        data: function (params) {
+                            return {
+                                search: params.term,
+                            }
+                        },
+                        processResults: function (data) {
+                            return {
+                                results: data
+                            };
+                        },
+                    delay: 700,
+                }
             });
             $('#search_zone').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search Zone',
@@ -396,16 +404,50 @@
                 width:'100%',
                 allowClear:true
             });
-            $('#search_case_nature_type').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Search Case Nature Type',
+            $('#search_case_nature_type').select2({
                 width:'100%',
-                allowClear:true
+                placeholder:"Select Case Nature Type",
+                allowClear:true,
+                multiple: true,
+                minimumInputLength: 2,
+                ajax: {
+                    dataType: 'json',
+                    url:  '{!! route('admin.reports.data_for_dropdown', ['type'=>'nature']) !!}',
+                        data: function (params) {
+                            return {
+                                search: params.term,
+                            }
+                        },
+                        processResults: function (data) {
+                            return {
+                                results: data
+                            };
+                        },
+                    delay: 700,
+                }
             });
-            
             $('#search_shipper').select2({
-                placeholder:'Search Shipper',
                 width:'100%',
-                allowClear:true
+                placeholder:"Select Shipper",
+                allowClear:true,
+                multiple: true,
+                minimumInputLength: 2,
+                ajax: {
+                    dataType: 'json',
+                    url:  '{!! route('admin.accounts.shipper_names.dropdown',['type'=>'active']) !!}',
+                        data: function (params) {
+                            return {
+                                search: params.term,
+                                exclude_shipper : 0
+                            }
+                        },
+                        processResults: function (data) {
+                            return {
+                                results: data
+                            };
+                        },
+                    delay: 700,
+                }
             });
             $('#search_status').select2({
                 placeholder:'Search CRM Status',
