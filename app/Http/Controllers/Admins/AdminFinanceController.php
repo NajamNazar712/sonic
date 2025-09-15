@@ -8706,6 +8706,8 @@ class AdminFinanceController extends Controller
                     return 'Reverted';
                 } else if ($done_payment->status == 3) {
                     return 'Settlement Requested';
+                 }else if ($done_payment->status == 4) {
+                    return 'Hold';
                 } else {
                     return 'Unknown';
                 }
@@ -8719,6 +8721,8 @@ class AdminFinanceController extends Controller
                     return $done_payment->status_updated_at;
                 }
                 else if ($done_payment->status == 3) {
+                    return $done_payment->status_updated_at;
+                } else if ($done_payment->status == 4) {
                     return $done_payment->status_updated_at;
                 } else {
                     return 'Unknown';
@@ -8857,7 +8861,10 @@ class AdminFinanceController extends Controller
                     $query->where('done_payments.status', '=', 1);
                 } else if ($keyword == 2) {
                     $query->where('done_payments.status', '=', 2);
-                } else {
+                } else if ($keyword == 4) {
+                    $query->where('done_payments.status', '=', 4);
+                }
+                else {
                     $query->whereRaw('false');
                 }
             })
@@ -8913,6 +8920,7 @@ class AdminFinanceController extends Controller
 
     public function done_payments_paid(Request $request)
     {
+        $hold_payments_ids = [];
         foreach ($request->ids as $done_payment_id) {
             $done_payment = DonePayment::find($done_payment_id);
 
@@ -8924,7 +8932,7 @@ class AdminFinanceController extends Controller
                 WalletBulkSettlementFromDonePayments::dispatch($done_payment_id,  Auth::id());
                 
             } else {
-                if ($done_payment->status != 1) {
+                if ($done_payment->status != 1  && $done_payment->status != 4) {
                     $done_payment->status = 1;
                     $done_payment->status_updated_at = Carbon::now();
                     $done_payment->status_updated_by = Auth::id();
@@ -8991,11 +8999,15 @@ class AdminFinanceController extends Controller
                             ShipmentsPaymentJourneyController::add($shipment->id, 3, Auth::id(), '', $done_payment->id);
                         }
                     }
+                }else {
+                    if($done_payment->status == 4) {
+                            $hold_payments_ids[]=$done_payment->id;
+                    }
                 }
             }  
         }
 
-        return ['status' => 0, 'success' => 'Payment(s) marked Paid'];
+        return ['status' => 0, 'success' => 'Payment(s) marked Paid','hold_payments_ids'=> $hold_payments_ids];
     }
 
     public function done_payments_reverted(Request $request)
@@ -9048,6 +9060,100 @@ class AdminFinanceController extends Controller
 
         return ['status' => 0, 'success' => 'Payment(s) marked Reverted'];
     }
+
+    public function done_payments_hold(Request $request)
+    {
+        $paid_payment_ids = [];
+        $markedHold = false;
+        foreach ($request->ids as $done_payment_id) {
+            $done_payment = DonePayment::find($done_payment_id);
+
+            if (!$done_payment && $done_payment->status == 4) {
+                continue;
+            }
+
+            if ($done_payment->is_wallet_payment == 0) {
+                if ($done_payment->status == 1) {
+                    $paid_payment_ids[] = $done_payment->id;
+                } else {
+                    $done_payment->status = 4;
+                    $done_payment->status_updated_at = Carbon::now();
+                    $done_payment->status_updated_by = Auth::id();
+                    $done_payment->save();
+
+                    foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
+                        $shipment = $done_payment_shipment->shipment;
+                        $shipment->payment_status_id = 13;
+                        $shipment->save();
+
+                        ShipmentsPaymentJourneyController::add($shipment->id, 13, Auth::id(), '', $done_payment->id);
+                    }
+
+                    $markedHold = true;
+                }
+            }
+        }
+
+        if ($markedHold) {
+            return response()->json([
+                'status' => 0,
+                'success' => 'Payment(s) marked as Hold',
+                'paid_payment_ids' => $paid_payment_ids
+            ]);
+        }
+        return response()->json([
+            'status' => 1,
+            'error' => 'No payment(s) marked as Hold',
+            'paid_payment_ids' => []
+        ]);
+    }
+
+    public function done_payments_un_hold(Request $request)
+    {
+        $payment_ids = [];
+        $markedunHold = false;
+        foreach ($request->ids as $done_payment_id) {
+            $done_payment = DonePayment::find($done_payment_id);
+
+            if (!$done_payment && $done_payment->is_wallet_payment == 0) {
+                continue;
+            }
+
+            if ($done_payment->status == 4) {
+                    $done_payment->status = 0;
+                    $done_payment->status_updated_at = Carbon::now();
+                    $done_payment->status_updated_by = Auth::id();
+                    $done_payment->save();
+
+                    foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
+                        $shipment = $done_payment_shipment->shipment;
+                        $shipment->payment_status_id = 1;
+                        $shipment->save();
+
+                        ShipmentsPaymentJourneyController::add($shipment->id, 1, Auth::id(), '', $done_payment->id);
+                    }
+
+                $markedunHold = true;
+
+            } else{
+                $payment_ids[]=$done_payment->id;
+            }
+        }
+
+        if ($markedunHold) {
+            return response()->json([
+                'status' => 0,
+                'success' => 'Payment(s) successfully taken off hold',
+                'payment_ids' => $payment_ids
+            ]);
+        }
+        return response()->json([
+            'status' => 1,
+            'error' => 'No payments remaining to unhold',
+            'payment_ids' => []
+        ]);
+    }
+
 
     public function done_payments_excel_store(Request $request)
     {

@@ -1757,7 +1757,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('view_status_history', 'Admins\AdminFinanceController@view_status_history')->name('view_status_history');
             Route::get('mark_settlement', 'Admins\AdminFinanceController@mark_settlement')->name('mark_settlement');
             Route::get('wallet_error_logs', 'Admins\AdminFinanceController@wallet_error_logs')->name('wallet_error_logs');
-            
+            Route::put('hold', 'Admins\AdminFinanceController@done_payments_hold')->name('hold');
+            Route::put('un_hold', 'Admins\AdminFinanceController@done_payments_un_hold')->name('un_hold');
+
+
         });
 
         Route::prefix('invoices')->name('invoices.')->group(function () {
