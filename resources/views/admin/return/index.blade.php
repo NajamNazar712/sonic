@@ -367,7 +367,7 @@
                                 <h2 class="heading">Tracking Number(s)</h2>
                             </div>
 
-                            <input type="hidden" id="reattempt_shipment_id">
+                            <input type="hidden" id="reattempt_shipment_id" >
                             <div class="row old_scroll" id="reattempt_shipments">
                             </div>
                             <hr>
@@ -2545,7 +2545,7 @@
                         var Shid = $(this).parents('tr').attr('id');
                         // var ConsigneeAddress = $(this).parents('tr').data('consignee_address');
                         var consigneeAddress = $(this).closest('tr').find('td.consignee_address').text().trim();
-
+                        $('#reattempt_shipment_id').val(Shid);
                         if (Shid) {
                             atext = 'Select Yes to change shipment status to Re-Attempt!';
                             $.ajax({
@@ -3241,8 +3241,7 @@
                         submitHandler: function(form) {
                             var reattempt_remarks = $('#reattempt_remarks').val();
                             var charges = $('#estimated_charges_input').val();
-                            var address = $('#address_1').val() + ' (' + $('#address_2').val()+')';
-                            console.log(address);
+                            var address = $('#address_1').val() + ' (' + $('#address_2').val()+')';                         
                             swal({
                                 title: 'Please Wait!',
                                 text: ' ',
