@@ -14929,8 +14929,8 @@ class RiderAPIController extends Controller
                             $exists->type_name_id = $shipmentData['type_name_id'];
                             $exists->rider_id = $request->rider_id;
                             $exists->status = 0;
-                           
-                        }else{
+                        $exists->save();
+                    }else{
                             AddressMissingShipment::create([
                                 'shipment_id'  => $shipment_id,
                                 'type_name_id' => $shipmentData['type_name_id'],
