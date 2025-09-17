@@ -14878,10 +14878,10 @@ class RiderAPIController extends Controller
                 ];
                 continue;
             }
-                
+            
             if($shipper_status_id->status_attempt_count_1 == 12 || $shipper_status_id->status_attempt_count_2 == 12){
-                // === Type 2: Validate OTP or Ticket ===
                 $shipper_status_id = 12;
+                // === Type 2: Validate OTP or Ticket ===
                 if ($type == 2) {
                     $rvr_verification = 0;
         
@@ -14902,7 +14902,7 @@ class RiderAPIController extends Controller
                             continue;
                         }
                     } else {
-                        $this->rvshipmentticketInsert($shipment_id, $shipper_status_id, $status_reason_id, Shipment::find($shipment_id)->first()->user_id);
+                        $this->rvshipmentticketInsert($shipment->id, $shipper_status_id, $status_reason_id, $shipment->user_id);
                     }
         
                     $verification = new ShipmentOtpVerification();
