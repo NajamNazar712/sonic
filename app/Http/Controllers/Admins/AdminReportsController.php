@@ -7193,9 +7193,7 @@ class AdminReportsController extends Controller
     public function crm_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 173);
-        $shippers = DB::connection('reports')->table('users')->whereIn('status', [3, 4])->select('id', 'name')->get();
         $cities = DB::connection('reports')->table('cities')->select('id', 'name')->get();
-        $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
         $zones = DB::connection('reports')->table('zones')->get();
         $agents = AdminRole::leftJoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
         ->whereIn('admin_roles.department_id', [3, 7])
@@ -7211,12 +7209,11 @@ class AdminReportsController extends Controller
         })
         ->get();
         $case_natures = DB::connection('reports')->table('crm_request_case_nature')->select('id', 'name')->get();
-        $case_nature_types = DB::connection('reports')->table('crm_request_case_nature_types')->select('id', 'type')->get();
         $statuses = DB::connection('reports')->table('crm_request_statuses')->select('id', 'name')->whereNotIn('id', [6, 7])->get();
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id', 'mode']);
         $service_types = DB::connection('reports')->table('booking_types')->get();
 
-        return view('admin.reports.crm_report')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'agents' => $agents, 'case_natures' => $case_natures, 'case_nature_types' => $case_nature_types, 'statuses' => $statuses, 'shipping_modes' => $shipping_modes, 'zones' => $zones, 'service_types'=> $service_types ]);
+        return view('admin.reports.crm_report')->with([ 'cities' => $cities, 'agents' => $agents, 'case_natures' => $case_natures, 'statuses' => $statuses, 'shipping_modes' => $shipping_modes, 'zones' => $zones, 'service_types'=> $service_types ]);
     }
 
     public function crm_list(Request $request)
@@ -8240,37 +8237,31 @@ class AdminReportsController extends Controller
 
         if ($from != null && $to != null) {
 
-            $from_id = DB::connection($connection)->table('shipments')->select('id')->where('created_at', '>=', $from);
-            if ($from_id->exists()) {
-                $from_id = $from_id->first()->id;
+            $from_id = DB::connection($connection)->table('shipments')
+                ->where('created_at', '>=', $from)
+                ->where('created_at', '<=',  $to)
+                ->orderBy('created_at', 'asc')->orderBy('id', 'asc')
+                ->limit(1)->value('id');
 
-                $to_id = DB::connection($connection)->table('shipments')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
+            $to_id = DB::connection($connection)->table('shipments')
+                ->where('created_at', '>=', $from)
+                ->where('created_at', '<=',  $to)
+                ->orderBy('created_at', 'desc')->orderBy('id', 'desc')
+                ->limit(1)->value('id');
 
-                if ($to_id->exists()) {
-                    $to_id = $to_id->first()->id;
-                }
-            }
+            $sj_from_id = DB::connection($connection)->table('shipments_journey')
+                ->where('created_at', '>=',   Carbon::parse($from)->subDay(10)->startOfDay())
+                ->where('created_at', '<=',    Carbon::parse($to)->addDay(10)->startOfDay())
+                ->orderBy('created_at', 'asc')->orderBy('id', 'asc')
+                ->limit(1)->value('id');
 
-            $sj_from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
+            $sj_to_id = DB::connection($connection)->table('shipments_journey')
+                ->where('created_at', '>=',   Carbon::parse($from)->subDay(10)->startOfDay())
+                ->where('created_at', '<=',    Carbon::parse($to)->addDay(10)->startOfDay())
+                ->orderBy('created_at', 'desc')->orderBy('id', 'desc')
+                ->limit(1)->value('id');
 
-
-            if ($sj_from_id->exists()) {
-                $sj_from_id = $sj_from_id->first()->id ?? 0;
-
-
-                $sj_to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
-                $arrived_sj_to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to)->orWhere('created_at', '>=', $to);
-
-                if ($sj_to_id->exists()) {
-                    $sj_to_id = $sj_to_id->first()->id ?? 0;
-                    $arrived_sj_to_id = $arrived_sj_to_id->first()->id ?? 0;
-
-                }
-            }else{
-                $sj_from_id=0;
-                $sj_to_id=0;
-                $arrived_sj_to_id=0;
-            }
+            $arrived_sj_to_id = $sj_to_id;
         }
         // if(!is_int($sj_from_id)){
         //     dd($sj_from_id);
@@ -8279,14 +8270,15 @@ class AdminReportsController extends Controller
         //     return $shipments;
         // }
 
-        $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'u.id', '=', 'shipments.user_id')
-            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
-            ->join('cities as h', 'dc.hub_id', '=', 'h.id')
+        $shipments = DB::connection('reports')->table('shipments')
+            ->leftjoin('users as u', 'u.id', '=', 'shipments.user_id')
+            ->leftjoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->leftjoin('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->leftjoin('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->leftjoin('cities as h', 'dc.hub_id', '=', 'h.id')
             ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
-            ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
-            ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
+            ->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
+            ->leftjoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
 
             ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=', 'sps.id')
             ->leftJoin('shipments_journey as sj', function ($join) use ($sj_from_id, $arrived_sj_to_id) {
@@ -8390,7 +8382,7 @@ class AdminReportsController extends Controller
 
 
         if ($from != null && $to != null) {
-            $shipments = $shipments->whereBetween('shipments.created_at', [$from, $to]);
+//            $shipments = $shipments->whereBetween('shipments.created_at', [$from, $to]);
 
             if ($from_id != null && $to_id != null) {
                 $shipments->where('shipments.id', '>=', $from_id)
@@ -18547,7 +18539,9 @@ class AdminReportsController extends Controller
                 }
             });
             
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['customer_name','brand_name'])
+        ->make(true);
 
     }
 }

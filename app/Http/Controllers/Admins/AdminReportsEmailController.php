@@ -3127,15 +3127,31 @@ class AdminReportsEmailController extends Controller
         $start = Carbon::now()->subYear()->startOfDay();
         $end   = Carbon::now()->endOfDay();
 
+// 2) Min/Max IDs for shipments_journey
         $sjMin = DB::connection($connection)->table('shipments_journey')
-            ->whereBetween('created_at', [$start, $end])->min('id');
-        $sjMax = DB::connection($connection)->table('shipments_journey')
-            ->whereBetween('created_at', [$start, $end])->max('id');
+            ->where('created_at', '>=', $start)
+            ->where('created_at', '<',  $end)
+            ->orderBy('created_at', 'asc')->orderBy('id', 'asc')
+            ->limit(1)->value('id');
 
+        $sjMax = DB::connection($connection)->table('shipments_journey')
+            ->where('created_at', '>=', $start)
+            ->where('created_at', '<',  $end)
+            ->orderBy('created_at', 'desc')->orderBy('id', 'desc')
+            ->limit(1)->value('id');
+
+// 3) Min/Max IDs for shipment_scanning_journeys
         $ssjMin = DB::connection($connection)->table('shipment_scanning_journeys')
-            ->whereBetween('created_at', [$start, $end])->min('id');
+            ->where('created_at', '>=', $start)
+            ->where('created_at', '<',  $end)
+            ->orderBy('created_at', 'asc')->orderBy('id', 'asc')
+            ->limit(1)->value('id');
+
         $ssjMax = DB::connection($connection)->table('shipment_scanning_journeys')
-            ->whereBetween('created_at', [$start, $end])->max('id');
+            ->where('created_at', '>=', $start)
+            ->where('created_at', '<',  $end)
+            ->orderBy('created_at', 'desc')->orderBy('id', 'desc')
+            ->limit(1)->value('id');
 
 
 // 4) Correlated subquery SQL snippets WITH id windows
@@ -3198,7 +3214,7 @@ class AdminReportsEmailController extends Controller
 
 // 5) Your query, unchanged except for using the snippets above
         $sales = DB::connection('reports')->table('shipments')
-            ->join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->leftJoin('users as u', 'shipments.user_id', '=', 'u.id')
 
             ->leftJoin('sale_person_tags as spt', function($join){
                 $join->on('spt.user_id','u.id')
@@ -3229,22 +3245,22 @@ class AdminReportsEmailController extends Controller
             })
             ->leftjoin('admins as scun', 'scun.id', '=', 'scu.user_id')
             ->leftJoin('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
-            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
-            ->join('cities as h', 'dc.hub_id', '=', 'h.id')
+            ->leftJoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->leftJoin('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->leftJoin('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->leftJoin('cities as h', 'dc.hub_id', '=', 'h.id')
             ->leftjoin('user_shipping_infos AS rsi', 'shipments.return_address_id', '=', 'rsi.id')
             ->leftjoin('cities AS rc', 'rsi.city_id', '=', 'rc.id')
             ->leftjoin('zones as z', 'z.id', '=', 'h.zone_id')
             ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
-            ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
+            ->leftJoin('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
 
             // SECOND-LATEST history status (uses windowed subquery)
-            ->join('shipment_status as hss', function($join) use ($secondLatestStatusSql) {
+            ->leftJoin('shipment_status as hss', function($join) use ($secondLatestStatusSql) {
                 $join->on('hss.id', '=', DB::raw($secondLatestStatusSql));
             })
 
-            ->join('sub_category_segments as scs', 'u.sub_segment_id', '=', 'scs.id')
+            ->leftJoin('sub_category_segments as scs', 'u.sub_segment_id', '=', 'scs.id')
 
             // LATEST status=2 at origin (windowed)
             ->leftJoin('shipments_journey as sj', function ($join) use ($latestAtOriginSql) {

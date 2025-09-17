@@ -392,7 +392,7 @@ class ShipperReceivingSheetController extends Controller
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();;
 
         $remove_logo = '';
-        $exclude_logo = FilterTrait::class::getFilteredShipperIds(auth()->user()->id);
+        $exclude_logo = FilterTrait::class::getFilteredShipperIds(session('user_id'));
         if($exclude_logo){
             $remove_logo = 'd-none-logo';
         }

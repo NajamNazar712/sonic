@@ -21,25 +21,39 @@ trait OperationReportTrait{
     {
         $connection = 'reports';
         $to = Carbon::parse($to)->addDay()->toDateString();
-        $shipments =  DB::connection($connection)->table('shipments')->join('users as u', 'u.id', 'shipments.user_id')
-            ->join('sub_category_segments as segments', 'segments.id', 'u.sub_segment_id')
+
+        $sj_from_id = DB::connection($connection)->table('shipments_journey')
+            ->where('created_at', '>=', $from)
+            ->where('created_at', '<',  $to)
+            ->orderBy('created_at', 'asc')->orderBy('id', 'asc')
+            ->limit(1)->value('id');
+
+        $sj_to_id = DB::connection($connection)->table('shipments_journey')
+            ->where('created_at', '>=', $from)
+            ->where('created_at', '<',  $to)
+            ->orderBy('created_at', 'desc')->orderBy('id', 'desc')
+            ->limit(1)->value('id');
+
+        $shipments =  DB::connection($connection)->table('shipments')
+            ->leftJoin('users as u', 'u.id', 'shipments.user_id')
+            ->leftJoin('sub_category_segments as segments', 'segments.id', 'u.sub_segment_id')
             ->leftJoin('shipping_modes as sm', 'sm.id', 'shipments.shipping_mode_id')
             ->leftJoin('booking_types as bt', 'bt.id', 'shipments.booking_type_id')
             ->leftJoin('business_categories as bc', 'bc.id', 'shipments.business_category_id')
             ->leftJoin('shipment_items as si', 'si.shipment_id', 'shipments.id')
-            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', 'usi.id') // usi for user shipping infos
-            ->join('cities AS oc', 'usi.city_id', 'oc.id') // oc for origin city
-            ->join('cities as och', 'oc.hub_id', 'och.id') // och for origin city hub
+            ->leftJoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', 'usi.id') // usi for user shipping infos
+            ->leftJoin('cities AS oc', 'usi.city_id', 'oc.id') // oc for origin city
+            ->leftJoin('cities as och', 'oc.hub_id', 'och.id') // och for origin city hub
             ->leftjoin('zones as ocz', 'ocz.id', 'oc.zone_id') // ocz for origin city zone
-            ->join('cities AS dc', 'shipments.consignee_city_id', 'dc.id') // dc for destination city
-            ->join('cities as dch', 'dc.hub_id', 'dch.id') // dch for destination city hub
+            ->leftJoin('cities AS dc', 'shipments.consignee_city_id', 'dc.id') // dc for destination city
+            ->leftJoin('cities as dch', 'dc.hub_id', 'dch.id') // dch for destination city hub
             ->leftjoin('zones as dcz', 'dcz.id', 'dc.zone_id') // dcz for destination city zone
-            ->leftJoin('shipments_journey as sja', function ($join) use ($connection) { // only fetch max arrival
+            ->leftJoin('shipments_journey as sja', function ($join) use ($connection,$sj_from_id, $sj_to_id) { // only fetch max arrival
                 $join->on('sja.shipment_id', 'shipments.id')
                     ->where(
                         'sja.id',
                         '=',
-                        DB::connection($connection)->raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)")
+                        DB::connection($connection)->raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2 and shipments_journey.id >= $sj_from_id and shipments_journey.id <= $sj_to_id)")
                     );
             })
             ->select( 
@@ -63,11 +77,10 @@ trait OperationReportTrait{
                 'shipments.actual_weight as weight',
                 'si.quantity as quantity'
             );
-            if($mode == 'test'){
-                $shipments->whereBetween('sja.created_at', ['2023-10-01', '2023-11-04'])
-                ->where('u.id', 26618);
-            }else{
-                $shipments->whereBetween('sja.created_at', [$from, $to]);
+
+            if ($sj_from_id != null && $sj_to_id != null) {
+                $shipments->where('sja.id', '>=', $sj_from_id)
+                    ->where('sja.id', '<=', $sj_to_id);
             }
             
             

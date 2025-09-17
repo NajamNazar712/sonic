@@ -25,7 +25,7 @@
                         @if(session('status') === 3)
 
                             @if(session('user_type') == 1)
-                                @if(Auth::user()->wallet)
+                                @if(Auth::user()->wallet || Auth::user()->id == 2121)
                                     <a class="nav-link d-inline-flex align-middle p-0" href="{{ route('cod.wallet.login') }}" target="_blank">
                                         <div class="m-0 bg-white primary rounded custom-nav-buttons-padding" style="background: rgb(67 118 98)!important;padding: 5px 8px;!important;">
                                             <span class="d-inline-block d-md-none d-lg-none d-xl-inline-block align-middle font-weight-bold" style="color: white!important;font-size: 13px!important;">Payments</span>

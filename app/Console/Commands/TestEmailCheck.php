@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Controllers\Shippers\ShipperShipmentBookController;
+use App\Http\Models\Shipment;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -32,6 +34,7 @@ class TestEmailCheck extends Command
         //        usefull commands
         //    revenue_report_by_user_excel
         //    mark_arrival
+
         if ($this->hasArgument('payment_id')){
             $paymentId = explode(',', $this->argument('payment_id'));
             $records = DB::table('done_payment_shipments')

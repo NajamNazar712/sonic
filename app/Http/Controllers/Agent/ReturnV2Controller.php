@@ -201,13 +201,17 @@ class ReturnV2Controller extends Controller
                             if (!$already_assigned_shipment) {
                                 $shipment = $this->findShipmentforAgent($agent_id);
                             } else {
-
+                                if (RvShipmentTicket::where(['shipment_id' => $already_assigned_shipment->shipment_id, 'permanent_disable' => '1'])->exists()) {
+                                    return response()->json(['status' => 5, 'errors' => 'No shipment found or Shipper is disabled']);
+                                } 
                                 //update in_progress to 1 for ticket
                                 RvShipmentTicket::where('shipment_id',$already_assigned_shipment->shipment_id)->update(['in_progress'=>1]);
                                 $shipment = $already_assigned_shipment->shipment_id;
                             }
                         } else {
-                            
+                            if (RvShipmentTicket::where(['shipment_id' => $assigned_shipment->shipment_id, 'permanent_disable' => '1'])->exists()) {
+                                return response()->json(['status' => 5, 'errors' => 'No shipment found or Shipper is disabled']);
+                            }
                             //update in_progress to 1 for ticket
                             RvShipmentTicket::where('shipment_id',$assigned_shipment->shipment_id)->update(['in_progress'=>1]);
                             $shipment = $assigned_shipment->shipment_id;

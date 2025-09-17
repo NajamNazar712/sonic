@@ -1129,6 +1129,7 @@
             });
 
 
+            var check_nsa = @json($check_nsa);
             var shipment_ids = [];
             $('#book').on('click', function () {
                var validator = $('#booking_form').valid();
@@ -1280,15 +1281,72 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
-                    swal({
-                        title: 'Please Wait!',
-                        text: 'Your shipment is being booked!',
-                        icon: 'info',
-                        buttons: false,
-                        closeOnClickOutside: false,
-                        closeOnEsc: false
-                    });
-                    form.submit();
+                    event.preventDefault();
+                    var consignee_address = $('#consignee_address').val();
+                    var strArray = consignee_address.split(/[ ,]+/);
+                    var present = [];
+                    for(k=0;k<strArray.length;k++) {
+                        for (i = 0; i < check_nsa.length; i++) {
+                            if(JSON.stringify(strArray[k]).toLowerCase()=== JSON.stringify(check_nsa[i]).toLowerCase()){
+                                present.push(strArray[k]);
+                            }
+                        }
+                    }
+                    if(present.length > 0){
+                        var url = '{{asset('img/nsa_osa.png')}}';
+                        var html = '<div class="row justify-content-center"><img src="' + url + '"></div>';
+                        html += '<div class="row justify-content-center"><h2><b>A Possible Address Anomaly: ' + present + ' Detected!</b></h2></div>';
+                        html += '<div class="text-left">In case of,<br/>';
+                        html += '<b>Out of Service Area:</b> Additional charges may apply.</br>';
+                        html += '<b>Non Service Area:</b> Shipment may be returned.</br>';
+                        html += '<b>For assistance, Call:</b> 021-38772222</br></div>';
+                        content = document.createElement('div');
+                        content.innerHTML = html;
+                        swal({
+                            content: content,
+                            buttons: {
+                                cancel: {
+                                    text: 'Cancel',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Continue to Booking',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
+                                }
+                            },
+                            closeOnClickOutside: false,
+                            closeOnEsc: false,
+                            // dangerMode: true
+                        }).then(function(confirm){
+                             if(confirm){
+                                 swal({
+                                     title: 'Please Wait!',
+                                     text: 'Your shipment is being booked!',
+                                     icon: 'info',
+                                     buttons: false,
+                                     closeOnClickOutside: false,
+                                     closeOnEsc: false
+                                 });
+                                 form.submit();
+                             }
+                        });
+
+                    } else {
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Your shipment is being booked!',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+                        form.submit();
+                    }
+                    return false; // very important
                 }
             });
 

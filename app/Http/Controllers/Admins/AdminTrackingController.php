@@ -939,19 +939,19 @@ class AdminTrackingController extends Controller
 //            ->whereBetween('shipments.created_at',[$start_date,$end_date]);
         if ($request->has('search_tracking') || $request->has('search_shipper') || $request->has('search_phone_no') || $request->has('search_order_id' || $request->has('crm_request_id') || $request->has('search_shipment_status'))) {
             if ($tracking = $request->get('search_tracking')) {
-                $quick_tracking->where('shipments.tracking_number', 'LIKE', '%' . $tracking . '%');
+                $quick_tracking->whereIn('shipments.tracking_number', $tracking);
             }
             if ($shipper = $request->get('search_shipper')) {
-                $quick_tracking->where('u.id', 'LIKE', '%' . $shipper . '%');
+                $quick_tracking->whereIn('u.id', $shipper);
             }
             if($phone_no = $request->get('search_phone_no')){
                 $quick_tracking->where('shipments.consignee_phone_number_1', '=', $phone_no);
             }
             if ($order_id = $request->get('search_order_id')) {
-                $quick_tracking->where('shipments.order_id', 'LIKE', '%' . $order_id . '%');
+                $quick_tracking->whereIn('shipments.order_id', $order_id);
             }
             if ($crm_request_id = $request->get('crm_request_id')) {
-                $quick_tracking->where('crm.id', $crm_request_id);
+                $quick_tracking->whereIn('crm.id', $crm_request_id);
             }
             if ($search_shipment_status = $request->get('search_shipment_status')) {
                 $quick_tracking->where('shipments.shipper_status_id', $search_shipment_status);
@@ -2770,7 +2770,7 @@ class AdminTrackingController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),616);
         }
 
-        $shipment_positions =   DB::connection('reports')->table('shipment_positions')->leftJoin('shipments as s','s.id','=','shipment_positions.shipment_id')
+        $shipment_positions =   DB::connection('reports_2')->table('shipment_positions')->leftJoin('shipments as s','s.id','=','shipment_positions.shipment_id')
         ->leftJoin('users as u','u.id','=','s.user_id')
         ->leftJoin('shipments_journey as sj','sj.shipment_id','=','shipment_positions.shipment_id')
         ->leftJoin('admins as a','a.id','=','sj.admin_id')

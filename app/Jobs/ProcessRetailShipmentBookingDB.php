@@ -320,7 +320,7 @@ class ProcessRetailShipmentBookingDB implements ShouldQueue
         $shipping_mode = RetailShippingMode::where('id', $shipping_mode_id)->first();
         $product_commission = RetailUserProductPercentage::where('retail_user_id', $retail_shipment->retail_user_id)
             ->where('retail_shipping_mode_id', $shipping_mode->id)->first();
-        $retail_user_history = RetailUserHistory::where('retail_user_id', Auth::user()->id);
+        $retail_user_history = RetailUserHistory::where('retail_user_id', $this->booking['retail_user_id']);
 
         if ($retail_user_history->exists()) {
             $history_data = $retail_user_history->latest()->first();
@@ -328,12 +328,12 @@ class ProcessRetailShipmentBookingDB implements ShouldQueue
         } else {
             $joining_date = null;
         }
-
+        $retail_user = RetailUser::find($this->booking['retail_user_id']);
         $data = [
-            'retail_user_id' => $retail_shipment->retail_user_id,
-            'trax_center_name' => Auth::user()->store->name,
-            'trax_center_code' => Auth::user()->store->code,
-            'trax_center_id' => Auth::user()->store->id,
+            'retail_user_id' => $retail_user->retail_user_id,
+            'trax_center_name' => $retail_user->store->name,
+            'trax_center_code' => $retail_user->store->code,
+            'trax_center_id' => $retail_user->store->id,
             'joining_date' => $joining_date,
             'retail_shipping_mode_id' => $shipping_mode_id,
             'retail_shipping_mode_name' => $shipping_mode->name ?? NULL,
