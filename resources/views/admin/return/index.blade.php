@@ -375,9 +375,14 @@
                                 <div class="row justify-content-center">
                                     <div class="col-12 d-none" id="missingAddress">
                                         <fieldset class="form-group">
-                                            <input type="text" name="consignee_address_1" id="address_1"
+                                            <textarea name="consignee_address_1" id="address_1"
+                                                class="form-control"
+                                                maxlength="50"
+                                                style="width:100%; height:60px; resize:none; white-space:normal; overflow-wrap:break-word;"
+                                                disabled></textarea>
+                                            {{-- <input type="text" name="consignee_address_1" id="address_1"
                                                 class="form-control" maxlength="200"
-                                                style="width:100%; height:60px; white-space:normal; overflow-wrap:break-word;" disabled>
+                                                style="width:100%; height:60px; white-space:normal; overflow-wrap:break-word;" disabled> --}}
                                         </fieldset>
                                         <fieldset class="form-group">
                                             <input type="text" name="consignee_address_1" id="address_2"
@@ -2504,6 +2509,9 @@
                     //reattempt for normal shipment (action button reattempt)
                     if (action === 'reattempt') {
                         $('#missingAddress').addClass('d-none'); 
+                        $('#address_1').val('');
+                        $('#address_2').val('');
+                        $('#reattempt_remarks').val('');
                         var Shid = $(this).parents('tr').attr('id');
                         // var ConsigneeAddress = $(this).parents('tr').data('consignee_address');
                         var consigneeAddress = $(this).closest('tr').find('td.consignee_address').text().trim();
