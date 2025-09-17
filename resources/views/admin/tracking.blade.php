@@ -490,6 +490,18 @@
                             <hr>
                             <div class="remarks" id="request_remarks">
                                 <div class="row justify-content-center">
+                                    <div class="col-12 d-none" id="missingAddress">
+                                        <fieldset class="form-group">
+                                            <input type="text" name="consignee_address_1" id="address_1"
+                                                class="form-control" maxlength="50"" disabled>
+                                        </fieldset>
+                                        <fieldset class="form-group">
+                                            <input type="text" name="consignee_address_1" id="address_2"
+                                                class="form-control" maxlength="50"
+                                                placeholder="Enter Missing Address Charges" data-rule-required="true"
+                                                data-msg-required="Missing Address is required">
+                                        </fieldset>
+                                    </div>
                                     <div class="col-12 d-none" id="reattempt_charges">
                                         <fieldset class="form-group">
                                             <input type="text" name="estimate_charges" id="estimated_charges_input"
@@ -1495,7 +1507,7 @@
 
             var complain_route = '{{ route('admin.crm.request.details', 0) }}';
             complain_route = complain_route.slice(0, -1);
-
+            let ConsigneeAddress = null;
             function track(tracking_numbers) {
                 $.ajax({
                         url: '{!! route('admin.tracking.track_v2') !!}',
@@ -1535,7 +1547,7 @@
                                 var shipment_type = details.shipment_type;
                                 var shipment = '';
                                 var on_hold_box_icon = '';
-
+                                ConsigneeAddress = details.consignee.address;
                                 if (details.consignee.crm_status) {
                                     on_hold_box_icon =
                                         ' <span><i class="fas fa-person-booth"></i></span> '
@@ -2829,8 +2841,11 @@
                 $('#reattempt_shipment_id').val(id);
                 $('#reattempt_shipments').html(tracking_rows);
                 $('#reattempt_remarks').val('');
+                $('#address_1').val('');
+                $('#address_2').val('');
                 $('#estimated_charges_input').val('');
                 $('#reattempt_charges').addClass('d-none');
+                $('#missingAddress').addClass('d-none');
                 $.ajax({
                         url: '{!! route('admin.tracking.estimation_check') !!}',
                         method: 'POST',
@@ -2842,7 +2857,11 @@
                     .done(function(data) {
                         if (data.contains == 1) {
                             $('#reattempt_charges').removeClass('d-none');
+                        }else if(data.addressMissingType){
+                            $('#address_1').val(ConsigneeAddress + " " + data.addressMissingType);                         
+                            $('#missingAddress').removeClass('d-none'); 
                         }
+                        
                     });
                 $('#ReattemptModal').modal('show');
 
@@ -4099,6 +4118,8 @@
             submitHandler: function(form) {
                 var reattempt_remarks = $('#reattempt_remarks').val();
                 var charges = $('#estimated_charges_input').val();
+                var address = $('#address_1').val() + ' (' + $('#address_2').val()+')';
+                console.log(address);
                 swal({
                     title: 'Please Wait!',
                     text: ' ',
@@ -4115,6 +4136,7 @@
                             'shipment_id': $('#reattempt_shipment_id').val(),
                             'remark': reattempt_remarks,
                             'action': 'reattempt',
+                            'consigneeaddress': address,
                             'charges': charges
                         }
                     })

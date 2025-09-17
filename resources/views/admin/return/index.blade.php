@@ -366,8 +366,70 @@
                 </div>
             </div>
         </div>
+        {{-- Reattempt Modal on header confirm button click --}}
+        <div class="modal fade text-left" id="ReattemptModal" data-backdrop="static" tabindex="-1" role="dialog"
+        aria-labelledby="ReattemptModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Re Attempt</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="reattempt_request_form" method="post">
+                        @csrf
+                        <div class="container">
+                            <div class="row">
+                                <h2 class="heading">Tracking Number(s)</h2>
+                            </div>
 
-        {{-- Return COnfirm Modal on header confirm button click --}}
+                            <input type="hidden" id="reattempt_shipment_id" >
+                            <div class="row old_scroll" id="reattempt_shipments">
+                            </div>
+                            <hr>
+                            <div class="remarks" id="request_remarks">
+                                <div class="row justify-content-center">
+                                    <div class="col-12 d-none" id="missingAddress">
+                                        <fieldset class="form-group">
+                                            <textarea name="consignee_address_1" id="address_1"
+                                                class="form-control"
+                                                maxlength="50"
+                                                style="width:100%; height:60px; resize:none; white-space:normal; overflow-wrap:break-word;"
+                                                disabled></textarea>
+                                            {{-- <input type="text" name="consignee_address_1" id="address_1"
+                                                class="form-control" maxlength="200"
+                                                style="width:100%; height:60px; white-space:normal; overflow-wrap:break-word;" disabled> --}}
+                                        </fieldset>
+                                        <fieldset class="form-group">
+                                            <input type="text" name="consignee_address_1" id="address_2"
+                                                class="form-control" maxlength="50"
+                                                placeholder="Enter Missing Address" data-rule-required="true"
+                                                data-msg-required="Missing Address is required">
+                                        </fieldset>
+                                    </div>
+                                    <div class="col-12">
+                                        <fieldset class="form-group">
+                                            <textarea class="form-control" name="reattempt_remarks" id="reattempt_remarks" rows="3"
+                                                placeholder="Enter Remarks Here..." data-rule-required="true" data-msg-required="Remarks is required"></textarea>
+                                        </fieldset>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row justify-content-center">
+                                <div class="col-3">
+                                    <button id="btnReattempt" type="submit"
+                                        class="btn btn-primary btn-block">Submit</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+                {{-- Return COnfirm Modal on header confirm button click --}}
         <div class="modal fade" id="ReturnConfirmReasonModal" data-backdrop="static" role="dialog" aria-labelledby="ReturnConfirmReasonModal" aria-hidden="true">
             <div class="modal-dialog modal-md" role="document">
                 <div class="modal-content">
@@ -600,35 +662,6 @@
      </div>
 
      {{-- Enter Remarks Modal --}}
-     <div class="modal fade" id="add_remarks_modal" role="dialog" aria-labelledby="add_remarks_title" aria-hidden="true">
-        <div class="modal-dialog modal-md" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="add_remarks_title">Remarks</h4>
-
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body text-center">
-                    <form id="add_remarks_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
-
-                        <div class="form-group">
-                            <input type="text" name="add_remarks" id="add_remarks" class="form-control add_remarks" placeholder="Remarks" data-rule-required="true" data-msg-required="Remarks is required">
-
-                        </div>
-                        <div class="form-group ml-1">
-                            <button type="submit" name="add" class="btn btn-primary add" value="Add">Add Remarks</button>
-                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
-
-                        </div>
-                    </form>
-
-                </div>
-
-            </div>
-        </div>
-    </div>
 
         <div class="modal fade text-left" id="ConsigneeInformationModal" data-backdrop="static" tabindex="-1"
             role="dialog" aria-labelledby="ConsigneeInformationModal" aria-hidden="true">
@@ -2171,7 +2204,15 @@
                     rowCallback: function(row, data, index) {
                         var info = table.page.info();
                         $('td:eq(1)', row).html(index + 1 + info.page * info.length);
-                        $('td:eq(0)', row).addClass('select-checkbox');
+                        // Reset first td
+                        $('td:eq(0)', row).removeClass('select-checkbox no-select');
+                        // Show checkbox only if reason_id is NOT 3 or 4
+                        if (data.reason_id != 3 && data.reason_id != 4) {
+                            $('td:eq(0)', row).addClass('select-checkbox');
+                        } else {
+                            // Optional: mark as not selectable
+                            $('td:eq(0)', row).addClass('no-select');
+                        }
 
                         // if (data.OsaStatus == 1) {
                         //     $('td:eq(0)', row).addClass('select-checkbox');
@@ -2526,8 +2567,38 @@
                     }
 
                     //reattempt for normal shipment (action button reattempt)
-                    else if (action === 'reattempt') {
-                        atext = 'Select Yes to change shipment status to Re-Attempt!';
+                    if (action === 'reattempt') {
+                        $('#missingAddress').addClass('d-none'); 
+                        $('#address_1').val('');
+                        $('#address_2').val('');
+                        $('#reattempt_remarks').val('');
+                        var Shid = $(this).parents('tr').attr('id');
+                        // var ConsigneeAddress = $(this).parents('tr').data('consignee_address');
+                        var consigneeAddress = $(this).closest('tr').find('td.consignee_address').text().trim();
+                        $('#reattempt_shipment_id').val(Shid);
+                        if (Shid) {
+                            atext = 'Select Yes to change shipment status to Re-Attempt!';
+                            $.ajax({
+                            url: '{!! route('admin.tracking.estimation_check') !!}',
+                            method: 'POST',
+                            data: {
+                                '_token': '{{ csrf_token() }}',
+                                'shipment_id': Shid
+                            }
+                        })
+                        .done(function(data) {
+                           
+                            if (data.contains == 1) {
+                                $('#reattempt_charges').removeClass('d-none');
+                            }else if (data?.addressMissingType) {
+                                $('#address_1').val(consigneeAddress + " " + data.addressMissingType);                         
+                                $('#missingAddress').removeClass('d-none'); 
+                            }
+                            
+                        });
+                            $('#ReattemptModal').modal('show');
+                           
+                        }
                     }
                     if (row_id != '' && action === 'reattempt' && id >= 1) {
                         var Shid = $(this).parents('tr').attr('id');
@@ -2537,7 +2608,7 @@
                             $('#eec_shipment_remark_NSAreattempt').val(remark);
                         }
                     }
-                    if (row_id != '' && action === 'reattempt' && id == '') {
+                    if (row_id != '' && action !== 'reattempt' && action !== 'confirm'  && id == '') {
 
                         swal({
                             title: 'Are You Sure?',
@@ -3189,7 +3260,55 @@
                         });
                     }
                 });
+                $("#reattempt_request_form").validate({
+                        errorClass: "danger",
+                        errorPlacement: function(error, element) {
+                            error.addClass('w-100').appendTo(element.parent('.form-group'));
+                        },
+                        submitHandler: function(form) {
+                            var reattempt_remarks = $('#reattempt_remarks').val();
+                            var charges = $('#estimated_charges_input').val();
+                            var address = $('#address_1').val() + ' (' + $('#address_2').val()+')';                         
+                            swal({
+                                title: 'Please Wait!',
+                                text: ' ',
+                                icon: 'info',
+                                buttons: false,
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                            $.ajax({
+                                    url: '{!! route('admin.return.marked.status.single') !!}',
+                                    method: 'POST',
+                                    data: {
+                                        '_token': '{{ csrf_token() }}',
+                                        'shipment_id': $('#reattempt_shipment_id').val(),
+                                        'remark': reattempt_remarks,
+                                        'action': 'reattempt',
+                                        'consigneeaddress': address,
+                                    }
+                                })
+                                .done(function(data) {
+                                    swal.close();
+                                    if (data.status == 1) {
+                                        UnblockPagePermanently();
+                                        table.draw('false');
+                                        toastr.success(data.success, 'Success!', {
+                                            positionClass: 'toast-bottom-center',
+                                            containerId: 'toast-bottom-center'
+                                        });
+                                    } else {
+                                        toastr.error(data.error, 'Error!', {
+                                            positionClass: 'toast-top-center',
+                                            containerId: 'toast-top-center'
+                                        });
+                                    }
 
+                                    $('#ReattemptModal').modal('hide');
+                                });
+
+                        }
+                    });
 
                 $('body').on('click', 'button.consignee_info_label', function() {
                     var phone = $(this).attr('rel');
