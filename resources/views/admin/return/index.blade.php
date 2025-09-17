@@ -638,46 +638,6 @@
      </div>
 
      {{-- Enter Remarks Modal --}}
-     <div class="modal fade" id="add_remarks_modal" role="dialog" aria-labelledby="add_remarks_title" aria-hidden="true">
-        <div class="modal-dialog modal-md" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="add_remarks_title">Remarks</h4>
-
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body text-center">
-                    <form id="add_remarks_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
-                        <div class="col-12 d-none" id="missingAddress">
-                            <fieldset class="form-group">
-                                <input type="text" name="consignee_address_1" id="address_1"
-                                    class="form-control" maxlength="50"" disabled>
-                            </fieldset>
-                            <fieldset class="form-group">
-                                <input type="text" name="consignee_address_1" id="address_2"
-                                    class="form-control" maxlength="50"
-                                    placeholder="Enter Missing Address Charges" data-rule-required="true"
-                                    data-msg-required="Missing Address is required">
-                            </fieldset>
-                        </div>
-                        <div class="form-group">
-                            <input type="text" name="add_remarks" id="add_remarks" class="form-control add_remarks" placeholder="Remarks" data-rule-required="true" data-msg-required="Remarks is required">
-
-                        </div>
-                        <div class="form-group ml-1">
-                            <button type="submit" name="add" class="btn btn-primary add" value="Add">Add Remarks</button>
-                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
-
-                        </div>
-                    </form>
-
-                </div>
-
-            </div>
-        </div>
-    </div>
 
         <div class="modal fade text-left" id="ConsigneeInformationModal" data-backdrop="static" tabindex="-1"
             role="dialog" aria-labelledby="ConsigneeInformationModal" aria-hidden="true">
@@ -2557,9 +2517,10 @@
                             }
                         })
                         .done(function(data) {
+                            $('#missingAddress').addClass('d-none'); 
                             if (data.contains == 1) {
                                 $('#reattempt_charges').removeClass('d-none');
-                            }else if(data.addressMissingType){
+                            }else if(data.addressMissingType ){
                                 $('#address_1').val(consigneeAddress + " " + data.addressMissingType);                         
                                 $('#missingAddress').removeClass('d-none'); 
                             }
@@ -2577,7 +2538,7 @@
                             $('#eec_shipment_remark_NSAreattempt').val(remark);
                         }
                     }
-                    if (row_id != '' && action !== 'reattempt' && id == '') {
+                    if (row_id != '' && action !== 'reattempt' && action !== 'confirm'  && id == '') {
 
                         swal({
                             title: 'Are You Sure?',
@@ -3259,12 +3220,13 @@
                                         'remark': reattempt_remarks,
                                         'action': 'reattempt',
                                         'consigneeaddress': address,
-                                        'charges': charges
                                     }
                                 })
                                 .done(function(data) {
                                     swal.close();
                                     if (data.status == 1) {
+                                        UnblockPagePermanently();
+                                        table.draw('false');
                                         toastr.success(data.success, 'Success!', {
                                             positionClass: 'toast-bottom-center',
                                             containerId: 'toast-bottom-center'
