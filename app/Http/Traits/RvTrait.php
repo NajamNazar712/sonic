@@ -1560,6 +1560,7 @@ trait RvTrait
                 ->where('is_completed',0)
                 ->where('is_bot',0)
                 ->orderBy('updated_at','asc')
+                ->limit(500)
                 ->get(['id','shipment_id']);
         return $shipments;                
     }
