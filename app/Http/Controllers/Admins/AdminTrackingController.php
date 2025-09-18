@@ -81,6 +81,7 @@ use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\CrmCaseNatureRemark;
 use App\Http\Models\InterceptReBookRequestHistory;
 use App\Http\Models\Shipper\UserShippingInfo;
+use App\Models\AddressMissingShipment;
 
 class AdminTrackingController extends Controller
 {
@@ -2348,8 +2349,12 @@ class AdminTrackingController extends Controller
         $contains = 0;
         if ($journey->status_reason_id == 12) {
             $contains = 1;
+        }elseif(in_array($journey->status_reason_id,[3,4]) && $journey->shipper_status_id == 12){
+            $addressMissingType = AddressMissingShipment::where(['shipment_id' => $request->shipment_id, 'status' => 0])->latest()->first();
+            return response()->json(['contains' => $contains, 'addressMissingType'  => $addressMissingType?->type?->type_name ??  null]);
         }
         return response()->json(['contains' => $contains]);
+
     }
 
     public function shipment_position_index()
