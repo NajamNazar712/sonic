@@ -2598,7 +2598,6 @@
                     //reattempt for normal shipment (action button reattempt)
                     else if (action === 'reattempt') {
                         $('#missingAddress').addClass('d-none'); 
-                        $('#address_1').val('');
                         $('#address_2').val('');
                         $('#reattempt_remarks').val('');
                         var Shid = $(this).parents('tr').attr('id');
@@ -3296,7 +3295,7 @@
                         },
                         submitHandler: function(form) {
                             var reattempt_remarks = $('#reattempt_remarks').val();
-                            var address =  $('#address_1').val() !== '' ? ($('#address_1').val() + ' (' + $('#address_2').val()+')') : null;                         
+                            var address =  $('#address_2').val() !== '' ? ($('#address_1').val() + ' (' + $('#address_2').val()+')') : null;                         
                             swal({
                                 title: 'Please Wait!',
                                 text: ' ',

@@ -2841,7 +2841,6 @@
                 $('#reattempt_shipment_id').val(id);
                 $('#reattempt_shipments').html(tracking_rows);
                 $('#reattempt_remarks').val('');
-                $('#address_1').val('');
                 $('#address_2').val('');
                 $('#estimated_charges_input').val('');
                 $('#reattempt_charges').addClass('d-none');
@@ -4118,8 +4117,7 @@
             submitHandler: function(form) {
                 var reattempt_remarks = $('#reattempt_remarks').val();
                 var charges = $('#estimated_charges_input').val();
-                var address =  $('#address_1').val() !== '' ? ($('#address_1').val() + ' (' + $('#address_2').val()+')') : null;   
-                console.log()                      
+                var address =  $('#address_2').val() !== '' ? ($('#address_1').val() + ' (' + $('#address_2').val()+')') : null;   
                 swal({
                     title: 'Please Wait!',
                     text: ' ',
