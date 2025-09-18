@@ -4118,8 +4118,7 @@
             submitHandler: function(form) {
                 var reattempt_remarks = $('#reattempt_remarks').val();
                 var charges = $('#estimated_charges_input').val();
-                var address = $('#address_1').val() + ' (' + $('#address_2').val()+')';
-                console.log(address);
+                var address =  $('#address_1').val() !== '' ? ($('#address_1').val() + ' (' + $('#address_2').val()+')') : null;                         
                 swal({
                     title: 'Please Wait!',
                     text: ' ',
