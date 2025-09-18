@@ -375,7 +375,7 @@ class ReturnV2Controller extends Controller
         ];
         
         // Conditional validation
-        if ($request->input('rv_assign_agent_status_id') == 2 && in_array($request->input('reasonId'), [3, 5, 7])) {
+        if ($request->input('rv_assign_agent_status_id') == 2 && in_array($request->input('reasonId'), [3, 5])) {
             $validations['consignee_address_1'] = 'required|string|max:255';
         }
 

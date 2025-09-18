@@ -1359,7 +1359,6 @@
                             else {
                                 var errors = data.errors;
                                 $.each(errors, function(field, messages) {
-                                    console.log(field);
                                     var errorMessage;
                                     if (field === 'rv_assign_agent_status_id' && $("#shipment_status").val() === "") {
                                         errorMessage = 'Action is Required';
@@ -1384,7 +1383,7 @@
                                         errorMessage = 'Remarks is Required';
                                         $('#shipment_remarks_error').text(errorMessage);
                                     }
-                                    if (field === 'consignee_address_1' && $("#consignee_address_input_1").val() === "") {
+                                    if ([3,4].includes(reason_id) &&  field === 'consignee_address_1' && $("#consignee_address_input_1").val() === "") {
                                         errorMessage = 'Missing Consignee Address is Required';
                                         $('#shipment_consignee_address_1_error').text(errorMessage);
                                     }
