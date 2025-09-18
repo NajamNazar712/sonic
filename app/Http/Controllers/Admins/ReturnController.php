@@ -1593,8 +1593,8 @@ class ReturnController extends Controller
                         }
                     }
                     if($request->consigneeaddress){
-                        // $parcel->consignee_address = $request->consigneeaddress;
-                        // AddressMissingShipment::where(['shipment_id' => $request->shipment_id, 'status' => 0])->update(['status' => 1, 'updated_by' => Auth::id()]);
+                        $parcel->consignee_address = $request->consigneeaddress;
+                        AddressMissingShipment::where(['shipment_id' => $request->shipment_id, 'status' => 0])->update(['status' => 1, 'updated_by' => Auth::id()]);
                     }
                     $parcel->shipper_status_id = 13;
                     $parcel->consignee_status_id = 13;
