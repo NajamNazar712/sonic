@@ -13742,7 +13742,7 @@ class AdminReportsController extends Controller
         })
         ->leftjoin('shipment_status_reason as rv_reason', 'sj_for_reason.status_reason_id', 'rv_reason.id')
         ->leftjoin('rv_agent_call_histories as rach', 'rach.id', 'rv_shipment_assign_agent_details.rv_agent_call_history_id')
-        ->leftjoin('shipments_journey as sjrc', function ($join use($sj_from_id,$arrived_sj_to_id) {
+        ->leftjoin('shipments_journey as sjrc', function ($join) use($sj_from_id,$arrived_sj_to_id) {
             $join->on('sjrc.shipment_id', '=', 'shipments.id')
                 ->where('sjrc.id', '=', DB::raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 20 and shipments_journey.id >= $sj_from_id and shipments_journey.id <= $arrived_sj_to_id)"));
         })
