@@ -13644,7 +13644,7 @@ class AdminReportsController extends Controller
 
     public function rv_report_list(Request $request)
     {
-        $connection = 'reports'
+        $connection = 'reports';
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
