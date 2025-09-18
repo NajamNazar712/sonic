@@ -13674,7 +13674,7 @@ class AdminReportsController extends Controller
             'rach.call_status as call_status', 
             'rc_reason.name as rc_reason_name'
         ];
-        $rv_report = RvShipmentAssignAgentDetails::on('reports_2')->join('shipments', 'rv_shipment_assign_agent_details.shipment_id','shipments.id')
+        $rv_report = RvShipmentAssignAgentDetails::on('reports')->join('shipments', 'rv_shipment_assign_agent_details.shipment_id','shipments.id')
         ->join('rv_shipment_assign_agents', 'rv_shipment_assign_agents.id', 'rv_shipment_assign_agent_details.rv_shipment_assign_agent_id')
         ->leftjoin('users', 'shipments.user_id', 'users.id')
         ->leftjoin('user_shipping_infos as uso', 'shipments.pickup_address_id', 'uso.id')
