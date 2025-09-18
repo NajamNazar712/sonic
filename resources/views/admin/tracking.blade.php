@@ -498,7 +498,7 @@
                                         <fieldset class="form-group">
                                             <input type="text" name="consignee_address_1" id="address_2"
                                                 class="form-control" maxlength="50"
-                                                placeholder="Enter Missing Address Charges" data-rule-required="true"
+                                                placeholder="Enter Missing Address" data-rule-required="true"
                                                 data-msg-required="Missing Address is required">
                                         </fieldset>
                                     </div>
