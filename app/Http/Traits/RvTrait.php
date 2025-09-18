@@ -1540,7 +1540,11 @@ trait RvTrait
 
     protected function getShipmentsFromRvShipmentTicket($agent = null)
     {
-        $shipments = RvShipmentTicket::on('reports')->where('disabled_shipper',0)
+        $shipments = RvShipmentTicket::on('reports')
+            ->whereBetween('updated_at', [
+                now()->startOfYear(),
+                now()->endOfYear()
+            ])->where('disabled_shipper',0)
                 ->when($agent, function ($query, $agent) {
                     if($agent->agent_caller_type == 1) //These Agents will get shipments pending with first call only
                     {
