@@ -1541,7 +1541,7 @@ trait RvTrait
     protected function getShipmentsFromRvShipmentTicket($agent = null)
     {
         $shipments = RvShipmentTicket::on('reports')
-            ->whereBetween('created_at', [
+            ->whereBetween('updpated_at', [
                 now()->startOfYear(),
                 now()->endOfYear()
             ])->where('disabled_shipper',0)
