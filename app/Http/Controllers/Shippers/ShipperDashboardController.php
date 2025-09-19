@@ -131,6 +131,8 @@ use App\Jobs\WalletSignUpLPendingRecordLogs;
 use Validator;
 //use Illuminate\Support\Facades\Auth;
 use App\Models\ParentProduct;
+use App\Models\CorporateUserOnDeliveredInvoice;
+
 
 class ShipperDashboardController extends Controller
 {
@@ -329,10 +331,11 @@ class ShipperDashboardController extends Controller
 
     public function welcome_list(Request $request)
     {   
-        $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'u.id', '=', 'shipments.user_id')
-            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+        $shipments = DB::connection('reports')->table('shipments')
+            ->leftJoin('users as u', 'u.id', '=', 'shipments.user_id')
+            ->leftJoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->leftJoin('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->leftJoin('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
             ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=', 'sps.id')
             ->leftJoin('shipments_journey as sj', function ($join) {
@@ -345,7 +348,7 @@ class ShipperDashboardController extends Controller
                     ->where('cj.id', '=',
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.verification = 1)'));
             })
-            ->join('shipment_status as ss', 'ss.id', '=', 'cj.shipper_status_id')
+            ->leftJoin('shipment_status as ss', 'ss.id', '=', 'cj.shipper_status_id')
             ->leftjoin('shipment_items as si', function ($join) {
                 $join->on('si.shipment_id', '=', 'shipments.id')
                     ->where('si.type', '=', 0);
@@ -371,21 +374,70 @@ class ShipperDashboardController extends Controller
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $shipments = $shipments->whereBetween('shipments.created_at', [$from, $to]);
 
-            $from_id = DB::connection('reports')->table('shipments')->select('id')->where('created_at', '>=', $from);
-            if ($from_id->exists()) {
-                $from_id = $from_id->first()->id;
 
-                $to_id = DB::connection('reports')->table('shipments')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
+            if ($from != null && $to != null) {
 
-                if ($to_id->exists()) {
-                    $to_id = $to_id->first()->id;
+                $from_id = DB::connection('reports')->table('shipments')
+                    ->where('created_at', '>=', $from)
+                    ->where('created_at', '<',  $to)
+                    ->orderBy('created_at', 'asc')->orderBy('id', 'asc')
+                    ->limit(1)->value('id');
 
+                $to_id = DB::connection('reports')->table('shipments')
+                    ->where('created_at', '>=', $from)
+                    ->where('created_at', '<',  $to)
+                    ->orderBy('created_at', 'desc')->orderBy('id', 'desc')
+                    ->limit(1)->value('id');
+            }
+
+            if ($from != null && $to != null) {
+
+                if ($from_id != null && $to_id != null) {
                     $shipments->where('shipments.id', '>=', $from_id)
                         ->where('shipments.id', '<=', $to_id);
                 }
+            }else{
+               $shipments = $shipments->whereBetween('shipments.created_at', [$from, $to]);
             }
+        }
+
+        if ($user = $request->get('search_user')) {
+            $shipments->whereIn('shipments.user_id', $user);
+        } else {
+            $shipments->where('shipments.user_id', session('user_id'));
+        }
+        if ($origin = $request->get('search_origin')) {
+            $shipments->where('oc.id', '=', $origin);
+        }
+        if ($destination = $request->get('search_destination')) {
+            $shipments->where('dc.id', '=', $destination);
+        }
+        if ($card = $request->get('cards_filter')) {
+            switch ($card) {
+                case 'total':
+                    $shipments->whereIn('shipments.shipper_status_id', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19, 49, 52, 14, 16, 30, 36, 37, 39, 40, 41, 47, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 42, 43, 44, 45, 46, 50, 17]);
+                    break;
+                case 'booked':
+                    $shipments->where('shipments.shipper_status_id', 1);
+                    break;
+                case 'received':
+                    $shipments->whereIn('shipments.shipper_status_id', [2, 3, 4]);
+                    break;
+                case 'delivered':
+                    $shipments->whereIn('shipments.shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
+                    break;
+                case 'returned':
+                    $shipments->whereIn('shipments.shipper_status_id', [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 42, 43, 44, 45, 46, 50]);
+                    break;
+                case 'in_process':
+                    $shipments->whereIn('shipments.shipper_status_id', [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19, 49, 52]);
+                    break;
+                case 'cancelled':
+                    $shipments->where('shipments.shipper_status_id', 17);
+                    break;
+            }
+
         }
 
         $datatable = Datatables::of($shipments)
@@ -396,44 +448,8 @@ class ShipperDashboardController extends Controller
             ->editColumn('collection_amount', function ($shipments) {
                 return number_format($shipments->collection_amount);
             });
-            if ($user = $request->get('search_user')) {
-                $datatable->whereIn('shipments.user_id', $user);
-            } else {
-                $datatable->where('shipments.user_id', session('user_id'));
-            }
-            if ($origin = $request->get('search_origin')) {
-                $datatable->where('oc.id', '=', $origin);
-            }
-            if ($destination = $request->get('search_destination')) {
-                $datatable->where('dc.id', '=', $destination);
-            }
-            if ($card = $request->get('cards_filter')) {
-                switch ($card) {
-                    case 'total':
-                        $datatable->whereIn('shipments.shipper_status_id', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19, 49, 52, 14, 16, 30, 36, 37, 39, 40, 41, 47, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 42, 43, 44, 45, 46, 50, 17]);
-                        break;
-                    case 'booked':
-                        $datatable->where('shipments.shipper_status_id', 1);
-                        break;
-                    case 'received':
-                        $datatable->whereIn('shipments.shipper_status_id', [2, 3, 4]);
-                        break;
-                    case 'delivered':
-                        $datatable->whereIn('shipments.shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
-                        break;
-                    case 'returned':
-                        $datatable->whereIn('shipments.shipper_status_id', [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 42, 43, 44, 45, 46, 50]);
-                        break;
-                    case 'in_process':
-                        $datatable->whereIn('shipments.shipper_status_id', [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19, 49, 52]);
-                        break;
-                    case 'cancelled':
-                        $datatable->where('shipments.shipper_status_id', 17);
-                        break;
-                }
 
-            }
-        return $datatable->make(true);
+        return $datatable->rawColumns(['tracking_number_link'])->make(true);
 
     }
 
@@ -1116,8 +1132,10 @@ class ShipperDashboardController extends Controller
         ->leftJoin('invoice_shipments as is','shipments.id','=','is.shipment_id')
         ->leftJoin('users as users','shipments.user_id' ,'=','users.id')
         ->where('shipments.id', $shipment_id)
-        ->select(['shipments.packaging_material_request','shipments.cash_handling_charges', 'shipments.return_charges', 'shipments.insurance_charges', 'shipments.fuel_surcharge', 'shipments.replacement_charges', 'shipments.try_and_buy_charges', 'shipments.intercept_charges', 'shipments.nsa_osa_charges', 'shipments.weight_charges','pps.sms_charges as pps_sms_charge' , 'dps.sms_charges as dps_sms_charge','pis.sms_charges as pis_sms_charge', 'is.sms_charges as is_sms_charge','users.account_type_id as account_type'])->first();
-        $returnHTML = view('client/components/shipment_charges')->with(['shipment'=>$shipment])->render();
+        ->select(['shipments.packaging_material_request','shipments.cash_handling_charges', 'shipments.return_charges', 'shipments.insurance_charges', 'shipments.fuel_surcharge', 'shipments.replacement_charges', 'shipments.try_and_buy_charges', 'shipments.intercept_charges', 'shipments.nsa_osa_charges', 'shipments.weight_charges','pps.sms_charges as pps_sms_charge' , 'dps.sms_charges as dps_sms_charge','pis.sms_charges as pis_sms_charge', 'is.sms_charges as is_sms_charge','users.account_type_id as account_type', 'users.id as user_id', 'shipments.shipper_status_id as current_status'])->first();
+       
+        $exists = CorporateUserOnDeliveredInvoice::where('user_id', $shipment->user_id )->where('status', 1)->exists();
+        $returnHTML = view('client/components/shipment_charges')->with(['shipment'=>$shipment, 'exists' => $exists])->render();
         return response()->json($returnHTML);
     }
     public function ecommerce() {
@@ -2779,8 +2797,10 @@ class ShipperDashboardController extends Controller
 
                 if (isset($finja['error'])) {
                     $finjaArray = json_decode(json_encode($finja), true);
+                    // Log::channel('cronJobLog')->info('s ' . 'finjaArray' . json_encode($finjaArray));
 
                     $errorMessages = collect($finjaArray['error']['users']);
+                    // Log::channel('cronJobLog')->info('s ' . 'errorMessages' . json_encode($errorMessages));
 
                     foreach ($errorMessages as $error_val){
                         $key = array_key_first(array_filter($data, function ($row) use ($error_val) {

@@ -1388,6 +1388,10 @@
                         <li><a class="menu-item" href="{{ route('admin.admin_otp.index') }}">Admin OTP</a></li>
                     @endif
 
+                    @if (session('role_id') == 1 || in_array(1043, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.retail_otp.index') }}">Retail Shipper OTP</a></li>
+                    @endif
+
                     @if (session('role_id') == 1 || in_array(563, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.rider_otp.index') }}">Rider OTP (Login &
                                 Delivery Note)</a></li>
@@ -2787,7 +2791,7 @@
                             </li>
                         @endif
                         @if (session('role_id') == 1 ||
-                                count(array_intersect([81, 85, 100, 417, 418, 152, 279, 358, 394, 447, 466, 601, 912,1040], session('permissions'))) !==
+                                count(array_intersect([81, 85, 100, 417, 418, 152, 279, 358, 394, 447, 466, 601, 912,1040,1043], session('permissions'))) !==
                                     0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Support</span></a>
                                 <ul class="menu-content">

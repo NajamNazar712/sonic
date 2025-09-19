@@ -201,7 +201,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('bulk:status-sharing-wallet-replicate')->withoutOverlapping()->everyFiveMinutes()->runInBackground();
+        $schedule->command('bulk:status-sharing-wallet-replicate')->everyTenMinutes()->runInBackground();
 
         $schedule->command('create:service_ledger')->dailyAt('00:00')->runInBackground();
         // $schedule->command('job:run email 25000')->dailyAt('02:02')->runInBackground();
@@ -603,7 +603,7 @@ class Kernel extends ConsoleKernel
             ->hourly()
             ->runInBackground();
 
-        $schedule->command('update:zero_arrival_charges')->hourly()->runInBackground();
+        $schedule->command('update:zero_arrival_charges')->everyTwoHours()->runInBackground();
         $schedule->command('delete:duplicate_arrival')->hourly()->runInBackground();
         $schedule->command('update_corporate_invoice_charges_issue')->hourly()->runInBackground();
         $schedule->command('update:pending_payment_shipment_arrival_charges')->hourly()->runInBackground();

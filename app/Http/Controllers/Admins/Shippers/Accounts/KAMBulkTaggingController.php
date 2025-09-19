@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers\Admins\Shippers\Accounts;
 
-use App\Http\Controllers\Admins\ActivityTrailController;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\SaleTierTag;
-use Illuminate\Support\Facades\Auth;
+use App\Models\AccountTaggingLog;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Controllers\Admins\ActivityTrailController;
 
 
 class KAMBulkTaggingController extends Controller
@@ -120,6 +121,18 @@ class KAMBulkTaggingController extends Controller
                 $trax_id = $row['trax_id'];
                 $shipper_id = (int)$row['shipper_id'];
                 $admin_id = (!$de_tag && isset($adminIds[$trax_id])) ? $adminIds[$trax_id] : null;
+
+                $old_kam_id = SaleTierTag::where('user_id', $shipper_id)
+                ->latest('id')
+                ->value('kam');
+
+                AccountTaggingLog::logTagging(
+                    $shipper_id,        
+                    Auth::id(),             
+                    $old_kam_id,                 
+                    $admin_id, 
+                    3                
+                );
 
                 SaleTierTag::updateOrCreate(
                     ['user_id' => $shipper_id],

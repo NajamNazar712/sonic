@@ -23,20 +23,38 @@
                         </select>
                     </div>
 
+                    <form id="track_form" class="form-inline mb-1 " novalidate="novalidate">
+                        <div class="form-group">
+                            <input type="text" name="tracking_numbers" class="tracking_numbers"
+                                   placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number"
+                                   data-rule-required="true" data-msg-required="Tracking Number is required">
+                        </div>
 
-                    <div class="col-5">
-                        <form id="track_form" class="form-inline mb-1 " novalidate="novalidate">
-                            <div class="form-group">
-                                <input type="text" name="tracking_numbers" class="tracking_numbers"
-                                    placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number"
-                                    data-rule-required="true" data-msg-required="Tracking Number is required">
+                        <div class="form-group input-group ml-1">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
                             </div>
 
-                            <div class="form-group ml-1">
-                                <button type="submit" class="btn btn-primary">Search</button>
+                            <input type="text"  data-value="{{ Carbon\Carbon::now()->subMonth(3) }}" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right height-5-per" id="search_date_from" placeholder="Search Date (From)">
+                        </div>
+
+
+                        <div class="form-group input-group ml-1">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
                             </div>
-                        </form>
-                    </div>
+
+                            <input type="text" data-value="{{ Carbon\Carbon::now() }}" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right height-5-per" id="search_date_to" placeholder="Search Date (To)">
+                        </div>
+
+                        <div class="form-group ml-1">
+                            <button type="submit" id="search_filter_btn" class="btn btn-primary">Search</button>
+                        </div>
+                    </form>
                 </div>
 
                 <input type="hidden" name="search_rvr_value_div" id="search_rvr_value_div">
@@ -49,7 +67,7 @@
                 <input type="hidden" name="number_of_oldest_shipments_value_div" id="number_of_oldest_shipments_value_div">
 
                 <div class="row justify-content-center" >
-                    
+
                     <div class="col justify-content-end mb-3">
                         <div class="card">
                             <div class="card-header">
@@ -102,7 +120,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                     <div class="alert alert-warning d-none shipment_msg_error">
                     </div>
 
@@ -348,8 +366,70 @@
                 </div>
             </div>
         </div>
+        {{-- Reattempt Modal on header confirm button click --}}
+        <div class="modal fade text-left" id="ReattemptModal" data-backdrop="static" tabindex="-1" role="dialog"
+        aria-labelledby="ReattemptModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Re Attempt</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="reattempt_request_form" method="post">
+                        @csrf
+                        <div class="container">
+                            <div class="row">
+                                <h2 class="heading">Tracking Number(s)</h2>
+                            </div>
 
-        {{-- Return COnfirm Modal on header confirm button click --}}
+                            <input type="hidden" id="reattempt_shipment_id" >
+                            <div class="row old_scroll" id="reattempt_shipments">
+                            </div>
+                            <hr>
+                            <div class="remarks" id="request_remarks">
+                                <div class="row justify-content-center">
+                                    <div class="col-12 d-none" id="missingAddress">
+                                        <fieldset class="form-group">
+                                            <textarea name="consignee_address_1" id="address_1"
+                                                class="form-control"
+                                                maxlength="50"
+                                                style="width:100%; height:60px; resize:none; white-space:normal; overflow-wrap:break-word;"
+                                                disabled></textarea>
+                                            {{-- <input type="text" name="consignee_address_1" id="address_1"
+                                                class="form-control" maxlength="200"
+                                                style="width:100%; height:60px; white-space:normal; overflow-wrap:break-word;" disabled> --}}
+                                        </fieldset>
+                                        <fieldset class="form-group">
+                                            <input type="text" name="consignee_address_1" id="address_2"
+                                                class="form-control" maxlength="50"
+                                                placeholder="Enter Missing Address" data-rule-required="true"
+                                                data-msg-required="Missing Address is required">
+                                        </fieldset>
+                                    </div>
+                                    <div class="col-12">
+                                        <fieldset class="form-group">
+                                            <textarea class="form-control" name="reattempt_remarks" id="reattempt_remarks" rows="3"
+                                                placeholder="Enter Remarks Here..." data-rule-required="true" data-msg-required="Remarks is required"></textarea>
+                                        </fieldset>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row justify-content-center">
+                                <div class="col-3">
+                                    <button id="btnReattempt" type="submit"
+                                        class="btn btn-primary btn-block">Submit</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+                {{-- Return COnfirm Modal on header confirm button click --}}
         <div class="modal fade" id="ReturnConfirmReasonModal" data-backdrop="static" role="dialog" aria-labelledby="ReturnConfirmReasonModal" aria-hidden="true">
             <div class="modal-dialog modal-md" role="document">
                 <div class="modal-content">
@@ -488,7 +568,7 @@
                                 <div id="error_assign_agent" class="text-danger"></div>
                             </div>
 
-                            
+
 
                             <div class="form-group ml-1 ">
                                 {{-- <button type="submit" name="add" id="btnReturn" class="btn btn-primary update_return_confirm" value="Add">Update Call History</button> --}}
@@ -522,7 +602,7 @@
                              <select name="call_finding_dropdown" class="form-control select2"
                                  id="call_finding_dropdown" data-rule-required="true"
                                  data-msg-required="Call Finding is required">
-                                 <option value="6">Unresponsive</option>  
+                                 <option value="6">Unresponsive</option>
                              </select>
                          </div>
 
@@ -723,113 +803,119 @@
         <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/vendors/css/forms/selects/select2.min.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/vendors/css/extensions/toastr.css') }}">
+
+        <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+        <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
         <style>
-            table.dataTable {
-                font-size: 12px;
-            }
+        table.dataTable {
+            font-size: 12px;
+        }
 
-            .cursor_color {
-                cursor: pointer;
-                color: #010a10;
-            }
+        .cursor_color {
+            cursor: pointer;
+            color: #010a10;
+        }
 
-            table.dataTable thead tr th {
-                padding-left: 0.5em;
-                white-space: normal;
-                word-wrap: break-word;
-            }
+        table.dataTable thead tr th {
+            padding-left: 0.5em;
+            white-space: normal;
+            word-wrap: break-word;
+        }
 
-            table.dataTable thead tr th:before,
-            table.dataTable thead tr th:after {
-                height: 20px;
-                margin-bottom: -10px;
-                bottom: 50% !important;
-            }
+        table.dataTable thead tr th:before,
+        table.dataTable thead tr th:after {
+            height: 20px;
+            margin-bottom: -10px;
+            bottom: 50% !important;
+        }
 
-            table.dataTable tbody tr td {
-                padding-left: 0.5em;
-                padding-right: 0.5em;
-            }
+        table.dataTable tbody tr td {
+            padding-left: 0.5em;
+            padding-right: 0.5em;
+        }
 
-            table.dataTable tbody tr td.select-checkbox:before {
-                top: 50%;
-                border-color: #64a0d2;
-            }
+        table.dataTable tbody tr td.select-checkbox:before {
+            top: 50%;
+            border-color: #64a0d2;
+        }
 
-            table.dataTable tbody tr.selected td.select-checkbox:after {
-                top: 50%;
-                text-shadow: none;
-            }
+        table.dataTable tbody tr.selected td.select-checkbox:after {
+            top: 50%;
+            text-shadow: none;
+        }
 
-            .btn-group .dropdown-menu .dropdown-item {
-                white-space: normal;
-            }
-            .bg-gradient-directional-delivered {
-            background-image: linear-gradient(45deg, #653800, #11f1ea);
+        .btn-group .dropdown-menu .dropdown-item {
+            white-space: normal;
+        }
+        .bg-gradient-directional-delivered {
+        background-image: linear-gradient(45deg, #653800, #11f1ea);
+        background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-booked_shipments {
+            background-image: linear-gradient(45deg, #5e187b, #ed86ff);
             background-repeat: repeat-x;
-            }
-            .bg-gradient-directional-booked_shipments {
-                background-image: linear-gradient(45deg, #5e187b, #ed86ff);
-                background-repeat: repeat-x;
-            }
+        }
 
-            .bg-gradient-directional-complaints_launched {
-                background-image: linear-gradient(45deg, #074077, #2FBEF5);
-                background-repeat: repeat-x;
-            }
-
-            .bg-gradient-directional-in_transit {
-            background-image: linear-gradient(45deg, #535BE2, #9ea5ff);
-            background-repeat: repeat-x;
-            }
-
-            .bg-gradient-directional-destination {
-            background-image: linear-gradient(45deg, #027d8a, #01e4e4);
-            background-repeat: repeat-x;
-            }
-            .bg-gradient-directional-return_delivered {
-            background-image: linear-gradient(45deg, #02c123, #99ff12d1);
-            background-repeat: repeat-x;
-            }
-            .bg-gradient-directional-pending_confirmation {
-            background-image: linear-gradient(45deg, #6a1fa2, #ff4961);
-            background-repeat: repeat-x;
-            }
-
-            .bg-gradient-directional-complaints_launched {
+        .bg-gradient-directional-complaints_launched {
             background-image: linear-gradient(45deg, #074077, #2FBEF5);
             background-repeat: repeat-x;
-            }
+        }
 
-            .bg-gradient-directional-oldest_shipment {
-            background-image: linear-gradient(45deg, #7f8b96, #f52f2f);
-            background-repeat: repeat-x;
-            }
-            #toast-bottom-center.toast-container {
-                text-align: center;
-            }
+        .bg-gradient-directional-in_transit {
+        background-image: linear-gradient(45deg, #535BE2, #9ea5ff);
+        background-repeat: repeat-x;
+        }
 
-            #toast-bottom-center.toast-container .toast {
-                display: table;
-                width: auto !important;
-                text-align: left;
-            }
+        .bg-gradient-directional-destination {
+        background-image: linear-gradient(45deg, #027d8a, #01e4e4);
+        background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-return_delivered {
+        background-image: linear-gradient(45deg, #02c123, #99ff12d1);
+        background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-pending_confirmation {
+        background-image: linear-gradient(45deg, #6a1fa2, #ff4961);
+        background-repeat: repeat-x;
+        }
 
-            .selectize-control {
-                width: 300px !important;
-            }
+        .bg-gradient-directional-complaints_launched {
+        background-image: linear-gradient(45deg, #074077, #2FBEF5);
+        background-repeat: repeat-x;
+        }
 
-            .goldClass {
-                background-color: gold;
-            }
+        .bg-gradient-directional-oldest_shipment {
+        background-image: linear-gradient(45deg, #7f8b96, #f52f2f);
+        background-repeat: repeat-x;
+        }
+        #toast-bottom-center.toast-container {
+            text-align: center;
+        }
 
-            .GreenColor {
-                background-color: #0aff00;
-            }
-        </style>
+        #toast-bottom-center.toast-container .toast {
+            display: table;
+            width: auto !important;
+            text-align: left;
+        }
+
+        .selectize-control {
+            width: 300px !important;
+        }
+
+        .goldClass {
+            background-color: gold;
+        }
+
+        .GreenColor {
+            background-color: #0aff00;
+        }
+    </style>
     @endsection
 
     @section('js')
+        <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+        <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+        <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
         <script src="{{ asset('app-assets/vendors/js/forms/select/select2.full.min.js') }}" type="text/javascript"></script>
         <script src="{{ asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js') }}" type="text/javascript">
         </script>
@@ -840,6 +926,39 @@
         <script src="{{ asset('app-assets/vendors/js/forms/select/selectize.min.js') }}" type="text/javascript"></script>
         <script src="{{ asset('app-assets/vendors/js/extensions/toastr.min.js') }}" type="text/javascript"></script>
         <script src="{{ asset('js/datatable_buttons.js') }}" type="text/javascript"></script>
+
+
+        <script type="text/javascript">
+            $(document).ready(function () {
+
+                $('#track_form #search_date_from').pickadate({
+                    firstDay: 1,
+                    selectYears: true,
+                    selectMonths: true,
+                    formatSubmit: 'yyyy-mm-dd 00:00:00',
+                    hiddenSuffix: '_formatted',
+                    onSet: function (context) {
+                        if (context.select) {
+                            $('#track_form #search_date_to').pickadate('picker').set('min', $('#track_form #search_date_from').pickadate('picker').get('select'));
+                        }
+                    }
+                });
+                $('#track_form #search_date_to').pickadate({
+                    firstDay: 1,
+                    selectYears: true,
+                    selectMonths: true,
+                    formatSubmit: 'yyyy-mm-dd 23:59:59',
+                    hiddenSuffix: '_formatted',
+                    onSet: function (context) {
+                        if (context.select) {
+                            $('#track_form #search_date_from').pickadate('picker').set('max', $('#track_form #search_date_to').pickadate('picker').get('select'));
+                        }
+                    }
+                });
+
+            });
+
+        </script>
 
         <script type="text/javascript">
             var selected_rows = [];
@@ -929,7 +1048,7 @@
                         }
                     })
                     .done(function(data) {
-                        if (data.status == 0) 
+                        if (data.status == 0)
                         {
                             // $('#assign_agent').empty();
                             $.map(data.data, function(agent) {
@@ -939,7 +1058,7 @@
                             $('.assign_agent_container').removeClass('d-none');
                         }
                     });
-                        
+
                 });
 
 
@@ -981,7 +1100,7 @@
                                         closeOnEsc: false
                                     });
                                     $('#update_call_status_modal').modal('hide');
-                                } 
+                                }
                                 else if(response.status == 0){
                                     swal({
                                         title: 'Something Went Wrong!',
@@ -1032,7 +1151,7 @@
                             if (response) {
                                 var modalBody = $('#call_history_modal .modal-body');
                                 modalBody.html('');
-                                
+
                                 var tableHtml =
                                     '<table id="call_history_table" class="table-striped table-bordered" style="width:100%">';
                                 tableHtml +=
@@ -1044,7 +1163,7 @@
                                     var trimmedTime = updated_at.substring(11, 19);
                                     var call_finding_id = 'Unresponsive';
                                     var call_finding_reason_id = value.data.rv_call_finding.name;
-                                    
+
                                     var remarks = value.data.remarks;
                                     if (remarks == null) {
                                         remarks = '-';
@@ -1059,7 +1178,7 @@
                                         call_to_id = 'Shipper'
                                     }
 
-                                    tableHtml += 
+                                    tableHtml +=
                                     '<tr><td class="p-1">' + trimmedDateTime +
                                     '</td><td>' + trimmedTime + '</td><td>' + call_finding_id + '</td><td>' + call_finding_reason_id +
                                     '</td><td>' + remarks + '</td><td>' + call_to_id + '</td><td>' + current_shipment_status +
@@ -1278,7 +1397,7 @@
                     width: '100%',
                     placeholder: 'Labeling*'
                 });
-                
+
 
                 $("#consignee_refused_reasons").prepend('<option value="" selected></option>').select2({
                     placeholder: "Select Sub Reason",
@@ -1461,8 +1580,8 @@
                                                 //     return false;
                                                 // }
                                                 // if ($("#update_assign_agent_form").valid()) {
-                                               
-                                                
+
+
                                                 swal({
                                                     text: 'Are you sure, you want to Assign these shipments(s)?',
                                                     icon: 'info',
@@ -1497,7 +1616,7 @@
                                                                     }
                                                                 })
                                                                 .done(function(data) {
-                                                                    if (data.status == 0) 
+                                                                    if (data.status == 0)
                                                                     {
                                                                         const $divElement = $('.shipment_msg_success');
 
@@ -1516,7 +1635,7 @@
                                                                                 }, 10000); // 5 seconds
                                                                                 table.rows().deselect();
                                                                                 table.draw();
-                                                                            } 
+                                                                            }
                                                                             else {
                                                                             const $divElement = $('.shipment_msg_error');
 
@@ -1548,7 +1667,7 @@
                                                                             table.rows().deselect();
                                                                             table.draw();
                                                                         }
-                                                                            
+
                                                                     selected_rows  = [];
                                                                     restricted_rows = [];
 
@@ -1755,13 +1874,13 @@
                                                             blockPagePermanently();
                                                             table.rows().nodes().each(function(index) {
                                                                 var row = table.row(index);
-        
+
                                                                 if ($(row.node()).hasClass('selected')) {
                                                                     var id = parseInt(row.id());
                                                                     shipment_remarks[id] = remarks;
                                                                 }
                                                             });
-        
+
                                                             $.ajax({
                                                                 url: "{{ route('admin.return.reattempt.status') }}",
                                                                 method: 'POST',
@@ -1787,7 +1906,7 @@
                                                                     .disable();
                                                                 table.rows().deselect();
                                                                 table.draw('false');
-        
+
                                                                 if (data.status == 1) {
                                                                     UnblockPagePermanently();
                                                                     table.draw('false');
@@ -1804,18 +1923,18 @@
                                                                             containerId: 'toast-top-center'
                                                                         });
                                                                 }
-        
+
                                                             });
                                                         }
                                                     });
 
                                                 }
                                             });
-                                
+
                                         }
                                     }
                             },
-                                
+
                             @endif {
                                 extend: 'excel',
                                 title: 'Return Marked',
@@ -1852,12 +1971,12 @@
                                         number_of_available_agents_value_div : $('#number_of_available_agents_value_div').val(),
                                         number_of_oldest_shipments_value_div : $('#number_of_oldest_shipments_value_div').val()
                                     };
-                                    
+
                                     //mergin all parameters
                                     var allParams = Object.assign({}, dtParams, additionalParams);
 
                                     $.post("{{ route('admin.return.list') }}", allParams).done(function(response) {
-                                        
+
                                         var blob = new Blob([response], { type: 'text/csv' });
 
                                         var url = window.URL.createObjectURL(blob);
@@ -2029,6 +2148,7 @@
                         processing: data_table_loader
                     },
                     serverSide: true,
+                    deferLoading: 0,
                     ajax: {
                         url: '{{ route('admin.return.list') }}',
                         method: 'POST',
@@ -2052,6 +2172,8 @@
                             d.number_of_inprocess_tickets_value_div = $('#number_of_inprocess_tickets_value_div').val();
                             d.number_of_available_agents_value_div = $('#number_of_available_agents_value_div').val();
                             d.number_of_oldest_shipments_value_div = $('#number_of_oldest_shipments_value_div').val();
+                            d.search_date_from = $('input[name="search_date_from_formatted"]').val();
+                            d.search_date_to = $('input[name="search_date_to_formatted"]').val();
 
                         },
 
@@ -2060,7 +2182,7 @@
                     order: [
                         [25, 'desc']
                     ],
-                    columns: 
+                    columns:
                         [{data: 'shId',orderable: false,searchable: false,class: 'text-center align-middle select p-1',targets: 0,
                             render: function(data, type, row) {
                                 return '';
@@ -2111,7 +2233,15 @@
                     rowCallback: function(row, data, index) {
                         var info = table.page.info();
                         $('td:eq(1)', row).html(index + 1 + info.page * info.length);
-                        $('td:eq(0)', row).addClass('select-checkbox');
+                        // Reset first td
+                        $('td:eq(0)', row).removeClass('select-checkbox no-select');
+                        // Show checkbox only if reason_id is NOT 3 or 4
+                        if (data.reason_id != 3 && data.reason_id != 4) {
+                            $('td:eq(0)', row).addClass('select-checkbox');
+                        } else {
+                            // Optional: mark as not selectable
+                            $('td:eq(0)', row).addClass('no-select');
+                        }
 
                         // if (data.OsaStatus == 1) {
                         //     $('td:eq(0)', row).addClass('select-checkbox');
@@ -2229,7 +2359,7 @@
                     }
                 });
 
-                
+
                 $('#ReturnConfirmReasonModal').on('hide.bs.modal', function(e) {
                     $('#return_reason_select').val('').trigger('change');
                     $('#return_reason_shipment_remarks').val('');
@@ -2241,8 +2371,8 @@
                 $('#EditEstimateChargesModalNSAreattempt').on('hide.bs.modal', function(e) {
                     $('#estimated_charges_NSAreattempt_input').val('');
                 });
-                
-        
+
+
 
                 var hub_ids = [];
 
@@ -2258,8 +2388,8 @@
                     var assigned_agent_id = table.row($(this).parents('tr')).data().assigned_agent_id;
                     var tat = table.row($(this).parents('tr')).data().confirmation_on;
                     var id = parseInt($(this).parent('tr').attr('id'));
-                    
-                    var index = call_history.indexOf(id);                    
+
+                    var index = call_history.indexOf(id);
                     if (index === -1) {
                         call_history.push(id);
                     } else {
@@ -2272,9 +2402,9 @@
                     }else{
                         table.button('.call_history').disable();
                     }
-                 
-                
-                    
+
+
+
                     if (con_id) {
                         if (hub_ids.length == 0) {
                             hub_ids.push(hub_id);
@@ -2361,7 +2491,7 @@
                                 } else {
                                     restricted_rows.splice(restricted_index, 1);
                                     table.button('.call_history').enable();
-                    
+
                                     table.button('.excel-upload').enable();
                                 }
                             }
@@ -2463,11 +2593,40 @@
                         $('#ReturnConfirmReasonSingleModal').modal('show');
                         $('#return_reason_shipment_id').val(row_id);
                         //$('#return_reason_shipment_remarks').val(remark);
-                    } 
-                    
+                    }
+
                     //reattempt for normal shipment (action button reattempt)
                     else if (action === 'reattempt') {
-                        atext = 'Select Yes to change shipment status to Re-Attempt!';
+                        $('#missingAddress').addClass('d-none'); 
+                        $('#address_2').val('');
+                        $('#reattempt_remarks').val('');
+                        var Shid = $(this).parents('tr').attr('id');
+                        // var ConsigneeAddress = $(this).parents('tr').data('consignee_address');
+                        var consigneeAddress = $(this).closest('tr').find('td.consignee_address').text().trim();
+                        $('#reattempt_shipment_id').val(Shid);
+                        if (Shid) {
+                            atext = 'Select Yes to change shipment status to Re-Attempt!';
+                            $.ajax({
+                            url: '{!! route('admin.tracking.estimation_check') !!}',
+                            method: 'POST',
+                            data: {
+                                '_token': '{{ csrf_token() }}',
+                                'shipment_id': Shid
+                            }
+                        })
+                        .done(function(data) {
+                           
+                            if (data.contains == 1) {
+                                $('#reattempt_charges').removeClass('d-none');
+                            }else if (data?.addressMissingType) {
+                                $('#address_1').val(consigneeAddress + " " + data.addressMissingType);                         
+                                $('#missingAddress').removeClass('d-none'); 
+                            }
+                            
+                        });
+                            $('#ReattemptModal').modal('show');
+                           
+                        }
                     }
                     if (row_id != '' && action === 'reattempt' && id >= 1) {
                         var Shid = $(this).parents('tr').attr('id');
@@ -2477,7 +2636,7 @@
                             $('#eec_shipment_remark_NSAreattempt').val(remark);
                         }
                     }
-                    if (row_id != '' && action === 'reattempt' && id == '') {
+                    if (row_id != '' && action !== 'reattempt' && action !== 'confirm'  && id == '') {
 
                         swal({
                             title: 'Are You Sure?',
@@ -2906,11 +3065,7 @@
 
                 $('#track_form').bind('submit', function(e) {
                     e.preventDefault();
-                    var tracking_numbers = $('#track_form .tracking_numbers').val();
-
-                    if (tracking_numbers != '') {
-                        table.draw();
-                    }
+                    table.draw();
 
                 });
 
@@ -2987,7 +3142,7 @@
                         $('#eec_shipment_id').val(id);
                     }
                 });
-                
+
                 $('#update_charges_NSAreattempt_form').validate({
                     errorClass: 'danger',
                     successClass: 'success',
@@ -3133,7 +3288,54 @@
                         });
                     }
                 });
+                $("#reattempt_request_form").validate({
+                        errorClass: "danger",
+                        errorPlacement: function(error, element) {
+                            error.addClass('w-100').appendTo(element.parent('.form-group'));
+                        },
+                        submitHandler: function(form) {
+                            var reattempt_remarks = $('#reattempt_remarks').val();
+                            var address =  $('#address_2').val() !== '' ? ($('#address_1').val() + ' (' + $('#address_2').val()+')') : null;                         
+                            swal({
+                                title: 'Please Wait!',
+                                text: ' ',
+                                icon: 'info',
+                                buttons: false,
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                            $.ajax({
+                                    url: '{!! route('admin.return.marked.status.single') !!}',
+                                    method: 'POST',
+                                    data: {
+                                        '_token': '{{ csrf_token() }}',
+                                        'shipment_id': $('#reattempt_shipment_id').val(),
+                                        'remark': reattempt_remarks,
+                                        'action': 'reattempt',
+                                        'consigneeaddress': address,
+                                    }
+                                })
+                                .done(function(data) {
+                                    swal.close();
+                                    if (data.status == 1) {
+                                        UnblockPagePermanently();
+                                        table.draw('false');
+                                        toastr.success(data.success, 'Success!', {
+                                            positionClass: 'toast-bottom-center',
+                                            containerId: 'toast-bottom-center'
+                                        });
+                                    } else {
+                                        toastr.error(data.error, 'Error!', {
+                                            positionClass: 'toast-top-center',
+                                            containerId: 'toast-top-center'
+                                        });
+                                    }
 
+                                    $('#ReattemptModal').modal('hide');
+                                });
+
+                        }
+                    });
 
                 $('body').on('click', 'button.consignee_info_label', function() {
                     var phone = $(this).attr('rel');
@@ -3310,7 +3512,7 @@
                     table.draw(true);
                     // $('#return_confirmation_pending_filter').val(0);
                 });
-                
+
             });
         </script>
     @endsection

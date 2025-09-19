@@ -57,7 +57,7 @@ class FingaIntegrationController extends Controller
 
         $api = config('app.FINGA_URL');
         $token = $this->getToken($api);
-        if(session('user_id') == 42723) {
+        if(session('user_id') == 2121) {
             $user = WalletUserDisable::where('user_id', session('user_id'));
         }else{
             $user = WalletUser::where('user_id', session('user_id'));
