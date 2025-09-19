@@ -13644,7 +13644,7 @@ class AdminReportsController extends Controller
 
     public function rv_report_list(Request $request)
     {
-        
+        $connection = 'reports';
         $select =    [
             'shipments.id as shipment_id',
             'sjj.created_at as arrival_date', 
@@ -13674,7 +13674,7 @@ class AdminReportsController extends Controller
             'rach.call_status as call_status', 
             'rc_reason.name as rc_reason_name'
         ];
-        $rv_report = RvShipmentAssignAgentDetails::on('reports')->join('shipments', 'rv_shipment_assign_agent_details.shipment_id','shipments.id')
+        $rv_report = RvShipmentAssignAgentDetails::join('shipments', 'rv_shipment_assign_agent_details.shipment_id','shipments.id')
         ->join('rv_shipment_assign_agents', 'rv_shipment_assign_agents.id', 'rv_shipment_assign_agent_details.rv_shipment_assign_agent_id')
         ->leftjoin('users', 'shipments.user_id', 'users.id')
         ->leftjoin('user_shipping_infos as uso', 'shipments.pickup_address_id', 'uso.id')
@@ -13690,7 +13690,7 @@ class AdminReportsController extends Controller
         ->leftjoin('rv_fake_statuses as rv_fakes', 'rv_shipment_assign_agent_details.rv_fake_status_id','rv_fakes.id')
         ->leftjoin('admins as add', 'rv_shipment_assign_agent_details.agent_id','add.id')
 
-        ->leftjoin('shipments_journey as sj', function($join) {
+        ->leftjoin('shipments_journey as sj', function($join) use ($connection) {
             $join->on('sj.shipment_id', '=', 'shipments.id')
                  ->where('sj.shipper_status_id', '=', 12);
         })

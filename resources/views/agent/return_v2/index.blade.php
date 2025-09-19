@@ -1281,7 +1281,7 @@
                     var call_to_id = $('#call_to_id').val();
                     var shipment_id_val = $("#shipment_id_val").val();
                     var phone_number = $('#phone_number').val();
-                    var consignee_address = $('#phone_number').val();
+                    var consignee_address = $('#consignee_address').val();
                     var  reasonId = $('#selected_reason_id').val();
                     blockPagePermanently();
                     $.ajax({
