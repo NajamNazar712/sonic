@@ -221,6 +221,20 @@
 												@endif
 												
 										</div>
+										<div id="info_display" class="form-group text-center p-1 border border-light rounded">
+											<label class="d-block">Self Pickup Collection</label>
+											<input type="checkbox"  name="is_pickup_self_collection" class="switch" id="is_pickup_self_collection">
+										</div>
+
+										<div id="pudo_pickup_retail" class="form-group">
+											<input type="hidden" name="retail_type" id="retail_type">
+											<select name="retail_pickup_store_id" class="select2" id="retail_pickup_store_id">
+												<option value="">Retail Store*</option>
+												@foreach($all_retail_stores as $all_retail_store)
+													<option value="{{ $all_retail_store->id }}" data-type="{{$all_retail_store->type}}">{{ $all_retail_store->name }}</option>
+												@endforeach
+											</select>
+										</div>
 										{{-- @if($air_waybill != null)
 											<div id="info_display" class="form-group text-center p-1 border border-light rounded">
 												<label class="d-block">Show Information on Air Waybill</label>
@@ -959,6 +973,7 @@
 				}
 			});
 
+
 			function shipping_modes() {
 				if ($('#pickup_address').val() == 0) {
 					var pickup_city_id = $('#new_pickup_city').val();
@@ -1492,7 +1507,39 @@
 
 			$('#information_display').checkboxpicker();
 			$('#self_collection').checkboxpicker();
-			
+			$("#is_pickup_self_collection").checkboxpicker();
+
+			// page load par default hide aur required remove
+			togglePickup(false);
+
+			// on change event
+			$('#is_pickup_self_collection').on('change', function () {
+				togglePickup($(this).is(':checked'));
+			});
+
+			function togglePickup(isChecked) {
+				if (isChecked) {
+					$('#pudo_pickup_retail').show();
+					$('#retail_pickup_store_id')
+							.attr('data-rule-required', 'true')
+							.attr('data-msg-required', 'Retail store is required');
+				} else {
+					$('#pudo_pickup_retail').hide();
+					$('#retail_pickup_store_id')
+							.removeAttr('data-rule-required')
+							.removeAttr('data-msg-required');
+					$('#retail_type').val('');
+				}
+			}
+
+			$("#retail_pickup_store_id").select2({
+				width: '100%',
+				placeholder: 'Retail Store*'
+			}).on('change',function (){
+				var type = $(this).find(':selected').data('type');
+				$('#retail_type').val(type);
+
+			});
 
 
 			$('#consignee_city').prepend('<option value="" selected="selected"></option>').select2({

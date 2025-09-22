@@ -190,7 +190,7 @@ class RetailAdminUserManagementController extends Controller
 
         $franchise = RetailFranchise::join('admins as a', 'a.id', '=', 'retail_franchises.updated_by')
             ->join('cities as c', 'c.id', '=', 'retail_franchises.default_hub')
-            ->select('retail_franchises.id', 'retail_franchises.name', 'retail_franchises.phone_no', 'retail_franchises.email', 'retail_franchises.cnic', 'c.name as default_hub', 'c.id as default_hub_id', 'a.name as updated_by', 'retail_franchises.status', 'retail_franchises.code', 'retail_franchises.location_latitude', 'retail_franchises.location_longitude', 'retail_franchises.created_at as created', 'retail_franchises.updated_at as updated', 'retail_franchises.discount','retail_franchises.insurance');
+            ->select('retail_franchises.id', 'retail_franchises.name', 'retail_franchises.phone_no', 'retail_franchises.email', 'retail_franchises.cnic', 'c.name as default_hub', 'c.id as default_hub_id', 'a.name as updated_by', 'retail_franchises.status', 'retail_franchises.code', 'retail_franchises.location_latitude', 'retail_franchises.location_longitude', 'retail_franchises.created_at as created', 'retail_franchises.updated_at as updated', 'retail_franchises.discount','retail_franchises.insurance','retail_franchises.is_pudo');
 
         $datatables = Datatables::of($franchise)
             ->editColumn('status', function ($data) {
@@ -200,6 +200,14 @@ class RetailAdminUserManagementController extends Controller
                     return 'In-Active';
                 }
             })
+            ->editColumn('is_pudo', function ($data) {
+                if ($data->is_pudo == 1) {
+                    return 'Enabled';
+                } else {
+                    return 'Disabled';
+                }
+            })
+
             ->addColumn('location', function ($data) {
                 $location = '<div class="text-center">';
                 if ($data->latitude != null && $data->longitude != null) {
@@ -322,6 +330,8 @@ class RetailAdminUserManagementController extends Controller
         $date = Carbon::now()->format('Y_m_d');
         $hub_count = RetailFranchise::where('default_hub', $request->hub)->count() + 1;
         $cnic_active_status = $request->cnic_status == "on" ? 1 : 0;
+        $is_pudo = $request->is_pudo == "on" ? 1 : 0;
+
 
         $franchise = new RetailFranchise();
         $franchise->name = $request->name;
@@ -336,6 +346,7 @@ class RetailAdminUserManagementController extends Controller
         $franchise->updated_by = Auth::id();
         $franchise->insurance = $request->insurance;
         $franchise->status = 1;
+        $franchise->is_pudo = $is_pudo;
         $franchise->save();
 
         $hub_name = City::find($request->hub)->name;
@@ -457,6 +468,8 @@ class RetailAdminUserManagementController extends Controller
         $existing_franchise = RetailUser::where('name', $request->name)->where('category_id', '!=', $id);
         if (!$existing_franchise->exists()) {
             $cnic_active_status = $request->cnic_status == "on" ? 1 : 0;
+            $is_pudo = $request->is_pudo == "on" ? 1 : 0;
+
             $franchise = RetailFranchise::find($request->franchise_id);
             $franchise->name = $request->name;
             $franchise->phone_no = $request->phone_number;
@@ -468,6 +481,7 @@ class RetailAdminUserManagementController extends Controller
             $franchise->discount = $request->discount;
             $franchise->insurance = $request->edit_insurance;
             $franchise->updated_by = Auth::id();
+            $franchise->is_pudo = $is_pudo;
             
 
             $changedFields = [];
@@ -1353,7 +1367,7 @@ class RetailAdminUserManagementController extends Controller
         }
         $trax_center = RetailTraxCenter::join('admins as a', 'a.id', '=', 'retail_trax_centers.updated_by')
             ->join('cities as c', 'c.id', '=', 'retail_trax_centers.default_hub')
-            ->select('retail_trax_centers.id', 'retail_trax_centers.name', 'retail_trax_centers.phone_no', 'retail_trax_centers.email', 'retail_trax_centers.cnic', 'c.name as default_hub', 'c.id as default_hub_id', 'a.name as updated_by', 'retail_trax_centers.status', 'retail_trax_centers.code', 'retail_trax_centers.location_latitude', 'retail_trax_centers.location_longitude', 'retail_trax_centers.created_at as created', 'retail_trax_centers.updated_at as updated','retail_trax_centers.discount','retail_trax_centers.insurance');
+            ->select('retail_trax_centers.id', 'retail_trax_centers.name', 'retail_trax_centers.phone_no', 'retail_trax_centers.email', 'retail_trax_centers.cnic', 'c.name as default_hub', 'c.id as default_hub_id', 'a.name as updated_by', 'retail_trax_centers.status', 'retail_trax_centers.code', 'retail_trax_centers.location_latitude', 'retail_trax_centers.location_longitude', 'retail_trax_centers.created_at as created', 'retail_trax_centers.updated_at as updated','retail_trax_centers.discount','retail_trax_centers.insurance','retail_trax_centers.is_pudo');
 
         $datatables = Datatables::of($trax_center)
             ->editColumn('status', function ($data) {
@@ -1361,6 +1375,13 @@ class RetailAdminUserManagementController extends Controller
                     return 'Active';
                 } else {
                     return 'In-Active';
+                }
+            })
+            ->editColumn('is_pudo', function ($data) {
+                if ($data->is_pudo == 1) {
+                    return 'Enabled';
+                } else {
+                    return 'Disabled';
                 }
             })
             ->addColumn('location', function ($data) {
@@ -1469,6 +1490,7 @@ class RetailAdminUserManagementController extends Controller
 
     public function trax_center_add(Request $request)
     {
+
         $request->validate([
             'attachment_1' => 'required|mimes:jpeg,png,jpg,pdf,doc,docx|max:2048',
         ]);
@@ -1487,6 +1509,7 @@ class RetailAdminUserManagementController extends Controller
         $trax_center->insurance = $request->insurance;
         $trax_center->updated_by = Auth::id();
         $trax_center->status = 1;
+        $trax_center->is_pudo = $request->has('is_pudo') ? 1 : 0;
         $trax_center->save();
 
         $hub_name = City::find($request->hub)->name;
@@ -1545,6 +1568,7 @@ class RetailAdminUserManagementController extends Controller
             $trax_center->discount = $request->discount;
             $trax_center->insurance = $request->edit_insurance;
             $trax_center->updated_by = Auth::id();
+            $trax_center->is_pudo = $request->has('is_pudo') ? 1 : 0;
 
             $fieldNames = [
                 'name' => 'Name',

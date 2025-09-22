@@ -37,6 +37,7 @@
                         <th class="border-primary border-darken-1">Location</th>
                         <th class="border-primary border-darken-1">Discount</th>
                         <th class="border-primary border-darken-1">Insurance</th>
+                        <th class="border-primary border-darken-1">Pickup Drop of</th>
                         <th class="border-primary border-darken-1"></th>
                     </tr>
                     </thead>
@@ -133,6 +134,12 @@
                                         {{-- <div class="input-group-append">
                                             <span class="input-group-text" id="basic-addon2"></span>
                                         </div> --}}
+                                    </div>
+                                    <div class="input-group mb-3">
+                                        <div class="form-group">
+                                            <label for="is_pudo" class="mr-1">Pickup Drop of</label>
+                                            <input type="checkbox" id="is_pudo" name="is_pudo" class="switchery" data-color="success" data-size="sm" data-switchery="true">
+                                        </div>
                                     </div>
                                 </div>
 
@@ -322,6 +329,12 @@
                                     <input type="text" name="franchise_deduction" id="deduction_percentage_edit" class="form-control deduction_percentage" placeholder="Commission GST Deduction*"  value="" max="100" data-toggle="tooltip" data-trigger="hover" data-placement="top" title="Deduction">
                                     <div class="input-group-append">
                                         <span class="input-group-text" id="basic-addon2">%</span>
+                                    </div>
+                                </div>
+                                <div class="input-group mb-3">
+                                    <div class="form-group">
+                                        <label for="edit_is_pudo" class="mr-1">Pickup Drop of</label>
+                                        <input type="checkbox" id="edit_is_pudo" name="is_pudo" class="switchery" data-color="success" data-size="sm" data-switchery="true">
                                     </div>
                                 </div>
                             </div>
@@ -565,6 +578,7 @@
                             head.push('Franchise Code');
                             head.push('Discount');
                             head.push('Insurance');
+                            head.push('Pickup Drop of');
 
 
                             $.each(result.data, function(index, values) {
@@ -583,6 +597,7 @@
                                 row.push(values.code);
                                 row.push(values.discount);
                                 row.push(values.insurance);
+                                row.push(values.is_pudo);
                                 body.push(row);
                             });
                         },
@@ -641,6 +656,7 @@
                     { data:'location' ,name: 'location', class: 'align-middle text-center location', orderable: false, searchable: false},
                     { data:'discount' ,name: 'retail_franchises.discount', class: 'align-middle text-center discount'},
                     { data:'insurance' ,name: 'retail_franchises.insurance', class: 'align-middle text-center insurance'},
+                    { data:'is_pudo' ,name: 'retail_franchises.is_pudo', class: 'align-middle text-center is_pudo',searchable: false},
                     { data:'action' ,name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
@@ -812,6 +828,7 @@
                 var long = table.row($(this).parents('tr')).data().location_longitude;
                 var discount = table.row($(this).parents('tr')).data().discount;
                 var insurance = table.row($(this).parents('tr')).data().insurance;
+                var is_pudo = table.row($(this).parents('tr')).data().is_pudo;
 
                 $('#franchise_id').val(id);
                 $('#edit_name').val(name);
@@ -822,6 +839,12 @@
                 $('#edit_long').val(long);
                 $('#edit_discount').val(discount);
                 $('#edit_insurance').val(insurance);
+
+                if(is_pudo == 'Enabled' &&  !$("#edit_is_pudo").is(':checked')){
+                    $("#edit_is_pudo").trigger('click')
+                }else if (is_pudo == 'Disabled' &&  $("#edit_is_pudo").is(':checked')) {
+                    $("#edit_is_pudo").trigger('click')
+                }
 
                 $('#edit_remarks_title').text('Edit Franchise ' + name);
 
