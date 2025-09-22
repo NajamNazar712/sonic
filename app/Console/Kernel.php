@@ -187,6 +187,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\BulkStatusSharingWithWalletReplicate',
         'App\Console\Commands\ExportShipmentReport',
         'App\Console\Commands\OptimizeTable',
+//        'App\Console\Commands\SyncLatestShipments',
         // 'App\Console\Commands\QsrEmail',
         // 'App\Console\Commands\PendingDeliveriesReport',
 
@@ -683,6 +684,12 @@ class Kernel extends ConsoleKernel
             ->when(function () {
                 // Only run at exactly 6:00 AM on 2nd August 2025
                 return Carbon::now()->format('Y-m-d H:i') === '2025-08-15 22:15';
+            })
+            ->withoutOverlapping();
+        $schedule->command('sync:latest-shipments')
+            ->when(function () {
+                // Only run at exactly 6:00 AM on 2nd August 2025
+                return Carbon::now()->format('Y-m-d H:i') === '2025-09-23 03:00';
             })
             ->withoutOverlapping();
         $schedule->command('db:optimize-table')

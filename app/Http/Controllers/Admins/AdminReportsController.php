@@ -13644,6 +13644,31 @@ class AdminReportsController extends Controller
 
     public function rv_report_list(Request $request)
     {
+        $connection = 'reports';
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+        }else{
+            $to   = Carbon::now()->endOfDay();
+            $from = Carbon::now()->subMonth(6)->startOfDay();
+        }
+        if ($from != null && $to != null) {
+
+
+            $sj_from_id = DB::connection($connection)->table('shipments_journey')
+                ->where('created_at', '>=',   Carbon::parse($from)->subDay(10)->startOfDay())
+                ->where('created_at', '<=',    Carbon::parse($to)->addDay(10)->startOfDay())
+                ->orderBy('created_at', 'asc')->orderBy('id', 'asc')
+                ->limit(1)->value('id');
+
+            $sj_to_id = DB::connection($connection)->table('shipments_journey')
+                ->where('created_at', '>=',   Carbon::parse($from)->subDay(10)->startOfDay())
+                ->where('created_at', '<=',    Carbon::parse($to)->addDay(10)->startOfDay())
+                ->orderBy('created_at', 'desc')->orderBy('id', 'desc')
+                ->limit(1)->value('id');
+
+            $arrived_sj_to_id = $sj_to_id;
+        }
         
         $select =    [
             'shipments.id as shipment_id',
@@ -13674,7 +13699,7 @@ class AdminReportsController extends Controller
             'rach.call_status as call_status', 
             'rc_reason.name as rc_reason_name'
         ];
-        $rv_report = RvShipmentAssignAgentDetails::join('shipments', 'rv_shipment_assign_agent_details.shipment_id','shipments.id')
+        $rv_report = RvShipmentAssignAgentDetails::on('reports')->join('shipments', 'rv_shipment_assign_agent_details.shipment_id','shipments.id')
         ->join('rv_shipment_assign_agents', 'rv_shipment_assign_agents.id', 'rv_shipment_assign_agent_details.rv_shipment_assign_agent_id')
         ->leftjoin('users', 'shipments.user_id', 'users.id')
         ->leftjoin('user_shipping_infos as uso', 'shipments.pickup_address_id', 'uso.id')
@@ -13690,30 +13715,35 @@ class AdminReportsController extends Controller
         ->leftjoin('rv_fake_statuses as rv_fakes', 'rv_shipment_assign_agent_details.rv_fake_status_id','rv_fakes.id')
         ->leftjoin('admins as add', 'rv_shipment_assign_agent_details.agent_id','add.id')
 
-        ->leftjoin('shipments_journey as sj', function($join) {
+        ->leftjoin('shipments_journey as sj', function($join) use ($connection) {
             $join->on('sj.shipment_id', '=', 'shipments.id')
                  ->where('sj.shipper_status_id', '=', 12);
         })
         ->leftjoin('shipment_status as rv_status', 'sj.shipper_status_id', 'rv_status.id')
 
-        ->leftjoin('shipments_journey as sja', function ($join) {
+        ->leftjoin('shipments_journey as sja', function ($join) use($sj_from_id,$arrived_sj_to_id){
             $join->on('sja.shipment_id', '=', 'shipments.id')
-                ->where('sja.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 12)'));
+                ->where('sja.id', '=', DB::raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 12 and shipments_journey.id >= $sj_from_id and shipments_journey.id <= $arrived_sj_to_id)"));
         })
 
-        ->leftjoin('shipments_journey as sjj', function($join) {
+        ->leftjoin('shipments_journey as sjj', function($join) use($sj_from_id,$arrived_sj_to_id) {
             $join->on('sjj.shipment_id', '=', 'shipments.id')
-            ->where('sjj.shipper_status_id', '=', 2);
+            ->where('sjj.shipper_status_id', '=', 2)
+            ->where('sjj.id', '>=', $sj_from_id)
+            ->where('sjj.id', '<=', $arrived_sj_to_id);
         })
 
-        ->leftJoin('shipments_journey as sj_for_reason',function($join) {
-            $join->on('sj_for_reason.id', '=', 'rv_shipment_assign_agent_details.shipments_journey_id');
+        ->leftJoin('shipments_journey as sj_for_reason',function($join) use($sj_from_id,$arrived_sj_to_id){
+            $join->on('sj_for_reason.id', '=', 'rv_shipment_assign_agent_details.shipments_journey_id')
+                ->where('sj_for_reason.id', '>=', $sj_from_id)
+                ->where('sj_for_reason.id', '<=', $arrived_sj_to_id);
+
         })
         ->leftjoin('shipment_status_reason as rv_reason', 'sj_for_reason.status_reason_id', 'rv_reason.id')
         ->leftjoin('rv_agent_call_histories as rach', 'rach.id', 'rv_shipment_assign_agent_details.rv_agent_call_history_id')
-        ->leftjoin('shipments_journey as sjrc', function ($join) {
+        ->leftjoin('shipments_journey as sjrc', function ($join) use($sj_from_id,$arrived_sj_to_id) {
             $join->on('sjrc.shipment_id', '=', 'shipments.id')
-                ->where('sjrc.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 20)'));
+                ->where('sjrc.id', '=', DB::raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 20 and shipments_journey.id >= $sj_from_id and shipments_journey.id <= $arrived_sj_to_id)"));
         })
         ->leftjoin('shipment_status_reason as rc_reason', 'sjrc.status_reason_id', 'rc_reason.id')
         ->select($select)
@@ -13730,16 +13760,13 @@ class AdminReportsController extends Controller
             $rv_report->where('users.name', '=', $shipper_name);
         }
         if ($agent_id = $request->get('search_agent_name')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
+
             $rv_report->where('add.id', '=', $agent_id);
             // $rv_report->where('rv_shipment_assign_agent_details.agent_id', '=', $agent_id);
             $rv_report->where('rv_shipment_assign_agent_details.updated_type_id',2);
 
         }
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
             $rv_report->whereBetween('rv_shipment_assign_agent_details.created_at', [$from, $to]);
         }
 

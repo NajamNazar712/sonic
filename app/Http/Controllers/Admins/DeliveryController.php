@@ -129,6 +129,7 @@ use App\Jobs\ProcessRvShipmentTicket;
 use App\RvShipmentTicket;
 use GuzzleHttp\Client;
 use App\Http\Models\Admin\NonCodShipmentLog;
+use App\Http\Models\ShipmentOtpVerification;
 
 class DeliveryController extends Controller
 {
@@ -155,19 +156,17 @@ class DeliveryController extends Controller
 
     public function pending_list(Request $request)
     {
-    
+        $connection = 'reports';
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 79);
         }
         // $status = array(2, 4, 6, 10, 13, 15, 49, 55, 59); //new changes for rv
-        
-         // $status = array(2, 4, 6, 10, 13, 15, 49, 55, 59); //new changes for rv
-        
-        $status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59); //for pending deliveries (old)
+        // statuses from your original code
+        $status = [2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59];
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
-            ->leftJoin('sub_category_segments as scs', 'scs.id' , 'u.sub_segment_id')
-//        $shipments = DB::connection('reports')->table('shipments')
-//            ->join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->leftJoin('sub_category_segments as scs', 'scs.id', 'u.sub_segment_id')
+            //        $shipments = DB::connection('reports')->table('shipments')
+            //            ->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->leftJoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->leftJoin('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->leftJoin('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
@@ -178,37 +177,37 @@ class DeliveryController extends Controller
             ->leftJoin('city_areas as ca', 'ca.id', '=', 'caa.city_area_id')
             ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
             ->leftJoin('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
-            ->leftJoin('shipments_journey', function ($join) {
+            ->leftJoin('shipments_journey', function ($join) use ($connection) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
                     ->where(
                         'shipments_journey.id',
                         '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)')
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)')
                     );
             })
-            ->leftjoin('shipments_journey as ras', function ($join) {
+            ->leftjoin('shipments_journey as ras', function ($join) use ($connection) {
                 $join->on('ras.shipment_id', '=', 'shipments.id')
                     ->where(
                         'ras.id',
                         '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 13)')
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 13)')
                     );
             })
             ->leftjoin('admins as agent', 'agent.id', '=', 'ras.admin_id')
-            ->leftJoin('shipments_journey as sj', function ($join) {
+            ->leftJoin('shipments_journey as sj', function ($join)  use ($connection) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where(
                         'sj.id',
                         '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)')
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)')
                     );
             })
-            ->leftJoin('shipments_journey as sjd', function ($join) {
+            ->leftJoin('shipments_journey as sjd', function ($join) use ($connection) {
                 $join->on('sjd.shipment_id', '=', 'shipments.id')
                     ->where(
                         'sjd.id',
                         '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 4)')
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 4)')
                     );
             })
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
@@ -218,65 +217,65 @@ class DeliveryController extends Controller
                     ->whereIn('crm.status_id', [DB::raw(2), DB::raw(3), DB::raw(5)])
                     ->where('crm.case_nature_id', DB::raw(1));
             })
-            ->leftjoin('shipment_items as si', function ($join) {
+            ->leftjoin('shipment_items as si', function ($join)  use ($connection) {
                 $join->on('si.shipment_id', '=', 'shipments.id')
                     ->where(
                         'si.id',
                         '=',
-                        DB::raw('(select max(id) from shipment_items where shipment_items.shipment_id = shipments.id)')
+                        DB::connection($connection)->raw('(select max(id) from shipment_items where shipment_items.shipment_id = shipments.id)')
                     );
             })
             ->leftjoin('products as prod', 'prod.id', '=', 'si.product_type_id')
             ->leftjoin('star_shippers as sts', 'sts.user_id', '=', 'u.id')
 
-            ->leftjoin('delivery_note_shipments as dns', function ($join) {
+            ->leftjoin('delivery_note_shipments as dns', function ($join)  use ($connection) {
                 $join->on('dns.shipment_id', '=', 'shipments.id')
                     ->where(
                         'dns.delivery_note_id',
                         '=',
-                        DB::raw('(select max(delivery_note_id) from delivery_note_shipments WHERE shipment_id = shipments.id)')
+                        DB::connection($connection)->raw('(select max(delivery_note_id) from delivery_note_shipments WHERE shipment_id = shipments.id)')
                     );
             })
             ->leftJoin('delivery_notes as dn', 'dn.id', '=', 'dns.delivery_note_id')
             ->leftjoin('riders as r', 'r.id', '=', 'dn.rider_id')
-        
-            ->leftJoin('shipments_journey as sjl', function ($join) {
+
+            ->leftJoin('shipments_journey as sjl', function ($join)  use ($connection) {
                 $join->on('sjl.shipment_id', '=', 'shipments.id')
                     ->where(
                         'sjl.id',
                         '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id IN (2,3,4,5,11,23,53))')
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id IN (2,3,4,5,11,23,53))')
                     );
             })
 
-            ->leftJoin('shipments_journey as journey', function ($join) {
+            ->leftJoin('shipments_journey as journey', function ($join)  use ($connection) {
                 $join->on('journey.shipment_id', '=', 'shipments.id')
                     ->where(
                         'journey.id',
                         '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)')
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)')
                     );
             })
-            ->leftJoin('shipment_scanning_journeys as ssj_last_location', function ($join) {
+            ->leftJoin('shipment_scanning_journeys as ssj_last_location', function ($join)   use ($connection) {
                 $join->on('ssj_last_location.shipment_id', '=', 'journey.shipment_id')
-                     ->whereRaw('ssj_last_location.id = (
+                    ->whereRaw('ssj_last_location.id = (
                                     select max(id) 
                                     from shipment_scanning_journeys 
                                     where shipment_scanning_journeys.shipment_id = journey.shipment_id
                                     and shipment_scanning_journeys.screen_location_id not in (9, 18)
                     )');
-            })        
+            })
             ->when(\DB::raw('ssj_last_location.user_type = 1'), function ($join) {
                 $join->leftJoin('admins as adm', function ($join) {
                     $join->on('adm.id', '=', 'ssj_last_location.admin_id')
-                         ->where('adm.role_id', '<>', 1);
+                        ->where('adm.role_id', '<>', 1);
                 });
             })
-            ->leftJoin('shipment_scanning_journey_area_logs as ssjal_last_location', function($join){
+            ->leftJoin('shipment_scanning_journey_area_logs as ssjal_last_location', function ($join) {
                 $join->on('ssjal_last_location.shipment_scanning_journey_id', '=', 'ssj_last_location.id')
-                     ->where('ssjal_last_location.hub_id', '=', DB::raw('journey.city_id'))
-                     ->where('ssjal_last_location.shipment_id', '=', DB::raw('journey.shipment_id'));
-            })                 
+                    ->where('ssjal_last_location.hub_id', '=', DB::raw('journey.city_id'))
+                    ->where('ssjal_last_location.shipment_id', '=', DB::raw('journey.shipment_id'));
+            })
             ->leftJoin('city_areas as ca_scanning_last_location_name', 'ssjal_last_location.area_id', '=', 'ca_scanning_last_location_name.id')
             ->leftJoin('shipment_scanning_screen_locations as last_screen_location', 'last_screen_location.id', '=', 'ssj_last_location.screen_location_id')
             ->select(
@@ -333,7 +332,7 @@ class DeliveryController extends Controller
                     $to   = $request->get('search_date_to');
                     $query->whereBetween('shipments.created_at', [$from, $to]);
                 }
-             )
+            )
             ->whereIn('shipments.shipper_status_id', $status)
             ->whereRaw('IF (shipments.shipper_status_id IN (2, 49), (oc.hub_id = dc.hub_id), TRUE)')
             ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
@@ -1260,7 +1259,7 @@ class DeliveryController extends Controller
                         $shipment_otp->shipment_id = $shipment_id;
                     }
                     $shipment_otp->dbf_otp = $dbf_otp;
-                    $shipment_otp->rider_id = null;
+                    $shipment_otp->rider_id = $request->selected_rider_id;
                     $shipment_otp->latitude = null;
                     $shipment_otp->longitude = null;
 
@@ -4017,8 +4016,28 @@ class DeliveryController extends Controller
                             //Remove Shipment from RV Shipment Ticket
                             RvShipmentTicket::where('shipment_id', $shipment)->delete();
 
+                        } elseif ($shipper_status_id == 12 && in_array($status_reason_id, [19, 8])) {
+                            $journey =  $shipment_details->latest_shipment_journey;   
+                            $shipmetOtpRvRAdd = ShipmentOtpVerification::where(['shipment_id' => $shipment_details->id, 'via_rvrsub_reason' => 1])->latest()->first();
+                                if ($shipmetOtpRvRAdd) {
+                                    Shipment::where('id', $shipment_details->id)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
+                                    if ($shipment_details->shipment_type == 1) {
+                                        if ($shipment_details->booking_type_id != 4) {
+                                            ShipmentChargesController::return($shipment_details->id);
+                                            if ($shipment_details->packaging_material_request != 1) {
+                                                AdminFinanceController::add_payment($shipment_details->id, 1);
+                                            }
+                                        } else {
+                                            ShipmentChargesController::walk_in_return($shipment_details->id);
+                                            $shipment_details->walk_in_status = 2;
+                                            $shipment_details->save();
+                                            AdminFinanceController::done_payment($shipment_details->id, 1);
+                                        }
+                                    }
+                                    ShipmentsJourneyController::add($shipment_details->id, 20, 20, $status_reason_id, $journey->remarks ?? NULL, NULL, 346, null, null, 1, null, null, null, null, null);
+                                }
+                            }
                         }
-                    }
 
                     if ($verification == 1) {
                         if (!empty($dispute_shipments)) {
@@ -10012,7 +10031,7 @@ class DeliveryController extends Controller
                             }
                             $shipment_otp->otp = $otp;
                             $shipment_otp->dbf_otp = $dbf_otp;
-                            $shipment_otp->rider_id = null;
+                            $shipment_otp->rider_id = $note->rider_id;
                             $shipment_otp->latitude = null;
                             $shipment_otp->longitude = null;
                             $shipment_otp->save();
@@ -10265,9 +10284,9 @@ class DeliveryController extends Controller
             ->leftjoin('city_areas as ca', 'ca.id', '=', 'r.area_id')
             ->join('delivery_note_shipments as ds', 'ds.shipment_id', '=', 's.id')
             ->join('delivery_notes as dn', 'dn.id', '=', 'ds.delivery_note_id')
-            ->where('s.amount', 0)
+            // ->where('s.amount', 0)
             ->whereNotNull('shipment_otps.dbf_otp')
-            ->where('dn.pending_status', 0)
+            // ->where('dn.pending_status', 0)
             ->whereIn('s.tracking_number', $tracking_numbers)
             ->select('shipment_otps.*', 'r.name as rider_name', 's.tracking_number as tracking_number', 'dc.hub_id', 'ca.name as area');
 
