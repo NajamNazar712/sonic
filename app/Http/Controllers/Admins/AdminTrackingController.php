@@ -2765,7 +2765,7 @@ class AdminTrackingController extends Controller
     }
 
     public function shipment_position_list(Request $request){
-        $connection = 'reports_2';
+        $connection = 'reports';
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(),616);
         }
@@ -2784,7 +2784,7 @@ class AdminTrackingController extends Controller
             ->limit(1)->value('id');
 
         $arrived_sj_to_id = $sj_to_id;
-        $shipment_positions =   DB::connection($connection)->table('shipment_positions')->leftJoin('shipments as s','s.id','=','shipment_positions.shipment_id')
+        $shipment_positions =   DB::connection('reports_2')->table('shipment_positions')->leftJoin('shipments as s','s.id','=','shipment_positions.shipment_id')
         ->leftJoin('users as u','u.id','=','s.user_id')
         // ->leftJoin('shipments_journey as sj','sj.shipment_id','=','shipment_positions.shipment_id')
             ->leftjoin('shipments_journey as sj', function ($join) use ($sj_from_id, $arrived_sj_to_id) {
