@@ -2765,19 +2765,19 @@ class AdminTrackingController extends Controller
     }
 
     public function shipment_position_list(Request $request){
-        $connection = 'reports';
+        $connection = 'reports_2';
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(),616);
         }
         $to   = Carbon::now()->endOfDay();
         $from = Carbon::now()->subMonth(6)->startOfDay();
-        $sj_from_id = DB::table('shipments_journey')
+        $sj_from_id = DB::connection('')->table('shipments_journey')
             ->where('created_at', '>=',   Carbon::parse($from)->subDay(10)->startOfDay())
             ->where('created_at', '<=',    Carbon::parse($to)->addDay(10)->startOfDay())
             ->orderBy('created_at', 'asc')->orderBy('id', 'asc')
             ->limit(1)->value('id');
 
-        $sj_to_id = DB::table('shipments_journey')
+        $sj_to_id = DB::connection($connection)->table('shipments_journey')
             ->where('created_at', '>=',   Carbon::parse($from)->subDay(10)->startOfDay())
             ->where('created_at', '<=',    Carbon::parse($to)->addDay(10)->startOfDay())
             ->orderBy('created_at', 'desc')->orderBy('id', 'desc')
@@ -2792,7 +2792,7 @@ class AdminTrackingController extends Controller
                     ->where('sj.id', '>=', $sj_from_id)
                     ->where('sj.id', '<=', $arrived_sj_to_id);
             })
-        ->join('admins as a','a.id','=','sj.admin_id')
+        ->leftJoin('admins as a','a.id','=','sj.admin_id')
         ->leftJoin('shipments_journey as sjl', function ($join) use ($sj_from_id, $arrived_sj_to_id) {
             $join->on('sjl.shipment_id', '=', 's.id')
                 ->where(
@@ -2836,8 +2836,8 @@ class AdminTrackingController extends Controller
                 $join->on('ssjal.shipment_scanning_journey_id', '=', 'ssj.id')
                     ->whereBetween('ssjal.created_at', [$from, $to]);
             })  
-        ->join('admins as new_admin', 'new_admin.id', '=', 'ssj.admin_id')        
-        ->join('city_areas as ca_scanning', 'new_admin.area_id', '=', 'ca_scanning.id')        
+        ->leftJoin('admins as new_admin', 'new_admin.id', '=', 'ssj.admin_id')        
+        ->leftJoin('city_areas as ca_scanning', 'new_admin.area_id', '=', 'ca_scanning.id')        
         ->select(['shipment_positions.tracking_number', 'shipment_positions.origin', 'shipment_positions.destination', 'shipment_positions.status', 'shipment_positions.status_at', 'shipment_positions.status_by', 'shipment_positions.screen_location', 'shipment_positions.city', 'shipment_positions.scanned_by', 'shipment_positions.scanned_at',  'shipment_positions.handover_created_by', 'shipment_positions.handover_created_at', 'shipment_positions.handover_from', 'shipment_positions.handover_to', 'shipment_positions.handover_received_by', 'shipment_positions.handover_received_at', 'u.name as shipper_name','s.amount as cod_value','a.trax_id' ,'sj.admin_id as admin_id','s.id as shipment_id','sjl.shipment_id as journey_latest_id',
         'sjl.updated_at as journey_latest_updated_at',
         'sjl.shipper_status_id as latest_shipper_status_id','s.shipper_status_id as shipper_status_id','ssj.id as ssj_id', 'ca_scanning.name as scanning_city_area_name',
