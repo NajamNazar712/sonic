@@ -2786,7 +2786,12 @@ class AdminTrackingController extends Controller
         $arrived_sj_to_id = $sj_to_id;
         $shipment_positions =   DB::connection($connection)->table('shipment_positions')->leftJoin('shipments as s','s.id','=','shipment_positions.shipment_id')
         ->leftJoin('users as u','u.id','=','s.user_id')
-        ->leftJoin('shipments_journey as sj','sj.shipment_id','=','shipment_positions.shipment_id')
+        // ->leftJoin('shipments_journey as sj','sj.shipment_id','=','shipment_positions.shipment_id')
+            ->leftjoin('shipments_journey as sj', function ($join) use ($sj_from_id, $arrived_sj_to_id) {
+                $join->on('sj.shipment_id', '=', 'shipment_positions.shipment_id')
+                    ->where('sj.id', '>=', $sj_from_id)
+                    ->where('sj.id', '<=', $arrived_sj_to_id);
+            })
         ->leftJoin('admins as a','a.id','=','sj.admin_id')
         ->leftJoin('shipments_journey as sjl', function ($join) use ($sj_from_id, $arrived_sj_to_id) {
             $join->on('sjl.shipment_id', '=', 's.id')
