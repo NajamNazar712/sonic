@@ -2789,7 +2789,7 @@ class AdminTrackingController extends Controller
             ->whereBetween('id', [$sj_from_id, $sj_to_id])
             ->groupBy('shipment_id');
         $arrived_sj_to_id = $sj_to_id;
-        $shipment_positions =   DB::connection('reports_2')->table('shipment_positions')->leftJoin('shipments as s','s.id','=','shipment_positions.shipment_id')
+        $shipment_positions =   DB::connection('reports')->table('shipment_positions')->leftJoin('shipments as s','s.id','=','shipment_positions.shipment_id')
         ->leftJoin('users as u','u.id','=','s.user_id')
         // ->leftJoin('shipments_journey as sj','sj.shipment_id','=','shipment_positions.shipment_id')
             ->leftjoin('shipments_journey as sj', function ($join) use ($sj_from_id, $arrived_sj_to_id) {
@@ -2806,9 +2806,6 @@ class AdminTrackingController extends Controller
             //             DB::connection('reports')->raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id IN (2,3,4,5,11,23,53) and sjl.id >= $sj_from_id and sjl.id <= $arrived_sj_to_id)")
             //         );
             // })
-        ->leftJoinSub($latestJourney, 'sjl_max', function ($join) {
-            $join->on('sjl_max.shipment_id', '=', 's.id');
-        })
         ->leftJoin('shipments_journey as sjl', 'sjl.id', '=', 'sjl_max.max_id')
         ->leftjoin('shipments_journey as sj_arrival', function ($join) use ($sj_from_id, $arrived_sj_to_id){
         $join->on('sj_arrival.shipment_id', '=', 's.id')
@@ -2823,15 +2820,19 @@ class AdminTrackingController extends Controller
                 );
         })
         ->leftJoin('scanned_user_types as sp', 'shipment_positions.scanned_by_user_type', '=', 'sp.id')
-        ->leftJoin('shipment_scanning_journeys as ssj', function ($join)  use ($sj_from_id, $arrived_sj_to_id){
-            $join->on('ssj.shipment_id', '=', 'journey.shipment_id')
-            ->whereRaw("ssj.id = (
-                select max(id) from shipment_scanning_journeys 
-                where shipment_scanning_journeys.shipment_id = journey.shipment_id
-                and shipment_scanning_journeys.screen_location_id = shipment_positions.screen_location_id 
-                and ssj.id >= $sj_from_id and ssj.id <= $arrived_sj_to_id
-            )");
+        // ->leftJoin('shipment_scanning_journeys as ssj', function ($join)  use ($sj_from_id, $arrived_sj_to_id){
+        //     $join->on('ssj.shipment_id', '=', 'journey.shipment_id')
+        //     ->whereRaw("ssj.id = (
+        //         select max(id) from shipment_scanning_journeys 
+        //         where shipment_scanning_journeys.shipment_id = journey.shipment_id
+        //         and shipment_scanning_journeys.screen_location_id = shipment_positions.screen_location_id 
+        //         and ssj.id >= $sj_from_id and ssj.id <= $arrived_sj_to_id
+        //     )");
+        // })
+        ->leftJoinSub($latestJourney, 'sjl_max', function ($join) {
+            $join->on('sjl_max.shipment_id', '=', 's.id');
         })
+        ->leftJoin('shipments_journey as ssj', 'ssj.id', '=', 'sjl_max.max_id')
         ->when(\DB::raw('sp.id = 1'), function ($join) {
             $join->leftJoin('admins as adm', function ($join) {
                 $join->on('adm.id', '=', 'shipment_positions.scanned_by_id')
@@ -2852,7 +2853,7 @@ class AdminTrackingController extends Controller
         'sjl.shipper_status_id as latest_shipper_status_id','s.shipper_status_id as shipper_status_id','ssj.id as ssj_id', 'ca_scanning.name as scanning_city_area_name',
         's.consignee_address', 's.actual_weight','shipment_positions.scanned_by_user_type as scanned_by_user_type','shipment_positions.scanned_by_id as scanned_by_id','sj_arrival.created_at as arrival', 'ssj.created_at as last_scanned_at', 'ssj.entry_method as entry_method'
         ])
-        ->where('tracked_by', Auth::id())->whereBetween('shipment_positions.created_at', [$from, $to])->distinct();
+        ->where('tracked_by', Auth::id())->whereBetween('shipment_positions.created_at', [$from, $to])->distinct('shipment_positions.shipment_id');
         // dd($shipment_positions->get()->toArray());
         $datatables = Datatables::of($shipment_positions)
             ->editColumn('tracking_number_link', function ($shipments) {
