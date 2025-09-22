@@ -2770,7 +2770,7 @@ class AdminTrackingController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),616);
         }
         $to   = Carbon::now()->endOfDay();
-        $from = "2025-07-15 23:59:59";
+        $from = "2025-09-15 23:59:59";
         $sj_from_id = DB::connection($connection)->table('shipments_journey')
             ->where('created_at', '>=',   Carbon::parse($from)->subDay(10)->startOfDay())
             ->where('created_at', '<=',    Carbon::parse($to)->addDay(10)->startOfDay())
