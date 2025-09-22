@@ -187,7 +187,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\BulkStatusSharingWithWalletReplicate',
         'App\Console\Commands\ExportShipmentReport',
         'App\Console\Commands\OptimizeTable',
-        'App\Console\Commands\SyncLatestShipments',
+//        'App\Console\Commands\SyncLatestShipments',
         // 'App\Console\Commands\QsrEmail',
         // 'App\Console\Commands\PendingDeliveriesReport',
 
