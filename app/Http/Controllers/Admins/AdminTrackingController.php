@@ -2841,7 +2841,7 @@ class AdminTrackingController extends Controller
         'sjl.shipper_status_id as latest_shipper_status_id','s.shipper_status_id as shipper_status_id','ssj.id as ssj_id', 'ca_scanning.name as scanning_city_area_name',
         's.consignee_address', 's.actual_weight','shipment_positions.scanned_by_user_type as scanned_by_user_type','shipment_positions.scanned_by_id as scanned_by_id','sj_arrival.created_at as arrival', 'ssj.created_at as last_scanned_at', 'ssj.entry_method as entry_method'
         ])
-            ->where('tracked_by', Auth::id())->whereBetween('shipment_positions.created_at', [$from, $to])->distinct('shipment_positions.shipment_id');
+            ->where('tracked_by', Auth::id())->groupBy('shipment_positions.shipment_id');
         // dd($shipment_positions->get()->toArray());
         $datatables = Datatables::of($shipment_positions)
             ->editColumn('tracking_number_link', function ($shipments) {
