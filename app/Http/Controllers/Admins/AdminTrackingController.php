@@ -2832,19 +2832,23 @@ class AdminTrackingController extends Controller
                 and ssj.id >= $sj_from_id and ssj.id <= $arrived_sj_to_id
             )");
         })
-        ->when(\DB::raw('sp.id = 1'), function ($join) {
-            $join->leftJoin('admins as adm', function ($join) {
-                $join->on('adm.id', '=', 'shipment_positions.scanned_by_id')
-                     ->where('adm.role_id', '<>', 1);
-            });
+        // ->when(\DB::raw('sp.id = 1'), function ($join) {
+        //     $join->leftJoin('admins as adm', function ($join) {
+        //         $join->on('adm.id', '=', 'shipment_positions.scanned_by_id')
+        //              ->where('adm.role_id', '<>', 1);
+        //     });
+        // })
+        ->leftJoin('admins as adm', function ($join) {
+            $join->on('adm.id', '=', 'shipment_positions.scanned_by_id')
+                ->where('shipment_positions.scanned_by_user_type', '=', 1)
+                ->where('adm.role_id', '<>', 1);
         })
 
-
-            // ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'ssj.id')
-            ->leftJoin('shipment_scanning_journey_area_logs as ssjal', function ($join) use ($from, $to) {
-                $join->on('ssjal.shipment_scanning_journey_id', '=', 'ssj.id')
-                    ->whereBetween('ssjal.created_at', [$from, $to]);
-            })  
+        // ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'ssj.id')
+        ->leftJoin('shipment_scanning_journey_area_logs as ssjal', function ($join) use ($from, $to) {
+            $join->on('ssjal.shipment_scanning_journey_id', '=', 'ssj.id')
+                ->whereBetween('ssjal.created_at', [$from, $to]);
+        })  
         ->leftJoin('admins as new_admin', 'new_admin.id', '=', 'ssj.admin_id')        
         ->leftJoin('city_areas as ca_scanning', 'new_admin.area_id', '=', 'ca_scanning.id')        
         ->select(['shipment_positions.tracking_number', 'shipment_positions.origin', 'shipment_positions.destination', 'shipment_positions.status', 'shipment_positions.status_at', 'shipment_positions.status_by', 'shipment_positions.screen_location', 'shipment_positions.city', 'shipment_positions.scanned_by', 'shipment_positions.scanned_at',  'shipment_positions.handover_created_by', 'shipment_positions.handover_created_at', 'shipment_positions.handover_from', 'shipment_positions.handover_to', 'shipment_positions.handover_received_by', 'shipment_positions.handover_received_at', 'u.name as shipper_name','s.amount as cod_value','a.trax_id' ,'sj.admin_id as admin_id','s.id as shipment_id','sjl.shipment_id as journey_latest_id',
