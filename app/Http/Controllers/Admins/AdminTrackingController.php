@@ -2769,8 +2769,9 @@ class AdminTrackingController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(),616);
         }
-        $to   = Carbon::now()->endOfDay();
-        $from = Carbon::now()->subMonth(6)->startOfDay();
+        // $to   = Carbon::now()->endOfDay();
+        $to   = "2025-09-22 00:00:00";
+        $from = "2025-09-22 23:59:59";
         $sj_from_id = DB::connection($connection)->table('shipments_journey')
             ->where('created_at', '>=',   Carbon::parse($from)->subDay(10)->startOfDay())
             ->where('created_at', '<=',    Carbon::parse($to)->addDay(10)->startOfDay())
