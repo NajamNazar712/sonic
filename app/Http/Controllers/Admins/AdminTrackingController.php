@@ -2816,16 +2816,19 @@ class AdminTrackingController extends Controller
                 );
         })
         ->leftJoin('scanned_user_types as sp', 'shipment_positions.scanned_by_user_type', '=', 'sp.id')
-        ->leftJoin('shipment_scanning_journeys as ssj', function ($join)  use ($sj_from_id, $arrived_sj_to_id,$from,$to){
-            $join->on('ssj.shipment_id', '=', 'journey.shipment_id')
-                 ->whereRaw("ssj.id = (
-                                select max(id) 
-                                from shipment_scanning_journeys 
-                                where shipment_scanning_journeys.shipment_id = journey.shipment_id
-                                and shipment_scanning_journeys.screen_location_id = shipment_positions.screen_location_id 
-                                and shipment_scanning_journeys.created_at >= $from and shipment_scanning_journeys.created_at <= $to
-                            )");
-        })
+            ->leftJoin('shipment_scanning_journeys as ssj', function ($join) use ($from, $to) {
+                $join->on('ssj.shipment_id', '=', 'journey.shipment_id')
+                    ->whereRaw(
+                        'ssj.id = (
+                SELECT MAX(sj2.id)
+                FROM shipment_scanning_journeys sj2
+                WHERE sj2.shipment_id = journey.shipment_id
+                  AND sj2.screen_location_id = shipment_positions.screen_location_id
+                  AND sj2.created_at BETWEEN ? AND ?
+            )',
+                        [$from, $to]  // <-- safely bound
+                    );
+            })
         ->when(\DB::raw('sp.id = 1'), function ($join) {
             $join->leftJoin('admins as adm', function ($join) {
                 $join->on('adm.id', '=', 'shipment_positions.scanned_by_id')
