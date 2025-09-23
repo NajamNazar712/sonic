@@ -160,6 +160,30 @@ class DeliveryController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 79);
         }
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+        } else {
+            $to   = Carbon::now()->endOfDay();
+            $from = Carbon::now()->subMonth(6)->startOfDay();
+        }
+        if ($from != null && $to != null) {
+
+
+            $sj_from_id = DB::connection($connection)->table('shipments_journey')
+                ->where('created_at', '>=',   Carbon::parse($from)->subDay(10)->startOfDay())
+                ->where('created_at', '<=',    Carbon::parse($to)->addDay(10)->startOfDay())
+                ->orderBy('created_at', 'asc')->orderBy('id', 'asc')
+                ->limit(1)->value('id');
+
+            $sj_to_id = DB::connection($connection)->table('shipments_journey')
+                ->where('created_at', '>=',   Carbon::parse($from)->subDay(10)->startOfDay())
+                ->where('created_at', '<=',    Carbon::parse($to)->addDay(10)->startOfDay())
+                ->orderBy('created_at', 'desc')->orderBy('id', 'desc')
+                ->limit(1)->value('id');
+
+            $arrived_sj_to_id = $sj_to_id;
+        }
         // $status = array(2, 4, 6, 10, 13, 15, 49, 55, 59); //new changes for rv
         // statuses from your original code
         $status = [2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59];
@@ -228,42 +252,46 @@ class DeliveryController extends Controller
             ->leftjoin('products as prod', 'prod.id', '=', 'si.product_type_id')
             ->leftjoin('star_shippers as sts', 'sts.user_id', '=', 'u.id')
 
-            ->leftjoin('delivery_note_shipments as dns', function ($join)  use ($connection) {
+            ->leftjoin('delivery_note_shipments as dns', function ($join)  use ($connection, $sj_from_id, $arrived_sj_to_id) {
                 $join->on('dns.shipment_id', '=', 'shipments.id')
                     ->where(
                         'dns.delivery_note_id',
                         '=',
-                        DB::connection($connection)->raw('(select max(delivery_note_id) from delivery_note_shipments WHERE shipment_id = shipments.id)')
+                        DB::connection($connection)->raw("(select max(delivery_note_id) from delivery_note_shipments WHERE shipment_id = shipments.id  and shipments_journey.id >= $sj_from_id and shipments_journey.id <= $arrived_sj_to_id)")
                     );
             })
             ->leftJoin('delivery_notes as dn', 'dn.id', '=', 'dns.delivery_note_id')
             ->leftjoin('riders as r', 'r.id', '=', 'dn.rider_id')
 
-            ->leftJoin('shipments_journey as sjl', function ($join)  use ($connection) {
+            ->leftJoin('shipments_journey as sjl', function ($join)  use ($connection, $sj_from_id, $arrived_sj_to_id) {
                 $join->on('sjl.shipment_id', '=', 'shipments.id')
                     ->where(
                         'sjl.id',
                         '=',
-                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id IN (2,3,4,5,11,23,53))')
+                        DB::connection($connection)->raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id IN (2,3,4,5,11,23,53)  and shipments_journey.id >= $sj_from_id and shipments_journey.id <= $arrived_sj_to_id)")
                     );
             })
 
-            ->leftJoin('shipments_journey as journey', function ($join)  use ($connection) {
+            ->leftJoin('shipments_journey as journey', function ($join)  use ($connection, $sj_from_id, $arrived_sj_to_id) {
                 $join->on('journey.shipment_id', '=', 'shipments.id')
                     ->where(
                         'journey.id',
                         '=',
-                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)')
+                        DB::connection($connection)->raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id  and shipments_journey.id >= $sj_from_id and shipments_journey.id <= $arrived_sj_to_id)")
                     );
             })
-            ->leftJoin('shipment_scanning_journeys as ssj_last_location', function ($join)   use ($connection) {
+            ->leftJoin('shipment_scanning_journeys as ssj_last_location', function ($join)   use ($from, $to) {
                 $join->on('ssj_last_location.shipment_id', '=', 'journey.shipment_id')
-                    ->whereRaw('ssj_last_location.id = (
+                    ->whereRaw(
+                'ssj_last_location.id = (
                                     select max(id) 
                                     from shipment_scanning_journeys 
                                     where shipment_scanning_journeys.shipment_id = journey.shipment_id
                                     and shipment_scanning_journeys.screen_location_id not in (9, 18)
-                    )');
+                                    AND ssj_last_location.created_at >= ? AND ssj_last_location.created_at <= ?
+                    )',
+                    [$from, $to]  
+                );
             })
             ->when(\DB::raw('ssj_last_location.user_type = 1'), function ($join) {
                 $join->leftJoin('admins as adm', function ($join) {
