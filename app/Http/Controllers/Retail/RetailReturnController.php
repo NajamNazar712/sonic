@@ -230,7 +230,7 @@ class RetailReturnController extends Controller
         if($parcel){
             // if($parcel->shipper_status_id != 52){
             if($parcel->shipper_status_id != 52 || $parcel->shipper_status_id != 66){
-                if($parcel->shipper_status_id == 12){
+                if($parcel->shipper_status_id == 65){
                     // $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 12)->where('status_reason_id', 12)->latest('id')->first();
                     // Shipment::where('id',$request->shipment_id)->update(['shipper_status_id' => 52,'consignee_status_id' => 52]);
 
