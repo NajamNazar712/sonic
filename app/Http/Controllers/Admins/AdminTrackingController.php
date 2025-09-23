@@ -2824,7 +2824,7 @@ class AdminTrackingController extends Controller
                 FROM shipment_scanning_journeys sj2
                 WHERE sj2.shipment_id = journey.shipment_id
                   AND sj2.screen_location_id = shipment_positions.screen_location_id
-                  AND sj2.created_at BETWEEN ? AND ?
+                  AND sj2.created_at >= ? AND sj2.created_at <= ?
             )',
                         [$from, $to]  // <-- safely bound
                     );
