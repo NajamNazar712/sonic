@@ -13043,7 +13043,6 @@ class AdminAPIController extends Controller
                 } else {
                     $details["etd_working_status"] = "Before ETD";
                 }
-                $etdDeadline = $shipment->created_at->copy()->addDays((int) $max);
                 $details['etd_working_days'] = $etd->label;
                 $details['etd_deadline'] =  $shipment->created_at->toDateString() .' - '. $shipment->created_at->copy()->addDays((int) $max)->toDateString();
             }
