@@ -13031,9 +13031,23 @@ class AdminAPIController extends Controller
             $details['shipment_status'] = $shipment->status_shipper->name;
 
             $shipper = $shipment->user;
-            $etd = $shipment->pickup_city_etd;
-            $details['etd_working_days'] = $etd->label;
-
+            if($shipment->shipper_status_id ==2){
+                $etd = $shipment->pickup_city_etd;
+                list($min, $max) = explode('-', $shipment->pickup_city_etd->range);
+                $daysDifference = $shipment->created_at->diffInDays($shipment->updated_at);
+    
+                if ($daysDifference >= (int)$min && $daysDifference <= (int)$max) {
+                    $details["etd_working_status"] = "Within ETD";
+                } elseif ($daysDifference > (int)$max) {
+                    $details["etd_working_status"] = "ETD Passed";
+                } else {
+                    $details["etd_working_status"] = "Before ETD";
+                }
+                $etdDeadline = $shipment->created_at->copy()->addDays((int) $max);
+                $details['etd_working_days'] = $etd->label;
+                $details['etd_deadline'] =  $shipment->created_at->toDateString() .' - '. $shipment->created_at->copy()->addDays((int) $max)->toDateString();
+            }
+            $details['crm_ticket_no'] = ($shipment?->crm_request) ? $shipment?->crm_request?->id .' ('.$shipment->crm_request?->request_status?->name .')' : null;
             $details['shipper']['name'] = $shipper->name;
 
             $pickup = $shipment->pickup_address;
