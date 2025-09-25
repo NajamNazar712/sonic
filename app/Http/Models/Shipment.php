@@ -193,6 +193,9 @@ class Shipment extends Model
     {
         return $this->hasOne('App\Models\BookingChannel');
     }
-
+    public function getDaysDifferenceAttribute()
+    {
+        return $this->created_at->diffInDays($this->updated_at);
+    }
 
 }
