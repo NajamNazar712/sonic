@@ -5,8 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
-use RecursiveIteratorIterator;
-use RecursiveDirectoryIterator;
+use Illuminate\Support\Facades\File;
 
 class ArchiveAwsBucket extends Command
 {
@@ -15,33 +14,30 @@ class ArchiveAwsBucket extends Command
 
     public function handle()
     {
-        $localPath = storage_path('app/public/replacement_parcel');
+        $basePath = storage_path('app/public/replacement_parcel');
+        $files = File::allFiles($basePath);
 
-        // Iterate files in the directory
-        $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($localPath, RecursiveDirectoryIterator::SKIP_DOTS)
-        );
+        $start = \Carbon\Carbon::parse('2024-04-01');
+        $end   = \Carbon\Carbon::parse('2024-09-30 23:59:59');
 
-        foreach ($iterator as $file) {
-            if ($file->isFile()) {
-                $modifiedTime = Carbon::createFromTimestamp($file->getMTime());
+        foreach ($files as $file) {
+            $modifiedTime = \Carbon\Carbon::createFromTimestamp($file->getMTime());
 
-                // Only between 2024-04-01 and 2024-09-30
-                if ($modifiedTime->between(Carbon::parse('2024-04-01'), Carbon::parse('2024-09-30 23:59:59'))) {
-                    $monthFolder = 'replacement_parcel/' . $modifiedTime->format('Y-m');
+            // only files in April → September 2024
+            if ($modifiedTime->between($start, $end)) {
+                // Get relative path inside replacement_parcel
+                $relativePath = str_replace($basePath . '/', '', $file->getPathname());
 
-                    $filePath   = $file->getRealPath();
-                    $fileName   = $file->getBasename();
+                // Build S3 path
+                $s3Path = "sonic_storage_archive/replacement_parcel/" . $relativePath;
 
-                    // Destination path in S3
-                    $s3Path = "sonic_storage_archive/{$monthFolder}/{$fileName}";
+                // Upload file
+                $stream = fopen($file->getPathname(), 'r+');
+                Storage::disk('s3')->put($s3Path, $stream);
+                fclose($stream);
 
-                    $stream = fopen($filePath, 'r+');
-                    Storage::disk('s3')->put($s3Path, $stream);
-                    fclose($stream);
-
-                    $this->info("Uploaded: {$s3Path}");
-                }
+                // (Optional) remove local file after upload
+                // \File::delete($file->getPathname());
             }
         }
 
