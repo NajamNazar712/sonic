@@ -28,7 +28,7 @@ class ArchiveAwsBucket extends Command
 
                 // Only between 2024-04-01 and 2024-09-30
                 if ($modifiedTime->between(Carbon::parse('2024-04-01'), Carbon::parse('2024-09-30 23:59:59'))) {
-                    $monthFolder = $modifiedTime->format('Y-m');
+                    $monthFolder = 'replacement_parcel/' . $modifiedTime->format('Y-m');
 
                     $filePath   = $file->getRealPath();
                     $fileName   = $file->getBasename();
