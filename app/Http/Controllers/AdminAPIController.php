@@ -13034,7 +13034,7 @@ class AdminAPIController extends Controller
             if($shipment->shipper_status_id ==2){
                 $etd = $shipment->pickup_city_etd;
                 list($min, $max) = explode('-', $shipment->pickup_city_etd->range);
-                $daysDifference = $shipment->created_at->diffInDays($shipment->updated_at);
+                $daysDifference = $shipment->getDaysDifferenceAttribute();
     
                 if ($daysDifference >= (int)$min && $daysDifference <= (int)$max) {
                     $details["etd_working_status"] = "Within ETD";
