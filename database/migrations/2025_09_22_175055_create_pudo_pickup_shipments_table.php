@@ -15,10 +15,10 @@ return new class extends Migration
     {
         Schema::create('pudo_pickup_shipments', function (Blueprint $table) {
             $table->id();
-            $table->unsignedInteger('retail_store_id');
-            $table->unsignedInteger('retail_address_id');
-            $table->unsignedInteger('shipment_id');
-            $table->tinyInteger('retail_type')->default(1); //1-trax center 2-franchise
+            $table->unsignedInteger('retail_store_id')->index();
+            $table->unsignedInteger('retail_address_id')->index();
+            $table->unsignedInteger('shipment_id')->index();
+            $table->tinyInteger('retail_type')->default(1);
             $table->timestamps();
         });
     }

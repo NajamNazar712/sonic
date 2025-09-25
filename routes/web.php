@@ -144,6 +144,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('check_consignee_return_ratio', 'Shippers\ShipperShipmentBookController@check_consignee_return_ratio')->name('check_consignee_return_ratio');
             Route::post('check_shipment_allowed_city', 'Shippers\ShipperShipmentBookController@check_shipment_allowed_city')->name('check_shipment_allowed_city');
             Route::get('check_negative_payable', 'Shippers\ShipperShipmentBookController@check_negative_payable')->name('check_negative_payable');
+            Route::get('get_retail_stores/{city_id}', 'Shippers\ShipperShipmentBookController@city_retail_stores')->name('get_retail_stores');
+
 
 
             Route::prefix('excel')->name('excel_')->group(function () {

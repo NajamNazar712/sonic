@@ -117,4 +117,20 @@ Route::prefix('retail')->name('retail.')->group(function () {
         Route::post('mark_reattempt', 'Retail\RetailReturnController@mark_reattempt')->name('mark_reattempt');
 
     });
+
+    Route::prefix('arrival_service')->name('arrival_service.')->group(function () {
+        Route::prefix('service')->name('service.')->group(function () {
+            Route::get('', 'Retail\RetailArrivalServiceController@arrival_service_index')->name('index');
+            Route::post('shipment_details', 'Retail\RetailArrivalServiceController@arrival_service_details')->name('shipment_details');
+            Route::post('store', 'Retail\RetailArrivalServiceController@service_arrival_submit')->name('store');
+            Route::prefix('piece')->name('piece.')->group(function () {
+                Route::post('piece_details', 'Retail\RetailArrivalServiceController@arrival_piece_details')->name('piece_details');
+                Route::post('shipment_details', 'Retail\RetailArrivalServiceController@arrival_piece_shipment_details')->name('shipment_details');
+            });
+
+            Route::prefix('try_and_buy')->name('try_and_buy.')->group(function (){
+                Route::post('shipment_details', 'Retail\RetailArrivalServiceController@arrival_try_and_buy_shipment_details')->name('shipment_details');
+            });
+        });
+    });
 });

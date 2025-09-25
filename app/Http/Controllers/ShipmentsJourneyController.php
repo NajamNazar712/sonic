@@ -8,10 +8,12 @@ use App\Http\Controllers\Webhook\ShipmentStatusWebhookController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
 use App\Http\Models\Admin\MasterCargo\Bag;
+use App\Http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\Admin\ShipmentJourneyConsigneeRefusedSubReason;
 use App\Http\Models\Rider;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
+use App\Models\ShipmentJourneyRetailUser;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\CRM\CRMCommentController;
@@ -34,7 +36,7 @@ use App\Models\StatusSharingWithWallet;
 
 class ShipmentsJourneyController extends Controller
 {
-    static public function add($shipment_id, $shipper_status_id, $consignee_status_id, $status_reason_id, $remarks, $user_id, $admin_id, $reference_1_id = NULL, $reference_2_id = NULL, $verification = 1, $received_or_refused_by = NULL, $rider_id = NULL, $cnic = NULL, $relation = NULL, $remarks_id = NULL) {
+    static public function add($shipment_id, $shipper_status_id, $consignee_status_id, $status_reason_id, $remarks, $user_id, $admin_id, $reference_1_id = NULL, $reference_2_id = NULL, $verification = 1, $received_or_refused_by = NULL, $rider_id = NULL, $cnic = NULL, $relation = NULL, $remarks_id = NULL, $retail_user_id = NULL) {
       $shipment_journey = new ShipmentsJourney();
 
       $shipment_journey->shipment_id = $shipment_id;
@@ -64,6 +66,11 @@ class ShipmentsJourneyController extends Controller
       else if($rider_id != null){
         $city_id = Rider::find($rider_id)->city_id;
           $shipment_journey->city_id = $city_id;
+      }
+      else if ($retail_user_id!=null){
+          $city_id = RetailUser::find($retail_user_id)->city_id;
+          $shipment_journey->city_id = $city_id;
+
       }
       else{
           if (in_array($shipper_status_id, [1, 2, 17, 19, 39, 40, 41, 42, 43, 47, 50, 61])) {
@@ -155,6 +162,13 @@ class ShipmentsJourneyController extends Controller
         }
 
       $shipment_journey->save();
+
+        if ($retail_user_id!=null) {
+            $retail_journey_user = new ShipmentJourneyRetailUser();
+            $retail_journey_user->shipment_journey_id = $shipment_journey->id;
+            $retail_journey_user->retail_user_id = $retail_user_id;
+            $retail_journey_user->save();
+        }
 
         if(in_array($shipper_status_id, [5,8,13,14,18,20,36,37,30])) {
             

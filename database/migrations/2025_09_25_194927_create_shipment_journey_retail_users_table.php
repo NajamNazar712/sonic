@@ -13,12 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('pudo_deliver_shipments', function (Blueprint $table) {
+        Schema::create('shipment_journey_retail_users', function (Blueprint $table) {
             $table->id();
-            $table->unsignedInteger('retail_store_id')->index();
-            $table->unsignedInteger('retail_address_id')->index();
-            $table->unsignedInteger('shipment_id')->index();
-            $table->tinyInteger('retail_type')->default(1); //1-franchise 2-trax center
+            $table->unsignedInteger('shipment_journey_id')->index();
+            $table->unsignedInteger('retail_user_id')->index();
             $table->timestamps();
         });
     }
@@ -30,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('pudo_deliver_shipments');
+        Schema::dropIfExists('shipment_journey_retail_users');
     }
 };

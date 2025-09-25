@@ -73,6 +73,7 @@ use App\Http\Traits\FilterTrait;
 use App\Jobs\ProcessShipmentBookingDB;
 use App\Jobs\ProcessShipmentBookingDBPriority;
 use App\Jobs\ProcessShipmentBookingDistributionDB;
+use App\Models\PudoDeliverShipment;
 use App\Models\PudoPickupShipment;
 use Auth;
 use Carbon\Carbon;
@@ -512,14 +513,41 @@ class ShipperShipmentBookController extends Controller
         $viewData['substitute_account'] = $substitute_account;
         $viewData['substitute_account_pickup_address'] = $substitute_account_pickup_address;
 
-        $franchises  = RetailFranchise::where('status',1)->where('is_pudo',1)->select('id', 'name', DB::raw("2 type"));
-        $centers  = RetailTraxCenter::where('status',1)->where('is_pudo',1)->select('id', 'name', DB::raw("1 as type"));
 
-        $allLocations = $franchises->union($centers)->get();
-
-        $viewData['all_retail_stores'] = $allLocations;
         // return view('client.shipment.book.index')->with(['booking_types' => $booking_types, 'user' => $user, 'multi_piece' => $multi_piece, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'consignee_cities' => $consignee_cities, 'check' => $check, 'charges_modes' => $charges_modes, 'date' => $date, 'air_waybill' => $air_waybill, 'omni_user' => $omni_user, 'airway_bill_address_visibility_users' => $airway_bill_address_visibility_users, 'parcel_bypass' => $parcel_bypass]);
         return view('client.shipment.book.index')->with($viewData);
+
+    }
+
+    public function city_retail_stores($city_id)
+    {
+        $city = City::where('status',1)->where('id',$city_id)->first();
+        if($city) {
+            $hub_id = $city->hub_id;
+            $franchises = RetailFranchise::where('status', 1)
+                ->where('default_hub',$hub_id)
+                ->where('is_pudo', 1)
+                ->select('id', 'name', DB::raw("1 as type"));
+
+            $centers = RetailTraxCenter::where('status', 1)
+                ->where('default_hub',$hub_id)
+                ->where('is_pudo', 1)
+                ->select('id', 'name', DB::raw("2 as type"));
+
+            $allLocations = $franchises->union($centers)->get();
+
+            $status = $allLocations->count() > 0 ? 1 : 0;
+
+            return response()->json([
+                'status' => $status,
+                'data'   => $allLocations
+            ]);
+        }
+
+        return response()->json([
+            'status' => 0,
+            'error'   => "City not found!"
+        ]);
 
     }
 
@@ -1009,17 +1037,36 @@ class ShipperShipmentBookController extends Controller
                         }
                     }
 
-                    //pudo retail work
+                    //pudo retail pickup work
                     if($request->filled('is_pickup_self_collection') &&  in_array($request->input('retail_type'), [1,2])) {
                         $retail_store_id = $request->input('retail_pickup_store_id');
                         $retail_type = $request->input('retail_type');
 
-                        $retail = $retail_type == 1
+                        $retail = $retail_type == 2
                             ? RetailTraxCenter::find($retail_store_id)
                             : RetailFranchise::find($retail_store_id);
 
                         if($retail) {
                             $pudo_pickup = new PudoPickupShipment();
+                            $pudo_pickup->retail_store_id = $retail->id;
+                            $pudo_pickup->retail_address_id = $retail->pickup_address_id;
+                            $pudo_pickup->hub_id = $retail->default_hub;
+                            $pudo_pickup->retail_type = $retail_type;
+                            $pudo_pickup->shipment_id = $shipment_id;
+                            $pudo_pickup->save();
+                        }
+                    }
+                    //pudo retail deliver work
+                    if($request->filled('is_deliver_self_collection') &&  in_array($request->input('retail_deliver_type'), [1,2])) {
+                        $retail_store_id = $request->input('retail_pickup_store_id');
+                        $retail_type = $request->input('retail_type');
+
+                        $retail = $retail_type == 2
+                            ? RetailTraxCenter::find($retail_store_id)
+                            : RetailFranchise::find($retail_store_id);
+
+                        if($retail) {
+                            $pudo_pickup = new PudoDeliverShipment();
                             $pudo_pickup->retail_store_id = $retail->id;
                             $pudo_pickup->retail_address_id = $retail->pickup_address_id;
                             $pudo_pickup->retail_type = $retail_type;

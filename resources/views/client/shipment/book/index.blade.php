@@ -230,9 +230,7 @@
 											<input type="hidden" name="retail_type" id="retail_type">
 											<select name="retail_pickup_store_id" class="select2" id="retail_pickup_store_id">
 												<option value="">Retail Store*</option>
-												@foreach($all_retail_stores as $all_retail_store)
-													<option value="{{ $all_retail_store->id }}" data-type="{{$all_retail_store->type}}">{{ $all_retail_store->name }}</option>
-												@endforeach
+
 											</select>
 										</div>
 										{{-- @if($air_waybill != null)
@@ -295,7 +293,21 @@
 											<input type="checkbox" name="self_collection" class="switch hidden" id="self_collection">
 										</div>
 
-										
+										<div id="info_display" class="form-group text-center p-1 border border-light rounded">
+											<label class="d-block">Self Deliver Collection</label>
+											<input type="checkbox"  name="is_deliver_self_collection" class="switch" id="is_deliver_self_collection">
+										</div>
+
+										<div id="pudo_deliver_retail" class="form-group">
+											<input type="hidden" name="retail_deliver_type" id="retail_deliver_type">
+											<select name="retail_deliver_store_id" class="select2" id="retail_deliver_store_id">
+												<option value="">Retail Store*</option>
+
+											</select>
+										</div>
+
+
+
 
 									</div>
 
@@ -1263,6 +1275,8 @@
 					shipping_modes();
 					set_return_city();
 
+
+
 					if (service_type == 2) {
 						$('.weight').inputmask({
 						'alias': 'decimal',
@@ -1305,6 +1319,12 @@
 			{{--$('#pickup_address').prepend('<option value="" selected="selected"></option>');--}}
 			{{--@endif--}}
 
+			let city_id = $('#pickup_address').find(':selected').data('city-id');
+			if(city_id){
+				getRetailStores(city_id,"#retail_pickup_store_id");
+			}
+
+
 			$('#pickup_address').select2({
 				width: '100%',
 				placeholder: 'Pickup Address*'
@@ -1315,7 +1335,10 @@
 
 				if (this.value == 0) {
 					$('#new_pickup_address').removeClass('d-none');
+					getRetailStores(null,"#retail_pickup_store_id");
 				} else {
+					var city_id = $(this).find(':selected').data('city-id');
+					getRetailStores(city_id,"#retail_pickup_store_id")
 					$('#new_pickup_address').addClass('d-none');
 				}
 
@@ -1334,6 +1357,7 @@
 				shipping_modes();
 
 				var pickup_city = $(this).val();
+				getRetailStores(pickup_city,"#retail_pickup_store_id");
 				var consignee_city = $('#consignee_city').val();
 
 				shipping_mode_same_day(pickup_city, consignee_city);
@@ -1508,11 +1532,17 @@
 			$('#information_display').checkboxpicker();
 			$('#self_collection').checkboxpicker();
 			$("#is_pickup_self_collection").checkboxpicker();
+			$("#is_deliver_self_collection").checkboxpicker();
 
 			// page load par default hide aur required remove
 			togglePickup(false);
+			toggleDeliver(false);
 
 			// on change event
+			$('#is_deliver_self_collection').on('change', function () {
+				toggleDeliver($(this).is(':checked'));
+			});
+
 			$('#is_pickup_self_collection').on('change', function () {
 				togglePickup($(this).is(':checked'));
 			});
@@ -1532,12 +1562,95 @@
 				}
 			}
 
+			function toggleDeliver(isChecked) {
+				if (isChecked) {
+					$('#pudo_deliver_retail').show();
+					$('#retail_deliver_store_id')
+							.attr('data-rule-required', 'true')
+							.attr('data-msg-required', 'Retail store is required');
+				} else {
+					$('#pudo_deliver_retail').hide();
+					$('#retail_deliver_store_id')
+							.removeAttr('data-rule-required')
+							.removeAttr('data-msg-required');
+					$('#retail_type').val('');
+				}
+			}
+
+			function getRetailStores(city_id,div_id) {
+				$(div_id).empty();
+				if (!city_id) {
+					$(div_id).html('<option value="">Retail Store*</option>');
+					return;
+				}
+
+				$.ajax({
+					url: "{{ route('cod.shipment.book.get_retail_stores', ':city_id') }}".replace(':city_id', city_id),
+					type: 'GET',
+					success: function(res) {
+						let options = '<option value="">Retail Store*</option>';
+
+						if (res.status === 1) {
+							$.each(res.data, function(index, store) {
+								options += `<option value="${store.id}" data-type="${store.type}">${store.name}</option>`;
+							});
+						} else {
+							options += '<option value="">No Retail Store Found</option>';
+						}
+
+						$(div_id).html(options);
+					},
+					error: function(xhr) {
+						console.log('Error:', xhr.responseText);
+					}
+				});
+			}
+
+			{{--function getDeliverRetailStores(city_id) {--}}
+			{{--	$('#retail_pickup_store_id').empty();--}}
+			{{--	if (!city_id) {--}}
+			{{--		$('#retail_pickup_store_id').html('<option value="">Retail Store*</option>');--}}
+			{{--		return;--}}
+			{{--	}--}}
+
+			{{--	$.ajax({--}}
+			{{--		url: "{{ route('cod.shipment.book.get_retail_stores', ':city_id') }}".replace(':city_id', city_id),--}}
+			{{--		type: 'GET',--}}
+			{{--		success: function(res) {--}}
+			{{--			let options = '<option value="">Retail Store*</option>';--}}
+
+			{{--			if (res.status === 1) {--}}
+			{{--				$.each(res.data, function(index, store) {--}}
+			{{--					options += `<option value="${store.id}" data-type="${store.type}">${store.name}</option>`;--}}
+			{{--				});--}}
+			{{--			} else {--}}
+			{{--				options += '<option value="">No Retail Store Found</option>';--}}
+			{{--			}--}}
+
+			{{--			$('#retail_pickup_store_id').html(options);--}}
+			{{--		},--}}
+			{{--		error: function(xhr) {--}}
+			{{--			console.log('Error:', xhr.responseText);--}}
+			{{--		}--}}
+			{{--	});--}}
+			{{--}--}}
 			$("#retail_pickup_store_id").select2({
 				width: '100%',
 				placeholder: 'Retail Store*'
 			}).on('change',function (){
+				$('#retail_type').val('');
 				var type = $(this).find(':selected').data('type');
 				$('#retail_type').val(type);
+
+			});
+
+			$("#retail_deliver_store_id").select2({
+				width: '100%',
+				placeholder: 'Retail Store*'
+			}).on('change',function (){
+				$('#retail_deliver_type').val('');
+				var type = $(this).find(':selected').data('type');
+				$('#retail_deliver_type').val(type);
 
 			});
 
@@ -1557,9 +1670,12 @@
 				}
 				else {
 					var pickup_city = $('#pickup_address').find(':selected').data('city-id');
+					// getRetailStores(pickup_city,"#retail_pickup_store_id");
 				}
 
 				var consignee_city = $(this).val();
+				getRetailStores(consignee_city,"#retail_deliver_store_id")
+
 
 				shipping_mode_same_day(pickup_city, consignee_city);
 			});

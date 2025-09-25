@@ -12,6 +12,7 @@
                 </ul>
             </li>
             <li><a class="menu-item" href="{{route('retail.parcel_receiving.other_parcel')}}"><i class="la la-dropbox"></i>Other Parcels</a></li>
+            <li><a class="menu-item" href="{{route('retail.arrival_service.service.index')}}"><i class="la la-dropbox"></i>Arrival Service Center</a></li>
             <li><a class="menu-item" href="{{route('retail.parcel_receiving.index')}}"><i class="la la-dropbox"></i>Parcel Receiving</a></li>
             <li class="menu-item"><a href="{{ route('retail.cancel_shipments.index') }}"><i class="la la-trash"></i>Cancelled</a>
             </li>

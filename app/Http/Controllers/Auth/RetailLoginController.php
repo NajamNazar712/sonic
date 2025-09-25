@@ -56,7 +56,8 @@ class RetailLoginController extends Controller
             $pickup_address_id = $admin->user()->store->pickup_address_id;
             $category = $admin->user()->category;
             $category_id = $admin->user()->category_id;
-            session(['user_id' => $shipper_user_id, 'pickup_address_id' => $pickup_address_id, 'category' => $category, 'category_id' => $category_id]);
+            $hub_id = $admin->user()->hub_id;
+            session(['user_id' => $shipper_user_id, 'pickup_address_id' => $pickup_address_id, 'category' => $category, 'category_id' => $category_id,'hub_id'=>$hub_id]);
             return redirect()->intended(route('retail.shipment.book.index'));
         }
         $errors = [$this->username() => trans('auth.failed')];
