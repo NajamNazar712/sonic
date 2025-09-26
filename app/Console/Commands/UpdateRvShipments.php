@@ -39,7 +39,7 @@ class UpdateRvShipments extends Command
             // Split comma-separated tracking numbers into an array
             $trackingNumbers = array_map('trim', explode(',', $trackingInput));
 
-            $shipments = Shipment::whereIn('tracking_number', $trackingNumbers)->get();
+            $shipments = Shipment::whereIn('tracking_number', $trackingNumbers)->where('shipper_status_id',12)->get();
 
             if ($shipments->isEmpty()) {
                 $this->info("❌ No shipments found for given tracking number(s): {$trackingInput}");
@@ -81,7 +81,7 @@ class UpdateRvShipments extends Command
             foreach ($chunks as $index => $chunk) {
                 $this->info("🚀 Processing chunk " . ($index + 1) . " of " . count($chunks) . " (Records: " . count($chunk) . ")");
 
-                $shipments = Shipment::whereIn('tracking_number', $chunk)->get();
+                $shipments = Shipment::whereIn('tracking_number', $chunk)->where('shipper_status_id', 12)->get();
 
                 if ($shipments->isEmpty()) {
                     $this->warn("⚠️ No shipments found for chunk " . ($index + 1));
