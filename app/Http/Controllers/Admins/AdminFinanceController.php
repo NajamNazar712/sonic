@@ -4522,7 +4522,7 @@ class AdminFinanceController extends Controller
                 $shipmentDeliveryNote->delivery_note->rider_id, // Rider ID
                 2, // Notification category or type
                 $shipment->id, // Shipment ID
-                $amount // old amount
+                $change_shipment_amount->old_amount // old amount
 
             );
         }
