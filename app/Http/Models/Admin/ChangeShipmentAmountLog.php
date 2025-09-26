@@ -12,4 +12,7 @@ class ChangeShipmentAmountLog extends Model
     public function admin() {
         return $this->belongsTo('App\Http\Models\Admin\Admin', 'admin_id', 'id');
     }
+    public function shipper() {
+        return $this->belongsTo('App\Http\Models\Shipper\User', 'user_id', 'id');
+    }
 }
