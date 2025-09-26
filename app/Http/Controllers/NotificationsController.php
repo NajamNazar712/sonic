@@ -11670,7 +11670,7 @@ class NotificationsController extends Controller
         }
         $to = $phone_number;
         self::sms_otp($body, $to, "Consignee", $pin, 1);
-    }p
+    }
 
     static public function app_notification($id, $employee_id, $employee_type, $reference1_id, $reference2_id = NULL)
     {
