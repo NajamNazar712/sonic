@@ -209,6 +209,11 @@
                         <th class="border-primary border-darken-1">Rider Picked Status Date</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Status Date</th>
+                        @if(in_array(session('user_id'), [49248, 49334]))
+                            <th class="border-primary border-darken-1">First Attempt</th>
+                            <th class="border-primary border-darken-1">Second Attempt</th>
+                            <th class="border-primary border-darken-1">Third Attempt</th>
+                        @endif
                         <th class="border-primary border-darken-1">Return Reason</th>
                         <th class="border-primary border-darken-1">Payment Status</th>
                         <th class="border-primary border-darken-1">Service Type</th>
@@ -473,6 +478,12 @@
                             head.push('Rider Picked Status Date');
                             head.push('Status');
                             head.push('Status Date');
+                            @if(in_array(session('user_id'), [49248, 49334]))
+                                head.push('First Attempt');
+                                head.push('Second Attempt');
+                                head.push('Third Attempt');
+
+                            @endif
                             head.push('Return Reason');
                             head.push('Payment Status');
                             head.push('Service Type');
@@ -499,6 +510,11 @@
                                 row.push(values.rider_picked_status_date);
                                 row.push(values.current_status);
                                 row.push(values.current_status_date);
+                                @if(in_array(session('user_id'), [49248, 49334]))
+                                    row.push(values.first_attempt_date);
+                                    row.push(values.second_attempt_date);
+                                    row.push(values.third_attempt_date);
+                                @endif
                                 row.push(values.return_reason);
                                 row.push(values.payment_status);
                                 row.push(values.service_type);
@@ -563,6 +579,11 @@
                     { data:'rider_picked_status_date' ,name: 'sjrp.created_at', class: 'align-middle rider_picked_status_date'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
                     { data:'current_status_date' ,name: 'cj.updated_at', class: 'align-middle current_status_date'},
+                    @if(in_array(session('user_id'), [49248, 49334]))
+                        { data:'first_attempt_date' ,name: 'sjfa.created_at', class: 'align-middle first_attempt_date'},
+                        { data:'second_attempt_date' ,name: 'sjf2.created_at', class: 'align-middle second_attempt_date'},
+                        { data:'third_attempt_date' ,name: 'sjf3.created_at', class: 'align-middle third_attempt_date'},
+                    @endif
                     { data: 'return_reason' ,name: 'ssr.name', class: 'align-middle return_reason'},
                     { data:'payment_status' ,name: 'sps.name', class: 'align-middle payment_status'},
                     { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},

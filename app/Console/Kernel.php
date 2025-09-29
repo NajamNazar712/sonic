@@ -187,6 +187,8 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\BulkStatusSharingWithWalletReplicate',
         'App\Console\Commands\ExportShipmentReport',
         'App\Console\Commands\OptimizeTable',
+       'App\Console\Commands\UpdateRvShipments',
+        'App\Console\Commands\UpdateRvShipments',
         // 'App\Console\Commands\QsrEmail',
         // 'App\Console\Commands\PendingDeliveriesReport',
 
@@ -200,7 +202,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('bulk:status-sharing-wallet-replicate')->withoutOverlapping()->everyFiveMinutes()->runInBackground();
+        $schedule->command('bulk:status-sharing-wallet-replicate')->everyTenMinutes()->runInBackground();
 
         $schedule->command('create:service_ledger')->dailyAt('00:00')->runInBackground();
         // $schedule->command('job:run email 25000')->dailyAt('02:02')->runInBackground();
@@ -602,7 +604,7 @@ class Kernel extends ConsoleKernel
             ->hourly()
             ->runInBackground();
 
-        $schedule->command('update:zero_arrival_charges')->hourly()->runInBackground();
+        $schedule->command('update:zero_arrival_charges')->everyTwoHours()->runInBackground();
         $schedule->command('delete:duplicate_arrival')->hourly()->runInBackground();
         $schedule->command('update_corporate_invoice_charges_issue')->hourly()->runInBackground();
         $schedule->command('update:pending_payment_shipment_arrival_charges')->hourly()->runInBackground();
@@ -679,13 +681,25 @@ class Kernel extends ConsoleKernel
             $time = $walletChargesUpdate->text; // e.g., '11:00'
             $schedule->command('wallet_charges_update')->dailyAt($time)->runInBackground();
         }
+        $schedule->command('shipment:delete_journey')
+            ->when(function () {
+                // Only run at exactly 6:00 AM on 2nd August 2025
+                return Carbon::now()->format('Y-m-d H:i') === '2025-08-15 22:15';
+            })
+            ->withoutOverlapping();
+        $schedule->command('sync:latest-shipments')
+            ->when(function () {
+                // Only run at exactly 6:00 AM on 2nd August 2025
+                return Carbon::now()->format('Y-m-d H:i') === '2025-09-23 03:00';
+            })
+            ->withoutOverlapping();
         $schedule->command('db:optimize-table')
             ->when(function () {
                 // Only run at exactly 6:00 AM on 2nd August 2025
                 return Carbon::now()->format('Y-m-d H:i') === '2025-08-10 13:00';
             })
             ->withoutOverlapping();
-        
+        $schedule->command('shipments:update-rv-sar')->dailyAt('05:00');
         // $schedule->command('export:shipment-report')
         //     ->dailyAt('14:46')              
         //     ->withoutOverlapping()         // prevent simultaneous runs

@@ -81,6 +81,7 @@ use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\CrmCaseNatureRemark;
 use App\Http\Models\InterceptReBookRequestHistory;
 use App\Http\Models\Shipper\UserShippingInfo;
+use App\Models\AddressMissingShipment;
 
 class AdminTrackingController extends Controller
 {
@@ -938,19 +939,19 @@ class AdminTrackingController extends Controller
 //            ->whereBetween('shipments.created_at',[$start_date,$end_date]);
         if ($request->has('search_tracking') || $request->has('search_shipper') || $request->has('search_phone_no') || $request->has('search_order_id' || $request->has('crm_request_id') || $request->has('search_shipment_status'))) {
             if ($tracking = $request->get('search_tracking')) {
-                $quick_tracking->where('shipments.tracking_number', 'LIKE', '%' . $tracking . '%');
+                $quick_tracking->whereIn('shipments.tracking_number', $tracking);
             }
             if ($shipper = $request->get('search_shipper')) {
-                $quick_tracking->where('u.id', 'LIKE', '%' . $shipper . '%');
+                $quick_tracking->whereIn('u.id', $shipper);
             }
             if($phone_no = $request->get('search_phone_no')){
                 $quick_tracking->where('shipments.consignee_phone_number_1', '=', $phone_no);
             }
             if ($order_id = $request->get('search_order_id')) {
-                $quick_tracking->where('shipments.order_id', 'LIKE', '%' . $order_id . '%');
+                $quick_tracking->whereIn('shipments.order_id', $order_id);
             }
             if ($crm_request_id = $request->get('crm_request_id')) {
-                $quick_tracking->where('crm.id', $crm_request_id);
+                $quick_tracking->whereIn('crm.id', $crm_request_id);
             }
             if ($search_shipment_status = $request->get('search_shipment_status')) {
                 $quick_tracking->where('shipments.shipper_status_id', $search_shipment_status);
@@ -1992,8 +1993,8 @@ class AdminTrackingController extends Controller
                                 $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
                                 $journey_details['old_amount'] = number_format($journey->old_amount);
                                 $journey_details['new_amount'] = number_format($journey->new_amount);
-                                $journey_details['remarks'] = $journey->remarks;
-                                $journey_details['user'] = $journey->admin->name;
+                                $journey_details['remarks'] = !empty($journey->remarks) ? $journey->remarks : 'Cod Amount Change';
+                                $journey_details['user'] = isset($journey->shipper->name) ? $journey->shipper->name : $journey->admin->name;
 
                                 $details['amount_history'][] = $journey_details;
                             }
@@ -2348,8 +2349,12 @@ class AdminTrackingController extends Controller
         $contains = 0;
         if ($journey->status_reason_id == 12) {
             $contains = 1;
+        }elseif(in_array($journey->status_reason_id,[3,4]) && $journey->shipper_status_id == 12){
+            $addressMissingType = AddressMissingShipment::where(['shipment_id' => $request->shipment_id, 'status' => 0])->latest()->first();
+            return response()->json(['contains' => $contains, 'addressMissingType'  => $addressMissingType?->type?->type_name ??  null]);
         }
         return response()->json(['contains' => $contains]);
+
     }
 
     public function shipment_position_index()
@@ -2760,54 +2765,81 @@ class AdminTrackingController extends Controller
     }
 
     public function shipment_position_list(Request $request){
-
+        $connection = 'reports_2';
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(),616);
         }
+        $to   = Carbon::now()->endOfDay();
+        $from = Carbon::now()->subMonth(6)->startOfDay();
+        $sj_from_id = DB::connection($connection)->table('shipments_journey')
+            ->where('created_at', '>=',   Carbon::parse($from)->subDay(10)->startOfDay())
+            ->where('created_at', '<=',    Carbon::parse($to)->addDay(10)->startOfDay())
+            ->orderBy('created_at', 'asc')->orderBy('id', 'asc')
+            ->limit(1)->value('id');
 
-        $shipment_positions =   DB::connection('reports')->table('shipment_positions')->leftJoin('shipments as s','s.id','=','shipment_positions.shipment_id')
+        $sj_to_id = DB::connection($connection)->table('shipments_journey')
+            ->where('created_at', '>=',   Carbon::parse($from)->subDay(10)->startOfDay())
+            ->where('created_at', '<=',    Carbon::parse($to)->addDay(10)->startOfDay())
+            ->orderBy('created_at', 'desc')->orderBy('id', 'desc')
+            ->limit(1)->value('id');
+
+        $arrived_sj_to_id = $sj_to_id;
+
+        $shipment_positions =   DB::connection($connection)->table('shipment_positions')
+        ->leftJoin('shipments as s','s.id','=','shipment_positions.shipment_id')
         ->leftJoin('users as u','u.id','=','s.user_id')
-        ->leftJoin('shipments_journey as sj','sj.shipment_id','=','shipment_positions.shipment_id')
+            // ->leftJoin('shipments_journey as sj','sj.shipment_id','=','shipment_positions.shipment_id')
+        ->leftjoin('shipments_journey as sj', function ($join) use ($sj_from_id, $arrived_sj_to_id) {
+            $join->on('sj.shipment_id', '=', 'shipment_positions.shipment_id')
+                ->where('sj.id', '>=', $sj_from_id)
+                ->where('sj.id', '<=', $arrived_sj_to_id);
+        })
         ->leftJoin('admins as a','a.id','=','sj.admin_id')
-        ->leftJoin('shipments_journey as sjl', function ($join) {
+        ->leftJoin('shipments_journey as sjl', function ($join) use ($sj_from_id, $arrived_sj_to_id,$connection) {
             $join->on('sjl.shipment_id', '=', 's.id')
                 ->where(
                     'sjl.id',
                     '=',
-                    DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id IN (2,3,4,5,11,23,53))')
+                    DB::connection($connection)->raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id IN (2,3,4,5,11,23,53) and shipments_journey.id >= $sj_from_id and shipments_journey.id <= $arrived_sj_to_id)")
                 );
         })
-        ->leftjoin('shipments_journey as sj_arrival', function ($join) {
+        ->leftjoin('shipments_journey as sj_arrival', function ($join) use ($sj_from_id, $arrived_sj_to_id){
             $join->on('sj_arrival.shipment_id', '=', 's.id')
-                ->where('sj_arrival.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id = 2)'));
+                ->where('sj_arrival.id', '=', DB::raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id = 2  and shipments_journey.id >= $sj_from_id and shipments_journey.id <= $arrived_sj_to_id)"));
         })
-        ->leftJoin('shipments_journey as journey', function ($join) {
+        ->leftJoin('shipments_journey as journey', function ($join) use ($sj_from_id, $arrived_sj_to_id,$connection) {
             $join->on('journey.shipment_id', '=', 's.id')
                 ->where(
                     'journey.id',
                     '=',
-                    DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id)')
+                    DB::connection($connection)->raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.id >= $sj_from_id and shipments_journey.id <= $arrived_sj_to_id )")
                 );
         })
         ->leftJoin('scanned_user_types as sp', 'shipment_positions.scanned_by_user_type', '=', 'sp.id')
-        ->leftJoin('shipment_scanning_journeys as ssj', function ($join) {
-            $join->on('ssj.shipment_id', '=', 'journey.shipment_id')
-                 ->whereRaw('ssj.id = (
-                                select max(id) 
-                                from shipment_scanning_journeys 
-                                where shipment_scanning_journeys.shipment_id = journey.shipment_id
-                                and shipment_scanning_journeys.screen_location_id = shipment_positions.screen_location_id
-                            )');
-        })
+            ->leftJoin('shipment_scanning_journeys as ssj', function ($join) use ($from, $to) {
+                $join->on('ssj.shipment_id', '=', 'journey.shipment_id')
+                    ->whereRaw(
+                        'ssj.id = (
+                SELECT MAX(sj2.id)
+                FROM shipment_scanning_journeys sj2
+                WHERE sj2.shipment_id = journey.shipment_id
+                  AND sj2.screen_location_id = shipment_positions.screen_location_id
+                  AND sj2.created_at >= ? AND sj2.created_at <= ?
+            )',
+                        [$from, $to]  // <-- safely bound
+                    );
+            })
         ->when(\DB::raw('sp.id = 1'), function ($join) {
             $join->leftJoin('admins as adm', function ($join) {
                 $join->on('adm.id', '=', 'shipment_positions.scanned_by_id')
                      ->where('adm.role_id', '<>', 1);
             });
         })
-        
-        
-        ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'ssj.id')
+        // ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'ssj.id')
+        ->leftJoin('shipment_scanning_journey_area_logs as ssjal', function ($join) use ($from, $to) {
+            $join->on('ssjal.shipment_scanning_journey_id', '=', 'ssj.id')
+                ->whereBetween('ssjal.created_at', [$from, $to]);
+        })
         ->leftJoin('admins as new_admin', 'new_admin.id', '=', 'ssj.admin_id')        
         ->leftJoin('city_areas as ca_scanning', 'new_admin.area_id', '=', 'ca_scanning.id')        
         ->select(['shipment_positions.tracking_number', 'shipment_positions.origin', 'shipment_positions.destination', 'shipment_positions.status', 'shipment_positions.status_at', 'shipment_positions.status_by', 'shipment_positions.screen_location', 'shipment_positions.city', 'shipment_positions.scanned_by', 'shipment_positions.scanned_at',  'shipment_positions.handover_created_by', 'shipment_positions.handover_created_at', 'shipment_positions.handover_from', 'shipment_positions.handover_to', 'shipment_positions.handover_received_by', 'shipment_positions.handover_received_at', 'u.name as shipper_name','s.amount as cod_value','a.trax_id' ,'sj.admin_id as admin_id','s.id as shipment_id','sjl.shipment_id as journey_latest_id',
@@ -2815,7 +2847,8 @@ class AdminTrackingController extends Controller
         'sjl.shipper_status_id as latest_shipper_status_id','s.shipper_status_id as shipper_status_id','ssj.id as ssj_id', 'ca_scanning.name as scanning_city_area_name',
         's.consignee_address', 's.actual_weight','shipment_positions.scanned_by_user_type as scanned_by_user_type','shipment_positions.scanned_by_id as scanned_by_id','sj_arrival.created_at as arrival', 'ssj.created_at as last_scanned_at', 'ssj.entry_method as entry_method'
         ])
-        ->where('tracked_by', Auth::id())->groupBy('shipment_positions.shipment_id');
+            ->where('tracked_by', Auth::id())
+            ->groupBy('shipment_positions.shipment_id');
         // dd($shipment_positions->get()->toArray());
         $datatables = Datatables::of($shipment_positions)
             ->editColumn('tracking_number_link', function ($shipments) {

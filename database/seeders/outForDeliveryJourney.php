@@ -27,10 +27,13 @@ class outForDeliveryJourney extends Seeder
     public function run(Request $request)
     {
         //
-        $shipmentId = [22314446468977, 27114446413572, 19514446412700, 485243431617, 14422346413845, 22314446402099, 15814446466130, 17414446418619, 17414446419658, 19514446451651, 20214446438897, 22314446400292, 22314446409657, 22314446411586, 22314446413612, 22314446468255, 22314446475657, 25114446436239, 28814446415152, 28814446416660, 29314446414670, 38314446485787, 14414446463423, 14414446471380];
+        $shipmentId = [
+            20221655496626,
+            17421655514041,
+            20221655544615];
         if ($shipmentId) {
             $shipmentId = Shipment::whereIn('tracking_number', $shipmentId)
-            ->where('shipper_status_id', 5)
+            // ->where('shipper_status_id', 5)
             ->get();
             echo count($shipmentId);
             $serial = 40;

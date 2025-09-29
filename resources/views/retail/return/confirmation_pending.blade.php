@@ -1,9 +1,9 @@
 @extends('retail.layout.master')
-@section('title','Return Confirmation Pending Shipments')
+@section('title','Shipper Advise Requested')
 
 @section('content')
     <h1 class="mb-1">
-        Return Confirmation Pending Shipments
+        Shipper Advise Requested
     </h1>
 
     <div class="card">

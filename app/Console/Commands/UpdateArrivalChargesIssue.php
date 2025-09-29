@@ -44,9 +44,8 @@ class UpdateArrivalChargesIssue extends Command
      */
     public function handle()
     {
-        $startDate =  Carbon::now()->subHour(1)->format('Y-m-d 00:00:00');
+        $startDate =  Carbon::now()->subMonth(12)->format('Y-m-d 00:00:00');
         $endDate = Carbon::now()->format('Y-m-d 23:59:59');
-
 
         $query = DB::table('pending_payment_shipments')
             ->select(
@@ -89,7 +88,7 @@ class UpdateArrivalChargesIssue extends Command
             ->having('new_charges', '!=', DB::raw('invoice_charges'))
             ->groupBy('pending_payment_shipments.shipment_id')
             ->get();
-
+        
 //        $query2 = DB::table('pending_payment_shipments')
 //            ->select(
 //                'shipments.tracking_number',
@@ -174,7 +173,8 @@ class UpdateArrivalChargesIssue extends Command
                     DB::raw('SUM(pending_payment_shipments.gst) as total_gst'),
                     DB::raw('SUM(pending_payment_shipments.sms_charges) as total_sms_charges'),
                     DB::raw('SUM(pending_payment_shipments.payable) as total_payable'),
-                    DB::raw('SUM(pending_payment_shipments.wht) as total_wht')
+                    DB::raw('SUM(pending_payment_shipments.wht) as total_wht'),
+                    DB::raw('SUM(pending_payment_shipments.cod_sst) as total_cod_sst')
                 )
                 ->join('pending_payment_calculations', 'pending_payment_shipments.pending_payment_id', '=', 'pending_payment_calculations.pending_payment_id')
                 ->join('pending_payments', 'pending_payment_calculations.pending_payment_id', '=', 'pending_payments.id')
@@ -194,6 +194,7 @@ class UpdateArrivalChargesIssue extends Command
                         'sms_charges' => $payment->total_sms_charges,
                         'payable' => $payment->total_payable,
                         'wht' => $payment->total_wht,
+                        'cod_sst' => $payment->total_cod_sst,
                     ]);
             }
 

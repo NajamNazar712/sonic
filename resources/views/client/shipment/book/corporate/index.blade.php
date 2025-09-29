@@ -806,6 +806,8 @@
             });
 
             //500 pieces start
+            var isLogistic = @json($is_logistic);
+            var maxPieces = isLogistic ? 100 : 10;
             $(this).find('.pieces').TouchSpin({
                 min: 1,
                 max: 10,
@@ -822,7 +824,7 @@
                 if ($(this).hasClass('exceed_pieces'))
                     $("#pieces").trigger("touchspin.updatesettings", {max: 500});
                 else
-                    $("#pieces").trigger("touchspin.updatesettings", {max: 10});
+                    $("#pieces").trigger("touchspin.updatesettings", {max: maxPieces});
             });
 
             $(".pieces").change(function () {

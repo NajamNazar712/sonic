@@ -147,6 +147,8 @@ use App\Jobs\WalletBulkSettlementFromDonePayments;
 use App\Models\ParentProduct;
 use App\Http\Models\Product;
 use App\Http\Models\Region;
+use App\Models\CorporateUserOnDeliveredInvoice;
+
 
 class AdminFinanceController extends Controller
 {
@@ -4474,7 +4476,7 @@ class AdminFinanceController extends Controller
                         $details['consignee']['destination'] = $shipment->consignee_city->name;
                         $details['consignee']['address'] = $shipment->consignee_address;
 
-                        ShipmentScanningJourneyController::add($shipment->id, 13, 1, Auth::id(), NULL, NULL, NULL, NULL, session('latitude'), session('longitude'), NULL);
+                        ShipmentScanningJourneyController::add($shipment->id, 13, 1, Auth::id() ?? 346, NULL, NULL, NULL, NULL, session('latitude'), session('longitude'), NULL);
                         return ['status' => 0, 'success' => 'Shipment\'s amount can be changed', 'details' => $details];
                     } else {
                         return ['status' => 1, 'error' => 'A Payment of given Shipment has already been Processed'];
@@ -4502,13 +4504,28 @@ class AdminFinanceController extends Controller
         $change_shipment_amount->shipment_id = $shipment->id;
         $change_shipment_amount->old_amount = $shipment->amount;
         $change_shipment_amount->new_amount = $amount ?? 0;
-        $change_shipment_amount->admin_id = Auth::id();
+        $change_shipment_amount->admin_id = Auth::id() ?? 346;
         $change_shipment_amount->remarks = $request->remarks;
+        $change_shipment_amount->user_id = $request->input('user_id',0);
         $change_shipment_amount->save();
 
         $shipment->amount = $amount;
 
         $shipment->save();
+
+        $shipmentDeliveryNote = DeliveryNoteShipment::with('delivery_note')->where('shipment_id', $shipment->id)->latest()->first();
+
+        if(!empty($shipmentDeliveryNote)) {
+
+            NotificationsController::app_notification(
+                23, // Notification type ID
+                $shipmentDeliveryNote->delivery_note->rider_id, // Rider ID
+                2, // Notification category or type
+                $shipment->id, // Shipment ID
+                $change_shipment_amount->old_amount // old amount
+
+            );
+        }
 
         ShipmentChargesController::cash_handling($shipment_id);
 
@@ -8955,7 +8972,7 @@ class AdminFinanceController extends Controller
     
                             //---------x-----------x-------------
                             // Start Auto Close Complaints
-                            $crm_request = CrmRequest::where('shipment_id', $shipment->id)->where('status_id', 2)->first();
+                            $crm_request = CrmRequest::where('shipment_id', $shipment->id)->whereNotIn('status_id', [4])->whereIn('case_nature_type_id', [1])->first();
                             
                             if ($crm_request) { 
                                 $shipperName = User::find(Shipment::where('id', $shipment->id)->select('user_id')->first()->user_id)->name;
@@ -19876,9 +19893,19 @@ class AdminFinanceController extends Controller
 
     static public function add_payment($shipment_id, $type, $shipment = array())
     {
+
         if (empty($shipment)) {
             $shipment = Shipment::find($shipment_id);
         }
+
+        $delivered_invoice_users = CorporateUserOnDeliveredInvoice::where('status', 1)
+        ->pluck('user_id')
+        ->toArray(); 
+
+        if(in_array($type, [3,1]) && in_array($shipment->user_id , $delivered_invoice_users)) {
+            return;
+        }
+       
         $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment_id);
         $check_arrival = ShipmentAdditionalCharges::check_additional_charges($shipment_id,true);
         $service_charges = ShipmentServicesCharges::where('shipment_id', $shipment_id);

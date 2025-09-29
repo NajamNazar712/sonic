@@ -18,27 +18,16 @@
                             <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
                         </fieldset>
                     </div>
+
                     <div class="col-4">
                         <fieldset class="form-group">
-                            <select name="search_shipper" id="search_shipper" class="form-control select2">
-                                @foreach($shippers as $shipper)
-                                    <option value="{{$shipper->id}}">{{$shipper->name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>
-                    <div class="col-4">
-                        <fieldset class="form-group">
-                            <select name="search_shippers[]" id="search_shippers" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
-                                @foreach($shippers as $shipper)
-                                    <option value="{{$shipper->id}}">{{$shipper->name}}</option>
-                                @endforeach
+                            <select name="search_shippers[]" id="search_shippers" class="form-control select2" multiple>
                             </select>
                         </fieldset>
                     </div>
                     @if (session('role_id') == 1 || in_array(261, session('permissions')))
                     <div class="col-4">
-                        <div class="form-group">
+                            <div class="form-group">
                             <select name="search_sales_person" class="select2" id="sales_person_select">
                                 @foreach($sales_persons as $sales)
                                     <option value="{{ $sales->id }}">{{ $sales->name }}</option>
@@ -430,6 +419,23 @@
                 width:'100%',
                 placeholder:"Select Multiple Shippers",
                 allowClear:true,
+                multiple: true,
+                minimumInputLength: 2,
+                ajax: {
+                    dataType: 'json',
+                    url:  '{!! route('admin.accounts.shipper_names.dropdown',['type'=>'active']) !!}',
+                        data: function (params) {
+                            return {
+                                search: params.term,
+                            }
+                        },
+                        processResults: function (data) {
+                            return {
+                                results: data
+                            };
+                        },
+                    delay: 700,
+                }
             });
             $('#sub_segment_select').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
@@ -703,7 +709,7 @@
                         targets: 0,
                         render: function (data, type, row) { return ''; }
                     },
-                    { data: 'shipment_id', name: 'shipments.id', orderable: true, searchable: false, visible: false, value: 'shipment_id', text: 'Shipment ID', download: true },
+                    { data: 'shipment_id', name: 'shipments.id', orderable: true, searchable: false, visible: false, value: 'shipment_id', text: 'Shipment ID', download: false },
                     { data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number_link', value: 'tracking_number_link', text: 'Tracking Number', download: true },
                     { data: 'account_no', name: 'u.id', class: 'align-middle account_no', value: 'account_no', text: 'Account Number', download: true },
                     { data: 'shipper', name: 'u.name', class: 'align-middle shipper', value: 'shipper', text: 'Shipper Name', download: true },
@@ -728,9 +734,9 @@
                     { data: 'origin', name: 'oc.name', class: 'align-middle origin', value: 'origin', text: 'Origin', download: true },
                     { data: 'origin_hub', name: 'och.name', class: 'align-middle origin_hub', value: 'origin_hub', text: 'Origin Hub', download: true },
                     { data: 'destination', name: 'dc.name', class: 'align-middle destination', value: 'destination', text: 'Destination', download: true },
-                    { data: 'hub', name: 'h.name', class: 'align-middle hub', value: 'hub', text: 'Hub', download: true },
+                    { data: 'hub', name: 'h.name', class: 'align-middle hub', value: 'hub', text: 'Destination Hub', download: true },
                     { data: 'return_city', name: 'return_city', class: 'align-middle return_city', value: 'return_city', text: 'Return City', download: true },
-                    { data: 'zone', name: 'z.name', class: 'align-middle zone', value: 'zone', text: 'Zone', download: true },
+                    { data: 'zone', name: 'z.name', class: 'align-middle zone', value: 'zone', text: 'Origin Zone', download: true },
                     { data: 'class', name: 'zcc.class', class: 'align-middle class', value: 'class', text: 'Class', download: true },
                     { data: 'attempts', name: 'attempts', class: 'align-middle attempts', sortable: false, value: 'attempts', text: 'Attempts', download: true },
                     { data: 'shipping_mode', name: 'sm.mode', class: 'align-middle shipping_mode', value: 'shipping_mode', text: 'Shipping Mode', download: true },
@@ -760,12 +766,12 @@
                     { data: 'fintech_charges', name: 'shipments.fintech_charges', class: 'align-middle fintech_charges', value: 'fintech_charges', text: 'Fintech Charges', download: true },
                     { data: 'p_total_charges', name: 'pps.charges', class: 'align-middle total_charges', value: 'p_total_charges', text: 'Total Charges', download: true },
                     { data: 'estimated_charges', name: 'estimated_charges', class: 'align-middle estimated_charges', sortable: false, value: 'estimated_charges', text: 'Estimated Charges', download: true },
-                    { data: 'packaging_charges', name: 'shipments.packaging_charges', class: 'align-middle packaging_charges', sortable: false, value: 'packaging_charges', text: 'Packaging Charges', download: true },
+                    { data: 'packaging_charges', name: 'shipments.packaging_charges', class: 'align-middle packaging_charges', sortable: false, value: 'packaging_charges', text: 'Packing Charges', download: true },
                     { data: 'p_net_payable', name: 'pps.payable', class: 'align-middle net_payable', value: 'p_net_payable', text: 'Net Payable', download: true },
                     { data: 'delivered_or_returned', name: 'dr.created_at', class: 'align-middle delivered_or_returned', value: 'delivered_or_returned', text: 'Delivered/Returned Date', download: true },
                     { data: 'received_or_refused_by', name: 'dr.received_or_refused_by', class: 'align-middle received_or_refused_by', value: 'received_or_refused_by', text: 'Received/Refused By', download: true },
                     { data: 'sales_person', name: 'adsp.name', class: 'align-middle sales_person', value: 'sales_person', text: 'Sales Person', download: true },
-                    { data: 'ref', name: 'r.name', class: 'align-middle ref', value: 'ref', text: 'Reference', download: true },
+                    { data: 'ref', name: 'r.name', class: 'align-middle ref', value: 'ref', text: 'Referral Name', download: true },
                     { data: 'special_instructions', name: 'shipments.special_instructions', class: 'align-middle special_instructions', value: 'special_instructions', text: 'Special Instructions', download: true },
                     { data: 'cost', name: 'ibs.cost', class: 'align-middle cost', value: 'cost', text: 'Cost', download: true }
                 ],

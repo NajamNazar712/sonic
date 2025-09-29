@@ -495,7 +495,8 @@ class ShipperShipmentBookController extends Controller
             'air_waybill' => $air_waybill,
             'omni_user' => $omni_user,
             'airway_bill_address_visibility_users' => $airway_bill_address_visibility_users,
-            'parcel_bypass' => $parcel_bypass
+            'parcel_bypass' => $parcel_bypass,
+            'is_logistic' => in_array($user->sub_segment_id, [1, 6]),
         ];
         
         $substitute_account = null;
@@ -604,9 +605,12 @@ class ShipperShipmentBookController extends Controller
             return back()->with(['error' => "Invalid File Format Of Replacement Parcel Image"]);
         }
         else {
-            if ($request->input('shipping_mode') != 2 && $request->input('pieces_quantity') > 10)
+            $userOld = User::find($user_id);
+            $inLimit = in_array($userOld?->sub_segment_id, [1, 6]) ? 100 : 10;
+
+            if ($request->input('shipping_mode') != 2 && (int) $request->input('pieces_quantity') > $inLimit)
             {
-                return back()->with(['error' => "Pieces quantity should be less then and equal to 10 if shipping mode is not saver plus !"]);
+                return back()->with(['error' => "Pieces quantity should be less than and equal to $inLimit if shipping mode is not saver plus !"]);
             }
             if (BookingType::where('id', '!=', 4)->where('id', $request->input('selected_service_type'))->exists()) {
 
@@ -1187,22 +1191,35 @@ class ShipperShipmentBookController extends Controller
     {
         $shipment_ids = array();
 
-        if (!$request->has('ids') && $request->filled(['fromDate', 'toDate'])) {
-            $fromDate = $request->fromDate;
-            $toDate = $request->toDate;
+       if ($request->filled(['fromDate', 'toDate'])) {
+            $fromDate = Carbon::parse($request->fromDate)->startOfDay();
+            $toDate   = Carbon::parse($request->toDate)->endOfDay();
 
             $shipments = Shipment::whereBetween('created_at', [$fromDate, $toDate])
-                ->pluck('id')
-                ->toArray();
+                ->where(function ($query) {
+                    $query->where('user_id', session('user_id'))
+                        ->orWhereIn('user_id', session('sister_users') ?? []);
+                })
+                ->where('shipper_status_id', 1);
+
+            if (session('user_type') == 2 && session('restriction') == 1) {
+                $shipments->join('substitute_user_shipments as sus', function ($join) {
+                    $join->on('sus.shipment_id', '=', 'shipments.id')
+                        ->where('sus.substitute_user_id', '=', Auth::id());
+                });
+            }
+
+            $shipments = $shipments->pluck('shipments.id')->toArray();
 
             $request->merge(['ids' => $shipments]);
         }
 
+        
         if ($request->ids) {
             $i = 0;
             $sticker = TRUE;
 
-            foreach ($request->ids as $id) {
+            foreach ($request->ids as $id) {    
                 $shipment = Shipment::find($id);
                 if ($shipment) {
                     if ($shipment->shipper_status_id == 1) {
@@ -1543,7 +1560,7 @@ class ShipperShipmentBookController extends Controller
             $prints = 1;
             $page_break = 0;
         }
-        $check = DeliveryLocationMappingKeyword::pluck('keyword')->toArray();
+//        $check = DeliveryLocationMappingKeyword::pluck('keyword')->toArray();
 
         foreach ($ids as $id) {
 //            dd('sss');
@@ -1555,6 +1572,31 @@ class ShipperShipmentBookController extends Controller
             ->where('shipment_id', $shipment->id)
             ->select('sub_category_segments.name')
             ->first();
+            //area start
+            $delivery_area = null;
+            $matched_keyword = null;
+
+
+            // Step 1: Tokenize consignee address into words
+            $tokens = preg_split('/[^\p{L}\p{N}]+/u', $shipment->consignee_address ?? '');
+            $tokens = array_filter($tokens); // remove empty
+            $tokens = array_map('mb_strtolower', $tokens); // normalize case
+
+            if (!empty($tokens)) {
+                // Step 2: Find matching area in one query
+                $found = DeliveryLocationMappingKeyword::query()
+                    ->join('delivery_location_mappings as dlm', 'delivery_location_mapping_keywords.mapping_id', '=', 'dlm.id')
+                    ->where('dlm.city_id', $shipment->consignee_city_id)
+                    ->whereIn(DB::raw('LOWER(delivery_location_mapping_keywords.keyword)'), $tokens)
+                    ->where('dlm.status', 1) // ✅ active areas only
+                    ->select('dlm.area_name', 'dlm.id as mapping_id', 'delivery_location_mapping_keywords.keyword')
+                    ->first(); // grabs the first match, or null if none
+                if ($found) { // ✅ safe check
+                    $delivery_area   = $found->area_name;
+                    $matched_keyword = $found->keyword;
+                }
+            }
+            //area end
 
             if ($sub_segment && $sub_segment->name)
             {
@@ -1789,8 +1831,11 @@ class ShipperShipmentBookController extends Controller
 
                         $origin_data = $return_address_id == NULL ? $shipment->pickup_address->city->name : $return_address_city;
                         $table_start .= '
+                               <tr> 
                                 <td class="color primary"><strong>Order ID</strong></td>
-                                <td colspan="3">' . $shipment->order_id . '</td>
+                                <td >' . $shipment->order_id . '</td>
+                                <td class="color primary border twice-bottom"><strong>Sub Area</strong></td>
+                                <td class="border twice-bottom"><strong>' . $delivery_area . '</strong></td>
                               </tr>
                               <tr>
                                 ' . $originstyle . '
@@ -1812,7 +1857,9 @@ class ShipperShipmentBookController extends Controller
                     } else {
                         $table_start .= '
                                 <td class="color primary"><strong>Order ID</strong></td>
-                                <td>' . $shipment->order_id . '</td>
+                                <td >' . $shipment->order_id . '</td>
+                                <td class="color primary border twice-bottom"><strong>Sub Area</strong></td>
+                                <td class="border twice-bottom"><strong>' . $delivery_area . '</strong></td>
                               </tr>
                               <tr>';
                         if ($shipment->business_category->id == 1) {
@@ -2094,7 +2141,7 @@ class ShipperShipmentBookController extends Controller
                     <tr>
                         <td colspan="1" style="font-size:13px;" class="color primary border twice-top twice-bottom twice-right"><strong>Shipping Mode</strong></td>
                         '.$shipment_mode.' 
-                        <td colspan="1" style="font-size:13px;" class="color primary border twice-top twice-bottom twice-left" style="height: 20px;"> Service </td>
+                        <td colspan="1" style="font-size:13px;" class="color primary border twice-top twice-bottom twice-left" style="height: 20px;"> <strong>Service</strong> </td>
                         '.$shipment_type.'
                     </tr>
                     
@@ -2104,10 +2151,10 @@ class ShipperShipmentBookController extends Controller
                         $table_end .= '
                               </tr>
                               <tr>
-                                <td colspan="8" class="text-center border twice-top urdu h5" dir="rtl"><em>برائے مہربانی رائڈر / کورئیر کو کوئی اضافی پیسہ نہ دیں۔ اگر پارسل / پیکٹ خراب یا خراب حالت میں ہے تو ، براہ کرم اسے وصول نہ کریں۔</em></td>
+                                <td colspan="8" class="text-center border twice-top urdu h5 ' . $remove_logo . '" dir="rtl"><em>برائے مہربانی رائڈر / کورئیر کو کوئی اضافی پیسہ نہ دیں۔ اگر پارسل / پیکٹ خراب یا خراب حالت میں ہے تو ، براہ کرم اسے وصول نہ کریں۔</em></td>
                               </tr>
                               <tr>
-                                <td colspan="8" class="text-center border twice-top urdu h5" dir="rtl"><em>ٹریکس لاجسٹک کا اس پارسل / پیکٹ میں موجود کسی آئٹم یا مواد سے کوئی تعلق نہیں ہے۔ ہم سامان ایک جگہ سے دوسری جگہ بھیجتے ہیں۔ اگر آپ کو اس بارے میں کوئی شکایت ہے تو ، براہ کرم متعلقہ آن لائن اسٹور سے رابطہ کریں۔</em></td>
+                                <td colspan="8" class="text-center border twice-top urdu h5 ' . $remove_logo . '" dir="rtl"><em>ٹریکس لاجسٹک کا اس پارسل / پیکٹ میں موجود کسی آئٹم یا مواد سے کوئی تعلق نہیں ہے۔ ہم سامان ایک جگہ سے دوسری جگہ بھیجتے ہیں۔ اگر آپ کو اس بارے میں کوئی شکایت ہے تو ، براہ کرم متعلقہ آن لائن اسٹور سے رابطہ کریں۔</em></td>
                               </tr>
                             </tbody>
                         </table>
@@ -2682,76 +2729,53 @@ class ShipperShipmentBookController extends Controller
 
                 }
                             //delivery location watermark start
-                            $msg_string = null;
-                            $str_arr = null;
-                            $str_arr = preg_split('/[\s.,-,_,*,?,<,>,!,@,#,$,%,^,&,(,)]+/', $shipment->consignee_address);
-                            // $str_arr = preg_split("/[ ,]+/", $shipment->consignee_address);
-                            foreach ($check as $nsa) {
-                                foreach ($str_arr as $arr_value) {
-                                    if (strtolower($nsa) == strtolower($arr_value)) {
-                                            $msg_string = $arr_value;
-                                    }
-                                }
-                            }
 
-                            $delivery_area = null;
-                            if($msg_string != null){
-                                $found = DeliveryLocationMappingKeyword::join('delivery_location_mappings as dlm','delivery_location_mapping_keywords.mapping_id','=','dlm.id')
-                                ->select('dlm.area_name as area_name','dlm.id')
-                                ->where('delivery_location_mapping_keywords.keyword',$msg_string)
-                                ->where('dlm.city_id',$shipment->consignee_city_id);
-                                if($found->exists()){
-                                    $found = $found->first();
-                                    $delivery_area = $found->area_name;
-                                }
-                            }
+//                            if($delivery_area != null){
+//                                for($i=0; $i<10; $i++){
+//                                    $delivery_area.= ' '.$delivery_area;
+//                                    if(strlen($delivery_area)>25){
+//                                        break;
+//                                    }
+//                                }
+//                                if($page_break){
+//                                    $shipment_details .= '
+//                                    <div id="delivery_area_watermark" class="delivery_area_watermark">
+//                                    <h1 style="
+//                                      text-align: center;
+//                                      text-transform: uppercase;
+//                                      overflow: hidden;
+//                                      position: absolute;
+//                                      margin-top: -1200px;
+//                                      opacity: 0.2;
+//                                      transform: rotate(350deg);
+//                                      font-size: 400%;
+//                                      color: #000000;
+//                                      font-stretch: extra-expanded;"
+//                                      > ' . $delivery_area . '  </h1>
+//
+//                                    <!--<p>Your trial membership will expire in 3 days!</p>-->
+//                                  </div>';
+//                                }else{
+//                                    $shipment_details .= '
+//                                    <div id="delivery_area_watermark" class="delivery_area_watermark">
+//                                    <h1 style="
+//                                      text-align: center;
+//                                      text-transform: uppercase;
+//                                      overflow: hidden;
+//                                      position: absolute;
+//                                      margin-top: -290px;
+//                                      opacity: 0.2;
+//                                      transform: rotate(350deg);
+//                                      font-size: 400%;
+//                                      color: #000000;
+//                                      font-stretch: extra-expanded;"
+//                                      > ' . $delivery_area . '  </h1>
+//
+//                                    <!--<p>Your trial membership will expire in 3 days!</p>-->
+//                                  </div>';
+//                                }
 
-                            if($delivery_area != null){
-                                for($i=0; $i<10; $i++){
-                                    $delivery_area.= ' '.$delivery_area;
-                                    if(strlen($delivery_area)>25){
-                                        break;
-                                    }
-                                }
-                                if($page_break){
-                                    $shipment_details .= '
-                                    <div id="delivery_area_watermark" class="delivery_area_watermark">
-                                    <h1 style="
-                                      text-align: center;  
-                                      text-transform: uppercase;                  
-                                      overflow: hidden;
-                                      position: absolute;
-                                      margin-top: -1200px;
-                                      opacity: 0.2;
-                                      transform: rotate(350deg);
-                                      font-size: 400%; 
-                                      color: #000000; 
-                                      font-stretch: extra-expanded;"     
-                                      > ' . $delivery_area . '  </h1>
-                                    
-                                    <!--<p>Your trial membership will expire in 3 days!</p>-->
-                                  </div>';
-                                }else{
-                                    $shipment_details .= '
-                                    <div id="delivery_area_watermark" class="delivery_area_watermark">
-                                    <h1 style="
-                                      text-align: center;  
-                                      text-transform: uppercase;                  
-                                      overflow: hidden;
-                                      position: absolute;
-                                      margin-top: -290px;
-                                      opacity: 0.2;
-                                      transform: rotate(350deg);
-                                      font-size: 400%; 
-                                      color: #000000; 
-                                      font-stretch: extra-expanded;"     
-                                      > ' . $delivery_area . '  </h1>
-                                    
-                                    <!--<p>Your trial membership will expire in 3 days!</p>-->
-                                  </div>';
-                                }
-
-                            }
+//                            }
 
                             //delivery location watermark end
 
@@ -2924,16 +2948,29 @@ class ShipperShipmentBookController extends Controller
             }
         }
 
-         if (!$request->has('ids') && $request->filled(['fromDate', 'toDate'])) {
-            $fromDate = $request->fromDate;
-            $toDate = $request->toDate;
+        if ($request->filled(['fromDate', 'toDate'])) {
+            $fromDate = Carbon::parse($request->fromDate)->startOfDay();
+            $toDate   = Carbon::parse($request->toDate)->endOfDay();
 
             $shipments = Shipment::whereBetween('created_at', [$fromDate, $toDate])
-                ->pluck('id')
-                ->toArray();
+                ->where(function ($query) {
+                    $query->where('user_id', session('user_id'))
+                        ->orWhereIn('user_id', session('sister_users') ?? []);
+                })
+                ->where('shipper_status_id', 1);
+
+            if (session('user_type') == 2 && session('restriction') == 1) {
+                $shipments->join('substitute_user_shipments as sus', function ($join) {
+                    $join->on('sus.shipment_id', '=', 'shipments.id')
+                        ->where('sus.substitute_user_id', '=', Auth::id());
+                });
+            }
+
+            $shipments = $shipments->pluck('shipments.id')->toArray();
 
             $request->merge(['ids' => $shipments]);
         }
+
 
         $user_type = NULL;
         $user_id = NULL;
@@ -4167,6 +4204,7 @@ class ShipperShipmentBookController extends Controller
             'user_delivery_types' => $user_delivery_types,
             'approve_ftl_requests' => $approve_ftl_requests,
             'omni_user' => $omni_user,
+            'is_logistic' => in_array($user->sub_segment_id, [1, 6]),
         ];
 
         $substitute_account = null;
@@ -4199,10 +4237,12 @@ class ShipperShipmentBookController extends Controller
         if ($validate->fails()) {
             return back()->with(['error' => "Invalid File Format Of Replacement Parcel Image"]);
         } else {
-        if ($request->input('shipping_mode') != 2 && $request->input('pieces_quantity') > 10)
-            {
-                return back()->with(['error' => "Pieces quantity should be less then and equal to 10 if shipping mode is not saver plus !"]);
-            }
+            $userOld = User::find(session('user_id'));
+            $inLimit = in_array($userOld?->sub_segment_id, [1, 6]) ? 100 : 10;
+        if ($request->input('shipping_mode') != 2 && (int) $request->input('pieces_quantity') > $inLimit)
+        {
+            return back()->with(['error' => "Pieces quantity should be less than and equal to $inLimit if shipping mode is not saver plus !"]);
+        }
         if ($request->open_shipment == 'on') {
             $open_shipment = 1;
         } else {
@@ -6280,7 +6320,7 @@ class ShipperShipmentBookController extends Controller
                 $query->whereIn('id', [3]);
             })],
             'information_display' => ['required', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
-            'consignee_city_name' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'name')->where('business_category_id', 1)->where('status', 1), 'destination_check'],
+            'consignee_city_name' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'name')->where('booking_enable_status', 1)->where('business_category_id', 1)->where('status', 1), 'destination_check'],
             'consignee_name' => ['required', 'between:1,100'],
             'consignee_address' => ['required', 'between:1,255'],
             'consignee_phone_number_1' => ['required', 'phone_number'],
@@ -9025,145 +9065,154 @@ class ShipperShipmentBookController extends Controller
 
     }
 
-    static function consignee_address_area($shipment_id,$pickup_address_id,$consignee_city_id,$consignee_address){
-
-        if(isset($consignee_city_id)){
-
-                $check_dlmk =  DeliveryLocationMappingKeyword::join('delivery_location_mappings as dlm','delivery_location_mapping_keywords.mapping_id','=','dlm.id')
-                    ->select('dlm.area_name as area_name','dlm.id','delivery_location_mapping_keywords.keyword','dlm.city_area_id')
-                    ->where('dlm.city_id',$consignee_city_id)
-                    ->get();
-
-                $str_arr = null;
-                $str_arr = preg_split('/[\s.,-,_,*,?,<,>,!,@,#,$,%,^,&,(,)]+/', $consignee_address);
-                $found_area_id = array();
-                $result = array();
-                $area_id = null;
-                foreach ($check_dlmk as $nsa) {
-                    foreach ($str_arr as $arr_value) {
-                        $arr_value = trim($arr_value);
-                        if (strtolower($nsa->keyword) == strtolower($arr_value)) {
-                            $found_area_id[$nsa->city_area_id] = isset($found_area_id[$nsa->city_area_id]) ?$found_area_id[$nsa->city_area_id] : $nsa->city_area_id;
-                        }
-                    }
-                }
-                $default_area = CityArea::where('city_id', $consignee_city_id)->where('default', 1)->where('status', 1)->orderby('id', 'desc');
-                if($found_area_id) {
-                    $area = CityArea::whereIn('id', $found_area_id)->where('status',1)->latest();
-                    if ($area->exists()) {
-                        $area = $area->first();
-                        $area_id = $area->id;
-                    }else if($default_area->exists()){
-                        $default_area = $default_area->first();
-                        $area_id = $default_area->id;
-                    }
-                }else{
-                    if($default_area->exists()) {
-                        $default_area = $default_area->first();
-                        $area_id = $default_area->id;
-                    }
-                }
-                if($area_id != null){
-                    $consignee_address_area = ConsigneeAddressArea::where('shipment_id', $shipment_id);
-                    if (!$consignee_address_area->exists()) {
-                        $consignee_address_area = new ConsigneeAddressArea();
-                        $consignee_address_area->shipment_id = $shipment_id;
-                        $consignee_address_area->city_area_id = $area_id;
-                        $consignee_address_area->save();
-                    }
-                }
-
-            }
+    static function consignee_address_area($shipment_id, $pickup_address_id, $consignee_city_id, $consignee_address)
+    {
+        if (!isset($consignee_city_id)) {
             return true;
         }
 
-    static function shipper_address_area($city_id,$address,$pickup_address_id){
+        // Tokenize consignee address → lowercased, deduped, unicode-aware
+        $tokens = preg_split('/[^\p{L}\p{N}]+/u', $consignee_address ?? '');
+        $tokens = array_values(array_unique(array_filter(array_map('mb_strtolower', $tokens))));
 
-        if(isset($city_id)){
-
-            $check_dlmk =  DeliveryLocationMappingKeyword::join('delivery_location_mappings as dlm','delivery_location_mapping_keywords.mapping_id','=','dlm.id')
-                ->select('dlm.area_name as area_name','dlm.id','delivery_location_mapping_keywords.keyword','dlm.city_area_id')
-                ->where('dlm.city_id',$city_id)
-                ->get();
-            $area_id = null;
-            $str_arr = null;
-            $str_arr = preg_split('/[\s.,-,_,*,?,<,>,!,@,#,$,%,^,&,(,)]+/', $address);
-            $found_area_id = array();
-            $result = array();
-            foreach ($check_dlmk as $nsa) {
-                foreach ($str_arr as $arr_value) {
-                    $arr_value = trim($arr_value);
-                    if (strtolower($nsa->keyword) == strtolower($arr_value)) {
-                        $found_area_id[$nsa->city_area_id] = isset($found_area_id[$nsa->city_area_id]) ?$found_area_id[$nsa->city_area_id] : $nsa->city_area_id;
-                    }
-                }
-            }
-            $default_area = CityArea::where('city_id', $city_id)->where('default', 1)->where('status', 1)->orderby('id', 'desc');
-            if($found_area_id) {
-                $area = CityArea::whereIn('id', $found_area_id)->where('status',1)->latest();
-                if ($area->exists()) {
-                    $area = $area->first();
-                    $area_id = $area->id;
-                }else if($default_area->exists()){
-                    $default_area = $default_area->first();
-                    $area_id = $default_area->id;
-                }
-            }else{
-                if($default_area->exists()) {
-                    $default_area = $default_area->first();
-                    $area_id = $default_area->id;
-                }
-            }
-            if($area_id) {
-                $user_shipping_info = UserShippingInfo::find($pickup_address_id);
-                $user_shipping_info->city_area_id = $area_id;
-                $user_shipping_info->save();
-            }
-            return true;
+        // Find candidate city_area_ids by matching any token to any keyword (case-insensitive)
+        $candidateAreaIds = [];
+        if (!empty($tokens)) {
+            $candidateAreaIds = DeliveryLocationMappingKeyword::query()
+                ->join('delivery_location_mappings as dlm', 'delivery_location_mapping_keywords.mapping_id', '=', 'dlm.id')
+                ->where('dlm.city_id', $consignee_city_id)
+                ->where('dlm.status', 1)
+                ->whereNotNull('dlm.city_area_id')
+                ->whereIn(DB::raw('LOWER(delivery_location_mapping_keywords.keyword)'), $tokens)
+                ->distinct()
+                ->pluck('dlm.city_area_id')
+                ->toArray();
         }
+
+        // Choose best area: latest active match, else default active area
+        $area = null;
+        if (!empty($candidateAreaIds)) {
+            $area = CityArea::whereIn('id', $candidateAreaIds)
+                ->where('status', 1)
+                ->latest('id')
+                ->first();
+        }
+
+        if (!$area) {
+            $area = CityArea::where('city_id', $consignee_city_id)
+                ->where('default', 1)
+                ->where('status', 1)
+                ->orderByDesc('id')
+                ->first();
+        }
+
+        if ($area) {
+            $consignee_address_area = ConsigneeAddressArea::where('shipment_id', $shipment_id)->first();
+            if (!$consignee_address_area) {
+                $consignee_address_area = new ConsigneeAddressArea();
+                $consignee_address_area->shipment_id = $shipment_id;
+            }
+            $consignee_address_area->city_area_id = $area->id;
+            $consignee_address_area->save();
+        }
+
+        return true;
     }
 
-    static function consignee_address_area_intercept($consignee_city_id,$consignee_address){
-        $city_area_id = null;
-        if(isset($consignee_city_id)){
-
-            $check_dlmk =  DeliveryLocationMappingKeyword::join('delivery_location_mappings as dlm','delivery_location_mapping_keywords.mapping_id','=','dlm.id')
-                ->select('dlm.area_name as area_name','dlm.id','delivery_location_mapping_keywords.keyword','dlm.city_area_id')
-                ->where('dlm.city_id',$consignee_city_id)
-                ->get();
-
-            $str_arr = null;
-            $str_arr = preg_split('/[\s.,-,_,*,?,<,>,!,@,#,$,%,^,&,(,)]+/', $consignee_address);
-            $found_area_id = array();
-            $result = array();
-            foreach ($check_dlmk as $nsa) {
-                foreach ($str_arr as $arr_value) {
-                    $arr_value = trim($arr_value);
-                    if (strtolower($nsa->keyword) == strtolower($arr_value)) {
-                        $found_area_id[$nsa->city_area_id] = isset($found_area_id[$nsa->city_area_id]) ?$found_area_id[$nsa->city_area_id] : $nsa->city_area_id;
-                    }
-                }
-            }
-            $default_area = CityArea::where('city_id', $consignee_city_id)->where('default', 1)->where('status', 1)->orderby('id', 'desc');
-            if($found_area_id) {
-                $area = CityArea::whereIn('id', $found_area_id)->where('status',1)->latest();
-                if ($area->exists()) {
-                    $area = $area->first();
-                    $city_area_id = $area->id;
-                }else if($default_area->exists()){
-                    $default_area = $default_area->first();
-                    $city_area_id = $default_area->id;
-                }
-            }else{
-                if($default_area->exists()) {
-                    $default_area = $default_area->first();
-                    $city_area_id = $default_area->id;
-                }
-            }
-
+    static function shipper_address_area($city_id, $address, $pickup_address_id)
+    {
+        if (!isset($city_id)) {
+            return true;
         }
-        return $city_area_id;
 
+        // Tokenize address
+        $tokens = preg_split('/[^\p{L}\p{N}]+/u', $address ?? '');
+        $tokens = array_values(array_unique(array_filter(array_map('mb_strtolower', $tokens))));
+
+        // Candidate area ids (active + this city)
+        $candidateAreaIds = [];
+        if (!empty($tokens)) {
+            $candidateAreaIds = DeliveryLocationMappingKeyword::query()
+                ->join('delivery_location_mappings as dlm', 'delivery_location_mapping_keywords.mapping_id', '=', 'dlm.id')
+                ->where('dlm.city_id', $city_id)
+                ->where('dlm.status', 1)
+                ->whereNotNull('dlm.city_area_id')
+                ->whereIn(DB::raw('LOWER(delivery_location_mapping_keywords.keyword)'), $tokens)
+                ->distinct()
+                ->pluck('dlm.city_area_id')
+                ->toArray();
+        }
+
+        // Pick latest active area among candidates or default
+        $area = null;
+        if (!empty($candidateAreaIds)) {
+            $area = CityArea::whereIn('id', $candidateAreaIds)
+                ->where('status', 1)
+                ->latest('id')
+                ->first();
+        }
+
+        if (!$area) {
+            $area = CityArea::where('city_id', $city_id)
+                ->where('default', 1)
+                ->where('status', 1)
+                ->orderByDesc('id')
+                ->first();
+        }
+
+        if ($area && $pickup_address_id) {
+            $user_shipping_info = UserShippingInfo::find($pickup_address_id);
+            if ($user_shipping_info) {
+                $user_shipping_info->city_area_id = $area->id;
+                $user_shipping_info->save();
+            }
+        }
+
+        return true;
+    }
+
+    static function consignee_address_area_intercept($consignee_city_id, $consignee_address)
+    {
+        if (!isset($consignee_city_id)) {
+            return null;
+        }
+
+        // Tokenize address
+        $tokens = preg_split('/[^\p{L}\p{N}]+/u', $consignee_address ?? '');
+        $tokens = array_values(array_unique(array_filter(array_map('mb_strtolower', $tokens))));
+
+        // Candidate area ids
+        $candidateAreaIds = [];
+        if (!empty($tokens)) {
+            $candidateAreaIds = DeliveryLocationMappingKeyword::query()
+                ->join('delivery_location_mappings as dlm', 'delivery_location_mapping_keywords.mapping_id', '=', 'dlm.id')
+                ->where('dlm.city_id', $consignee_city_id)
+                ->where('dlm.status', 1)
+                ->whereNotNull('dlm.city_area_id')
+                ->whereIn(DB::raw('LOWER(delivery_location_mapping_keywords.keyword)'), $tokens)
+                ->distinct()
+                ->pluck('dlm.city_area_id')
+                ->toArray();
+        }
+
+        // Best active match or default
+        $area = null;
+        if (!empty($candidateAreaIds)) {
+            $area = CityArea::whereIn('id', $candidateAreaIds)
+                ->where('status', 1)
+                ->latest('id')
+                ->first();
+        }
+
+        if (!$area) {
+            $area = CityArea::where('city_id', $consignee_city_id)
+                ->where('default', 1)
+                ->where('status', 1)
+                ->orderByDesc('id')
+                ->first();
+        }
+
+        return $area?->id;
     }
 
     static function update_consignee_address_area($shipment_id,$area_id){

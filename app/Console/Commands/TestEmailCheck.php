@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Controllers\Shippers\ShipperShipmentBookController;
+use App\Http\Models\Shipment;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -13,7 +15,7 @@ class TestEmailCheck extends Command
      *
      * @var string
      */
-    protected $signature = 'test:email_check';
+    protected $signature = 'test:email_check {payment_id?}';
 
     /**
      * The console command description.
@@ -29,28 +31,50 @@ class TestEmailCheck extends Command
      */
     public function handle()
     {
-//        usefull commands
-    //    revenue_report_by_user_excel
-    //    mark_arrival
-        $records = DB::table('done_payment_shipments')
-            ->whereIn('done_payment_id', [1633458])
-            ->select('id', 'wht', 'cod_sst','payable')
-            ->get();
+        //        usefull commands
+        //    revenue_report_by_user_excel
+        //    mark_arrival
 
-        foreach ($records as $record) {
-//            $currentPayable = DB::table('done_payment_shipments')
-//                ->where('id', $record->id)
-//                ->value('payable');
+        if ($this->hasArgument('payment_id')){
+            $paymentId = explode(',', $this->argument('payment_id'));
+            $records = DB::table('done_payment_shipments')
+                ->whereIn('done_payment_id', $paymentId)
+                ->select('id', 'wht', 'cod_sst', 'payable')
+                ->get();
+
+            foreach ($records as $record) {
+                //            $currentPayable = DB::table('done_payment_shipments')
+                //                ->where('id', $record->id)
+                //                ->value('payable');
 
 
-            $currentPayable = $record->payable;
-            DB::table('done_payment_shipments')
-                ->where('id', $record->id)
-                ->update(['payable' => $currentPayable + $record->wht + $record->cod_sst, 'cod_sst' => 0, 'wht' => 0]);
+                $currentPayable = $record->payable;
+                DB::table('done_payment_shipments')
+                    ->where('id', $record->id)
+                    ->update(['payable' => $currentPayable + $record->wht + $record->cod_sst, 'cod_sst' => 0, 'wht' => 0]);
+            }
 
+            DB::select('CALL update_done_payment_statistics(?)', $paymentId);
         }
+//         $records = DB::table('done_payment_shipments')
+//             ->whereIn('done_payment_id', [1641598])
+//             ->select('id', 'wht', 'cod_sst','payable')
+//             ->get();
 
-        DB::select('CALL update_done_payment_statistics(?)', [1633458]);
+//         foreach ($records as $record) {
+// //            $currentPayable = DB::table('done_payment_shipments')
+// //                ->where('id', $record->id)
+// //                ->value('payable');
+
+
+//             $currentPayable = $record->payable;
+//             DB::table('done_payment_shipments')
+//                 ->where('id', $record->id)
+//                 ->update(['payable' => $currentPayable + $record->wht + $record->cod_sst, 'cod_sst' => 0, 'wht' => 0]);
+
+//         }
+
+//         DB::select('CALL update_done_payment_statistics(?)', [1641598]);
         // DB::select('CALL update_done_payment_statistics(?)', [1629765]);
 //        DB::select('CALL update_done_payment_statistics(?)', [1624481]);
 
