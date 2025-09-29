@@ -87,7 +87,7 @@ class AutoDeliveryNoteVerify extends Command
                             $shipments = Shipment::whereIn('id', $shipmentChunk)
                                 ->whereNotIn('shipper_status_id', [30, 36, 37, 56])
                                 ->where('booking_type_id', '!=', 6)
-                                ->select('id', 'shipper_status_id', 'booking_type_id', 'packaging_material_request', 'packaging_material_charges', 'shipment_type')
+                                ->select('id', 'shipper_status_id', 'booking_type_id', 'packaging_material_request', 'packaging_material_charges', 'shipment_type','user_id')
                                 ->get(); 
                             // Fetch shipments journey data for the current chunk
                             // $shipmentIds = array_column($shipments->toArray(), 'id');

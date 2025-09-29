@@ -13,12 +13,13 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class UpdateRvShipments extends Command
 {
-    protected $signature = 'shipments:update-rv-sar {tracking_number?} {--file= : Path to Excel file containing tracking numbers}';
+    protected $signature = 'shipments:update-rv-sar {tracking_number?} {fileInput?} {--file= : Path to Excel file containing tracking numbers} ';
     protected $description = 'Update RV shipments and handle missing SAR shipments';
 
     public function handle()
     {
         $trackingInput = $this->argument('tracking_number');
+        $fileInput = $this->argument('fileInput');
         
         if ($trackingInput) {
             // Handle tracking number input
@@ -29,13 +30,14 @@ class UpdateRvShipments extends Command
         // If no tracking number is provided, check the file option
         $filePath = base_path($this->option('file'));
 
-        if ($filePath) {
+        if ($filePath && $fileInput) {
+            
             // Handle Excel file input
             $this->processShipmentsByFile($filePath);
         }
 
         // If neither tracking number nor file is provided, process shipments by shipper_status_id 12
-        if (!$trackingInput && !$filePath) {
+        if (!$trackingInput && !$fileInput) {
             $this->processMissingShipments();
         }
     }
@@ -109,10 +111,10 @@ class UpdateRvShipments extends Command
             ->join('shipments_journey as sj', 'sj.shipment_id', '=', 's.id')
             ->where('sj.shipper_status_id', 12)
             ->where('sj.verification', 1)
-            ->where('sj.created_at', '>=',  $yesterday  . ' 00:00:00')
-            ->where('sj.updated_at', '<=',  $yesterday  . ' 23:59:59')
+            ->where('sj.created_at', '>=',  "2025-09-24"  . ' 00:00:00')
+            ->where('sj.updated_at', '<=',  "2025-09-27"  . ' 23:59:59')
             ->where('s.shipper_status_id', 12)
-            ->select('s.id')
+            ->select('s.id','s.user_id','s.tracking_number')
             ->get();
 
         if ($missingShipments->isEmpty()) {
