@@ -108,15 +108,17 @@ class UpdateRvShipments extends Command
                 $join->on('s.id', '=', 'rst.shipment_id')
                     ->where('rst.permanent_disable', 1);
             })
-            // ->join('shipments_journey as sj', 'sj.shipment_id', '=', 's.id')
-            // ->where('sj.shipper_status_id', 12)
-            // ->where('sj.verification', 1)
-            // ->where('sj.created_at', '>=',  $yesterday  . ' 00:00:00')
-            // ->where('sj.updated_at', '<=',  $yesterday  . ' 23:59:59')
+            ->join('shipments_journey as sj', 'sj.shipment_id', '=', 's.id')
+            ->where('sj.shipper_status_id', 12)
+            ->where('sj.verification', 1)
+            ->where('sj.created_at', '>=',  $yesterday  . ' 00:00:00')
+            ->where('sj.updated_at', '<=',  $yesterday  . ' 23:59:59')
             ->where('s.shipper_status_id', 12)
+            ->where('s.updated_at', '>=',  $yesterday  . ' 00:00:00')
+            ->where('s.updated_at', '<=',  $yesterday  . ' 23:59:59')
             ->select('s.id','s.user_id','s.tracking_number')
             ->get();
-
+            
         if ($missingShipments->isEmpty()) {
             $this->info("❌ No missing shipments found.");
             return;
