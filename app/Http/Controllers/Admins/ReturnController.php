@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Models\ShipmentGeoCode;
-use DB;
 use DateTime;
 use Exception;
 use Carbon\Carbon;
