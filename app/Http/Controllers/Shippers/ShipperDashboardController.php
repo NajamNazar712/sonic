@@ -1603,7 +1603,7 @@ class ShipperDashboardController extends Controller
         $latitude = $request->latitude;
         $longitude = $request->longitude;
 
-        if($pickup_address != null && $phone != null && $poc != null && $email != null && $city_id != null && $id != null  && $latitude != null && $longitude != null)
+        if($pickup_address != null && $phone != null && $poc != null && $email != null && $city_id != null && $id != null)
         {
             $user_shipping_info = UserShippingInfo::find($id);
             if($user_shipping_info){
@@ -1614,8 +1614,8 @@ class ShipperDashboardController extends Controller
                 $user_shipping_info->city_id = $city_id;
                 $user_shipping_info->phone = $phone;
                 $user_shipping_info->vendor = $vendor;
-                $user_shipping_info->latitude = $latitude;
-                $user_shipping_info->longitude = $longitude;
+                $user_shipping_info->latitude = $latitude ?? null;
+                $user_shipping_info->longitude = $longitude ?? null;
                 $user_shipping_info->save();
                 return redirect()->back()->with('success','Pickup Address updated successfully!');
             }
