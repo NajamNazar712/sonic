@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Rider;
 
+use App\Models\ShipmentGeoCode;
 use DB;
 use Validator;
 use App\SubReason;
@@ -1536,6 +1537,8 @@ class RiderAPIController extends Controller
                 $pickup['address'] = $pickup_address->pickup_address;
                 $pickup['location_latitude'] = $pickup_address->location_latitude;
                 $pickup['location_longitude'] = $pickup_address->location_longitude;
+                $pickup['geo_latitude'] = $pickup_address->latitude ?? 0;
+                $pickup['geo_longitude'] = $pickup_address->longitude ?? 0;
 
                 $information['pickups'][] = $pickup;
             }
@@ -12917,9 +12920,29 @@ class RiderAPIController extends Controller
                         $shipment_reattempt = NULL;
                     }
 
+                    $latitude = 0;
+                    $longitude = 0;
+
+                    $geo_code = ShipmentGeoCode::where('shipment_id', $shipment_data->id)
+                        ->where('geo_code_type', 1)
+                        ->first();
+
+                    if (!$geo_code) {
+                        $geo_code = ShipmentGeoCode::where('shipment_id', $shipment_data->id)
+                            ->where('geo_code_type', 2)
+                            ->first();
+                    }
+
+                    if ($geo_code) {
+                        $latitude  = $geo_code->latitude;
+                        $longitude = $geo_code->longitude;
+                    }
+
                     $deliveries['consignee_name'] = $consignee_name;
                     $deliveries['consignee_address'] = $consignee_address;
                     $deliveries['consignee_phone'] = $consignee_phone;
+                    $deliveries['geo_code_latitude'] = $latitude;
+                    $deliveries['geo_code_longitude'] = $longitude;
                     $deliveries['cod_amount'] = $cod_amount;
                     $deliveries['special_instructions'] = $special_instructions;
                     $deliveries['booking_type'] = $booking_type;

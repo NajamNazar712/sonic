@@ -62,6 +62,8 @@
                                                         <input type="hidden" name="form[{{$no}}][service_type_id]" value="{{$ro['service_type_id']}}">
                                                         <input type="hidden" name="form[{{$no}}][pickup_address_id]" value="{{$ro['pickup_address_id']}}">
                                                         <input type="hidden" name="form[{{$no}}][return_address_id]" value="{{$ro['return_address_id']}}">
+                                                           <input type="hidden" name="form[{{$no}}][consignee_latitude]" value="{{$ro['consignee_latitude']}}">
+                                                         <input type="hidden" name="form[{{$no}}][consignee_longitude]" value="{{$ro['consignee_longitude']}}">
 
                                                         <input type="hidden" name="form[{{$no}}][information_display]" value="{{$ro['information_display']}}">
                                                         <td><input type="text" name="form[{{$no}}][consignee_city_name]" class="form-control text" value="{{$ro['consignee_city_name']}}" readonly="readonly"></td>
