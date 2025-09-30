@@ -12,7 +12,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 
     Route::get('/login', 'Auth\AdminLoginController@showLoginForm')->name('login');
-    Route::post('/login', 'Auth\AdminLoginController@login')->name('login.submit');
+    Route::post('/login', 'Auth\AdminLoginController@login')->middleware('login.check')->name('login.submit');
     Route::post('/credentials', 'Auth\AdminLoginController@credentials')->name('login.credentials');
     Route::post('/verify_otp', 'Auth\AdminLoginController@verify_otp')->name('login.verify_otp');
     Route::get('access_denied', 'Admins\AdminController@access_denied')->name('access_denied');
@@ -211,6 +211,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('invoice_log', 'Admins\AdminDashboardController@packaging_invoice_log')->name('invoice.log');
         });
 
+        Route::prefix('on_delivered')->name('on_delivered.')->group(function () {
+            Route::post('delivered_invoice_log', 'Admins\AdminDashboardController@delivered_invoice_log')->name('invoice.log');
+        });
+
         Route::prefix('disable_account_intimation_survey')->name('disable.account.intimation.survey.')->group(function () {
             Route::get('', 'Admins\AdminDashboardController@disable_account_intimation_survey_index')->name('index');
             Route::get('list', 'Admins\AdminDashboardController@disable_account_intimation_survey_list')->name('list');
@@ -323,6 +327,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 
         Route::get('city/{id}/changes', 'Admins\AdminDashboardController@getAjaxCityChanges')->name('getAjaxCityChanges');
+        Route::get('/{id}/tagging-history', 'Admins\AdminDashboardController@taggingHistory')->name('taggingHistory');
 
         //Route
         Route::prefix('route')->name('route.')->group(function () {
@@ -1752,7 +1757,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('view_status_history', 'Admins\AdminFinanceController@view_status_history')->name('view_status_history');
             Route::get('mark_settlement', 'Admins\AdminFinanceController@mark_settlement')->name('mark_settlement');
             Route::get('wallet_error_logs', 'Admins\AdminFinanceController@wallet_error_logs')->name('wallet_error_logs');
-            
+            Route::put('hold', 'Admins\AdminFinanceController@done_payments_hold')->name('hold');
+            Route::put('un_hold', 'Admins\AdminFinanceController@done_payments_un_hold')->name('un_hold');
+
+
         });
 
         Route::prefix('invoices')->name('invoices.')->group(function () {
@@ -2050,6 +2058,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     //Reports start
     Route::prefix('reports')->name('reports.')->group(function () {
+        Route::get('data_for_dropdown/{type}','Admins\AdminDashboardController@data_for_dropdown')->name('data_for_dropdown');
         Route::prefix('qsr')->name('qsr.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@qsr_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@qsr_list')->name('list');
@@ -4413,11 +4422,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('list', 'Admins\UserManagementController@admin_otp_list')->name('list');
         Route::post('update', 'Admins\UserManagementController@admin_otp_update')->name('update');
     });
+
+    Route::prefix('retail_otp')->name('retail_otp.')->group(function () {
+        Route::get('', 'Admins\UserManagementController@retail_otp_index')->name('index');
+        Route::get('list', 'Admins\UserManagementController@retail_otp_list')->name('list');
+//        Route::post('update', 'Admins\UserManagementController@admin_otp_update')->name('update');
+    });
+
     Route::prefix('rider_otp')->name('rider_otp.')->group(function () {
         Route::get('', 'Admins\RiderManagementController@rider_otp_index')->name('index');
         Route::get('list', 'Admins\RiderManagementController@rider_otp_list')->name('list');
         Route::post('update', 'Admins\RiderManagementController@rider_otp_update')->name('update');
     });
+
+
 
     Route::prefix('shipment_otp')->name('shipment_otp.')->group(function () {
         Route::get('', 'Admins\DeliveryController@shipment_otp_index')->name('index');

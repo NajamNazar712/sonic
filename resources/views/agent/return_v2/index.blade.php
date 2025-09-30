@@ -491,9 +491,9 @@
 
 
                 var auth_id = null;
-
+                let reason_id = null;
+                let ConsigneeAddress = null;
                 var auth_id = $('.auth_id').val();
-
                 function track() {
                     $.ajax({
                             url: '{!! route('agent.dashboard.get_ticket') !!}',
@@ -506,8 +506,10 @@
                         .done(function(data) {
                             if (data.shipment != undefined) {
                                 $('#shipment_id_val').val(data.shipment.id)
+                             
                                 var shipment = '';
-
+                                 reason_id  = data.rider_details?.reason?.id ?? null;
+                                 ConsigneeAddress = data.shipment.consignee_address ?? '-';
                                 shipment +=
                                     '<form id="get_submit" class="form-horizontal" method="post" enctype="multipart/form-data"> @csrf'
                                 shipment += '<div class="row justify-content-between pl-1">'
@@ -707,8 +709,8 @@
                                 shipment +=
                                     '<th style="padding-right:0px" class="col-1"><strong>Reason:</strong></th>';
 
-                                shipment += '<td>' + ((data.rider_details.reason != null) ? data
-                                    .rider_details.reason : '-----------') + '</td>';
+                                shipment += '<td>' + ((data.rider_details.reason.name != null) ? data
+                                    .rider_details.reason.name : '-----------') + '</td>';
                                 shipment +=
                                     '<th style="padding-right:0px" class="col-1"><strong>Attempted Time:</strong></th>';
                                 shipment += '<td>' + ((data.rider_details.attempted_time != null) ? data
@@ -792,7 +794,8 @@
                                 });
 
                                 shipment += '</select></strong><div id="rv_assign_agent_status_error" class="error_message_rv_assign_agent_status error_message"></div></th>';
-
+                                shipment += '<input type="hidden" id="selected_reason_id" name="reasonId" value="'+ reason_id +'">';
+                                    
                                 shipment += '<th><strong><select class="form-control d-none" id="call_to_id" name="call_to_id" disabled>';
                                 shipment += '<option value="">Select Call To</option>';
                                 shipment += '<option value="1" selected>Consignee</option>';
@@ -805,10 +808,20 @@
                                     '<th><strong><select class="form-control" id="shipment_reason" name="shipment_reason">';
                                 shipment +=
                                     '</select></strong><div id="rv_assign_agent_sub_status_error" class="error_message_rv_assign_agent_sub_status error_message"></div></th>';
-
+                                // Add hidden consignee address input field
+                                shipment +=
+                                '<th><strong>' +
+                                    '<textarea class="form-control form-control-sm" id="consignee_address_input" name="consignee_address" rows="2" placeholder="Remarks" style="display:none;" readonly></textarea>' +
+                                '</strong></th>';
 
                                 shipment +=
-                                    '<th><strong><textarea class="form-control form-control-sm" id="shipment_remarks" name="shipment_remarks "rows="2" placeholder="Remarks"></textarea><div id="shipment_remarks_error" class="error_message_shipment_remarks error_message"></div></strong></th>';
+                                '<th><strong>' +
+                                    '<textarea class="form-control form-control-sm" id="consignee_address_input_1" name="consignee_address_1" rows="2" placeholder="Consignee Addess Missing Required" style="display:none;"></textarea>' +
+                                    '<div id="shipment_consignee_address_1_error" class="shipment_consignee_address_1_error error_message"></div>' +
+
+                                '</strong></th>';
+                                shipment +=
+                                    '<th><strong><textarea class="form-control form-control-sm" id="shipment_remarks" name="shipment_remarks "rows="2" placeholder="Remarks"></textarea><div id="error_message_shipment_remarks" class="error_message_shipment_remarks error_message"></div></strong></th>';
                                     
                                 shipment +=
                                     '</select></strong></th>';
@@ -1072,15 +1085,23 @@
 
                 $(document).on('change', '#shipment_status', function() {
                     var id = $(this).val();
+                ConsigneeAddress
                     $.ajax({
                             url: '{!! route('agent.dashboard.get_shipment_reason') !!}',
                             method: 'POST',
                             data: {
                                 '_token': '{{ csrf_token() }}',
-                                'id': id
+                                'id': id,
+                                'shipment_id' : $('#shipment_id_val').val(),id 
                             }
                         })
                         .done(function(data) {
+                            if(id != 3){
+                                $("#consignee_address_input").hide();
+                                $("#consignee_address_input_1").hide();
+                                $("#consignee_address_input").val('');
+                                $("#consignee_address_input_1").val('');
+                            }
                             if (data.status == 1 && (id == 1 || id == 5)) {
                                 var options = '';
                                 options += '<option hidden value="">Select Reason *</option>';
@@ -1130,6 +1151,7 @@
                                         }
                                     })
                                     .done(function(data) {
+                                        
                                         if (data.status == 1) {
 
                                             $('input[name="shipment_id"]').val(data.shipment.id);
@@ -1179,15 +1201,25 @@
                                     });
 
                             } else if (data.status == 1 && id == 3) {
+                                
                                 $('.error_message_rv_assign_agent_sub_status').text('')
                                 $('#shipment_reason').hide();
                                 $('#call_to_id').addClass('d-none');
-
+                                
+                            }else if(id == 2 && [3,4].includes(reason_id)){
+                                console.log(  $("#consignee_address_input").show());
+                                $("#consignee_address_input").show();
+                                $("#consignee_address_input_1").show();
+                                $("#consignee_address_input").val(function(_, current) {
+                                    return (current ? current + " " : "")  + " " + ConsigneeAddress + " " +(data.addressMissingType ?? "");
+                                });
+                                // make it mandatory
                             } else {
                                 $('#shipment_reason').hide();
                                 $('#call_to_id').addClass('d-none');
 
                             }
+                           
                         });
                 });
 
@@ -1239,6 +1271,7 @@
                 var checkbox = null;
 
                 $(document).on('submit', '#get_submit', function(event) {
+
                     event.preventDefault(); // Prevent the default form submission
                     var shipment_status = $('#shipment_status').val();
                     var shipment_reason = $('#shipment_reason').val();
@@ -1248,6 +1281,8 @@
                     var call_to_id = $('#call_to_id').val();
                     var shipment_id_val = $("#shipment_id_val").val();
                     var phone_number = $('#phone_number').val();
+                    var consignee_address = $('#consignee_address').val();
+                    var  reasonId = $('#selected_reason_id').val();
                     blockPagePermanently();
                     $.ajax({
                             url: '{!! route('agent.dashboard.submit_ticket') !!}',
@@ -1270,7 +1305,10 @@
                                 'intercept_type': intercept_type,
                                 'consignee_email': consignee_email,
                                 'amount': amount,
-                                'phone_number': phone_number
+                                'phone_number': phone_number,
+                                'reasonId': reasonId,
+                                'consignee_address_1':  $('#consignee_address_input_1').val(),
+                                'consigneeAddress':  $('#consignee_address_input').val() +' ('+ $('#consignee_address_input_1').val()+')',
 
                             }
 
@@ -1344,6 +1382,10 @@
                                     if (field === 'remarks' && $("#shipment_remarks").val() === "") {
                                         errorMessage = 'Remarks is Required';
                                         $('#shipment_remarks_error').text(errorMessage);
+                                    }
+                                    if ([3,4].includes(reason_id) &&  field === 'consignee_address_1' && $("#consignee_address_input_1").val() === "") {
+                                        errorMessage = 'Missing Consignee Address is Required';
+                                        $('#shipment_consignee_address_1_error').text(errorMessage);
                                     }
                 
                                 });

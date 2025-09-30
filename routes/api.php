@@ -243,6 +243,7 @@ use Illuminate\Http\Request;
                 Route::get('summary/multiple_v6', 'Rider\RiderAPIController@delivery_summary_multiple_v6')->name('delivery_summary_multiple_v6');
                 Route::post('undelivered_v3', 'Rider\RiderAPIController@shipment_undelivered_v3')->name('undelivered_v3');
                 Route::post('undelivered_v4', 'Rider\RiderAPIController@shipment_undelivered_v4')->name('undelivered_v4');
+                Route::post('rvrsub_reason', 'Rider\RiderAPIController@shipmentUndeliveredRvrSubReason')->name('rvrsub_reason');
                 Route::get('undelivered_reason_map', 'Rider\RiderAPIController@undelivered_reason_map')->name('undelivered_reason_map');
 
                 Route::post('delivered_v5', 'Rider\RiderAPIController@shipment_delivered_v5')->name('delivered_v5');
@@ -675,7 +676,8 @@ use Illuminate\Http\Request;
             });
             Route::get('get_shipper_info','ShipperAPIController@get_shipper_info')->name('get_shipper_info');
             Route::get('notification_history', 'ShipperAPIController@notification_history')->name('notification_history');
-
+            Route::get('is_wallet_user' ,'ShipperAPIController@is_wallet_user')->name('is_wallet_user');
+            
             Route::prefix('add_request')->name('add_request.')->group(function () {
                 Route::get('index', 'ShipperAPIController@add_request_index')->name('index');
                 Route::post('submit', 'ShipperAPIController@add_request_submit')->name('submit');

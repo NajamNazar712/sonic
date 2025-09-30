@@ -263,7 +263,7 @@ class AgentSarNotification extends Command
                     ['rv_shipment_tickets.permanent_disable', 0],
                     ['shipments.updated_at', '<=', $nowSub48Hours]
                 ])
-                ->whereNotIn('rv_shipment_tickets.user_id',  $shippers)
+                ->whereNotIn('rv_shipment_tickets.shipment_user_id',  $shippers)
                 ->groupBy('rv_shipment_tickets.id') // Group by primary key
                 ->havingRaw('COUNT(shipments_journey.id) > 1')
                 ->get();

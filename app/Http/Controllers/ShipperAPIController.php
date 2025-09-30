@@ -2184,5 +2184,15 @@ class ShipperAPIController extends Controller
         $user = User::where('id',$request->shipper_id)->first();
         return response()->json(['status' => 0, 'shipper' => $user]);
     }
+
+    public function is_wallet_user(Request $request) {
+
+        $user = WalletUser::where('user_id', $request->shipper_id)->where('substitute_user_id', 0)->first();
+        if($user) {
+            return response()->json(['status' => 1, 'is_wallet_user' => 1]);
+        } else {
+            return response()->json(['status' => 0, 'is_wallet_user' => 0]);
+        }
+    }
     
 }

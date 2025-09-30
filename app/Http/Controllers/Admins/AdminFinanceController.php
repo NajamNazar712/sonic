@@ -147,6 +147,8 @@ use App\Jobs\WalletBulkSettlementFromDonePayments;
 use App\Models\ParentProduct;
 use App\Http\Models\Product;
 use App\Http\Models\Region;
+use App\Models\CorporateUserOnDeliveredInvoice;
+
 
 class AdminFinanceController extends Controller
 {
@@ -4511,6 +4513,20 @@ class AdminFinanceController extends Controller
 
         $shipment->save();
 
+        $shipmentDeliveryNote = DeliveryNoteShipment::with('delivery_note')->where('shipment_id', $shipment->id)->latest()->first();
+
+        if(!empty($shipmentDeliveryNote)) {
+
+            NotificationsController::app_notification(
+                23, // Notification type ID
+                $shipmentDeliveryNote->delivery_note->rider_id, // Rider ID
+                2, // Notification category or type
+                $shipment->id, // Shipment ID
+                $change_shipment_amount->old_amount // old amount
+
+            );
+        }
+
         ShipmentChargesController::cash_handling($shipment_id);
 
         return redirect()->route('admin.finance.change_shipment_amount.index')->with('success', 'Shipment\'s amount has been changed');
@@ -8704,6 +8720,8 @@ class AdminFinanceController extends Controller
                     return 'Reverted';
                 } else if ($done_payment->status == 3) {
                     return 'Settlement Requested';
+                 }else if ($done_payment->status == 4) {
+                    return 'Hold';
                 } else {
                     return 'Unknown';
                 }
@@ -8717,6 +8735,8 @@ class AdminFinanceController extends Controller
                     return $done_payment->status_updated_at;
                 }
                 else if ($done_payment->status == 3) {
+                    return $done_payment->status_updated_at;
+                } else if ($done_payment->status == 4) {
                     return $done_payment->status_updated_at;
                 } else {
                     return 'Unknown';
@@ -8855,7 +8875,10 @@ class AdminFinanceController extends Controller
                     $query->where('done_payments.status', '=', 1);
                 } else if ($keyword == 2) {
                     $query->where('done_payments.status', '=', 2);
-                } else {
+                } else if ($keyword == 4) {
+                    $query->where('done_payments.status', '=', 4);
+                }
+                else {
                     $query->whereRaw('false');
                 }
             })
@@ -8911,6 +8934,7 @@ class AdminFinanceController extends Controller
 
     public function done_payments_paid(Request $request)
     {
+        $hold_payments_ids = [];
         foreach ($request->ids as $done_payment_id) {
             $done_payment = DonePayment::find($done_payment_id);
 
@@ -8922,7 +8946,7 @@ class AdminFinanceController extends Controller
                 WalletBulkSettlementFromDonePayments::dispatch($done_payment_id,  Auth::id());
                 
             } else {
-                if ($done_payment->status != 1) {
+                if ($done_payment->status != 1  && $done_payment->status != 4) {
                     $done_payment->status = 1;
                     $done_payment->status_updated_at = Carbon::now();
                     $done_payment->status_updated_by = Auth::id();
@@ -8989,11 +9013,15 @@ class AdminFinanceController extends Controller
                             ShipmentsPaymentJourneyController::add($shipment->id, 3, Auth::id(), '', $done_payment->id);
                         }
                     }
+                }else {
+                    if($done_payment->status == 4) {
+                            $hold_payments_ids[]=$done_payment->id;
+                    }
                 }
             }  
         }
 
-        return ['status' => 0, 'success' => 'Payment(s) marked Paid'];
+        return ['status' => 0, 'success' => 'Payment(s) marked Paid','hold_payments_ids'=> $hold_payments_ids];
     }
 
     public function done_payments_reverted(Request $request)
@@ -9046,6 +9074,100 @@ class AdminFinanceController extends Controller
 
         return ['status' => 0, 'success' => 'Payment(s) marked Reverted'];
     }
+
+    public function done_payments_hold(Request $request)
+    {
+        $paid_payment_ids = [];
+        $markedHold = false;
+        foreach ($request->ids as $done_payment_id) {
+            $done_payment = DonePayment::find($done_payment_id);
+
+            if (!$done_payment && $done_payment->status == 4) {
+                continue;
+            }
+
+            if ($done_payment->is_wallet_payment == 0) {
+                if ($done_payment->status == 1) {
+                    $paid_payment_ids[] = $done_payment->id;
+                } else {
+                    $done_payment->status = 4;
+                    $done_payment->status_updated_at = Carbon::now();
+                    $done_payment->status_updated_by = Auth::id();
+                    $done_payment->save();
+
+                    foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
+                        $shipment = $done_payment_shipment->shipment;
+                        $shipment->payment_status_id = 13;
+                        $shipment->save();
+
+                        ShipmentsPaymentJourneyController::add($shipment->id, 13, Auth::id(), '', $done_payment->id);
+                    }
+
+                    $markedHold = true;
+                }
+            }
+        }
+
+        if ($markedHold) {
+            return response()->json([
+                'status' => 0,
+                'success' => 'Payment(s) marked as Hold',
+                'paid_payment_ids' => $paid_payment_ids
+            ]);
+        }
+        return response()->json([
+            'status' => 1,
+            'error' => 'No payment(s) marked as Hold',
+            'paid_payment_ids' => []
+        ]);
+    }
+
+    public function done_payments_un_hold(Request $request)
+    {
+        $payment_ids = [];
+        $markedunHold = false;
+        foreach ($request->ids as $done_payment_id) {
+            $done_payment = DonePayment::find($done_payment_id);
+
+            if (!$done_payment && $done_payment->is_wallet_payment == 0) {
+                continue;
+            }
+
+            if ($done_payment->status == 4) {
+                    $done_payment->status = 0;
+                    $done_payment->status_updated_at = Carbon::now();
+                    $done_payment->status_updated_by = Auth::id();
+                    $done_payment->save();
+
+                    foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
+                        $shipment = $done_payment_shipment->shipment;
+                        $shipment->payment_status_id = 1;
+                        $shipment->save();
+
+                        ShipmentsPaymentJourneyController::add($shipment->id, 1, Auth::id(), '', $done_payment->id);
+                    }
+
+                $markedunHold = true;
+
+            } else{
+                $payment_ids[]=$done_payment->id;
+            }
+        }
+
+        if ($markedunHold) {
+            return response()->json([
+                'status' => 0,
+                'success' => 'Payment(s) successfully taken off hold',
+                'payment_ids' => $payment_ids
+            ]);
+        }
+        return response()->json([
+            'status' => 1,
+            'error' => 'No payments remaining to unhold',
+            'payment_ids' => []
+        ]);
+    }
+
 
     public function done_payments_excel_store(Request $request)
     {
@@ -17191,8 +17313,12 @@ class AdminFinanceController extends Controller
             ->leftjoin('banks_lists as b', 'retail_done_payments.company_bank_id', '=', 'b.id')
             ->leftJoin('retail_done_payment_shipments as rdps', 'rdps.retail_done_payment_id', '=', 'retail_done_payments.id')
             ->leftJoin('retail_shipments as rs', 'rs.shipment_id', '=', 'rdps.shipment_id')
+            ->leftJoin('retail_done_payments as rdp', function ($query) {
+                $query->on('rdp.id', '=', 'retail_done_payments.id')
+                    ->where('rdp.status', 1);
+            })
             ->select('retail_done_payments.id as id', 'dpc.retail_done_payment_id as payment_done_id', 'retail_done_payments.id as payment_id', 'rsi.shipper_name as shipper', 'c.name as city', 'rsi.shipper_phone_no as shipper_phone', 'rsi.shipper_address', 'retail_done_payments.total_shipments', 'retail_done_payments.delivered_shipments', 'retail_done_payments.delivered_shipments as delivered_shipments_count', 'retail_done_payments.adjusted_shipments', 'retail_done_payments.adjusted_shipments as adjusted_shipments_count', 'dpc.amount as total_amount', 'dpc.payable as total_payable', 'ubi.name as bank', 'retail_done_payments.reference_number', 'retail_done_payments.created_at as done_at', 'b.name as company_bank', 'retail_done_payments.status', 'retail_done_payments.ibft_charges', 'dpc.adjustment as adjustment_charges', 'retail_done_payments.status_updated_at as status_updated_at',  DB::raw('SUM(rs.wht) as total_wht'),
-            DB::raw('SUM(rs.cod_sst) as total_cod_sst'), 'retail_done_payments.tax_status')
+            DB::raw('SUM(rs.cod_sst) as total_cod_sst'), 'retail_done_payments.tax_status',DB::raw('rdp.status_updated_at as paid_at'))
             ->groupBy([
             'retail_done_payments.id',
         ]);
@@ -19877,9 +20003,19 @@ class AdminFinanceController extends Controller
 
     static public function add_payment($shipment_id, $type, $shipment = array())
     {
+
         if (empty($shipment)) {
             $shipment = Shipment::find($shipment_id);
         }
+
+        $delivered_invoice_users = CorporateUserOnDeliveredInvoice::where('status', 1)
+        ->pluck('user_id')
+        ->toArray(); 
+
+        if(in_array($type, [3,1]) && in_array($shipment->user_id , $delivered_invoice_users)) {
+            return;
+        }
+       
         $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment_id);
         $check_arrival = ShipmentAdditionalCharges::check_additional_charges($shipment_id,true);
         $service_charges = ShipmentServicesCharges::where('shipment_id', $shipment_id);
