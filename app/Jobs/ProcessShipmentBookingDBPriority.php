@@ -220,8 +220,8 @@ class ProcessShipmentBookingDBPriority implements ShouldQueue
             }
 
             //lat and long manual set
-            $lat = $this->booking['consignee_latitude'];
-            $lng = $this->booking['consignee_longitude'];
+            $lat = isset($this->booking['consignee_latitude']) ? $this->booking['consignee_latitude'] : 0;
+            $lng = isset($this->booking['consignee_longitude']) ? $this->booking['consignee_longitude'] :  0;
             if(!empty($shipment_id) && is_numeric($lat) && $lat > 0 && is_numeric($lng) && $lng > 0) {
 
                 $shipment_geo_code = new ShipmentGeoCode();
