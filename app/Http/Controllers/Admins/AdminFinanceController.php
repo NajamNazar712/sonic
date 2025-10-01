@@ -8929,6 +8929,7 @@ class AdminFinanceController extends Controller
                 $done_payment->status_updated_at = Carbon::now();
                 $done_payment->save();
                 WalletBulkSettlementFromDonePayments::dispatch($done_payment_id,  Auth::id());
+                $payment_paid=true;
                 
             } else {
                 if ($done_payment->status != 1  && $done_payment->status != 4) {
