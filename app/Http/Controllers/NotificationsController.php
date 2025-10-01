@@ -723,7 +723,12 @@ class NotificationsController extends Controller
                         if (empty($bcc)) {
                             $bcc = NULL;
                         }
-
+                        Log::channel('botCallJobLog')->info('Shipment Arrival charges', [
+                            'subject' => $subject,
+                            'to'      => $to,
+                            'bcc'     => $bcc,
+                            'body'    => $body,
+                        ]);
                         self::email($subject, $body, $to, NULL, $bcc);
 
                         $subject = $original_subject;
