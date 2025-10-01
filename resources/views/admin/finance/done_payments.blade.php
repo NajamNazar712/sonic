@@ -746,7 +746,9 @@
 								})
 								.done(function(data) {
 									if (data.status == 0) {
-										toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+										if (data.payment_paid) {
+											toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+										}
 
 										// Show list of already paid IDs, if any
 											if (data.hold_payments_ids && data.hold_payments_ids.length > 0) {
@@ -851,7 +853,7 @@
 							}
 						},
 						@endif
-					@if (session('role_id') == 1 || in_array(63, session('permissions')))
+					@if (session('role_id') == 1 || in_array(1044, session('permissions')))
 					{
 						text: 'Hold',
 						className: 'btn btn-primary hold',
@@ -899,7 +901,7 @@
 						}
 					},
 					@endif
-                     @if (session('role_id') == 1 || in_array(63, session('permissions')))
+                     @if (session('role_id') == 1 || in_array(1044, session('permissions')))
                     {
                         text: 'UnHold',
                         className: 'btn btn-primary un_hold',
