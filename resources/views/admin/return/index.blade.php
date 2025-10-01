@@ -2289,8 +2289,12 @@
                         if (data.reason_id != 3 && data.reason_id != 4) {
                             $('td:eq(0)', row).addClass('select-checkbox');
                         } else {
+                            if(data.current_status_id == 12){
+                                $('td:eq(0)', row).addClass('no-select');
+                            }else{
+                                $('td:eq(0)', row).addClass('select-checkbox');
+                            }
                             // Optional: mark as not selectable
-                            $('td:eq(0)', row).addClass('no-select');
                         }
 
                         // if (data.OsaStatus == 1) {
