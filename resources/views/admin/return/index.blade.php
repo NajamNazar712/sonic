@@ -2286,7 +2286,7 @@
                         // Reset first td
                         $('td:eq(0)', row).removeClass('select-checkbox no-select');
                         // Show checkbox only if reason_id is NOT 3 or 4
-                        if (data.reason_id != 3 && data.reason_id != 4 && current_status_id == 12) {
+                        if (data.reason_id != 3 && data.reason_id != 4 && current_status_id != 12) {
                             $('td:eq(0)', row).addClass('select-checkbox');
                         } else {
                             // Optional: mark as not selectable
