@@ -16,7 +16,7 @@ class AddExcelBookingChannelSeeder extends Seeder
     public function run()
     {
         DB::table('channels')->insert(array(
-            array('id' => 6, 'name' => 'Sonic Excel'),
+            array('id' => 6, 'name' => 'Sonic Excel','created_at'=>now(), 'updated_at'=>now()),
         ));
     }
 }
