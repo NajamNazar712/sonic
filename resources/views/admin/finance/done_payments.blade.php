@@ -746,7 +746,9 @@
 								})
 								.done(function(data) {
 									if (data.status == 0) {
-										toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+										if (data.payment_paid) {
+											toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+										}
 
 										// Show list of already paid IDs, if any
 											if (data.hold_payments_ids && data.hold_payments_ids.length > 0) {
