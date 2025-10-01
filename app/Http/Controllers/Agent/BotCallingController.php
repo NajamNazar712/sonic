@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Agent;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\RvShipmentAssignAgent;
@@ -33,6 +34,7 @@ class BotCallingController extends Controller
 
     public function bot_get_ticket_details(Request $request)
     {
+        NotificationsController::send(4, [48025341]);
         // $this->rvshipmentticketInsert(378130,12,1,1049,0);
         // $shipmentId= 378130;
         // $data  = [
