@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Rider;
-
+use Illuminate\Support\Facades\Log;
 use App\Models\ShipmentGeoCode;
 use DB;
 use Validator;
@@ -13594,6 +13594,9 @@ class RiderAPIController extends Controller
 
     public function create_delivery_note(Request $request)
     {
+        Log::channel('cronJobLog')->info('create_delivery_note request', [
+            'payload' => $request->all()
+        ]);
         $rules = [
             'hub_id' => ['required'],
             'selected_route_id' => ['required'],
