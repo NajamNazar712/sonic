@@ -224,7 +224,7 @@ class UpdateRvShipments extends Command
 
         Shipment::where('id', $shipment->id)->update([
             'shipper_status_id'   => 65,
-            'consignee_status_id' => 65,
+            'consignee_status_id' => 65,g
         ]);
 
         ShipmentsJourneyController::add(
