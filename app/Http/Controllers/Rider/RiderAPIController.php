@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Rider;
-
+use Illuminate\Support\Facades\Log;
 use App\Models\ShipmentGeoCode;
 use DB;
 use Validator;
