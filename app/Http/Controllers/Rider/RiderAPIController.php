@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Rider;
 
+use App\Models\TempDeliveryNoteVerify;
 use DB;
 use Validator;
 use App\SubReason;
@@ -13581,6 +13582,10 @@ class RiderAPIController extends Controller
 
     public function create_delivery_note(Request $request)
     {
+        Log::channel('cronJobLog')->info('create_delivery_note request', [
+            'payload' => $request->all()
+        ]);
+
         $rules = [
             'hub_id' => ['required'],
             'selected_route_id' => ['required'],
@@ -13588,66 +13593,113 @@ class RiderAPIController extends Controller
             'open_box_ids' => ['nullable'],
             'notification_ids' => ['nullable'],
             'rider_info_ids' => ['nullable'],
+            'rider_id' => ['required'], // ensure rider_id is present
         ];
         $validate = Validator::make($request->all(), $rules, $this->messages);
         $validate->setAttributeNames($this->names);
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-        } else {
-            $tracking_numbers = explode(',', $request->shipment_ids);
-            $open_box_ids = explode(',', $request->open_box_ids);
-            $notifications = explode(',', $request->notification_ids);
-            $rider_informations = explode(',', $request->rider_info_ids);
-            $shipments = Shipment::whereIn('tracking_number', $tracking_numbers)->pluck('id')->toArray();
-            if (count($shipments) == 0) {
-                return response()->json(['status' => 0, 'message' => 'Shipments not entered!']);
-            }
-            $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59);
-            $valid_shipments = Shipment::whereIn('id', $shipments)->whereIn('shipper_status_id', $pending_status)->pluck('id');
-            $shipments_count = count($valid_shipments);
-            if ($shipments_count != 0) {
-                $valid_shipments = $valid_shipments->toArray();
-                $total_cod_amount = Shipment::whereIn('id', $valid_shipments)->where(function ($query) {
-                    $query->where('booking_type_id', '!=', 4)
-                        ->orWhere(function ($sub_query) {
-                            $sub_query->where('booking_type_id', '=', 4)
-                                ->where('charges_mode_id', '=', 2);
-                        });
-                })->sum('amount');
-                $order = false;
-                if ($request->has('order_checkbox')) {
-                    $order = true;
-                }
-                $note = RiderDeliveryNoteRequest::create([
-                    'hub_id' => $request->hub_id,
-                    'rider_id' => $request->rider_id,
-                    'route_id' => $request->selected_route_id,
-                    'shipment_count' => $shipments_count,
-                    'total_cod_amount' => $total_cod_amount,
-                    'ordering' => $order
-                ]);
-                if ($note) {
-                    if (!$order) {  //Default
-                        sort($valid_shipments); //sort_valid_shipments;
-                    }
-                    $serial = 1;
-                    foreach ($valid_shipments as $shipment) {
-                        RiderDeliveryNoteRequestShipment::create([
-                            'request_note_id' => $note->id,
-                            'shipment_id' => $shipment,
-                            'notification' => (in_array($shipment, $notifications)) ? 1 : 0,
-                            'rider_information' => (in_array($shipment, $rider_informations)) ? 1 : 0,
-                            'open_box' => (in_array($shipment, $open_box_ids)) ? 1 : 0,
-                            'ordering' => $serial
-                        ]);
-                        $serial++;
-                    }
-                }
-                return response()->json(['status' => 0, 'create_message' => 'Delivery note Request has been created successfully & Pending for riderroval']);
-            } else {
-                return response()->json(['status' => 1, 'message' => 'All the Shipment(s) are not ready for delivery yet or already in another delivery note, please check tracking!']);
-            }
         }
+
+        // Parse incoming identifiers
+        $tracking_numbers   = array_filter(explode(',', (string) $request->shipment_ids));
+        $open_box_ids       = array_filter(explode(',', (string) $request->open_box_ids));
+        $notifications      = array_filter(explode(',', (string) $request->notification_ids));
+        $rider_informations = array_filter(explode(',', (string) $request->rider_info_ids));
+
+        $shipments = Shipment::whereIn('tracking_number', $tracking_numbers)->pluck('id')->toArray();
+        if (count($shipments) === 0) {
+            return response()->json(['status' => 0, 'message' => 'Shipments not entered!']);
+        }
+
+        $pending_status = [2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59];
+        $valid_shipments = Shipment::whereIn('id', $shipments)
+            ->whereIn('shipper_status_id', $pending_status)
+            ->pluck('id')
+            ->toArray();
+
+        $shipments_count = count($valid_shipments);
+        if ($shipments_count === 0) {
+            return response()->json(['status' => 1, 'message' => 'All the Shipment(s) are not ready for delivery yet or already in another delivery note, please check tracking!']);
+        }
+
+        // NEW: Normalize the shipment set (sorted unique) and build hash for *today*
+        $normalized_ids = array_values(array_unique($valid_shipments));
+        sort($normalized_ids); // canonical order
+        $normalized_csv = implode(',', $normalized_ids);
+        $set_hash = hash('sha256', $normalized_csv);
+        $today = now()->toDateString();
+
+        // NEW: Idempotency check – if same rider + same shipment set already seen today, skip
+        $verify = TempDeliveryNoteVerify::firstOrCreate(
+            [
+                'rider_id'        => (int) $request->rider_id,
+                'request_date'    => $today,
+                'shipment_set_hash' => $set_hash,
+            ],
+            [
+                'shipment_ids_csv' => $normalized_csv,
+            ]
+        );
+
+        if (!$verify->wasRecentlyCreated) {
+            // Duplicate request for today – do not create another note
+            return response()->json([
+                'status'  => 0,
+                'message' => 'Duplicate submit ignored: a delivery note for this rider and shipment set already exists for today.',
+                // 'existing_note_id' => $verify->created_note_id ?? null, // if you link it later
+            ]);
+        }
+
+        // proceed to create note (original logic), keep default ordering behavior
+        $total_cod_amount = Shipment::whereIn('id', $normalized_ids)
+            ->where(function ($query) {
+                $query->where('booking_type_id', '!=', 4)
+                    ->orWhere(function ($sub_query) {
+                        $sub_query->where('booking_type_id', '=', 4)
+                            ->where('charges_mode_id', '=', 2);
+                    });
+            })->sum('amount');
+
+        $order = $request->has('order_checkbox');
+
+        // Use a transaction so either the whole note is created or nothing
+        return DB::transaction(function () use ($request, $normalized_ids, $open_box_ids, $notifications, $rider_informations, $total_cod_amount, $order /*, $verify */) {
+
+            $note = RiderDeliveryNoteRequest::create([
+                'hub_id'           => $request->hub_id,
+                'rider_id'         => $request->rider_id,
+                'route_id'         => $request->selected_route_id,
+                'shipment_count'   => count($normalized_ids),
+                'total_cod_amount' => $total_cod_amount,
+                'ordering'         => $order,
+            ]);
+
+            if (!$order) {
+                // Default: keep normalized_ids already sorted
+            }
+
+            $serial = 1;
+            foreach ($normalized_ids as $shipment) {
+                RiderDeliveryNoteRequestShipment::create([
+                    'request_note_id'    => $note->id,
+                    'shipment_id'        => $shipment,
+                    'notification'       => in_array($shipment, $notifications) ? 1 : 0,
+                    'rider_information'  => in_array($shipment, $rider_informations) ? 1 : 0,
+                    'open_box'           => in_array($shipment, $open_box_ids) ? 1 : 0,
+                    'ordering'           => $serial++,
+                ]);
+            }
+
+            // Optional: store linkage back into the temp record for audit (uncomment if you add the column)
+            // TempDeliveryNoteVerify::where('id', $verify->id)->update(['created_note_id' => $note->id]);
+
+            return response()->json([
+                'status'          => 0,
+                'create_message'  => 'Delivery note Request has been created successfully & Pending for rider approval',
+                'request_note_id' => $note->id,
+            ]);
+        });
     }
 
     public function generate_otp_for_consignee(Request $request)
