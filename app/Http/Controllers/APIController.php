@@ -1077,7 +1077,7 @@ class APIController extends Controller
                 }
 
                 if ($service_type_id == 1) {
-                    if ($request->has('return_address_id')) {
+                    if ($request->has('return_address_id') && $user_id != 50755) {
 
                         $settings = GlobalSettings::where('type', 'omni_users');
                         if ($settings->exists()) {
