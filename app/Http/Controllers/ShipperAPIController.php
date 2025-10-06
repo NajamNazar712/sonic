@@ -2206,7 +2206,6 @@ class ShipperAPIController extends Controller
         if ($validate->fails()) {
             return response()->json([
                 'status' => 1,
-                'StatusCode' => 422,
                 'message' => 'Error(s) in Input',
                 'errors' => $validate->errors()
             ]);
@@ -2232,8 +2231,6 @@ class ShipperAPIController extends Controller
         if (!$query->exists()) {
             return response()->json([
                 'status' => 1,
-                'statusCode' => 404,
-                'StatusMessage' => "Failure",
                 'message' => 'No Shipments Found'
             ]);
         }
