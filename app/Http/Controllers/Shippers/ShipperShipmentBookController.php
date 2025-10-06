@@ -5474,6 +5474,8 @@ class ShipperShipmentBookController extends Controller
             'consignee_phone_number_1' => 'Consignee Phone Number 1',
             'consignee_phone_number_2' => 'Consignee Phone Number 2',
             'consignee_email_address' => 'Consignee Email Address',
+            'consignee_latitude' => 'Consignee Address Latitude',
+            'consignee_longitude' => 'Consignee Address Longitude',
             'self_collection' => 'Self Collection',
             'order_id' => 'Order ID',
             'order_date' => 'Order Date',
@@ -5545,6 +5547,9 @@ class ShipperShipmentBookController extends Controller
             'boolean' => ':attribute must be 0 or 1.',
             'digits_between' => ':attribute must be between :min and :max Digits.',
             'email' => ':attribute must be a Valid Email Address.',
+            'consignee_latitude.numeric' => 'Consignee latitude must be a number.',
+            'consignee_longitude.numeric' => 'Consignee longitude must be a number.',
+
             'exists' => 'Given :attribute is of Invalid ID.',
             'unique' => ':attribute is already Present.',
             'date_format' => ':attribute must be of valid Format, required Format is: YYYY-MM-DD.',
@@ -5567,6 +5572,8 @@ class ShipperShipmentBookController extends Controller
             'consignee_phone_number_1' => ['required', 'phone_number'],
             'consignee_phone_number_2' => ['nullable', 'phone_number'],
             'consignee_email_address' => ['nullable', 'email', 'between:0,100'],
+            'consignee_latitude' => ['nullable','numeric'],
+            'consignee_longitude' => ['nullable','numeric'],
 
             'item_description' => ['required', 'between:0,1000'],
 
@@ -5588,8 +5595,8 @@ class ShipperShipmentBookController extends Controller
         }
 
         if (isset($spreadsheet)) {
-            $column_count = 15;
-            $fields = [0 => 'consignee_city_name', 1 => 'consignee_name', 2 => 'consignee_address', 3 => 'consignee_phone_number_1', 4 => 'consignee_phone_number_2', 5 => 'consignee_email_address', 6 => 'order_id', 7 => 'item_description', 8 => 'special_instructions', 9 => 'estimated_weight', 10 => 'shipper_reference_number_1', 11 => 'shipper_reference_number_2', 12 => 'shipper_reference_number_3', 13 => 'shipper_reference_number_4', 14 => 'shipper_reference_number_5'];
+            $column_count = 17;
+            $fields = [0 => 'consignee_city_name', 1 => 'consignee_name', 2 => 'consignee_address', 3 => 'consignee_phone_number_1', 4 => 'consignee_phone_number_2', 5 => 'consignee_email_address', 6 => 'consignee_latitude',7 => 'consignee_longitude', 8 => 'order_id', 9 => 'item_description', 10 => 'special_instructions', 11 => 'estimated_weight', 12 => 'shipper_reference_number_1', 13 => 'shipper_reference_number_2', 14 => 'shipper_reference_number_3', 15 => 'shipper_reference_number_4', 16 => 'shipper_reference_number_5'];
             $service_type_check_id = 1;
             if (count($spreadsheet[0]) != $column_count) {
                 return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
@@ -5731,6 +5738,14 @@ class ShipperShipmentBookController extends Controller
                 if(!isset($row['same_day_timing_id'])) {
                     $row['same_day_timing_id'] = NULL;
                     $rows[$key]['same_day_timing_id'] = NULL;
+                }
+                if(!isset($row['consignee_latitude'])) {
+                    $row['consignee_latitude'] = NULL;
+                    $rows[$key]['consignee_latitude'] = NULL;
+                }
+                if(!isset($row['consignee_longitude'])) {
+                    $row['consignee_longitude'] = NULL;
+                    $rows[$key]['consignee_longitude'] = NULL;
                 }
 
                 if (Session::has('substitute_user_id') && $substitute_user_pickup_address && $substitute_user_pickup_address->pickup_address_id !== null)
