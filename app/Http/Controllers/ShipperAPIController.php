@@ -2216,14 +2216,13 @@ class ShipperAPIController extends Controller
             ->leftJoin('rv_agent_call_histories as call', 'shipments.id', '=', 'call.shipment_id')
             ->leftJoin('rv_assign_agent_sub_statuses as raass', 'call.call_finding_id', '=', 'raass.id')
             ->select(
-                'shipments.tracking_number',
-                'ss.name as Status',
-                'raass.name as Call_Finding_Status',
-                 DB::raw("'Call Courier' as username"),
-                'call.remarks as Remarks',
-                'call.created_at'
+                'shipments.tracking_number as tracking_number',
+                'ss.name as status',
+                'raass.name as call_finding_status',
+                DB::raw("COALESCE(call.remarks, '-') as remarks"),
+                'call.created_at as datetime' 
             )
-            ->where('shipments.shipper_status_id', DB::raw(65))
+            ->where('shipments.shipper_status_id', DB::raw(60))
             ->where('shipments.user_id', $request->shipper_id)
             ->orderBy('shipments.id', 'desc');
 
