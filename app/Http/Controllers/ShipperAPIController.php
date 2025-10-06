@@ -2222,7 +2222,7 @@ class ShipperAPIController extends Controller
                 DB::raw("COALESCE(call.remarks, '-') as remarks"),
                 'call.created_at as datetime' 
             )
-            ->where('shipments.shipper_status_id', DB::raw(60))
+            ->where('shipments.shipper_status_id', DB::raw(65))
             ->where('shipments.user_id', $request->shipper_id)
             ->orderBy('shipments.id', 'desc');
 
