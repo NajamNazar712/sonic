@@ -251,6 +251,9 @@ use Illuminate\Http\Request;
                 Route::post('action_log', 'Rider\RiderAPIController@delivery_action_log')->name('delivery_action_log');
                 Route::post('otp_generate', 'Rider\RiderAPIController@generate_otp_for_consignee')->name('otp_generate');
                 Route::post('pending_for_verification', 'Rider\RiderAPIController@pending_for_verification')->name('pending_for_verification');
+
+                Route::post('dncc/print', 'Rider\RiderAPIController@dncc_print')->name('dncc.print');
+
             });
             Route::prefix('comments')->name('comments.')->group(function () {
                 Route::post('add', 'Rider\RiderAPIController@crm_comment_add')->name('add');
@@ -286,6 +289,9 @@ use Illuminate\Http\Request;
                 Route::post('delivered_v2', 'Rider\RiderAPIController@return_shipment_delivered_v2')->name('delivered_v2');
                 Route::post('undelivered_v4', 'Rider\RiderAPIController@return_shipment_undelivered_v4')->name('undelivered_v4');
                 Route::post('action_log', 'Rider\RiderAPIController@return_action_log')->name('action_log');
+
+                Route::post('return_note/print', 'Rider\RiderAPIController@return_note_print')->name('return_note.print');
+
             });
 
             Route::get('rider_wallet', 'Rider\RiderAPIController@rider_wallet')->name('rider_wallet');
