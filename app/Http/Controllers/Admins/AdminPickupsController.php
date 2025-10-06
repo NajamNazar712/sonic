@@ -66,12 +66,12 @@ class AdminPickupsController extends Controller
       $this->middleware('Permission');
     }
 
-    static public function generate($shipment_id) {
+    static public function generate($shipment_id,$assign_rider=true) {
               $shipment = Shipment::find($shipment_id);
-              if(in_array($shipment->shipper_status_id, [1, 17])){
+              if(in_array($shipment->shipper_status_id, [1, 17,61])){
 
                   if($shipment->shipper_status_id == 17){
-                      
+
                       if($shipment->shipment_type == 2){
                          return false;
                       }
@@ -155,7 +155,9 @@ class AdminPickupsController extends Controller
                       $pickup_request->save();
                       $pickup_request_id = $pickup_request->id;
                       $allow = TRUE;
-                      self::auto_pickup_assign($pickup_request_id);
+                      if($assign_rider){
+                          self::auto_pickup_assign($pickup_request_id);
+                      }
                   }
 
                   if ($allow) {

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Rider;
 
+use App\Models\PudoPickupShipment;
 use DB;
+use Illuminate\Support\Facades\Log;
 use Validator;
 use App\SubReason;
 use Carbon\Carbon;
@@ -2940,6 +2942,47 @@ class RiderAPIController extends Controller
         }
     }
 
+//    public function scan_shipment_detail(Request $request)
+//    {
+//        $rider_id = $request->rider_id;
+//        $tracking_no = $request->tracking_no;
+//        $lat = $request->latitude;
+//        $long = $request->longitude;
+//
+//        $shipment_id = Shipment::where('tracking_number',  $tracking_no)->first()->id;
+//        $pickup_requests = V2PickupRequest::join('v2_pickup_request_shipments as prs', 'v2_pickup_requests.id', '=', 'prs.pickup_request_id')
+//            ->join('shipments as s', 'prs.shipment_id', '=', 's.id')
+//            ->where('s.tracking_number', $tracking_no)
+//            ->where('v2_pickup_requests.status_id', 1)
+//            ->where('prs.status', 0);
+//
+//        if ($pickup_requests->exists()) {
+//            $pickup_requests = $pickup_requests->first();
+//            $shipment_status = $pickup_requests->shipper_status_id;
+//            ShipmentScanningJourneyController::add($shipment_id, 8, 5, $rider_id, null, null ,null,null, $lat, $long ,'rider');
+//
+//            if ($pickup_requests->current_rider_id == $rider_id) {
+//                return response()->json(['status' => 1, 'message' => 'Pickup Already Assigned to You']);
+//            } elseif ($shipment_status != 1 && $shipment_status != 17) {
+//                return response()->json(['status' => 1, 'message' => 'Pickup Already Modified']);
+//            } else {
+//                $pickup = array();
+//                $pickup_address = $pickup_requests->pickup_address;
+//                $pickup['pickup_request_id'] = $pickup_requests->pickup_request_id;
+//                $pickup['shipments'] = $pickup_requests->booked;
+//                $pickup['shipper_name'] = $pickup_address->user->name;
+//                $pickup['person_of_contact'] = $pickup_address->poc;
+//                $pickup['phone_number'] = $pickup_address->phone;
+//                $pickup['address'] = $pickup_address->pickup_address;
+//                $pickup['location_latitude'] = $pickup_address->location_latitude;
+//                $pickup['location_longitude'] = $pickup_address->location_longitude;
+//                return response()->json(['status' => 0, 'shipment_detail' => $pickup]);
+//            }
+//        } else {
+//            return response()->json(['status' => 1, 'message' => 'Pickup Request Not Found']);
+//        }
+//    }
+
     public function scan_shipment_detail(Request $request)
     {
         $rider_id = $request->rider_id;
@@ -2947,38 +2990,64 @@ class RiderAPIController extends Controller
         $lat = $request->latitude;
         $long = $request->longitude;
 
-        $shipment_id = Shipment::where('tracking_number',  $tracking_no)->first()->id;
-        $pickup_requests = V2PickupRequest::join('v2_pickup_request_shipments as prs', 'v2_pickup_requests.id', '=', 'prs.pickup_request_id')
+//        $shipment_id = Shipment::where('tracking_number',  $tracking_no)->first()->id;
+        $shipment = Shipment::where('tracking_number', $tracking_no)->first();
+        if (!$shipment) {
+            return response()->json(['status' => 1, 'message' => 'Shipment Not Found']);
+        }
+        $shipment_id = $shipment->id;
+        $pickup_requests = $this->getPickupRequest($tracking_no);
+        if ($pickup_requests) {
+            $shipment_status = $pickup_requests->shipper_status_id;
+            ShipmentScanningJourneyController::add($shipment_id, 8, 5, $rider_id, null, null ,null,null, $lat, $long ,'rider');
+            if ($pickup_requests->current_rider_id == $rider_id) {
+                return response()->json(['status' => 1, 'message' => 'Pickup Already Assigned to You']);
+            } elseif ($shipment_status != 1 && $shipment_status != 17 && $shipment_status!=61) {
+                return response()->json(['status' => 1, 'message' => 'Pickup Already Modified']);
+            } else {
+                 return response()->json(['status' => 0, 'shipment_detail' => $this->formatPickup($pickup_requests)]);
+            }
+        }
+        if(PudoPickupShipment::where('shipment_id',$shipment->id)->exists() && $shipment->shipper_status_id == 61) {
+            try {
+                AdminPickupsController::generate($shipment_id,false);
+                $pickup_requests = $this->getPickupRequest($tracking_no);
+                if ($pickup_requests) {
+                    ShipmentScanningJourneyController::add($shipment_id, 8, 5, $rider_id, null, null, null, null, $lat, $long, 'rider');
+                    return response()->json(['status' => 0, 'shipment_detail' => $this->formatPickup($pickup_requests)]);
+                }
+            } catch (\Throwable $th){
+                Log::channel('errorlog')->error($th->getMessage());
+            }
+        }
+
+        return response()->json(['status' => 1, 'message' => 'Pickup Request Not Found']);
+
+    }
+
+    private function getPickupRequest($tracking_no)
+    {
+        return V2PickupRequest::join('v2_pickup_request_shipments as prs', 'v2_pickup_requests.id', '=', 'prs.pickup_request_id')
             ->join('shipments as s', 'prs.shipment_id', '=', 's.id')
             ->where('s.tracking_number', $tracking_no)
             ->where('v2_pickup_requests.status_id', 1)
-            ->where('prs.status', 0);
+            ->where('prs.status', 0)
+            ->first();
+    }
+    private function formatPickup($pickup_requests)
+    {
+        $pickup_address = $pickup_requests->pickup_address ?? null;
 
-        if ($pickup_requests->exists()) {
-            $pickup_requests = $pickup_requests->first();
-            $shipment_status = $pickup_requests->shipper_status_id;
-            ShipmentScanningJourneyController::add($shipment_id, 8, 5, $rider_id, null, null ,null,null, $lat, $long ,'rider');
-
-            if ($pickup_requests->current_rider_id == $rider_id) {
-                return response()->json(['status' => 1, 'message' => 'Pickup Already Assigned to You']);
-            } elseif ($shipment_status != 1 && $shipment_status != 17) {
-                return response()->json(['status' => 1, 'message' => 'Pickup Already Modified']);
-            } else {
-                $pickup = array();
-                $pickup_address = $pickup_requests->pickup_address;
-                $pickup['pickup_request_id'] = $pickup_requests->pickup_request_id;
-                $pickup['shipments'] = $pickup_requests->booked;
-                $pickup['shipper_name'] = $pickup_address->user->name;
-                $pickup['person_of_contact'] = $pickup_address->poc;
-                $pickup['phone_number'] = $pickup_address->phone;
-                $pickup['address'] = $pickup_address->pickup_address;
-                $pickup['location_latitude'] = $pickup_address->location_latitude;
-                $pickup['location_longitude'] = $pickup_address->location_longitude;
-                return response()->json(['status' => 0, 'shipment_detail' => $pickup]);
-            }
-        } else {
-            return response()->json(['status' => 1, 'message' => 'Pickup Request Not Found']);
-        }
+        return [
+            'pickup_request_id'   => $pickup_requests->pickup_request_id,
+            'shipments'           => $pickup_requests->booked ?? 0,
+            'shipper_name'        => $pickup_address->user->name ?? '',
+            'person_of_contact'   => $pickup_address->poc ?? '',
+            'phone_number'        => $pickup_address->phone ?? '',
+            'address'             => $pickup_address->pickup_address ?? '',
+            'location_latitude'   => $pickup_address->location_latitude ?? '',
+            'location_longitude'  => $pickup_address->location_longitude ?? '',
+        ];
     }
 
     public function scan_shipment_assign(Request $request)
