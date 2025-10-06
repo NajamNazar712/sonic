@@ -74,7 +74,7 @@
                                             {{-- <div class="row">
                                                 <div class="col"> --}}
                                                     <div class="form-group text-right">
-                                                        <a href="{{ asset('file/MMS Regular Booking New Template.xlsx') }}" class="btn btn-primary btn-block"><i class="la la-download"></i> Regular</a>
+                                                        <a href="{{ asset('file/MMS Regular Booking Template.xlsx') }}" class="btn btn-primary btn-block"><i class="la la-download"></i> Regular</a>
                                                     </div>
                                                 {{-- </div>
                                             </div> --}}
