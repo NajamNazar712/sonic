@@ -2217,9 +2217,11 @@ class ShipperAPIController extends Controller
             ->leftJoin('rv_agent_call_histories as call', 'shipments.id', '=', 'call.shipment_id')
             ->leftJoin('rv_assign_agent_sub_statuses as raass', 'call.call_finding_id', '=', 'raass.id')
             ->select(
-                'shipments.id',
                 'shipments.tracking_number',
-                'raass.name as call_status',
+                'ss.name as Status',
+                'raass.name as Call_Finding_Status',
+                 DB::raw("'Call Courier' as username"),
+                'call.remarks as Remarks',
                 'call.created_at'
             )
             ->where('shipments.shipper_status_id', DB::raw(65))
@@ -2240,29 +2242,27 @@ class ShipperAPIController extends Controller
         $shipments = $query->get();
 
         // Group remarks by tracking number
-        $grouped = $shipments->groupBy('tracking_number')->map(function ($group) {
-            $transactionRemarks = $group->map(function ($item) {
-                return [
-                    'username' => 'Call Courier',
-                    'remarks' => $item->call_status,
-                    'remarksDateTime' => $item->created_at
-                        ? \Carbon\Carbon::parse($item->created_at)->format('Y-m-d H:i:s')
-                        : null
-                ];
-            })->values();
+        // $grouped = $shipments->groupBy('tracking_number')->map(function ($group) {
+        //     $transactionRemarks = $group->map(function ($item) {
+        //         return [
+        //             'username' => 'Call Courier',
+        //             'remarks' => $item->call_status,
+        //             'remarksDateTime' => $item->created_at
+        //                 ? \Carbon\Carbon::parse($item->created_at)->format('Y-m-d H:i:s')
+        //                 : null
+        //         ];
+        //     })->values();
 
-            return [
-                'tracking_number' => $group->first()->tracking_number,
-                'transactionDetails' => $transactionRemarks
-            ];
-        })->values();
+        //     return [
+        //         'tracking_number' => $group->first()->tracking_number,
+        //         'transactionDetails' => $transactionRemarks
+        //     ];
+        // })->values();
 
         // Return formatted API response
         return response()->json([
             'status' => 0,
-            'statusCode' => 200,
-            'StatusMessage' => "Success",
-            'data' => $grouped,
+            'data' => $shipments,
             'message' => 'Shipments Found!'
         ]);
     }
