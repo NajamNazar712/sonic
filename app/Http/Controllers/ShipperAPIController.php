@@ -2199,17 +2199,17 @@ class ShipperAPIController extends Controller
     {
 
         // Validate request input
-        $validate = Validator::make($request->all(), [
-            'shipper_id' => 'required|integer'
-        ]);
+        // $validate = Validator::make($request->all(), [
+        //     'shipper_id' => 'required|integer'
+        // ]);
 
-        if ($validate->fails()) {
-            return response()->json([
-                'status' => 1,
-                'message' => 'Error(s) in Input',
-                'errors' => $validate->errors()
-            ]);
-        }
+        // if ($validate->fails()) {
+        //     return response()->json([
+        //         'status' => 1,
+        //         'message' => 'Error(s) in Input',
+        //         'errors' => $validate->errors()
+        //     ]);
+        // }
 
         // Build query
         $query = Shipment::join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
