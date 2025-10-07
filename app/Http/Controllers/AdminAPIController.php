@@ -13047,6 +13047,7 @@ class AdminAPIController extends Controller
                 $details['etd_deadline'] =  $shipment->created_at->toDateString() .' - '. $shipment->created_at->copy()->addDays((int) $max)->toDateString();
             }
             $details['crm_ticket_no'] = ($shipment?->crm_request) ? $shipment?->crm_request?->id .' ('.$shipment->crm_request?->request_status?->name .')' : null;
+            $details['crm_ticket_date'] = ($shipment?->crm_request) ? $shipment?->crm_request?->created_at->toDateString()  : null;
             $details['shipper']['name'] = $shipper->name;
 
             $pickup = $shipment->pickup_address;
