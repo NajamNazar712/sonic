@@ -3246,6 +3246,7 @@ class RiderAPIController extends Controller
                     })
                     ->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
                     ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
+                    ->leftJoin('delivery_notes', 'delivery_notes.id', '=', 'delivery_note_shipments.delivery_note_id')
                     ->select('s.tracking_number', 'shipments_journey.shipper_status_id', 'ss.name as shipment_status', 'ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by', 'rider_deliveries.picture_path', 'delivery_note_shipments.status as delivery_note_shipments_status', 'delivery_note_shipments.update_type as updated_type', 'delivery_note_shipments.fake_status as fake_status', 'delivery_note_shipments.fake_status_updated_at as fake_status_updated_at','delivery_notes.total_cod_amount as total_cod_amount', 'delivery_notes.received_cod_amount as received_cod_amount', 's.consignee_name as consignee_name')
                     ->where('delivery_note_shipments.delivery_note_id', $delivery_note_id);
 
@@ -3412,7 +3413,7 @@ class RiderAPIController extends Controller
         } else {
             $rider_deliveries = DeliveryNote::join('delivery_note_shipments', 'delivery_note_shipments.delivery_note_id', '=', 'delivery_notes.id')
                 ->join('shipments', 'shipments.id', '=', 'delivery_note_shipments.shipment_id')
-                ->select('delivery_notes.created_at as created_at', 'delivery_notes.id as delivery_note_id', 'shipments.tracking_number as tracking_number')
+                ->select('delivery_notes.created_at as created_at', 'delivery_notes.id as delivery_note_id', 'shipments.tracking_number as tracking_number', 'delivery_notes.total_cod_amount as total_cod_amount', 'delivery_notes.received_cod_amount as received_cod_amount')
                 ->where('delivery_notes.pending_status', 1)
                 ->where('delivery_notes.rider_id', $rider_id);
 
