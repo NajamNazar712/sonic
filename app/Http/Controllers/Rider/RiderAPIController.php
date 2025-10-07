@@ -3010,7 +3010,7 @@ class RiderAPIController extends Controller
         }
         if(PudoPickupShipment::where('shipment_id',$shipment->id)->exists() && $shipment->shipper_status_id == 61) {
             try {
-                AdminPickupsController::generate($shipment_id,false);
+                AdminPickupsController::generate($shipment_id,true);
                 $pickup_requests = $this->getPickupRequest($tracking_no);
                 if ($pickup_requests) {
                     ShipmentScanningJourneyController::add($shipment_id, 8, 5, $rider_id, null, null, null, null, $lat, $long, 'rider');

@@ -21,6 +21,7 @@ use App\Http\Models\V2Pickup\V2PickupNoteRequest;
 use App\Http\Models\V2Pickup\V2PickupRequest;
 use App\Http\Models\V2Pickup\V2PickupRequestAttempt;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
+use App\Models\PudoPickupShipment;
 use App\RouteLocations;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -66,7 +67,7 @@ class AdminPickupsController extends Controller
       $this->middleware('Permission');
     }
 
-    static public function generate($shipment_id,$assign_rider=true) {
+    static public function generate($shipment_id,$is_pudo=false) {
               $shipment = Shipment::find($shipment_id);
               if(in_array($shipment->shipper_status_id, [1, 17,61])){
 
@@ -80,7 +81,16 @@ class AdminPickupsController extends Controller
                   }
                   $shipment->pickup_date = Carbon::now();
                   $shipment->save();
-                  $pickup_request = V2PickupRequest::where('pickup_address_id', $shipment->pickup_address_id)->whereIn('status_id', [1,3]);
+                  $is_pudo=0;
+                  $pudo_shipment = PudoPickupShipment::where('shipment_id',$shipment->id);
+                  if($pudo_shipment->exists()){
+                      $is_pudo = 1;
+                  }
+                  $pickup_request = V2PickupRequest::where('pickup_address_id', $shipment->pickup_address_id)
+                      ->whereIn('status_id', [1,3]);
+                  if($is_pudo == 1) {
+                      $pickup_request->where('is_pudo',1);
+                  }
                   $pickup_request_id = NULL;
                   $shipments_count = 0;
                   $shipments = array();
@@ -103,7 +113,12 @@ class AdminPickupsController extends Controller
                       }
                   }
                   else {
-                      $existing_pickup_request = V2PickupRequest::where('pickup_address_id', $shipment->pickup_address_id)->orderBy('id', 'DESC')->first();
+                      $existing_pickup_request = V2PickupRequest::where('pickup_address_id', $shipment->pickup_address_id)
+                          ->orderBy('id', 'DESC');
+                      if($is_pudo == 1) {
+                          $existing_pickup_request->where('is_pudo',1);
+                      }
+                      $existing_pickup_request = $existing_pickup_request->first();
                       if($existing_pickup_request){
                           if($existing_pickup_request->status_id == 4 && $existing_pickup_request->renew == 0){
                               $existing_pickup_request_shipments = V2PickupRequestShipment::where('pickup_request_id', $existing_pickup_request->id)->get();
@@ -137,6 +152,8 @@ class AdminPickupsController extends Controller
                       $pickup_request->pickup_address_id = $shipment->pickup_address_id;
                       $pickup_request->city_id = $shipment->pickup_address->city_id;
                       $pickup_request->booked = $shipments_count + 1;
+                      $pickup_request->is_pudo = $is_pudo;
+
                       if(($vendor == FALSE) && ($shipment->pickup_address->vendor != NULL)){
                           $vendor = TRUE;
                       }
@@ -155,7 +172,7 @@ class AdminPickupsController extends Controller
                       $pickup_request->save();
                       $pickup_request_id = $pickup_request->id;
                       $allow = TRUE;
-                      if($assign_rider){
+                      if($is_pudo == 0){
                           self::auto_pickup_assign($pickup_request_id);
                       }
                   }
