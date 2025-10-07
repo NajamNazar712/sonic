@@ -3246,7 +3246,7 @@ class RiderAPIController extends Controller
                     })
                     ->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
                     ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
-                    ->select('s.tracking_number', 'shipments_journey.shipper_status_id', 'ss.name as shipment_status', 'ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by', 'rider_deliveries.picture_path', 'delivery_note_shipments.status as delivery_note_shipments_status', 'delivery_note_shipments.update_type as updated_type', 'delivery_note_shipments.fake_status as fake_status', 'delivery_note_shipments.fake_status_updated_at as fake_status_updated_at')
+                    ->select('s.tracking_number', 'shipments_journey.shipper_status_id', 'ss.name as shipment_status', 'ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by', 'rider_deliveries.picture_path', 'delivery_note_shipments.status as delivery_note_shipments_status', 'delivery_note_shipments.update_type as updated_type', 'delivery_note_shipments.fake_status as fake_status', 'delivery_note_shipments.fake_status_updated_at as fake_status_updated_at','delivery_notes.total_cod_amount as total_cod_amount', 'delivery_notes.received_cod_amount as received_cod_amount', 's.consignee_name as consignee_name')
                     ->where('delivery_note_shipments.delivery_note_id', $delivery_note_id);
 
                 if ($shipment_details->exists()) {
@@ -3262,6 +3262,9 @@ class RiderAPIController extends Controller
                         $datum['picture_path'] = $shipment_detail->picture_path;
                         $datum['fake_status'] = $shipment_detail->fake_status;
                         $datum['fake_status_updated_at'] = $shipment_detail->fake_status_updated_at;
+                        $datum['dncc_amount'] = $shipment_detail->received_cod_amount;
+                        $datum['total_cod_amount'] = $shipment_detail->total_cod_amount;
+                        $datum['consignee_name'] = $shipment_detail->consignee_name;
                         if ($shipment_detail->updated_type == 0) {
                             $datum['updated_by'] = "Debriefer";
                         } else {
@@ -3299,7 +3302,7 @@ class RiderAPIController extends Controller
                     })
                     ->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
                     ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
-                    ->select('s.tracking_number', 'shipments_journey.shipper_status_id', 'ss.name as shipment_status', 'ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by', 'rider_return_deliveries.picture_path', 'return_note_shipments.status as return_note_shipments_status', 'return_note_shipments.update_type as updated_type')
+                    ->select('s.tracking_number', 'shipments_journey.shipper_status_id', 'ss.name as shipment_status', 'ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by', 'rider_return_deliveries.picture_path', 'return_note_shipments.status as return_note_shipments_status', 'return_note_shipments.update_type as updated_type','s.consignee_name as consignee_name')
                     ->where('return_note_shipments.return_note_id', $return_note_id);
 
                 if ($shipment_details->exists()) {
@@ -3313,6 +3316,7 @@ class RiderAPIController extends Controller
                         $datum['update_date_time'] = $shipment_detail->update_date_time;
                         $datum['received_or_refused_by'] = $shipment_detail->received_or_refused_by;
                         $datum['picture_path'] = $shipment_detail->picture_path;
+                        $datum['consignee_name'] = $shipment_detail->consignee_name;
                         if ($shipment_detail->updated_type == 0) {
                             $datum['updated_by'] = "Return Assistant";
                         } else {
@@ -3446,6 +3450,8 @@ class RiderAPIController extends Controller
                     $delivery_history['undelivered_shipments'] = $undelivered_shipments;
                     $delivery_history['fake_status_count'] = $fake_status_count;
                     $delivery_history['created_at'] = date('Y-m-d', strtotime($rider_delivery->created_at));
+                    $delivery_history['dncc_amount'] = $rider_delivery->received_cod_amount;
+                    $delivery_history['total_cod_amount'] = $rider_delivery->total_cod_amount;
                     $rider_delivery_history[] = $delivery_history;
                 }
                 return response()->json(["status" => 0, "deliveries" => $rider_delivery_history]);
