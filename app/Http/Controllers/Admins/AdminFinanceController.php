@@ -8935,6 +8935,7 @@ class AdminFinanceController extends Controller
     public function done_payments_paid(Request $request)
     {
         $hold_payments_ids = [];
+        $payment_paid = false;
         foreach ($request->ids as $done_payment_id) {
             $done_payment = DonePayment::find($done_payment_id);
 
@@ -8944,6 +8945,7 @@ class AdminFinanceController extends Controller
                 $done_payment->status_updated_at = Carbon::now();
                 $done_payment->save();
                 WalletBulkSettlementFromDonePayments::dispatch($done_payment_id,  Auth::id());
+                $payment_paid=true;
                 
             } else {
                 if ($done_payment->status != 1  && $done_payment->status != 4) {
@@ -9013,6 +9015,7 @@ class AdminFinanceController extends Controller
                             ShipmentsPaymentJourneyController::add($shipment->id, 3, Auth::id(), '', $done_payment->id);
                         }
                     }
+                    $payment_paid=true;
                 }else {
                     if($done_payment->status == 4) {
                             $hold_payments_ids[]=$done_payment->id;
@@ -9021,7 +9024,7 @@ class AdminFinanceController extends Controller
             }  
         }
 
-        return ['status' => 0, 'success' => 'Payment(s) marked Paid','hold_payments_ids'=> $hold_payments_ids];
+        return ['status' => 0, 'success' => 'Payment(s) marked Paid','hold_payments_ids'=> $hold_payments_ids,'payment_paid'=>$payment_paid];
     }
 
     public function done_payments_reverted(Request $request)
