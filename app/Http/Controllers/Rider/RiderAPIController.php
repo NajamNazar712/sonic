@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers\Rider;
+use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionDeliveryNote;
+use App\Http\Models\ShipmentInformationLog;
 use Illuminate\Support\Facades\Log;
 use App\Models\ShipmentGeoCode;
 use DB;
@@ -15003,11 +15005,10 @@ class RiderAPIController extends Controller
             ]);
         }
 
-        $delivery_note = DeliveryNote::where('id', $request->id)->where('rider_id',$rider->id);
+        $delivery_note_id = $request->id;
+        $delivery_note = DeliveryNote::where('id', $delivery_note_id)->where('rider_id',$rider->id);
         if ($delivery_note->exists()) {
-
             $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
-
             $html = '
                 <!doctype html>
                 <html lang="en">
@@ -15016,8 +15017,9 @@ class RiderAPIController extends Controller
                     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
                     <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+                    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/fonts/line-awesome/css/line-awesome.min.css') . '">
 
-                    <title>Delivery Note Cash Collection</title>
+                    <title>Delivery Note</title>
 
                     <style>
                       @page {
@@ -15058,22 +15060,39 @@ class RiderAPIController extends Controller
                       .border {
                         border: 1px solid #09262e !important;
                       }
-                      
-                      .w-150 {
-                        width: 150px;
-                      }
-                      
-                      .w-200 {
-                        width: 200px;
+
+                      td.replacement span {
+                        width: 22px;
                       }
 
-                      .line {
-                        border-bottom: 1px solid #09262e !important;
+                      td.replacement span img {
+                        display: block;
+                        width: 100%;
+                        margin: auto;
+                        background: #c8c8c8;
+                        border-radius: 25px;
                       }
 
-                      .manual_form {
-                        page-break-inside: avoid;
+                      td.try_and_buy span {
+                        width: 22px;
                       }
+
+                      td.try_and_buy span img {
+                        display: block;
+                        width: 100%;
+                        margin: auto;
+                        background: #c8c8c8;
+                        border-radius: 25px;
+                      }
+                      
+                      td.complaint {
+                            background: #09262e !important;
+                            color: #ffffff;
+                       }
+                      td.details_changed {
+                            background: #000000 !important;
+                            color: #ffffff;
+                       }
                     </style>
                   </head>
                   <body>
@@ -15083,111 +15102,230 @@ class RiderAPIController extends Controller
             $total_weight = 0;
             $total_shipments = 0;
             $total_cod_amount = 0;
-            $dncc_status = array(14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38);
-            $shipment_ids = DeliveryNoteShipment::where('delivery_note_id', $request->id)->where('status', '>', 1)->where('status', '!=', 8)->select('shipment_id')->get();
-            $filtered_shipments = Shipment::whereIn('id', $shipment_ids)->whereIn('shipper_status_id', $dncc_status)->orderBy('id')->get();
-            //echo "<pre>";print_r($filtered_shipments);echo "</pre>";die();
-            //            $shipment_details = '
-            //                      <table class="table table-bordered border" style="margin-bottom: 10rem !important;">
-            //                        <tbody>
-            //                          <tr>
-            //                            <td class="color primary"><strong>S. No.</strong></td>
-            //                            <td class="color primary"><strong>Tracking No.</strong></td>
-            //                            <td class="color primary"><strong>Consignee Name & Phone No(s).</strong></td>
-            //                            <td class="color primary"><strong>Consignee Address</strong></td>
-            //                            <td class="color primary"><strong>Service Type</strong></td>
-            //                            <td class="color primary"><strong>Client Name & Phone</strong></td>
-            //                            <td class="color primary"><strong>Weight</strong></td>
-            //                            <td class="color primary"><strong>Collection Amount</strong></td>
-            //                          </tr>
-            //        ';
-            //
-            //
-            foreach ($filtered_shipments as $shipment) {
+            $shipments = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->select('shipment_id')->orderBy('ordering', 'asc', 'shipment_id', 'asc')->get();
+
+            $shipment_details = '
+                      <table class="table table-sm table-bordered border">
+                        <tbody>
+                          <tr>
+                            <td class="color primary"><strong>S. No.</strong></td>
+                            <td class="color primary"><strong>Tracking No.</strong></td>
+                            <td class="color primary"><strong>Client Name & Phone</strong></td>
+                            <td class="color primary"><strong>Consignee Name & Phone No(s).</strong></td>
+                            <td class="color primary"><strong>Consignee Address</strong></td>
+                            <td class="color primary"><strong>Service Type</strong></td>
+                            <td class="color primary"><strong>Item Qty</strong></td>
+                            <td class="color primary"><strong>Weight</strong></td>
+                            <td class="color primary"><strong>Collection Amount</strong></td>
+                            <td class="color primary"><strong>Special Instructions</strong></td>
+                            <td class="color primary"><strong>Open Shipment</strong></td>
+                            <td class="color primary"><strong>Remarks</strong></td>
+                            <td class="color primary" style="width:200px;"><strong>Receiver\'s Name</strong></td>
+                            <td class="color primary" style="width:200px;"><strong>Sign</strong></td>
+                          </tr>
+        ';
+
+
+            foreach ($shipments as $parcel) {
                 $total_shipments++;
+                $shipment = Shipment::find($parcel->shipment_id);
                 $total_weight += (float) $shipment->actual_weight;
-                ////                    $shipment = Shipment::find($parcel->shipment_id);
-                //                $check_walk_in = GlobalSettings::where('type', 'Walk-In')->first();
-                //                if($check_walk_in['setting_value'] == $shipment->user->id){
-                //                    $user_details = 'Walk-In ('.$shipment->pickup_address->poc . ') | ' . $shipment->pickup_address->phone;
-                //                }
-                //                else{
-                //                    $user_details = $shipment->user->name . ' | ' . $shipment->user->phone . (($shipment->phone2) ? (' / ' . $shipment->phone2) : '');
-                //                }
-                //                $shipment_details_row_start = '
-                //                          <tr>
-                //                            <td>' . $total_shipments . '</td>
-                //                            <td>' . $shipment->tracking_number . '</td>
-                //                            <td>' . $shipment->consignee_name . ' | ' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
-                //                            <td>' . $shipment->consignee_address . '</td>
-                //                            <td>' . $shipment->booking_type->booking_type . '</td>
-                //                            <td>' . $user_details . '</td>
-                //                            <td>' . (($shipment->booking_type_id == 2) ? $shipment->replacement_weight : $shipment->actual_weight) . '</td>
-                //                ';
-                //
-                //                if ($shipment->booking_type_id != 4 || ($shipment->booking_type_id == 4 && $shipment->charges_mode_id == 2)) {
-                //                    $shipment_details_row_start .= '
-                //                            <td>Rs ' . number_format($shipment->received_amount) . '</td>
-                //                    ';
-                //
-                if (!($shipment->booking_type_id == 4 && $shipment->charges_mode_id == 1)) {
-                    $total_cod_amount += $shipment->received_amount;
+                $class = null;
+                $details_change_class = null;
+                if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
+                    $class = 'complaint';
+                } elseif (ShipmentInformationLog::where('shipment_id', $shipment->id)->exists()) {
+                    $details_change_class = 'details_changed';
+                }
+                $check_walk_in = GlobalSettings::where('type', 'Walk-In')->first();
+                if ($check_walk_in['setting_value'] == $shipment->user->id) {
+                    $user_details = 'Walk-In (' . $shipment->pickup_address->poc . ') | ' . $shipment->pickup_address->phone;
+                } else {
+                    $user_details = $shipment->user->name . ' | ' . $shipment->user->phone . (($shipment->phone2) ? (' / ' . $shipment->phone2) : '');
+                }
+                $ccd_icon = '';
+                if ($shipment->payment_mode_id == 2) {
+                    $tracking_number = '<b>' . $shipment->tracking_number . ' </b><br/><span><i class="la la-credit-card"></i>(Credit Card on Delivery-CCD)</span>';
+                } else {
+                    $tracking_number = $shipment->tracking_number;
+                }
+                $consignee_address = '';
+                if ($shipment->consignee_address != null) {
+                    $consignee_address = $shipment->consignee_address;
                 }
 
-                //                }
-                //                else {
-                //                    $shipment_details_row_start .= '
-                //                            <td>Rs 0</td>
-                //                    ';
-                //                }
-                //
-                //                $shipment_details_row_start .= '
-                //                          </tr>
-                //                ';
-                //
-                //                $shipment_details .= $shipment_details_row_start;
-            }
-            //            $shipment_details .= '
-            //                        </tbody>
-            //                      </table>
-            //        ';
-            $delivery_note_details = DeliveryNote::where('id', $request->id)->first();
-//            $rider = Rider::where('id', $delivery_note_details->rider_id)->first();
-            $city_name = $delivery_note_details->hub->name;
-            $rider_name = $rider->name;
-            $category = $rider->rider_category->name;
-            $route = $delivery_note_details->route;
-            if ($route){
-                $route_name = $route->code . ' (' . $route->start . ' to ' . $route->end . ')';
-            } else {
-                $route_name = "-";
-            }
+                $shipment_details_row_start = '
+                          <tr>
+                            <td class="' . $class . '">' . $total_shipments . '</td>
+                            <td class="' . $class . '">' . $tracking_number . '</td>
+                            <td class="' . $class . '">' . $user_details . '</td>
+                            <td class="' . $class . ' ' . $details_change_class . '">' . $shipment->consignee_name . ' | ' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
+                             <td class="' . $class . '">' . $consignee_address . '</td>
+                           
+                ';
 
+                if ($shipment->booking_type_id == 1) {
+                    $shipment_details_row_start .= '
+                    <td class="' . $class . '">' . $shipment->booking_type->booking_type . '</td>
+                ';
+                } else if ($shipment->booking_type_id == 2) {
+                    $shipment_details_row_start .= '
+                    <td class="replacement ' . $class . '"><span class="align-middle">' . $shipment->booking_type->booking_type . '</span><span class="d-inline-block align-middle float-right"><img src="' . asset('img/replacement.png') . '"></span></td>
+                ';
+                } else if ($shipment->booking_type_id == 3) {
+                    $shipment_details_row_start .= '
+                    <td class="try_and_buy ' . $class . '"><span class="align-middle">' . $shipment->booking_type->booking_type . '</span><span class="d-inline-block align-middle float-right"><img src="' . asset('img/try_and_buy.png') . '"></span></td>
+                ';
+                } else {
+                    $shipment_details_row_start .= '
+                    <td class="' . $class . '">' . $shipment->booking_type->booking_type . '</td>
+                ';
+                }
+
+                $shipment_details_row_start .= '
+                    <td class="' . $class . '">' . $shipment->items->sum('quantity') . '</td>';
+                $shipment_details_row_start .= '
+                    <td class="' . $class . '">' . $shipment->actual_weight . '</td>';
+
+                if ($shipment->booking_type_id != 4 || ($shipment->booking_type_id == 4 && $shipment->charges_mode_id == 2)) {
+                    $shipment_details_row_start .= '
+                            <td class="' . $class . '">Rs ' . number_format($shipment->amount) . '</td>
+                    ';
+
+                    $total_cod_amount += $shipment->amount;
+                } else {
+                    $shipment_details_row_start .= '
+                            <td class="' . $class . '">Rs 0</td>
+                    ';
+                }
+                if ($shipment->special_instructions != null) {
+                    $shipment_details_row_start .= '<td class="' . $class . ' ' . $details_change_class . '">' . $shipment->special_instructions . '</td>';
+                } else {
+                    $shipment_details_row_start .= '<td class="' . $class . ' ' . $details_change_class . '">-</td>';
+                }
+                if ($shipment->shipment_detail()->exists()) {
+                    if ($shipment->shipment_detail->is_open == 1) {
+                        $shipment_details_row_start .= '
+                    <td class="' . $class . '"><strong> Yes <span><img src="' . asset('img/open_box_icon.png') . '" ></span></strong></td>';
+                    } else {
+                        $shipment_details_row_start .= '
+                    <td class="' . $class . '"><strong> No <span></span></strong></td>';
+                    }
+                } else {
+                    $shipment_details_row_start .= '
+                    <td class="' . $class . '"><strong> No <span></span></strong></td>';
+                }
+                $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', '!=', 5)->where('remarks', '!=', null)->select('remarks');
+
+                if ($shipment_journey->exists()) {
+                    $shipment_journey = $shipment_journey->latest()->first();
+
+                    $shipment_details_row_start .= '
+                            <td class="' . $class . '">' . $shipment_journey->remarks . '</td>
+                    ';
+                } else {
+                    $shipment_details_row_start .= '
+                            <td class="' . $class . '"></td>
+                    ';
+                }
+
+
+                $shipment_details_row_start .= '
+                            <td class="' . $class . '"></td>
+                            <td class="' . $class . '"></td>
+                          </tr>
+                ';
+
+                $shipment_details .= $shipment_details_row_start;
+
+                if ($shipment->booking_type_id == 3) {
+                    $total_Shipment_items = 0;
+                    foreach ($shipment->items as $shipment_item) {
+                        $total_Shipment_items++;
+                        $shipment_details_row_start = '
+                          <tr>
+                            <td class="' . $class . '">' . $total_shipments . '.' . $total_Shipment_items . '</td>
+                            <td class="' . $class . '">' . $shipment_item->id . ' (' . $shipment->tracking_number . ')</td>
+                            <td class="' . $class . '"><b>Product Type:</b></td>
+                            <td class="' . $class . '">' . $shipment_item->product->product_name . '</td>
+                            <td class="' . $class . '">' . $shipment_item->description . '</td>
+                ';
+                        $shipment_details_row_start .= '
+                    <td class="try_and_buy ' . $class . '"><span class="align-middle">' . $shipment->booking_type->booking_type . '</span><span class="d-inline-block align-middle float-right"><img src="' . asset('img/try_and_buy.png') . '"></span></td>
+                ';
+
+                        $shipment_details_row_start .= '
+                    <td class="' . $class . '">' . $shipment_item->quantity . '</td>';
+
+                        $shipment_details_row_start .= '
+                            <td class="' . $class . '">Rs ' . number_format($shipment_item->price) . '</td>
+                    ';
+                        $shipment_details_row_start .= '<td class="' . $class . '">-</td>';
+
+                        $shipment_details_row_start .= '
+                        <td class="' . $class . '"></td>
+                    ';
+
+
+                        $shipment_details_row_start .= '
+                            <td class="' . $class . '"></td>
+                            <td class="' . $class . '"></td>
+                          </tr>
+                ';
+
+                        $shipment_details .= $shipment_details_row_start;
+                    }
+                }
+            }
+            $shipment_details .= '
+                        </tbody>
+                      </table>
+        ';
+            $delivery_note_details = DeliveryNote::where('id', $delivery_note_id)->first();
+            $rider = Rider::where('id', $delivery_note_details->rider_id)->first();
+            $city_name = $delivery_note_details->hub->name;
+            $delivery_note = $delivery_note->first();
+            $rider_id = NULL;
+            if ($delivery_note->special_rider) {
+                $rider_name = $rider->name . ' ( ' . $delivery_note->special_rider_name . ' )';
+            } else {
+                $rider_name = $rider->name;
+                $rider_id = $rider->trax_id;
+            }
+            $category = $rider->rider_category->name;
+            $route_name = $delivery_note_details->route ? $delivery_note_details->route->code . '( ' . $delivery_note_details->route->start . ' to ' . $delivery_note_details->route->end . ' )' : 'Hold In Route';
+
+            //HBL Konnect Integration
+            $hbl_transactions_amount = 0;
+            $hbl_transactions_delivery_note = HblKonnectTransactionDeliveryNote::where('delivery_note_id', $delivery_note_id);
+            if ($hbl_transactions_delivery_note->exists()) {
+                $hbl_transactions_delivery_note = $hbl_transactions_delivery_note->first();
+                $hbl_transactions_amount = $hbl_transactions_delivery_note->transactions_amount;
+                $cash_amount = $hbl_transactions_delivery_note->cash_amount;
+            } else {
+                $cash_amount = $delivery_note->recived_cod_amount;
+            }
+            //HBL Konnect Integration
             $main_details = '
                       <table class="table table-sm table-bordered border">
                         <tbody>
                           <tr>
-                            <td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>';
-            if ($request->has('temporary') && ($request->temporary != null)) {
-                $main_details .= '<td class="text-center align-middle color primary"><strong>Temporary Cash Collection</strong></td>';
-            } else {
-                $main_details .= '<td class="text-center align-middle color primary"><strong>Delivery Note Cash Collection</strong></td>';
-            }
-
-            $main_details .= '<td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst($rider->name) . '</td>
+                            <td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>
+                            <td class="text-center align-middle color primary"><strong>Delivery Note</strong></td>
+                            <td class="text-center align-middle color secondary">Created at ' . $delivery_note_details->created_at . '</br> by ' . ucfirst($delivery_note_details->admin->name) . '</td>
+                            <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst($rider->name) . '</td>
                           </tr>
-                          <tr>
-                            <td class="color secondary"><strong>Delivery Note No.</strong></td>
-                            <td>' . str_pad($delivery_note_details->id, 6, '0', STR_PAD_LEFT) . '</td>
-                          </tr>
-                          <tr>
                           <tr>
                             <td class="color secondary"><strong>Rider Name</strong></td>
                             <td>' . $rider_name . '</td>
-                            <td rowspan="7" class="pl-1 pr-1 text-center align-middle">
-                              <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($request->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
-                              <span><strong>' . str_pad($request->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
+                            <td colspan="2" rowspan="9" class="pl-1 pr-1 text-center align-middle">
+                              <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($delivery_note_id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                              <span><strong>' . str_pad($delivery_note_id, 6, '0', STR_PAD_LEFT) . '</strong></span>
                             </td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Rider Trax ID</strong></td>
+                            <td>' . $rider_id . '</td>
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>Category</strong></td>
@@ -15202,16 +15340,20 @@ class RiderAPIController extends Controller
                             <td>' . $city_name . '</td>
                           </tr>
                           <tr>
-                            <td class="color secondary"><strong>Total Shipments</strong></td>
-                            <td>' . $delivery_note_details->shipments_count . '</td>
-                          </tr>
-                          <tr>
-                            <td class="color secondary"><strong>Delivered Shipments</strong></td>
-                            <td>' . $total_shipments . '</td>
-                          </tr>
-                          <tr>
-                            <td class="color secondary"><strong>DNCC Amount</strong></td>
+                            <td class="color secondary"><strong>Total Collection Amount</strong></td>
                             <td>Rs ' . number_format($total_cod_amount) . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>HBL Transactions Amount</strong></td>
+                            <td>Rs ' . number_format($hbl_transactions_amount) . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Cash Amount</strong></td>
+                            <td>Rs ' . number_format($cash_amount) . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Total Shipments</strong></td>
+                            <td>' . $total_shipments . '</td>
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>Total Weight (Kg)</strong></td>
@@ -15220,137 +15362,10 @@ class RiderAPIController extends Controller
                         </tbody>
                       </table>
         ';
-            $main_details .= '
-                      <div class="mt-1 manual_form">
-                      <div class="row  mt-1">
-                         <div class="col">
-                            <div class="text-right">
-                                <span class="d-inline-block w-150 text-left"><strong>DNCC Amount</strong></span>
-                                <strong>Rs. ' . number_format($total_cod_amount) . '</strong>
-                            </div>
-                          </div>
-                        </div>
-                        <hr>';
-
-            $sub_seg_shipments = \Illuminate\Support\Facades\DB::table('delivery_note_shipments as dns')
-                ->select(
-                    'dns.delivery_note_id',
-                    'scs.name AS sub_segment',
-                    DB::raw('COUNT(s.id) AS no_of_delivered_shipments'),
-                    DB::raw('SUM(s.received_amount) AS cod_amount')
-                )
-                ->join('shipments AS s', 's.id', '=', 'dns.shipment_id')
-                ->join('users AS u', 'u.id', '=', 's.user_id')
-                ->join('sub_category_segments AS scs', 'scs.id', '=', 'u.sub_segment_id')
-                ->whereIn('s.shipper_status_id', $dncc_status)
-                ->whereIn('s.id', $shipment_ids)
-                ->where('dns.delivery_note_id', $request->id)
-                ->whereNotIn('dns.status',[8,10,11])
-                ->groupBy('scs.name', 'dns.delivery_note_id')
-                ->get();
-
-            if (count($sub_seg_shipments) > 0) {
-                $main_details .= '
-                    <table class="table table-sm table-bordered border small">
-                        <tbody>
-                        <tr>
-                            <td class="text-center align-middle color primary" colspan="3"><strong>Delivery Note Cash Collection</strong></td>
-                        </tr>
-                        <tr>
-                            <td class="text-center align-middle"><strong>Sub Segment</strong></td>
-                            <td class="text-center align-middle"><strong>No. of Delivered Shipments</strong></td>
-                            <td class="text-center align-middle"><strong>COD Amount</strong></td>
-                        </tr>';
-
-                foreach ($sub_seg_shipments as $sub_seg) {
-                    $main_details .= '<tr>
-                        <td class="color secondary"><strong>' . $sub_seg->sub_segment . '</strong></td>
-                        <td class="text-center align-middle">' . $sub_seg->no_of_delivered_shipments . '</td>
-                        <td class="text-center align-middle">' . $sub_seg->cod_amount . '</td>
-                    </tr>';
-                }
-
-                $main_details .= '</tbody>
-                    </table>
-                    <hr>';
-            }
-
             $html .= $main_details;
-            $html .= $main_details;
-            //            $html .= '<div class="row justify-content-end mt-2">
-            //                                    <div class="col-3 ">
-            //                                    <table class="table table-sm table-bordered border">
-            //                                        <thead>
-            //                                          <tr>
-            //                                            <th class="color primary"><strong>Denomination</strong></th>
-            //                                            <th class="color primary"><strong>Qty</strong></th>
-            //                                            <th class="color primary"><strong>Amount</strong></th>
-            //
-            //                                          </tr>
-            //                                          </thead>
-            //                                          <tbody>
-            //                                          <tr><td>5,000</td><td></td><td></td></tr>
-            //                                          <tr><td>1,000</td><td></td><td></td></tr>
-            //                                          <tr><td>500</td><td></td><td></td></tr>
-            //                                          <tr><td>100</td><td></td><td></td></tr>
-            //                                          <tr><td>50</td><td></td><td></td></tr>
-            //                                          <tr><td>20</td><td></td><td></td></tr>
-            //                                          <tr><td>10</td><td></td><td></td></tr>
-            //                                          <tr><td><b>Coins</b></td><td></td><td></td></tr>
-            //                                          <tr><td><b>Total</b></td><td></td><td></td></tr>
-            //                                          </tbody>
-            //                                    </table>
-            //                                    </div>
-            //                                  </div>';
-            //
-            //            $html .= $shipment_details;
+            $html .= $shipment_details;
 
-            //                      $html .= '<div class="row justify-content-center align-items-end mt-5">
-            //                          <div class="col justify-content-center ">
-            //                            <div class="text-center">
-            //                              <span class="d-block w-200 mx-auto line"></span>
-            //                              <strong class="d-inline-block w-200">Rider Name</strong>
-            //                            </div>
-            //                          </div>
-            //                          <div class="col justify-content-center ">
-            //                            <div class="text-center">
-            //                              <span class="d-block w-200 mx-auto line"></span>
-            //                              <strong class="d-inline-block w-200">Rider Signature</strong>
-            //                            </div>
-            //                          </div>
-            //                        </div>
-            //                        <div class="row justify-content-between align-items-end mt-5">
-            //                          <div class="col justify-content-center ">
-            //                            <div class="text-center">
-            //                              <span class="d-block w-200 mx-auto line"></span>
-            //                              <strong class="d-inline-block w-200">Operation Staff Name</strong>
-            //                            </div>
-            //                          </div>
-            //                          <div class="col justify-content-center ">
-            //                            <div class="text-center">
-            //                              <span class="d-block w-200 mx-auto line"></span>
-            //                              <strong class="d-inline-block w-200">Operation Staff Signature</strong>
-            //                            </div>
-            //                          </div>
-            //                        </div>
-            //                        <div class="row justify-content-between align-items-end mt-5">
-            //                          <div class="col justify-content-center ">
-            //                            <div class="text-center">
-            //                              <span class="d-block w-200 mx-auto line"></span>
-            //                              <strong class="d-inline-block w-200">Cashier Name</strong>
-            //                            </div>
-            //                          </div>
-            //                          <div class="col justify-content-center ">
-            //                            <div class="text-center">
-            //                              <span class="d-block w-200 mx-auto line"></span>
-            //                              <strong class="d-inline-block w-200">Cashier Signature</strong>
-            //                            </div>
-            //                          </div>
-            //                        </div>
-            //                      </div>
-            //        ';
-
-               $html .= '
+            $html .= '
                     </div>
 
                     <script>
@@ -15363,8 +15378,8 @@ class RiderAPIController extends Controller
       ';
 
             return $html;
-        }
 
+        }
         return response()->json([
             'status'   => 0,
             'message'  => "Delivery Note not found!",
