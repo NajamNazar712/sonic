@@ -13046,8 +13046,8 @@ class AdminAPIController extends Controller
                 $details['etd_working_days'] = $etd->label;
                 $details['etd_deadline'] =  $shipment->created_at->toDateString() .' - '. $shipment->created_at->copy()->addDays((int) $max)->toDateString();
             }
-            $details['crm_ticket_no'] = ($shipment?->crm_request) ? $shipment?->crm_request?->id .' ('.$shipment->crm_request?->request_status?->name .')' : null;
-            $details['crm_ticket_date'] = ($shipment?->crm_request) ? $shipment?->crm_request?->created_at->toDateString()  : null;
+            $details['crm_ticket_no'] = ($shipment?->crm_request) ? $shipment?->crm_request?->id .' ('.$shipment->crm_request?->request_status?->name .')' : '-';
+            $details['crm_ticket_date'] = ($shipment?->crm_request) ? $shipment?->crm_request?->created_at  : '-';
             $details['shipper']['name'] = $shipper->name;
 
             $pickup = $shipment->pickup_address;
@@ -13100,7 +13100,7 @@ class AdminAPIController extends Controller
                         $journey_details['timestamp'] = Carbon::parse($journey->created_at)->timestamp;
                         $journey_details['status'] = $journey->shipment_status_shipper->name;
 
-                        $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : null;
+                        $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : '-';
 
                         $details['tracking_history'][] = $journey_details;
                     }
