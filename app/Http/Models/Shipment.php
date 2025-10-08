@@ -195,7 +195,12 @@ class Shipment extends Model
     }
     public function getDaysDifferenceAttribute()
     {
-        return $this->created_at->diffInDays($this->updated_at);
+        if (!$this->updated_at) {
+            return null; // or 0, whatever you prefer
+        }
+
+        return $this->updated_at ? $this->updated_at->diffInDays(now()) : null;
+        // absolute positive integer
     }
 
 }
