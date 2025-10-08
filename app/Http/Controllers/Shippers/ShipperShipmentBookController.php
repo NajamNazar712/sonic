@@ -4058,7 +4058,7 @@ class ShipperShipmentBookController extends Controller
         }
     }
 
-    static public function corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment, $return_address_id,$parcel_value = null,$booked_by=null, $channel_id=null)
+    static public function corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment, $return_address_id,$parcel_value = null,$booked_by=null, $channel_id=null,$retail_pickup_store_id = null,$retail_type = null,$retail_deliver_store_id=null,$retail_deliver_type=null)
     {
 
         $information_display = self::information_display_check($user_id);
@@ -4137,7 +4137,40 @@ class ShipperShipmentBookController extends Controller
             $shipment_self_collection->save();
         }
 
-        AdminPickupsController::generate($shipment_id);
+        if ($retail_pickup_store_id && in_array($retail_type, [1, 2])) {
+            $retail = $retail_type == 2
+                ? RetailTraxCenter::find($retail_pickup_store_id)
+                : RetailFranchise::find($retail_pickup_store_id);
+
+            if($retail) {
+                $pudo_pickup = new PudoPickupShipment();
+                $pudo_pickup->retail_store_id = $retail->id;
+                $pudo_pickup->retail_address_id = $retail->pickup_address_id;
+                $pudo_pickup->hub_id = $retail->default_hub;
+                $pudo_pickup->retail_type = $retail_type;
+                $pudo_pickup->shipment_id = $shipment_id;
+                $pudo_pickup->save();
+            }
+        }
+        if($retail_deliver_store_id && in_array($retail_deliver_type, [1, 2])){
+            $retail_deliver = $retail_deliver_type == 2
+                ? RetailTraxCenter::find($retail_deliver_store_id)
+                : RetailFranchise::find($retail_deliver_store_id);
+
+            if($retail_deliver) {
+                $pudo_deliver = new PudoDeliverShipment();
+                $pudo_deliver->retail_store_id = $retail_deliver->id;
+                $pudo_deliver->retail_address_id = $retail_deliver->pickup_address_id;
+                $pudo_deliver->retail_type = $retail_deliver_type;
+                $pudo_deliver->shipment_id = $shipment_id;
+                $pudo_deliver->save();
+            }
+        }
+
+        if(!PudoPickupShipment::where('shipment_id',$shipment_id)->exists()) {
+            AdminPickupsController::generate($shipment_id);
+        }
+
 
         if (session('user_type') != 1) {
             $reference_1_id = Auth::id();
@@ -4513,7 +4546,23 @@ class ShipperShipmentBookController extends Controller
                 $pieces_quantity = $request->pieces_quantity ?? 1;
             }
             $business_category_id = 1;
-            $shipment_id = $this->corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment, $return_address_id,$parcel_value);
+
+            $retail_pickup_store_id   = null;
+            $retail_type              = null;
+            $retail_deliver_store_id  = null;
+            $retail_deliver_type      = null;
+
+            if($request->filled('is_pickup_self_collection') &&  in_array($request->input('retail_type'), [1,2])) {
+                $retail_pickup_store_id  = $request->input('retail_pickup_store_id');
+                $retail_type   = $request->input('retail_type');
+            }
+
+            if($request->filled('is_deliver_self_collection') &&  in_array($request->input('retail_deliver_type'), [1,2])) {
+                $retail_deliver_store_id = $request->input('retail_deliver_store_id');
+                $retail_deliver_type = $request->input('retail_deliver_type');
+            }
+
+            $shipment_id = $this->corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment, $return_address_id,$parcel_value,null,1,$retail_pickup_store_id,$retail_type,$retail_deliver_store_id,$retail_deliver_type);
 
             if (session('user_type') == 2) {
                 $substitute_user_shipment = new SubstituteUserShipment();

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\Models\PudoPickupShipment;
 use Auth;
 use Carbon\Carbon;
 use Cassandra\Session;
@@ -242,6 +243,12 @@ class ShipperTrackingController extends Controller
                         $details['pickup']['email'] = $pickup->email;
                         $details['pickup']['origin'] = $pickup->city->name;
                         $details['pickup']['address'] = $pickup->pickup_address;
+
+                        $pudo_pickup = PudoPickupShipment::where('shipment_id', $shipment->id)->first();
+                        if($pudo_pickup && $pudo_pickup->store){
+                            $retail_store_name = $pudo_pickup->store->name ?? '-';
+                            $details['pickup']['retail_store_code'] = $retail_store_name;
+                        }
 
                         $details['consignee']['name'] = $shipment->consignee_name;
                         $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;

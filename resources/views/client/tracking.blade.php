@@ -827,6 +827,14 @@
                                 shipment += '<td><strong>Address</strong></td>';
                                 shipment += '<td colspan="3">' + details.pickup.address + '</td>';
                                 shipment += '</tr>';
+
+                                if (details.pickup.retail_store_code) {
+                                    shipment += '<tr>';
+                                    shipment += '<td><strong>Retail Store</strong></td>';
+                                    shipment += '<td colspan="3">' + details.pickup.retail_store_code + '</td>';
+                                    shipment += '</tr>';
+                                }
+
                                 shipment += '</tbody>';
                                 shipment += '</table>';
                                 shipment += '</div>';

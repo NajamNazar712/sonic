@@ -1856,10 +1856,20 @@
                                 shipment += '<td><strong>Address</strong></td>';
                                 shipment += '<td colspan="3">' + details.pickup.address + '</td>';
                                 shipment += '</tr>';
+
+                                if (details.pickup.retail_store_code) {
+                                    shipment += '<tr>';
+                                    shipment += '<td><strong>Retail Store</strong></td>';
+                                    shipment += '<td colspan="3">' + details.pickup.retail_store_code + '</td>';
+                                    shipment += '</tr>';
+                                }
+
                                 shipment += '</tbody>';
                                 shipment += '</table>';
                                 shipment += '</div>';
                                 shipment += '</div>';
+
+
 
                                 shipment += '<div class="col-xs-12 col-sm-12 col-md-12 col-lg-5 mt-2">';
                                 shipment += '<h4><u>Consignee Information</u></h4>';

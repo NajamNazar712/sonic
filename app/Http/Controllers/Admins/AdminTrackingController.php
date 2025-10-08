@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Traits\FilterTrait;
+use App\Models\PudoPickupShipment;
+use App\Models\ShipmentJourneyRetailUser;
 use DB;
 use Auth;
 use Carbon\Carbon;
@@ -1252,6 +1254,13 @@ class AdminTrackingController extends Controller
                         $details['pickup']['origin'] = $pickup->city->name;
                         $details['pickup']['address'] = $pickup->pickup_address;
 
+                        $pudo_pickup = PudoPickupShipment::where('shipment_id', $shipment->id)->first();
+                        if($pudo_pickup && $pudo_pickup->store){
+                            $retial_store_name = $pudo_pickup->store->name ?? '-';
+                            $retail_store_code = $pudo_pickup->store->code ?? '-';
+                            $details['pickup']['retail_store_code'] = $retial_store_name . ' ('.$retail_store_code.')';
+                        }
+
                         $details['consignee']['name'] = $shipment->consignee_name;
                         $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
                         $details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
@@ -1571,6 +1580,15 @@ class AdminTrackingController extends Controller
 
                                 $journey_details['status'] .= ')';
                             }
+
+                            if($journey->shipper_status_id == 61){
+                                $pudo_retail_journey = ShipmentJourneyRetailUser::where('shipment_journey_id', $journey->id)->first();
+                                if ($pudo_retail_journey && $pudo_retail_journey->retail_user && $pudo_retail_journey->retail_user->store) {
+                                    $code = $pudo_retail_journey->retail_user->store->code ?? '';
+                                    $journey_details['status'] .= ' (' . $code. ')';
+                                }
+                            }
+
                             $user = '';
                             if ($journey->admin_id) {
                                 $user = $journey->admin->name;
@@ -1580,6 +1598,15 @@ class AdminTrackingController extends Controller
                             if ($journey->shipper_status_id == 2) {
                                 $user = $user . $machine_name;
 
+                            }
+                            if ($journey->shipper_status_id == 61) {
+                                $pudo_retail_journey = ShipmentJourneyRetailUser::where('shipment_journey_id', $journey->id)->first();
+
+                                if ($pudo_retail_journey && $pudo_retail_journey->retail_user) {
+                                    $user = $pudo_retail_journey->retail_user->name ?? '';
+                                } else {
+                                    $user = '-';
+                                }
                             }
                             if(in_array($journey->shipper_status_id, [1])){
 
