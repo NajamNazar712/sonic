@@ -3061,9 +3061,7 @@ class RiderAPIController extends Controller
             ->join('shipments as s', 'prs.shipment_id', '=', 's.id')
             ->where('s.tracking_number', $tracking_no)
             ->where('v2_pickup_requests.status_id', 1)
-            ->where('prs.status', 0)
-            ->whereIn('s.shipper_status_id', [1, 17]);
-
+            ->whereIn('s.shipper_status_id', [1, 17,61]);
         if ($pickup_requests->exists()) {
             $pickup_requests = $pickup_requests->first();
 
@@ -11366,7 +11364,6 @@ class RiderAPIController extends Controller
             $rider_id = $request->rider_id;
 
             $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
-            
             if (!V2RiderPickup::where('pickup_note_id', $request->pickup_note_id)->where('pickup_request_id', $request->pickup_request_id)->where('pickup_type', 1)->where('added_at', $added_at)->exists()) {
                 if (V2PickupRequest::where('id', $request->pickup_request_id)->where('current_rider_id', $rider_id)->exists()) {
                     $pickup_request = V2PickupRequest::find($request->pickup_request_id);
@@ -11448,7 +11445,7 @@ class RiderAPIController extends Controller
                             $shipment = Shipment::where('tracking_number', $shipment_id);
                             if ($shipment->exists()) {
                                 $shipment = $shipment->first();
-                                if ($shipment->shipper_status_id == 1 && in_array($shipment->id, $pickup_request_shipments)) {
+                                if (in_array($shipment->shipper_status_id,[1,61]) && in_array($shipment->id, $pickup_request_shipments)) {
                                     $shipment->shipper_status_id = 53;
                                     $shipment->consignee_status_id = 53;
                                     $shipment->save();
@@ -14786,12 +14783,17 @@ class RiderAPIController extends Controller
                         return response()->json(['status' => 0, 'success_message' => 'Shipment scanned successfuly', 'data' => $data]);
                         break;
 
+
                     case 17 : //Cancelled..
                         return response()->json(['status' => 1, 'message' => 'Shipment is cancelled']);
                         break;
 
                     case 53 : //Rider Picked...
                         return response()->json(['status' => 1, 'message' => 'Shipment is already rider picked']);
+                        break;
+
+                    case 61 : //arrival service center...
+                        return response()->json(['status' => 0, 'success_message' => 'Shipment scanned successfuly', 'data' => $data]);
                         break;
 
                     default:
