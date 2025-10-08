@@ -252,7 +252,7 @@ use Illuminate\Http\Request;
                 Route::post('otp_generate', 'Rider\RiderAPIController@generate_otp_for_consignee')->name('otp_generate');
                 Route::post('pending_for_verification', 'Rider\RiderAPIController@pending_for_verification')->name('pending_for_verification');
 
-                Route::post('print', 'Rider\RiderAPIController@dncc_print')->name('dncc.print');
+                Route::post('print', 'Rider\RiderAPIController@delivery_print')->name('print');
 
             });
             Route::prefix('comments')->name('comments.')->group(function () {
