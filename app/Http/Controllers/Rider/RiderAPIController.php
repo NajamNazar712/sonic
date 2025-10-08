@@ -14994,7 +14994,7 @@ class RiderAPIController extends Controller
         ]);
     }
 
-    public function dncc_print(Request $request)
+    public function delivery_print(Request $request)
     {
 
         $rider = Rider::where('status',1)->where('id',$request->rider_id)->first();
@@ -15377,7 +15377,10 @@ class RiderAPIController extends Controller
                 </html>
       ';
 
-            return $html;
+            $pdf = SnappyPdf::loadHTML($html);
+            $uniqueId = time() . rand(100, 999);
+            $filename = "delivery_note_{$uniqueId}.pdf";
+            return $pdf->download($filename);
 
         }
         return response()->json([
