@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\Models\ShipmentGeoCode;
 use Auth;
 use Carbon\Carbon;
 use Cassandra\Session;
@@ -9,6 +10,7 @@ use App\Http\Models\Rider;
 use App\RvAgentCallHistory;
 use Illuminate\Http\Request;
 use App\Http\Models\Shipment;
+use Illuminate\Support\Facades\Validator;
 use Yajra\Datatables\Datatables;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\RiderDelivery;
@@ -954,6 +956,66 @@ class ShipperTrackingController extends Controller
         }
        
     }
+
+
+    public  function get_shipment_geo_codes(Request $request)
+    {
+
+        $shipment_geo_code = ShipmentGeoCode::where('shipment_id',$request->shipment_id)->where('geo_code_type',2)
+            ->select('latitude','longitude')->first();
+
+        $lat = null;
+        $long = null;
+        if($shipment_geo_code){
+            $shipment_id = $shipment_geo_code->shipment_id;
+            $lat = $shipment_geo_code->latitude;
+            $long = $shipment_geo_code->longitude;
+        }
+
+        return response()->json(['status'=>0,'lat'=>$lat,'long'=>$long]);
+    }
+
+    public function update_geo_codes(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'shipment_id' => 'required|integer|exists:shipments,id',
+            'lat'         => 'required|numeric',
+            'long'        => 'required|numeric',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 1,
+                'error'  => $validator->errors()->first()
+            ]);
+        }
+
+        // Check existing record
+        $geoCode = ShipmentGeoCode::where('shipment_id', $request->shipment_id)
+            ->where('geo_code_type', 2)
+            ->first();
+
+        if ($geoCode) {
+            // Update existing
+            $geoCode->latitude  = $request->lat;
+            $geoCode->longitude = $request->long;
+        } else {
+            // New insert
+            $geoCode = new ShipmentGeoCode();
+            $geoCode->shipment_id = $request->geo_code_shipment_id;
+            $geoCode->latitude    = $request->lat;
+            $geoCode->longitude   = $request->long;
+            $geoCode->geo_code_type        = 2;
+        }
+
+        $geoCode->save();
+
+        return response()->json([
+            'status'  => 0,
+            'message' => 'Geo code saved successfully!'
+        ]);
+    }
+
 
 
 }

@@ -4513,6 +4513,20 @@ class AdminFinanceController extends Controller
 
         $shipment->save();
 
+        $shipmentDeliveryNote = DeliveryNoteShipment::with('delivery_note')->where('shipment_id', $shipment->id)->latest()->first();
+
+        if(!empty($shipmentDeliveryNote)) {
+
+            NotificationsController::app_notification(
+                23, // Notification type ID
+                $shipmentDeliveryNote->delivery_note->rider_id, // Rider ID
+                2, // Notification category or type
+                $shipment->id, // Shipment ID
+                $change_shipment_amount->old_amount // old amount
+
+            );
+        }
+
         ShipmentChargesController::cash_handling($shipment_id);
 
         return redirect()->route('admin.finance.change_shipment_amount.index')->with('success', 'Shipment\'s amount has been changed');

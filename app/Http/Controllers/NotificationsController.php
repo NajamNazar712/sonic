@@ -723,7 +723,7 @@ class NotificationsController extends Controller
                         if (empty($bcc)) {
                             $bcc = NULL;
                         }
-
+                        
                         self::email($subject, $body, $to, NULL, $bcc);
 
                         $subject = $original_subject;
@@ -11984,6 +11984,21 @@ class NotificationsController extends Controller
                     if (strpos($body, '[tracking_number]') !== FALSE) {
 
                         $body = str_replace('[tracking_number]', $tracking->tracking_number, $body);
+                    }
+                    self::push_notification($employee_id, $employee_type, $title, $body);
+                }else if ($id == 23) {
+                    $tracking = Shipment::find($reference1_id);
+                    if (strpos($body, '[tracking_number]') !== FALSE) {
+
+                        $body = str_replace('[tracking_number]', $tracking->tracking_number, $body);
+                    }
+                    if (strpos($body, '[old_amount]') !== FALSE) {
+
+                        $body = str_replace('[old_amount]', $reference2_id, $body);
+                    }
+                    if (strpos($body, '[new_amount]') !== FALSE) {
+
+                        $body = str_replace('[new_amount]', $tracking->amount, $body);
                     }
                     self::push_notification($employee_id, $employee_type, $title, $body);
                 }

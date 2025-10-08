@@ -208,6 +208,10 @@ class AgentSarNotification extends Command
                     ->where('shipments_journey.created_at','>=',$date.' 00:00:00')
                     ->where('shipments_journey.updated_at','<=',date('Y-m-d').' 23:59:59');
                 })
+                ->join('shipments', function ($join) {
+                    $join->on('rv_shipment_tickets.shipment_id', '=', 'shipments.id')
+                        ->where('shipments.shipper_status_id', 12);
+                })
                 ->where('disabled_shipper',1)
                 ->where('permanent_disable',0)
                 ->where('halt_shipper',0)

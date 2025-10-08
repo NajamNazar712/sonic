@@ -9,6 +9,7 @@ use App\Http\Models\ShipmentOrderDate;
 use App\Http\Models\ShipmentShipperReference;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\SubstituteUserShipment;
+use App\Models\ShipmentGeoCode;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
@@ -223,6 +224,20 @@ class ProcessShipmentBookingDB implements ShouldQueue
                 }
 
                 $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment, $return_address_id, $parcel_value);
+            }
+
+            //lat and long manual set
+            $lat = isset($this->booking['consignee_latitude']) ? $this->booking['consignee_latitude'] : 0;
+            $lng = isset($this->booking['consignee_longitude']) ? $this->booking['consignee_longitude'] :  0;
+            if(!empty($shipment_id) && is_numeric($lat) && $lat > 0 && is_numeric($lng) && $lng > 0) {
+
+                $shipment_geo_code = new ShipmentGeoCode();
+                $shipment_geo_code->user_id = $user_id;
+                $shipment_geo_code->shipment_id= $shipment_id;
+                $shipment_geo_code->geo_code_type = 2;
+                $shipment_geo_code->latitude= $lat;
+                $shipment_geo_code->longitude= $lng;
+                $shipment_geo_code->save();
             }
 
             if ($this->booking['substitute_user_id'] != null) {

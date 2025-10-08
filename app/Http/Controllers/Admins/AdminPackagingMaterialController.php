@@ -619,7 +619,7 @@ class AdminPackagingMaterialController extends Controller
         $request_id = $request->id;
 
         $request_details = PackagingMaterialRequest::where('id', $request_id)->first();
-
+        
         if ($request_details != null) {
             if ($request_details->shipment_id == null) {
                 $user_id = $request_details->user_id;
@@ -689,7 +689,7 @@ class AdminPackagingMaterialController extends Controller
                         }
                     }
                 }
-                //dd($invalid_product_ids);
+                // dd($invalid_product_ids);
                 if (count($invalid_product_ids) > 0) {
                     return response()->json(['status' => 0, 'error' => $invalid_products . ' does\'nt exists in requested hub!']);
                 }

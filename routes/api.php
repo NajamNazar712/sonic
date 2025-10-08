@@ -690,6 +690,7 @@ use Illuminate\Http\Request;
 
             Route::prefix('rcp')->name('rcp.')->group(function () {
                 Route::get('list', 'ShipperAPIController@confirmation_pending_list')->name('list');
+                Route::get('shipper-advice', 'ShipperAPIController@shipper_sar')->name('shipper-advice');
                 Route::post('mark_return_confirm', 'ShipperAPIController@mark_return_confirm')->name('mark_return_confirm');
                 Route::post('mark_reattempt', 'ShipperAPIController@mark_reattempt')->name('mark_reattempt');
                 Route::prefix('intercept')->name('intercept.')->group(function () {
