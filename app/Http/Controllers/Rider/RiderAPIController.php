@@ -15377,10 +15377,7 @@ class RiderAPIController extends Controller
                 </html>
       ';
 
-            $pdf = SnappyPdf::loadHTML($html);
-            $uniqueId = time() . rand(100, 999);
-            $filename = "delivery_note_{$uniqueId}.pdf";
-            return $pdf->download($filename);
+            return $html;
 
         }
         return response()->json([
