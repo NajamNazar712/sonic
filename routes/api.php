@@ -268,8 +268,10 @@ use Illuminate\Http\Request;
                 //Current
                 Route::post('pickup_v2', 'Rider\RiderAPIController@pickups_history_v2')->name('pickup_v2');
                 Route::post('delivery_v2', 'Rider\RiderAPIController@delivery_history_v2')->name('delivery_v2');
+                Route::post('delivery_v3', 'Rider\RiderAPIController@delivery_history_v3')->name('delivery_v3');
                 Route::post('return_v2', 'Rider\RiderAPIController@return_history_v2')->name('return_v2');
                 Route::post('history_details', 'Rider\RiderAPIController@history_details')->name('history_details');
+                Route::post('history_details_v1', 'Rider\RiderAPIController@history_details_v1')->name('history_details_v1');
             });
 
             Route::prefix('return')->name('return.')->group(function () {
