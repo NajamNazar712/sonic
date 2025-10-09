@@ -1091,7 +1091,7 @@ class TestEmailCheck extends Command
             $records = DB::table('done_payment_shipments')
                 ->whereIn('done_payment_id', $paymentId)
                 ->whereIn('shipment_id', $shipments)
-                ->select('id', 'wht', 'cod_sst', 'payable')
+                ->select('id', 'wht', 'cod_sst', 'payable','amount')
                 ->get();
 
             foreach ($records as $record) {
