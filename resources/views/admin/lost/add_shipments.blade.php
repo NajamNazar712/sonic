@@ -63,6 +63,7 @@
                             <th class="border-primary border-darken-1">Amount</th>
                             <th class="border-primary border-darken-1">Parcel Value</th>
                             <th class="border-primary border-darken-1">Remarks</th>
+                            <th class="border-primary border-darken-1">Lost Category</th>
                             <th class="border-primary border-darken-1">Shipping Mode</th>
                             <th class="border-primary border-darken-1">Service Type</th>
                             <th class="border-primary border-darken-1">Action</th>
@@ -126,6 +127,17 @@ label.error {
     margin-top: 0;
     padding-top: 0;
 }
+
+.readonly-select {
+    pointer-events: none;    
+    opacity: 0.6;           
+    background-color: #f8f9fa;
+    cursor: not-allowed;     
+}
+
+.remark-select {
+    min-width: 260px; 
+}
 </style>
 @endsection
 
@@ -155,6 +167,7 @@ label.error {
                     {name: 'amount', class: 'align-middle amount', orderable: false},
                     {name: 'parcel_value', class: 'align-middle parcel_value', orderable: false},
                     {name: 'remarks', class: 'align-middle remarks', orderable: false},
+                    {name: 'lost_category', class: 'align-middle lost_category', orderable: false},
                     {name: 'mode', class: 'align-middle mode', orderable: false},
                     {name: 'service_type', class: 'align-middle service_type', orderable: false},
                     {name: 'action_button', class: 'align-middle action_button', orderable: false},
@@ -210,7 +223,7 @@ label.error {
 
                                     if (index === -1) {
                                         var rowNo = table.rows().count();
-
+                                        var remarkCell = renderRemarkSelect(data.details.id, ''); 
                                         var action = '<a href="javascript:void(0);" class="btn btn-icon btn-danger removerow" data-shipment_id="' + data.details.id + '"><i class="la la-close"></i></a>';
                                         table.row.add([
                                             rowNo + 1, data.details.tracking_number, 
@@ -221,6 +234,7 @@ label.error {
                                             data.details.amount, 
                                             data.details.parcel_value,
                                             data.details.remarks,
+                                            remarkCell,
                                             data.details.mode,
                                             data.details.service_type, 
                                             data.details.action_button,
@@ -307,7 +321,7 @@ label.error {
                                         
                                         if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(shipment.tracking_number)) === -1) {
                                             var rowNo = table.rows().count();
-       
+                                            var remarkCell = renderRemarkSelect(id, ''); 
                                            var action = '<a href="javascript:void(0);" class="btn btn-icon btn-danger removerow"><i class="la la-close"></i></a>';
                                            table.row.add([
                                            rowNo + 1,
@@ -319,6 +333,7 @@ label.error {
                                            shipment.amount,
                                            shipment.parcel_value,
                                            shipment.remarks,
+                                            remarkCell, 
                                            shipment.mode,
                                            shipment.service_type, 
                                            shipment.action_button,
@@ -395,6 +410,22 @@ label.error {
                 return false;
             }
         });
+
+        function findShipmentsWithMissingRemarks(shipmentIds, changeMap) {
+            var missing = [];
+            $.each(shipmentIds, function(_, sid) {
+                var id = String(sid);
+                if ($.inArray(id, Object.keys(changeMap)) !== -1) {
+                return;
+                }
+                var $sel = $(`select[name="remarks_category[${id}]"]`);
+                var v = $sel.val();
+                if (v !== '1' && v !== '2') {
+                missing.push(id);
+                }
+            });
+            return missing;
+        }
         $('#update_lost_form').validate({
             errorClass: 'danger',
             successClass: 'success',
@@ -405,24 +436,22 @@ label.error {
                 return $.trim(value);
             },
             submitHandler: function(form) {
-        
+                var missing = findShipmentsWithMissingRemarks(shipment_ids, change);
+                if (missing.length > 0) {
+                toastr.error(
+                    'Please select a Remark (1 = Transit Lost / 2 = Snatching/Theft/Stolen) for shipments: ' + missing.join(', '),
+                    'Error!',
+                    { positionClass: 'toast-top-center', containerId: 'toast-top-center' }
+                );
+                    return false; 
+                }
                 swal({
                     title: 'Are You Sure?',
                     text: 'Select Yes to add to Lost Shipments!',
                     icon: 'warning',
                     buttons: {
-                        cancel: {
-                            text: 'No',
-                            value: null,
-                            visible: true,
-                            closeModal: true,
-                        },
-                        confirm: {
-                            text: 'Yes',
-                            value: true,
-                            visible: true,
-                            closeModal: true
-                        }
+                    cancel: { text: 'No', value: null, visible: true, closeModal: true },
+                    confirm: { text: 'Yes', value: true, visible: true, closeModal: true }
                     },
                     closeOnClickOutside: false,
                     closeOnEsc: false,
@@ -431,8 +460,8 @@ label.error {
                     if (confirm) {
                         blockPagePermanently();
                         $('#update_lost_form button[type="submit"]').attr('disabled', 'disabled');
-                        $('#update_lost_form input#shipment_ids').val(shipment_ids); // Corrected line to set shipment_ids back as string
-                        form.submit(); // Submit the form
+                        $('#update_lost_form input#shipment_ids').val(shipment_ids); 
+                        form.submit(); 
                     }
                 });
             
@@ -497,10 +526,11 @@ label.error {
         });
 
         var shipment_id;
+        var modalButton;
         $('body').on('click', '.add_lost_responsible', function () {
             shipment_id = $(this).attr('data-id');
             var modalId = 'addLostResponsibleModal_' + shipment_id;
-            var modalButton = 'addLostResponsibleModalBtn_' + shipment_id;
+            modalButton = 'addLostResponsibleModalBtn_' + shipment_id;
             var closeModalButton = 'addLostResponsibleCloseModalBtn';
 
             var modalContent = '<div class="modal fade text-left addLostResponsible" id="' + modalId + '" data-backdrop="static" tabindex="-1" role="dialog">' +
@@ -650,6 +680,8 @@ label.error {
                                     if (existingChangeIndex === -1) {
                                         change[shipment_id].push({
                                             value: inputValue,
+                                            computedType: response.details.computedType 
+
                                         });
                                     }
 
@@ -678,6 +710,7 @@ label.error {
             });
         }
         $('body').on('click', 'a.remove_row', function () {
+            
             var index = $.inArray(rid, selected_rows);
             var rid = parseInt($(this).parents('tr').attr('id'));
             var shipment_id_remove = $(this).attr('data-shipment_id');
@@ -774,7 +807,7 @@ label.error {
             
         });
 
-        $(document).on('click', '.addLostResponsible #addLostResponsibleCloseModalBtn', function (e) {            
+        $(document).on('click', '.addLostResponsible #addLostResponsibleCloseModalBtn', function (e) {                        
             if (change[shipment_id] && change[shipment_id].length != 0 && change[shipment_id].length === new_array[shipment_id].length){
                 
                 swal({
@@ -818,6 +851,83 @@ label.error {
                 $('.addLostResponsible').modal('hide')
 
             }
+        });
+
+        $(document).on('click', '[id^="addLostResponsibleModalBtn_"]', function() {
+            updateRemarksCategory(shipment_id)
+        });
+        
+
+        const REMARK_OPTIONS = [
+            { id: 1, text: 'Transit Lost' },
+            { id: 2, text: 'Snatching/Theft/Stolen' }
+        ];
+
+        const AUTO_REMARKS = {
+            3: 'Lost by Operation Staff',
+            4: 'Lost by Rider',
+            5: 'Lost by Rider & Operation Staff'
+        };
+
+        function renderRemarkSelect(shipmentId, selectedVal) {
+            let opts = REMARK_OPTIONS.map(o =>
+                `<option value="${o.id}" ${String(selectedVal)===String(o.id) ? 'selected' : ''}>${o.text}</option>`
+            ).join('');
+
+            return `
+                <select name="remarks_category[${shipmentId}]" 
+                        id="remarks_category_${shipmentId}"
+                        class="form-control remark-select" 
+                        data-shipment-id="${shipmentId}" required>
+                    <option value="">-- Select Remark --</option>
+                    ${opts}
+                </select>`;
+        }
+        function updateRemarksCategory(shipment_id) {
+            if (manualRemarkMode[shipment_id]) return;
+
+            let types = change[shipment_id]?.map(item => item.computedType) || [];
+            if (types.length === 0) return;
+
+            let allRider = types.every(t => t === 'Rider');
+            let allAdmin = types.every(t => t === 'Operation Staff');
+            let mixed = !allRider && !allAdmin;
+
+            let categoryId = null;
+            if (allAdmin) categoryId = 3;
+            else if (allRider) categoryId = 4;
+            else if (mixed) categoryId = 5;
+
+            let remarksField = $('#remarks_category_' + shipment_id);
+            if (remarksField.length && categoryId) {
+                if (!remarksField.find(`option[value="${categoryId}"]`).length) {
+                    remarksField.append(`<option value="${categoryId}">${AUTO_REMARKS[categoryId]}</option>`);
+                }
+                remarksField.val(categoryId).prop('readonly', true).addClass('readonly-select');
+            }
+        }
+        let manualRemarkMode = {}; 
+
+        $(document).on('keypress', '.remarks', function () {
+            let shipment_id = $(this).data('shipment-id');
+            manualRemarkMode[shipment_id] = true; 
+
+            let remarksField = $('#remarks_category_' + shipment_id);
+
+            remarksField.removeClass('readonly-select')
+                        .prop('readonly', false);
+
+            remarksField.html(`
+                <option value="">-- Select Remark --</option>
+                ${REMARK_OPTIONS.map(o =>
+                    `<option value="${o.id}">${o.text}</option>`
+                ).join('')}
+            `);
+        });
+
+
+        $(document).off('click', '#' + modalButton).on('click', '#' + modalButton, function () {
+           updateRemarksCategory(shipment_id)
         });
 
     });

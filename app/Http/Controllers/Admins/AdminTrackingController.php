@@ -2020,8 +2020,8 @@ class AdminTrackingController extends Controller
                                 $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
                                 $journey_details['old_amount'] = number_format($journey->old_amount);
                                 $journey_details['new_amount'] = number_format($journey->new_amount);
-                                $journey_details['remarks'] = $journey->remarks;
-                                $journey_details['user'] = $journey->admin->name;
+                                $journey_details['remarks'] = !empty($journey->remarks) ? $journey->remarks : 'Cod Amount Change';
+                                $journey_details['user'] = isset($journey->shipper->name) ? $journey->shipper->name : $journey->admin->name;
 
                                 $details['amount_history'][] = $journey_details;
                             }
@@ -2797,7 +2797,7 @@ class AdminTrackingController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),616);
         }
         $to   = Carbon::now()->endOfDay();
-        $from = "2025-09-15 23:59:59";
+        $from = Carbon::now()->subMonth(6)->startOfDay();
         $sj_from_id = DB::connection($connection)->table('shipments_journey')
             ->where('created_at', '>=',   Carbon::parse($from)->subDay(10)->startOfDay())
             ->where('created_at', '<=',    Carbon::parse($to)->addDay(10)->startOfDay())
@@ -2868,7 +2868,7 @@ class AdminTrackingController extends Controller
         'sjl.shipper_status_id as latest_shipper_status_id','s.shipper_status_id as shipper_status_id','ssj.id as ssj_id', 'ca_scanning.name as scanning_city_area_name',
         's.consignee_address', 's.actual_weight','shipment_positions.scanned_by_user_type as scanned_by_user_type','shipment_positions.scanned_by_id as scanned_by_id','sj_arrival.created_at as arrival', 'ssj.created_at as last_scanned_at', 'ssj.entry_method as entry_method'
         ])
-            ->where('tracked_by', Auth::id())->whereBetween('shipment_positions.created_at', [$from, $to])->distinct('shipment_positions.shipment_id');
+            ->where('tracked_by', Auth::id())->groupBy('shipment_positions.shipment_id');
         // dd($shipment_positions->get()->toArray());
         $datatables = Datatables::of($shipment_positions)
             ->editColumn('tracking_number_link', function ($shipments) {

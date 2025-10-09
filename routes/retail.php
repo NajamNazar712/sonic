@@ -7,7 +7,7 @@ Route::prefix('retail')->name('retail.')->group(function () {
     Route::get('404', 'Auth\RetailLoginController@not_found')->name('404');
 
     Route::get('/login', 'Auth\RetailLoginController@showLoginForm')->name('login');
-    Route::post('/login', 'Auth\RetailLoginController@login')->name('login.submit');
+    Route::post('/login', 'Auth\RetailLoginController@login')->middleware('login.check')->name('login.submit');
     Route::post('/radius', 'Auth\RetailLoginController@radius_check')->name('login.radius');
     Route::post('/verify_otp', 'Auth\RetailLoginController@verify_otp')->name('login.verify_otp');
     Route::post('/logout', 'Auth\RetailLoginController@logout')->name('logout');
