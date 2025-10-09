@@ -339,7 +339,25 @@
 
 									</table>
 
-
+									<table class="table table-bordered">
+										<thead>
+										<tr role="row" class="bg-primary white text-center">
+											<th colspan="2" class="border-primary border-darken-1">Retail Stores</th>
+										</tr>
+										<tr role="row" class="bg-primary bg-lighten-1 white">
+											<th class="text-center border-primary border-lighten-2">ID</th>
+											<th class="border-primary border-lighten-2">Name</th>
+										</tr>
+										</thead>
+										<tbody>
+										@foreach ($retail_stores as $retail_store)
+											<tr role="row">
+												<td class="text-center">{{ $retail_store->id }}</td>
+												<td>{{ $retail_store->name }}, {{$retail_store->hub_name}}</td>
+											</tr>
+										@endforeach
+										</tbody>
+									</table>
 
 									<table class="table table-bordered">
 										<thead>

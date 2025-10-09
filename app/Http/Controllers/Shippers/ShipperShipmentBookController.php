@@ -3156,6 +3156,32 @@ class ShipperShipmentBookController extends Controller
         $viewData['substitute_account'] = $substitute_account;
         $viewData['substitute_account_pickup_address'] = $substitute_account_pickup_address;
 
+        $city_ids = $pickup_addresses->pluck('city_id')->unique()->values();
+        $allLocations = collect();
+        if($city_ids->isNotEmpty()){
+            $hub_ids = City::where('status',1)->whereIn('id',$city_ids)->pluck('hub_id')->unique();
+            $cityNames = City::whereIn('id', $hub_ids)->pluck('name', 'id');
+
+
+            $franchises = RetailFranchise::where('status', 1)
+                ->whereIn('default_hub',$hub_ids)
+                ->where('is_pudo', 1)
+                ->select('id', 'name','default_hub');
+
+            $centers = RetailTraxCenter::where('status', 1)
+                ->whereIn('default_hub',$hub_ids)
+                ->where('is_pudo', 1)
+                ->select('id', 'name','default_hub');
+
+            $allLocations = $franchises->union($centers)->get();
+            $allLocations->map(function ($item) use ($cityNames) {
+                $item->hub_name = $cityNames[$item->default_hub] ?? '';
+                return $item;
+            });
+        }
+
+
+        $viewData['retail_stores'] = $allLocations;
         // return view('client.shipment.book.excel')->with(['booking_types' => $booking_types, 'user' => $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'charges_modes' => $charges_modes, 'omni_user' => $omni_user]);
         return view('client.shipment.book.excel')->with($viewData);
     }
