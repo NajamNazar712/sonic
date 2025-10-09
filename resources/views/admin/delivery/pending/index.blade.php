@@ -356,9 +356,9 @@
                             row.push(`="${values.tracking_number}"`);
                             row.push(values.shipper);
                             row.push(values.sub_segment_name);
-                            row.push(values.origin);
-                            row.push(values.destination);
-                            row.push(values.hub);
+                            row.push(decodeURIComponent(escape(values.origin || '')));
+                            row.push(decodeURIComponent(escape(values.destination || '')));
+                            row.push(decodeURIComponent(escape(values.hub || '')));
                             row.push(values.area);
                             row.push(values.consignee_name);
                             row.push(values.consignee_phone);

@@ -66,7 +66,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('/address1', 'Shippers\ShipperDashboardController@wordpressAddressView')->name('wordpress.new.address');
     Route::get('/bank1', 'Shippers\ShipperDashboardController@wordpressBankView')->name('wordpress.new.bank');
 
-    Route::post('/login', 'Auth\LoginController@login')->name('login.submit');
+    Route::post('/login', 'Auth\LoginController@login')->middleware('login.check')->name('login.submit');
     //    Route::get('/register/','Auth\GetStartedController@index')->name('register');
     //    Route::get('/get-started', 'Auth\GetStartedController@index')->name('getstarted');
     //    Route::post('/get-started','Auth\GetStartedController@getstarted_submit')->name('getstarted');
