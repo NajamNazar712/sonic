@@ -51,7 +51,9 @@
                                                         @if ($shipping_information['hidden'] == 0 && $shipping_information['status'] == 1)
                                                             <option value="{{ $shipping_information['id'] }}" 
                                                                     data-city-id="{{ $shipping_information['city']['id'] }}" 
-                                                                    data-city-name="{{ $shipping_information['city']['name'] }}" 
+                                                                    data-city-name="{{ $shipping_information['city']['name'] }}"
+                                                                    data-latitude="{{ $shipping_information['latitude'] }}"
+                                                                    data-longitude="{{ $shipping_information['longitude'] }}"
                                                                     {{ $shipping_information['default_address'] == 1 ? 'selected' : '' }}>
                                                                 {{ $shipping_information['poc'] }}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['name'] }}
                                                             </option>
@@ -66,7 +68,9 @@
                                                         @if ($shipping_information['hidden'] == 0 && $shipping_information['status'] == 1)
                                                             <option value="{{ $shipping_information['id'] }}" 
                                                                     data-city-id="{{ $shipping_information['city']['id'] }}" 
-                                                                    data-city-name="{{ $shipping_information['city']['name'] }}" 
+                                                                    data-city-name="{{ $shipping_information['city']['name'] }}"
+                                                                    data-latitude="{{ $shipping_information['latitude'] }}"
+                                                                    data-longitude="{{ $shipping_information['longitude'] }}"
                                                                     {{ $shipping_information['default_address'] == 1 ? 'selected' : '' }}>
                                                                 {{ $shipping_information['poc'] }}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['name'] }}
                                                             </option>
@@ -82,7 +86,9 @@
                                                         @if ($shipping_information['hidden'] == 0 && $shipping_information['status'] == 1)
                                                             <option value="{{ $shipping_information['id'] }}" 
                                                                     data-city-id="{{ $shipping_information['city']['id'] }}" 
-                                                                    data-city-name="{{ $shipping_information['city']['name'] }}" 
+                                                                    data-city-name="{{ $shipping_information['city']['name'] }}"
+                                                                    data-latitude="{{ $shipping_information['latitude'] }}"
+                                                                    data-longitude="{{ $shipping_information['longitude'] }}"
                                                                     {{ $shipping_information['default_address'] == 1 ? 'selected' : '' }}>
                                                                 {{ $shipping_information['poc'] }}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['name'] }}
                                                             </option>
@@ -92,7 +98,12 @@
                                                 @endif
                                             </select>
                                         </div>
-
+                                        <div class="form-group">
+                                            <input type="text" name="latitude" id="pickup_latitude" class="form-control" placeholder="Latitude">
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="text" name="longitude" id="pickup_longitude" class="form-control" placeholder="Longitude">
+                                        </div>
                                         {{-- <div class="form-group">
                                             <select name="pickup_address" class="select2" id="pickup_address" data-rule-required="true" data-msg-required="Pickup Address is required">
                                                 <option value="0">New</option>
@@ -143,6 +154,12 @@
 
                                             <div class="form-group">
                                                 <input type="email" name="new_pickup_email_address" class="form-control" placeholder="Email Address*" data-rule-required="true" data-msg-required="Email Address is required">
+                                            </div>
+                                            <div class="form-group">
+                                                <input type="text" name="new_pickup_latitude" class="form-control" placeholder="Latitude">
+                                            </div>
+                                            <div class="form-group">
+                                                <input type="text" name="new_pickup_longitude" class="form-control" placeholder="Longitude">
                                             </div>
                                         </div>
 
@@ -276,6 +293,12 @@
 
                                         <div class="form-group">
                                             <input type="email" name="consignee_email_address" class="form-control" placeholder="Email Address" data-rule-maxlength="100" data-msg-maxlength="Email Address can be maximum 100 characters">
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="text" name="consignee_latitude" class="form-control" placeholder="Latitude">
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="text" name="consignee_longitude" class="form-control" placeholder="Longitude">
                                         </div>
 
                                         <div id="self_collection_div" class="form-group text-center p-1 border border-light rounded">
@@ -988,13 +1011,28 @@
                 if ($('#pickup_address').val() == 0) {
                     var pickup_city_id = $('#new_pickup_city').val();
                     $('#pickup_city_name').addClass('d-none');
+                    $("#pickup_latitude, #pickup_longitude").addClass('d-none')
+                    $("#pickup_latitude,#pickup_longitude").val('');
 
                 }
                 else {
                     var pickup_city_id = $('#pickup_address').find(':selected').data('city-id');
                     var pickup_city_name = $('#pickup_address').find(':selected').data('city-name');
                     $('#pickup_city_name').removeClass('d-none');
+                    $("#pickup_latitude, #pickup_longitude").removeClass('d-none')
                     $('#pickup_city_name').html('City : ' + pickup_city_name);
+
+                    var latitude = $('#pickup_address').find(':selected').data('latitude');
+                    var longitude = $('#pickup_address').find(':selected').data('longitude');
+                    if (latitude !== undefined && latitude !== '' && longitude !== undefined && longitude !== '') {
+                        $("#pickup_latitude").val(latitude);
+                        $("#pickup_longitude").val(longitude);
+                        $("#pickup_latitude, #pickup_longitude").prop("readonly", true);
+                    }else{
+                        $("#pickup_latitude, #pickup_longitude").removeAttr("readonly");
+                        $("#pickup_latitude").val('');
+                        $("#pickup_longitude").val('');
+                    }
                 }
 
                 consignee_city_id = $('#consignee_city').val();
@@ -1521,6 +1559,8 @@
                             $('input[name="consignee_phone_number_1"]').val(data.details.phone_number_1).change();
                             $('input[name="consignee_phone_number_2"]').val(data.details.phone_number_2);
                             $('input[name="consignee_email_address"]').val(data.details.email);
+                            $('input[name="consignee_latitude"]').val(data.geo_code.latitude ?? '');
+                            $('input[name="consignee_longitude"]').val(data.geo_code.longitude ?? '');
                         }else{
                             toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         }

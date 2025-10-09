@@ -31,6 +31,8 @@
                                 <th>Consignee Phone Number 1 (03000000000)</th>
                                 <th>Consignee Phone Number 2 (03000000000)</th>
                                 <th>Consignee Email Address</th>
+                                <th>Consignee Address Latitude</th>
+                                <th>Consignee Address Longitude</th>
                                 @if($service_type_check_id == 1 || $service_type_check_id == null)
                                     <th>Self Collection</th>
                                 @endif
@@ -168,6 +170,16 @@
                                 @else
                                     <td>{!! Form::textarea('form[' . $no . '][consignee_email_address]', $ro['consignee_email_address'],['class' => 'form-control','style'=>'width:auto','rows' => 4,'cols' => 20,'readonly' => 'readonly']) !!}</td>
                                 @endif
+                                    @if(isset($errors[$no]['consignee_latitude']))
+                                        <td>{!! Form::textarea('form[' . $no . '][consignee_latitude]', $ro['consignee_latitude'],['class' => 'form-control is-invalid','style'=>'width:auto','rows' => 4,'cols' => 20]) !!}<font color="red">{{$errors[$no]['consignee_latitude']}}</font></td>
+                                    @else
+                                        <td>{!! Form::textarea('form[' . $no . '][consignee_latitude]', $ro['consignee_latitude'],['class' => 'form-control','style'=>'width:auto','rows' => 4,'cols' => 20,'readonly' => 'readonly']) !!}</td>
+                                    @endif
+                                    @if(isset($errors[$no]['consignee_longitude']))
+                                        <td>{!! Form::textarea('form[' . $no . '][consignee_longitude]', $ro['consignee_longitude'],['class' => 'form-control is-invalid','style'=>'width:auto','rows' => 4,'cols' => 20]) !!}<font color="red">{{$errors[$no]['consignee_longitude']}}</font></td>
+                                    @else
+                                        <td>{!! Form::textarea('form[' . $no . '][consignee_longitude]', $ro['consignee_longitude'],['class' => 'form-control','style'=>'width:auto','rows' => 4,'cols' => 20,'readonly' => 'readonly']) !!}</td>
+                                    @endif
                                 @if($service_type_check_id == 1 || $service_type_check_id == null)
                                     @if(isset($errors[$no]['self_collection']))
                                         <td>{!! Form::select('form[' . $no . '][self_collection]',['no'=>'no','yes'=>'yes'],null, ['class' => 'form-control is-invalid self_collection select2','id'=>'self_collection','placeholder' => '']) !!}<font color="red">{{$errors[$no]['self_collection']}}</font></td>
