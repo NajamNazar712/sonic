@@ -2752,8 +2752,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'GeoCodesController@list')->name('list');
             Route::post('get_shipment_lat_long', 'GeoCodesController@get_shipment_lat_long')->name('get_shipment_lat_long');
             Route::get('view_tpl_map', 'GeoCodesController@view_tpl_map')->name('view_tpl_map');
-            Route::post('get_manual_shipment_geo_codes', 'GeoCodesController@get_manual_shipment_geo_codes')->name('get_manual_shipment_geo_codes');
-            Route::post('update_manual_geo_codes', 'GeoCodesController@update_manual_geo_codes')->name('update_manual_geo_codes');
 
         });
 
@@ -4171,6 +4169,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::prefix('zonal-margin-column')->name('zonal_margin_column.')->group(function (){
                 Route::get('', 'Admins\GlobalSettingsController@zonal_margin_column_index')->name('index');
                 Route::post('submit', 'Admins\GlobalSettingsController@ZoneMarginColumnSubmit')->name('submit');
+
+                // Route::post('zone_margin_column', 'Admins\InternationalEconomyStandardRatesController@zonal_margin_column_index')->name('excel');
+
+            });
+            Route::prefix('zone')->name('zone.')->group(function (){
+                Route::get('', 'Admins\GlobalSettingsController@zone_management_index')->name('index');
+                Route::get('list', 'Admins\GlobalSettingsController@zone_management_list')->name('list');
+                Route::get('{id}', 'Admins\GlobalSettingsController@zone_management_edit')->name('edit');
+                Route::post('store', 'Admins\GlobalSettingsController@zone_management_store')->name('store');
+                Route::post('update', 'Admins\GlobalSettingsController@zone_management_update')->name('update');
 
                 // Route::post('zone_margin_column', 'Admins\InternationalEconomyStandardRatesController@zonal_margin_column_index')->name('excel');
 

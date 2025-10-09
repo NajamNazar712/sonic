@@ -178,6 +178,8 @@ use App\Models\WalletShipperSetting;
 use Illuminate\Support\Str;
 use App\Http\Traits\CommonTrait;
 use App\ChangeLogs;
+use App\Http\Models\BusinessCategory;
+use App\Http\Models\InternationalDhlZone;
 use App\Models\ParentProduct;
 use App\Models\ParentProductTaxLog;
 
@@ -4738,7 +4740,6 @@ class GlobalSettingsController extends Controller
             $spreadsheet = IOFactory::createReaderForFile($file);
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
-
             $header = array_merge([
                 'Range Up',
                 'Range Down'
@@ -10944,5 +10945,110 @@ class GlobalSettingsController extends Controller
                 return $row->created_at ? \Carbon\Carbon::parse($row->created_at)->format('Y-m-d H:i') : '-';
             })
         ->make(true);
-    } 
+    }
+
+    /**
+     * Display the Zone Management view.
+     *
+     * @return \Illuminate\View\View
+     */
+    public function zone_management_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 1045);
+        $businessCategory = BusinessCategory::all();
+        return view('admin.settings.zone_settings')->with('businessCategory', $businessCategory);
+    }
+
+    /**
+     * Fetch the list of zones for display (AJAX-based DataTable).
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function zone_management_list(Request $request)
+    {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 1045);
+        }
+        $route_management = Zone::join('business_categories as bc', 'zones.business_category_id', 'bc.id')
+            ->select('zones.id', 'zones.created_at', 'zones.name', 'zones.gst', 'zones.status', 'bc.name as business_category_name')
+            ->orderBy('zones.created_at', 'desc');
+        $datatable = Datatables::of($route_management)
+            ->editColumn('status', function ($route_management) {
+                if ($route_management->status == 1) {
+                    return 'Enable';
+                } else {
+                    return 'Disable';
+                }
+            })
+            ->addColumn('action', function ($fleet) {
+                $enable = '<button type="button" class="dropdown-item status"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                $disable = '<button type="button" class="dropdown-item status"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Disable</div></button>';
+
+                $dropdown = '
+                    <div class="btn-group">
+                      <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                      <div class="dropdown-menu dropdown-menu-sm">';
+                $dropdown .= '<button type="button" class="dropdown-item edit_zone"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+
+                if ($fleet->status == 0) {
+                    $dropdown .= $enable;
+                }
+                if ($fleet->status == 1) {
+                    $dropdown .= $disable;
+                }
+                return $dropdown;
+            })->rawColumns(['action']);
+        return $datatable->make(true);
+    }
+
+    /**
+     * Retrieve zone details for editing.
+     *
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+
+    public function zone_management_edit($id)
+    {
+        $zoneManagement = Zone::find($id);
+
+        if ($zoneManagement) {
+            return response()->json(['status' => 1, 'data' => $zoneManagement]);
+        } else {
+            return response()->json(['status' => 0, 'message' => 'Zone not found']);
+        }
+    }
+
+
+    /**
+     * Store or update a Zone record.
+     * Handles both creation and update based on the presence of ID.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function zone_management_store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'gst' => 'required|numeric',
+            'status' => 'required|boolean',
+            'business_category_id' => 'required|integer',
+        ]);
+
+        $zone = Zone::updateOrCreate(
+            ['id' => $request->id], // match existing record by ID
+            $validated // update or insert data
+        );
+
+        if(InternationalDhlZone::where('zone_id',$zone->id)->doesntExist() && $zone->business_category_id == 2){
+            $dhl_zone = new InternationalDhlZone();
+            $dhl_zone->zone_id = $zone->id;
+            $dhl_zone->zone_name = $request->name;
+            $dhl_zone->save();
+        }
+        return redirect()->back()->with('success', 'Zone Added successfully!');
+    }
+
 }
