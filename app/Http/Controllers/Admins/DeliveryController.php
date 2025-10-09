@@ -4036,7 +4036,7 @@ class DeliveryController extends Controller
 //                                        NotificationsController::send(220, $rvshipments);
 //                                    }
 
-                                   if($shipment_details->shipper_status_id == 12 && RvShipmentTicket::where(['shipment_id' => $shipment_details->id, 'permanent_disable' => '0'])->exists()){
+                                   if($shipment_details->shipper_status_id == 12 && RvShipmentTicket::where(['shipment_id' => $shipment_details->id, 'permanent_disable' => '1'])->exists()){
                                     $this->conditionalRvSarUpdate($shipment_details,$status_reason_id,1);
                                    }
                             }
