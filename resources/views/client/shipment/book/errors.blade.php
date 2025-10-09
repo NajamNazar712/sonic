@@ -467,6 +467,18 @@
                                             <td>{!! Form::text('form[' . $no . '][parcel_value]', $ro['parcel_value'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
                                         @endif
                                     @endif
+
+                                    @if(isset($errors[$no]['retail_pickup_store_id']))
+                                        <td>{!! Form::textarea('form[' . $no . '][retail_pickup_store_id]', $ro['retail_pickup_store_id'],['class' => 'form-control is-invalid','style'=>'width:auto','rows' => 4,'cols' => 20]) !!}<font color="red">{{$errors[$no]['retail_pickup_store_id']}}</font></td>
+                                    @else
+                                        <td>{!! Form::textarea('form[' . $no . '][retail_pickup_store_id]', $ro['retail_pickup_store_id'],['class' => 'form-control','style'=>'width:auto','rows' => 4,'cols' => 20,'readonly' => 'readonly']) !!}</td>
+                                    @endif
+
+                                    @if(isset($errors[$no]['retail_deliver_store_id']))
+                                        <td>{!! Form::textarea('form[' . $no . '][retail_deliver_store_id]', $ro['retail_deliver_store_id'],['class' => 'form-control is-invalid','style'=>'width:auto','rows' => 4,'cols' => 20]) !!}<font color="red">{{$errors[$no]['retail_deliver_store_id']}}</font></td>
+                                    @else
+                                        <td>{!! Form::textarea('form[' . $no . '][retail_deliver_store_id]', $ro['retail_deliver_store_id'],['class' => 'form-control','style'=>'width:auto','rows' => 4,'cols' => 20,'readonly' => 'readonly']) !!}</td>
+                                    @endif
                                     <td><button type="button" class="btn btn-icon btn-danger cancel_shipment"><i class="la la-close"></i> </button></td>
 
                             </tr>

@@ -907,15 +907,28 @@ class ShipperShipmentBookController extends Controller
                     $retail_deliver_store_id  = null;
                     $retail_deliver_type      = null;
 
-                    if($request->filled('is_pickup_self_collection') &&  in_array($request->input('retail_type'), [1,2])) {
-                        $retail_pickup_store_id  = $request->input('retail_pickup_store_id');
-                        $retail_type   = $request->input('retail_type');
+                    $is_reverse = $service_type_id == 5;
+
+                    if($request->filled('is_pickup_self_collection') && in_array($request->input('retail_type'), [1,2])) {
+                        if($is_reverse) {
+                            $retail_deliver_store_id = $request->input('retail_pickup_store_id');
+                            $retail_deliver_type  = $request->input('retail_type');
+                        } else {
+                            $retail_pickup_store_id  = $request->input('retail_pickup_store_id');
+                            $retail_type   = $request->input('retail_type');
+                        }
                     }
 
-                    if($request->filled('is_deliver_self_collection') &&  in_array($request->input('retail_deliver_type'), [1,2])) {
-                        $retail_deliver_store_id = $request->input('retail_deliver_store_id');
-                        $retail_deliver_type = $request->input('retail_deliver_type');
+                    if($request->filled('is_deliver_self_collection') && in_array($request->input('retail_deliver_type'), [1,2])) {
+                        if($is_reverse) {
+                            $retail_pickup_store_id  = $request->input('retail_deliver_store_id');
+                            $retail_type = $request->input('retail_deliver_type');
+                        } else {
+                            $retail_deliver_store_id = $request->input('retail_deliver_store_id');
+                            $retail_deliver_type = $request->input('retail_deliver_type');
+                        }
                     }
+
 
                     $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces_quantity, $self_collection, $business_category_id, $open_shipment, $return_address_id,$parcel_value,null,1,$retail_pickup_store_id,$retail_type,$retail_deliver_store_id,$retail_deliver_type);
 
@@ -3183,30 +3196,41 @@ class ShipperShipmentBookController extends Controller
 
         $city_ids = $pickup_addresses->pluck('city_id')->unique()->values();
         $allLocations = collect();
-        if($city_ids->isNotEmpty()){
-            $hub_ids = City::where('status',1)->whereIn('id',$city_ids)->pluck('hub_id')->unique();
-            $cityNames = City::whereIn('id', $hub_ids)->pluck('name', 'id');
+//        if($city_ids->isNotEmpty()){
+//            $hub_ids = City::where('status',1)->whereIn('id',$city_ids)->pluck('hub_id')->unique();
+//            $cityNames = City::whereIn('id', $hub_ids)->pluck('name', 'id');
+//
+//
+//            $franchises = RetailFranchise::where('status', 1)
+//                ->whereIn('default_hub',$hub_ids)
+//                ->where('is_pudo', 1)
+//                ->select('code', 'name','default_hub');
+//
+//            $centers = RetailTraxCenter::where('status', 1)
+//                ->whereIn('default_hub',$hub_ids)
+//                ->where('is_pudo', 1)
+//                ->select('code', 'name','default_hub');
+//
+//            $allLocations = $franchises->union($centers)->get();
+//            $allLocations->map(function ($item) use ($cityNames) {
+//                $item->hub_name = $cityNames[$item->default_hub] ?? '';
+//                return $item;
+//            });
+//        }
+            $franchises = RetailFranchise::join('cities','cities.id','retail_franchises.default_hub')
+                ->where('retail_franchises.status', 1)
+                ->where('retail_franchises.is_pudo', 1)
+                ->select('retail_franchises.code', 'retail_franchises.name','cities.name as city');
 
-
-            $franchises = RetailFranchise::where('status', 1)
-                ->whereIn('default_hub',$hub_ids)
-                ->where('is_pudo', 1)
-                ->select('id', 'name','default_hub');
-
-            $centers = RetailTraxCenter::where('status', 1)
-                ->whereIn('default_hub',$hub_ids)
-                ->where('is_pudo', 1)
-                ->select('id', 'name','default_hub');
+            $centers = RetailTraxCenter::join('cities','cities.id','retail_trax_centers.default_hub')
+                ->where('retail_trax_centers.status', 1)
+                ->where('retail_trax_centers.is_pudo', 1)
+                ->select('retail_trax_centers.code', 'retail_trax_centers.name','cities.name as city');
 
             $allLocations = $franchises->union($centers)->get();
-            $allLocations->map(function ($item) use ($cityNames) {
-                $item->hub_name = $cityNames[$item->default_hub] ?? '';
-                return $item;
-            });
-        }
 
+            $viewData['retail_stores'] = $allLocations;
 
-        $viewData['retail_stores'] = $allLocations;
         // return view('client.shipment.book.excel')->with(['booking_types' => $booking_types, 'user' => $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'charges_modes' => $charges_modes, 'omni_user' => $omni_user]);
         return view('client.shipment.book.excel')->with($viewData);
     }
@@ -3396,6 +3420,8 @@ class ShipperShipmentBookController extends Controller
             'open_shipment' => 'Open Shipment',
             'return_address_id' => 'Return Address Id',
             'parcel_value' => 'Parcel Value',
+            'retail_pickup_store_id' => 'Retail Pickup Store ID',
+            'retail_deliver_store_id' => 'Retail Deliver Store ID',
 
         ];
 
@@ -3523,6 +3549,8 @@ class ShipperShipmentBookController extends Controller
                 'integer',
                 'pieces_check'
             ],
+            'retail_pickup_store_id' => ['nullable','string','max:200'],
+            'retail_deliver_store_id' => ['nullable','string','max:200'],
         ];
 
 
@@ -3553,9 +3581,9 @@ class ShipperShipmentBookController extends Controller
             $column_count = null;
 
             if ($excel_type == 1) {
-                $column_count = 63;
+                $column_count = 65;
 
-                $fields = [ 0  => 'service_type_id', 1  => 'pickup_address_id', 2  => 'information_display', 3  => 'consignee_city_name', 4  => 'consignee_name', 5  => 'consignee_address', 6  => 'consignee_phone_number_1', 7  => 'consignee_phone_number_2', 8  => 'consignee_email_address', 9  => 'consignee_latitude', 10 => 'consignee_longitude', 11 => 'self_collection', 12 => 'order_id', 13 => 'order_date', 14 => 'item_product_type_id', 15 => 'item_description', 16 => 'item_quantity', 17 => 'item_insurance', 18 => 'item_price', 19 => 'replacement_item_product_type_id', 20 => 'replacement_item_description', 21 => 'replacement_item_quantity', 22 => 'item_product_type_id_1', 23 => 'item_description_1', 24 => 'item_quantity_1', 25 => 'item_insurance_1', 26 => 'item_price_1', 27 => 'item_product_type_id_2', 28 => 'item_description_2', 29 => 'item_quantity_2', 30 => 'item_insurance_2', 31 => 'item_price_2', 32 => 'item_product_type_id_3', 33 => 'item_description_3', 34 => 'item_quantity_3', 35 => 'item_insurance_3', 36 => 'item_price_3', 37 => 'item_product_type_id_4', 38 => 'item_description_4', 39 => 'item_quantity_4', 40 => 'item_insurance_4', 41 => 'item_price_4', 42 => 'item_product_type_id_5', 43 => 'item_description_5', 44 => 'item_quantity_5', 45 => 'item_insurance_5', 46 => 'item_price_5', 47 => 'special_instructions', 48 => 'estimated_weight', 49 => 'shipping_mode_id', 50 => 'same_day_timing_id', 51 => 'try_and_buy_charges', 52 => 'amount', 53 => 'payment_mode_id', 54 => 'charges_mode_id', 55 => 'pieces_quantity', 56 => 'shipper_reference_number_1', 57 => 'shipper_reference_number_2', 58 => 'shipper_reference_number_3', 59 => 'shipper_reference_number_4', 60 => 'shipper_reference_number_5', 61 => 'open_shipment', 62 => 'parcel_value' ];
+                $fields = [ 0  => 'service_type_id', 1  => 'pickup_address_id', 2  => 'information_display', 3  => 'consignee_city_name', 4  => 'consignee_name', 5  => 'consignee_address', 6  => 'consignee_phone_number_1', 7  => 'consignee_phone_number_2', 8  => 'consignee_email_address', 9  => 'consignee_latitude', 10 => 'consignee_longitude', 11 => 'self_collection', 12 => 'order_id', 13 => 'order_date', 14 => 'item_product_type_id', 15 => 'item_description', 16 => 'item_quantity', 17 => 'item_insurance', 18 => 'item_price', 19 => 'replacement_item_product_type_id', 20 => 'replacement_item_description', 21 => 'replacement_item_quantity', 22 => 'item_product_type_id_1', 23 => 'item_description_1', 24 => 'item_quantity_1', 25 => 'item_insurance_1', 26 => 'item_price_1', 27 => 'item_product_type_id_2', 28 => 'item_description_2', 29 => 'item_quantity_2', 30 => 'item_insurance_2', 31 => 'item_price_2', 32 => 'item_product_type_id_3', 33 => 'item_description_3', 34 => 'item_quantity_3', 35 => 'item_insurance_3', 36 => 'item_price_3', 37 => 'item_product_type_id_4', 38 => 'item_description_4', 39 => 'item_quantity_4', 40 => 'item_insurance_4', 41 => 'item_price_4', 42 => 'item_product_type_id_5', 43 => 'item_description_5', 44 => 'item_quantity_5', 45 => 'item_insurance_5', 46 => 'item_price_5', 47 => 'special_instructions', 48 => 'estimated_weight', 49 => 'shipping_mode_id', 50 => 'same_day_timing_id', 51 => 'try_and_buy_charges', 52 => 'amount', 53 => 'payment_mode_id', 54 => 'charges_mode_id', 55 => 'pieces_quantity', 56 => 'shipper_reference_number_1', 57 => 'shipper_reference_number_2', 58 => 'shipper_reference_number_3', 59 => 'shipper_reference_number_4', 60 => 'shipper_reference_number_5', 61 => 'open_shipment', 62 => 'parcel_value' , 63 => 'retail_pickup_store_id' , 64 => 'retail_deliver_store_id'];
                 $rules['service_type_id'] = ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function ($query) {
                     $query->whereNotIn('id', [4]);
                 })];
@@ -3563,31 +3591,31 @@ class ShipperShipmentBookController extends Controller
                 $service_type_check_id = null;
             } elseif ($excel_type == 2) {
 
-                $column_count = 33;
-                $fields = [ 0  => 'pickup_address_id', 1  => 'information_display', 2  => 'consignee_city_name', 3  => 'consignee_name', 4  => 'consignee_address', 5  => 'consignee_phone_number_1', 6  => 'consignee_phone_number_2', 7  => 'consignee_email_address', 8  => 'consignee_latitude', 9  => 'consignee_longitude', 10 => 'self_collection', 11 => 'order_id', 12 => 'order_date', 13 => 'item_product_type_id', 14 => 'item_description', 15 => 'item_quantity', 16 => 'item_insurance', 17 => 'item_price', 18 => 'special_instructions', 19 => 'estimated_weight', 20 => 'shipping_mode_id', 21 => 'same_day_timing_id', 22 => 'amount', 23 => 'payment_mode_id', 24 => 'charges_mode_id', 25 => 'pieces_quantity', 26 => 'shipper_reference_number_1', 27 => 'shipper_reference_number_2', 28 => 'shipper_reference_number_3', 29 => 'shipper_reference_number_4', 30 => 'shipper_reference_number_5', 31 => 'open_shipment', 32 => 'parcel_value' ];
+                $column_count = 35;
+                $fields = [ 0  => 'pickup_address_id', 1  => 'information_display', 2  => 'consignee_city_name', 3  => 'consignee_name', 4  => 'consignee_address', 5  => 'consignee_phone_number_1', 6  => 'consignee_phone_number_2', 7  => 'consignee_email_address', 8  => 'consignee_latitude', 9  => 'consignee_longitude', 10 => 'self_collection', 11 => 'order_id', 12 => 'order_date', 13 => 'item_product_type_id', 14 => 'item_description', 15 => 'item_quantity', 16 => 'item_insurance', 17 => 'item_price', 18 => 'special_instructions', 19 => 'estimated_weight', 20 => 'shipping_mode_id', 21 => 'same_day_timing_id', 22 => 'amount', 23 => 'payment_mode_id', 24 => 'charges_mode_id', 25 => 'pieces_quantity', 26 => 'shipper_reference_number_1', 27 => 'shipper_reference_number_2', 28 => 'shipper_reference_number_3', 29 => 'shipper_reference_number_4', 30 => 'shipper_reference_number_5', 31 => 'open_shipment', 32 => 'parcel_value' , 33 => 'retail_pickup_store_id' , 34 => 'retail_deliver_store_id'];
                 $service_type_check_id = 1;
             } elseif ($excel_type == 3) {
-                $column_count = 34;
-                $fields = [ 0  => 'pickup_address_id', 1  => 'information_display', 2  => 'consignee_city_name', 3  => 'consignee_name', 4  => 'consignee_address', 5  => 'consignee_phone_number_1', 6  => 'consignee_phone_number_2', 7  => 'consignee_email_address', 8  => 'consignee_latitude', 9  => 'consignee_longitude', 10 => 'order_id', 11 => 'order_date', 12 => 'item_product_type_id', 13 => 'item_description', 14 => 'item_quantity', 15 => 'item_insurance', 16 => 'item_price', 17 => 'replacement_item_product_type_id', 18 => 'replacement_item_description', 19 => 'replacement_item_quantity', 20 => 'special_instructions', 21 => 'estimated_weight', 22 => 'shipping_mode_id', 23 => 'same_day_timing_id', 24 => 'amount', 25 => 'payment_mode_id', 26 => 'charges_mode_id', 27 => 'shipper_reference_number_1', 28 => 'shipper_reference_number_2', 29 => 'shipper_reference_number_3', 30 => 'shipper_reference_number_4', 31 => 'shipper_reference_number_5', 32 => 'open_shipment', 33 => 'parcel_value' ];
+                $column_count = 36;
+                $fields = [ 0  => 'pickup_address_id', 1  => 'information_display', 2  => 'consignee_city_name', 3  => 'consignee_name', 4  => 'consignee_address', 5  => 'consignee_phone_number_1', 6  => 'consignee_phone_number_2', 7  => 'consignee_email_address', 8  => 'consignee_latitude', 9  => 'consignee_longitude', 10 => 'order_id', 11 => 'order_date', 12 => 'item_product_type_id', 13 => 'item_description', 14 => 'item_quantity', 15 => 'item_insurance', 16 => 'item_price', 17 => 'replacement_item_product_type_id', 18 => 'replacement_item_description', 19 => 'replacement_item_quantity', 20 => 'special_instructions', 21 => 'estimated_weight', 22 => 'shipping_mode_id', 23 => 'same_day_timing_id', 24 => 'amount', 25 => 'payment_mode_id', 26 => 'charges_mode_id', 27 => 'shipper_reference_number_1', 28 => 'shipper_reference_number_2', 29 => 'shipper_reference_number_3', 30 => 'shipper_reference_number_4', 31 => 'shipper_reference_number_5', 32 => 'open_shipment', 33 => 'parcel_value' , 34 => 'retail_pickup_store_id' , 35 => 'retail_deliver_store_id' ];
                 $service_type_check_id = 2;
             } elseif ($excel_type == 4) {
-                $column_count = 50;
-                $fields = [ 0  => 'pickup_address_id', 1  => 'information_display', 2  => 'consignee_city_name', 3  => 'consignee_name', 4  => 'consignee_address', 5  => 'consignee_phone_number_1', 6  => 'consignee_phone_number_2', 7  => 'consignee_email_address', 8  => 'consignee_latitude', 9  => 'consignee_longitude', 10 => 'order_id', 11 => 'order_date', 12 => 'item_product_type_id_1', 13 => 'item_description_1', 14 => 'item_quantity_1', 15 => 'item_insurance_1', 16 => 'item_price_1', 17 => 'item_product_type_id_2', 18 => 'item_description_2', 19 => 'item_quantity_2', 20 => 'item_insurance_2', 21 => 'item_price_2', 22 => 'item_product_type_id_3', 23 => 'item_description_3', 24 => 'item_quantity_3', 25 => 'item_insurance_3', 26 => 'item_price_3', 27 => 'item_product_type_id_4', 28 => 'item_description_4', 29 => 'item_quantity_4', 30 => 'item_insurance_4', 31 => 'item_price_4', 32 => 'item_product_type_id_5', 33 => 'item_description_5', 34 => 'item_quantity_5', 35 => 'item_insurance_5', 36 => 'item_price_5', 37 => 'special_instructions', 38 => 'estimated_weight', 39 => 'shipping_mode_id', 40 => 'same_day_timing_id', 41 => 'try_and_buy_charges', 42 => 'payment_mode_id', 43 => 'charges_mode_id', 44 => 'shipper_reference_number_1', 45 => 'shipper_reference_number_2', 46 => 'shipper_reference_number_3', 47 => 'shipper_reference_number_4', 48 => 'shipper_reference_number_5', 49 => 'open_shipment' ];
+                $column_count = 52;
+                $fields = [ 0  => 'pickup_address_id', 1  => 'information_display', 2  => 'consignee_city_name', 3  => 'consignee_name', 4  => 'consignee_address', 5  => 'consignee_phone_number_1', 6  => 'consignee_phone_number_2', 7  => 'consignee_email_address', 8  => 'consignee_latitude', 9  => 'consignee_longitude', 10 => 'order_id', 11 => 'order_date', 12 => 'item_product_type_id_1', 13 => 'item_description_1', 14 => 'item_quantity_1', 15 => 'item_insurance_1', 16 => 'item_price_1', 17 => 'item_product_type_id_2', 18 => 'item_description_2', 19 => 'item_quantity_2', 20 => 'item_insurance_2', 21 => 'item_price_2', 22 => 'item_product_type_id_3', 23 => 'item_description_3', 24 => 'item_quantity_3', 25 => 'item_insurance_3', 26 => 'item_price_3', 27 => 'item_product_type_id_4', 28 => 'item_description_4', 29 => 'item_quantity_4', 30 => 'item_insurance_4', 31 => 'item_price_4', 32 => 'item_product_type_id_5', 33 => 'item_description_5', 34 => 'item_quantity_5', 35 => 'item_insurance_5', 36 => 'item_price_5', 37 => 'special_instructions', 38 => 'estimated_weight', 39 => 'shipping_mode_id', 40 => 'same_day_timing_id', 41 => 'try_and_buy_charges', 42 => 'payment_mode_id', 43 => 'charges_mode_id', 44 => 'shipper_reference_number_1', 45 => 'shipper_reference_number_2', 46 => 'shipper_reference_number_3', 47 => 'shipper_reference_number_4', 48 => 'shipper_reference_number_5', 49 => 'open_shipment' , 50 => 'retail_pickup_store_id'  , 51 => 'retail_deliver_store_id'];
                 $service_type_check_id = 3;
             } elseif ($excel_type == 5) {
-                $column_count = 27;
-                $fields = [ 0  => 'pickup_address_id', 1  => 'information_display', 2  => 'consignee_city_name', 3  => 'consignee_name', 4  => 'consignee_address', 5  => 'consignee_phone_number_1', 6  => 'consignee_phone_number_2', 7  => 'consignee_email_address', 8  => 'consignee_latitude', 9  => 'consignee_longitude', 10 => 'order_id', 11 => 'order_date', 12 => 'item_product_type_id', 13 => 'item_description', 14 => 'item_quantity', 15 => 'item_insurance', 16 => 'item_price', 17 => 'special_instructions', 18 => 'estimated_weight', 19 => 'shipping_mode_id', 20 => 'same_day_timing_id', 21 => 'shipper_reference_number_1', 22 => 'shipper_reference_number_2', 23 => 'shipper_reference_number_3', 24 => 'shipper_reference_number_4', 25 => 'shipper_reference_number_5', 26 => 'open_shipment' ];
+                $column_count = 29;
+                $fields = [ 0  => 'pickup_address_id', 1  => 'information_display', 2  => 'consignee_city_name', 3  => 'consignee_name', 4  => 'consignee_address', 5  => 'consignee_phone_number_1', 6  => 'consignee_phone_number_2', 7  => 'consignee_email_address', 8  => 'consignee_latitude', 9  => 'consignee_longitude', 10 => 'order_id', 11 => 'order_date', 12 => 'item_product_type_id', 13 => 'item_description', 14 => 'item_quantity', 15 => 'item_insurance', 16 => 'item_price', 17 => 'special_instructions', 18 => 'estimated_weight', 19 => 'shipping_mode_id', 20 => 'same_day_timing_id', 21 => 'shipper_reference_number_1', 22 => 'shipper_reference_number_2', 23 => 'shipper_reference_number_3', 24 => 'shipper_reference_number_4', 25 => 'shipper_reference_number_5', 26 => 'open_shipment'  , 27 => 'retail_pickup_store_id' , 28 => 'retail_deliver_store_id'];
                 $service_type_check_id = 5;
             } elseif ($excel_type == 6) {      //for omni
-                $column_count = 34;
+                $column_count = 36;
 
-                $fields = [ 0  => 'pickup_address_id', 1  => 'information_display', 2  => 'consignee_city_name', 3  => 'consignee_name', 4  => 'consignee_address', 5  => 'consignee_phone_number_1', 6  => 'consignee_phone_number_2', 7  => 'consignee_email_address', 8  => 'consignee_latitude', 9  => 'consignee_longitude', 10 => 'self_collection', 11 => 'order_id', 12 => 'order_date', 13 => 'item_product_type_id', 14 => 'item_description', 15 => 'item_quantity', 16 => 'item_insurance', 17 => 'item_price', 18 => 'special_instructions', 19 => 'estimated_weight', 20 => 'shipping_mode_id', 21 => 'same_day_timing_id', 22 => 'amount', 23 => 'payment_mode_id', 24 => 'charges_mode_id', 25 => 'pieces_quantity', 26 => 'shipper_reference_number_1', 27 => 'shipper_reference_number_2', 28 => 'shipper_reference_number_3', 29 => 'shipper_reference_number_4', 30 => 'shipper_reference_number_5', 31 => 'open_shipment', 32 => 'return_address_id', 33 => 'parcel_value' ];
+                $fields = [ 0  => 'pickup_address_id', 1  => 'information_display', 2  => 'consignee_city_name', 3  => 'consignee_name', 4  => 'consignee_address', 5  => 'consignee_phone_number_1', 6  => 'consignee_phone_number_2', 7  => 'consignee_email_address', 8  => 'consignee_latitude', 9  => 'consignee_longitude', 10 => 'self_collection', 11 => 'order_id', 12 => 'order_date', 13 => 'item_product_type_id', 14 => 'item_description', 15 => 'item_quantity', 16 => 'item_insurance', 17 => 'item_price', 18 => 'special_instructions', 19 => 'estimated_weight', 20 => 'shipping_mode_id', 21 => 'same_day_timing_id', 22 => 'amount', 23 => 'payment_mode_id', 24 => 'charges_mode_id', 25 => 'pieces_quantity', 26 => 'shipper_reference_number_1', 27 => 'shipper_reference_number_2', 28 => 'shipper_reference_number_3', 29 => 'shipper_reference_number_4', 30 => 'shipper_reference_number_5', 31 => 'open_shipment', 32 => 'return_address_id', 33 => 'parcel_value' , 34 => 'retail_pickup_store_id' , 35 => 'retail_deliver_store_id'];
                 $omni = 1;
                 $service_type_check_id = 1;
             } elseif ($excel_type == 7) {      //for omni overall
-                $column_count = 64;
+                $column_count = 66;
 
-                $fields = [ 0  => 'service_type_id', 1  => 'pickup_address_id', 2  => 'information_display', 3  => 'consignee_city_name', 4  => 'consignee_name', 5  => 'consignee_address', 6  => 'consignee_phone_number_1', 7  => 'consignee_phone_number_2', 8  => 'consignee_email_address', 9  => 'consignee_latitude', 10 => 'consignee_longitude', 11 => 'self_collection', 12 => 'order_id', 13 => 'order_date', 14 => 'item_product_type_id', 15 => 'item_description', 16 => 'item_quantity', 17 => 'item_insurance', 18 => 'item_price', 19 => 'replacement_item_product_type_id', 20 => 'replacement_item_description', 21 => 'replacement_item_quantity', 22 => 'item_product_type_id_1', 23 => 'item_description_1', 24 => 'item_quantity_1', 25 => 'item_insurance_1', 26 => 'item_price_1', 27 => 'item_product_type_id_2', 28 => 'item_description_2', 29 => 'item_quantity_2', 30 => 'item_insurance_2', 31 => 'item_price_2', 32 => 'item_product_type_id_3', 33 => 'item_description_3', 34 => 'item_quantity_3', 35 => 'item_insurance_3', 36 => 'item_price_3', 37 => 'item_product_type_id_4', 38 => 'item_description_4', 39 => 'item_quantity_4', 40 => 'item_insurance_4', 41 => 'item_price_4', 42 => 'item_product_type_id_5', 43 => 'item_description_5', 44 => 'item_quantity_5', 45 => 'item_insurance_5', 46 => 'item_price_5', 47 => 'special_instructions', 48 => 'estimated_weight', 49 => 'shipping_mode_id', 50 => 'same_day_timing_id', 51 => 'try_and_buy_charges', 52 => 'amount', 53 => 'payment_mode_id', 54 => 'charges_mode_id', 55 => 'pieces_quantity', 56 => 'shipper_reference_number_1', 57 => 'shipper_reference_number_2', 58 => 'shipper_reference_number_3', 59 => 'shipper_reference_number_4', 60 => 'shipper_reference_number_5', 61 => 'open_shipment', 62 => 'return_address_id', 63 => 'parcel_value' ];
+                $fields = [ 0  => 'service_type_id', 1  => 'pickup_address_id', 2  => 'information_display', 3  => 'consignee_city_name', 4  => 'consignee_name', 5  => 'consignee_address', 6  => 'consignee_phone_number_1', 7  => 'consignee_phone_number_2', 8  => 'consignee_email_address', 9  => 'consignee_latitude', 10 => 'consignee_longitude', 11 => 'self_collection', 12 => 'order_id', 13 => 'order_date', 14 => 'item_product_type_id', 15 => 'item_description', 16 => 'item_quantity', 17 => 'item_insurance', 18 => 'item_price', 19 => 'replacement_item_product_type_id', 20 => 'replacement_item_description', 21 => 'replacement_item_quantity', 22 => 'item_product_type_id_1', 23 => 'item_description_1', 24 => 'item_quantity_1', 25 => 'item_insurance_1', 26 => 'item_price_1', 27 => 'item_product_type_id_2', 28 => 'item_description_2', 29 => 'item_quantity_2', 30 => 'item_insurance_2', 31 => 'item_price_2', 32 => 'item_product_type_id_3', 33 => 'item_description_3', 34 => 'item_quantity_3', 35 => 'item_insurance_3', 36 => 'item_price_3', 37 => 'item_product_type_id_4', 38 => 'item_description_4', 39 => 'item_quantity_4', 40 => 'item_insurance_4', 41 => 'item_price_4', 42 => 'item_product_type_id_5', 43 => 'item_description_5', 44 => 'item_quantity_5', 45 => 'item_insurance_5', 46 => 'item_price_5', 47 => 'special_instructions', 48 => 'estimated_weight', 49 => 'shipping_mode_id', 50 => 'same_day_timing_id', 51 => 'try_and_buy_charges', 52 => 'amount', 53 => 'payment_mode_id', 54 => 'charges_mode_id', 55 => 'pieces_quantity', 56 => 'shipper_reference_number_1', 57 => 'shipper_reference_number_2', 58 => 'shipper_reference_number_3', 59 => 'shipper_reference_number_4', 60 => 'shipper_reference_number_5', 61 => 'open_shipment', 62 => 'return_address_id', 63 => 'parcel_value' , 64 => 'retail_pickup_store_id' , 65 => 'retail_deliver_store_id'];
                 $rules['service_type_id'] = ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function ($query) {
                     $query->whereNotIn('id', [4]);
                 })];
@@ -3808,11 +3836,29 @@ class ShipperShipmentBookController extends Controller
                     //     }
                     // } order id duplicate check remove by subhan requirement 28-august-2024
 
+
                     if ($row['service_type_id'] != 5) {
                         $user_shipping_info = UserShippingInfo::find($row['pickup_address_id']);
 
                         if (!$user_shipping_info->status) {
                             $errors[$row_id]['pickup_address_id'] = 'Pickup Address ID #' . $row['pickup_address_id'] . ' is disabled';
+                        }
+
+                        if (!empty($row['retail_pickup_store_id'])) {
+                            $retail_store = RetailTraxCenter::where('code',$row['retail_pickup_store_id'])->first();
+                            if (!$retail_store) {
+                                $retail_store = RetailFranchise::where('code',$row['retail_pickup_store_id'])->first();
+                            }
+                            if (!$retail_store) {
+                                $errors[$row_id]['retail_pickup_store_id'] = 'Retail Pickup Store #' . $row['retail_pickup_store_id'] . ' not found';
+                            } else if (!$retail_store->status) {
+                                $errors[$row_id]['retail_pickup_store_id'] = 'Retail Pickup Store #' . $row['retail_pickup_store_id'] . ' is disabled';
+                            } else {
+                                $pickup_city_hub = City::find($user_shipping_info->city_id);
+                                if ($pickup_city_hub && $pickup_city_hub->hub_id != $retail_store->default_hub) {
+                                    $errors[$row_id]['retail_pickup_store_id'] = 'Retail Pickup Store #' . $row['retail_pickup_store_id'] . ' city does not match pickup address city';
+                                }
+                            }
                         }
 
                         if ($row['service_type_id'] == 1 && $omni == 1) {
@@ -3846,8 +3892,28 @@ class ShipperShipmentBookController extends Controller
 
                         $consignee_city = City::where('name', $row['consignee_city_name'])->first();
 
+                        if (!$consignee_city) {
+                            $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $row['consignee_city_name'] . ' not found';
+                        }
+
                         if (!$consignee_city->status) {
                             $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $consignee_city->name . ' is deactivated';
+                        }
+
+                        if (!empty($row['retail_deliver_store_id'])) {
+
+                            $retail_store = RetailTraxCenter::where('code',$row['retail_deliver_store_id'])->first();
+                            if (!$retail_store) {
+                                $retail_store = RetailFranchise::where('code',$row['retail_deliver_store_id'])->first();
+                            }
+                            if (!$retail_store) {
+                                $errors[$row_id]['retail_deliver_store_id'] = 'Retail Deliver Store #' . $row['retail_deliver_store_id'] . ' not found';
+                            } else if (!$retail_store->status) {
+                                $errors[$row_id]['retail_deliver_store_id'] = 'Retail Deliver Store #' . $row['retail_deliver_store_id'] . ' is disabled';
+                            } else if ($consignee_city->hub_id != $retail_store->default_hub) {
+                                    $errors[$row_id]['retail_deliver_store_id'] = 'Retail Deliver Store #' . $row['retail_deliver_store_id'] . ' city does not match consignees city';
+                            }
+
                         }
 
                         if ($consignee_city->id == 1244 && $user_id != 5982 && $user_id != 3324 && $user_id != 10104 && $user_id != 14110 && $user_id != 16292) {
@@ -3893,6 +3959,7 @@ class ShipperShipmentBookController extends Controller
                                 $errors[$row_id]['amount'] = "Zone class does'nt exists";
                             }
                         }
+
                         if (!$request->excel_nsa) {
                             $con_nsa = array();
                             $msg_string = '';
@@ -3968,9 +4035,14 @@ class ShipperShipmentBookController extends Controller
                     } else {
                         $pickup_consignee_city = City::where('name', $row['consignee_city_name'])->first();
 
+                        if (!$pickup_consignee_city) {
+                            $errors[$row_id]['consignee_city_name'] = 'Pickup Address\'s City: ' . $row['consignee_city_name'] . ' not found';
+                        }
+
                         if (!$pickup_consignee_city->status) {
                             $errors[$row_id]['consignee_city_name'] = 'Pickup Address\'s City: ' . $pickup_consignee_city->name . ' is deactivated';
                         }
+
 
                         if ($pickup_consignee_city->id == 1244 && $user_id != 5982 && $user_id != 3324 && $user_id != 10104 && $user_id != 14110 && $user_id != 16292) {
                             $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $pickup_consignee_city->name . ' is not allowed for this shipper';
@@ -3986,6 +4058,24 @@ class ShipperShipmentBookController extends Controller
                             }
                         }
 
+                        //reverse
+                        if (!empty($row['retail_deliver_store_id'])) {
+
+                            $retail_store = RetailTraxCenter::where('code',$row['retail_deliver_store_id'])->first();
+                            if (!$retail_store) {
+                                $retail_store = RetailFranchise::where('code',$row['retail_deliver_store_id'])->first();
+                            }
+                            if (!$retail_store) {
+                                $errors[$row_id]['retail_deliver_store_id'] = 'Retail Pickup Store #' . $row['retail_deliver_store_id'] . ' not found';
+                            } else if (!$retail_store->status) {
+                                $errors[$row_id]['retail_deliver_store_id'] = 'Retail Pickup Store #' . $row['retail_deliver_store_id'] . ' is disabled';
+                            } else if ($pickup_consignee_city->hub_id != $retail_store->default_hub) {
+                                $errors[$row_id]['retail_deliver_store_id'] = 'Retail Pickup Store #' . $row['retail_deliver_store_id'] . ' city does not match pickup address city';
+                            }
+
+                        }
+
+
                         $pickup_address_id_for_delivery = $row['pickup_address_id'];
                         $pickup_address_for_delivery = UserShippingInfo::find($pickup_address_id_for_delivery);
                         $delivery_city = City::find($pickup_address_for_delivery->city_id);
@@ -3999,6 +4089,22 @@ class ShipperShipmentBookController extends Controller
                         }
                         if (!$delivery_city->zone_id) {
                             $errors[$row_id]['pickup_address_id'] = 'Delivery City: ' . $delivery_city->name . ' is deactivated';
+                        }
+
+                        //reverse pickup
+                        if (!empty($row['retail_pickup_store_id'])) {
+                            $retail_store = RetailTraxCenter::where('code',$row['retail_pickup_store_id'])->first();
+                            if (!$retail_store) {
+                                $retail_store = RetailFranchise::where('code',$row['retail_pickup_store_id'])->first();
+                            }
+                            if (!$retail_store) {
+                                $errors[$row_id]['retail_pickup_store_id'] = 'Retail Deliver Store #' . $row['retail_pickup_store_id'] . ' not found';
+                            } else if (!$retail_store->status) {
+                                $errors[$row_id]['retail_pickup_store_id'] = 'Retail Deliver Store #' . $row['retail_pickup_store_id'] . ' is disabled';
+                            } else if ($delivery_city->hub_id != $retail_store->default_hub) {
+                                    $errors[$row_id]['retail_pickup_store_id'] = 'Retail Deliver Store #' . $row['retail_pickup_store_id'] . ' city does not match delivery city';
+                            }
+
                         }
 
                         $pickup_city_id = $pickup_consignee_city->id;
@@ -4602,14 +4708,26 @@ class ShipperShipmentBookController extends Controller
             $retail_deliver_store_id  = null;
             $retail_deliver_type      = null;
 
-            if($request->filled('is_pickup_self_collection') &&  in_array($request->input('retail_type'), [1,2])) {
-                $retail_pickup_store_id  = $request->input('retail_pickup_store_id');
-                $retail_type   = $request->input('retail_type');
+            $is_reverse = $service_type_id == 5;
+
+            if($request->filled('is_pickup_self_collection') && in_array($request->input('retail_type'), [1,2])) {
+                if($is_reverse) {
+                    $retail_deliver_store_id = $request->input('retail_pickup_store_id');
+                    $retail_deliver_type  = $request->input('retail_type');
+                } else {
+                    $retail_pickup_store_id  = $request->input('retail_pickup_store_id');
+                    $retail_type   = $request->input('retail_type');
+                }
             }
 
-            if($request->filled('is_deliver_self_collection') &&  in_array($request->input('retail_deliver_type'), [1,2])) {
-                $retail_deliver_store_id = $request->input('retail_deliver_store_id');
-                $retail_deliver_type = $request->input('retail_deliver_type');
+            if($request->filled('is_deliver_self_collection') && in_array($request->input('retail_deliver_type'), [1,2])) {
+                if($is_reverse) {
+                    $retail_pickup_store_id  = $request->input('retail_deliver_store_id');
+                    $retail_type = $request->input('retail_deliver_type');
+                } else {
+                    $retail_deliver_store_id = $request->input('retail_deliver_store_id');
+                    $retail_deliver_type = $request->input('retail_deliver_type');
+                }
             }
 
             $shipment_id = $this->corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment, $return_address_id,$parcel_value,null,1,$retail_pickup_store_id,$retail_type,$retail_deliver_store_id,$retail_deliver_type);
@@ -5706,8 +5824,7 @@ class ShipperShipmentBookController extends Controller
             'boolean' => ':attribute must be 0 or 1.',
             'digits_between' => ':attribute must be between :min and :max Digits.',
             'email' => ':attribute must be a Valid Email Address.',
-            'consignee_latitude.numeric' => 'Consignee latitude must be a number.',
-            'consignee_longitude.numeric' => 'Consignee longitude must be a number.',
+
 
             'exists' => 'Given :attribute is of Invalid ID.',
             'unique' => ':attribute is already Present.',
@@ -6455,6 +6572,8 @@ class ShipperShipmentBookController extends Controller
             'open_shipment' => 'Open Shipment',
             'return_address_id' => 'Return Address Id',
             'parcel_value' => 'Parcel Value',
+            'retail_pickup_store_id' => 'Retail Pickup Store ID',
+            'retail_deliver_store_id' => 'Retail Deliver Store ID',
 
         ];
 
@@ -6571,6 +6690,9 @@ class ShipperShipmentBookController extends Controller
                 'integer',
                 'pieces_check'
             ],
+
+             'retail_pickup_store_id' => ['nullable','string','max:200'],
+            'retail_deliver_store_id' => ['nullable','string','max:200'],
         ];
         $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
         if ($ccd_booking->exists()) {
@@ -6608,38 +6730,38 @@ class ShipperShipmentBookController extends Controller
 
             if ($excel_type == 0) {
             } else if ($excel_type == 1) {
-                $column_count = 38;
+                $column_count = 40;
 
-                $fields = [ 0  => 'service_type_id', 1  => 'pickup_address_id', 2  => 'delivery_type_id', 3  => 'information_display', 4  => 'consignee_city_name', 5  => 'consignee_name', 6  => 'consignee_address', 7  => 'consignee_phone_number_1', 8  => 'consignee_phone_number_2', 9  => 'consignee_email_address', 10 => 'consignee_latitude', 11 => 'consignee_longitude', 12 => 'self_collection', 13 => 'order_id', 14 => 'order_date', 15 => 'item_product_type_id', 16 => 'item_description', 17 => 'item_quantity', 18 => 'item_insurance', 19 => 'item_price', 20 => 'replacement_item_product_type_id', 21 => 'replacement_item_description', 22 => 'replacement_item_quantity', 23 => 'special_instructions', 24 => 'estimated_weight', 25 => 'shipping_mode_id', 26 => 'same_day_timing_id', 27 => 'amount', 28 => 'payment_mode_id', 29 => 'charges_mode_id', 30 => 'pieces_quantity', 31 => 'shipper_reference_number_1', 32 => 'shipper_reference_number_2', 33 => 'shipper_reference_number_3', 34 => 'shipper_reference_number_4', 35 => 'shipper_reference_number_5', 36 => 'open_shipment', 37 => 'parcel_value' ];
+                $fields = [ 0  => 'service_type_id', 1  => 'pickup_address_id', 2  => 'delivery_type_id', 3  => 'information_display', 4  => 'consignee_city_name', 5  => 'consignee_name', 6  => 'consignee_address', 7  => 'consignee_phone_number_1', 8  => 'consignee_phone_number_2', 9  => 'consignee_email_address', 10 => 'consignee_latitude', 11 => 'consignee_longitude', 12 => 'self_collection', 13 => 'order_id', 14 => 'order_date', 15 => 'item_product_type_id', 16 => 'item_description', 17 => 'item_quantity', 18 => 'item_insurance', 19 => 'item_price', 20 => 'replacement_item_product_type_id', 21 => 'replacement_item_description', 22 => 'replacement_item_quantity', 23 => 'special_instructions', 24 => 'estimated_weight', 25 => 'shipping_mode_id', 26 => 'same_day_timing_id', 27 => 'amount', 28 => 'payment_mode_id', 29 => 'charges_mode_id', 30 => 'pieces_quantity', 31 => 'shipper_reference_number_1', 32 => 'shipper_reference_number_2', 33 => 'shipper_reference_number_3', 34 => 'shipper_reference_number_4', 35 => 'shipper_reference_number_5', 36 => 'open_shipment', 37 => 'parcel_value', 38 => 'retail_pickup_store_id' , 39 => 'retail_deliver_store_id' ];
                 $rules['service_type_id'] = ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function ($query) {
                     $query->whereNotIn('id', [4]);
                 })];
                 $service_type_check_id = null;
             } elseif ($excel_type == 2) {
-                $column_count = 34;
-                $fields = [ 0  => 'pickup_address_id', 1  => 'delivery_type_id', 2  => 'information_display', 3  => 'consignee_city_name', 4  => 'consignee_name', 5  => 'consignee_address', 6  => 'consignee_phone_number_1', 7  => 'consignee_phone_number_2', 8  => 'consignee_email_address', 9  => 'consignee_latitude', 10 => 'consignee_longitude', 11 => 'self_collection', 12 => 'order_id', 13 => 'order_date', 14 => 'item_product_type_id', 15 => 'item_description', 16 => 'item_quantity', 17 => 'item_insurance', 18 => 'item_price', 19 => 'special_instructions', 20 => 'estimated_weight', 21 => 'shipping_mode_id', 22 => 'same_day_timing_id', 23 => 'amount', 24 => 'payment_mode_id', 25 => 'charges_mode_id', 26 => 'pieces_quantity', 27 => 'shipper_reference_number_1', 28 => 'shipper_reference_number_2', 29 => 'shipper_reference_number_3', 30 => 'shipper_reference_number_4', 31 => 'shipper_reference_number_5', 32 => 'open_shipment', 33 => 'parcel_value' ];
+                $column_count = 36;
+                $fields = [ 0  => 'pickup_address_id', 1  => 'delivery_type_id', 2  => 'information_display', 3  => 'consignee_city_name', 4  => 'consignee_name', 5  => 'consignee_address', 6  => 'consignee_phone_number_1', 7  => 'consignee_phone_number_2', 8  => 'consignee_email_address', 9  => 'consignee_latitude', 10 => 'consignee_longitude', 11 => 'self_collection', 12 => 'order_id', 13 => 'order_date', 14 => 'item_product_type_id', 15 => 'item_description', 16 => 'item_quantity', 17 => 'item_insurance', 18 => 'item_price', 19 => 'special_instructions', 20 => 'estimated_weight', 21 => 'shipping_mode_id', 22 => 'same_day_timing_id', 23 => 'amount', 24 => 'payment_mode_id', 25 => 'charges_mode_id', 26 => 'pieces_quantity', 27 => 'shipper_reference_number_1', 28 => 'shipper_reference_number_2', 29 => 'shipper_reference_number_3', 30 => 'shipper_reference_number_4', 31 => 'shipper_reference_number_5', 32 => 'open_shipment', 33 => 'parcel_value' , 34 => 'retail_pickup_store_id' , 35 => 'retail_deliver_store_id' ];
                 $service_type_check_id = 1;
             } elseif ($excel_type == 3) {
-                $column_count = 35;
-                $fields = [ 0  => 'pickup_address_id', 1  => 'delivery_type_id', 2  => 'information_display', 3  => 'consignee_city_name', 4  => 'consignee_name', 5  => 'consignee_address', 6  => 'consignee_phone_number_1', 7  => 'consignee_phone_number_2', 8  => 'consignee_email_address', 9  => 'consignee_latitude', 10 => 'consignee_longitude', 11 => 'order_id', 12 => 'order_date', 13 => 'item_product_type_id', 14 => 'item_description', 15 => 'item_quantity', 16 => 'item_insurance', 17 => 'item_price', 18 => 'replacement_item_product_type_id', 19 => 'replacement_item_description', 20 => 'replacement_item_quantity', 21 => 'special_instructions', 22 => 'estimated_weight', 23 => 'shipping_mode_id', 24 => 'same_day_timing_id', 25 => 'amount', 26 => 'payment_mode_id', 27 => 'charges_mode_id', 28 => 'shipper_reference_number_1', 29 => 'shipper_reference_number_2', 30 => 'shipper_reference_number_3', 31 => 'shipper_reference_number_4', 32 => 'shipper_reference_number_5', 33 => 'open_shipment', 34 => 'parcel_value' ];
+                $column_count = 37;
+                $fields = [ 0  => 'pickup_address_id', 1  => 'delivery_type_id', 2  => 'information_display', 3  => 'consignee_city_name', 4  => 'consignee_name', 5  => 'consignee_address', 6  => 'consignee_phone_number_1', 7  => 'consignee_phone_number_2', 8  => 'consignee_email_address', 9  => 'consignee_latitude', 10 => 'consignee_longitude', 11 => 'order_id', 12 => 'order_date', 13 => 'item_product_type_id', 14 => 'item_description', 15 => 'item_quantity', 16 => 'item_insurance', 17 => 'item_price', 18 => 'replacement_item_product_type_id', 19 => 'replacement_item_description', 20 => 'replacement_item_quantity', 21 => 'special_instructions', 22 => 'estimated_weight', 23 => 'shipping_mode_id', 24 => 'same_day_timing_id', 25 => 'amount', 26 => 'payment_mode_id', 27 => 'charges_mode_id', 28 => 'shipper_reference_number_1', 29 => 'shipper_reference_number_2', 30 => 'shipper_reference_number_3', 31 => 'shipper_reference_number_4', 32 => 'shipper_reference_number_5', 33 => 'open_shipment', 34 => 'parcel_value' , 35 => 'retail_pickup_store_id' , 36 => 'retail_deliver_store_id'];
                 $service_type_check_id = 2;
             } elseif ($excel_type == 4) {
-                $column_count = 51;
-                $fields = [ 0  => 'pickup_address_id', 1  => 'delivery_type_id', 2  => 'information_display', 3  => 'consignee_city_name', 4  => 'consignee_name', 5  => 'consignee_address', 6  => 'consignee_phone_number_1', 7  => 'consignee_phone_number_2', 8  => 'consignee_email_address', 9  => 'consignee_latitude', 10 => 'consignee_longitude', 11 => 'order_id', 12 => 'order_date', 13 => 'item_product_type_id_1', 14 => 'item_description_1', 15 => 'item_quantity_1', 16 => 'item_insurance_1', 17 => 'item_price_1', 18 => 'item_product_type_id_2', 19 => 'item_description_2', 20 => 'item_quantity_2', 21 => 'item_insurance_2', 22 => 'item_price_2', 23 => 'item_product_type_id_3', 24 => 'item_description_3', 25 => 'item_quantity_3', 26 => 'item_insurance_3', 27 => 'item_price_3', 28 => 'item_product_type_id_4', 29 => 'item_description_4', 30 => 'item_quantity_4', 31 => 'item_insurance_4', 32 => 'item_price_4', 33 => 'item_product_type_id_5', 34 => 'item_description_5', 35 => 'item_quantity_5', 36 => 'item_insurance_5', 37 => 'item_price_5', 38 => 'special_instructions', 39 => 'estimated_weight', 40 => 'shipping_mode_id', 41 => 'same_day_timing_id', 42 => 'try_and_buy_charges', 43 => 'payment_mode_id', 44 => 'charges_mode_id', 45 => 'shipper_reference_number_1', 46 => 'shipper_reference_number_2', 47 => 'shipper_reference_number_3', 48 => 'shipper_reference_number_4', 49 => 'shipper_reference_number_5', 50 => 'open_shipment' ];
+                $column_count = 53;
+                $fields = [ 0  => 'pickup_address_id', 1  => 'delivery_type_id', 2  => 'information_display', 3  => 'consignee_city_name', 4  => 'consignee_name', 5  => 'consignee_address', 6  => 'consignee_phone_number_1', 7  => 'consignee_phone_number_2', 8  => 'consignee_email_address', 9  => 'consignee_latitude', 10 => 'consignee_longitude', 11 => 'order_id', 12 => 'order_date', 13 => 'item_product_type_id_1', 14 => 'item_description_1', 15 => 'item_quantity_1', 16 => 'item_insurance_1', 17 => 'item_price_1', 18 => 'item_product_type_id_2', 19 => 'item_description_2', 20 => 'item_quantity_2', 21 => 'item_insurance_2', 22 => 'item_price_2', 23 => 'item_product_type_id_3', 24 => 'item_description_3', 25 => 'item_quantity_3', 26 => 'item_insurance_3', 27 => 'item_price_3', 28 => 'item_product_type_id_4', 29 => 'item_description_4', 30 => 'item_quantity_4', 31 => 'item_insurance_4', 32 => 'item_price_4', 33 => 'item_product_type_id_5', 34 => 'item_description_5', 35 => 'item_quantity_5', 36 => 'item_insurance_5', 37 => 'item_price_5', 38 => 'special_instructions', 39 => 'estimated_weight', 40 => 'shipping_mode_id', 41 => 'same_day_timing_id', 42 => 'try_and_buy_charges', 43 => 'payment_mode_id', 44 => 'charges_mode_id', 45 => 'shipper_reference_number_1', 46 => 'shipper_reference_number_2', 47 => 'shipper_reference_number_3', 48 => 'shipper_reference_number_4', 49 => 'shipper_reference_number_5', 50 => 'open_shipment' , 51 => 'retail_pickup_store_id' , 52 => 'retail_deliver_store_id' ];
                 $service_type_check_id = 3;
 
             } elseif ($excel_type == 5) {
-                $column_count = 27;
+                $column_count = 29;
                 $fields = [ 0  => 'pickup_address_id', 1  => 'information_display', 2  => 'consignee_city_name', 3  => 'consignee_name', 4  => 'consignee_address', 5  => 'consignee_phone_number_1', 6  => 'consignee_phone_number_2', 7  => 'consignee_email_address', 8  => 'consignee_latitude', 9  => 'consignee_longitude', 10 => 'order_id', 11 => 'order_date', 12 => 'item_product_type_id', 13 => 'item_description', 14 => 'item_quantity', 15 => 'item_insurance', 16 => 'item_price', 17 => 'special_instructions', 18 => 'estimated_weight', 19 => 'shipping_mode_id', 20 => 'same_day_timing_id', 21 => 'shipper_reference_number_1', 22 => 'shipper_reference_number_2', 23 => 'shipper_reference_number_3', 24 => 'shipper_reference_number_4', 25 => 'shipper_reference_number_5', 26 => 'open_shipment' ];
                 $service_type_check_id = 5;
             } elseif ($excel_type == 6) {  //for omni
-                $column_count = 35;
-                $fields = [ 0  => 'pickup_address_id', 1  => 'delivery_type_id', 2  => 'information_display', 3  => 'consignee_city_name', 4  => 'consignee_name', 5  => 'consignee_address', 6  => 'consignee_phone_number_1', 7  => 'consignee_phone_number_2', 8  => 'consignee_email_address', 9  => 'consignee_latitude', 10 => 'consignee_longitude', 11 => 'self_collection', 12 => 'order_id', 13 => 'order_date', 14 => 'item_product_type_id', 15 => 'item_description', 16 => 'item_quantity', 17 => 'item_insurance', 18 => 'item_price', 19 => 'special_instructions', 20 => 'estimated_weight', 21 => 'shipping_mode_id', 22 => 'same_day_timing_id', 23 => 'amount', 24 => 'payment_mode_id', 25 => 'charges_mode_id', 26 => 'pieces_quantity', 27 => 'shipper_reference_number_1', 28 => 'shipper_reference_number_2', 29 => 'shipper_reference_number_3', 30 => 'shipper_reference_number_4', 31 => 'shipper_reference_number_5', 32 => 'open_shipment', 33 => 'return_address_id', 34 => 'parcel_value' ];
+                $column_count = 37;
+                $fields = [ 0  => 'pickup_address_id', 1  => 'delivery_type_id', 2  => 'information_display', 3  => 'consignee_city_name', 4  => 'consignee_name', 5  => 'consignee_address', 6  => 'consignee_phone_number_1', 7  => 'consignee_phone_number_2', 8  => 'consignee_email_address', 9  => 'consignee_latitude', 10 => 'consignee_longitude', 11 => 'self_collection', 12 => 'order_id', 13 => 'order_date', 14 => 'item_product_type_id', 15 => 'item_description', 16 => 'item_quantity', 17 => 'item_insurance', 18 => 'item_price', 19 => 'special_instructions', 20 => 'estimated_weight', 21 => 'shipping_mode_id', 22 => 'same_day_timing_id', 23 => 'amount', 24 => 'payment_mode_id', 25 => 'charges_mode_id', 26 => 'pieces_quantity', 27 => 'shipper_reference_number_1', 28 => 'shipper_reference_number_2', 29 => 'shipper_reference_number_3', 30 => 'shipper_reference_number_4', 31 => 'shipper_reference_number_5', 32 => 'open_shipment', 33 => 'return_address_id', 34 => 'parcel_value' , 35 => 'retail_pickup_store_id' , 36 => 'retail_deliver_store_id' ];
                 $service_type_check_id = 1;
                 $omni = 1;
             } elseif ($excel_type == 7) {      //for omni overall
-                $column_count = 39;
-                $fields = [ 0  => 'service_type_id', 1  => 'pickup_address_id', 2  => 'delivery_type_id', 3  => 'information_display', 4  => 'consignee_city_name', 5  => 'consignee_name', 6  => 'consignee_address', 7  => 'consignee_phone_number_1', 8  => 'consignee_phone_number_2', 9  => 'consignee_email_address', 10 => 'consignee_latitude', 11 => 'consignee_longitude', 12 => 'self_collection', 13 => 'order_id', 14 => 'order_date', 15 => 'item_product_type_id', 16 => 'item_description', 17 => 'item_quantity', 18 => 'item_insurance', 19 => 'item_price', 20 => 'replacement_item_product_type_id', 21 => 'replacement_item_description', 22 => 'replacement_item_quantity', 23 => 'special_instructions', 24 => 'estimated_weight', 25 => 'shipping_mode_id', 26 => 'same_day_timing_id', 27 => 'amount', 28 => 'payment_mode_id', 29 => 'charges_mode_id', 30 => 'pieces_quantity', 31 => 'shipper_reference_number_1', 32 => 'shipper_reference_number_2', 33 => 'shipper_reference_number_3', 34 => 'shipper_reference_number_4', 35 => 'shipper_reference_number_5', 36 => 'open_shipment', 37 => 'return_address_id', 38 => 'parcel_value' ];
+                $column_count = 41;
+                $fields = [ 0  => 'service_type_id', 1  => 'pickup_address_id', 2  => 'delivery_type_id', 3  => 'information_display', 4  => 'consignee_city_name', 5  => 'consignee_name', 6  => 'consignee_address', 7  => 'consignee_phone_number_1', 8  => 'consignee_phone_number_2', 9  => 'consignee_email_address', 10 => 'consignee_latitude', 11 => 'consignee_longitude', 12 => 'self_collection', 13 => 'order_id', 14 => 'order_date', 15 => 'item_product_type_id', 16 => 'item_description', 17 => 'item_quantity', 18 => 'item_insurance', 19 => 'item_price', 20 => 'replacement_item_product_type_id', 21 => 'replacement_item_description', 22 => 'replacement_item_quantity', 23 => 'special_instructions', 24 => 'estimated_weight', 25 => 'shipping_mode_id', 26 => 'same_day_timing_id', 27 => 'amount', 28 => 'payment_mode_id', 29 => 'charges_mode_id', 30 => 'pieces_quantity', 31 => 'shipper_reference_number_1', 32 => 'shipper_reference_number_2', 33 => 'shipper_reference_number_3', 34 => 'shipper_reference_number_4', 35 => 'shipper_reference_number_5', 36 => 'open_shipment', 37 => 'return_address_id', 38 => 'parcel_value' , 39 => 'retail_pickup_store_id' , 40 => 'retail_deliver_store_id'];
                 $rules['service_type_id'] = ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function ($query) {
                     $query->whereNotIn('id', [4]);
                 })];
@@ -6899,6 +7021,23 @@ class ShipperShipmentBookController extends Controller
                             $errors[$row_id]['pickup_address_id'] = 'Pickup Address ID #' . $row['pickup_address_id'] . ' is disabled';
                         }
 
+                        if (!empty($row['retail_pickup_store_id'])) {
+                            $retail_store = RetailTraxCenter::where('code',$row['retail_pickup_store_id'])->first();
+                            if (!$retail_store) {
+                                $retail_store = RetailFranchise::where('code',$row['retail_pickup_store_id'])->first();
+                            }
+                            if (!$retail_store) {
+                                $errors[$row_id]['retail_pickup_store_id'] = 'Retail Pickup Store #' . $row['retail_pickup_store_id'] . ' not found';
+                            } else if (!$retail_store->status) {
+                                $errors[$row_id]['retail_pickup_store_id'] = 'Retail Pickup Store #' . $row['retail_pickup_store_id'] . ' is disabled';
+                            } else {
+                                $pickup_city_hub = City::find($user_shipping_info->city_id);
+                                if ($pickup_city_hub && $pickup_city_hub->hub_id != $retail_store->default_hub) {
+                                    $errors[$row_id]['retail_pickup_store_id'] = 'Retail Pickup Store #' . $row['retail_pickup_store_id'] . ' city does not match pickup address city';
+                                }
+                            }
+                        }
+
                         if ($row['service_type_id'] == 1 && $omni == 1) {
                             if ($row['return_address_id'] != NULL) {
                                 $user_return_info = UserShippingInfo::find($row['return_address_id']);
@@ -6930,9 +7069,30 @@ class ShipperShipmentBookController extends Controller
 
                         $consignee_city = City::where('name', $row['consignee_city_name'])->first();
 
+                        if (!$consignee_city) {
+                            $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $row['consignee_city_name'] . ' not found';
+                        }
+
                         if (!$consignee_city->status) {
                             $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $consignee_city->name . ' is deactivated';
                         }
+
+                        if (!empty($row['retail_deliver_store_id'])) {
+
+                            $retail_store = RetailTraxCenter::where('code',$row['retail_deliver_store_id'])->first();
+                            if (!$retail_store) {
+                                $retail_store = RetailFranchise::where('code',$row['retail_deliver_store_id'])->first();
+                            }
+                            if (!$retail_store) {
+                                $errors[$row_id]['retail_deliver_store_id'] = 'Retail Deliver Store #' . $row['retail_deliver_store_id'] . ' not found';
+                            } else if (!$retail_store->status) {
+                                $errors[$row_id]['retail_deliver_store_id'] = 'Retail Deliver Store #' . $row['retail_deliver_store_id'] . ' is disabled';
+                            } else if ($consignee_city->hub_id != $retail_store->default_hub) {
+                                $errors[$row_id]['retail_deliver_store_id'] = 'Retail Deliver Store #' . $row['retail_deliver_store_id'] . ' city does not match consignees city';
+                            }
+
+                        }
+
 
                         if ($consignee_city->id == 1244 && $user_id != 5982 && $user_id != 3324 && $user_id != 10104 && $user_id != 14110 && $user_id != 16292) {
                             $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $consignee_city->name . ' is not allowed for this shipper';
@@ -7054,9 +7214,15 @@ class ShipperShipmentBookController extends Controller
                     } else {
                         $pickup_consignee_city = City::where('name', $row['consignee_city_name'])->first();
 
+                        if (!$pickup_consignee_city) {
+                            $errors[$row_id]['consignee_city_name'] = 'Pickup Address\'s City: ' . $row['consignee_city_name'] . ' not found';
+                        }
+
                         if (!$pickup_consignee_city->status) {
                             $errors[$row_id]['consignee_city_name'] = 'Pickup Address\'s City: ' . $pickup_consignee_city->name . ' is deactivated';
                         }
+
+
 
                         if ($pickup_consignee_city->id == 1244 && $user_id != 5982 && $user_id != 3324 && $user_id != 10104 && $user_id != 14110 && $user_id != 16292) {
                             $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $pickup_consignee_city->name . ' is not allowed for this shipper';
@@ -7072,6 +7238,23 @@ class ShipperShipmentBookController extends Controller
                             }
                         }
 
+                        //reverse
+                        if (!empty($row['retail_deliver_store_id'])) {
+
+                            $retail_store = RetailTraxCenter::where('code',$row['retail_deliver_store_id'])->first();
+                            if (!$retail_store) {
+                                $retail_store = RetailFranchise::where('code',$row['retail_deliver_store_id'])->first();
+                            }
+                            if (!$retail_store) {
+                                $errors[$row_id]['retail_deliver_store_id'] = 'Retail Pickup Store #' . $row['retail_deliver_store_id'] . ' not found';
+                            } else if (!$retail_store->status) {
+                                $errors[$row_id]['retail_deliver_store_id'] = 'Retail Pickup Store #' . $row['retail_deliver_store_id'] . ' is disabled';
+                            } else if ($pickup_consignee_city->hub_id != $retail_store->default_hub) {
+                                $errors[$row_id]['retail_deliver_store_id'] = 'Retail Pickup Store #' . $row['retail_deliver_store_id'] . ' city does not match pickup address city';
+                            }
+
+                        }
+
                         $pickup_address_id_for_delivery = $row['pickup_address_id'];
                         $pickup_address_for_delivery = UserShippingInfo::find($pickup_address_id_for_delivery);
                         $delivery_city = City::find($pickup_address_for_delivery->city_id);
@@ -7085,6 +7268,22 @@ class ShipperShipmentBookController extends Controller
                         }
                         if (!$delivery_city->zone_id) {
                             $errors[$row_id]['pickup_address_id'] = 'Delivery City: ' . $delivery_city->name . ' is deactivated';
+                        }
+
+                        //reverse pickup
+                        if (!empty($row['retail_pickup_store_id'])) {
+                            $retail_store = RetailTraxCenter::where('code',$row['retail_pickup_store_id'])->first();
+                            if (!$retail_store) {
+                                $retail_store = RetailFranchise::where('code',$row['retail_pickup_store_id'])->first();
+                            }
+                            if (!$retail_store) {
+                                $errors[$row_id]['retail_pickup_store_id'] = 'Retail Deliver Store #' . $row['retail_pickup_store_id'] . ' not found';
+                            } else if (!$retail_store->status) {
+                                $errors[$row_id]['retail_pickup_store_id'] = 'Retail Deliver Store #' . $row['retail_pickup_store_id'] . ' is disabled';
+                            } else if ($delivery_city->hub_id != $retail_store->default_hub) {
+                                $errors[$row_id]['retail_pickup_store_id'] = 'Retail Deliver Store #' . $row['retail_pickup_store_id'] . ' city does not match delivery city';
+                            }
+
                         }
 
                         $pickup_city_id = $pickup_consignee_city->id;

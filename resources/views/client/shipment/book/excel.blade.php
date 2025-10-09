@@ -93,37 +93,37 @@
 										<div class="row">
 											<div class="col">
 												<div class="form-group text-right">
-													<a href="{{ asset('file/Trax Book Regular Shipment Template.xlsx') }}?v=23_03_2023" class="btn btn-primary btn-block"><i class="la la-download"></i> Regular</a>
+													<a href="{{ asset('file/Trax Book Regular Shipment Template.xlsx') }}?v=10_09_2025" class="btn btn-primary btn-block"><i class="la la-download"></i> Regular</a>
 												</div>
 											</div>
 											<div class="col">
 												<div class="form-group text-right">
-												<a href="{{ asset('file/Trax Book Replacement Shipment Template.xlsx') }}?v=23_03_2023" class="btn btn-primary btn-block"><i class="la la-download"></i> Replacement</a>
+												<a href="{{ asset('file/Trax Book Replacement Shipment Template.xlsx') }}?v=10_09_2025" class="btn btn-primary btn-block"><i class="la la-download"></i> Replacement</a>
 												</div>
 											</div>
 											<div class="col">
 												<div class="form-group text-right">
-													<a href="{{ asset('file/Trax Book Try And Buy Shipment Template.xlsx') }}?v=09_06_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Try And Buy</a>
+													<a href="{{ asset('file/Trax Book Try And Buy Shipment Template.xlsx') }}?v=10_09_2025" class="btn btn-primary btn-block"><i class="la la-download"></i> Try And Buy</a>
 												</div>
 											</div>
 											<div class="col">
 												<div class="form-group text-right">
-													<a href="{{ asset('file/Trax Book Reverse Pickup Shipment Template.xlsx') }}?v=09_06_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Reverse Pickup</a>
+													<a href="{{ asset('file/Trax Book Reverse Pickup Shipment Template.xlsx') }}?v=10_09_2025" class="btn btn-primary btn-block"><i class="la la-download"></i> Reverse Pickup</a>
 												</div>
 											</div>
 											<div class="col">
 												<div class="form-group text-right">
 													@if($omni_user != 1)
-														<a href="{{ asset('file/Trax Book Shipment Template.xlsx') }}?v=23_03_2023" class="btn btn-primary btn-block"><i class="la la-download"></i> Overall</a>
+														<a href="{{ asset('file/Trax Book Shipment Template.xlsx') }}?v=10_09_2025" class="btn btn-primary btn-block"><i class="la la-download"></i> Overall</a>
 													@else
-														<a href="{{ asset('file/Trax Book Omni Overall Shipment Template.xlsx') }}?v=06_04_2023" class="btn btn-primary btn-block"><i class="la la-download"></i> Overall</a>
+														<a href="{{ asset('file/Trax Book Omni Overall Shipment Template.xlsx') }}?v=10_09_2025" class="btn btn-primary btn-block"><i class="la la-download"></i> Overall</a>
 							  						@endif
 												</div>
 											</div>
 											@if($omni_user == 1)
 												<div class="col">
 													<div class="form-group text-right">
-														<a href="{{ asset('file/Trax Book Omni Shipment Template.xlsx') }}?v=23_03_2023" class="btn btn-primary btn-block"><i class="la la-download"></i> Omni</a>
+														<a href="{{ asset('file/Trax Book Omni Shipment Template.xlsx') }}?v=10_09_2025" class="btn btn-primary btn-block"><i class="la la-download"></i> Omni</a>
 													</div>
 												</div>
 											@endif
@@ -352,8 +352,8 @@
 										<tbody>
 										@foreach ($retail_stores as $retail_store)
 											<tr role="row">
-												<td class="text-center">{{ $retail_store->id }}</td>
-												<td>{{ $retail_store->name }}, {{$retail_store->hub_name}}</td>
+												<td class="text-center">{{ $retail_store->code }}</td>
+												<td>{{ $retail_store->name }}, {{$retail_store->city}}</td>
 											</tr>
 										@endforeach
 										</tbody>

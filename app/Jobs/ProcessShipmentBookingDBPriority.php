@@ -3,6 +3,8 @@
 namespace App\Jobs;
 
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\Retail\RetailFranchise;
+use App\Http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentOrderDate;
@@ -199,8 +201,60 @@ class ProcessShipmentBookingDBPriority implements ShouldQueue
                 $payment_mode_id = 1;
             }
 
+            $retail_pickup_store_id   = null;
+            $retail_type              = null;
+            $retail_deliver_store_id  = null;
+            $retail_deliver_type      = null;
+
+            if (!empty($this->booking['retail_pickup_store_id'])) {
+                $retail_pickup_store = RetailTraxCenter::where('code', $this->booking['retail_pickup_store_id'])->first();
+
+                if (!$retail_pickup_store) {
+                    $retail_pickup_store = RetailFranchise::where('code', $this->booking['retail_pickup_store_id'])->first();
+                    if ($retail_pickup_store) {
+                        $retail_pickup_store->type = 1; // manually set type
+                    }
+                } else {
+                    $retail_pickup_store->type = 2; // manually set type
+                }
+
+                if ($retail_pickup_store) {
+                    if ($service_type_id == 5) {
+                        $retail_deliver_store_id = $retail_pickup_store->id;
+                        $retail_deliver_type = $retail_pickup_store->type;
+                    } else {
+                        $retail_pickup_store_id = $retail_pickup_store->id;
+                        $retail_type = $retail_pickup_store->type;
+                    }
+                }
+            }
+
+            if (!empty($this->booking['retail_deliver_store_id'])) {
+                $retail_deliver_store = RetailTraxCenter::where('code', $this->booking['retail_deliver_store_id'])->first();
+
+                if (!$retail_deliver_store) {
+                    $retail_deliver_store = RetailFranchise::where('code', $this->booking['retail_deliver_store_id'])->first();
+                    if ($retail_deliver_store) {
+                        $retail_deliver_store->type = 1; // manual type
+                    }
+                } else {
+                    $retail_deliver_store->type = 2; // manual type
+                }
+
+                if ($retail_deliver_store) {
+                    if ($service_type_id == 5) {
+                        $retail_pickup_store_id = $retail_deliver_store->id;
+                        $retail_type = $retail_deliver_store->type;
+                    } else {
+                        $retail_deliver_store_id = $retail_deliver_store->id;
+                        $retail_deliver_type = $retail_deliver_store->type;
+                    }
+                }
+            }
+
+
             if ($this->booking['account_type_id'] == 1) {
-                $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces_quantity, $self_collection, $business_category_id, $open_shipment, $return_address_id, $parcel_value,null,6);
+                $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces_quantity, $self_collection, $business_category_id, $open_shipment, $return_address_id, $parcel_value,null,6,$retail_pickup_store_id,$retail_type,$retail_deliver_store_id,$retail_deliver_type);
             } else {
                 if ($service_type_id == 5) {
                     $delivery_type_id = 1;
@@ -216,7 +270,7 @@ class ProcessShipmentBookingDBPriority implements ShouldQueue
                     $consignee_address = 'TRAX Office ' . $this->booking['consignee_city_name'];
                 }
 
-                $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment, $return_address_id, $parcel_value,null,6);
+                $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment, $return_address_id, $parcel_value,null,6,$retail_pickup_store_id,$retail_type,$retail_deliver_store_id,$retail_deliver_type);
             }
 
             //lat and long manual set
