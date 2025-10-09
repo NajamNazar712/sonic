@@ -30,7 +30,7 @@ class DoneToPendingMove extends Command
     public function handle()
     {
         $donePaymentIds = [
-            1647512, 1647510
+            1660524
         ];
 
         DB::transaction(function () use ($donePaymentIds) {

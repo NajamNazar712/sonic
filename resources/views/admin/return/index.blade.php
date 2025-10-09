@@ -795,6 +795,56 @@
                 </div>
             </div>
         </div>
+
+        {{-- Geo Codes --}}
+        <div class="modal fade text-left" id="AddGeoCodeModal" data-backdrop="static" tabindex="-1" role="dialog"
+             aria-labelledby="AddGeoCodeModal" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary white">
+                        <h4 class="modal-title white">Consignee Address Geo Code</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <form id="add_geo_code_form" method="post">
+                            @method('POST')
+                            @csrf
+                            <div class="container">
+                                <div class="row">
+                                    <h2 class="heading">Tracking Number(s)</h2>
+                                </div>
+
+                                <input type="hidden" name="shipment_id" id="geo_code_shipment_id">
+                                <div class="row old_scroll" id="geo_code_shipments">
+                                </div>
+                                <hr>
+                                <div class="row justify-content-center">
+                                    <div class="col-10">
+                                        <fieldset class="form-group">
+                                            <input type="text" class="form-control" placeholder="Enter Latitude" name="lat" id="lat"  data-rule-required="true"
+                                                   data-msg-required="Consignee Address Latitude is required">
+                                        </fieldset>
+                                        <fieldset class="form-group">
+                                            <input type="text" class="form-control" placeholder="Enter Longitude" name="long" id="long"  data-rule-required="true"
+                                                   data-msg-required="Consignee Address Longitude is required">
+                                        </fieldset>
+                                    </div>
+                                </div>
+                                <div class="row justify-content-center">
+                                    <div class="col-3">
+                                        <button id="AdGeoCodeRequest" type="submit"
+                                                class="btn btn-primary btn-block">Submit</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="loader"></div>
 
     @endsection
@@ -2239,8 +2289,12 @@
                         if (data.reason_id != 3 && data.reason_id != 4) {
                             $('td:eq(0)', row).addClass('select-checkbox');
                         } else {
+                            if(data.current_status_id == 12){
+                                $('td:eq(0)', row).addClass('no-select');
+                            }else{
+                                $('td:eq(0)', row).addClass('select-checkbox');
+                            }
                             // Optional: mark as not selectable
-                            $('td:eq(0)', row).addClass('no-select');
                         }
 
                         // if (data.OsaStatus == 1) {
@@ -2866,6 +2920,80 @@
 
                     }
                 });
+
+                $("body").on('click','.geo_codes',function (){
+                    // Form reset
+                    $("#add_geo_code_form")[0].reset();
+                    // Validation reset
+                    $("#add_geo_code_form").validate().resetForm();
+                    // Danger class remove
+                    $("#add_geo_code_form").find(".danger").removeClass("danger");
+                    $('#lat').val('');
+                    $('#long').val('');
+
+                    var id = $(this).parents('tr').attr('id');
+                    var tracking = $(this).closest('tr').find('.tracking').text();
+                    var tracking_rows =
+                        '<div class="col-4"><span class="mr-1"><i class="la la-angle-right align-bottom"></i><b> ' +
+                        tracking + '</b></span></div>';
+
+                    $('#geo_code_shipment_id').val(id);
+                    $('#geo_code_shipments').html(tracking_rows);
+                    $.ajax({
+                        url: "{{ route('admin.settings.geo_codes.get_manual_shipment_geo_codes') }}",
+                        type: "POST",
+                        data: {
+                            shipment_id: id,
+                            _token: "{{ csrf_token() }}"
+                        },
+                        success: function (res) {
+                            if(res.status === 0){
+                                if(res.lat) $("#lat").val(res.lat);
+                                if(res.long) $("#long").val(res.long);
+                            }
+                            $('#AddGeoCodeModal').modal('show'); // modal ab show hoga
+                        },
+                        error: function () {
+                            $('#AddGeoCodeModal').modal('show'); // error pe bhi modal dikhana ho
+                        }
+                    });
+                    // $('#AddGeoCodeModal').modal('show');
+                });
+
+                $("#add_geo_code_form").validate({
+                    errorClass:"danger",
+                    normalizer: function(value) {
+                        return $.trim(value);
+                    },
+                    errorPlacement: function(error, element) {
+                        error.addClass('w-100').appendTo(element.parent('.form-group'));
+                    },
+                    submitHandler: function(form) {
+                        $.ajax({
+                            url: "{{ route('admin.settings.geo_codes.update_manual_geo_codes') }}", // tumhara update route
+                            type: "POST",
+                            data: $(form).serialize(), // form ke sare fields bhej do
+                            success: function(res) {
+                                if (res.status === 0) {
+                                    toastr.success(res.message); // success msg
+                                    $('#AddGeoCodeModal').modal('hide');
+
+                                    // Reset form
+                                    $("#add_geo_code_form")[0].reset();
+                                    $("#add_geo_code_form").validate().resetForm();
+                                    $("#add_geo_code_form").find(".danger").removeClass("danger");
+                                } else {
+                                    toastr.error(res.error); // validation ya custom error
+                                }
+                            },
+                            error: function() {
+                                toastr.error("Something went wrong!");
+                            }
+                        });
+                        return false; // normal submit rokne ke liye
+                    }
+                });
+
 
                 // select all return confirm work
 

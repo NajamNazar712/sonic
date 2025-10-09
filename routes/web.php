@@ -271,6 +271,9 @@ Route::prefix('cod')->name('cod.')->group(function () {
 
         Route::post('shipper_visibility', 'Shippers\ShipperTrackingController@shipper_visibility')->name('shipper_visibility');
         Route::post('rider_information', 'Shippers\ShipperTrackingController@rider_information')->name('rider_information');
+        Route::post('get_shipment_geo_codes', 'Shippers\ShipperTrackingController@get_shipment_geo_codes')->name('get_shipment_geo_codes');
+        Route::post('update_geo_codes', 'Shippers\ShipperTrackingController@update_geo_codes')->name('update_geo_codes');
+
     });
     Route::prefix('order')->name('order.')->group(function () {
         Route::get('{order_id?}', 'Shippers\ShipperTrackingController@order_index')->name('index');
@@ -311,6 +314,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('reattempt/status/single', 'Shippers\ShipperReturnController@return_reattempt_single_status')->name('reattempt.status.single');
             Route::post('marked/self_collection', 'Shippers\ShipperReturnController@change_status_to_self_collection')->name('marked.self_collection');
             Route::post('consignee', 'Shippers\ShipperReturnController@blacklist_search_consignee')->name('consignee');
+            Route::post('get_manual_shipment_geo_codes', 'Shippers\ShipperReturnController@get_manual_shipment_geo_codes')->name('get_manual_shipment_geo_codes');
+            Route::post('update_manual_geo_codes', 'Shippers\ShipperReturnController@update_manual_geo_codes')->name('update_manual_geo_codes');
         });
         Route::prefix('reattempt_history')->name('reattempt_history.')->group(function () {
             Route::get('', 'Shippers\ShipperReturnController@return_reattempt_history_index')->name('index');

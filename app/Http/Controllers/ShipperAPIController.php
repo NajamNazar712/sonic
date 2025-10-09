@@ -2194,5 +2194,73 @@ class ShipperAPIController extends Controller
             return response()->json(['status' => 0, 'is_wallet_user' => 0]);
         }
     }
+
+    public function shipper_sar(Request $request)
+    {
+
+        // Validate request input
+        // $validate = Validator::make($request->all(), [
+        //     'shipper_id' => 'required|integer'
+        // ]);
+
+        // if ($validate->fails()) {
+        //     return response()->json([
+        //         'status' => 1,
+        //         'message' => 'Error(s) in Input',
+        //         'errors' => $validate->errors()
+        //     ]);
+        // }
+
+        // Build query
+        $query = Shipment::join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
+            ->leftJoin('rv_agent_call_histories as call', 'shipments.id', '=', 'call.shipment_id')
+            ->leftJoin('rv_assign_agent_sub_statuses as raass', 'call.call_finding_id', '=', 'raass.id')
+            ->select(
+                'shipments.tracking_number as tracking_number',
+                'ss.name as status',
+                'raass.name as call_finding_status',
+                DB::raw("COALESCE(call.remarks, '-') as remarks"),
+                'call.created_at as datetime' 
+            )
+            ->where('shipments.shipper_status_id', DB::raw(65))
+            ->where('shipments.user_id', $request->shipper_id)
+            ->orderBy('shipments.id', 'desc');
+
+        // Check if records exist before executing get()
+        if (!$query->exists()) {
+            return response()->json([
+                'status' => 1,
+                'message' => 'No Shipments Found'
+            ]);
+        }
+
+        // Get all records
+        $shipments = $query->get();
+
+        // Group remarks by tracking number
+        // $grouped = $shipments->groupBy('tracking_number')->map(function ($group) {
+        //     $transactionRemarks = $group->map(function ($item) {
+        //         return [
+        //             'username' => 'Call Courier',
+        //             'remarks' => $item->call_status,
+        //             'remarksDateTime' => $item->created_at
+        //                 ? \Carbon\Carbon::parse($item->created_at)->format('Y-m-d H:i:s')
+        //                 : null
+        //         ];
+        //     })->values();
+
+        //     return [
+        //         'tracking_number' => $group->first()->tracking_number,
+        //         'transactionDetails' => $transactionRemarks
+        //     ];
+        // })->values();
+
+        // Return formatted API response
+        return response()->json([
+            'status' => 0,
+            'data' => $shipments,
+            'message' => 'Shipments Found!'
+        ]);
+    }
     
 }

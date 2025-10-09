@@ -723,7 +723,7 @@ class NotificationsController extends Controller
                         if (empty($bcc)) {
                             $bcc = NULL;
                         }
-
+                        
                         self::email($subject, $body, $to, NULL, $bcc);
 
                         $subject = $original_subject;
