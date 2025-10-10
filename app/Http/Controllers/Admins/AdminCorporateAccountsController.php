@@ -37731,12 +37731,16 @@ class AdminCorporateAccountsController extends Controller
             if ($shipper_id && $rate_type_id) {
                 $shipper = User::find($shipper_id);
                 if ($shipper) {
-                    $shipper->corporate_rate_type_id = $rate_type_id;
-                    $shipper->account_type_id = 2;
-                    $shipper->agreement_signed = 0;
-                    $shipper->status = 0;
-                    $shipper->save();
-                    return response()->json(['status' => 1, 'success' => 'Account Successfully Switch to Corporate']);
+                    if(!isset($shipper->wallet->id)) {
+                        $shipper->corporate_rate_type_id = $rate_type_id;
+                        $shipper->account_type_id = 2;
+                        $shipper->agreement_signed = 0;
+                        $shipper->status = 0;
+                        $shipper->save();
+                        return response()->json(['status' => 1, 'success' => 'Account Successfully Switch to Corporate']);
+                    }else{
+                        return response()->json(['status' => 1, 'success' => 'Wallet Users are not allowed']);
+                    }
                 }
                 return response()->json(['status' => 0, 'error' => 'Shipper not found!']);
             }else{
