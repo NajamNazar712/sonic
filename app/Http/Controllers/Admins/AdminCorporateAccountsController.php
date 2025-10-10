@@ -37733,6 +37733,7 @@ class AdminCorporateAccountsController extends Controller
                 if ($shipper) {
                     $shipper->corporate_rate_type_id = $rate_type_id;
                     $shipper->account_type_id = 2;
+                    $shipper->agreement_signed = 0;
                     $shipper->status = 0;
                     $shipper->save();
                     return response()->json(['status' => 1, 'success' => 'Account Successfully Switch to Corporate']);
