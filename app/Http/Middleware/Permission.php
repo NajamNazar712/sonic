@@ -725,6 +725,7 @@ class Permission
             'management.zonal.view_cities' => 131,
 
             'management.city.index' => 88,
+            'management.cx_city_list' => 1034,
             'management.city.ajax' => 88,
             'management.city.form' => 89,
             'management.city.edit' => 90,
@@ -1657,9 +1658,10 @@ class Permission
      */
     public function handle($request, Closure $next)
     {
-       
+    
         if (Auth::guard('admin')->check()) {
             $action = str_replace('admin.', '', $request->route()->getName());
+
             if (session('department_id') == 7) {
                 if (!Session::has('sale_users_bypass')) {
                     $sale_users_bypass = array();
