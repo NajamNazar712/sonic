@@ -14,6 +14,7 @@ use App\HistoryShipmentReturnDiscountCharges;
 use App\HistoryZeroCodDiscountCharges;
 use App\Http\Models\DonePayment;
 use App\Http\Models\PendingPayment;
+use App\Http\Models\Shipper\UserBankInfo;
 use App\PendingCorporateDefaultShipmentReturnDiscountCharges;
 use App\PendingCorporateDefaultZeroCodDiscountCharges;
 use App\PendingCorporateShipmentReturnDiscountCharges;
@@ -37737,6 +37738,12 @@ class AdminCorporateAccountsController extends Controller
                         $shipper->agreement_signed = 0;
                         $shipper->status = 0;
                         $shipper->save();
+
+                        $latestBankInfo = UserBankInfo::where('user_id', $shipper_id)->latest()->first();
+                        $latestBankInfo->invoicing_cycle_id = $shipper->payment_cycle_id;
+                        $latestBankInfo->save();
+
+
                         return response()->json(['status' => 1, 'success' => 'Account Successfully Switch to Corporate']);
                     }else{
                         return response()->json(['status' => 0, 'error' => 'Wallet Users are not allowed']);
