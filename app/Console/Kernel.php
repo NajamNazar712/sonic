@@ -183,7 +183,12 @@ class Kernel extends ConsoleKernel
 
         'App\Console\Commands\QualityOfServiceReport',
         'App\Console\Commands\PendingDeliveriesReportNew',
-
+        'App\Console\Commands\WalletChargesUpdate',
+        'App\Console\Commands\BulkStatusSharingWithWalletReplicate',
+        'App\Console\Commands\ExportShipmentReport',
+        'App\Console\Commands\OptimizeTable',
+       'App\Console\Commands\UpdateRvShipments',
+        'App\Console\Commands\UpdateRvShipments',
         // 'App\Console\Commands\QsrEmail',
         // 'App\Console\Commands\PendingDeliveriesReport',
 
@@ -197,6 +202,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        $schedule->command('bulk:status-sharing-wallet-replicate')->everyTenMinutes()->runInBackground();
+
         $schedule->command('create:service_ledger')->dailyAt('00:00')->runInBackground();
         // $schedule->command('job:run email 25000')->dailyAt('02:02')->runInBackground();
         $schedule->command('corporate_reimbursement_setting:update')->monthlyOn(1, '00:15')->runInBackground();
@@ -279,8 +286,13 @@ class Kernel extends ConsoleKernel
         if($checkBot)
         {
             $schedule->command('agent:botcallunresponsive')->everyFifteenMinutes()->runInBackground();
-            $schedule->command('missingfirst:call')->hourly()->runInBackground();
-
+           $schedule->command('missingfirst:call')->hourly()->runInBackground();
+           $schedule->command('missingfirst:call', [
+               '--start' => Carbon::yesterday()->startOfDay()->toDateTimeString(),
+               '--end' => Carbon::yesterday()->endOfDay()->toDateTimeString()
+           ])
+               ->dailyAt('00:30') // runs at 12:30 AM every night
+               ->runInBackground();
         }
 
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
@@ -541,6 +553,7 @@ class Kernel extends ConsoleKernel
         //        }
 //        $schedule->command('crm:autoassign')->dailyAt('17:00')->runInBackground();
         $schedule->command('crm:autoassign_new')->dailyAt('17:00')->runInBackground();
+        $schedule->command('crm:autoassign_new')->dailyAt('08:00')->runInBackground();
 
         $schedule->command('sum:pendingpayments')->dailyAt('6:00')->runInBackground();
 
@@ -586,12 +599,12 @@ class Kernel extends ConsoleKernel
 //        $schedule->command('logistic:shipper-bookings')->dailyAt('06:00')->runInBackground();
 //        $schedule->command('hourly-logistic:shipper-bookings')->hourly()->runInBackground();
         $schedule->command('delete:short-url-data')->dailyAt('01:00')->runInBackground();
-//        $schedule->command('supervisord:restart')
-//        // ->cron('0 9,13,16 * * *')
-//            ->everyThirtyMinutes()
-//            ->runInBackground();
+        $schedule->command('supervisord:restart')
+//         ->cron('0 9,13,16 * * *')
+            ->hourly()
+            ->runInBackground();
 
-        $schedule->command('update:zero_arrival_charges')->hourly()->runInBackground();
+        $schedule->command('update:zero_arrival_charges')->everyTwoHours()->runInBackground();
         $schedule->command('delete:duplicate_arrival')->hourly()->runInBackground();
         $schedule->command('update_corporate_invoice_charges_issue')->hourly()->runInBackground();
         $schedule->command('update:pending_payment_shipment_arrival_charges')->hourly()->runInBackground();
@@ -600,13 +613,17 @@ class Kernel extends ConsoleKernel
 //        $schedule->command('email:revenuereport_lastmonth 3')->dailyAt('11:30')->runInBackground();
 
         $schedule->command('update:shipper_segment_logs')->everyFiveMinutes()->runInBackground();
-        $schedule->command('apollo:fetch-shipments-status')->everyFiveMinutes()->runInBackground();
+//        $schedule->command('apollo:fetch-shipments-status')->everyFifteenMinutes()->runInBackground();
+//        $schedule->command('apollo:fetch-shipments-status')->dailyAt('15:36')->runInBackground();
+        $schedule->command('apollo:fetch-shipments-status')->everyThreeHours()->runInBackground();
+
         $schedule->command('fingsurgent:sonic-payment')->hourly()->runInBackground(); //wallet
 //        $schedule->command('status:re-push-wallet')->hourly()->runInBackground(); // wallet no need now after bulk status work
         $schedule->command('rerun:wallet_log_re_push')->hourly()->runInBackground(); // wallet
         $schedule->command('rerun_wallet_settlement')->everySixHours()->runInBackground(); //wallet
-        $schedule->command('bulk:status-sharing-wallet')->withoutOverlapping()->everyFiveMinutes()->runInBackground();
-        
+        // $schedule->command('bulk:status-sharing-wallet')->withoutOverlapping()->everyFiveMinutes()->runInBackground();
+//        $schedule->command('api:visionsoftexcel_multiple')->dailyAt('20:01')->runInBackground();
+
 
         // $schedule->command('email:daily_received_deliveries_report')->dailyAt('09:00')->runInBackground();
         // $schedule->command('email:daily_return_received_deliveries_report')->dailyAt('09:00')->runInBackground();
@@ -657,7 +674,39 @@ class Kernel extends ConsoleKernel
         }
         $schedule->command('update:shipment_additional_charges')->withoutOverlapping()->daily()->runInBackground();
         $schedule->command('wallet-users:make-to-done')->dailyAt('06:00')->runInBackground();
-        
+        $schedule->command('revenue_report_by_user_excel')->dailyAt('16:11')->runInBackground();
+        $schedule->command('disable_wallet_users')->twiceDaily('13','18')->runInBackground();
+        $walletChargesUpdate = GlobalSettings::where(['type' => 'wallet_charges_updated', 'setting_value' => 1])->first();
+        if ($walletChargesUpdate) {
+            $time = $walletChargesUpdate->text; // e.g., '11:00'
+            $schedule->command('wallet_charges_update')->dailyAt($time)->runInBackground();
+        }
+        $schedule->command('shipment:delete_journey')
+            ->when(function () {
+                // Only run at exactly 6:00 AM on 2nd August 2025
+                return Carbon::now()->format('Y-m-d H:i') === '2025-08-15 22:15';
+            })
+            ->withoutOverlapping();
+        $schedule->command('sync:latest-shipments')
+            ->when(function () {
+                // Only run at exactly 6:00 AM on 2nd August 2025
+                return Carbon::now()->format('Y-m-d H:i') === '2025-09-23 03:00';
+            })
+            ->withoutOverlapping();
+        $schedule->command('db:optimize-table')
+            ->when(function () {
+                // Only run at exactly 6:00 AM on 2nd August 2025
+                return Carbon::now()->format('Y-m-d H:i') === '2025-08-10 13:00';
+            })
+            ->withoutOverlapping();
+        $schedule->command('shipments:update-rv-sar')->dailyAt('05:00');
+        // $schedule->command('export:shipment-report')
+        //     ->dailyAt('14:46')              
+        //     ->withoutOverlapping()         // prevent simultaneous runs
+        //     ->onOneServer()                // ensures single server execution
+        //     ->runInBackground()            // runs non-blocking
+        //     ->sendOutputTo(storage_path('logs/shipment_report.log'))
+        //     ->emailOutputOnFailure('anas.mazhar@logiserves.com');
     }
     /**
      * Register the commands for the application.

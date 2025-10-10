@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\RvShipmentAssignAgent;
 use App\Http\Models\Shipment;
 use App\Http\Traits\RvTrait;
@@ -68,9 +69,10 @@ class AgentSarNotification extends Command
             // $dateTime = Carbon::createFromFormat('Y-m-d H:i:s', '2025-01-29 23:15:00');
             // $nowSub48Hours = $dateTime->subHours(48)->toDateTimeString();
             // $nowSub24Hours = $dateTime->subHours(24)->toDateTimeString();
-
+            $globalSetting = GlobalSettings::where(['type'=> 'rv_permanent_disable_shippers', 'setting_value' => 1])->first();
+            $shippers = explode(',', $globalSetting->text);
+           
             $nowSub48Hours = Carbon::parse($nowSub48Hours)->addMinutes(44)->format('Y-m-d H:i:s');
-            
             // rv_assign_agent_status_id' 7 (Shipper Advised Request) and Check If State Is 2 (Unassign Assigned)
             $sendEmails = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 7)
                 ->where('rv_state_id', 2)
@@ -106,6 +108,7 @@ class AgentSarNotification extends Command
                 $join->on('rv_shipment_assign_agents.shipment_id', '=', 'shipments.id')
                     ->where('shipments.shipper_status_id','=' , 65);
                 })
+                ->whereNotIn('shipments.user_id',  $shippers)
                 ->where('rv_shipment_assign_agents.rv_assign_agent_status_id', 7)
                 ->where('rv_shipment_assign_agents.rv_state_id', 2)
                 ->where('rv_shipment_assign_agents.unresponsive_count', 3)
@@ -113,7 +116,7 @@ class AgentSarNotification extends Command
                 ->where('rv_shipment_assign_agents.unresponsive_email_time', '<=', $nowSub48Hours)
                 ->select('rv_shipment_assign_agents.*') // Select only columns from rv_shipment_assign_agents
                 ->get();
-
+                
             if ($unresponsive_shipments->isNotEmpty()) {
                 foreach ($unresponsive_shipments as $shipment) {
 
@@ -158,6 +161,7 @@ class AgentSarNotification extends Command
                 $join->on('rv_shipment_assign_agents.shipment_id', '=', 'shipments.id')
                     ->where('shipments.shipper_status_id', '=', 65);
                 })
+                ->whereNotIn('shipments.user_id',  $shippers)
                 ->where('rv_assign_agent_status_id', 8)
                 ->where('rv_state_id', 2)
                 ->where('rv_shipment_assign_agents.updated_at', '<=', $nowSub24Hours)
@@ -204,8 +208,15 @@ class AgentSarNotification extends Command
                     ->where('shipments_journey.created_at','>=',$date.' 00:00:00')
                     ->where('shipments_journey.updated_at','<=',date('Y-m-d').' 23:59:59');
                 })
+                ->join('shipments', function ($join) {
+                    $join->on('rv_shipment_tickets.shipment_id', '=', 'shipments.id')
+                        ->where('shipments.shipper_status_id', 12);
+                })
                 ->where('disabled_shipper',1)
+                ->where('permanent_disable',0)
                 ->where('halt_shipper',0)
+                ->where('call_count',0)
+                ->whereNotIn('shipment_status_reason_id',[27,35])
                 ->where('rv_shipment_tickets.updated_at','>=',$date.' 00:00:00')
                 ->where('rv_shipment_tickets.updated_at','<=', date('Y-m-d').' 23:59:59')
                 ->select('rv_shipment_tickets.*', 'shipments_journey.id as journeyId')->get();
@@ -233,7 +244,48 @@ class AgentSarNotification extends Command
                     // ->whereDate('created_at',$date)
                     ->update(['unresponsive_count' => 3, 'unresponsive_email_count'=>1, 'unresponsive_email_time' => date('Y-m-d h:i:s')]);
                 }
-//            Log::channel('cronJobLog')->info('s ' .'agent:sarnotification Completedagent:sarnotification Completed');
+
+                /**
+                 * Automatically updates eligible shipments as return-confirmed
+                 * based on specific business criteria:
+                 * - Shipment has >1 journey records with status 12
+                 * - Associated ticket has disabled_shipper=1 and halt_shipper=1
+                 * - Shipment is older than 48 hours
+                 */
+                $haltShipperReturn = RvShipmentTicket::select('rv_shipment_tickets.*')
+                ->join('shipments', function ($join) {
+                    $join->on('rv_shipment_tickets.shipment_id', '=', 'shipments.id')
+                        ->where('shipments.shipper_status_id', 12);
+                })
+                ->join('shipments_journey', function ($join) {
+                    $join->on('shipments.id', '=', 'shipments_journey.shipment_id')
+                        ->where('shipments_journey.shipper_status_id', 12);
+                })
+                ->where([
+                    ['rv_shipment_tickets.disabled_shipper', 1],
+                    ['rv_shipment_tickets.halt_shipper', 1],
+                    ['rv_shipment_tickets.permanent_disable', 0],
+                    ['shipments.updated_at', '<=', $nowSub48Hours]
+                ])
+                ->whereNotIn('rv_shipment_tickets.shipment_user_id',  $shippers)
+                ->groupBy('rv_shipment_tickets.id') // Group by primary key
+                ->havingRaw('COUNT(shipments_journey.id) > 1')
+                ->get();
+                if($haltShipperReturn->isNotEmpty()){
+
+                    foreach ($haltShipperReturn as $haltReturns) {
+ 
+                        $request = (object) [
+                            'shipment_id' => $haltReturns->shipment_id,
+                            'remarks' => 'The shipment is automatically updated as return confirm',
+                            'rv_assign_agent_sub_status_id' => Null,
+                            'consignee_refused_reasons' => Null,
+                        ];
+                        $globalAdminId = 346;
+                        $this->return_confirm($request, $globalAdminId);
+                    }
+                }
+                
 
         } catch (\Throwable $th) {
             Log::channel('cronJobLog')->info('s ' .'agent:sarnotification Failed'. $th->getMessage());

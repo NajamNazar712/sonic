@@ -18,18 +18,33 @@
                             <div class="card-body">
                                 @include('admin.inc.messages')
 
-                                <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                                <div class="col mt-2">
+                                    <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
 
-                                    <div class="form-group">
-                                        <input type="text" name="tracking_numbers" class="dt_search tracking_numbers"
-                                               placeholder="Tracking Number(s)" data-tags-input-name="tracking_number">
-                                    </div>
-                                    <div class="form-group justify-content-center">
-                                        <button id="datatable_filter_btn" type="submit" class="ml-1 btn btn-outline-primary btn-min-width"><i
-                                                    class="la la-search"></i> Search
-                                        </button>
-                                    </div>
-                                </form>
+                                        <div class="form-group">
+                                            <input type="text" name="tracking_numbers" class="dt_search tracking_numbers"
+                                                   placeholder="Tracking Number(s)" data-tags-input-name="tracking_number">
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="form-group input-group">
+                                                <div class="input-group-prepend">
+                                                  <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                    <span class="la la-calendar-o small-calender-icon"></span>
+                                                  </span>
+                                                </div>
+                                                <input type="text" name="request_date"
+                                                       class="form-control bg-primary border-primary white rounded-right"
+                                                       id="request_date" placeholder="By Cut-Off Date">
+                                            </div>
+                                        </div>
+                                        <div class="form-group justify-content-center">
+                                            <button id="datatable_filter_btn" type="submit" class="ml-1 btn btn-outline-primary btn-min-width"><i
+                                                        class="la la-search"></i> Search
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+
 
                                 <div class="col justify-content-end">
                                     <div class="card-header">
@@ -74,6 +89,7 @@
                                         <th class="border-primary border-darken-1">Agent</th>
                                         <th class="border-primary border-darken-1">Agent Assigned By</th>
                                         <th class="border-primary border-darken-1">Parcel Value</th>
+                                        <th class="border-primary border-darken-1">Claim Amount</th>
                                         <th class="border-primary border-darken-1">COD Value</th>
                                         <th class="border-primary border-darken-1">Segment</th>
                                         <th class="border-primary border-darken-1">Weight</th>
@@ -303,6 +319,8 @@
     </div>
 @endsection
 @section('css')
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
@@ -320,6 +338,9 @@
 @endsection
 
 @section('js')
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
@@ -369,6 +390,7 @@
                                 head.push('Agent');
                                 head.push('Agent Assigned By');
                                 head.push('Parcel Value');
+                                head.push('Claim Amount');
                                 head.push('COD Value');
                                 head.push('Segment');
                                 head.push('Weight');
@@ -412,6 +434,7 @@
                                     row.push(values.agent); // {data: 'agent', name: 'ad.name'}
                                     row.push(values.agent_assigned_by); // {data: 'agent_assigned_by', name: 'resby.name'}
                                     row.push(values.parcel_value); // {data: 'parcel_value', name: 'parcel_value'}
+                                    row.push(values.product_cost); // {data: 'product_cost', name: 'product_cost'}
                                     row.push(values.cod_value); // {data: 'cod_value', name: 'cod_value'}
                                     row.push(values.segment); // {data: 'segment', name: 'seg.name'}
                                     row.push(values.actual_weight); // {data: 'actual_weight', name: 's.actual_weight'}
@@ -419,10 +442,10 @@
                                     row.push(values.shipper_category); // {data: 'shipper_category', name: 'shipper_category'}
                                     row.push(values.kae); // {data: 'kae', name: 'ad2.name'}
                                     row.push(values.launched_by_name); // {data: 'launched_by_name', name: 'launched_by_name'}
-                                    row.push(values.tagged); // {data: 'tagged'}
+                                    row.push(values.added_by);  // {data: 'added_by'}
                                     row.push(values.tagged_to_operation); // {data: 'tagged_to_operation', name: 'tagged_to_operation'}
                                     row.push(values.manual_tagged_to); // {data: 'tagged_to_manual', name: 'tagged_to_manual'}
-                                    row.push(values.added_by); // {data: 'added_by'}
+                                    row.push(values.tagged); // {data: 'tagged'}
                                     row.push(values.last_comment_name); // {data: 'last_comment_name', name: 'last_comment_name'}
                                     row.push(values.last_comment.replace(/<br>/gi, '\n')); // {data: 'last_comment', name: 'ccs.comment'}
                                     body.push(row);
@@ -461,7 +484,7 @@
                         @endif
                         @if (session('role_id') == 1 || session('role_id') == 6 || in_array(787, session('permissions')))
                     {
-                        text: 'Valid',
+                        text: 'Accept Ticket',
                         className: 'btn btn-primary valid',
                         enabled: false,
                         action: function (e, dt, node, config) {
@@ -668,6 +691,7 @@
                     },
                     data: function (d) {
                         d.tracking_numbers = $('#track_form .tracking_numbers').val();
+                        d.request_date = $('input[name="request_date_formatted"]').val()
                         d.star_shipper_filter = $('#star_shippers_filter').val();
                     }
                 },
@@ -700,6 +724,7 @@
                     {data: 'agent', name: 'ad.name', class: 'align-middle agent'}, // Agent
                     {data: 'agent_assigned_by', name: 'resby.name', class: 'align-middle agent_assigned_by'}, // Agent Assigned By
                     {data: 'parcel_value', name: 's.parcel_value', class: 'align-middle parcel_value'}, // Parcel Value
+                    {data: 'product_cost', name: 'crm_requests.product_cost', class: 'align-middle product_cost'}, // Claim Amount
                     {data: 'cod_value', name: 's.amount', class: 'align-middle cod_value'}, // COD Value
                     {data: 'segment', name: 'seg.name', class: 'align-middle segment'}, // Segment
                     {data: 'actual_weight', name: 's.actual_weight', class: 'align-middle actual_weight'}, // Weight
@@ -707,10 +732,10 @@
                     {data: 'shipper_category', name: 'shipper_category', class: 'align-middle shipper_category'}, // Key account category
                     {data: 'kae', name: 'ad2.name', class: 'align-middle kae'}, // KAE
                     {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'}, // Launched By
-                    {data: 'tagged', name: 'crt.crm_request_tagging_type_id', class: 'align-middle tagged'},
+                    {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'}, // Launched By Type
                     {data: 'tagged_to_operation', name: 'tagged_to_operation', class: 'align-middle tagged_to_operation'},
                     {data: 'tagged_to_manual', name: 'tagged_to_manual', class: 'align-middle tagged_to_manual'}, // Manual Tagged To
-                    {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'}, // Launched By Type
+                    {data: 'tagged', name: 'crt.crm_request_tagging_type_id', class: 'align-middle tagged'},
                     {data: 'last_comment_name', name: 'last_comment_name', class: 'align-middle last_comment_name'}, // Last Comment By
                     {data: 'last_comment', name: 'ccs.comment', class: 'align-middle last_comment'}, // Last Comment
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
@@ -744,8 +769,10 @@
                         '<option value="0">Admin</option>' +
                         '<option value="1">Shipper</option>' +
                         '<option value="2">Shipper Substitute User</option>' +
-                        '<option value="3">Consignee</option>' +
-                        '<option value="4">External</option>' +
+                        '<option value="3">Retail</option>' +
+                        '<option value="4">Consignee</option>' +
+                        // '<option value="4">External</option>' +
+                        '<option value="5">Retail App</option>'+
                         '</select>';
 
                     var tagging_type = '<select name="tagging_type" id="tagging_type" class="select2 form-control">' +
@@ -1230,6 +1257,24 @@
                     $('#UpdateRequestBtn').addClass('d-none');
 
                 }
+            });
+             $('#request_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                // onOpen: function() {
+                //     $('#booking_from_date_root').css('top','40px');
+                // },
+                // onSet: function(context) {
+                //     if (context.select) {
+                //         $('#track_form #booking_to_date').pickadate('picker').set('min', $('#track_form #booking_from_date').pickadate('picker').get('select'));
+                //     }
+                // }
             });
             $('#case_nature_complaints').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',

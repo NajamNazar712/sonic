@@ -246,7 +246,24 @@ $(".steps-validation").validate({
     },
     rules: {
         email: {
-            email: true
+            required: true,
+            email: true,
+            remote: {
+                url: "/cod/check_email",
+                type: 'GET',
+                data: {
+                    email: function() {
+                        return $("input[name='email']").val();
+                    }
+                }
+            }
+        }
+    },
+    messages: {
+        email: {
+            required: "Email is required",
+            email: "Please enter a valid email address",
+            remote: "Email is already taken. Please choose another."
         }
     }
 });

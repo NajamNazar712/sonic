@@ -42,6 +42,7 @@
 										<th class="border-primary border-darken-1">Total Charges</th>
 										<th class="border-primary border-darken-1">Total GST</th>
 										<th class="border-primary border-darken-1">Total WHT</th>
+										<th class="border-primary border-darken-1">Total COD SST</th>
 										<th class="border-primary border-darken-1">Total Payable</th>
 										<th class="border-primary border-darken-1">Bank</th>
 										<th class="border-primary border-darken-1">Return Shipments Avg. Aging</th>
@@ -244,6 +245,7 @@
                             head.push('Total Charges');
                             head.push('Total GST');
                             head.push('Total WHT');
+                            head.push('Total COD SST');
                             head.push('Total Payable');
                             head.push('Bank');
                             head.push('Return Shipments Avg. Aging');
@@ -271,6 +273,7 @@
                                 row.push(values.total_charges);
                                 row.push(values.total_gst);
                                 row.push(values.total_wht);
+                                row.push(values.total_cod_sst);
                                 row.push(values.total_payable);
                                 row.push(values.bank);
                                 row.push(values.return_shipments_average_aging);
@@ -333,6 +336,7 @@
 					{data:'total_charges', name: 'total_charges', class: 'align-middle text-center total_charges', sortable: false},
 					{data:'total_gst', name: 'total_gst', class: 'align-middle text-center total_gst', sortable: false},
 					{data:'total_wht', name: 'total_wht', class: 'align-middle text-center total_wht', sortable: false},
+					{data:'total_cod_sst', name: 'total_cod_sst', class: 'align-middle text-center total_cod_sst', sortable: false},
 					{data:'total_payable', name: 'total_payable', class: 'align-middle text-center total_payable', sortable: false},
 					{data:'bank', name: 'bank', class: 'align-middle text-center bank'},
 					{data:'return_shipments_average_aging', name: 'return_shipments_average_aging', class: 'align-middle text-center return_shipments_average_aging', sortable: false},
@@ -364,7 +368,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.total_amount') || $(header).is('.total_charges') || $(header).is('.total_gst') || $(header).is('.total_payable') || $(header).is('.return_shipments_average_aging') || $(header).is('.action') || $(header).is('.total_wht')) {
+						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.total_amount') || $(header).is('.total_charges') || $(header).is('.total_gst') || $(header).is('.total_payable') || $(header).is('.return_shipments_average_aging') || $(header).is('.action') || $(header).is('.total_wht') || $(header).is('.total_cod_sst')) {
 							$(td).appendTo($(search));
 						}else if($(header).is('.bank')){
                             $(bank_select).appendTo($(search))

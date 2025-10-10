@@ -22,9 +22,12 @@
                                     <th class="border-primary border-darken-1">S. No</th>
                                     <th class="border-primary border-darken-1">Canvas Bag No#</th>
                                     <th class="border-primary border-darken-1">Origin</th>
+                                    <th class="border-primary border-darken-1">Active Date / Time</th>
                                     <th class="border-primary border-darken-1">Remark</th>
+                                    <th class="border-primary border-darken-1">Inactive Date / Time</th>
                                     <th class="border-primary border-darken-1">User</th>
-
+                                    <th class="border-primary border-darken-1">Status</th>
+                                    <th class="border-primary border-darken-1">Action</th>
                                 </tr>
                                 </thead>
                             </table>
@@ -331,6 +334,17 @@
                          
                         }
                     },
+                    {
+                        extend: 'excelHtml5',
+                        filename: 'Canvas Bag Report',
+                        title: '',
+                        text:'<i class="la la-file-excel-o"></i> Excel',
+                        className:'btn btn-primary',
+                        // Exclude the last column (Actions)
+                        exportOptions: {
+                            columns: ':not(:last-child)'
+                        }
+                    },
                 
                     'reset'
                 ],
@@ -340,12 +354,6 @@
                 ],
                 @endif
                 scrollX: true, scrollY: '500px',
-                // select: {
-                //     info: false,
-                //     style: 'multi',
-                //     selector: 'td.select-checkbox',
-                //     className: 'selected bg-primary bg-lighten-5 primary'
-                // },
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',
@@ -361,7 +369,6 @@
                 rowId: 'id',
                 order: [[2, 'desc']],
                 columns: [
-                
                     {
                         data: 'serial_number',
                         orderable: false,
@@ -369,192 +376,156 @@
                         name: 'id',
                         class: 'align-middle serial_number',
                         targets: 1,
-                        render: function (data, type, row) {
-                            return '';
+                        render: function (data, type, row, meta) {
+                            return meta.row + 1;
                         }
                     },
                     {data: 'sack_bag_no', name: 'sack_bag_no', class: 'align-middle sack_bag_no'},
                     {data: 'origin', name: 'origin', class: 'align-middle origin'},
+                    {data: 'active_time', name: 'active_time', class: 'align-middle active_time'},
                     {data: 'remarks', name: 'remarks', class: 'align-middle remarks', orderable: false},
+                    {data: 'inactive_time', name: 'inactive_time', class: 'align-middle inactive_time'},
                     {data: 'user_id', name: 'user_id', class: 'align-middle user_id'},
-                 
+                    {data: 'status', name: 'status', class: 'align-middle status'},
+                    {data: 'action', class: 'align-middle action', name:'action'}
                 ],
                 rowCallback: function (row, data, index) {
                     var info = table.page.info();
-
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-
                     if ($.inArray(data.id, selected_rows) !== -1) {
                         table.row(row).select();
                     }
                 },
                 initComplete: function () {
-                
                     this.api().columns().every(function (column_id) {
                         var column = this;
                         var header = column.header();
-
-                        
-                        // if ($(header).is('.action') || $(header).is('.select') || $(header).is('.serial_number') || $(header).is('.shipments') || $(header).is('.status') || $(header).is('.trax_reason') || $(header).is('.trax_remarks') || $(header).is('.shipper_remarks') || $(header).is('.attempted_date') || $(header).is('.action') || $(header).is('.rider_remarks') || $(header).is('.brand_name') || $(header).is('.all_remarks')) {
-                        //     $(td).appendTo($(search));
-                        // } else {
-                        //     var current = $(input).appendTo($(search)).on('change', function () {
-                        //         column.search($(this).val(), false, false, true).draw();
-                        //     }).wrap(td).after(icon);
-
-                        //     if (column.search()) {
-                        //         current.val(column.search());
-                        //     }
-                        // }
                     });
-
                     this.api().table().columns.adjust();
                 }
-
-               
-
             });
-
-
-
-          
-            
-           
-               $("#add_sack_bag_form").validate({
-                            errorClass: "danger",
-                            successClass: 'success',
-                            errorPlacement: function (error, element) {
-                                error.addClass('w-100').appendTo(element.parent('.form-group'));
-                            },
-                            submitHandler: function (form) {
-                                if($("#sack_bag_no_check").val()!=1)
-                                {
-                                    form.submit();
-                                }else{
-                                    scan_sound(2);
-                                    toastr.error("Canvas Bag No# already exist!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                }
-                            }
+            $("#add_sack_bag_form").validate({
+                    errorClass: "danger",
+                    successClass: 'success',
+                    errorPlacement: function (error, element) {
+                        error.addClass('w-100').appendTo(element.parent('.form-group'));
+                    },
+                    submitHandler: function (form) {
+                        if($("#sack_bag_no_check").val()!=1)
+                        {
+                            form.submit();
+                        }else{
+                            scan_sound(2);
+                            toastr.error("Canvas Bag No# already exist!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                    }
                 });
-          
-
             
                 // add sackbag_no in detail on scan
                 $("#add_sack_bag_form #sackbag_detail").on("keydown","tr", function(e) {
                     if(e.which == 13 || e.keyCode == 13) {
-                       var tr_index = $(this).index();
-                    
-                     
+                        var tr_index = $(this).index();
                         $(".errormessage").empty();
-                        //  var sack_bag_no=$("#sackbag_detail tr:last input[name='sack_bag_no[]']").val();
-                   
-                            var sack_bag_no = $(this).find("#sack_bag_no_id").val();
-                            if(sack_bag_no!='')
-                            {
-                                // alert(sack_bag_no);
-                              sack_bag_no_check(sack_bag_no,tr_index);
-                            }else{
-                                scan_sound(2);
-                                toastr.error("Please fill Canvas Bag No!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                            }
+                        var sack_bag_no = $(this).find("#sack_bag_no_id").val();
+                        if(sack_bag_no!='')
+                        {
+                            sack_bag_no_check(sack_bag_no,tr_index);
+                        } else{
+                            scan_sound(2);
+                            toastr.error("Please fill Canvas Bag No!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
                     }
-                      
                 });
 
-                // $("#addrow").click(function(){
-                //     var sack_bag_no=$("#sackbag_detail tr:last input[name='sack_bag_no[]']").val();
-                //     if(sack_bag_no!='')
-                //     {
-                        
-                //         sack_bag_no_check(sack_bag_no);
-                //     }else{
-                //          scan_sound(2);
-                //          toastr.error("Please fill Sack Bag No!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                //     }
-                //     // var row='<tr><td><input type="text" name="sack_bag_no[]" class="form-control"></td><td><input type="text" name="remarks[]" class="form-control"></td><td><span class="btn btn-danger" id="remove_row">x</span></td></tr>';
-                //     // $("#sackbag_detail").append(row);
-                // }); 
-          
             $('body').on('click','#remove_row',function(){
                 $(this).closest('tr').remove();
             });
 
+            $('#datatable').on('click', '.status_sack_bag', function(event){
+                let sackBagId = $(this).data('id');
+                let newStatus = $(this).data('status');
+                $.ajax({
+                    url: "{{ route('admin.sack_bag.update_sack_bag_status') }}",
+                    method: "POST",
+                    data: {
+                        id: sackBagId,
+                        status: newStatus,
+                        _token: $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            toastr.success(response.success, 'Success!', {
+                                positionClass: 'toast-bottom-center',
+                                containerId: 'toast-bottom-center'
+                            });
+                        }
+                        $('#datatable').DataTable().ajax.reload(null, false);
+                    },
+                    error: function (xhr) {
+                        const errorMsg = xhr.responseJSON?.error || 'Failed to update sack bag status.';
+                        toastr.error(errorMsg, 'Error', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                });
+
+            });
         });
 
         //this function check sackbag_no not duplicate on screen frontend 
-        //
-         var current_sack_bag_no=Array(); 
+        var current_sack_bag_no=Array(); 
         function sack_bag_check_zero(sack_bag_no)
         {   
-                  
-                    var sackbag_no=0;
-                    current_sack_bag_no = [];
-            
-                    $("#sackbag_detail tr").each(function(index, element) {
-
-                        sackbag_no = $(element).find("#sack_bag_no_id").val();
-                        if(current_sack_bag_no.includes(sackbag_no))
-                        {   
-                           
-                            scan_sound(2);
-                            toastr.error("Canvas Bag Already Added!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});  scan_sound(2);
-                            // $(sack_bag_no).closest('tr').find('#sack_bag_no_id').val('');
-                            $(sack_bag_no).closest('tr').remove();
-                            $("#sack_bag_no_check").val(1);
-                           
-                        }else{
-                             current_sack_bag_no.push(sackbag_no);
-                             $("#sack_bag_no_check").val(0);
-                          
-                        }
-                       
-                 
-                    });
-
-                    
+            var sackbag_no=0;
+            current_sack_bag_no = [];
+            $("#sackbag_detail tr").each(function(index, element) {
+                sackbag_no = $(element).find("#sack_bag_no_id").val();
+                if(current_sack_bag_no.includes(sackbag_no))
+                {   
+                    scan_sound(2);
+                    toastr.error("Canvas Bag Already Added!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});  scan_sound(2);
+                    $(sack_bag_no).closest('tr').remove();
+                    $("#sack_bag_no_check").val(1);
+                } else{
+                    current_sack_bag_no.push(sackbag_no);
+                    $("#sack_bag_no_check").val(0);
+                }
+            });
         }
-
 
         // this function check input sack bag no exist in database 
         function sack_bag_no_check(sack_bag_no,index)
         {
-                   $("#sack_bag_no_check").val(0);
-                 $.ajax({
-                            url: '{!! route('admin.cargo_manifest.bags.sack_bag.sack_bag_check') !!}',
-                            method: 'POST',
-                            data: {
-                                'sack_bag_no': sack_bag_no,
-                                '_token': '{{ csrf_token() }}'
-                            }
-                        }).done(function(data){
-                            if(data.error)
-                            {
-                                setTimeout(() => {
-                                     $(".errormessage").empty();
-                                }, 2500);
-                                $(".errormessage").append('<div class="alert alert-danger">'+data.error+'</div>');
-                                $(".errormessage").show();
-                                $("#sack_bag_no_check").val(1);
-                                $("#sack_bag_no_id").eq(index).val('');
-                            } else{
-                             
-                                    if( $("#sack_bag_no_check").val() == 0)
-                                    {
-                                        
-                                           var row='<tr><td><input type="text" id="sack_bag_no_id" name="sack_bag_no[]" class="form-control" onchange="sack_bag_check_zero(this)"></td><td><input type="text" name="remarks[]" class="form-control"></td><td><span class="btn btn-danger" id="remove_row">x</span></td></tr>';
-                                            var $row = $(row);
-                                            $("#sackbag_detail").append($row);
-                                            $row.find('#sack_bag_no_id').focus();
-                                            //  $("#sack_bag_no_check").val(0);
-
-                                    }
-                                
-                            }
-                });
-                          
+            $("#sack_bag_no_check").val(0);
+            $.ajax({
+                url: '{!! route('admin.cargo_manifest.bags.sack_bag.sack_bag_check') !!}',
+                method: 'POST',
+                data: {
+                    'sack_bag_no': sack_bag_no,
+                    '_token': '{{ csrf_token() }}'
+                }
+            }).done(function(data){
+                if(data.error)
+                {
+                    setTimeout(() => {
+                        $(".errormessage").empty();
+                    }, 2500);
+                    $(".errormessage").append('<div class="alert alert-danger">'+data.error+'</div>');
+                    $(".errormessage").show();
+                    $("#sack_bag_no_check").val(1);
+                    $("#sack_bag_no_id").eq(index).val('');
+                } else {
+                    if( $("#sack_bag_no_check").val() == 0)
+                    {
+                        var row='<tr><td><input type="text" id="sack_bag_no_id" name="sack_bag_no[]" class="form-control" onchange="sack_bag_check_zero(this)"></td><td><input type="text" name="remarks[]" class="form-control"></td><td><span class="btn btn-danger" id="remove_row">x</span></td></tr>';
+                        var $row = $(row);
+                        $("#sackbag_detail").append($row);
+                        $row.find('#sack_bag_no_id').focus();
+                    }
+                }
+            });
         }
 
-      
-  
     </script>
 @endsection

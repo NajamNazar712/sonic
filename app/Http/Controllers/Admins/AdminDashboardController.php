@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admins;
 use Exception;
 use Carbon\Carbon;
 use App\FafCharges;
+use App\Models\CityLog;
 use App\RouteLocations;
 use App\Http\Models\City;
 use App\Http\Models\Zone;
@@ -16,7 +17,9 @@ use App\TerritoryTagHistory;
 use CreateCityOsaRatesTable;
 use Illuminate\Http\Request;
 use App\Http\Models\CityArea;
+use App\Http\Models\Province;
 use App\Http\Models\Shipment;
+use App\Models\ParentProduct;
 use App\Http\Models\AdminLogs;
 use App\Http\Models\BanksList;
 use App\Http\Models\Reference;
@@ -33,6 +36,7 @@ use App\Http\Models\CityHistory;
 use App\Http\Models\CityOsaRate;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\SaleTierTag;
+use App\Http\Traits\FilterTrait;
 use Yajra\DataTables\DataTables;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\DeliveryType;
@@ -43,6 +47,7 @@ use App\Http\Models\ShippingMode;
 use App\Http\Models\WalkInCities;
 use App\Http\Models\WeightCharge;
 use App\Jobs\CountFintechCharges;
+use App\Models\AccountTaggingLog;
 use App\Http\Models\Admin\Segment;
 use App\Http\Models\DuplicateUser;
 use App\Http\Models\EmployeeShift;
@@ -56,6 +61,7 @@ use App\Http\Models\InvoicingCycle;
 use App\Http\Models\PendingPayment;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShipperContact;
+use App\Models\CityStatusChangeLog;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\Lead\Lead;
@@ -201,13 +207,13 @@ use App\Http\Models\Sister_account\MergedAccountHead;
 use App\Http\Models\CorporateDefaultHistoryRateStatus;
 use App\Http\Models\PendingCorporateDefaultRateStatus;
 use App\Http\Models\WMS\WmsHistoryPerSquareFootCharge;
+
 use App\Http\Models\WMS\WmsPendingPerSquareFootCharge;
 use App\PendingCorporateShipmentReturnDiscountCharges;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Models\Rates\HistoryCorporateWeightCharge;
 use App\Http\Models\Sister_account\MergedSisterAccount;
 use App\Http\Controllers\Admins\ActivityTrailController;
-
 use App\Http\Models\CorporateDefaultHistoryWeightCharge;
 use App\Http\Models\Rates\HistoryCorporateFuelSurcharge;
 use App\Http\Models\Admin\CargoManifest\V2JunctionRoutes;
@@ -234,10 +240,11 @@ use App\Http\Models\Operataions\OperationsForecastLastUpdatedTime;
 use App\Http\Models\Operataions\OperationsOutgoingTopCustomersShipments;
 use App\Http\Models\Operataions\OperationsOutgoingPickupRequestShipments;
 use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
-use App\Http\Models\Province;
+use App\Models\CorporateUserOnDeliveredInvoiceLog;
+use App\Models\CorporateUserOnDeliveredInvoice;
 
 class AdminDashboardController extends Controller
-{   use RateReusableTrait;
+{   use RateReusableTrait,FilterTrait;
 
     public function __construct()
     {   $this->middleware('auth:admin');
@@ -1330,24 +1337,47 @@ class AdminDashboardController extends Controller
         $keyword = $request->search;
         $subSegment = $request->input('sub_segment_select', null);
         $account_tye_id = $request->input('account_type_id', null);
-        $shippers = User::where('name', 'like', '%' . $keyword . '%');
+        $report_type = $request->report_type; //1 => for kam & poc qsr report
+        $exclude_shipper =  $request->exclude_shipper;
+        if($report_type == 1) {
+            $shippers = User::leftJoin('sale_tier_tags', 'sale_tier_tags.user_id', '=', 'users.id')
+            ->where(function($query) {
+            $query->whereNotNull('sale_tier_tags.poc')
+                 ->orWhereNotNull('sale_tier_tags.kam');
+            })
+            ->where('users.name', 'like', '%' . $keyword . '%');
+
+        } else {
+            $shippers = User::where(function($q) use ($keyword) {
+                $q->where('name', 'like', '%' . $keyword . '%')
+                    ->orWhere('id', 'like', '%' . $keyword . '%');
+            });
+
+        }
         
         if($type == 'active')
         {
-            $shippers = $shippers->whereIn('status', [3, 4]);
+            $shippers = $shippers->whereIn('users.status', [3, 4]);
         }
         elseif($type == 'pending')
         {
-            $shippers = $shippers->whereIn('status', [0, 1, 2, 5]);
+            $shippers = $shippers->whereIn('users.status', [0, 1, 2, 5]);
         }
         if($subSegment){
-            $shippers = $shippers->where('segment_id', $subSegment);
+            $shippers = $shippers->where('users.segment_id', $subSegment);
         }
         if($account_tye_id){
-            $shippers = $shippers->whereIn('account_type_id', $account_tye_id);
+            $shippers = $shippers->whereIn('users.account_type_id', $account_tye_id);
         }
-
-        $shippers = $shippers->select('id','name as text')->take(10)->get()->toArray();
+        if($exclude_shipper == null) {
+            $shippers = $shippers->where(function($query){
+                $idsToExclude = FilterTrait::class::getFilteredIds(auth()->user()->id);
+                if (!empty($idsToExclude)) {
+                    $query->whereNotIn('users.id', $idsToExclude);
+                }
+            });
+        }
+        $shippers = $shippers->select('users.id','name as text')->take(10)->get()->toArray();
 
         return response()->json($shippers);
     }
@@ -1363,9 +1393,29 @@ class AdminDashboardController extends Controller
             $shippers = $shippers->whereIn('status', [3, 4]);
         }
 
+        $shippers = $shippers->where(function($query){
+            $idsToExclude = FilterTrait::class::getFilteredIds(auth()->user()->id);
+            if (!empty($idsToExclude)) {
+                $query->whereNotIn('users.id', $idsToExclude);
+            }
+        });
+
         $shippers = $shippers->select('id','name as text')->take(10)->get()->toArray();
 
         return response()->json($shippers);
+    }
+
+    public function data_for_dropdown(Request $request, $type)
+    {
+        $keyword = $request->search;
+
+        if($type == 'hub') {
+            $data = DB::connection('reports')->table('cities')->where('hub', 1)->where('name', 'like', '%' . $keyword . '%')->select('id','name as text')->take(10)->get()->toArray();
+        } elseif($type == 'nature') {
+            $data = DB::connection('reports')->table('crm_request_case_nature_types')->where('type', 'like', '%' . $keyword . '%')->select('id','type as text')->take(10)->get()->toArray();
+        } 
+        
+        return response()->json($data);
     }
 
     public function shipperExclude(Request $request)
@@ -1498,6 +1548,14 @@ class AdminDashboardController extends Controller
                 $sale_person_tag->user_id = $shipper_id;
                 $sale_person_tag->save();
 
+                AccountTaggingLog::logTagging(
+                    $shipper_id,       
+                    Auth::id(),         
+                    $old_sale_person?->id, 
+                    $tag_id,            
+                    1                    
+                );
+
                 $shipper_zone_id = $user->city->zone_id; 
                 $zone = Zone::where('status', 1)->where('id', $shipper_zone_id)->first();
 
@@ -1539,6 +1597,14 @@ class AdminDashboardController extends Controller
                             $old_sale_person_data = $old_sale_person->sales_person;
                         }
                         $new_sale_person = Admin::find($tag_id);
+
+                        AccountTaggingLog::logTagging(
+                            $shipper_id,       
+                            Auth::id(),         
+                            $old_sale_person_data?->id, 
+                            $tag_id,            
+                            1                    
+                        );
 
                         $sale_person_tag = new SalePersonTag();
                         $sale_person_tag->admin_id = $tag_id;
@@ -9612,7 +9678,85 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             ->leftjoin('faf_charges', function($join){
                 $join->on('faf_charges.user_id', '=', 'users.id')->where('faf_charges.status', '=', 1);
             })
-            ->select(['users.ntn_no', 'users.blacklist', 'rrb.name as rates_rejected_by', 'users.disable_at as disable_at', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.disable_reason as disable_reason', 'users.rejected_reason as rejected_reason', 'users.rate_status as rate_status', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'p.product_name as product_type', 'rab.name as added_by', 'rabna.name as updated_by', 'users.created_at', 'rabb.name as approved_by', 'rabba.name as account_activated_by', 'users.activated_at as activated_date', 'users.status', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'poc.name as tagged_poc', 'k.name as kam', 'r.name as ref','r.trax_id as rider_id', 'users.address as address', 'users.email', 't.name as territory', 'users.corporate_rate_type_id as corporate_rate_type_id', 'users.new_rate_type_id as new_rate_type_id', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name','ucs.status_count as status_count','z.name as zone', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso','scun.name as search','scun_r.name as search_user_type','users.lead_id', 'users.average_shipments', 'bdru.name as reason','users.sms_charges','faf_charges.status as fc_status'])
+            ->leftJoin('wallet_users', 'wallet_users.user_id', 'users.id')
+
+            // ->select(['users.ntn_no', 'users.blacklist', 'rrb.name as rates_rejected_by', 'users.disable_at as disable_at', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.disable_reason as disable_reason', 'users.rejected_reason as rejected_reason', 'users.rate_status as rate_status', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'p.product_name as product_type', 'rab.name as added_by', 'rabna.name as updated_by', 'users.created_at', 'rabb.name as approved_by', 'rabba.name as account_activated_by', 'users.activated_at as activated_date', 'users.status', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'poc.name as tagged_poc', 'k.name as kam', 'r.name as ref','r.trax_id as rider_id', 'users.address as address', 'users.email', 't.name as territory', 'users.corporate_rate_type_id as corporate_rate_type_id', 'users.new_rate_type_id as new_rate_type_id', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name','ucs.status_count as status_count','z.name as zone', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso','scun.name as search','scun_r.name as search_user_type','users.lead_id', 'users.average_shipments', 'bdru.name as reason','users.sms_charges','faf_charges.status as fc_status'])
+
+            ->select([
+                'users.ntn_no',
+                'users.blacklist',
+                'rrb.name as rates_rejected_by',
+                'users.disable_at',
+                'users.rates_added_at',
+                'users.rates_approved_at',
+                'users.rates_rejected_at',
+                'users.disable_reason',
+                'users.rejected_reason',
+                'users.rate_status',
+                'users.id',
+                'ad.name as admin_tag_id',
+                'users.name',
+                'cities.name as city',
+                'users.poc',
+                'p.product_name as product_type',
+                'rab.name as added_by',
+                'rabna.name as updated_by',
+                'users.created_at',
+                'rabb.name as approved_by',
+                'rabba.name as account_activated_by',
+                'users.activated_at as activated_date',
+                'users.status',
+                'users.account_type_id',
+                'at.name as account_type',
+                'users.documents_status',
+                'users.documents_status_reason as documents_rejection_reason',
+                'users.other_product_name',
+                'users.auto_shipment_cancellation_days',
+                'du.phone as duplicate_phone',
+                'du.cnic as duplicate_cnic',
+                'du.iban as duplicate_iban',
+                'du.name as duplicate_name',
+                'users.brand_name',
+                'iui.status as international_rate_status',
+                'iui.rejected_reason as international_rejected_reason',
+                'uda.uploaded_at as documents_uploaded_at',
+                'uda.approved_at as documents_approved_at',
+                'dab.name as documents_approved_by',
+                'drb.name as documents_rejected_by',
+                'uda.rejected_at as documents_rejected_at',
+                'poc.name as tagged_poc',
+                'k.name as kam',
+                'r.name as ref',
+                'r.trax_id as rider_id',
+                'users.address',
+                'users.email',
+                't.name as territory',
+                'users.corporate_rate_type_id',
+                'users.new_rate_type_id',
+                'seg.name as segment',
+                'seg_sub.name as sub_segment',
+                'ref.name as referral_name',
+                'ucs.status_count',
+                'z.name as zone',
+                'pc.id as payment_cycle_id',
+                'pc.name as payment_cycle',
+                'users.payment_cycle_days',
+                'e.name as eso',
+                'scun.name as search',
+                'scun_r.name as search_user_type',
+                'users.lead_id',
+                'users.average_shipments',
+                'bdru.name as reason',
+                'users.sms_charges',
+                'faf_charges.status as fc_status',
+                'wallet_users.user_id as wallet_shippers'
+            ])
+            ->where(function($query){
+                $idsToExclude = FilterTrait::class::getFilteredIds(auth()->user()->id);
+                if (!empty($idsToExclude)) {
+                    $query->whereNotIn('users.id', $idsToExclude);
+                }
+            })
             ->whereIn('users.status', [3, 4, 6])
             ->where('users.blacklist', 0)
             ->groupBy('users.id');
@@ -10020,6 +10164,16 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             ->filterColumn('users.average_shipments', function ($query, $keyword) {
                 return $query->where('users.average_shipments', '=', $keyword);
             })
+            ->editColumn('wallet_shippers', function($user){
+                return $user->wallet_shippers ? "Fintech" : "Normal";
+            })
+            ->filterColumn('wallet_shippers', function($query, $keyword){
+                if($keyword == 1) {
+                    $query->whereNotNull('wallet_users.user_id');
+                } else if($keyword == 2) {
+                    $query->whereNull('wallet_users.user_id');
+                }
+            })
             ->addColumn("action", function ($result) {
                 if ($result->id != 8761 && $result->id != 9358) {
                     if (in_array($result->id, session('tagged_shippers'))) {
@@ -10101,7 +10255,10 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                             $dropdown .= '<button type="button" class="dropdown-item view_invoice_log" rel="block"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-x "></i></div><div class="col-9 offset-1">View Packaging Invoice Log</div></button>';
                         }
                     }
-
+                    if (CorporateUserOnDeliveredInvoiceLog::where('user_id', $result->id)->exists()) {
+                            $dropdown .= '<button type="button" class="dropdown-item view_delivered_setting_log" rel="block"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-x "></i></div><div class="col-9 offset-1">View Delivered Invoice Setting Logs</div></button>';
+                    }
+                    
                     if ($result->blacklist == 0 && (session('role_id') == 1 || in_array(14, session('permissions')))) {
                         $dropdown .= '<button type="button" class="dropdown-item blacklist" data-id="' . $result->id . '" rel="block"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-x"></i></div><div class="col-9 offset-1">Block</div></div></button>';
                     }
@@ -10213,6 +10370,13 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 $dropdown .= '<button type="button" class="dropdown-item add_shipper_exclude_intercept_type"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add shipper exclude/Intercept 
                 Type </div></button>';
 
+                $dropdown .= '<button type="button" class="dropdown-item account_tagging_history" data-id="' . $result->id . '" data-toggle="modal" data-target="#AccountTaggingHistoryModal">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col-2"><i class="ft-activity"></i></div>
+                        <div class="col-9 offset-1">Account Tagging History</div>
+                    </div>
+                </button>';
+
                     $dropdown .= '
                     </div>
                   </div>
@@ -10281,8 +10445,14 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 $join->on('faf_charges.user_id', '=', 'users.id')->where('faf_charges.status', '=', 1);
             })
             ->leftjoin('territories as t', 't.id', '=', 'users.territory_id')
-            ->select(['users.ntn_no','rrb.name as rates_rejected_by', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.rate_status as rate_status', 'users.rejected_reason as rejected_reason', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'users.cnic', 'users.status', 'users.created_at', 'products.product_name as product_type', 'users.blacklist', 'rab.name as rates_added_by', 'rabb.name as rates_authorized_by', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'p.name as tagged_poc', 'k.name as kam', 'r.name as ref','r.trax_id as rider_id', 'users.corporate_rate_type_id', 'users.email', 't.name as territory', 'users.address as address', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso', 'users.status as status_id', 'users.lead_id','scun.name as search','scun_r.name as search_user_type' , 'users.sms_charges', 'users.on_board_status', 'users.request_custom_quotation', 'faf_charges.status as fc_status'])->whereIn('users.status', [0, 1, 2, 5])->where('users.blacklist', 0)->where('users.email_verified', 1)->groupBy('users.id');
-
+            ->select(['users.ntn_no','rrb.name as rates_rejected_by', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.rate_status as rate_status', 'users.rejected_reason as rejected_reason', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'users.cnic', 'users.status', 'users.created_at', 'products.product_name as product_type', 'users.blacklist', 'rab.name as rates_added_by', 'rabb.name as rates_authorized_by', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'p.name as tagged_poc', 'k.name as kam', 'r.name as ref','r.trax_id as rider_id', 'users.corporate_rate_type_id', 'users.email', 't.name as territory', 'users.address as address', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso', 'users.status as status_id', 'users.lead_id','scun.name as search','scun_r.name as search_user_type' , 'users.sms_charges', 'users.on_board_status', 'users.request_custom_quotation', 'faf_charges.status as fc_status'])->whereIn('users.status', [0, 1, 2, 5])->where('users.blacklist', 0)->where('users.email_verified', 1)
+            ->where(function($query){
+                $idsToExclude = FilterTrait::class::getFilteredIds(auth()->user()->id);
+                if (!empty($idsToExclude)) {
+                    $query->whereNotIn('users.id', $idsToExclude);
+                }
+            })
+            ->groupBy('users.id');
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
         }
@@ -10637,7 +10807,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 }
             })
             ->addColumn("lead_progress", function ($user) {
-                if($user->lead_id){
+                if(isset($user->lead_id) && !empty($lead_progress_setting->percent)){
                     $weight_charges = WeightCharge::where('user_id' , $user->id);
 
                     $description = '-';
@@ -10848,6 +11018,13 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                     $dropdown .= '<button type="button" class="dropdown-item add_fintech_charges"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Fintech Charges</div></button>';
                 }
 
+                $dropdown .= '<button type="button" class="dropdown-item account_tagging_history" data-id="' . $result->id . '" data-toggle="modal" data-target="#AccountTaggingHistoryModal">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col-2"><i class="ft-activity"></i></div>
+                        <div class="col-9 offset-1">Account Tagging History</div>
+                    </div>
+                </button>';
+
                 $dropdown .= '
                     </div>
                   </div>
@@ -10979,6 +11156,8 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         $payment_cycle_days = $this->user_payment_cycles_days($user);
         $products = Product::all();
         $banks = BanksList::all();
+        // $parent_products = ParentProduct::get();
+        // $parent_product = ParentProduct::find($user->parent_product_id);
         $invoicing_cycle = InvoicingCycle::all();
         $city_list = City::all();
         $emails = ShipperNotificationEmail::where('user_id', $user->id)->select('email')->get();
@@ -11174,7 +11353,8 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             ->leftjoin('business_categories as bc', 'bc.id', '=', 'cities.business_category_id')
             ->join('zones as z', 'cities.zone_id', '=', 'z.id')
             ->leftJoin('provinces', 'provinces.id', 'cities.province_id')
-            ->select(['cities.id as city_id', 'cities.city_code as city_code', 'cities.id as id', 'cities.name as name', 'h.name as hub', 'cities.hub_id', 'z.name as zone', 'cities.hub as isHub', 'cities.status as status', 'ch.created_at as updated', 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat', 'cities.location_latitude', 'cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category', 'cities.hub_location_latitude', 'cities.hub_location_longitude', 'cities.iata_code as iata_code','cities.booking_enable_status as booking_enable_status', 'c.name as created_by', 'cities.created_at as created_at', 'provinces.name as province_name'])
+            ->select(['cities.id as city_id', 'cities.city_code as city_code', 'cities.id as id', 'cities.name as name', 'h.name as hub', 'cities.hub_id', 'z.name as zone', 'cities.hub as isHub', 'cities.status as status', 'ch.created_at as updated', 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat', 'cities.location_latitude', 'cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category', 'cities.hub_location_latitude', 'cities.hub_location_longitude', 'cities.iata_code as iata_code','cities.booking_enable_status as booking_enable_status', 'c.name as created_by', 'cities.created_at as created_at', 'provinces.name as province_name', DB::raw('(SELECT COUNT(*) FROM city_logs WHERE city_logs.city_id = cities.id) as city_logs'), DB::raw('(SELECT COUNT(*) FROM city_status_change_logs WHERE city_status_change_logs.city_id = cities.id AND column_type = 2) as status_change_logs_count')
+            ,DB::raw('(SELECT COUNT(*) FROM city_status_change_logs WHERE city_status_change_logs.city_id = cities.id AND column_type = 1) as booking_status_change_logs_count')])
             ->where('cities.permanent_disabled',0);
 
         return Datatables::of($cities)
@@ -11214,6 +11394,37 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 } else {
                     return '-';
                 }
+            })
+            ->editColumn('status_logs', function ($cities) {
+                if ($cities->status_change_logs_count) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle status_logs" data-id="' . $cities->city_id . '" data-type="city">' . $cities->status_change_logs_count . '</button>';
+                }
+
+                return '-';
+            })
+            ->editColumn('booking_enable_disable_logs', function ($cities) {
+                if ($cities->booking_status_change_logs_count) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle booking_enable_disable_logs" data-id="' . $cities->city_id . '" data-type="booking">' . $cities->booking_status_change_logs_count . '</button>';
+                }
+
+                return '-';
+            })
+            ->orderColumn('status_logs', 'status_change_logs_count $1')
+            ->orderColumn('booking_enable_disable_logs', 'booking_enable_disable_logs_count $1')
+            ->filterColumn('status_logs', function ($query, $keyword) {
+                $keyword = trim($keyword);
+                $query->whereRaw('(SELECT COUNT(*) FROM city_status_change_logs WHERE city_status_change_logs.city_id = cities.id AND column_type = 2) = ?', [(int) $keyword]);
+            })
+            ->filterColumn('booking_enable_disable_logs', function ($query, $keyword) {
+                $keyword = trim($keyword);
+                $query->whereRaw('(SELECT COUNT(*) FROM city_status_change_logs WHERE city_status_change_logs.city_id = cities.id AND column_type = 1) = ?', [(int) $keyword]);
+            })
+            ->editColumn('city_logs', function ($cities) {
+                if ($cities->city_logs) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle city_logs" data-id="' . $cities->city_id . '" data-type="city">' . $cities->city_logs . '</button>';
+                }
+
+                return '-';
             })
             ->addColumn("action", function ($result) {
                 if (session('role_id') == 1 || count(array_intersect([90, 91,850], session('permissions'))) !== 0) {
@@ -11279,7 +11490,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 return '-';
             })
 
-            ->rawColumns(['location','hub_location','osa_list','action'])
+            ->rawColumns(['location','hub_location','osa_list','action','city_logs', 'status_logs', 'booking_enable_disable_logs'])
             ->make(true);
     }
 
@@ -11331,11 +11542,11 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
     public function updateCity(Request $request, $id)
     {
-        CityOsaRate::where('city_id', $id)->delete();
 
         $city_id = City::where('id', $id)->first();
         if ($city_id) {
             if ($request->has('updatedelivery') && count($request->updatedelivery) > 0) {
+                $oldCity = City::with(['osaRates', 'deliveries', 'walkIns'])->find($id);
                 if ($request->postType == 'city') {
                     City::where('id', $id)->update([
                         'name' => $request->cityName,
@@ -11382,6 +11593,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                     }
 
                     CityDelivery::where('city_id', $id)->delete();
+                    CityOsaRate::where('city_id', $id)->delete();
 
                     foreach ($request->updatedelivery as $booking_type_id => $shipping_modes) {
                         foreach ($shipping_modes as $shipping_mode_id => $shipping_mode_value) {
@@ -11392,8 +11604,8 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                             ]);
                         }
                     }
-                    if ($request->osa_name != null) {
 
+                    if ($request->osa_name != null) {
                         foreach ($request->osa_name as $key => $value) {
 
                             $osa_charges = new CityOsaRate();
@@ -11404,6 +11616,8 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                             $osa_charges->save();
                         }
                     }
+
+                    $this->logCityChangesAfterUpdate($oldCity);
                     return redirect()->back()->with('success', 'City updated successfully');
                 } elseif ($request->postType == 'hub') {
                     City::where('id', $id)->update([
@@ -11453,6 +11667,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                     }
 
                     CityDelivery::where('city_id', $id)->delete();
+                    CityOsaRate::where('city_id', $id)->delete();
 
                     foreach ($request->updatedelivery as $booking_type_id => $shipping_modes) {
                         foreach ($shipping_modes as $shipping_mode_id => $shipping_mode_value) {
@@ -11464,7 +11679,6 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                         }
                     }
                     if ($request->osa_name != null) {
-
                         foreach ($request->osa_name as $key => $value) {
 
                             $osa_charges = new CityOsaRate();
@@ -11478,6 +11692,8 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
                     $admin_ids = Admin::where('management_user', 1)->pluck('id')->toArray();
                     self::addManagementHubUser($admin_ids, $id);
+
+
 
                     //Check if Closest Hub is Selected then auto assign mappings according to the selected hub to the new newly created hub and delete all current mappings
                     if ($request->closest_hub) {
@@ -11505,6 +11721,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                         $this->makeDynamicHubsMapping($request->vehicles, $closestHubId, $city);
                     }
                 
+                    $this->logCityChangesAfterUpdate($oldCity);
                     return redirect()->back()->with('success', 'Hub/city updated successfully');
                 }
             } else {
@@ -12032,6 +12249,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                         $zone->status = 0;
                         $zone->save();
                     }
+                    $this->logCityStatusChanges((array) $id, false, 2);
                     return redirect()->route('admin.management.city')->with('success', 'City is inactive now.');
                 } else {
                     return redirect()->route('admin.management.city')->with('error', 'There are some active cities in hub, please deactivate those cities first!');
@@ -12039,6 +12257,8 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             } elseif ($city->status == 1) {
                 $city->status = 0;
                 $city->save();
+
+                $this->logCityStatusChanges((array) $id, false, 2);
                 return redirect()->route('admin.management.city')->with('success', 'City is inactive now.');
             }
         } elseif ($status == 'cityactive') {
@@ -12051,6 +12271,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 if ($city->status == 0) {
                     $city->status = 1;
                     $city->save();
+                    $this->logCityStatusChanges((array) $id, true, 2);
                     return redirect()->route('admin.management.city')->with('success', 'City is active now.');
                 }
             } else {
@@ -12058,6 +12279,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 if ($hub->exists()) {
                     $city->status = 1;
                     $city->save();
+                    $this->logCityStatusChanges((array) $id, true, 2);
                     return redirect()->route('admin.management.city')->with('success', 'City is active now.');
 
                 } else {
@@ -12079,6 +12301,8 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
             }
         }
+     
+
         return redirect()->route('admin.management.city')->with('danger', 'This city is already inactive.');
     }
 
@@ -14275,6 +14499,20 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
     }
 
+    public function delivered_invoice_log(Request $request)
+    {
+        $logs = CorporateUserOnDeliveredInvoiceLog::join('admins as a', 'a.id', '=', 'corporate_user_on_delivered_invoice_logs.admin_id')
+            ->select('a.name as admin', 'corporate_user_on_delivered_invoice_logs.created_at as time', 'corporate_user_on_delivered_invoice_logs.status as status')
+            ->where('corporate_user_on_delivered_invoice_logs.user_id', $request->user_id);
+        if ($logs->exists()) {
+            $logs = $logs->get();
+            return response()->json(['status' => 0, 'details' => $logs]);
+        } else {
+            return response()->json(['status' => 1, 'error' => 'No Log found!']);
+        }
+
+    }
+
     public function auto_cancelation_days(Request $request)
     {
         $user = User::find($request->user_id);
@@ -14933,7 +15171,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                     return '';
                 }
             })
-            ->make(true);
+            ->rawColumns(['location', 'action'])->make(true);
 
     }
 
@@ -15051,44 +15289,47 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
     }
 
     public function disable_booking_status(Request $request){
-        $userIDS = $request->input('userIDS', []);
+        $cityIDS = $request->input('cityIDS', []);
 
-        if(!is_array($userIDS) || empty($userIDS)){
+        if(!is_array($cityIDS) || empty($cityIDS)){
             return response()->json(['status' => 'Invalid IDS'], 400);
         }
-        $error = City::whereIn('id', $userIDS)->where('booking_enable_status', 0)->get();
+        $error = City::whereIn('id', $cityIDS)->where('booking_enable_status', 0)->get();
 
-        if(count($error) > 0 && count($userIDS) === count($error)){
+        if(count($error) > 0 && count($cityIDS) === count($error)){
             return response()->json(['status' => 'Already Disabled !!']);
-        }else if (count($error) > 0 && count($userIDS) != count($error)){
+        }else if (count($error) > 0 && count($cityIDS) != count($error)){
             return response()->json(['status' => 'Some Of The Selected Cities Are Already Disabled']);
         }
 
-        City::whereIn('id', $userIDS)->update(['booking_enable_status' => '0']);
+        City::whereIn('id', $cityIDS)->update(['booking_enable_status' => '0']);
+
+        $this->logCityStatusChanges($cityIDS, false);
+
         return response()->json(['status' => 200]);
     }
 
     public function enable_booking_status(Request $request){
-        $userIDS = $request->input('userIDS', []);
+        $cityIDS = $request->input('cityIDS', []);
 
-        if(!is_array($userIDS) || empty($userIDS)){
+        if(!is_array($cityIDS) || empty($cityIDS)){
             return response()->json(['status' => 'Invalid IDS'], 400);
         }
 
-        $error = City::whereIn('id', $userIDS)->where('booking_enable_status', 1)->get();
+        $error = City::whereIn('id', $cityIDS)->where('booking_enable_status', 1)->get();
 
-        if(count($error) > 0 && count($userIDS) === count($error)){
+        if(count($error) > 0 && count($cityIDS) === count($error)){
             return response()->json(['status' => 'Already Enabled !!']);
-        }else if (count($error) > 0 && count($userIDS) != count($error)){
+        }else if (count($error) > 0 && count($cityIDS) != count($error)){
             return response()->json(['status' => 'Some Of The Selected Cities Are Already Enabled']);
         }
 
-        City::whereIn('id', $userIDS)->update(['booking_enable_status' => '1']);
+        City::whereIn('id', $cityIDS)->update(['booking_enable_status' => '1']);
+        $this->logCityStatusChanges($cityIDS, true);
+
         return response()->json(['status' => 200]);
 
     }
-
-
 
 
     public function add_rate_commission_corporate_reimb(Request $request, $shipper_ids)
@@ -15142,7 +15383,16 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
                     foreach($request->tier_id as $row_id => $tier){
                         $sales_tier = SalesTier::find($tier);
+                        $old_kam_id = null; 
+
                         if(isset($request->user_id[$row_id])){
+                            $latestRecord = SalesCommissionUser::where('sales_commission_id', $sales_commission_id)
+                                ->latest()
+                                ->first();
+
+                            $old_kam_id = ($latestRecord && $latestRecord->tier_id == 3)
+                                ? $latestRecord->user_id
+                                : null;
                             if (strpos($request->user_id[$row_id], 'riders') !== false) {
                                 preg_match('/\d+/', $request->user_id[$row_id], $matches);
                                 $rider_id = isset($matches[0]) ? $matches[0] : null;
@@ -15183,11 +15433,21 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                             $sales_commission_user->commission = $request->commission_percentage[$row_id];
                             $actual_commission += $request->commission_percentage[$row_id];
                             $sales_commission_user->save();
+
+                            if($tier == 3){
+                                AccountTaggingLog::logTagging(
+                                    $shipper_id,        
+                                    Auth::id(),             
+                                    $old_kam_id,                 
+                                    $sales_commission_user->user_id, 
+                                    3                
+                                );
+                            }
                         }
                     }
+
                     $sales_commission->commission = $total_commission;
                     $sales_commission->save();
-
                 }else{
                     $sales_commission = new SalesCommission();
                     $sales_commission->shipper_id = $shipper_id;
@@ -15209,6 +15469,13 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                                     $sales_commission_user->user_type = "2";
                                 }
 
+                                $latestRecord = SalesCommissionUser::where('sales_commission_id', $sales_commission_id)
+                                    ->latest()
+                                    ->first();
+
+                                $old_kam_id = ($latestRecord && $latestRecord->tier_id == 3)
+                                    ? $latestRecord->user_id
+                                    : null;
 
                                 if(isset($user_type[$row_id]) && $user_type[$row_id] == "2"){
                                     $sales_commission_user->user_type = "2";
@@ -15225,6 +15492,16 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                             $sales_commission_user->commission = $request->commission_percentage[$row_id];
                             $actual_commission += $request->commission_percentage[$row_id];
                             $sales_commission_user->save();
+
+                            if($tier == 3){
+                                AccountTaggingLog::logTagging(
+                                    $shipper_id,        
+                                    Auth::id(),             
+                                    $old_kam_id,                 
+                                    $sales_commission_user->user_id, 
+                                    3                   
+                                );
+                            }
                         }
                     }
                     $sales_commission->commission = $actual_commission;
@@ -15255,7 +15532,10 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                     $sale_tier_object->kam = $request->user_id[$row_id];
                     $sale_tier_object->save();
                 }
+
+               
             }
+
         }
 
         return back()->with('success', 'Commission Has Been Added !!');
@@ -16136,4 +16416,234 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         return $historyArray;
     }
 
+    private function logCityStatusChanges(array $cityIds, bool $newStatus, $columnType = 1)
+    {
+        $logs = [];
+        $userId = auth()->id();
+        $now = now();
+
+        foreach ($cityIds as $cityId) {
+            $logs[] = [
+                'column_type' => $columnType, 
+                'updated_by' => $userId,
+                'city_id' => $cityId,
+                'new_status' => $newStatus,
+                'changed_at' => $now,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        }
+
+        CityStatusChangeLog::insert($logs);
+    }
+
+    public function get_city_status_logs($cityId, Request $request)
+    {
+        $type = $request->get('type') === 'booking' ? 1 : 2;
+
+        $logs = CityStatusChangeLog::with(['city', 'admin'])
+            ->where('city_id', $cityId)
+            ->where('column_type', $type)
+            ->orderByDesc('changed_at')
+            ->get()
+            ->map(function ($log) {
+                return [
+                    'city_name' => $log->city?->name ?? 'N/A',
+                    'new_status' => $log->new_status,
+                    'changed_at' => optional($log->changed_at)->format('Y-m-d H:i:s'),
+                    'updated_by_name' => $log->admin?->name ?? 'N/A',
+                ];
+            });
+
+        return response()->json($logs);
+    }
+    
+    public static function logCityChangesAfterUpdate($oldCity)
+    {
+        $cityId = $oldCity->id;
+
+        $oldHub = !empty($oldCity->hub_id) ? City::find($oldCity->hub_id) : null;
+        $oldZone = !empty($oldCity->zone_id) ? Zone::find($oldCity->zone_id) : null;
+        $oldProvince = !empty($oldCity->province_id) ? Province::find($oldCity->province_id) : null;
+
+        $oldData = [
+            'city' => array_merge(
+                $oldCity->only([
+                    'name',
+                    'city_code',
+                    'hub',
+                    'hub_id',
+                    'zone_id',
+                    'province_id',
+                    'pickup',
+                    'gc_area',
+                    'attempt_tat',
+                    'location_latitude',
+                    'location_longitude',
+                    'hub_location_latitude',
+                    'hub_location_longitude',
+                    'address',
+                    'pickup_cut_off_time'
+                ]),
+                [
+                    'hub_name' => optional($oldHub)->name,
+                    'zone_name' => optional($oldZone)->name,
+                    'province_name' => optional($oldProvince)->name,
+                ]
+            ),
+            'osa_rates' => $oldCity->osaRates->map(function ($r) {
+                return ['osa_name' => $r->osa_name, 'osa_rate' => $r->osa_rate];
+            })->toArray(),
+            'deliveries' => $oldCity->deliveries->map(function ($d) {
+                return ['booking_type_id' => $d->booking_type_id, 'shipping_mode_id' => $d->shipping_mode_id];
+            })->toArray(),
+            'walk_ins' => $oldCity->walkIns->map(function ($w) {
+                return ['pickup' => $w->pickup, 'delivery' => $w->delivery];
+            })->toArray(),
+        ];
+
+        $newCity = City::with(['osaRates', 'deliveries', 'walkIns'])->find($cityId);
+
+        if (!$newCity) {
+            return;
+        }
+
+        $newHub = !empty($newCity->hub_id) ? City::find($newCity->hub_id) : null;
+        $newZone = !empty($newCity->zone_id) ? Zone::find($newCity->zone_id) : null;
+        $newProvince = !empty($newCity->province_id) ? Province::find($newCity->province_id) : null;
+
+        $newData = [
+            'city' => array_merge(
+                $newCity->only([
+                    'name',
+                    'city_code',
+                    'hub',
+                    'hub_id',
+                    'zone_id',
+                    'province_id',
+                    'pickup',
+                    'gc_area',
+                    'attempt_tat',
+                    'location_latitude',
+                    'location_longitude',
+                    'hub_location_latitude',
+                    'hub_location_longitude',
+                    'address',
+                    'pickup_cut_off_time'
+                ]),
+                [
+                    'hub_name' => optional($newHub)->name,
+                    'zone_name' => optional($newZone)->name,
+                    'province_name' => optional($newProvince)->name,
+                ]
+            ),
+            'osa_rates' => $newCity->osaRates->map(function ($r) {
+                return ['osa_name' => $r->osa_name, 'osa_rate' => $r->osa_rate];
+            })->toArray(),
+            'deliveries' => $newCity->deliveries->map(function ($d) {
+                return ['booking_type_id' => $d->booking_type_id, 'shipping_mode_id' => $d->shipping_mode_id];
+            })->toArray(),
+            'walk_ins' => $newCity->walkIns->map(function ($w) {
+                return ['pickup' => $w->pickup, 'delivery' => $w->delivery];
+            })->toArray(),
+        ];
+
+        if ($oldData !== $newData) {
+            CityLog::create([
+                'city_id' => $cityId,
+                'old_data' => $oldData,
+                'new_data' => $newData,
+                'admin_id' => auth()->id(),
+            ]);
+        }
+    }
+
+    public static function getCityChanges(array $oldData, array $newData)
+    {
+        $changes = [];
+
+        $excludedFields = ['zone_id', 'hub_id', 'province_id'];
+
+
+        foreach ($oldData['city'] as $key => $oldValue) {
+
+            if (in_array($key, $excludedFields)) {
+                continue;
+            }
+
+            $newValue = $newData['city'][$key] ?? null;
+            if ($oldValue != $newValue) {
+                $changes['city'][$key] = [
+                    'old' => $oldValue,
+                    'new' => $newValue
+                ];
+            }
+        }
+
+        $compareList = function (array $oldList, array $newList) {
+            $old = collect($oldList)->map(fn($v) => json_encode($v))->toArray();
+            $new = collect($newList)->map(fn($v) => json_encode($v))->toArray();
+
+            return [
+                'removed' => array_values(array_map('json_decode', array_diff($old, $new))),
+                'added'   => array_values(array_map('json_decode', array_diff($new, $old))),
+            ];
+        };
+
+        $osaChanges = $compareList($oldData['osa_rates'], $newData['osa_rates']);
+        if (!empty($osaChanges['added']) || !empty($osaChanges['removed'])) {
+            $changes['osa_rates'] = $osaChanges;
+        }
+
+        $deliveryChanges = $compareList($oldData['deliveries'], $newData['deliveries']);
+        if (!empty($deliveryChanges['added']) || !empty($deliveryChanges['removed'])) {
+            $changes['deliveries'] = $deliveryChanges;
+        }
+
+        $walkInChanges = $compareList($oldData['walk_ins'], $newData['walk_ins']);
+        if (!empty($walkInChanges['added']) || !empty($walkInChanges['removed'])) {
+            $changes['walk_ins'] = $walkInChanges;
+        }
+
+        return $changes;
+    }
+
+    public function getAjaxCityChanges($id)
+    {
+        $logs = CityLog::with('admin')->where('city_id', $id)
+            ->orderByDesc('id')  
+            ->get();
+
+        if ($logs->isEmpty()) {
+            return response()->json([]);
+        }
+
+        $allChanges = [];
+
+        foreach ($logs as $log) {
+            $oldData = is_string($log->old_data) ? json_decode($log->old_data, true) : $log->old_data;
+            $newData = is_string($log->new_data) ? json_decode($log->new_data, true) : $log->new_data;
+
+            $allChanges[] = [
+                'timestamp' => $log->created_at->toDateTimeString(),
+                'changes' => $this->getCityChanges($oldData, $newData),
+                'admin' => $log->admin?->name . ' - ' . $log->admin?->trax_id
+            ];
+        }
+
+        return response()->json($allChanges);
+    }
+
+    public function taggingHistory($id)
+    {
+        $logs = AccountTaggingLog::with(['changedBy', 'newSalesAdmin', 'prevSalesAdmin'])
+            ->where('account_id', $id)
+            ->orderByDesc('created_at')
+            ->get()
+            ->groupBy(function ($log) {
+                return $log->created_at->format('Y-m-d H:i:s');
+            });
+
+        return response()->json($logs);
+    }
 }

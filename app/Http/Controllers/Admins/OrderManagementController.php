@@ -37,6 +37,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
+use App\Models\CorporateUserOnDeliveredInvoice;
 
 class OrderManagementController extends Controller
 {
@@ -83,7 +84,9 @@ class OrderManagementController extends Controller
             ->leftJoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
             ->leftJoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
             ->leftJoin('business_categories as bc', 'shipments.business_category_id', '=' , 'bc.id')
-            ->select(['shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','shipments.order_id','u.name as shipper','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2', 'shipments.created_at as booking_date','shipments.shipper_status_id', 'sps.name as payment_status', 'shipments.booking_type_id', 'usi.poc','usi.vendor as vendor','shipments_journey.shipper_status_id as status_id', 'bc.name as business_category', 'pm.mode as payment_mode','shipments.amount']);
+            ->leftJoin('booking_channels', 'booking_channels.shipment_id', 'shipments.id')
+            ->leftJoin('channels', 'channels.id','booking_channels.channel_id')
+            ->select(['shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','shipments.order_id','u.name as shipper','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2', 'shipments.created_at as booking_date','shipments.shipper_status_id', 'sps.name as payment_status', 'shipments.booking_type_id', 'usi.poc','usi.vendor as vendor','shipments_journey.shipper_status_id as status_id', 'bc.name as business_category', 'pm.mode as payment_mode','shipments.amount','channels.name as channel_name']);
 
         if(session('department_id') == 7){
             if(!in_array(session('id'), session('sale_users_bypass')) ){
@@ -235,7 +238,9 @@ class OrderManagementController extends Controller
         if($shipment->shipment_type == 2){
             $retail_shipment = RetailShipment::where('shipment_id',$shipment_id)->first();
         }
-        $returnHTML = view('admin/components/shipment_charges')->with(['shipment'=>$shipment,'retail_shipment' => $retail_shipment])->render();
+
+        $exists = CorporateUserOnDeliveredInvoice::where('user_id', $shipment->user_id )->where('status', 1)->exists();
+        $returnHTML = view('admin/components/shipment_charges')->with(['shipment'=>$shipment,'retail_shipment' => $retail_shipment, 'exists' => $exists])->render();
         return response()->json($returnHTML);
     }
     public function shipper_recall(Request $request) {

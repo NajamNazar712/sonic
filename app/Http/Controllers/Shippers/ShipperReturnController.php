@@ -27,6 +27,7 @@ use App\Http\Models\ShipmentStatus;
 use App\Http\Models\Shipper\ReturnSheet;
 use App\Http\Models\Shipper\ReturnSheetShipments;
 use App\Http\Models\ShippingMode;
+use App\Models\ShipmentGeoCode;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -34,6 +35,7 @@ use App\Http\Models\ReturnAssignedShipmentLogs;
 use App\Http\Traits\RvTrait;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Yajra\Datatables\Datatables;
 use App\Http\Models\Admin\ShipperInterceptExclude;
 use App\Http\Models\SpecifiedShipper;
@@ -190,6 +192,7 @@ class ShipperReturnController extends Controller
                 $reattempt_button = '<a href="javascript:void(0);" class="dropdown-item returnReattemptStatus"><i class="ft-plus-circle primary"></i> Re-Attempt Request</a>';
                 $intercept = '<a href="javascript:void(0);" class="dropdown-item intercept"><i class="ft-plus-circle primary"></i> Intercept/Re-Book</a>';
                 $self_collection_button = '<a href="javascript:void(0);" class="dropdown-item selfCollection" data-action="selfCollection"><i class="ft-plus-circle primary"></i> Mark for Self Collection</a>';
+                $provide_geo_code = '<a href="javascript:void(0);" class="dropdown-item geo_codes"><i class="ft-plus-circle primary"></i> Provide Geo Codes</a>';
 
                 $dropdown = "
                         <div class='btn-group'>
@@ -215,7 +218,7 @@ class ShipperReturnController extends Controller
                     $dropdown .= $self_collection_button;
                 }
 
-
+                $dropdown.=$provide_geo_code;
                 $dropdown .= "
                             </div>
                         </div>
@@ -744,7 +747,7 @@ class ShipperReturnController extends Controller
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
             ->select('shipments.id as shId', 'shipments.tracking_number', 'shipments.tracking_number as tracking', 'u.name as shipper', 'u.phone as shipper_phone1', 'u.phone2 as shipper_phone2', 'oc.name as origin', 'dc.name as destination', 'shipments.order_id', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'shipments.consignee_address', 'shipments.amount', 'sm.mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.id as reason_id', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as last_status_date', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc', 'shipments_journey.remarks as shipper_remarks', 'shipments.shipper_status_id as current_status_id', 'shipments.nsa_osa_estimated_charges', 'shipments_journey.shipper_status_id as journey_shipper_status_id', 'dc.pickup as pickup', 'shipments.intercepted as intercepted', 'dc.id as consignee_city_id', 'shipments.shipping_mode_id')
             ->where('shipments.user_id', session('user_id'))
-//            ->where('shipments.shipper_status_id', DB::raw(20))
+           ->where('shipments.shipper_status_id', DB::raw(20))
             ->groupBy('shipments.id');
         if (session('user_type') == 2) {
             if (session('restriction') == 1) {
@@ -1106,5 +1109,65 @@ class ShipperReturnController extends Controller
                 }
             });
         return $datatable->rawColumns(['tracking_number'])->make(true);
+    }
+
+    public  function get_manual_shipment_geo_codes(Request $request)
+    {
+
+        $shipment_geo_code = ShipmentGeoCode::where('shipment_id',$request->shipment_id)->where('geo_code_type',2)
+            ->select('latitude','longitude')->first();
+
+        $lat = null;
+        $long = null;
+        if($shipment_geo_code){
+            $shipment_id = $shipment_geo_code->shipment_id;
+            $lat = $shipment_geo_code->latitude;
+            $long = $shipment_geo_code->longitude;
+        }
+
+        return response()->json(['status'=>0,'lat'=>$lat,'long'=>$long]);
+    }
+
+    public function update_manual_geo_codes(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'shipment_id' => 'required|integer|exists:shipments,id',
+            'lat'         => 'required|numeric',
+            'long'        => 'required|numeric',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 1,
+                'error'  => $validator->errors()->first()
+            ]);
+        }
+
+
+        // Check existing record
+        $geoCode = ShipmentGeoCode::where('shipment_id', $request->shipment_id)
+            ->where('geo_code_type', 2)
+            ->first();
+
+        if ($geoCode) {
+            // Update existing
+            $geoCode->latitude  = $request->lat;
+            $geoCode->longitude = $request->long;
+        } else {
+            // New insert
+            $geoCode = new ShipmentGeoCode();
+            $geoCode->shipment_id = $request->shipment_id;
+            $geoCode->latitude    = $request->lat;
+            $geoCode->longitude   = $request->long;
+            $geoCode->geo_code_type        = 2;
+
+        }
+        $geoCode->save();
+
+
+        return response()->json([
+            'status'  => 0,
+            'message' => 'Geo code saved successfully!'
+        ]);
     }
 }

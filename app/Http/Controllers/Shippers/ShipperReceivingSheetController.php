@@ -16,6 +16,7 @@ use App\Http\Models\ShippingMode;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use App\Http\Models\SubstituteUserReceivingSheet;
 use App\Http\Models\SubstituteUserShipment;
+use App\Http\Traits\FilterTrait;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Shippers\ShipperShipmentBookController;
@@ -38,6 +39,7 @@ use App\Jobs\ProcessGulAhmedShipmentConfirmation;
 
 class ShipperReceivingSheetController extends Controller
 {
+    use FilterTrait;
     public function __construct() {
         $this->middleware('auth:web,substitute_users');
 
@@ -146,7 +148,30 @@ class ShipperReceivingSheetController extends Controller
     }
 
     public function list() {
-        $shipments = Shipment::join('booking_types AS bt', 'shipments.booking_type_id', '=', 'bt.id')
+        $count = Shipment::leftjoin('receiving_sheet_shipments as rss', 'shipments.id', '=', 'rss.shipment_id')
+            ->leftjoin('receiving_sheets AS rs', 'rss.receiving_sheet_id', '=', 'rs.id')
+            ->whereIn('shipments.shipper_status_id', [1,64])
+            ->where('shipments.packaging_material_request', 0)
+            ->where(function ($query) {
+                $query->whereNull('rs.status')->orWhere('rs.status', 0);
+            })
+            ->where(function ($query) {
+                $query->where('shipments.user_id', session('user_id'))
+                ->orwhereIn('shipments.user_id', session('sister_users'));
+            });
+
+            if(session('user_type') == 2){
+                if(session('restriction') == 1){
+                    $count = $count->join('substitute_user_shipments as sus', function($join){
+                        $join->on('sus.shipment_id', '=', 'shipments.id')
+                            ->where('sus.substitute_user_id', '=', Auth::id());
+                    });
+                }
+            }
+        
+        $count = $count->count();
+
+        $shipments = Shipment::leftjoin('booking_types AS bt', 'shipments.booking_type_id', '=', 'bt.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
@@ -175,6 +200,7 @@ class ShipperReceivingSheetController extends Controller
             }
 
         return Datatables::of($shipments)
+            ->setTotalRecords($count)
             ->editColumn('receiving_sheet', function($shipment) {
                 if ($shipment->receiving_sheet) {
                     return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle id">' . str_pad($shipment->receiving_sheet, 6, "0", STR_PAD_LEFT) . '</span></button>';
@@ -363,8 +389,13 @@ class ShipperReceivingSheetController extends Controller
     }
 
     static public function view($id, $user_type, $body_only = FALSE) {
-        $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
+        $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();;
 
+        $remove_logo = '';
+        $exclude_logo = FilterTrait::class::getFilteredShipperIds(session('user_id'));
+        if($exclude_logo){
+            $remove_logo = 'd-none-logo';
+        }
         $html = '';
 
         if (!$body_only) {
@@ -378,14 +409,20 @@ class ShipperReceivingSheetController extends Controller
 
             if ($user_type != 4) {
                 $html .= '
-                    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
-                ';
-            }
-            else {
+        <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+        <style>
+            .d-none-logo { display: none !important; }
+        </style>
+    ';
+            } else {
                 $html .= '
-                    <style>' . file_get_contents(public_path('app-assets/css/bootstrap.min.css')) . '</style>
-                ';
+        <style>' . file_get_contents(public_path('app-assets/css/bootstrap.min.css')) . '</style>
+        <style>
+            .d-none-logo { display: none !important; }
+        </style>
+    ';
             }
+
 
             $html .= '
                     <title>Receiving Sheet</title>
@@ -480,7 +517,7 @@ class ShipperReceivingSheetController extends Controller
                             <td class="color primary"><strong>Destination</strong></td>
                             <td class="color primary"><strong>Estimated Weight</strong></td>
                             ';
-            if(in_array(session('user_id'),[6693,12412])){
+            if(in_array(session('user_id'),[6693,12412, 49251])){
                 $shipment_details .=
                     ' <td class="color primary"><strong>Actual Weight</strong></td> ';
             }
@@ -507,7 +544,7 @@ class ShipperReceivingSheetController extends Controller
                         $shipment_details_row_end = '
                             <td>' . $shipment->consignee_city->name . '</td>
                             <td>' . $shipment->estimated_weight . '</td> ';
-                        if(in_array(session('user_id'),[6693,12412])) {
+                        if(in_array(session('user_id'),[6693,12412, 49251])) {
                             $shipment_details_row_end .= '<td>' . $shipment->actual_weight . '</td> ';
                         }
                         $shipment_details_row_end .= '<td>' . $shipment->pieces . '</td>
@@ -643,12 +680,12 @@ class ShipperReceivingSheetController extends Controller
 
             if ($user_type != 4) {
                 $main_details .= '
-                            <td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>
+                            <td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto ' . $remove_logo . '"></td>
                 ';
             }
             else {
                 $main_details .= '
-                            <td class="text-center align-middle"><img src="' . public_path('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>
+                            <td class="text-center align-middle"><img src="' . public_path('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto ' . $remove_logo . '"></td>
                 ';
             }
 
@@ -790,8 +827,8 @@ class ShipperReceivingSheetController extends Controller
 
                         <div class="row">
                           <div class="col text-center mt-2">
-                            <span class="d-block">Plot 105, Mehran Town Sector 7 A Korangi Karachi, Karachi, Karachi City, Sindh, Pakistan</span>
-                            <span class="d-block">Phone: 0304-11-11-232 | Email: info@trax.pk | URL: www.trax.pk</span>
+                            <span class="d-block ' . $remove_logo . '">Plot 105, Mehran Town Sector 7 A Korangi Karachi, Karachi, Karachi City, Sindh, Pakistan</span>
+                            <span class="d-block ' . $remove_logo . '">Phone: 0304-11-11-232 | Email: info@slgtrax.com | URL: www.trax.pk</span>
                           </div>
                         </div>
                       </div>

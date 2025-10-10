@@ -66,6 +66,7 @@
                                         <th class="border-primary border-darken-1">City</th>
                                         <th class="border-primary border-darken-1">Territory</th>
                                         <th class="border-primary border-darken-1">Product Type</th>
+                                        <th class="border-primary border-darken-1">User Type</th>
                                         <th class="border-primary border-darken-1">Status</th>
                                         <th class="border-primary border-darken-1">Sales Person Tagged</th>
                                         <th class="border-primary border-darken-1">POC Tagged</th>
@@ -106,6 +107,7 @@
                                         {{-- <th class="border-primary border-darken-1">Referral Code</th> --}}
                                         <th class="border-primary border-darken-1">Payment Cycle</th>
                                         <th class="border-primary border-darken-1">Payment Cycle Days</th>
+                                        
                                         <th class="border-primary border-darken-1">Action</th>
                                     </tr>
                                 </thead>
@@ -601,6 +603,23 @@
         </div>
     </div>
 
+    <div class="modal fade text-left" id="CorporateDeliveredInvoiceLogModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="CorporateDeliveredInvoiceLogModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Invoicing On Delivered Toggle Log</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                   
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <div class="modal fade text-left" id="faf_charges_modal" data-backdrop="static" role="dialog" aria-labelledby=""
          aria-hidden="true">
@@ -840,6 +859,39 @@ aria-hidden="true">
         </div>
     </div>
 </div>
+
+
+<div class="modal fade" id="AccountTaggingHistoryModal" tabindex="-1" role="dialog" aria-labelledby="AccountTaggingHistoryLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      
+      <div class="modal-header">
+        <h5 class="modal-title">Account Tagging History</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+          <table class="table table-bordered table-striped" id="taggingHistoryTable">
+              <thead>
+                  <tr>
+                      <th>#</th>
+                      <th>Changed By</th>
+                      <th>Previous Sales/KAM</th>
+                      <th>New Sales/KAM</th>
+                      <th>Type</th>
+                      <th>Changed At</th>
+                  </tr>
+              </thead>
+              <tbody>
+              </tbody>
+          </table>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 @endsection
 
@@ -1121,6 +1173,7 @@ function checkboxStatus() {
                         head.push('City');
                         head.push('Territory');
                         head.push('Product Type');
+                        head.push('User Type');
                         head.push('Status');
                         head.push('Sales Person Tagged');
                         head.push('POC Tagged');
@@ -1161,6 +1214,7 @@ function checkboxStatus() {
                         //head.push('Referral Code');
                         head.push('Payment Cycle');
                         head.push('Payment Cycle Days');
+                        
                         $.each(result.data, function(index, values) {
                             row = [];
 
@@ -1184,6 +1238,7 @@ function checkboxStatus() {
                             row.push(values.city);
                             row.push(values.territory);
                             row.push(values.product_type);
+                            row.push(values.wallet_shippers)
                             row.push(values.status);
                             row.push(values.admin_tag_id);
                             row.push(values.tagged_poc);
@@ -1224,6 +1279,7 @@ function checkboxStatus() {
                             //row.push(values.referral_name);
                             row.push(values.payment_cycle);
                             row.push(values.payment_cycle_days);
+                            
                             body.push(row);
                         });
                     },
@@ -1806,6 +1862,7 @@ function checkboxStatus() {
                 {data: 'city', name: 'cities.name', class: 'align-middle city'},
                 {data: 'territory', name: 't.name', class: 'align-middle territory'},
                 {data: 'product_type', name: 'product_type', class: 'align-middle product_type'},
+                {data: 'wallet_shippers', name: 'wallet_shippers', class: 'align-middle wallet_shippers'},
                 {data: 'status', name: 'status', class: 'align-middle status'},
                 {data: 'admin_tag_id', name: 'ad.name', class: 'align-middle admin_tag_id'},
                 {data: 'tagged_poc', name: 'poc.name', class: 'align-middle tagged_poc'},
@@ -1869,6 +1926,13 @@ function checkboxStatus() {
                     '<option value="4">Disable</option>' +
                     '<option value="6">Booking Paused</option>' +
                     '</select>';
+
+                var wallet_shippers = '<select name="wallet_shippers" id="wallet_shippers" class="select2 form-control">' +
+                    '<option value="1">Fintech</option>' +
+                    '<option value="2">Normal</option>' +
+                    '<option value="3">All Type</option>' +
+                    '</select>';
+
                 var documents_drop_select = '<select name="documents_status_select" id="documents_status_select" class="select2 form-control">' +
                     '<option value="0">Incomplete</option>' +
                     '<option value="1">Pending for Approval</option>' +
@@ -1909,7 +1973,14 @@ function checkboxStatus() {
                             .on( 'change', function () {
                                 column.search($(this).val(), false, false, true).draw();
                             } ).wrap(td);
-                    }else if($(header).is('.product_type')){
+                    }
+                    else if($(header).is('.wallet_shippers')){
+                        $(wallet_shippers).appendTo($(search))
+                            .on( 'change', function () {
+                                column.search($(this).val(), false, false, true).draw();
+                            } ).wrap(td);
+                    }
+                    else if($(header).is('.product_type')){
                         $(product_select).appendTo($(search))
                             .on( 'change', function () {
                                 column.search($(this).val(), false, false, true).draw();
@@ -1976,6 +2047,12 @@ function checkboxStatus() {
                 });
                 $("#status_select").prepend('<option value="" selected></option>').select2({
                     placeholder: "Select a Status",
+                    width:'100%',
+                    containerCssClass: 'select-xs',
+                    dropdownCssClass: 'form-control-sm p-0'
+                });
+                $("#wallet_shippers").prepend('<option value="" selected></option>').select2({
+                    placeholder: "Select User Type",
                     width:'100%',
                     containerCssClass: 'select-xs',
                     dropdownCssClass: 'form-control-sm p-0'
@@ -3405,6 +3482,54 @@ function checkboxStatus() {
 
                 });
             }
+
+            if ($(this).hasClass('view_delivered_setting_log')) {
+
+                $.ajax({
+                    url: '{!! route('admin.accounts.on_delivered.invoice.log') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'user_id': user_id,
+                    }
+                }).done(function(data){
+
+                    if (data.status == 0) {
+
+
+                        var html = '<table class="table table-bordered">' +
+                                    '<thead><tr><td><strong>S.No</strong></td><td><strong>Admin</strong></td><td><strong>Status</strong></td><td><strong>Time</strong></td></tr></thead><tbody>';
+
+                        $.each(data.details, function (index,value) {
+                            // console.log(value,value.admin);
+                                var serial = index + 1;
+                                var status = '';
+                                if(value['status'] == 1){
+                                    status = 'On';
+                                }
+                                else{
+                                    status = 'Off';
+                                }
+
+                                html += '<tr><td>'+serial +'</td><td>' + value['admin'] + '</td>' +
+                                         '<td>'+ status + '</td>' +
+                                    '<td>' + value['time']+ '</td></tr>';
+                            serial++;
+                        });
+
+                         html +=  '</tbody></table>';
+
+                        $('#CorporateDeliveredInvoiceLogModal .modal-body').html(html);
+
+                        $('#CorporateDeliveredInvoiceLogModal').modal('show');
+
+                    }
+                    else{
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+
+                });
+            }
         });
     });
 
@@ -3922,6 +4047,44 @@ var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
             return $result;
         }
+
+        $(document).on("click", ".account_tagging_history", function () {
+            let accountId = $(this).data("id");
+            let tableBody = $("#taggingHistoryTable tbody");
+            tableBody.html("<tr><td colspan='6' class='text-center'>Loading...</td></tr>");
+
+            $.get("/admin/management/" + accountId + "/tagging-history", function (groups) {
+                tableBody.empty();
+
+                if ($.isEmptyObject(groups)) {
+                    tableBody.html("<tr><td colspan='6' class='text-center'>No history found</td></tr>");
+                } else {
+                    let groupIndex = 1;
+                    $.each(groups, function (timestamp, logs) {
+                        let first = true;
+                        logs.forEach((log, index) => {
+                            let type = log.type == 1 ? "Sales" : (log.type == 3 ? "KAM" : "Other");
+
+                            tableBody.append(`
+                                <tr>
+                                    <td>${first ? groupIndex : ''}</td>
+                                    <td>${log.changed_by ? log.changed_by.name : '-'}</td>
+                                    <td>${log.prev_sales_admin ? log.prev_sales_admin.name : '-'}</td>
+                                    <td>${log.new_sales_admin ? log.new_sales_admin.name : '-'}</td>
+                                    <td>${type}</td>
+                                    <td>${first ? timestamp : ''}</td>
+                                </tr>
+                            `);
+
+                            first = false;
+                        });
+                        groupIndex++;
+                    });
+                }
+            });
+        });
+
+
 
     </script>
 

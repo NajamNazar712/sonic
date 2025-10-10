@@ -824,9 +824,11 @@ trait RvTrait
                 $rv_shipment_assign_agent->save();
 
                 $rv_shipment_ticket = RvShipmentTicket::where('shipment_id',$request->shipment_id)->first();
-                $rv_shipment_ticket->increment('call_count');
-                $rv_shipment_ticket->save();
-                if($rv_shipment_assign_agent->unresponsive_count <= 3 && !$botCall){
+                if($rv_shipment_ticket){
+                    $rv_shipment_ticket->increment('call_count');
+                    $rv_shipment_ticket->save();
+                }
+                if($rv_shipment_assign_agent->unresponsive_count <= 3 && !$botCall && $rv_shipment_ticket){
                     // $rv_shipment_ticket->updated_at = carbon::parse($rv_shipment_ticket->created_at)->addhours(2);
                     $rv_shipment_ticket->in_progress = 0;
                     $rv_shipment_ticket->save();
@@ -849,6 +851,26 @@ trait RvTrait
                     ]);
                     $this->return_confirm($request);
                     return ['status' => 1, 'success'=> 'Shipment Updated Successfully', 'rv_agent_call_history_record_id' => $status->id];
+                }
+                //if unresponsive count 3 & status_reason_id is 27,35 then shipment status will be auto return confirm
+                else if ($rv_shipment_assign_agent->unresponsive_count > 2 && in_array($rv_shipment_ticket->shipment_status_reason_id,[27,35])) {
+
+                    $request->merge([
+                        'shipment_id' => $rv_shipment_assign_agent->shipment_id,
+                        'remarks' => $request->remarks,
+                        'rv_assign_agent_sub_status_id' => null
+                    ]);
+                    $this->return_confirm($request);
+                }
+                //Auto-return if shipment has 3+ unresponsive attempts and is halted (halt_shipper=1)
+                else if ($rv_shipment_assign_agent->unresponsive_count >= 3 && RvShipmentTicket::where(['shipment_id'=>$request->shipment_id,'halt_shipper'=>1])->exists()) {
+
+                    $request->merge([
+                        'shipment_id' => $rv_shipment_assign_agent->shipment_id,
+                        'remarks' => $request->remarks,
+                        'rv_assign_agent_sub_status_id' => null
+                    ]);
+                    $this->return_confirm($request);
                 }
                 //if unresponsive count is 3 unassigned the shipment & set the assign_agent_status_id to 7, the shipment will be shown to to the shipper 
                 else if ($rv_shipment_assign_agent->unresponsive_count == 3) {
@@ -1520,7 +1542,11 @@ trait RvTrait
 
     protected function getShipmentsFromRvShipmentTicket($agent = null)
     {
-        $shipments = RvShipmentTicket::where('disabled_shipper',0)
+        $shipments = RvShipmentTicket::on('reports')
+            ->whereBetween('updated_at', [
+                now()->startOfYear(),
+                now()->endOfYear()
+            ])->where('disabled_shipper',0)
                 ->when($agent, function ($query, $agent) {
                     if($agent->agent_caller_type == 1) //These Agents will get shipments pending with first call only
                     {
@@ -1535,10 +1561,12 @@ trait RvTrait
                         return $query->orderBy('call_count','ASC');//These Agents will get shipments in order of call count to Agent of Both Call Type
                     }
                 })
+                ->where('permanent_disable',0)
                 ->where('in_progress', 0)
                 ->where('is_completed',0)
                 ->where('is_bot',0)
                 ->orderBy('updated_at','asc')
+                ->limit(500)
                 ->get(['id','shipment_id']);
         return $shipments;                
     }
@@ -2150,4 +2178,19 @@ trait RvTrait
             return $remarks;
         }
     }
+
+    public function conditionalRvSarUpdate($shipment,$statusReasonId,$type=2){
+        if(Shipment::where('id', $shipment->id)->where('shipper_status_id', 12)->exists()){
+            $rvshipments = RvShipmentAssignAgent::where('shipment_id', $shipment->id);
+            Shipment::where('id', $shipment->id)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);   
+            ShipmentsJourneyController::add($shipment->id, 65, 65, $statusReasonId,null, $shipment->user_id, Auth::id() ?? 346);
+            $updateField = (($type == 1) ? ['agent_id' => 346, 'rv_state_id' => 2, 'rv_assign_agent_status_id' => 7, 'unresponsive_count' => 3, 'unresponsive_email_count' => 1, 'unresponsive_email_time' => date('Y-m-d h:i:s')] : ['agent_id' => 346, 'rv_state_id' => 3, 'rv_assign_agent_status_id' => 2]);
+            RvShipmentAssignAgent::where('shipment_id', $shipment->id)
+            // ->whereDate('created_at',$date)
+            ->update($updateField);                                    
+            NotificationsController::send(220, $rvshipments);
+        }
+    }
+
+    
 }

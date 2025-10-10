@@ -7,7 +7,7 @@ Route::prefix('retail')->name('retail.')->group(function () {
     Route::get('404', 'Auth\RetailLoginController@not_found')->name('404');
 
     Route::get('/login', 'Auth\RetailLoginController@showLoginForm')->name('login');
-    Route::post('/login', 'Auth\RetailLoginController@login')->name('login.submit');
+    Route::post('/login', 'Auth\RetailLoginController@login')->middleware('login.check')->name('login.submit');
     Route::post('/radius', 'Auth\RetailLoginController@radius_check')->name('login.radius');
     Route::post('/verify_otp', 'Auth\RetailLoginController@verify_otp')->name('login.verify_otp');
     Route::post('/logout', 'Auth\RetailLoginController@logout')->name('logout');
@@ -24,6 +24,7 @@ Route::prefix('retail')->name('retail.')->group(function () {
             Route::post('/excel_store', 'Retail\RetailShipmentBookController@excel_store')->name('excel_store');
             Route::post('/add_city_req', 'Retail\RetailShipmentBookController@add_city_req')->name('add_city_req');
             Route::post('/consignee_info', 'Retail\RetailShipmentBookController@consignee_info')->name('consignee_info');
+            Route::post('/get_products', 'Retail\RetailShipmentBookController@get_products')->name('get_products');
             Route::get('address_verify', 'Retail\RetailShipmentBookController@address_verify')->name('address_verify');
             Route::get('discount_code_verify/{discount_code?}', 'Retail\RetailShipmentBookController@is_discount_available_to_apply')->name('discount_code_verify');
             Route::post('previous_names_verify', 'Retail\RetailShipmentBookController@previous_names_verify')->name('previous_names_verify');

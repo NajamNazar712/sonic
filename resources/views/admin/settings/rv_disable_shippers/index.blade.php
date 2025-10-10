@@ -42,7 +42,18 @@
                                                 @endforeach
                                             </select>
                                         </div>
-
+                                        <div class="col-12 form-group" id="permanent_users_container">
+                                            <label class="mr-2 font-medium-2"><b>Permanent Disabled Shipper(s)</b></label>
+                                            <select name="rv_disable_shippers_all_permanat_shippers[]" 
+                                                    id="permanent_users" 
+                                                    class="form-control select2 bg-light" 
+                                                    style="width: 100%" 
+                                                    multiple="multiple">
+                                                @foreach($permanent_disable as $shipper)
+                                                    <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
                                         <div class="col-md-12 form-group">
                                             <button type="submit" class="col-md-4 btn btn-primary">Update</button>
                                         </div>
@@ -93,7 +104,11 @@
                 width:'100%',
                 allowClear:true
             });
-
+            $('#permanent_users').select2({
+                placeholder:'Select Permanent Disabled Shippers',
+                width:'100%',
+                allowClear:true
+            });
             @if(count($excluded_shippers) > 0)
                 var ids = @json($excluded_shippers);
                 $('#excluded_users').val(ids).trigger('change');
@@ -102,6 +117,10 @@
             @if(count($only_shippers) > 0)
                 var ids = @json($only_shippers);
                 $('#only_users').val(ids).trigger('change');
+            @endif
+            @if(count($permanentDisabledIds) > 0)
+                var ids = @json($permanentDisabledIds);
+                $('#permanent_users').val(ids).trigger('change');
             @endif
 
             $('#settings_form').validate({

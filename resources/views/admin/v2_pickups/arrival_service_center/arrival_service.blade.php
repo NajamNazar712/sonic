@@ -382,7 +382,7 @@
                                 'tracking_number': tracking_number,
                                 '_token': '{{ csrf_token() }}'
                             },
-                            timeout: 5000,
+                            timeout: 10000,
                             error: function (data) {
                                 form.reset();
 
@@ -537,7 +537,7 @@
                                 'item_id': item,
                                 '_token': '{{ csrf_token() }}'
                             },
-                            timeout: 5000,
+                            timeout: 10000,
                             error: function (data) {
                                 toastr.error('Couldn\'t connect to server, check internet connection and re-enter!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             },
@@ -612,7 +612,7 @@
                             'tracking_number': tracking_number,
                             '_token': '{{ csrf_token() }}'
                         },
-                        timeout: 5000,
+                        timeout: 10000,
                         error: function (data) {
                             toastr.error('Couldn\'t connect to server, check internet connection and re-enter!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         },
@@ -736,7 +736,7 @@
                         'id': id,
                         '_token': '{{ csrf_token() }}'
                     },
-                    timeout: 5000,
+                    timeout: 10000,
                     error: function (data) {
                         toastr.error('Couldn\'t connect to server, check internet connection and re-enter!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     },
@@ -810,7 +810,7 @@
                                 'piece_id': item,
                                 '_token': '{{ csrf_token() }}'
                             },
-                            timeout: 5000,
+                            timeout: 10000,
                             error: function (data) {
                                 toastr.error('Couldn\'t connect to server, check internet connection and re-enter!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             },
@@ -876,7 +876,7 @@
                             'tracking_number': tracking_number,
                             '_token': '{{ csrf_token() }}'
                         },
-                        timeout: 5000,
+                        timeout: 10000,
                         error: function (data) {
                             form.reset();
                             $('#add_shipment_form button.add').prop('disabled', false);

@@ -27,13 +27,11 @@
                                     </div>
                                     <div class="col-3">
                                         <fieldset class="form-group">
-                                            <select name="search_shipper" id="search_shipper" class="form-control select2">
-                                                @foreach($shippers as $shipper)
-                                                    <option value="{{$shipper->id}}">{{$shipper->name}}</option>
-                                                @endforeach
+                                            <select name="search_shipper[]" id="search_shipper" class="form-control select2" multiple>
                                             </select>
                                         </fieldset>
                                     </div>
+                                    
                                     <div class="col-3" style="height: 60px">
                                         <fieldset>
                                             <input type="text" class="form-control" placeholder="Order ID" id="search_order_id">
@@ -233,7 +231,7 @@
                                     </div>
                                     <div class="col-8" id="claim_product_cost_div">
                                         <fieldset class="form-group">
-                                            <input class="form-control" name="claim_product_cost" id="claim_product_cost" value="" placeholder="Enter Product Cost">
+                                            <input class="form-control" name="claim_product_cost" id="claim_product_cost" value="" placeholder="Enter Claim Amount">
                                         </fieldset>
                                     </div>
                                     <div class="col-8 text-left" id="claim_product_picture_div">
@@ -335,6 +333,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/modal/sweetalert.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css') }}">
     <style>
         table.dataTable {
             font-size: 12px;
@@ -392,11 +391,67 @@
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/sweetalert.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
-
+    <script src="{{ asset('app-assets/vendors/js/forms/select/selectize.min.js') }}" type="text/javascript"></script>
+    <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
 
     <script type="text/javascript">
         $(document).ready(function () {
+          
+            jQuery.fn.DataTable.Api.register('buttons.exportData()', function(options) {
+                if (this.context.length) {
+                    body = [];
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
+                    params.excel = -1;
+                    var jsonResult =
+                        $.ajax({
+                            url: '{{ route('admin.cx_quick_tracking.cx_list') }}',
+                            method: 'GET',
+                            data: params,
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
+                            success: function(res) 
+                            {
+                                head = [];
+                                head.push('S. No.');
+                                head.push('Tracking Number');
+                                head.push('Order ID');
+                                head.push('Origin');
+                                head.push('Destination');
+                                head.push('Address');
+                                head.push('COD Amount');
+                                head.push('Status');
+                                head.push('Shipper Name');
+                                head.push('Consignee Name');
+                                head.push('Consignee Phone Number');
+
+                                $.each(res.data || [], function(i, r) {
+                                    var row = [];
+                                    row.push(i + 1);
+                                    row.push(r.tracking_number || r.tracking_number_link || '');
+                                    row.push(r.order_id || '');
+                                    row.push(r.origin || '');
+                                    row.push(r.destination || '');
+                                    row.push(r.address || '');
+                                    row.push(r.cod_amount || '');
+                                    row.push(r.status || '');
+                                    row.push(r.shipper_name || '');
+                                    row.push(r.consignee_name || '');
+                                    row.push(r.consignee_phone_no || '');
+                                    body.push(row);
+                                });
+                            },
+                            async: false
+                        });
+                    return {
+                        header: head,
+                        body: body
+                    };
+                }
+            });  
             $('#search_consignee_phone_number').inputmask({
                 'mask': '9999-9999999',
                 'clearIncomplete': true
@@ -426,17 +481,30 @@
                 'allowPlus': false
             });
 
-            $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder: 'Shipper',
-                width: '100%',
-                allowClear: true
-            });
-
-            $("#search_form").keyup(function(event) {
-                if (event.keyCode === 13) {
-                    $("#search_filter_btn").click();
+            $('#search_shipper').select2({
+                width:'100%',
+                placeholder:"Select Shipper",
+                allowClear:true,
+                multiple: true,
+                minimumInputLength: 2,
+                ajax: {
+                    dataType: 'json',
+                    url:  '{!! route('admin.accounts.shipper_names.dropdown',['type'=>'active']) !!}',
+                        data: function (params) {
+                            return {
+                                search: params.term,
+                            }
+                        },
+                        processResults: function (data) {
+                            return {
+                                results: data
+                            };
+                        },
+                    delay: 700,
                 }
             });
+
+
             $('#search_shipment_status').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder: 'Shipment Status',
                 width: '100%',
@@ -444,6 +512,7 @@
             });
 
             var table;
+            let trackingSelect, orderSelect, requestSelect;
             function init(){
 
                 $('#case_nature_select').prepend('<option value="" selected="selected"></option>').select2({
@@ -558,10 +627,18 @@
                 });
 
                 table = $('#datatable').DataTable({
-                    dom: '<"d-inline-block"l>tipr',
+                    dom: '<"d-inline-block"l><"pull-right"B>tipr',
                     lengthMenu: [[10, 50, 100], [10, 50, 100]],
                     scrollX: true,
                     pageLength: 10,
+                    buttons:[
+                        {
+                            extend: 'excel',
+                            title: 'CX Quicking Tracking',
+                            className: 'btn btn-primary',
+                            text: '<i class="la la-file-excel-o"></i> Excel',
+                        },
+                    ],
                     pagingType: 'full_numbers',
                     processing: true,
                     language: {
@@ -570,12 +647,14 @@
                     serverSide: true,
                     ajax: {
                         url: '{{ route('admin.cx_quick_tracking.cx_list') }}',
-                        data: function (d) {
-                            d.search_tracking = $('#search_tracking_number').val();
-                            d.search_shipper = $('#search_shipper').val();
-                            d.search_phone_no = $('#search_consignee_phone_number').val();
-                            d.search_order_id = $('#search_order_id').val();
-                            d.crm_request_id = $('#crm_request_id').val();
+                      data: function (d) {
+                            const itemsOf = (sel) => (sel && Array.isArray(sel.items)) ? sel.items : [];
+
+                            d.search_tracking        = itemsOf(trackingSelect);
+                            d.search_shipper         = $('#search_shipper').val();
+                            d.search_phone_no        = $('#search_consignee_phone_number').val();
+                            d.search_order_id        = itemsOf(orderSelect);
+                            d.crm_request_id         = itemsOf(requestSelect);
                             d.search_shipment_status = $('#search_shipment_status').val();
                         }
                     },
@@ -607,6 +686,7 @@
 
                 var shipment_id = null;
                 var update_shipment_id = null;
+                
                 $('body').on('click','.request_add',function () {
                     shipment_id = $(this).parents('tr').attr('id');
                     var tracking_number = table.row( $(this).parents('tr') ).data().tracking_number;
@@ -763,70 +843,165 @@
                         }
                         if(nature_flag){
                             $('#AddNewRequest').attr('disabled',true);
-                            $.ajax({
-                                url: '{!! route('admin.crm.request.add') !!}',
-                                method: 'POST',
-                                data: {
-                                    '_token': '{{ csrf_token() }}',
-                                    'shipment_id': shipment_id,
-                                    'case_nature_id' : case_nature_id,
-                                    'complaint_id' : case_nature_complaint_id,
-                                    'channel_id': case_nature_channel_id,
-                                    'description' : service_description,
-                                    'complainant_phone' : $('#complainant_phone').val(),
-                                    'case_nature_complainant' : $('#case_nature_complainant').val(),
-                                }
-                            })
-                                .done(function(data) {
-                                    if (data.status) {
-                                        if(data.flag){
-                                            var html = '';
+                            if(case_nature_complaint_id == 39) {
+                                swal({
+                                    title: 'Are you sure to change service type?',
+                                    text: 'Select Yes to change service type!',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function (confirm){
+                                    if(confirm){
+                                        $.ajax({
+                                            url: '{!! route('admin.crm.request.add') !!}',
+                                            method: 'POST',
+                                            data: {
+                                                '_token': '{{ csrf_token() }}',
+                                                'shipment_id': shipment_id,
+                                                'case_nature_id' : case_nature_id,
+                                                'complaint_id' : case_nature_complaint_id,
+                                                'channel_id': case_nature_channel_id,
+                                                'description' : service_description,
+                                                'complainant_phone' : $('#complainant_phone').val(),
+                                                'case_nature_complainant' : $('#case_nature_complainant').val(),
+                                            }
+                                        })
+                                            .done(function(data) {
+                                                if (data.status) {
+                                                    if(data.flag){
+                                                        var html = '';
 
-                                            $.each(data.already_existed_shipments, function(index, tracking_number) {
-                                                html += tracking_number + '<br/>';
+                                                        $.each(data.already_existed_shipments, function(index, tracking_number) {
+                                                            html += tracking_number + '<br/>';
+                                                        });
+
+                                                        if (!data.cannot_change) {
+                                                            html += '<br/>Request/Complaint already lodged for the above Shipment(s)!';
+                                                        }
+                                                        else {
+                                                            html += '<br/>Request for Change cannot be opened for the above Shipment(s) at the Current Status!';
+                                                        }
+
+                                                        content = document.createElement('div');
+                                                        content.innerHTML = html;
+
+                                                        swal({
+                                                            title: 'Request / Complaint Cannot Be Lodged!',
+                                                            content: content,
+                                                            icon: 'warning',
+                                                            buttons: {
+                                                                cancel: {
+                                                                    text: 'Close',
+                                                                    value: null,
+                                                                    visible: true,
+                                                                    closeModal: true,
+                                                                },
+                                                            },
+                                                            closeOnClickOutside: false,
+                                                            closeOnEsc: false,
+                                                            dangerMode: true
+                                                        });
+                                                    }else{
+                                                        toastr.success(data.success, 'Success!', {
+                                                            positionClass: 'toast-bottom-center',
+                                                            containerId: 'toast-bottom-center'
+                                                        });
+                                                    }
+                                                    // toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                                }
+                                                else {
+                                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                                }
+
+                                                $('#AddRequestModal').modal('hide');
+                                                $('#AddNewRequest').attr('disabled',false);
                                             });
+                                    }else{
+                                        $('#AddNewRequest').attr('disabled',false);
+                                    }
+                                });
+                            }
+                            else {
+                                $.ajax({
+                                    url: '{!! route('admin.crm.request.add') !!}',
+                                    method: 'POST',
+                                    data: {
+                                        '_token': '{{ csrf_token() }}',
+                                        'shipment_id': shipment_id,
+                                        'case_nature_id' : case_nature_id,
+                                        'complaint_id' : case_nature_complaint_id,
+                                        'channel_id': case_nature_channel_id,
+                                        'description' : service_description,
+                                        'complainant_phone' : $('#complainant_phone').val(),
+                                        'case_nature_complainant' : $('#case_nature_complainant').val(),
+                                    }
+                                })
+                                    .done(function(data) {
+                                        if (data.status) {
+                                            if(data.flag){
+                                                var html = '';
 
-                                            if (!data.cannot_change) {
-                                            html += '<br/>Request/Complaint already lodged for the above Shipment(s)!';
+                                                $.each(data.already_existed_shipments, function(index, tracking_number) {
+                                                    html += tracking_number + '<br/>';
+                                                });
+
+                                                if (!data.cannot_change) {
+                                                    html += '<br/>Request/Complaint already lodged for the above Shipment(s)!';
+                                                }
+                                                else {
+                                                    html += '<br/>Request for Change cannot be opened for the above Shipment(s) at the Current Status!';
+                                                }
+
+                                                content = document.createElement('div');
+                                                content.innerHTML = html;
+
+                                                swal({
+                                                    title: 'Request / Complaint Cannot Be Lodged!',
+                                                    content: content,
+                                                    icon: 'warning',
+                                                    buttons: {
+                                                        cancel: {
+                                                            text: 'Close',
+                                                            value: null,
+                                                            visible: true,
+                                                            closeModal: true,
+                                                        },
+                                                    },
+                                                    closeOnClickOutside: false,
+                                                    closeOnEsc: false,
+                                                    dangerMode: true
+                                                });
+                                            }else{
+                                                toastr.success(data.success, 'Success!', {
+                                                    positionClass: 'toast-bottom-center',
+                                                    containerId: 'toast-bottom-center'
+                                                });
+                                            }
+                                            // toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                         }
                                         else {
-                                            html += '<br/>Request for Change cannot be opened for the above Shipment(s) at the Current Status!';
+                                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                         }
 
-                                            content = document.createElement('div');
-                                            content.innerHTML = html;
-
-                                            swal({
-                                                title: 'Request / Complaint Cannot Be Lodged!',
-                                                content: content,
-                                                icon: 'warning',
-                                                buttons: {
-                                                    cancel: {
-                                                        text: 'Close',
-                                                        value: null,
-                                                        visible: true,
-                                                        closeModal: true,
-                                                    },
-                                                },
-                                                closeOnClickOutside: false,
-                                                closeOnEsc: false,
-                                                dangerMode: true
-                                            });
-                                        }else{
-                                            toastr.success(data.success, 'Success!', {
-                                                positionClass: 'toast-bottom-center',
-                                                containerId: 'toast-bottom-center'
-                                            });
-                                        }
-                                        // toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                    }
-                                    else {
-                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                    }
-
-                                    $('#AddRequestModal').modal('hide');
-                                    $('#AddNewRequest').attr('disabled',false);
-                                });
+                                        $('#AddRequestModal').modal('hide');
+                                        $('#AddNewRequest').attr('disabled',false);
+                                    });
+                            }
                         }
                     }else if(case_nature_id == 3) {
                         var feedback_flag = true;
@@ -917,7 +1092,7 @@
                         var nature_flag = true;
                         var case_nature_claim_id = $('#case_nature_claim').val();
                         var case_nature_channel_id = $('#claim_channel').val();
-                        var product_cost = $('#claim_product_cost').val();
+                        var product_cost = parseFloat($('#claim_product_cost').inputmask('unmaskedvalue'));
                         var check_product_picture = $('#product_picture').val();
                         var check_invoice_picture = $('#invoice_picture').val();
                         $('#shipment_ids').val(shipment_id);
@@ -948,7 +1123,7 @@
                             }
                             if(!product_cost){
                                 nature_flag = false;
-                                var error = "Please enter Product Cost!";
+                                var error = isNaN(product_cost) ? "Please enter Claim Amount!" : "Claim Amount cannot be zero !!";
                                 toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             }
                             if(!check_invoice_picture){
@@ -1111,6 +1286,77 @@
                     }
                 }
             });
-        });
+
+            function initNumericOnlySelectize(selector, minLength = 1, placeholder = '') {
+                var $el = $(selector);
+                if ($el.length === 0) return null;
+
+                var select = $el.selectize({
+                    placeholder: placeholder,
+                    delimiter: ',',
+                    createOnBlur: true,
+                    persist: false,
+                    plugins: ['remove_button'],
+                    onDropdownOpen: function () { return false; },
+                    create: function (input) {
+                    input = input.trim();
+                    if ($.isNumeric(input) && input.length >= minLength) {
+                        return { value: input, text: input };
+                    }
+                    return false;
+                    }
+                });
+
+                var inst = select[0].selectize;
+                inst.$control_input.on('input', function () {
+                    var v = this.value.replace(/[^0-9,]/g, '');
+                    if (this.value !== v) this.value = v;
+                });
+                inst.$control_input.on('keydown', function (e) {
+                    if (e.key === 'Enter') {
+                    e.preventDefault();
+                    inst.createItem();
+                    }
+                });
+
+                return inst;
+            }
+
+            function initAnySelectize(selector, minLength = 1, placeholder = '') {
+                var $el = $(selector);
+                if ($el.length === 0) return null;
+
+                var select = $el.selectize({
+                    placeholder: placeholder,
+                    delimiter: ',',
+                    createOnBlur: true,
+                    persist: false,
+                    plugins: ['remove_button'],
+                    onDropdownOpen: function () { return false; },
+                    create: function (input) {
+                    input = input.trim();
+                    if (input.length >= minLength) {
+                        return { value: input, text: input };
+                    }
+                    return false;
+                    }
+                });
+
+                var inst = select[0].selectize;
+                inst.$control_input.on('keydown', function (e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        inst.createItem();
+                    }
+                });
+
+                return inst;
+            }
+
+            trackingSelect = initNumericOnlySelectize('#search_tracking_number', 6, 'Tracking Number(s)*');
+            requestSelect  = initNumericOnlySelectize('#crm_request_id', 1, 'Request ID(s)*');
+
+            orderSelect    = initAnySelectize('#search_order_id', 1, 'Order ID(s)*');
+            });
     </script>
 @endsection

@@ -16,6 +16,7 @@ use App\Http\Models\ReturnAssignedShipmentLogs;
 use App\Http\Models\ReturnAssignedShipments;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentReplacementParcelImage;
+use App\Models\ShipmentGeoCode;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -121,6 +122,8 @@ class AdminInterceptRebookRequestHistoryController extends Controller
         if($shipment_id){
             $shipment = Shipment::where('id',$shipment_id)->first();
             if($shipment){
+                $latitude=null;
+                $longitude=null;
                 if($shipment->shipping_mode_id == 2){
                     $restricted_cities = RestrictedCityIntercept::pluck('city_id')->toArray();
                 $consignee_cities = Shipment::leftjoin('city_deliveries as cd', 'cd.booking_type_id', '=', 'shipments.booking_type_id')
@@ -144,7 +147,13 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                 $consignee_cities = $consignee_cities->orderBy('c.name')
                     ->groupBy('c.name')
                     ->get();
-                return view('admin.intercept.index')->with(['shipment' => $shipment, 'consignee_cities' => $consignee_cities]);
+                $shipment_geo_codes = ShipmentGeoCode::where('shipment_id', $shipment_id)
+                    ->where('geo_code_type',2)->first();
+                if($shipment_geo_codes){
+                    $latitude = $shipment_geo_codes->latitude;
+                    $longitude = $shipment_geo_codes->longitude;
+                }
+                return view('admin.intercept.index')->with(['shipment' => $shipment, 'consignee_cities' => $consignee_cities,'latitude' => $latitude, 'longitude' => $longitude]);
             }
             return redirect()->back()->with('error', 'Shipment not found!');
         }
@@ -408,6 +417,24 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                         $shipment_parcel_image->save();
                     }
 
+                   }
+                   $latitude = $request->input('latitude');
+                   $longitude = $request->input('longitude');
+                   if($latitude > 0 && $longitude > 0){
+                        $shipment_geo_code  = ShipmentGeoCode::where('shipment_id', $request->shipment_id)
+                            ->where('geo_code_type',2)->first();
+                        if($shipment_geo_code){
+                            $shipment_geo_code->latitude = $latitude;
+                            $shipment_geo_code->longitude = $longitude;
+                        }else {
+                            $shipment_geo_code = new ShipmentGeoCode();
+                            $shipment_geo_code->user_id = $shipment->user_id;
+                            $shipment_geo_code->shipment_id = $shipment->id;
+                            $shipment_geo_code->geo_code_type = 2;
+                            $shipment_geo_code->latitude = $latitude;
+                            $shipment_geo_code->longitude = $longitude;
+                            $shipment_geo_code->save();
+                        }
                    }
                     return redirect()->back()->with('success', 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment['tracking_number']);
                 }

@@ -378,10 +378,23 @@ class ShipperCRMController extends Controller
                     $payment_shipment = DonePaymentShipment::where('done_payment_id', $payment->id)->first();
                     $shipment = Shipment::where('id', $payment_shipment->shipment_id)->first();
                     $is_shipment = CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_id', $nature_id);
+
                     if($is_shipment->exists()){
                         return ['status' => 0, 'error' => 'Request/Complaint already lodged for the Payment ID: ' . $payment_id_padded];
                     }
                     else{
+                        $check_claim_can_lock = CrmRequest::where('shipment_id',$shipment->id)->latest()->first();
+                        $response = AdminCRMController::canLockClaim($shipment, $is_shipment, $nature_id, $request, $check_claim_can_lock);
+
+                        if ($response['status'] === 0) {
+                            return $response;
+                        }
+
+                        $canComplaintPaymentLocked = AdminCRMController::canComplaintPaymentLocked($shipment->id);
+                        if ($canComplaintPaymentLocked['status'] === 0) {
+                            return $canComplaintPaymentLocked;
+                        }
+                        
                         CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment->id, session('user_id'), NULL, $description);
                     }
                     return ['status' => 1, 'success' => 'Request(s) successfully added'];
@@ -407,11 +420,25 @@ class ShipperCRMController extends Controller
                         $shipment = Shipment::where('id', $pickup_request_shipment->shipment_id)->first();
                         $shipment_id = $shipment->id;
                         $is_shipment = CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_id', $nature_id)->first();
+                        $check_claim_can_lock = CrmRequest::where('shipment_id',$shipment->id)->latest()->first();
+                        $response = AdminCRMController::canLockClaim($shipment, $is_shipment, $nature_id, $request, $check_claim_can_lock);
+
+                        if ($response['status'] === 0) {
+                            return $response;
+                        }
+                        if($nature_id == 1 && $request->complaint_id == 1){
+                            $canComplaintPaymentLocked = AdminCRMController::canComplaintPaymentLocked($shipment_id);
+                            if ($canComplaintPaymentLocked['status'] === 0) {
+                                return $canComplaintPaymentLocked;
+                            }
+                        }
+
                         if($is_shipment){
+
                             if($is_shipment->case_nature_id != $nature_id){
                                 if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
 
-                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL , NULL, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
+                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL , NULL, $request->product_cost ?: $request->claim_product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
                                 }
                                 else{
 
@@ -424,7 +451,7 @@ class ShipperCRMController extends Controller
                             }
                         }else{
                             if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
-                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL , NULL, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
+                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL , NULL, $request->product_cost ?: $request->claim_product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
                             }
                             else{
                                 CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
@@ -459,13 +486,30 @@ class ShipperCRMController extends Controller
                         }
 
                         $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
+                        $check_claim_can_lock = CrmRequest::where('shipment_id',$shipment_id)->latest()->first();
+
+                        $response = AdminCRMController::canLockClaim($shipment, $is_shipment, $nature_id, $request, $check_claim_can_lock);
+
+                        if ($response['status'] === 0) {
+                            return $response;
+                        }
+
+                        if($nature_id == 1 && $request->complaint_id == 1){
+                            $canComplaintPaymentLocked = AdminCRMController::canComplaintPaymentLocked($shipment_id);
+                            if ($canComplaintPaymentLocked['status'] === 0) {
+                                return $canComplaintPaymentLocked;
+                            }
+                        }
 
                         $already_lodged = false;
-                        if($is_shipment){
+                        if($is_shipment){ 
                             $already_lodged = true;
+
                             if($is_shipment->case_nature_id != $nature_id){
+
+
                                 if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
-                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL , NULL, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
+                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL , NULL, $request->product_cost ?: $request->claim_product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
                                 }
                                 else{
                                     if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
@@ -479,6 +523,10 @@ class ShipperCRMController extends Controller
                                             CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
                                         }
                                     }
+                                    // auto change service type
+//                                    else if($complaint_id == 39 && in_array($shipment->shipper_status_id,[53,2,3,4,5,12,65,66,21,56])) {
+//                                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, null,true);
+//                                    }
                                     else{
                                         CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
                                     }
@@ -493,13 +541,13 @@ class ShipperCRMController extends Controller
                             if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
                                 if($nature_id == 4) {
                                     if ($complaint_id == 21 || $complaint_id == 22) {
-                                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'), $request->file('damage_product_picture'), $request->file('product_packaging_picture'), $request->file('actual_product_picture'), $request->damage_claim_product_cost, $request->file('missing_product_picture'), $request->file('product_packaging_picture_content_short'), $request->file('actual_product_picture_content_short'), $request->claim_content_product_cost);
+                                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description, $request->product_cost ?: $request->claim_product_cost, $request->file('product_picture'), $request->file('invoice_picture'), $request->file('damage_product_picture'), $request->file('product_packaging_picture'), $request->file('actual_product_picture'), $request->damage_claim_product_cost, $request->file('missing_product_picture'), $request->file('product_packaging_picture_content_short'), $request->file('actual_product_picture_content_short'), $request->claim_content_product_cost);
                                     } else {
-                                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'), null, null, null, null, null, null, null, null);
+                                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description, $request->product_cost ?: $request->claim_product_cost, $request->file('product_picture'), $request->file('invoice_picture'), null, null, null, null, null, null, null, null);
                                     }
                                 }
                                 else{
-                                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, NULL, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'));
+                                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, NULL, $request->product_cost ?: $request->claim_product_cost, $request->file('product_picture'), $request->file('invoice_picture'));
                                     }
                                 }
                             else{
@@ -542,6 +590,10 @@ class ShipperCRMController extends Controller
                                             CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $is_automated_cod_change);
                                         }
                                     }
+                                    // auto change service type
+//                                    else if($complaint_id == 39 && in_array($shipment->shipper_status_id,[53,2,3,4,5,12,65,66,21,56])) {
+//                                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, null,true);
+//                                    }
                                     else{
                                         $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
                                     }
@@ -642,10 +694,23 @@ class ShipperCRMController extends Controller
                     }
 
                     $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
-                    
+                    $check_claim_can_lock = CrmRequest::where('shipment_id',$shipment_id)->latest()->first();
+                    $response = AdminCRMController::canLockClaim($shipment, $is_shipment, $nature_id, $request, $check_claim_can_lock);
+
+                    if ($response['status'] === 0) {
+                        return $response;
+                    }
+
+                    if($nature_id == 1 && $request->complaint_id == 1){
+                        $canComplaintPaymentLocked = AdminCRMController::canComplaintPaymentLocked($shipment_id);
+                        if ($canComplaintPaymentLocked['status'] === 0) {
+                            return $canComplaintPaymentLocked;
+                        }
+                    }  
                     $already_lodged = false;
-                    if($is_shipment){    
+                    if($is_shipment){  
                         $already_lodged = true;
+
                         if($is_shipment->case_nature_id != $nature_id){
                             if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
                                 if(in_array($complaint_id, [11, 13])){
@@ -686,6 +751,10 @@ class ShipperCRMController extends Controller
                                         CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $is_automated_cod_change);
                                     }
                                 }
+                                // auto change service type
+//                                else if($complaint_id == 39 && in_array($shipment->shipper_status_id,[53,2,3,4,5,12,65,66,21,56])) {
+//                                    $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, null,true);
+//                                }
                                 else{
                                     $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
                                 }
@@ -738,6 +807,10 @@ class ShipperCRMController extends Controller
                                 }
                                 
                             }
+                            // auto change service type
+//                            else if($complaint_id == 39 && in_array($shipment->shipper_status_id,[53,2,3,4,5,12,65,66,21,56])) {
+//                                $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, null,true);
+//                            }
                             else{
                                 $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
                             }

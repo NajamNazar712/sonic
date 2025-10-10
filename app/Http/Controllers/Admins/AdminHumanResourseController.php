@@ -5875,24 +5875,38 @@ class AdminHumanResourseController extends Controller
         }
     }
 
-    public function get_employee_info_name_type(Request $request){
-        $employee = Employee::where('trax_id',$request->trax_id);
-        if($employee->exists()){
-            $employee = $employee->first();
-            if($employee->admin != null || $employee->rider != null){
-                $details = array();
-                $details['trax_id'] = $employee->trax_id;
-                $details['name'] = $employee->name;
-                $details['type'] = $employee->employee_type->name;
-                $details['status'] = $employee->employee_status->name;
-                return response()->json(['status' => 1, 'success' => 'Employee found!','details' => $details]);
-            }else{
-                return response()->json(['status' => 0, 'error' => 'Employee not found!']);
-            }
-        }else{
+    public function get_employee_info_name_type(Request $request)
+    {
+        $employee = Employee::with(['admin', 'rider', 'employee_type', 'employee_status'])
+            ->where('trax_id', $request->trax_id)
+            ->first();
+
+        if (!$employee) {
             return response()->json(['status' => 0, 'error' => 'Employee not found!']);
         }
+
+        $hasAdmin = !is_null($employee->admin);
+        $hasRider = !is_null($employee->rider);
+
+        if (!$hasAdmin && !$hasRider) {
+            return response()->json(['status' => 0, 'error' => 'Employee not found!']);
+        }
+
+        $computedType = ($hasAdmin && $hasRider)
+            ? 'Rider & Operation Staff'
+            : ($hasAdmin ? 'Operation Staff' : 'Rider');
+
+        $details = [
+            'trax_id' => $employee->trax_id,
+            'name'    => $employee->name,
+            'type'    => $employee->employee_type->name,     
+            'computedType' => $computedType,
+            'status'  => optional($employee->employee_status)->name,
+        ];
+
+        return response()->json(['status' => 1, 'success' => 'Employee found!', 'details' => $details]);
     }
+
 
     public function submit_employee_rating(Request $request){
 

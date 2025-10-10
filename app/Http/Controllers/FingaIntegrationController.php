@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Auth;
 use Illuminate\Support\Facades\App;
+use App\Models\WalletUserDisable;
 class FingaIntegrationController extends Controller
 {
 
@@ -56,7 +57,11 @@ class FingaIntegrationController extends Controller
 
         $api = config('app.FINGA_URL');
         $token = $this->getToken($api);
-        $user = WalletUser::where('user_id', session('user_id'));
+        if(session('user_id') == 2121) {
+            $user = WalletUserDisable::where('user_id', session('user_id'));
+        }else{
+            $user = WalletUser::where('user_id', session('user_id'));
+        }
 
         if (session('user_type') == 1) {
             $user->where('substitute_user_id', 0);
@@ -79,13 +84,13 @@ class FingaIntegrationController extends Controller
 
     }
 
-    public static function signUp($user = array()) {
+    public static function signUp($user = array(), $shipper_id = null) {
 
         $api = config('app.FINGA_URL');
         $token = self::getToken($api);
         $cnic_front = '';
         $cnic_back = '';
-        $user_id = session('user_id');
+        $user_id = session('user_id') ?? $shipper_id;
         $parent_user = User::find($user_id);
 
         if($token) {

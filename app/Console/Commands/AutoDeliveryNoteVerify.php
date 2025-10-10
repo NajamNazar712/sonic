@@ -5,17 +5,19 @@ namespace App\Console\Commands;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\GlobalSettingsController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
+use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\Webhook\FinalChargesWebhookController;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\RvShipmentAssignAgent;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentOtpVerification;
 use App\Http\Models\ShipmentsJourney;
 use App\RvShipmentTicket;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use App\Http\Traits\RvTrait;
 
@@ -78,7 +80,6 @@ class AutoDeliveryNoteVerify extends Command
                             ->toArray(); // Convert to array for chunking
                         $totalShipments = count($deliveryNoteShipmentsId); // Total number of shipments
                         $chunkSize = 1000; // Define the chunk size
-
                         for ($offset = 0; $offset < $totalShipments; $offset += $chunkSize) {
                             // Get the current chunk of shipment IDs
                             $shipmentChunk = array_slice($deliveryNoteShipmentsId, $offset, $chunkSize);
@@ -86,7 +87,7 @@ class AutoDeliveryNoteVerify extends Command
                             $shipments = Shipment::whereIn('id', $shipmentChunk)
                                 ->whereNotIn('shipper_status_id', [30, 36, 37, 56])
                                 ->where('booking_type_id', '!=', 6)
-                                ->select('id', 'shipper_status_id', 'booking_type_id', 'packaging_material_request', 'packaging_material_charges', 'shipment_type')
+                                ->select('id', 'shipper_status_id', 'booking_type_id', 'packaging_material_request', 'packaging_material_charges', 'shipment_type','user_id')
                                 ->get(); 
                             // Fetch shipments journey data for the current chunk
                             // $shipmentIds = array_column($shipments->toArray(), 'id');
@@ -100,7 +101,7 @@ class AutoDeliveryNoteVerify extends Command
                             foreach ($shipments as $shipment) {
                                 $journey =  $shipment->latest_shipment_journey;
                                 ShipmentsJourneyController::add($journey->shipment_id, $journey->shipper_status_id, $journey->consignee_status_id, $journey->status_reason_id, $journey->remarks, $journey->user_id, 346, $journey->reference_1_id, $journey->reference_2_id, 1, $journey->received_or_refused_by, $journey->rider_id, $journey->cnic, $journey->relation);
-    
+
                                 if ($shipment->shipper_status_id == 14) {
                                    
                                     if ($shipment->booking_type_id == 1) {
@@ -114,33 +115,58 @@ class AutoDeliveryNoteVerify extends Command
                                  FinalChargesWebhookController::webhook_subscription($shipment->id);
     
                                 }
+                                if ($shipment->shipper_status_id == 12 && RvShipmentTicket::where(['shipment_id' => $shipment->id, 'permanent_disable' => '1'])->exists()) {
+                                    $this->conditionalRvSarUpdate($shipment, $journey->status_reason_id);
+                                }
                                 // Mark Return Confirm if $shipper_status_id == 12 And $status_reason_id == (27 or 35)
                                 // 27 = Shipment Damaged
                                 // 35 = Delivery Stopped
-                                if($shipment->shipper_status_id == 12 && in_array($journey->status_reason_id, [27, 35])) {
-                                    $globalAdminId = 346;
-                                    $shipment->shipper_status_id = 20;
-                                    $shipment->consignee_status_id = 20;
-                                    
-                                    if ($shipment->shipment_type == 1) {
-                                        if ($shipment->booking_type_id != 4) {
-                                            ShipmentChargesController::return($shipment->id);
-                                            if ($shipment->packaging_material_request != 1) {
-                                                AdminFinanceController::add_payment($shipment->id, 1);
+                                if($shipment->shipper_status_id == 12 && in_array($journey->status_reason_id, [27, 35]) && RvShipmentTicket::where(['shipment_id' => $shipment->id, 'permanent_disable' => '0'])->exists()) {
+
+                                    $journeys = ShipmentsJourney::where('shipment_id', $shipment->id)->whereIn('status_reason_id', [27, 35])->count();
+                                    if ($journeys > 2) {
+                                        Shipment::where('id', $shipment->id)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
+                                        if ($shipment->shipment_type == 1) {
+                                            if ($shipment->booking_type_id != 4) {
+                                                ShipmentChargesController::return($shipment->id);
+                                                if ($shipment->packaging_material_request != 1) {
+                                                    AdminFinanceController::add_payment($shipment->id, 1);
+                                                }
+                                            } else {
+                                                ShipmentChargesController::walk_in_return($shipment->id);
+                                                $shipment->walk_in_status = 2;
+                                                $shipment->save();
+                                                AdminFinanceController::done_payment($shipment->id, 1);
                                             }
-                                        } else {
-                                            ShipmentChargesController::walk_in_return($shipment->id);
-                                            $shipment->walk_in_status = 2;
-                                            AdminFinanceController::done_payment($shipment->id, 1);
+                                        }
+                                        ShipmentsJourneyController::add($shipment->id, 20, 20, $journey->status_reason_id, $journey->remarks ?? NULL, NULL, 346, null, null, 1, null, null, null, null, null);
+                                    } else {
+                                        if ($shipment->shipper_status_id == 12 && RvShipmentTicket::where(['shipment_id' => $shipment->id, 'permanent_disable' => '0'])->exists()) {
+                                                $this->conditionalRvSarUpdate($shipment, $journey->status_reason_id, 1);
                                         }
                                     }
-                                    ShipmentsJourneyController::add($shipment->id, 20, 20, $journey->status_reason_id, $journey->remarks, NULL, $globalAdminId, null, null, 1, null, null, null, null, null);
-                                    $shipment->save();
-    
                                     //Remove Shipment from RV Shipment Ticket
                                     RvShipmentTicket::where('shipment_id', $shipment->id)->delete();
+                                }elseif ($shipment->shipper_status_id == 12 && in_array($journey->status_reason_id, [19,8])) {
+                                    $shipmetOtpRvRAdd = ShipmentOtpVerification::where(['shipment_id' =>$shipment->id, 'via_rvrsub_reason'=>1])->latest()->first();
+                                    if ($shipmetOtpRvRAdd) {
+                                        Shipment::where('id', $shipment->id)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
+                                        if ($shipment->shipment_type == 1) {
+                                            if ($shipment->booking_type_id != 4) {
+                                                ShipmentChargesController::return($shipment->id);
+                                                if ($shipment->packaging_material_request != 1) {
+                                                    AdminFinanceController::add_payment($shipment->id, 1);
+                                                }
+                                            } else {
+                                                ShipmentChargesController::walk_in_return($shipment->id);
+                                                $shipment->walk_in_status = 2;
+                                                $shipment->save();
+                                                AdminFinanceController::done_payment($shipment->id, 1);
+                                            }
+                                        }
+                                        ShipmentsJourneyController::add($shipment->id, 20, 20, $journey->status_reason_id, $journey->remarks ?? NULL, NULL, 346, null, null, 1, null, null, null, null, null);
+                                    } 
                                 }
-    
                             }
                         }
                         $current_time = Carbon::now();

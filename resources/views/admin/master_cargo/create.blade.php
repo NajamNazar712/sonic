@@ -301,7 +301,7 @@
                                 'shipping_mode_id': shipping_mode_id,
                                 '_token': '{{ csrf_token() }}'
                             },
-                            timeout: 5000,
+                            timeout: 10000,
                             error: function (data) {
                                 $('#add_bag_form button.add').prop('disabled', false);
                                 UnblockPagePermanently();
@@ -392,7 +392,7 @@
                         'bag_ids': bag_ids,
                         '_token': '{{ csrf_token() }}'
                     },
-                    timeout: 5000,
+                    timeout: 10000,
                     error: function (data) {
                         $('#master_cargo_consignment').modal('hide');
 

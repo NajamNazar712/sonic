@@ -161,7 +161,7 @@
                             <div class="col-5">
                                 <div class="form-group">
                                     <div class="input-group mb-2">
-                                        <input type="text" name="product_percentage[]" id="product_percentage_edit" class="form-control product_percentage_edit" placeholder="Commission"  value="" max="100">
+                                        <input type="text" name="product_percentage[]" id="product_percentage_edit" class="form-control product_percentage_edit" placeholder="Commission"  value="">
                                         <div class="input-group-append">
                                             <span class="input-group-text" id="basic-addon2">%</span>
                                         </div>
@@ -403,7 +403,7 @@
             var selectedOptionEdit = $("#retail_shipping_mode_id_edit option:selected").text();
             var productPercentageEdit = $("#product_percentage_edit").val();
 
-            if (productPercentageEdit.trim() === '' || !$.isNumeric(productPercentageEdit)) {
+            if (productPercentageEdit.trim() === '' || !$.isNumeric(productPercentageEdit) || productPercentageEdit > 100 ) {
                 $("#error_message_edit").text("Please enter a valid product percentage.").show();
                 $("#product_percentage_edit").attr("required", true);
             } else {

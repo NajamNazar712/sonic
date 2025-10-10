@@ -1,0 +1,21 @@
+image: atlassian/default-image:3
+
+pipelines:
+  branches:
+    staging:
+      - step:
+          name: 'Deploy to staging VM'
+          deployment: staging
+          script:
+            - echo "Deploying to staging branch VM..."
+            - ssh -o StrictHostKeyChecking=no $SPRINT_132_HOST << EOF
+              cd /var/www/html/sonic3 && ./deploy.sh
+              EOF
+
+    master:
+      - step:
+          name: 'Deploy to Production VM'
+          deployment: Production
+          script:
+            - echo "Deploying to production server..."
+            - ssh -o StrictHostKeyChecking=no $PRODUCTION_HOST "cd /var/www/html/sonic && ./deploy.sh"

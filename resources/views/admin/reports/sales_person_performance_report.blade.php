@@ -25,7 +25,7 @@
                             </div>
                             <div class="col-4 mb-1">
                                 <div class="form-group">
-                                    <select name="sales_person" class="select2" id="sales_person_select">
+                                    <select name="sales_person" class="select2" id="sales_person_select" data-rule-required="true">
                                         @foreach($sales_persons as $sales)
                                             <option value="{{ $sales->id }}">{{ $sales->name }}</option>
                                         @endforeach

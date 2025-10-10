@@ -337,7 +337,7 @@
                     $.ajax({
                     url: '{{ route('admin.logistic.shipment', ['cn_number' => '']) }}/' + cn_number,
                     method: 'GET',
-                    timeout: 5000,
+                    timeout: 10000,
                     error: function (data) {
                         toastr.error('Couldn\'t connect to server, check internet connection and re-enter!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     },

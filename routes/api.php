@@ -15,7 +15,6 @@ use Illuminate\Http\Request;
 
 
     Route::name('api.')->group(function () {
-
     Route::get('fetch_complaints', 'APIController@fetch_complaints')->name('fetch_complaints');
     Route::post('shipment/track/public/crm/request', 'APIController@add_request')->name('crm.track.public');
     Route::post('login', 'APIController@login')->name('login');
@@ -41,6 +40,8 @@ use Illuminate\Http\Request;
 
 
     Route::post('employee_attendance_details', 'APIController@employee_checkin')->name('employee_attendance_details');
+
+    Route::post('lead_website', 'APIController@storeWebsiteLead');
 
     Route::middleware('APIToken')->group(function () {
 
@@ -126,6 +127,12 @@ use Illuminate\Http\Request;
                 Route::get('return_shipments_list', 'APIController@return_shipments_list')->name('return_shipments_list');
             });
         });
+        Route::prefix('partner')->name('partner.')->group(function () {
+            Route::post('mark-prepaid', 'APIController@can_specific_user_change_amount')->name('can_specific_user_change_amount');
+        });
+
+
+
     });
 
 
@@ -169,7 +176,7 @@ use Illuminate\Http\Request;
 
         Route::prefix('register_request')->name('register_request.')->group(function () {
             //Obsoleted
-            Route::post('store', 'Rider\RiderAPIController@rider_signup_v2')->name('store');
+            Route::post('store', 'Rider\RiderAPIController@rider_signup_v2')->name('store2');
             Route::post('store_v2', 'Rider\RiderAPIController@rider_signup_v3')->name('store_v3');
             Route::post('attachment_store', 'Rider\RiderAPIController@rider_attachments_store')->name('attachment_store');
 
@@ -248,6 +255,7 @@ use Illuminate\Http\Request;
                 Route::get('summary/multiple_v6', 'Rider\RiderAPIController@delivery_summary_multiple_v6')->name('delivery_summary_multiple_v6');
                 Route::post('undelivered_v3', 'Rider\RiderAPIController@shipment_undelivered_v3')->name('undelivered_v3');
                 Route::post('undelivered_v4', 'Rider\RiderAPIController@shipment_undelivered_v4')->name('undelivered_v4');
+                Route::post('rvrsub_reason', 'Rider\RiderAPIController@shipmentUndeliveredRvrSubReason')->name('rvrsub_reason');
                 Route::get('undelivered_reason_map', 'Rider\RiderAPIController@undelivered_reason_map')->name('undelivered_reason_map');
 
                 Route::post('delivered_v5', 'Rider\RiderAPIController@shipment_delivered_v5')->name('delivered_v5');
@@ -255,6 +263,9 @@ use Illuminate\Http\Request;
                 Route::post('action_log', 'Rider\RiderAPIController@delivery_action_log')->name('delivery_action_log');
                 Route::post('otp_generate', 'Rider\RiderAPIController@generate_otp_for_consignee')->name('otp_generate');
                 Route::post('pending_for_verification', 'Rider\RiderAPIController@pending_for_verification')->name('pending_for_verification');
+
+                Route::post('print', 'Rider\RiderAPIController@delivery_print')->name('print');
+
             });
             Route::prefix('comments')->name('comments.')->group(function () {
                 Route::post('add', 'Rider\RiderAPIController@crm_comment_add')->name('add');
@@ -269,8 +280,10 @@ use Illuminate\Http\Request;
                 //Current
                 Route::post('pickup_v2', 'Rider\RiderAPIController@pickups_history_v2')->name('pickup_v2');
                 Route::post('delivery_v2', 'Rider\RiderAPIController@delivery_history_v2')->name('delivery_v2');
+                Route::post('delivery_v3', 'Rider\RiderAPIController@delivery_history_v3')->name('delivery_v3');
                 Route::post('return_v2', 'Rider\RiderAPIController@return_history_v2')->name('return_v2');
                 Route::post('history_details', 'Rider\RiderAPIController@history_details')->name('history_details');
+                Route::post('history_details_v1', 'Rider\RiderAPIController@history_details_v1')->name('history_details_v1');
             });
 
             Route::prefix('return')->name('return.')->group(function () {
@@ -290,6 +303,9 @@ use Illuminate\Http\Request;
                 Route::post('delivered_v2', 'Rider\RiderAPIController@return_shipment_delivered_v2')->name('delivered_v2');
                 Route::post('undelivered_v4', 'Rider\RiderAPIController@return_shipment_undelivered_v4')->name('undelivered_v4');
                 Route::post('action_log', 'Rider\RiderAPIController@return_action_log')->name('action_log');
+
+                Route::post('return_note/print', 'Rider\RiderAPIController@return_note_print')->name('return_note.print');
+
             });
 
             Route::get('rider_wallet', 'Rider\RiderAPIController@rider_wallet')->name('rider_wallet');
@@ -522,6 +538,7 @@ use Illuminate\Http\Request;
                 Route::get('check_v2', 'AdminAPIController@check_profile_v2')->name('check_v2');
                 Route::post('check_v3', 'AdminAPIController@check_profile_v3')->name('check_v3');
                 Route::post('update_v2', 'AdminAPIController@update_profile_v2')->name('update_v2');
+
             });
             Route::get('profile', 'AdminAPIController@admin_profile')->name('profile');
             Route::get('employee_id', 'AdminAPIController@get_employee_id')->name('employee_id');
@@ -652,8 +669,24 @@ use Illuminate\Http\Request;
 
     Route::prefix('shipper')->name('shipper.')->group(function () {
         Route::post('login', 'ShipperAPIController@login')->name('login');
+        Route::post('reset_password', 'ShipperAPIController@reset_password')->name('reset_password');
+        Route::post('send_otp', 'ShipperAPIController@sendOtp')->name('reset_password');
+        Route::post('verify_otp', 'ShipperAPIController@verifyOtp')->name('reset_password');
+
+
+
         Route::post('test', 'ShipperAPIController@test')->name('test');
         Route::middleware('ShipperAPIToken')->group(function () {
+
+            //airwaybill
+            Route::post('shipment/air_waybill_pdf', 'ShipperOrderManagementApiController@shipment_air_waybill')->name('shipment.air_waybill');
+
+            Route::prefix('retail')->name('retail.')->group(function () {
+                Route::get('shipment_track', 'APIController@retail_shipment_track')->name('track');
+            });
+
+            Route::post('wallet_registration', 'ShipperAPIController@updateprofilewalletbulk')->name('wallet_registration');
+            Route::post('wallet_login', 'ShipperAPIController@wallet_login')->name('wallet_login');
             Route::post('pod_tracking', 'ShipperAPIController@shipment_pod_tracking')->name('pod_tracking');
             Route::post('shipment_history', 'ShipperAPIController@shipment_history')->name('shipment_history');
             Route::prefix('subscription')->name('subscription.')->group(function () {
@@ -661,8 +694,10 @@ use Illuminate\Http\Request;
                 Route::get('list', 'ShipperAPIController@shipper_subscription_list')->name('list');
                 Route::post('delete', 'ShipperAPIController@shipper_subscription_delete')->name('delete');
             });
+            Route::get('get_shipper_info','ShipperAPIController@get_shipper_info')->name('get_shipper_info');
             Route::get('notification_history', 'ShipperAPIController@notification_history')->name('notification_history');
-
+            Route::get('is_wallet_user' ,'ShipperAPIController@is_wallet_user')->name('is_wallet_user');
+            
             Route::prefix('add_request')->name('add_request.')->group(function () {
                 Route::get('index', 'ShipperAPIController@add_request_index')->name('index');
                 Route::post('submit', 'ShipperAPIController@add_request_submit')->name('submit');
@@ -671,6 +706,7 @@ use Illuminate\Http\Request;
 
             Route::prefix('rcp')->name('rcp.')->group(function () {
                 Route::get('list', 'ShipperAPIController@confirmation_pending_list')->name('list');
+                Route::get('shipper-advice', 'ShipperAPIController@shipper_sar')->name('shipper-advice');
                 Route::post('mark_return_confirm', 'ShipperAPIController@mark_return_confirm')->name('mark_return_confirm');
                 Route::post('mark_reattempt', 'ShipperAPIController@mark_reattempt')->name('mark_reattempt');
                 Route::prefix('intercept')->name('intercept.')->group(function () {
@@ -692,6 +728,44 @@ use Illuminate\Http\Request;
                 Route::post('shipping_modes', 'ShipperAPIController@reimbursement_shipping_modes')->name('shipping_modes');
                 Route::post('submit', 'APIController@shipment_book')->name('submit');
             });
+
+            Route::post('shipping_address','ShipperAPIController@shipping_address')->name('shipping_address');
+
+            Route::get('profile', 'ShipperAppController@profile')->name('profile');
+
+            //Shipment Call History
+            Route::post('shipment_call_status_history', 'ShipperAppController@shipment_call_status_history')->name('profile');
+
+            //meta api for booking resources
+            Route::get('booking_resources','ShipperAppController@booking_resources')->name('booking_resources');
+
+            //shipper pickup addresss and return addresses
+            Route::get('pickup_address','ShipperAppController@pickup_address')->name('pickup_address');
+
+            //order management Api
+            Route::prefix('orders')->name('orders.')->group(function (){
+                Route::get('order_list/{tracking_number?}', 'ShipperOrderManagementApiController@order_list')->name('order_list');
+                Route::post('shipment_chart_summary','ShipperOrderManagementApiController@shipments_summary')->name('shipment_chart_summary');
+                Route::post('cancel_all', 'ShipperOrderManagementApiController@order_cancel_all')->name('cancel_all');
+            });
+
+            //finance Apis
+            Route::prefix('finance')->name('finance.')->group(function (){
+                  Route::get('v2/payments/{id?}','ShipperFinanceApiController@payment_list')->name('payments');
+                  Route::get('v2/GetPaymentShipments','ShipperFinanceApiController@GetPaymentShipments')->name('getPaymentShipments');});
+
+            // CRM Apis
+            Route::prefix('crm')->name('crm.')->group(function (){
+                Route::get('request_resources','ShipperCrmApiController@crm_request_resources')->name('request_resources');
+                Route::post('add_request', 'ShipperCrmApiController@add_crm_request')->name('shipper.crm.add_request');
+                Route::get('request_summary', 'ShipperCrmApiController@crm_request_summary')->name('request_summary');
+//                Route::get('request_list/{status?}', 'ShipperCrmApiController@crm_request_list')->name('request_list');
+                Route::get('request_list', 'ShipperCrmApiController@crm_request_list')->name('request_list');
+
+                Route::post('single_crm_request','ShipperCrmApiController@single_crm_request')->name('single_crm_request');
+                Route::post('receiving_sheet','ShipperCrmApiController@get_receving_sheet')->name('receiving_sheet');
+            });
+
 
         });
     });

@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
 use DNS2D;
+use App\Models\RetailLog;
 
 class RetailAdminAccounts extends Controller
 {
@@ -51,6 +52,7 @@ class RetailAdminAccounts extends Controller
                 if (session('role_id') == 1 || in_array(486, session('permissions'))) {
                     $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
                     $view_button = '<button type="button" class="dropdown-item view"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View</div></button>';
+                    
 
                     $dropdown = '
                     <div class="btn-group">
@@ -60,6 +62,16 @@ class RetailAdminAccounts extends Controller
 
                         $dropdown .= $edit_button;
                         $dropdown .= $view_button;
+                        $dropdown  .= '<button type="button" class="dropdown-item view_logs">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col-2">
+                                    <i class="ft-edit"></i>
+                                </div>
+                                <div class="col-9 offset-1">
+                                    View Logs
+                                </div>
+                            </div>
+                        </button>';
 
                     $dropdown .= '
                       </div>
@@ -114,7 +126,7 @@ class RetailAdminAccounts extends Controller
       if(strlen($request->iban) !== 24){
         return redirect()->back()->with('error', 'Invalid Iban No');
       }
-      
+        $changedFields = [];
         $shipper_account = RetailShipperInfo::find($request->id);
         if($shipper_account){
             $shipper_account->iban = $request->iban;
@@ -124,11 +136,37 @@ class RetailAdminAccounts extends Controller
                 $filename = 'retail_shipper_' . $shipper_account->id . '_cheque_image.png';
 
                 $file = $request->file('cheque_image');
+                $changedFields[] = 'Cheque Image' . ' ' . 'Changed at' . ' ' .  now()->toDateTimeString();
 
                 Storage::disk('public')->putFileAs('retail_shipper_cheque', $file, $filename);
                 $shipper_account->cheque_image = $filename;
                 $shipper_account->completed_status = 1;
             }
+            
+            $fieldNames = [
+              'iban' => 'IBAN',
+              'account_number' => 'Account Number',
+              'bank_id' => 'Bank'
+            ];
+
+            foreach ($fieldNames as $field => $fieldName) {
+                if ($shipper_account->isDirty($field)) {
+                  if($field == 'bank_id') { 
+                      $old_bank_name = optional(BanksList::find($shipper_account->getOriginal($field)))->name ?? 'N/A';
+                      $new_bank_name = optional(BanksList::find($shipper_account->$field))->name ?? 'N/A';
+                      $changedFields[] = $fieldName . ': ' . $old_bank_name . ' -> ' . $new_bank_name;
+                  } else {
+                    $changedFields[] = $fieldName . ': ' . $shipper_account->getOriginal($field) . ' -> ' . $shipper_account->$field;
+                  }
+                }
+            }
+            $record = new RetailLog;
+            $record->changed_by_id = auth()->user()->id;
+            $record->data = implode(', ', $changedFields);
+            $record->changed_in_record_id = $shipper_account->id;
+            $record->screen_name = 'Retail Accounts';
+            $record->save();
+
             $shipper_account->save();
         }
         return redirect()->back()->with('success', 'Shipper details updated successfully');
@@ -369,7 +407,7 @@ class RetailAdminAccounts extends Controller
                               <tr>
                                 <td colspan="2" class="border twice-bottom twice-left">' . $shipment->retail->shipping_modes->name . '</td>
                                 <td colspan="2" class="border twice-bottom">' . $shipment->pieces . '</td>
-                                <td colspan="2" class="border twice-bottom">' . number_format($shipment->estimated_weight) . '</td>
+                                <td colspan="2" class="border twice-bottom">' . floatval($shipment->estimated_weight) . '</td>
                                 <td colspan="2" class="border twice-bottom">' . number_format(ROUND($shipment->retail->weight_charges, 0, PHP_ROUND_HALF_DOWN)) . '</td>
                                 <td colspan="2" class="border twice-bottom">' . number_format(ROUND($fuel_and_gst, 0, PHP_ROUND_HALF_DOWN)) . '</td>
                                 <td colspan="2" class="border twice-bottom twice-right">' . number_format(ROUND($shipment->retail->total_charges, 0, PHP_ROUND_HALF_DOWN)) . '</td>

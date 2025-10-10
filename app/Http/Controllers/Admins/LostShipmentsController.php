@@ -18,6 +18,7 @@ use App\Http\Models\ShippingMode;
 use Illuminate\Support\Facades\DB;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Controllers\Controller;
+use App\Models\LostCategoryShipment;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\ShipmentsJourney;
@@ -164,8 +165,9 @@ class LostShipmentsController extends Controller
                 ->leftjoin('lost_shipment_responsibles as lsr', 'lsr.shipment_id', '=', 'shipments.id')
                 ->leftJoin('lost_shipment_status_counts as lssc', 'lssc.shipment_id', '=', 'shipments.id')
                 ->leftJoin('lost_shipment_status_counts as lssc_new', 'lssc_new.shipment_id', '=', 'shipments.id')
+                ->leftJoin('lost_category_shipments as lcs', 'lcs.shipment_id', '=', 'shipments.id')
 
-                ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number','shipments.user_id as shipper_id', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival','shipments.payment_status_id', 'shipments.booking_type_id', 'usi.poc', 'shipments_journey.reference_1_id as reference','ad.name as marked_by', 'lsr.shipment_id as responsible_person_shipment','shipments_journey.updated_at as marked_at','lssc.approval_count as approval','lssc.cleared as cleared','lssc.shipment_id as shipment_cleared', 'shipments_journey.verification as verification', 'lssc_new.shipment_id as null_shipment', 'ci.name as last_hub_name', 'zo.name as last_zone_name', 'shipments.parcel_value')
+                ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number','shipments.user_id as shipper_id', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival','shipments.payment_status_id', 'shipments.booking_type_id', 'usi.poc', 'shipments_journey.reference_1_id as reference','ad.name as marked_by', 'lsr.shipment_id as responsible_person_shipment','shipments_journey.updated_at as marked_at','lssc.approval_count as approval','lssc.cleared as cleared','lssc.shipment_id as shipment_cleared', 'shipments_journey.verification as verification', 'lssc_new.shipment_id as null_shipment', 'ci.name as last_hub_name', 'zo.name as last_zone_name', 'shipments.parcel_value','shipments_journey.status_reason_id as status_reason_id', 'lcs.type as lost_category')
                 ->where('shipments.shipper_status_id', 18)->groupBy('shipments.id');
             if(session('role_id') != 1){
                 $check_lost_shipments_admins = LostShipmentAdmin::where('admin_id', Auth::id());
@@ -230,11 +232,19 @@ class LostShipmentsController extends Controller
                         return " - ";
                     }
                 })
-                ->editColumn('remarks', function ($shipments) {
-                    if ($shipments->remarks) {
+               ->editColumn('remarks', function ($shipments) {
+                    if (!empty($shipments?->remarks)) {
                         return $shipments->remarks;
+                    } 
+                    elseif ($shipments?->status_reason_id != 90 && empty($shipments?->remarks)) {
+                        $fallback = ShipmentsJourney::where([
+                            'shipment_id' => $shipments?->shId,
+                            'status_reason_id' => 90
+                        ])->latest()->first();
+
+                        return $fallback?->remarks ?? '-';
                     } else {
-                        return " - ";
+                        return "-";
                     }
                 })
                 ->editColumn('amount', function($shipment){
@@ -761,7 +771,6 @@ class LostShipmentsController extends Controller
             }
     }
     public function add_lost_shipments(Request $request){
-    
         $passing_status_array = array(1,14,17,18,25,31,38);
         $shipment_status_for_bags = array(3,21,26,32,49);
         $shipments = explode(',', $request->shipment_ids);
@@ -885,6 +894,33 @@ class LostShipmentsController extends Controller
                     $this->LostShipmentResponsible($LostShipmentResponsible, $lostShipmentsTime);
                 }
             }
+
+            $remarks_category = $request->remarks_category ?? [];
+
+            if (!empty($remarks_category)) {
+                $categoryIds = array_values($remarks_category);
+                $categories = DB::table('lost_categories')
+                    ->whereIn('id', $categoryIds)
+                    ->pluck('name', 'id'); 
+
+                $insertData = [];
+                $now = now();
+                foreach ($remarks_category as $shipmentId => $categoryId) {
+                    if (isset($categories[$categoryId])) {
+                        $insertData[] = [
+                            'shipment_id' => $shipmentId,
+                            'type'        => $categories[$categoryId],
+                            'created_at'  => $now,
+                            'updated_at'  => $now,
+                        ];
+                    }
+                }
+
+                if (!empty($insertData)) {
+                    LostCategoryShipment::insert($insertData);
+                }
+            }
+
 
             return redirect()->back()->with(['success' => 'Shipment(s) has been added to Lost!']);
 
@@ -1044,7 +1080,13 @@ class LostShipmentsController extends Controller
                         $data[$shipment->id]['amount'] = number_format($shipment->amount);
                         $data[$shipment->id]['parcel_value'] = number_format($shipment->parcel_value);
                         $data[$shipment->id]['mode'] = $shipment->shipping_mode->mode;
-                        $data[$shipment->id]['remarks'] = '<input class="form-control form-control-sm" name="remarks[' . $shipment->id. ']" placeholder="Enter Remarks">';
+                        $data[$shipment->id]['remarks'] = '
+                            <div class="remarks-cell" data-shipment-id="'.$shipment->id.'">
+                                <input class="form-control form-control-sm remarks" 
+                                    data-shipment-id="'.$shipment->id.'" 
+                                    name="remarks['.$shipment->id.']" 
+                                    placeholder="Enter Remarks">
+                            </div>';
 
                         $data[$shipment->id]['service_type'] = $shipment->booking_type->booking_type;
                         $data[$shipment->id]['service_type'] = $shipment->booking_type->booking_type;
@@ -1117,7 +1159,10 @@ class LostShipmentsController extends Controller
                     $bag->save();
                 }
             }
-            ShipmentsJourneyController::add($shipment_id, 18, NULL, NULL, NULL, NULL, Auth::id(), NULL, NULL, $request->approve);
+
+            $latest_shipment_journey = ShipmentsJourney::where('shipment_id', $shipment_id)->where('status_reason_id', 90)->latest()->first();
+
+            ShipmentsJourneyController::add($shipment_id, 18, NULL, NULL, $latest_shipment_journey?->remarks, NULL, Auth::id(), NULL, NULL, $request->approve);
             $this->updateLostShipmentApproval($shipment_id, 'approval_count', 1);
         }
         return response()->json(['status' => 1, 'success' => 'Shipment Has Been Approved To Lost !!']);

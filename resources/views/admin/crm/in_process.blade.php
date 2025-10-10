@@ -71,6 +71,7 @@
                                     <th class="border-primary border-darken-1">Agent</th>
                                     <th class="border-primary border-darken-1">Agent Assigned By</th>
                                     <th class="border-primary border-darken-1">Parcel Value</th>
+                                    <th class="border-primary border-darken-1">Claim Amount</th>
                                     <th class="border-primary border-darken-1">COD Value</th>
                                     <th class="border-primary border-darken-1">Segment</th>
                                     <th class="border-primary border-darken-1">Weight</th>
@@ -301,14 +302,102 @@
             </div>
         </div>
     </div>
+
+
+            <div class="modal fade text-left" id="CloseReasonModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="CloseReasonModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Who’s at Fault</h4>
+                </div>
+                <input type="hidden" name="close_reason_type" id="close_reason_type" value="">
+                <input type="hidden" name="close_reason_crm_ids" id="close_reason_crm_ids" value="0">
+                <div class="modal-body">
+                    <select name="closed_reason_status" id="closed_reason_status" class="form-control select2">
+                        @foreach($closed_reason_statuses as $closed_reason_status)
+                            <option value="{{ $closed_reason_status->id }}" > {{ $closed_reason_status->name }} </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="closed_reason_submit">Submit</button>
+                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<div class="modal fade text-left" id="claimInvalidModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="claimInvalidModal" aria-hidden="true">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Claim Invalid Reason</h4>
+            </div>
+
+            <div class="modal-body">
+                <select name="claim_invalid_reasons[]" id="claim_invalid_reasons" class="form-control select2" multiple>
+                    @foreach($invalid_reasons as $reason)
+                        <option value="{{ $reason->id }}">{{ $reason->reason }}</option>
+                    @endforeach
+                </select>
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="invalid_submit">Submit</button>
+                <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+ <div class="modal fade text-left" id="claimResolvedModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="claimResolvedModal" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Claim Resolved Reason</h4>
+                </div>
+
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="claim_resolved_reason">Select Reason</label>
+                        <select name="claim_resolved_reason" id="claim_resolved_reason" class="form-control select2">
+                            <option value="" disabled selected> Select a reason </option>
+                            @foreach($resolved_reasons as $reason)
+                                <option value="{{ $reason->id }}">{{ $reason->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="form-group mt-3" id="sub_reason_wrapper" style="display: none;">
+                        <label for="claim_resolved_sub_reasons">Select Sub Reason(s)</label>
+                        <select name="claim_resolved_sub_reasons[]" id="claim_resolved_sub_reasons" class="form-control select2" multiple>
+                            @foreach($resolved_sub_reasons as $sub)
+                                <option value="{{ $sub->id }}">{{ $sub->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="resolved_submit">Submit</button>
+                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+</div>
+
 @endsection
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
+    
     <style type="text/css">
         .selectize-control {
-            width: 300px !important;
+            width: 500px !important;
         }
 
         .select-checkbox{
@@ -327,6 +416,17 @@
         tr.highalert_row a{
             color: whitesmoke;
         }
+        .select2-search__field{
+            width: 140px !important;
+        }
+
+        .select2-container--default .select2-selection--multiple {
+            min-height: 48px !important;      
+            max-height: 100px !important;   
+            overflow-y: auto !important;   
+            padding-bottom: 5px;
+        }
+
     </style>
 @endsection
 
@@ -380,6 +480,7 @@
                             head.push('Agent');
                             head.push('Agent Assigned By');
                             head.push('Parcel Value');           // Newly added based on your list
+                            head.push('Claim Amount');           // Newly added based on your list
                             head.push('COD Value');              // Newly added based on your list
                             head.push('Segment');                // Newly added based on your list
                             head.push('Weight');                 // Newly added based on your list
@@ -426,6 +527,7 @@
                                 row.push(values.agent);                                       // Agent
                                 row.push(values.agent_assigned_by);                           // Agent Assigned By
                                 row.push(values.parcel_value);                                // Parcel Value
+                                row.push(values.product_cost);                                // Claim Amount
                                 row.push(values.cod_value);                                   // COD Value
                                 row.push(values.segment);                                    // Segment
                                 row.push(values.actual_weight);                               // Weight
@@ -433,10 +535,10 @@
                                 row.push(values.shipper_category);                            // Key account category
                                 row.push(values.kae);                                        // KAE
                                 row.push(values.launched_by_name);                            // Launched By
-                                row.push(values.tagged);                                   // Launched By Type
+                                row.push(values.added_by);                                 // Launched By Type
                                 row.push(values.tagged_to_operation);                         // Tagged To Operation
                                 row.push(values.tagged_to_manual);                            // Manual Tagged To
-                                row.push(values.added_by);                           // Tagged (Admin/Department)
+                                row.push(values.tagged);                                    // Tagged (Admin/Department)
                                 row.push(values.last_comment_name);                           // Last Comment By
                                 row.push(values.last_comment.replace(/<br>/gi, '\n'));       // Last Comment
                                 row.push(values.last_comment_date);                           // Last Comment Date
@@ -481,69 +583,102 @@
 
                     // bulk resolve button
                     @if (session('role_id') == 1 || in_array(1013, session('permissions')))
-                        {
-                            text: 'Resolve',
-                            className: 'btn btn-primary bulk_resolve',
-                            enabled: false,
-                            action: function (e, dt, node, config) {
-                                swal({
-                                    title: 'Are you sure?',
-                                    text: 'Are you sure you want to mark them as resolved?',
-                                    icon: 'warning',
-                                    buttons: {
-                                        cancel: {
-                                            text: 'No',
-                                            value: null,
-                                            visible: true,
-                                            closeModal: true,
-                                        },
-                                        confirm: {
-                                            text: 'Yes',
-                                            value: true,
-                                            visible: true,
-                                            closeModal: true
+                    {
+                        text: 'Resolve',
+                        className: 'btn btn-primary bulk_resolve',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            $.ajax({
+                                url: '{{ route("admin.crm.bulk_resolve") }}',
+                                method: 'POST',
+                                data: {
+                                    crm_request_ids: selected_rows,
+                                    inprocess: true,
+                                    _token: '{{ csrf_token() }}'
+                                }
+                            })
+                            .done(function (data) {
+                                if (data.status === 1 && data.errors && Array.isArray(data.errors)) {
+                                    data.errors.forEach(function (error) {
+                                        if (Array.isArray(error) && error.length > 0) {
+                                            toastr.error(error[0], 'Error!', {
+                                                positionClass: 'toast-top-center',
+                                                containerId: 'toast-top-center',
+                                            });
+                                        } else if (typeof error === 'string') {
+                                            toastr.error(error, 'Error!', {
+                                                positionClass: 'toast-top-center',
+                                                containerId: 'toast-top-center',
+                                            });
                                         }
-                                    },
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false,
-                                    dangerMode: true
-                                }).then((result) => {
-                                    if (result) {
-                                        $.ajax({
-                                            url: '{!! route('admin.crm.bulk_resolve') !!}',
-                                            method: 'POST',
-                                            data: {
-                                                'crm_request_ids': selected_rows,
-                                                '_token': '{{ csrf_token() }}'
+                                    });
+                                }else if (data.status === 2) {
+                                    swal({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: 'Kindly select all claim',
+                                        confirmButtonColor: '#d33'
+                                    });
+                                } else if (data.status === 3) {
+                                     const fakeForm = $('<form>', {
+                                        method: 'POST',
+                                        action: '{{ route("admin.crm.bulk_resolve") }}'
+                                    });
+
+                                    fakeForm.append($('<input>', {
+                                        type: 'hidden',
+                                        name: '_token',
+                                        value: '{{ csrf_token() }}'
+                                    }));
+
+                                    selected_rows.forEach(function (id) {
+                                        fakeForm.append($('<input>', {
+                                            type: 'hidden',
+                                            name: 'crm_request_ids[]',
+                                            value: id
+                                        }));
+                                    });
+
+                                    $('body').append(fakeForm); 
+                                    pendingForm = fakeForm[0]; 
+                                    $('#claimResolvedModal').modal('show');
+                                } else {
+                                    swal({
+                                        title: 'Are you sure?',
+                                        text: 'Are you sure you want to mark them as resolved?',
+                                        icon: 'warning',
+                                        buttons: {
+                                            cancel: {
+                                                text: 'No',
+                                                value: null,
+                                                visible: true,
+                                                closeModal: true,
+                                            },
+                                            confirm: {
+                                                text: 'Yes',
+                                                value: true,
+                                                visible: true,
+                                                closeModal: true
                                             }
-                                        })
-                                        .done(function (data) {
-                                            if (data.status === 1 && data.errors && Array.isArray(data.errors)) {
-                                                // Iterate over the data.errors array and extract the error messages
-                                                data.errors.forEach(function(error) {
-                                                    if (Array.isArray(error) && error.length > 0) {
-                                                        // If the error is an array, display the first element as the message
-                                                        toastr.error(error[0], 'Error!', {
-                                                            positionClass: 'toast-top-center',
-                                                            containerId: 'toast-top-center',
-                                                        });
-                                                    } else if (typeof error === 'string') {
-                                                        // If it's a string, display it directly
-                                                        toastr.error(error, 'Error!', {
-                                                            positionClass: 'toast-top-center',
-                                                            containerId: 'toast-top-center',
-                                                        });
-                                                    }
-                                                });
-                                            }
-                                            else {
-                                                window.location.href = '{!! route('admin.crm.resolved.index') !!}';
-                                            }
-                                        });
-                                    }
+                                        },
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false,
+                                        dangerMode: true
+                                    }).then((result) => {
+                                        if (result) {
+                                            window.location.href = '{{ route("admin.crm.resolved.index") }}';
+                                        }
+                                    });
+                                }
+                            })
+                            .fail(function () {
+                                toastr.error('Something went wrong. Please try again later.', 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center',
                                 });
-                            }
-                        },
+                            });
+                        }
+                    },
                     @endif
 
                     @if (session('role_id') == 1 || session('role_id') == 6 || in_array(787, session('permissions')))
@@ -557,6 +692,7 @@
                                 method: 'POST',
                                 data: {
                                     // 'closed_reason_status':closed_reason_status,
+                                    'inprocess': true,
                                     'crm_request_ids': selected_rows,
                                     '_token': '{{ csrf_token() }}'
                                 }
@@ -566,7 +702,17 @@
                                     $('#close_reason_crm_ids').val(data.crm_ids);
                                     $('#close_reason_type').val(1);
                                     $('#CloseReasonModal').modal('show');
-                                }else{
+                                }else if(data.status == 2){
+                                     swal({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: 'Kindly select all claim',
+                                        confirmButtonColor: '#d33'
+                                    });
+                                }else if(data.status == 3){                           
+                                    $('#claimInvalidModal').modal('show');
+                                } 
+                                else{
                                     mark_valid_invalid(0);
                                 }
                             });
@@ -822,6 +968,7 @@
                     {data: 'agent', name: 'ad.name', class: 'align-middle agent'},                                         // Agent
                     {data: 'agent_assigned_by', name: 'resby.name', class: 'align-middle agent_assigned_by'},              // Agent Assigned By
                     {data: 'parcel_value', name: 's.parcel_value', class: 'align-middle parcel_value'},                      // Parcel Value
+                    {data: 'product_cost', name: 'crm_requests.product_cost', class: 'align-middle product_cost'},          //Claim Amount
                     {data: 'cod_value', name: 's.amount', class: 'align-middle cod_value'},                              // COD Value
                     {data: 'segment', name: 'seg.name', class: 'align-middle segment'}, // Segment
                     {data: 'actual_weight', name: 's.actual_weight', class: 'align-middle actual_weight'}, // Weight
@@ -829,10 +976,10 @@
                     {data: 'shipper_category', name: 'shipper_category', class: 'align-middle shipper_category'}, // Key account category
                     {data: 'kae', name: 'ad2.name', class: 'align-middle kae'}, // KAE
                     {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'},                      // Launched By
-                    {data: 'tagged', name: 'crt.crm_request_tagging_type_id', class: 'align-middle tagged'},
+                    {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'}, // Launched By Type
                     {data: 'tagged_to_operation', name: 'tagged_to_operation', class: 'align-middle tagged_to_operation'}, //Tagged To Operation
                     {data: 'tagged_to_manual', name: 'tagged_to_manual', class: 'align-middle tagged_to_manual'}, // Manual Tagged To
-                    {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'}, // Launched By Type
+                    {data: 'tagged', name: 'crt.crm_request_tagging_type_id', class: 'align-middle tagged'},
                     {data: 'last_comment_name', name: 'last_comment_name', class: 'align-middle last_comment_name'},       // Last Comment By
                     {data: 'last_comment', name: 'ccs.comment', class: 'align-middle last_comment'},                       // Last Comment
                     {data: 'last_comment_date', name: 'ccs.created_at', class: 'align-middle last_comment_date'},          // Last Comment Date
@@ -866,7 +1013,10 @@
                         '<option value="0">Admin</option>' +
                         '<option value="1">Shipper</option>' +
                         '<option value="2">Shipper Substitute User</option>' +
-                        '<option value="3">Consignee</option>' +
+                        '<option value="3">Retail</option>' +
+                        '<option value="4">Consignee</option>' +
+                        // '<option value="4">External</option>' +
+                        '<option value="5">Retail App</option>'+
                         '</select>';
                     var tagging_type = '<select name="tagging_type" id="tagging_type" class="select2 form-control">' +
                         '<option value="1">Department</option>' +
@@ -1699,6 +1849,7 @@
                             'crm_request_ids[]': selected_rows,
                             'closed_reason_status': closed_reason_status,
                             'close_reason_crm_ids': close_reason_crm_ids,
+                            'selected_invalid_reason_ids': selected_invalid_reason_ids,
                             'valid': valid,
                             '_token': '{{ csrf_token() }}'
                         }
@@ -1722,6 +1873,7 @@
 
                             table.draw();
                             $('#CloseReasonModal').modal('hide');
+                            $('#claimInvalidModal').modal('hide');
 
                         });
                     }
@@ -1733,6 +1885,103 @@
                 table.draw(true);
                 $('#star_shippers_filter').val(0);
             });
+
+           let selected_invalid_reason_ids = [];
+
+            $('#claim_invalid_reasons').select2({
+                width: '100%',
+                placeholder: 'Select Invalid Reason(s)',
+                allowClear: true,
+                dropdownParent: $('#claimInvalidModal')
+            }).on('change', function () {
+                const currentSelection = $(this).val() || [];
+
+                currentSelection.forEach(id => {
+                    if (!selected_invalid_reason_ids.includes(id)) {
+                        selected_invalid_reason_ids.push(id);
+                    }
+                });
+
+                selected_invalid_reason_ids = selected_invalid_reason_ids.filter(id => currentSelection.includes(id));
+
+            });
+
+
+          $('#invalid_submit').on('click', function () {
+                mark_valid_invalid(0); 
+            });
+
+
+            $('#claimInvalidModal').on('hide.bs.modal', function (e) {
+                selected_invalid_reason_ids = [];
+                $('#claim_invalid_reasons').val(null).trigger('change');
+            });
+
+
+             $('#claim_resolved_reason')
+                .select2({
+                    placeholder: 'Select a reason',
+                    allowClear: true,
+                    width: '100%',
+                    minimumResultsForSearch: Infinity
+            }).on('change', function () {
+                    const selected = $(this).val();
+                    selected_resolved_reason_ids = selected ? [selected] : [];
+
+                    if (selected) {
+                        $('#sub_reason_wrapper').slideDown();
+                    } else {
+                        $('#sub_reason_wrapper').slideUp();
+                        $('#claim_resolved_sub_reasons').val(null).trigger('change');
+                    }
+            });
+
+            $('#claim_resolved_sub_reasons').select2({
+                placeholder: 'Select sub reason(s)',
+                allowClear: true,
+                width: '100%'
+            }).on('change', function () {
+                selected_resolved_sub_reason_ids = $(this).val() || [];
+            });
+
+
+            $('#resolved_submit').on('click', function () {
+                var selectedReason = $('#claim_resolved_reason').val();
+                var selectedSubReasons = $('#claim_resolved_sub_reasons').val();
+
+                if (pendingForm) {
+                    $(pendingForm).find('input[name="claim_resolved_reason"]').remove();
+                    $(pendingForm).find('input[name="claim_resolved_sub_reasons[]"]').remove();
+
+                    $('<input>').attr({
+                        type: 'hidden',
+                        name: 'claim_resolved_reason',
+                        value: selectedReason
+                    }).appendTo(pendingForm);
+
+                    selectedSubReasons.forEach(function (sub) {
+                        $('<input>').attr({
+                            type: 'hidden',
+                            name: 'claim_resolved_sub_reasons[]',
+                            value: sub
+                        }).appendTo(pendingForm);
+                    });
+
+                    $('#claimResolvedModal').modal('hide'); 
+                    pendingForm.submit();                  
+                    pendingForm = null;   
+                }
+            });
+
+             $('#claimResolvedModal').on('hide.bs.modal', function (e) {
+                selected_resolved_reason_ids = [];
+                selected_resolved_sub_reason_ids = [];
+
+                $('#claim_resolved_reason').val(null).trigger('change');
+                $('#claim_resolved_sub_reasons').val(null).trigger('change');
+                 $('#sub_reason_wrapper').slideUp();
+            });
+
         });
     </script>
 @endsection

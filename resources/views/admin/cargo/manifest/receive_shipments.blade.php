@@ -41,6 +41,11 @@
                                     {!! session('already_received_shipments_html') !!}
                                 </div>
                             @endif
+                            @if(session('rm_html'))
+                                <div class="alert alert-info">
+                                    {!! session('rm_html') !!}
+                                </div>
+                            @endif
                             <div id="camera_scan" class="d-none">
                                 <div id="camera_view" class="camera_view"></div>
                             </div>

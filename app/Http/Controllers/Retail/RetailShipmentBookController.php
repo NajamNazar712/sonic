@@ -7,6 +7,7 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\NonServiceArea;
 use App\Http\Models\Admin\Retail\RetailCashDeposit;
 use App\Http\Models\Admin\Retail\RetailCashDepositShipment;
 use App\Http\Models\Admin\Retail\RetailFranchise;
@@ -65,6 +66,7 @@ use App\RetailDiscountCode;
 use Illuminate\Support\Facades\Log;
 use App\Http\Models\ShipperSegmentLogs;
 use App\Http\Models\Shipper\User;
+use App\Models\ParentProduct;
 
 class RetailShipmentBookController extends Controller
 {
@@ -215,6 +217,7 @@ class RetailShipmentBookController extends Controller
 
     public function index(){
         $products = Product::all();
+        $parent_products = ParentProduct::get();
         $business_categories = BusinessCategory::all();
         $shipping_modes = RetailShippingMode::where('business_category_id',1)->get();
         $retail_international_shipping_modes =  RetailShippingMode::where('business_category_id',2)->get();
@@ -225,9 +228,10 @@ class RetailShipmentBookController extends Controller
         $charges_modes = ChargesMode::whereIn('id', [1, 2])->get();
         $trax_boxes = RetailTraxBox::all();
         $banks = BanksList::all();
+        $check_nsa = NonServiceArea::pluck('name')->toArray();
 
         $refs = ['Social Media','Website','Signages','Existing Customer','Others'];
-        return view('retail.shipment.booking.index')->with(['products' => $products, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'domestic_cities' => $domestic_cities, 'domestic_overland_cities' => $domestic_overland_cities,'international_cities'=>$international_cities, 'payment_modes' => $payment_modes, 'trax_boxes' => $trax_boxes, 'banks' => $banks, 'charges_modes' => $charges_modes, 'refs' => $refs,'retail_international_shipping_modes' => $retail_international_shipping_modes]);
+        return view('retail.shipment.booking.index')->with(['products' => $products, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'domestic_cities' => $domestic_cities, 'domestic_overland_cities' => $domestic_overland_cities,'international_cities'=>$international_cities, 'payment_modes' => $payment_modes, 'trax_boxes' => $trax_boxes, 'banks' => $banks, 'charges_modes' => $charges_modes, 'refs' => $refs,'retail_international_shipping_modes' => $retail_international_shipping_modes, 'parent_products' => $parent_products,'check_nsa'=>$check_nsa]);
     }
 
     public function store(Request $request){
@@ -324,7 +328,7 @@ class RetailShipmentBookController extends Controller
             $height = null;
         }
 
-        $rates = RetailRatesCalculationController::rates($shipping_mode_check, $business_category_id, $pickup_city_id, $consignee_city_id, $request->trax_box, $discount, $estimated_weight,$insurance_amount,$packaging);
+        $rates = RetailRatesCalculationController::rates($shipping_mode_check, $business_category_id, $pickup_city_id, $consignee_city_id, $request->trax_box, $discount, $estimated_weight,$insurance_amount,$packaging, $request->product, $request->cod);
 
 
         if($request->has('admin_discount'))
@@ -446,19 +450,21 @@ class RetailShipmentBookController extends Controller
             $shipper_info->shipper_address = $request->shipper_address;
             $shipper_info->city_id = $pickup_city_id;
 
-            if (!$shipper_info->iban_no && (!$request->iban_no || $request->iban_no == '')) {
-                return redirect()->back()->with(['error' => 'Please provide the IBAN number']);
+            if($shipping_mode_check == 3 ){
+                if (!$shipper_info->iban_no && (!$request->iban_no || $request->iban_no == '')) {
+                    return redirect()->back()->with(['error' => 'Please provide the IBAN number']);
+                }
+                if (!$shipper_info->account_no && (!$request->account_no || $request->account_no == '')) {
+                    return redirect()->back()->with(['error' => 'Please provide the account number']);
+                }
+                if (!$shipper_info->bank && (!$request->bank || $request->bank == '')) {
+                    return redirect()->back()->with(['error' => 'Please choose a bank']);
+                }
+                if (!$shipper_info->cheque_image && !$request->hasFile('cheque_image')) {
+                    return redirect()->back()->with(['error' => 'Please provide the cheque image']);
+                }
             }
-            if (!$shipper_info->account_no && (!$request->account_no || $request->account_no == '')) {
-                return redirect()->back()->with(['error' => 'Please provide the account number']);
-            }
-            if (!$shipper_info->bank && (!$request->bank || $request->bank == '')) {
-                return redirect()->back()->with(['error' => 'Please choose a bank']);
-            }
-            if (!$shipper_info->cheque_image && !$request->hasFile('cheque_image')) {
-                return redirect()->back()->with(['error' => 'Please provide the cheque image']);
-            }
-
+           
             if ($request->iban_no != null && $request->account_no != null && $request->bank != null) {
                 $shipper_info->bank_id = $request->bank;
                 $shipper_info->iban = $request->iban_no;
@@ -484,18 +490,20 @@ class RetailShipmentBookController extends Controller
             $shipper_info->city_id = $pickup_city_id;
             $shipper_info->save();
 
-            if ($request->iban_no == null || $request->iban_no == ''){
-                return redirect()->back()->with(['error' => 'Please provide the IBAN number']);
-            } 
-            if ($request->account_no == null || $request->account_no == '') {
-                return redirect()->back()->with(['error' => 'Please provide the account number']);
-            } 
-            if ($request->bank == null || $request->bank == ''){
-                return redirect()->back()->with(['error' => 'Please choose a bank']);
-            } 
-            if (!$request->hasFile('cheque_image')){
-                return redirect()->back()->with(['error' => 'Please provide the cheque image']);
-            } 
+            if($shipping_mode_check == 3 ){
+                if ($request->iban_no == null || $request->iban_no == ''){
+                    return redirect()->back()->with(['error' => 'Please provide the IBAN number']);
+                } 
+                if ($request->account_no == null || $request->account_no == '') {
+                    return redirect()->back()->with(['error' => 'Please provide the account number']);
+                } 
+                if ($request->bank == null || $request->bank == ''){
+                    return redirect()->back()->with(['error' => 'Please choose a bank']);
+                } 
+                if (!$request->hasFile('cheque_image')){
+                    return redirect()->back()->with(['error' => 'Please provide the cheque image']);
+                } 
+            }
 
             if ($request->hasFile('cheque_image') && $request->iban_no != null && $request->account_no != null && $request->bank != null) {
                 $shipper_info->bank_id = $request->bank;
@@ -555,6 +563,8 @@ class RetailShipmentBookController extends Controller
         $retail_shipment->retail_user_id = Auth::id();
         $retail_shipment->category = $cat;
         $retail_shipment->category_id = $cat_id;
+        $retail_shipment->wht = $rates['wht'];
+        $retail_shipment->cod_sst = $rates['cod_sst'];
         if($request->has('admin_discount'))
         {
             $retail_shipment->admin_discount = $request->admin_discount;
@@ -723,7 +733,7 @@ class RetailShipmentBookController extends Controller
             $insurance_amount = round($insurance_amount * $insurance / 100,2);
         }
 
-        $details = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->consignee_city_id, $request->trax_box, $discount, $weight,$insurance_amount,$packaging);
+        $details = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->consignee_city_id, $request->trax_box, $discount, $weight,$insurance_amount,$packaging, $request->product_id, $request->cod);
 
         if($request->has('admin_discount'))
         {
@@ -1086,7 +1096,7 @@ class RetailShipmentBookController extends Controller
                               <tr>
                                 <td colspan="2" class="border twice-bottom twice-left">' . $shipment->retail->shipping_modes->name . '</td>
                                 <td colspan="2" class="border twice-bottom">' . $shipment->pieces . '</td>
-                                <td colspan="1" class="border twice-bottom">' . number_format($shipment->estimated_weight) . '</td>
+                                <td colspan="1" class="border twice-bottom">' . floatval($shipment->estimated_weight) . '</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->weight_charges,2) . '</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->discount,2) . '</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->admin_discount,2) .$r_t.'</td>
@@ -1190,8 +1200,17 @@ class RetailShipmentBookController extends Controller
                            ';
 
             $slip .= '
-                  <div class="col m-1 row justify-content-center"><div class="col"><hr></div><div class=""><p>Shipper Copy</p></div><div class="col"><hr></div>
-                  <div class=""><i class="la la-cut la-rotate-180 align-middle"></i></div></div>
+                <div class="col m-1 row justify-content-center">
+                    <div class="col"><hr></div>
+                    <div class=""><p>Sales and Income tax has been deducted from the total COD amount as per applicable tax laws.</p></div>
+                    <div class="col"><hr></div>
+                </div>
+                  <div class="col m-1 row justify-content-center">
+                    <div class="col"><hr></div>
+                    <div class=""><p>Shipper Copy</p></div>
+                    <div class="col"><hr></div>
+                    <div class=""><i class="la la-cut la-rotate-180 align-middle"></i></div>
+                  </div>
                 ';
             $shipment_details .= $slip;
 
@@ -2201,6 +2220,8 @@ class RetailShipmentBookController extends Controller
             }
 
             $errors = array();
+            $check = NonServiceArea::pluck('name')->toArray();
+            $nsa_error = array();
 
             foreach ($rows as $key => $row) {
                 $row_id = $key + 2;
@@ -2278,19 +2299,46 @@ class RetailShipmentBookController extends Controller
                         $rows[$key]['height'] = $row['height'];
                     }
                 }
+
+                if (!$request->excel_nsa) {
+                    $con_nsa = array();
+                    $msg_string = '';
+                    $str_arr = null;
+                    $str_arr = preg_split("/[ ,]+/", $row['consignee_address']);
+                    foreach ($check as $nsa) {
+                        foreach ($str_arr as $arr_value) {
+                            if (strtolower($nsa) == strtolower($arr_value)) {
+                                $con_nsa[$row_id] = $arr_value;
+                                if ($msg_string != null) {
+                                    $msg_string = $msg_string . ', ' . $arr_value;
+                                } else {
+                                    $msg_string = $arr_value;
+                                }
+                            }
+                        }
+                    }
+                    if (isset($con_nsa[$row_id])) {
+                        $nsa_error[$row_id]['msg'] = "A Possible Address Anomaly: " . $msg_string . " Detected!";
+                    }
+                };
             }
 
             if (empty($errors)) {
-                foreach ($rows as $key => $row) {
-                    $row['user_id'] = $user_id;
-                    $row['retail_user_id'] = $retail_user_id;
-                    $row['pickup_address_id'] = $pickup_address_id;
-                    $row['category'] = $category;
-                    $row['category_id'] = $category_id;
-                    dispatch(new ProcessRetailShipmentBookingDB($row));
+                if (empty($nsa_error)) {
+                    foreach ($rows as $key => $row) {
+                        $row['user_id'] = $user_id;
+                        $row['retail_user_id'] = $retail_user_id;
+                        $row['pickup_address_id'] = $pickup_address_id;
+                        $row['category'] = $category;
+                        $row['category_id'] = $category_id;
+                        dispatch(new ProcessRetailShipmentBookingDB($row));
+                    }
+
+                    return redirect()->route('retail.shipment.book.excel')->with(['success' => 'Booking of ' . count($rows) . ' Shipment(s) is being Processed']);
+                } else{
+                    return view('retail.shipment.booking.nsa')->with(['data' => $rows, 'nsa_error' => $nsa_error]);
                 }
 
-                return redirect()->route('retail.shipment.book.excel')->with(['success' => 'Booking of ' . count($rows) . ' Shipment(s) is being Processed']);
             }
             else {
                 $products = Product::pluck('product_name', 'id');
@@ -3109,5 +3157,15 @@ class RetailShipmentBookController extends Controller
         $html .= '</body>';
         $html .= '</html>';
         return $html;
+    }
+    
+    public function get_products(Request $request) {
+
+        $products = Product::where('parent_product_id', $request->parent_product_id)->get();
+        if ($products) {
+            return response()->json(['status' => 0, 'products' => $products]);
+        } else {
+            return response()->json(['status' => 1]);
+        }
     }
 }

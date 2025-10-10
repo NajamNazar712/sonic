@@ -58,7 +58,7 @@ class RetailReturnController extends Controller
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
             ->join('shipping_modes as sm','sm.id','=','shipments.shipping_mode_id')
-            ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
+            ->leftJoin('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
             ->leftJoin('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
@@ -77,7 +77,7 @@ class RetailReturnController extends Controller
                         DB::raw('(select consolidation_id from consolidation_shipments where consolidation_shipments.shipment_id = shipments.id)'));
             })
             ->select('rs.retail_user_id as retail_user_id','shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking','u.name as shipper','u.phone as shipper_phone1','u.phone2 as shipper_phone2','oc.name as origin','dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1','shipments.consignee_phone_number_2','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','shipments_journey.remarks as remarks','ssr.id as reason_id','ssr.name as reason','shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', 'shipments.shipper_status_id as shipper_status_id', 'shipments_journey.shipper_status_id as journey_shipper_status_id', 'dc.pickup as pickup', 'shipments.intercepted as intercepted','shipments.nsa_osa_estimated_charges', 'consolidations.consolidation_id')
-            ->where('shipments.shipper_status_id', DB::raw(12))
+            ->where('shipments.shipper_status_id', DB::raw(65))
             ->where('rs.retail_user_id', Auth::id())
             ->whereBetween('rs.created_at', [$from, $to])
             ->groupBy('shipments.id');
@@ -230,7 +230,7 @@ class RetailReturnController extends Controller
         if($parcel){
             // if($parcel->shipper_status_id != 52){
             if($parcel->shipper_status_id != 52 || $parcel->shipper_status_id != 66){
-                if($parcel->shipper_status_id == 12){
+                if($parcel->shipper_status_id == 65){
                     // $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 12)->where('status_reason_id', 12)->latest('id')->first();
                     // Shipment::where('id',$request->shipment_id)->update(['shipper_status_id' => 52,'consignee_status_id' => 52]);
 
@@ -327,7 +327,7 @@ class RetailReturnController extends Controller
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 's.consignee_city_id', '=', 'dc.id')
             ->join('shipping_modes as sm','sm.id','=','s.shipping_mode_id')
-            ->join('booking_types as bt','bt.id','=','s.booking_type_id')
+            ->leftJoin('booking_types as bt','bt.id','=','s.booking_type_id')
             ->join('shipment_status as ss','ss.id','=','s.shipper_status_id')
             ->leftJoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 's.id')

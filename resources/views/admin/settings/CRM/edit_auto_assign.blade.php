@@ -76,8 +76,8 @@
                                 <div class="row">
                                     <div class="col-4">
                                         <div class="form-group">
-                                            <label>Origin Zone&nbsp;(<input type="checkbox" class="checkAll" >Select All)</label>
-                                            <select name="origin_zone_id[]" id="origin_zone_id" class="form-control select2" multiple="multiple">
+                                            <label>Origin Zone*&nbsp;(<input type="checkbox" class="checkAll" >Select All)</label>
+                                            <select name="origin_zone_id[]" id="origin_zone_id" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
                                                 <option value="" disabled>Select</option>
                                                 @foreach($zones as $zone)
                                                     <option value="{{ $zone->id }}" {{ in_array($zone->id, $origin_zone_id)  ? 'selected' : '' }}> {{ $zone->name }} </option>
@@ -179,7 +179,7 @@
                                         <div class="col-6">
                                             <div class="form-group">
                                                 <label>Shipper without KAM &nbsp;(<input type="checkbox" class="checkAll"  >Select All)</label>
-                                                <select name="shipper_non_key_id[]" id="shipper_non_key_id" class="form-control select2" multiple="multiple"  >
+                                                <select name="shipper_non_key_id[]" id="shipper_non_key_id" class="form-control select2" multiple="multiple"  @if(empty($shipper_non_key)) disabled @endif>
                                                     @foreach($shipper_non_key as $cn)
                                                     <option value="{{ $cn->id }}" {{ in_array($cn->id, $snk)  ? 'selected' : '' }}>
                                                         {{ $cn->name }}

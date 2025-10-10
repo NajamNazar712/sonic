@@ -62,6 +62,55 @@
         </div>
     </div>
 
+    {{-- Geo Codes --}}
+    <div class="modal fade text-left" id="AddGeoCodeModal" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="AddGeoCodeModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Consignee Address Geo Code</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="add_geo_code_form" method="post">
+                        @method('POST')
+                        @csrf
+                        <div class="container">
+                            <div class="row">
+                                <h2 class="heading">Tracking Number(s)</h2>
+                            </div>
+
+                            <input type="hidden" name="shipment_id" id="geo_code_shipment_id">
+                            <div class="row old_scroll" id="geo_code_shipments">
+                            </div>
+                            <hr>
+                            <div class="row justify-content-center">
+                                <div class="col-10">
+                                    <fieldset class="form-group">
+                                        <input type="text" class="form-control" placeholder="Enter Latitude" name="lat" id="lat"  data-rule-required="true"
+                                               data-msg-required="Consignee Address Latitude is required">
+                                    </fieldset>
+                                    <fieldset class="form-group">
+                                        <input type="text" class="form-control" placeholder="Enter Longitude" name="long" id="long"  data-rule-required="true"
+                                               data-msg-required="Consignee Address Longitude is required">
+                                    </fieldset>
+                                </div>
+                            </div>
+                            <div class="row justify-content-center">
+                                <div class="col-3">
+                                    <button id="AdGeoCodeRequest" type="submit"
+                                            class="btn btn-primary btn-block">Submit</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- Get Support --}}
     <div class="modal fade text-left" id="AddRequestModal" data-backdrop="static" tabindex="-1" role="dialog"
         aria-labelledby="AddRequestModal" aria-hidden="true">
@@ -286,7 +335,7 @@
                                     <div class="col-10" id="claim_product_cost_div">
                                         <fieldset class="form-group">
                                             <input class="form-control" name="claim_product_cost" id="claim_product_cost"
-                                                value="" placeholder="Enter Product Cost">
+                                                value="" placeholder="Enter Claim Amount">
                                         </fieldset>
                                     </div>
                                     <div class="col-10 d-none" id="receiving_sheet_div">
@@ -685,6 +734,10 @@
                                     id + ' data-tracking=' + details.tracking_number +
                                     '>Get Support</button>';
                                 shipment +=
+                                    '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 geo_codes" id=' +
+                                    id + ' data-tracking=' + details.tracking_number +
+                                    '>Provide Geocodes</button>';
+                                shipment +=
                                     '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 call_status" id=' +
                                     id + ' data-tracking=' + details.tracking_number +
                                     '>Call History</button>';
@@ -946,6 +999,11 @@
                                 shipment += '<td>' + details.order_information.sub_segment + '</td>';
                                 shipment += '</tr>';
 
+                                shipment += '<tr>';
+                                shipment += '<td><strong>Booking Channel</strong></td>';
+                                shipment += '<td>' + details.order_information.channel + '</td>';
+                                shipment += '</tr>';
+
                                 shipment += '</tbody>';
                                 shipment += '</table>';
                                 shipment += '</div>';
@@ -1174,6 +1232,94 @@
 
                 print(id);
             });
+            $("#tracking").on('click','.geo_codes',function (){
+                // Form reset
+                $("#add_geo_code_form")[0].reset();
+                // Validation reset
+                $("#add_geo_code_form").validate().resetForm();
+                // Danger class remove
+                $("#add_geo_code_form").find(".danger").removeClass("danger");
+                $('#lat').val('');
+                $('#long').val('');
+
+                id = $(this).attr('id');
+                var tracking = $(this).attr('data-tracking');
+                var tracking_rows =
+                    '<div class="col-4"><span class="mr-1"><i class="la la-angle-right align-bottom"></i><b> ' +
+                    tracking + '</b></span></div>';
+
+                $('#geo_code_shipment_id').val(id);
+                $('#geo_code_shipments').html(tracking_rows);
+                $.ajax({
+                    url: "{{ route('cod.tracking.get_shipment_geo_codes') }}",
+                    type: "POST",
+                    data: {
+                        shipment_id: id,
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function (res) {
+                        if(res.status === 0){
+                            if(res.lat) $("#lat").val(res.lat);
+                            if(res.long) $("#long").val(res.long);
+                        }
+                        $('#AddGeoCodeModal').modal('show'); // modal ab show hoga
+                    },
+                    error: function () {
+                        $('#AddGeoCodeModal').modal('show'); // error pe bhi modal dikhana ho
+                    }
+                });
+                // $('#AddGeoCodeModal').modal('show');
+            });
+
+            // $( "#add_geo_code_form" ).validate({
+            //     errorClass:"danger",
+            //     normalizer: function(value) {
+            //         return $.trim(value);
+            //     },
+            //     errorPlacement: function(error, element) {
+            //         error.addClass('w-100').appendTo(element.parent('.form-group'));
+            //     },
+            //     submitHandler: function(form) {
+            //
+            //         form.submit();
+            //
+            //     }
+            // });
+            $("#add_geo_code_form").validate({
+                errorClass:"danger",
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $.ajax({
+                        url: "{{ route('cod.tracking.update_geo_codes') }}", // tumhara update route
+                        type: "POST",
+                        data: $(form).serialize(), // form ke sare fields bhej do
+                        success: function(res) {
+                            if (res.status === 0) {
+                                toastr.success(res.message); // success msg
+                                $('#AddGeoCodeModal').modal('hide');
+
+                                // Reset form
+                                $("#add_geo_code_form")[0].reset();
+                                $("#add_geo_code_form").validate().resetForm();
+                                $("#add_geo_code_form").find(".danger").removeClass("danger");
+                            } else {
+                                toastr.error(res.error); // validation ya custom error
+                            }
+                        },
+                        error: function() {
+                            toastr.error("Something went wrong!");
+                        }
+                    });
+                    return false; // normal submit rokne ke liye
+                }
+            });
+
+
             $('#tracking').on('click', '.add_request', function() {
                 id = $(this).attr('id');
                 var tracking = $(this).attr('data-tracking');
@@ -1781,6 +1927,7 @@
                     // }
 
                     else if (case_nature_id == 2) {
+                        var alternate_phone = $('#alternate_phone').val();
                         var complaint_id = $('#case_nature_requests').val();
                         var description = "";
                         if (!$('#case_nature_service_remarks_div').hasClass('d-none')) {
@@ -1893,7 +2040,7 @@
                     else if (case_nature_id === 4) {
                         var nature_flag = true;
                         var case_nature_claim_id = $('#case_nature_claim').val();
-                        var product_cost = $('#claim_product_cost').val();
+                        var product_cost = parseFloat($('#claim_product_cost').inputmask('unmaskedvalue'));
                         var check_product_picture = $('#product_picture').val();
                         var check_invoice_picture = $('#invoice_picture').val();
                         // var claim_description = $('#claim_description').val();
@@ -1968,7 +2115,7 @@
                             }
                             if (!product_cost) {
                                 nature_flag = false;
-                                var error = "Please enter Product Cost!";
+                                var error = isNaN(product_cost) ? "Please enter Claim Amount!" : "Claim Amount cannot be zero !!";
                                 toastr.error(error, 'Error!', {
                                     positionClass: 'toast-top-center',
                                     containerId: 'toast-top-center'
@@ -1985,14 +2132,16 @@
                         }
                         if (nature_flag) {
                             $('#AddNewRequest').attr('disabled', true);
-                            swal({
-                                title: 'Please Wait!',
-                                text: 'Launching Request.',
-                                icon: 'info',
-                                buttons: false,
-                                closeOnClickOutside: false,
-                                closeOnEsc: false
-                            });
+
+                                swal({
+                                    title: 'Please Wait!',
+                                    text: 'Launching Request.',
+                                    icon: 'info',
+                                    buttons: false,
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false
+                                });
+
                             $.ajax({
                                     url: '{!! route('cod.crm.request.add') !!}',
                                     method: 'POST',
@@ -2062,19 +2211,9 @@
                         }
                     }
 
-
-
-
                     else {
                         $('#AddNewRequest').attr('disabled',true);
-                            swal({
-                                title: 'Please Wait!',
-                                text: 'Launching Request.',
-                                icon: 'info',
-                                buttons: false,
-                                closeOnClickOutside: false,
-                                closeOnEsc: false
-                            });
+
 
                             /*********
                             // Commented this because in Complain type = 1, the value set in different variable
@@ -2197,7 +2336,114 @@
                                     }
                                 });
                             }
+                            else if (complaint_id == 39) {
+                                swal({
+                                    title: 'Are you sure to change service type?',
+                                    text: 'Select Yes to change service type!',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function (confirm){
+                                    if(confirm){
+                                        $.ajax({
+                                            url: '{!! route('cod.crm.request.add') !!}',
+                                            method: 'POST',
+                                            data: {
+                                                '_token': '{{ csrf_token() }}',
+                                                'shipment_id': $('#requested_shipment_id').val(),
+                                                'case_nature_id': case_nature_id,
+                                                'complaint_id': complaint_id,
+                                                'description': description,
+                                            }
+                                        })
+                                            .done(function (data) {
+                                                swal.close();
+
+                                                if (data.status) {
+                                                    if (data.flag) {
+                                                        var html = '';
+
+                                                        $.each(data.already_existed_shipments, function (index, tracking_number) {
+                                                            html += tracking_number + '<br/>';
+                                                        });
+
+                                                        if (!data.cannot_change) {
+                                                            html += '<br/>Request/Complaint already lodged for the above Shipment(s)!';
+                                                        }
+                                                        else {
+                                                            html += '<br/>Request for Change cannot be opened for the above Shipment(s) at the Current Status!';
+                                                        }
+
+                                                        content = document.createElement('div');
+                                                        content.innerHTML = html;
+
+                                                        swal({
+                                                            title: 'Request / Complaint Cannot Be Lodged!',
+                                                            content: content,
+                                                            icon: 'warning',
+                                                            buttons: {
+                                                                cancel: {
+                                                                    text: 'Close',
+                                                                    value: null,
+                                                                    visible: true,
+                                                                    closeModal: true,
+                                                                },
+                                                            },
+                                                            closeOnClickOutside: false,
+                                                            closeOnEsc: false,
+                                                            dangerMode: true
+                                                        });
+                                                    } else {
+                                                        toastr.success(data.success, 'Success!', {
+                                                            positionClass: 'toast-bottom-center',
+                                                            containerId: 'toast-bottom-center'
+                                                        });
+                                                    }
+                                                    // toastr.success(data.success, 'Success!', {
+                                                    //     positionClass: 'toast-bottom-center',
+                                                    //     containerId: 'toast-bottom-center'
+                                                    // });
+                                                } else {
+                                                    toastr.error(data.error, 'Error!', {
+                                                        positionClass: 'toast-top-center',
+                                                        containerId: 'toast-top-center'
+                                                    });
+                                                }
+                                                $('#AddRequestModal').modal('hide');
+                                                $('#request_id').val('').trigger('change');
+                                                $('#receiving_sheet_div').addClass('d-none');
+                                                $('#AddNewRequest').attr('disabled',false);
+                                            });
+                                    }
+                                    else {
+                                        $('#AddNewRequest').attr('disabled',false);
+                                    }
+                                });
+                            }
                             else{
+                                swal({
+                                    title: 'Please Wait!',
+                                    text: 'Launching Request.',
+                                    icon: 'info',
+                                    buttons: false,
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false
+                                });
                                 $.ajax({
                                     url: '{!! route('cod.crm.request.add') !!}',
                                     method: 'POST',
@@ -2209,6 +2455,7 @@
                                         'description': description,
                                         'complainant_phone' : $('#complainant_phone').val(),
                                         'case_nature_complainant' : $('#case_nature_complainant').val(),
+                                        'alternate_phone': alternate_phone,
                                     }
                                 })
                                 .done(function (data) {
@@ -2319,6 +2566,7 @@
                 window.open($(this).data('link'), '_blank');
 
             });
+
 
             $('#tracking').on('click', '.call_status', function() {
                 var id = $(this).attr('id');

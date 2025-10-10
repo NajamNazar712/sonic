@@ -66,7 +66,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('/address1', 'Shippers\ShipperDashboardController@wordpressAddressView')->name('wordpress.new.address');
     Route::get('/bank1', 'Shippers\ShipperDashboardController@wordpressBankView')->name('wordpress.new.bank');
 
-    Route::post('/login', 'Auth\LoginController@login')->name('login.submit');
+    Route::post('/login', 'Auth\LoginController@login')->middleware('login.check')->name('login.submit');
     //    Route::get('/register/','Auth\GetStartedController@index')->name('register');
     //    Route::get('/get-started', 'Auth\GetStartedController@index')->name('getstarted');
     //    Route::post('/get-started','Auth\GetStartedController@getstarted_submit')->name('getstarted');
@@ -102,8 +102,10 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::post('/crf/update', 'Shippers\ShipperDashboardController@updateCrfSign')->name('updateSignOffCrf');;
 
     Route::post('get_sub_segment', 'Auth\RegisterController@get_sub_segment')->name('get_sub_segment');
+    Route::get('get_products', 'Auth\RegisterController@get_products')->name('get_products');
 
     Route::get('referral', 'Auth\RegisterController@referral_valid')->name('referral.valid');
+    Route::get('check_email', 'Auth\RegisterController@check_email')->name('register.check_email');
 
     Route::prefix('orders')->name('orders.')->group(function () {
         Route::get('', 'Shippers\ShipperDashboardController@orders_index')->name('index');
@@ -269,6 +271,9 @@ Route::prefix('cod')->name('cod.')->group(function () {
 
         Route::post('shipper_visibility', 'Shippers\ShipperTrackingController@shipper_visibility')->name('shipper_visibility');
         Route::post('rider_information', 'Shippers\ShipperTrackingController@rider_information')->name('rider_information');
+        Route::post('get_shipment_geo_codes', 'Shippers\ShipperTrackingController@get_shipment_geo_codes')->name('get_shipment_geo_codes');
+        Route::post('update_geo_codes', 'Shippers\ShipperTrackingController@update_geo_codes')->name('update_geo_codes');
+
     });
     Route::prefix('order')->name('order.')->group(function () {
         Route::get('{order_id?}', 'Shippers\ShipperTrackingController@order_index')->name('index');
@@ -309,6 +314,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('reattempt/status/single', 'Shippers\ShipperReturnController@return_reattempt_single_status')->name('reattempt.status.single');
             Route::post('marked/self_collection', 'Shippers\ShipperReturnController@change_status_to_self_collection')->name('marked.self_collection');
             Route::post('consignee', 'Shippers\ShipperReturnController@blacklist_search_consignee')->name('consignee');
+            Route::post('get_manual_shipment_geo_codes', 'Shippers\ShipperReturnController@get_manual_shipment_geo_codes')->name('get_manual_shipment_geo_codes');
+            Route::post('update_manual_geo_codes', 'Shippers\ShipperReturnController@update_manual_geo_codes')->name('update_manual_geo_codes');
         });
         Route::prefix('reattempt_history')->name('reattempt_history.')->group(function () {
             Route::get('', 'Shippers\ShipperReturnController@return_reattempt_history_index')->name('index');

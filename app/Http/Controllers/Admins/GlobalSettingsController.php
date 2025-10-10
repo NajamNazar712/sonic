@@ -178,6 +178,9 @@ use App\Models\WalletShipperSetting;
 use Illuminate\Support\Str;
 use App\Http\Traits\CommonTrait;
 use App\ChangeLogs;
+use App\Models\ParentProduct;
+use App\Models\ParentProductTaxLog;
+
 
 class GlobalSettingsController extends Controller
 {
@@ -1714,7 +1717,7 @@ class GlobalSettingsController extends Controller
             ->orderBy('crm_request_case_nature_types.id', 'desc');
         $datatable = Datatables::of($case_nature_types)
             ->editColumn('status', function ($case_nature_types) {
-                if ($case_nature_types->status == 1) {
+                if ($case_nature_types?->status == 1) {
                     return 'Enable';
                 } else {
                     return 'Disable';
@@ -1867,7 +1870,7 @@ class GlobalSettingsController extends Controller
             }
         }
         $case_nature_types = CrmRequestCaseNatureType::where('type', $type);
-        if ($case_nature_types->exists()) {
+        if ($case_nature_types?->exists()) {
             // return response()->json(['status' => 0, 'error' => 'Same Case Nature Type already exists!']);
             return redirect()->back()->with('error', 'Same Case Nature Type already exists!');
         } else {
@@ -5651,7 +5654,7 @@ class GlobalSettingsController extends Controller
         return view('admin.settings.CRM.auto_assigning')->with(['agents' => $agents, 'settings' => $settings]);
     }
 
-    public function crm_auto_assigning_list()
+    public function crm_auto_assigning_list(Request $request)
     {
         $roles = CrmAgentAutoAssign::with('origin_zones.zones','origin_hubs.hubs','origin_areas.city_area','zones.zones', 'hubs.hubs', 'case_natures', 'case_nature_types', 'business_types', 'sub_business_types', 'shipper_keys', 'shipper_non_keys', 'shipment_statuses')
             ->join('admins as ad', 'ad.id', '=', 'crm_agent_auto_assigns.agent_id')
@@ -5663,6 +5666,14 @@ class GlobalSettingsController extends Controller
                 'ad.name as agent_name',
             ]);
 
+
+       $enable_disable = $request->input('enable_disable');
+
+        if ($enable_disable == '1' || is_null($enable_disable)) {
+            $roles->where('crm_agent_auto_assigns.status', 1);
+        } else {
+            $roles->where('crm_agent_auto_assigns.status', 0);
+        }
 
         $datatables = Datatables::of($roles)
             ->addColumn('action', function ($roles) {
@@ -5696,9 +5707,9 @@ class GlobalSettingsController extends Controller
                 $counter = 0;
                 foreach ($roles->origin_zones as $value) {
                     if ($counter < 3) {
-                        $zone .= "<li>" . $value->zones->name . "</li>";
+                        $zone .= "<li>" . $value->zones?->name  . "</li>";
                     } else {
-                        $zone .= "<li class='hidden-text' style='display:none;'>" . $value->zones->name . "</li>";
+                        $zone .= "<li class='hidden-text' style='display:none;'>" . $value->zones?->name . "</li>";
                     }
                     $counter++;
                 }
@@ -5712,9 +5723,9 @@ class GlobalSettingsController extends Controller
                 $counter = 0;
                 foreach ($roles->origin_hubs as $value) {
                     if ($counter < 3) {
-                        $hub .= "<li>" . $value->hubs->name . "</li>";
+                        $hub .= "<li>" . $value->hubs?->name  . "</li>";
                     } else {
-                        $hub .= "<li class='hidden-text' style='display:none;'>" . $value->hubs->name . "</li>";
+                        $hub .= "<li class='hidden-text' style='display:none;'>" . $value->hubs?->name . "</li>";
                     }
                     $counter++;
                 }
@@ -5728,9 +5739,9 @@ class GlobalSettingsController extends Controller
                 $counter = 0;
                 foreach ($roles->origin_areas as $value) {
                     if ($counter < 3) {
-                        $hub .= "<li>" . $value->city_area->name . "</li>";
+                        $hub .= "<li>" . $value->city_area?->name . "</li>";
                     } else {
-                        $hub .= "<li class='hidden-text' style='display:none;'>" . $value->city_area->name . "</li>";
+                        $hub .= "<li class='hidden-text' style='display:none;'>" . $value->city_area?->name . "</li>";
                     }
                     $counter++;
                 }
@@ -5744,9 +5755,9 @@ class GlobalSettingsController extends Controller
                 $counter = 0;
                 foreach ($roles->zones as $value) {
                     if ($counter < 3) {
-                        $zone .= "<li>" . $value->zones->name . "</li>";
+                        $zone .= "<li>" . $value->zones?->name . "</li>";
                     } else {
-                        $zone .= "<li class='hidden-text' style='display:none;'>" . $value->zones->name . "</li>";
+                        $zone .= "<li class='hidden-text' style='display:none;'>" . $value->zones?->name . "</li>";
                     }
                     $counter++;
                 }
@@ -5760,9 +5771,9 @@ class GlobalSettingsController extends Controller
                 $counter = 0;
                 foreach ($roles->hubs as $value) {
                     if ($counter < 3) {
-                        $hub .= "<li>" . $value->hubs->name . "</li>";
+                        $hub .= "<li>" . $value->hubs?->name . "</li>";
                     } else {
-                        $hub .= "<li class='hidden-text' style='display:none;'>" . $value->hubs->name . "</li>";
+                        $hub .= "<li class='hidden-text' style='display:none;'>" . $value->hubs?->name . "</li>";
                     }
                     $counter++;
                 }
@@ -5776,9 +5787,9 @@ class GlobalSettingsController extends Controller
                 $counter = 0;
                 foreach ($roles->case_natures as $value) {
                     if ($counter < 3) {
-                        $case_natures .= "<li>" . $value->case_natures->name . "</li>";
+                        $case_natures .= "<li>" . $value->case_natures?->name . "</li>";
                     } else {
-                        $case_natures .= "<li class='hidden-text' style='display:none;'>" . $value->case_natures->name . "</li>";
+                        $case_natures .= "<li class='hidden-text' style='display:none;'>" . $value->case_natures?->name . "</li>";
                     }
                     $counter++;
                 }
@@ -5792,9 +5803,9 @@ class GlobalSettingsController extends Controller
                 $counter = 0; // Initialize counter
                 foreach ($roles->case_nature_types as $value) {
                     if ($counter < 3) { // Show only the first 3 items
-                        $case_natures_type .= "<li>" . $value->case_nature_types->type . "</li>";
+                        $case_natures_type .= "<li>" . $value->case_nature_types?->type . "</li>";
                     } else {
-                        $case_natures_type .= "<li class='hidden-text' style='display:none;'>" . $value->case_nature_types->type . "</li>";
+                        $case_natures_type .= "<li class='hidden-text' style='display:none;'>" . $value->case_nature_types?->type . "</li>";
                     }
                     $counter++;
                 }
@@ -5808,9 +5819,9 @@ class GlobalSettingsController extends Controller
                 $counter = 0;
                 foreach ($roles->business_types as $value) {
                     if ($counter < 3) {
-                        $business_segment .= "<li>" . $value->business_types->name . "</li>";
+                        $business_segment .= "<li>" . $value->business_types?->name . "</li>";
                     } else {
-                        $business_segment .= "<li class='hidden-text' style='display:none;'>" . $value->business_types->name . "</li>";
+                        $business_segment .= "<li class='hidden-text' style='display:none;'>" . $value->business_types?->name . "</li>";
                     }
                     $counter++;
                 }
@@ -5824,9 +5835,9 @@ class GlobalSettingsController extends Controller
                 $counter = 0;
                 foreach ($roles->sub_business_types as $value) {
                     if ($counter < 3) {
-                        $sub_business_types .= "<li>" . $value->sub_business_types->name . "</li>";
+                        $sub_business_types .= "<li>" . $value->sub_business_types?->name . "</li>";
                     } else {
-                        $sub_business_types .= "<li class='hidden-text' style='display:none;'>" . $value->sub_business_types->name . "</li>";
+                        $sub_business_types .= "<li class='hidden-text' style='display:none;'>" . $value->sub_business_types?->name . "</li>";
                     }
                     $counter++;
                 }
@@ -5840,9 +5851,9 @@ class GlobalSettingsController extends Controller
                 $counter = 0;
                 foreach ($roles->shipper_keys as $value) {
                     if ($counter < 3) {
-                        $shipper_key .= "<li>" . $value->shipper_keys->name . "</li>";
+                        $shipper_key .= "<li>" . $value->shipper_keys?->name . "</li>";
                     } else {
-                        $shipper_key .= "<li class='hidden-text' style='display:none;'>" . $value->shipper_keys->name . "</li>";
+                        $shipper_key .= "<li class='hidden-text' style='display:none;'>" . $value->shipper_keys?->name . "</li>";
                     }
                     $counter++;
                 }
@@ -5856,9 +5867,9 @@ class GlobalSettingsController extends Controller
                 $counter = 0;
                 foreach ($roles->shipper_non_keys as $value) {
                     if ($counter < 3) {
-                        $shipper_non_key .= "<li>" . $value->shipper_non_keys->name . "</li>";
+                        $shipper_non_key .= "<li>" . $value->shipper_non_keys?->name . "</li>";
                     } else {
-                        $shipper_non_key .= "<li class='hidden-text' style='display:none;'>" . $value->shipper_non_keys->name . "</li>";
+                        $shipper_non_key .= "<li class='hidden-text' style='display:none;'>" . $value->shipper_non_keys?->name . "</li>";
                     }
                     $counter++;
                 }
@@ -5872,9 +5883,9 @@ class GlobalSettingsController extends Controller
                 $counter = 0; // Initialize counter
                 foreach ($roles->shipment_statuses as $value) {
                     if ($counter < 3) { // Show only the first 3 statuses
-                        $shipment_statuses .= "<li>" . $value->shipment_statuses->name . "</li>";
+                        $shipment_statuses .= "<li>" . $value->shipment_statuses?->name . "</li>";
                     } else {
-                        $shipment_statuses .= "<li class='hidden-text' style='display:none;'>" . $value->shipment_statuses->name . "</li>";
+                        $shipment_statuses .= "<li class='hidden-text' style='display:none;'>" . $value->shipment_statuses?->name . "</li>";
                     }
                     $counter++;
                 }
@@ -5903,7 +5914,6 @@ class GlobalSettingsController extends Controller
                 'shipper_non_key',
                 'shipment_status',
                 'action']);
-
 
         return $datatables->make(true);
     }
@@ -5935,7 +5945,11 @@ class GlobalSettingsController extends Controller
             $shipper_non_key=[];
 
             if(in_array($selected_agent->role_id ,[43,67,75,115])){
-                $shipper_key = SaleTierTag::join('users as u', 'u.id', 'sale_tier_tags.user_id')->WhereNotNull('kam')->select('u.id', 'u.name')->get();
+                $shipper_key = SaleTierTag::join('users as u', 'u.id', 'sale_tier_tags.user_id')
+                    ->WhereNotNull('kam')
+                    ->where('kam', '=', $id)
+                    ->where('u.status', '=', 3)
+                    ->select('u.id', 'u.name')->get();
             }
             else if(in_array($selected_agent->role_id ,[37, 28])){
                 // $shipper_non_key = SaleTierTag::join('users as u', 'u.id', 'sale_tier_tags.user_id')->WhereNull('kam')->select('u.id', 'u.name')->get();
@@ -5966,10 +5980,10 @@ class GlobalSettingsController extends Controller
 //            $origin_ids = $selected_agent->origin_hubs->pluck('origin_hub_id')->toArray();
 //            $origin_areas = CityArea::whereIn('city_id',$origin_ids)->get();
 
-            $cn = $selected_agent->case_natures->pluck('case_nature_id')->toArray();
+            $cn = $selected_agent->case_natures?->pluck('case_nature_id')->toArray();
             $case_nature_types = CrmRequestCaseNatureType::whereIn('nature_id', $cn)->get();
 
-            $bsi = $selected_agent->business_types->pluck('business_segment_id')->toArray();
+            $bsi = $selected_agent->business_types?->pluck('business_segment_id')->toArray();
             $sub_segment = SubCategorySegment::whereIn('segment_id', $bsi)->select('id', 'name')->orderby('name', 'asc')->get();
 
             return view('admin.settings.CRM.edit_auto_assign')->with(['selected_agent' => $selected_agent, 'agents' => $agents,'zones' => $zones, 'case_natures' => $case_natures, 'segments' => $segments, 'sub_segment' => $sub_segment, 'shipper_key' => $shipper_key, 'shipper_non_key' => $shipper_non_key, 'shipment_status' => $shipment_status, 'hubs' => $hubs, 'case_nature_types' => $case_nature_types]);
@@ -9607,6 +9621,7 @@ class GlobalSettingsController extends Controller
         $excluded_shipper = GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers');
         $only_shipper = GlobalSettings::where('type', 'rv_disable_shippers_only_shippers');
         $all_shipper = GlobalSettings::where('type', 'rv_disable_shippers_all_shippers');
+        $permanentDisableShipper = GlobalSettings::where('type', 'rv_permanent_disable_shippers');
 
         if ($excluded_shipper->exists()) {
             $excluded_shipper = $excluded_shipper->first();
@@ -9636,16 +9651,25 @@ class GlobalSettingsController extends Controller
             $all_shipper->type = "rv_disable_shippers_all_shippers";
             $all_shipper->save();
         }
-
+        if ($permanentDisableShipper->exists()) {
+            $permanentDisabled = $permanentDisableShipper->first();
+            $permanentDisabledIds = explode(',', $permanentDisabled->text);
+        } else {
+            $all_shipper = new GlobalSettings();
+            $all_shipper->setting_value = 1;
+            $all_shipper->type = "rv_disable_shippers_all_shippers";
+            $all_shipper->save();
+        }
         $shippers = User::select('id', 'name')->where('status', 3)->get();
+        $permanent_disable = $shippers->whereNotIn('id', $only_shippers)->values();
+        $shippers = $shippers->whereNotIn('id',$permanentDisabledIds)->values();
 
-        return view('admin.settings.rv_disable_shippers.index')->with(['shippers' => $shippers, 'excluded_shippers' => $excluded_shippers, 'only_shippers' => $only_shippers, 'all_shippers' => $all_shipper]);
+        return view('admin.settings.rv_disable_shippers.index')->with(['shippers' => $shippers, 'excluded_shippers' => $excluded_shippers, 'only_shippers' => $only_shippers, 'all_shippers' => $all_shipper, 'permanentDisabledIds'=> $permanentDisabledIds, 'permanent_disable'=> $permanent_disable]);
     }
 
 
     public function rv_disable_shippers_store(Request $request)
     {
-
         ActivityTrailController::createActivityTrailLog(Auth::id(), 682);
 
         $all_shipper_settings = GlobalSettings::where('type', 'rv_disable_shippers_all_shippers');
@@ -9702,6 +9726,27 @@ class GlobalSettingsController extends Controller
             $this->updateDisabledUserInRvShipmentTickets($shippers, 1);
         } else {
             GlobalSettings::where('type', 'rv_disable_shippers_only_shippers')->update(['setting_value' => 0, 'text' => NULL]);
+        }
+        if ($request->has('rv_disable_shippers_all_permanat_shippers')) {
+            $only_users = implode(',', $request->rv_disable_shippers_all_permanat_shippers);
+            $settings = GlobalSettings::where('type', 'rv_permanent_disable_shippers');
+
+            if ($settings->exists()) {
+                $settings = $settings->first();
+            } else {
+                $settings = new GlobalSettings();
+                $settings->type = 'rv_permanent_disable_shippers';
+            }
+            $settings->setting_value = 1;
+            $settings->text = $only_users;
+            $settings->save();
+            $changes = $settings;
+
+            // Update disabled users in RV shipment tickets (Set disable_shipper to 1 of given shippers)
+            $shippers = explode(',', $only_users);
+            // $this->updateDisabledUserInRvShipmentTickets($shippers, 1);
+        } else {
+            GlobalSettings::where('type', 'rv_permanent_disable_shippers')->update(['setting_value' => 0, 'text' => NULL]);
         }
 
         if (!($request->has('all_shipper_toggle') && $request->has('excluded_users')) && !(!$request->has('all_shipper_toggle') && $request->has('only_users'))) {
@@ -9773,7 +9818,7 @@ class GlobalSettingsController extends Controller
             ->where('u.status',3)
             ->WhereNotNull('kam')
             ->where('kam',$agent_id)->select('u.id', 'u.name')->get();
-        if($shipper_keys->isNotEmpty()){
+        if($shipper_keys?->isNotEmpty()){
             return response()->json(['status' => 1, 'shipper_keys' => $shipper_keys]);
         }else {
             return response()->json(['status' => 0, 'error' => 'No data Found']);
@@ -10746,5 +10791,158 @@ class GlobalSettingsController extends Controller
     
         return redirect()->back()->with('success', 'Settings Updated!');
     }
+
+    public function product_tax_index()
+    {
+        $excluded_users_sst_array =[];
+        $excluded_users_wht_array = [];
+        $data = ParentProduct::get();
+        $shippers = User::where('status', 3)->select('id', 'name')->get();
+        $excluded_users_wht = GlobalSettings::where('type', 'excluded_users_wht');
+        if ($excluded_users_wht->exists()) {
+            $excluded_users_wht = $excluded_users_wht->first();
+            $excluded_users_wht_array = array_map('strval', explode(',', $excluded_users_wht->text));
+        }
+        $excluded_users_sst = GlobalSettings::where('type', 'excluded_users_sst');
+        if ($excluded_users_sst->exists()) {
+            $excluded_users_sst = $excluded_users_sst->first();
+            $excluded_users_sst_array = array_map('strval', explode(',', $excluded_users_sst->text));
+        }
+        return view('admin.settings.product_percentage')->with(['data' => $data, 'shippers' => $shippers, 'excluded_users_wht' => $excluded_users_wht_array, 'excluded_users_sst' => $excluded_users_sst_array]);
+    }
+
+    public function product_tax_update(Request $request)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 831);
+        if ($request->has('tax_percentage') && $request->has('sst_percentage')) {
+            foreach ($request->tax_percentage as $id => $new_value) {
+                $product = ParentProduct::find($id);
+                if ($product && $product->tax_percentage != $new_value) {
+                    
+                    ParentProductTaxLog::create([
+                        'parent_product_id' => $product->id,
+                        'field_changed' => 'Tax Percentage',
+                        'old_value' => $product->tax_percentage,
+                        'new_value' => $new_value,
+                        'updated_by' => Auth::id(),
+                    ]);    
+                    $product->update(['tax_percentage' => $new_value]);
+                }
+            }
+            foreach ($request->sst_percentage as $id => $new_value) {
+                $product = ParentProduct::find($id);
+                if ($product && $product->sst_percentage != $new_value) {
+                    ParentProductTaxLog::create([
+                        'parent_product_id' => $product->id,
+                        'field_changed' => 'SST Percentage',
+                        'old_value' => $product->sst_percentage,
+                        'new_value' => $new_value,
+                        'updated_by' => Auth::id(),
+                    ]);
+
+                    $product->update(['sst_percentage' => $new_value]);
+                }
+            }
+        }
+      
+        $previous_wht = GlobalSettings::where('type', 'excluded_users_wht')->value('text');
+        $previous_sst = GlobalSettings::where('type', 'excluded_users_sst')->value('text');
+
+        $previous_wht_array = $previous_wht ? explode(',', $previous_wht) : [];
+        $previous_sst_array = $previous_sst ? explode(',', $previous_sst) : [];
+
+        // Get current submitted shippers from request
+        $current_wht_array = $request->excluded_users_wht ?? [];
+        $current_sst_array = $request->excluded_users_sst ?? [];
+
+        // Find removed shippers for WHT
+        $removed_wht = array_diff($previous_wht_array, $current_wht_array);
+
+        // Find removed shippers for SST
+        $removed_sst = array_diff($previous_sst_array, $current_sst_array);
+
+        $excluded_users_wht = $request->excluded_users_wht ? implode(',', $request->excluded_users_wht) : '';
+        $settings = GlobalSettings::where('type', 'excluded_users_wht');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+        } else {
+            $settings = new GlobalSettings();
+            $settings->type = 'excluded_users_wht';
+            $settings->setting_value = 0;
+        }
+        $settings->text = $excluded_users_wht;
+        $settings->save();
     
+    
+        $excluded_users_sst = $request->excluded_users_sst ? implode(',', $request->excluded_users_sst) : '';
+        $settings = GlobalSettings::where('type', 'excluded_users_sst');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+        } else {
+            $settings = new GlobalSettings();
+            $settings->type = 'excluded_users_sst';
+            $settings->setting_value = 0;
+        }
+        $settings->text = $excluded_users_sst;
+        $settings->save();
+
+        if(!empty($removed_wht)) {
+
+            $removed_wht_list = User::whereIn('id', $removed_wht)->pluck('name')->implode(', ');
+            ParentProductTaxLog::create([
+                'parent_product_id' => null,
+                'field_changed' => 'WHT Excluded Shippers',
+                'old_value' => null,
+                'new_value' => null,
+                'text' => $removed_wht_list,
+                'updated_by' => Auth::id(),
+            ]);
+        }
+
+        if(!empty($removed_sst)) {
+
+            $removed_sst_list = User::whereIn('id', $removed_sst)->pluck('name')->implode(', ');
+            ParentProductTaxLog::create([
+                'parent_product_id' => null,
+                'field_changed' => 'COD SST Excluded Shippers',
+                'old_value' => null,
+                'new_value' => null,
+                'text' => $removed_sst_list,
+                'updated_by' => Auth::id(),
+            ]);
+        }
+        
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+    public function product_tax_logs_index(Request $request) 
+    {
+        
+        return view('admin.settings.product_percentage_logs');
+       
+    }
+
+    public function product_tax_logs(Request $request) 
+    {
+ 
+        $query = DB::table('parent_product_percentage_logs as pl')
+            ->leftJoin('parent_products as pp', 'pp.id', '=', 'pl.parent_product_id')
+            ->leftJoin('admins as u', 'u.id', '=', 'pl.updated_by')
+            ->select([
+                'pl.id',
+                'pp.name as parent_product_name',
+                'pl.field_changed',
+                'pl.old_value',
+                'pl.new_value',
+                'u.name as updated_by_name',
+                'pl.created_at',
+                'pl.text as shippers'
+            ])->orderByDesc('pl.created_at');
+
+        return DataTables::of($query)
+            ->editColumn('created_at', function ($row) {
+                return $row->created_at ? \Carbon\Carbon::parse($row->created_at)->format('Y-m-d H:i') : '-';
+            })
+        ->make(true);
+    } 
 }

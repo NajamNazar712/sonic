@@ -207,7 +207,7 @@
                                     </div>
                                     <div class="col-8" id="claim_product_cost_div">
                                         <fieldset class="form-group">
-                                            <input class="form-control" name="claim_product_cost" id="claim_product_cost" value="" placeholder="Enter Product Cost">
+                                            <input class="form-control" name="claim_product_cost" id="claim_product_cost" value="" placeholder="Enter Claim Amount">
                                         </fieldset>
                                     </div>
                                     <div class="col-8 text-left" id="claim_product_picture_div">
@@ -1107,7 +1107,7 @@
                     {
                         var nature_flag = true;
                         var case_nature_claim_id = $('#case_nature_claim').val();
-                        var product_cost = $('#claim_product_cost').val();
+                        var product_cost = parseFloat($('#claim_product_cost').inputmask('unmaskedvalue'));
                         var check_product_picture = $('#product_picture').val();
                         var check_invoice_picture = $('#invoice_picture').val();
                         $('#pickup_request_ids').val(selected_rows);
@@ -1128,7 +1128,7 @@
                             }
                             if(!product_cost){
                                 nature_flag = false;
-                                var error = "Please enter Product Cost!";
+                                var error = "Please Enter Claim Amount!";
                                 toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             }
                             if(!check_invoice_picture){

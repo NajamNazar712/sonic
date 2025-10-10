@@ -26,20 +26,25 @@ class FinvoWalletUserMiddleware
                 $user = User::where('api_token', $api_token);
                 if ($user->exists()) {
                     $user = $user->first();
+                    if($user->id != 46611) {
+                        if ($user->blacklist == 1) {
+                            return response()->json([
+                                'status' => 1,
+                                'message' => 'Your Account is Blacklisted.'
+                            ]);
+                        } else if ($user->status != 3) {
+                            return response()->json([
+                                'status' => 1,
+                                'message' => 'Your Account is not Activated yet.'
+                            ]);
+                        } else if ($user->phone_number_verified == 0) {
+                            return response()->json(['status' => 1, 'message' => 'Your Account phone number is not verified.']);
+                        } else {
+                            $request->merge(['user_id' => $user->id]);
 
-                    if ($user->blacklist == 1) {
-                        return response()->json([
-                            'status' => 1,
-                            'message' => 'Your Account is Blacklisted.'
-                        ]);
-                    } else if ($user->status != 3) {
-                        return response()->json([
-                            'status' => 1,
-                            'message' => 'Your Account is not Activated yet.'
-                        ]);
-                    } else if ($user->phone_number_verified == 0) {
-                        return response()->json(['status' => 1, 'message' => 'Your Account phone number is not verified.']);
-                    } else {
+                            return $next($request);
+                        }
+                    }else{
                         $request->merge(['user_id' => $user->id]);
 
                         return $next($request);

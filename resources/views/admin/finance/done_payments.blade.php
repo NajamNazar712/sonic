@@ -19,7 +19,7 @@
 							<div class="row justify-content-center mb-1">
 								<div class="col-12">
 									<div class="row">
-										<div class="col-3">
+										<div class="col-2">
 											<fieldset class="form-group">
 												<select name="search_shipper" id="search_shipper" class="form-control select2">
 													{{--                                            @foreach ($shippers as $shipper)--}}
@@ -27,6 +27,15 @@
 													{{--                                            @endforeach--}}
 												</select>
 											</fieldset>
+										</div>
+										<div class="col-2">
+											<div class="form-group">
+												<select name="search_region" id="search_region" class="search_region form-control select2">
+													@foreach($region as $r) 
+													<option value="{{ $r->id }}">{{ $r->name }}</option>
+													@endforeach
+												</select>
+											</div>
 										</div>
 										<div class="col-2">
 											<fieldset class="form-group">
@@ -53,7 +62,7 @@
 												</div>
 											</form>
 										</div>
-										<div class="col-3 text-center">
+										<div class="col-2 text-center">
 											<form id="done_payment_id_form"
 												  class="form" novalidate="novalidate">
 												<div class="form-group">
@@ -167,7 +176,9 @@
 										<th class="border-primary border-darken-1">Shipper</th>
 										<th class="border-primary border-darken-1">Sale Person</th>
 										<th class="border-primary border-darken-1">City</th>
+										<th class="border-primary border-darken-1">Territory </th>
 										<th class="border-primary border-darken-1">Phone No(s).</th>
+										<th class="border-primary border-darken-1">Financing Product Type</th>
 										<th class="border-primary border-darken-1">Address</th>
 										<th class="border-primary border-darken-1">Total Shipments</th>
 										<th class="border-primary border-darken-1">Delivered Shipments</th>
@@ -179,6 +190,7 @@
 										<th class="border-primary border-darken-1">Total Charges</th>
 										<th class="border-primary border-darken-1">Total GST</th>
 										<th class="border-primary border-darken-1">Total WHT</th>
+										<th class="border-primary border-darken-1">Total COD SST</th>
 										<th class="border-primary border-darken-1">Total Per SMS Charges</th>
 										<th class="border-primary border-darken-1">Packing Charges</th>
 										<th class="border-primary border-darken-1">Total Deductible</th>
@@ -192,7 +204,7 @@
 										<th class="border-primary border-darken-1">Payment Cycle</th>
                                         <th class="border-primary border-darken-1">Payment Cycle Days</th>
 										<th class="border-primary border-darken-1">Status</th>
-										<th class="border-primary border-darken-1">Paid / Reverted Datetime</th>
+										<th class="border-primary border-darken-1">Paid / Reverted / Hold Datetime</th>
 										{{--										<th class="border-primary border-darken-1">Aging</th>--}}
 										<th class="border-primary border-darken-1"></th>
 									</tr>
@@ -504,6 +516,12 @@
                 width: '100%',
                 allowClear: true
             });
+			$('#search_region').prepend(
+                '<option value="" selected></option>').select2({
+                placeholder: 'Search By Region',
+                width: '100%',
+                allowClear: true
+            });
 
 			$('#update_details .company_bank').prepend('<option value="" selected="selected"></option>').select2({
 				width: '100%',
@@ -597,7 +615,9 @@
                             head.push('Shipper');
 							head.push('Sale Person');
                             head.push('City');
+							head.push('Territory');
                             head.push('Phone No(s).');
+                            head.push('Financing Product Type');
                             head.push('Address');
                             head.push('Total Shipments');
                             head.push('Delivered Shipments');
@@ -609,6 +629,7 @@
                             head.push('Total Charges');
                             head.push('Total GST');
                             head.push('Total WHT');
+							head.push('Total COD SST');
 							head.push('Total Per SMS Charges');
                             head.push('Packing Charges');
                             head.push('Total Deductable');
@@ -635,7 +656,9 @@
                                 row.push(values.shipper);
 								row.push(values.sale_person_name);
                                 row.push(values.city);
+                                row.push(values.territory);
                                 row.push(values.phone_numbers);
+                                row.push(values.finova_account_type);
                                 row.push(values.address);
                                 row.push(values.total_shipments);
                                 row.push(values.delivered_shipments_count);
@@ -647,6 +670,7 @@
                                 row.push(values.total_charges);
                                 row.push(values.total_gst);
                                 row.push(values.total_wht);
+								row.push(values.total_cod_sst);
 								row.push(values.total_sms_charges);
                                 row.push(values.packaging_charges);
                                 row.push(values.total_deductable);
@@ -722,6 +746,56 @@
 								})
 								.done(function(data) {
 									if (data.status == 0) {
+										if (data.payment_paid) {
+											toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+										}
+
+										// Show list of already paid IDs, if any
+											if (data.hold_payments_ids && data.hold_payments_ids.length > 0) {
+												let paidIdsText = data.hold_payments_ids.join(', ');
+												toastr.error('The following payment IDs should not be marked as Paid: ' + paidIdsText, 'Info', {
+													positionClass: 'toast-top-center',
+													containerId: 'toast-top-center',
+													timeOut: 8000
+												});
+											}
+									}
+									else {
+										toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+									}
+
+									table.rows().deselect();
+
+									selected_rows = [];
+
+									table.button('.paid').disable();
+									table.button('.tax_paid').disable();
+									table.button('.reverted').disable();
+									table.button('.hold').disable();
+                                    table.button('.un_hold').disable();
+									table.draw('false');
+								});
+							}
+						},
+					@endif
+
+					@if (session('role_id') == 1 || in_array(1038, session('permissions')))
+							{
+							text: 'Tax Paid',
+							className: 'btn btn-primary tax_paid',
+							enabled: false,
+							action: function (e, dt, node, config) {
+								$.ajax({
+									url: '{!! route('admin.finance.done_payments.tax_paid') !!}',
+									method: 'PUT',
+									data: {
+										'_token': '{{ csrf_token() }}',
+										'ids': selected_rows,
+										'type': 1
+									}
+								})
+								.done(function(data) {
+									if (data.status == 0) {
 										toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 									}
 									else {
@@ -733,8 +807,10 @@
 									selected_rows = [];
 
 									table.button('.paid').disable();
+									table.button('.tax_paid').disable();
 									table.button('.reverted').disable();
-
+									table.button('.hold').disable();
+                                    table.button('.un_hold').disable();
 									table.draw('false');
 								});
 							}
@@ -768,13 +844,114 @@
 									selected_rows = [];
 
 									table.button('.paid').disable();
+									table.button('.tax_paid').disable();
 									table.button('.reverted').disable();
-
+									table.button('.hold').disable();
+                                    table.button('.un_hold').disable();
 									table.draw('false');
 								});
 							}
 						},
+						@endif
+					@if (session('role_id') == 1 || in_array(1044, session('permissions')))
+					{
+						text: 'Hold',
+						className: 'btn btn-primary hold',
+						enabled: false,
+						action: function (e, dt, node, config) {
+							$.ajax({
+								url: '{!! route('admin.finance.done_payments.hold') !!}',
+								method: 'PUT',
+								data: {
+									'_token': '{{ csrf_token() }}',
+									'ids': selected_rows,
+								},
+								beforeSend: function () {
+									node.prop('disabled', true);
+								}
+							}).done(function(data) {
+										if (data.status == 0) {
+											if (data.payment_paid) {
+												toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+											}
+
+											// Show list of already paid IDs, if any
+											if (data.paid_payment_ids && data.paid_payment_ids.length > 0) {
+												let paidIdsText = data.paid_payment_ids.join(', ');
+												toastr.info('The following payment IDs were already paid and skipped: ' + paidIdsText, 'Info', {
+													positionClass: 'toast-top-center',
+													containerId: 'toast-top-center',
+													timeOut: 8000
+												});
+											}
+										}
+										else {
+											toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+										}
+
+										table.rows().deselect();
+
+										selected_rows = [];
+
+										table.button('.paid').disable();
+										table.button('.tax_paid').disable();
+										table.button('.reverted').disable();
+										table.button('.hold').disable();
+                                        table.button('.un_hold').disable();
+										table.draw('false');
+									});
+						}
+					},
 					@endif
+                     @if (session('role_id') == 1 || in_array(1044, session('permissions')))
+                    {
+                        text: 'UnHold',
+                        className: 'btn btn-primary un_hold',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            $.ajax({
+                                url: '{!! route('admin.finance.done_payments.un_hold') !!}',
+                                method: 'PUT',
+                                data: {
+                                    '_token': '{{ csrf_token() }}',
+                                    'ids': selected_rows,
+                                },
+                                beforeSend: function () {
+                                    node.prop('disabled', true);
+                                }
+                            }).done(function(data) {
+                                if (data.status == 0) {
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                                    // Show list of already paid IDs, if any
+                                    if (data.payment_ids && data.payment_ids.length > 0) {
+                                        let paidIdsText = data.payment_ids.join(', ');
+                                        toastr.info('The following payment IDs are not in "Hold" status and were skipped: ' + paidIdsText, 'Info', {
+                                            positionClass: 'toast-top-center',
+                                            containerId: 'toast-top-center',
+                                            timeOut: 8000
+                                        });
+                                    }
+                                }
+                                else {
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }
+
+                                table.rows().deselect();
+
+                                selected_rows = [];
+
+                                table.button('.paid').disable();
+                                table.button('.tax_paid').disable();
+                                table.button('.reverted').disable();
+                                table.button('.hold').disable();
+                                table.button('.un_hold').disable();
+
+                                table.draw('false');
+                            });
+                        }
+                    },
+                        @endif
                     {
                         extend: 'excel',
                         title: 'Done Payments',
@@ -802,7 +979,10 @@
 	                                }
 
 	                                table.button('.paid').enable();
+	                                table.button('.tax_paid').enable();
 	                                table.button('.reverted').enable();
+									table.button('.hold').enable();
+                                    table.button('.un_hold').enable();
 	                            }
 	                        });
 	                    }
@@ -829,7 +1009,10 @@
 
 	                            if (selected_rows.length == 0) {
 	                                table.button('.paid').disable();
+									table.button('.tax_paid').disable();
 	                                table.button('.reverted').disable();
+									table.button('.hold').disable();
+                                    table.button('.un_hold').disable();
 	                            }
 	                          }
 	                        });
@@ -876,6 +1059,7 @@
 						d.search_payment_ids = $('#done_payment_id_form .done_payment_ids').val();
 						d.star_shipper_filter = $('#star_shippers_filter').val();
 						d.wallet_filter = $('#wallet_filter').val();
+						d.search_region = $('#search_region').val();
 					}
 				},
 				rowId: 'id',
@@ -889,7 +1073,9 @@
 					{data:'shipper', name: 'u.name', class: 'align-middle text-center shipper'},
 					{data:'sale_person_name', name: 'sale_admin.name', class: 'align-middle text-center sale_person_name'},
 					{data:'city', name: 'c.name', class: 'align-middle text-center city'},
+					{data:'territory', name: 't.name', class: 'align-middle text-center territory'},
 					{data:'phone_numbers', name: 'phone_numbers', class: 'align-middle text-center phone_numbers'},
+					{data:'finova_account_type', name: 'finova_account_type', class: 'align-middle text-center finova_account_type'},
 					{data:'address', name: 'u.address', class: 'align-middle text-center address'},
 					{data:'total_shipments', name: 'done_payments.total_shipments', class: 'align-middle text-center total_shipments'},
 					{data:'delivered_shipments', name: 'done_payments.delivered_shipments', class: 'align-middle text-center delivered_shipments'},
@@ -902,6 +1088,7 @@
 					{data:'total_charges', name: 'dpc.charges', class: 'align-middle text-center total_charges', orderable: false},
 					{data:'total_gst', name: 'dpc.gst', class: 'align-middle text-center total_gst', orderable: false},
 					{data:'total_wht', name: 'dpc.wht', class: 'align-middle text-center total_wht', orderable: false},
+					{data:'total_cod_sst', name: 'dpc.cod_sst', class: 'align-middle text-center total_cod_sst', orderable: false},
 					{data:'total_sms_charges', name:'dpc.sms_charges', class: 'align-middle text-center total_sms_charges', orderable: false},
 					{data:'packaging_charges', name: 'dpc.packaging_charges', class: 'align-middle text-center packaging_charges', orderable: false},
 					{data:'total_deductable', name: 'total_deductable', class: 'align-middle text-center total_deductable', orderable: false},
@@ -924,7 +1111,7 @@
 
 					$('td:eq(1)', row).html(index + 1 + info.page * info.length);
 
-					if (data.status != 'Paid') {
+					if (data.status != 'Paid' || data.tax_status != 1) {
 						$('td:eq(0)', row).addClass('select-checkbox');
 
 						if ($.inArray(data.id, selected_rows) !== -1) {
@@ -944,6 +1131,7 @@
                         '<option value="0">Processed</option>' +
                         '<option value="1">Paid</option>' +
                         '<option value="2">Reverted</option>' +
+						'<option value="4">Hold</option>' +
                         '</select>';
 					var payment_cycle_select =
                         '<select name="payment_cycle_select" id="payment_cycle_select" class="select2 form-control">' +
@@ -960,7 +1148,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.total_amount') || $(header).is('.total_charges') || $(header).is('.total_gst') || $(header).is('.total_deductable') || $(header).is('.total_payable') || $(header).is('.return_shipments_average_aging') || $(header).is('.action') || $(header).is('.packaging_charges') || $(header).is('.adjustment_charges') || $(header).is('.total_wht') || $(header).is('.total_sms_charges') || $(header).is('.wallet_error_logs') ) {
+						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.total_amount') || $(header).is('.total_charges') || $(header).is('.total_gst') || $(header).is('.total_deductable') || $(header).is('.total_payable') || $(header).is('.return_shipments_average_aging') || $(header).is('.action') || $(header).is('.packaging_charges') || $(header).is('.adjustment_charges') || $(header).is('.total_wht') || $(header).is('.total_sms_charges') || $(header).is('.wallet_error_logs') || $(header).is('.total_cod_sst') ) {
 							$(td).appendTo($(search));
 						}else if($(header).is('.bank')){
                             $(bank_select).appendTo($(search))
@@ -1103,11 +1291,17 @@
 
 				if (selected_rows.length > 0) {
 					table.button('.paid').enable();
+					table.button('.tax_paid').enable();
 					table.button('.reverted').enable();
+					table.button('.hold').enable();
+                    table.button('.un_hold').enable();
 				}
 				else {
 					table.button('.paid').disable();
+					table.button('.tax_paid').disable();
 					table.button('.reverted').disable();
+					table.button('.hold').disable();
+                    table.button('.un_hold').disable();
 				}
 			});
             var route = '{!! route('admin.tracking.index') !!}';

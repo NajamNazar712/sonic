@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\CRM;
 
 use App\Http\Controllers\NotificationsController;
+use App\Http\Controllers\ReplacementToRegualrShipmemtController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\CRM\CrmRequest;
@@ -12,6 +13,7 @@ use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Models\CRM\CrmRequestTaggingHistory;
 use App\Http\Models\SaleTierTag;
 use App\Http\Models\ConsigneeAddressArea;
+use App\Http\Models\ShipmentsJourney;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\CrmAutoTagUser;
@@ -25,7 +27,7 @@ class CRMController extends Controller
     //launched_by = 1 => Shipper
     //launched_by = 2 => Substitute Shipper
 
-    static public function add($case_nature_id, $case_nature_type_id = NULL, $channel_id, $status_id = 1, $launched_by_id = NULL, $launched_by, $shipment_id = NULL, $shipper_id = NULL, $agent_id = NULL,$description = NULL, $product_cost = NULL, $product_picture = NULL, $invoice_picture = NULL, $damage_product_picture = NULL, $product_packaging_picture = NULL, $actual_product_picture = NULL, $damage_product_price = NULL, $missing_product_picture = NULL, $product_packaging_picture_for_content_short = NULL, $actual_product_picture_for_content_short = NULL, $missing_product_price = NULL, $is_automated_cod_change = false){
+    static public function add($case_nature_id, $case_nature_type_id = NULL, $channel_id, $status_id = 1, $launched_by_id = NULL, $launched_by, $shipment_id = NULL, $shipper_id = NULL, $agent_id = NULL,$description = NULL, $product_cost = NULL, $product_picture = NULL, $invoice_picture = NULL, $damage_product_picture = NULL, $product_packaging_picture = NULL, $actual_product_picture = NULL, $damage_product_price = NULL, $missing_product_picture = NULL, $product_packaging_picture_for_content_short = NULL, $actual_product_picture_for_content_short = NULL, $missing_product_price = NULL, $is_automated_cod_change = false , $is_automated_service_type = false){
         $crm_request = new CrmRequest();
         $crm_request->case_nature_id = $case_nature_id;
         $crm_request->case_nature_type_id = $case_nature_type_id;
@@ -214,7 +216,7 @@ class CRMController extends Controller
                     $crm_city_id = $crm_request->shipment->consignee_city_id;
                     $crm_city_area_id = ConsigneeAddressArea::where('shipment_id',$crm_request->shipment->id)->pluck('city_area_id')->first() ?? 0;
                 }
-                
+
                 if($crm_request->shipper_id){
                     $sales_tier_tag = SaleTierTag::where('user_id', $crm_request->shipper_id);
                     if($sales_tier_tag->exists()){
@@ -357,8 +359,6 @@ class CRMController extends Controller
         if($case_nature_id == 2){
             $shipment = Shipment::find($shipment_id);
 
-      
-
             if($shipment){
                 if($case_nature_type_id == 13){
                     $crm_request->status_id = 4;
@@ -438,14 +438,73 @@ class CRMController extends Controller
                     $crm_request_status_history->save();
                     
                 }
+                // auto change service type
+                else if($case_nature_type_id == 39 && in_array($shipment->shipper_status_id,[2, 3, 4, 5, 7, 8, 9, 11, 12, 13,20, 15, 30, 32, 49, 53, 54, 55, 56, 62, 65, 66, 67,68])){
+
+                    //testedQ
+                    $proceed = true;
+
+                    if (in_array($shipment->shipper_status_id, [7, 8, 9, 12, 15, 30, 56, 65])) {
+                        $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)
+                            ->where('shipper_status_id', $shipment->shipper_status_id)
+                            ->where('verification', 1)
+                            ->first();
+
+                        $proceed = $shipment_journey ? true : false;
+                    } else if(in_array($shipment->shipper_status_id,[13,20])) {
+
+                        //rvr check exist then verified anas ba said
+                        $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)
+                            ->where('shipper_status_id', 12);
+
+                        if ($shipment_journey->exists()) {
+                            $shipment_journey_verified = $shipment_journey->where('verification', 1)->first();
+                            $proceed = $shipment_journey_verified ? true : false;
+                        }
+                    }
+
+                    if ($proceed) {
+                        // Update CRM request statusS
+                        foreach ([2, 4] as $status) {
+                            $crm_request->status_id = $status;
+                            $crm_request->save();
+
+                            $crm_request_status_history = new CrmRequestStatusHistory();
+                            $crm_request_status_history->crm_request_id = $id;
+                            $crm_request_status_history->status_id = $status;
+                            $crm_request_status_history->save();
+                        }
+
+                        // Call the replacement function
+                        ReplacementToRegualrShipmemtController::replaceAutoWithRegularShipment(
+                            $shipment->id,
+                            $shipment->amount,
+                            null,
+                            $launched_by,
+                            $launched_by_id
+                        );
+                    }
+                }
             }
 
-            $comment = "Dear Customer,
+            // auto change service type
+            if($case_nature_type_id!=null && $case_nature_type_id == 39) {
+
+                $shipper_name = isset($shipment->user->name) ? $shipment->user->name : 'Customer';
+                $comment = "Dear $shipper_name,
+                       The request for “Replacement to Regular” has been updated successfully.
+                       Regards,
+                       TRAX";
+
+            } else {
+
+                $comment = "Dear Customer,
                         Thank you for reaching out to us!
                         We want to inform you that your service request has been successfully received and processed. please dont hesitate to contact us. You can reach us at:
                         UAN # 021-111-11-8729 
-                        Email:Info@trax.pk";
-            
+                        Email:info@slgtrax.com";
+            }
+
             $comment_by = 0;
             $comment_type = 0;
 

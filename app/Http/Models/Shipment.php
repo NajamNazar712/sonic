@@ -48,6 +48,10 @@ class Shipment extends Model
 		return $this->hasOne('App\Http\Models\ReceivingSheetShipment');
 	}
 
+    public function retail_shipment()
+    {
+        return $this->hasOne(RetailShipment::class, 'shipment_id');
+    }
 	public function shipment_journey(){
 	    return $this->hasMany('App\Http\Models\ShipmentsJourney')->orderBy('id', 'DESC');
     }
@@ -158,4 +162,10 @@ class Shipment extends Model
     public function faf_charges_data() {
         return $this->belongsTo('App\ShipmentAdditionalCharges', 'id', 'shipment_id');
     }
+    public function bookingChannel()
+    {
+        return $this->hasOne('App\Models\BookingChannel');
+    }
+
+
 }

@@ -44,7 +44,12 @@
                             <div class="form-group">
                                 <textarea id="consignee_address" name="consignee_address" class="form-control" rows="6" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required" data-rule-maxlength="255" data-msg-maxlength="Address can be maximum 255 characters">{{$shipment['consignee_address']}}</textarea>
                             </div>
-
+                            <div class="form-group">
+                                <input type="number" name="consignee_latitude" id="consignee_latitude" class="form-control consignee_latitude" value="{{$latitude ?? ''}}" placeholder="Latitude" >
+                            </div>
+                            <div class="form-group">
+                                <input type="number" name="consignee_longitude" id="consignee_longitude" class="form-control consignee_longitude" value="{{$longitude ?? ''}}" placeholder="Longitude" >
+                            </div>
                             <div class="form-group">
                                 <input type="text" name="consignee_phone_number_1" class="form-control phone_number" value="{{$shipment['consignee_phone_number_1']}}" placeholder="Phone Number 1*" data-rule-required="true" data-msg-required="Phone Number is required">
                             </div>
@@ -117,6 +122,20 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+
+            function reset_lat_lng() {
+                $('#consignee_latitude').val('');
+                $('#consignee_longitude').val('');
+            }
+
+            $('#consignee_address').on('input', function() {
+                reset_lat_lng();
+            });
+
+            $('#consignee_city').on('change', function() {
+                reset_lat_lng();
+            });
+
             var consignee_name = @json($shipment['consignee_name']);
             var city = @json($shipment['consignee_city_id']);
             var email = @json($shipment['consignee_email']);
@@ -144,6 +163,7 @@
                   $( "#amount" ).val(amount);
                   $( "#amount" ).prop('readonly', true);
                   $("#replacement_parcel_image_div").removeClass("d-none");
+
               }
               else{
                   $( "#consignee_name" ).prop('readonly', false);

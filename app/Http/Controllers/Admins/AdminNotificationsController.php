@@ -960,7 +960,7 @@ class AdminNotificationsController extends Controller
             $details['fields'] = ['Shipper','person_of_contact','Shipper name'];
         }
         else if ($id == 150){
-            $details['receiver'] = ['Sales Person','CC-m.sohail@trax.pk','CC-tauseef.sarfaraz@trax.pk','CC-Shahrukh.raheem@trax.pk','CC-Mohsin.khan@trax.pk','CC-ops.excellence@trax.pk'];
+            $details['receiver'] = ['Sales Person','CC-m.sohail@trax.pk','CC-tauseef.sarfaraz@trax.pk','CC-cs.dept@trax.pk','CC-Mohsin.khan@trax.pk','CC-ops.excellence@trax.pk'];
 
             $details['fields'] = ['preview'];
         }
@@ -1224,7 +1224,7 @@ class AdminNotificationsController extends Controller
         }
         else if($id == 221)
         {
-            $details['receiver'] = ['mohsin.khan@trax.pk','CC-(shahrukh.raheem@trax.pk)'];
+            $details['receiver'] = ['muhammad.zain@trax.pk', 'mohsin.khan@trax.pk', 'muhammad.anas@trax.pk', 'CC-(tauseef.sarfaraz@trax.pk)'];
 
             $details['fields'] = ['preview'];
         }
@@ -1236,7 +1236,7 @@ class AdminNotificationsController extends Controller
         }
         else if($id == 223)
         {
-            $details['receiver'] = ['mohsin.khan@trax.pk','CC-(shahrukh.raheem@trax.pk)'];
+            $details['receiver'] = ['muhammad.zain@trax.pk', 'mohsin.khan@trax.pk', 'muhammad.anas@trax.pk', 'CC-(tauseef.sarfaraz@trax.pk)'];
 
             $details['fields'] = ['preview'];
         }
@@ -1276,11 +1276,40 @@ class AdminNotificationsController extends Controller
 
             $details['fields'] = [''];
         }
+        else if ($id == 243)
+        {
+            $details['receiver'] = ['Retail Shipper'];
+
+            $details['fields'] = ['user_name','otp','expire_at'];
+        }
+
+        else if ($id == 248)
+        {
+            $details['receiver'] = ['Shipper'];
+
+            $details['fields'] = ['user_name','otp','expire_at'];
+        }
 
         else if (/* $id == 110 || $id == 226 || */ $id == 236 || $id == 237 || $id == 238 || $id == 239 || $id == 240 || $id == 241 || $id == 242)
         {
             $details['receiver'] = ['shahbaz.abbasi@trax.pk', 'mansoor.ahmad@trax.pk'];
             $details['fields'] = ['link'];
+        }
+        else if($id == 244) {
+            $details['receiver'] = ['Consignee Phone Number'];
+            $details['fields'] = ['tracking_number', 'rider_number', 'otp'];
+        }
+        else if($id == 245) {
+            $details['receiver'] = ['Consignee Phone Number'];
+            $details['fields'] = ['tracking_number'];
+        }
+        else if($id == 246) {
+            $details['receiver'] = ['Consignee Phone Number'];
+            //$details['fields'] = ['tracking_number'];
+        }
+        else if($id == 247) {
+            $details['receiver'] = ['Consignee Phone Number'];
+            //$details['fields'] = ['tracking_number'];
         }
 
         return $details;

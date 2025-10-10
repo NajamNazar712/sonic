@@ -51,7 +51,7 @@ class User extends Authenticatable
         return $this->hasMany('App\Http\Models\Shipper\UserBankInfo');
     }
     public function shipping(){
-        return $this->hasMany('App\Http\Models\Shipper\UserShippingInfo');
+        return $this->hasMany('App\Http\Models\Shipper\UserShippingInfo', 'user_id','id');
     }
     public function sales_person(){
         return $this->hasMany('App\Http\Models\Admin\SalePersonTag');
@@ -113,4 +113,8 @@ class User extends Authenticatable
         return $this->hasMany('App\Http\Models\Shipper\SubstituteUser','user_id', 'id')->where('status',1);
     }
 
+    public function reference()
+    {
+        return $this->belongsTo('App\Http\Models\Reference', 'reference_id', 'id');
+    }
 }

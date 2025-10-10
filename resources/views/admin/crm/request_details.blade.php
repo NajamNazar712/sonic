@@ -288,7 +288,7 @@
                                                             @if($crm_details['status_id'] == 1 ||$crm_details['status_id'] == 5)
                                                                 <button id="valid" type="submit"class="btn btn-success mr-1">
                                                                     <span class="d-none d-lg-block">
-                                                                        Valid
+                                                                        Accept Ticket
                                                                     </span>
                                                                 </button>
                                                             @elseif($crm_details['status_id'] == 2)
@@ -1075,7 +1075,7 @@
                                         </div>
                                         <div class="col-8">
                                             <fieldset class="form-group">
-                                                <input class="form-control" name="claim_product_cost" id="claim_product_cost" value="" placeholder="Enter Product Cost">
+                                                <input class="form-control" name="claim_product_cost" id="claim_product_cost" value="" placeholder="Enter Claim Amount">
                                             </fieldset>
                                         </div>
                                         <div class="col-8 text-left">
@@ -1349,6 +1349,68 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade text-left" id="claimInvalidModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="claimInvalidModal" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Claim Invalid Reason</h4>
+                </div>
+
+                <div class="modal-body">
+                    <select name="claim_invalid_reasons[]" id="claim_invalid_reasons" class="form-control select2" multiple>
+                        @foreach($invalid_reasons as $reason)
+                            <option value="{{ $reason->id }}">{{ $reason->reason }}</option>
+                        @endforeach
+                    </select>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="invalid_submit">Submit</button>
+                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade text-left" id="claimResolvedModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="claimResolvedModal" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Claim Resolved Reason</h4>
+                </div>
+
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="claim_resolved_reason">Select Reason</label>
+                        <select name="claim_resolved_reason" id="claim_resolved_reason" class="form-control select2">
+                            <option value="" disabled selected> Select a reason </option>
+                            @foreach($resolved_reasons as $reason)
+                                <option value="{{ $reason->id }}">{{ $reason->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="form-group mt-3" id="sub_reason_wrapper" style="display: none;">
+                        <label for="claim_resolved_sub_reasons">Select Sub Reason(s)</label>
+                        <select name="claim_resolved_sub_reasons[]" id="claim_resolved_sub_reasons" class="form-control select2" multiple>
+                            @foreach($resolved_sub_reasons as $sub)
+                                <option value="{{ $sub->id }}">{{ $sub->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="resolved_submit">Submit</button>
+                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 @endsection
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
@@ -1490,6 +1552,36 @@
             font-size: 4rem;
         }
 
+        .selectize-control {
+            width: 500px !important;
+        }
+
+        .select-checkbox{
+            border-color: #64a0d2;
+        }
+
+        .select2-container--classic .select2-selection--multiple .select2-selection__choice, .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: #64a0d2 !important;
+            border-color: #5587b4 !important;
+            color: #FFFFFF;
+        }
+        tr.highalert_row{
+            background-color: #ff6326;
+            color: whitesmoke;
+        }
+        tr.highalert_row a{
+            color: whitesmoke;
+        }
+        .select2-search__field{
+            width: 140px !important;
+        }
+
+        .select2-container--default .select2-selection--multiple {
+            min-height: 48px !important;      
+            max-height: 100px !important;   
+            overflow-y: auto !important;   
+            padding-bottom: 5px;
+        }
       
     </style>
 @endsection
@@ -2250,7 +2342,7 @@
                     else if(case_nature_id === 4){
                         var nature_flag = true;
                         var case_nature_claim_id = $('#case_nature_claim').val();
-                        var product_cost = $('#claim_product_cost').val();
+                        var product_cost = parseFloat($('#claim_product_cost').inputmask('unmaskedvalue'));
                         var check_product_picture = $('#product_picture').val();
                         var check_invoice_picture = $('#invoice_picture').val();
                         $('#tracking_number').val(tracking_number);
@@ -2269,7 +2361,7 @@
                         }
                         if(!product_cost){
                             nature_flag = false;
-                            var error = "Please enter Product Cost!";
+                            var error = isNaN(product_cost) ? "Please enter Claim Amount!" : "Claim Amount cannot be zero !!";
                             toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         }
                         if(!check_invoice_picture){
@@ -2469,6 +2561,8 @@
                 }
             });
 
+            let crm_status = @json($crm_status);
+            let crm_case_nature = @json($crm_case_nature);
 
             $('#valid_form').validate({
                 errorClass: 'danger',
@@ -2493,10 +2587,16 @@
                         }).done(function (data) {
                             if(data.status == 1){
                                 $('#CloseReasonModal').modal('show');
+                            }else if(isClaimInvalid){
+                                pendingForm = form;     
+                                $('#claimResolvedModal').modal('show');
                             }else{
                                 form.submit();
                             }
                         });
+                    }else if(isClaimInvalid){
+                        pendingForm = form;     
+                        $('#claimResolvedModal').modal('show');
                     }else{
                         form.submit();
                     }
@@ -2521,6 +2621,9 @@
             //     blockPagePermanently();
             // });
 
+            let pendingForm = null;
+
+            let isClaimInvalid = (crm_status == 2 && crm_case_nature == 4)
 
             $('#invalid_form').validate({
                 errorClass: 'danger',
@@ -2545,10 +2648,17 @@
                         }).done(function (data) {
                             if(data.status == 1){
                                 $('#CloseReasonModal').modal('show');
+                            }
+                            else if(isClaimInvalid){
+                                pendingForm = form; 
+                                $('#claimInvalidModal').modal('show');
                             }else{
                                 form.submit();
                             }
                         });
+                    }else if(isClaimInvalid){
+                        pendingForm = form; 
+                        $('#claimInvalidModal').modal('show');
                     }else{
                         form.submit();
                     }
@@ -2904,6 +3014,119 @@
                 //mark_close
                 $('#resolved_close_val').val("1");
                 form.submit();
+            });
+
+
+             let selected_invalid_reason_ids = [];
+             let selected_resolved_reason_ids = [];
+             let selected_resolved_sub_reason_ids = [];
+
+            $('#claim_invalid_reasons').select2({
+                width: '100%',
+                placeholder: 'Select Invalid Reason(s)',
+                allowClear: true,
+                dropdownParent: $('#claimInvalidModal')
+            }).on('change', function () {
+                const currentSelection = $(this).val() || [];
+
+                currentSelection.forEach(id => {
+                    if (!selected_invalid_reason_ids.includes(id)) {
+                        selected_invalid_reason_ids.push(id);
+                    }
+                });
+
+                selected_invalid_reason_ids = selected_invalid_reason_ids.filter(id => currentSelection.includes(id));
+
+            });
+
+
+            $('#invalid_submit').on('click', function () {
+                var selectedReasons = $('#claim_invalid_reasons').val();
+
+                if (pendingForm) {
+                    $(pendingForm).find('input[name="claim_invalid_reasons[]"]').remove();
+
+                    selectedReasons.forEach(function(reason) {
+                        $('<input>').attr({
+                            type: 'hidden',
+                            name: 'claim_invalid_reasons[]',
+                            value: reason
+                        }).appendTo(pendingForm);
+                    });
+
+                    $('#claimInvalidModal').modal('hide'); 
+                    pendingForm.submit();                  
+                    pendingForm = null;                  
+                }
+            });
+
+            $('#claimInvalidModal').on('hide.bs.modal', function (e) {
+                selected_invalid_reason_ids = [];
+                $('#claim_invalid_reasons').val(null).trigger('change');
+            });
+
+            $('#claim_resolved_reason')
+                .select2({
+                    placeholder: 'Select a reason',
+                    allowClear: true,
+                    width: '100%',
+                    minimumResultsForSearch: Infinity
+            }).on('change', function () {
+                    const selected = $(this).val();
+                    selected_resolved_reason_ids = selected ? [selected] : [];
+
+                    if (selected) {
+                        $('#sub_reason_wrapper').slideDown();
+                    } else {
+                        $('#sub_reason_wrapper').slideUp();
+                        $('#claim_resolved_sub_reasons').val(null).trigger('change');
+                    }
+            });
+
+            $('#claim_resolved_sub_reasons').select2({
+                placeholder: 'Select sub reason(s)',
+                allowClear: true,
+                width: '100%'
+            }).on('change', function () {
+                selected_resolved_sub_reason_ids = $(this).val() || [];
+            });
+
+
+            $('#resolved_submit').on('click', function () {
+                var selectedReason = $('#claim_resolved_reason').val();
+                var selectedSubReasons = $('#claim_resolved_sub_reasons').val();
+
+                if (pendingForm) {
+                    $(pendingForm).find('input[name="claim_resolved_reason"]').remove();
+                    $(pendingForm).find('input[name="claim_resolved_sub_reasons[]"]').remove();
+
+                    $('<input>').attr({
+                        type: 'hidden',
+                        name: 'claim_resolved_reason',
+                        value: selectedReason
+                    }).appendTo(pendingForm);
+
+                    selectedSubReasons.forEach(function (sub) {
+                        $('<input>').attr({
+                            type: 'hidden',
+                            name: 'claim_resolved_sub_reasons[]',
+                            value: sub
+                        }).appendTo(pendingForm);
+                    });
+
+                    $('#claimResolvedModal').modal('hide'); 
+                    pendingForm.submit();                  
+                    pendingForm = null;                
+                }
+            });
+
+             $('#claimResolvedModal').on('hide.bs.modal', function (e) {
+                selected_resolved_reason_ids = [];
+                selected_resolved_sub_reason_ids = [];
+
+                $('#claim_resolved_reason').val(null).trigger('change');
+                $('#claim_resolved_sub_reasons').val(null).trigger('change');
+                 $('#sub_reason_wrapper').slideUp();
             });
 
         });

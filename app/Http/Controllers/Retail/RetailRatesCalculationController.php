@@ -12,10 +12,12 @@ use App\Http\Models\Zone;
 use App\Http\Models\ZoneCitiesGst;
 use App\Http\Models\ZoneClassCity;
 use Illuminate\Http\Request;
+use App\Models\ParentProduct;
+use App\Http\Models\Product;
 
 class RetailRatesCalculationController extends Controller
 {
-    static public function rates($shipping_mode_id, $business_category_id, $pickup_city_id, $destination_id, $trax_box_id, $discount, $weight, $insurance_amount, $packaging)
+    static public function rates($shipping_mode_id, $business_category_id, $pickup_city_id, $destination_id, $trax_box_id, $discount, $weight, $insurance_amount, $packaging, $product_id = null, $cod = null)
     {
         if ($discount == null || $discount == '') {
             $discount = 0;
@@ -34,6 +36,8 @@ class RetailRatesCalculationController extends Controller
         $packaging_and_insurance_charges = 0;
         $charges_without_gst = 0;
         $charges_with_discount_and_gst = 0;
+        $wht = 0;
+        $cod_sst = 0;
 
         if ($business_category_id == 1) {
             $destination_city = City::find($destination_id);
@@ -165,7 +169,7 @@ class RetailRatesCalculationController extends Controller
                 }
             }
 
-            $zone_city_gst = ZoneCitiesGst::where('zone_id',$pickup_city->zone->id)->where('city_id',$pickup_city->id);
+            $zone_city_gst = ZoneCitiesGst::where('zone_id',$pickup_city->zone?->id)->where('city_id',$pickup_city->id);
             if ($zone_city_gst->exists())
             {
                 $zone_city_gst = $zone_city_gst->first();
@@ -173,7 +177,26 @@ class RetailRatesCalculationController extends Controller
             }
             else
             {
-                $gst = 1 + $pickup_city->zone->gst;
+                $gst = 1 + $pickup_city->zone?->gst;
+            }
+            $parent_product_id = Product::where('id', $product_id)->value('parent_product_id');
+            //dd($product_id);
+            if($parent_product_id && $shipping_mode_id == 3 && $cod > 0) {
+                
+                $cod = str_replace(',', '', $cod);
+                $cod = intval($cod);
+                $tax_percentage  = ParentProduct::where('id', $parent_product_id)->value('tax_percentage');
+                if($tax_percentage != 0) {
+                    
+                    $wht  = ($cod * floatval($tax_percentage)) / 100;
+                    //return $tax_amount;
+                }
+
+                $sst_percentage  = ParentProduct::where('id', $parent_product_id)->value('sst_percentage');
+                if($sst_percentage != 0) {
+                    $cod_sst  = ($cod * floatval($sst_percentage)) / 100;
+                    // return $cod_sst;
+                }
             }
 
             $charges_without_gst = round($charges / $gst, 2); //
@@ -218,7 +241,7 @@ class RetailRatesCalculationController extends Controller
                     $charges = $weight_charge[$zone_id];
 
                     $city = City::find($pickup_city_id);
-                    $zone_city_gst = ZoneCitiesGst::where('zone_id',$city->zone->id)->where('city_id',$city->id);
+                    $zone_city_gst = ZoneCitiesGst::where('zone_id',$city->zone?->id)->where('city_id',$city->id);
                     if ($zone_city_gst->exists())
                     {
                         $zone_city_gst = $zone_city_gst->first();
@@ -226,7 +249,7 @@ class RetailRatesCalculationController extends Controller
                     }
                     else
                     {
-                        $gst = 1 + $city->zone->gst;
+                        $gst = 1 + $city->zone?->gst;
                     }
                     // $gst_charges = round($charges * $gst,2);
                     // $charges = round($charges - $gst_charges,2);
@@ -257,6 +280,8 @@ class RetailRatesCalculationController extends Controller
         $rates['gst_charges'] = $gst_amount;
         $rates['packaging_and_insurance_charges'] = $packaging_and_insurance_charges;
         $rates['total_charges'] = $total_charges;
+        $rates['wht'] = $wht;
+        $rates['cod_sst'] = $cod_sst;
     
 
         return $rates;

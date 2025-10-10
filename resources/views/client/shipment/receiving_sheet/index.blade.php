@@ -22,6 +22,7 @@
 									<tr role="row" class="bg-primary white">
 										<th class="border-primary border-darken-1"></th>
 										<th class="border-primary border-darken-1">S. No.</th>
+										<th class="border-primary border-darken-1">ID</th>
 										<th class="border-primary border-darken-1">Tracking Number</th>
 										<th class="border-primary border-darken-1">Shipper</th>
 										<th class="border-primary border-darken-1">Order ID</th>
@@ -484,10 +485,11 @@
 				serverSide: true,
 				ajax: '{{ route('cod.shipment.receiving_sheet.list') }}',
 				rowId: 'id',
-				order: [[9, 'desc']],
+				order: [[2, 'desc']],
 				columns: [
 					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'serial_number', orderable: false, searchable: false, name: 'id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
+					{data: 'id', name: 'shipments.id', orderable: true, searchable: false, visible: false},
 					{data: 'tracking_number', name: 'tracking_number', class: 'align-middle tracking_number'},
 					{data: 'user', name: 'u.name', class: 'align-middle user'},
 					{data: 'order_id', name: 'order_id', class: 'align-middle order_id'},

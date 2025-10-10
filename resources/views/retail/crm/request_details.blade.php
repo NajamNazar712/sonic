@@ -233,7 +233,7 @@
                                                                 @if($crm_details['status_id'] == 1 ||$crm_details['status_id'] == 5)
                                                                     <button id="valid" type="submit"class="btn btn-success mr-1">
                                                                         <span class="d-none d-lg-block">
-                                                                            Valid
+                                                                            Accept Ticket
                                                                         </span>
                                                                     </button>
                                                                 @elseif($crm_details['status_id'] == 2)
@@ -1023,7 +1023,7 @@
                                         </div>
                                         <div class="col-8">
                                             <fieldset class="form-group">
-                                                <input class="form-control" name="claim_product_cost" id="claim_product_cost" value="" placeholder="Enter Product Cost">
+                                                <input class="form-control" name="claim_product_cost" id="claim_product_cost" value="" placeholder="Enter Claim Amount">
                                             </fieldset>
                                         </div>
                                         <div class="col-8 text-left">
@@ -2201,7 +2201,7 @@
                     else if(case_nature_id === 4){
                         var nature_flag = true;
                         var case_nature_claim_id = $('#case_nature_claim').val();
-                        var product_cost = $('#claim_product_cost').val();
+                        var product_cost = parseFloat($('#claim_product_cost').inputmask('unmaskedvalue'));
                         var check_product_picture = $('#product_picture').val();
                         var check_invoice_picture = $('#invoice_picture').val();
                         $('#tracking_number').val(tracking_number);
@@ -2220,7 +2220,7 @@
                         }
                         if(!product_cost){
                             nature_flag = false;
-                            var error = "Please enter Product Cost!";
+                            var error = isNaN(product_cost) ? "Please enter Claim Amount!" : "Claim Amount cannot be zero !!";
                             toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         }
                         if(!check_invoice_picture){

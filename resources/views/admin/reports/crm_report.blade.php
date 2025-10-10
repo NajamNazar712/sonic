@@ -27,9 +27,6 @@
                     <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_shipper" id="search_shipper" class="form-control select2" multiple="multiple">
-                                @foreach($shippers as $shipper)
-                                    <option value="{{$shipper->id}}">{{$shipper->name}}</option>
-                                @endforeach
                             </select>
                         </fieldset>
                     </div>
@@ -38,9 +35,6 @@
                     <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_hub" id="search_hub" class="form-control select2">
-                                @foreach($hubs as $hub)
-                                    <option value="{{$hub->id}}">{{$hub->name}}</option>
-                                @endforeach
                             </select>
                         </fieldset>
                     </div>
@@ -68,9 +62,6 @@
                     <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_case_nature_type" id="search_case_nature_type" class="form-control select2">
-                                @foreach($case_nature_types as $case_nature_type)
-                                    <option value="{{$case_nature_type->id}}">{{$case_nature_type->type}}</option>
-                                @endforeach
                             </select>
                         </fieldset>
                     </div>
@@ -179,6 +170,7 @@
 
                         <!-- Parcel Value column added -->
                         <th class="border-primary border-darken-1">Parcel Value</th>
+                        <th class="border-primary border-darken-1">Claim Amount</th>
 
                         <th class="border-primary border-darken-1">COD Value</th>
                         <th class="border-primary border-darken-1">Adjusted Amount</th>
@@ -218,6 +210,9 @@
                         <th class="border-primary border-darken-1">Case Closed Remarks</th>
                         <th class="border-primary border-darken-1">Complainant</th>
                         <th class="border-primary border-darken-1">Complainant Contact Number</th>
+
+                        <th class="border-primary border-darken-1">Claim Resolved/Invalid Reason</th>
+                        <th class="border-primary border-darken-1">Claim Resolved Sub Reason</th>
 
                     </tr>
                     </thead>
@@ -372,10 +367,27 @@
                 width:'100%',
                 allowClear:true
             });
-            $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Search Hub',
+            $('#search_hub').select2({
                 width:'100%',
-                allowClear:true
+                placeholder:"Select Hub",
+                allowClear:true,
+                multiple: true,
+                minimumInputLength: 2,
+                ajax: {
+                    dataType: 'json',
+                    url:  '{!! route('admin.reports.data_for_dropdown', ['type'=>'hub']) !!}',
+                        data: function (params) {
+                            return {
+                                search: params.term,
+                            }
+                        },
+                        processResults: function (data) {
+                            return {
+                                results: data
+                            };
+                        },
+                    delay: 700,
+                }
             });
             $('#search_zone').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search Zone',
@@ -392,16 +404,50 @@
                 width:'100%',
                 allowClear:true
             });
-            $('#search_case_nature_type').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Search Case Nature Type',
+            $('#search_case_nature_type').select2({
                 width:'100%',
-                allowClear:true
+                placeholder:"Select Case Nature Type",
+                allowClear:true,
+                multiple: true,
+                minimumInputLength: 2,
+                ajax: {
+                    dataType: 'json',
+                    url:  '{!! route('admin.reports.data_for_dropdown', ['type'=>'nature']) !!}',
+                        data: function (params) {
+                            return {
+                                search: params.term,
+                            }
+                        },
+                        processResults: function (data) {
+                            return {
+                                results: data
+                            };
+                        },
+                    delay: 700,
+                }
             });
-            
             $('#search_shipper').select2({
-                placeholder:'Search Shipper',
                 width:'100%',
-                allowClear:true
+                placeholder:"Select Shipper",
+                allowClear:true,
+                multiple: true,
+                minimumInputLength: 2,
+                ajax: {
+                    dataType: 'json',
+                    url:  '{!! route('admin.accounts.shipper_names.dropdown',['type'=>'active']) !!}',
+                        data: function (params) {
+                            return {
+                                search: params.term,
+                                exclude_shipper : 0
+                            }
+                        },
+                        processResults: function (data) {
+                            return {
+                                results: data
+                            };
+                        },
+                    delay: 700,
+                }
             });
             $('#search_status').select2({
                 placeholder:'Search CRM Status',
@@ -413,6 +459,19 @@
                 placeholder:"Select Service Type",
                 allowClear:true,
             });
+
+            function addMonths(date, months) {
+                let d = new Date(date);
+                d.setMonth(d.getMonth() + months);
+                return d;
+            }
+
+            function subtractMonths(date, months) {
+                let d = new Date(date);
+                d.setMonth(d.getMonth() - months);
+                return d;
+            }
+
             $('#from_date').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -422,10 +481,17 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        $('#to_date').pickadate('picker').set('min', $('#from_date').pickadate('picker').get('select'));
+                        let fromDate = new Date(context.select);
+                        let toMinDate = new Date(fromDate); // same as from date
+                        let toMaxDate = addMonths(fromDate, 3); // max 3 months later
+
+                        let toPicker = $('#to_date').pickadate('picker');
+                        toPicker.set('min', toMinDate);
+                        toPicker.set('max', toMaxDate);
                     }
                 }
             });
+
             $('#to_date').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -435,10 +501,18 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        $('#from_date').pickadate('picker').set('max', $('#to_date').pickadate('picker').get('select'));
+                        let toDate = new Date(context.select);
+                        let fromMaxDate = new Date(toDate); // same as to date
+                        let fromMinDate = subtractMonths(toDate, 3); // min 3 months earlier
+
+                        let fromPicker = $('#from_date').pickadate('picker');
+                        fromPicker.set('max', fromMaxDate);
+                        fromPicker.set('min', fromMinDate);
                     }
                 }
             });
+
+
             var index_column = 0;
             var table = $('#datatable').DataTable({
                 scrollX: true, scrollY: '500px',
@@ -607,6 +681,8 @@
                     // Parcel Value column added here
                     {data: 'parcel_value', name: 's.parcel_value', class: 'align-middle parcel_value', text: 'Parcel Value', value: 'parcel_value', download: true},
 
+                    {data: 'product_cost', name: 'crm_requests.product_cost', class: 'align-middle product_cost', text: 'Claim Amount', value: 'product_cost', download: true},
+
                     {data: 'cod_amount', name: 's.amount', class: 'align-middle cod_amount', text: 'COD Amount', value: 'cod_amount', download: true},
                     {data: 'adjusted_amount', name: 'adjustment.adjustment_amount', class: 'align-middle adjusted_amount', text: 'Adjusted Amount', value: 'adjusted_amount', download: true},
                     {data: 'weight_charges', name: 'change_shipment_weight_logs.new_charges', class: 'align-middle weight_charges', text: 'Weight Charges', value: 'weight_charges', download: true},
@@ -644,7 +720,9 @@
                     {data: 'resolved_date', name: 'crshr.created_at', class: 'align-middle resolved_date', text: 'Resolved Date', value: 'resolved_date', download: true},
                     {data: 'case_closed_remark', name: 'sjcc.remarks', class: 'align-middle case_closed_remark', text: 'Case Closed Remark', value: 'case_closed_remark', download: true},
                     {data: 'case_nature_complainant', name: 'crm_requests.case_nature_complainant', class: 'align-middle case_nature_complainant', text: 'Complainant', value: 'case_nature_complainant', download: true},
-                    {data: 'complainant_phone', name: 'crm_requests.complainant_phone', class: 'align-middle complainant_phone', text: 'Complainant Contact Number', value: 'complainant_phone', download: true}
+                    {data: 'complainant_phone', name: 'crm_requests.complainant_phone', class: 'align-middle complainant_phone', text: 'Complainant Contact Number', value: 'complainant_phone', download: true},
+                    {data: 'claim_resolved_invalid_reason', name: 'claim_resolved_invalid_reason', class: 'align-middle claim_resolved_invalid_reason', text: 'Claim Resolved/Invalid Reason', value: 'claim_resolved_invalid_reason', download: true},
+                    {data: 'claim_resolved_sub_reason', name: 'claim_resolved_sub_reason', class: 'align-middle claim_resolved_sub_reason', text: 'Claim Resolved Sub Reason', value: 'claim_resolved_sub_reason', download: true}
 
                 ],
                 rowCallback: function(row, data, index) {

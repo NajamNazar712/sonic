@@ -2,17 +2,18 @@
 
 namespace App\Http\Controllers\Shippers;
 
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\Http\Models\City;
-use App\Http\Models\Shipper\SubstituteUserModulePermission;
-use App\Http\Models\Shipper\SubstituteUser;
-use App\Http\Models\Shipper\SubstituteUserPermission;
-use App\Http\Models\Shipper\UserShippingInfo;
 use Auth;
-
-use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
+use App\Http\Models\City;
+use Illuminate\Http\Request;
+use Yajra\Datatables\Datatables;
+use App\Http\Models\Shipper\User;
+use App\Http\Controllers\Controller;
+use App\Http\Models\Shipper\SubstituteUser;
+
+use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Models\Shipper\SubstituteUserPermission;
+use App\Http\Models\Shipper\SubstituteUserModulePermission;
 
 class ShipperSubstituteAccountManagementController extends Controller
 {
@@ -78,25 +79,29 @@ class ShipperSubstituteAccountManagementController extends Controller
       return $datatables->rawColumns(['action'])->make(true);
     }
 
-    public function email(Request $request) {
-      if ($request->filled('email')) {
-        $email = SubstituteUser::where('email', $request->input('email'));
-
-        if ($request->has('id')) {
-          $email = $email->where('id', '!=', $request->input('id'));
-        }
-
-        if (!$email->exists()) {
-          return 'true';
-        }
-        else {
+   public function email(Request $request) {
+      if (!$request->filled('email')) {
           return 'false';
-        }
       }
-      else {
-        return 'false';
+
+      $email = $request->input('email');
+      $id = $request->input('id');
+
+      $subUserQuery = SubstituteUser::where('email', $email);
+      if ($id) {
+          $subUserQuery->where('id', '!=', $id);
       }
-    }
+      $subUserExists = $subUserQuery->exists();
+
+      $userExists = User::where('email', $email)->exists();
+
+      if (!$subUserExists && !$userExists) {
+          return 'true';
+      }
+
+      return 'false';
+  }
+
 
     public function status(Request $request) {
       $substitute_user = SubstituteUser::find($request->id);

@@ -337,7 +337,7 @@
                                     <div class="col-10" id="claim_product_cost_div">
                                         <fieldset class="form-group">
                                             <input class="form-control" name="claim_product_cost" id="claim_product_cost"
-                                                value="" placeholder="Enter Product Cost">
+                                                value="" placeholder="Enter Claim Amount">
                                         </fieldset>
                                     </div>
                                     <div class="col-10 d-none" id="receiving_sheet_div">
@@ -490,6 +490,18 @@
                             <hr>
                             <div class="remarks" id="request_remarks">
                                 <div class="row justify-content-center">
+                                    <div class="col-12 d-none" id="missingAddress">
+                                        <fieldset class="form-group">
+                                            <input type="text" name="consignee_address_1" id="address_1"
+                                                class="form-control" maxlength="50"" disabled>
+                                        </fieldset>
+                                        <fieldset class="form-group">
+                                            <input type="text" name="consignee_address_1" id="address_2"
+                                                class="form-control" maxlength="50"
+                                                placeholder="Enter Missing Address" data-rule-required="true"
+                                                data-msg-required="Missing Address is required">
+                                        </fieldset>
+                                    </div>
                                     <div class="col-12 d-none" id="reattempt_charges">
                                         <fieldset class="form-group">
                                             <input type="text" name="estimate_charges" id="estimated_charges_input"
@@ -738,6 +750,56 @@
 
     <div class="modal fade text-left addLostResponsibleModal" data-backdrop="static" tabindex="-1" role="dialog">        
 
+    </div>
+
+
+    {{-- Geo Codes --}}
+    <div class="modal fade text-left" id="AddGeoCodeModal" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="AddGeoCodeModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Consignee Address Geo Code</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="add_geo_code_form" method="post">
+                        @method('POST')
+                        @csrf
+                        <div class="container">
+                            <div class="row">
+                                <h2 class="heading">Tracking Number(s)</h2>
+                            </div>
+
+                            <input type="hidden" name="shipment_id" id="geo_code_shipment_id">
+                            <div class="row old_scroll" id="geo_code_shipments">
+                            </div>
+                            <hr>
+                            <div class="row justify-content-center">
+                                <div class="col-10">
+                                    <fieldset class="form-group">
+                                        <input type="text" class="form-control" placeholder="Enter Latitude" name="lat" id="lat"  data-rule-required="true"
+                                               data-msg-required="Consignee Address Latitude is required">
+                                    </fieldset>
+                                    <fieldset class="form-group">
+                                        <input type="text" class="form-control" placeholder="Enter Longitude" name="long" id="long"  data-rule-required="true"
+                                               data-msg-required="Consignee Address Longitude is required">
+                                    </fieldset>
+                                </div>
+                            </div>
+                            <div class="row justify-content-center">
+                                <div class="col-3">
+                                    <button id="AdGeoCodeRequest" type="submit"
+                                            class="btn btn-primary btn-block">Submit</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 @endsection
 
@@ -1495,7 +1557,7 @@
 
             var complain_route = '{{ route('admin.crm.request.details', 0) }}';
             complain_route = complain_route.slice(0, -1);
-
+            let ConsigneeAddress = null;
             function track(tracking_numbers) {
                 $.ajax({
                         url: '{!! route('admin.tracking.track_v2') !!}',
@@ -1535,7 +1597,7 @@
                                 var shipment_type = details.shipment_type;
                                 var shipment = '';
                                 var on_hold_box_icon = '';
-
+                                ConsigneeAddress = details.consignee.address;
                                 if (details.consignee.crm_status) {
                                     on_hold_box_icon =
                                         ' <span><i class="fas fa-person-booth"></i></span> '
@@ -1584,6 +1646,14 @@
                                     '<button class="btn btn-secondary ml-auto mr-1 mr-sm-1 add_request" id=' +
                                     id + ' data-tracking=' + details.tracking_number +
                                     '>Get Support</button>';
+
+                                @if(session('role_id') == 1 || in_array(1042, session('permissions')))
+                                    shipment +=
+                                    '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 geo_codes" id=' +
+                                    id + ' data-tracking=' + details.tracking_number +
+                                    '>Provide Geocodes</button>';
+                                @endif
+
 
                                 shipment +=
                                         '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 view_odr" id=' +
@@ -1950,6 +2020,9 @@
                                 shipment += '<td>' + details.order_information.sub_segment + '</td>';
                                 shipment += '</tr>';
 
+                                shipment += '<td><strong>Booking Channel</strong></td>';
+                                shipment += '<td>' + details.order_information.channel + '</td>';
+                                shipment += '</tr>';
 
                                 shipment += '<tr>';
                                 shipment += length;
@@ -2330,22 +2403,25 @@
                                     shipment += '<tbody>';
                                     $count = 0;
                                     $.each(details.crm_requests, function(index, crm_request) {
-                                        $count = $count + 1;
-                                        shipment += '<tr>';
-                                        shipment += '<td>' + $count + '</td>';
-                                        if (crm_request.status_id === 1 || crm_request
-                                            .status_id === 5) {
-                                            shipment += '<td>' + crm_request.status +
-                                                '(<a class="btn btn-sm btn-outline-info align-middle" href="' +
-                                                complain_route + crm_request.id +
-                                                '" target="_blank">(' + crm_request.id +
-                                                ')</a>)</td>';
-                                        } else {
-                                            shipment += '<td>' + crm_request.status + '</td>';
+                                        if(crm_request.status_id!=6){
+                                            $count = $count + 1;
+                                            shipment += '<tr>';
+                                            shipment += '<td>' + $count + '</td>';
+                                            if (crm_request.status_id === 1 || crm_request
+                                                .status_id === 5) {
+                                                shipment += '<td>' + crm_request.status +
+                                                    '(<a class="btn btn-sm btn-outline-info align-middle" href="' +
+                                                    complain_route + crm_request.id +
+                                                    '" target="_blank">(' + crm_request.id +
+                                                    ')</a>)</td>';
+                                            } else {
+                                                shipment += '<td>' + crm_request.status + '</td>';
+                                            }
+                                            shipment += '<td>' + crm_request.created_at + '</td>';
+                                            shipment += '<td>' + crm_request.created_by + '</td>';
+                                            shipment += '</tr>';
                                         }
-                                        shipment += '<td>' + crm_request.created_at + '</td>';
-                                        shipment += '<td>' + crm_request.created_by + '</td>';
-                                        shipment += '</tr>';
+
                                     });
 
                                     shipment += '</tbody>';
@@ -2823,8 +2899,10 @@
                 $('#reattempt_shipment_id').val(id);
                 $('#reattempt_shipments').html(tracking_rows);
                 $('#reattempt_remarks').val('');
+                $('#address_2').val('');
                 $('#estimated_charges_input').val('');
                 $('#reattempt_charges').addClass('d-none');
+                $('#missingAddress').addClass('d-none');
                 $.ajax({
                         url: '{!! route('admin.tracking.estimation_check') !!}',
                         method: 'POST',
@@ -2836,7 +2914,11 @@
                     .done(function(data) {
                         if (data.contains == 1) {
                             $('#reattempt_charges').removeClass('d-none');
+                        }else if(data.addressMissingType){
+                            $('#address_1').val(ConsigneeAddress + " " + data.addressMissingType);                         
+                            $('#missingAddress').removeClass('d-none'); 
                         }
+                        
                     });
                 $('#ReattemptModal').modal('show');
 
@@ -3370,8 +3452,8 @@
                             });
                     }
 
-                } 
-                
+                }
+
                 else if (case_nature_id == 2) {
                     var nature_flag = true;
                     var case_nature_complaint_id = $('#case_nature_requests').val();
@@ -3459,9 +3541,8 @@
                         $('#AddNewRequest').attr('disabled', true);
 
                         var complaint_id = $('#case_nature_requests').val();
-                        
-                        if(complaint_id == 12)
-                        {
+
+                        if(complaint_id == 12) {
                             swal({
                                 title: 'Please Wait!',
                                 text: 'Launching Request.',
@@ -3581,6 +3662,104 @@
                                 }
                             });
                         }
+                        else if(complaint_id == 39) {
+                            swal({
+                                title: 'Are you sure to change service type?',
+                                text: 'Select Yes to change service type!',
+                                icon: 'warning',
+                                buttons: {
+                                    cancel: {
+                                        text: 'No',
+                                        value: null,
+                                        visible: true,
+                                        closeModal: true,
+                                    },
+                                    confirm: {
+                                        text: 'Yes',
+                                        value: true,
+                                        visible: true,
+                                        closeModal: true
+                                    }
+                                },
+                                closeOnClickOutside: false,
+                                closeOnEsc: false,
+                                dangerMode: true
+                            }).then(function (confirm){
+                                if(confirm){
+                                    $.ajax({
+                                        url: '{!! route('admin.crm.request.add') !!}',
+                                        method: 'POST',
+                                        data: {
+                                            '_token': '{{ csrf_token() }}',
+                                            'shipment_id': $('#requested_shipment_id').val(),
+                                            'case_nature_id': case_nature_id,
+                                            'complaint_id': case_nature_complaint_id,
+                                            'channel_id': case_nature_channel_id,
+                                            'description': service_description,
+                                            'alternate_phone': alternate_phone,
+                                            // 'cod_amount': cod_amount,
+                                        }
+                                    }).done(function (data) {
+                                            swal.close();
+                                            if (data.status) {
+                                                if (data.flag) {
+                                                    var html = '';
+
+                                                    $.each(data.already_existed_shipments, function(index,
+                                                                                                    tracking_number) {
+                                                        html += tracking_number + '<br/>';
+                                                    });
+
+                                                    if (!data.cannot_change) {
+                                                        html +=
+                                                            '<br/>Request/Complaint already lodged for the above Shipment(s)!';
+                                                    } else {
+                                                        html +=
+                                                            '<br/>Request for Change cannot be opened for the above Shipment(s) at the Current Status!';
+                                                    }
+
+                                                    content = document.createElement('div');
+                                                    content.innerHTML = html;
+
+                                                    swal({
+                                                        title: 'Request / Complaint Cannot Be Lodged!',
+                                                        content: content,
+                                                        icon: 'warning',
+                                                        buttons: {
+                                                            cancel: {
+                                                                text: 'Close',
+                                                                value: null,
+                                                                visible: true,
+                                                                closeModal: true,
+                                                            },
+                                                        },
+                                                        closeOnClickOutside: false,
+                                                        closeOnEsc: false,
+                                                        dangerMode: true
+                                                    });
+                                                } else {
+                                                    toastr.success(data.success, 'Success!', {
+                                                        positionClass: 'toast-bottom-center',
+                                                        containerId: 'toast-bottom-center'
+                                                    });
+                                                }
+                                                // toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                            } else {
+                                                toastr.error(data.error, 'Error!', {
+                                                    positionClass: 'toast-top-center',
+                                                    containerId: 'toast-top-center'
+                                                });
+                                            }
+
+                                            $('#AddRequestModal').modal('hide');
+                                            $('#AddNewRequest').attr('disabled', false);
+                                    });
+                                }
+                                else {
+                                  $('#AddNewRequest').attr('disabled',false);
+                                }
+                            });
+                        }
                         else{
                             swal({
                                 title: 'Please Wait!',
@@ -3665,8 +3844,8 @@
                             });
                         }
                     }
-                } 
-                
+                }
+
                 else if (case_nature_id == 3) {
                     var feedback_flag = true;
                     var feedback_channel = $('#feedback_channel_request').val();
@@ -3753,13 +3932,13 @@
                                 $('#AddNewRequest').attr('disabled', false);
                             });
                     }
-                } 
-                
+                }
+
                 else if (case_nature_id === 4) {
                     var nature_flag = true;
                     var case_nature_claim_id = $('#case_nature_claim').val();
                     var case_nature_channel_id = $('#claim_channel').val();
-                    var product_cost = $('#claim_product_cost').val();
+                    var product_cost = parseFloat($('#claim_product_cost').inputmask('unmaskedvalue'));
                     var check_product_picture = $('#product_picture').val();
                     var check_invoice_picture = $('#invoice_picture').val();
                     $('#shipment_ids').val($('#requested_shipment_id').val());
@@ -3831,7 +4010,8 @@
                         }
                         if (!product_cost) {
                             nature_flag = false;
-                            var error = "Please enter Product Cost!";
+                            var error = isNaN(product_cost) ? "Please enter Claim Amount!" : "Claim Amount cannot be zero !!";
+                            
                             toastr.error(error, 'Error!', {
                                 positionClass: 'toast-top-center',
                                 containerId: 'toast-top-center'
@@ -3995,6 +4175,7 @@
             submitHandler: function(form) {
                 var reattempt_remarks = $('#reattempt_remarks').val();
                 var charges = $('#estimated_charges_input').val();
+                var address =  $('#address_2').val() !== '' ? ($('#address_1').val() + ' (' + $('#address_2').val()+')') : null;   
                 swal({
                     title: 'Please Wait!',
                     text: ' ',
@@ -4011,6 +4192,7 @@
                             'shipment_id': $('#reattempt_shipment_id').val(),
                             'remark': reattempt_remarks,
                             'action': 'reattempt',
+                            'consigneeaddress': address,
                             'charges': charges
                         }
                     })
@@ -4070,6 +4252,78 @@
 
 
 
+        });
+
+        $("#tracking").on('click','.geo_codes',function (){
+            // Form reset
+            $("#add_geo_code_form")[0].reset();
+            // Validation reset
+            $("#add_geo_code_form").validate().resetForm();
+            // Danger class remove
+            $("#add_geo_code_form").find(".danger").removeClass("danger");
+            $('#lat').val('');
+            $('#long').val('');
+
+            id = $(this).attr('id');
+            var tracking = $(this).attr('data-tracking');
+            var tracking_rows =
+                '<div class="col-4"><span class="mr-1"><i class="la la-angle-right align-bottom"></i><b> ' +
+                tracking + '</b></span></div>';
+
+            $('#geo_code_shipment_id').val(id);
+            $('#geo_code_shipments').html(tracking_rows);
+            $.ajax({
+                url: "{{ route('admin.settings.geo_codes.get_manual_shipment_geo_codes') }}",
+                type: "POST",
+                data: {
+                    shipment_id: id,
+                    _token: "{{ csrf_token() }}"
+                },
+                success: function (res) {
+                    if(res.status === 0){
+                        if(res.lat) $("#lat").val(res.lat);
+                        if(res.long) $("#long").val(res.long);
+                    }
+                    $('#AddGeoCodeModal').modal('show'); // modal ab show hoga
+                },
+                error: function () {
+                    $('#AddGeoCodeModal').modal('show'); // error pe bhi modal dikhana ho
+                }
+            });
+            // $('#AddGeoCodeModal').modal('show');
+        });
+        $("#add_geo_code_form").validate({
+            errorClass:"danger",
+            normalizer: function(value) {
+                return $.trim(value);
+            },
+            errorPlacement: function(error, element) {
+                error.addClass('w-100').appendTo(element.parent('.form-group'));
+            },
+            submitHandler: function(form) {
+                $.ajax({
+                    url: "{{ route('admin.settings.geo_codes.update_manual_geo_codes') }}", // tumhara update route
+                    type: "POST",
+                    data: $(form).serialize(), // form ke sare fields bhej do
+                    success: function(res) {
+                        if (res.status === 0) {
+                            toastr.success(res.message); // success msg
+                            $('#AddGeoCodeModal').modal('hide');
+
+                            // Reset form
+                            $("#add_geo_code_form")[0].reset();
+                            $("#add_geo_code_form").validate().resetForm();
+                            $("#add_geo_code_form").find(".danger").removeClass("danger");
+                        } else {
+                            toastr.error(res.error); // validation ya custom error
+                        }
+                    },
+                    error: function() {
+                        toastr.error("Something went wrong!");
+                    }
+                });
+                return false; // normal submit rokne ke liye
+            }
         });
 
         $('#tracking').on('click', '.replacement_booked_image', function () {

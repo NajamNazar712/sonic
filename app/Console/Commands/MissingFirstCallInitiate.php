@@ -12,6 +12,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use App\Http\Traits\RvTrait;
 use App\Jobs\BotCallDispatch;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 
 use function GuzzleHttp\json_encode;
@@ -52,8 +53,12 @@ class MissingFirstCallInitiate extends Command
     {
         //
         try{
-            
-        
+
+            // $shipmentId = ApiCallLog::where('created_at','>=','2025-06-23 16:30:00')->where('status_code', 403)->groupBy('shipment_id')->pluck('shipment_id')->toArray();
+            // foreach ($shipmentId as $ids) {
+            //     dispatch(new BotCallDispatch($ids));
+            // }
+            // return true;  
         if($this->argument('startDate') != 0 && $this->argument('endDate') != 0 ){
             $timeEnd = $this->argument('endDate');
             $timeStart = $this->argument('startDate');
@@ -67,7 +72,7 @@ class MissingFirstCallInitiate extends Command
             $shipment->updated_at = $shipment->created_at;
             $shipment->save();
         }
-        Log::channel('botCallJobLog')->info('s ' . 'bot call misisng entry ' . $timeStart . ' bot call time End '. $timeEnd);
+        // Log::channel('botCallJobLog')->info('s ' . 'bot call misisng entry ' . $timeStart . ' bot call time End '. $timeEnd);
         $globalSettings = GlobalSettings::where('setting_value', 1)
         ->whereIn('type',[ 'rv_disable_shippers_only_shippers', 'bot_call_enable_disable'])
         ->pluck('text','type');
@@ -88,7 +93,7 @@ class MissingFirstCallInitiate extends Command
         ->toArray();  // Ensure this returns an array
                 
         $rvShipmentInsert = array_diff($shipmentIds, $rvShipmentTickets);
-        Log::channel('botCallJobLog')->info('s ' . 'call missing entry check' .json_encode(($rvShipmentInsert)));
+        // Log::channel('botCallJobLog')->info('s ' . 'call missing entry check' .json_encode(($rvShipmentInsert)));
 
             if(!empty($rvShipmentInsert)){
                 foreach($shipments as $value){
@@ -99,6 +104,15 @@ class MissingFirstCallInitiate extends Command
                     }
                 }
             }
+            // $failedJobs = DB::table('failed_jobs')
+            //     ->get();
+            // if ($failedJobs->isNotEmpty()) {
+            //     foreach ($failedJobs as $job) {
+            //         Artisan::call('queue:retry', ['id' => $job->id]);
+            //     }
+            // }
+
+            
             // if ($this->argument('startDate') != 0 && $this->argument('endDate') != 0) {
             //     $rvShipments = RvShipmentTicket::where([['rv_shipment_tickets.updated_at', '>=', $timeStart], ['rv_shipment_tickets.updated_at', '<=', $timeEnd]])->where('is_bot',1)
             //         ->where('in_progress',1)
