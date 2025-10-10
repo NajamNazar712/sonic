@@ -11030,6 +11030,7 @@ class GlobalSettingsController extends Controller
      */
     public function zone_management_store(Request $request)
     {
+       
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'gst' => 'required|numeric',
@@ -11041,12 +11042,15 @@ class GlobalSettingsController extends Controller
             ['id' => $request->id], // match existing record by ID
             $validated // update or insert data
         );
-
-        if(InternationalDhlZone::where('zone_id',$zone->id)->doesntExist() && $zone->business_category_id == 2){
-            $dhl_zone = new InternationalDhlZone();
-            $dhl_zone->zone_id = $zone->id;
-            $dhl_zone->zone_name = $request->name;
-            $dhl_zone->save();
+       
+        if($zone->business_category_id == 2){
+            InternationalDhlZone::updateOrCreate(
+                ['zone_id' => $zone->id], // match existing record by ID
+                [
+                    'zone_id' => $zone->id,
+                    'zone_name' =>  strtolower(preg_replace('/\s*zone\s*/i', '', $request->name))
+                ] // update or insert data
+            );
         }
         return redirect()->back()->with('success', 'Zone Added successfully!');
     }
