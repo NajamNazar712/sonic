@@ -360,6 +360,7 @@ class ShipperTrackingController extends Controller
                             if($journey->shipper_status_id != '67'){
                                 if ($journey->verification) {
                                     $journey_details = array();
+                                    $journey_details['image_audio_location'] = $this->getImageAudio($journey);
 
                                     $journey_details['date_time'] = $journey->created_at->toDateTimeString();
                                     if($journey->shipper_status_id == '68'){
@@ -515,7 +516,7 @@ class ShipperTrackingController extends Controller
                         if ($shipment_pickup_journey) {
                             foreach ($shipment_pickup_journey as $journey) {
                                 $journey_details = array();
-
+                                $journey_details['image_audio_location'] = '';
                                 $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
                                 $journey_details['status'] = $journey->status->name;
                                 if($journey->reason_id != NULL){

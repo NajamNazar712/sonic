@@ -14,11 +14,14 @@ use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeLeave;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider;
+use App\Http\Models\Rider\RiderReturnDelivery;
+use App\Http\Models\RiderDelivery;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentInformationLog;
 use App\Http\Models\ShipmentsJourney;
 use App\Models\InternationalZonalMarginColumn;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 trait CommonTrait
 {
@@ -570,4 +573,154 @@ trait CommonTrait
       $marginColumnsArray = explode(",", $zoneColumn->margin_column);
       return ['zoneColumnArray'=> $zoneColumnsArray,'marginColumn'=> $marginColumnsArray];
     }
+
+  /**
+   * Get image, audio, and location buttons for a given shipment journey.
+   *
+   * This method checks the shipment status and retrieves the corresponding
+   * RiderDelivery or RiderReturnDelivery records. If image/audio files exist,
+   * it generates temporary S3 URLs or public URLs for display buttons.
+   * It also includes a Google Maps location button if coordinates are available.
+   *
+   * @param  object  $journey  The shipment journey instance containing status info.
+   * @return string  HTML string with action buttons or '-' if no data found.
+   */
+  function getImageAudio($journey)
+  {
+    // Define which statuses belong to normal delivery or return delivery
+    $deliveryStatuses = [7, 8, 9, 12, 15, 18, 14, 30, 37, 56];
+    $returnStatuses = [47, 24, 48, 60, 25, 31, 38];
+
+    $output = '-'; // Default output if no data found
+
+    // === CASE 1: RiderDelivery ===
+    if (in_array($journey->shipment_status_shipper->id, $deliveryStatuses)) {
+
+      $riderDelivery = RiderDelivery::where('shipment_id', $journey->shipment_id)
+        ->where('delivery_note_id', $journey->reference_1_id)
+        ->where('rider_status_id', $journey->shipper_status_id)
+        ->where('rider_status_reason_id', $journey->status_reason_id)
+        ->first();
+
+      if ($riderDelivery) {
+        $output = '';
+
+         if ($riderDelivery->picture_path) {
+          if (Storage::disk('public')->exists($riderDelivery->picture_path)) {
+            $imageUrl = asset(Storage::url($riderDelivery->picture_path));
+          } else {
+            try {
+              $imageUrl = Storage::disk('s3')->temporaryUrl(
+                $riderDelivery->picture_path,
+                now()->addMinutes(5)
+              );
+            } catch (\Exception $e) {
+              \Log::error('S3 Image URL error: ' . $e->getMessage());
+              $imageUrl = null;
+            }
+          }
+
+          if ($imageUrl) {
+            $output .= '<button type="button" class="btn btn-sm btn-outline-info align-middle picture p-0" data-link="' . $imageUrl . '" target="_blank"><i class="la la-lg la-image"></i></button>';
+          }
+        }
+
+        // ✅ Handle Audio
+        if ($riderDelivery->audio_path) {
+          if (Storage::disk('public')->exists($riderDelivery->audio_path)) {
+            $audioUrl = asset(Storage::url($riderDelivery->audio_path));
+          } else {
+            try {
+              $audioUrl = Storage::disk('s3')->temporaryUrl(
+                $riderDelivery->audio_path,
+                now()->addMinutes(5)
+              );
+            } catch (\Exception $e) {
+              \Log::error('S3 Audio URL error: ' . $e->getMessage());
+              $audioUrl = null;
+            }
+          }
+
+          if ($audioUrl) {
+            $output .= '| <button type="button" class="btn btn-sm btn-outline-info align-middle picture p-0" data-link="' . $audioUrl . '" target="_blank"><i class="la la-file-sound-o"></i></button>';
+          }
+        }
+
+        // ✅ Handle Location
+        if ($riderDelivery->actual_location_latitude && $riderDelivery->actual_location_longitude) {
+          $locationUrl = 'https://www.google.com/maps/search/?api=1&query=' .
+            $riderDelivery->actual_location_latitude . ',' .
+            $riderDelivery->actual_location_longitude;
+          $output .= '| <a type="button" class="btn btn-sm btn-outline-info align-middle location p-0" href="' . $locationUrl . '" target="_blank"><i class="la la-map-marker"></i></a>';
+        }
+      }
+    }
+
+    // === CASE 2: RiderReturnDelivery ===
+    else if (in_array($journey->shipment_status_shipper->id, $returnStatuses)) {
+
+      $riderReturn = RiderReturnDelivery::where('shipment_id', $journey->shipment_id)
+        ->where('return_note_id', $journey->reference_1_id)
+        ->where('rider_status_id', $journey->shipper_status_id)
+        ->where('rider_status_reason_id', $journey->status_reason_id)
+        ->first();
+
+      if ($riderReturn) {
+        $output = '';
+
+        // ✅ Handle Image
+        if ($riderReturn->picture_path) {
+          if (Storage::disk('public')->exists($riderReturn->picture_path)) {
+            $imageUrl = asset(Storage::url($riderReturn->picture_path));
+          } else {
+            try {
+              $imageUrl = Storage::disk('s3')->temporaryUrl(
+                $riderReturn->picture_path,
+                now()->addMinutes(5)
+              );
+            } catch (\Exception $e) {
+              \Log::error('S3 Return Image URL error: ' . $e->getMessage());
+              $imageUrl = null;
+            }
+          }
+
+          if ($imageUrl) {
+            $output .= '<button type="button" class="btn btn-sm btn-outline-info align-middle picture p-0" data-link="' . $imageUrl . '" target="_blank"><i class="la la-lg la-image"></i></button>';
+          }
+        }
+
+        // ✅ Handle Audio
+        if ($riderReturn->audio_path) {
+          if (Storage::disk('public')->exists($riderReturn->audio_path)) {
+            $audioUrl = asset(Storage::url($riderReturn->audio_path));
+          } else {
+            try {
+              $audioUrl = Storage::disk('s3')->temporaryUrl(
+                $riderReturn->audio_path,
+                now()->addMinutes(5)
+              );
+            } catch (\Exception $e) {
+              \Log::error('S3 Return Audio URL error: ' . $e->getMessage());
+              $audioUrl = null;
+            }
+          }
+
+          if ($audioUrl) {
+            $output .= '| <button type="button" class="btn btn-sm btn-outline-info align-middle picture p-0" data-link="' . $audioUrl . '" target="_blank"><i class="la la-file-sound-o"></i></button>';
+          }
+        }
+
+        // ✅ Handle Location
+        if ($riderReturn->actual_location_latitude && $riderReturn->actual_location_longitude) {
+          $locationUrl = 'https://www.google.com/maps/search/?api=1&query=' .
+            $riderReturn->actual_location_latitude . ',' .
+            $riderReturn->actual_location_longitude;
+          $output .= '| <a type="button" class="btn btn-sm btn-outline-info align-middle location p-0" href="' . $locationUrl . '" target="_blank"><i class="la la-map-marker"></i></a>';
+        }
+      }
+    }
+
+    // Return all generated buttons or '-' if nothing found
+    return $output ?: '-';
+  }
 }
