@@ -525,7 +525,7 @@ class ShipperTrackingController extends Controller
                                 else{
                                     $journey_details['reason'] = '';
                                 }
-
+                                
                                 if ($journey->reference_1_id) {
                                     $journey_details['status'] .= ' (' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT);
 
