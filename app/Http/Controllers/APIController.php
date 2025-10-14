@@ -924,8 +924,8 @@ class APIController extends Controller
 //                    'origin_check',
             ];
 
-            $rules['new_pickup_address_latitude'] = ['required', 'integer'];
-            $rules['new_pickup_address_longitude'] = ['required', 'integer'];
+            $rules['new_pickup_address_latitude'] = ['required', 'numeric','between:-90,90'];
+            $rules['new_pickup_address_longitude'] = ['required', 'numeric','between:-90,90'];
         }
         else {
             $rules = [
@@ -938,6 +938,8 @@ class APIController extends Controller
                     'origin_check', // or new OriginCheck if it's a class
                 ],
             ];
+            $rules['pickup_address_latitude'] = ['nullable', 'numeric','between:-90,90'];
+            $rules['pickup_address_longitude'] = ['nullable', 'numeric','between:-90,90'];
 
         }
 

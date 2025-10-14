@@ -3413,6 +3413,8 @@ class ShipperShipmentBookController extends Controller
                 'integer',
                 'pieces_check'
             ],
+            'consignee_latitude' => ['nullable','numeric','between:-90,90'],
+            'consignee_longitude' => ['nullable','numeric','between:-180,180'],
         ];
 
 
@@ -6412,6 +6414,8 @@ class ShipperShipmentBookController extends Controller
                 'integer',
                 'pieces_check'
             ],
+            'consignee_latitude' => ['nullable','numeric','between:-90,90'],
+            'consignee_longitude' => ['nullable','numeric','between:-180,180'],
         ];
         $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
         if ($ccd_booking->exists()) {

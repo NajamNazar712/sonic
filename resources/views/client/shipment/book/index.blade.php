@@ -102,10 +102,10 @@
 										</div>
 
 										<div class="form-group">
-											<input type="text" name="latitude" id="pickup_latitude" class="form-control" placeholder="Latitude">
+											<input type="number" step="any" name="latitude" id="pickup_latitude" class="form-control" placeholder="Latitude">
 										</div>
 										<div class="form-group">
-											<input type="text" name="longitude" id="pickup_longitude" class="form-control" placeholder="Longitude">
+											<input type="number" step="any" name="longitude" id="pickup_longitude" class="form-control" placeholder="Longitude">
 										</div>
 										{{-- <div class="form-group">
 											<select name="pickup_address" class="select2" id="pickup_address" data-rule-required="true" data-msg-required="Pickup Address is required">
@@ -152,10 +152,10 @@
 												<input type="email" name="new_pickup_email_address" class="form-control" placeholder="Email Address*" data-rule-required="true" data-msg-required="Email Address is required">
 											</div>
 											<div class="form-group">
-												<input type="text" name="new_pickup_latitude" class="form-control" placeholder="Latitude">
+												<input type="number" step="any" name="new_pickup_latitude" class="form-control" placeholder="Latitude">
 											</div>
 											<div class="form-group">
-												<input type="text" name="new_pickup_longitude" class="form-control" placeholder="Longitude">
+												<input type="number" step="any" name="new_pickup_longitude" class="form-control" placeholder="Longitude">
 											</div>
 
 											<div class="form-group">
@@ -285,10 +285,10 @@
 											<input type="email" name="consignee_email_address" class="form-control" placeholder="Email Address" data-rule-maxlength="100" data-msg-maxlength="Email Address can be maximum 100 characters">
 										</div>
 										<div class="form-group">
-											<input type="text" name="consignee_latitude" class="form-control" placeholder="Latitude">
+											<input type="number" step="any" name="consignee_latitude" class="form-control" placeholder="Latitude">
 										</div>
 										<div class="form-group">
-											<input type="text" name="consignee_longitude" class="form-control" placeholder="Longitude">
+											<input type="number" step="any" name="consignee_longitude" class="form-control" placeholder="Longitude">
 										</div>
 
 
