@@ -79,6 +79,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use NumberToWords\NumberToWords;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Session;
 use SnappyPDF;
@@ -1242,6 +1243,27 @@ class ShipperShipmentBookController extends Controller
         }
     }
 
+    static private function amount_to_words($amount)
+    {
+
+        $number_to_words = new NumberToWords();
+        $number_transformer = $number_to_words->getNumberTransformer('en');
+
+        $amount_in_words = $number_transformer->toWords($amount, 'PKR');
+
+        $last_position = strrpos($amount_in_words, ' ');
+
+        if ($last_position !== FALSE) {
+            $amount_in_words = substr_replace($amount_in_words, ' & ', $last_position, strlen(' '));
+        }
+
+        $amount_in_words = str_replace('-', ' ', $amount_in_words);
+
+        $amount_in_words = ucwords($amount_in_words);
+
+        return $amount_in_words;
+    }
+
     public static function air_waybill($user_type, $user_id, $ids, $body_only = FALSE, $type = NULL, $shipper_name = NULL, $shipper_phone = NULL, $print_status = NULL)
     {
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
@@ -2095,6 +2117,7 @@ class ShipperShipmentBookController extends Controller
                         } else {
                             $table_end .= '
                                 <td class="align-middle border twice-top twice-bottom twice-left"><strong>Rs ' . number_format($shipment->amount) . '</strong></td>
+                                <td colspan="4" class="border twice-top twice-bottom twice-left" style="height: 32px;"><strong>' . self::amount_to_words($shipment->amount) . ' Only</strong></td>
                         ';
                         }
                     }
