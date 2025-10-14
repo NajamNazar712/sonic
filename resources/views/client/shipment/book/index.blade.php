@@ -1502,8 +1502,8 @@
 							$('input[name="consignee_phone_number_1"]').val(data.details.phone_number_1).change();
 							$('input[name="consignee_phone_number_2"]').val(data.details.phone_number_2);
 							$('input[name="consignee_email_address"]').val(data.details.email);
-							$('input[name="consignee_latitude"]').val(data.geo_code.latitude ?? '');
-							$('input[name="consignee_longitude"]').val(data.geo_code.longitude ?? '');
+							$('input[name="consignee_latitude"]').val(data.geo_code?.latitude ?? '');
+							$('input[name="consignee_longitude"]').val(data.geo_code?.longitude ?? '');
 						}else{
 							toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 						}
