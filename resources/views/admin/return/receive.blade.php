@@ -43,6 +43,7 @@
 
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Return Note No.</th>
+                        <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Rider ID</th>
  						<th class="border-primary border-darken-1">Areas</th>
@@ -278,6 +279,7 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'return_note' ,name: 'return_notes.id', class: 'align-middle return_note'},
                     { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
+                    { data:'zone_name' ,name: 'z.name', class: 'align-middle zone_name'},
                     { data:'rider_trax_id' ,name: 'riders.trax_id', class: 'align-middle rider'},
                      { data:'area' ,name: 'ca.name', class: 'align-middle area'},
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
