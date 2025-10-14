@@ -202,6 +202,7 @@
                             head = [];
                             head.push('S.No');
                             head.push('Return Note No.');
+                            head.push('Zone');
                             head.push('Hub');
                             head.push('Rider ID');
    							head.push('Area');
@@ -223,6 +224,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.return_note_id_padded);
+                                row.push(values.zone_name);
                                 row.push(values.hub);
                                 row.push(values.rider_trax_id);
  								row.push(values.area);
@@ -278,8 +280,8 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'return_note' ,name: 'return_notes.id', class: 'align-middle return_note'},
-                    { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
                     { data:'zone_name' ,name: 'z.name', class: 'align-middle zone_name'},
+                    { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
                     { data:'rider_trax_id' ,name: 'riders.trax_id', class: 'align-middle rider'},
                      { data:'area' ,name: 'ca.name', class: 'align-middle area'},
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
