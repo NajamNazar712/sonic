@@ -578,8 +578,9 @@ class DeliveryController extends Controller
             })->editColumn('entry_method', function ($shipment) {
                 return  ($shipment->entry_method == 1 ? 'Scanned' : 'Manual');
             })->rawColumns(['tracking_number_link','status_date','action']);
-
-
+        if ($request->get('excel') && $request->get('excel') == true) {
+            $datatables = DataTables::of($datatables)->skipPaging();   
+        }
         return $datatables->make(true);
     }
 

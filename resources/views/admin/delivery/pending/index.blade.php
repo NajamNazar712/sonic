@@ -314,6 +314,7 @@
                     url: '{{ route('admin.delivery.pending.list') }}',
                     data: params,
                     success: function (result) {
+                        console.log('result',result.data);
                         head = [];
                         head.push('S.No');
                         head.push('Tracking .No');
