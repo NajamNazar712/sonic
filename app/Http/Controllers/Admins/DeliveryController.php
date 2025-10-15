@@ -395,6 +395,9 @@ class DeliveryController extends Controller
         if ($area = $request->get('search_area')) {
             $shipments = $shipments->where('caa.city_area_id', '=', $area);
         }
+        if ($request->get('excel') && $request->get('excel') == true) {
+            $datatables = DataTables::of($shipments)->skipPaging();   
+        }
         $datatables = Datatables::of($shipments)
             ->setRowAttr([
                 'class' => function ($shipments) {
@@ -578,9 +581,7 @@ class DeliveryController extends Controller
             })->editColumn('entry_method', function ($shipment) {
                 return  ($shipment->entry_method == 1 ? 'Scanned' : 'Manual');
             })->rawColumns(['tracking_number_link','status_date','action']);
-        if ($request->get('excel') && $request->get('excel') == true) {
-            $datatables = DataTables::of($datatables)->skipPaging();   
-        }
+       
         return $datatables->make(true);
     }
 
