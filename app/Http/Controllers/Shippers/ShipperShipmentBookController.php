@@ -599,43 +599,10 @@ class ShipperShipmentBookController extends Controller
         $user_id = session('user_id');
         $rules = [
             'replacement_parcel_img' => ['nullable', 'mimes:png,jpeg,jpg'],
-
-            // 🌍 Consignee coordinates
-            'consignee_latitude' => ['nullable', 'numeric', 'between:-90,90', 'required_with:consignee_longitude'],
-            'consignee_longitude' => ['nullable', 'numeric', 'between:-180,180', 'required_with:consignee_latitude'],
-
-            // 🚚 Pickup coordinates
-            'pickup_latitude' => ['nullable', 'numeric', 'between:-90,90', 'required_with:pickup_longitude'],
-            'pickup_longitude' => ['nullable', 'numeric', 'between:-180,180', 'required_with:pickup_latitude'],
-
-            // 🆕 New pickup (optional pair)
-            'new_pickup_latitude' => ['nullable', 'numeric', 'between:-90,90', 'required_with:new_pickup_longitude'],
-            'new_pickup_longitude' => ['nullable', 'numeric', 'between:-180,180', 'required_with:new_pickup_latitude'],
-
         ];
-
-        $messages = [
-            // 📷 Custom image error
-            'replacement_parcel_img.mimes' => 'Invalid File Format Of Replacement Parcel Image',
-
-            // 🌍 Geo coordinate errors
-            'consignee_latitude.required_with' => 'Consignee coordinates are required when longitude is provided.',
-            'consignee_longitude.required_with' => 'Consignee coordinates are required when latitude is provided.',
-
-            'pickup_latitude.required_with' => 'Pickup coordinates are required when longitude is provided.',
-            'pickup_longitude.required_with' => 'Pickup coordinates are required when latitude is provided.',
-
-            'new_pickup_latitude.required_with' => 'New pickup coordinates are required when longitude is provided.',
-            'new_pickup_longitude.required_with' => 'New pickup coordinates are required when latitude is provided.',
-        ];
-
-        $validate = Validator::make($request->all(), $rules ,$messages);
-
+        $validate = Validator::make($request->all(), $rules);
         if ($validate->fails()) {
-//            return back()->with(['error' => "Invalid File Format Of Replacement Parcel Image"]);
-            return back()
-                ->withErrors($validate);
-//                ->with(['error' => 'Please correct the highlighted fields before continuing.']);
+            return back()->with(['error' => "Invalid File Format Of Replacement Parcel Image"]);
         }
         else {
             $userOld = User::find($user_id);
@@ -4267,33 +4234,10 @@ class ShipperShipmentBookController extends Controller
     public function corporate_store(Request $request) {
         $rules = [
             'replacement_parcel_img' => ['nullable', 'mimes:png,jpeg,jpg'],
-            'consignee_latitude' => ['nullable', 'numeric', 'between:-90,90', 'required_with:consignee_longitude'],
-            'consignee_longitude' => ['nullable', 'numeric', 'between:-180,180', 'required_with:consignee_latitude'],
-
-            'pickup_latitude' => ['nullable', 'numeric', 'between:-90,90', 'required_with:pickup_longitude'],
-            'pickup_longitude' => ['nullable', 'numeric', 'between:-180,180', 'required_with:pickup_latitude'],
-
-            'new_pickup_latitude' => ['nullable', 'numeric', 'between:-90,90', 'required_with:new_pickup_longitude'],
-            'new_pickup_longitude' => ['nullable', 'numeric', 'between:-180,180', 'required_with:new_pickup_latitude'],
         ];
-
-        $messages = [
-            'replacement_parcel_img.mimes' => 'Invalid File Format Of Replacement Parcel Image',
-
-            'consignee_latitude.required_with' => 'Consignee coordinates are required when longitude is provided.',
-            'consignee_longitude.required_with' => 'Consignee coordinates are required when latitude is provided.',
-
-            'pickup_latitude.required_with' => 'Pickup coordinates are required when longitude is provided.',
-            'pickup_longitude.required_with' => 'Pickup coordinates are required when latitude is provided.',
-
-            'new_pickup_latitude.required_with' => 'New pickup coordinates are required when longitude is provided.',
-            'new_pickup_longitude.required_with' => 'New pickup coordinates are required when latitude is provided.',
-        ];
-
-        $validate = Validator::make($request->all(), $rules ,$messages);
+        $validate = Validator::make($request->all(), $rules);
         if ($validate->fails()) {
-//            return back()->with(['error' => "Invalid File Format Of Replacement Parcel Image"]);
-            return back()->withErrors($validate);
+            return back()->with(['error' => "Invalid File Format Of Replacement Parcel Image"]);
         } else {
             $userOld = User::find(session('user_id'));
             $inLimit = in_array($userOld?->sub_segment_id, [1, 6]) ? 100 : 10;
