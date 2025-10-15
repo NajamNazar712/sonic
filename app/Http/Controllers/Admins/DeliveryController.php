@@ -395,9 +395,9 @@ class DeliveryController extends Controller
         if ($area = $request->get('search_area')) {
             $shipments = $shipments->where('caa.city_area_id', '=', $area);
         }
-        if ($request->get('excel') && $request->get('excel') == true) {
-            $datatables = DataTables::of($shipments)->skipPaging();   
-        }
+        // if ($request->get('excel') && $request->get('excel') == true) {
+        //     $datatables = DataTables::of($shipments)->skipPaging();   
+        // }
         $datatables = Datatables::of($shipments)
             ->setRowAttr([
                 'class' => function ($shipments) {
