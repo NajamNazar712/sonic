@@ -936,6 +936,12 @@
                                         '</td>';
                                     shipment += '</tr>';
                                 }
+                                if (details.consignee.retail_store_code) {
+                                    shipment += '<tr>';
+                                    shipment += '<td><strong>Retail Store</strong></td>';
+                                    shipment += '<td colspan="3">' + details.consignee.retail_store_code + '</td>';
+                                    shipment += '</tr>';
+                                }
 
                                 shipment += '</tbody>';
                                 shipment += '</table>';

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Rider;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionDeliveryNote;
 use App\Http\Models\ShipmentInformationLog;
+use App\Models\PudoDeliverShipment;
 use Illuminate\Support\Facades\Log;
 use App\Models\ShipmentGeoCode;
 use DB;
@@ -13402,6 +13403,12 @@ class RiderAPIController extends Controller
                     $rider_name = ' - ';
                     if ($shipment->exists()) {
                         $shipment = $shipment->first();
+
+                        //PUDO WORK said by shahban bhai agar shipment pudo ki hugi tww iuska delivery note nhi banega transfer note bane ga
+                        if(PudoDeliverShipment::where('shipment_id',$shipment->id)->exists()){
+                            return response()->json(['status' => 1, 'message' => 'Following shipment belongs to a PUDO shipment']);
+                        }
+
                         $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
                         if (!$dispute_check) {
                             return response()->json(['status' => 1, 'message' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)']);
@@ -13836,6 +13843,19 @@ class RiderAPIController extends Controller
             $shipments_count = count($valid_shipments);
             if ($shipments_count != 0) {
                 $valid_shipments = $valid_shipments->toArray();
+
+                //pudo work
+                $pudo_shipment_ids = [];
+                if (!empty($valid_shipments)) {
+                    // Find PUDO shipment IDs among them
+                    $pudo_shipment_ids = PudoDeliverShipment::whereIn('shipment_id', $valid_shipments)
+                        ->pluck('shipment_id')
+                        ->toArray();
+
+                }
+                // Exclude PUDO shipments
+                $valid_shipments = array_diff($valid_shipments, $pudo_shipment_ids);
+
                 $total_cod_amount = Shipment::whereIn('id', $valid_shipments)->where(function ($query) {
                     $query->where('booking_type_id', '!=', 4)
                         ->orWhere(function ($sub_query) {

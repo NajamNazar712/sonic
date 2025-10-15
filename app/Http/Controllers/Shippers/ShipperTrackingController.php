@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\Models\PudoDeliverShipment;
 use App\Models\PudoPickupShipment;
 use App\Models\ShipmentGeoCode;
 use Auth;
@@ -276,6 +277,12 @@ class ShipperTrackingController extends Controller
                         $on_hold_sc = CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_type_id',20);
                         if($on_hold_sc->exists()){
                             $details['consignee']['crm_status'] = 1;
+                        }
+
+                        $pudo_deliver = PudoDeliverShipment::where('shipment_id', $shipment->id)->first();
+                        if($pudo_deliver && $pudo_deliver->store){
+                            $retail_store_name = $pudo_deliver->store->name ?? '-';
+                            $details['consignee']['retail_store_code'] = $retail_store_name;
                         }
 
                         $check = DeliveryLocationMappingKeyword::pluck('keyword')->toArray();

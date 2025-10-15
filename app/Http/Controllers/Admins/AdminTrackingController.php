@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Traits\FilterTrait;
+use App\Models\PudoDeliverShipment;
 use App\Models\PudoPickupShipment;
 use App\Models\ShipmentJourneyRetailUser;
 use DB;
@@ -1286,6 +1287,13 @@ class AdminTrackingController extends Controller
                         $on_hold_sc = CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_type_id',20);
                         if($on_hold_sc->exists()){
                             $details['consignee']['crm_status'] = 1;
+                        }
+
+                        $pudo_deliver= PudoDeliverShipment::where('shipment_id', $shipment->id)->first();
+                        if($pudo_deliver && $pudo_deliver->store){
+                            $retial_store_name = $pudo_deliver->store->name ?? '-';
+                            $retail_store_code = $pudo_deliver->store->code ?? '-';
+                            $details['consignee']['retail_store_code'] = $retial_store_name . ' ('.$retail_store_code.')';
                         }
 
 

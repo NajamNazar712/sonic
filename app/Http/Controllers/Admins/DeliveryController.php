@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Models\PudoDeliverShipment;
 use App\Models\TempRequestNoteApproval;
 use Carbon\Carbon;
 use App\Http\Models\City;
@@ -786,7 +787,11 @@ class DeliveryController extends Controller
                 $rider_name = '';
                 if ($shipment->exists()) {
                     $shipment = $shipment->first();
-                    
+
+                    //PUDO WORK said by shahban bhai agar shipment pudo ki hugi tww iuska delivery note nhi banega transfer note bane ga
+                    if(PudoDeliverShipment::where('shipment_id',$shipment->id)->exists()){
+                        return ['status' => 1, 'error' => 'Following shipment belongs to a PUDO shipment'];
+                    }
 
                     if ($request->operation_rider_type_id == 2) { 
                         $latestAgentAssignment = RvShipmentAssignAgent::where('shipment_id', $shipment->id)
@@ -1155,6 +1160,21 @@ class DeliveryController extends Controller
 
         if ($shipments_count != 0) {
             $valid_shipments = $valid_shipments->toArray();
+
+            //pudo work
+            $pudo_shipment_ids = [];
+            if(!empty($valid_shipments)) {
+                // Find PUDO shipment IDs among them
+                $pudo_shipment_ids = PudoDeliverShipment::whereIn('shipment_id', $valid_shipments)
+                    ->pluck('shipment_id')
+                    ->toArray();
+            }
+            // Exclude PUDO shipments
+            $valid_shipments = array_diff($valid_shipments, $pudo_shipment_ids);
+
+            if(empty($valid_shipments)) {
+                return redirect()->back()->with(['error' => 'All the Shipment(s) belongs to a PUDO shipment!']);
+            }
 
             Shipment::whereIn('id', $valid_shipments)->update(['shipper_status_id' => 5, 'consignee_status_id' => 5]);
 
@@ -9957,6 +9977,18 @@ class DeliveryController extends Controller
                     $shipments_count = count($valid_shipments);
                     if ($shipments_count != 0) {
                         $valid_shipments = $valid_shipments->toArray();
+
+                        //pudo work
+                        $pudo_shipment_ids=[];
+                        if(!empty($valid_shipments)) {
+                            // Find PUDO shipment IDs among them
+                            $pudo_shipment_ids = PudoDeliverShipment::whereIn('shipment_id', $valid_shipments)
+                                ->pluck('shipment_id')
+                                ->toArray();
+                        }
+                        // Exclude PUDO shipments
+                        $valid_shipments = array_diff($valid_shipments, $pudo_shipment_ids);
+
                         $invalid_shipments = array_diff($shipments, $valid_shipments);
                         Shipment::whereIn('id', $valid_shipments)->update(['shipper_status_id' => 5, 'consignee_status_id' => 5]);
                         $total_cod_amount = Shipment::whereIn('id', $valid_shipments)->where(function ($query) {
