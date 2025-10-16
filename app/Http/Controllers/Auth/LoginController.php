@@ -331,7 +331,7 @@ class LoginController extends Controller
         session(['packaging_charges_check' => $packaging_charges_check]);
 
         $rate_status = RateStatus::where('user_id', $shipper_user_id)->where('status', 1);
-        if($rate_status->exists() && $user->account_type_id == 1){
+        if($rate_status->exists()){
             session(['rate_status' => TRUE]);
         }
         else{
