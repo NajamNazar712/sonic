@@ -313,6 +313,7 @@
                 var jsonResult = $.ajax({
                     url: '{{ route('admin.delivery.pending.list') }}',
                     data: params,
+                    bom: true,
                     success: function (result) {
                         // console.log('result',result.data);
                         head = [];
@@ -405,10 +406,17 @@
             dom: '<"d-inline-block"l><"pull-right"B>tipr',
             buttons: [
                 {
-                    extend: 'csv',
+                    extend: 'csvHtml5',
                     title: 'Pending Deliveries',
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
+                    bom: true,               
+                    charset: 'utf-8',        
+                    fieldSeparator: ',',     
+                    filename: 'Pending_Deliveries', // optional custom file name
+                    exportOptions: {
+                    columns: ':visible'
+                    }
                 },
                 'reset'
             ],
