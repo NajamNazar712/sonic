@@ -188,6 +188,7 @@
             </div>
         </div>
     </div>
+
     <div class="modal fade text-left" id="ShipmentCancellationDaysModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ShipmentCancellationDaysModal"
          aria-hidden="true">
         <div class="modal-dialog modal-md" role="document">
@@ -586,7 +587,7 @@
         </div>
     </div>
 
-<div class="modal fade text-left" id="CorporateInvoiceLogModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="CorporateInvoiceLogModal"
+    <div class="modal fade text-left" id="CorporateInvoiceLogModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="CorporateInvoiceLogModal"
          aria-hidden="true">
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
@@ -650,9 +651,37 @@
         </div>
     </div>
 
+    <div class="modal fade" id="SwitchCorporate" data-backdrop="static" role="dialog" aria-labelledby="SwitchCorporate_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="corporate_rate_type_title">Switch To Corporate Invoicing Account</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="form-group">
+                        <input type="hidden" id="corporate_rate_type_shipper_id">
+                        <select name="corporate_rate_type_id" id="corporate_rate_type_select" class="form-control select2">
+                            @foreach($corporate_rate_types as $rate_type)
+                                <option value="{{ $rate_type->id }}" > {{ $rate_type->name }} </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="switch_corporate_submit_btn" class="btn btn-success">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
-{{-- Add Fintech Charges Modal --}}
+
+
+    {{-- Add Fintech Charges Modal --}}
 
 
 <div class="modal fade text-left" id="AddFintechChargesModal" data-backdrop="static" role="dialog" aria-labelledby=""
@@ -2581,6 +2610,54 @@ function checkboxStatus() {
             }
         });
         var old_dates = [];
+
+        $("#corporate_rate_type_select").prepend('<option value="" selected></option>').select2({
+            placeholder: "Select Corporate Rate Type",
+            width:'100%',
+            dropdownParent:$('#SwitchCorporate')
+        });
+
+        $('body').on('click', 'button.switch_corporate_button',  function(){
+            var id = $(this).parents('tr').attr('id');
+            if(id){
+                $('#SwitchCorporate').modal('show');
+                $('#corporate_rate_type_shipper_id').val(id);
+            }
+        });
+
+        $('#switch_corporate_submit_btn').on('click',function () {
+            var shipper   = Number($('#corporate_rate_type_shipper_id').val());
+            var rate_type = Number($('#corporate_rate_type_select').val());
+            var url = "{{ url('') }}/admin/corporate/" + shipper + "/add/rates";
+            if(rate_type){
+                $.ajax({
+                    url: '{!! route('admin.accounts.switch_corporate_submit') !!}',
+                    method: 'POST',
+                    data: {
+                        'shipper_id':shipper,
+                        'rate_type':rate_type,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        if(data.status){
+                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            window.location.href = url;
+                        }
+                        else {
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                        }
+                        $('#corporate_rate_type_select').val('').trigger('change');
+                        $('#SwitchCorporate').modal('hide');
+                        table.draw(true);
+                    });
+            }else{
+                var error = "Rate Type Not Selected!";
+                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+            }
+
+        });
 
         $('#old_rate_date').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select Date',

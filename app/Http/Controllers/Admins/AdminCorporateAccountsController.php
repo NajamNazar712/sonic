@@ -12,6 +12,9 @@ use App\HistoryCorporateShipmentReturnDiscountCharges;
 use App\HistoryCorporateZeroCodDiscountCharges;
 use App\HistoryShipmentReturnDiscountCharges;
 use App\HistoryZeroCodDiscountCharges;
+use App\Http\Models\DonePayment;
+use App\Http\Models\PendingPayment;
+use App\Http\Models\Shipper\UserBankInfo;
 use App\PendingCorporateDefaultShipmentReturnDiscountCharges;
 use App\PendingCorporateDefaultZeroCodDiscountCharges;
 use App\PendingCorporateShipmentReturnDiscountCharges;
@@ -37720,7 +37723,41 @@ class AdminCorporateAccountsController extends Controller
     }
 
 
+    public function switch_corporate_submit(Request $request){
+        $rate_type_id = $request->rate_type;
+        $shipper_id = $request->shipper_id;
+        $pending_payment =  PendingPayment::where('user_id',$shipper_id);
+        $done_payment =  DonePayment::where('user_id',$shipper_id)->where('status',0);
+        if(!$pending_payment->exists() && !$done_payment->exists()) {
+            if ($shipper_id && $rate_type_id) {
+                $shipper = User::find($shipper_id);
+                if ($shipper) {
+                    if(!isset($shipper->wallet->id)) {
+                        $shipper->corporate_rate_type_id = $rate_type_id;
+                        $shipper->account_type_id = 2;
+                        $shipper->agreement_signed = 0;
+                        $shipper->status = 0;
+                        $shipper->save();
 
+                        $latestBankInfo = UserBankInfo::where('user_id', $shipper_id)->latest()->first();
+                        $latestBankInfo->invoicing_cycle_id = $shipper->payment_cycle_id;
+                        $latestBankInfo->save();
+
+
+                        return response()->json(['status' => 1, 'success' => 'Account Successfully Switch to Corporate']);
+                    }else{
+                        return response()->json(['status' => 0, 'error' => 'Wallet Users are not allowed']);
+                    }
+                }
+                return response()->json(['status' => 0, 'error' => 'Shipper not found!']);
+            }else{
+                return response()->json(['status' => 0, 'error' => 'Rate type or shipper not selected!']);
+            }
+        }else{
+            return response()->json(['status' => 0, 'error' => 'Please Clear the Payment First']);
+        }
+
+    }
 
 }
 
