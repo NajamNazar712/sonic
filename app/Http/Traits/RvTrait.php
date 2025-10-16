@@ -2180,7 +2180,7 @@ trait RvTrait
     }
 
     public function conditionalRvSarUpdate($shipment,$statusReasonId,$type=2){
-        if($shipment->shipper_status_id == 12){
+        if(Shipment::where('id', $shipment->id)->where('shipper_status_id', 12)->exists()){
             $rvshipments = RvShipmentAssignAgent::where('shipment_id', $shipment->id);
             Shipment::where('id', $shipment->id)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);   
             ShipmentsJourneyController::add($shipment->id, 65, 65, $statusReasonId,null, $shipment->user_id, Auth::id() ?? 346);
