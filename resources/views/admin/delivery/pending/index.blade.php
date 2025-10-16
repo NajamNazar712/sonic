@@ -406,7 +406,7 @@
             dom: '<"d-inline-block"l><"pull-right"B>tipr',
             buttons: [
                 {
-                    extend: 'csvHtml5',
+                    extend: 'csv',
                     title: 'Pending Deliveries',
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
