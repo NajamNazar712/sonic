@@ -4176,16 +4176,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 // Route::post('zone_margin_column', 'Admins\InternationalEconomyStandardRatesController@zonal_margin_column_index')->name('excel');
 
             });
-            Route::prefix('zone')->name('zone.')->group(function (){
-                Route::get('', 'Admins\GlobalSettingsController@zone_management_index')->name('index');
-                Route::get('list', 'Admins\GlobalSettingsController@zone_management_list')->name('list');
-                Route::get('{id}', 'Admins\GlobalSettingsController@zone_management_edit')->name('edit');
-                Route::post('store', 'Admins\GlobalSettingsController@zone_management_store')->name('store');
-                Route::post('update', 'Admins\GlobalSettingsController@zone_management_update')->name('update');
-
-                // Route::post('zone_margin_column', 'Admins\InternationalEconomyStandardRatesController@zonal_margin_column_index')->name('excel');
-
-            });
         });
 
         Route::get('add/standard_rates', 'Admins\Retail\RetailAdminUserManagementController@add_standard_rates')->name('add.rates');
