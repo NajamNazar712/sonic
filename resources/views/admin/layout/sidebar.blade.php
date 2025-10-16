@@ -3083,13 +3083,6 @@
                                             </a> 
                                         </li>
                                     @endif
-                                    @if (session('role_id') == 1 && session('department_id') == 1)
-                                        <li class=" nav-item">
-                                            <a href="{{ route('admin.retail.international.zone.index') }}">
-                                                <span class="menu-title">Zone View</span>
-                                            </a> 
-                                        </li>
-                                    @endif
                                 </ul>
                             </li>
                         @endif
