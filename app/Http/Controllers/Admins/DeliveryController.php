@@ -395,6 +395,7 @@ class DeliveryController extends Controller
         if ($area = $request->get('search_area')) {
             $shipments = $shipments->where('caa.city_area_id', '=', $area);
         }
+        
         $datatables = Datatables::of($shipments)
             ->setRowAttr([
                 'class' => function ($shipments) {
@@ -578,8 +579,7 @@ class DeliveryController extends Controller
             })->editColumn('entry_method', function ($shipment) {
                 return  ($shipment->entry_method == 1 ? 'Scanned' : 'Manual');
             })->rawColumns(['tracking_number_link','status_date','action']);
-
-
+       
         return $datatables->make(true);
     }
 
@@ -2294,6 +2294,9 @@ class DeliveryController extends Controller
         }
         if ($selected_status == 0 || $selected_status == null || $selected_status == '') {
             return response()->json(['status' => 0, 'error' => 'Status not selected!']);
+        }
+        if (($request->selected_reason === null || $request->selected_reason <= 0) && $selected_status == 12) {
+            return response()->json(['status' => 0, 'error' => 'Reason not selected!']);
         }
         if (DeliveryNote::where('id', $delivery_note_id)->where('pending_status', 1)->exists()) {
             return response()->json(['status' => 0, 'error' => 'Delivery note already updated']);
