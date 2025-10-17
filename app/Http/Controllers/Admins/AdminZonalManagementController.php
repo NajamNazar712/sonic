@@ -12,7 +12,6 @@ use App\Http\Models\Admin\Admin;
 use App\Http\Models\Zone;
 use App\Http\Models\ZoneClassCity;
 use App\Http\Models\City;
-use App\Http\Models\InternationalDhlZone;
 use Auth;
 
 use Yajra\Datatables\Datatables;
