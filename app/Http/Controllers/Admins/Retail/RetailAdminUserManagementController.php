@@ -1545,7 +1545,8 @@ class RetailAdminUserManagementController extends Controller
             $trax_center->discount = $request->discount;
             $trax_center->insurance = $request->edit_insurance;
             $trax_center->updated_by = Auth::id();
-
+            $changes = $trax_center->getDirty();
+            
             $fieldNames = [
                 'name' => 'Name',
                 'phone_no' => 'Phone No',
@@ -1564,8 +1565,9 @@ class RetailAdminUserManagementController extends Controller
                     $changedFields[] = $fieldName . ': ' . $originalValue . ' -> ' . $currentValue;
                 }
             }
+            $hub_name = City::find($trax_center->default_hub)->name;
             $trax_center->save();
-
+            $this->updatePickupAddress($changes,$trax_center->pickup_address_id, $hub_name);
             $trax_center_attachment = TraxCenterAttachment::where('retail_trax_center_id', $request->trax_center_id)->first();
             if ($trax_center_attachment != null) {
                 $trax_center_attachment->advance_amount = (int) str_replace(',', '', $request->advance_amount);
@@ -3998,5 +4000,19 @@ class RetailAdminUserManagementController extends Controller
         $record->changed_in_record_id = $changed_in_record_id;
         $record->screen_name = $screen_name;
         $record->save();
+    }
+
+    public static function updatePickupAddress($changes,$id, $hub_name){
+
+        $record = UserShippingInfo::where('id',$id)->first();
+        if($record){
+            $record->pickup_address = $changes['name'].' - '. $hub_name;
+            $record->phone = $changes['phone_number'] ?? $record->phone_number;
+            $record->email = $changes['email_address'] ?? $record->email;
+            $record->location_latitude = $changes['location_latitude']  ?? $record->location_latitude;
+            $record->location_longitude = $changes['location_longitude']  ?? $record->location_longitude;
+
+            $record->save();
+        }
     }
 }
