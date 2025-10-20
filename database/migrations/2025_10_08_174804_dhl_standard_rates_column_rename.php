@@ -79,7 +79,7 @@ return new class extends Migration
         Schema::table('international_standard_dhl_rates', function (Blueprint $table) {
             // Revert renames
             $table->renameColumn('zone_1a', 'zone_1');
-            $table->renameColumn('zone_8b', 'zone_8');
+            $table->renameColumn('zone_8a', 'zone_8');
 
             // Drop new columns
             $table->dropColumn(['zone_1b','zone_8b','zone_8c']);
@@ -91,7 +91,7 @@ return new class extends Migration
             $table->renameColumn('zone_8a', 'zone_8');
 
             // Drop new columns
-            $table->dropColumn(['zone_8c']);
+            $table->dropColumn(['zone_1b','zone_8b','zone_8c']);
         });
 
         Schema::table('international_standard_retail_rates', function (Blueprint $table) {
@@ -100,7 +100,7 @@ return new class extends Migration
             $table->renameColumn('zone_8a', 'zone_8');
 
             // Drop new columns
-            $table->dropColumn(['zone_8c']);
+            $table->dropColumn(['zone_1b','zone_8b','zone_8c']);
         });
     }
 };
