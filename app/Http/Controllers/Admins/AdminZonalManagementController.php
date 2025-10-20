@@ -12,6 +12,7 @@ use App\Http\Models\Admin\Admin;
 use App\Http\Models\Zone;
 use App\Http\Models\ZoneClassCity;
 use App\Http\Models\City;
+use App\Http\Models\InternationalDhlZone;
 use Auth;
 
 use Yajra\Datatables\Datatables;
@@ -277,6 +278,13 @@ class AdminZonalManagementController extends Controller
         $zone->gst = $request->gst;
 
         $zone->save();
+        InternationalDhlZone::updateOrCreate(
+            ['zone_id' => $zone->id], // match existing record by ID
+            [
+                'zone_id' => $zone->id,
+                'zone_name' =>  strtolower(preg_replace('/\s*zone\s*/i', '', $request->name))
+            ] // update or insert data
+        );
         
         return redirect()->route('admin.management.zonal.index')->with(['success' => 'Zone: ' . $request->name . ' has been updated!']);
     }

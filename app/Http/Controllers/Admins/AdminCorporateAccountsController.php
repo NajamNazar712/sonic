@@ -12,6 +12,10 @@ use App\HistoryCorporateShipmentReturnDiscountCharges;
 use App\HistoryCorporateZeroCodDiscountCharges;
 use App\HistoryShipmentReturnDiscountCharges;
 use App\HistoryZeroCodDiscountCharges;
+use App\Http\Models\DonePayment;
+use App\Http\Models\PendingPayment;
+use App\Http\Models\Rates\PendingRateStatus;
+use App\Http\Models\Shipper\UserBankInfo;
 use App\PendingCorporateDefaultShipmentReturnDiscountCharges;
 use App\PendingCorporateDefaultZeroCodDiscountCharges;
 use App\PendingCorporateShipmentReturnDiscountCharges;
@@ -37720,7 +37724,76 @@ class AdminCorporateAccountsController extends Controller
     }
 
 
+    public function switch_corporate_submit(Request $request)
+    {
+        $rate_type_id = $request->rate_type;
+        $shipper_id = $request->shipper_id;
 
+        $pending_payment = PendingPayment::where('user_id', $shipper_id);
+        $done_payment = DonePayment::where('user_id', $shipper_id)->where('status', 0);
+
+        if ($pending_payment->exists() || $done_payment->exists()) {
+            return response()->json(['status' => 0, 'error' => 'Please Clear the Payment First']);
+        }
+
+        if (!$shipper_id || !$rate_type_id) {
+            return response()->json(['status' => 0, 'error' => 'Rate type or shipper not selected!']);
+        }
+
+        $shipper = User::find($shipper_id);
+        if (!$shipper) {
+            return response()->json(['status' => 0, 'error' => 'Shipper not found!']);
+        }
+
+        if (isset($shipper->wallet->id)) {
+            return response()->json(['status' => 0, 'error' => 'Wallet Users are not allowed']);
+        }
+
+        DB::beginTransaction();
+        try {
+            $shipper->corporate_rate_type_id = $rate_type_id;
+            $shipper->account_type_id = 2;
+            $shipper->agreement_signed = 0;
+            $shipper->status = 0;
+            $shipper->save();
+
+            $latestBankInfo = UserBankInfo::where('user_id', $shipper_id)->latest()->first();
+            if ($latestBankInfo) {
+                $latestBankInfo->invoicing_cycle_id = $shipper->payment_cycle_id;
+                $latestBankInfo->save();
+            }
+
+            $rateRows = RateStatus::where('user_id', $shipper_id)->get();
+
+            if ($rateRows->isNotEmpty()) {
+                $now = now();
+                $payload = $rateRows->map(function ($row) use ($shipper_id, $now) {
+                    return [
+                        'user_id'               => $shipper_id,
+                        'shipping_mode_id'      => $row->shipping_mode_id,
+                        'status'                => (int) $row->status,
+                        'cash_handling_charges' => (int) $row->cash_handling_charges,
+                        'insurance_charges'     => (int) $row->insurance_charges,
+                        'return_charges'        => (int) $row->return_charges,
+                        'fuel_charges'          => (int) $row->fuel_charges,
+                        'zero_cod_discount'     => (int) $row->zero_cod_discount,
+                        'return_discount'       => (int) $row->return_discount,
+                        'created_at'            => $now,
+                        'updated_at'            => $now,
+                    ];
+                })->all();
+
+                PendingRateStatus::insert($payload);
+                RateStatus::where('user_id', $shipper_id)->delete();
+            }
+
+            DB::commit();
+            return response()->json(['status' => 1, 'success' => 'Account Successfully Switched to Corporate']);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json(['status' => 0, 'error' => 'Failed to switch account.'], 500);
+        }
+    }
 
 }
 
