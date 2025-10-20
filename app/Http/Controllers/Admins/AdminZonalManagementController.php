@@ -292,6 +292,7 @@ class AdminZonalManagementController extends Controller
                 'zone_name' =>  strtolower(preg_replace('/\s*zone\s*/i', '', $request->name))
             ] // update or insert data
         );
+        
         return redirect()->route('admin.management.zonal.index')->with(['success' => 'Zone: ' . $request->name . ' has been updated!']);
     }
 
