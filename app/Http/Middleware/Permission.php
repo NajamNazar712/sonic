@@ -1548,7 +1548,10 @@ class Permission
 
             'settings.product_tax.index' => 1037,
             'settings.product_tax_logs.index' => 1039,
-             'settings.geo_codes.index' => 1040
+             'settings.geo_codes.index' => 1040,
+            'admin.finance.prf.index' => 1046,
+            'admin.finance.prf.list' => 1047,
+            'admin.finance.prf.completed_list' => 1050
         ],
         'shipper' => [
             'shipment.book.index' => 1,

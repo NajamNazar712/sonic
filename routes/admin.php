@@ -1854,6 +1854,28 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminFinanceController@wallet_user_index')->name('index');
             Route::get('list', 'Admins\AdminFinanceController@walle_user_list')->name('list');
         });
+        
+        Route::prefix('prf')->name('prf.')->group(function () {
+            Route::get('', 'Admins\PaymentRequisitionController@index')->name('index');
+            Route::post('', 'Admins\PaymentRequisitionController@store')->name('submit');
+            Route::get('list', 'Admins\PaymentRequisitionController@list')->name('list');
+            Route::get('ajaxList', 'Admins\PaymentRequisitionController@ajaxList')->name('ajaxList');   
+            Route::get('{id}/edit',  'Admins\PaymentRequisitionController@edit')->name('edit');
+            Route::post('{id}/update', 'Admins\PaymentRequisitionController@update')->name('update');
+            Route::post('/approve',  'Admins\PaymentRequisitionController@approve')->name('approve');
+            Route::post('/add_cheque',  'Admins\PaymentRequisitionController@add_cheque')->name('add_cheque');
+            Route::post('/cancel',  'Admins\PaymentRequisitionController@cancel')->name('cancel');
+            Route::get('/journey',  'Admins\PaymentRequisitionController@view_journey')->name('journey');
+            Route::get('/approval_logs',  'Admins\PaymentRequisitionController@approval_logs')->name('approval_logs');
+            Route::post('/complete',  'Admins\PaymentRequisitionController@complete')->name('complete');
+            Route::get('/completed_list',  'Admins\PaymentRequisitionController@completed_list')->name('completed_list');
+            Route::get('/ajaxCompletedList',  'Admins\PaymentRequisitionController@ajaxCompletedList')->name('ajaxCompletedList');
+            Route::get('{id}/chat', 'Admins\PaymentRequisitionController@chat_view')->name('chat');
+            Route::prefix('comment')->name('comment.')->group(function () {
+                Route::post('list', 'Admins\PaymentRequisitionController@get_latest_comment')->name('list'); 
+                Route::post('add', 'Admins\PaymentRequisitionController@add_comment')->name('add'); 
+            });
+        });
     });
 
     Route::prefix('petty_cash')->name('petty_cash.')->group(function () {
