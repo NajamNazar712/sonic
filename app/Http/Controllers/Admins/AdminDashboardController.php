@@ -1291,7 +1291,7 @@ class AdminDashboardController extends Controller
     public function activeAccountsList()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 2);
-        
+        $corporate_rate_types = CorporateRateType::all();
         $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name', 'admins.id'])->where('status', 1)->where('ar.department_id', 7)->get();
         $products = Product::select('id', 'product_name')->get();
         $segments = Segment::all();
@@ -1330,7 +1330,7 @@ class AdminDashboardController extends Controller
         $all_users['results'][2]['children'] = [];
         $all_users['pagination']['more'] = true;
         // $active_shippers = User::whereIn('status', [3, 4])->get();
-        return view('admin.accounts.active_accounts_list')->with(['products' => $products, 'sale_name' => $salesperson,'payment_cycles' => $payment_cycles, 'segments' => $segments, 'ecom_segments' => $ecom_segments, 'general_segments' => $general_segments, 'sale_tier_types' => $sale_tier_types, 'territories' => $territories,'sales_tiers'=>$sales_tiers, 'commission_percentage'=>$commission_percentage,'riders_permanent'=>$riders_permanent,'all_users'=>$all_users, 'block_disable_reasons'=> $block_disable_reasons]);
+        return view('admin.accounts.active_accounts_list')->with(['products' => $products, 'sale_name' => $salesperson,'payment_cycles' => $payment_cycles, 'segments' => $segments, 'ecom_segments' => $ecom_segments, 'general_segments' => $general_segments, 'sale_tier_types' => $sale_tier_types, 'territories' => $territories,'sales_tiers'=>$sales_tiers, 'commission_percentage'=>$commission_percentage,'riders_permanent'=>$riders_permanent,'all_users'=>$all_users, 'block_disable_reasons'=> $block_disable_reasons,'corporate_rate_types'=>$corporate_rate_types]);
     }
 
     public function shipperNamesForDropdown(Request $request, $type)
@@ -10208,6 +10208,10 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                         }
                         if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(115, session('permissions')))) {
                             $dropdown .= '<button onclick="window.open(\'' . route('admin.view.rates', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Rates</div></button>';
+                        }
+                        if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(1045, session('permissions')))) {
+                            $dropdown .= '<button type="button" class="dropdown-item switch_corporate_button" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#SwitchCorporate"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Swicth To Corporate</div></button>';
+
                         }
                         if ((session('role_id') == 1 || in_array(115, session('permissions')))) {
                             $dropdown .= '<button type="button" class="dropdown-item rates_history" data-target-id=' . $result->id . ' rel="rates_history" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Rates History</div></button>';

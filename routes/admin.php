@@ -12,7 +12,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 
     Route::get('/login', 'Auth\AdminLoginController@showLoginForm')->name('login');
-    Route::post('/login', 'Auth\AdminLoginController@login')->name('login.submit');
+    Route::post('/login', 'Auth\AdminLoginController@login')->middleware('login.check')->name('login.submit');
     Route::post('/credentials', 'Auth\AdminLoginController@credentials')->name('login.credentials');
     Route::post('/verify_otp', 'Auth\AdminLoginController@verify_otp')->name('login.verify_otp');
     Route::get('access_denied', 'Admins\AdminController@access_denied')->name('access_denied');
@@ -130,6 +130,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('auto_shipment_cancel_days/submit', 'Admins\AdminShipmentCancelController@auto_shipment_cancel_days')->name('auto_shipment_cancel_days.submit');
         Route::post('kam_poc_ref_tag/submit', 'Admins\AdminDashboardController@kam_poc_ref_tag')->name('kam_poc_ref_tag.submit');
         Route::post('rate_type/submit', 'Admins\AdminCorporateAccountsController@rate_type_submit')->name('rate_type.submit');
+        Route::post('swicth/corporate/submit', 'Admins\AdminCorporateAccountsController@switch_corporate_submit')->name('switch_corporate_submit');
         Route::post('/add_territory', 'Admins\AdminDashboardController@add_territory')->name('add_territory');
         Route::post('/add_segments', 'Admins\AdminDashboardController@add_segments')->name('add_segments');
         Route::get('active_today', 'Admins\AdminDashboardController@todayActiveAccountsList')->name('active.today');
@@ -1761,7 +1762,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('view_status_history', 'Admins\AdminFinanceController@view_status_history')->name('view_status_history');
             Route::get('mark_settlement', 'Admins\AdminFinanceController@mark_settlement')->name('mark_settlement');
             Route::get('wallet_error_logs', 'Admins\AdminFinanceController@wallet_error_logs')->name('wallet_error_logs');
-            
+            Route::put('hold', 'Admins\AdminFinanceController@done_payments_hold')->name('hold');
+            Route::put('un_hold', 'Admins\AdminFinanceController@done_payments_un_hold')->name('un_hold');
+
+
         });
 
         Route::prefix('invoices')->name('invoices.')->group(function () {
@@ -2758,7 +2762,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('view_tpl_map', 'GeoCodesController@view_tpl_map')->name('view_tpl_map');
             Route::post('get_manual_shipment_geo_codes', 'GeoCodesController@get_manual_shipment_geo_codes')->name('get_manual_shipment_geo_codes');
             Route::post('update_manual_geo_codes', 'GeoCodesController@update_manual_geo_codes')->name('update_manual_geo_codes');
-
         });
 
         // //test

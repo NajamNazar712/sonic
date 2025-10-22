@@ -313,7 +313,9 @@
                 var jsonResult = $.ajax({
                     url: '{{ route('admin.delivery.pending.list') }}',
                     data: params,
+                    bom: true,
                     success: function (result) {
+                        // console.log('result',result.data);
                         head = [];
                         head.push('S.No');
                         head.push('Tracking .No');
@@ -356,9 +358,12 @@
                             row.push(`="${values.tracking_number}"`);
                             row.push(values.shipper);
                             row.push(values.sub_segment_name);
+                            // row.push(decodeURIComponent(escape(values.origin || '')));
                             row.push(values.origin);
                             row.push(values.destination);
                             row.push(values.hub);
+                            // row.push(decodeURIComponent(escape(values.destination || '')));
+                            // row.push(decodeURIComponent(escape(values.hub || '')));
                             row.push(values.area);
                             row.push(values.consignee_name);
                             row.push(values.consignee_phone);
@@ -405,6 +410,13 @@
                     title: 'Pending Deliveries',
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
+                    bom: true,               
+                    charset: 'utf-8',        
+                    fieldSeparator: ',',     
+                    filename: 'Pending_Deliveries', // optional custom file name
+                    exportOptions: {
+                    columns: ':visible'
+                    }
                 },
                 'reset'
             ],
