@@ -1996,6 +1996,14 @@
                                 </a>
                             </li>
                         @endif
+
+                        @if (session('role_id') == 1 || in_array(1051, session('permissions')))
+                            <li>
+                                <a class="menu-item" href="{{ route('admin.reports.sub_hub.index') }}">
+                                    SUB HUB Station Visibility
+                                </a>
+                            </li>
+                        @endif
                     </ul>
                 </li>
             @endif
