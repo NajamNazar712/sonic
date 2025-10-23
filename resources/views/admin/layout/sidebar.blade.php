@@ -3101,6 +3101,13 @@
                                                 href="{{ route('admin.settings.international_automation_user.index') }}">Automation
                                                 User</a></li>
                                     @endif
+                                    @if (session('role_id') == 1 && session('department_id') == 1)
+                                        <li class=" nav-item">
+                                            <a href="{{ route('admin.retail.international.zonal_margin_column.index') }}">
+                                                <span class="menu-title">Retail International Zone Margin Column Settings</span>
+                                            </a> 
+                                        </li>
+                                    @endif
                                 </ul>
                             </li>
                         @endif

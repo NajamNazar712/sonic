@@ -16946,7 +16946,8 @@ class AdminReportsController extends Controller
             ) AS jour'),
             'case_closed_remarks.remarks AS case_closed_remarks',
             'sjl.created_at AS requested_date_time',
-            'lost_approved.created_at AS approval_date_time'
+            'lost_approved.created_at AS approval_date_time',
+            'lcs.type as lost_category'
         )
         ->leftJoin('shipments_journey AS sjl', function($join) {
             $join->on('sjl.shipment_id', '=', 'shipments.id')
@@ -16997,7 +16998,7 @@ class AdminReportsController extends Controller
         ->leftJoin('employee_statuses AS rider_status', 'rider_status.id', '=', 'rider_employees.status_id')
         ->leftJoin('cities AS city', 'city.id', '=', 'sjl.city_id')
         ->leftJoin('users AS user_shipment', 'user_shipment.id', '=', 'shipments.user_id')
-
+        ->leftJoin('lost_category_shipments as lcs', 'lcs.shipment_id', '=', 'shipments.id')
         ->leftJoin('shipments_journey AS case_closed_remarks', function($join) {
             $join->on('case_closed_remarks.shipment_id', '=', 'shipments.id')
                 ->where('case_closed_remarks.shipper_status_id', 51)

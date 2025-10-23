@@ -185,146 +185,98 @@ class ShipperAgreementController extends Controller
                 $sales_person_name = $shipper->name;
             }
         }
-        $claim_policy = '<h2 class="text-center mt-4">Claim Policy</h2>
+        $claim_policy = <<<HTML
+<h2 class="text-center mt-4">Claim Policy & Pre-Requisites</h2>
 <style> .table1 tr:nth-child(even) {background-color: #d9e2f3;}</style>
 <table class="table table-bordered table1 p-4" >
-                                    <thead style="/*background-color: #4472c4; color: white;*/font-weight: bold;">
-                                        <tr>
-                                            <td>S.no</td>
-                                            <td>Claim Type</td>
-                                            <td>Pre-Requisition</td>
-                                            <td>Cut Off</td>
-                                            <td>Action</td>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                        <tr>
-                                            <td>1</td>
-                                            <td>Damage + Short Content
-                                                    on Delivery (Consignee).</td>
-                                            <td>Within 24
-                                                Hours</td>
-                                            <td>Product details + Marketing
-                                                    picture + Damage parcel picture
-                                                    by consignee + Invoice.</td>
-                                            <td>For all the damage & short
-                                                content at delivery, shipper
-                                                must inform through claim form
-                                                within given cut-off time</td>        
-                                        </tr>
-                                        <tr>
-                                            <td>2-a</td>
-                                            <td>Lost - Booked not
-                                                  arrived.</td>
-                                            <td>4 Days of
-                                            Booking</td>
-                                            <td>Scanned signed receiving sheet+
-                                                invoice</td>
-                                            <td>For all the shipments booked
-                                                but not arrived at Trax, shipper
-                                                must inform within given cut-off
-                                                time</td>    
-                                        </tr>
-                                        <tr>
-                                            <td>2-b</td>
-                                            <td>Lost – After arrival
-                                                before delivery.</td>
-                                            <td>45 Days</td>
-                                            <td>Product details + Marketing
-                                            picture + Invoice</td>
-                                            <td>For all the shipments arrived at
-                                                Trax office but not delivered or
-                                                returned, shipper must inform
-                                                within given cut-off time</td>
-                                        </tr>
-                                        <tr>
-                                            <td>2-c</td>
-                                            <td>Lost –
-                                            Returned/Charges
-                                            Deducted.</td>
-                                            <td>3 Days</td>
-                                            <td>Product Details + Marketing
-                                                picture + Invoice</td>
-                                                <td>For all the return shipments,
-                                                which are not received
-                                                physically to shipper.</td>
-                                        </tr>
-                                        <tr>
-                                            <td>3</td>
-                                            <td>Theft & Snatching</td>
-                                            <td>2 Days Notice</td>
-                                            <td>Product Details</td>
-                                                <td>No Claim</td>
-                                        </tr>
-                                        <tr>
-                                            <td>4</td>
-                                            <td>Weight Dispute</td>
-                                            <td>3 Days of Arrival</td>
-                                            <td>Product details + Picture +
-                                                Actual weight of product + or
-                                                Alternate CN# of similar
-                                                product.</td>
-                                                <td>Claim amount disburse upon
-                                                calculation & Shipper can claim
-                                                it within given cut-off time.</td>
-                                        </tr>
-                                         <tr>
-                                            <td>5</td>
-                                            <td>Tariff</td>
-                                            <td>2 Days of Invoice</td>
-                                            <td>Proposal copy + Calculation Error</td>
-                                                <td>Claim amount disburse upon
-                                                    calculation & Shipper can claim
-                                                    it within given cut-off time</td>
-                                        </tr>
-                                         <tr>
-                                            <td>6</td>
-                                            <td>Damage + Content Short
-                                            Return (Shipper).</td>
-                                            <td>24 Hours of Return.</td>
-                                            <td>Product details + Picture + Invoice</td>
-                                                <td>Shipper can claim any damage
-                                                    short content in return
-                                                    shipment within given cut-off
-                                                    time.</td>
-                                        </tr>
-</tbody>
-</table>
-
-<table class="table table-bordered " >
+    <thead style="font-weight: bold;">
+        <tr>
+            <td>S.no</td>
+            <td>Category</td>
+            <td>Description</td>
+            <td>Reporting - Deadline</td>
+            <td>Required Documents</td>
+        </tr>
+    </thead>
     <tbody>
         <tr>
-            <td>Flyer/Packing un intact while delivery claim
-            amount will be Up to 80% of product value.</td>
-            <td>Flyer/Packing burnt + damage claim amount
-            will be up to 80% of invoice.</td>
+            <td>1</td>
+            <td>Weight Dispute</td>
+            <td>When the charged weight is higher than the actual weight.</td>
+            <td>Within 4 days of shipment arrival at origin.</td>
+            <td>Product details + Product image + Actual weight proof or alternate CN of similar product</td>
         </tr>
         <tr>
-            <td>Flyer/Packing un intact and mishandled at
-            time of return, shipper needs write broken
-            received on return receiving document -
-            claim amount will be up to 50%.</td>
-            <td>Packing intact and no mishandling no amount
-            disburse. </td>
+            <td>2</td>
+            <td>Lost Shipment</td>
+            <td>Shipment declared lost, not traceable within system.</td>
+            <td>File claim within 30 days from lost status.</td>
+            <td>Product details + Marketing pictures + Invoice</td>
         </tr>
-        </tbody>
+        <tr>
+            <td>3</td>
+            <td>Delivered/Returned but Missing</td>
+            <td>Shipment is in a final status (Delivered or Returned), but customer claims it's lost.</td>
+            <td>Report within 4 days of final status.</td>
+            <td>Product details + Invoice + Tracking proof (if available)</td>
+        </tr>
+        <tr>
+            <td>4</td>
+            <td>No Final Status Yet</td>
+            <td>Shipment not marked as Delivered/Returned, and customer wishes to flag it.</td>
+            <td>Claim can be initiated anytime before final status.</td>
+            <td>To identify the shipment and check its status + Brief explanation of the issue for record</td>
+        </tr>
+        <tr>
+            <td>5</td>
+            <td>Damage + Open/Short Content</td>
+            <td>Items missing or package opened. Remarks must be recorded at time of delivery or return.</td>
+            <td>Must be reported within 2 days.</td>
+            <td>Delivery/Return remarks recorded + Product details + Images of packaging</td>
+        </tr>
+    </tbody>
 </table>
 
-<ul>Note:
-<li>If Cod amount is 0-25,000/- claim would be up to 80% of product cost</li>
-<li>If COD amount is 25000+ Trax will not entertain any claim</li>
-<li>Shipper using Trax flyers or approved packaging only then the claim will be entertained
-otherwise it will be rejected</li>
-<li>No claim will be entertained in case of theft and snatching</li>
-<li>Total claim processing time is 15 working days</li>
-
+<h2 class="terms_conditions pl-1 pt-6" style="text-decoration: underline;">Limited Liabilities of SLGTRAX over Claims</h2>
+<ul  class="pl-3">
+    <li>Damage (in case of inadequate or unfit packaging)</li>
+    <li>Short or Missing (Incomplete Details in shipment description)</li>
+    <li>No declared Value for Zero COD shipments.</li>
+    <li>Safe and Sound Delivery.</li>
+    <li>Unforeseen/act of God (in case of stolen or theft SLGTRAX Management is bound to share Relevant Police Incident Report to the Claimant)</li>
+    <li>Prohibited/Contraband items</li>
+    <li>Replacement Services.</li>
+    <li>Try and Buy Service.</li>
+    <li>Allowed to Open Service.</li>
+    <li>Time Barred</li>
+    <li>Insubstantial Contents (Documents, Antiques etc.).</li>
 </ul>
-';
+
+
+
+<h2 class="terms_conditions pl-1 pt-6" style="text-decoration: underline;">Terms & Conditions for Claims</h2>
+<ul class="pl-3">
+    <li>Adherence of pre-requisites is mandatory for smooth claim processing.</li>
+    <li>The declared value of the parcel is required to be in accordance with the details on the invoice.</li>
+    <li>In the event of any missing details identified during the claim processing, customers will be granted a period of 4 working days to provide the required information.</li>
+    <li>Customers with a negative balance or outstanding recovery will not be eligible for claim facilitation until clearance.</li>
+    <li>The policy in question does not apply to customers with an exclusive Service Level Agreement (SLA) with SLGTRAX, specifically mentioning the presence of a limitation of liability clause within that SLA.</li>
+    <li>All international claims settlement is aligned with concern Service Provider Policy.</li>
+    <li>Salvages of damaged shipments must be returned to or handed over to SLGTRAX before claim any payment.</li>
+    <li>Prior to claim processing, it is required that all dues be settled by the shipper.</li>
+    <li>For warehousing clients, actual shrinkage policy will apply to all claims.</li>
+    <li>Customers will not be allowed to deduct claim amounts from their invoices directly without following appropriate claim procedures and due diligence.</li>
+    <li>Retail customers can initiate claim through our official email platform.</li>
+    <li>The Claim settlement timelines are 10-15 working days.</li>
+    <li>The Settlement of claimed amount is up to 80% Value.</li>
+    <li>TRAX Management reserves all the right to decline any claim.</li>
+</ul>
+HTML;
 
         $page = '<table class="table table-sm table-borderless mb-0">
                         <tbody>
                           <tr class="double-border-bottom">
-                            <td colspan="4" class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="150" class="d-block mx-auto"></td>
+                            <td colspan="4" class="text-center align-middle"><img src="' . asset('img/slg_logo.png') . '" width="150" class="d-block mx-auto"></td>
                           </tr>
                           <tr class="double-border-bottom">
                             <td colspan="4" class="text-center align-middle"><strong><b>Customer Registration Form</b></strong></td>
