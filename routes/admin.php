@@ -2592,6 +2592,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@kam_and_poc_qsr_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@kam_and_poc_qsr_list')->name('list');
         });
+        Route::prefix('sub_hub')->name('sub_hub.')->group(function () {
+            Route::get('', 'Admins\Reports\SubHubStationVisibilityController@index')->name('index');
+            Route::post('list', 'Admins\Reports\SubHubStationVisibilityController@list')->name('list');
+        });
     });
 
     //Reports end
