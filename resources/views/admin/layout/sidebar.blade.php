@@ -868,6 +868,27 @@
                                 </ul>
                             </li>
                         @endif
+
+                          @if (session('role_id') == 1 ||
+                                  count(array_intersect([32, 33, 35, 36, 40, 42, 105, 262, 441, 464, 531, 757, 758, 815], session('permissions'))) !== 0)
+                                <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">PUDO Shipments</span></a>
+                                    <ul class="menu-content">
+                                        <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Return</span></a>
+                                            <ul class="menu-content">
+                                                <li><a class="menu-item"
+                                                       href="{{ route('admin.return_transfer_note.rider_request.index') }}">Pending Return Transfer Note Request</a></li>
+
+                                                <li><a class="menu-item"
+                                                       href="{{ route('admin.return_transfer_note.receive.index') }}">Receive Return Shipments</a></li>
+                                            </ul>
+                                        </li>
+                                        @if (session('role_id') == 1 || in_array(33, session('permissions')))
+                                            <li><a class="menu-item"
+                                                   href="{{ route('admin.transfer_note.rider_request.index') }}">Pending Transfer Note Request</a></li>
+                                        @endif
+                                    </ul>
+                                </li>
+                          @endif
                     </ul>
                 </li>
             @endif

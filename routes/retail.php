@@ -133,4 +133,32 @@ Route::prefix('retail')->name('retail.')->group(function () {
             });
         });
     });
+
+    Route::prefix('receive')->name('receive.')->group(function () {
+        Route::prefix('shipment')->name('shipment.')->group(function () {
+            Route::get('', 'Retail\RetailArrivalServiceController@receive_shipment_index')->name('index');
+            Route::post('shipment_details', 'Retail\RetailArrivalServiceController@receive_shipment_details')->name('shipment_details');
+            Route::post('store', 'Retail\RetailArrivalServiceController@receive_shipment_submit')->name('store');
+            Route::prefix('piece')->name('piece.')->group(function () {
+                Route::post('piece_details', 'Retail\RetailArrivalServiceController@receive_piece_details')->name('piece_details');
+                Route::post('shipment_details', 'Retail\RetailArrivalServiceController@receive_piece_shipment_details')->name('shipment_details');
+            });
+
+            Route::prefix('try_and_buy')->name('try_and_buy.')->group(function (){
+                Route::post('shipment_details', 'Retail\RetailArrivalServiceController@receive_try_and_buy_shipment_details')->name('shipment_details');
+            });
+        });
+    });
+
+    Route::prefix('last_mile')->name('last_mile.')->group(function (){
+        Route::prefix('pending_shipment')->name('pending_shipment.')->group(function () {
+            Route::get('', 'Retail\RetailLastMileController@index')->name('index');
+            Route::get('list', 'Retail\RetailLastMileController@pending_list')->name('list');
+
+        });
+        Route::prefix('shipment')->name('shipment.')->group(function () {
+            Route::post('delivered', 'Retail\RetailLastMileController@shipment_delivered')->name('delivered');
+
+        });
+    });
 });

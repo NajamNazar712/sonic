@@ -277,6 +277,7 @@ class ShipperShipmentBookController extends Controller
                 $pudo_deliver = new PudoDeliverShipment();
                 $pudo_deliver->retail_store_id = $retail_deliver->id;
                 $pudo_deliver->retail_address_id = $retail_deliver->pickup_address_id;
+                $pudo_deliver->hub_id = $retail_deliver->default_hub;
                 $pudo_deliver->retail_type = $retail_deliver_type;
                 $pudo_deliver->shipment_id = $shipment_id;
                 $pudo_deliver->save();
@@ -4148,6 +4149,7 @@ class ShipperShipmentBookController extends Controller
                                         $row['amount'] = 0;
                                     }
                                 }
+
                                 if (in_array($user_id, [32722, 3324])) {
                                     dispatch(new ProcessShipmentBookingDBPriority($row));
                                 } else {
@@ -4314,6 +4316,7 @@ class ShipperShipmentBookController extends Controller
                 $pudo_deliver = new PudoDeliverShipment();
                 $pudo_deliver->retail_store_id = $retail_deliver->id;
                 $pudo_deliver->retail_address_id = $retail_deliver->pickup_address_id;
+                $pudo_deliver->hub_id = $retail_deliver->default_hub;
                 $pudo_deliver->retail_type = $retail_deliver_type;
                 $pudo_deliver->shipment_id = $shipment_id;
                 $pudo_deliver->save();

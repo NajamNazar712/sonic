@@ -13,6 +13,7 @@
             </li>
             <li><a class="menu-item" href="{{route('retail.parcel_receiving.other_parcel')}}"><i class="la la-dropbox"></i>Other Parcels</a></li>
             <li><a class="menu-item" href="{{route('retail.arrival_service.service.index')}}"><i class="la la-dropbox"></i>Arrival Service Center</a></li>
+            <li><a class="menu-item" href="{{route('retail.receive.shipment.index')}}"><i class="la la-dropbox"></i>Receive Shipments</a></li>
             <li><a class="menu-item" href="{{route('retail.parcel_receiving.index')}}"><i class="la la-dropbox"></i>Parcel Receiving</a></li>
             <li class="menu-item"><a href="{{ route('retail.cancel_shipments.index') }}"><i class="la la-trash"></i>Cancelled</a>
             </li>
@@ -26,10 +27,24 @@
                     Retail Commission View
                 </a>
             </li>
+            <li>
+                <a class="menu-item" href="{{route('retail.last_mile.pending_shipment.index')}}">
+                    <i class="la la-file-text-o"></i>
+                    PUDO Last Mile
+                </a>
+            </li>
 
             @if (session('category') == 2)
                 <li><a class="menu-item" href="{{route('retail.shipment.other_booking.index')}}"><i class="la la-cubes"></i>Other Bookings</a></li>
             @endif
+{{--            <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-rotate-left"></i>PUDO Last Mile</span></a>--}}
+{{--                <ul class="menu-content">--}}
+{{--                    <li><a class="menu-item" href="{{ route('retail.return.confirmation_pending.index') }}">Pending Delivery</a></li>--}}
+{{--                </ul>--}}
+{{--                <ul class="menu-content">--}}
+{{--                    <li><a class="menu-item" href="{{ route('retail.return.reattempt_history.index') }}"></a>Return Shipments</li>--}}
+{{--                </ul>--}}
+{{--            </li>--}}
             <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-rotate-left"></i>Return</span></a>
                 <ul class="menu-content">
                     <li><a class="menu-item" href="{{ route('retail.return.confirmation_pending.index') }}">Confirmation Pending</a></li>

@@ -1,12 +1,12 @@
 
 @extends('admin.layout.master')
-@section('title','Receive Return Deliveries')
+@section('title','Receive Transfer Note Return Shipments')
 
 @section('content')
     <h1 class="mb-1">
-        Receive Return Deliveries
+        Receive Transfer Note Return Shipments
     </h1>
-z
+
     <div class="card">
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
@@ -81,45 +81,45 @@ z
     </div>
     <!--Shipments popup -->
 
-    <div class="modal fade text-left" id="uploadReturnNote" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="uploadReturnNote"
-         aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Return Note Image Upload</h4>
+{{--    <div class="modal fade text-left" id="uploadReturnNote" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="uploadReturnNote"--}}
+{{--         aria-hidden="true">--}}
+{{--        <div class="modal-dialog modal-lg" role="document">--}}
+{{--            <div class="modal-content">--}}
+{{--                <div class="modal-header bg-primary white">--}}
+{{--                    <h4 class="modal-title white">Return Note Image Upload</h4>--}}
 
-                </div>
-                <div class="modal-body  text-center">
-                    <form id="return_note_upload_form" class="form" action="{{route('admin.return.receive.upload_image')}}" method="post" enctype="multipart/form-data">
-                        @csrf
-                        <input type="hidden" name="image_return_note_id" id="image_return_note_id"/>
-                        <input type="hidden" name="selected_ids" id="selected_ids"/>
-                        <table class="table table-bordered datatable" id="return_upload_table" style="z-index: 3;">
-                            <thead>
-                            <tr role="row" class="bg-primary white">
+{{--                </div>--}}
+{{--                <div class="modal-body  text-center">--}}
+{{--                    <form id="return_note_upload_form" class="form" action="{{route('admin.return_transfer_note.receive.upload_image')}}" method="post" enctype="multipart/form-data">--}}
+{{--                        @csrf--}}
+{{--                        <input type="hidden" name="image_return_note_id" id="image_return_note_id"/>--}}
+{{--                        <input type="hidden" name="selected_ids" id="selected_ids"/>--}}
+{{--                        <table class="table table-bordered datatable" id="return_upload_table" style="z-index: 3;">--}}
+{{--                            <thead>--}}
+{{--                            <tr role="row" class="bg-primary white">--}}
 
-                                <th class="border-primary border-darken-1">S. No.</th>
-                                <th class="border-primary border-darken-1">Image</th>
-                                <th class="border-primary border-darken-1"></th>
+{{--                                <th class="border-primary border-darken-1">S. No.</th>--}}
+{{--                                <th class="border-primary border-darken-1">Image</th>--}}
+{{--                                <th class="border-primary border-darken-1"></th>--}}
 
-                            </tr>
-                            </thead>
-                        </table>
-                        <hr>
-                        <div class="row justify-content-center">
-                            <div class="col-3">
-                                <button id="" type="button" class="btn btn-danger btn-block" data-dismiss="modal">Close</button>
-                            </div>
-                            <div class="col-3">
-                                <button id="ReturnNoteImageSubmitButton" type="submit" class="btn btn-primary btn-block">Upload</button>
-                            </div>
+{{--                            </tr>--}}
+{{--                            </thead>--}}
+{{--                        </table>--}}
+{{--                        <hr>--}}
+{{--                        <div class="row justify-content-center">--}}
+{{--                            <div class="col-3">--}}
+{{--                                <button id="" type="button" class="btn btn-danger btn-block" data-dismiss="modal">Close</button>--}}
+{{--                            </div>--}}
+{{--                            <div class="col-3">--}}
+{{--                                <button id="ReturnNoteImageSubmitButton" type="submit" class="btn btn-primary btn-block">Upload</button>--}}
+{{--                            </div>--}}
 
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+{{--                        </div>--}}
+{{--                    </form>--}}
+{{--                </div>--}}
+{{--            </div>--}}
+{{--        </div>--}}
+{{--    </div>--}}
 @endsection
 
 @section('css')
@@ -195,7 +195,7 @@ z
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.return.receive.list') }}',
+                        url: '{{ route('admin.return_transfer_note.receive.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -266,7 +266,7 @@ z
                 },
                 serverSide: true,
                 ajax: {
-                    url: '{{ route('admin.return.receive.list') }}',
+                    url: '{{ route('admin.return_transfer_note.receive.list') }}',
                     data: function (d) {
                         d.return_note_number = $('#scan_return_note').val();
                         d.search_tracking = $('#search_tracking').val();
@@ -276,17 +276,17 @@ z
                 order: [[1, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'return_note' ,name: 'return_notes.id', class: 'align-middle return_note'},
+                    { data:'return_note' ,name: 'return_transfer_notes.id', class: 'align-middle return_note'},
                     { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
                     { data:'rider_trax_id' ,name: 'riders.trax_id', class: 'align-middle rider'},
                      { data:'area' ,name: 'ca.name', class: 'align-middle area'},
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
-                    { data:'shipments_count_link' ,name: 'return_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
+                    { data:'shipments_count_link' ,name: 'return_transfer_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
                     // { data:'shipments_count_link' ,name: 'return_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
                     { data:'shipments_unverified_link' ,name: 'shipments_unverified_count', class: 'align-middle shipments_unverified_link text-center',orderable: false, searchable: false},
                     { data:'assignee' ,name: 'admins.name', class: 'align-middle assignee'},
-                    { data:'created' ,name: 'return_notes.created_at', class: 'align-middle created_at'},
-                    { data:'return_note_status' ,name: 'return_notes.status', class: 'align-middle return_note_status'},
+                    { data:'created' ,name: 'return_transfer_notes.created_at', class: 'align-middle created_at'},
+                    { data:'return_note_status' ,name: 'return_transfer_notes.status', class: 'align-middle return_note_status'},
                     {data:'action' ,name: 'action', class: 'align-middle action text-center',orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
@@ -313,8 +313,8 @@ z
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
-                        '<option value="0">Created</option>' +
-                        '<option value="3">Updated</option>' +
+                        '<option value="1">Pending</option>' +
+                        '<option value="4">Pending for completion</option>' +
                         '</select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
@@ -371,7 +371,7 @@ z
 
             function print(id) {
                 $.ajax({
-                    url: '{!! route('admin.return.receive.rn.print') !!}',
+                    url: '{!! route('admin.return_transfer_note.rn.print') !!}',
                     method: 'POST',
                     data: {
                         'id': id,
@@ -411,7 +411,7 @@ z
                 $('#shipments_modal').modal('show');
 
                 $.ajax({
-                    url: '{!! route('admin.return.receive.shipments') !!}',
+                    url: '{!! route('admin.return_transfer_note.receive.shipment_list') !!}',
                     method: 'POST',
                     data: {
                         '_token': '{{ csrf_token() }}',

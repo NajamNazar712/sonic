@@ -377,6 +377,28 @@ use Illuminate\Http\Request;
                 Route::post('create', 'Rider\RiderAPIController@create_delivery_note')->name('create');
             });
 
+            Route::prefix('pudo')->name('pudo.')->group(function (){
+                Route::get('retail_stores', 'Rider\RiderAPIController@retail_store_list')->name('retail_stores');
+
+                Route::prefix('transfer_note')->name('transfer_note.')->group(function () {
+                    Route::get('summary', 'Rider\RiderAPIController@transfer_note_summary')->name('summary');
+                    Route::post('shipment_details', 'Rider\RiderAPIController@get_transfer_note_shipment_details')->name('shipment_details');
+                    Route::post('piece_details', 'Rider\RiderAPIController@get_transfer_note_piece_details')->name('piece_details');
+                    Route::post('create', 'Rider\RiderAPIController@create_transfer_note')->name('create');
+                    Route::post('completed', 'Rider\RiderAPIController@transfer_note_completed')->name('completed');
+                });
+
+                Route::prefix('return_transfer_note')->name('return_transfer_note.')->group(function () {
+                    Route::get('summary', 'Rider\RiderAPIController@return_transfer_note_summary')->name('summary');
+                    Route::post('shipment_details', 'Rider\RiderAPIController@get_return_transfer_note_shipment_details')->name('shipment_details');
+                    Route::post('piece_details', 'Rider\RiderAPIController@get_return_transfer_note_piece_details')->name('piece_details');
+                    Route::post('create', 'Rider\RiderAPIController@return_transfer_note_create')->name('create');
+                    Route::post('completed', 'Rider\RiderAPIController@return_transfer_note_completed')->name('completed');
+                });
+
+            });
+
+
             Route::prefix('quick_tracking')->name('quick_tracking.')->group(function () {
                 Route::post('scan_shipment', 'Rider\RiderAPIController@scan_shipment')->name('index');
             });

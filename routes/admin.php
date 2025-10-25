@@ -698,6 +698,49 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
     });
 
+    Route::prefix('transfer_note')->name('transfer_note.')->group(function (){
+        Route::post('shipment/info', 'Admins\Pudo\TransferNoteController@get_shipment_details')->name('shipment.info');
+        Route::prefix('rider_request')->name('rider_request.')->group(function () {
+            Route::get('', 'Admins\Pudo\TransferNoteController@rider_request_note_index')->name('index');
+            Route::get('list', 'Admins\Pudo\TransferNoteController@rider_request_note_list')->name('list');
+            Route::post('shipments', 'Admins\Pudo\TransferNoteController@request_note_shipments')->name('shipments');
+            Route::get('{id}/approve', 'Admins\Pudo\TransferNoteController@request_note_approve')->name('approve');
+            Route::get('{id}/reject', 'Admins\Pudo\TransferNoteController@request_note_reject')->name('reject');
+            Route::get('{id}/update', 'Admins\Pudo\TransferNoteController@request_note_update')->name('update');
+            Route::get('{id}/update/list', 'Admins\Pudo\TransferNoteController@request_note_update_list')->name('update.list');
+            Route::post('update/remove', 'Admins\Pudo\TransferNoteController@request_note_remove')->name('update.remove');
+            Route::post('update/remove_bulk', 'Admins\Pudo\TransferNoteController@request_note_remove_bulk')->name('update.remove.bulk');
+            Route::post('/add/tracking_number', 'Admins\Pudo\TransferNoteController@add_shipments_in_request_note')->name('add.shipments');
+        });
+    });
+
+    Route::prefix('return_transfer_note')->name('return_transfer_note.')->group(function (){
+        Route::post('shipment_details', 'Admins\Pudo\ReturnTransferNoteController@get_shipment_details')->name('shipment_details');
+        Route::post('shipment/piece_details', 'Admins\Pudo\ReturnTransferNoteController@get_piece_details')->name('shipment.piece_details');
+        Route::prefix('rider_request')->name('rider_request.')->group(function () {
+            Route::get('', 'Admins\Pudo\ReturnTransferNoteController@rider_request_note_index')->name('index');
+            Route::get('list', 'Admins\Pudo\ReturnTransferNoteController@rider_request_note_list')->name('list');
+            Route::post('shipments', 'Admins\Pudo\ReturnTransferNoteController@request_note_shipments')->name('shipments');
+            Route::get('{id}/approve', 'Admins\Pudo\ReturnTransferNoteController@request_note_approve')->name('approve');
+            Route::get('{id}/reject', 'Admins\Pudo\ReturnTransferNoteController@request_note_reject')->name('reject');
+            Route::get('{id}/update', 'Admins\Pudo\ReturnTransferNoteController@request_note_update')->name('update');
+            Route::get('{id}/update/list', 'Admins\Pudo\ReturnTransferNoteController@request_note_update_list')->name('update.list');
+            Route::post('update/remove', 'Admins\Pudo\ReturnTransferNoteController@request_note_remove')->name('update.remove');
+            Route::post('update/remove_bulk', 'Admins\Pudo\ReturnTransferNoteController@request_note_remove_bulk')->name('update.remove.bulk');
+            Route::post('/add/tracking_number', 'Admins\Pudo\ReturnTransferNoteController@add_shipments_in_request_note')->name('add.shipments');
+        });
+
+        Route::prefix('receive')->name('receive.')->group(function (){
+            Route::get('', 'Admins\Pudo\ReturnTransferNoteController@return_receive_shipments_index')->name('index');
+            Route::get('list', 'Admins\Pudo\ReturnTransferNoteController@return_receive_shipments_list')->name('list');
+            Route::post('shipment_list','Admins\Pudo\ReturnTransferNoteController@receive_shipment_list')->name('shipment_list');
+            Route::get('status/{id}','Admins\Pudo\ReturnTransferNoteController@receive_shipment_status')->name('status');
+            Route::post('rn.print', 'Admins\Pudo\ReturnTransferNoteController@rrd_print')->name('rn.print');
+
+        });
+    });
+
+
     Route::prefix('delivery')->name('delivery.')->group(function () {
         Route::prefix('pending')->name('pending.')->group(function () {
             Route::get('', 'Admins\DeliveryController@pending_delivery_index')->name('index');

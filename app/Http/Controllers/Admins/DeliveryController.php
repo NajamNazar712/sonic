@@ -308,6 +308,8 @@ class DeliveryController extends Controller
             })
             ->leftJoin('city_areas as ca_scanning_last_location_name', 'ssjal_last_location.area_id', '=', 'ca_scanning_last_location_name.id')
             ->leftJoin('shipment_scanning_screen_locations as last_screen_location', 'last_screen_location.id', '=', 'ssj_last_location.screen_location_id')
+            ->leftJoin('pudo_deliver_shipments as pds', 'pds.shipment_id', '=', 'shipments.id')
+            ->whereNull('pds.shipment_id') // Exclude all PUDO shipments
             ->select(
                 'agent.name as agent',
                 'shipments.id as shId',
@@ -2669,9 +2671,9 @@ class DeliveryController extends Controller
                                 }
                                 Shipment::where('id', $shipment)->update(['received_amount' => null, 'shipper_status_id' => $request->status_drop[$shipment], 'consignee_status_id' => $request->status_drop[$shipment]]);
                                 DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
-                            }
+                            }                            $remarks = null;
+
                         } else {
-                            $remarks = null;
                             if ($request->status_drop[$shipment] == 12) {
 
                                 // $journey = ShipmentsJourney::where('shipment_id',$shipment)->whereIn('status_reason_id',[27,35])->count();
