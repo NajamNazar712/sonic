@@ -403,7 +403,7 @@ class TransferNoteController extends Controller
             ->leftjoin('city_areas as ca', 'ca.id', '=', 'r.id')
             ->join('rider_types', 'rider_types.id', '=', 'r.rider_type_id')
             ->join('zones as z', 'c.zone_id', '=', 'z.id')
-//            ->whereDate('rider_transfer_note_requests.created_at', Carbon::today())
+            ->whereDate('rider_transfer_note_requests.created_at', Carbon::today())
             ->where('rider_transfer_note_requests.status_id', 1)
             ->select('rider_transfer_note_requests.id as id', 'rider_transfer_note_requests.id as request_note_id', 'rider_transfer_note_requests.created_at as date', 'r.name as rider_name', 'c.name as hub', 'rider_transfer_note_requests.total_cod_amount as amount', 'rider_transfer_note_requests.shipments_count as shipments_count', 'rider_transfer_note_requests.shipments_count as shipments_count_link', 'z.name as zone_name', 'r.operation_rider_id', 'r.rider_type_id', 'rider_types.name as rt', 'ad.name as admin_name', 'rider_transfer_note_requests.updated_at as updated_at', 'ca.name as area', 'r.trax_id as rider_trax_id')
             ->orderBy('rider_transfer_note_requests.id', 'DESC');

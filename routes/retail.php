@@ -158,7 +158,7 @@ Route::prefix('retail')->name('retail.')->group(function () {
         });
         Route::prefix('shipment')->name('shipment.')->group(function () {
             Route::post('delivered', 'Retail\RetailLastMileController@shipment_delivered')->name('delivered');
-
+            Route::post('return', 'Retail\RetailLastMileController@return_shipment')->name('return');
         });
     });
 });

@@ -23,7 +23,8 @@ return new class extends Migration
             $table->unsignedInteger('shipments_count');
             $table->unsignedInteger('completed_shipments')->default(0);
             $table->decimal('total_cod_amount', 10, 2)->nullable();
-            $table->unsignedTinyInteger('status')->default(1);
+            $table->unsignedBigInteger('admin_id')->index();
+            $table->unsignedTinyInteger('status')->default(1)->index();
             $table->unsignedBigInteger('last_status_updated_by')->nullable();
             $table->timestamp('last_status_updated_at')->nullable();
             $table->tinyInteger('last_status_updated_type')->nullable()->comment('1-Admin,2-Rider,3-Retail');

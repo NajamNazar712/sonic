@@ -136,6 +136,46 @@
         </div>
     </div>
 
+    <div class="modal fade" id="returnToShipperModal" tabindex="-1" role="dialog" aria-labelledby="returnToShipperModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <form id="returnToShipperForm">
+                @csrf
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="returnToShipperModalLabel">Return Shipment to Shipper</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+                        <input type="hidden" name="shipment_id" id="return_shipment_id">
+
+                        <div class="form-group">
+                            <label>Receive By <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="receive_by" id="receive_by" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>OTP <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" name="otp" id="otp" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Remarks</label>
+                            <textarea class="form-control" name="remarks" id="remarks" rows="2"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Submit Return</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
 
 @endsection
 
@@ -589,6 +629,71 @@
                     }
                 });
             });
+
+            $(document).on('click', '.return-to-shipper-btn', function() {
+                const shipmentId = $(this).data('id');
+                $('#return_shipment_id').val(shipmentId);
+                $('#returnToShipperModal').modal('show');
+            });
+
+            $('#returnToShipperForm').on('submit', function (e) {
+                e.preventDefault();
+
+                let formData = $(this).serialize();
+
+                swal({
+                    title: "Are you sure?",
+                    text: "Do you really want to return this shipment to the shipper?",
+                    icon: "warning",
+                    buttons: {
+                        cancel: "Cancel",
+                        confirm: {
+                            text: "Yes, Return it!",
+                            value: true,
+                            closeModal: false
+                        }
+                    },
+                    dangerMode: true,
+                }).then((willReturn) => {
+                    if (!willReturn) return;
+
+                    swal({
+                        title: 'Please wait...',
+                        text: 'Processing shipment return...',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        content: {
+                            element: "div",
+                            attributes: {
+                                innerHTML: '<i class="fa fa-spinner fa-spin fa-2x"></i>',
+                            },
+                        },
+                    });
+
+                    $.ajax({
+                        url: "{{ route('retail.last_mile.shipment.return') }}",
+                        type: "POST",
+                        data: formData,
+                        success: function (response) {
+                            if (response.status === 1) {
+                                swal("Success!", response.message, "success").then(() => {
+                                    $('#returnToShipperModal').modal('hide');
+                                    $('#returnToShipperForm')[0].reset();
+                                    $('#datatable').DataTable().ajax.reload(null, false);
+                                });
+                            } else {
+                                swal("Error!", response.message, "error");
+                            }
+                        },
+                        error: function () {
+                            swal("Error!", "Something went wrong! Please try again.", "error");
+                        }
+                    });
+                });
+            });
+
+
 
 
         {{--$('#delivered_form').on('submit', function (e) {--}}
