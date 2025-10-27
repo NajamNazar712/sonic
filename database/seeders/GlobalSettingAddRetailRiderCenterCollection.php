@@ -17,6 +17,19 @@ class GlobalSettingAddRetailRiderCenterCollection extends Seeder
     {
         $timestamp = now();
 
+
+        $route_id = DB::table('routes')->insertGetId([
+            'city_id' => 202,
+            'code' => 'Retail Collection Route',
+            'start' => 'TRAX Office',
+            'end' => 'Retail Office',
+            'junction' => 'Retail Collection Route',
+            'status' => 1,
+            'created_at' => $timestamp,
+            'updated_at' => $timestamp,
+            'route_type_id' => 2, // add value if known
+        ]);
+
         // 1 Insert rider and get its auto ID
         $riderId = DB::table('riders')->insertGetId([
             'city_id' => 202,
@@ -25,7 +38,7 @@ class GlobalSettingAddRetailRiderCenterCollection extends Seeder
             'cnic' => '00000-0000000-0',
             'address' => 'Retail Trax Center',
             'rider_main_category_id' => 1,
-            'route_id' => null,
+            'route_id' => $route_id,
             'rider_category_id' => 1,
             'status' => 0,
             'created_at' => $timestamp,
