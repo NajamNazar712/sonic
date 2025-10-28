@@ -130,6 +130,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('auto_shipment_cancel_days/submit', 'Admins\AdminShipmentCancelController@auto_shipment_cancel_days')->name('auto_shipment_cancel_days.submit');
         Route::post('kam_poc_ref_tag/submit', 'Admins\AdminDashboardController@kam_poc_ref_tag')->name('kam_poc_ref_tag.submit');
         Route::post('rate_type/submit', 'Admins\AdminCorporateAccountsController@rate_type_submit')->name('rate_type.submit');
+        Route::post('swicth/corporate/submit', 'Admins\AdminCorporateAccountsController@switch_corporate_submit')->name('switch_corporate_submit');
         Route::post('/add_territory', 'Admins\AdminDashboardController@add_territory')->name('add_territory');
         Route::post('/add_segments', 'Admins\AdminDashboardController@add_segments')->name('add_segments');
         Route::get('active_today', 'Admins\AdminDashboardController@todayActiveAccountsList')->name('active.today');
@@ -2757,7 +2758,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('view_tpl_map', 'GeoCodesController@view_tpl_map')->name('view_tpl_map');
             Route::post('get_manual_shipment_geo_codes', 'GeoCodesController@get_manual_shipment_geo_codes')->name('get_manual_shipment_geo_codes');
             Route::post('update_manual_geo_codes', 'GeoCodesController@update_manual_geo_codes')->name('update_manual_geo_codes');
-
         });
 
         // //test

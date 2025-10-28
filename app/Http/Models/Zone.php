@@ -6,6 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Zone extends Model
 {
+    protected $fillable = [
+        'name',
+        'gst',
+        'status',
+        'business_category_id',
+    ];
     public function zone_cities() {
         return $this->hasMany('App\Http\Models\City');
     }

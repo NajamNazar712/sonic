@@ -147,11 +147,11 @@ class AdminShipmentHandoverController extends Controller
             }
 
 // Optional consistency check against request->delivery_location_mapping
-            if (!is_null($request->delivery_location_mapping)) {
-                if ((int) $request->delivery_location_mapping !== (int) $delivery_area) {
-                    return ['status' => 1, 'error' => 'Delivery Location is different'];
-                }
-            }
+//            if (!is_null($request->delivery_location_mapping)) {
+//                if ((int) $request->delivery_location_mapping !== (int) $delivery_area) {
+//                    return ['status' => 1, 'error' => 'Delivery Location is different'];
+//                }
+//            }
 
             $details['delivery_area'] = $delivery_area;
 
@@ -232,11 +232,11 @@ class AdminShipmentHandoverController extends Controller
             }
 
 // Consistency check against requested mapping (if provided)
-            if (!is_null($request->delivery_location_mapping)) {
-                if ((int) $request->delivery_location_mapping !== $delivery_area) {
-                    return ['status' => 1, 'error' => 'Delivery Location is different'];
-                }
-            }
+//            if (!is_null($request->delivery_location_mapping)) {
+//                if ((int) $request->delivery_location_mapping !== $delivery_area) {
+//                    return ['status' => 1, 'error' => 'Delivery Location is different'];
+//                }
+//            }
 
             $details['delivery_area'] = $delivery_area;
 

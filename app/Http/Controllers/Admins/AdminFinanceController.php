@@ -10212,7 +10212,7 @@ class AdminFinanceController extends Controller
                         $generate = TRUE;
 
                         /*$billing_period_from_date = Carbon::now()->subDay()->day($user_banking_information->generation_date)->startOfDay()->toDateString();*/
-                        $billing_period_from_date = Carbon::now()->startOfMonth()->startOfDay()->toDateString();
+                        $billing_period_from_date = Carbon::now()->subMonth()->startOfMonth()->startOfDay()->toDateString();
                         $current_date_string = Carbon::now()->addDay()->toDateString();
 
                     }

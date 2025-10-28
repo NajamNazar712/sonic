@@ -667,7 +667,13 @@ class ShipperTrackingController extends Controller
 
         $order_id = $request->order_id;
         $tracking = array();
-            $shipment = Shipment::where('order_id', $order_id)->where('user_id',session('user_id'));
+            $shipment = Shipment::where('order_id', $order_id)->where(function ($query) {
+                $query->where('user_id', session('user_id'));
+                // TO-7240
+                if (!empty(session('sister_users'))) {
+                    $query->orWhereIn('user_id', session('sister_users'));
+                }
+            });;
 
             if ($shipment->exists()) {
                 $shipments = $shipment->get();

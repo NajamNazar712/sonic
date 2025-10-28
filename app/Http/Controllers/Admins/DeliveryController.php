@@ -395,6 +395,7 @@ class DeliveryController extends Controller
         if ($area = $request->get('search_area')) {
             $shipments = $shipments->where('caa.city_area_id', '=', $area);
         }
+        
         $datatables = Datatables::of($shipments)
             ->setRowAttr([
                 'class' => function ($shipments) {
@@ -578,8 +579,7 @@ class DeliveryController extends Controller
             })->editColumn('entry_method', function ($shipment) {
                 return  ($shipment->entry_method == 1 ? 'Scanned' : 'Manual');
             })->rawColumns(['tracking_number_link','status_date','action']);
-
-
+       
         return $datatables->make(true);
     }
 
@@ -2294,6 +2294,9 @@ class DeliveryController extends Controller
         }
         if ($selected_status == 0 || $selected_status == null || $selected_status == '') {
             return response()->json(['status' => 0, 'error' => 'Status not selected!']);
+        }
+        if (($request->selected_reason === null || $request->selected_reason <= 0) && $selected_status == 12) {
+            return response()->json(['status' => 0, 'error' => 'Reason not selected!']);
         }
         if (DeliveryNote::where('id', $delivery_note_id)->where('pending_status', 1)->exists()) {
             return response()->json(['status' => 0, 'error' => 'Delivery note already updated']);
@@ -7342,7 +7345,7 @@ class DeliveryController extends Controller
                          as excel_general_ecom_express"),
 
                     // others: segment in (1,2) and sub_segment in (1,3,4,6,8,9,10,11)
-                    DB::raw("SUM(CASE WHEN uu.segment_id IN (1,2) AND uu.sub_segment_id IN (1,3,4,6,8,9,10,11) THEN 1 ELSE 0 END) as excel_others"),
+                    DB::raw("SUM(CASE WHEN uu.segment_id IN (1,2) AND uu.sub_segment_id IN (3,4,6,8,9,10,11) THEN 1 ELSE 0 END) as excel_others"),
 
                     // ---------- Delivered ----------
                     // delivered filter: delivery_note_shipments.status > 1 AND delivery_note_shipments.status NOT IN (8,10,11) AND shipments.shipper_status_id IN dncc
@@ -7370,7 +7373,7 @@ class DeliveryController extends Controller
                     DB::raw("
                     SUM(CASE 
                         WHEN (delivery_note_shipments.status > 1 AND delivery_note_shipments.status NOT IN (8,10,11) AND shipments.shipper_status_id IN (" . implode(',', $dnccStatuses) . "))
-                             AND uu.segment_id IN (1,2) AND uu.sub_segment_id IN (1,3,4,6,8,9,10,11)
+                             AND uu.segment_id IN (1,2) AND uu.sub_segment_id IN (3,4,6,8,9,10,11)
                         THEN 1 ELSE 0 END
                     ) as delivered_excel_others"),
                 ]);
