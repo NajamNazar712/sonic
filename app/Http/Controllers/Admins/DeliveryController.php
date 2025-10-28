@@ -7345,7 +7345,7 @@ class DeliveryController extends Controller
                          as excel_general_ecom_express"),
 
                     // others: segment in (1,2) and sub_segment in (1,3,4,6,8,9,10,11)
-                    DB::raw("SUM(CASE WHEN uu.segment_id IN (1,2) AND uu.sub_segment_id IN (1,3,4,6,8,9,10,11) THEN 1 ELSE 0 END) as excel_others"),
+                    DB::raw("SUM(CASE WHEN uu.segment_id IN (1,2) AND uu.sub_segment_id IN (3,4,6,8,9,10,11) THEN 1 ELSE 0 END) as excel_others"),
 
                     // ---------- Delivered ----------
                     // delivered filter: delivery_note_shipments.status > 1 AND delivery_note_shipments.status NOT IN (8,10,11) AND shipments.shipper_status_id IN dncc
