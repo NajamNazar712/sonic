@@ -4013,7 +4013,7 @@ class RetailAdminUserManagementController extends Controller
         $record = UserShippingInfo::where('id',$id)->first();
         if($record){
             $record->poc = $changes['name'] ?? $record->poc;
-            // $record->pickup = $changes['name'] ?? $record->poc;
+            $record->pickup_address = $changes['name'] . ' - ' . $hub_name;
             $record->phone = '021-111-118-729';
             $record->email = 'info@slgtrax.com';
             $record->location_latitude = $changes['location_latitude']  ?? $record->location_latitude;
