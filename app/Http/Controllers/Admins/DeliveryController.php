@@ -7373,7 +7373,7 @@ class DeliveryController extends Controller
                     DB::raw("
                     SUM(CASE 
                         WHEN (delivery_note_shipments.status > 1 AND delivery_note_shipments.status NOT IN (8,10,11) AND shipments.shipper_status_id IN (" . implode(',', $dnccStatuses) . "))
-                             AND uu.segment_id IN (1,2) AND uu.sub_segment_id IN (1,3,4,6,8,9,10,11)
+                             AND uu.segment_id IN (1,2) AND uu.sub_segment_id IN (3,4,6,8,9,10,11)
                         THEN 1 ELSE 0 END
                     ) as delivered_excel_others"),
                 ]);
