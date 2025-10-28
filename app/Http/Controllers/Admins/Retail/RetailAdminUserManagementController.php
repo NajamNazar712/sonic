@@ -468,7 +468,7 @@ class RetailAdminUserManagementController extends Controller
             $franchise->discount = $request->discount;
             $franchise->insurance = $request->edit_insurance;
             $franchise->updated_by = Auth::id();
-            
+            $changes = $franchise->getDirty();
 
             $changedFields = [];
             $fieldNames = [
@@ -497,7 +497,10 @@ class RetailAdminUserManagementController extends Controller
             }
 
             $franchise->save();
-
+            $hub_name = City::find($franchise->default_hub)->name;
+            if (!empty($changes)) {
+                $this->updatePickupAddress($changes, $franchise->pickup_address_id, $hub_name);
+            }
             $existingPercentages = RetailFranchiseProductPercentage::where('franchise_id', $franchise->id)->get()->keyBy('retail_shipping_mode_id');
 
             $new_names = json_decode($request->input('retail_shipping_mode_id'));
@@ -1567,7 +1570,10 @@ class RetailAdminUserManagementController extends Controller
             }
             $hub_name = City::find($trax_center->default_hub)->name;
             $trax_center->save();
-            $this->updatePickupAddress($changes,$trax_center->pickup_address_id, $hub_name);
+            if(!empty($changes)){
+                $this->updatePickupAddress($changes,$trax_center->pickup_address_id, $hub_name);
+
+            }
             $trax_center_attachment = TraxCenterAttachment::where('retail_trax_center_id', $request->trax_center_id)->first();
             if ($trax_center_attachment != null) {
                 $trax_center_attachment->advance_amount = (int) str_replace(',', '', $request->advance_amount);
@@ -1646,7 +1652,7 @@ class RetailAdminUserManagementController extends Controller
                 }
                 $new_trax_center_attachments->save();
             }
-
+           
             if(!empty($changedFields)) {
                 self::retail_logs(Auth::id(), $changedFields, $trax_center->id, $screen_name = 'Retail Center');
             }
