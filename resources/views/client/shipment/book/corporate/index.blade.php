@@ -99,10 +99,10 @@
                                             </select>
                                         </div>
                                         <div class="form-group">
-                                            <input type="text" name="latitude" id="pickup_latitude" class="form-control" placeholder="Latitude">
+                                            <input type="number" step="any" name="latitude" id="pickup_latitude" class="form-control" placeholder="Latitude">
                                         </div>
                                         <div class="form-group">
-                                            <input type="text" name="longitude" id="pickup_longitude" class="form-control" placeholder="Longitude">
+                                            <input type="number" step="any" name="longitude" id="pickup_longitude" class="form-control" placeholder="Longitude">
                                         </div>
                                         {{-- <div class="form-group">
                                             <select name="pickup_address" class="select2" id="pickup_address" data-rule-required="true" data-msg-required="Pickup Address is required">
@@ -156,10 +156,10 @@
                                                 <input type="email" name="new_pickup_email_address" class="form-control" placeholder="Email Address*" data-rule-required="true" data-msg-required="Email Address is required">
                                             </div>
                                             <div class="form-group">
-                                                <input type="text" name="new_pickup_latitude" class="form-control" placeholder="Latitude">
+                                                <input type="number" step="any" name="new_pickup_latitude" id="new_pickup_latitude" class="form-control" placeholder="Latitude">
                                             </div>
                                             <div class="form-group">
-                                                <input type="text" name="new_pickup_longitude" class="form-control" placeholder="Longitude">
+                                                <input type="number" step="any" name="new_pickup_longitude" id="new_pickup_longitude" class="form-control" placeholder="Longitude">
                                             </div>
                                         </div>
 
@@ -283,10 +283,10 @@
                                             <input type="email" name="consignee_email_address" class="form-control" placeholder="Email Address" data-rule-maxlength="100" data-msg-maxlength="Email Address can be maximum 100 characters">
                                         </div>
                                         <div class="form-group">
-                                            <input type="text" name="consignee_latitude" class="form-control" placeholder="Latitude">
+                                            <input type="number" step="any" name="consignee_latitude" id="consignee_latitude" class="form-control" placeholder="Latitude">
                                         </div>
                                         <div class="form-group">
-                                            <input type="text" name="consignee_longitude" class="form-control" placeholder="Longitude">
+                                            <input type="number" step="any" name="consignee_longitude" id="consignee_longitude" class="form-control" placeholder="Longitude">
                                         </div>
 
                                         <div id="self_collection_div" class="form-group text-center p-1 border border-light rounded">
@@ -2130,12 +2130,102 @@
                         // },
                         maxlength: 255,
                     },
+                    consignee_latitude: {
+                        number: true,
+                        min: -90,
+                        max: 90,
+                        // required only if longitude has value
+                        required: function () {
+                            return $.trim($('#consignee_longitude').val()) !== '';
+                        }
+                    },
+                    consignee_longitude: {
+                        number: true,
+                        min: -180,
+                        max: 180,
+                        // required only if latitude has value
+                        required: function () {
+                            return $.trim($('#consignee_latitude').val()) !== '';
+                        }
+                    },
+                    latitude: {
+                        number: true,
+                        min: -90,
+                        max: 90,
+                        // required only if longitude has value
+                        required: function () {
+                            return $.trim($('#pickup_longitude').val()) !== '';
+                        }
+                    },
+                    longitude: {
+                        number: true,
+                        min: -180,
+                        max: 180,
+                        // required only if latitude has value
+                        required: function () {
+                            return $.trim($('#pickup_latitude').val()) !== '';
+                        }
+                    },
+                    new_pickup_latitude: {
+                        number: true,
+                        min: -90,
+                        max: 90,
+                        // required only if longitude has value
+                        required: function () {
+                            return $.trim($('#new_pickup_longitude').val()) !== '';
+                        }
+                    },
+                    new_pickup_longitude: {
+                        number: true,
+                        min: -180,
+                        max: 180,
+                        // required only if latitude has value
+                        required: function () {
+                            return $.trim($('#new_pickup_latitude').val()) !== '';
+                        }
+                    }
                 },
                 messages: {
                     consignee_address: {
                         required: "Address Is Required",
                         maxlength :"Address can be maximum 255 characters",
                     },
+                    consignee_latitude: {
+                        required: "Please enter both Latitude and Longitude.",
+                        number: "Latitude must be a valid number.",
+                        min: "Latitude must be within -90 to 90 degrees.",
+                        max: "Latitude must be within -90 to 90 degrees."
+                    },
+                    consignee_longitude: {
+                        required: "Please enter both Latitude and Longitude.",
+                        number: "Longitude must be a valid number.",
+                        min: "Longitude must be within -180 to 180 degrees.",
+                        max: "Longitude must be within -180 to 180 degrees."
+                    },
+                    pickup_latitude: {
+                        required: "Please enter both Latitude and Longitude.",
+                        number: "Latitude must be a valid number.",
+                        min: "Latitude must be within -90 to 90 degrees.",
+                        max: "Latitude must be within -90 to 90 degrees."
+                    },
+                    pickup_longitude: {
+                        required: "Please enter both Latitude and Longitude.",
+                        number: "Longitude must be a valid number.",
+                        min: "Longitude must be within -180 to 180 degrees.",
+                        max: "Longitude must be within -180 to 180 degrees."
+                    },
+                    new_pickup_latitude: {
+                        required: "Please enter both Latitude and Longitude.",
+                        number: "Latitude must be a valid number.",
+                        min: "Latitude must be within -90 to 90 degrees.",
+                        max: "Latitude must be within -90 to 90 degrees."
+                    },
+                    new_pickup_longitude: {
+                        required: "Please enter both Latitude and Longitude.",
+                        number: "Longitude must be a valid number.",
+                        min: "Longitude must be within -180 to 180 degrees.",
+                        max: "Longitude must be within -180 to 180 degrees."
+                    }
                 },
                 normalizer: function(value) {
                     @if(session('user_id') == 10354)
