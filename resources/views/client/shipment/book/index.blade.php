@@ -1844,9 +1844,18 @@
 				return true;
 			}
 
+			$.validator.addMethod("latlongPair", function(value, element, otherSelector) {
+				const otherVal = $.trim($(otherSelector).val());
+				const thisVal = $.trim(value);
+
+				// valid if both blank or both filled
+				return (thisVal && otherVal) || (!thisVal && !otherVal);
+			}, "Please enter both Latitude and Longitude.");
+
 			var breakup_rows = {};
 
 			var check = @json($check);
+
 
 			$('#booking_form').validate({
 				errorClass: 'danger',
@@ -1862,93 +1871,75 @@
 						number: true,
 						min: -90,
 						max: 90,
-						// required only if longitude has value
-						required: function () {
-							return $.trim($('#consignee_longitude').val()) !== '';
-						}
+						latlongPair: "#consignee_longitude"
 					},
 					consignee_longitude: {
 						number: true,
 						min: -180,
 						max: 180,
-						// required only if latitude has value
-						required: function () {
-							return $.trim($('#consignee_latitude').val()) !== '';
-						}
+						latlongPair: "#consignee_latitude"
 					},
-					pickup_latitude: {
+					latitude: {
 						number: true,
 						min: -90,
 						max: 90,
-						// required only if longitude has value
-						required: function () {
-							return $.trim($('#pickup_latitude').val()) !== '';
-						}
+						latlongPair: "#pickup_longitude"
 					},
-					pickup_longitude: {
+					longitude: {
 						number: true,
 						min: -180,
 						max: 180,
-						// required only if latitude has value
-						required: function () {
-							return $.trim($('#pickup_longitude').val()) !== '';
-						}
+						latlongPair: "#pickup_latitude"
 					},
 					new_pickup_latitude: {
 						number: true,
 						min: -90,
 						max: 90,
-						// required only if longitude has value
-						required: function () {
-							return $.trim($('#new_pickup_latitude').val()) !== '';
-						}
+						latlongPair: "#new_pickup_longitude"
 					},
 					new_pickup_longitude: {
 						number: true,
 						min: -180,
 						max: 180,
-						// required only if latitude has value
-						required: function () {
-							return $.trim($('#new_pickup_longitude').val()) !== '';
-						}
+						latlongPair: "#new_pickup_latitude"
 					}
 				},
 				messages: {
 					consignee_latitude: {
-						required: "Please enter both Latitude and Longitude.",
 						number: "Latitude must be a valid number.",
 						min: "Latitude must be within -90 to 90 degrees.",
-						max: "Latitude must be within -90 to 90 degrees."
+						max: "Latitude must be within -90 to 90 degrees.",
+						latlongPair: "Please enter both Latitude and Longitude."
 					},
 					consignee_longitude: {
-						required: "Please enter both Latitude and Longitude.",
 						number: "Longitude must be a valid number.",
 						min: "Longitude must be within -180 to 180 degrees.",
-						max: "Longitude must be within -180 to 180 degrees."
+						max: "Longitude must be within -180 to 180 degrees.",
+						latlongPair: "Please enter both Latitude and Longitude."
 					},
 					pickup_latitude: {
-						required: "Please enter both Latitude and Longitude.",
 						number: "Latitude must be a valid number.",
 						min: "Latitude must be within -90 to 90 degrees.",
-						max: "Latitude must be within -90 to 90 degrees."
+						max: "Latitude must be within -90 to 90 degrees.",
+						latlongPair: "Please enter both Latitude and Longitude."
 					},
 					pickup_longitude: {
-						required: "Please enter both Latitude and Longitude.",
 						number: "Longitude must be a valid number.",
 						min: "Longitude must be within -180 to 180 degrees.",
-						max: "Longitude must be within -180 to 180 degrees."
+						max: "Longitude must be within -180 to 180 degrees.",
+						latlongPair: "Please enter both Latitude and Longitude."
 					},
 					new_pickup_latitude: {
-						required: "Please enter both Latitude and Longitude.",
 						number: "Latitude must be a valid number.",
 						min: "Latitude must be within -90 to 90 degrees.",
-						max: "Latitude must be within -90 to 90 degrees."
+						max: "Latitude must be within -90 to 90 degrees.",
+						latlongPair: "Please enter both Latitude and Longitude."
 					},
 					new_pickup_longitude: {
-						required: "Please enter both Latitude and Longitude.",
 						number: "Longitude must be a valid number.",
 						min: "Longitude must be within -180 to 180 degrees.",
-						max: "Longitude must be within -180 to 180 degrees."
+						max: "Longitude must be within -180 to 180 degrees.",
+						latlongPair: "Please enter both Latitude and Longitude."
 					}
 				},
 				submitHandler: function(form) {

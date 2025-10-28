@@ -2148,22 +2148,22 @@
                             return $.trim($('#consignee_latitude').val()) !== '';
                         }
                     },
-                    pickup_latitude: {
+                    latitude: {
                         number: true,
                         min: -90,
                         max: 90,
                         // required only if longitude has value
                         required: function () {
-                            return $.trim($('#pickup_latitude').val()) !== '';
+                            return $.trim($('#pickup_longitude').val()) !== '';
                         }
                     },
-                    pickup_longitude: {
+                    longitude: {
                         number: true,
                         min: -180,
                         max: 180,
                         // required only if latitude has value
                         required: function () {
-                            return $.trim($('#pickup_longitude').val()) !== '';
+                            return $.trim($('#pickup_latitude').val()) !== '';
                         }
                     },
                     new_pickup_latitude: {
@@ -2172,7 +2172,7 @@
                         max: 90,
                         // required only if longitude has value
                         required: function () {
-                            return $.trim($('#new_pickup_latitude').val()) !== '';
+                            return $.trim($('#new_pickup_longitude').val()) !== '';
                         }
                     },
                     new_pickup_longitude: {
@@ -2181,7 +2181,7 @@
                         max: 180,
                         // required only if latitude has value
                         required: function () {
-                            return $.trim($('#new_pickup_longitude').val()) !== '';
+                            return $.trim($('#new_pickup_latitude').val()) !== '';
                         }
                     }
                 },
