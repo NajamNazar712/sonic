@@ -226,7 +226,7 @@
                                                 <th class="border-primary border-darken-1">Account Number</th>
                                                 <th class="border-primary border-darken-1">Account Title</th>
                                                 <th class="border-primary border-darken-1">IBAN No.</th>
-                                                <th class="border-primary border-darken-1" colspan="2"></th>
+                                                <th class="border-primary border-darken-1"></th>
                                             </tr>
                                             </thead>
                                         </table>
@@ -710,7 +710,7 @@
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="add_bank_title">Add Bank</h4>
+                    <h4 class="modal-title" id="bankModalTitle">Add Bank</h4>
                 </div>
 
                 <form id="add_bank_form" action="{{route('cod.add.bank')}}" method="post">
@@ -718,6 +718,7 @@
                         @method('POST')
                         @csrf
                         <div class="container">
+                            <input type="hidden" id="bank_id" name="id">
 
                             <div class="row mb-2 justify-content-center">
                                 <div class="col-12">
@@ -762,6 +763,13 @@
 
                                     </div>
                                 </div>
+                                 <div class="col-12">
+                                    <div class="form-group">
+                                        <label for="blank_cheque">Upload Blank Cheque</label>
+                                        <input type="file" name="blank_cheque" id="blank_cheque" class="form-control" accept="image/*">
+                                        <small class="text-muted">Allowed types: JPG, PNG (Max 2MB)</small>
+                                    </div>
+                                 </div>   
                             </div>
                         </div>
 
@@ -1492,7 +1500,10 @@
                         className: 'btn btn-primary add_bank',
                         enabled: true,
                         action: function (e, dt, node, config) {
-
+                            console.log( $('#add_bank_form'))
+                            $('#add_bank_form')[0].reset();
+                            $('#bank_id').val('');
+                            $('#addBank').text('Save');
                             $('#AddBankModal').modal('show');
 
                             /**/
@@ -1520,27 +1531,22 @@
                     {data: 'account_title', name: 'user_bank_infos.account_title'},
                     {data: 'iban',orderable: false, name: 'user_bank_infos.iban',class:'status'},
                     {data: 'action',orderable: false, name: 'action',class:'action'},
-                    { data: 'city_id', visible: false, searchable: false },
-                    { data: 'bank_name_id', visible: false, searchable: false },
-                    { data: 'default_bank', visible: false, searchable: false }
+                    
                 ],
                 rowCallback: function(row, data, index) {
                     var info = btable.page.info();
+                    console.log(data);
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                     // Attach useful attributes for actions
-                      // attach backend IDs for later use (edit modal, etc.)
-                    $(row).attr({
-                        'id': data.bank_row_id,
-                        'city_id': data.city_id,
-                        'bank_name_id': data.bank_name_id,
-                        'bank_branch': data.bank_branch,
-                        'account_no': data.account_no,
-                        'account_title': data.account_title,
-                        'iban': data.iban
-                    });
+                    $(row).attr('bank_branch', data.bank_branch);
+                    $(row).attr('bank_name', data.bank_name);
+                    $(row).attr('account_no', data.account_no);
+                    $(row).attr('account_title', data.account_title);
+                    $(row).attr('iban', data.iban);
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
+
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
@@ -1551,7 +1557,8 @@
 
                         if ($(header).is('.serial_number') || $(header).is('.action')) {
                             $(td).appendTo($(search));
-                        } else {
+                        }
+                        else {
                             var current = $(input).appendTo($(search)).on('change', function() {
                                 column.search($(this).val(), false, false, true).draw();
                             }).wrap(td).after(icon);
@@ -1561,6 +1568,7 @@
                             }
                         }
                     });
+
                     this.api().table().columns.adjust();
                 }
             });
@@ -1568,6 +1576,7 @@
                 btable.columns.adjust().draw();
             });
             $('#bank_datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+                 var rowData = btable.row($(this).parents('tr')).data();
 
                 var id = parseInt($(this).parents('tr').attr('id'));
 
@@ -1577,15 +1586,15 @@
 
                 }
                 if ($(this).hasClass('editBank')) {
-                    $('#bank_info_id').val(id);
-                    $('#bank_select').val(id);
-                    $('#add_bank_title').val('Edited Bank Information');
-                    $('#bank_select').val($(this).parents('tr').attr('bank_name_id')).trigger('change');
+                    $('#bank_id').val(id);
+                    $('#bank_select').val(rowData.bank_name_id).trigger('change');
+                    $('#bankModalTitle').text('Edit Bank');
                     $('#branch').val($(this).parents('tr').attr('bank_branch'));
                     $('#accountno').val($(this).parents('tr').attr('account_no'));
                     $('#accounttitle').val($(this).parents('tr').attr('account_title'));
                     $('#ibanno').val($(this).parents('tr').attr('iban'));
-                    $('#bank_city').val($(this).parents('tr').attr('city_id')).trigger('change');
+                    $('#addBank').text('Update');
+                    $('#bank_city').val(rowData.city_id).trigger('change');
                     $('#AddBankModal').modal('show');
 
                 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\ChangeLogs;
 use App\DailyVisit;
 use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Controllers\Controller;
@@ -1254,9 +1255,51 @@ class ShipperDashboardController extends Controller
     }
 
     public function addBank(Request $request){
-
+        dd($request->all());
         $user_id    = session('user_id');
         if($user_id){
+            if(!empty($request->id)){
+                $userBank = UserBankInfo::find($request->id);
+                $userAttachment = UserDocumentAttachment::where('user_id',$user_id)->first();
+                if($userBank){
+                    $oldData = $userBank->only(['bank_name', 'bank_branch', 'account_no', 'account_title', 'iban_no', 'bank_city']);
+                    $userBank->bank_name = $request->bank_select;
+                    $userBank->bank_branch = $request->bank_branch;
+                    $userBank->account_no = $request->account_no;
+                    $userBank->account_title = $request->account_title;
+                    $userBank->iban_no = $request->iban_no;
+                    $userBank->bank_city = $request->bank_city;
+                    if ($userBank->isDirty()) {
+                        $userBank->save();
+                        ChangeLogs::create([
+                            'table_name' => $userBank->getTable(),
+                            'record_id' => $userBank->getKey(),
+                            'old_data' => json_encode($oldData),
+                            'new_data' => json_encode($$userBank->getChanges()),
+                            'updated_by' => 346,
+                        ]);
+                    }
+                }
+                if ($request->hasFile('blank_cheque_image') && $userAttachment) {
+                    if ($$userAttachment->blank_cheque_image != NULL) {
+                        Storage::disk('public')->delete('users_attached_documents/' . ($request->user_id ?? session('user_id')) . '/' . cc);
+                    }
+                    $filename = 'blank_cheque_image_' . ('Y-m-d') . '_' . ($user->id ?? session('user_id'))  . '.png';
+                    $file = $request->file('blank_cheque_image');
+                    Storage::disk('public')->putFileAs('users_attached_documents/' . ($user->id ?? session('user_id')) . '', $file, $filename);
+                    $userAttachment->blank_cheque_image = $filename;
+                    if ($userAttachment->isDirty()) {
+                        $userAttachment->save();
+                        ChangeLogs::create([
+                            'table_name' => $userAttachment->getTable(),
+                            'record_id' => $userAttachment->getKey(),
+                            'old_data' => json_encode($userAttachment),
+                            'new_data' => json_encode($$userAttachment->getChanges()),
+                            'updated_by' => $user_id,
+                        ]);
+                    }
+                }
+            }
             if(UserBankInfo::where('user_id',$user_id)->exists())
             {
                 UserBankInfo::where('user_id', $user_id)->update(['default_bank' => 0]);
