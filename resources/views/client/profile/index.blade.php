@@ -226,7 +226,7 @@
                                                 <th class="border-primary border-darken-1">Account Number</th>
                                                 <th class="border-primary border-darken-1">Account Title</th>
                                                 <th class="border-primary border-darken-1">IBAN No.</th>
-                                                <th class="border-primary border-darken-1"></th>
+                                                <th class="border-primary border-darken-1" colspan="2"></th>
                                             </tr>
                                             </thead>
                                         </table>
@@ -710,7 +710,7 @@
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="">Add Bank</h4>
+                    <h4 class="modal-title" id="add_bank_title">Add Bank</h4>
                 </div>
 
                 <form id="add_bank_form" action="{{route('cod.add.bank')}}" method="post">
@@ -732,23 +732,23 @@
                                 </div>
                                 <div class="col-12">
                                     <div class="form-group">
-                                        <input type="text" class="form-control" name="bank_branch" placeholder="Branch Name*" data-rule-required="true" data-msg-required="Branch Name is required">
+                                        <input type="text" class="form-control" name="bank_branch" id="branch" placeholder="Branch Name*" data-rule-required="true" data-msg-required="Branch Name is required">
                                     </div>
                                 </div>
 
                                 <div class="col-12">
                                     <div class="form-group">
-                                        <input type="text" class="form-control required" name="account_no" placeholder="Account Number*" data-rule-required="true" data-msg-required="Account No. is required">
+                                        <input type="text" class="form-control required" name="account_no" id="accountno" placeholder="Account Number*" data-rule-required="true" data-msg-required="Account No. is required">
                                     </div>
                                 </div>
                                 <div class="col-12">
                                     <div class="form-group">
-                                        <input type='text' class="form-control" name="account_title" placeholder="Account Title*" data-rule-required="true" data-msg-required="Account Title is required">
+                                        <input type='text' class="form-control" name="account_title" id="accounttitle" placeholder="Account Title*" data-rule-required="true" data-msg-required="Account Title is required">
                                     </div>
                                 </div>
                                 <div class="col-12">
                                     <div class="form-group">
-                                        <input type="text" class="form-control" placeholder="(e.g: PK37MEZN0001220100004069)" name="iban_no" data-rule-required="true" data-msg-required="IBAN is required" data-rule-maxlength="24">
+                                        <input type="text" class="form-control" placeholder="(e.g: PK37MEZN0001220100004069)" name="iban_no" id="ibanno" data-rule-required="true" data-msg-required="IBAN is required" data-rule-maxlength="24">
                                     </div>
                                 </div>
                                 <div class="col-12">
@@ -1519,16 +1519,28 @@
                     {data: 'account_no', name: 'user_bank_infos.account_no'},
                     {data: 'account_title', name: 'user_bank_infos.account_title'},
                     {data: 'iban',orderable: false, name: 'user_bank_infos.iban',class:'status'},
-                    {data: 'action',orderable: false, name: 'action',class:'action'}
+                    {data: 'action',orderable: false, name: 'action',class:'action'},
+                    { data: 'city_id', visible: false, searchable: false },
+                    { data: 'bank_name_id', visible: false, searchable: false },
+                    { data: 'default_bank', visible: false, searchable: false }
                 ],
                 rowCallback: function(row, data, index) {
                     var info = btable.page.info();
-
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                    // Attach useful attributes for actions
+                      // attach backend IDs for later use (edit modal, etc.)
+                    $(row).attr({
+                        'id': data.bank_row_id,
+                        'city_id': data.city_id,
+                        'bank_name_id': data.bank_name_id,
+                        'bank_branch': data.bank_branch,
+                        'account_no': data.account_no,
+                        'account_title': data.account_title,
+                        'iban': data.iban
+                    });
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
-
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
@@ -1539,8 +1551,7 @@
 
                         if ($(header).is('.serial_number') || $(header).is('.action')) {
                             $(td).appendTo($(search));
-                        }
-                        else {
+                        } else {
                             var current = $(input).appendTo($(search)).on('change', function() {
                                 column.search($(this).val(), false, false, true).draw();
                             }).wrap(td).after(icon);
@@ -1550,7 +1561,6 @@
                             }
                         }
                     });
-
                     this.api().table().columns.adjust();
                 }
             });
@@ -1564,6 +1574,19 @@
                 if ($(this).hasClass('default')) {
                     $('#bank_info_id').val(id);
                     $('#DefaultBankModal').modal('show');
+
+                }
+                if ($(this).hasClass('editBank')) {
+                    $('#bank_info_id').val(id);
+                    $('#bank_select').val(id);
+                    $('#add_bank_title').val('Edited Bank Information');
+                    $('#bank_select').val($(this).parents('tr').attr('bank_name_id')).trigger('change');
+                    $('#branch').val($(this).parents('tr').attr('bank_branch'));
+                    $('#accountno').val($(this).parents('tr').attr('account_no'));
+                    $('#accounttitle').val($(this).parents('tr').attr('account_title'));
+                    $('#ibanno').val($(this).parents('tr').attr('iban'));
+                    $('#bank_city').val($(this).parents('tr').attr('city_id')).trigger('change');
+                    $('#AddBankModal').modal('show');
 
                 }
 

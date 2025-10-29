@@ -1285,12 +1285,13 @@ class ShipperDashboardController extends Controller
             $join->on('wu.user_id', '=', 'user_bank_infos.user_id')
                ->where('wu.substitute_user_id', '0');
         })
-        ->select(['user_bank_infos.id as bank_row_id','user_bank_infos.bank_branch','user_bank_infos.account_no','user_bank_infos.account_title','user_bank_infos.iban','c.name as city','bl.name as bank_name','user_bank_infos.default_bank', 'wu.user_id as wallet_user'])
+        ->select(['user_bank_infos.id as bank_row_id','user_bank_infos.bank_branch','user_bank_infos.account_no','user_bank_infos.account_title','user_bank_infos.iban','c.name as city','bl.name as bank_name','user_bank_infos.default_bank', 'wu.user_id as wallet_user', 'user_bank_infos.bank_name as bank_name_id','c.id as city_id'])
         ->where('user_bank_infos.user_id', session('user_id'));
 
         return Datatables::of($banks)
         ->addColumn('action', function ($bank) {
-
+            
+            // $dropdown .= $default_button;
             if(!$bank->wallet_user) {
                 $dropdown = '
                 <div class="btn-group">
@@ -1298,10 +1299,11 @@ class ShipperDashboardController extends Controller
                     <div class="dropdown-menu dropdown-menu-sm">
                 ';
                 $default_button = '<button type="button" class="dropdown-item default"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Make Default</div></button>';
-
+                
                 if ($bank->default_bank) {
-                    $dropdown = 'Default Address';
-
+                  
+                    $default_button = '<button type="button" class="dropdown-item editBank"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit Bank</div></button>';
+                    $dropdown .= $default_button;
                 }else{
                     $dropdown .= $default_button;
                 }
@@ -1314,9 +1316,9 @@ class ShipperDashboardController extends Controller
 
                 
             } else {
+                   
                 if ($bank->default_bank) {
-                    $dropdown = 'Default Address';
-
+                    // $dropdown = 'Default Address';
                 }else{
                     $dropdown = '';
                 }
