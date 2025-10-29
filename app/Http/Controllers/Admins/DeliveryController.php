@@ -7294,7 +7294,15 @@ class DeliveryController extends Controller
             ->leftjoin('admins as ccb', 'delivery_notes.cash_collected_by', '=', 'ccb.id')
             ->leftjoin('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
-            ->leftjoin('rider_delivery_note_statuses as rdns', 'rdns.delivery_note_id', '=', 'delivery_notes.id')
+            ->leftjoin('rider_delivery_note_statuses as rdns', function ($join) {
+                $join->on('rdns.delivery_note_id', '=', 'delivery_notes.id')
+                    ->where(
+                        'rdns.id',
+                        '=',
+                        DB::raw('(select max(id) from rider_delivery_note_statuses where delivery_note_id = delivery_notes.id)')
+                    );
+            })
+
             //commenting this as it has no issue now and also it is effecting sum of actual weights
             //->leftjoin('rider_deliveries as rd', 'rd.delivery_note_id', '=', 'delivery_notes.id')
             ->leftjoin('rider_types as rt', 'rt.id', '=', 'riders.rider_type_id')
