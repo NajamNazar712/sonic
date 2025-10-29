@@ -1019,6 +1019,7 @@
                                 shipment += '<tr role="row">';
                                 shipment += '<th><strong>Date / Time</strong></th>';
                                 shipment += '<th><strong>Status</strong></th>';
+                                shipment += '<th><strong>Details</strong></th>';
                                 shipment += '<th><strong>Reason</strong></th>';
                                 shipment += '<th><strong>Remarks</strong></th>';
                                 shipment += '<th><strong>Received/Refused By</strong></th>';
@@ -1030,6 +1031,13 @@
                                     shipment += '<tr>';
                                     shipment += '<td>' + history.date_time + '</td>';
                                     shipment += '<td>' + history.status + '</td>';
+                                    shipment += '<td>' + 
+                                    (history.image_audio_location !== undefined ? history.image_audio_location : '-') + '|' + 
+                                    (history.responsible && history.responsible.length > 0 ? 
+                                        '<button class="btn btn-sm btn-outline-info align-middle responsible_person_shipment" data-shipment-id="' + id + '" data-journey_updated_at="' + history.responsible[0].journey_updated_at + '">' + 'Responsibles (' + history.responsible.length + ') </button>' :
+                                        '-'
+                                    ) +
+                                    '</td>';
                                     shipment += '<td>' + ((history.status_reason) ? history
                                         .status_reason : '') + '</td>';
                                     shipment += '<td>' + history.status_remarks + '</td>';
@@ -1165,6 +1173,10 @@
                                     {
                                         name: 'status',
                                         class: 'align-middle status'
+                                    },
+                                    {
+                                        name: 'image_audio_location',
+                                        class: 'align-middle image_audio_location'
                                     },
                                     {
                                         name: 'reason',
@@ -2556,7 +2568,10 @@
                 $('#complainant_phone').val('');
             });
 
-
+            $('#tracking').on('click', '.picture', function() {
+                var pod_image = $(this).data('link');
+                window.open(pod_image, "_blank")
+            });
             $('#tracking').on('click', '.replacement_booked_image', function() {
                 window.open($(this).data('link'), '_blank');
 
