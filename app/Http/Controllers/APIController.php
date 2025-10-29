@@ -929,15 +929,13 @@ class APIController extends Controller
 
         }
         else {
-            $rules = [
-                'pickup_address_id' => [
-                    'required',
-                    'integer',
-                    'digits_between:1,10',
-                    Rule::exists('user_shipping_infos', 'id')
-                        ->where(fn ($q) => $q->where('user_id', $user_id)->where('hidden', 0)),
-                    'origin_check', // or new OriginCheck if it's a class
-                ],
+            $rules['pickup_address_id'] = [
+                'required',
+                'integer',
+                'digits_between:1,10',
+                Rule::exists('user_shipping_infos', 'id')
+                    ->where(fn ($q) => $q->where('user_id', $user_id)->where('hidden', 0)),
+                'origin_check', // or new OriginCheck if it's a class
             ];
             $rules['pickup_address_latitude'] = ['nullable', 'numeric','between:-90,90','required_with:pickup_address_longitude'];
             $rules['pickup_address_longitude'] = ['nullable', 'numeric','between:-90,90','required_with:pickup_address_latitude'];
@@ -951,7 +949,7 @@ class APIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-
+            
             if ($request->input('amount') == 0 || $request->input('amount') === null) {
                 $amount = $request->input('amount');
                 $parcel_value = $request->input('parcel_value');
