@@ -1477,7 +1477,7 @@ class UserManagementController extends Controller
             ->join('cities', 'retail_shipper_infos.city_id', '=', 'cities.id')
             ->whereNotNull('retail_shipper_infos.retail_otp');
         if (!in_array(session('role_id'), [1, 58, 61, 56, 71, 70, 63, 104])) {
-            $retail = $retail->join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->where('ar.department_id', session('department_id'));
+//            $retail = $retail->join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->where('ar.department_id', session('department_id'));
         }
         $datatable = Datatables::of($retail);
         return $datatable->make(true);
