@@ -44,21 +44,37 @@ class InternationalWholesaleInvoiceController extends Controller
         $number_to_words = new NumberToWords();
         $number_transformer = $number_to_words->getNumberTransformer('en');
 
-        $amount_in_words = $number_transformer->toWords(floor($amount));
-
-        // Check for paisa part (decimals)
-        $decimal_part = round(($amount - floor($amount)) * 100);
-
-        if ($decimal_part > 0) {
-            $paisa_words = $number_transformer->toWords($decimal_part);
-            $amount_in_words = $amount_in_words . " And " . $paisa_words . " Paisa";
+        // Handle zero amount
+        if ($amount == 0) {
+            return "Zero Rupees";
         }
 
-        $amount_in_words = str_replace('-', ' ', $amount_in_words);
-        $amount_in_words = ucwords($amount_in_words);
+        $integer_part = floor($amount);
+        $decimal_part = round(($amount - $integer_part) * 100);
 
-        return $amount_in_words;
+        // If amount is less than 1 (e.g. 0.05, 0.5)
+        if ($integer_part == 0 && $decimal_part > 0) {
+            $paisa_words = ucwords(str_replace('-', ' ', $number_transformer->toWords($decimal_part)));
+            return $paisa_words . " Paisa";
+        }
+
+        // Convert main (rupees) part
+        $words = ucwords(str_replace('-', ' ', $number_transformer->toWords($integer_part)));
+
+        // Add "Rupees" for smaller numbers
+        if ($integer_part < 1000) {
+            $words .= " Rupees";
+        }
+
+        // Add paisa part if exists
+        if ($decimal_part > 0) {
+            $paisa_words = ucwords(str_replace('-', ' ', $number_transformer->toWords($decimal_part)));
+            $words .= " And " . $paisa_words . " Paisa";
+        }
+
+        return $words;
     }
+
     public function __construct() {
         $this->middleware('auth:admin');
 
