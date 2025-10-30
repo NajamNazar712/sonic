@@ -167,22 +167,42 @@ class AdminFinanceController extends Controller
         $sdn_log->save();
     }
 
+//    static private function amount_to_words($amount)
+//    {
+//
+//        $number_to_words = new NumberToWords();
+//        $number_transformer = $number_to_words->getNumberTransformer('en');
+//
+//        $amount_in_words = $number_transformer->toWords($amount, 'PKR');
+//
+//        $last_position = strrpos($amount_in_words, ' ');
+//
+//        if ($last_position !== FALSE) {
+//            $amount_in_words = substr_replace($amount_in_words, ' & ', $last_position, strlen(' '));
+//        }
+//
+//        $amount_in_words = str_replace('-', ' ', $amount_in_words);
+//
+//        $amount_in_words = ucwords($amount_in_words);
+//
+//        return $amount_in_words;
+//    }
     static private function amount_to_words($amount)
     {
-
         $number_to_words = new NumberToWords();
         $number_transformer = $number_to_words->getNumberTransformer('en');
 
-        $amount_in_words = $number_transformer->toWords($amount, 'PKR');
+        $amount_in_words = $number_transformer->toWords(floor($amount));
 
-        $last_position = strrpos($amount_in_words, ' ');
+        // Check for paisa part (decimals)
+        $decimal_part = round(($amount - floor($amount)) * 100);
 
-        if ($last_position !== FALSE) {
-            $amount_in_words = substr_replace($amount_in_words, ' & ', $last_position, strlen(' '));
+        if ($decimal_part > 0) {
+            $paisa_words = $number_transformer->toWords($decimal_part);
+            $amount_in_words = $amount_in_words . " And " . $paisa_words . " Paisa";
         }
 
         $amount_in_words = str_replace('-', ' ', $amount_in_words);
-
         $amount_in_words = ucwords($amount_in_words);
 
         return $amount_in_words;
