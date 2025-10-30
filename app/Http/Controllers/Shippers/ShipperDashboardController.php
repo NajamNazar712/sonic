@@ -2862,18 +2862,18 @@ class ShipperDashboardController extends Controller
 
     public function sarReport(Request $request)
     {
-        // 📅 Current date (agar user ne date select ki hai to wo)
-//        $selectedDate = $request->input('date')
-//            ? Carbon::parse($request->input('date'))->startOfDay()
-//            : Carbon::today()->startOfDay();
 
-        // 🕒 Cutoff time: 48 hours pehle ka time
+        $setting = GlobalSettings::where('type', 'rv_permanent_disable_shippers')->first();
+        $shippers = [];
+
+        if ($setting && !empty($setting->text)) {
+            $shippers = explode(',', $setting->text);
+        }
+
         $cutoffTime = Carbon::now()->subHours(48);
-
         // 🧩 Subquery: har shipment ki latest SAR (status 65) journey
         $latestJourney = DB::table('shipments_journey')
             ->select(DB::raw('MAX(id) as max_id'), 'shipment_id')
-//            ->where('shipper_status_id', 65)
             ->groupBy('shipment_id');
 
         // 🧾 Main query
@@ -2897,9 +2897,13 @@ class ShipperDashboardController extends Controller
         return DataTables::of($sarReport)
             ->addColumn('sar_date', fn($item) => Carbon::parse($item->sar_date)->format('d-M-Y'))
             ->addColumn('total_shipments', fn($item) => $item->total_shipments)
-            ->addColumn('return_confirm_date', fn($item) =>
-                Carbon::parse($item->sar_date)->addDays(2)->format('d-M-Y')
-            )
+            ->addColumn('return_confirm_date', function ($data) use ($shippers) {
+                if (in_array($data->user_id, $shippers)) {
+                    return '-';
+                }else {
+                    return  Carbon::parse($data->sar_date)->addDays(2)->format('d-M-Y');
+                }
+            })
             ->rawColumns(['sar_date', 'return_confirm_date'])
             ->make(true);
     }
