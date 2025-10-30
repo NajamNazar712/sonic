@@ -681,7 +681,8 @@ class ShipperDashboardController extends Controller
 //        END
 
 
-      return view('client.dashboard')->with(['case_nature' => $case_nature,'cities'=>$cities,'dispute_types'=>$dispute_types,'shipment_status'=>$shipment_status,'service_type'=>$service_type,'products'=>$products,'payment_status'=>$payment_status,'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_type_claims' => $case_nature_type_claims, 'business_categories' => $business_categories , 'payment_module' => $payment_module, 'merged_accounts'=> $merged_accounts]);
+        $userIdForDescription = [49110,49113,49115, 49117, 49118,49120, 49121,49122 ];
+      return view('client.dashboard')->with(['case_nature' => $case_nature,'cities'=>$cities,'dispute_types'=>$dispute_types,'shipment_status'=>$shipment_status,'service_type'=>$service_type,'products'=>$products,'payment_status'=>$payment_status,'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_type_claims' => $case_nature_type_claims, 'business_categories' => $business_categories , 'payment_module' => $payment_module, 'merged_accounts'=> $merged_accounts , 'userIdForDescription' => $userIdForDescription]);
     }
     public function orders_list(Request $request) {
 
@@ -705,6 +706,9 @@ class ShipperDashboardController extends Controller
             $to_forward = Carbon::parse($to)->addMonth()->format('Y-m-d H:i:s');
         }
 
+        $userIdForJoin = [49110,49113,49115, 49117, 49118,49120, 49121,49122 ]; // the specific user you want this for
+        $loggedInUserId = Auth::id(); // current logged-in user ID
+
         $connection = 'reports';
         $shipments = DB::connection($connection)->table('shipments')
             ->leftJoin('users as u', 'shipments.user_id', '=', 'u.id')
@@ -727,8 +731,16 @@ class ShipperDashboardController extends Controller
             ->leftJoin('business_categories as bc', 'shipments.business_category_id', '=' , 'bc.id')
             ->leftJoin('booking_channels', 'booking_channels.shipment_id', 'shipments.id')
             ->leftJoin('channels', 'channels.id','booking_channels.channel_id')
-            ->whereIn('shipments.user_id', $masp)
-            ->select(['u.id as user_id', 'u.name as user_name', 'shipments_journey.remarks as cancellation_remarks','shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.order_id','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.amount','shipments.created_at as booking_date','shipments.special_instructions as instructions','shipments.shipper_status_id', 'sps.name as payment_status','ssr.name as reason', 'shipments_journey.shipper_status_id as status_id', 'shipments.booked_by as booked_by', 'bc.name as business_category' ,'pm.mode as payment_module','shipments.tracking_number as tracking', 'channels.name as channel_name']);
+            ->whereIn('shipments.user_id', $masp);
+
+            if (in_array($loggedInUserId, $userIdForJoin )) {
+                $shipments->leftJoin('shipment_items', 'shipment_items.shipment_id', '=', 'shipments.id');
+            }
+            $shipments->select(['u.id as user_id', 'u.name as user_name', 'shipments_journey.remarks as cancellation_remarks','shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.order_id','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.amount','shipments.created_at as booking_date','shipments.special_instructions as instructions','shipments.shipper_status_id', 'sps.name as payment_status','ssr.name as reason', 'shipments_journey.shipper_status_id as status_id', 'shipments.booked_by as booked_by', 'bc.name as business_category' ,'pm.mode as payment_module','shipments.tracking_number as tracking', 'channels.name as channel_name']);
+
+            if (in_array($loggedInUserId, $userIdForJoin )) {
+                $shipments->addSelect('shipment_items.description as item_desc');
+            }
 //            ->where('shipments.user_id', session('user_id'))
 //            ->orwhereIn('shipments.user_id', session('sister_users'))
 //            ->groupBy('shipments.id');
@@ -776,6 +788,12 @@ class ShipperDashboardController extends Controller
                     return $shipments->phone1.", ".$shipments->phone2;                    
                 else
                     return $shipments->phone1." ".$shipments->phone2;
+            })
+            ->addColumn('item_description',function ($shipments) use ($loggedInUserId , $userIdForJoin){
+                if(in_array($loggedInUserId,$userIdForJoin ))
+                    return $shipments->item_desc;                    
+                else
+                    return '-';
             })
             ->editColumn('amount', function($shipment){
                 return number_format($shipment->amount);
