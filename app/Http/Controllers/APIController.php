@@ -690,9 +690,9 @@ class APIController extends Controller
                 // 'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
                 //     $query->whereNotIn('id', [3]);
                 // })],
-                'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function ($query) {
-                    $query->whereIn('id', [4]);
-                })],
+                // 'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function ($query) {
+                //     $query->whereIn('id', [4]);
+                // })],
 
                 'item_product_type_id' => ['required_if:service_type_id,1,2,5', 'integer', 'digits_between:1,10', 'exists:products,id'],
                 'item_description' => ['required_if:service_type_id,1,2,5', 'between:0,1000'],
@@ -782,9 +782,9 @@ class APIController extends Controller
                 // 'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
                 //     $query->whereNotIn('id', [3]);
                 // })],
-                'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function ($query) {
-                    $query->whereIn('id', [3]);
-                })],
+                // 'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function ($query) {
+                //     $query->whereIn('id', [3]);
+                // })],
 
                 'item_product_type_id' => ['required_if:service_type_id,1,2,5', 'integer', 'digits_between:1,10', 'exists:products,id'],
                 'item_description' => ['required_if:service_type_id,1,2,5', 'between:0,500'],
@@ -1308,14 +1308,19 @@ class APIController extends Controller
                     }
                 }
 
-                if ($request->filled('charges_mode_id')) {
-                    $charges_mode_id = $request->input('charges_mode_id');
+                // if ($request->filled('charges_mode_id')) {
+                //     $charges_mode_id = $request->input('charges_mode_id');
+                // } else {
+                //     if ($user_type['account_type_id'] == 1) {
+                //         $charges_mode_id = 4;
+                //     } else {
+                //         $charges_mode_id = 3;
+                //     }
+                // }
+                if ($user_type['account_type_id'] == 1) {
+                    $charges_mode_id = 4;
                 } else {
-                    if ($user_type['account_type_id'] == 1) {
-                        $charges_mode_id = 4;
-                    } else {
-                        $charges_mode_id = 3;
-                    }
+                    $charges_mode_id = 3;
                 }
 
                 $payment_mode_id = $request->input('payment_mode_id');
@@ -9305,9 +9310,9 @@ class APIController extends Controller
                 // 'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
                 //     $query->whereNotIn('id', [3]);
                 // })],
-                'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function ($query) {
-                    $query->whereIn('id', [4]);
-                })],
+                // 'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function ($query) {
+                //     $query->whereIn('id', [4]);
+                // })],
 
                 'item_product_type_id' => ['required_if:service_type_id,1,2,5', 'integer', 'digits_between:1,10', 'exists:products,id'],
                 'item_description' => ['required_if:service_type_id,1,2,5', 'between:0,1000'],
@@ -9397,9 +9402,9 @@ class APIController extends Controller
                 // 'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
                 //     $query->whereNotIn('id', [3]);
                 // })],
-                'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function ($query) {
-                    $query->whereIn('id', [4]);
-                })],
+                // 'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function ($query) {
+                //     $query->whereIn('id', [4]);
+                // })],
 
                 'item_product_type_id' => ['required_if:service_type_id,1,2,5', 'integer', 'digits_between:1,10', 'exists:products,id'],
                 'item_description' => ['required_if:service_type_id,1,2,5', 'between:0,1000'],
@@ -9485,9 +9490,9 @@ class APIController extends Controller
                 // 'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
                 //     $query->whereNotIn('id', [3]);
                 // })],
-                'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function ($query) {
-                    $query->whereIn('id', [3]);
-                })],
+                // 'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function ($query) {
+                //     $query->whereIn('id', [3]);
+                // })],
 
                 'item_product_type_id' => ['required_if:service_type_id,1,2,5', 'integer', 'digits_between:1,10', 'exists:products,id'],
                 'item_description' => ['required_if:service_type_id,1,2,5', 'between:0,500'],
@@ -9881,14 +9886,19 @@ class APIController extends Controller
                     }
                 }
 
-                if ($request->filled('charges_mode_id')) {
-                    $charges_mode_id = $request->input('charges_mode_id');
+                // if ($request->filled('charges_mode_id')) {
+                //     $charges_mode_id = $request->input('charges_mode_id');
+                // } else {
+                //     if ($user_type['account_type_id'] == 1) {
+                //         $charges_mode_id = 4;
+                //     } else {
+                //         $charges_mode_id = 3;
+                //     }
+                // }
+                if ($user_type['account_type_id'] == 1) {
+                    $charges_mode_id = 4;
                 } else {
-                    if ($user_type['account_type_id'] == 1) {
-                        $charges_mode_id = 4;
-                    } else {
-                        $charges_mode_id = 3;
-                    }
+                    $charges_mode_id = 3;
                 }
 
                 $payment_mode_id = $request->input('payment_mode_id');
