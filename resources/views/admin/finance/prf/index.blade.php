@@ -24,7 +24,7 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label>Invoice or Document ID</label>
-                                        <input type="text" name="invoice_id" class="form-control" placeholder="Invoice / Document ID*" data-rule-required="true" data-msg-required="Invoice ID is required">
+                                        <input type="text" name="invoice_id" class="form-control" placeholder="Invoice / Document ID*">
                                     </div>
 
                                     <div class="form-group">
@@ -53,8 +53,11 @@
 
                                     <div class="form-group">
                                         <label>Bank Account / IBAN</label>
-                                        <input type="text" name="iban" class="form-control" placeholder="IBAN*" data-rule-required="true">
+                                        <input type="text" name="iban" id="iban" class="form-control" placeholder="(e.g: PK37MEZN0001220100004069)" data-rule-maxlength="24" data-rule-maxlength-message="Max character length 24">
+                                        <span id="iban_no_error" class="danger" style="display: none;">IBAN Number must be of 24 characters</span>
+
                                     </div>
+
 
                                     <div class="form-group">
                                         <label>Amount</label>
@@ -189,7 +192,37 @@
                 'min' :1
 			});
 
+            $('#iban').inputmask({
+                mask: 'R',
+                repeat: 24,
+                greedy: false,
+                definitions: {
+                    R: {
+                        validator: '[a-zA-Z0-9]',
+                    },
+                },
+            });
 
+            $('#iban').on('input', function (e) {
+                var iban = $(this).val().replace(/\s+/g, '').toUpperCase(); // Remove white spaces and convert to uppercase
+                var defaultPrefix = 'PK';
+
+                if (!iban.startsWith(defaultPrefix)) {
+                    iban = defaultPrefix + iban.substring(defaultPrefix.length);
+                }
+
+                if (iban.length > 2 && !iban.startsWith(defaultPrefix)) {
+                    $(this).val(defaultPrefix + iban.substring(defaultPrefix.length));
+                } else {
+                    $(this).val(iban);
+                }
+
+                if (iban.length !== 24 || !iban.startsWith(defaultPrefix)) {
+                    $('#iban_no_error').show();
+                } else {
+                    $('#iban_no_error').hide();
+                }
+            });
 
 
             $('#finance_request_form').validate({
@@ -202,6 +235,15 @@
 					error.addClass('w-100').appendTo(element.parent('.form-group'));
 				},
                 submitHandler: function(form) {
+                    let iban = $('#iban').val().trim();
+                    let defaultPrefix = 'PK';
+
+                    if (iban.length !== 24 || !iban.startsWith(defaultPrefix)) {
+                        $('#iban_no_error').show();
+                        return false; // ❌ stop submission
+                    } else {
+                        $('#iban_no_error').hide();
+                    }
                     form.submit();
                 }
             });
