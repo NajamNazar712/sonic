@@ -25,4 +25,9 @@ class PaymentRequisition extends Model
         'document3',
         'document4',
     ];
+
+    protected function serializeDate(\DateTimeInterface $date)
+    {
+        return $date->format('Y-m-d H:i:s');
+    }
 }

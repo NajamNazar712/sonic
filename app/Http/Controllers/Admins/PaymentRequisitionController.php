@@ -249,13 +249,13 @@ class PaymentRequisitionController extends Controller
                     $d .= "<a href='" . asset('/uploads/payment_requisitions/'.$data->document1) . "' target='_blank'>Document 1</a><br>";
                 }
                 if ($data->document2) {
-                    $d .= "<a href='" . asset($data->document2) . "' target='_blank'>Document 2</a><br>";
+                    $d .= "<a href='" . asset('/uploads/payment_requisitions/'.$data->document2) . "' target='_blank'>Document 2</a><br>";
                 }
                 if ($data->document3) {
-                    $d .= "<a href='" . asset($data->document3) . "' target='_blank'>Document 3</a><br>";
+                    $d .= "<a href='" . asset('/uploads/payment_requisitions/'.$data->document3) . "' target='_blank'>Document 3</a><br>";
                 }
                 if ($data->document4) {
-                    $d .= "<a href='" . asset($data->document4) . "' target='_blank'>Document 4</a><br>";
+                    $d .= "<a href='" . asset('/uploads/payment_requisitions/'.$data->document4) . "' target='_blank'>Document 4</a><br>";
                 }
 
                 return $d ?: '-';
@@ -630,13 +630,13 @@ class PaymentRequisitionController extends Controller
                     $d .= "<a href='" . asset('/uploads/payment_requisitions/'.$data->document1) . "' target='_blank'>Document 1</a><br>";
                 }
                 if ($data->document2) {
-                    $d .= "<a href='" . asset($data->document2) . "' target='_blank'>Document 2</a><br>";
+                    $d .= "<a href='" . asset('/uploads/payment_requisitions/'.$data->document2) . "' target='_blank'>Document 2</a><br>";
                 }
                 if ($data->document3) {
-                    $d .= "<a href='" . asset($data->document3) . "' target='_blank'>Document 3</a><br>";
+                    $d .= "<a href='" . asset('/uploads/payment_requisitions/'.$data->document3) . "' target='_blank'>Document 3</a><br>";
                 }
                 if ($data->document4) {
-                    $d .= "<a href='" . asset($data->document4) . "' target='_blank'>Document 4</a><br>";
+                    $d .= "<a href='" . asset('/uploads/payment_requisitions/'.$data->document4) . "' target='_blank'>Document 4</a><br>";
                 }
 
                 return $d ?: '-';
