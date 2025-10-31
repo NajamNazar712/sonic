@@ -54,11 +54,15 @@
                         <th class="border-primary border-darken-1">On Account of</th>
                         <th class="border-primary border-darken-1">Invoice or Document ID</th>
                         <th class="border-primary border-darken-1">Payee or Beneficiary Name</th>
+                        <th class="border-primary border-darken-1">CNIC/NTN</th>
+                        <th class="border-primary border-darken-1">Bank Name</th>
+                        <th class="border-primary border-darken-1">Bank Title</th>
+                        <th class="border-primary border-darken-1">Bank Account/IBAN</th>
                         <th class="border-primary border-darken-1">Particular or Description</th>
                         <th class="border-primary border-darken-1">Check/Instrument No.</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <!-- <th class="border-primary border-darken-1">Status Date</th> -->
-                        <th class="border-primary border-darken-1">Documents</th>
+                        <!-- <th class="border-primary border-darken-1">Documents</th> -->
                         <th class="border-primary border-darken-1">Required Approval</th>
                         <th class="border-primary border-darken-1">Approved By</th>
                         <th class="border-primary border-darken-1">Amount</th>
@@ -251,6 +255,10 @@
                             head.push('On Account of');
                             head.push('Invoice or Document ID');
                             head.push('Payee or Beneficiary Name');
+                            head.push('CNIC/NTN');
+                            head.push('Bank Name');
+                            head.push('Bank Title');
+                            head.push('Bank Account/IBAN');
                             head.push('Particular or Description');
                             head.push('Check/Instrument No.');
                             head.push('Status');
@@ -269,6 +277,10 @@
                                 row.push(values.account_of_name); // On Account of
                                 row.push(values.invoice_no); // Invoice or Document ID
                                 row.push(values.payee_name); // Payee or Beneficiary Name
+                                row.push(values.ntn_cnic);
+                                row.push(values.bank_name);
+                                row.push(values.bank_title);
+                                row.push(values.iban);
                                 row.push(values.description); // Particular or Description
                                 row.push(values.cheque_no); // Check/Instrument No.
                                 row.push(values.status_name); // Status
@@ -544,11 +556,17 @@
                     {data: 'account_of_name', name: 'ao.name', class: 'align-middle account_of_name'},
                     {data: 'invoice_no', name: 'payment_requisitions.invoice_no', class: 'align-middle invoice_no'},
                     {data: 'payee_name', name: 'payment_requisitions.payee_name', class: 'align-middle payee_name'},
+
+                    {data: 'ntn_cnic', name: 'payment_requisitions.ntn_cnic', class: 'align-middle ntn_cnic'},
+                    {data: 'bank_name', name: 'b.name', class: 'align-middle bank_name'},
+                    {data: 'bank_title', name: 'payment_requisitions.bank_title', class: 'align-middle bank_title'},
+                    {data: 'iban', name: 'payment_requisitions.iban', class: 'align-middle iban'},
+
                     {data: 'description', name: 'payment_requisitions.description', class: 'align-middle description'},
                     {data: 'cheque_no', name: 'payment_requisitions.cheque_no', class: 'align-middle cheque_no'},
                     {data: 'status_name', name: 'status.name', class: 'align-middle status text-center status_name'},
                     // {data: 'updated_at', name: 'payment_requisitions.updated_at', class: 'align-middle status_date'},
-                    {data: 'documents', name: 'documents', class: 'align-middle documents'},
+                    // {data: 'documents', name: 'documents', class: 'align-middle documents'},
                     {data: 'required_approvals', name: 'required_approvals', class: 'align-middle required_approvals'},
                     {data: 'approved_by', name: 'approved_by', class: 'align-middle approved_by'},
                     {data: 'amount', name: 'payment_requisitions.amount', class: 'align-middle text-end amount'},

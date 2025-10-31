@@ -281,6 +281,8 @@ class PaymentRequisitionController extends Controller
                 $dropdown .='<button type="button" class="dropdown-item view_journey" data-target-id=' . $data->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1">View Journey</div></button>';
                 
                 $dropdown .='<button type="button" class="dropdown-item approval_logs" data-target-id=' . $data->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1">View Approval Logs</div></button>';
+
+                $dropdown .= '<button onclick="window.open(\'' . route('admin.finance.prf.documents', ['id' => $data->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Documents</div></button>';
                 if (session('role_id') == 1 || in_array(1048, session('permissions'))    ) {
                    $dropdown .= '<button type="button" class="dropdown-item add_cheque" data-target-id=' . $data->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Cheque No</div></button>';
                 }
@@ -669,7 +671,9 @@ class PaymentRequisitionController extends Controller
                 $dropdown .='<button type="button" class="dropdown-item view_journey" data-target-id=' . $data->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1">View Journey</div></button>';
                 
                 $dropdown .='<button type="button" class="dropdown-item approval_logs" data-target-id=' . $data->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1">View Approval Logs</div></button>';
-              
+
+                $dropdown .= '<button onclick="window.open(\'' . route('admin.finance.prf.documents', ['id' => $data->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Documents</div></button>';
+                $dropdown .= '<button onclick="window.open(\'' . route('admin.finance.prf.chat', ['id' => $data->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Chat History</div></button>';
     
                 $dropdown .= '
                     </div>
@@ -751,4 +755,43 @@ class PaymentRequisitionController extends Controller
         }
         
     }
+
+    public function viewDocuments($id)
+    {
+        $request = PaymentRequisition::find($id);
+
+        if (!$request) {
+            return redirect()->back()->with('error', 'Payment requisition not found.');
+        }
+
+        return view('admin.finance.prf.documents_view', [
+            'request' => $request,
+        ]);
+    }
+
+    public function openDocument($id, $doc)
+    {
+        $request = PaymentRequisition::find($id);
+
+        if (!$request || !in_array($doc, ['document1', 'document2', 'document3', 'document4'])) {
+            return redirect()->back()->with('error', 'Invalid document.');
+        }
+
+        $file = $request->$doc;
+
+        if (!$file) {
+            return redirect()->back()->with('error', 'Document not uploaded.');
+        }
+
+        //$path = storage_path('app/public/payment_requisitions/' . $id . '/' . $file);
+
+        $path = public_path('uploads/payment_requisitions/' . $file);
+
+        if (!file_exists($path)) {
+            return redirect()->back()->with('error', 'File not found on server.');
+        }
+
+        return response()->file($path);
+    }
+
 }

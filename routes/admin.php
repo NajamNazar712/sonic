@@ -1879,6 +1879,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('list', 'Admins\PaymentRequisitionController@get_latest_comment')->name('list'); 
                 Route::post('add', 'Admins\PaymentRequisitionController@add_comment')->name('add'); 
             });
+
+            Route::get('/documents/{id}', 'Admins\PaymentRequisitionController@viewDocuments')->name('documents');
+            Route::get('/documents/{id}/open/{doc}',  'Admins\PaymentRequisitionController@openDocument')->name('document.open');
         });
     });
 
