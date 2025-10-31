@@ -1487,7 +1487,7 @@
                         </li>
                     @endif
 
-                    <!-- @if (session('role_id') == 1  || count(array_intersect([1046, 1047, 1050], session('permissions'))) !== 0 )
+                    @if (session('role_id') == 1  || count(array_intersect([1046, 1047, 1050], session('permissions'))) !== 0 )
                         <li><a class="menu-item" href="#">Payment Requisition</a>
 
                         <ul class="menu-content">
@@ -1510,26 +1510,7 @@
                         </ul>
                     
                         </li>
-                    @endif -->
-
-                    <li><a class="menu-item" href="#">Payment Requisition</a>
-
-                        <ul class="menu-content">
-                         
-                            <li><a class="menu-item"
-                                    href="{{ route('admin.finance.prf.index') }}">Form</a>
-                            </li>
-                        
-                            <li><a class="menu-item"
-                                    href="{{ route('admin.finance.prf.list') }}">List</a>
-                            </li>
-                        
-                            <li><a class="menu-item"
-                                    href="{{ route('admin.finance.prf.completed_list') }}">Completed/Cancelled List</a>
-                            </li>
-                        </ul>
-                    
-                    </li>
+                    @endif
 
                 </ul>
 
