@@ -37,7 +37,6 @@ class PaymentRequisitionController extends Controller
         $banks = BanksList::get();
         $accounts = PettyCashAccountTitle::get();
         $departments = AdminDepartment::where('id' , '!=' , session('department_id'))->get();
-       // dd( session('department_id') );
         return view('admin.finance.prf.index')->with(['banks' => $banks, 'accounts' => $accounts, 'departments' => $departments]);
     }
 
@@ -202,8 +201,8 @@ class PaymentRequisitionController extends Controller
             'ao.name as account_of_name',
             'b.name as bank_name',
             'status.name as status_name',
-            DB::raw('GROUP_CONCAT(DISTINCT ad.name ORDER BY pra.level SEPARATOR ", ") as required_approvals'),
-            DB::raw('GROUP_CONCAT(DISTINCT appr.name ORDER BY pra.level SEPARATOR ", ") as approved_by_names')
+            DB::raw('GROUP_CONCAT( ad.name ORDER BY pra.level SEPARATOR ", ") as required_approvals'),
+            DB::raw('GROUP_CONCAT( appr.name ORDER BY pra.level SEPARATOR ", ") as approved_by_names')
         ])
         ->leftJoin('banks_lists as b', 'b.id', 'payment_requisitions.bank_id' )
         ->leftJoin('admins as u', 'u.id', 'payment_requisitions.requester_id')
@@ -222,7 +221,7 @@ class PaymentRequisitionController extends Controller
         //     }
         // })
 
-        if (!in_array(1048, $permissions) && !in_array(1049, $permissions)) {
+        if (!in_array(1048, $permissions) && !in_array(1049, $permissions) && $userRole != 1 ) {
             $query->where(function ($q) use ($approvableAllIds) {
                 $q->where('payment_requisitions.requester_id', Auth::id());
                 if (!empty($approvableAllIds)) {
@@ -240,7 +239,7 @@ class PaymentRequisitionController extends Controller
             ->addColumn('required_approvals', function ($data) {
                 return $data->required_approvals ?: '-';
             })
-             ->addColumn('approved_by', function ($data) {
+            ->addColumn('approved_by', function ($data) {
                 return $data->approved_by_names ?: '-';
             })
             ->addColumn('documents', function ($data) {
@@ -287,7 +286,7 @@ class PaymentRequisitionController extends Controller
                 }
     
 
-                if ( ( $data->requester_id == Auth::id() || (isset($approvalStatuses[$data->id]) && $approvalStatuses[$data->id] == 'active' ) )
+                if ( ( $data->requester_id == Auth::id() || (isset($approvalStatuses[$data->id]) && $approvalStatuses[$data->id] == 'active' ) || session('role_id') == 1 )
                     
                      && in_array($data->status, [1,2,3])   
                 ) {
@@ -409,12 +408,19 @@ class PaymentRequisitionController extends Controller
      */
     public function cancel(Request $request)
     {
-        $data = PaymentRequisition::find($request->id);
-        $data->status = 7;
-        $data->save();
+        $id = $request->id;
+        $remarks = $request->remarks;
 
-        $this->logJourney($data->id, Auth::id() , 7 , 'Request cancelled.!');
-        return response()->json(['status' => 1, 'message' => 'Cancelled Successfully.']);
+        $requisition = PaymentRequisition::find($id);
+        if (!$requisition) {
+            return response()->json(['status' => false, 'message' => 'Record not found.']);
+        }
+        $requisition->update([
+            'status' => 7
+        ]);
+
+        $this->logJourney($requisition->id, Auth::id() , 7 , $remarks);
+        return response()->json(['status' => 1, 'message' => 'Requisition cancelled successfully.']);
 
     }
 
@@ -430,11 +436,16 @@ class PaymentRequisitionController extends Controller
                 ->where('status', 'active')
                 ->first();
 
-            if (!$activeApproval ||
-                $activeApproval->approver_role_id != $user->role_id ||
-                $activeApproval->dept_id != session('department_id')) {
-                
+            if (!$activeApproval) {
                 continue;
+            }
+            if ($user->role_id != 1) {
+                if (
+                    $activeApproval->approver_role_id != $user->role_id ||
+                    $activeApproval->dept_id != session('department_id')
+                ) {
+                    continue;
+                }
             }
 
             $activeApproval->update([
@@ -524,36 +535,42 @@ class PaymentRequisitionController extends Controller
 
     public function complete(Request $request)
     {
-        $ids = $request->ids; // array of IDs
+        $ids = $request->ids;
 
         if (empty($ids) || !is_array($ids)) {
             return response()->json(['status' => false, 'message' => 'No requests selected.']);
         }
 
-        // Get all matching requisitions with status = 5
-        $requisitions = PaymentRequisition::whereIn('id', $ids)
-            ->where('status', 5)
-            ->get();
+        $requisitions = PaymentRequisition::whereIn('id', $ids)->get();
 
-        if ($requisitions->isEmpty()) {
-            return response()->json(['status' => false, 'message' => 'No valid requests found.']);
-        }
-
-        $completedIds = [];
+        $completed = [];
+        $skipped = [];
 
         foreach ($requisitions as $req) {
-            $req->status = 6; // e.g., Completed
-            $req->save();
+            if ($req->status == 5) {
+                $req->status = 6;
+                $req->save();
+                $completed[] = $req->id;
 
-            $completedIds[] = $req->id;
+                $this->logJourney($req->id, Auth::id(), 6, 'Marked as Completed.');
+            } else {
+                $skipped[] = $req->id;
+            }
+        }
 
-            $this->logJourney($$req->id, Auth::id() , 6, 'Marked as Completed.');
+        $message = '';
+        if (!empty($completed)) {
+            $message .= 'Completed: ' . implode(', ', $completed) . '. ';
+        }
+        if (!empty($skipped)) {
+            $message .= 'Skipped (not in valid status): ' . implode(', ', $skipped) . '.';
         }
 
         return response()->json([
-            'status' => true,
-            'message' => 'Selected requests marked as completed successfully.',
-            'completed_ids' => $completedIds
+            'status' => 1,
+            'message' => trim($message),
+            'completed_ids' => $completed,
+            'skipped_ids' => $skipped
         ]);
     }
 
@@ -584,8 +601,8 @@ class PaymentRequisitionController extends Controller
             'ao.name as account_of_name',
             'b.name as bank_name',
             'status.name as status_name',
-            DB::raw('GROUP_CONCAT(DISTINCT ad.name ORDER BY pra.level SEPARATOR ", ") as required_approvals'),
-            DB::raw('GROUP_CONCAT(DISTINCT appr.name ORDER BY pra.level SEPARATOR ", ") as approved_by_names')
+            DB::raw('GROUP_CONCAT( ad.name ORDER BY pra.level SEPARATOR ", ") as required_approvals'),
+            DB::raw('GROUP_CONCAT( appr.name ORDER BY pra.level SEPARATOR ", ") as approved_by_names')
         ])
         ->leftJoin('banks_lists as b', 'b.id', 'payment_requisitions.bank_id' )
         ->leftJoin('admins as u', 'u.id', 'payment_requisitions.requester_id')
@@ -598,7 +615,7 @@ class PaymentRequisitionController extends Controller
         ->leftJoin('admin_departments as ad', 'ad.id', '=', 'pra.dept_id')
         ->leftJoin('admins as appr', 'appr.id', '=', 'pra.approved_by');
 
-        if (!in_array(1048, $permissions) && !in_array(1049, $permissions)) {
+        if (!in_array(1048, $permissions) && !in_array(1049, $permissions) && $userRole != 1) {
             $query->where(function ($q) use ($approvableAllIds) {
                 $q->where('payment_requisitions.requester_id', Auth::id());
                 if (!empty($approvableAllIds)) {

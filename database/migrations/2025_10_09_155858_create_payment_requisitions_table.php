@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('iban');
             $table->decimal('amount', 15, 2)->default(0);
             $table->integer('account_of_id')->index(); // foreign key from accounts table
-            $table->integer('related_department_id')->index(); // foreign key from accounts table
+            $table->integer('related_department_id')->index()->nullable(); // foreign key from accounts table
             $table->integer('requester_department_id')->index(); // foreign key from departments table
             $table->text('description')->nullable();
             $table->integer('status')->nullable();
