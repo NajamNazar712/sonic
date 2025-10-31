@@ -142,6 +142,32 @@
         </div>
     </div>
 
+    <!-- Cancellation Remarks Modal -->
+    <div class="modal fade" id="cancelRemarksModal" tabindex="-1" role="dialog" aria-labelledby="cancelRemarksLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header bg-primary">
+            <h5 class="modal-title text-white" id="cancelRemarksLabel">Cancel Requisition</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span>&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="cancel_req_id">
+            <div class="form-group">
+            <label>Cancellation Remarks <span class="text-danger">*</span></label>
+            <textarea id="cancel_remarks" class="form-control" rows="3" placeholder="Enter reason for cancellation..."></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-danger" id="confirmCancelBtn">Submit</button>
+        </div>
+        </div>
+    </div>
+    </div>
+
+
 @endsection
 
 @section('css')
@@ -201,6 +227,7 @@
             
             const loggedInUserId = {{ Auth::id() }};
             const userPermissions = @json(session('permissions'));
+            const  userRoleId = {{ session('role_id') }};
 
 
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
@@ -379,7 +406,7 @@
                             table.button('.approved').disable();
                         }
                     }
-                }, @if(in_array(1049, session('permissions'))){
+                }, @if(in_array(1049, session('permissions')) || session('role_id') == 1){
 
                     text: '<i class="la la-cogs"></i> Completed/Done',
                     className: 'btn btn-primary complete',
@@ -423,12 +450,46 @@
                                             'ids': selected_rows
                                         }
                                     }).done(function(data){
-                                        if(data.status){
+                                        if (data.status) {
                                             table.rows().deselect();
                                             selected_rows = [];
                                             table.button('.complete').disable();
-                                            table.draw(true);
-                                            toastr.success(data.message, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                                            let completedList = '';
+                                            let skippedList = '';
+
+                                            if (data.completed_ids.length > 0) {
+                                                completedList = '<strong style="color:green;">Completed:</strong> ' + data.completed_ids.join(', ') + '<br>';
+                                            }
+
+                                            if (data.skipped_ids.length > 0) {
+                                                skippedList = '<strong style="color:red;">Skipped (not valid status):</strong> ' + data.skipped_ids.join(', ');
+                                            }
+
+                                            let msg = completedList + skippedList;
+                                            
+                                            swal({
+                                                title: "Process Summary",
+                                                content: {
+                                                    element: "div",
+                                                    attributes: {
+                                                        innerHTML: msg
+                                                    }
+                                                },
+                                                icon: "info",
+                                                buttons: {
+                                                    confirm: {
+                                                        text: "OK",
+                                                        value: true,
+                                                        visible: true,
+                                                        className: "btn-primary",
+                                                        closeModal: true
+                                                    }
+                                                }
+                                            }).then(function () {
+                                                // redraw after alert is closed
+                                                table.draw(true);
+                                            });
                                         }
 
                                     });
@@ -503,7 +564,7 @@
 
                     //$('td:eq(1)', row).html(index + 1 + info.page * info.length);
                     //$('td:eq(0)', row).addClass('select-checkbox');
-                     if (data.can_approve == 1 || ( userPermissions.includes(1049) && data.status == 5  ) ) {
+                     if (data.can_approve == 1 || ( userPermissions.includes(1049) && data.status == 5  ) || userRoleId == 1 ) {
                         $('td:eq(0)', row).addClass('select-checkbox');
                     } else {
                         $('td:eq(0)', row).removeClass('select-checkbox');
@@ -595,53 +656,49 @@
 
 
 
-            $('body').on('click','button.cancel_requisition',function () {
-                var id = $(this).parents('tr').attr('id');
-                if(id){
-                    swal({
-                        title: 'Are You Sure?',
-                        text: 'Select Yes to cancel.!',
-                        icon: 'warning',
-                        buttons: {
-                            cancel: {
-                                text: 'No',
-                                value: null,
-                                visible: true,
-                                closeModal: true,
-                            },
-                            confirm: {
-                                text: 'Yes',
-                                value: true,
-                                visible: true,
-                                closeModal: true
-                            }
-                        },
-                        closeOnClickOutside: false,
-                        closeOnEsc: false,
-                        dangerMode: true
-                    }).then(function (confirm) {
-                        if (confirm) {
-                            $.ajax({
-                                url: '{!! route('admin.finance.prf.cancel') !!}',
-                                method: 'POST',
-                                data: {
-                                    '_token': '{{ csrf_token() }}',
-                                    'id': id
-                                }
-                            }).done(function(data){
-                                if(data.status){
-                                    table.draw(true);
-                                    toastr.success(data.message, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+            $('body').on('click', 'button.cancel_requisition', function () {
+                var id = $(this).closest('tr').attr('id');
 
-                                }
-                            });
-                        }
+                if (id) {
+                    $('#cancel_req_id').val(id);
+                    $('#cancel_remarks').val('');
+                    $('#cancelRemarksModal').modal('show');
+                } else {
+                    toastr.error('Statement ID Not Found, Please Try again!', 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
                     });
-
-                }else{
-                    var error = 'Statement ID Not Found, Please Try again!';
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
+            });
+
+            // Handle confirm button inside modal
+            $('#confirmCancelBtn').on('click', function () {
+                var id = $('#cancel_req_id').val();
+                var remarks = $('#cancel_remarks').val().trim();
+
+                if (remarks === '') {
+                    toastr.error('Please enter cancellation remarks!', 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                    return;
+                }
+
+                $.ajax({
+                    url: '{!! route('admin.finance.prf.cancel') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'id': id,
+                        'remarks': remarks
+                    }
+                }).done(function (data) {
+                    if (data.status) {
+                        $('#cancelRemarksModal').modal('hide');
+                        table.draw(true);
+                        toastr.success(data.message, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                    }
+                });
             });
 
 
