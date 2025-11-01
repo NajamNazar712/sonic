@@ -493,13 +493,16 @@ class AdminRetailReportController extends Controller
 
     public static function retail_sales_report_by_delivery($report_type){
 
-        if($report_type == 1){
-            $from = Carbon::today()->firstOfMonth()->toDateTimeString();
-            $to = Carbon::parse($from)->addDays(9)->endOfDay()->toDateTimeString();
+        if ($report_type == 1) {
+            // 1st to 10th October
+            $from = Carbon::create(null, 10)->startOfMonth()->startOfDay()->toDateTimeString(); // Oct 1
+            $to = Carbon::create(null, 10)->startOfMonth()->addDays(9)->endOfDay()->toDateTimeString(); // Oct 10
         }
-        if($report_type == 2){
-            $from = Carbon::today()->startOfMonth()->addDays(10)->toDateTimeString();
-            $to = Carbon::parse($from)->addDays(9)->endOfDay()->toDateTimeString();
+
+        if ($report_type == 2) {
+            // 11th to 20th October
+            $from = Carbon::create(null, 10)->startOfMonth()->addDays(10)->startOfDay()->toDateTimeString(); // Oct 11
+            $to = Carbon::create(null, 10)->startOfMonth()->addDays(19)->endOfDay()->toDateTimeString(); // Oct 20
         }
         if($report_type == 3){
             $from = Carbon::today()->subMonth(1)->firstOfMonth()->addDays(20)->toDateTimeString();
