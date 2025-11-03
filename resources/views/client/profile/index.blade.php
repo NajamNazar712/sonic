@@ -713,7 +713,7 @@
                     <h4 class="modal-title" id="bankModalTitle">Add Bank</h4>
                 </div>
 
-                <form id="add_bank_form" action="{{route('cod.add.bank')}}" method="post">
+                <form id="add_bank_form" action="{{route('cod.add.bank')}}" method="post" enctype="multipart/form-data">
                     <div class="modal-body">
                         @method('POST')
                         @csrf
