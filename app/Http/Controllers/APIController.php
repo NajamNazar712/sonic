@@ -680,7 +680,7 @@ class APIController extends Controller
                 'self_collection' => ['nullable', 'boolean'],
                 'order_date' => ['nullable', 'date_format:Y-m-d'],
                 'package_type' => ['nullable', 'boolean'],
-                'special_instructions' => ['nullable', 'filled', 'between:0,190'],
+                'special_instructions' => ['nullable', 'between:0,190'],
                 'estimated_weight' => ['required', 'numeric', 'between:0.1,100000'],
 
                 'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
@@ -772,7 +772,7 @@ class APIController extends Controller
                 'consignee_email_address' => ['nullable', 'filled', 'email'],
                 'order_date' => ['nullable', 'date_format:Y-m-d'],
                 'package_type' => ['nullable', 'boolean'],
-                'special_instructions' => ['nullable', 'filled', 'between:0,190'],
+                'special_instructions' => ['nullable', 'between:0,190'],
                 'estimated_weight' => ['required', 'numeric', 'between:0.1,100000'],
 
                 'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
