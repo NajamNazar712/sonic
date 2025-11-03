@@ -449,55 +449,5 @@ class ShipperCrmApiController extends Controller
         }
         return response()->json(['status' => 1,'error'=>'No Shipments Found']);
     }
-    public function crm_comment_add(Request $request)
-    {
-        
-        $validate = Validator::make($request->all(), [
-            'messages' => ['required', 'array', 'min:1'],
-            'messages.*.crm_request_id' => ['required', 'integer', 'digits_between:1,10', 'exists:crm_requests,id'],
-            'messages.*.comment' => ['required', 'between:0,190'],
-        ]);
-       
-        if ($validate->fails()) {
-            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-        } else {
-            $rider_id =  $request->shipper_id;
-
-            foreach ($request->messages as $message) {
-                $commented_at = Carbon::createFromTimestampMs($message['commented_at'])->toDateTimeString();
-                $comment = new CrmComments();
-                $comment->crm_request_id = $message['crm_request_id'];
-                $comment->comment_by_id = $rider_id;
-                $comment->comment_by = 1;
-                $comment->comment_type = 1;
-                $comment->comment = $message['comment'];
-                $comment->created_at = date('Y-m-d h:i:s');
-                $comment->updated_at = date('Y-m-d h:i:s');
-                $comment->save();
-            }
-
-            return response()->json(['status' => 0, 'message' => 'Comment(s) Added Successfully']);
-        }
-    }
-
-    public function request_details(Request $request, $id)
-    {
-        $crm_request = CrmRequest::find($id);
-        $details = [];
-        if ($crm_request) {
-           
-          $comments = CrmComments::where('crm_request_id', $crm_request->id)
-          ->orderBy('created_at','desc')
-          ->get();
-          foreach($comments as $comment){
-                $details[] = [
-                    'crm_message' =>  strip_tags($comment->comment),
-                    'date_time' =>  Carbon::parse($comment->created_at)->format('Y-m-d h:i:s'),
-                ];
-          }
-            return response()->json(['status' => 0, 'message' => 'Success', 'crm_request' => $details]);
-        } else {
-            return redirect()->back()->with('danger', 'CRM Request Not found!');
-        }
-    }
+  
 }
