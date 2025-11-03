@@ -34,8 +34,10 @@
 
                                     <div class="form-group">
                                         <label>NTN / CNIC</label>
-                                        <input type="text" name="ntn_cnic" class="form-control" placeholder="NTN / CNIC*" data-rule-required="true">
+                                        <input type="text" name="ntn_cnic" id="ntn_cnic" class="form-control" placeholder="NTN / CNIC*" data-rule-required="true">
+                                        <span id="ntn_no_error" class="danger" style="display: none;">NTN / CNIC must be exactly 13 digits</span>
                                     </div>
+
 
                                     <div class="form-group">
                                         <label>Bank Name</label>
@@ -61,7 +63,8 @@
 
                                     <div class="form-group">
                                         <label>Amount</label>
-                                        <input type="text" name="amount" id="amount" class="form-control text-right" placeholder="Amount*" data-rule-required="true" data-rule-number="true">
+                                        <input type="text" name="amount" id="amount" class="form-control text-right" placeholder="Amount*" data-rule-required="true">
+                                        <span id="amount_no_error" class="danger" style="display:none;">Amount cannot exceed 9 digits</span>
                                     </div>
 
                                     <div class="form-group">
@@ -186,11 +189,38 @@
             });
 
             $('#amount').inputmask({
-				'alias': 'integer',
-				'allowMinus': false,
-				'allowPlus': false,
-                'min' :1
-			});
+                mask: '999999999', // exactly 9 digits
+                placeholder: '',
+                showMaskOnHover: false,
+                showMaskOnFocus: false
+            });
+
+            $('#amount').on('input', function() {
+                let amount = $(this).val().replace(/\D/g, '');
+                if (amount.length > 9) {
+                    $('#amount_no_error').show();
+                } else {
+                    $('#amount_no_error').hide();
+                }
+            });
+
+            // === NTN / CNIC (exactly 13 digits) ===
+            $('#ntn_cnic').inputmask({
+                mask: '9999999999999', // 13 digits
+                placeholder: '',
+                showMaskOnHover: false,
+                showMaskOnFocus: false
+            });
+
+            $('#ntn_cnic').on('input', function() {
+                let ntn = $(this).val().replace(/\D/g, '');
+                if (ntn.length !== 13) {
+                    $('#ntn_no_error').show();
+                } else {
+                    $('#ntn_no_error').hide();
+                }
+            });
+
 
             $('#iban').inputmask({
                 mask: 'R',
@@ -236,13 +266,30 @@
 				},
                 submitHandler: function(form) {
                     let iban = $('#iban').val().trim();
+                    let ntn = $('#ntn_cnic').val().replace(/\D/g, '');
+                    let amount = $('#amount').val().replace(/\D/g, '');
                     let defaultPrefix = 'PK';
 
                     if (iban.length !== 24 || !iban.startsWith(defaultPrefix)) {
                         $('#iban_no_error').show();
-                        return false; // ❌ stop submission
+                        return false; 
                     } else {
                         $('#iban_no_error').hide();
+                    }
+
+                     if (ntn.length !== 13) {
+                        $('#ntn_no_error').show();
+                        console.log(ntn.length)
+                        return false;
+                    } else {
+                        $('#ntn_no_error').hide();
+                    }
+
+                    if (amount.length === 0 || amount.length > 9) {
+                        $('#amount_no_error').show();
+                        return false;
+                    } else {
+                        $('#amount_no_error').hide();
                     }
                     form.submit();
                 }

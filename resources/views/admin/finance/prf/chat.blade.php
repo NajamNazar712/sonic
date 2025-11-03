@@ -128,6 +128,9 @@
                                                 </div>
                                             </section>
 
+
+                                            @if(!in_array($requisition->status, [6,7]))
+
                                             <section class="chat-app-form pb-0">
                                                 <form class="chat-app-input row" id="chat_form">
                                                     <fieldset
@@ -148,6 +151,8 @@
                                                     </div>
                                                 </form>
                                             </section>
+                                            @endif
+                                            
                                         </div>
                                     </div>
                                 </div>
