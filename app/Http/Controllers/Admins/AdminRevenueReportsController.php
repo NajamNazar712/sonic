@@ -26,18 +26,20 @@ class AdminRevenueReportsController extends Controller
     public static function revenue_report_by_delivery_date($report_type)
     {
         if($report_type == 1){
-            $from = Carbon::today()->firstOfMonth()->toDateTimeString();
+            $from = Carbon::today()->subMonth(1)->firstOfMonth()->toDateTimeString();
             $to = Carbon::parse($from)->addDays(9)->endOfDay()->toDateTimeString();
         }
         if($report_type == 2){
-            $from = Carbon::today()->startOfMonth()->addDays(10)->toDateTimeString();
+            $from = Carbon::today()->subMonth(1)->startOfMonth()->addDays(10)->toDateTimeString();
             $to = Carbon::parse($from)->addDays(9)->endOfDay()->toDateTimeString();
         }
         if($report_type == 3){
-            $from = Carbon::today()->firstOfMonth()->addDays(20)->toDateTimeString();
-            $to = Carbon::today()->endOfMonth()->toDateTimeString();
+            $from = Carbon::today()->subMonth(1)->firstOfMonth()->addDays(20)->toDateTimeString();
+            $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();
         }
+
         $from_id = DB::table('shipments_journey')->select(DB::raw('MIN(id) as id'))->where('created_at', '>=', $from)->first()->id;
+
         $to_id = DB::table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to)->first()->id;
 
         $connection = 'reports';
