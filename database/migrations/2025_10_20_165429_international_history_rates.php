@@ -14,19 +14,19 @@ return new class extends Migration
     public function up()
     {
         //
-        Schema::table('history_international_user_rates', function (Blueprint $table) {
-            // 🔁 Rename existing columns
-            $table->renameColumn('margin_1', 'margin_1a');
-            $table->renameColumn('margin_8', 'margin_8a');
-            // ➕ Add new columns  
-        });
-
-        Schema::table('history_international_user_rates', function (Blueprint $table) {
-            // ➕ Add new columns  
-            $table->decimal('margin_1b', 8, 2)->nullable()->after('margin_1a');
-            $table->decimal('margin_8b', 8, 2)->nullable()->after('margin_8a');
-            $table->decimal('margin_8c', 8, 2)->nullable()->after('margin_8b');
-        });
+//        Schema::table('history_international_user_rates', function (Blueprint $table) {
+//            // 🔁 Rename existing columns
+//            $table->renameColumn('margin_1', 'margin_1a');
+//            $table->renameColumn('margin_8', 'margin_8a');
+//            // ➕ Add new columns
+//        });
+//
+//        Schema::table('history_international_user_rates', function (Blueprint $table) {
+//            // ➕ Add new columns
+//            $table->decimal('margin_1b', 8, 2)->nullable()->after('margin_1a');
+//            $table->decimal('margin_8b', 8, 2)->nullable()->after('margin_8a');
+//            $table->decimal('margin_8c', 8, 2)->nullable()->after('margin_8b');
+//        });
     }
 
     /**
