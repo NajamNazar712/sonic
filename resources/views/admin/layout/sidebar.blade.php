@@ -2440,7 +2440,7 @@
                                                 @endif
                                                 @if (session('role_id') == 1 || in_array(1034, session('permissions')))
                                                     <li><a class="menu-item"
-                                                            href="{{ route('admin.management.cx_city_list') }}">City</a>
+                                                            href="{{ route('admin.management.cx_city_list') }}">Cx City</a>
                                                     </li>
                                                 @endif
 
