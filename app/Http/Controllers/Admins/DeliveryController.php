@@ -7294,7 +7294,15 @@ class DeliveryController extends Controller
             ->leftjoin('admins as ccb', 'delivery_notes.cash_collected_by', '=', 'ccb.id')
             ->leftjoin('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
-            ->leftjoin('rider_delivery_note_statuses as rdns', 'rdns.delivery_note_id', '=', 'delivery_notes.id')
+            ->leftjoin('rider_delivery_note_statuses as rdns', function ($join) {
+                $join->on('rdns.delivery_note_id', '=', 'delivery_notes.id')
+                    ->where(
+                        'rdns.id',
+                        '=',
+                        DB::raw('(select max(id) from rider_delivery_note_statuses where delivery_note_id = delivery_notes.id)')
+                    );
+            })
+
             //commenting this as it has no issue now and also it is effecting sum of actual weights
             //->leftjoin('rider_deliveries as rd', 'rd.delivery_note_id', '=', 'delivery_notes.id')
             ->leftjoin('rider_types as rt', 'rt.id', '=', 'riders.rider_type_id')
@@ -7345,7 +7353,7 @@ class DeliveryController extends Controller
                          as excel_general_ecom_express"),
 
                     // others: segment in (1,2) and sub_segment in (1,3,4,6,8,9,10,11)
-                    DB::raw("SUM(CASE WHEN uu.segment_id IN (1,2) AND uu.sub_segment_id IN (1,3,4,6,8,9,10,11) THEN 1 ELSE 0 END) as excel_others"),
+                    DB::raw("SUM(CASE WHEN uu.segment_id IN (1,2) AND uu.sub_segment_id IN (3,4,6,8,9,10,11) THEN 1 ELSE 0 END) as excel_others"),
 
                     // ---------- Delivered ----------
                     // delivered filter: delivery_note_shipments.status > 1 AND delivery_note_shipments.status NOT IN (8,10,11) AND shipments.shipper_status_id IN dncc
@@ -7373,7 +7381,7 @@ class DeliveryController extends Controller
                     DB::raw("
                     SUM(CASE 
                         WHEN (delivery_note_shipments.status > 1 AND delivery_note_shipments.status NOT IN (8,10,11) AND shipments.shipper_status_id IN (" . implode(',', $dnccStatuses) . "))
-                             AND uu.segment_id IN (1,2) AND uu.sub_segment_id IN (1,3,4,6,8,9,10,11)
+                             AND uu.segment_id IN (1,2) AND uu.sub_segment_id IN (3,4,6,8,9,10,11)
                         THEN 1 ELSE 0 END
                     ) as delivered_excel_others"),
                 ]);

@@ -449,10 +449,10 @@
                                     </select>
                                 </div>
                                 <div class="col-6 form-group">
-                                    <input type="text" name="latitude" id="latitude" class="form-control"  placeholder="Latitude">
+                                    <input type="number" step="any" name="latitude" id="latitude" class="form-control"  placeholder="Latitude">
                                 </div>
                                 <div class="col-6 form-group">
-                                    <input type="text" name="longitude" id="longitude" class="form-control" placeholder="Longitude">
+                                    <input type="number" step="any" name="longitude" id="longitude" class="form-control" placeholder="Longitude">
                                 </div>
                             </div>
                             <div class="row justify-content-center">
@@ -509,10 +509,10 @@
                                     </select>
                                 </div>
                                 <div class="col-6 form-group">
-                                    <input type="text" name="latitude" id="edit_latitude" class="form-control"  placeholder="Latitude">
+                                    <input type="number" step="any" name="latitude" id="edit_latitude" class="form-control"  placeholder="Latitude">
                                 </div>
                                 <div class="col-6 form-group">
-                                    <input type="text" name="longitude" id="edit_longitude" class="form-control "  placeholder="Longitude">
+                                    <input type="number" step="any" name="longitude" id="edit_longitude" class="form-control "  placeholder="Longitude">
                                 </div>
                             </div>
                             <div class="row justify-content-center">

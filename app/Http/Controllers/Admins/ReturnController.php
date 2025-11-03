@@ -3331,6 +3331,7 @@ class ReturnController extends Controller
 
 
         $deliveries = ReturnNote::leftjoin('cities AS oc', 'return_notes.hub_id', '=', 'oc.id')
+            ->leftjoin('zones as z','z.id','oc.zone_id')
             ->leftjoin('riders', 'return_notes.rider_id', '=', 'riders.id')
             ->leftjoin('city_areas as ca', 'ca.id', '=', 'riders.area_id')
             ->leftjoin('admins', 'admins.id', '=', 'return_notes.admin_id')
@@ -3348,6 +3349,7 @@ class ReturnController extends Controller
                 'return_notes.id',
                 'return_notes.id as return_note_id',
                 'oc.name as hub',
+                'z.name as zone_name',
                 'riders.name as rider',
                 'admins.name as assignee',
                 'return_notes.created_at',

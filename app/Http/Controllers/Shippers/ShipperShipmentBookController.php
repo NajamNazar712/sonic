@@ -79,6 +79,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use NumberToWords\NumberToWords;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Session;
 use SnappyPDF;
@@ -1241,6 +1242,63 @@ class ShipperShipmentBookController extends Controller
             return ['status' => 2];
         }
     }
+    static private function amount_to_words($amount)
+    {
+        $number_to_words = new NumberToWords();
+        $number_transformer = $number_to_words->getNumberTransformer('en');
+
+        // Handle zero amount
+        if ($amount == 0) {
+            return "Zero Rupees";
+        }
+
+        $integer_part = floor($amount);
+        $decimal_part = round(($amount - $integer_part) * 100);
+
+        // If amount is less than 1 (e.g. 0.05, 0.5)
+        if ($integer_part == 0 && $decimal_part > 0) {
+            $paisa_words = ucwords(str_replace('-', ' ', $number_transformer->toWords($decimal_part)));
+            return $paisa_words . " Paisa";
+        }
+
+        // Convert main (rupees) part
+        $words = ucwords(str_replace('-', ' ', $number_transformer->toWords($integer_part)));
+
+        // Add "Rupees" for smaller numbers
+        if ($integer_part < 1000) {
+            $words .= " Rupees";
+        }
+
+        // Add paisa part if exists
+        if ($decimal_part > 0) {
+            $paisa_words = ucwords(str_replace('-', ' ', $number_transformer->toWords($decimal_part)));
+            $words .= " And " . $paisa_words . " Paisa";
+        }
+
+        return $words;
+    }
+
+
+//    static private function amount_to_words($amount)
+//    {
+//
+//        $number_to_words = new NumberToWords();
+//        $number_transformer = $number_to_words->getNumberTransformer('en');
+//
+//        $amount_in_words = $number_transformer->toWords($amount, 'PKR');
+//
+//        $last_position = strrpos($amount_in_words, ' ');
+//
+//        if ($last_position !== FALSE) {
+//            $amount_in_words = substr_replace($amount_in_words, ' & ', $last_position, strlen(' '));
+//        }
+//
+//        $amount_in_words = str_replace('-', ' ', $amount_in_words);
+//
+//        $amount_in_words = ucwords($amount_in_words);
+//
+//        return $amount_in_words;
+//    }
 
     public static function air_waybill($user_type, $user_id, $ids, $body_only = FALSE, $type = NULL, $shipper_name = NULL, $shipper_phone = NULL, $print_status = NULL)
     {
@@ -2095,6 +2153,7 @@ class ShipperShipmentBookController extends Controller
                         } else {
                             $table_end .= '
                                 <td class="align-middle border twice-top twice-bottom twice-left"><strong>Rs ' . number_format($shipment->amount) . '</strong></td>
+                                <td colspan="4" class="border twice-top twice-bottom twice-left" style="height: 32px;"><strong>' . self::amount_to_words($shipment->amount) . ' Only</strong></td>
                         ';
                         }
                     }
@@ -3413,6 +3472,8 @@ class ShipperShipmentBookController extends Controller
                 'integer',
                 'pieces_check'
             ],
+            'consignee_latitude' => ['nullable','numeric','between:-90,90','required_with:consignee_longitude'],
+            'consignee_longitude' => ['nullable','numeric','between:-180,180','required_with:consignee_latitude'],
         ];
 
 
@@ -6412,6 +6473,8 @@ class ShipperShipmentBookController extends Controller
                 'integer',
                 'pieces_check'
             ],
+            'consignee_latitude' => ['nullable','numeric','between:-90,90','required_with:consignee_longitude'],
+            'consignee_longitude' => ['nullable','numeric','between:-180,180','required_with:consignee_latitude'],
         ];
         $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
         if ($ccd_booking->exists()) {
