@@ -947,7 +947,7 @@ class APIController extends Controller
         $validate->setAttributeNames($this->names);
 
         if ($validate->fails()) {
-            Log::error('Shipment Booking API', ['api' => 'shipment_booking', 'point' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+            Log::error('Shipment Booking API', ['api' => 'shipment_booking', 'point' => 1,'user_id'=>$user_id, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
             
@@ -986,7 +986,7 @@ class APIController extends Controller
                 $flag = true;
             }
             if (!$flag) {
-                Log::error('Shipment Booking API', ['api' => 'shipment_booking', 'point' => 2, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+                Log::error('Shipment Booking API', ['api' => 'shipment_booking', 'point' => 2,'user_id'=>$user_id, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
                 return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => 'Parcel value is required when collection amount is zero, and should be greater then 0']);
             }
 
