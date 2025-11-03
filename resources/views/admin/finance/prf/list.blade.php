@@ -91,7 +91,7 @@
                         {{csrf_field()}}
                         <input type="hidden" name="request_id" id="request_id" value="">
                         <div class="form-group">
-                            <input type="number" name="cheque_no" id="cheque_no" class="form-control" placeholder="Cheque No.*" data-rule-required="true" data-msg-required="Cheque no is required">
+                            <input type="text" name="cheque_no" id="cheque_no" class="form-control" placeholder="Cheque No.*" data-rule-required="true" data-msg-required="Cheque no is required">
                         </div>
                        
                         <div class="form-group">
