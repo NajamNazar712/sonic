@@ -291,11 +291,11 @@ class AdminRetailReportController extends Controller
     public static function retail_sales_report($report_type){
 
         if($report_type == 1){
-            $from = Carbon::today()->firstOfMonth()->toDateTimeString();
+            $from = Carbon::today()->subMonth(1)->firstOfMonth()->toDateTimeString();
             $to = Carbon::parse($from)->addDays(9)->endOfDay()->toDateTimeString();
         }
         if($report_type == 2){
-            $from = Carbon::today()->startOfMonth()->addDays(10)->toDateTimeString();
+            $from = Carbon::today()->subMonth(1)->startOfMonth()->addDays(10)->toDateTimeString();
             $to = Carbon::parse($from)->addDays(9)->endOfDay()->toDateTimeString();
         }
         if($report_type == 3){
@@ -494,11 +494,11 @@ class AdminRetailReportController extends Controller
     public static function retail_sales_report_by_delivery($report_type){
 
         if($report_type == 1){
-            $from = Carbon::today()->firstOfMonth()->toDateTimeString();
+            $from = Carbon::today()->subMonth(1)->firstOfMonth()->toDateTimeString();
             $to = Carbon::parse($from)->addDays(9)->endOfDay()->toDateTimeString();
         }
         if($report_type == 2){
-            $from = Carbon::today()->startOfMonth()->addDays(10)->toDateTimeString();
+            $from = Carbon::today()->subMonth(1)->startOfMonth()->addDays(10)->toDateTimeString();
             $to = Carbon::parse($from)->addDays(9)->endOfDay()->toDateTimeString();
         }
         if($report_type == 3){
