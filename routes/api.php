@@ -338,6 +338,7 @@ use Illuminate\Http\Request;
                 Route::post('retail_shipment_store_v3', 'Rider\RiderAPIController@retail_shipment_store_v3')->name('retail_shipment_store_v3');
             });
 
+            
             Route::prefix('profile')->name('profile.')->group(function () {
                 //Obsoleted
                 Route::get('index', 'Rider\RiderAPIController@get_profile')->name('index');
@@ -473,8 +474,11 @@ use Illuminate\Http\Request;
                 Route::post('retail_shipment_store', 'AdminAPIController@retail_shipment_store')->name('retail_shipment_store');
                 Route::post('retail_shipment_store_v2', 'AdminAPIController@retail_shipment_store_v2')->name('retail_shipment_store_v2');
                 Route::post('retail_shipment_store_v3', 'AdminAPIController@retail_shipment_store_v3')->name('retail_shipment_store_v3');
+                Route::post('retail_center_location', 'AdminAPIController@retail_center_location')->name('retail_center_location');
             });
-
+            Route::prefix('track')->name('track.')->group(function () {
+                Route::get('', 'AdminAPIController@shipmentTrack')->name('track');
+            });
             Route::prefix('master_cargo')->name('master_cargo.')->group(function () {
                 Route::post('list', 'AdminAPIController@master_cargo')->name('list');
                 Route::post('bags', 'AdminAPIController@cargo_bags')->name('bags');
