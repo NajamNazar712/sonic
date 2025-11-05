@@ -13049,7 +13049,7 @@ class AdminAPIController extends Controller
             $details['shipment_status'] = $shipment->status_shipper->name;
 
             $shipper = $shipment->user;
-            if($shipment->shipper_status_id ==2){
+            if($shipment->shipper_status_id == 14){
                 $etd = $shipment->pickup_city_etd;
                 list($min, $max) = explode('-', $shipment->pickup_city_etd->range);
                 $daysDifference = $shipment->getDaysDifferenceAttribute();
