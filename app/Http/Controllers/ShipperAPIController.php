@@ -2222,7 +2222,7 @@ class ShipperAPIController extends Controller
                 'ss.name as status',
                 'raass.name as call_finding_status',
                 DB::raw("COALESCE(call.remarks, '-') as remarks"),
-                "ssr.name as ticket_status_reason",
+                "ssr.name as shipment_status_reason",
                 'call.created_at as datetime' 
             )
             ->where('shipments.shipper_status_id', DB::raw(65))
