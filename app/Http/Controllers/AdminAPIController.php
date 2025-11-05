@@ -13051,17 +13051,19 @@ class AdminAPIController extends Controller
             $shipper = $shipment->user;
             if($shipment->shipper_status_id != 14){
                 $etd = $shipment->pickup_city_etd;
-                list($min, $max) = explode('-', $shipment->pickup_city_etd->range);
-                $daysDifference = $shipment->getDaysDifferenceAttribute();
-                if ($daysDifference >= (int)$min && $daysDifference <= (int)$max) {
-                    $details["etd_working_status"] = "Within ETD";
-                } elseif ($daysDifference > (int)$max) {
-                    $details["etd_working_status"] = "ETD Passed";
-                } else {
-                    $details["etd_working_status"] = "Before ETD";
+                if($etd){
+                    list($min, $max) = explode('-', $shipment->pickup_city_etd->range);
+                    $daysDifference = $shipment->getDaysDifferenceAttribute();
+                    if ($daysDifference >= (int)$min && $daysDifference <= (int)$max) {
+                        $details["etd_working_status"] = "Within ETD";
+                    } elseif ($daysDifference > (int)$max) {
+                        $details["etd_working_status"] = "ETD Passed";
+                    } else {
+                        $details["etd_working_status"] = "Before ETD";
+                    }
+                    $details['etd_working_days'] = $etd->label;
+                    $details['etd_deadline'] =  $shipment->created_at->toDateString() .' - '. $shipment->created_at->copy()->addDays((int) $max)->toDateString();
                 }
-                $details['etd_working_days'] = $etd->label;
-                $details['etd_deadline'] =  $shipment->created_at->toDateString() .' - '. $shipment->created_at->copy()->addDays((int) $max)->toDateString();
             }
             $details['crm_ticket_no'] = ($shipment?->crm_request) ? $shipment?->crm_request?->id .' ('.$shipment->crm_request?->request_status?->name .')' : '-';
             $details['crm_ticket_date'] = ($shipment?->crm_request) ? $shipment?->crm_request?->created_at->format('Y-m-d H:i:s')  : '-';
