@@ -294,7 +294,7 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'trax_id', name: 'riders.trax_id', class: 'align-middle trax_id'},
                     {data: 'city', name: 'cities.name', class: 'align-middle city'},
-                    {data: 'zone', name: 'zone', class: 'align-middle zone'},
+                    {data: 'zone', name: 'z.name', class: 'align-middle zone'},
                     {data: 'hub', name: 'c.name', class: 'align-middle hub'},
                     {data: 'rider', name: 'riders.name', class: 'align-middle name'},
                     {data: 'phone', name: 'riders.phone', class: 'align-middle phone'},
