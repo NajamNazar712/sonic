@@ -13,80 +13,60 @@
                 </h1>
 
                 <div class="card">
-                    <div class="card-content" aria-expanded="true">
+                    <div class="card-content">
                         <div class="card-body">
                             @include('admin.inc.messages')
-                                <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.sales.targets.update') }}" novalidate="novalidate">
-                                    {{ csrf_field() }}
-                                    <div class="row justify-content-center">
-                                        <div class="col-5">
-                                            <div class="col">
-                                                <div class="form-group">
-                                                    <input type="text" name="search_date_from"  class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_from" placeholder="Select Date">
-                                                </div>
-                                            </div>
-                                            <div class="col">
-                                                <div class="form-group">
-                                                    <select name="segment[]" id="segment_select" class="form-control select2" multiple data-msg-required="Segment is required" data-rule-required="true" required="required">
-                                                        @foreach($segments as $segment)
-                                                            <option value="{{$segment->id}}">{{$segment->name}}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                
-                                            </div>
-                                            <div class="col">
-                                                <div class="form-group">
-                                                    <select name="sales_person[]" id="sales_person_select" class="form-control select2" multiple="multiple" data-msg-required="Atleast one Sales Person is required" data-rule-required="true" required="required">
-                                                        @foreach($sales_person as $person)
-                                                            <option value="{{$person->id}}">{{$person->name}}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="col">
-                                                <div class="form-group">
-                                                    <div class="input-group">
-                                                        <div class="input-group-prepend">
-                                                            <span class="input-group-text">Target Shipments/Day</span>
-                                                        </div>
-                                                        <input type="text" name="target_shipment_days" id="target_shipment_days" class="form-control class" placeholder="Target Shipments/Day*" data-rule-required="true" data-msg-required="Target Shipments/Day is required" value="">
 
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col">
-                                                <div class="form-group">
-                                                    <div class="input-group">
-                                                        <div class="input-group-prepend">
-                                                            <span class="input-group-text">Target Shipments/Month</span>
-                                                        </div>
-                                                        <input type="text" name="target_shipment_month" id="target_shipment_month" class="form-control class" placeholder="Target Shipments/Month*" data-rule-required="true" data-msg-required="Target Shipments/Month is required" value="">
+                            {{-- Upload Form (top right corner) --}}
+                        <div class="card mb-2">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    @include('admin.inc.messages')
 
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col">
-                                                <div class="form-group">
-                                                    <div class="input-group">
-                                                        <div class="input-group-prepend">
-                                                            <span class="input-group-text">Average Revenue</span>
-                                                        </div>
-                                                        <input type="text" name="average_revenue" class="form-control class" placeholder="Average Revenue*" data-rule-required="true" data-msg-required="Average Revenue is required" value="">
-
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col">
-                                                <div class="form-group">
-                                                    <div class="input-group justify-content-center">
-                                                        <button type="submit" class="btn btn-primary">Update</button>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                    <form  id="settings_form" action="{{ route('admin.settings.sales.targets.upload') }}" method="POST" enctype="multipart/form-data" class="row g-3 align-items-end">
+                                        @csrf
+                                        <div class="col-md-3">
+                                            <label for="month" class="form-label fw-bold">Select Month</label>
+                                            <input type="month" 
+                                                name="month" 
+                                                class="form-control @error('month') is-invalid @enderror" 
+                                                value="{{ old('month') }}" 
+                                                required>
+                                            @error('month')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
                                         </div>
-                                    </div>
-                                </form>
+
+                                        <div class="col-md-6">
+                                            <label for="file" class="form-label fw-bold">Select Excel File</label>
+                                            <input type="file" 
+                                                name="file" 
+                                                class="form-control @error('file') is-invalid @enderror" 
+                                                required>
+                                            @error('file')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <div class="col-md-3 text-end">
+                                            <button type="submit" class="btn btn-primary mt-2">Upload</button>
+                                            <!-- Download Demo Button -->
+                                            <a href="{{ asset('uploads/demo/sales_targets_demo.xlsx') }}" class="btn btn-success mt-2 ms-2" download>
+                                                <i class="la la-download"></i> Download Excel Demo
+                                            </a>
+                                        </div>
+                                    </form>
+                                    
+                                </div>
+                            </div>
+                        </div>
+
+                            {{-- Filters Form --}}
+                            <div class="row g-3 align-items-center mb-2">
+                               
+                            </div>
+
+                           
                         </div>
                     </div>
                 </div>
@@ -94,12 +74,58 @@
                 <div class="card">
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
-                    
+                            <div class="row justify-content-center mb-2">
+                                    <div class="col-md-3">
+                                            <label>Start Date</label>
+                                            <div class="form-group input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                    <span class="la la-calendar-o small-calender-icon"></span>
+                                                </span>
+                                            </div>
+                                            <input type="text" name="search_date_from" class="form-control bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)"  data-value="{{ \Carbon\Carbon::now() }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label>End Date</label>
+                                        <div class="form-group input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                    <span class="la la-calendar-o small-calender-icon"></span>
+                                                </span>
+                                            </div>
+                                            <input type="text" name="search_date_to" class="form-control bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)" data-value="{{ \Carbon\Carbon::now() }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label>Sub Segment</label>
+                                            <select name="segment[]" id="segment_filter" class="form-control select2" multiple data-msg-required="Segment is required" data-rule-required="true" required="required">
+                                                @foreach($segments as $segment)
+                                                    <option value="{{$segment->id}}">{{$segment->name}}</option>
+                                                @endforeach
+                                            </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label>Sale Persons</label>
+                                             <select name="sales_person[]" id="sales_person_select" class="form-control select2" multiple="multiple" data-msg-required="Atleast one Sales Person is required" data-rule-required="true" required="required">
+                                                @foreach($sales_person as $person)
+                                                    <option value="{{$person->id}}">{{$person->name}}</option>
+                                                @endforeach
+                                            </select>
+                                    </div>
+                                 <!-- Button in a new row below -->
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col mb-1 text-center">
+                                    <button type="button" id="search_filter_btn" class="btn btn-outline-primary w-25">
+                                        <i class="la la-search"></i> Search
+                                    </button>
+                                </div>
+                            </div>
                             <div class="row justify-content-center">
                                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                     <thead>
                                     <tr role="row" class="bg-primary white">
-                                        <th class="border-primary border-darken-1"></th>
                                         <th class="border-primary border-darken-1">S. No.</th>
                                         <th class="border-primary border-darken-1">Sales Person</th>
                                         <th class="border-primary border-darken-1">Segment</th>
@@ -110,6 +136,12 @@
                                         <th class="border-primary border-darken-1">Target Shipments/Month</th>
                                         <th class="border-primary border-darken-1">Revenue Target/Month</th>
                                         <th class="border-primary border-darken-1">Average Revenue</th>
+                                        <th  class="border-primary border-darken-1">Achieved Shipments/Day</th>
+                                        <th class="border-primary border-darken-1">Achieved Revenue/Day</th>
+                                        <th class="border-primary border-darken-1">Achieved Shipments/Month</th>
+                                        <th class="border-primary border-darken-1">Achieved Revenue/Month</th>
+                                        <th class="border-primary border-darken-1">Achieved RPS</th>
+                                        <th class="border-primary border-darken-1">Achieved RPK</th>
                                     </tr>
                                     </thead>
                                 </table>
@@ -162,7 +194,36 @@
             }
             }
         });
-
+        var search_date_to = $('#search_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                }
+            });
+        $('#settings_form').validate({
+            errorClass: 'is-invalid',       // changed from 'danger'
+            successClass: 'is-valid',       // optional, for valid fields
+            errorPlacement: function(error, element) {
+                // Append the error message directly after the input
+                error.addClass('invalid-feedback'); // Bootstrap class for error text
+                element.closest('div').append(error);
+            },
+            highlight: function(element) {
+                $(element).addClass('is-invalid').removeClass('is-valid');
+            },
+            unhighlight: function(element) {
+                $(element).removeClass('is-invalid').addClass('is-valid');
+            }
+        });
+        $('#search_filter_btn').on('click',function () {
+                table.draw();
+        });
         $('#target_shipment_days').on('change', function() {
             var days = $(this).val();
             $('#target_shipment_month').val(daysInMonth * days); // Use daysInMonth here
@@ -175,7 +236,7 @@
             //     placeholder:'Select Segment',
             //     width:'100%'
             // });
-            $('#segment_select').select2({
+            $('#segment_filter').select2({
                 placeholder:'Select Segment',
                 width:'100%'
             });
@@ -200,11 +261,13 @@
                 if ( this.context.length ) {
                     body = [];
                     var params = table.ajax.params();
+                    params._token = '{{ csrf_token() }}'; 
                     params.start = 0;
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.settings.sales.targets.list') }}',
+                         method: 'POST',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -219,7 +282,12 @@
                             head.push('Target Shipments/Month');
                             head.push('Revenue Shipments/Month');
                             head.push('Average Revenue');
-
+                            head.push('Achieved Shipments/Day');
+                            head.push('Achieved Revenue/Day');
+                            head.push('Achieved Shipments/Month');
+                            head.push('Achieved Revenue/Month');
+                            head.push('Achieved RPS');
+                            head.push('Achieved RPK');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -233,7 +301,12 @@
                                 row.push(values.target_month);
                                 row.push(values.per_month_revenue_target);
                                 row.push(values.average_revenue);
-
+                                row.push(values.achieved_shipments_day || 0);
+                                row.push(values.achieved_revenue_day || 0);
+                                row.push(values.achieved_shipments_month || 0);
+                                row.push(values.achieved_revenue_month || 0);
+                                row.push(values.achieved_rps || 0);
+                                row.push(values.achieved_rpk || 0);
                                 body.push(row);
                             });
                         },
@@ -249,66 +322,66 @@
                 buttons: [
                     @if ((in_array(790, session('permissions'))) || session('role_id') == 1 )
 
-                    {
-                        text: 'Delete',
-                        className: 'btn btn-primary delete_sale_person',
-                        enabled:false,
-                        action: function (e, dt, node, config) {
-                            if(selected_rows != ''){
+                    // {
+                    //     text: 'Delete',
+                    //     className: 'btn btn-primary delete_sale_person',
+                    //     enabled:false,
+                    //     action: function (e, dt, node, config) {
+                    //         if(selected_rows != ''){
 
-                                swal({
-                                    text: 'Are you sure, you want to Delete?',
-                                    icon: 'info',
-                                    buttons: {
-                                        cancel: {
-                                            text: 'No',
-                                            value: null,
-                                            visible: true,
-                                            closeModal: true,
-                                        },
-                                        confirm: {
-                                            text: 'Yes',
-                                            value: true,
-                                            visible: true,
-                                            closeModal: true
-                                        }
-                                    },
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false,
-                                    dangerMode: true
-                                }).then(function(confirm) {
-                                    if (confirm) {
+                    //             swal({
+                    //                 text: 'Are you sure, you want to Delete?',
+                    //                 icon: 'info',
+                    //                 buttons: {
+                    //                     cancel: {
+                    //                         text: 'No',
+                    //                         value: null,
+                    //                         visible: true,
+                    //                         closeModal: true,
+                    //                     },
+                    //                     confirm: {
+                    //                         text: 'Yes',
+                    //                         value: true,
+                    //                         visible: true,
+                    //                         closeModal: true
+                    //                     }
+                    //                 },
+                    //                 closeOnClickOutside: false,
+                    //                 closeOnEsc: false,
+                    //                 dangerMode: true
+                    //             }).then(function(confirm) {
+                    //                 if (confirm) {
 
-                                        $.ajax({
-                                            url: '{!! route('admin.settings.sales.targets.delete') !!}',
-                                            method: 'POST',
-                                            data: {
-                                                'sale_person_ids[]': selected_rows,
-                                                '_token': '{{ csrf_token() }}'
-                                            }
-                                        })
-                                        .done(function (data) {
-                                            if (data.status === 0) {
-                                                toastr.error(data.error, 'Error!', {
-                                                    positionClass: 'toast-top-center',
-                                                    containerId: 'toast-top-center'
-                                                });
-                                            }
-                                            selected_rows = [];
-                                            table.rows().deselect();
-                                            table.draw(true);
-                                            table.button('.delete_sale_person').disable();
+                    //                     $.ajax({
+                    //                         url: '{!! route('admin.settings.sales.targets.delete') !!}',
+                    //                         method: 'POST',
+                    //                         data: {
+                    //                             'sale_person_ids[]': selected_rows,
+                    //                             '_token': '{{ csrf_token() }}'
+                    //                         }
+                    //                     })
+                    //                     .done(function (data) {
+                    //                         if (data.status === 0) {
+                    //                             toastr.error(data.error, 'Error!', {
+                    //                                 positionClass: 'toast-top-center',
+                    //                                 containerId: 'toast-top-center'
+                    //                             });
+                    //                         }
+                    //                         selected_rows = [];
+                    //                         table.rows().deselect();
+                    //                         table.draw(true);
+                    //                         table.button('.delete_sale_person').disable();
 
-                                        });
-                                    }
-                                });
+                    //                     });
+                    //                 }
+                    //             });
 
-                            }else{
-                                var error = "Not selected any Sale Person!";
-                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                            }
-                        }
-                    },
+                    //         }else{
+                    //             var error = "Not selected any Sale Person!";
+                    //             toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    //         }
+                    //     }
+                    // },
 
                     @endif
                     {
@@ -335,10 +408,22 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
-                ajax: '{{ route('admin.settings.sales.targets.list') }}',
+                 ajax: {
+                    url: '{{ route('admin.settings.sales.targets.list') }}',
+                    method: 'POST',
+                    headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                     data: function (d) {
+                        d.start_date   = $('#start_date_filter').val();
+                        d.end_date     = $('#end_date_filter').val();
+                        d.month        = $('#month_filter').val();
+                        d.sales_person = $('#sales_person_select').val();
+                        d.segments     = $('#segment_filter').val();
+                    }
+                },
                 order: [[1, 'desc']],
                 columns: [
-                    {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'sales_person', name:'a.name', class: 'align-middle sales_person'},
                     {data: 'segments', name:'segments', class: 'align-middle segment'},
@@ -348,15 +433,20 @@
                     {data: 'per_day_revenue_target', name: 'per_day_revenue_target', class: 'align-middle per_day_revenue_target'},
                     {data: 'target_month', name: 'sale_person_targets.target_month', class: 'align-middle target_month'},
                     {data: 'per_month_revenue_target', name: 'per_month_revenue_target', class: 'align-middle per_month_revenue_target'},
-                    {data: 'average_revenue', name: 'sale_person_targets.average_revenue', class: 'align-middle average_revenue'},
+                    {data: 'achieved_shipments_day', name: 'sale_person_targets.achieved_shipments_day', class: 'align-middle achieved_shipments_day'},
+                    {data: 'achieved_revenue_day', name: 'sale_person_targets.achieved_revenue_day', class: 'align-middle achieved_revenue_day'},
+                    {data: 'achieved_shipments_month', name: 'sale_person_targets.achieved_shipments_month', class: 'align-middle achieved_shipments_month'},
+                    {data: 'achieved_revenue_month', name: 'sale_person_targets.achieved_revenue_month', class: 'align-middle achieved_revenue_month'},
+                    {data: 'achieved_rps', name: 'sale_person_targets.achieved_rps', class: 'align-middle achieved_rps'},
+                    {data: 'achieved_rpk', name: 'sale_person_targets.achieved_rpk', class: 'align-middle achieved_rpk'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
 
-                    $('td:eq(1)', row).html(index + 1 + info.page * info.length);
-                    if ($.inArray(data.id, selected_rows) !== -1) {
-                        table.row(row).select();
-                    }
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                    // if ($.inArray(data.id, selected_rows) !== -1) {
+                    //     table.row(row).select();
+                    // }
 
                 },
                 initComplete: function() {

@@ -182,7 +182,7 @@ use App\Http\Models\BusinessCategory;
 use App\Http\Models\InternationalDhlZone;
 use App\Models\ParentProduct;
 use App\Models\ParentProductTaxLog;
-
+use App\Models\SalespersonTargetSegment;
 
 class GlobalSettingsController extends Controller
 {
@@ -2529,10 +2529,230 @@ class GlobalSettingsController extends Controller
         return $datatable->make(true);
     }
 
+    public function upload(Request $request)
+    {
+        $request->validate([
+            'file'  => 'required|file|mimes:xlsx,xls',
+            'month' => ['required', 'regex:/^\d{4}-(0[1-9]|1[0-2])$/'], // YYYY-MM
+        ], [
+            'month.regex' => 'The month must be in YYYY-MM format.'
+        ]);
+
+        $file  = $request->file('file');
+        $month = $request->month;
+
+        // Load spreadsheet
+        $spreadsheet = IOFactory::load($file->getRealPath());
+        $sheet = $spreadsheet->getActiveSheet();
+        $rows = $sheet->toArray();
+
+        // Required headers
+        $requiredHeaders = [
+            'SalesTraxID',
+            'COD',
+            'COD Revenue',
+            'COD Shipments',
+            'COD RPS',
+            'COD RPK',
+            'Logistics',
+            'Logistics Revenue',
+            'Logistics Shipments',
+            'Logistics RPS',
+            'Logistics RPK',
+            'Express',
+            'Express Revenue',
+            'Express Shipments',
+            'Express RPS',
+            'Express RPK',
+            'Internatinal',          // Note: spelling must match Excel exactly
+            'Internatinal Revenue',
+            'Internatinal RPK',
+            'Internatinal RPS',
+        ];
+        $header = $rows[0] ?? [];
+        foreach ($requiredHeaders as $key => $value) {
+            if (!isset($header[$key]) || trim($header[$key]) != $value) {
+                return back()->with('error', "Invalid Excel header: expected '{$value}' at column " . ($key + 1));
+            }
+        }
+
+        // Month -> start_date & end_date
+        $startDate = Carbon::createFromFormat('Y-m', $month)->startOfMonth()->toDateString();
+        $endDate   = Carbon::createFromFormat('Y-m', $month)->endOfMonth()->toDateString();
+
+        // Skip header
+        unset($rows[0]);
+
+        DB::beginTransaction();
+        try {
+            foreach ($rows as $row) {
+                if (empty($row[0])) continue; // skip empty rows
+
+                $salesTraxId = trim($row[0]);
+                $salesperson = Admin::where('trax_id', $salesTraxId)->first();
+                if (!$salesperson) continue;
+
+                // after $salesTraxId and $salesperson lookup
+                // --- COD
+                $codFlag           = (int)$row[1];
+                $codRevenue        = (float)$row[2];
+                $codShipments      = (int)$row[3];
+                $codRps            = (float)$row[4];
+                $codRpk            = (float)$row[5];
+
+                // --- Logistics
+                $logisticsFlag      = (int)$row[6];
+                $logisticsRevenue   = (float)$row[7];
+                $logisticsShipments = (int)$row[8];
+                $logisticsRps       = (float)$row[9];
+                $logisticsRpk       = (float)$row[10];
+
+                // --- Express (no explicit flag column in your header)
+                $expressFlag    = (float)$row[11];
+                $expressRevenue    = (float)$row[12];
+                $expressShipments  = (int)$row[13];
+                $expressRps        = (float)$row[14];
+                $expressRpk        = (float)$row[15];
+                // treat express as present if revenue or shipments > 0
+
+                // --- International (your header has a flag at col 15)
+                $intlFlag    = (int)$row[16];
+                $intlRevenue = (float)$row[17];
+                $intlRpk     = (float)$row[18];
+                $intlRps     = (float)$row[19];
+                // NOTE: your template does not include "Intl Shipments" column,
+                // so we'll set target_shipments_month => 0 for International.
+                // If you have Intl Shipments, add that column and map it here.
+
+                // segment map (keep as-is)
+                $segmentMap = [
+                    'COD'           => 5,
+                    'Logistics'     => 6,
+                    'Express'       => 7,
+                    'International' => 4,
+                ];
+
+                $segmentsToInsert = [];
+
+                // COD
+                if ($codFlag === 1) {
+                    $segmentsToInsert[] = [
+                        'segment_id'              => $segmentMap['COD'],
+                        'target_shipments_month'  => $codShipments,
+                        'revenue_target_month'    => $codRevenue,
+                        'avg_rps'                 => $codRps,
+                        'avg_rpk'                 => $codRpk,
+                    ];
+                }
+
+                // Logistics
+                if ($logisticsFlag === 1) {
+                    $segmentsToInsert[] = [
+                        'segment_id'              => $segmentMap['Logistics'],
+                        'target_shipments_month'  => $logisticsShipments,
+                        'revenue_target_month'    => $logisticsRevenue,
+                        'avg_rps'                 => $logisticsRps,
+                        'avg_rpk'                 => $logisticsRpk,
+                    ];
+                }
+                // Express (no flag column — use computed $expressFlag)
+                if ($expressFlag === 1) {
+                    $segmentsToInsert[] = [
+                        'segment_id'              => $segmentMap['Express'],
+                        'target_shipments_month'  => $expressShipments,
+                        'revenue_target_month'    => $expressRevenue,
+                        'avg_rps'                 => $expressRps,
+                        'avg_rpk'                 => $expressRpk,
+                    ];
+                }
+
+                // International
+                if ($intlFlag === 1) {
+                    $segmentsToInsert[] = [
+                        'segment_id'              => $segmentMap['International'],
+                        'target_shipments_month'  => 0,           // no Intl Shipments in template
+                        'revenue_target_month'    => $intlRevenue,
+                        'avg_rps'                 => $intlRps,
+                        'avg_rpk'                 => $intlRpk,
+                    ];
+                }
+                // Insert into DB
+                foreach ($segmentsToInsert as $data) {
+                    SalespersonTargetSegment::updateOrCreate(
+                        [
+                            'salesperson_id' => $salesperson->id,
+                            'segment_id'     => $data['segment_id']
+                        ],
+                        [
+                            'is_active'               => 1,
+                            'target_shipments_day'    => 0, // default or calculate
+                            'revenue_target_day'      => 0, // default or calculate
+                            'start_date'              => $startDate,  
+                            'end_date'                => $endDate,  
+                            'target_shipments_month'  => $data['target_shipments_month'],
+                            'revenue_target_month'    => $data['revenue_target_month'],
+                            'avg_rps'                 => $data['avg_rps'],
+                            'avg_rpk'                 => $data['avg_rpk'],
+                        ]
+                    );
+                }
+            }
+
+            DB::commit();
+            return back()->with('success', 'Sales targets uploaded successfully.');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return back()->with('error', 'Upload failed: ' . $th->getMessage());
+        }
+    }
     public function sales_person_targets_history()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 51);
         return view('admin.settings.sales_person.history');
+    }
+
+    public function sales_person_targets_segment_list(Request $request)
+    {
+
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 110);
+        }
+        $query = SalespersonTargetSegment::join('admins as a', 'a.id', '=', 'salesperson_target_segments.salesperson_id')
+            ->leftJoin('sub_category_segments as spts', 'spts.id', '=', 'salesperson_target_segments.segment_id')
+            ->select(
+                'salesperson_target_segments.id',
+                'salesperson_target_segments.start_date',
+                'salesperson_target_segments.end_date',
+                'a.name as sales_person',
+                'salesperson_target_segments.target_shipments_day as target_days',
+                'salesperson_target_segments.target_shipments_month as target_month',
+                'salesperson_target_segments.avg_rps as average_revenue',
+                'salesperson_target_segments.achieved_shipments_day',
+                'salesperson_target_segments.achieved_revenue_day',
+                'salesperson_target_segments.achieved_shipments_month',
+                'salesperson_target_segments.achieved_revenue_month',
+                'salesperson_target_segments.achieved_rps',
+            'salesperson_target_segments.achieved_rpk',
+                'spts.name as segments',
+                DB::raw('(salesperson_target_segments.target_shipments_day * salesperson_target_segments.avg_rps) as per_day_revenue_target'),
+                DB::raw('(salesperson_target_segments.target_shipments_month * salesperson_target_segments.avg_rps) as per_month_revenue_target')
+            )
+            ->where('a.status', 1);
+
+        // 🔍 Apply filters dynamically
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $query->whereBetween('salesperson_target_segments.start_date', [$request->start_date, $request->end_date]);
+        }
+
+        if ($request->filled('sales_person')) {
+            $query->whereIn('salesperson_target_segments.salesperson_id', $request->sales_person);
+        }
+
+        if ($request->filled('segments')) {
+            $query->whereIn('salesperson_target_segments.segment_id', $request->segments);
+        }
+        $datatable = Datatables::of($query);
+        return $datatable->make(true);
     }
 
     public function sales_person_targets_history_list(Request $request)
