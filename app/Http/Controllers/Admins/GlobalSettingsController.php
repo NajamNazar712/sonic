@@ -183,6 +183,7 @@ use App\Http\Models\InternationalDhlZone;
 use App\Models\ParentProduct;
 use App\Models\ParentProductTaxLog;
 use App\Models\SalespersonTargetSegment;
+use Carbon\CarbonPeriod;
 
 class GlobalSettingsController extends Controller
 {
@@ -2566,8 +2567,9 @@ class GlobalSettingsController extends Controller
             'Express RPK',
             'Internatinal',          // Note: spelling must match Excel exactly
             'Internatinal Revenue',
-            'Internatinal RPK',
+            'Internatinal Shipments',
             'Internatinal RPS',
+            'Internatinal RPK',
         ];
         $header = $rows[0] ?? [];
         foreach ($requiredHeaders as $key => $value) {
@@ -2579,11 +2581,14 @@ class GlobalSettingsController extends Controller
         // Month -> start_date & end_date
         $startDate = Carbon::createFromFormat('Y-m', $month)->startOfMonth()->toDateString();
         $endDate   = Carbon::createFromFormat('Y-m', $month)->endOfMonth()->toDateString();
+        $period = CarbonPeriod::create($startDate, $endDate);
+        $workingDays = collect($period)->filter(fn($date) => $date->dayOfWeek !== Carbon::SUNDAY)->count();
 
         // Skip header
         unset($rows[0]);
 
         DB::beginTransaction();
+        
         try {
             foreach ($rows as $row) {
                 if (empty($row[0])) continue; // skip empty rows
@@ -2618,8 +2623,9 @@ class GlobalSettingsController extends Controller
                 // --- International (your header has a flag at col 15)
                 $intlFlag    = (int)$row[16];
                 $intlRevenue = (float)$row[17];
-                $intlRpk     = (float)$row[18];
+                $intlShipments = (float)$row[18];
                 $intlRps     = (float)$row[19];
+                $intlRpk     = (float)$row[20];
                 // NOTE: your template does not include "Intl Shipments" column,
                 // so we'll set target_shipments_month => 0 for International.
                 // If you have Intl Shipments, add that column and map it here.
@@ -2640,6 +2646,8 @@ class GlobalSettingsController extends Controller
                         'segment_id'              => $segmentMap['COD'],
                         'target_shipments_month'  => $codShipments,
                         'revenue_target_month'    => $codRevenue,
+                        'target_shipments_day'   => $workingDays > 0 ? round($codShipments / $workingDays) : 0,
+                        'revenue_target_day'     => $workingDays > 0 ? round($codRevenue / $workingDays, 2) : 0,
                         'avg_rps'                 => $codRps,
                         'avg_rpk'                 => $codRpk,
                     ];
@@ -2651,16 +2659,20 @@ class GlobalSettingsController extends Controller
                         'segment_id'              => $segmentMap['Logistics'],
                         'target_shipments_month'  => $logisticsShipments,
                         'revenue_target_month'    => $logisticsRevenue,
+                        'target_shipments_day'   => $workingDays > 0 ? round($logisticsShipments / $workingDays) : 0,
+                        'revenue_target_day'     => $workingDays > 0 ? round($logisticsRevenue / $workingDays, 2) : 0,
                         'avg_rps'                 => $logisticsRps,
                         'avg_rpk'                 => $logisticsRpk,
                     ];
                 }
                 // Express (no flag column — use computed $expressFlag)
-                if ($expressFlag === 1) {
+                if ($expressFlag !== 0) {
                     $segmentsToInsert[] = [
                         'segment_id'              => $segmentMap['Express'],
                         'target_shipments_month'  => $expressShipments,
                         'revenue_target_month'    => $expressRevenue,
+                        'target_shipments_day'   => $workingDays > 0 ? round($expressRevenue / $workingDays) : 0,
+                        'revenue_target_day'     => $workingDays > 0 ? round($expressRevenue / $workingDays, 2) : 0,
                         'avg_rps'                 => $expressRps,
                         'avg_rpk'                 => $expressRpk,
                     ];
@@ -2672,21 +2684,28 @@ class GlobalSettingsController extends Controller
                         'segment_id'              => $segmentMap['International'],
                         'target_shipments_month'  => 0,           // no Intl Shipments in template
                         'revenue_target_month'    => $intlRevenue,
-                        'avg_rps'                 => $intlRps,
-                        'avg_rpk'                 => $intlRpk,
+                        'target_shipments_month'  => $intlShipments,
+                        'revenue_target_month'    => $intlRevenue,
+                        'target_shipments_day'   => $workingDays > 0 ? round($intlShipments / $workingDays) : 0,
+                        'revenue_target_day'     => $workingDays > 0 ? round($intlRevenue / $workingDays, 2) : 0,
+                        'avg_rps'                 => $intlRpk,
+                        'avg_rpk'                 => $intlRps,
                     ];
                 }
                 // Insert into DB
+                error_log('data'.print_r($segmentsToInsert,true));
                 foreach ($segmentsToInsert as $data) {
                     SalespersonTargetSegment::updateOrCreate(
                         [
                             'salesperson_id' => $salesperson->id,
-                            'segment_id'     => $data['segment_id']
+                            'segment_id'     => $data['segment_id'],
+                            'start_date'     => $startDate,
+                            'end_date'       => $endDate,
                         ],
                         [
                             'is_active'               => 1,
-                            'target_shipments_day'    => 0, // default or calculate
-                            'revenue_target_day'      => 0, // default or calculate
+                            'target_shipments_day'    => $data['target_shipments_day'], // default or calculate
+                            'revenue_target_day'      => $data['revenue_target_day'], // default or calculate
                             'start_date'              => $startDate,  
                             'end_date'                => $endDate,  
                             'target_shipments_month'  => $data['target_shipments_month'],
@@ -2724,20 +2743,19 @@ class GlobalSettingsController extends Controller
                 'salesperson_target_segments.start_date',
                 'salesperson_target_segments.end_date',
                 'a.name as sales_person',
-                'salesperson_target_segments.target_shipments_day as target_days',
+                'salesperson_target_segments.target_shipments_day as target_shipments_day',
                 'salesperson_target_segments.target_shipments_month as target_month',
+                'salesperson_target_segments.revenue_target_day as revenue_target_day',
+                'salesperson_target_segments.revenue_target_month as revenue_target_month',
                 'salesperson_target_segments.avg_rps as average_revenue',
                 'salesperson_target_segments.achieved_shipments_day',
                 'salesperson_target_segments.achieved_revenue_day',
                 'salesperson_target_segments.achieved_shipments_month',
                 'salesperson_target_segments.achieved_revenue_month',
                 'salesperson_target_segments.achieved_rps',
-            'salesperson_target_segments.achieved_rpk',
+                'salesperson_target_segments.achieved_rpk',
                 'spts.name as segments',
-                DB::raw('(salesperson_target_segments.target_shipments_day * salesperson_target_segments.avg_rps) as per_day_revenue_target'),
-                DB::raw('(salesperson_target_segments.target_shipments_month * salesperson_target_segments.avg_rps) as per_month_revenue_target')
-            )
-            ->where('a.status', 1);
+            );
 
         // 🔍 Apply filters dynamically
         if ($request->filled('start_date') && $request->filled('end_date')) {

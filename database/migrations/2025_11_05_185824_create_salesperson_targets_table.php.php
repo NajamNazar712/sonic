@@ -33,7 +33,7 @@ return new class extends Migration {
             $table->timestamps();
 
             // unique constraint
-            $table->unique(['salesperson_id', 'segment_id'], 'salesperson_segment_month_unique');
+            $table->unique(['salesperson_id', 'segment_id', 'start_date', 'end_date'], 'salesperson_segment_month_unique');
         });
     }
 
