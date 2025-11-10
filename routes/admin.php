@@ -303,7 +303,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/city/ajax', 'Admins\AdminDashboardController@cityListAjax')->name('city.ajax');
         Route::get('/city/form', 'Admins\AdminDashboardController@getCityForm')->name('city.form');
         Route::get('/international/city/form', 'Admins\AdminDashboardController@getInternationalCityForm')->name('international.city.form');
-        Route::get('/city/{id}/edit/form', 'Admins\AdminDashboardController@getEditCityForm')->name('city.edit');
+        Route::get('/city/{id}/edit/form/{cx?}', 'Admins\AdminDashboardController@getEditCityForm')->name('city.edit');
         Route::get('/international/city/{id}/edit/form', 'Admins\AdminDashboardController@getEditInternationalCityForm')->name('international.city.edit');
         Route::post('/city', 'Admins\AdminDashboardController@addCityHub')->name('city');
 
@@ -330,6 +330,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('city/{id}/changes', 'Admins\AdminDashboardController@getAjaxCityChanges')->name('getAjaxCityChanges');
         Route::get('/{id}/tagging-history', 'Admins\AdminDashboardController@taggingHistory')->name('taggingHistory');
 
+    //    Route::prefix('cx_city_list')->name('cx_city_list.')->group(function () {
+            Route::get('/cx_city', 'Admins\AdminDashboardController@CxCityView')->name('cx_city_list');
+            // Route::get('list', 'Admins\AdminDashboardController@cx_city_list')->name('list');
+        // });
         //Route
         Route::prefix('route')->name('route.')->group(function () {
             Route::get('/', 'Admins\AdminDashboardController@routeView')->name('index');

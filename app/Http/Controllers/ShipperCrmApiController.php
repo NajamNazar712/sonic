@@ -8,12 +8,13 @@ use App\Http\Controllers\CRM\CRMController;
 use App\Http\Models\Admin\ChangeShipmentAmountLog;
 
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\CRM\CrmComments;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\CRM\CrmRequestChannel;
 use App\Http\Models\Shipment;
-
+use App\Http\Models\ShipmentsJourney;
 use App\Http\Requests\AddCrmRequest;
 use App\Http\Requests\ValidateShipmentIdRequest;
 use Carbon\Carbon;
@@ -448,7 +449,5 @@ class ShipperCrmApiController extends Controller
         }
         return response()->json(['status' => 1,'error'=>'No Shipments Found']);
     }
-
-
-
+  
 }
