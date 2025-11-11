@@ -2591,6 +2591,66 @@ class GlobalSettingsController extends Controller
         
         try {
             foreach ($rows as $row) {
+                $row = [
+                    "salesperson"      => $row[0] ?? null,
+                    "codFlag"          => $row[1] ?? null,
+                    "codRevenue"       => $row[2] ?? null,
+                    "codShipments"     => $row[3] ?? null,
+                    "codRps"           => $row[4] ?? null,
+                    "codRpk"           => $row[5] ?? null,
+
+                    "logisticsFlag"      => $row[6] ?? null,
+                    "logisticsRevenue"   => $row[7] ?? null,
+                    "logisticsShipments" => $row[8] ?? null,
+                    "logisticsRps"       => $row[9] ?? null,
+                    "logisticsRpk"       => $row[10] ?? null,
+
+                    "expressFlag"      => $row[11] ?? null,
+                    "expressRevenue"   => $row[12] ?? null,
+                    "expressShipments" => $row[13] ?? null,
+                    "expressRps"       => $row[14] ?? null,
+                    "expressRpk"       => $row[15] ?? null,
+
+                    "intlFlag"         => $row[16] ?? null,
+                    "intlRevenue"      => $row[17] ?? null,
+                    "intlShipments"    => $row[18] ?? null,
+                    "intlRps"          => $row[19] ?? null,
+                    "intlRpk"          => $row[20] ?? null,
+                ];
+                $validator = Validator::make($row, [
+                    'salesperson' => 'required|string|max:100',
+
+                    'codFlag' => 'required|integer',
+                    'codRevenue' => 'required|numeric',
+                    'codShipments' => 'required|integer',
+                    'codRps' => 'required|numeric',
+                    'codRpk' => 'required|numeric',
+
+                    'logisticsFlag' => 'required|integer',
+                    'logisticsRevenue' => 'required|numeric',
+                    'logisticsShipments' => 'required|integer',
+                    'logisticsRps' => 'required|numeric',
+                    'logisticsRpk' => 'required|numeric',
+
+                    'expressFlag' => 'required|integer',
+                    'expressRevenue' => 'required|numeric',
+                    'expressShipments' => 'required|integer',
+                    'expressRps' => 'required|numeric',
+                    'expressRpk' => 'required|numeric',
+
+                    'intlFlag' => 'required|integer',
+                    'intlRevenue' => 'required|numeric',
+                    'intlShipments' => 'required|integer',
+                    'intlRps' => 'required|numeric',
+                    'intlRpk' => 'required|numeric',
+                ]);
+
+                if ($validator->fails()) {
+                    return redirect()
+                        ->back()
+                        ->withErrors($validator)
+                        ->withInput(); // ✅ necessary for @error + old() to work
+                }
                 if (empty($row[0])) continue; // skip empty rows
 
                 $salesTraxId = trim($row[0]);
@@ -2626,6 +2686,8 @@ class GlobalSettingsController extends Controller
                 $intlShipments = (float)$row[18];
                 $intlRps     = (float)$row[19];
                 $intlRpk     = (float)$row[20];
+                
+
                 // NOTE: your template does not include "Intl Shipments" column,
                 // so we'll set target_shipments_month => 0 for International.
                 // If you have Intl Shipments, add that column and map it here.
@@ -2693,7 +2755,6 @@ class GlobalSettingsController extends Controller
                     ];
                 }
                 // Insert into DB
-                error_log('data'.print_r($segmentsToInsert,true));
                 foreach ($segmentsToInsert as $data) {
                     SalespersonTargetSegment::updateOrCreate(
                         [

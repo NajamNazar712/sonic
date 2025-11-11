@@ -51,7 +51,7 @@
                                         <div class="col-md-3 text-end">
                                             <button type="submit" class="btn btn-primary mt-2">Upload</button>
                                             <!-- Download Demo Button -->
-                                            <a href="{{ asset('uploads/demo/sales_targets_demo.xlsx') }}" class="btn btn-success mt-2 ms-2" download>
+                                            <a href="{{ asset('file/sales_targets_demo.xlsx') }}" class="btn btn-success mt-2 ms-2" download>
                                                 <i class="la la-download"></i> Download Excel Demo
                                             </a>
                                         </div>
