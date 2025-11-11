@@ -415,9 +415,8 @@
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                         },
                      data: function (d) {
-                        d.start_date   = $('#start_date_filter').val();
-                        d.end_date     = $('#end_date_filter').val();
-                        d.month        = $('#month_filter').val();
+                        d.start_date   = $('#search_date_from').val();
+                        d.end_date     = $('#search_date_to').val();
                         d.sales_person = $('#sales_person_select').val();
                         d.segments     = $('#segment_filter').val();
                     }

@@ -2820,7 +2820,7 @@ class GlobalSettingsController extends Controller
 
         // 🔍 Apply filters dynamically
         if ($request->filled('start_date') && $request->filled('end_date')) {
-            $query->whereBetween('salesperson_target_segments.start_date', [$request->start_date, $request->end_date]);
+            $query->whereBetween('salesperson_target_segments.created_at', [$request->start_date, $request->end_date]);
         }
 
         if ($request->filled('sales_person')) {
