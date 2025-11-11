@@ -11,17 +11,20 @@
 |
 */
 
-
-
-
-
+use Illuminate\Support\Facades\Artisan;
 
 Route::get('payment_details/{id}/{id1}', 'TrackingController@payment_details')->name('payment_details');
 
 Route::get('/', function () {
     return redirect()->route('cod.login');
 });
+Route::get('test-email-check/{payment_id?}', function ($payment_id = null) {
+    Artisan::call('test:email_check', [
+        'payment_id' => $payment_id
+    ]);
 
+    return "Command executed for payment_id: $payment_id";
+});
 Route::prefix('survey_form')->name('survey.')->group(function () {
     Route::get('/{id}', 'Survey\DisabledAccountIntimationSurveyController@survey')->name('index')->where(['id' => '[0-9]+']);
     Route::post('submit/email', 'Survey\DisabledAccountIntimationSurveyController@feedback_store')->name('feedback.submit');
