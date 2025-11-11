@@ -11599,11 +11599,11 @@ class NotificationsController extends Controller
                         // self::sms($body, $to, 1);
                         self::sms_otp($body, $to, $name, $otp, 3, null, $id);
                     }
-                } else if ($id == 250) {
+                } else if ($id == 252) {
                     $to = $reference_1_id;
                     $body = str_replace('[status]', 'Approved', $body);
                     self::email($subject, $body, $to);
-                } else if ($id == 251) {
+                } else if ($id == 253) {
                     // Build HTML table
                     $htmlTable = '
                     <h3 style="font-family:Arial;">Daily Bank Account Change Summary</h3>

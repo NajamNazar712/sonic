@@ -60,7 +60,7 @@ class UpdatePendingBanks extends Command
                 }
                 $user_attachment->blank_cheque_image = $bank->blank_cheque_image;
                 $user_attachment->save();
-                NotificationsController::send(250, $bank->user->email);
+                NotificationsController::send(252, $bank->user->email);
                 $processed[] = [
                     'user_id' => $bank->user_id,
                     'user_name' => $bank->user->name,
@@ -75,7 +75,7 @@ class UpdatePendingBanks extends Command
                 $bank->status = 1;
                 $bank->save();
             }
-            NotificationsController::send(251,  $processed);
+            NotificationsController::send(253,  $processed);
         }
         return Command::SUCCESS;
     }
