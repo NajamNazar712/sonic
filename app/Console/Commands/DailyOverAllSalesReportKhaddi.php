@@ -33,6 +33,6 @@ class DailyOverAllSalesReportKhaddi extends Command
     {
         $day = Carbon::yesterday()->toDateString();
         $response = AdminReportsEmailController::overall_sales_report_khaddi($day);
-        NotificationsController::send(250, $response);
+        NotificationsController::send(254, $response);
     }
 }

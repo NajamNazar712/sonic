@@ -11422,7 +11422,7 @@ class NotificationsController extends Controller
                         // }
 
                         $to = array();
-                        $bcc = array();
+                        $bcc = array(); 
                         $to[] = 'aftab.qidwai@trax.pk';
                         $to[] = 'anas.mazhar@trax.pk';
 
@@ -11456,6 +11456,36 @@ class NotificationsController extends Controller
                     $bcc = array();
                     $to[] = 'shahbaz.abbasi@trax.pk';
                     $to[] = 'mansoor.ahmad@trax.pk';
+
+                    self::email($subject, $body, $to, NULL, $bcc);
+                } else if ( $id == 254) {
+                    $date = Carbon::today()->format('Y-m-d');
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+                    if (strpos($subject, '[date]') !== FALSE) {
+                        $subject = str_replace('[date]', $date, $subject);
+                    }
+
+                    if (strpos($body, '[date]') !== FALSE) {
+                        $body = str_replace('[date]', $date, $body);
+                    }
+
+                    $link = '<a href="' . $reference_1_id . '" target="_blank">Report</a>';
+
+                    if (strpos($subject, '[link]') !== FALSE) {
+                        $subject = str_replace('[link]', $link, $subject);
+                    }
+
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+
+                    $to = array();
+                    $bcc = array();
+                    $to[] = 'sahban.ghani@logiserves.com';
+                    $to[] = 'hammad.saleem@slgtrax.com';
+                    $to[] = 'fawad.ahmed@slgtrax.com';
+                    $to[] = 'syed.furqan@slgtrax.com';
 
                     self::email($subject, $body, $to, NULL, $bcc);
                 } else if( $id == 244) {
