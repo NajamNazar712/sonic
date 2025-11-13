@@ -112,6 +112,9 @@
                                         <th class="border-primary border-darken-1">Shipper</th>
                                         <th class="border-primary border-darken-1">Booked By</th>
                                         <th class="border-primary border-darken-1">Service Type</th>
+                                        @if (!empty($userIdForDescription) && in_array(Auth::id(), $userIdForDescription))
+                                            <th class="border-primary border-darken-1">Description</th>
+                                        @endif
                                         <th class="border-primary border-darken-1">Booking Channel</th>
                                         <th class="border-primary border-darken-1">Status</th>
                                         <th class="border-primary border-darken-1">Reason</th>
@@ -121,9 +124,6 @@
                                         <th class="border-primary border-darken-1">Consignee Name</th>
                                         <th class="border-primary border-darken-1">Consignee Contact</th>
                                         <th class="border-primary border-darken-1">Consignee Address</th>
-                                        @if (!empty($userIdForDescription) && in_array(Auth::id(), $userIdForDescription))
-                                            <th class="border-primary border-darken-1">Description</th>
-                                        @endif
                                         <th class="border-primary border-darken-1">Collection Amount</th>
                                         <th class="border-primary border-darken-1">Booking Date</th>
                                         <th class="border-primary border-darken-1">Instructions</th>
@@ -868,6 +868,9 @@
                         head.push('Shipper');
                         head.push('Booked By');
                         head.push('Service Type');
+                        @if (!empty($userIdForDescription) && in_array(Auth::id(), $userIdForDescription))
+                            head.push('Description');
+                        @endif
                         head.push('Booking Channel');
                         head.push('Status');
                         head.push('Reason');
@@ -877,11 +880,6 @@
                         head.push('Consignee Name');
                         head.push('Consignee Contact');
                         head.push('Consignee Address');
-
-                        @if (!empty($userIdForDescription) && in_array(Auth::id(), $userIdForDescription))
-                            head.push('Description');
-                        @endif
-
                         head.push('Collection Amount');
                         head.push('Booking Date');
                         head.push('Instructions');
@@ -896,6 +894,10 @@
                             row.push(values.user_name);
                             row.push(values.booked_by);
                             row.push(values.service_type);
+                            @if (!empty($userIdForDescription) && in_array(Auth::id(), $userIdForDescription))
+                                row.push(values.item_description);
+                            @endif
+
                             row.push(values.channel_name);
                             row.push(values.status);
                             row.push(values.reason);
@@ -905,11 +907,6 @@
                             row.push(values.consignee_name);
                             row.push(values.phone);
                             row.push(values.consignee_address);
-
-                            @if (!empty($userIdForDescription) && in_array(Auth::id(), $userIdForDescription))
-                                row.push(values.item_description);
-                            @endif
-
                             row.push(values.amount);
                             row.push(values.booking_date);
                             row.push(values.instructions);
@@ -976,7 +973,7 @@
             ];
 
             @if (!empty($userIdForDescription) && in_array(Auth::id(), $userIdForDescription))
-                columns.splice(18, 0, {
+                columns.splice(9, 0, {
                     data: 'item_description',
                     name: 'item_description',
                     className: 'align-middle item_description'
