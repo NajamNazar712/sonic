@@ -475,7 +475,7 @@ trait RvTrait
     // Description: userId variable used for the AlistShipper
     protected function reattempt($request,$userId = null)
     {
-        $remarks = $request->remarks;
+        $remarks = $request->remarks ?? $request->remark;
         $parcel = Shipment::find($request->shipment_id);
         if ($request->has('charges')) {
             if ($request->charges != null) {
