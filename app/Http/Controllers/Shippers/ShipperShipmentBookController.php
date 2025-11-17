@@ -4107,6 +4107,7 @@ class ShipperShipmentBookController extends Controller
                 }
                 unset($r);
                 return view('client.shipment.book.errors')->with(['data' => $errorRowsOnly, 'errors' => $errors, 'cities' => $city_name, 'booking_types' => $booking_types, 'pickup_addresses' => $pickup_addresses, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'user_shipping_modes' => $user_shipping_modes, 'charges_modes' => $charges_modes, 'service_type_check_id' => $service_type_check_id, 'omni' => $omni,'batch_id'=>$batchId]);
+
             }
         } else {
             return redirect()->back()->with('error', 'No Shipments in File');
@@ -7187,8 +7188,17 @@ class ShipperShipmentBookController extends Controller
                     $city_name[$city->name] = $city->name;
                 }
 
+
+                $error_keys = array_keys($errors);
+                $allRowsByExcelId = [];
+                foreach ($rows as $idx => $row) {
+                    $excelRowId = $idx + 2;
+                    $allRowsByExcelId[$excelRowId] = $row;
+                }
+
+
                 $batchId = (string) Str::uuid();
-                $cacheKey = "cor_excel_import:{$user_id}:{$batchId}";
+                $cacheKey = "excel_import:{$user_id}:{$batchId}";
 
                 Cache::put($cacheKey, [
                     'rows' => $allRowsByExcelId,
