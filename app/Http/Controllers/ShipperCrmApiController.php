@@ -449,5 +449,81 @@ class ShipperCrmApiController extends Controller
         }
         return response()->json(['status' => 1,'error'=>'No Shipments Found']);
     }
-  
+    public function crm_comment_add(Request $request)
+    {
+        $validate = Validator::make($request->all(), [
+            'messages' => ['required', 'array', 'min:1'],
+            'messages.*.crm_request_id' => ['required', 'integer', 'digits_between:1,10', 'exists:crm_requests,id'],
+            'messages.*.comment' => ['required', 'between:0,190'],
+        ]);
+       
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $rider_id =  $request->shipper_id;
+
+            foreach ($request->messages as $message) {
+                $commented_at = Carbon::createFromTimestampMs($message['commented_at'])->toDateTimeString();
+                $comment = new CrmComments();
+                $comment->crm_request_id = $message['crm_request_id'];
+                $comment->comment_by_id = $rider_id;
+                $comment->comment_by = 1;
+                $comment->comment_type = 1;
+                $comment->comment = $message['comment'];
+                $comment->created_at = $commented_at;
+                $comment->updated_at = $commented_at;
+                $comment->save();
+            }
+
+            return response()->json(['status' => 0, 'message' => 'Comment(s) Added Successfully']);
+        }
+    }
+
+    public function request_details(Request $request, $id)
+    {
+        $crm_request = CrmRequest::where('crm_requests.id', $id)->leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_requests.case_nature_id')
+            ->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'crm_requests.case_nature_type_id')
+            ->leftjoin('crm_request_channels as crc', 'crc.id', '=', 'crm_requests.channel_id')
+            ->leftjoin('crm_request_statuses as crs', 'crs.id', '=', 'crm_requests.status_id')
+            ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+            ->leftjoin('shipment_status as ss', 'ss.id', '=', 's.shipper_status_id')
+            ->leftjoin('crm_request_status_histories as crmst', function ($join) {
+                $join->on('crmst.crm_request_id', '=', 'crm_requests.id')
+                    ->where('crm_requests.status_id', 4)
+                    ->where(
+                        'crmst.id',
+                        '=',
+                        DB::raw('(select max(id) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id)')
+                    );
+            })->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'ss.name as shipment_status', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as request_status', 'crm_requests.created_at as created_at', 'crmst.id as histories')->first();
+        $details = [];
+        if ($crm_request) {
+           
+          $comments = CrmComments::where('crm_request_id', $crm_request->id)
+          ->orderBy('created_at','desc')
+          ->get();
+            
+             
+            $details = [
+            'tracking_no' => $crm_request->tracking_number,
+            'shipment_status' => $crm_request->shipment_status,
+            'case_nature' => $crm_request->case_nature,
+            'case_nature_type' => $crm_request->case_nature_type,
+            'channel' => $crm_request->channel,
+            'request_status' => $crm_request->request_status,
+            'created_at' => Carbon::parse($crm_request->created_at)->format('Y-m-d h:i:s'),
+            'histories' => $crm_request->created_at
+            ];
+            foreach($comments as $comment){
+                    $details[] = [
+                        'crm_message' =>  strip_tags($comment->comment),
+                        'date_time' =>  Carbon::parse($comment->created_at)->format('Y-m-d h:i:s'),
+                    ];
+            }
+         
+            return response()->json(['status' => 0, 'message' => 'Success', 'crm_request' => $details]);
+        } else {
+            return redirect()->back()->with('danger', 'CRM Request Not found!');
+        }
+    }
 }
