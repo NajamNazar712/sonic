@@ -468,7 +468,7 @@ class RetailAdminUserManagementController extends Controller
             $franchise->discount = $request->discount;
             $franchise->insurance = $request->edit_insurance;
             $franchise->updated_by = Auth::id();
-            
+            $changes = $franchise->getDirty();
 
             $changedFields = [];
             $fieldNames = [
@@ -497,7 +497,10 @@ class RetailAdminUserManagementController extends Controller
             }
 
             $franchise->save();
-
+            $hub_name = City::find($franchise->default_hub)->name;
+            if (!empty($changes)) {
+                $this->updatePickupAddress($changes, $franchise->pickup_address_id, $hub_name);
+            }
             $existingPercentages = RetailFranchiseProductPercentage::where('franchise_id', $franchise->id)->get()->keyBy('retail_shipping_mode_id');
 
             $new_names = json_decode($request->input('retail_shipping_mode_id'));
@@ -1545,7 +1548,8 @@ class RetailAdminUserManagementController extends Controller
             $trax_center->discount = $request->discount;
             $trax_center->insurance = $request->edit_insurance;
             $trax_center->updated_by = Auth::id();
-
+            $changes = $trax_center->getDirty();
+            
             $fieldNames = [
                 'name' => 'Name',
                 'phone_no' => 'Phone No',
@@ -1564,8 +1568,12 @@ class RetailAdminUserManagementController extends Controller
                     $changedFields[] = $fieldName . ': ' . $originalValue . ' -> ' . $currentValue;
                 }
             }
+            $hub_name = City::find($trax_center->default_hub)->name;
             $trax_center->save();
+            if(!empty($changes)){
+                $this->updatePickupAddress($changes,$trax_center->pickup_address_id, $hub_name);
 
+            }
             $trax_center_attachment = TraxCenterAttachment::where('retail_trax_center_id', $request->trax_center_id)->first();
             if ($trax_center_attachment != null) {
                 $trax_center_attachment->advance_amount = (int) str_replace(',', '', $request->advance_amount);
@@ -1644,7 +1652,7 @@ class RetailAdminUserManagementController extends Controller
                 }
                 $new_trax_center_attachments->save();
             }
-
+           
             if(!empty($changedFields)) {
                 self::retail_logs(Auth::id(), $changedFields, $trax_center->id, $screen_name = 'Retail Center');
             }
@@ -3998,5 +4006,20 @@ class RetailAdminUserManagementController extends Controller
         $record->changed_in_record_id = $changed_in_record_id;
         $record->screen_name = $screen_name;
         $record->save();
+    }
+
+    public static function updatePickupAddress($changes,$id, $hub_name){
+
+        $record = UserShippingInfo::where('id',$id)->first();
+        if($record){
+            $record->poc = $changes['name'] ?? $record->poc;
+            $record->pickup_address = $changes['name'] . ' - ' . $hub_name;
+            $record->phone = '021-111-118-729';
+            $record->email = 'info@slgtrax.com';
+            $record->location_latitude = $changes['location_latitude']  ?? $record->location_latitude;
+            $record->location_longitude = $changes['location_longitude']  ?? $record->location_longitude;
+
+            $record->save();
+        }
     }
 }

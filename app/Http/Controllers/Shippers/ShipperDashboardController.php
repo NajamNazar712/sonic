@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\ChangeLogs;
 use App\DailyVisit;
 use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Controllers\Controller;
@@ -132,7 +133,7 @@ use Validator;
 //use Illuminate\Support\Facades\Auth;
 use App\Models\ParentProduct;
 use App\Models\CorporateUserOnDeliveredInvoice;
-
+use App\Models\PendingBankAccount;
 
 class ShipperDashboardController extends Controller
 {
@@ -1272,9 +1273,46 @@ class ShipperDashboardController extends Controller
     }
 
     public function addBank(Request $request){
-
         $user_id    = session('user_id');
         if($user_id){
+            if(!empty($request->id)){
+                $userBank = UserBankInfo::find($request->id);
+                if($userBank){
+                    $oldData = $userBank->only(['bank_name', 'bank_branch', 'account_no', 'account_title', 'iban_no', 'bank_city']);
+                    $pendingAccount = PendingBankAccount::where('user_id',$user_id)->first();
+                    if(!$pendingAccount){
+                        $pendingAccount = new PendingBankAccount();
+                    }
+                    $pendingAccount->bank_name = $request->bank_select;
+                    $pendingAccount->bank_branch = $request->bank_branch;
+                    $pendingAccount->account_no = $request->account_no;
+                    $pendingAccount->account_title = $request->account_title;
+                    $pendingAccount->iban_no = $request->iban_no;
+                    $pendingAccount->bank_city = $request->bank_city;
+                    $pendingAccount->user_id = $user_id;
+                    $pendingAccount->bank_id = $request->id;
+                    $pendingAccount->status = 0;
+                    if ($request->hasFile('blank_cheque')) {
+                        if ($pendingAccount->blank_cheque_image != NULL) {
+                            Storage::disk('public')->delete('users_attached_documents/' . ($user_id  ?? session('user_id')) . '/' . $pendingAccount->blank_cheque_image);
+                        }
+                        $filename = 'blank_cheque' . date('Y-m-d') . '_' . ($user_id ?? session('user_id'))  . '.png';
+                        $file = $request->file('blank_cheque');
+                        Storage::disk('public')->putFileAs('users_attached_documents/' . ($user_id ?? session('user_id')) . '', $file, $filename);
+                        $pendingAccount->blank_cheque_image = $filename;
+                    }
+                    $pendingAccount->save();
+                    ChangeLogs::create([
+                        'table_name' => $userBank->getTable(),
+                        'record_id' => $userBank->getKey(),
+                        'old_data' => json_encode($oldData),
+                        'new_data' => json_encode($pendingAccount),
+                        'updated_by' => $user_id,
+                    ]);
+                     return redirect()->back()->with(['success' => 'Bank account pending — will be updated automatically within 24 hours.!']);
+                }
+               
+            }
             if(UserBankInfo::where('user_id',$user_id)->exists())
             {
                 UserBankInfo::where('user_id', $user_id)->update(['default_bank' => 0]);
@@ -1303,12 +1341,13 @@ class ShipperDashboardController extends Controller
             $join->on('wu.user_id', '=', 'user_bank_infos.user_id')
                ->where('wu.substitute_user_id', '0');
         })
-        ->select(['user_bank_infos.id as bank_row_id','user_bank_infos.bank_branch','user_bank_infos.account_no','user_bank_infos.account_title','user_bank_infos.iban','c.name as city','bl.name as bank_name','user_bank_infos.default_bank', 'wu.user_id as wallet_user'])
+        ->select(['user_bank_infos.id as bank_row_id','user_bank_infos.bank_branch','user_bank_infos.account_no','user_bank_infos.account_title','user_bank_infos.iban','c.name as city','bl.name as bank_name','user_bank_infos.default_bank', 'wu.user_id as wallet_user', 'user_bank_infos.bank_name as bank_name_id','c.id as city_id'])
         ->where('user_bank_infos.user_id', session('user_id'));
 
         return Datatables::of($banks)
         ->addColumn('action', function ($bank) {
-
+            
+            // $dropdown .= $default_button;
             if(!$bank->wallet_user) {
                 $dropdown = '
                 <div class="btn-group">
@@ -1316,10 +1355,11 @@ class ShipperDashboardController extends Controller
                     <div class="dropdown-menu dropdown-menu-sm">
                 ';
                 $default_button = '<button type="button" class="dropdown-item default"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Make Default</div></button>';
-
+                
                 if ($bank->default_bank) {
-                    $dropdown = 'Default Address';
-
+                  
+                    $default_button = '<button type="button" class="dropdown-item editBank"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit Bank</div></button>';
+                    $dropdown .= $default_button;
                 }else{
                     $dropdown .= $default_button;
                 }
@@ -1332,9 +1372,9 @@ class ShipperDashboardController extends Controller
 
                 
             } else {
+                   
                 if ($bank->default_bank) {
-                    $dropdown = 'Default Address';
-
+                    // $dropdown = 'Default Address';
                 }else{
                     $dropdown = '';
                 }
