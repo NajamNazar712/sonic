@@ -43,18 +43,24 @@ class BotCallDispatchThird implements ShouldQueue
 
         //
         try {
-            $botRecordData = $this->botCallingDataSet($this->shipmentId);
-            if ($botRecordData) {                 
-               
+           
+            $botRecordData = $this->botCallingThirdDataSet($this->shipmentId);
+            if ($botRecordData) {
+                $token = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiNjYzMTQyNi05ODQyLTQzNjEtYmU1Mi1lZGI3OWEwMTkyOGMiLCJpYXQiOjE3NjI1MDg4ODUsImV4cCI6NDkxODE4MjQ4NSwidHlwZSI6ImV4dGVybmFsQXBpIn0.J7B45SejW4pDHLh5sYSDCMyayRLgOJpZCWNlJ58Esek";
                 $client = new Client(['base_uri' => $botRecordData['base_uri'], 'http_errors' => FALSE, 'connect_timeout' => 120, 'timeout' => 120, 'verify' => false]);
+                // Send POST request
                 $response = $client->post('', [
-                    'json' => $botRecordData['post']
+                    'headers' => [
+                        'Authorization' => $token,
+                        'Content-Type'  => 'application/json',
+                    ],
+                    'json' => $botRecordData['post'],
                 ]);
 
                 $status_code = $response->getStatusCode();
                 $response = $response->getBody()->getContents();
                 $response = json_decode($response);
-                WebhookLogController::zong_call_log($botRecordData['user_id'],  $status_code, $this->shipmentId, 3, json_encode($response));
+                WebhookLogController::zong_call_log($botRecordData['user_id'],  $status_code, $this->shipmentId, 3, json_encode($response),'whatsapp');
                 if ($response->message == 'Data Not Found' && $response->code == 400) {
                     Log::channel('botCallJobLog')->info('s ' . 'Log after  respsone condition call second-record' . $response->message);
                     $this->inValidEntityEntertain($botRecordData['post']['tracking_number']);

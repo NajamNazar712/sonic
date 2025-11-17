@@ -1555,6 +1555,7 @@ trait RvTrait
                     else if($agent->agent_caller_type == 2)//These Agents will get shipments pending with second call only
                     {
                         return $query->where('call_count' , '>', 0);
+                        return $query->where('call_count' , '<', 2);
                     }
                     else
                     {
@@ -2075,6 +2076,38 @@ trait RvTrait
                     'brand_name' => $shipment->user->name ?? $shipment->user->brand_name,
                     'customer_name' => $shipment->consignee_name,
                 ];
+                return ['post' => $post, 'base_uri' => $base_uri, 'user_id' => $shipment->user_id];
+            } else {
+                return null;
+            }
+        }
+    }
+    static function botCallingThirdDataSet($shipmentId){
+    
+        if (GlobalSettings::where(['type' => 'bot_call_enable_disable', 'setting_value' => 1])->exists()) {
+            // status_reason
+            $rvShipmentikcet = RvShipmentTicket::where('shipment_id', $shipmentId)->whereNull('deleted_at')->where('in_progress', 0);
+           
+            if ($rvShipmentikcet->exists()) {
+               
+                $base_uri = 'https://trax-api.xnotify.ai/api/messages';
+                $rvShipment = $rvShipmentikcet->first();
+                // $rvShipment->update(['in_progress' => 1,'is_bot'=>1]);
+                $shipment = Shipment::with(['user:id,name,brand_name', 'destination_city:id,name'])->select('user_id', 'consignee_city_id', 'consignee_phone_number_1', 'consignee_name', 'tracking_number', 'amount')->find($shipmentId);
+                $final_phone = self::phoneNo($shipment->consignee_phone_number_1);
+                $post = [
+                    'send_to' => $final_phone,
+                    'tracking_id' => (string) $shipment->tracking_number,
+                    'tns_no' => $shipment->tracking_number . '-' . uniqid(),
+                    'amount' => $shipment->amount,
+                    'reason_name' => "Address Closed",
+                    'shipper' => $shipment->user->name ?? $shipment->user->brand_name,
+                    'city_name' => $shipment->destination_city->name,
+                    'location' => $shipment->destination_city->name,
+                    'item_type' => "Document"
+                ];
+                error_log('post'.print_r($post,true));
+                error_log('$base_uri'.print_r($base_uri,true));
                 return ['post' => $post, 'base_uri' => $base_uri, 'user_id' => $shipment->user_id];
             } else {
                 return null;
