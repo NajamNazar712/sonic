@@ -11422,7 +11422,7 @@ class NotificationsController extends Controller
                         // }
 
                         $to = array();
-                        $bcc = array();
+                        $bcc = array(); 
                         $to[] = 'aftab.qidwai@trax.pk';
                         $to[] = 'anas.mazhar@trax.pk';
 
@@ -11456,6 +11456,36 @@ class NotificationsController extends Controller
                     $bcc = array();
                     $to[] = 'shahbaz.abbasi@trax.pk';
                     $to[] = 'mansoor.ahmad@trax.pk';
+
+                    self::email($subject, $body, $to, NULL, $bcc);
+                } else if ( $id == 254) {
+                    $date = Carbon::today()->format('Y-m-d');
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+                    if (strpos($subject, '[date]') !== FALSE) {
+                        $subject = str_replace('[date]', $date, $subject);
+                    }
+
+                    if (strpos($body, '[date]') !== FALSE) {
+                        $body = str_replace('[date]', $date, $body);
+                    }
+
+                    $link = '<a href="' . $reference_1_id . '" target="_blank">Report</a>';
+
+                    if (strpos($subject, '[link]') !== FALSE) {
+                        $subject = str_replace('[link]', $link, $subject);
+                    }
+
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+
+                    $to = array();
+                    $bcc = array();
+                    $to[] = 'sahban.ghani@logiserves.com';
+                    $to[] = 'hammad.saleem@slgtrax.com';
+                    $to[] = 'fawad.ahmed@slgtrax.com';
+                    $to[] = 'syed.furqan@slgtrax.com';
 
                     self::email($subject, $body, $to, NULL, $bcc);
                 } else if( $id == 244) {
@@ -11599,6 +11629,54 @@ class NotificationsController extends Controller
                         // self::sms($body, $to, 1);
                         self::sms_otp($body, $to, $name, $otp, 3, null, $id);
                     }
+                } else if ($id == 252) {
+                    $to = $reference_1_id;
+                    $body = str_replace('[status]', 'Approved', $body);
+                    self::email($subject, $body, $to);
+                } else if ($id == 253) {
+                    // Build HTML table
+                    $htmlTable = '
+                    <h3 style="font-family:Arial;">Daily Bank Account Change Summary</h3>
+                    <p style="font-family:Arial;">The following bank accounts were changed within the last 24 hours:</p>
+                    <table border="1" cellspacing="0" cellpadding="8" style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;">
+                        <thead style="background-color:#f2f2f2;">
+                            <tr>
+                                <th>User ID</th>
+                                <th>Bank Name</th>
+                                <th>Branch</th>
+                                <th>City</th>
+                                <th>Account No</th>
+                                <th>Account Title</th>
+                                <th>IBAN No</th>
+                                <th>Blank Cheque</th>
+                            </tr>
+                        </thead>
+                        <tbody>';
+                        $salesPersonId = [];
+                    foreach ($reference_1_id as $bank) {
+                        $sale_person_tag = SalePersonTag::where('user_id', $bank['user_id'])->first();
+                        PendingBankAccount::where('user_id',$bank['user_id'])->update(['email_status'=>1]);
+                        $salesPersonId[] = $sale_person_tag->admin_id; 
+                        $imageUrl = asset('storage/users_attached_documents/' . $bank['user_id'] . '/' . $bank['blank_cheque_image']);
+                        $htmlTable .= '
+                        <tr>
+                            <td>' . $bank['user_name'] . '</td>
+                            <td>' . $bank['bank_name'] . '</td>
+                            <td>' . $bank['bank_branch'] . '</td>
+                            <td>' . $bank['bank_city'] . '</td>
+                            <td>' . $bank['account_no'] . '</td>
+                            <td>' . $bank['account_title'] . '</td>
+                            <td>' . $bank['iban_no'] . '</td>
+                            <td><a href="' . $imageUrl . '" target="_blank">View Image</a></td>
+                        </tr>';
+                    }
+                    $htmlTable .= '</tbody></table>';
+                    $htmlTable .= '<br><p style="font-family:Arial;">Regards,<br><b>SLG Trax System</b></p>';
+                    $to = Admin::whereIn('id',$salesPersonId)->pluck('email');
+                    // Send email to main recipient and CC respective salespersons if needed
+                    $cc = 'fawad.ahmed@slgtrax.com';
+                    $body = str_replace('[preview]', $htmlTable, $body);
+                    self::email($subject, $body, $to, $cc);
                 }
             }
         }
