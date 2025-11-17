@@ -451,7 +451,6 @@ class ShipperCrmApiController extends Controller
     }
     public function crm_comment_add(Request $request)
     {
-        
         $validate = Validator::make($request->all(), [
             'messages' => ['required', 'array', 'min:1'],
             'messages.*.crm_request_id' => ['required', 'integer', 'digits_between:1,10', 'exists:crm_requests,id'],
