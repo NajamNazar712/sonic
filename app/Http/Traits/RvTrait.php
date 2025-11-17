@@ -2092,7 +2092,7 @@ trait RvTrait
                
                 $base_uri = 'https://trax-api.xnotify.ai/api/messages';
                 $rvShipment = $rvShipmentikcet->first();
-                // $rvShipment->update(['in_progress' => 1,'is_bot'=>1]);
+                $rvShipment->update(['in_progress' => 1,'is_bot'=>1]);
                 $shipment = Shipment::with(['user:id,name,brand_name', 'destination_city:id,name'])->select('user_id', 'consignee_city_id', 'consignee_phone_number_1', 'consignee_name', 'tracking_number', 'amount')->find($shipmentId);
                 $final_phone = self::phoneNo($shipment->consignee_phone_number_1);
                 $post = [
@@ -2100,14 +2100,12 @@ trait RvTrait
                     'tracking_id' => (string) $shipment->tracking_number,
                     'tns_no' => $shipment->tracking_number . '-' . uniqid(),
                     'amount' => $shipment->amount,
-                    'reason_name' => "Address Closed",
+                    'reason_name' => $rvShipment?->status_reason?->name ?? '',
                     'shipper' => $shipment->user->name ?? $shipment->user->brand_name,
                     'city_name' => $shipment->destination_city->name,
                     'location' => $shipment->destination_city->name,
                     'item_type' => "Document"
                 ];
-                error_log('post'.print_r($post,true));
-                error_log('$base_uri'.print_r($base_uri,true));
                 return ['post' => $post, 'base_uri' => $base_uri, 'user_id' => $shipment->user_id];
             } else {
                 return null;
