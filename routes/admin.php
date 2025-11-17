@@ -303,7 +303,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/city/ajax', 'Admins\AdminDashboardController@cityListAjax')->name('city.ajax');
         Route::get('/city/form', 'Admins\AdminDashboardController@getCityForm')->name('city.form');
         Route::get('/international/city/form', 'Admins\AdminDashboardController@getInternationalCityForm')->name('international.city.form');
-        Route::get('/city/{id}/edit/form', 'Admins\AdminDashboardController@getEditCityForm')->name('city.edit');
+        Route::get('/city/{id}/edit/form/{cx?}', 'Admins\AdminDashboardController@getEditCityForm')->name('city.edit');
         Route::get('/international/city/{id}/edit/form', 'Admins\AdminDashboardController@getEditInternationalCityForm')->name('international.city.edit');
         Route::post('/city', 'Admins\AdminDashboardController@addCityHub')->name('city');
 
@@ -330,6 +330,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('city/{id}/changes', 'Admins\AdminDashboardController@getAjaxCityChanges')->name('getAjaxCityChanges');
         Route::get('/{id}/tagging-history', 'Admins\AdminDashboardController@taggingHistory')->name('taggingHistory');
 
+    //    Route::prefix('cx_city_list')->name('cx_city_list.')->group(function () {
+            Route::get('/cx_city', 'Admins\AdminDashboardController@CxCityView')->name('cx_city_list');
+            // Route::get('list', 'Admins\AdminDashboardController@cx_city_list')->name('list');
+        // });
         //Route
         Route::prefix('route')->name('route.')->group(function () {
             Route::get('/', 'Admins\AdminDashboardController@routeView')->name('index');
@@ -1760,6 +1764,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('wallet_error_logs', 'Admins\AdminFinanceController@wallet_error_logs')->name('wallet_error_logs');
             Route::put('hold', 'Admins\AdminFinanceController@done_payments_hold')->name('hold');
             Route::put('un_hold', 'Admins\AdminFinanceController@done_payments_un_hold')->name('un_hold');
+            Route::post('generate_or_find_report', 'Admins\AdminFinanceController@generate_or_find_report')->name('generate_or_find_report');
 
 
         });
@@ -1857,6 +1862,31 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('wallet_users')->name('wallet_users.')->group(function () {
             Route::get('', 'Admins\AdminFinanceController@wallet_user_index')->name('index');
             Route::get('list', 'Admins\AdminFinanceController@walle_user_list')->name('list');
+        });
+        
+        Route::prefix('prf')->name('prf.')->group(function () {
+            Route::get('', 'Admins\PaymentRequisitionController@index')->name('index');
+            Route::post('', 'Admins\PaymentRequisitionController@store')->name('submit');
+            Route::get('list', 'Admins\PaymentRequisitionController@list')->name('list');
+            Route::get('ajaxList', 'Admins\PaymentRequisitionController@ajaxList')->name('ajaxList');   
+            Route::get('{id}/edit',  'Admins\PaymentRequisitionController@edit')->name('edit');
+            Route::post('{id}/update', 'Admins\PaymentRequisitionController@update')->name('update');
+            Route::post('/approve',  'Admins\PaymentRequisitionController@approve')->name('approve');
+            Route::post('/add_cheque',  'Admins\PaymentRequisitionController@add_cheque')->name('add_cheque');
+            Route::post('/cancel',  'Admins\PaymentRequisitionController@cancel')->name('cancel');
+            Route::get('/journey',  'Admins\PaymentRequisitionController@view_journey')->name('journey');
+            Route::get('/approval_logs',  'Admins\PaymentRequisitionController@approval_logs')->name('approval_logs');
+            Route::post('/complete',  'Admins\PaymentRequisitionController@complete')->name('complete');
+            Route::get('/completed_list',  'Admins\PaymentRequisitionController@completed_list')->name('completed_list');
+            Route::get('/ajaxCompletedList',  'Admins\PaymentRequisitionController@ajaxCompletedList')->name('ajaxCompletedList');
+            Route::get('{id}/chat', 'Admins\PaymentRequisitionController@chat_view')->name('chat');
+            Route::prefix('comment')->name('comment.')->group(function () {
+                Route::post('list', 'Admins\PaymentRequisitionController@get_latest_comment')->name('list'); 
+                Route::post('add', 'Admins\PaymentRequisitionController@add_comment')->name('add'); 
+            });
+
+            Route::get('/documents/{id}', 'Admins\PaymentRequisitionController@viewDocuments')->name('documents');
+            Route::get('/documents/{id}/open/{doc}',  'Admins\PaymentRequisitionController@openDocument')->name('document.open');
         });
     });
 
@@ -2592,6 +2622,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@kam_and_poc_qsr_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@kam_and_poc_qsr_list')->name('list');
         });
+        Route::prefix('sub_hub')->name('sub_hub.')->group(function () {
+            Route::get('', 'Admins\Reports\SubHubStationVisibilityController@index')->name('index');
+            Route::post('list', 'Admins\Reports\SubHubStationVisibilityController@list')->name('list');
+        });
     });
 
     //Reports end
@@ -2989,7 +3023,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::prefix('targets')->name('targets.')->group(function () {
                 Route::get('', 'Admins\GlobalSettingsController@sales_person_targets')->name('index');
                 Route::post('', 'Admins\GlobalSettingsController@sales_person_targets_submit')->name('update');
-                Route::get('list', 'Admins\GlobalSettingsController@sales_person_targets_list')->name('list');
+                Route::post('upload', 'Admins\GlobalSettingsController@upload')->name('upload');
+                // Route::get('list', 'Admins\GlobalSettingsController@sales_person_targets_list')->name('list');
+                Route::post('list', 'Admins\GlobalSettingsController@sales_person_targets_segment_list')->name('list');
                 Route::post('delete_sale_person_targets', 'Admins\GlobalSettingsController@delete_sale_person_targets')->name('delete');
             });
             Route::prefix('history')->name('history.')->group(function () {

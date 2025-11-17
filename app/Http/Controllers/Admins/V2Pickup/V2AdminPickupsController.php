@@ -4420,7 +4420,7 @@ class V2AdminPickupsController extends Controller
                         $details['tracking_number'] = $shipment->tracking_number;
                         $details['pieces_count'] = $shipment->pieces;
                         $details['pieces_tracking_numbers'] = $shipment_pieces;
-                        ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null, $shipment_pieces->id);
+                        ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null, null);
                         return ['status' => 3, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
                     } else {
                         if ($shipment->shipper_status_id == 17) {

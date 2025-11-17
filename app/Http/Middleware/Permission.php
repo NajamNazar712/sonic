@@ -725,6 +725,7 @@ class Permission
             'management.zonal.view_cities' => 131,
 
             'management.city.index' => 88,
+            'management.cx_city_list' => 1034,
             'management.city.ajax' => 88,
             'management.city.form' => 89,
             'management.city.edit' => 90,
@@ -1548,7 +1549,10 @@ class Permission
 
             'settings.product_tax.index' => 1037,
             'settings.product_tax_logs.index' => 1039,
-             'settings.geo_codes.index' => 1040
+             'settings.geo_codes.index' => 1040,
+            'admin.finance.prf.index' => 1046,
+            'admin.finance.prf.list' => 1047,
+            'admin.finance.prf.completed_list' => 1050
         ],
         'shipper' => [
             'shipment.book.index' => 1,
@@ -1657,9 +1661,10 @@ class Permission
      */
     public function handle($request, Closure $next)
     {
-       
+    
         if (Auth::guard('admin')->check()) {
             $action = str_replace('admin.', '', $request->route()->getName());
+
             if (session('department_id') == 7) {
                 if (!Session::has('sale_users_bypass')) {
                     $sale_users_bypass = array();

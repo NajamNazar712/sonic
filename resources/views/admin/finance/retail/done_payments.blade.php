@@ -338,6 +338,51 @@
 									</div>
 								</div>
 							</div>
+
+							<div class="modal fade" id="done_payment_reports" role="dialog" aria-labelledby="done_payment_reports" aria-hidden="true">
+								<div class="modal-dialog modal-lg" role="document">
+									<div class="modal-content col">
+										<div class="modal-header">
+											<h4 class="modal-title" id="company_banks_title">Done Payment Reports</h4>
+
+											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+												<span aria-hidden="true">×</span>
+											</button>
+										</div>
+										<form method="post" class="form-horizontal" id="dps_payment_form" novalidate="novalidate">
+											@csrf
+											<div class="modal-body  text-center">
+												<div class="row justify-content-center">
+													<div class="col-6">
+														<label>Select Date</label>
+														<div class="form-group input-group ml">
+															<div class="input-group-prepend">
+															<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+																<span class="la la-calendar-o"></span>
+															</span>
+															</div>
+															<input type="text" name="dps_from"
+																   data-value="{{date('Y-m-d')}}"
+																   class="form-control pickadate bg-primary border-primary white rounded-right"
+																   id="dps_date_from" placeholder="Date (From)">
+														</div>
+													</div>
+
+													<div class="col-md-12">
+														<table id="dps_report_table" class="table table-responsive">
+
+														</table>
+													</div>
+
+												</div>
+											</div>
+											<div class="modal-footer">
+												<button tabindex="-1" type="submit" class="btn btn-primary ml-1 text-left" id="dps_submit_report">Generate</button>
+											</div>
+										</form>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -382,6 +427,99 @@
 					$(this).valid();
 				}
 			});
+
+
+			$('#dps_date_from').pickadate({
+				firstDay: 1,
+				clear: '',
+				selectYears: true,
+				selectMonths: true,
+				formatSubmit: 'yyyy-mm-dd 00:00:00',
+				hiddenSuffix: '_formatted',
+				onSet: function(context) {
+					if (context.select) {
+						$('#search_date_to').pickadate('picker').set('min', $('#dps_date_from').pickadate('picker').get('select'));
+					}
+				}
+			});
+
+
+			$('#dps_payment_form').validate({
+				errorClass: 'danger',
+				successClass: 'success',
+				normalizer: function (value) {
+					return $.trim(value);
+				},
+				errorPlacement: function (error, element) {
+					error.addClass('w-100').appendTo(element.parent('.form-group'));
+				},
+				submitHandler: function (form) {
+					$.ajax({
+						url: '{!! route('admin.finance.done_payments.generate_or_find_report') !!}',
+						method: 'POST',
+						data: {
+							'_token': '{{ csrf_token() }}',
+							'retail': 1,
+							'dps_date_from': $('input[name="dps_from_formatted"]').val(),
+						}
+					})
+							.done(function (data) {
+
+								// 🔹 Base URL for reports (public/reports)
+								var reportsBaseUrl = '{{ url('reports') }}';
+
+								// 🔹 Target table body (or table) where rows will be pushed
+								var $table = $('#dps_report_table');
+								$table.empty(); // clear previous results
+
+								if (data && data.files && data.files.length) {
+									// Build a row for each file
+									$.each(data.files, function (index, fileName) {
+										var fileUrl = reportsBaseUrl + '/' + fileName;
+
+										var rowHtml =
+												'<tr>' +
+												'<td>' + (index + 1) + '</td>' +
+												'<td>' + (data.date || '') + '</td>' +
+												'<td>' + fileName + '</td>' +
+												'<td>' +
+												'<a href="' + fileUrl + '" target="_blank" class="btn btn-sm btn-primary">' +
+												'View / Download' +
+												'</a>' +
+												'</td>' +
+												'</tr>';
+
+										$table.append(rowHtml);
+									});
+
+									// Optional toast
+									toastr.success('Reports found for ' + (data.date || ''), 'Success!', {
+										positionClass: 'toast-bottom-center',
+										containerId: 'toast-bottom-center'
+									});
+
+								} else {
+									// No files found → show a single row
+									var emptyRow =
+											'<tr>' +
+											'<td colspan="4" class="text-center text-muted">No reports found for this date.</td>' +
+											'</tr>';
+
+									$table.append(emptyRow);
+
+									toastr.warning('No reports found for selected date.', 'Info', {
+										positionClass: 'toast-bottom-center',
+										containerId: 'toast-bottom-center'
+									});
+								}
+
+								// If you still want to hide the modal:
+								// $('#done_payment_reports').modal('hide');
+							});
+				}
+			});
+
+
             $('#search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -548,6 +686,19 @@
 						}
 					},
 						@endif
+
+						@if (session('role_id') == 1 || in_array(1053, session('permissions')))
+					{
+						text: 'Generate Done Payment Report',
+						className: 'btn btn-primary',
+						enabled: true,
+						action: function (e, dt, node, config) {
+							$('#done_payment_reports').modal('show');
+
+						}
+					},
+						@endif
+
 						@if (session('role_id') == 1 || in_array(457, session('permissions')))
 							{
 							text: 'Paid',

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\Admins\FTLController;
@@ -79,6 +81,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use NumberToWords\NumberToWords;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Session;
 use SnappyPDF;
@@ -1241,6 +1244,63 @@ class ShipperShipmentBookController extends Controller
             return ['status' => 2];
         }
     }
+    static private function amount_to_words($amount)
+    {
+        $number_to_words = new NumberToWords();
+        $number_transformer = $number_to_words->getNumberTransformer('en');
+
+        // Handle zero amount
+        if ($amount == 0) {
+            return "Zero Rupees";
+        }
+
+        $integer_part = floor($amount);
+        $decimal_part = round(($amount - $integer_part) * 100);
+
+        // If amount is less than 1 (e.g. 0.05, 0.5)
+        if ($integer_part == 0 && $decimal_part > 0) {
+            $paisa_words = ucwords(str_replace('-', ' ', $number_transformer->toWords($decimal_part)));
+            return $paisa_words . " Paisa";
+        }
+
+        // Convert main (rupees) part
+        $words = ucwords(str_replace('-', ' ', $number_transformer->toWords($integer_part)));
+
+        // Add "Rupees" for smaller numbers
+        if ($integer_part < 1000) {
+            $words .= " Rupees";
+        }
+
+        // Add paisa part if exists
+        if ($decimal_part > 0) {
+            $paisa_words = ucwords(str_replace('-', ' ', $number_transformer->toWords($decimal_part)));
+            $words .= " And " . $paisa_words . " Paisa";
+        }
+
+        return $words;
+    }
+
+
+//    static private function amount_to_words($amount)
+//    {
+//
+//        $number_to_words = new NumberToWords();
+//        $number_transformer = $number_to_words->getNumberTransformer('en');
+//
+//        $amount_in_words = $number_transformer->toWords($amount, 'PKR');
+//
+//        $last_position = strrpos($amount_in_words, ' ');
+//
+//        if ($last_position !== FALSE) {
+//            $amount_in_words = substr_replace($amount_in_words, ' & ', $last_position, strlen(' '));
+//        }
+//
+//        $amount_in_words = str_replace('-', ' ', $amount_in_words);
+//
+//        $amount_in_words = ucwords($amount_in_words);
+//
+//        return $amount_in_words;
+//    }
 
     public static function air_waybill($user_type, $user_id, $ids, $body_only = FALSE, $type = NULL, $shipper_name = NULL, $shipper_phone = NULL, $print_status = NULL)
     {
@@ -2095,6 +2155,7 @@ class ShipperShipmentBookController extends Controller
                         } else {
                             $table_end .= '
                                 <td class="align-middle border twice-top twice-bottom twice-left"><strong>Rs ' . number_format($shipment->amount) . '</strong></td>
+                                <td colspan="4" class="border twice-top twice-bottom twice-left" style="height: 32px;"><strong>' . self::amount_to_words($shipment->amount) . ' Only</strong></td>
                         ';
                         }
                     }
@@ -3511,18 +3572,44 @@ class ShipperShipmentBookController extends Controller
 
                 unset($spreadsheet);
             } else {
-                $forms = $request->all();
+                // Recombine corrected error rows back into the original cached full set
+                $batchId = $request->input('batch_id');
+                $cacheKey = $batchId ? "excel_import:{$user_id}:{$batchId}" : null;
 
-                $forms = $forms['form'];
-                foreach ($forms as $form) {
-                    $row = array();
-                    foreach ($form as $key => $value) {
-                        $row[$key] = $value;
+                $payload = $cacheKey ? Cache::get($cacheKey) : null;
+                // Fallback: if no cache (unexpected), use raw form rows (legacy)
+                if (!$payload) {
+                    $rows = [];
+                    $forms = $request->input('form', []);
+                    foreach ($forms as $excelRowId => $form) {
+                        $row = [];
+                        foreach ($form as $k => $v) $row[$k] = $v;
+                        $rows[] = $row;
                     }
-                    $rows[] = $row;
-                }
-                $service_type_check_id = $request->service_type_check_id;
+                    $service_type_check_id = $request->service_type_check_id;
+                } else {
+                    // We have the original full set cached (keyed by Excel row id: 2..N)
+                    $cachedRowsById = $payload['rows'];                   // [2 => [...], 3 => [...], ...]
+                    $meta           = $payload['meta'] ?? [];
 
+                    // Trust server meta primarily; fall back to request if meta missing
+                    $service_type_check_id = $meta['service_type_check_id'] ?? $request->service_type_check_id ?? null;
+                    $omni                  = $meta['omni'] ?? $omni;
+
+                    // Overlay incoming corrections onto cached rows by exact excel row id
+                    $incoming = $request->input('form', []);              // ['2' => [...], '5' => [...], ...]
+                    foreach ($incoming as $excelRowId => $formRow) {
+                        if (isset($cachedRowsById[$excelRowId])) {
+                            // do not keep any helper keys you may add on the frontend
+                            unset($formRow['_row_id']);
+                            $cachedRowsById[$excelRowId] = array_merge($cachedRowsById[$excelRowId], $formRow);
+                        }
+                    }
+
+                    // Rebuild $rows in the original order (2..N); this keeps $key+2 == ExcelRowId
+                    ksort($cachedRowsById, SORT_NUMERIC);
+                    $rows = array_values($cachedRowsById);
+                }
             }
 
             $errors = array();
@@ -3904,6 +3991,7 @@ class ShipperShipmentBookController extends Controller
                     }
                 }
             }
+
             if (empty($errors)) {
                 if (empty($nsa_error)) {
                     if (empty($bdmk_error)) {
@@ -3990,7 +4078,35 @@ class ShipperShipmentBookController extends Controller
                 foreach ($cities as $city) {
                     $city_name[$city->name] = $city->name;
                 }
-                return view('client.shipment.book.errors')->with(['data' => $rows, 'errors' => $errors, 'cities' => $city_name, 'booking_types' => $booking_types, 'pickup_addresses' => $pickup_addresses, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'user_shipping_modes' => $user_shipping_modes, 'charges_modes' => $charges_modes, 'service_type_check_id' => $service_type_check_id, 'omni' => $omni]);
+
+
+                $error_keys = array_keys($errors);
+                $allRowsByExcelId = [];
+                foreach ($rows as $idx => $row) {
+                    $excelRowId = $idx + 2;
+                    $allRowsByExcelId[$excelRowId] = $row;
+                }
+
+
+                $batchId = (string) Str::uuid();
+                $cacheKey = "excel_import:{$user_id}:{$batchId}";
+
+                Cache::put($cacheKey, [
+                    'rows' => $allRowsByExcelId,
+                    'meta' => [
+                        'service_type_check_id' => $service_type_check_id,
+                        'omni' => $omni,
+                    ],
+                ], now()->addHours(2));
+
+
+                $errorRowsOnly = array_intersect_key($allRowsByExcelId, array_flip($error_keys));
+
+                foreach ($errorRowsOnly as $rid => &$r) {
+                    $r['_row_id'] = $rid;
+                }
+                unset($r);
+                return view('client.shipment.book.errors')->with(['data' => $errorRowsOnly, 'errors' => $errors, 'cities' => $city_name, 'booking_types' => $booking_types, 'pickup_addresses' => $pickup_addresses, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'user_shipping_modes' => $user_shipping_modes, 'charges_modes' => $charges_modes, 'service_type_check_id' => $service_type_check_id, 'omni' => $omni,'batch_id'=>$batchId]);
             }
         } else {
             return redirect()->back()->with('error', 'No Shipments in File');
@@ -6518,17 +6634,44 @@ class ShipperShipmentBookController extends Controller
 
                 unset($spreadsheet);
             } else {
-                $forms = $request->all();
+                // Recombine corrected error rows back into the original cached full set
+                $batchId = $request->input('batch_id');
+                $cacheKey = $batchId ? "cor_excel_import:{$user_id}:{$batchId}" : null;
 
-                $forms = $forms['form'];
-                foreach ($forms as $form) {
-                    $row = array();
-                    foreach ($form as $key => $value) {
-                        $row[$key] = $value;
+                $payload = $cacheKey ? Cache::get($cacheKey) : null;
+                // Fallback: if no cache (unexpected), use raw form rows (legacy)
+                if (!$payload) {
+                    $rows = [];
+                    $forms = $request->input('form', []);
+                    foreach ($forms as $excelRowId => $form) {
+                        $row = [];
+                        foreach ($form as $k => $v) $row[$k] = $v;
+                        $rows[] = $row;
                     }
-                    $rows[] = $row;
+                    $service_type_check_id = $request->service_type_check_id;
+                } else {
+                    // We have the original full set cached (keyed by Excel row id: 2..N)
+                    $cachedRowsById = $payload['rows'];                   // [2 => [...], 3 => [...], ...]
+                    $meta           = $payload['meta'] ?? [];
+
+                    // Trust server meta primarily; fall back to request if meta missing
+                    $service_type_check_id = $meta['service_type_check_id'] ?? $request->service_type_check_id ?? null;
+                    $omni                  = $meta['omni'] ?? $omni;
+
+                    // Overlay incoming corrections onto cached rows by exact excel row id
+                    $incoming = $request->input('form', []);              // ['2' => [...], '5' => [...], ...]
+                    foreach ($incoming as $excelRowId => $formRow) {
+                        if (isset($cachedRowsById[$excelRowId])) {
+                            // do not keep any helper keys you may add on the frontend
+                            unset($formRow['_row_id']);
+                            $cachedRowsById[$excelRowId] = array_merge($cachedRowsById[$excelRowId], $formRow);
+                        }
+                    }
+
+                    // Rebuild $rows in the original order (2..N); this keeps $key+2 == ExcelRowId
+                    ksort($cachedRowsById, SORT_NUMERIC);
+                    $rows = array_values($cachedRowsById);
                 }
-                $service_type_check_id = $request->service_type_check_id;
             }
 
             $errors = array();
@@ -7044,7 +7187,26 @@ class ShipperShipmentBookController extends Controller
                     $city_name[$city->name] = $city->name;
                 }
 
-                return view('client.shipment.book.corporate.errors')->with(['data' => $rows, 'errors' => $errors, 'cities' => $city_name, 'booking_types' => $booking_types, 'pickup_addresses' => $pickup_addresses, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'delivery_types' => $delivery_types, 'charges_modes' => $charges_modes, 'user_shipping_modes' => $user_shipping_modes, 'service_type_check_id' => $service_type_check_id, 'omni' => $omni]);
+                $batchId = (string) Str::uuid();
+                $cacheKey = "cor_excel_import:{$user_id}:{$batchId}";
+
+                Cache::put($cacheKey, [
+                    'rows' => $allRowsByExcelId,
+                    'meta' => [
+                        'service_type_check_id' => $service_type_check_id,
+                        'omni' => $omni,
+                    ],
+                ], now()->addHours(2));
+
+
+                $errorRowsOnly = array_intersect_key($allRowsByExcelId, array_flip($error_keys));
+
+                foreach ($errorRowsOnly as $rid => &$r) {
+                    $r['_row_id'] = $rid;
+                }
+                unset($r);
+
+                return view('client.shipment.book.corporate.errors')->with(['data' => $rows, 'errors' => $errors, 'cities' => $city_name, 'booking_types' => $booking_types, 'pickup_addresses' => $pickup_addresses, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'delivery_types' => $delivery_types, 'charges_modes' => $charges_modes, 'user_shipping_modes' => $user_shipping_modes, 'service_type_check_id' => $service_type_check_id, 'omni' => $omni,'batch_id'=>$batchId]);
             }
         } else {
             return redirect()->back()->with('error', 'No Shipments in File');

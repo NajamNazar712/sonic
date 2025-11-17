@@ -167,25 +167,60 @@ class AdminFinanceController extends Controller
         $sdn_log->save();
     }
 
+//    static private function amount_to_words($amount)
+//    {
+//
+//        $number_to_words = new NumberToWords();
+//        $number_transformer = $number_to_words->getNumberTransformer('en');
+//
+//        $amount_in_words = $number_transformer->toWords($amount, 'PKR');
+//
+//        $last_position = strrpos($amount_in_words, ' ');
+//
+//        if ($last_position !== FALSE) {
+//            $amount_in_words = substr_replace($amount_in_words, ' & ', $last_position, strlen(' '));
+//        }
+//
+//        $amount_in_words = str_replace('-', ' ', $amount_in_words);
+//
+//        $amount_in_words = ucwords($amount_in_words);
+//
+//        return $amount_in_words;
+//    }
     static private function amount_to_words($amount)
     {
-
         $number_to_words = new NumberToWords();
         $number_transformer = $number_to_words->getNumberTransformer('en');
 
-        $amount_in_words = $number_transformer->toWords($amount, 'PKR');
-
-        $last_position = strrpos($amount_in_words, ' ');
-
-        if ($last_position !== FALSE) {
-            $amount_in_words = substr_replace($amount_in_words, ' & ', $last_position, strlen(' '));
+        // Handle zero amount
+        if ($amount == 0) {
+            return "Zero Rupees";
         }
 
-        $amount_in_words = str_replace('-', ' ', $amount_in_words);
+        $integer_part = floor($amount);
+        $decimal_part = round(($amount - $integer_part) * 100);
 
-        $amount_in_words = ucwords($amount_in_words);
+        // If amount is less than 1 (e.g. 0.05, 0.5)
+        if ($integer_part == 0 && $decimal_part > 0) {
+            $paisa_words = ucwords(str_replace('-', ' ', $number_transformer->toWords($decimal_part)));
+            return $paisa_words . " Paisa";
+        }
 
-        return $amount_in_words;
+        // Convert main (rupees) part
+        $words = ucwords(str_replace('-', ' ', $number_transformer->toWords($integer_part)));
+
+        // Add "Rupees" for smaller numbers
+        if ($integer_part < 1000) {
+            $words .= " Rupees";
+        }
+
+        // Add paisa part if exists
+        if ($decimal_part > 0) {
+            $paisa_words = ucwords(str_replace('-', ' ', $number_transformer->toWords($decimal_part)));
+            $words .= " And " . $paisa_words . " Paisa";
+        }
+
+        return $words;
     }
 
     static public function international_gst()
@@ -22297,4 +22332,46 @@ class AdminFinanceController extends Controller
         return ['status' => 0, 'success' => 'Payment(s) Tax marked Paid'];
     }
 
+    public function generate_or_find_report(Request $request){
+        if ($request->filled('dps_date_from')) {
+
+            // Convert incoming date to Y_m_d format
+            $date = Carbon::parse($request->dps_date_from)->format('Y_m_d');
+
+            // Path to /public/reports
+            $path = public_path('reports');
+
+            if(isset($request->retail)){
+                // File search pattern
+                $pattern = $path . "/retail_done_payment_report_{$date}_*.xlsx";
+                // Find matching files
+                $files = glob($pattern);
+                if(count($files) == 0){
+                    AdminReportsEmailController::done_payment($date);
+                    $files = glob($pattern);
+                }
+            }else{
+                // File search pattern
+                $pattern = $path . "/done_payment_report_{$date}_*.xlsx";
+                // Find matching files
+                $files = glob($pattern);
+                if(count($files) == 0){
+                    AdminReportsEmailController::done_payment($date);
+                    $files = glob($pattern);
+                }
+            }
+
+
+            return response()->json([
+                'date'  => $date,
+                'files' => array_map('basename', $files),
+                'count' => count($files),
+            ]);
+
+        }
+
+        return response()->json([
+            'error' => 'dps_date_from is required'
+        ], 400);
+    }
 }

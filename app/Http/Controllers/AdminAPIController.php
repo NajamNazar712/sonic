@@ -167,7 +167,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Password;
 use Illuminate\Support\Str;
-
+use App\Models\TrackingActivity;
 
 class AdminAPIController extends Controller
 {
@@ -2831,6 +2831,36 @@ class AdminAPIController extends Controller
             return response()->json(['status' => 0, 'rates' => $rates]);
         }
         return response()->json(['status' => 1, 'message' => "Invalid Pickup Address"]);
+    }
+    public function retail_center_location(Request $request){
+        
+        $rules = [
+            'latitude' => 'required',
+            'longitude' => 'required',
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+        
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+
+            $latitude = $request->latitude;
+            $longitude = $request->longitude;
+            
+            $tolerance = 0.05; // 1 degree latitude ≈ 111 km && 0.05 degrees ≈ 0.05 × 111 = ~5.5 km
+            $centerLocations = RetailTraxCenter::whereBetween('location_latitude', [$latitude - $tolerance, $latitude + $tolerance])
+                ->whereBetween('location_longitude', [$longitude - $tolerance, $longitude + $tolerance])
+                ->select('name', 'location_latitude as latitude', 'location_longitude as longitude')
+                ->get();
+            
+            if($centerLocations->isNotEmpty()) {
+                return response()->json(['status' => 0, 'details' => $centerLocations]);
+            }
+            return response()->json(['status' => 1, 'message' => "Trax center not available at the given location.s"]);
+        }
     }
 
     public function retail_shipment_store(Request $request)
@@ -12956,4 +12986,166 @@ class AdminAPIController extends Controller
             }
             return response()->json(['status' => 1, 'error' => 'Shipper not found!']);
         }
+        public function shipmentTrack(Request $request)
+    {
+        $rules = [
+            'tracking_number' => ['required', 'integer', 'digits_between:10,20', 'exists:shipments,tracking_number'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $tracking_number = $request->tracking_number;
+            $crmRequest = $request->crm_request;
+            $shipment = Shipment::where('tracking_number', $tracking_number)->first();
+            //using this condition for the raise of complain request.
+            if($crmRequest == 1){
+                
+                $crmCheck = CrmRequest::where('shipment_id', $shipment->id)->whereIn('status_id',[1,2])->exists();   
+                if($crmCheck){
+                    return response()->json(['status' => 1, 'message' => 'Tracking of Shipment #' . $tracking_number . 'has been complain request already Locked.']);
+                }
+                if ($shipment->pickup_address->city->id == $shipment->consignee_city_id && $shipment->created_at > Carbon::now()->subHours(24) && !$crmCheck && $shipment->shipper_status_id == 1) {
+                    CRMController::add(1, 3, 5,1 ,$request->admin_id, 0, $shipment->id, $shipment->user_id, NULL, 'Shipment delay pickup: Same city before 24 hours');
+                    return response()->json(['status' => 0, 'message' => 'Tracking of Shipment #' . $tracking_number . 'has been automatically generated for your request']);
+                } elseif ($shipment->pickup_address->city->id != $shipment->consignee_city_id && $shipment->created_at > Carbon::now()->subHours(72) &&  $shipment->shipper_status_id == 1) {
+                    CRMController::add(1, 3, 5, 1, $request->admin_id, 0, $shipment->id, $shipment->user_id, NULL, 'Shipment delay pickup (different city before 72 hrs).');
+                    return response()->json(['status' => 0, 'message' => 'Tracking of Shipment #' . $tracking_number . 'has been automatically generated for your request']);
+                }else{
+                    // Shipment is less than 24 hours old &  Raise complaint or take action
+                    return response()->json(['status' => 0, 'message' => 'Tracking of Shipment #' . $tracking_number . '— a complaint ticket has already been raised by the CRM.']);
+                }
+
+            }    
+            if(!TrackingActivity::where('shipment_id',$shipment->id)->exists()){
+                TrackingActivity::create([
+                    'shipment_id' => $shipment->id,
+                    'admin_id' => $request->admin_id,
+                ]);
+            }
+            $sub_segment_name = '-';
+            $sub_segment = DB::table('shipper_segment_logs')
+                ->leftJoin('sub_category_segments', 'sub_category_segments.id', 'shipper_segment_logs.sub_segment_id')
+                ->where('shipment_id', $shipment->id)
+                ->select('sub_category_segments.name')
+                ->first();
+
+            if ($sub_segment && $sub_segment->name) {
+                $sub_segment_name = $sub_segment->name;
+            }
+
+            $details = array();
+
+            $details['tracking_number'] = $tracking_number;
+
+            $details['order_id'] = $shipment->order_id;
+
+            $details['order_date'] = $shipment->pickup_date;
+            $details['booking_date'] = $shipment->created_at;
+            $details['shipment_status'] = $shipment->status_shipper->name;
+
+            $shipper = $shipment->user;
+            if($shipment->shipper_status_id != 14){
+                $etd = $shipment->pickup_city_etd;
+                if($etd){
+                    list($min, $max) = explode('-', $shipment->pickup_city_etd->range);
+                    $daysDifference = $shipment->getDaysDifferenceAttribute();
+                    if ($daysDifference >= (int)$min && $daysDifference <= (int)$max) {
+                        $details["etd_working_status"] = "Within ETD";
+                    } elseif ($daysDifference > (int)$max) {
+                        $details["etd_working_status"] = "ETD Passed";
+                    } else {
+                        $details["etd_working_status"] = "Before ETD";
+                    }
+                    $details['etd_working_days'] = $etd->label;
+                    $details['etd_deadline'] =  $shipment->created_at->toDateString() .' - '. $shipment->created_at->copy()->addDays((int) $max)->toDateString();
+                }
+            }
+            $details['crm_ticket_no'] = ($shipment?->crm_request) ? $shipment?->crm_request?->id .' ('.$shipment->crm_request?->request_status?->name .')' : '-';
+            $details['crm_ticket_date'] = ($shipment?->crm_request) ? $shipment?->crm_request?->created_at->format('Y-m-d H:i:s')  : '-';
+            $details['shipper']['name'] = $shipper->name;
+
+            $pickup = $shipment->pickup_address;
+
+            $details['pickup']['origin'] = $pickup->city->name;
+
+            // if ($type == 0) {
+                $details['shipper']['account_number'] = $shipper->id;
+                $details['shipper']['phone_number_1'] = $shipper->phone;
+                $details['shipper']['phone_number_2'] = $shipper->phone2;
+                $details['shipper']['email'] = $shipper->email;
+                $details['shipper']['city'] = $shipper->city->name;
+
+                $details['pickup']['person_of_contact'] = $pickup->poc;
+                $details['pickup']['phone_number'] = $pickup->phone;
+                $details['pickup']['email'] = $pickup->email;
+                $details['pickup']['address'] = $pickup->pickup_address;
+            // }
+
+            $details['consignee']['name'] = $shipment->consignee_name;
+            $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
+            $details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
+            $details['consignee']['destination'] = $shipment->consignee_city->name;
+            $details['consignee']['address'] = $shipment->consignee_address;
+
+            foreach ($shipment->items as $item) {
+                $item_details = array();
+
+                $item_details['order_id'] = $shipment->order_id;
+                $item_details['product_type'] = $item->product->product_name;
+                $item_details['description'] = $item->description;
+                $item_details['quantity'] = $item->quantity;
+
+                $details['order_information']['items'][] = $item_details;
+            }
+
+            // if ($type == 0) {
+                $details['order_information']['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
+                $details['order_information']['shipping_mode'] = $shipment->shipping_mode->mode;
+                $details['order_information']['amount'] = $shipment->amount;
+                $details['order_information']['instructions'] = $shipment->special_instructions;
+            // }
+
+            // if ($type == 0) {
+                foreach ($shipment->shipment_journey as $journey) {
+                    if ($journey->verification) {
+                        $journey_details = array();
+
+                        $journey_details['date_time'] = Carbon::parse($journey->created_at)->format('d/m/Y h:i A');
+                        $journey_details['timestamp'] = Carbon::parse($journey->created_at)->timestamp;
+                        $journey_details['status'] = $journey->shipment_status_shipper->name;
+
+                        $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : '-';
+
+                        $details['tracking_history'][] = $journey_details;
+                    }
+                }
+            // } else {
+                // foreach ($shipment->shipment_journey as $journey) {
+                //     if ($journey->consignee_status_id != null) {
+                //         if ($journey->verification) {
+                //             $journey_details = array();
+
+                //             $journey_details['date_time'] = Carbon::parse($journey->created_at)->format('d/m/Y h:i A');
+                //             $journey_details['timestamp'] = Carbon::parse($journey->created_at)->timestamp;
+                //             $journey_details['status'] = $journey->shipment_status_consignee->name;
+
+                //             $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : null;
+
+                //             $details['tracking_history'][] = $journey_details;
+                //         }
+                //     }
+                // }
+            // }
+
+            $details['order_information']['sub_segment'] = $sub_segment_name;
+
+            return response()->json(['status' => 0, 'message' => 'Tracking of Shipment #' . $tracking_number, 'details' => $details]);
+        }
     }
+
+}

@@ -187,8 +187,9 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\BulkStatusSharingWithWalletReplicate',
         'App\Console\Commands\ExportShipmentReport',
         'App\Console\Commands\OptimizeTable',
+        'App\Console\Commands\TicketDraftingCRM',
        'App\Console\Commands\UpdateRvShipments',
-        'App\Console\Commands\UpdateRvShipments',
+        'App\Console\Commands\UpdatePendingBanks',
         // 'App\Console\Commands\QsrEmail',
         // 'App\Console\Commands\PendingDeliveriesReport',
 
@@ -676,6 +677,9 @@ class Kernel extends ConsoleKernel
         $schedule->command('wallet-users:make-to-done')->dailyAt('06:00')->runInBackground();
         $schedule->command('revenue_report_by_user_excel')->dailyAt('16:11')->runInBackground();
         $schedule->command('disable_wallet_users')->twiceDaily('13','18')->runInBackground();
+        $schedule->command('ticketdraft:crm')
+            ->dailyAt('00:15') // runs at 12:15 AM every night
+            ->runInBackground();
         $walletChargesUpdate = GlobalSettings::where(['type' => 'wallet_charges_updated', 'setting_value' => 1])->first();
         if ($walletChargesUpdate) {
             $time = $walletChargesUpdate->text; // e.g., '11:00'
@@ -699,7 +703,7 @@ class Kernel extends ConsoleKernel
                 return Carbon::now()->format('Y-m-d H:i') === '2025-08-10 13:00';
             })
             ->withoutOverlapping();
-        // $schedule->command('shipments:update-rv-sar')->dailyAt('05:00');
+        $schedule->command('banks:update-pending')->dailyAt('23:00');
         // $schedule->command('export:shipment-report')
         //     ->dailyAt('14:46')              
         //     ->withoutOverlapping()         // prevent simultaneous runs

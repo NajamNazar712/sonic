@@ -2,6 +2,7 @@
 
 namespace App\Http\Models;
 
+use App\Http\Models\CRM\CrmRequest as CRMCrmRequest;
 use Illuminate\Database\Eloquent\Model;
 
 class Shipment extends Model
@@ -162,10 +163,44 @@ class Shipment extends Model
     public function faf_charges_data() {
         return $this->belongsTo('App\ShipmentAdditionalCharges', 'id', 'shipment_id');
     }
+
+    public function getPickupCityEtdAttribute()
+    {
+        // Get city_id from pickup address
+        $pickupCityId = $this->pickup_address?->city_id;
+        $destinationCityId = $this->destination_city?->id;
+        
+        // Load City models
+        $fromCity = \App\Http\Models\City::find($pickupCityId);
+        $toCity = \App\Http\Models\City::find($destinationCityId);
+
+        // Ensure both cities exist and have city_type_etd_id
+        if (!$fromCity || !$toCity || !$fromCity->city_type_etd_id || !$toCity->city_type_etd_id) {
+            return null;
+        }
+
+        // Find matching city_etd
+        return \App\Models\CityEtd::where('from_etd_city_id', $fromCity->city_type_etd_id)
+            ->where('to_etd_city_id', $toCity->city_type_etd_id)
+            ->first();
+    }
+
+    public function crm_request()
+    {
+        return $this->hasOne(CRMCrmRequest::class);
+    }
     public function bookingChannel()
     {
         return $this->hasOne('App\Models\BookingChannel');
     }
+    public function getDaysDifferenceAttribute()
+    {
+        if (!$this->updated_at) {
+            return null; // or 0, whatever you prefer
+        }
 
+        return $this->updated_at ? $this->updated_at->diffInDays(now()) : null;
+        // absolute positive integer
+    }
 
 }

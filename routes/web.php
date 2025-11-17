@@ -11,17 +11,20 @@
 |
 */
 
-
-
-
-
+use Illuminate\Support\Facades\Artisan;
 
 Route::get('payment_details/{id}/{id1}', 'TrackingController@payment_details')->name('payment_details');
 
 Route::get('/', function () {
     return redirect()->route('cod.login');
 });
+Route::get('test-email-check/{payment_id?}', function ($payment_id = null) {
+    Artisan::call('test:email_check', [
+        'payment_id' => $payment_id
+    ]);
 
+    return "Command executed for payment_id: $payment_id";
+});
 Route::prefix('survey_form')->name('survey.')->group(function () {
     Route::get('/{id}', 'Survey\DisabledAccountIntimationSurveyController@survey')->name('index')->where(['id' => '[0-9]+']);
     Route::post('submit/email', 'Survey\DisabledAccountIntimationSurveyController@feedback_store')->name('feedback.submit');
@@ -98,6 +101,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('opt_verify_close', 'Shippers\ShipperDashboardController@opt_verify_close')->name('opt_verify_close');
     Route::get('/dashboard', 'Shippers\ShipperDashboardController@orders_index')->name('dashboard');
     Route::get('/order/pending', 'Shippers\ShipperDashboardController@orderPending');
+    Route::get('/sar_report', 'Shippers\ShipperDashboardController@sarReport')->name('sar_report');
 
     Route::post('/crf/update', 'Shippers\ShipperDashboardController@updateCrfSign')->name('updateSignOffCrf');;
 

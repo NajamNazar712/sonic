@@ -1393,7 +1393,7 @@ class AdminReportsEmailController extends Controller
             $sheet->fromArray($done_payment_array, NULL, 'A2', true);
             $sheet->getStyle("B2:C4")->applyFromArray($cell_s);
             $sheet->getStyle("A7:F7")->applyFromArray($cell_st);
-            $date_file_name = Carbon::now()->format('Y_m_d_s');
+            $date_file_name = Carbon::parse($date)->format('Y_m_d_s');
             $sheet->setTitle('Done Payments ' . $date_file_name);
             $writer = new Xlsx($spreadsheet);
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -1618,7 +1618,7 @@ class AdminReportsEmailController extends Controller
                 $sheet->fromArray($retail_done_payment_array, NULL, 'A2', true);
                 $sheet->getStyle("B2:C4")->applyFromArray($cell_s);
                 $sheet->getStyle("A7:E7")->applyFromArray($cell_st);
-                $date_file_name = Carbon::now()->format('Y_m_d_s');
+                $date_file_name = Carbon::parse($date)->format('Y_m_d_s');
                 $sheet->setTitle('Retail Done Payments');
                 $writer = new Xlsx($spreadsheet);
                 header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
