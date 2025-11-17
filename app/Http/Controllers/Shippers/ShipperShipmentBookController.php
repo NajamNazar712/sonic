@@ -7198,7 +7198,7 @@ class ShipperShipmentBookController extends Controller
 
 
                 $batchId = (string) Str::uuid();
-                $cacheKey = "excel_import:{$user_id}:{$batchId}";
+                $cacheKey = "cor_excel_import:{$user_id}:{$batchId}";
 
                 Cache::put($cacheKey, [
                     'rows' => $allRowsByExcelId,
