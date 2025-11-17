@@ -2917,4 +2917,54 @@ class ShipperDashboardController extends Controller
 
         return response()->json(['status' => 1, 'success'=>'Profile Information Successfully Updated"']);
     }
+
+    public function sarReport(Request $request)
+    {
+
+        $setting = GlobalSettings::where('type', 'rv_permanent_disable_shippers')->first();
+        $shippers = [];
+
+        if ($setting && !empty($setting->text)) {
+            $shippers = explode(',', $setting->text);
+        }
+
+        $cutoffTime = Carbon::now()->subHours(48);
+        // 🧩 Subquery: har shipment ki latest SAR (status 65) journey
+        $latestJourney = DB::table('shipments_journey')
+            ->select(DB::raw('MAX(id) as max_id'), 'shipment_id')
+            ->groupBy('shipment_id');
+
+        // 🧾 Main query
+        $sarReport = DB::table('shipments_journey as sj')
+            ->joinSub($latestJourney, 'latest', function ($join) {
+                $join->on('sj.id', '=', 'latest.max_id');
+            })
+            ->join('shipments as s', 's.id', '=', 'sj.shipment_id')
+            ->select(
+                's.user_id',
+                DB::raw('COUNT(sj.shipment_id) as total_shipments'),
+                DB::raw('DATE(sj.created_at) as sar_date')
+            )
+            ->where('sj.shipper_status_id', 65)
+            ->where('sj.created_at', '>=', $cutoffTime)
+            ->where('s.user_id', Auth::id())
+            ->groupBy('s.user_id', DB::raw('DATE(sj.created_at)'))
+            ->orderBy('sar_date', 'desc');
+
+        // 🧮 Return Yajra DataTable
+        return DataTables::of($sarReport)
+            ->addColumn('sar_date', fn($item) => Carbon::parse($item->sar_date)->format('d-M-Y'))
+            ->addColumn('total_shipments', fn($item) => $item->total_shipments)
+            ->addColumn('return_confirm_date', function ($data) use ($shippers) {
+                if (in_array($data->user_id, $shippers)) {
+                    return '-';
+                }else {
+                    return  Carbon::parse($data->sar_date)->addDays(2)->format('d-M-Y');
+                }
+            })
+            ->rawColumns(['sar_date', 'return_confirm_date'])
+            ->make(true);
+    }
+
+
 }
