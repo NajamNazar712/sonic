@@ -581,6 +581,7 @@ use Illuminate\Http\Request;
             Route::prefix('sales_target')->name('sales_target.')->group(function () {
                 Route::get('list', 'AdminAPIController@sales_person_targets')->name('list');
                 Route::post('history', 'AdminAPIController@sales_person_target_history')->name('history');
+                Route::post('history_v1', 'AdminAPIController@sales_person_target_v1')->name('history_v1');
             });
 
             Route::prefix('delivery_note')->name('delivery_note.')->group(function () {
