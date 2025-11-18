@@ -134,7 +134,7 @@ use App\Http\Models\Excel_reports\RetailDonePaymentsReport;
 use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
 use App\Http\Models\Admin\ShipperVerificationPinCode as AdminShipperVerificationPinCode;
 use App\Http\Models\Admin\Retail\RetailShipment;
-
+use App\Models\PendingBankAccount;
 
 class NotificationsController extends Controller
 {
@@ -11674,7 +11674,7 @@ class NotificationsController extends Controller
                     $htmlTable .= '<br><p style="font-family:Arial;">Regards,<br><b>SLG Trax System</b></p>';
                     $to = Admin::whereIn('id',$salesPersonId)->pluck('email');
                     // Send email to main recipient and CC respective salespersons if needed
-                    $cc = 'fawad.ahmed@slgtrax.com';
+                    $cc = ['fawad.ahmed@slgtrax.com', 'ali.haiderd@slgtrax.com','anas.mazhar@slgtrax.com'];
                     $body = str_replace('[preview]', $htmlTable, $body);
                     self::email($subject, $body, $to, $cc);
                 }
