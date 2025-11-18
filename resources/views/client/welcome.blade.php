@@ -134,7 +134,7 @@
                                     <h2>Summary of Shipper Advice Request</h2>
                                 </div>
                                 <div class="col-auto">
-                                    <a href="{{ route('cod.return.pending.index') }}" class="btn btn-primary" data-toggle="tooltip" title="Click to order your packaging materials now" data-placement="bottom">
+                                    <a href="{{ route('cod.return.pending.index') }}" class="btn btn-primary"  data-placement="bottom">
                                         <i class="la la-rotate-left"></i>
                                         Shipper Advise Requested
                                     </a>
@@ -145,7 +145,7 @@
                                     <tr role="row" class="bg-primary white">
                                         <th class="border-primary border-darken-1">SAR Date</th>
                                         <th class="border-primary border-darken-1">Shipments</th>
-                                        <th class="border-primary border-darken-1">Return-Confirm/Reattempt Date</th>
+                                        <th class="border-primary border-darken-1">Return-Confirm Date</th>
                                     </tr>
                                 </thead>
                             </table>
