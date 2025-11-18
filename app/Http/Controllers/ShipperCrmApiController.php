@@ -490,7 +490,7 @@ class ShipperCrmApiController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $crm_request = CrmRequest::where('crm_requests.id', $request->crm_request_id)->leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_requests.case_nature_id')
+            $crm_request = CrmRequest::where(['crm_requests.id'=>$request->crm_request_id,'shipper_id'=> $request->shipper_id])->leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_requests.case_nature_id')
                 ->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'crm_requests.case_nature_type_id')
                 ->leftjoin('crm_request_channels as crc', 'crc.id', '=', 'crm_requests.channel_id')
                 ->leftjoin('crm_request_statuses as crs', 'crs.id', '=', 'crm_requests.status_id')
