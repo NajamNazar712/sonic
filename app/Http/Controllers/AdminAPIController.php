@@ -10337,6 +10337,9 @@ class AdminAPIController extends Controller
                 ->where('salesperson_target_segments.salesperson_id',$admin_id)
                 ->whereMonth('salesperson_target_segments.start_date', Carbon::parse($request->date)->format("m"))
                 ->whereYear('salesperson_target_segments.start_date', Carbon::parse($request->date)->format("Y"))
+                ->when($request->segment_id, function ($query) use ($request) {
+                    $query->where('salesperson_target_segments.segment_id', $request->segment_id);
+                })
                 ->orderBy('salesperson_target_segments.updated_at');
 
             if ($targets->exists()) {
