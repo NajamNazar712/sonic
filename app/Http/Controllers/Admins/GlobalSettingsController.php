@@ -2754,6 +2754,7 @@ class GlobalSettingsController extends Controller
                         'avg_rpk'                 => $intlRps,
                     ];
                 }
+                dd($segmentsToInser);
                 // Insert into DB
                 foreach ($segmentsToInsert as $data) {
                     SalespersonTargetSegment::updateOrCreate(
