@@ -755,7 +755,7 @@ use Illuminate\Http\Request;
 //                Route::get('request_list/{status?}', 'ShipperCrmApiController@crm_request_list')->name('request_list');
                 Route::get('request_list', 'ShipperCrmApiController@crm_request_list')->name('request_list');
                 Route::post('add_comments', 'ShipperCrmApiController@crm_comment_add')->name('add_comments');
-                Route::post('comments_details/{id}', 'ShipperCrmApiController@request_details')->name('comments_details');
+                Route::post('comments_details', 'ShipperCrmApiController@request_details')->name('comments_details');
                 Route::post('single_crm_request','ShipperCrmApiController@single_crm_request')->name('single_crm_request');
                 Route::post('receiving_sheet','ShipperCrmApiController@get_receving_sheet')->name('receiving_sheet');
             });
