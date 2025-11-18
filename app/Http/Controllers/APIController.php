@@ -4308,10 +4308,54 @@ class APIController extends Controller
                         else {
                             $details['payment_type'] = 'Adjusted';
                         }
+                        if($account_type_id == 1 && $done_payment_shipment->type == 0 ) {
+                            $details['total_charges'] =  $done_payment_shipment->charges + $done_payment_shipment->gst + $done_payment_shipment->sms_charges + $done_payment_shipment->wht + $done_payment_shipment->cod_sst;
+
+                        }else if ($account_type_id == 1 && $done_payment_shipment->type == 1 ) {
+                            $details['total_charges'] = $done_payment_shipment->charges + $done_payment_shipment->gst + $done_payment_shipment->sms_charges;
+
+                        }else if ($account_type_id == 1 && $done_payment_shipment->type == 3 ) {
+                            $details['total_charges'] = $done_payment_shipment->charges + $done_payment_shipment->gst + $done_payment_shipment->sms_charges;
+
+                        } else if ($account_type_id == 1 && $done_payment_shipment->type == 2) {
+                            $details['total_charges'] = '0';
+                        }
+
                         $details['payment_id'] = $done_payment_shipment->done_payment->id;
                         if ($account_type_id == 2) {
                             $details['invoice_ids'] = array();
-                            $details['invoice_ids'] = InvoiceShipment::where('shipment_id', $shipment->id)->groupBy('invoice_id')->pluck('invoice_id')->toArray();
+                            // Get all invoice shipments for this shipment
+                            $invoiceShipments = InvoiceShipment::where('shipment_id', $shipment->id)
+                            ->where('type', $done_payment_shipment->type) // same type (Delivered / Returned / Arrival)
+                            ->get();
+
+                            $total_charges = 0;
+
+                            foreach ($invoiceShipments as $inv) {
+
+                                // Delivered
+                                if ($done_payment_shipment->type == 0) {
+                                    $total_charges += ($inv->charges + $inv->gst + $inv->sms_charges + $inv->wht + $inv->cod_sst);
+                                }
+
+                                // Returned or Arrival
+                                else if ($done_payment_shipment->type == 1 || $done_payment_shipment->type == 3) {
+                                    $total_charges += ($inv->charges + $inv->gst + $inv->sms_charges);
+                                }
+
+                                // Adjusted or anything else
+                                else {
+                                    $total_charges += 0;
+                                }
+                            }
+
+                            $details['total_charges'] = $total_charges;
+
+                            // Also return invoice IDs (you already do this)
+                            $details['invoice_ids'] = InvoiceShipment::where('shipment_id', $shipment->id)
+                            ->groupBy('invoice_id')
+                            ->pluck('invoice_id')
+                            ->toArray();
                         }
                         $data[$shipment->tracking_number][] = $details;
                     }
