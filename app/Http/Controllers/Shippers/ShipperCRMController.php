@@ -250,7 +250,7 @@ class ShipperCRMController extends Controller
             $shipment_status = null;
             if($crm_request->shipment_id != null) {
                 $shipment_status = Shipment::find($crm_request->shipment_id);
-                $shipment_status = $shipment_status->status_shipper->name;
+                $shipment_status = $shipment_status?->status_shipper?->name;
             }
             $crm_comments = array();
             $last_comment = null;

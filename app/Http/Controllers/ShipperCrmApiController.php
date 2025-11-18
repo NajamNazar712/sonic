@@ -460,18 +460,20 @@ class ShipperCrmApiController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $rider_id =  $request->shipper_id;
-
+            $shipperId =  $request->shipper_id;
             foreach ($request->messages as $message) {
-                $commented_at = Carbon::createFromTimestampMs($message['commented_at'])->toDateTimeString();
+                $crmRequest = CrmRequest::find($message['crm_request_id']);
+                $crmRequest->launched_by_id = $shipperId;
+                $crmRequest->launched_by = 1;
+                $crmRequest->save();
                 $comment = new CrmComments();
                 $comment->crm_request_id = $message['crm_request_id'];
-                $comment->comment_by_id = $rider_id;
+                $comment->comment_by_id = $shipperId;
                 $comment->comment_by = 1;
-                $comment->comment_type = 1;
+                $comment->comment_type = 0;
                 $comment->comment = $message['comment'];
-                $comment->created_at = $commented_at;
-                $comment->updated_at = $commented_at;
+                $comment->created_at = date('Y-m-d H:i:s');
+                $comment->updated_at = $message['commented_at'];
                 $comment->save();
             }
 
