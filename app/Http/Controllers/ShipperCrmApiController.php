@@ -21,6 +21,8 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+
 use function foo\func;
 
 class ShipperCrmApiController extends Controller
@@ -451,9 +453,12 @@ class ShipperCrmApiController extends Controller
     }
     public function crm_comment_add(Request $request)
     {
+        $shipperId = $request->shipper_id;
         $validate = Validator::make($request->all(), [
             'messages' => ['required', 'array', 'min:1'],
-            'messages.*.crm_request_id' => ['required', 'integer', 'digits_between:1,10', 'exists:crm_requests,id'],
+            'messages.*.crm_request_id' => ['required', 'integer', 'digits_between:1,10',  Rule::exists('crm_requests', 'id')->where(function ($query) use ($shipperId) {
+                $query->where('shipper_id', $shipperId);
+            })],
             'messages.*.comment' => ['required', 'between:0,190'],
         ]);
        
@@ -532,7 +537,7 @@ class ShipperCrmApiController extends Controller
             
                 return response()->json(['status' => 0, 'message' => 'Success', 'crm_request' => $details]);
             } else {
-                return redirect()->back()->with('danger', 'CRM Request Not found!');
+                return response()->json(['status' => 1, 'message', 'CRM Request Not found!']);
             }
         }
     }
