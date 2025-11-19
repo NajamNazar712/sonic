@@ -4303,6 +4303,7 @@ class APIController extends Controller
                         } else if ($done_payment_shipment->type == 1) {
                             $details['payment_type'] = 'Returned';
                         }else if ($done_payment_shipment->type == 3) {
+                            $details['arrival_weight'] = $shipment->actual_weight;
                             $details['payment_type'] = 'Arrival';
                         }
                         else {
