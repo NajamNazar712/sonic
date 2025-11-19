@@ -2543,7 +2543,7 @@ class GlobalSettingsController extends Controller
         $month = $request->month;
 
         // Load spreadsheet
-        $spreadsheet = IOFactory::load($file->getRealPath());
+        $spreadsheet = IOFactory::load($file->getPathname());
         $sheet = $spreadsheet->getActiveSheet();
         $rows = $sheet->toArray();
 
@@ -2590,8 +2590,10 @@ class GlobalSettingsController extends Controller
         DB::beginTransaction();
         
         try {
+            
             foreach ($rows as $row) {
-                $row = [
+                
+                $valrow = [
                     "salesperson"      => $row[0] ?? null,
                     "codFlag"          => $row[1] ?? null,
                     "codRevenue"       => $row[2] ?? null,
@@ -2617,7 +2619,8 @@ class GlobalSettingsController extends Controller
                     "intlRps"          => $row[19] ?? null,
                     "intlRpk"          => $row[20] ?? null,
                 ];
-                $validator = Validator::make($row, [
+                
+                $validator = Validator::make($valrow, [
                     'salesperson' => 'required|string|max:100',
 
                     'codFlag' => 'required|integer',
@@ -2644,17 +2647,18 @@ class GlobalSettingsController extends Controller
                     'intlRps' => 'required|numeric',
                     'intlRpk' => 'required|numeric',
                 ]);
-
                 if ($validator->fails()) {
                     return redirect()
                         ->back()
                         ->withErrors($validator)
                         ->withInput(); // ✅ necessary for @error + old() to work
                 }
+
                 if (empty($row[0])) continue; // skip empty rows
 
                 $salesTraxId = trim($row[0]);
                 $salesperson = Admin::where('trax_id', $salesTraxId)->first();
+
                 if (!$salesperson) continue;
 
                 // after $salesTraxId and $salesperson lookup
@@ -2821,7 +2825,7 @@ class GlobalSettingsController extends Controller
 
         // 🔍 Apply filters dynamically
         if ($request->filled('start_date') && $request->filled('end_date')) {
-            $query->whereBetween('salesperson_target_segments.updated_at', [$request->start_date, $request->end_date]);
+            $query->where('salesperson_target_segments.start_date', [$request->start_date, $request->end_date]);
         }
 
         if ($request->filled('sales_person')) {
