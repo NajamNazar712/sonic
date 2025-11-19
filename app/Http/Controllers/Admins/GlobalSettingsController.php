@@ -2758,7 +2758,6 @@ class GlobalSettingsController extends Controller
                         'avg_rpk'                 => $intlRps,
                     ];
                 }
-                dd($segmentsToInser);
                 // Insert into DB
                 foreach ($segmentsToInsert as $data) {
                     SalespersonTargetSegment::updateOrCreate(
@@ -2825,7 +2824,8 @@ class GlobalSettingsController extends Controller
 
         // 🔍 Apply filters dynamically
         if ($request->filled('start_date') && $request->filled('end_date')) {
-            $query->where('salesperson_target_segments.start_date', [$request->start_date, $request->end_date]);
+            $query->whereMonth('salesperson_target_segments.start_date', Carbon::parse($request->start_date)->format("m"));
+            $query ->whereYear('salesperson_target_segments.start_date', Carbon::parse($request->start_date)->format("Y"));
         }
 
         if ($request->filled('sales_person')) {
