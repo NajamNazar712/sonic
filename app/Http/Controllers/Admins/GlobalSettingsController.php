@@ -2823,7 +2823,7 @@ class GlobalSettingsController extends Controller
             );
 
         // 🔍 Apply filters dynamically
-        if ($request->filled('start_date') && $request->filled('end_date')) {
+        if ($request->filled('start_date')) {
             $query->whereMonth('salesperson_target_segments.start_date', Carbon::parse($request->start_date)->format("m"));
             $query ->whereYear('salesperson_target_segments.start_date', Carbon::parse($request->start_date)->format("Y"));
         }
