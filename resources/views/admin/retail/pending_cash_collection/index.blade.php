@@ -164,12 +164,36 @@
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
+
                 onSet: function(context) {
+                    var fromPicker = $('#search_date_from').pickadate('picker');
+                    var toPicker   = $('#search_date_to').pickadate('picker');
+
+                    // When user selects a date
                     if (context.select) {
-                        $('#search_date_to').pickadate('picker').set('min', $('#search_date_from').pickadate('picker').get('select'));
+                        var fromDate = new Date(context.select);
+                        var maxAllowed = new Date(fromDate);
+                        maxAllowed.setMonth(maxAllowed.getMonth() + 1);
+
+                        toPicker.set('min', fromDate);
+                        toPicker.set('max', maxAllowed);
+                    }
+
+                    // When CLEAR is pressed
+                    if (context.clear) {
+                        // Reset To limits
+                        toPicker.set('min', false);
+                        toPicker.set('max', false);
+
+                        // BUG FIX: Reinit FROM picker
+                        fromPicker.stop();   // destroy
+                        $('#search_date_from').pickadate(); // reinitialize
                     }
                 }
             });
+
+
+
             $('#search_date_to').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
@@ -177,12 +201,34 @@
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
+
                 onSet: function(context) {
+                    var fromPicker = $('#search_date_from').pickadate('picker');
+                    var toPicker   = $('#search_date_to').pickadate('picker');
+
+                    // When user selects a date
                     if (context.select) {
-                        $('#search_date_from').pickadate('picker').set('max', $('#search_date_to').pickadate('picker').get('select'));
+                        var toDate = new Date(context.select);
+                        var minAllowed = new Date(toDate);
+                        minAllowed.setMonth(minAllowed.getMonth() - 1);
+
+                        fromPicker.set('max', toDate);
+                        fromPicker.set('min', minAllowed);
+                    }
+
+                    // When CLEAR is pressed
+                    if (context.clear) {
+                        fromPicker.set('min', false);
+                        fromPicker.set('max', false);
+
+                        // BUG FIX: Reinit TO picker
+                        toPicker.stop();   // destroy
+                        $('#search_date_to').pickadate(); // reinitialize
                     }
                 }
             });
+
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
