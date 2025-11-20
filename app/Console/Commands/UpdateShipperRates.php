@@ -128,7 +128,7 @@ class UpdateShipperRates extends Command
                     InitialChargesWebhookController::webhook_subscription($shipment_id);
                 }
             }
-
+            $shipment->refresh();
             $type = 3;
             if($shipment->shipper_status_id == 25){
                 $type = 1;
@@ -223,9 +223,9 @@ class UpdateShipperRates extends Command
                     $payable = $amount - ($charges + $gst + $wht + $cod_sst);
                 }
             }
-
-            AdminFinanceController::add_adjustment($shipment->id, $payable, 'Shipment Adjustment Charges', 15);
-
+            if($payable) {
+                AdminFinanceController::add_adjustment($shipment->id, $payable, 'Shipment Adjustment Charges', 15);
+            }
 
         }
     }
