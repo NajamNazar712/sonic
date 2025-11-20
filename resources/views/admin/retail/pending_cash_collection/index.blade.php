@@ -15,7 +15,26 @@
 
                 <div class="col">
                     <div class="row mb-2 justify-content-center">
-
+                        <div class="col-4">
+                            <div class="form-group input-group ml">
+                                <div class="input-group-prepend">
+                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="la la-calendar-o"></span>
+                                            </span>
+                                </div>
+                                <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from"  placeholder="Search Date (From)">
+                            </div>
+                        </div>
+                        <div class="col-4 ">
+                            <div class="form-group input-group ml">
+                                <div class="input-group-prepend">
+                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="la la-calendar-o"></span>
+                                            </span>
+                                </div>
+                                <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to"  placeholder="Search Date (To)">
+                            </div>
+                        </div>
                         <div class="col-3">
                             <fieldset class="position-relative has-icon-left">
                                 <input type="text" class="form-control" placeholder="Search By Tracking Number" id="search_tracking">
@@ -24,7 +43,11 @@
                                 </div>
                             </fieldset>
                         </div>
-
+                    </div>
+                    <div class="row mb-2 justify-content-center">
+                        <div class="col-2">
+                            <button type="button" id="search_filter_btn" class="mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                        </div>
                     </div>
 
                     <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
@@ -107,14 +130,22 @@
 
 @endsection
 @section('css')
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
+
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/fonts/line-awesome/css/line-awesome.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/fonts/simple-line-icons/style.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+
 @endsection
 
 @section('js')
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
@@ -126,6 +157,32 @@
 
     <script type="text/javascript">
         $(document).ready(function() {
+            $('#search_date_from').pickadate({
+                firstDay: 1,
+                clear: 'Clear',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_date_to').pickadate('picker').set('min', $('#search_date_from').pickadate('picker').get('select'));
+                    }
+                }
+            });
+            $('#search_date_to').pickadate({
+                firstDay: 1,
+                clear: 'Clear',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_date_from').pickadate('picker').set('max', $('#search_date_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -354,6 +411,8 @@
                     url:'{{ route('admin.delivery.cash_collection.retail.list') }}',
                     data:function (d) {
                         d.search_tracking = $('#search_tracking').val();
+                        d.search_date_from = $('input[name="search_date_from_formatted"]').val();
+                        d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
                 },
                  rowId: 'retail_pickup_note_id',
@@ -417,6 +476,12 @@
             $('#search_tracking').on('change',function () {
                 table.draw();
             });
+
+            $('#search_filter_btn').on('click',function () {
+                table.draw();
+            });
+
+
             var hub_ids = [];
             $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
 
