@@ -112,6 +112,7 @@ use Illuminate\Http\Request;
         Route::get('catalyst_users', 'APIController@catalyst_users')->name('catalyst_users');
 
         Route::post('payments', 'APIController@payments')->name('payments');
+        Route::get('invoices', 'APIController@invoice_data')->name('invoices');
 
         Route::get('ideas_payments', 'APIController@ideas_payments')->name('ideas_payments');
 

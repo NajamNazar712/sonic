@@ -11116,6 +11116,76 @@ class APIController extends Controller
         return response()->json($check);
     }
 
+
+    public function invoice_data(Request $request) {
+
+        $rules = [
+            'from' => ['required', 'date_format:Y-m-d'],
+            'to'   => ['required', 'date_format:Y-m-d', 'after_or_equal:from'],
+        ];
+
+        $validator = Validator::make($request->all(), $rules, $this->messages);
+        $validator->setAttributeNames($this->names);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status'  => 0,
+                'message' => 'Error(s) in Input',
+                'errors'  => $validator->errors()
+            ]);
+        }
+
+        $details = [];
+        $user_id = $request->user_id;
+        $to = $request->to;
+        $from = $request->from;
+
+        $user = User::find($user_id);
+
+        if($user && $user->account_type_id == 1){
+
+            $data = DonePayment::leftJoin('done_payment_calculations as dpc' ,'dpc.done_payment_id', 'done_payments.id')->where('done_payments.user_id', $user_id)->whereDate('done_payments.created_at', '>=', $from)
+            ->whereDate('done_payments.created_at', '<=', $to)->select(['done_payments.id as id', 'done_payments.created_at as date', 'done_payments.status', 'dpc.payable as amount'])->get();
+
+            foreach($data as $d) {
+                $data = [];
+                $data['payment_id'] = $d->id;
+                $data['amount'] = $d->amount;
+                $data['date'] = $d->date;
+
+                if ($d->status == 0) {
+                    $data['status'] = 'Processed';
+                } else if ($d->status == 1) {
+                    $data['status'] = 'Paid';
+                } else if ($d->status == 2) {
+                    $data['status'] = 'Reverted';
+                } else if ($d->status == 3) {
+                    $data['status'] = 'Settlement Requested';
+                }  else if ($d->status == 4) {
+                    $data['status'] = 'Hold';
+                }
+                $details[] = $data;
+            }
+
+        }else if($user && $user->account_type_id == 2 ) {
+
+            $data = Invoice::leftJoin('invoice_statuses as is', 'is.id' ,'invoices.status_id')->where('invoices.user_id', $user_id)->whereDate('invoices.created_at', '>=', $from)
+            ->whereDate('invoices.created_at', '<=', $to)->select(['invoices.id', 'invoices.created_at' ,'invoices.total_invoice_amount', 'is.name as status'])->get();
+
+            foreach($data as $d) {
+                $data = [];
+                $data['invoice_id'] = $d->id;
+                $data['amount'] = $d->total_invoice_amount;
+                $data['date'] = $d->created_at->toDateTimeString();
+                $data['status'] = $d->status;
+                $details[] = $data;
+            }
+
+        }
+
+        return response()->json(['status' => 1, 'data' => $details]);
+
+    }
 }
 
 
