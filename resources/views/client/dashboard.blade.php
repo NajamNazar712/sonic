@@ -112,6 +112,9 @@
                                         <th class="border-primary border-darken-1">Shipper</th>
                                         <th class="border-primary border-darken-1">Booked By</th>
                                         <th class="border-primary border-darken-1">Service Type</th>
+                                        @if (!empty($userIdForDescription) && in_array(Auth::id(), $userIdForDescription))
+                                            <th class="border-primary border-darken-1">Description</th>
+                                        @endif
                                         <th class="border-primary border-darken-1">Booking Channel</th>
                                         <th class="border-primary border-darken-1">Status</th>
                                         <th class="border-primary border-darken-1">Reason</th>
@@ -856,55 +859,62 @@
                         url: '{{ route('cod.orders.list') }}',
                         data: params,
                         success: function (result) {
-                            head = [];
+                        head = [];
 
-                            head.push('S.No');
-                            head.push('Tracking No.');
-                            head.push('Business Category');
-                            head.push('Order ID');
-                            head.push('Shipper');
-                            head.push('Booked By');
-                            head.push('Service Type');
-                            head.push('Booking Channel');
-                            head.push('Status');
-                            head.push('Reason');
-                            head.push('Payment Status');
-                            head.push('Origin');
-                            head.push('Destination');
-                            head.push('Consignee Name');
-                            head.push('Consignee Contact');
-                            head.push('Consignee Address');
-                            head.push('Collection Amount');
-                            head.push('Booking Date');
-                            head.push('Instructions');
-                            head.push('Cancellation Remarks');
-                            head.push('Payment Mode');
-                            $.each(result.data, function(index, values) {
-                                row = [];
-                                row.push(index + 1);
-                                row.push(values.tracking);
-                                row.push(values.business_category);
-                                row.push(values.order_id);
-                                row.push(values.user_name);
-                                row.push(values.booked_by);
-                                row.push(values.service_type);
-                                row.push(values.channel_name);
-                                row.push(values.status);
-                                row.push(values.reason);
-                                row.push(values.payment_status);
-                                row.push(values.origin);
-                                row.push(values.destination);
-                                row.push(values.consignee_name);
-                                row.push(values.phone);
-                                row.push(values.consignee_address);
-                                row.push(values.amount);
-                                row.push(values.booking_date);
-                                row.push(values.instructions);
-                                row.push(values.cancellation_remarks);
-                                row.push(values.payment_module);
-                                body.push(row);
-                            });
-                        },
+                        head.push('S.No');
+                        head.push('Tracking No.');
+                        head.push('Business Category');
+                        head.push('Order ID');
+                        head.push('Shipper');
+                        head.push('Booked By');
+                        head.push('Service Type');
+                        @if (!empty($userIdForDescription) && in_array(Auth::id(), $userIdForDescription))
+                            head.push('Description');
+                        @endif
+                        head.push('Booking Channel');
+                        head.push('Status');
+                        head.push('Reason');
+                        head.push('Payment Status');
+                        head.push('Origin');
+                        head.push('Destination');
+                        head.push('Consignee Name');
+                        head.push('Consignee Contact');
+                        head.push('Consignee Address');
+                        head.push('Collection Amount');
+                        head.push('Booking Date');
+                        head.push('Instructions');
+                        head.push('Cancellation Remarks');
+                        head.push('Payment Mode');
+                        $.each(result.data, function(index, values) {
+                            row = [];
+                            row.push(index + 1);
+                            row.push(values.tracking);
+                            row.push(values.business_category);
+                            row.push(values.order_id);
+                            row.push(values.user_name);
+                            row.push(values.booked_by);
+                            row.push(values.service_type);
+                            @if (!empty($userIdForDescription) && in_array(Auth::id(), $userIdForDescription))
+                                row.push(values.item_description);
+                            @endif
+
+                            row.push(values.channel_name);
+                            row.push(values.status);
+                            row.push(values.reason);
+                            row.push(values.payment_status);
+                            row.push(values.origin);
+                            row.push(values.destination);
+                            row.push(values.consignee_name);
+                            row.push(values.phone);
+                            row.push(values.consignee_address);
+                            row.push(values.amount);
+                            row.push(values.booking_date);
+                            row.push(values.instructions);
+                            row.push(values.cancellation_remarks);
+                            row.push(values.payment_module);
+                            body.push(row);
+                        });
+                    },
                         async: false
                     });
                     UnblockPagePermanently();
@@ -914,6 +924,61 @@
             } );
 
             var selected_rows = [];
+            var columns = [
+                {
+                    data: 'id',
+                    orderable: false,
+                    searchable: false,
+                    class: 'text-center align-middle select p-1',
+                    targets: 0,
+                    render: function (data, type, row) { return ''; }
+                },
+                {
+                    orderable: false,
+                    searchable: false,
+                    name: 'serial_number',
+                    class: 'align-middle serial_number',
+                    targets: 0,
+                    render: function (data, type, row) { return ''; }
+                },
+                {data: 'shipment_id', name: 'shipments.id', visible: false},
+                {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
+                {data: 'business_category', name: 'bc.id', class: 'align-middle business_category'},
+                {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
+                {data: 'user_name', name: 'u.name', class: 'align-middle user_name'},
+                {data: 'booked_by', name: 'shipments.booked_by', class: 'align-middle booked_by'},
+                {data: 'service_type', name: 'bt.id', class: 'align-middle service_type'},
+                {data: 'channel_name', name: 'channels.name', class: 'align-middle channel_name'},
+                {data: 'status', name: 'status', class: 'align-middle status'},
+                {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
+                {data: 'payment_status', name: 'payment_status', class: 'align-middle payment_status'},
+                {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
+                {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
+                {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
+                {data: 'phone', name: 'phone', class: 'align-middle phone'},
+                {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
+                // item_description column deliberately omitted here (will be pushed conditionally)
+                {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
+                {data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date'},
+                {data: 'instructions', name: 'shipments.special_instructions', class: 'align-middle instructions'},
+                {data: 'cancellation_remarks', name: 'shipments_journey.remarks', class: 'align-middle cancellation_remarks'},
+                {data: 'payment_module', name: 'shipments.payment_mode_id', class: 'align-middle payment_module'},
+                {
+                    data: 'action',
+                    name: 'action',
+                    class: 'text-center align-middle action p-1',
+                    orderable: false,
+                    searchable: false
+                }
+            ];
+
+            @if (!empty($userIdForDescription) && in_array(Auth::id(), $userIdForDescription))
+                columns.splice(9, 0, {
+                    data: 'item_description',
+                    name: 'item_description',
+                    className: 'align-middle item_description'
+                });
+            @endif
             var table = $('#datatable').DataTable({
                 scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -1157,70 +1222,7 @@
                 },
                 rowId: 'shipment_id',
                 order: [[2, 'desc']],
-
-                columns: [
-                    {
-                        data: 'id',
-                        orderable: false,
-                        searchable: false,
-                        class: 'text-center align-middle select p-1',
-                        targets: 0,
-                        render: function (data, type, row) {
-                            return '';
-                        }
-                    },
-                    {
-                        orderable: false,
-                        searchable: false,
-                        name: 'serial_number',
-                        class: 'align-middle serial_number',
-                        targets: 0,
-                        render: function (data, type, row) {
-                            return '';
-                        }
-                    },
-                    {data: 'shipment_id', name: 'shipments.id', visible: false},
-                    {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
-                    {data: 'business_category', name: 'bc.id', class: 'align-middle business_category'},
-                    {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
-                    {data: 'user_name', name: 'u.name', class: 'align-middle user_name'},
-                    {data: 'booked_by', name: 'shipments.booked_by', class: 'align-middle booked_by'},
-                    {data: 'service_type', name: 'bt.id', class: 'align-middle service_type'},
-                    {data: 'channel_name', name: 'channels.name', class: 'align-middle channel_name'},
-                    {data: 'status', name: 'status', class: 'align-middle status'},
-                    {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
-                    {data: 'payment_status', name: 'payment_status', class: 'align-middle payment_status'},
-                    {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
-                    {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
-                    {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
-                    {data: 'phone', name: 'phone', class: 'align-middle phone'},
-                    {
-                        data: 'consignee_address',
-                        name: 'shipments.consignee_address',
-                        class: 'align-middle consignee_address'
-                    },
-                    {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
-                    {data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date'},
-                    {data: 'instructions', name: 'shipments.special_instructions', class: 'align-middle instructions'},
-                    {
-                        data: 'cancellation_remarks',
-                        name: 'shipments_journey.remarks',
-                        class: 'align-middle cancellation_remarks'
-                    },
-                    {
-                        data: 'payment_module',
-                        name: 'shipments.payment_mode_id',
-                        class: 'align-middle payment_module'
-                    },
-                    {
-                        data: 'action',
-                        name: 'action',
-                        class: 'text-center align-middle action p-1',
-                        orderable: false,
-                        searchable: false
-                    }
-
-                ],
+                columns: columns,
 
                 rowCallback: function (row, data, index) {
                     var info = table.page.info();
@@ -1256,7 +1258,7 @@
                         var header = column.header();
 
                         if (column.visible()) {
-                            if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select')) {
+                            if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select') ||$(header).is('.item_description') ) {
                                 $(td).appendTo($(search));
                             } else if ($(header).is('.status')) {
                                 $(status_select).appendTo($(search))

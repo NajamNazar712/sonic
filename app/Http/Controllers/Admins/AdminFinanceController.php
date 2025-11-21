@@ -167,25 +167,60 @@ class AdminFinanceController extends Controller
         $sdn_log->save();
     }
 
+//    static private function amount_to_words($amount)
+//    {
+//
+//        $number_to_words = new NumberToWords();
+//        $number_transformer = $number_to_words->getNumberTransformer('en');
+//
+//        $amount_in_words = $number_transformer->toWords($amount, 'PKR');
+//
+//        $last_position = strrpos($amount_in_words, ' ');
+//
+//        if ($last_position !== FALSE) {
+//            $amount_in_words = substr_replace($amount_in_words, ' & ', $last_position, strlen(' '));
+//        }
+//
+//        $amount_in_words = str_replace('-', ' ', $amount_in_words);
+//
+//        $amount_in_words = ucwords($amount_in_words);
+//
+//        return $amount_in_words;
+//    }
     static private function amount_to_words($amount)
     {
-
         $number_to_words = new NumberToWords();
         $number_transformer = $number_to_words->getNumberTransformer('en');
 
-        $amount_in_words = $number_transformer->toWords($amount, 'PKR');
-
-        $last_position = strrpos($amount_in_words, ' ');
-
-        if ($last_position !== FALSE) {
-            $amount_in_words = substr_replace($amount_in_words, ' & ', $last_position, strlen(' '));
+        // Handle zero amount
+        if ($amount == 0) {
+            return "Zero Rupees";
         }
 
-        $amount_in_words = str_replace('-', ' ', $amount_in_words);
+        $integer_part = floor($amount);
+        $decimal_part = round(($amount - $integer_part) * 100);
 
-        $amount_in_words = ucwords($amount_in_words);
+        // If amount is less than 1 (e.g. 0.05, 0.5)
+        if ($integer_part == 0 && $decimal_part > 0) {
+            $paisa_words = ucwords(str_replace('-', ' ', $number_transformer->toWords($decimal_part)));
+            return $paisa_words . " Paisa";
+        }
 
-        return $amount_in_words;
+        // Convert main (rupees) part
+        $words = ucwords(str_replace('-', ' ', $number_transformer->toWords($integer_part)));
+
+        // Add "Rupees" for smaller numbers
+        if ($integer_part < 1000) {
+            $words .= " Rupees";
+        }
+
+        // Add paisa part if exists
+        if ($decimal_part > 0) {
+            $paisa_words = ucwords(str_replace('-', ' ', $number_transformer->toWords($decimal_part)));
+            $words .= " And " . $paisa_words . " Paisa";
+        }
+
+        return $words;
     }
 
     static public function international_gst()
@@ -10212,7 +10247,7 @@ class AdminFinanceController extends Controller
                         $generate = TRUE;
 
                         /*$billing_period_from_date = Carbon::now()->subDay()->day($user_banking_information->generation_date)->startOfDay()->toDateString();*/
-                        $billing_period_from_date = Carbon::now()->startOfMonth()->startOfDay()->toDateString();
+                        $billing_period_from_date = Carbon::now()->subMonth()->startOfMonth()->startOfDay()->toDateString();
                         $current_date_string = Carbon::now()->addDay()->toDateString();
 
                     }

@@ -1487,6 +1487,30 @@
                         </li>
                     @endif
 
+                    @if (session('role_id') == 1  || count(array_intersect([1046, 1047, 1050], session('permissions'))) !== 0 )
+                        <li><a class="menu-item" href="#">Payment Requisition</a>
+
+                        <ul class="menu-content">
+                            @if (session('role_id') == 1 || in_array(1046, session('permissions')) )
+                                <li><a class="menu-item"
+                                        href="{{ route('admin.finance.prf.index') }}">Form</a>
+                                </li>
+                            @endif
+                            @if (session('role_id') == 1 || in_array(1047, session('permissions')) )
+                                <li><a class="menu-item"
+                                        href="{{ route('admin.finance.prf.list') }}">List</a>
+                                </li>
+                            @endif
+
+                             @if (session('role_id') == 1 || in_array(1050, session('permissions')) )
+                                <li><a class="menu-item"
+                                        href="{{ route('admin.finance.prf.completed_list') }}">Completed/Cancelled List</a>
+                                </li>
+                            @endif
+                        </ul>
+                    
+                        </li>
+                    @endif
 
                 </ul>
 
@@ -1996,6 +2020,14 @@
                                 </a>
                             </li>
                         @endif
+
+                        @if (session('role_id') == 1 || in_array(1051, session('permissions')))
+                            <li>
+                                <a class="menu-item" href="{{ route('admin.reports.sub_hub.index') }}">
+                                    SUB HUB Station Visibility
+                                </a>
+                            </li>
+                        @endif
                     </ul>
                 </li>
             @endif
@@ -2404,6 +2436,11 @@
                                                 @if (session('role_id') == 1 || in_array(88, session('permissions')))
                                                     <li><a class="menu-item"
                                                             href="{{ route('admin.management.city.index') }}">City</a>
+                                                    </li>
+                                                @endif
+                                                @if (session('role_id') == 1 || in_array(1034, session('permissions')))
+                                                    <li><a class="menu-item"
+                                                            href="{{ route('admin.management.cx_city_list') }}">Cx City</a>
                                                     </li>
                                                 @endif
 
@@ -3075,6 +3112,13 @@
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.settings.international_automation_user.index') }}">Automation
                                                 User</a></li>
+                                    @endif
+                                    @if (session('role_id') == 1 && session('department_id') == 1)
+                                        <li class=" nav-item">
+                                            <a href="{{ route('admin.retail.international.zonal_margin_column.index') }}">
+                                                <span class="menu-title">Retail International Zone Margin Column Settings</span>
+                                            </a> 
+                                        </li>
                                     @endif
                                 </ul>
                             </li>

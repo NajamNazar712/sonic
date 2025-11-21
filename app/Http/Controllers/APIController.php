@@ -540,7 +540,7 @@ class APIController extends Controller
         $user_type = User::where('id', $user_id)->first();
 
         // sahban bhai said service type 3,5 then disabled this below condition
-            if ($request->input('amount') == 0 && Carbon::parse($user_type->activated_at)->lt(Carbon::now()->subDays(7)) && !PendingPayment::check_negative_payable($user_id, $user_type['account_type_id']) && !in_array($request->input('service_type_id',1), [3,5])) {
+            if ($request->input('amount') == 0 && Carbon::parse($user_type->activated_at)->lt(Carbon::now()->subDays(1)) && !PendingPayment::check_negative_payable($user_id, $user_type['account_type_id']) && !in_array($request->input('service_type_id',1), [3,5])) {
 
                 return response()->json([
                     'status' => 1,
@@ -680,7 +680,7 @@ class APIController extends Controller
                 'self_collection' => ['nullable', 'boolean'],
                 'order_date' => ['nullable', 'date_format:Y-m-d'],
                 'package_type' => ['nullable', 'boolean'],
-                'special_instructions' => ['nullable', 'filled', 'between:0,190'],
+                'special_instructions' => ['nullable', 'between:0,190'],
                 'estimated_weight' => ['required', 'numeric', 'between:0.1,100000'],
 
                 'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
@@ -690,9 +690,9 @@ class APIController extends Controller
                 // 'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
                 //     $query->whereNotIn('id', [3]);
                 // })],
-                'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function ($query) {
-                    $query->whereIn('id', [4]);
-                })],
+                // 'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function ($query) {
+                //     $query->whereIn('id', [4]);
+                // })],
 
                 'item_product_type_id' => ['required_if:service_type_id,1,2,5', 'integer', 'digits_between:1,10', 'exists:products,id'],
                 'item_description' => ['required_if:service_type_id,1,2,5', 'between:0,1000'],
@@ -772,7 +772,7 @@ class APIController extends Controller
                 'consignee_email_address' => ['nullable', 'filled', 'email'],
                 'order_date' => ['nullable', 'date_format:Y-m-d'],
                 'package_type' => ['nullable', 'boolean'],
-                'special_instructions' => ['nullable', 'filled', 'between:0,190'],
+                'special_instructions' => ['nullable', 'between:0,190'],
                 'estimated_weight' => ['required', 'numeric', 'between:0.1,100000'],
 
                 'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
@@ -782,9 +782,9 @@ class APIController extends Controller
                 // 'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
                 //     $query->whereNotIn('id', [3]);
                 // })],
-                'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function ($query) {
-                    $query->whereIn('id', [3]);
-                })],
+                // 'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function ($query) {
+                //     $query->whereIn('id', [3]);
+                // })],
 
                 'item_product_type_id' => ['required_if:service_type_id,1,2,5', 'integer', 'digits_between:1,10', 'exists:products,id'],
                 'item_description' => ['required_if:service_type_id,1,2,5', 'between:0,500'],
@@ -924,20 +924,21 @@ class APIController extends Controller
 //                    'origin_check',
             ];
 
-            $rules['new_pickup_address_latitude'] = ['required', 'integer'];
-            $rules['new_pickup_address_longitude'] = ['required', 'integer'];
+            $rules['new_pickup_address_latitude']  = ['nullable', 'numeric', 'between:-90,90', 'required_with:new_pickup_address_longitude'];
+            $rules['new_pickup_address_longitude'] = ['nullable', 'numeric', 'between:-180,180', 'required_with:new_pickup_address_latitude'];
+
         }
         else {
-            $rules = [
-                'pickup_address_id' => [
-                    'required',
-                    'integer',
-                    'digits_between:1,10',
-                    Rule::exists('user_shipping_infos', 'id')
-                        ->where(fn ($q) => $q->where('user_id', $user_id)->where('hidden', 0)),
-                    'origin_check', // or new OriginCheck if it's a class
-                ],
+            $rules['pickup_address_id'] = [
+                'required',
+                'integer',
+                'digits_between:1,10',
+                Rule::exists('user_shipping_infos', 'id')
+                    ->where(fn ($q) => $q->where('user_id', $user_id)->where('hidden', 0)),
+                'origin_check', // or new OriginCheck if it's a class
             ];
+            $rules['pickup_address_latitude'] = ['nullable', 'numeric','between:-90,90','required_with:pickup_address_longitude'];
+            $rules['pickup_address_longitude'] = ['nullable', 'numeric','between:-90,90','required_with:pickup_address_latitude'];
 
         }
 
@@ -946,9 +947,10 @@ class APIController extends Controller
         $validate->setAttributeNames($this->names);
 
         if ($validate->fails()) {
+//            Log::error('Shipment Booking API', ['api' => 'shipment_booking', 'point' => 1,'user_id'=>$user_id, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-
+            
             if ($request->input('amount') == 0 || $request->input('amount') === null) {
                 $amount = $request->input('amount');
                 $parcel_value = $request->input('parcel_value');
@@ -984,6 +986,7 @@ class APIController extends Controller
                 $flag = true;
             }
             if (!$flag) {
+//                Log::error('Shipment Booking API', ['api' => 'shipment_booking', 'point' => 2,'user_id'=>$user_id, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
                 return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => 'Parcel value is required when collection amount is zero, and should be greater then 0']);
             }
 
@@ -1307,14 +1310,19 @@ class APIController extends Controller
                     }
                 }
 
-                if ($request->filled('charges_mode_id')) {
-                    $charges_mode_id = $request->input('charges_mode_id');
+                // if ($request->filled('charges_mode_id')) {
+                //     $charges_mode_id = $request->input('charges_mode_id');
+                // } else {
+                //     if ($user_type['account_type_id'] == 1) {
+                //         $charges_mode_id = 4;
+                //     } else {
+                //         $charges_mode_id = 3;
+                //     }
+                // }
+                if ($user_type['account_type_id'] == 1) {
+                    $charges_mode_id = 4;
                 } else {
-                    if ($user_type['account_type_id'] == 1) {
-                        $charges_mode_id = 4;
-                    } else {
-                        $charges_mode_id = 3;
-                    }
+                    $charges_mode_id = 3;
                 }
 
                 $payment_mode_id = $request->input('payment_mode_id');
@@ -4295,15 +4303,60 @@ class APIController extends Controller
                         } else if ($done_payment_shipment->type == 1) {
                             $details['payment_type'] = 'Returned';
                         }else if ($done_payment_shipment->type == 3) {
+                            $details['arrival_weight'] = $shipment->actual_weight;
                             $details['payment_type'] = 'Arrival';
                         }
                         else {
                             $details['payment_type'] = 'Adjusted';
                         }
+                        if($account_type_id == 1 && $done_payment_shipment->type == 0 ) {
+                            $details['total_charges'] =  $done_payment_shipment->charges + $done_payment_shipment->gst + $done_payment_shipment->sms_charges + $done_payment_shipment->wht + $done_payment_shipment->cod_sst;
+
+                        }else if ($account_type_id == 1 && $done_payment_shipment->type == 1 ) {
+                            $details['total_charges'] = $done_payment_shipment->charges + $done_payment_shipment->gst + $done_payment_shipment->sms_charges;
+
+                        }else if ($account_type_id == 1 && $done_payment_shipment->type == 3 ) {
+                            $details['total_charges'] = $done_payment_shipment->charges + $done_payment_shipment->gst + $done_payment_shipment->sms_charges;
+
+                        } else if ($account_type_id == 1 && $done_payment_shipment->type == 2) {
+                            $details['total_charges'] = '0';
+                        }
+
                         $details['payment_id'] = $done_payment_shipment->done_payment->id;
                         if ($account_type_id == 2) {
                             $details['invoice_ids'] = array();
-                            $details['invoice_ids'] = InvoiceShipment::where('shipment_id', $shipment->id)->groupBy('invoice_id')->pluck('invoice_id')->toArray();
+                            // Get all invoice shipments for this shipment
+                            $invoiceShipments = InvoiceShipment::where('shipment_id', $shipment->id)
+                            ->where('type', $done_payment_shipment->type) // same type (Delivered / Returned / Arrival)
+                            ->get();
+
+                            $total_charges = 0;
+
+                            foreach ($invoiceShipments as $inv) {
+
+                                // Delivered
+                                if ($done_payment_shipment->type == 0) {
+                                    $total_charges += ($inv->charges + $inv->gst + $inv->sms_charges + $inv->wht + $inv->cod_sst);
+                                }
+
+                                // Returned or Arrival
+                                else if ($done_payment_shipment->type == 1 || $done_payment_shipment->type == 3) {
+                                    $total_charges += ($inv->charges + $inv->gst + $inv->sms_charges);
+                                }
+
+                                // Adjusted or anything else
+                                else {
+                                    $total_charges += 0;
+                                }
+                            }
+
+                            $details['total_charges'] = $total_charges;
+
+                            // Also return invoice IDs (you already do this)
+                            $details['invoice_ids'] = InvoiceShipment::where('shipment_id', $shipment->id)
+                            ->groupBy('invoice_id')
+                            ->pluck('invoice_id')
+                            ->toArray();
                         }
                         $data[$shipment->tracking_number][] = $details;
                     }
@@ -9304,9 +9357,9 @@ class APIController extends Controller
                 // 'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
                 //     $query->whereNotIn('id', [3]);
                 // })],
-                'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function ($query) {
-                    $query->whereIn('id', [4]);
-                })],
+                // 'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function ($query) {
+                //     $query->whereIn('id', [4]);
+                // })],
 
                 'item_product_type_id' => ['required_if:service_type_id,1,2,5', 'integer', 'digits_between:1,10', 'exists:products,id'],
                 'item_description' => ['required_if:service_type_id,1,2,5', 'between:0,1000'],
@@ -9396,9 +9449,9 @@ class APIController extends Controller
                 // 'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
                 //     $query->whereNotIn('id', [3]);
                 // })],
-                'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function ($query) {
-                    $query->whereIn('id', [4]);
-                })],
+                // 'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function ($query) {
+                //     $query->whereIn('id', [4]);
+                // })],
 
                 'item_product_type_id' => ['required_if:service_type_id,1,2,5', 'integer', 'digits_between:1,10', 'exists:products,id'],
                 'item_description' => ['required_if:service_type_id,1,2,5', 'between:0,1000'],
@@ -9484,9 +9537,9 @@ class APIController extends Controller
                 // 'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
                 //     $query->whereNotIn('id', [3]);
                 // })],
-                'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function ($query) {
-                    $query->whereIn('id', [3]);
-                })],
+                // 'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function ($query) {
+                //     $query->whereIn('id', [3]);
+                // })],
 
                 'item_product_type_id' => ['required_if:service_type_id,1,2,5', 'integer', 'digits_between:1,10', 'exists:products,id'],
                 'item_description' => ['required_if:service_type_id,1,2,5', 'between:0,500'],
@@ -9880,14 +9933,19 @@ class APIController extends Controller
                     }
                 }
 
-                if ($request->filled('charges_mode_id')) {
-                    $charges_mode_id = $request->input('charges_mode_id');
+                // if ($request->filled('charges_mode_id')) {
+                //     $charges_mode_id = $request->input('charges_mode_id');
+                // } else {
+                //     if ($user_type['account_type_id'] == 1) {
+                //         $charges_mode_id = 4;
+                //     } else {
+                //         $charges_mode_id = 3;
+                //     }
+                // }
+                if ($user_type['account_type_id'] == 1) {
+                    $charges_mode_id = 4;
                 } else {
-                    if ($user_type['account_type_id'] == 1) {
-                        $charges_mode_id = 4;
-                    } else {
-                        $charges_mode_id = 3;
-                    }
+                    $charges_mode_id = 3;
                 }
 
                 $payment_mode_id = $request->input('payment_mode_id');

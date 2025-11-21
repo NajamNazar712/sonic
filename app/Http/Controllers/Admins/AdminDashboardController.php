@@ -242,6 +242,7 @@ use App\Http\Models\Operataions\OperationsOutgoingPickupRequestShipments;
 use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
 use App\Models\CorporateUserOnDeliveredInvoiceLog;
 use App\Models\CorporateUserOnDeliveredInvoice;
+use App\Models\CityTypeETD;
 
 class AdminDashboardController extends Controller
 {   use RateReusableTrait,FilterTrait;
@@ -1290,7 +1291,7 @@ class AdminDashboardController extends Controller
     public function activeAccountsList()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 2);
-        
+        $corporate_rate_types = CorporateRateType::all();
         $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name', 'admins.id'])->where('status', 1)->where('ar.department_id', 7)->get();
         $products = Product::select('id', 'product_name')->get();
         $segments = Segment::all();
@@ -1329,7 +1330,7 @@ class AdminDashboardController extends Controller
         $all_users['results'][2]['children'] = [];
         $all_users['pagination']['more'] = true;
         // $active_shippers = User::whereIn('status', [3, 4])->get();
-        return view('admin.accounts.active_accounts_list')->with(['products' => $products, 'sale_name' => $salesperson,'payment_cycles' => $payment_cycles, 'segments' => $segments, 'ecom_segments' => $ecom_segments, 'general_segments' => $general_segments, 'sale_tier_types' => $sale_tier_types, 'territories' => $territories,'sales_tiers'=>$sales_tiers, 'commission_percentage'=>$commission_percentage,'riders_permanent'=>$riders_permanent,'all_users'=>$all_users, 'block_disable_reasons'=> $block_disable_reasons]);
+        return view('admin.accounts.active_accounts_list')->with(['products' => $products, 'sale_name' => $salesperson,'payment_cycles' => $payment_cycles, 'segments' => $segments, 'ecom_segments' => $ecom_segments, 'general_segments' => $general_segments, 'sale_tier_types' => $sale_tier_types, 'territories' => $territories,'sales_tiers'=>$sales_tiers, 'commission_percentage'=>$commission_percentage,'riders_permanent'=>$riders_permanent,'all_users'=>$all_users, 'block_disable_reasons'=> $block_disable_reasons,'corporate_rate_types'=>$corporate_rate_types]);
     }
 
     public function shipperNamesForDropdown(Request $request, $type)
@@ -10208,6 +10209,10 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                         if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(115, session('permissions')))) {
                             $dropdown .= '<button onclick="window.open(\'' . route('admin.view.rates', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Rates</div></button>';
                         }
+                        if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(1045, session('permissions')))) {
+                            $dropdown .= '<button type="button" class="dropdown-item switch_corporate_button" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#SwitchCorporate"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Swicth To Corporate</div></button>';
+
+                        }
                         if ((session('role_id') == 1 || in_array(115, session('permissions')))) {
                             $dropdown .= '<button type="button" class="dropdown-item rates_history" data-target-id=' . $result->id . ' rel="rates_history" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Rates History</div></button>';
                         }
@@ -11333,11 +11338,23 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         $business_categories = BusinessCategory::all();
         return view('admin.management.city_management')->with(['business_categories' => $business_categories]);
     }
+    public function CxCityView(Request $request)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 1034);
+        $business_categories = BusinessCategory::all();
+        $cityEtd = CityTypeETD::where(['status'=>1])->get();
+        return view('admin.management.cx_etd_city_list')->with(['cityType' => $cityEtd,'business_categories'=> $business_categories]);
+    }
 
     public function cityListAjax(Request $request)
     {
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 349);
+        }
+
+        $cxListAction = 0;
+        if($request->get('search_cx_city')){
+            $cxListAction = 1;
         }
 
         $cities = City::join('cities as h', 'cities.hub_id', '=', 'h.id')
@@ -11351,10 +11368,11 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             ->leftjoin('admins as c', 'c.id', '=', 'cities.created_by')
 
             ->leftjoin('business_categories as bc', 'bc.id', '=', 'cities.business_category_id')
+            ->leftjoin('city_type_etds as cetds', 'cetds.id', '=', 'cities.city_type_etd_id')
             ->join('zones as z', 'cities.zone_id', '=', 'z.id')
             ->leftJoin('provinces', 'provinces.id', 'cities.province_id')
             ->select(['cities.id as city_id', 'cities.city_code as city_code', 'cities.id as id', 'cities.name as name', 'h.name as hub', 'cities.hub_id', 'z.name as zone', 'cities.hub as isHub', 'cities.status as status', 'ch.created_at as updated', 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat', 'cities.location_latitude', 'cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category', 'cities.hub_location_latitude', 'cities.hub_location_longitude', 'cities.iata_code as iata_code','cities.booking_enable_status as booking_enable_status', 'c.name as created_by', 'cities.created_at as created_at', 'provinces.name as province_name', DB::raw('(SELECT COUNT(*) FROM city_logs WHERE city_logs.city_id = cities.id) as city_logs'), DB::raw('(SELECT COUNT(*) FROM city_status_change_logs WHERE city_status_change_logs.city_id = cities.id AND column_type = 2) as status_change_logs_count')
-            ,DB::raw('(SELECT COUNT(*) FROM city_status_change_logs WHERE city_status_change_logs.city_id = cities.id AND column_type = 1) as booking_status_change_logs_count')])
+            , 'cetds.name as city_type_etd'])
             ->where('cities.permanent_disabled',0);
 
         return Datatables::of($cities)
@@ -11426,38 +11444,36 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
                 return '-';
             })
-            ->addColumn("action", function ($result) {
+            ->addColumn("action", function ($result) use($cxListAction) {
                 if (session('role_id') == 1 || count(array_intersect([90, 91,850], session('permissions'))) !== 0) {
                     $dropdown = '
                   <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">
                 ';
+                    if($cxListAction == 0 ){
 
-                    if (session('role_id') == 1 || in_array(90, session('permissions'))) {
-                        if ($result->business_category_id == 1) {
-                            $dropdown .= '<button type="button" class="dropdown-item" data-target-id=' . $result->city_id . ' rel="editcity" data-toggle="modal" data-target="#editCity"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update City Status</div></button>';
-                        } else {
-                            $dropdown .= '<button type="button" class="dropdown-item" data-target-id=' . $result->city_id . ' rel="editinternationalcity" data-toggle="modal" data-target="#editInternationalCity"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update International City Status</div></button>';
+                        if (session('role_id') == 1 || in_array(90, session('permissions')) && $cxListAction == 0) {
+                            
+                            if ($result->business_category_id == 1) {
+                                $dropdown .= '<button type="button" class="dropdown-item" data-target-id=' . $result->city_id . ' rel="editcity" data-toggle="modal" data-target="#editCity"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update City Status</div></button>';
+                            } else {
+                                $dropdown .= '<button type="button" class="dropdown-item" data-target-id=' . $result->city_id . ' rel="editinternationalcity" data-toggle="modal" data-target="#editInternationalCity"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update International City Status</div></button>';
+                            }
                         }
-                    }
-
-                    if (session('role_id') == 1 || in_array(91, session('permissions'))) {
-                        if ($result->status == 1) {
-                            $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->city_id . ' rel="cityInactive" hub=' . $result->isHub . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate City</div></button>';
-                        } else {
-                            $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->city_id . ' rel="cityactive" hub=' . $result->isHub . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate City</div></button>';
+    
+                        if (session('role_id') == 1 || in_array(91, session('permissions'))) {
+                            if ($result->status == 1) {
+                                $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->city_id . ' rel="cityInactive" hub=' . $result->isHub . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate City</div></button>';
+                            } else {
+                                $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->city_id . ' rel="cityactive" hub=' . $result->isHub . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate City</div></button>';
+                            }
                         }
-                    }
-
-                    if (session('role_id') == 1 || in_array(850, session('permissions'))) {
-                        if ($result->isHub == 1) {
-                            $dropdown .= '<a target="_blank" class="dropdown-item" href='.route('admin.management.add_city_sub_area', ['id' => $result->id]).'>
-                                <div class="row no-gutters align-items-center">
-                                    <div class="col-2"><i class="ft-plus-circle"></i></div>
-                                    <div class="col-9 offset-1">Add Areas</div>
-                                </div>                          
-                            </a>';
+                    }else{
+                        if (session('role_id') == 1 || in_array(1035, session('permissions'))) {
+                            if ($cxListAction == 1) {
+                                $dropdown .= '<button type="button" class="dropdown-item" data-target-id=' . $result->city_id . ' rel="editCity" data-toggle="modal" data-target="#editCity"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update City ETD</div></button>';
+                            }
                         }
                     }
 
@@ -11505,7 +11521,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         return view('admin.management.add_city_form')->with(['hubs' => $hubs, 'zones' => $zones, 'shippingMode' => $shippingMode, 'bookings' => $booking, 'vehicles' => $vehicles, 'provinces' => $provinces]);
     }
 
-    public function getEditCityForm($id)
+    public function getEditCityForm($id,$cxEtdType=0)
     {
         $city = City::find($id);
         if ($city->hub == 1) {
@@ -11536,12 +11552,20 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             $walk_in_delivery[$walk_in_detail['delivery']] = $walk_in_detail['delivery'];
         }
         $provinces = Province::all();
-        return view('admin.management.edit_city_form')->with(['hubs' => $hubs, 'zones' => $zones, 'shippingMode' => $shippingMode, 'bookings' => $booking, 'isHub' => $isHub, 'city' => $city, 'delivery' => $delivery, 'cityhub' => $cityhub, 'walk_in_city' => $walk_in_delivery, 'osa_list' => $osa_list, 'vehicles' => $vehicles, 'provinces' => $provinces]);
+        $cityEtd = CityTypeETD::where(['status' => 1])->get();
+        return view('admin.management.edit_city_form')->with(['hubs' => $hubs, 'zones' => $zones, 'shippingMode' => $shippingMode, 'bookings' => $booking, 'isHub' => $isHub, 'city' => $city, 'delivery' => $delivery, 'cityhub' => $cityhub, 'walk_in_city' => $walk_in_delivery, 'osa_list' => $osa_list, 'vehicles' => $vehicles, 'provinces' => $provinces, 'cxEtdTypeEdited' => $cxEtdType, 'cityEtdlist'=> $cityEtd]);
 
     }
 
     public function updateCity(Request $request, $id)
     {
+        if ($request->has('cx_city_etd_type') == 1){
+            City::where('id', $id)->update([
+                    'city_type_etd_id' => $request->city_type_etd_id,
+            ]);
+            return redirect()->back()->with('success', 'City Etd Type updated successfully');
+        }
+        CityOsaRate::where('city_id', $id)->delete();
 
         $city_id = City::where('id', $id)->first();
         if ($city_id) {

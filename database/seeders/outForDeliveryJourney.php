@@ -28,22 +28,75 @@ class outForDeliveryJourney extends Seeder
     {
         //
         $shipmentId = [
-            20221655496626,
-            17421655514041,
-            20221655544615];
+            22317456953573,
+            15817456969959,
+            20217456826319,
+            20217456851496,
+            20217456928303,
+            20217456865085,
+            20217456864989,
+            20217456892049,
+            20217456859847,
+            20217456875013,
+            20217456867378,
+            14417456947729,
+            20217456868500,
+            20217456946308,
+            20217456889746,
+            20217456922737,
+            22317456960118,
+            152991645800,
+            20217456871516,
+            20217456849409,
+            20217456877647,
+            20217456867459,
+            20217456880333,
+            20217456892062,
+            20217456909848,
+            20217456900268,
+            20217456881079,
+            20217456885639,
+            22328856963949,
+            22317456921329,
+            22317456981764,
+            20217456895506,
+            20217456937683,
+            20217456874372,
+            20217456923238,
+            20217456863891,
+            22317456980802,
+            22317456984058,
+            17417456999566,
+            20217456918386,
+            20217456925139,
+            20217456938819,
+            20217456935065,
+            152991644891,
+            152991644922,
+            20217456857977,
+            20217456912773,
+            20217456820662,
+            20217456861586,
+            20217456908592,
+            20217456917221,
+            20217456900480,
+            20217456851598,
+            20217456862666,
+            20217456903119
+        ];
         if ($shipmentId) {
             $shipmentId = Shipment::whereIn('tracking_number', $shipmentId)
-            // ->where('shipper_status_id', 5)
+            ->where('shipper_status_id', 5)
             ->get();
             echo count($shipmentId);
-            $serial = 40;
+            $serial = 6;
 
             foreach ($shipmentId as $shipment) {
 
                 $deliveryNoteId = DeliveryNoteShipment::where('shipment_id', $shipment->id)->latest()->first();
                 if (!$deliveryNoteId) {
                     $deliveryNoteId =  new DeliveryNoteShipment();
-                    $deliveryNoteId->delivery_note_id = 2590709;
+                    $deliveryNoteId->delivery_note_id = 3238510;
                     $deliveryNoteId->status = 1;
                     $deliveryNoteId->shipment_id = $shipment->id;
                     $deliveryNoteId->notification = 1;
