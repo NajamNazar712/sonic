@@ -121,18 +121,17 @@ class BotCallingController extends Controller
             // Log::channel('cronJobLog')->info('s ' . 'Request All' . json_encode($request->all()));
             // Log::channel('cronJobLog')->info('s ' . 'Api Does Not exists' . json_encode(ApiZongLog::where(['shipment_id' => $findShipmentId, 'call_date_time' => $request->start_date])->doesntExist()));
             // Log::channel('cronJobLog')->info('s ' . 'OPS LOG' . ApiZongLog::where(['shipment_id' => $findShipmentId, 'call_date_time' => $request->start_date])->doesntExist());
-            
+            if (RvShipmentAgent::where('agent_id', $request->admin_id)->doesntExist()) {
+                $new = new RvShipmentAgent();
+                $new->agent_id = $request->admin_id;
+                $new->total_shipments = 0;
+                $new->actual_productivity = 0;
+                $new->save();
+            }
             if(ApiZongLog::where(['shipment_id' => $findShipmentId->id, 'call_date_time' => $request->start_date])->doesntExist()){
                 if (in_array($findShipmentId->shipper_status_id, [12, 52, 65, 66]) && RvShipmentTicket::where('shipment_id', $findShipmentId->id)->whereNull('deleted_at')->where('is_bot', 1)->exists()) {
                     // RvShipmentTicket::where('shipment_id', $findShipmentId->id)->update(['in_progress' => 1]);
-                    dd(RvShipmentAgent::where('agent_id', $request->admin_id)->doesntExist());
-                    if (RvShipmentAgent::where('agent_id', $request->admin_id)->doesntExist()) {
-                        $new = new RvShipmentAgent();
-                        $new->agent_id = $request->admin_id;
-                        $new->total_shipments = 0;
-                        $new->actual_productivity = 0;
-                        $new->save();
-                    }
+                    
                     $noAnswer = [
                         'ANSWER' => 34,
                         'BUSY' => 32,
