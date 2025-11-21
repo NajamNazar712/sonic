@@ -125,6 +125,13 @@ class BotCallingController extends Controller
             if(ApiZongLog::where(['shipment_id' => $findShipmentId->id, 'call_date_time' => $request->start_date])->doesntExist()){
                 if (in_array($findShipmentId->shipper_status_id, [12, 52, 65, 66]) && RvShipmentTicket::where('shipment_id', $findShipmentId->id)->whereNull('deleted_at')->where('is_bot', 1)->exists()) {
                     // RvShipmentTicket::where('shipment_id', $findShipmentId->id)->update(['in_progress' => 1]);
+                    if (RvShipmentAgent::where('agent_id', $request->admin_id)->doesntExist()) {
+                        $new = new RvShipmentAgent();
+                        $new->agent_id = $request->admin_id;
+                        $new->total_shipments = 0;
+                        $new->actual_productivity = 0;
+                        $new->save();
+                    }
                     $noAnswer = [
                         'ANSWER' => 34,
                         'BUSY' => 32,
@@ -181,13 +188,7 @@ class BotCallingController extends Controller
                         $status->updated_at = $request->end_date;
                         $status->save();
                     }
-                    if (RvShipmentAgent::where('agent_id', $request->admin_id)->doesntExist()) {
-                        $new = new RvShipmentAgent();
-                        $new->agent_id = $request->admin_id;
-                        $new->total_shipments = 0;
-                        $new->actual_productivity = 0;
-                        $new->save();
-                    }
+                   
                     $assigned_agent = RvShipmentAgent::where('agent_id', $request->admin_id)->first();
                     $admin_agent = Admin::where('id', $request->admin_id)->first();
                     $this->update_shipment_assign_agent($request, $assigned_agent, $admin_agent, $shipment_assign_agent);
