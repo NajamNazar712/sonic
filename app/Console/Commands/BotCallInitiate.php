@@ -8,6 +8,7 @@ use App\Jobs\BotCallDispatchThird;
 use App\RvCronLog;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class BotCallInitiate extends Command
 {
