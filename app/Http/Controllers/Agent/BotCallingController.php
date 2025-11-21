@@ -125,6 +125,7 @@ class BotCallingController extends Controller
             if(ApiZongLog::where(['shipment_id' => $findShipmentId->id, 'call_date_time' => $request->start_date])->doesntExist()){
                 if (in_array($findShipmentId->shipper_status_id, [12, 52, 65, 66]) && RvShipmentTicket::where('shipment_id', $findShipmentId->id)->whereNull('deleted_at')->where('is_bot', 1)->exists()) {
                     // RvShipmentTicket::where('shipment_id', $findShipmentId->id)->update(['in_progress' => 1]);
+                    dd(RvShipmentAgent::where('agent_id', $request->admin_id)->doesntExist());
                     if (RvShipmentAgent::where('agent_id', $request->admin_id)->doesntExist()) {
                         $new = new RvShipmentAgent();
                         $new->agent_id = $request->admin_id;
