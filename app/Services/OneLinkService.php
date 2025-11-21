@@ -23,9 +23,9 @@ class OneLinkService
     {
         // Point to the TUNNEL base so requests ride the IPsec path.
         // For prod, just switch env to ONE_LINK_URL_PROD (same shape).
-        $this->baseUrl      = env('ONE_LINK_BASE_URL', env('ONE_LINK_URL_SANDBOX_M', 'https://onelinktunnel.sonic.pk/ol'));
-        $this->clientId     = env('ONE_LINK_CLIENT_ID', env('ONE_LINK_CLIENT_ID_SANDBOX_M'));
-        $this->clientSecret = env('ONE_LINK_SECRET',    env('ONE_LINK_SECRET_SANDBOX_M'));
+        $this->baseUrl      = env('ONE_LINK_BASE_URL', env('ONE_LINK_URL_SANDBOX_M', 'https://onelinktunnel.sonic.pk/ol/onelink/production'));
+        $this->clientId     = env('ONE_LINK_CLIENT_ID', env('ONE_LINK_CLIENT_ID_SANDBOX_M','7e1320f3627079431658e4dfacab4056'));
+        $this->clientSecret = env('ONE_LINK_SECRET',    env('ONE_LINK_SECRET_SANDBOX_M','ed02b938add93a952c326560faa6a84a'));
         $this->scope        = env('ONE_LINK_SCOPE', '1LinkApi');
 
         // Networking / resiliency
