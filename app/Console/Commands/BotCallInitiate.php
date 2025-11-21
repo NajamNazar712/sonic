@@ -80,7 +80,7 @@ class BotCallInitiate extends Command
             // $third_count =1;
             if(count($shipmentThirds) > 0){
                 // Log::channel('botCallJobLog')->info('s ' . 'Call initiate start third-call' . Carbon::parse(now())->format('Y-m-d H:i:s'));
-
+                RvShipmentAssignAgent::whereIn('shipment_id', $shipmentThirds)->update(['rv_state_id'=>3]);    
                 foreach($shipmentThirds as $shipmentId){
                     dispatch(new BotCallDispatchThird($shipmentId));
                 }
