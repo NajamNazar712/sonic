@@ -30,9 +30,9 @@ class OneLinkService
 
         // Networking / resiliency
         $this->verifySsl    = (bool) env('ONE_LINK_VERIFY_SSL', false); // false is OK for pilot through tunnel
-        $this->timeout      = (int) env('ONE_LINK_TIMEOUT', 15);        // seconds
-        $this->retries      = (int) env('ONE_LINK_RETRIES', 2);
-        $this->retryDelayMs = (int) env('ONE_LINK_RETRY_DELAY_MS', 300);
+        $this->timeout      = (int) env('ONE_LINK_TIMEOUT', 60);        // seconds
+        $this->retries      = (int) env('ONE_LINK_RETRIES', 3);
+        $this->retryDelayMs = (int) env('ONE_LINK_RETRY_DELAY_MS', 600);
 
         $this->token        = $this->getAccessToken();
     }
@@ -44,7 +44,8 @@ class OneLinkService
     {
         // baseUrl/timeout/retry are first-class on Laravel's HTTP client
         // (see docs). TLS verify can be toggled as needed during pilot.
-        return Http::baseUrl($this->baseUrl)     // e.g. https://onelinktunnel.sonic.pk/ol
+        return Http::baseUrl($this->baseUrl)
+            ->connectTimeout(30)   // TCP connect// e.g. https://onelinktunnel.sonic.pk/ol
         ->timeout($this->timeout)           // seconds
         ->retry($this->retries, $this->retryDelayMs) // attempts, delay(ms)
         ->withOptions(['verify' => $this->verifySsl]); // trust on pilot or set CA later
