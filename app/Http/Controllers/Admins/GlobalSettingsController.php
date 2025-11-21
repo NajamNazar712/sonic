@@ -2142,7 +2142,7 @@ class GlobalSettingsController extends Controller
 
     public function multiple_sale_tagging_assign_view_assigned(Request $request)
     {
-        $tagged_users = MultipleSaleTagging::leftjoin('admins as a', 'a.id', '=', 'multiple_sale_taggings.admin_id')->where('lead_id', $request->id)->select('a.name')->pluck('a.name')->toArray();
+        $tagged_users = MultipleSaleTagging::leftjoin('admins as a', 'a.id', '=', 'multiple_sale_taggings.admin_id')->where('multiple_sale_taggings.lead_id', $request->id)->select('a.name')->pluck('a.name')->toArray();
         return response()->json(['status' => 1, 'tagged_users' => $tagged_users]);
     }
 
