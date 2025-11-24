@@ -36,21 +36,12 @@ class UpdateShipperRates extends Command
     public function handle()
     {
         $array = [
-            "16134056481169",
-            "16131556687782",
-            "16125156438047",
-            "16110656437068",
+            33622355051941,
+            33620255051936,
             //shipper
-
-            "22322355968008,",
-            "22322355222784,",
-            "22322355193516",
-
-            //shipper 3
-
-            "31522356065968",
-            "31520256112013",
-            "31517456065913"
+            27146555581746,
+            22320255484276,
+            14420255680538
 
         ];
         $shipments = Shipment::whereIn('tracking_number',$array)->where('packaging_material_request',0)->get();
