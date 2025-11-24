@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PaymentModeLog;
 use DB;
 use Exception;
 use SnappyPDF;
@@ -1415,6 +1416,11 @@ class APIController extends Controller
                 $tracking_number = ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
             }
 
+            PaymentModeLog::create([
+                'shipment_id'         => $shipment_id,
+                'user_id'             => $user_id,
+                'payment_mode_id' => $payment_mode_id,
+            ]);
             //substitute_user_email
             if ($request->has('substitute_user_email')) {
                 if ($request->substitute_user_email != null) {
