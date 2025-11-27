@@ -477,7 +477,7 @@ trait RvTrait
     {
         $remarks = $request->remarks;
         $parcel = Shipment::find($request->shipment_id);
-        dd($parcel);
+
         if ($request->has('charges')) {
             if ($request->charges != null) {
                 $check = $this->update_estimate_charges($request->shipment_id, $request->charges);
