@@ -415,7 +415,7 @@ class ShipperReturnController extends Controller
                         $remarks = $request->remark[$parcel->id] != null ? $request->remark[$parcel->id] : null;
                         $journey = ShipmentsJourney::where('shipment_id', $shipment)->where('shipper_status_id', 65)->where('status_reason_id', 12)->latest('id')->first();
                         $reattempt_percentage_shippers = ReattemptPercentageForShipper::where('user_id', $parcel->user_id)->first();
-                        if (isset($reattempt_percentage_shippers) && $reattempt_percentage_shippers->percentage >= 50) {
+                        if (isset($reattempt_percentage_shippers) && $reattempt_percentage_shippers->percentage >= 60) {
                             $request->merge(['shipment_id' => $request->shipment_id]);
                             $this->reattempt($request, session('user_id'));
                             continue;
@@ -539,7 +539,7 @@ class ShipperReturnController extends Controller
                     // Shipment::where('id',$request->shipment_id)->update(['shipper_status_id' => 52,'consignee_status_id' => 52]);
 
                     $reattempt_percentage_shippers = ReattemptPercentageForShipper::where('user_id', $parcel->user_id)->first();
-                    if (isset($reattempt_percentage_shippers) && $reattempt_percentage_shippers->percentage >= 50) {
+                    if (isset($reattempt_percentage_shippers) && $reattempt_percentage_shippers->percentage >= 60) {
                         $request->merge(['shipment_id' => $request->shipment_id]);
                         $this->reattempt($request, session('user_id'));
                         return response()->json(['status' => 1, 'success' => "We're reattempting your shipment request directly, without a call request"]);

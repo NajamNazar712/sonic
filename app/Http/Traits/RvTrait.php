@@ -2066,7 +2066,7 @@ trait RvTrait
                 RvShipmentTicket::where('shipment_id', $shipmentId)->update(['in_progress' => 1]);
                 $shipment = Shipment::with(['user:id,name,brand_name'])->select('user_id', 'consignee_phone_number_1', 'consignee_name', 'tracking_number', 'amount')->find($shipmentId);
 
-                $final_phone = self::phoneNo($shipment->consignee_phone_number_1);
+            $final_phone = self::phoneNo($shipment->consignee_phone_number_1);
                 $post = [
                     'vpbx_id' => '66bdfd18cb67f',
                     'caller_id' => $final_phone,
