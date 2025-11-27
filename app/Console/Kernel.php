@@ -703,7 +703,7 @@ class Kernel extends ConsoleKernel
                 return Carbon::now()->format('Y-m-d H:i') === '2025-08-10 13:00';
             })
             ->withoutOverlapping();
-        $schedule->command('banks:update-pending')->dailyAt('23:00');
+        // $schedule->command('banks:update-pending')->dailyAt('23:00');
         // $schedule->command('export:shipment-report')
         //     ->dailyAt('14:46')              
         //     ->withoutOverlapping()         // prevent simultaneous runs

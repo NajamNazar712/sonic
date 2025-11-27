@@ -1357,9 +1357,9 @@ class ShipperDashboardController extends Controller
                 $default_button = '<button type="button" class="dropdown-item default"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Make Default</div></button>';
                 
                 if ($bank->default_bank) {
-                  
-                    $default_button = '<button type="button" class="dropdown-item editBank"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit Bank</div></button>';
-                    $dropdown .= $default_button;
+                    $dropdown = 'Default Address';
+                    // $default_button = '<button type="button" class="dropdown-item editBank"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit Bank</div></button>';
+                    // $dropdown .= $default_button;
                 }else{
                     $dropdown .= $default_button;
                 }
