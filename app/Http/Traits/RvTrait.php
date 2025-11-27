@@ -2085,7 +2085,7 @@ trait RvTrait
     
         if (GlobalSettings::where(['type' => 'bot_call_enable_disable', 'setting_value' => 1])->exists()) {
             // status_reason
-            $rvShipmentikcet = RvShipmentTicket::where('shipment_id', $shipmentId)->whereNull('deleted_at')->where('in_progress', 0);
+            $rvShipmentikcet = RvShipmentTicket::where('shipment_id', $shipmentId)->whereNull('deleted_at');
            
             if ($rvShipmentikcet->exists()) {
                
