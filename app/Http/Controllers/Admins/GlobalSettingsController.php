@@ -182,6 +182,7 @@ use App\Http\Models\BusinessCategory;
 use App\Http\Models\InternationalDhlZone;
 use App\Models\ParentProduct;
 use App\Models\ParentProductTaxLog;
+use App\Models\SalespersonSegmentLog;
 use App\Models\SalespersonTargetSegment;
 use Carbon\CarbonPeriod;
 
@@ -2759,8 +2760,41 @@ class GlobalSettingsController extends Controller
                     ];
                 }
                 // Insert into DB
+                // foreach ($segmentsToInsert as $data) {
+                //     SalespersonTargetSegment::updateOrCreate(
+                //         [
+                //             'salesperson_id' => $salesperson->id,
+                //             'segment_id'     => $data['segment_id'],
+                //             'start_date'     => $startDate,
+                //             'end_date'       => $endDate,
+                //         ],
+                //         [
+                //             'is_active'               => 1,
+                //             'target_shipments_day'    => $data['target_shipments_day'], // default or calculate
+                //             'revenue_target_day'      => $data['revenue_target_day'], // default or calculate
+                //             'start_date'              => $startDate,  
+                //             'end_date'                => $endDate,  
+                //             'target_shipments_month'  => $data['target_shipments_month'],
+                //             'revenue_target_month'    => $data['revenue_target_month'],
+                //             'avg_rps'                 => $data['avg_rps'],
+                //             'avg_rpk'                 => $data['avg_rpk'],
+                //         ]
+                //     );
+                // }
                 foreach ($segmentsToInsert as $data) {
-                    SalespersonTargetSegment::updateOrCreate(
+
+                    // Get existing record (for old values)
+                    $existing = SalespersonTargetSegment::where([
+                        'salesperson_id' => $salesperson->id,
+                        'segment_id'     => $data['segment_id'],
+                        'start_date'     => $startDate,
+                        'end_date'       => $endDate,
+                    ])->first();
+
+                    $oldValues = $existing ? $existing->toArray() : null;
+
+                    // Create or Update
+                    $record = SalespersonTargetSegment::updateOrCreate(
                         [
                             'salesperson_id' => $salesperson->id,
                             'segment_id'     => $data['segment_id'],
@@ -2769,16 +2803,27 @@ class GlobalSettingsController extends Controller
                         ],
                         [
                             'is_active'               => 1,
-                            'target_shipments_day'    => $data['target_shipments_day'], // default or calculate
-                            'revenue_target_day'      => $data['revenue_target_day'], // default or calculate
-                            'start_date'              => $startDate,  
-                            'end_date'                => $endDate,  
+                            'target_shipments_day'    => $data['target_shipments_day'],
+                            'revenue_target_day'      => $data['revenue_target_day'],
                             'target_shipments_month'  => $data['target_shipments_month'],
                             'revenue_target_month'    => $data['revenue_target_month'],
                             'avg_rps'                 => $data['avg_rps'],
                             'avg_rpk'                 => $data['avg_rpk'],
                         ]
                     );
+
+                    // Determine action
+                    $action = $record->wasRecentlyCreated ? 'created' : 'updated';
+
+                    // Insert log
+                    SalespersonSegmentLog::create([
+                        'salesperson_id' => $salesperson->id,
+                        'segment_id'     => $data['segment_id'],
+                        'action'         => $action,
+                        'old_values'     => $oldValues ? json_encode($oldValues) : null,
+                        'new_values'     => json_encode($record->getAttributes()),
+                        'updated_by'     => auth()->id() ?? null,
+                    ]);
                 }
             }
 
