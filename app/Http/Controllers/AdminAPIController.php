@@ -151,6 +151,7 @@ use App\Http\Models\Rider\RiderReturnNoteRequest;
 use App\Http\Models\Rider\RiderReturnNoteRequestShipment;
 use App\Http\Traits\CommonTrait;
 use App\Http\Traits\RvTrait;
+use App\Models\SalespersonTargetSegment;
 use App\Models\TempRequestNoteApproval;
 use App\RiderAssignedHubForDeliveryNote;
 use App\RiderMainCategory;
@@ -10290,6 +10291,56 @@ class AdminAPIController extends Controller
                 ->whereMonth('sale_person_target_logs.start_date', Carbon::parse($request->date)->format("m"))
                 ->whereYear('sale_person_target_logs.start_date', Carbon::parse($request->date)->format("Y"))
                 ->orderBy('sale_person_target_logs.created_at');
+
+            if ($targets->exists()) {
+                $targets = $targets->get();
+                return response()->json(['status' => 0, 'data' => $targets]);
+            }
+            return response()->json(['status' => 1, 'message' => 'No Data Found']);
+        }
+    }
+    public function sales_person_target_v1(Request $request)
+    {
+        $rules = [
+            'date' => ['required', 'date'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $admin_id = $request->admin_id;
+
+            $targets = SalespersonTargetSegment::join('admins as a', 'a.id', '=', 'salesperson_target_segments.salesperson_id')
+                ->leftJoin('sub_category_segments as spts', 'spts.id', '=', 'salesperson_target_segments.segment_id')
+                ->select(
+                    'salesperson_target_segments.id',
+                    'salesperson_target_segments.start_date',
+                    'salesperson_target_segments.end_date',
+                    'a.name as sales_person',
+                    'salesperson_target_segments.target_shipments_day as target_shipments_day',
+                    'salesperson_target_segments.target_shipments_month as target_month',
+                    'salesperson_target_segments.revenue_target_day as revenue_target_day',
+                    'salesperson_target_segments.revenue_target_month as revenue_target_month',
+                    'salesperson_target_segments.avg_rps as average_revenue',
+                    'salesperson_target_segments.achieved_shipments_day',
+                    'salesperson_target_segments.achieved_revenue_day',
+                    'salesperson_target_segments.achieved_shipments_month',
+                    'salesperson_target_segments.achieved_revenue_month',
+                    'salesperson_target_segments.achieved_rps',
+                    'salesperson_target_segments.achieved_rpk',
+                    'spts.name as segments',
+                )
+                ->where('salesperson_target_segments.salesperson_id',$admin_id)
+                ->whereMonth('salesperson_target_segments.start_date', Carbon::parse($request->date)->format("m"))
+                ->whereYear('salesperson_target_segments.start_date', Carbon::parse($request->date)->format("Y"))
+                ->when($request->segment_id, function ($query) use ($request) {
+                    $query->where('salesperson_target_segments.segment_id', $request->segment_id);
+                })
+                ->orderBy('salesperson_target_segments.updated_at');
 
             if ($targets->exists()) {
                 $targets = $targets->get();

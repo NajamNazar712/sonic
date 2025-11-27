@@ -1764,6 +1764,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('wallet_error_logs', 'Admins\AdminFinanceController@wallet_error_logs')->name('wallet_error_logs');
             Route::put('hold', 'Admins\AdminFinanceController@done_payments_hold')->name('hold');
             Route::put('un_hold', 'Admins\AdminFinanceController@done_payments_un_hold')->name('un_hold');
+            Route::post('generate_or_find_report', 'Admins\AdminFinanceController@generate_or_find_report')->name('generate_or_find_report');
 
 
         });
@@ -3022,7 +3023,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::prefix('targets')->name('targets.')->group(function () {
                 Route::get('', 'Admins\GlobalSettingsController@sales_person_targets')->name('index');
                 Route::post('', 'Admins\GlobalSettingsController@sales_person_targets_submit')->name('update');
-                Route::get('list', 'Admins\GlobalSettingsController@sales_person_targets_list')->name('list');
+                Route::post('upload', 'Admins\GlobalSettingsController@upload')->name('upload');
+                // Route::get('list', 'Admins\GlobalSettingsController@sales_person_targets_list')->name('list');
+                Route::post('list', 'Admins\GlobalSettingsController@sales_person_targets_segment_list')->name('list');
                 Route::post('delete_sale_person_targets', 'Admins\GlobalSettingsController@delete_sale_person_targets')->name('delete');
             });
             Route::prefix('history')->name('history.')->group(function () {

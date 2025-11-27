@@ -581,6 +581,7 @@ use Illuminate\Http\Request;
             Route::prefix('sales_target')->name('sales_target.')->group(function () {
                 Route::get('list', 'AdminAPIController@sales_person_targets')->name('list');
                 Route::post('history', 'AdminAPIController@sales_person_target_history')->name('history');
+                Route::post('history_v1', 'AdminAPIController@sales_person_target_v1')->name('history_v1');
             });
 
             Route::prefix('delivery_note')->name('delivery_note.')->group(function () {
@@ -754,7 +755,7 @@ use Illuminate\Http\Request;
 //                Route::get('request_list/{status?}', 'ShipperCrmApiController@crm_request_list')->name('request_list');
                 Route::get('request_list', 'ShipperCrmApiController@crm_request_list')->name('request_list');
                 Route::post('add_comments', 'ShipperCrmApiController@crm_comment_add')->name('add_comments');
-                Route::post('comments_details/{id}', 'ShipperCrmApiController@request_details')->name('comments_details');
+                Route::get('comments_details', 'ShipperCrmApiController@request_details')->name('comments_details');
                 Route::post('single_crm_request','ShipperCrmApiController@single_crm_request')->name('single_crm_request');
                 Route::post('receiving_sheet','ShipperCrmApiController@get_receving_sheet')->name('receiving_sheet');
             });
