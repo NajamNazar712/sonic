@@ -2920,6 +2920,7 @@ class ShipperDashboardController extends Controller
 
     public function sarReport(Request $request)
     {
+        return true;
         $from = Carbon::now()->subMonths(6)->startOfDay();
         $to   = Carbon::now()->endOfDay();
 
