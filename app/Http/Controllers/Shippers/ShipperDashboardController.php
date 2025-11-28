@@ -2989,6 +2989,8 @@ class ShipperDashboardController extends Controller
                 })
                 ->rawColumns(['sar_date', 'return_confirm_date'])
                 ->make(true);
+        }else{
+            return true;
         }
        
     }
