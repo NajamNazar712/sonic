@@ -20,8 +20,7 @@ class InsertOFDJourney extends Command
 {
     protected $signature = 'ofd:insert 
                             {tracking_numbers : Comma-separated tracking numbers}
-                            {delivery_note_id : Delivery Note ID}
-                            {start_serial : Starting serial number}';
+                            {delivery_note_id : Delivery Note ID}';
 
     protected $description = 'Insert OFD journey based on tracking number, delivery note, and serial no';
 
@@ -29,12 +28,11 @@ class InsertOFDJourney extends Command
     {
         $trackingNumbers = explode(',', $this->argument('tracking_numbers'));
         $deliveryNoteId  = $this->argument('delivery_note_id');
-        $serial          = (int) $this->argument('start_serial');
+      
 
         $this->info("Processing OFD journey insert...");
         $this->info("Tracking Numbers: " . implode(', ', $trackingNumbers));
         $this->info("Delivery Note ID: $deliveryNoteId");
-        $this->info("Start Serial: $serial");
 
         // Fetch Shipments
         $shipments = Shipment::whereIn('tracking_number', $trackingNumbers)
@@ -58,7 +56,10 @@ class InsertOFDJourney extends Command
             $request = RiderDeliveryNoteRequest::find($deliveryNote->request_note_id);
             $riderId = $request?->rider_id;
         }
+        $lastSerial = DeliveryNoteShipment::where('delivery_note_id', $deliveryNoteId)
+            ->max('ordering');     // This returns the highest serial value
 
+        $serial = $lastSerial ? $lastSerial + 1 : 1; // Auto-start serial from 1 if empty
         foreach ($shipments as $shipment) {
 
             // Check if DNS already exists
