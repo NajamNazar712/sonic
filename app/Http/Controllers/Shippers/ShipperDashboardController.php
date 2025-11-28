@@ -2920,6 +2920,7 @@ class ShipperDashboardController extends Controller
 
     public function sarReport(Request $request)
     {
+        return true;
 
         $setting = GlobalSettings::where('type', 'rv_permanent_disable_shippers')->first();
         $shippers = [];
