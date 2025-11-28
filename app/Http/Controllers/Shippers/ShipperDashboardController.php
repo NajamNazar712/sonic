@@ -2921,7 +2921,7 @@ class ShipperDashboardController extends Controller
     public function sarReport(Request $request)
     {
         // return true;
-        if ((string) Auth::id() === '013580') {
+        if (Auth::id() === 37631) {
             $from = Carbon::now()->subMonths(6)->startOfDay();
             $to   = Carbon::now()->endOfDay();
 
