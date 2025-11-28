@@ -2920,7 +2920,23 @@ class ShipperDashboardController extends Controller
 
     public function sarReport(Request $request)
     {
-        return true;
+        $from = Carbon::now()->subMonths(6)->startOfDay();
+        $to   = Carbon::now()->endOfDay();
+
+        $connection = 'reports';
+        // First and last shipments_journey IDs within the window
+        $sj_from_id = DB::connection($connection)
+            ->table('shipments_journey')
+            ->whereBetween('created_at', [$from, $to])
+            ->orderBy('created_at', 'asc')->orderBy('id', 'asc')
+            ->limit(1)->value('id');
+
+        $sj_to_id = DB::connection($connection)
+            ->table('shipments_journey')
+            ->whereBetween('created_at', [$from, $to])
+            ->orderBy('created_at', 'desc')->orderBy('id', 'desc')
+            ->limit(1)->value('id');
+
 
         $setting = GlobalSettings::where('type', 'rv_permanent_disable_shippers')->first();
         $shippers = [];
@@ -2936,9 +2952,10 @@ class ShipperDashboardController extends Controller
             ->groupBy('shipment_id');
 
         // 🧾 Main query
-        $sarReport = DB::table('shipments_journey as sj')
-            ->joinSub($latestJourney, 'latest', function ($join) {
-                $join->on('sj.id', '=', 'latest.max_id');
+        $sarReport = DB::connection($connection)->table('shipments_journey as sj')
+            ->joinSub($latestJourney, 'latest', function ($join) use ($sj_from_id, $sj_to_id) {
+                $join->on('sj.id', '=', 'latest.max_id')
+                  ->whereBetween('sj.id', [$sj_from_id, $sj_to_id]);
             })
             ->join('shipments as s', 's.id', '=', 'sj.shipment_id')
             ->select(
