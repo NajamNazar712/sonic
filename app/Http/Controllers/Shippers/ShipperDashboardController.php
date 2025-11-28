@@ -2920,70 +2920,77 @@ class ShipperDashboardController extends Controller
 
     public function sarReport(Request $request)
     {
-        return true;
-        $from = Carbon::now()->subMonths(6)->startOfDay();
-        $to   = Carbon::now()->endOfDay();
+        // return true;
+        if ((string) Auth::id() === '013580') {
+            $from = Carbon::now()->subMonths(6)->startOfDay();
+            $to   = Carbon::now()->endOfDay();
 
-        $connection = 'reports';
-        // First and last shipments_journey IDs within the window
-        $sj_from_id = DB::connection($connection)
-            ->table('shipments_journey')
-            ->whereBetween('created_at', [$from, $to])
-            ->orderBy('created_at', 'asc')->orderBy('id', 'asc')
-            ->limit(1)->value('id');
+            $connection = 'reports';
+            // First and last shipments_journey IDs within the window
+            $sj_from_id = DB::connection($connection)
+                ->table('shipments_journey')
+                ->whereBetween('created_at', [$from, $to])
+                ->orderBy('created_at', 'asc')->orderBy('id', 'asc')
+                ->limit(1)->value('id');
 
-        $sj_to_id = DB::connection($connection)
-            ->table('shipments_journey')
-            ->whereBetween('created_at', [$from, $to])
-            ->orderBy('created_at', 'desc')->orderBy('id', 'desc')
-            ->limit(1)->value('id');
+            $sj_to_id = DB::connection($connection)
+                ->table('shipments_journey')
+                ->whereBetween('created_at', [$from, $to])
+                ->orderBy('created_at', 'desc')->orderBy('id', 'desc')
+                ->limit(1)->value('id');
 
 
-        $setting = GlobalSettings::where('type', 'rv_permanent_disable_shippers')->first();
-        $shippers = [];
+            $setting = GlobalSettings::where('type', 'rv_permanent_disable_shippers')->first();
+            $shippers = [];
 
-        if ($setting && !empty($setting->text)) {
-            $shippers = explode(',', $setting->text);
+            if ($setting && !empty($setting->text)) {
+                $shippers = explode(',', $setting->text);
+            }
+
+            $cutoffTime = Carbon::now()->subHours(48);
+
+            // 🧾 Main query
+            $sarReport = DB::connection($connection)
+                ->table('shipments_journey as sj')
+                ->join('shipments as s', 's.id', '=', 'sj.shipment_id')
+                ->join('shipments_journey as sjpa', function ($join) use ($shippers, $sj_from_id, $sj_to_id) {
+                    $join->on('sjpa.shipment_id', '=', 'sj.shipment_id')
+                        ->whereBetween('sjpa.id', [$sj_from_id, $sj_to_id])
+                        ->where(
+                            'sjpa.id',
+                            '=',
+                            DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = sjpa.shipment_id  and shipments_journey.shipper_status_id = 65)')
+                        )->when(!empty($shippers), function ($query) use ($shippers) {
+                            $query->whereNotIn('sjpa.user_id', $shippers);
+                        });
+                })
+                ->select(
+                    's.user_id',
+                    DB::raw('COUNT(sj.shipment_id) as total_shipments'),
+                    DB::raw('DATE(sj.created_at) as sar_date')
+                )
+                ->where('sj.created_at', '>=', $cutoffTime)
+                ->where('s.user_id', Auth::id())
+                ->groupBy('s.user_id', 'sar_date')
+                ->orderBy('sar_date', 'desc')
+                ->get();
+
+
+            // 🧮 Return Yajra DataTable
+            return DataTables::of($sarReport)
+                ->addColumn('sar_date', fn($item) => Carbon::parse($item->sar_date)->format('d-M-Y'))
+                ->addColumn('total_shipments', fn($item) => $item->total_shipments)
+                ->addColumn('return_confirm_date', function ($data) use ($shippers) {
+                    if (in_array($data->user_id, $shippers)) {
+                        return '-';
+                    } else {
+                        return  Carbon::parse($data->sar_date)->addDays(2)->format('d-M-Y');
+                    }
+                })
+                ->rawColumns(['sar_date', 'return_confirm_date'])
+                ->make(true);
         }
-
-        $cutoffTime = Carbon::now()->subHours(48);
-        // 🧩 Subquery: har shipment ki latest SAR (status 65) journey
-        $latestJourney = DB::connection($connection)->table('shipments_journey')
-            ->whereBetween('sj.id', [$sj_from_id, $sj_to_id])
-            ->select(DB::raw('MAX(id) as max_id'), 'shipment_id')
-            ->groupBy('shipment_id');
-
-        // 🧾 Main query
-        $sarReport = DB::connection($connection)->table('shipments_journey as sj')
-            ->joinSub($latestJourney, 'latest', function ($join) use ($sj_from_id, $sj_to_id) {
-                $join->on('sj.id', '=', 'latest.max_id')
-                  ->whereBetween('sj.id', [$sj_from_id, $sj_to_id]);
-            })
-            ->join('shipments as s', 's.id', '=', 'sj.shipment_id')
-            ->select(
-                's.user_id',
-                DB::raw('COUNT(sj.shipment_id) as total_shipments'),
-                DB::raw('DATE(sj.created_at) as sar_date')
-            )
-            ->where('sj.shipper_status_id', 65)
-            ->where('sj.created_at', '>=', $cutoffTime)
-            ->where('s.user_id', Auth::id())
-            ->groupBy('s.user_id', DB::raw('DATE(sj.created_at)'))
-            ->orderBy('sar_date', 'desc');
-
-        // 🧮 Return Yajra DataTable
-        return DataTables::of($sarReport)
-            ->addColumn('sar_date', fn($item) => Carbon::parse($item->sar_date)->format('d-M-Y'))
-            ->addColumn('total_shipments', fn($item) => $item->total_shipments)
-            ->addColumn('return_confirm_date', function ($data) use ($shippers) {
-                if (in_array($data->user_id, $shippers)) {
-                    return '-';
-                }else {
-                    return  Carbon::parse($data->sar_date)->addDays(2)->format('d-M-Y');
-                }
-            })
-            ->rawColumns(['sar_date', 'return_confirm_date'])
-            ->make(true);
+       
     }
 
 
