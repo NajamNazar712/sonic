@@ -21,7 +21,9 @@
                             @endif
                             {!! Form::hidden('service_type_check_id', $service_type_check_id) !!}
                             {!! Form::hidden('omni', $omni) !!}
-                            <div class="table-responsive">
+                            {!! Form::hidden('batch_id', $batch_id ?? null) !!}
+
+                                <div class="table-responsive">
                                 <table class='table table-bordered' id='tbl'>
                                     <thead>
                                     <tr>
@@ -124,12 +126,12 @@
                                                 }
                                             $no=1;
                                     @endphp
-                                    @foreach($data as $ro)
+                                    @foreach($data as $no=> $ro)
                                         <tr>
-                                            @if(isset($errors[$no+1]))
-                                                <td><h4 style="color: red">{!! $no=$no+1!!}</h4><font color="red">{{ 'Error(s) in this row' }}</font></td>
+                                            @if(isset($errors[$no]))
+                                                <td><h4 style="color: red">{!! $no!!}</h4><font color="red">{{ 'Error(s) in this row' }}</font></td>
                                             @else
-                                                <td>{!! $no=$no+1!!}</td>
+                                                <td>{!! $no!!}</td>
                                             @endif
                                             @if(isset($errors[$no]['service_type_id']))
                                                 <td>{!! Form::select('form[' . $no . '][service_type_id]',$booking_types,null, ['class' => 'form-control is-invalid service_type_id select2','id'=>'service_type_id','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['service_type_id']}}</font></td>

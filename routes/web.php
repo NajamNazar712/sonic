@@ -101,6 +101,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('opt_verify_close', 'Shippers\ShipperDashboardController@opt_verify_close')->name('opt_verify_close');
     Route::get('/dashboard', 'Shippers\ShipperDashboardController@orders_index')->name('dashboard');
     Route::get('/order/pending', 'Shippers\ShipperDashboardController@orderPending');
+    Route::get('/sar_report', 'Shippers\ShipperDashboardController@sarReport')->name('sar_report');
 
     Route::post('/crf/update', 'Shippers\ShipperDashboardController@updateCrfSign')->name('updateSignOffCrf');;
 
