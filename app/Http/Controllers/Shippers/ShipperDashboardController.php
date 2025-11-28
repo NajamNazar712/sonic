@@ -2920,7 +2920,6 @@ class ShipperDashboardController extends Controller
 
     public function sarReport(Request $request)
     {
-        return true;
         $from = Carbon::now()->subMonths(6)->startOfDay();
         $to   = Carbon::now()->endOfDay();
 
@@ -2948,7 +2947,8 @@ class ShipperDashboardController extends Controller
 
         $cutoffTime = Carbon::now()->subHours(48);
         // 🧩 Subquery: har shipment ki latest SAR (status 65) journey
-        $latestJourney = DB::table('shipments_journey')
+        $latestJourney = DB::connection($connection)->table('shipments_journey')
+            ->whereBetween('sj.id', [$sj_from_id, $sj_to_id])
             ->select(DB::raw('MAX(id) as max_id'), 'shipment_id')
             ->groupBy('shipment_id');
 
