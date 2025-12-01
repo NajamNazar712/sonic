@@ -11486,6 +11486,7 @@ class NotificationsController extends Controller
                     $to[] = 'hammad.saleem@slgtrax.com';
                     $to[] = 'fawad.ahmed@slgtrax.com';
                     $to[] = 'syed.furqan@slgtrax.com';
+                    $to[] = 'wajiha.majeed@slgtrax.com';
 
                     self::email($subject, $body, $to, NULL, $bcc);
                 } else if( $id == 244) {
