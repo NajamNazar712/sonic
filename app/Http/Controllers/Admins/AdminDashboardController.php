@@ -1414,7 +1414,9 @@ class AdminDashboardController extends Controller
             $data = DB::connection('reports')->table('cities')->where('hub', 1)->where('name', 'like', '%' . $keyword . '%')->select('id','name as text')->take(10)->get()->toArray();
         } elseif($type == 'nature') {
             $data = DB::connection('reports')->table('crm_request_case_nature_types')->where('type', 'like', '%' . $keyword . '%')->select('id','type as text')->take(10)->get()->toArray();
-        } 
+        } elseif($type == 'rider') {
+            $data = $rider_name = Rider::where('name', 'like', '%' . $keyword . '%')->select('id','name as text')->take(10)->get()->toArray();
+        }
         
         return response()->json($data);
     }
