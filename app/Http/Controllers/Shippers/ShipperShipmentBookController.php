@@ -1149,7 +1149,7 @@ class ShipperShipmentBookController extends Controller
 
 
                     } catch (\Exception $e) {
-                        Log::error('Error creating shipper segment log from shipment public function store(Request $request)' . $shipment_id . ': ' . $e->getMessage());
+                        Log::error('Error creating shipper segment log from shipment public function store(Request $request)' . $shipment_id . ': ' . $e->getMessage() . ' | File: ' . $e->getFile() . ' | Line: ' . $e->getLine() );
                     }
                     return redirect()->back()->with(['success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'print' => $print]);
                 }
