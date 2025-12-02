@@ -1555,7 +1555,7 @@ trait RvTrait
                     }
                     else if($agent->agent_caller_type == 2)//These Agents will get shipments pending with second call only
                     {
-                        return $query->where('call_count' , '>', 0)->where('call_count' , '<', 2);
+                        return $query->where('call_count' , '>', 0)->where('call_count' , '<', 2)->whereNotIn('shipment_user_id', [16344, 26249, 13060, 5553, 30230, 49055, 50475, 27425, 31794, 31902, 31538, 51353, 19943, 8732, 44233, 37631, 48558, 35049, 25244, 49028]);
                     }
                     else
                     {
@@ -2063,9 +2063,12 @@ trait RvTrait
     
         if (GlobalSettings::where(['type' => 'bot_call_enable_disable', 'setting_value' => 1])->exists()) {
             if (RvShipmentTicket::where('shipment_id', $shipmentId)->whereNull('deleted_at')->where('is_bot', 1)->exists()) {
+                $shipment = Shipment::with(['user:id,name,brand_name'])->select('user_id', 'consignee_phone_number_1', 'consignee_name', 'tracking_number', 'amount')->find($shipmentId);
+                if(in_array($shipment->user_id,[16344, 26249, 13060, 5553, 30230, 49055, 50475, 27425, 31794, 31902, 31538, 51353, 19943, 8732, 44233, 37631, 48558, 35049, 25244, 49028])){
+                   return self::botCallingThirdDataSet($shipmentId);
+                }
                 $base_uri = 'https://cap.zong.com.pk:8444/vpbx-apis/roboCalls/outboundCall';
                 RvShipmentTicket::where('shipment_id', $shipmentId)->update(['in_progress' => 1]);
-                $shipment = Shipment::with(['user:id,name,brand_name'])->select('user_id', 'consignee_phone_number_1', 'consignee_name', 'tracking_number', 'amount')->find($shipmentId);
 
             $final_phone = self::phoneNo($shipment->consignee_phone_number_1);
                 $post = [

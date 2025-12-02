@@ -74,7 +74,7 @@ class BotCallInitiate extends Command
                 // Log::channel('botCallJobLog')->info('s ' . 'Call initiate end second-call' . Carbon::parse(now())->format('Y-m-d H:i:s'));
             }
             
-            $shipmentThirds = RvShipmentAssignAgent::join('shipments as s', 's.id', 'rv_shipment_assign_agents.shipment_id')->where([['unresponsive_attempt_time', '>=', $timeStart], ['unresponsive_attempt_time', '<=', $timeEnd], 'unresponsive_count' => 2, 'rv_assign_agent_status_id' => 6])->pluck('shipment_id');
+            $shipmentThirds = RvShipmentAssignAgent::join('shipments as s', 's.id', 'rv_shipment_assign_agents.shipment_id')->where(['agent_id' => 4620,['unresponsive_attempt_time', '>=', $timeStart], ['unresponsive_attempt_time', '<=', $timeEnd], 'call_count' => 2, 'rv_assign_agent_status_id' => 6])->whereNotIn('s.user_id',[16344,26249,13060,5553,30230,49055,50475,27425,31794,31902,31538,51353,19943,8732,44233,37631,48558,35049,25244,49028])->pluck('shipment_id');
             Log::channel('botCallJobLog')->info('s ' . 'Log after  shipmentThirds call  record' . count($shipmentThirds));
            
             // $third_count =1;
@@ -86,7 +86,15 @@ class BotCallInitiate extends Command
                 }
                 // Log::channel('botCallJobLog')->info('s ' . 'Call initiate end third-call' . Carbon::parse(now())->format('Y-m-d H:i:s'));
             }
-        
+            $shipmentThirds = RvShipmentAssignAgent::join('shipments as s', 's.id', 'rv_shipment_assign_agents.shipment_id')->where([['unresponsive_attempt_time', '>=', $timeStart], ['unresponsive_attempt_time', '<=', $timeEnd], 'unresponsive_count' => 2, 'rv_assign_agent_status_id' => 6])->whereIn('s.user_id', [16344, 26249, 13060, 5553, 30230, 49055, 50475, 27425, 31794, 31902, 31538, 51353, 19943, 8732, 44233, 37631, 48558, 35049, 25244, 49028])->pluck('shipment_id');
+            if (count($shipmentThirds) > 0) {
+                // Log::channel('botCallJobLog')->info('s ' . 'Call initiate start third-call' . Carbon::parse(now())->format('Y-m-d H:i:s'));
+                RvShipmentAssignAgent::whereIn('shipment_id', $shipmentThirds)->update(['rv_state_id' => 3]);
+                foreach ($shipmentThirds as $shipmentId) {
+                    dispatch(new BotCallDispatchThird($shipmentId));
+                }
+                // Log::channel('botCallJobLog')->info('s ' . 'Call initiate end third-call' . Carbon::parse(now())->format('Y-m-d H:i:s'));
+            }
         } catch (\Throwable $th) {
             // Log::channel('botCallJobLog')->info(' Unresponsive Count ');
 

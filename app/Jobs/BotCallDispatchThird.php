@@ -44,7 +44,7 @@ class BotCallDispatchThird implements ShouldQueue
         //
         try {
            
-            $botRecordData = $this->botCallingThirdDataSet($this->shipmentId);
+            $botRecordData = $this->botCallingDataSet($this->shipmentId);
             if ($botRecordData) {
                 $token = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiNjYzMTQyNi05ODQyLTQzNjEtYmU1Mi1lZGI3OWEwMTkyOGMiLCJpYXQiOjE3NjI1MDg4ODUsImV4cCI6NDkxODE4MjQ4NSwidHlwZSI6ImV4dGVybmFsQXBpIn0.J7B45SejW4pDHLh5sYSDCMyayRLgOJpZCWNlJ58Esek";
                 $client = new Client(['base_uri' => $botRecordData['base_uri'], 'http_errors' => FALSE, 'connect_timeout' => 120, 'timeout' => 120, 'verify' => false]);
