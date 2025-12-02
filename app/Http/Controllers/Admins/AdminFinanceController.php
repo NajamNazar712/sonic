@@ -22332,4 +22332,46 @@ class AdminFinanceController extends Controller
         return ['status' => 0, 'success' => 'Payment(s) Tax marked Paid'];
     }
 
+    public function generate_or_find_report(Request $request){
+        if ($request->filled('dps_date_from')) {
+
+            // Convert incoming date to Y_m_d format
+            $date = Carbon::parse($request->dps_date_from)->format('Y_m_d');
+
+            // Path to /public/reports
+            $path = public_path('reports');
+
+            if(isset($request->retail)){
+                // File search pattern
+                $pattern = $path . "/retail_done_payment_report_{$date}_*.xlsx";
+                // Find matching files
+                $files = glob($pattern);
+                if(count($files) == 0){
+                    AdminReportsEmailController::done_payment($date);
+                    $files = glob($pattern);
+                }
+            }else{
+                // File search pattern
+                $pattern = $path . "/done_payment_report_{$date}_*.xlsx";
+                // Find matching files
+                $files = glob($pattern);
+                if(count($files) == 0){
+                    AdminReportsEmailController::done_payment($date);
+                    $files = glob($pattern);
+                }
+            }
+
+
+            return response()->json([
+                'date'  => $date,
+                'files' => array_map('basename', $files),
+                'count' => count($files),
+            ]);
+
+        }
+
+        return response()->json([
+            'error' => 'dps_date_from is required'
+        ], 400);
+    }
 }

@@ -10,6 +10,64 @@
                     @include('admin.inc.messages')
                     <div class="col mt-3">
                         <form id="search_form" class="row mb-2 justify-content-center" novalidate="novalidate">
+                           
+                            <div class="col-3 text-center">
+                                <h4 class="bg-primary mb-0 text-white border">Total Amount</h4>
+                                <p class="border" >Rs. </p>
+                            </div>
+
+                            <div class="col-3 text-center">
+                                <h4 class="bg-primary mb-0 text-white border">Total Tax</h4>
+                                <p class="border" >Rs. </p>
+                            </div>
+
+                            <div class="col-3 text-center">
+                                <h4 class="bg-primary mb-0 text-white border">Paid Tax</h4>
+                                <p class="border" >Rs.</p>
+                            </div>
+
+                            <div class="col-3 text-center">
+                                <h4 class="bg-primary mb-0 text-white border">Un-Paid Tax</h4>
+                                <p class="border" >Rs.</p>
+                            </div>
+                           
+                            <div class="col-4">
+                                <fieldset class="form-group">
+                                    <select name="search_shippers[]" id="search_shippers" class="form-control select2" multiple>
+                                    </select>
+                                </fieldset>
+                            </div>
+                            <div class="col-4">
+                                <fieldset class="form-group">
+                                    <select name="search_origin" id="search_origin" class="form-control select2">
+                                        @foreach($cities as $origin)
+                                            <option value="{{$origin->id}}">{{$origin->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
+
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <select name="search_sales_person" class="select2" id="sales_person_select">
+                                        @foreach($sales_persons as $sales)
+                                            <option value="{{ $sales->id }}">{{ $sales->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <select name="tax_status" class="select2" id="tax_status">
+            
+                                        <option value="1">Paid</option>
+                                        <option value="0">Un Paid</option>
+
+                                       
+                                    </select>
+                                </div>
+                            </div>
                             {{-- Search date from filter --}}
                             <div class="col-4">
                                 <div class="form-group input-group">
@@ -57,6 +115,7 @@
                                 <th class="border-primary border-darken-1">CNIC Number</th>
                                 <th class="border-primary border-darken-1">Customer Name</th>
                                 <th class="border-primary border-darken-1">City</th>
+                                <th class="border-primary border-darken-1">Sales Person</th>
                                 <th class="border-primary border-darken-1">Business Name</th>
                                 <th class="border-primary border-darken-1">Taxable Amount</th>
                                 <th class="border-primary border-darken-1">Tax Amount</th>
@@ -194,6 +253,46 @@
                 }
             });
 
+            $('#search_origin').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Origin City',
+                width:'100%',
+                allowClear:true
+            });
+
+            $('#sales_person_select').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Sales Person',
+                allowClear:true
+            });
+
+            $('#tax_status').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Tax Status',
+                allowClear:true
+            });
+
+            $('#search_shippers').select2({
+                width:'100%',
+                placeholder:"Select Multiple Shippers",
+                allowClear:true,
+                multiple: true,
+                minimumInputLength: 2,
+                ajax: {
+                    dataType: 'json',
+                    url:  '{!! route('admin.accounts.shipper_names.dropdown',['type'=>'active']) !!}',
+                        data: function (params) {
+                            return {
+                                search: params.term,
+                            }
+                        },
+                        processResults: function (data) {
+                            return {
+                                results: data
+                            };
+                        },
+                    delay: 700,
+                }
+            });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -226,6 +325,7 @@
                             head.push('CNIC Number');
                             head.push('Customer Name');
                             head.push('City');
+                            head.push('Sales Person');
                             head.push('Business Name');
                             head.push('Taxable Amount');
                             head.push('Tax Amount');
@@ -246,6 +346,7 @@
                                 row.push(values.cnic);
                                 row.push(values.customer_name);
                                 row.push(values.city_name);
+                                row.push(values.sales_person);
                                 row.push(values.brand_name);
                                 row.push(values.taxable_amount);
                                 row.push(values.tax_amount);
@@ -296,6 +397,10 @@
                     data: function (d) {
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                        d.search_origin = $('#search_origin').val();
+                        d.search_sales_person =  $('#sales_person_select').val();
+                        d.tax_status =  $('#tax_status').val();
+                        d.search_shippers = $('#search_shippers').val();
                     }
                 },
                 //order: [[1, 'desc'], [2, 'asc']], // Order by 'created_at' DESC and 'description' ASC
@@ -309,23 +414,30 @@
                     {data: 'cnic', name: 'cnic', class: 'text-center align-middle cnic', searchable: false},
                     {data: 'customer_name', name: 'customer_name', class: 'text-center align-middle customer_name', searchable: false},
                     {data: 'city_name', name: 'city_name', class: 'text-center align-middle city_name', searchable: false},
+                    {data: 'sales_person', name: 'sales_person', class: 'text-center align-middle sales_person', searchable: false},
                     {data: 'brand_name', name: 'brand_name', class: 'text-center align-middle brand_name', searchable: false},
                     {data: 'taxable_amount', name: 'taxable_amount', class: 'text-center align-middle taxable_amount', searchable: false},
                     {data: 'tax_amount', name: 'tax_amount', class: 'text-center align-middle tax_amount', searchable: false},
                     {data: 'cod_sst', name: 'cod_sst', class: 'text-center align-middle cod_sst', searchable: false},
                     {data: 'status', name: 'status', class: 'text-center align-middle status', searchable: false},
                     {data: 'tax_paid_date', name: 'tax_paid_date', class: 'text-center align-middle tax_paid_date', searchable: false},
-                    {data: 'updated_by', name: 'updated_by', class: 'text-center align-middle updated_by', searchable: false},
-                    
-
+                    {data: 'updated_by', name: 'updated_by', class: 'text-center align-middle updated_by', searchable: false},       
 
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
-        });
+            });
 
+            table.on('xhr.dt', function(e, settings, json, xhr) {
+                if (json && json.totals) {
+                    $('.card p:eq(0)').text('Rs. ' + json.totals.total_amount);
+                    $('.card p:eq(1)').text('Rs. ' + json.totals.total_tax);
+                    $('.card p:eq(2)').text('Rs. ' + json.totals.paid_tax);
+                    $('.card p:eq(3)').text('Rs. ' + json.totals.unpaid_tax);
+                }
+            });
         $('#search_form').bind('submit', function (e) {
             e.preventDefault();
             var search_date_from = $('#search_form #search_date_from').val();

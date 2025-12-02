@@ -40,6 +40,8 @@ use Yajra\Datatables\Datatables;
 use App\Http\Models\Admin\ShipperInterceptExclude;
 use App\Http\Models\SpecifiedShipper;
 use Illuminate\Support\Facades\Log;
+use App\Http\Models\Sister_account\MergedSisterAccountMapping;
+
 
 class ShipperReturnController extends Controller
 {
@@ -67,6 +69,12 @@ class ShipperReturnController extends Controller
     }
     public function confirmation_pending_list(Request $request)
     {
+        $masp = [session('user_id')];
+        $merged_account_sister_mapping = MergedSisterAccountMapping::where('head_user_id',session('user_id'))->pluck('sister_user_id')->toArray();
+        
+        if(count($merged_account_sister_mapping) >  0){
+            $masp = array_merge($masp,$merged_account_sister_mapping);
+        }
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
@@ -104,7 +112,8 @@ class ShipperReturnController extends Controller
             ->select('shipments.id as shId', 'shipments.tracking_number', 'shipments.tracking_number as tracking', 'u.name as shipper', 'u.phone as shipper_phone1', 'u.phone2 as shipper_phone2', 'oc.name as origin', 'dc.name as destination', 'shipments.order_id', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'shipments.consignee_address', 'shipments.amount', 'sm.mode', 'bt.booking_type as service_type', 'ss.name as status', 'shipments_journey.remarks as remarks', 'ssr.id as reason_id', 'ssr.name as reason', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as last_status_date', 'sj.created_at as arrival', 'shipments.shipper_status_id as shipper_status_id', 'shipments_journey.shipper_status_id as journey_shipper_status_id', 'dc.pickup as pickup', 'shipments.intercepted as intercepted', 'shipments.nsa_osa_estimated_charges', 'consolidations.consolidation_id')
             ->where('shipments.shipper_status_id', 65) //shipper advise request
             // ->orWhere('rsaa.unresponsive_count','>', 0) //Unresponsive Count
-            ->where('shipments.user_id', '=', session('user_id'))
+            //->where('shipments.user_id', '=', session('user_id'))
+            ->whereIn('shipments.user_id', $masp)
             ->groupBy('shipments.id');
 
         if (session('user_type') == 2) {

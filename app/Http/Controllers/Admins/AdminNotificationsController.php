@@ -1295,6 +1295,11 @@ class AdminNotificationsController extends Controller
             $details['receiver'] = ['shahbaz.abbasi@trax.pk', 'mansoor.ahmad@trax.pk'];
             $details['fields'] = ['link'];
         }
+        else if ( $id == 254)
+        {
+            $details['receiver'] = ['sahban.ghani@logiserves.com', 'hammad.saleem@slgtrax.com', 'fawad.ahmed@slgtrax.com', 'syed.furqan@slgtrax.com'];
+            $details['fields'] = ['link'];
+        }
         else if($id == 244) {
             $details['receiver'] = ['Consignee Phone Number'];
             $details['fields'] = ['tracking_number', 'rider_number', 'otp'];
