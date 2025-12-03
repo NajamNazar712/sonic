@@ -104,7 +104,7 @@ class UpdateRvShipments extends Command
 
     protected function processMissingShipments()
     {
-        $yesterday = Carbon::now()->subDay()->format('Y-m-d');
+        $yesterday = Carbon::now()->subDay(6)->format('Y-m-d');
         // Get shipments with shipper_status_id = 12 and no associated RvShipmentTicket with permanent_disable = 1
         $missingShipments =  DB::table('shipments as s')
             ->join('rv_shipment_tickets as rst', function ($join) {
