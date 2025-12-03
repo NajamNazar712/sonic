@@ -713,6 +713,7 @@ class Kernel extends ConsoleKernel
         //     ->sendOutputTo(storage_path('logs/shipment_report.log'))
         //     ->emailOutputOnFailure('anas.mazhar@logiserves.com');
         $schedule->command('email:daily_overall_sales_report_khaddi')->dailyAt('09:00')->runInBackground();
+        $schedule->command('shipments:update-rv-sar')->dailyAt('05:00');
     }
     /**
      * Register the commands for the application.
