@@ -193,6 +193,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\DailyOverAllSalesReportKhaddi',
         // 'App\Console\Commands\QsrEmail',
         // 'App\Console\Commands\PendingDeliveriesReport',
+        'App\Console\Commands\RemoveExpiredZeroCodShippers',
 
     ];
 
@@ -713,6 +714,8 @@ class Kernel extends ConsoleKernel
         //     ->sendOutputTo(storage_path('logs/shipment_report.log'))
         //     ->emailOutputOnFailure('anas.mazhar@logiserves.com');
         $schedule->command('email:daily_overall_sales_report_khaddi')->dailyAt('09:00')->runInBackground();
+        $schedule->command('shippers:remove-expired')->everyFiveMinutes()->withoutOverlapping()->runInBackground();
+        
     }
     /**
      * Register the commands for the application.

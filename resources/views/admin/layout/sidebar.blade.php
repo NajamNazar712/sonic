@@ -2249,6 +2249,14 @@
                                         <li><a class="menu-item"
                                                    href="{{ route('admin.settings.wallet_shippers.index') }}">Wallet Shippers</a></li>
                                         @endif
+                                        @if (session('role_id') == 1 || in_array(1054, session('permissions')))
+                                        <li><a class="menu-item"
+                                                   href="{{ route('admin.settings.zero_cod_shippers.index') }}">Zero COD Shippers</a></li>
+                                        @endif
+                                        @if (session('role_id') == 1 || in_array(1055, session('permissions')))
+                                        <li><a class="menu-item"
+                                                   href="{{ route('admin.settings.zero_cod_shippers.logs') }}">Zero COD Shippers Logs</a></li>
+                                        @endif
                                 </ul>
 
                             </li>
