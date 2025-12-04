@@ -5797,7 +5797,7 @@ class AdminReportsEmailController extends Controller
                     $sale->category,  
                     $sale->description,  
                     $sale->international_tracking_number,  
-                    $sale->p_collection_amount,  
+                    $sale->s_collection_amount, 
                     $sale->actual_weight,  
                     $sale->chargeable_weight,  
                     $sale->weight_charges,  
