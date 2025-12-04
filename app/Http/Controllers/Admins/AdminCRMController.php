@@ -260,7 +260,18 @@ class AdminCRMController extends Controller
                             if($is_shipment){
                                 $already_lodged = true;
                                 $complain = $is_shipment->id;
-                                if($is_shipment->case_nature_id != $nature_id){
+                                $request_check = true;
+
+                                if($nature_id == 1) {
+                                    $check_request = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)
+                                        ->where('status_id',1)
+                                        ->first();
+                                    if($check_request) {
+                                        $request_check = false;
+                                    }
+                                }
+
+                                if($is_shipment->case_nature_id != $nature_id || $request_check){
                                     if ($nature_id == 4) {
                                         if($complaint_id == 26){
                                             $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL , $description);
@@ -525,8 +536,18 @@ class AdminCRMController extends Controller
                         if($is_shipment){
                             $already_lodged = true;
                             $complain = $is_shipment->id;
+                            $request_check = true;
 
-                            if($is_shipment->case_nature_id != $nature_id){
+                            if($nature_id == 1) {
+                                $check_request = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)
+                                    ->where('status_id',1)
+                                    ->first();
+                                if($check_request) {
+                                    $request_check = false;
+                                }
+                            }
+
+                            if($is_shipment->case_nature_id != $nature_id || $request_check){
                                 if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
                                     if(in_array($complaint_id, [11, 13])){
                                         $present_shipments[] = $shipment->tracking_number;
