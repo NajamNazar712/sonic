@@ -147,6 +147,7 @@ use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransaction;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionDeliveryNote;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransactionRetail;
+use App\Models\BookingPayloadLog;
 
 class APIController extends Controller
 {
@@ -1394,6 +1395,11 @@ class APIController extends Controller
                 $amount = 0;
                 $parcel_value = 0;
             }
+            BookingPayloadLog::create([
+                'user_id'  =>  $user_id,
+                'api_name' => 'create_booking',
+                'payload'  => $request->all(),
+            ]);
 
 
             $booked_by = $request->booked_by;
