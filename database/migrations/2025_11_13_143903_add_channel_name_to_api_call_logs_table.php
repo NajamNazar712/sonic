@@ -13,6 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+        return true;
         Schema::table('api_call_logs', function (Blueprint $table) {
             // Add column with default value 'zong'
             $table->string('channel_name', 100)
