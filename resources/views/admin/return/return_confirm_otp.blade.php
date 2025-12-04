@@ -18,9 +18,7 @@
                                 <fieldset class="form-group">
                                     <select name="search_rider" id="search_rider" class="form-control select2"
                                         multiple="multiple">
-                                        @foreach ($rider_name as $admin)
-                                            <option value="{{ $admin->id }}">{{ $admin->name }}</option>
-                                        @endforeach
+                                        
                                     </select>
                                 </fieldset>
                             </div>
@@ -28,9 +26,7 @@
                                 <fieldset class="form-group">
                                     <select name="search_hub[]" id="search_hub" class="form-control select2"
                                         multiple="multiple">
-                                        @foreach ($hub_name as $hub)
-                                            <option value="{{ $hub->id }}">{{ $hub->name }}</option>
-                                        @endforeach
+                                        
                                     </select>
                                 </fieldset>
                             </div>
@@ -223,19 +219,64 @@
                 }
             });
 
+            // $('#search_rider').select2({
+            //     width: '100%',
+            //     placeholder: "Select Rider",
+            //     allowClear: true,
+            //     dropdownParent: $('#search_form')
+            // });
+            // $('#search_hub').select2({
+            //     width: '100%',
+            //     placeholder: "Select Hub",
+            //     allowClear: true,
+            //     dropdownParent: $('#search_form')
+            // });
+
             $('#search_rider').select2({
-                width: '100%',
-                placeholder: "Select Rider",
-                allowClear: true,
-                dropdownParent: $('#search_form')
-            });
-            $('#search_hub').select2({
-                width: '100%',
-                placeholder: "Select Hub",
-                allowClear: true,
-                dropdownParent: $('#search_form')
+                width:'100%',
+                placeholder:"Select Rider",
+                allowClear:true,
+                multiple: true,
+                minimumInputLength: 2,
+                ajax: {
+                    dataType: 'json',
+                    url:  '{!! route('admin.reports.data_for_dropdown', ['type'=>'rider']) !!}',
+                        data: function (params) {
+                            return {
+                                search: params.term,
+                            }
+                        },
+                        processResults: function (data) {
+                            return {
+                                results: data
+                            };
+                        },
+                    delay: 700,
+                }
             });
 
+            $('#search_hub').select2({
+                width:'100%',
+                placeholder:"Select Hub",
+                allowClear:true,
+                multiple: true,
+                minimumInputLength: 2,
+                ajax: {
+                    dataType: 'json',
+                    url:  '{!! route('admin.reports.data_for_dropdown', ['type'=>'hub']) !!}',
+                        data: function (params) {
+                            return {
+                                search: params.term,
+                            }
+                        },
+                        processResults: function (data) {
+                            return {
+                                results: data
+                            };
+                        },
+                    delay: 700,
+                }
+            });
 
             $('#search_form').validate({
                 errorClass: 'danger',
