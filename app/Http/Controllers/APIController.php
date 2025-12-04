@@ -1395,11 +1395,11 @@ class APIController extends Controller
                 $amount = 0;
                 $parcel_value = 0;
             }
-            BookingPayloadLog::create([
-                'user_id'  =>  $user_id,
-                'api_name' => 'create_booking',
-                'payload'  => $request->all(),
-            ]);
+            // BookingPayloadLog::create([
+            //     'user_id'  =>  $user_id,
+            //     'api_name' => 'create_booking',
+            //     'payload'  => $request->all(),
+            // ]);
 
 
             $booked_by = $request->booked_by;
