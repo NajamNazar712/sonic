@@ -1396,13 +1396,8 @@ class APIController extends Controller
                 $amount = 0;
                 $parcel_value = 0;
             }
-            BookingApiLog::create([
-                'user_id'  =>  $user_id,
-                'endpoint' => 'book',
-                'payload'  => $request->all(),
-            ]);
-
-
+            $payloads = $request->all();
+            
             $booked_by = $request->booked_by;
             $channel_id = $request->channel_id;
             $business_category_id = 1;
@@ -1422,6 +1417,14 @@ class APIController extends Controller
             } else {
                 $tracking_number = ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
             }
+
+            BookingApiLog::create([
+                'user_id'  =>  $user_id,
+                'shipment_id' => $shipment_id,
+                'endpoint' => 'book',
+                'ip' => $request->ip(),
+                'payload'  => $payloads ,
+            ]);
 
             PaymentModeLog::create([
                 'shipment_id'         => $shipment_id,

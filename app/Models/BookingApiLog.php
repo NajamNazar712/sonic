@@ -10,6 +10,7 @@ class BookingApiLog extends Model
     use HasFactory;
     protected $fillable = [
         'user_id',
+        'shipment_id',
         'endpoint',
         'payload',
         'ip',
