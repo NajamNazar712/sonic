@@ -43,7 +43,7 @@ class BotCallDispatch implements ShouldQueue
     {
 
         //
-        $botRecordData = $this->botCallingDpataSet($this->shipmentId);
+        $botRecordData = $this->botCallingDataSet($this->shipmentId);
 
         if ($botRecordData) {
 
