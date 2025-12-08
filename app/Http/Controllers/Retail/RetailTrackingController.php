@@ -54,7 +54,7 @@ class RetailTrackingController extends Controller
     }
 
     public function index(Request $request) {
-        $case_nature = CrmRequestCaseNature::get();
+        $case_nature = CrmRequestCaseNature::whereNotIn('id' , [3])->get();
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id',1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->get();
         $case_nature_channels = CrmRequestChannel::where('id', '!=', 1)->get();
