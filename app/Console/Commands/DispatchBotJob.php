@@ -23,7 +23,6 @@ class DispatchBotJob extends Command
             ->whereDate('created_at', '>=', "2025-12-04")
             ->where('channel_name', 'zong')
             ->where('payload', 'like', '%"message":"Please authenticate"%')
-            ->where('shipment_id', 48086411)
             ->groupBy('shipment_id')
             ->get();
         $callCount = $logs->count();
