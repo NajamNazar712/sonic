@@ -6,6 +6,7 @@ use App\Http\Models\RvShipmentAssignAgent;
 use App\Jobs\BotCallDispatchSecod;
 use App\Jobs\BotCallDispatchThird;
 use App\RvCronLog;
+use App\RvShipmentTicket;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -89,6 +90,7 @@ class BotCallInitiate extends Command
             if (count($shipmentSpecificThirds) > 0) {
                 // Log::channel('botCallJobLog')->info('s ' . 'Call initiate start third-call' . Carbon::parse(now())->format('Y-m-d H:i:s'));
                 RvShipmentAssignAgent::whereIn('shipment_id', $shipmentSpecificThirds)->update(['rv_state_id' => 3]);
+                RvShipmentTicket::whereIn('shipment_id', $shipmentSpecificThirds)->update(['is_bot' => 1]);
                 foreach ($shipmentSpecificThirds as $shipmentId) {
                     dispatch(new BotCallDispatchThird($shipmentId));
                 }
