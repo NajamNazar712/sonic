@@ -44,12 +44,12 @@ class BotCallDispatchThird implements ShouldQueue
         //
         try {
            
-            $botRecordData = $this->botCallingDataSet($this->shipmentId);
+            $botRecordData = $this->botCallingDataSet($this->shipmentId,3);
             if ($botRecordData) {
                 $token = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiNjYzMTQyNi05ODQyLTQzNjEtYmU1Mi1lZGI3OWEwMTkyOGMiLCJpYXQiOjE3NjI1MDg4ODUsImV4cCI6NDkxODE4MjQ4NSwidHlwZSI6ImV4dGVybmFsQXBpIn0.J7B45SejW4pDHLh5sYSDCMyayRLgOJpZCWNlJ58Esek";
                 $client = new Client(['base_uri' => $botRecordData['base_uri'], 'http_errors' => FALSE, 'connect_timeout' => 120, 'timeout' => 120, 'verify' => false]);
                 // Send POST request
-                if(in_array($botRecordData['user_id'],[16344, 26249, 13060, 5553, 30230, 49055, 50475, 27425, 31794, 31902, 31538, 51353, 19943, 8732, 44233, 37631, 48558, 35049, 25244, 49028])){
+                if(in_array($botRecordData['user_id'],[16344, 26249, 13060, 5553, 30230, 49055, 50475, 27425, 31794, 31902, 31538, 51353, 19943, 8732, 44233, 37631, 48558, 35049, 25244, 49028,1049])){
                     $response = $client->post('', [
                         'headers' => [
                             'Authorization' => $token,
