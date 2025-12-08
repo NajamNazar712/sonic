@@ -20,9 +20,11 @@ class DispatchBotJob extends Command
 
         // Fetch matching API call logs
         $logs = DB::table('api_call_logs')
-            ->whereDate('created_at', '>=', "2025-12-04")
-            ->where('channel_name', 'zong')
-            ->where('payload', 'like', '%"message":"Please authenticate"%')
+            // ->whereDate('created_at', '>=', "2025-12-04")
+            // ->where('channel_name', 'zong')
+            // ->where('payload', 'like', '%"message":"Please authenticate"%')
+            ->distinct()
+            ->where('shipment_id', 48086411)
             ->get();
 
         $callCount = $logs->count();
