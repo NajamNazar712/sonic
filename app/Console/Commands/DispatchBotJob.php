@@ -40,7 +40,7 @@ class DispatchBotJob extends Command
 
             if (!$shipmentId) continue; // skip if no shipment_id
 
-            switch ($callCount) {
+            switch ($log->call_count_initiate) {
                 case 1:
                     BotCallDispatch::dispatch($shipmentId);
                     $this->info("BotCallDispatch dispatched for shipment_id: {$shipmentId}");
