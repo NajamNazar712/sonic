@@ -24,7 +24,7 @@ class DispatchBotJob extends Command
             // ->where('channel_name', 'zong')
             // ->where('payload', 'like', '%"message":"Please authenticate"%')
             ->distinct()
-            ->where('shipment_id', 57577478)
+            ->where('id', 6963351)
             ->select('shipment_id', 'channel_name', 'created_at', 'call_count_initiate', 'payload')
             ->get();
         $callCount = $logs->count();
