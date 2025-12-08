@@ -231,7 +231,7 @@ class ShipperDashboardController extends Controller
                     else{
                         $sales_person_data['phone'] = $sales_person_tag->phone_number;
                     }
-                    
+
                     $sales_person_data['email'] = $sales_person_tag->email;
                 }
                 $details = SalesCommission::join('sales_commission_users as scu','sales_commissions.id','=','scu.sales_commission_id')
@@ -262,13 +262,13 @@ class ShipperDashboardController extends Controller
                         ->select('riders.phone as phone', 'riders.name as name','oc.name as city')->orderBy('riders.created_at', 'desc')->get();
                 }
 
-                $percentage = null; 
+                $percentage = null;
                 $color = null;
                 $short_description = "";
                 $description = "";
 
                 $user = User::find($shipper_id);
-                
+
                 $weight_charges = WeightCharge::where('user_id' , $shipper_id);
                 if(($user->on_board_status < 1 && $user->created_at > '2024-06-13 00:00:00')){
                     $lead_progress_setting = LeadProgressSetting::find(1);
@@ -277,7 +277,7 @@ class ShipperDashboardController extends Controller
 
                     $description = "Your account is $percentage% completed";
                     $short_description = 'Signed Up';
-                    
+
                 }else if(($weight_charges->exists() || $user->request_custom_quotation == 1) && !isset($user->rates_added_by)){
                     $lead_progress_setting = LeadProgressSetting::find(2);
                     $percentage = $lead_progress_setting->percent;
@@ -300,7 +300,7 @@ class ShipperDashboardController extends Controller
                     $lead_progress_setting = LeadProgressSetting::find(4);
                     $percentage = $lead_progress_setting->percent;
                     $color = $lead_progress_setting->color;
-                    
+
                     $description = "Your account is $percentage% completed";
                     $short_description = 'Documents Verified';
 
@@ -326,12 +326,12 @@ class ShipperDashboardController extends Controller
 
                 return view('client.welcome')->with(['sales_person_data'=>$sales_person_data ,'poc' => $poc,'kam' => $kam, 'pickup_riders' => $riders, 'shipper_payments' => $shipper_payment, 'percentage' => $percentage, 'user' => $user, 'color' => $color , 'description' => $description, 'short_description' => $short_description]);
             }
- 
+
         }
     }
 
     public function welcome_list(Request $request)
-    {   
+    {
         $shipments = DB::connection('reports')->table('shipments')
             ->leftJoin('users as u', 'u.id', '=', 'shipments.user_id')
             ->leftJoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -672,7 +672,7 @@ class ShipperDashboardController extends Controller
         $get_merged_head_id = MergedSisterAccount::where('user_id', session('user_id'))->first();
         if($get_merged_head_id){
             $merged_head_id =  $get_merged_head_id->merged_head_id;
-            
+
             $merged_user_id =  $get_merged_head_id->user_id;
             $merged_accounts = SubstituteUserMergeSisterAccountMapping::leftjoin('users as u', 'u.id', '=', 'substitute_user_merge_sister_account_mappings.sister_user_id')
             ->where('substitute_user_merge_sister_account_mappings.head_user_id', session('user_id'))
@@ -689,7 +689,7 @@ class ShipperDashboardController extends Controller
 
         $masp = [session('user_id')];
         $merged_account_sister_mapping = MergedSisterAccountMapping::where('head_user_id',session('user_id'))->pluck('sister_user_id')->toArray();
-        
+
         if(count($merged_account_sister_mapping) >  0){
             $masp = array_merge($masp,$merged_account_sister_mapping);
         }
@@ -786,13 +786,13 @@ class ShipperDashboardController extends Controller
             })
             ->editColumn('phone',function ($shipments){
                 if($shipments->phone2)
-                    return $shipments->phone1.", ".$shipments->phone2;                    
+                    return $shipments->phone1.", ".$shipments->phone2;
                 else
                     return $shipments->phone1." ".$shipments->phone2;
             })
             ->addColumn('item_description',function ($shipments) use ($loggedInUserId , $userIdForJoin){
                 if(in_array($loggedInUserId,$userIdForJoin ))
-                    return $shipments->item_desc;                    
+                    return $shipments->item_desc;
                 else
                     return '-';
             })
@@ -940,8 +940,8 @@ class ShipperDashboardController extends Controller
                         if($other_parcel_receiving->total_cn < 1){
                             $other_parcel_receiving->total_cn = 0;
                             $other_parcel_receiving->save();
-                        } 
-                    }    
+                        }
+                    }
                     if($shipment->warehouse == 1){
                         return response()->json(['status' => 0,'error' => 'Warehouse Shipment can not be cancelled from Sonic!']);
                     }
@@ -978,7 +978,7 @@ class ShipperDashboardController extends Controller
                         $packaging_material->status_id = 6;
                         $packaging_material->save();
                     }
-                    
+
                     if($shipment->warehouse == 1){
                         $shipment->warehouse_order_status = 9;
                         $shipment_products = WmsShipmentProduct::where('shipment_id', $shipment->id)->get();
@@ -1016,7 +1016,7 @@ class ShipperDashboardController extends Controller
                     return response()->json(['status'=>1,'success'=>'Shipment has been cancelled successfully']);
                 }
                 else {
-                  
+
                     return response()->json(['status'=>0,'error'=>'Shipment\'s Status has already been changed']);
                 }
             }else{
@@ -1152,7 +1152,7 @@ class ShipperDashboardController extends Controller
         ->leftJoin('users as users','shipments.user_id' ,'=','users.id')
         ->where('shipments.id', $shipment_id)
         ->select(['shipments.packaging_material_request','shipments.cash_handling_charges', 'shipments.return_charges', 'shipments.insurance_charges', 'shipments.fuel_surcharge', 'shipments.replacement_charges', 'shipments.try_and_buy_charges', 'shipments.intercept_charges', 'shipments.nsa_osa_charges', 'shipments.weight_charges','pps.sms_charges as pps_sms_charge' , 'dps.sms_charges as dps_sms_charge','pis.sms_charges as pis_sms_charge', 'is.sms_charges as is_sms_charge','users.account_type_id as account_type', 'users.id as user_id', 'shipments.shipper_status_id as current_status'])->first();
-       
+
         $exists = CorporateUserOnDeliveredInvoice::where('user_id', $shipment->user_id )->where('status', 1)->exists();
         $returnHTML = view('client/components/shipment_charges')->with(['shipment'=>$shipment, 'exists' => $exists])->render();
         return response()->json($returnHTML);
@@ -1174,11 +1174,11 @@ class ShipperDashboardController extends Controller
         $weekly = [2, 4, 5]; // Twice, Thrice, and Weekly.
         $fort_month = [3, 6]; // Monthly and Fortnight.
         $days = [];
-    
+
         if (isset($user->payment_cycle->id)) {
             if (in_array($user->payment_cycle->id, $weekly)) {
                 foreach ($payment_cycle_days as $payment_cycle_day) {
-                    $date = Carbon::now()->startOfWeek()->addDays($payment_cycle_day - 1);                                                
+                    $date = Carbon::now()->startOfWeek()->addDays($payment_cycle_day - 1);
                     $dayName = $date->format('l');
                     $days[] = $dayName;
                 }
@@ -1188,11 +1188,11 @@ class ShipperDashboardController extends Controller
                 $days[] = 'Daily';
             }
         } else {
-            $days[] = 'Payment Cycle Not Defined'; 
+            $days[] = 'Payment Cycle Not Defined';
         }
-    
+
         $days = implode(', ', $days);
-    
+
         return $days;
     }
 
@@ -1222,7 +1222,7 @@ class ShipperDashboardController extends Controller
         $userShippingInfosStatus = $request->input('user_shipper_infos_status');
         if ($userId != 2234 && $userId != 1049){
             return response()->json(['error' => 'Invalid user']);
-        } 
+        }
         if (!$shipperStoreId) {
             return response()->json(['error' => 'Please enter a store ID']);
         }
@@ -1311,7 +1311,7 @@ class ShipperDashboardController extends Controller
                     ]);
                      return redirect()->back()->with(['success' => 'Bank account pending — will be updated automatically within 24 hours.!']);
                 }
-               
+
             }
             if(UserBankInfo::where('user_id',$user_id)->exists())
             {
@@ -1327,7 +1327,7 @@ class ShipperDashboardController extends Controller
             $user_bank->city_id = $request->bank_city;
             $user_bank->default_bank = 1; // always make the new bank info as default
             $user_bank->save();
-            
+
             return redirect()->back()->with(['success' => 'Bank successfully added!']);
 
         }
@@ -1346,7 +1346,7 @@ class ShipperDashboardController extends Controller
 
         return Datatables::of($banks)
         ->addColumn('action', function ($bank) {
-            
+
             // $dropdown .= $default_button;
             if(!$bank->wallet_user) {
                 $dropdown = '
@@ -1355,7 +1355,7 @@ class ShipperDashboardController extends Controller
                     <div class="dropdown-menu dropdown-menu-sm">
                 ';
                 $default_button = '<button type="button" class="dropdown-item default"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Make Default</div></button>';
-                
+
                 if ($bank->default_bank) {
                     $dropdown = 'Default Address';
                     // $default_button = '<button type="button" class="dropdown-item editBank"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit Bank</div></button>';
@@ -1363,16 +1363,16 @@ class ShipperDashboardController extends Controller
                 }else{
                     $dropdown .= $default_button;
                 }
-                
+
 
                 $dropdown .= '
                         </div>
                     </div>
                 ';
 
-                
+
             } else {
-                   
+
                 if ($bank->default_bank) {
                     $dropdown = 'Default Address';
                 }else{
@@ -1408,7 +1408,7 @@ class ShipperDashboardController extends Controller
             $return_default_button = '<button type="button" class="dropdown-item return_default"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Make Default Return Address</div></button>';
             $add_store_id_button = '<button type="button" class="dropdown-item add_store_id"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Add Store ID</div></button>';
             $edit_store_id_button = '<button type="button" class="dropdown-item add_store_id"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit Store ID</div></button>';
-            
+
             // if((auth()->user()->id == 2234 || auth()->user()->id == 10364) && $store_id_check){
             //     $dropdown .= $add_store_id_button;
             // }
@@ -1424,7 +1424,7 @@ class ShipperDashboardController extends Controller
 
             if ((auth()->user()->id == 2234 || auth()->user()->id == 1049) && $pickup->shipper_store_id) {
                 $dropdown .= $edit_store_id_button;
-            } 
+            }
             if ((auth()->user()->id == 2234 || auth()->user()->id == 1049)  && !$pickup->shipper_store_id) {
                 $dropdown .= $add_store_id_button;
             }
@@ -1870,9 +1870,9 @@ class ShipperDashboardController extends Controller
     }
 
     public function view_rates_index(){
-        
+
         $id = session('user_id');
-        
+
         $user = User::find($id);
         $sms_charge = User::where('id', $id)->select(['id','sms_charges','sms_charges_status'])->get();
         if(session('account_type') == 1){
@@ -2291,7 +2291,7 @@ class ShipperDashboardController extends Controller
                     return 'false';
                 }
             }
-            
+
         }
         else {
             return 'true';
@@ -2402,7 +2402,7 @@ class ShipperDashboardController extends Controller
 
             $date = Carbon::now()->format('Y_m_d');
 
-            
+
 
             if($user_attachment->e_sign_image != NULL) {
                 Storage::disk('public')->delete('users_attached_documents/' . session('user_id') . '/' . $user_attachment->e_sign_image);
@@ -2419,7 +2419,7 @@ class ShipperDashboardController extends Controller
 
              $user = User::find(session('user_id'));
              if($user->lead_id){
-                $this->download_crf($user_attachment, $date);        
+                $this->download_crf($user_attachment, $date);
              }
 
             NotificationsController::send(149,session('user_id'));
@@ -2447,7 +2447,7 @@ class ShipperDashboardController extends Controller
             if ($user_attachment->signed_acknowledgement_pdf != NULL) {
                     Storage::disk('public')->delete('users_attached_documents/' . session('user_id') . '/' . $user_attachment->signed_acknowledgement_pdf);
             }
-        
+
             $date = now()->format('Ymd_His');
 
             $filename_signed = 'filled_and_signed_pdf_' . $date . '_' . session('user_id') . '.pdf';
@@ -2657,7 +2657,7 @@ class ShipperDashboardController extends Controller
             $sales_tiers = SalesTier::where('status', 1)->get(['id', 'tier_name', 'tier_type', 'commission', 'sales_status']);
             $admin_users = Admin::leftjoin('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name','ar.department_id','admins.trax_id'])->where('admins.status', 1)->get();
             $riders_permanent = Rider::where('rider_type_id', 1)->get();
-     
+
             $users = array();
             $sales = array();
             $all_users = array();
@@ -2668,7 +2668,7 @@ class ShipperDashboardController extends Controller
                     $sales[] = array('id' => $u->id, 'text' => $u->name . '-' . $u->trax_id);
                 }
             }
-          
+
             $all_users['results'][0]['text'] = 'Sales';
             $all_users['results'][0]['children'] = $sales;
             $all_users['results'][1]['text'] = 'Admins';
@@ -2697,9 +2697,9 @@ class ShipperDashboardController extends Controller
             if ($sales_persons_city->exists()){
                 // Check if city exists
                 $sales_persons_city = $sales_persons_city->first();
-                $zone_id = $sales_persons_city->zone_id; 
-                $sale_persons = LeadZone::where(['zone_id' => $zone_id, 'status' => 1])->first(); 
-                
+                $zone_id = $sales_persons_city->zone_id;
+                $sale_persons = LeadZone::where(['zone_id' => $zone_id, 'status' => 1])->first();
+
                 return response()->json(['status' => 0, 'sale_persons' => $sale_persons]);
             }else{
                 $sale_person_admin = City::find($id)->name;
@@ -2885,7 +2885,7 @@ class ShipperDashboardController extends Controller
                         $data[$key]['updated_at'] = Carbon::now();
                     }
                     WalletUser::wallet_create($data);
-                    
+
                     $hasSubstituteZero = array_filter($data, function ($item) {
                         return isset($item['substitute_user_id']) && $item['substitute_user_id'] == 0;
                     });
@@ -2918,81 +2918,401 @@ class ShipperDashboardController extends Controller
         return response()->json(['status' => 1, 'success'=>'Profile Information Successfully Updated"']);
     }
 
+//    public function sarReport(Request $request)
+//    {
+//        // return true;
+////        if (Auth::id() === 37631) {
+//            $from = Carbon::now()->subMonths(6)->startOfDay();
+//            $to   = Carbon::now()->endOfDay();
+//
+//            $connection = 'reports';
+//            // First and last shipments_journey IDs within the window
+//            $sj_from_id = DB::connection($connection)
+//                ->table('shipments_journey')
+//                ->whereBetween('created_at', [$from, $to])
+//                ->orderBy('created_at', 'asc')->orderBy('id', 'asc')
+//                ->limit(1)->value('id');
+//
+//            $sj_to_id = DB::connection($connection)
+//                ->table('shipments_journey')
+//                ->whereBetween('created_at', [$from, $to])
+//                ->orderBy('created_at', 'desc')->orderBy('id', 'desc')
+//                ->limit(1)->value('id');
+//
+//
+//            $setting = GlobalSettings::where('type', 'rv_permanent_disable_shippers')->first();
+//            $shippers = [];
+//
+//            if ($setting && !empty($setting->text)) {
+//                $shippers = explode(',', $setting->text);
+//            }
+//
+//            $cutoffTime = Carbon::now()->subHours(48);
+//
+//            // 🧾 Main query
+//            $sarReport = DB::connection($connection)
+//                ->table('shipments_journey as sj')
+//                ->join('shipments as s', 's.id', '=', 'sj.shipment_id')
+//                ->join('shipments_journey as sjpa', function ($join) use ($shippers, $sj_from_id, $sj_to_id) {
+//                    $join->on('sjpa.shipment_id', '=', 'sj.shipment_id')
+//                        ->whereBetween('sjpa.id', [$sj_from_id, $sj_to_id])
+//                        ->where(
+//                            'sjpa.id',
+//                            '=',
+//                            DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = sjpa.shipment_id  and shipments_journey.shipper_status_id = 65)')
+//                        )->when(!empty($shippers), function ($query) use ($shippers) {
+//                            $query->whereNotIn('sjpa.user_id', $shippers);
+//                        });
+//                })
+//                ->select(
+//                    's.user_id',
+//                    DB::raw('COUNT(sj.shipment_id) as total_shipments'),
+//                    DB::raw('DATE(sj.created_at) as sar_date')
+//                )
+//                ->where('sj.created_at', '>=', $cutoffTime)
+//                ->where('s.user_id', Auth::id())
+//                ->groupBy('s.user_id', 'sar_date')
+//                ->orderBy('sar_date', 'desc')
+//                ->get();
+//
+//
+//            // 🧮 Return Yajra DataTable
+//            return DataTables::of($sarReport)
+//                ->addColumn('sar_date', fn($item) => Carbon::parse($item->sar_date)->format('d-M-Y'))
+//                ->addColumn('total_shipments', fn($item) => $item->total_shipments)
+//                ->addColumn('return_confirm_date', function ($data) use ($shippers) {
+//                    if (in_array($data->user_id, $shippers)) {
+//                        return '-';
+//                    } else {
+//                        return  Carbon::parse($data->sar_date)->addDays(2)->format('d-M-Y');
+//                    }
+//                })
+//                ->rawColumns(['sar_date', 'return_confirm_date'])
+//                ->make(true);
+////        }else{
+////            return true;
+////        }
+//
+//    }
+
+    public function sarReportOld(Request $request)
+    {
+        $connection = 'reports';
+
+        // -----------------------------------------
+        // WINDOW SETTING (1 month + 48 hours rule)
+        // -----------------------------------------
+        $windowFrom = Carbon::now()->subMonth()->startOfDay();
+        $windowTo   = Carbon::now()->endOfDay();
+        $cutoffTime = Carbon::now()->subHours(48);
+
+        // -----------------------------------------
+        // OPTIONAL: BLOCKED / DISABLED SHIPPERS
+        // -----------------------------------------
+        $setting = GlobalSettings::where('type', 'rv_permanent_disable_shippers')->first();
+        $disabledShippers = $setting && $setting->text ? explode(',', $setting->text) : [];
+
+        // -----------------------------------------
+        // STEP-0: PRE-COMPUTE JOURNEY ID RANGE
+        // (Just like summary list pattern)
+        // -----------------------------------------
+        $sj_from_id = DB::connection($connection)
+            ->table('shipments_journey')
+            ->whereBetween('created_at', [$windowFrom, $windowTo])
+            ->orderBy('id', 'asc')
+            ->limit(1)
+            ->value('id');
+
+        $sj_to_id = DB::connection($connection)
+            ->table('shipments_journey')
+            ->whereBetween('created_at', [$windowFrom, $windowTo])
+            ->orderBy('id', 'desc')
+            ->limit(1)
+            ->value('id');
+
+        if (!$sj_from_id || !$sj_to_id) {
+            return DataTables::of(collect())->make(true); // No data in window
+        }
+
+        // -----------------------------------------
+        // STEP-1: LATEST JOURNEY (MAX(id)) per shipment
+        // With: 1 month date range + ID safe range
+        // -----------------------------------------
+        $latestJourney = DB::connection($connection)
+            ->table('shipments_journey')
+            ->select('shipment_id', DB::raw('MAX(id) as max_id'))
+            ->whereBetween('id', [$sj_from_id, $sj_to_id])
+            ->groupBy('shipment_id');
+
+        // -----------------------------------------
+        // STEP-2: VALID SHIPMENTS (Latest = 65)
+        // -----------------------------------------
+        $validShipments = DB::connection($connection)
+            ->table('shipments_journey as sj')
+            ->joinSub($latestJourney, 'lj', function ($join) {
+                $join->on('sj.id', '=', 'lj.max_id');
+            })
+            ->where('sj.shipper_status_id', 65)
+            ->where('sj.created_at', '>=', $cutoffTime)
+            ->select(
+                'lj.shipment_id',
+                'sj.created_at'
+            );
+
+        // -----------------------------------------
+        // STEP-3: MAIN SAR REPORT (Summary List Style)
+        // -----------------------------------------
+        $sarQuery = DB::connection($connection)
+            ->table('shipments as s')
+            ->joinSub($validShipments, 'v', 'v.shipment_id', '=', 's.id')
+            ->select(
+                's.user_id',
+                DB::raw('DATE(v.created_at) as sar_date'),
+                DB::raw('COUNT(*) as total_shipments')
+            )
+            ->where('s.user_id', Auth::id()) // your shipper only
+            ->groupBy('s.user_id', 'sar_date')
+            ->orderByDesc('sar_date');
+
+        // -----------------------------------------
+        // STEP-4: DATATABLE FORMAT (Like summary list)
+        // -----------------------------------------
+        return DataTables::of($sarQuery)
+            ->addColumn('sar_date', fn($row) => Carbon::parse($row->sar_date)->format('d-M-Y'))
+            ->addColumn('total_shipments', fn($row) => $row->total_shipments)
+            ->addColumn('return_confirm_date', function ($row) use ($disabledShippers) {
+                return in_array($row->user_id, $disabledShippers)
+                    ? '-'
+                    : Carbon::parse($row->sar_date)->addDays(2)->format('d-M-Y');
+            })
+            ->rawColumns(['sar_date', 'return_confirm_date'])
+            ->make(true);
+    }
+
+    public function sarReportold3(Request $request)
+    {
+        $connection = 'reports';
+
+        $windowFrom = Carbon::now()->subMonth()->startOfDay();
+        $windowTo   = Carbon::now()->endOfDay();
+        $cutoffTime = Carbon::now()->subHours(48);
+
+        $setting = GlobalSettings::where('type', 'rv_permanent_disable_shippers')->first();
+        $disabledShippers = $setting && $setting->text ? explode(',', $setting->text) : [];
+
+        // STEP 1 — Only journeys in 1-month window + status=65
+        $latestJourney = DB::connection($connection)
+            ->table('shipments_journey')
+            ->where('shipper_status_id', 65)
+            ->whereBetween('created_at', [$windowFrom, $windowTo])
+            ->select('shipment_id', DB::raw('MAX(id) AS max_id'))
+            ->groupBy('shipment_id');
+
+        // STEP 2 — Join back to get date
+        $validShipments = DB::connection($connection)
+            ->table('shipments_journey as sj')
+            ->joinSub($latestJourney, 'lj', 'sj.id', '=', 'lj.max_id')
+            ->where('sj.created_at', '>=', $cutoffTime)
+            ->select('sj.shipment_id', 'sj.created_at');
+
+        // STEP 3 — Main SAR report
+        $sarQuery = DB::connection($connection)
+            ->table('shipments as s')
+            ->joinSub($validShipments, 'v', 'v.shipment_id', '=', 's.id')
+            ->select(
+                's.user_id',
+                DB::raw('DATE(v.created_at) as sar_date'),
+                DB::raw('COUNT(*) as total_shipments')
+            )
+            ->where('s.user_id', Auth::id())
+            ->groupBy('s.user_id', 'sar_date')
+            ->orderByDesc('sar_date');
+
+        return DataTables::of($sarQuery)
+            ->addColumn('sar_date', fn($row) => Carbon::parse($row->sar_date)->format('d-M-Y'))
+            ->addColumn('total_shipments', fn($row) => $row->total_shipments)
+            ->addColumn('return_confirm_date', function ($row) use ($disabledShippers) {
+                return in_array($row->user_id, $disabledShippers)
+                    ? '-'
+                    : Carbon::parse($row->sar_date)->addDays(2)->format('d-M-Y');
+            })
+            ->rawColumns(['sar_date', 'return_confirm_date'])
+            ->make(true);
+    }
+
+
+    public function sarReportold2(Request $request)
+    {
+        $connection = 'reports';
+
+        // -----------------------------------------
+        // WINDOW SETTING
+        //  - 1 month window for ID range
+        //  - 48 hours rule for SAR qualification
+        // -----------------------------------------
+        $now = Carbon::now();
+
+        // 1 month ka data window for shipments_journey scan
+        $windowFrom = $now->copy()->subMonth()->startOfDay();
+        $windowTo   = $now->copy()->endOfDay();
+
+        // 48 hours cutoff: latest journey row is at least 48 hours old
+        $cutoffTime = $now->copy()->subHours(48);
+
+        // -----------------------------------------
+        // OPTIONAL: BLOCKED / DISABLED SHIPPERS
+        // -----------------------------------------
+        $setting = GlobalSettings::where('type', 'rv_permanent_disable_shippers')->first();
+        $disabledShippers = $setting && $setting->text ? explode(',', $setting->text) : [];
+
+        // -----------------------------------------
+        // STEP-0: PRE-COMPUTE JOURNEY ID RANGE
+        // Using your two-query approach
+        // -----------------------------------------
+        $sj_from_id = DB::connection($connection)
+            ->table('shipments_journey')
+            ->whereBetween('created_at', [$windowFrom, $windowTo])
+//            ->orderBy('id', 'asc')   // IMPORTANT: smallest id in window
+            ->limit(1)
+            ->value('id');
+
+        $sj_to_id = DB::connection($connection)
+            ->table('shipments_journey')
+            ->whereBetween('created_at', [$windowFrom, $windowTo])
+//            ->orderBy('id', 'desc')  // largest id in window
+            ->limit(1)
+            ->value('id');
+
+        if (!$sj_from_id || !$sj_to_id) {
+            return DataTables::of(collect())->make(true); // No data in window
+        }
+
+        // -----------------------------------------
+        // STEP-1: LATEST JOURNEY (MAX(id)) per shipment
+        // Within ID range derived above
+        // -----------------------------------------
+        $latestJourney = DB::connection($connection)
+            ->table('shipments_journey')
+            ->select('shipment_id', DB::raw('MAX(id) as max_id'))
+            ->whereBetween('id', [$sj_from_id, $sj_to_id])
+            ->groupBy('shipment_id');
+
+        // -----------------------------------------
+        // STEP-2: VALID SHIPMENTS
+        //  - Latest journey = 65
+        //  - That latest 65 is at least 48 hours old
+        // -----------------------------------------
+        $validShipments = DB::connection($connection)
+            ->table('shipments_journey as sj')
+            ->joinSub($latestJourney, 'lj', function ($join) {
+                $join->on('sj.id', '=', 'lj.max_id');
+            })
+            ->where('sj.shipper_status_id', 65)
+            // qualified for 48 hours -> row time <= cutoffTime
+            ->where('sj.created_at', '>=', $cutoffTime)
+            ->select(
+                'lj.shipment_id',
+                'sj.created_at'
+            );
+
+        // -----------------------------------------
+        // STEP-3: MAIN SAR REPORT (Summary List Style)
+        // -----------------------------------------
+        $sarQuery = DB::connection($connection)
+            ->table('shipments as s')
+            ->joinSub($validShipments, 'v', 'v.shipment_id', '=', 's.id')
+            ->select(
+                's.user_id',
+                DB::raw('DATE(v.created_at) as sar_date'),
+                DB::raw('COUNT(*) as total_shipments')
+            )
+            ->where('s.user_id', Auth::id()) // current shipper only
+            ->groupBy('s.user_id', 'sar_date')
+            ->orderByDesc('sar_date');
+
+        // -----------------------------------------
+        // STEP-4: DATATABLE FORMAT (Like summary list)
+        // -----------------------------------------
+        return DataTables::of($sarQuery)
+            ->addColumn('sar_date', fn($row) =>
+            Carbon::parse($row->sar_date)->format('d-M-Y')
+            )
+            ->addColumn('total_shipments', fn($row) =>
+            $row->total_shipments
+            )
+            ->addColumn('return_confirm_date', function ($row) use ($disabledShippers) {
+                // permanently disabled shippers -> no return date
+                if (in_array($row->user_id, $disabledShippers)) {
+                    return '-';
+                }
+
+                // SAR date + 2 days (48h)
+                return Carbon::parse($row->sar_date)
+                    ->addDays(2)
+                    ->format('d-M-Y');
+            })
+            ->rawColumns(['sar_date', 'return_confirm_date'])
+            ->make(true);
+    }
+
+
     public function sarReport(Request $request)
     {
-        // return true;
-        if (Auth::id() === 37631) {
-            $from = Carbon::now()->subMonths(6)->startOfDay();
-            $to   = Carbon::now()->endOfDay();
+        $connection = 'reports';
+        $now = Carbon::now();
 
-            $connection = 'reports';
-            // First and last shipments_journey IDs within the window
-            $sj_from_id = DB::connection($connection)
-                ->table('shipments_journey')
-                ->whereBetween('created_at', [$from, $to])
-                ->orderBy('created_at', 'asc')->orderBy('id', 'asc')
-                ->limit(1)->value('id');
+        // 48 hours cutoff: latest journey row is at least 48 hours old
+        $cutoffTime = $now->copy()->subHours(48);
 
-            $sj_to_id = DB::connection($connection)
-                ->table('shipments_journey')
-                ->whereBetween('created_at', [$from, $to])
-                ->orderBy('created_at', 'desc')->orderBy('id', 'desc')
-                ->limit(1)->value('id');
+        $setting = GlobalSettings::where('type', 'rv_permanent_disable_shippers')->first();
+        $disabledShippers = $setting && $setting->text ? explode(',', $setting->text) : [];
 
+        $latestJourney = DB::connection($connection)
+            ->table('shipments_journey as sj')
+            ->join('shipments as s', 's.id', '=', 'sj.shipment_id')
+            ->where('sj.shipper_status_id', 65)
+            ->where('sj.created_at', '>=', $cutoffTime)
+            ->where('s.user_id', Auth::id())
+            ->select(
+                'sj.shipment_id',
+                DB::raw('MAX(sj.id) as max_id')
+            )
+            ->groupBy('sj.shipment_id');
 
-            $setting = GlobalSettings::where('type', 'rv_permanent_disable_shippers')->first();
-            $shippers = [];
+        $validShipments = DB::connection($connection)
+            ->table('shipments_journey as sj')
+            ->joinSub($latestJourney, 'lj', function ($join) {
+                $join->on('sj.id', '=', 'lj.max_id');
+            })
+            ->select(
+                'lj.shipment_id',
+                'sj.created_at'
+            );
 
-            if ($setting && !empty($setting->text)) {
-                $shippers = explode(',', $setting->text);
-            }
+        $sarQuery = DB::connection($connection)
+            ->table('shipments as s')
+            ->joinSub($validShipments, 'v', 'v.shipment_id', '=', 's.id')
+            ->select(
+//                's.user_id',
+                DB::raw('DATE(v.created_at) as sar_date'),
+                DB::raw('COUNT(*) as total_shipments')
+            )
+            ->where('s.user_id', Auth::id())
+            ->groupBy( 'sar_date')
+            ->orderByDesc('sar_date');
 
-            $cutoffTime = Carbon::now()->subHours(48);
+        return DataTables::of($sarQuery)
+            ->addColumn('sar_date', fn($row) => Carbon::parse($row->sar_date)->format('d-M-Y'))
+            ->addColumn('total_shipments', fn($row) => $row->total_shipments)
+            ->addColumn('return_confirm_date', function ($row) use ($disabledShippers) {
+                $currentUser = Auth::id();
+                return in_array($currentUser, $disabledShippers)
+                    ? '-'
+                    : Carbon::parse($row->sar_date)->addDays(2)->format('d-M-Y');
+            })
+            ->rawColumns(['sar_date', 'return_confirm_date'])
+            ->make(true);
 
-            // 🧾 Main query
-            $sarReport = DB::connection($connection)
-                ->table('shipments_journey as sj')
-                ->join('shipments as s', 's.id', '=', 'sj.shipment_id')
-                ->join('shipments_journey as sjpa', function ($join) use ($shippers, $sj_from_id, $sj_to_id) {
-                    $join->on('sjpa.shipment_id', '=', 'sj.shipment_id')
-                        ->whereBetween('sjpa.id', [$sj_from_id, $sj_to_id])
-                        ->where(
-                            'sjpa.id',
-                            '=',
-                            DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = sjpa.shipment_id  and shipments_journey.shipper_status_id = 65)')
-                        )->when(!empty($shippers), function ($query) use ($shippers) {
-                            $query->whereNotIn('sjpa.user_id', $shippers);
-                        });
-                })
-                ->select(
-                    's.user_id',
-                    DB::raw('COUNT(sj.shipment_id) as total_shipments'),
-                    DB::raw('DATE(sj.created_at) as sar_date')
-                )
-                ->where('sj.created_at', '>=', $cutoffTime)
-                ->where('s.user_id', Auth::id())
-                ->groupBy('s.user_id', 'sar_date')
-                ->orderBy('sar_date', 'desc')
-                ->get();
-
-
-            // 🧮 Return Yajra DataTable
-            return DataTables::of($sarReport)
-                ->addColumn('sar_date', fn($item) => Carbon::parse($item->sar_date)->format('d-M-Y'))
-                ->addColumn('total_shipments', fn($item) => $item->total_shipments)
-                ->addColumn('return_confirm_date', function ($data) use ($shippers) {
-                    if (in_array($data->user_id, $shippers)) {
-                        return '-';
-                    } else {
-                        return  Carbon::parse($data->sar_date)->addDays(2)->format('d-M-Y');
-                    }
-                })
-                ->rawColumns(['sar_date', 'return_confirm_date'])
-                ->make(true);
-        }else{
-            return true;
-        }
-       
     }
 
 
