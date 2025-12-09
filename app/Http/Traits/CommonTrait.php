@@ -727,11 +727,12 @@ trait CommonTrait
   function withOtpOrNot($journey)
   {
     // Extract the date-hour-minute from journey time
-    $timestamp = Carbon::parse($journey->created_at)->format('Y-m-d H:i');
+    $start = Carbon::parse($journey->created_at)->subMinute();
+    $end   = Carbon::parse($journey->created_at)->addMinute();
 
     $otpRecord = ShipmentOtpVerification::where('shipment_id', $journey->shipment_id)
         ->where('via_rvrsub_reason', 1)
-        ->whereRaw("DATE_FORMAT(created_at, '%Y-%m-%d %H:%i') = ?", [$timestamp])
+        ->whereBetween('created_at', [$start, $end])
         ->first();
 
     return $otpRecord ? 'With OTP' : 'Without OTP';
