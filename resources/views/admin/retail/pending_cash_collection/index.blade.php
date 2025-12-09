@@ -22,7 +22,7 @@
                                                 <span class="la la-calendar-o"></span>
                                             </span>
                                 </div>
-                                <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from"  placeholder="Search Date (From)">
+                                <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from"  placeholder="Search Date (From)" data-value="{{ \Carbon\Carbon::today()->subDays(31)->startOfDay() }}">
                             </div>
                         </div>
                         <div class="col-4 ">
@@ -32,7 +32,7 @@
                                                 <span class="la la-calendar-o"></span>
                                             </span>
                                 </div>
-                                <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to"  placeholder="Search Date (To)">
+                                <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to"  placeholder="Search Date (To)" data-value="{{ \Carbon\Carbon::now() }}">
                             </div>
                         </div>
                         <div class="col-3">
@@ -157,7 +157,7 @@
 
     <script type="text/javascript">
         $(document).ready(function() {
-            $('#search_date_from').pickadate({
+            var search_date_from = $('#search_date_from').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
                 selectYears: true,
@@ -166,65 +166,29 @@
                 hiddenSuffix: '_formatted',
 
                 onSet: function(context) {
-                    var fromPicker = $('#search_date_from').pickadate('picker');
-                    var toPicker   = $('#search_date_to').pickadate('picker');
 
-                    // When user selects a date
-                    if (context.select) {
-                        var fromDate = new Date(context.select);
-                        var maxAllowed = new Date(fromDate);
-                        maxAllowed.setMonth(maxAllowed.getMonth() + 1);
+                    var old_date_formatted = $('input[name="search_date_from_formatted"]').val();
+                    var contractMoment = moment(old_date_formatted);
+                    var current = moment(contractMoment).add(31, 'days');
+                    var current_max = moment(contractMoment).add(1, 'days');
+                    search_date_to.pickadate('picker').set('min', new Date(old_date_formatted),{muted:true});
+                    search_date_to.pickadate('picker').set('max', new Date(current.toDate()),{muted:true});
+                    search_date_to.pickadate('picker').set('select', new Date(current.toDate()),{muted:true});
 
-                        toPicker.set('min', fromDate);
-                        toPicker.set('max', maxAllowed);
-                    }
-
-                    // When CLEAR is pressed
-                    if (context.clear) {
-                        // Reset To limits
-                        toPicker.set('min', false);
-                        toPicker.set('max', false);
-
-                        // BUG FIX: Reinit FROM picker
-                        fromPicker.stop();   // destroy
-                        $('#search_date_from').pickadate(); // reinitialize
-                    }
                 }
             });
 
 
 
-            $('#search_date_to').pickadate({
+            var search_date_to = $('#search_date_to').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
-
                 onSet: function(context) {
-                    var fromPicker = $('#search_date_from').pickadate('picker');
-                    var toPicker   = $('#search_date_to').pickadate('picker');
 
-                    // When user selects a date
-                    if (context.select) {
-                        var toDate = new Date(context.select);
-                        var minAllowed = new Date(toDate);
-                        minAllowed.setMonth(minAllowed.getMonth() - 1);
-
-                        fromPicker.set('max', toDate);
-                        fromPicker.set('min', minAllowed);
-                    }
-
-                    // When CLEAR is pressed
-                    if (context.clear) {
-                        fromPicker.set('min', false);
-                        fromPicker.set('max', false);
-
-                        // BUG FIX: Reinit TO picker
-                        toPicker.stop();   // destroy
-                        $('#search_date_to').pickadate(); // reinitialize
-                    }
                 }
             });
 
