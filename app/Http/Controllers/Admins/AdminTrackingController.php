@@ -1396,6 +1396,7 @@ class AdminTrackingController extends Controller
                             $machine_name = '';
                         }
                         foreach ($shipment->shipment_journey as $journey) {
+                            $otp_verification = '';
                             $journey_details = array();
                             $journey_details['image_audio_location'] = '';
                             $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
@@ -1548,6 +1549,11 @@ class AdminTrackingController extends Controller
 
                                 }
                             }
+                            if($journey->shipper_status_id == 12 && $journey->verification == 0) {
+
+                                $otp_verification = '-' . ' ' .  $this->withOtpOrNot($journey);
+
+                            }
                             $shipment_scanning_query = ShipmentScanningJourney::select(
                                 'ssjal.location_status',
                                 'shipment_scanning_journeys.latitude',
@@ -1625,7 +1631,10 @@ class AdminTrackingController extends Controller
                                 $scanning_data = null;
                             }
                             $journey_details['area_log'] = $this->setJourneyDetails($scanning_data);
-                            $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
+                            // $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
+                            $journey_details['status_reason'] = 
+                            ($journey->status_reason_id ? $journey->shipment_status_reason->name : NULL)
+                            . ' ' . $otp_verification;
                             $journey_details['remarks'] = !empty($journey?->remarks)
                             ? $journey->remarks
                             : (($journey?->shipper_status_id == 18 && $journey?->status_reason_id != 90 && empty($journey?->remarks))
