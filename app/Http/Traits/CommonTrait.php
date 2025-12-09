@@ -22,7 +22,7 @@ use App\Http\Models\ShipmentsJourney;
 use App\Models\InternationalZonalMarginColumn;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use App\Http\Models\ShipmentOTPVerification;
+use App\Http\Models\ShipmentOtpVerification;
 
 trait CommonTrait
 {
@@ -729,7 +729,7 @@ trait CommonTrait
     // Extract the date-hour-minute from journey time
     $timestamp = Carbon::parse($journey->created_at)->format('Y-m-d H:i');
 
-    $otpRecord = ShipmentOTPVerification::where('shipment_id', $journey->shipment_id)
+    $otpRecord = ShipmentOtpVerification::where('shipment_id', $journey->shipment_id)
         ->where('via_rvrsub_reason', 1)
         ->whereRaw("DATE_FORMAT(created_at, '%Y-%m-%d %H:%i') = ?", [$timestamp])
         ->first();
