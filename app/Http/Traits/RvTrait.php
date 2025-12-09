@@ -2065,6 +2065,7 @@ trait RvTrait
             if (RvShipmentTicket::where('shipment_id', $shipmentId)->whereNull('deleted_at')->where('is_bot', 1)->exists()) {
                 $shipment = Shipment::with(['user:id,name,brand_name'])->select('user_id', 'consignee_phone_number_1', 'consignee_name', 'tracking_number', 'amount')->find($shipmentId);
                 if(in_array($shipment->user_id,[16344, 26249, 13060, 5553, 30230, 49055, 50475, 27425, 31794, 31902, 31538, 51353, 19943, 8732, 44233, 37631, 48558, 35049, 25244, 49028, 1049]) && $callCount == 3){
+                    Log::channel('botCallJobLog')->info('s ' . '31538 this is hit multiple time or not...!' );
                    return self::botCallingThirdDataSet($shipmentId);
                 }
                 $base_uri = 'https://cap.zong.com.pk:8444/vpbx-apis/roboCalls/outboundCall';
