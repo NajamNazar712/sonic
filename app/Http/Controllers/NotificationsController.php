@@ -135,6 +135,7 @@ use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
 use App\Http\Models\Admin\ShipperVerificationPinCode as AdminShipperVerificationPinCode;
 use App\Http\Models\Admin\Retail\RetailShipment;
 use App\Models\PendingBankAccount;
+use Illuminate\Support\Facades\Http;
 
 class NotificationsController extends Controller
 {
@@ -11725,7 +11726,44 @@ class NotificationsController extends Controller
             $notification_history->save();
         }
     }
+    static function sendFcmNotificationV1(
+        $employee_id,
+        $employee_type,
+        $device_token,
+        $notification_title,
+        $notification_body,
+        ?string $screen_id = null
+    ) {
+        $projectId   = 'bolt-rider-a37e0';
+        $accessToken = getFcmAccessToken();
 
+        $fcmUrl = "https://fcm.googleapis.com/v1/projects/{$projectId}/messages:send";
+        $payload = [
+            'message' => [
+                // 'token' => 'fg_hDx1QTO6OlCtZqDG46X:APA91bGDpTsoGTyPBm0KTmQqtGP5KtgOslolsrsCPaOcukNoJSjB-JIrPfWy6Zr42LmDvYuWLYWO3gKZfdIL8Q8uyjhQoeRPb7KV4LLrIdcqTgMnB7v8evg',
+                'token' => $device_token,
+                'notification' => [
+                    'title' => $notification_title,
+                    'body'  => $notification_body,
+                ],
+                'data' => [
+                    'screen_id' => (string)($screen_id ?? ''),
+                ],
+            ],
+        ];
+       
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $accessToken,
+            'Content-Type'  => 'application/json',
+        ])->post($fcmUrl, $payload);
+
+
+
+        return [
+            'status' => $response->status(),
+            'body'   => $response->json(),
+        ];
+    }
     static public function bolt_forget_pin($phone_number, $pin, $name)
     {
         $notification = Notification::find(61);
