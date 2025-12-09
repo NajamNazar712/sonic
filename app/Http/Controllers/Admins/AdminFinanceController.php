@@ -10259,7 +10259,7 @@ class AdminFinanceController extends Controller
                     //}
                 }
                 //$generate = TRUE;
-         
+
                 //$billing_period_from_date = Carbon::now()->subDays(7)->startOfDay()->toDateString();
                 if ($generate) {
 
@@ -22374,4 +22374,155 @@ class AdminFinanceController extends Controller
             'error' => 'dps_date_from is required'
         ], 400);
     }
+
+    public function sst_wht_remove_view()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 838);
+
+        return view('admin.finance.remove_sst_wht.index');
+    }
+
+
+    public function sst_wht_remove_upload(Request $request)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 839);
+        $names = [
+            'payment_id' => 'Payment Id',
+        ];
+
+        $messages = [
+            'required' => ':attribute is Required.',
+            'integer' => ':attribute must be an Integer.',
+        ];
+        $rules = [
+            'payment_id' => ['required', 'numeric', Rule::exists('done_payments', 'id')]
+        ];
+        $fields = [0 => 'payment_id'];
+
+        if ($file = $request->file('payment_ids')) {
+            $spreadsheet = IOFactory::createReaderForFile($file);
+            $spreadsheet->setReadDataOnly(true);
+            $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
+
+            $header = ['PAYMENT_ID'];
+
+            if (isset($spreadsheet)) {
+                $header_correct = TRUE;
+                foreach ($spreadsheet[0] as $index => $header_value) {
+
+                    if ($index == 1) {
+                    } elseif (!isset($header[$index]) || $header_value != $header[$index]) {
+                        $header_correct = FALSE;
+
+                        break;
+                    }
+                }
+
+
+                if (!$header_correct) {
+                    return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+                } else {
+                    unset($spreadsheet[0]);
+                }
+            }
+
+            // Check if the number of rows exceeds the limit
+            if (count($spreadsheet) > 20001) { // including header row
+                return redirect()->back()->with('error', 'The uploaded file exceeds the maximum allowed row limit of 20000.');
+            }
+
+            $valid_fields = true;
+            if (!empty($spreadsheet) || !isset($spreadsheet)) {
+                $rows = array();
+                foreach ($spreadsheet as $spreadsheet_row) {
+                    $row = array();
+
+                    foreach ($spreadsheet_row as $key => $value) {
+                        if(array_key_exists($key, $fields)){
+                            $row[$fields[$key]] = $value;
+                        }
+                        else{
+                            $valid_fields = false;
+                        }
+                    }
+
+                    $rows[] = $row;
+                }
+                $errors = array();
+                if($valid_fields){
+                    unset($spreadsheet);
+                    $tracking_ids = array();
+                    $tracking_id_row = array();
+                    foreach ($rows as $key => $row) {
+                        $row_id = $key + 2;
+                        $validate = Validator::make($row, $rules, $messages);
+
+                        $validate->setAttributeNames($names);
+
+                        if ($validate->fails()) {
+                            $errors['Row #' . $row_id] = $validate->errors()->all();
+                        }
+                        if (empty($errors['Row #' . $row_id])) {
+                            if (!empty(trim($row['payment_id']))) {
+                                if (empty($tracking_ids)) {
+                                    $payment_ids[] = $row['payment_id'];
+                                    $payment_id_row[$row['payment_id']] = $row_id;
+                                } else {
+                                    if (in_array($row['payment_id'], $payment_ids)) {
+                                        $errors['Row #' . $row_id][] = 'Same Payment ID as of Row #' . $payment_id_row[$row['payment_id']];
+                                    } else {
+                                        $payment_ids[] = $row['payment_id'];
+                                        $payment_id_row[$row['payment_id']] = $row_id;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (empty($errors)) {
+                        $payment_id_data = array();
+
+                        foreach ($rows as $key => $row) {
+                            $row_id = $key + 2;
+                            $paymentId = trim($row['payment_id']);
+
+                            $records = DB::table('done_payment_shipments')
+                                ->where('done_payment_id', $paymentId)
+                                ->select('id', 'wht', 'cod_sst', 'payable')
+                                ->get();
+
+                            foreach ($records as $record) {
+                                $currentPayable = $record->payable;
+                                DB::table('done_payment_shipments')
+                                    ->where('id', $record->id)
+                                    ->update(['payable' => $currentPayable + $record->wht + $record->cod_sst, 'cod_sst' => 0, 'wht' => 0]);
+                            }
+
+                            DB::select('CALL update_done_payment_statistics(?)', $paymentId);
+
+                        }
+                        return redirect()->back()->with(['success' => 'SST & WHT Removed Successfully']);
+                    }
+                    else {
+                        $errors = array_map(function ($row, $errors) {
+                            return $row . ':' . PHP_EOL . implode(' | ', $errors);
+                        }, array_keys($errors), $errors);
+
+                        return redirect()->back()->withErrors($errors);
+                    }
+                }
+                else{
+                    $errors[] = 'In-Valid Fields';
+                    return redirect()->back()->withErrors($errors);
+                }
+            }
+            else {
+                return redirect()->back()->with('error', 'No Payment ID in File');
+            }
+        }
+        else {
+            return redirect()->back()->with('error', 'File not found');
+        }
+    }
+
+
 }

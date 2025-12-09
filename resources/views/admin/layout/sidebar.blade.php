@@ -874,7 +874,7 @@
 
             @if (session('role_id') == 1 ||
                     count(array_intersect(
-                            [42, 52, 54, 59, 61, 136, 167, 232, 120, 145, 146, 147, 232, 238, 243, 454, 455, 509, 625, 807, 827, 984,1017],
+                            [42, 52, 54, 59, 61, 136, 167, 232, 120, 145, 146, 147, 232, 238, 243, 454, 455, 509, 625, 807, 827, 984,1017,1057],
                             session('permissions'))) !== 0)
 
                 <li class="nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i
@@ -1049,6 +1049,10 @@
 
                         @if (session('role_id') == 1  || in_array(1022, session('permissions')) )
                             <li><a class="menu-item" href="{{ route('admin.finance.wallet_users.index') }}">Wallet</a></li>
+                        @endif
+
+                        @if (session('role_id') == 1  || in_array(1057, session('permissions')) )
+                            <li><a class="menu-item" href="{{ route('admin.finance.removal_sst_wht.index') }}">Remove WHT & SST</a></li>
                         @endif
                     </ul>
 
