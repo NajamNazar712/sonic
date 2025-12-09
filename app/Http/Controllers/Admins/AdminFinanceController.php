@@ -22427,8 +22427,8 @@ class AdminFinanceController extends Controller
             }
 
             // Check if the number of rows exceeds the limit
-            if (count($spreadsheet) > 20001) { // including header row
-                return redirect()->back()->with('error', 'The uploaded file exceeds the maximum allowed row limit of 20000.');
+            if (count($spreadsheet) > 20) { // including header row
+                return redirect()->back()->with('error', 'The uploaded file exceeds the maximum allowed row limit of 20.');
             }
 
             $valid_fields = true;

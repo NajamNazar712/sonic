@@ -26,7 +26,7 @@
 
                                     <div class="col">
                                         <div class="form-group text-left">
-                                            <button type="submit" name="upload" class="btn btn-primary">Track</button>
+                                            <button type="submit" name="upload" class="btn btn-primary">Upload</button>
                                         </div>
                                     </div>
 
@@ -84,7 +84,7 @@
 
                     swal({
                         title: 'Please Wait!',
-                        text: 'Your shipment(s) are being tracked!',
+                        text: 'Your payment(s) are being processing!',
                         icon: 'info',
                         buttons: false,
                         closeOnClickOutside: false,
