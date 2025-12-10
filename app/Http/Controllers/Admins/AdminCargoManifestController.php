@@ -5903,6 +5903,10 @@ class AdminCargoManifestController extends Controller
             // disabled this because ali requirment
             //  $misroute_history_count = $shipment->shipment_journey->where('shipper_status_id', 49)->count();
 
+            if(in_array($shipment->shipper_status_id,[12,8,24])) {
+                return ['status' => 1, 'error' => 'Shipment status modified !'];
+            }
+            
             if (in_array($shipment->shipper_status_id,[23,25]))
                 return ['status' => 1, 'error' => 'Shipment is at dispatched or delivered to shipper !'];
             // disabled this because ali requirment

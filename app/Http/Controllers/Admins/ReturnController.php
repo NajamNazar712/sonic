@@ -7820,12 +7820,12 @@ class ReturnController extends Controller
     public function return_confirm_otp_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 640);
-        $rider_name = Rider::all();
+        //$rider_name = Rider::all();
         $shipment_status = ShipmentStatus::select('id', 'name')->whereIn('id', [12, 20])->get();
-        $hub_name = City::where('hub', 1)->where('status', 1)->select('id', 'name')->get();
+        //$hub_name = City::where('hub', 1)->where('status', 1)->select('id', 'name')->get();
         $today = Carbon::now()->endOfDay();
         $sevenDays = Carbon::now()->subDays(7)->startOfDay();
-        return view('admin.return.return_confirm_otp')->with(['rider_name' => $rider_name, 'hub_name' => $hub_name, 'shipment_status' => $shipment_status, 'today' => $today, 'sevenDays' => $sevenDays]);
+        return view('admin.return.return_confirm_otp')->with([ 'shipment_status' => $shipment_status, 'today' => $today, 'sevenDays' => $sevenDays]);
     }
     public function return_confirm_otp_list(Request $request)
     {
