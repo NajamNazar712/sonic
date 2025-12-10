@@ -129,11 +129,17 @@
                                     </tbody>
                                 </table>
                             @endif
-                            <div class="row mt-2">
-                                <div class="col d-flex justify-content-center" style="margin: 0px 0px 0px 277px;">
+                            <div class="row mt-2 mb-1">
+                                <div class="col-auto mr-1">
+                                    <a href="javascript:void(0)" id="loadSarReport" class="btn btn-primary">
+                                        <i class="la la-bar-chart"></i>
+                                        Click here to view Summary of SAR
+                                    </a>
+                                </div>
+                                <div class="col d-flex justify-content-center" >
                                     <h2>Summary of Shipper Advice Request</h2>
                                 </div>
-                                <div class="col-auto">
+                                <div class="col-auto ml-1">
                                     <a href="{{ route('cod.return.pending.index') }}" class="btn btn-primary"  data-placement="bottom">
                                         <i class="la la-rotate-left"></i>
                                         Shipper Advise Requested
@@ -280,40 +286,45 @@
     <script type="text/javascript">
         $(document).ready(function(){
 
-            var table = $('#sarReportTable').DataTable({
-                dom: 't<"bottom"ip>',
-                scrollX: true,
-                scrollY: '500px',
-                buttons: [
+            var sarTable = null;
 
-                ],
-                paging: false,        // pagination off
-                info: true,          // "showing 1 of n entries" off
-                searching: false,     // search bar off
-                ordering: false,      // sorting arrows off (optional)
-                lengthChange: false,  // "Show 10 / 25 / 50" off
-                processing: true,
-                language: {
-                    processing: data_table_loader
-                },
-                serverSide: true,
-                ajax: {
-                    url: '{{ route("cod.sar_report") }}',
-                    // data: function (d) {
-                    //     // optional: date filter
-                    //     d.date = $('input[name="search_date"]').val();
-                    // }
-                },
-                order: [[0, 'desc']], // SAR date desc
-                columns: [
-                    { data: 'sar_date', name: 'sar_date', class: 'align-middle text-center' },
-                    { data: 'total_shipments', name: 'total_shipments', class: 'align-middle text-center' },
-                    { data: 'return_confirm_date', name: 'return_confirm_date', class: 'align-middle text-center' },
-                ],
-                initComplete: function() {
-                    this.api().table().columns.adjust();
+            $('#loadSarReport').on('click', function () {
+
+                // already loaded then reload
+                if (sarTable !== null) {
+                    sarTable.ajax.reload();
+                    return;
                 }
+
+                sarTable = $('#sarReportTable').DataTable({
+                    dom: 't<"bottom"ip>',
+                    scrollX: true,
+                    scrollY: '500px',
+                    paging: false,
+                    info: true,
+                    searching: false,
+                    ordering: false,
+                    lengthChange: false,
+                    processing: true,
+                    language: {
+                        processing: data_table_loader
+                    },
+                    serverSide: true,
+                    ajax: {
+                        url: '{{ route("cod.sar_report") }}',
+                    },
+                    order: [[0, 'desc']],
+                    columns: [
+                        { data: 'sar_date', name: 'sar_date', class: 'align-middle text-center' },
+                        { data: 'total_shipments', name: 'total_shipments', class: 'align-middle text-center' },
+                        { data: 'return_confirm_date', name: 'return_confirm_date', class: 'align-middle text-center' },
+                    ],
+                    initComplete: function() {
+                        this.api().table().columns.adjust();
+                    }
+                });
             });
+
 
         @if ($user->lead_id)
                 @if (session('status') != 3 && $user->status == 3)

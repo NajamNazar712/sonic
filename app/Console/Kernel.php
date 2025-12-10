@@ -191,6 +191,7 @@ class Kernel extends ConsoleKernel
        'App\Console\Commands\UpdateRvShipments',
         'App\Console\Commands\UpdatePendingBanks',
         'App\Console\Commands\DailyOverAllSalesReportKhaddi',
+        'App\Console\Commands\ArchiveBookingApiLogs',
         // 'App\Console\Commands\QsrEmail',
         // 'App\Console\Commands\PendingDeliveriesReport',
 
@@ -714,6 +715,7 @@ class Kernel extends ConsoleKernel
         //     ->emailOutputOnFailure('anas.mazhar@logiserves.com');
         $schedule->command('email:daily_overall_sales_report_khaddi')->dailyAt('09:00')->runInBackground();
         $schedule->command('shipments:update-rv-sar')->dailyAt('05:00');
+        $schedule->command('logs:archive-booking-api')->dailyAt('03:00');
     }
     /**
      * Register the commands for the application.

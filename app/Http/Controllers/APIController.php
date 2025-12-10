@@ -147,6 +147,8 @@ use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransaction;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionDeliveryNote;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransactionRetail;
+use App\Models\BookingApiLog;
+use App\Models\BookingPayloadLog;
 
 class APIController extends Controller
 {
@@ -1394,8 +1396,8 @@ class APIController extends Controller
                 $amount = 0;
                 $parcel_value = 0;
             }
-
-
+            $payloads = $request->all();
+            
             $booked_by = $request->booked_by;
             $channel_id = $request->channel_id;
             $business_category_id = 1;
@@ -1415,6 +1417,14 @@ class APIController extends Controller
             } else {
                 $tracking_number = ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
             }
+
+            BookingApiLog::create([
+                'user_id'  =>  $user_id,
+                'shipment_id' => $shipment_id,
+                'endpoint' => 'book',
+                'ip' => $request->ip(),
+                'payload'  => $payloads ,
+            ]);
 
             PaymentModeLog::create([
                 'shipment_id'         => $shipment_id,
@@ -11134,7 +11144,7 @@ class APIController extends Controller
         if (config('app.env') === 'staging') {
             $allowedIps = ['164.90.252.105','103.244.178.3','134.209.126.19','72.255.0.55','110.93.236.91'];
         } elseif (config('app.env') === 'production') {
-            $allowedIps = ['3.23.216.198', '18.118.233.146','103.244.178.3'];
+            $allowedIps = ['3.23.216.198', '18.118.233.146','103.244.178.3','35.209.242.61','35.209.38.219'];
         }
 
         if ($allowedIps && !in_array($request->ip(), $allowedIps)) {
