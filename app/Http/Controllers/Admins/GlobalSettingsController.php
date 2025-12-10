@@ -8,6 +8,9 @@ use App\FafChargesGlobalHistory;
 use App\Http\Models\Admin\CrmAgentAutoAssignOriginArea;
 use App\Http\Models\Admin\CrmAgentAutoAssignOriginHub;
 use App\Http\Models\Admin\CrmAgentAutoAssignOriginZone;
+use App\Models\GeoCodeApiCount;
+use App\Models\GeoCodesAssignDestinationHubs;
+use App\Models\GeoCodesAssignSubSegments;
 use Carbon\Carbon;
 use App\Http\Models\City;
 use App\Http\Models\Zone;
@@ -11274,7 +11277,7 @@ class GlobalSettingsController extends Controller
 
     public function product_tax_logs(Request $request) 
     {
- 
+
         $query = DB::table('parent_product_percentage_logs as pl')
             ->leftJoin('parent_products as pp', 'pp.id', '=', 'pl.parent_product_id')
             ->leftJoin('admins as u', 'u.id', '=', 'pl.updated_by')
@@ -11295,4 +11298,109 @@ class GlobalSettingsController extends Controller
             })
         ->make(true);
     }
+
+    public function geo_codes_setting_index(Request $request)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 837);
+
+        $geo_codes_enabled = 0;
+        $geo_codes_max_limit = 0;
+        $geo_setting = GlobalSettings::where('type','geo_codes_enabled')->first();
+        if($geo_setting){
+            $geo_codes_enabled = $geo_setting->setting_value;
+        }
+
+        $geo_limit_setting = GlobalSettings::where('type','geo_codes_max_limit')->first();
+        if($geo_limit_setting){
+            $geo_codes_max_limit = $geo_limit_setting->setting_value;
+        }
+
+        $destination_hubs = City::where('hub', 1)->where('status',1)
+            ->select('id', 'name')->orderby('name', 'asc')->get();
+
+        $sub_segments = SubCategorySegment::select('id', 'name')->orderby('name', 'asc')->get();
+
+        $assigned_destination_hubs = GeoCodesAssignDestinationHubs::pluck('destination_hub_id')->toArray();
+        $assigned_sub_segments = GeoCodesAssignSubSegments::pluck('sub_segment_id')->toArray();
+
+        return view('admin.settings.geocodes.geo_codes_settings',
+            compact('geo_codes_enabled','geo_codes_max_limit','destination_hubs','sub_segments','assigned_destination_hubs','assigned_sub_segments'));
+    }
+
+    public function geo_codes_setting_store(Request $request)
+    {
+        $request->validate([
+            'geo_codes_enabled'      => 'nullable|in:on,off',
+            'geo_codes_max_limit'    => 'required|integer|min:1|max:100000',
+        ], [
+            // Custom Messages (Roman Urdu)
+            'geo_codes_max_limit.required' => 'Geo Code ka maximum limit dena zaroori hai.',
+            'geo_codes_max_limit.integer'  => 'Geo Code limit sirf number honi chahiye.',
+
+        ]);
+
+        $geo_codes_enabled = GlobalSettings::where('type', 'geo_codes_enabled')->first();
+        if($geo_codes_enabled){
+            $geo_codes_enabled->setting_value = $request->has('geo_codes_enabled') ? 1 : 0;
+            $geo_codes_enabled->save();
+        }
+
+        $geo_codes_max_limit = GlobalSettings::where('type', 'geo_codes_max_limit')->first();
+        if($geo_codes_max_limit) {
+            $geo_codes_max_limit->setting_value = $request->geo_codes_max_limit ?? 0;
+            $geo_codes_max_limit->save();
+
+            $geo_api_count = GeoCodeApiCount::first();
+            if($geo_api_count && $request->limit_is_changed){
+                $geo_api_count->api_count = 0;
+                $geo_api_count->save();
+            }
+        }
+
+        $existing = GeoCodesAssignSubSegments::pluck('sub_segment_id')->toArray();
+        $new = $request->sub_segment_ids ?? [];
+
+        // IDs to add (present in new but not in existing)
+        $toAdd = array_diff($new, $existing);
+
+        // IDs to delete (present in existing but not in new)
+        $toDelete = array_diff($existing, $new);
+
+        // 1: Delete only removed items
+        if (!empty($toDelete)) {
+            GeoCodesAssignSubSegments::whereIn('sub_segment_id', $toDelete)->delete();
+        }
+
+        // 2: Insert only new items
+        foreach ($toAdd as $seg_id) {
+            GeoCodesAssignSubSegments::create([
+                'sub_segment_id' => $seg_id
+            ]);
+        }
+
+        $existingHubs = GeoCodesAssignDestinationHubs::pluck('destination_hub_id')->toArray();
+        $newHubs = $request->destination_hub_ids ?? [];
+
+        // IDs to add (present in new but not in existing)
+        $toAdd = array_diff($newHubs, $existingHubs);
+
+        // IDs to delete (present in existing but not in new)
+        $toDelete = array_diff($existingHubs, $newHubs);
+
+        // 1: Delete only removed hubs
+        if (!empty($toDelete)) {
+            GeoCodesAssignDestinationHubs::whereIn('destination_hub_id', $toDelete)->delete();
+        }
+
+        // 2: Insert only new hubs
+        foreach ($toAdd as $hubId) {
+            GeoCodesAssignDestinationHubs::create([
+                'destination_hub_id' => $hubId
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+
+    }
 }
+

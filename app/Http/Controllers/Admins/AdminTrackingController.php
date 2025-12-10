@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Traits\FilterTrait;
+use App\Models\ShipmentGeoCode;
 use DB;
 use Auth;
 use Carbon\Carbon;
@@ -1273,6 +1274,20 @@ class AdminTrackingController extends Controller
 
                         // $details['consignee']['address'] = $shipment->consignee_address;
                         $details['consignee']['email'] = $shipment->consignee_email;
+
+                        //tpl geo codes
+                        $lat = 0;
+                        $lng = 0;
+                        $shipment_geo_code = ShipmentGeoCode::where('shipment_id', $shipment->id)->where('geo_code_type',1)->first();
+                        if(!$shipment_geo_code) {
+                            $shipment_geo_code = ShipmentGeoCode::where('shipment_id', $shipment->id)->where('geo_code_type',2)->first();
+                        }
+                        if($shipment_geo_code) {
+                            $lat = $shipment_geo_code->latitude;
+                            $lng = $shipment_geo_code->longitude;
+                        }
+                        $details['consignee']['latitude'] = $lat;
+                        $details['consignee']['longitude'] = $lng;
 
                         $details['consignee']['crm_status'] = 0;
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\Jobs\ShipmentGeoCodesTPL;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
@@ -287,6 +288,9 @@ class ShipperShipmentBookController extends Controller
 //                $user->save();
 //            }
 //        }
+
+        //GeoCodes Shipments
+        ShipmentGeoCodesTPL::dispatch([$shipment_id]);
 
         return $shipment_id;
     }
@@ -4227,7 +4231,9 @@ class ShipperShipmentBookController extends Controller
 //            }
 //        }
 
-
+        //GeoCodes Shipments
+        ShipmentGeoCodesTPL::dispatch([$shipment_id]);
+        
         return $shipment_id;
     }
 

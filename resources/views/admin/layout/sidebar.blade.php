@@ -2937,7 +2937,11 @@
                                         @if (session('role_id') == 1 || in_array(1040, session('permissions')) )
                                                 <li><a class="menu-item"
                                                        href="{{ route('admin.settings.geo_codes.index') }}">Geocodes Settings</a></li>
-                                            @endif
+                                        @endif
+                                        @if (session('role_id') == 1 || in_array(1056, session('permissions')) )
+                                            <li><a class="menu-item"
+                                                   href="{{ route('admin.settings.geo_codes.global_setting.index') }}">Manage Geo Code Settings (TPL)</a></li>
+                                        @endif
                                     @endif
                                 </ul>
                             </li>

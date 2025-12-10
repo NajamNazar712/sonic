@@ -2792,6 +2792,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('view_tpl_map', 'GeoCodesController@view_tpl_map')->name('view_tpl_map');
             Route::post('get_manual_shipment_geo_codes', 'GeoCodesController@get_manual_shipment_geo_codes')->name('get_manual_shipment_geo_codes');
             Route::post('update_manual_geo_codes', 'GeoCodesController@update_manual_geo_codes')->name('update_manual_geo_codes');
+            Route::post('get_sub_segments', 'GeoCodesController@get_sub_segments')->name('get_sub_segments');
+            Route::prefix('global_setting')->name('global_setting.')->group(function (){
+                Route::get('', 'Admins\GlobalSettingsController@geo_codes_setting_index')->name('index');
+                Route::post('store', 'Admins\GlobalSettingsController@geo_codes_setting_store')->name('store');
+
+            });
         });
 
         // //test
