@@ -504,14 +504,15 @@ class ShipperCRMController extends Controller
                         $already_lodged = false;
                         if($is_shipment){ 
                             $already_lodged = true;
-                            $request_check = true;
+                            $request_check = false;
+
 
                             if($nature_id == 1) {
                                 $check_request = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)
-                                    ->where('status_id',1)
-                                    ->first();
-                                if($check_request) {
-                                    $request_check = false;
+                                    ->where('case_nature_type_id',$complaint_id)
+                                    ->where('status_id',4);
+                                if($check_request->exists()) {
+                                    $request_check = true;
                                 }
                             }
 
