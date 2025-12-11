@@ -18,7 +18,7 @@ return new class extends Migration
 
             // Link to main push_notifications table
             $table->unsignedBigInteger('push_notification_id')->nullable();
-            $table->integer('push_notification_id');
+            $table->integer('employee_push_notification_id');
 
             // Notification data
             $table->string('device_token')->nullable();
