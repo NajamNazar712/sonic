@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Http\Controllers\NotificationsController;
 use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\EmployeeNotificationHistory;
 use GuzzleHttp\Client;
@@ -42,14 +43,23 @@ class ProcessPushNotification implements ShouldQueue
         if ($employee_device_token->exists()) {
             $employee_device_token = $employee_device_token->first();
             $device_token = $employee_device_token->device_token;
-            $server_key = 'AAAAPew_cdc:APA91bEJb7w_3-rOI5Pkr1wVVG9Qtl_WBQh_fEEk1N0yY-CHeUwOWKmSUODGhFbGuJv-BaqY-NS6KAYIo3Cw_UyKm2PvlM4reEae1SPj-y75z0Eu722IYUUqm_M2W9UOYnu40QyCIFGL';
-            $fcmUrl = 'https://fcm.googleapis.com/fcm/send';
             $data['title'] = $push_notification->title;
             $data['body'] = $push_notification->message;
             if($push_notification->screen_id != null){
                 $data['screen_id'] = $push_notification->screen_id;
             }
-
+            if ($data['title'] == 'Shipment Change Cod Amount') {
+                $response = NotificationsController::sendFcmNotificationV1($employee_device_token->employee_id, $employee_device_token->employee_type_id, $employee_device_token->device_token, $data['title'], $data['body'],  $data['screen_id'] ?? null);
+                if (isset($response['status'])) {
+                    if ($response['status'] == 200) {
+                        $push_notification->status = 1;
+                        $push_notification->save();
+                    }
+                }
+                return true;
+            }
+            $server_key = 'AAAAPew_cdc:APA91bEJb7w_3-rOI5Pkr1wVVG9Qtl_WBQh_fEEk1N0yY-CHeUwOWKmSUODGhFbGuJv-BaqY-NS6KAYIo3Cw_UyKm2PvlM4reEae1SPj-y75z0Eu722IYUUqm_M2W9UOYnu40QyCIFGL';
+            $fcmUrl = 'https://fcm.googleapis.com/fcm/send';
             if(in_array($push_notification->employee_type_id,[3,4])){
                 $message = [
                     'notification' => $data,
