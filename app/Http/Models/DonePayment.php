@@ -2,6 +2,7 @@
 
 namespace App\Http\Models;
 
+use App\Models\UserSettledPaymentBank;
 use Illuminate\Database\Eloquent\Model;
 
 class DonePayment extends Model
@@ -50,7 +51,10 @@ class DonePayment extends Model
             ->orderBy('shipment_id', 'DESC');
     }
 
-
+    public function bankDetail()
+    {
+        return $this->hasOne(UserSettledPaymentBank::class, 'done_payment_id', 'id');
+    }
 
 
 }

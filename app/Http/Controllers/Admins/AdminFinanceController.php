@@ -148,6 +148,7 @@ use App\Models\ParentProduct;
 use App\Http\Models\Product;
 use App\Http\Models\Region;
 use App\Models\CorporateUserOnDeliveredInvoice;
+use App\Models\UserSettledPaymentBank;
 
 
 class AdminFinanceController extends Controller
@@ -7742,7 +7743,6 @@ class AdminFinanceController extends Controller
             }
 
         }
-
         if(count($final_Array) > 0) {
 
             $pending_payment_shipment_ids = PendingPaymentShipment::whereIn('id', $final_Array)->select('pending_payment_id', 'id')->get()->mapToGroups(function ($item, $key) {
@@ -7772,20 +7772,21 @@ class AdminFinanceController extends Controller
                 $pending_payment = PendingPayment::find($pending_payment_id);
                 if ($pending_payment) {
                     $user_bank_id = NULL;
+                    $userBankInfo = NULL;
 
                     if ($request->has('make_payments_pickup_wise')) {
                         $pickup_address_map = PickupAddressIbanMapping::where('pickup_address_id', $request->pickup_address_id)->select('bank_info_id as id');
                         if ($pickup_address_map->exists()) {
                             $user_bank_id = $pickup_address_map->first();
                         } else {
-                            $user_bank_id = UserBankInfo::where('user_id', $pending_payment->user_id)->where('default_bank', 1)->select('id')->first();
+                            $user_bank_id = UserBankInfo::where('user_id', $pending_payment->user_id)->where('default_bank', 1)->select('id','bank_name','bank_branch','account_no','account_title','iban')->first();
                         }
-                    } else {
-                        $user_bank_id = UserBankInfo::where('user_id', $pending_payment->user_id)->where('default_bank', 1)->select('id')->first();
-
+                    }else {
+                            $user_bank_id = UserBankInfo::where('user_id', $pending_payment->user_id)->where('default_bank', 1)->select('id','bank_name','bank_branch','account_no','account_title','iban')->first();
                     }
 
                     if ($user_bank_id) {
+                        $userBankInfo = $user_bank_id;
                         $user_bank_id = $user_bank_id->id;
                     }
 
@@ -7824,8 +7825,18 @@ class AdminFinanceController extends Controller
                         }
 
                         $done_payment->save();
-
                         $pending_payment->delete();
+                        if($wallet_check == 0){
+                            UserSettledPaymentBank::create([
+                                'user_id'         => $done_payment->user_id,
+                                'done_payment_id' => $done_payment->id,
+                                'bank_id'         => $userBankInfo->bank_name,
+                                'bank_branch'     => $userBankInfo->bank_branch, 
+                                'account_title'   => $userBankInfo->account_title, 
+                                'account_number'  => $userBankInfo->account_number,
+                                'iban'            => $userBankInfo->iban,
+                            ]);
+                        }
                         foreach ($pending_payment_shipment_ids as $pending_payment_shipment_id) {
                             $pending_payment_shipment = PendingPaymentShipment::find($pending_payment_shipment_id);
                             
@@ -7969,7 +7980,17 @@ class AdminFinanceController extends Controller
 
 
                         $done_payment->save();
-
+                        if($wallet_check == 0){
+                            UserSettledPaymentBank::create([
+                                'user_id'         => $done_payment->user_id,
+                                'done_payment_id' => $done_payment->id,
+                                'bank_id'         => $userBankInfo->bank_name,
+                                'bank_branch'     => $userBankInfo->bank_branch, 
+                                'account_title'   => $userBankInfo->account_title, 
+                                'account_number'  => $userBankInfo->account_no,
+                                'iban'            => $userBankInfo->iban,
+                            ]);
+                        }
                         $total_shipments = 0;
                         $delivered_shipments = 0;
                         $returned_shipments = 0;
@@ -8411,13 +8432,24 @@ class AdminFinanceController extends Controller
                         '(select max(id) from user_bank_infos where user_id = u.id and default_bank = 1)'
                     ));
             })
+            ->leftJoin('user_settled_payment_banks', 'user_settled_payment_banks.done_payment_id', '=', 'done_payments.id')
             ->leftJoin('banks_lists as ub', function ($join) {
-                $join->where(function ($sub_query) {
-                    $sub_query->whereNotNull('done_payments.user_bank_info_id')
-                        ->where('ubi.bank_name', '=', DB::raw('`ub`.`id`'));
-                })->orWhere(function ($sub_query) {
-                    $sub_query->whereNull('done_payments.user_bank_info_id')
-                        ->where('ubi_default.bank_name', '=', DB::raw('`ub`.`id`'));
+                $join->where(function ($sub) {
+                    // PRIORITY 1: If bank ID exists in user_settled_payment_banks
+                    $sub->whereNotNull('user_settled_payment_banks.bank_id')
+                        ->whereColumn('user_settled_payment_banks.bank_id', 'ub.id');
+                })
+                ->orWhere(function ($sub) {
+                    // PRIORITY 2: If user selected a bank in done_payments
+                    $sub->whereNull('user_settled_payment_banks.bank_id') // only if no settled bank
+                        ->whereNotNull('done_payments.user_bank_info_id')
+                        ->whereColumn('ubi.bank_name', 'ub.id');
+                })
+                ->orWhere(function ($sub) {
+                    // PRIORITY 3: Fallback to default bank
+                    $sub->whereNull('user_settled_payment_banks.bank_id')
+                        ->whereNull('done_payments.user_bank_info_id')
+                        ->whereColumn('ubi_default.bank_name', 'ub.id');
                 });
             })
             ->leftjoin('banks_lists as b', 'done_payments.company_bank_id', '=', 'b.id')
@@ -9458,6 +9490,9 @@ class AdminFinanceController extends Controller
             $shipper_bank = UserBankInfo::where('user_id', $shipper->id)->where('default_bank', 1)->first();
         } else {
             $shipper_bank = UserBankInfo::find($done_payment->user_bank_info_id);
+        }
+        if($done_payment->bankDetail){
+             $shipper_bank = $done_payment->bankDetail->load('bank');
         }
         $old = $request->input('old',0);
 

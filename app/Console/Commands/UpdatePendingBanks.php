@@ -75,7 +75,6 @@ class UpdatePendingBanks extends Command
                 $bank->status = 1;
                 $bank->save();
             }
-            NotificationsController::send(253,  $processed);
         }
         return Command::SUCCESS;
     }

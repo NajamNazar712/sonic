@@ -11636,13 +11636,14 @@ class NotificationsController extends Controller
                     self::email($subject, $body, $to);
                 } else if ($id == 253) {
                     // Build HTML table
+                    $salesPersonId = SalePersonTag::where('user_id', $reference_1_id['user_id'])->pluck('admin_id');
                     $htmlTable = '
-                    <h3 style="font-family:Arial;">Daily Bank Account Change Summary</h3>
+                    <h3 style="font-family:Arial;">Shipper Bank Account Change Summary</h3>
                     <p style="font-family:Arial;">The following bank accounts were changed within the last 24 hours:</p>
                     <table border="1" cellspacing="0" cellpadding="8" style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;">
                         <thead style="background-color:#f2f2f2;">
                             <tr>
-                                <th>User ID</th>
+                                <th>Account User ID</th>
                                 <th>Bank Name</th>
                                 <th>Branch</th>
                                 <th>City</th>
@@ -11653,27 +11654,22 @@ class NotificationsController extends Controller
                             </tr>
                         </thead>
                         <tbody>';
-                        $salesPersonId = [];
-                    foreach ($reference_1_id as $bank) {
-                        $sale_person_tag = SalePersonTag::where('user_id', $bank['user_id'])->first();
-                        PendingBankAccount::where('user_id',$bank['user_id'])->update(['email_status'=>1]);
-                        $salesPersonId[] = $sale_person_tag->admin_id; 
-                        $imageUrl = asset('storage/users_attached_documents/' . $bank['user_id'] . '/' . $bank['blank_cheque_image']);
+                    // foreach ($reference_1_id as $bank) {
+                        $imageUrl = asset('storage/users_attached_documents/' .$reference_2_id);
                         $htmlTable .= '
                         <tr>
-                            <td>' . $bank['user_name'] . '</td>
-                            <td>' . $bank['bank_name'] . '</td>
-                            <td>' . $bank['bank_branch'] . '</td>
-                            <td>' . $bank['bank_city'] . '</td>
-                            <td>' . $bank['account_no'] . '</td>
-                            <td>' . $bank['account_title'] . '</td>
-                            <td>' . $bank['iban_no'] . '</td>
+                            <td>' . $reference_1_id->user_id . '</td>
+                            <td>' . $reference_1_id?->bank?->name . '</td>
+                            <td>' . $reference_1_id['bank_branch'] . '</td>
+                            <td>' . $reference_1_id['bank_city'] . '</td>
+                            <td>' . $reference_1_id['account_no'] . '</td>
+                            <td>' . $reference_1_id['account_title'] . '</td>
+                            <td>' . $reference_1_id['iban_no'] . '</td>
                             <td><a href="' . $imageUrl . '" target="_blank">View Image</a></td>
                         </tr>';
-                    }
                     $htmlTable .= '</tbody></table>';
                     $htmlTable .= '<br><p style="font-family:Arial;">Regards,<br><b>SLG Trax System</b></p>';
-                    $to = Admin::whereIn('id',$salesPersonId)->pluck('email');
+                    $to = Admin::whereIn('id',$salesPersonId)->pluck('email')->merge([$reference_1_id?->user?->email]);
                     // Send email to main recipient and CC respective salespersons if needed
                     $cc = ['fawad.ahmed@slgtrax.com', 'ali.haiderd@slgtrax.com','anas.mazhar@slgtrax.com'];
                     $body = str_replace('[preview]', $htmlTable, $body);

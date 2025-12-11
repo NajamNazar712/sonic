@@ -1279,37 +1279,43 @@ class ShipperDashboardController extends Controller
                 $userBank = UserBankInfo::find($request->id);
                 if($userBank){
                     $oldData = $userBank->only(['bank_name', 'bank_branch', 'account_no', 'account_title', 'iban_no', 'bank_city']);
-                    $pendingAccount = PendingBankAccount::where('user_id',$user_id)->first();
-                    if(!$pendingAccount){
-                        $pendingAccount = new PendingBankAccount();
-                    }
-                    $pendingAccount->bank_name = $request->bank_select;
-                    $pendingAccount->bank_branch = $request->bank_branch;
-                    $pendingAccount->account_no = $request->account_no;
-                    $pendingAccount->account_title = $request->account_title;
-                    $pendingAccount->iban_no = $request->iban_no;
-                    $pendingAccount->bank_city = $request->bank_city;
-                    $pendingAccount->user_id = $user_id;
-                    $pendingAccount->bank_id = $request->id;
-                    $pendingAccount->status = 0;
+                    $userBank->bank_name = $request->bank_select;
+                    $userBank->bank_branch = $request->bank_branch;
+                    $userBank->account_no = $request->account_no;
+                    $userBank->account_title = $request->account_title;
+                    $userBank->iban = $request->iban_no;
+                    $userBank->user_id = $user_id;
+                    $userBank->save();
+
                     if ($request->hasFile('blank_cheque')) {
-                        if ($pendingAccount->blank_cheque_image != NULL) {
-                            Storage::disk('public')->delete('users_attached_documents/' . ($user_id  ?? session('user_id')) . '/' . $pendingAccount->blank_cheque_image);
+                        $user_attachment = UserDocumentAttachment::where('user_id', $userBank->user_id)->latest()->first();
+                        $oldblank_cheque_image = $user_attachment->blank_cheque_image;
+                        if ($user_attachment->blank_cheque_image != NULL) {
+                            Storage::disk('public')->delete('users_attached_documents/' . ($user_id  ?? session('user_id')) . '/' . $user_attachment->blank_cheque_image);
                         }
                         $filename = 'blank_cheque' . date('Y-m-d') . '_' . ($user_id ?? session('user_id'))  . '.png';
                         $file = $request->file('blank_cheque');
                         Storage::disk('public')->putFileAs('users_attached_documents/' . ($user_id ?? session('user_id')) . '', $file, $filename);
-                        $pendingAccount->blank_cheque_image = $filename;
+                        $user_attachment->blank_cheque_image = $user_attachment->blank_cheque_image;
+                        $user_attachment->save();
+                        ChangeLogs::create([
+                            'table_name' => $user_attachment->getTable(),
+                            'record_id' => $user_attachment->getKey(),
+                            'old_data' => json_encode($oldblank_cheque_image),
+                            'new_data' => json_encode($user_attachment),
+                            'updated_by' => $user_id,
+                        ]);
                     }
-                    $pendingAccount->save();
+
                     ChangeLogs::create([
                         'table_name' => $userBank->getTable(),
                         'record_id' => $userBank->getKey(),
                         'old_data' => json_encode($oldData),
-                        'new_data' => json_encode($pendingAccount),
+                        'new_data' => json_encode($userBank),
                         'updated_by' => $user_id,
                     ]);
-                     return redirect()->back()->with(['success' => 'Bank account pending — will be updated automatically within 24 hours.!']);
+                    NotificationsController::send(253,  $userBank, $user_attachment->blank_cheque_image);
+                    return redirect()->back()->with(['success' => 'Bank account pending — will be updated automatically within 2 hours.!']);
                 }
 
             }
@@ -1357,9 +1363,9 @@ class ShipperDashboardController extends Controller
                 $default_button = '<button type="button" class="dropdown-item default"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Make Default</div></button>';
 
                 if ($bank->default_bank) {
-                    $dropdown = 'Default Address';
-                    // $default_button = '<button type="button" class="dropdown-item editBank"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit Bank</div></button>';
-                    // $dropdown .= $default_button;
+                    // $dropdown = 'Default Address';
+                    $default_button = '<button type="button" class="dropdown-item editBank"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit Bank</div></button>';
+                    $dropdown .= $default_button;
                 }else{
                     $dropdown .= $default_button;
                 }
