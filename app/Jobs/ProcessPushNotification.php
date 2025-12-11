@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\EmployeeNotificationHistory;
+use App\Models\PusherNotification;
 use GuzzleHttp\Client;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
@@ -54,6 +55,15 @@ class ProcessPushNotification implements ShouldQueue
                     if ($response['status'] == 200) {
                         $push_notification->status = 1;
                         $push_notification->save();
+                    }else{
+                        PusherNotification::create([
+                            'push_notification_id' => $push_notification->id,
+                            'device_token'         => $push_notification->device_token,
+                            'title'                => $push_notification->title,
+                            'body'                 => $push_notification->body,
+                            'payload'              => $response,
+                            'status'               => 0,
+                        ]);
                     }
                 }
                 return true;
