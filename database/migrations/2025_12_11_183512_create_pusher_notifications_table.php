@@ -18,9 +18,7 @@ return new class extends Migration
 
             // Link to main push_notifications table
             $table->unsignedBigInteger('push_notification_id')->nullable();
-            $table->foreign('push_notification_id')
-                ->references('id')->on('push_notifications')
-                ->onDelete('set null');
+            $table->integer('push_notification_id');
 
             // Notification data
             $table->string('device_token')->nullable();
