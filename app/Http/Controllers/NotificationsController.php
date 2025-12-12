@@ -11742,12 +11742,19 @@ class NotificationsController extends Controller
         $payload = [
             'message' => [
                 'token' => $device_token,
-                'notification' => [
-                    'title' => $notification_title,
-                    'body'  => $notification_body,
-                ],
+                
                 'data' => [
-                    'screen_id' => (string)($screen_id ?? ''),
+                    'title'     => (string) $notification_title,
+                    'body'      => (string) $notification_body,
+                    'screen_id' => (string) ($screen_id ?? ''),
+                    // optional: add unique id/timestamp if you want
+                    'ts'        => (string) microtime(true),
+                ],
+
+                // optional but good to have
+                'android' => [
+                    'priority' => 'HIGH',
+                    'ttl'      => '3600s',
                 ],
             ],
         ];
