@@ -4551,7 +4551,6 @@ class AdminFinanceController extends Controller
         $shipmentDeliveryNote = DeliveryNoteShipment::with('delivery_note')->where('shipment_id', $shipment->id)->latest()->first();
 
         if(!empty($shipmentDeliveryNote)) {
-            dd('data');
             NotificationsController::app_notification(
                 23, // Notification type ID
                 $shipmentDeliveryNote->delivery_note->rider_id, // Rider ID

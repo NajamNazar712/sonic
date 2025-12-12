@@ -178,8 +178,9 @@ class NotificationsController extends Controller
 
     static private function push_notification($employee_id, $employee_type, $title, $body, $screen = NULL)
     {
-        $notification_history = new EmployeeNotificationHistory();
+        dd($employee_id, $employee_type, $title, $body, $screen);
 
+        $notification_history = new EmployeeNotificationHistory();
         $notification_history->employee_id = $employee_id;
         $notification_history->employee_type_id = $employee_type;
         $notification_history->title = $title;
@@ -11791,6 +11792,7 @@ class NotificationsController extends Controller
 
     static public function app_notification($id, $employee_id, $employee_type, $reference1_id, $reference2_id = NULL)
     {
+
         $push_notification = AppNotification::find($id);
         if ($push_notification) {
             if ($push_notification->status) {
