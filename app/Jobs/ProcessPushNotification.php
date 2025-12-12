@@ -59,7 +59,7 @@ class ProcessPushNotification implements ShouldQueue
                     }else{
                         PusherNotification::create([
                             'push_notification_id' => $push_notification->id,
-                            'device_token'         => $push_notification->device_token,
+                            'device_token'         => $device_token,
                             'title'                => $push_notification->title,
                             'body'                 => $push_notification->body,
                             'payload'              => json_encode($response['fcm_response']) ?? '',
