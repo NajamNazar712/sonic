@@ -11751,13 +11751,13 @@ class NotificationsController extends Controller
                 ],
             ],
         ];
-       var_dump($payload);
+       
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $accessToken,
             'Content-Type'  => 'application/json',
         ])->post($fcmUrl, $payload);
 
-
+var_dump("resoi".$payload);
 
         return [
             'status' => $response->status(),

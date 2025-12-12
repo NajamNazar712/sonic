@@ -49,10 +49,9 @@ class ProcessPushNotification implements ShouldQueue
             if($push_notification->screen_id != null){
                 $data['screen_id'] = $push_notification->screen_id;
             }
-            var_dump('Sendig to device token:');
             if ($data['title'] == 'Shipment Change Cod Amount') {
                 $response = NotificationsController::sendFcmNotificationV1($employee_device_token->employee_id, $employee_device_token->employee_type_id, $employee_device_token->device_token, $data['title'], $data['body'],  $data['screen_id'] ?? null);
-                var_dump('Sendig to device token:'. $response);
+                var_dump('Sendig to device response:'. $response);
                 if (isset($response['status'])) {
                     if ($response['status'] == 200) {
                         $push_notification->status = 1;
