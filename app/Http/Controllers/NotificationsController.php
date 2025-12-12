@@ -11736,11 +11736,11 @@ class NotificationsController extends Controller
     ) {
         $projectId   = 'bolt-rider-a37e0';
         $accessToken = getFcmAccessToken();
-        dd($device_token);
+
         $fcmUrl = "https://fcm.googleapis.com/v1/projects/{$projectId}/messages:send";
+
         $payload = [
             'message' => [
-                // 'token' => 'fg_hDx1QTO6OlCtZqDG46X:APA91bGDpTsoGTyPBm0KTmQqtGP5KtgOslolsrsCPaOcukNoJSjB-JIrPfWy6Zr42LmDvYuWLYWO3gKZfdIL8Q8uyjhQoeRPb7KV4LLrIdcqTgMnB7v8evg',
                 'token' => $device_token,
                 'notification' => [
                     'title' => $notification_title,
@@ -11751,17 +11751,15 @@ class NotificationsController extends Controller
                 ],
             ],
         ];
-       
+        // Send Request
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $accessToken,
             'Content-Type'  => 'application/json',
         ])->post($fcmUrl, $payload);
 
-var_dump("resoi".$payload);
-
         return [
-            'status' => $response->status(),
-            'body'   => $response->json(),
+            'http_status' => $response->status(),
+            'fcm_response'   => $response->json(),
         ];
     }
     static public function bolt_forget_pin($phone_number, $pin, $name)
