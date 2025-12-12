@@ -11736,7 +11736,7 @@ class NotificationsController extends Controller
     ) {
         $projectId   = 'bolt-rider-a37e0';
         $accessToken = getFcmAccessToken();
-
+        dd($device_token);
         $fcmUrl = "https://fcm.googleapis.com/v1/projects/{$projectId}/messages:send";
         $payload = [
             'message' => [
