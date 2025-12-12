@@ -178,7 +178,6 @@ class NotificationsController extends Controller
 
     static private function push_notification($employee_id, $employee_type, $title, $body, $screen = NULL)
     {
-        dd($employee_id, $employee_type, $title, $body, $screen);
 
         $notification_history = new EmployeeNotificationHistory();
         $notification_history->employee_id = $employee_id;
@@ -11752,7 +11751,7 @@ class NotificationsController extends Controller
                 ],
             ],
         ];
-       
+       var_dump($payload);
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $accessToken,
             'Content-Type'  => 'application/json',

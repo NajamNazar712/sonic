@@ -13,9 +13,9 @@
 
 use Illuminate\Support\Facades\Artisan;
 
-// Route::get('test-fcm-token', function () {
-//     return getFcmAccessToken();
-// });
+Route::get('test-fcm-token', function () {
+    return getFcmAccessToken();
+});
 // Route::get('/test-fcm-file', function () {
 //     $path = config('services.fcm.service_account');
 //     return [
