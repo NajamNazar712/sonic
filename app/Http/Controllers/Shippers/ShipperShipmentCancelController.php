@@ -13,6 +13,7 @@ use App\Http\Models\ShipmentStatus;
 use App\Http\Models\Shipper\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
@@ -32,6 +33,23 @@ class ShipperShipmentCancelController extends Controller
     }
 
     public function list(Request $request) {
+        $from = Carbon::now()->subMonths(6)->startOfDay();
+        $to   = Carbon::now()->endOfDay();
+
+        $connection = 'reports';
+        // First and last shipments_journey IDs within the window
+        $sj_from_id = DB::connection($connection)
+            ->table('shipments_journey')
+            ->whereBetween('created_at', [$from, $to])
+            ->orderBy('created_at', 'asc')->orderBy('id', 'asc')
+            ->limit(1)->value('id');
+
+        $sj_to_id = DB::connection($connection)
+            ->table('shipments_journey')
+            ->whereBetween('created_at', [$from, $to])
+            ->orderBy('created_at', 'desc')->orderBy('id', 'desc')
+            ->limit(1)->value('id');
+        //
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
@@ -39,8 +57,9 @@ class ShipperShipmentCancelController extends Controller
             ->join('cities as h' , 'dc.hub_id', '=' , 'h.id')
             ->leftJoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
             ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
-            ->leftJoin('shipments_journey', function ($join) {
+            ->leftJoin('shipments_journey', function ($join) use ($sj_from_id, $sj_to_id) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
+                    ->whereBetween('shipments_journey.id', [$sj_from_id, $sj_to_id])
                     ->where('shipments_journey.created_at', '=', DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
             })
             ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
