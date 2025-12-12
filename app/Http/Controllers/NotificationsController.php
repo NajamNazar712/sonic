@@ -11754,7 +11754,7 @@ class NotificationsController extends Controller
                 // optional but good to have
                 'android' => [
                     'priority' => 'HIGH',
-                    'ttl'      => '18000s',
+                    'ttl'      => '18000s', //% hours 
                 ],
             ],
         ];
