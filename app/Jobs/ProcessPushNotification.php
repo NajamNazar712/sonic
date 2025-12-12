@@ -61,7 +61,7 @@ class ProcessPushNotification implements ShouldQueue
                             'device_token'         => $push_notification->device_token,
                             'title'                => $push_notification->title,
                             'body'                 => $push_notification->body,
-                            'payload'              => $response,
+                            'payload'              => $response['fcm_response'] ?? '',
                             'status'               => 0,
                         ]);
                     }
