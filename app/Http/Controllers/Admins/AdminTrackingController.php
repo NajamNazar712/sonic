@@ -1549,7 +1549,7 @@ class AdminTrackingController extends Controller
 
                                 }
                             }
-                            if($journey->shipper_status_id == 12 && $journey->verification == 0) {
+                            if($journey->shipper_status_id == 12 && $journey->verification == 0 && in_array($journey?->status_reason_id,[8,19])) {
 
                                 $otp_verification = '-' . ' ' .  $this->withOtpOrNot($journey);
 

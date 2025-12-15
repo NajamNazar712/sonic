@@ -4839,18 +4839,20 @@ class AdminFinanceController extends Controller
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
             $header = ['Tracking Number', 'Actual Weight'];
-
+            
             if (isset($spreadsheet)) {
                 $header_correct = TRUE;
 
                 foreach ($spreadsheet[0] as $index => $header_value) {
                     if ($index == 2) {
+                        $header_correct = TRUE;
+                        break;
                     } elseif (!isset($header[$index]) || $header_value != $header[$index]) {
                         $header_correct = FALSE;
                         break;
                     }
                 }
-
+     
                 if (!$header_correct) {
                     return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
                 } else {
