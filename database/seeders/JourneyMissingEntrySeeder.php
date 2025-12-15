@@ -167,12 +167,12 @@ class JourneyMissingEntrySeeder extends Seeder
             echo count($shipmentId);
         
             foreach ($shipmentId as $shipment) {
-                // $shipment->shipper_status_id = 13;
-                //     $shipment->consignee_status_id = 13;
-                //     $shipment->save();
-                // ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, NULL, NULL, 346);
-                // return  $shipment;
-                // if ($shipment->shipper_status_id === 5) {
+                $shipment->shipper_status_id = 13;
+                    $shipment->consignee_status_id = 13;
+                    $shipment->save();
+                ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, NULL, NULL, 346);
+                return  $shipment;
+                if ($shipment->shipper_status_id === 5) {
                 //     // $shipment->created_at = $shipment->updated_at;
                 //     $shipment->shipper_status_id = 14;
                 //     $shipment->consignee_status_id = 14;
