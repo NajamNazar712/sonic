@@ -79,7 +79,6 @@ class JourneyMissingEntrySeeder extends Seeder
             22322358090586,
             20222358098993,
             22325158117033,
-            20215857814698,
             22327158071090,
             20225157982564,
             22317458068027,
@@ -171,7 +170,7 @@ class JourneyMissingEntrySeeder extends Seeder
                     $shipment->consignee_status_id = 13;
                     $shipment->save();
                 ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, NULL, NULL, 346);
-                return  $shipment;
+                // return  $shipment;
                 // if ($shipment->shipper_status_id === 5) {
                 //     // $shipment->created_at = $shipment->updated_at;
                 //     $shipment->shipper_status_id = 14;
