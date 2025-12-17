@@ -192,6 +192,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\UpdatePendingBanks',
         'App\Console\Commands\DailyOverAllSalesReportKhaddi',
         'App\Console\Commands\ArchiveBookingApiLogs',
+        'App\Console\Commands\DeleteDuplicateDonePayment',
         // 'App\Console\Commands\QsrEmail',
         // 'App\Console\Commands\PendingDeliveriesReport',
 
@@ -609,6 +610,7 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('update:zero_arrival_charges')->everyTwoHours()->runInBackground();
         $schedule->command('delete:duplicate_arrival')->hourly()->runInBackground();
+        $schedule->command('delete:duplicate_done_delivered')->everyThirtyMinutes()->runInBackground();
         $schedule->command('update_corporate_invoice_charges_issue')->hourly()->runInBackground();
         $schedule->command('update:pending_payment_shipment_arrival_charges')->hourly()->runInBackground();
 //        $schedule->command('storage:amazon')->dailyAt('15:05')->runInBackground();
