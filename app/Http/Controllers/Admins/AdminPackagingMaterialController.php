@@ -56,6 +56,9 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\PackagingMaterialCart;
 use App\Http\Models\ShipperPackagingMaterailType;
+use App\Services\Marco\MarcoOrderService;
+use App\Services\Marco\MarcoSkuService;
+use App\Services\Marco\Packaging\MarcoOrderService as PackagingMarcoOrderService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
@@ -663,10 +666,50 @@ class AdminPackagingMaterialController extends Controller
                 $invalid_product_ids = array();
                 $total_quantity = 0;
                 $invalid_products = '';
+                if ($user_id == 10378) {
+
+                    $shipper_details = User::where('id', $user_id)->select('city_id','name', 'poc', 'phone', 'email','address')->first();
+               
+                    foreach ($request_details->items as $item) {
+                        $newProducts[] = [
+                            'product_id'  => $item->wms_product_id,
+                            'quantity'    => $item->quantity,
+                        ];
+                    }
+                    $marcoOrderService = new PackagingMarcoOrderService();
+
+
+
+                    $marcoPayload = [
+                        'order_type'           => 1,
+                        'courier_type'         => 1,
+                        'self_pickup'          => 1,
+                        'city_name'            => $request_details->city?->name,
+                        'cod'                  => $request_details->amount,
+                        'consignee_name'       => $shipper_details->name,
+                        'address'              => $shipper_details->address,
+                        'phone_number_1'       => $shipper_details->phone,
+                        'shipper_order_id'     => $user_id.'-PM-'. $request_details->id,
+                        'shipping_mode'        => 1,
+                        'courier_charges_id'   => 1,
+                        'products'             => $newProducts,
+                        'special_instructions' => $request->special_instructions ?? '-',
+                        'packaging_material_request_id'     => $request_details->id ?? null,
+                    ];
+                    $result = $marcoOrderService->bookPackagingOrder($marcoPayload);
+                    if(!isset($result) && $result['success']){
+                       return response()->json(['status' => 1,
+                            'success' => 'Packaging Material Request has been sent to Marco successfully!'
+                        ]);
+                    }else{
+                        return response()->json(['status' => 0, 'error' => $result['data']['message'] ?? 'Marco order booking failed!']);
+                    }
+                }
                 foreach ($request_details->items as $item) {
                     $product_ids[] = $item->wms_product_id;
                     $total_quantity = $total_quantity + $item->quantity;
-
+                    
+                    // dd('data2');
                     $check_current_stock = WmsCurrentStock::where('product_id', $item->wms_product_id)->where('warehouse_pickup_address_id', $trax_address->id)->where('user_id', $wms_user_id);
                     if ($check_current_stock->exists()) {
                         $check_current_stock = $check_current_stock->first();
@@ -1521,7 +1564,32 @@ class AdminPackagingMaterialController extends Controller
                     $product_type->user_id = $setting->setting_value;
                     $product_type->save();
                 }
-
+                $payload = [
+                    "product_id"             => $packaging_material_type_size->id,
+                    "product_name"           => $packaging_material_type_size->type->type . ' - ' . $packaging_material_type_size->size,
+                    "product_type_id"        => 11,
+                    "product_category_id"    => 2,
+                    "product_description"    => 'Packaging Material Type-Size : ' . $packaging_material_type_size->type->type . '-' . $packaging_material_type_size->size,
+                    "sku_id"                 => 'PM-' . $packaging_material_type_size->type->id . '-' . $packaging_material_type_size->id,
+                    "buffer_quantity"        => 1,
+                    "length"                 => 1,
+                    "breadth"                => 1,
+                    "height"                 => 1,
+                    "qc_required"            => 0,
+                    "self_barcoded"          => 1,
+                    "self_product_barcode"   => strtoupper('PM-' . $packaging_material_type_size->type->id . '-' . $packaging_material_type_size->id),
+                    "pickup_address"         => 1,
+                    "pickup_counter"         => 1,
+                    "tax"                    => 0, 
+                    "price"                  => 1, 
+                    "weight"                 => 1,  
+                    "pickup_info"            => [
+                        ["id" => 94],
+                        ["id" => 95]
+                    ],
+                ];
+                $marcoService = new MarcoSkuService();
+                $result = $marcoService->createSku($payload);
                 $product = new WmsProduct();
                 $product->name = $packaging_material_type_size->type->type . ' - ' . $packaging_material_type_size->size;
                 $product->sku_id = 'PM-' . $packaging_material_type_size->type->id . '-' . $packaging_material_type_size->id;
@@ -1531,12 +1599,20 @@ class AdminPackagingMaterialController extends Controller
                 $product->user_id = $setting->setting_value;
                 $product->category_id = $product_type->id;
                 $product->save();
+
                 $barcode = $setting->setting_value . '-' . strtoupper($product->sku_id);
                 $product->barcode_series = $barcode;
                 $product->save();
+                if (!empty($result["success"]) && $result["success"]) {
 
-                $packaging_material_type_size->wms_product_id = $product->id;
-                $packaging_material_type_size->save();
+                    $wmsProductId = $result['data']['data'];
+                    $packaging_material_type_size->wms_product_id = $wmsProductId;
+                    $packaging_material_type_size->save();
+                    
+                } else {
+                    // Handle error from Marco API
+                    Log::error('Marco SKU creation failed', ['payload' => $payload, 'response' => $result]);
+                }
             }
         }
         return redirect()->back()->with(['status' => 1, 'success' => "Packaging Material Type has been Added successfully!"]);
@@ -2086,6 +2162,7 @@ class AdminPackagingMaterialController extends Controller
 
     public function stock_request_confirm(Request $request)
     {
+        dd('da');
         $request_id = $request->stock_request_id;
         $stock_request = WarehouseStockRequest::find($request_id);
         if ($stock_request) {

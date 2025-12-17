@@ -122,6 +122,19 @@ return [
             'engine' => null,
         ],
 
+        // 'marco' => [
+        //     'driver' => 'mysql',
+        //     'host' => env('DB_HOST_MARCO', '127.0.0.1'),
+        //     'port' => env('DB_PORT_MARCO', '3306'),
+        //     'database' => env('DB_DATABASE_MARCO', 'marco'),
+        //     'username' => env('DB_USERNAME_MARCO', 'root'),
+        //     'password' => env('DB_PASSWORD_MARCO', ''),
+        //     'charset' => 'utf8mb4',
+        //     'collation' => 'utf8mb4_unicode_ci',
+        //     'prefix' => '',
+        //     'strict' => true,
+        //     'engine' => null,
+        // ],
     ],
 
     /*
