@@ -31,7 +31,7 @@ class DeleteDuplicateDonePayment extends Command
     public function handle()
     {
 
-        $startDate =  Carbon::now()->subDays(60)->format('Y-m-d 00:00:00');
+        $startDate =  Carbon::now()->subDays(10)->format('Y-m-d 00:00:00');
         $startDate2 =  Carbon::now()->subDays(30)->format('Y-m-d 00:00:00');
         $endDate = Carbon::now()->format('Y-m-d 23:59:59');
         $type = 0;
@@ -64,7 +64,7 @@ class DeleteDuplicateDonePayment extends Command
             foreach ($done_payment_ids as $value){
                 DB::select('CALL update_done_payment_statistics(?)', $value);
             }
-            
+
 
             echo "Deleted/Update duplicate records successfully.";
         } else {
