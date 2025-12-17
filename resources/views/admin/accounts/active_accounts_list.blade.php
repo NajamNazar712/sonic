@@ -60,6 +60,7 @@
                                         <th class="border-primary border-darken-1">Account ID</th>
                                         <th class="border-primary border-darken-1">Account Type</th>
                                         <th class="border-primary border-darken-1">Company Name</th>
+                                        <th class="border-primary border-darken-1">Expected Shipments</th>
                                         <th class="border-primary border-darken-1">Contact Person</th>
                                         {{-- <th class="border-primary border-darken-1">Address</th> --}}
                                         <th class="border-primary border-darken-1">Zone</th>
@@ -651,6 +652,35 @@
         </div>
     </div>
 
+    <div class="modal fade text-left" id="exp_shipment_modal" data-backdrop="static" role="dialog" aria-labelledby=""
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Expected Shipment Chargeable Percentage</h4>
+                </div>
+                            
+                <form id="exp_shipment_form" class="form" novalidate="novalidate" method="post" action="{{ route('admin.accounts.exp_shipment_percentage.submit') }}">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="col text-center">
+                            <label class="font-medium-2 font-weight-bold block">Add Percentage</label>
+                            <div class="form-group">
+                                <input type="hidden" name="user_id" id="exp_shipment_user_id">
+                                
+                                <input type="text" class="form-control" placeholder="Expected Shipment Chargeable Percentage" name="exp_shipment_percentage" id="exp_shipment_percentage" data-rule-required="true" data-msg-required="Required">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success" id="faf_charges_submit">Submit</button>
+                        <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="SwitchCorporate" data-backdrop="static" role="dialog" aria-labelledby="SwitchCorporate_modal" aria-hidden="true">
         <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
@@ -1196,6 +1226,7 @@ function checkboxStatus() {
                         head.push('Account ID');
                         head.push('Account Type');
                         head.push('Company Name');
+                        head.push('Expected Shipments');
                         head.push('Contact Person');
                         //head.push('Address');
                         head.push('Zone');
@@ -1260,7 +1291,7 @@ function checkboxStatus() {
                                 tempElement.innerHTML = values.name;
                                 return tempElement.value;
                             })());
-
+                            row.push(values.average_shipments);
                             row.push(values.poc);
                             //row.push(values.address);
                             row.push(values.zone);
@@ -1885,6 +1916,7 @@ function checkboxStatus() {
                 {data: 'id_padded', name: 'users.id', class: 'align-middle account_id'},
                 {data: 'account_type', name: 'at.name', class: 'align-middle account_type'},
                 {data: 'name', name: 'name', class: 'align-middle company_name'},
+                {data: 'average_shipments', name: 'users.average_shipments', class: 'align-middle average_shipments'},
                 {data: 'poc', name: 'poc', class: 'align-middle contact_person'},
                 //{data: 'address', name: 'users.address', class: 'align-middle address'},
                 {data: 'zone', name: 'z.name', class: 'align-middle zone'},
@@ -3254,6 +3286,31 @@ function checkboxStatus() {
             }
         });
 
+        $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+            var id = $(this).parents('tr').attr('id');
+            if($(this).hasClass('exp_shipment_percentage')){
+                if(id){
+                    $.ajax({
+                        url: '{!! route('admin.accounts.exp_shipment_percentage.info') !!}',
+                        method: 'POST',
+                        data: {
+                            'user_id': id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                    .done(function(data) {
+                        if (data.status == 1) {
+                            $('#exp_shipment_percentage').val(data.percentage);
+                        }
+                        $('#exp_shipment_user_id').val(id);
+                        $('#exp_shipment_modal').modal('show');
+
+
+                    });
+                }
+            }
+        });
+
         $('#restrict_order_id_form').validate({
             errorClass: 'danger',
             successClass: 'success',
@@ -3297,6 +3354,27 @@ function checkboxStatus() {
                 swal({
                     title: 'Please Wait!',
                     text: 'Auto Cancelation Days being updated!',
+                    icon: 'info',
+                    buttons: false,
+                    closeOnClickOutside: false,
+                    closeOnEsc: false
+                });
+                form.submit();
+            }
+        });
+        $('#exp_shipment_form').validate({
+            errorClass: 'danger',
+            successClass: 'success',
+            normalizer: function(value) {
+                return $.trim(value);
+            },
+            errorPlacement: function(error, element) {
+                error.addClass('w-100').appendTo(element.parent('.form-group'));
+            },
+            submitHandler: function(form) {
+                swal({
+                    title: 'Please Wait!',
+                    text: 'Its being updated!',
                     icon: 'info',
                     buttons: false,
                     closeOnClickOutside: false,
@@ -3861,6 +3939,15 @@ var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
         'digits': 2,
         'min': 0.00,
         'max': commission_max,
+    });
+
+    $('#exp_shipment_percentage').inputmask({
+        'alias': 'decimal',
+        'allowMinus': false,
+        'allowPlus': false,
+        'rightAlign': false,
+        'digits': 2,
+        'min': 0.00,
     });
 
     var table_2 = $('#datatable_rate').DataTable({

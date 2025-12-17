@@ -10372,6 +10372,13 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                             $dropdown .= '<button type="button" class="dropdown-item pause_shipper_booking"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Pause Shipper Booking</div></button>';
                         }
                     }
+
+                    if($result->sub_segment_id == 5) {
+
+                        $dropdown .= '<button type="button" class="dropdown-item exp_shipment_percentage"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Exp Shipment %</div></button>';
+                    }
+                        
+                    
                 
 
                 $dropdown .= '<button type="button" class="dropdown-item add_shipper_exclude_intercept_type"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add shipper exclude/Intercept 
@@ -11025,6 +11032,10 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                     $dropdown .= '<button type="button" class="dropdown-item add_fintech_charges"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Fintech Charges</div></button>';
                 }
 
+                if($result->sub_segment_id == 5) {
+                    $dropdown .= '<button type="button" class="dropdown-item exp_shipment_percentage"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Exp Shipment %</div></button>';
+                }
+                 
                 $dropdown .= '<button type="button" class="dropdown-item account_tagging_history" data-id="' . $result->id . '" data-toggle="modal" data-target="#AccountTaggingHistoryModal">
                     <div class="row no-gutters align-items-center">
                         <div class="col-2"><i class="ft-activity"></i></div>
@@ -11212,6 +11223,10 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         }
 
         if ($flag == true) {
+
+            $user = User::select('average_shipments')->find($user_id);
+            $oldAverageShipments = $user->average_shipments;
+
             if ($request->password == "" || $request->password == null) {
                 User::where('id', $user_id)->update(['name' => $request->name, 'poc' => $request->poc, 'email' => $request->email, 'address' => $request->address, 'phone' => $request->phone, 'phone2' => $request->phone2, 'cnic' => $request->cnic,
                     'ntn_no' => $request->ntn_no, 'strn_no' => $request->strn_no, 'updated_by_type' => 1, 'updated_by_id' => Auth::id(), 'city_id' => $request->city_id, 'segment_id' => $request->segment_id, 'sub_segment_id' => $request->sub_segment_id, 'url' => $request->url, 'product_id' => $request->product_id, 'other_product_name' => $request->has('product_name') ? $request->product_name : null, 'brand_name' => $request->has('brand_name') ? $request->brand_name : null , 'average_shipments' => $request->avg_shipments, 'average_shipment_duration_id' => $request->average_shipment_duration_id]);
@@ -11223,6 +11238,11 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             } else {
                 User::where('id', $user_id)->update(['name' => $request->name, 'poc' => $request->poc, 'email' => $request->email, 'address' => $request->address, 'phone' => $request->phone, 'phone2' => $request->phone2, 'cnic' => $request->cnic,
                     'ntn_no' => $request->ntn_no, "password" => Hash::make($request->password), 'updated_by_type' => 1, 'updated_by_id' => Auth::id(), 'city_id' => $request->city_id, 'segment_id' => $request->segment_id, 'sub_segment_id' => $request->sub_segment_id, 'url' => $request->url, 'product_id' => $request->product_id, 'brand_name' => $request->has('brand_name') ? $request->brand_name : null , 'average_shipments' => $request->avg_shipments, 'average_shipment_duration_id' => $request->average_shipment_duration_id]);
+            }
+
+            $newAverageShipments = $request->avg_shipments;
+            if ($oldAverageShipments != $newAverageShipments) {
+                NotificationsController::send(255, $user_id, $oldAverageShipments, $newAverageShipments );
             }
 
             return redirect()->back()->with(['success' => "Profile Information Successfully Updated"]);
@@ -16671,5 +16691,30 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             });
 
         return response()->json($logs);
+    }
+
+    public function exp_shipment_percentage_info(Request $request) {
+
+        $percentage = User::where('id', $request->user_id)
+        ->value('percentage_on_expected_shipments');
+
+        return response()->json([
+            'status' => 1,
+            'percentage' => $percentage ?? 0
+        ]);
+    }
+
+
+    public function exp_shipment_percentage_submit(Request $request) {
+
+        $user = User::find($request->user_id);
+
+        $user->percentage_on_expected_shipments = $request->exp_shipment_percentage;
+        $user->percentage_on_expected_shipments_added_by = Auth::id();
+        $user->percentage_on_expected_shipments_added_at = Carbon::now();
+
+        $user->save();
+
+        return redirect()->back()->with('success', 'Percentage Updated');
     }
 }
