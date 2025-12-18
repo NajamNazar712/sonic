@@ -943,7 +943,8 @@ class AdminTrackingController extends Controller
             ->orderBy('created_at', 'desc')->orderBy('id', 'desc')
             ->limit(1)->value('id');
 
-        $quick_tracking = Shipment::leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
+        $quick_tracking = DB::connection($connection)->table('shipments')
+            ->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
             ->leftjoin('users as u', 'shipments.user_id', '=', 'u.id')
             ->leftjoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->leftjoin('cities as oc', 'usi.city_id', '=', 'oc.id')
