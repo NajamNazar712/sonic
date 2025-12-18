@@ -32,8 +32,9 @@ class Generate1LinkQR extends Command
         $accessToken = $tokenResponse->json('access_token');
 
         // 2️⃣ Prepare timestamps
-        $executionDateTime = Carbon::now()->toIso8601String();
-        $expiryDateTime = Carbon::now()->addMinutes(40)->toIso8601String();
+        $executionDateTime = Carbon::now()->format('Y-m-d\TH:i:s');
+        $expiryDateTime = Carbon::now()->addMinutes(40)->format('Y-m-d\TH:i:s');
+
 
         // 3️⃣ Build payload
         $payload = [
