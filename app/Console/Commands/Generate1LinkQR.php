@@ -43,10 +43,10 @@ class Generate1LinkQR extends Command
                 "iban" => "PK94AIIN0000102514490014",
                 "bankBic" => "AIIN",
                 "merchantCategoryCode" => "4215",
-                "merchantID" => "YOUR_PRODUCTION_MERCHANT_ID",
+                "merchantID" => "854710236963454",
                 "postalAddress" => [
                     "townName" => "KARACHI",
-                    "subDept" => "YOUR_PRODUCTION_SUBDEPT",
+                    "subDept" => "96010001",
                     "addressLine" => "Plot 105, Sector 7-A, Mehran Town, Korangi, Karachi"
                 ],
                 "contactDetails" => [
