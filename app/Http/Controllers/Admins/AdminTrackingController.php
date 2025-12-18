@@ -930,15 +930,31 @@ class AdminTrackingController extends Controller
         $date = date('Y-m-d H:i:s');
         $start_date = date('Y-m-d 00:00:01', strtotime('-12 months', strtotime($date)));
         $end_date = date('Y-m-d 23:59:59',strtotime($date));
+        $connection = 'reports';
+        $from_id = DB::connection($connection)->table('shipments')
+            ->where('created_at', '>=', $start_date)
+            ->where('created_at', '<=',  $end_date)
+            ->orderBy('created_at', 'asc')->orderBy('id', 'asc')
+            ->limit(1)->value('id');
 
-        $quick_tracking = Shipment::join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
-            ->join('users as u', 'shipments.user_id', '=', 'u.id')
-            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-            ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
-            ->join('cities as dc', 'shipments.consignee_city_id', '=', 'dc.id')
+        $to_id = DB::connection($connection)->table('shipments')
+            ->where('created_at', '>=', $start_date)
+            ->where('created_at', '<=',  $end_date)
+            ->orderBy('created_at', 'desc')->orderBy('id', 'desc')
+            ->limit(1)->value('id');
+
+        $quick_tracking = Shipment::leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
+            ->leftjoin('users as u', 'shipments.user_id', '=', 'u.id')
+            ->leftjoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->leftjoin('cities as oc', 'usi.city_id', '=', 'oc.id')
+            ->leftjoin('cities as dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->leftjoin('crm_requests as crm', 'shipments.id', '=', 'crm.shipment_id')
             ->select('shipments.id as shipment_id', 'shipments.tracking_number as tracking_number', 'shipments.order_id', 'oc.name as origin', 'dc.name as destination', 'shipments.consignee_address as address', 'shipments.amount as cod_amount', 'ss.name as status', 'u.name as shipper_name', 'shipments.consignee_name as consignee_name', 'shipments.consignee_phone_number_1 as consignee_phone_no', 'shipments.shipper_status_id as status_id', 'shipments.special_instructions as special_instructions', 'oc.id as origin_id', 'dc.id as destination_id');
-//            ->whereBetween('shipments.created_at',[$start_date,$end_date]);
+             if ($from_id != null && $to_id != null) {
+                 $quick_tracking->where('shipments.id', '>=', $from_id)
+                     ->where('shipments.id', '<=', $to_id);
+             }
+
         if ($request->has('search_tracking') || $request->has('search_shipper') || $request->has('search_phone_no') || $request->has('search_order_id' || $request->has('crm_request_id') || $request->has('search_shipment_status'))) {
             if ($tracking = $request->get('search_tracking')) {
                 $quick_tracking->whereIn('shipments.tracking_number', $tracking);
