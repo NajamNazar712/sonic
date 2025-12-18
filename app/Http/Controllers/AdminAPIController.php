@@ -13223,6 +13223,13 @@ class AdminAPIController extends Controller
                 'message' => 'This vehicle does not belong to your hub.'
             ]);
         }
+        $trip_type = 'out';
+        $vehicle_trip = LocalFleetVehicleTrip::where('vehicle_id',$vehicle->id)
+            ->orderByDesc('id')
+            ->first();
+        if($vehicle_trip && $vehicle_trip->status == 0) {
+            $trip_type = 'in';
+        }
 
         $detail = [
             'vehicle_id'          => $vehicle->id,
@@ -13235,6 +13242,7 @@ class AdminAPIController extends Controller
             'rent_type'           => $vehicle->rent_type == 1 ? 'Daily' : 'Monthly',
             'rent_amount'         => $vehicle->rent_amount,
             'fuel_responsibility' => $vehicle->fueling_responsibility == 1 ? 'Trax' : 'Vendor',
+            'trip_type'           => $trip_type
         ];
 
         return response()->json([
@@ -13282,7 +13290,7 @@ class AdminAPIController extends Controller
             ];
 
             $request->validate($rules);
-            return $this->handleVehicleOut($request, $vehicle);
+            return $this->handleVehicleOut($request, $vehicle,$request->trip_type);
         }
 
         if ($request->trip_type === 'in') {
@@ -13292,11 +13300,11 @@ class AdminAPIController extends Controller
                 'incident_image'    => 'nullable|file|mimes:png,jpg,jpeg,pdf|max:2048',
             ];
             $request->validate($rules);
-            return $this->handleVehicleIn($request, $vehicle);
+            return $this->handleVehicleIn($request, $vehicle,$request->trip_type);
         }
     }
 
-    private function handleVehicleOut(Request $request, LocalFleetVehicle $vehicle)
+    private function handleVehicleOut(Request $request, LocalFleetVehicle $vehicle,$trip_type)
     {
         $runningTrip = LocalFleetVehicleTrip::where('vehicle_id', $vehicle->id)
             ->where('status', 0)
@@ -13333,7 +13341,7 @@ class AdminAPIController extends Controller
             : [];
 
         $pickupIds = $request->pickup_note_ids
-            ? V2PickupNote::whereIn('id', $request->pickup_note_ids)->pluck('id')->toArray()
+            ? V2PickupRequest::whereIn('id', $request->pickup_note_ids)->pluck('id')->toArray()
             : [];
 
         // Map job types to IDs
@@ -13362,7 +13370,7 @@ class AdminAPIController extends Controller
         }
 
         //add trip cost if any
-        $this->trip_cost($request,$trip->id);
+        $this->trip_cost($request,$trip->id,$trip_type);
 
         return response()->json([
             'status' => 0,
@@ -13370,7 +13378,7 @@ class AdminAPIController extends Controller
         ]);
     }
 
-    private function handleVehicleIn(Request $request, LocalFleetVehicle $vehicle)
+    private function handleVehicleIn(Request $request, LocalFleetVehicle $vehicle,$trip_type)
     {
         $trip = LocalFleetVehicleTrip::where('vehicle_id', $vehicle->id)
             ->where('status', 0)
@@ -13422,7 +13430,7 @@ class AdminAPIController extends Controller
         $trip->save();
 
         //add trip cost if any
-        $this->trip_cost($request,$trip->id);
+        $this->trip_cost($request,$trip->id,$trip_type);
 
         return response()->json([
             'status' => 0,
@@ -13432,12 +13440,17 @@ class AdminAPIController extends Controller
         ]);
     }
 
-    private function trip_cost(Request $request,$trip_id)
+    private function trip_cost(Request $request,$trip_id,$trip_type)
     {
 
         if($request->cost_amount >0){
 
-            $trip_cost_check = LocalTripVehicleCost::where('trip_id',$trip_id);
+            $type=0;
+            if($trip_type=='in'){
+                $type=1;
+            }
+            $trip_cost_check = LocalTripVehicleCost::where('trip_id',$trip_id)
+                ->where('trip_type',$type);
             if($trip_cost_check->exists()) {
                 return;
             }
@@ -13458,6 +13471,7 @@ class AdminAPIController extends Controller
             $trip_cost->remarks = $request->cost_remarks;
             $trip_cost->receipt_path = $path;
             $trip_cost->created_by = Auth::id();
+            $trip_cost->trip_type = $trip_type;
             $trip_cost->save();
 
         }
@@ -13485,8 +13499,14 @@ class AdminAPIController extends Controller
         }
 
         $rider = Rider::where('trax_id',$request->rider_trax_id)->where('status',1)->first();
-       if($rider)
-       {
+       if($rider) {
+           $rider_hub_id = $rider->city->hub_id;
+           if ($request->admin_role_id != 1 && !in_array($rider_hub_id, $request->admin_hubs)) {
+               return response()->json([
+                   'status'  => 1,
+                   'message' => 'This Rider does not belong to your hub.'
+               ]);
+           }
             $rider_detail = [
                 'rider_id' => $rider->id,
                 'rider_name' => $rider->name,

@@ -23,10 +23,10 @@ return new class extends Migration
             $table->integer('in_meter')->nullable();
             $table->integer('rider_id')->index()->nullable(); //riders table
             $table->integer('route_id')->index()->nullable(); // routes table
-            $table->text('out_remarks');
-            $table->text('in_remarks');
-            $table->integer('mileage');        // in_meter - out_meter
-            $table->decimal('fuel_liters', 10, 2); // mileage / mileage_per_liter
+            $table->text('out_remarks')->nullable();
+            $table->text('in_remarks')->nullable();
+            $table->integer('mileage')->nullable();        // in_meter - out_meter
+            $table->decimal('fuel_liters', 10, 2)->nullable(); // mileage / mileage_per_liter
             $table->text('incident_report')->nullable();
             $table->string('incident_image')->nullable();
             $table->tinyInteger('status')->default(0)->comment('0-pending,1-completed');
