@@ -13546,4 +13546,23 @@ class AdminAPIController extends Controller
         ]);
     }
 
+    public function admin_routes(Request $request)
+    {
+        $routes = Route::whereHas('city', function ($query) use ($request) {
+            $query->whereIn('hub_id', function ($q) use ($request) {
+                $q->select('hub_id')
+                    ->from('admin_hubs');
+                if ($request->admin_role_id != 1) {
+                    $q->whereIn('admin_id', (array) $request->admin_hubs);
+                }
+
+            });
+        })->where('status',1)->select('routes.*')->get();
+
+        return response()->json([
+            'status'  => 0,
+            'routes' => $routes,
+        ]);
+    }
+
 }

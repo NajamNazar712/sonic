@@ -618,6 +618,7 @@ use Illuminate\Http\Request;
                 Route::post('vehicle_trip','AdminAPIController@vehicle_trip')->name('vehicle_trip');
                 Route::post('trip_rider','AdminAPIController@rider_detail')->name('trip_rider');
                 Route::post('rider_job_references','AdminAPIController@rider_job_references')->name('rider_job_references');
+                Route::get('admin_routes','AdminAPIController@admin_routes')->name('admin_routes');
             });
 
         });
