@@ -52,9 +52,9 @@ class Generate1LinkQR extends Command
         $payload = [
             "merchantDetails" => [
                 "dbaName" => "Sonic",
-                "merchantName" => "Trax Online (Pvt.) Ltd.",
-                "iban" => "PK94AIIN0000102514490014",
-                "bankBic" => "EGIB00",
+                "merchantName" => "TRAX ONLINE PRIVATE LIMITED",
+                "iban" => "PK28MEZN0099120102951143",
+                "bankBic" => "MEZN",
                 "merchantCategoryCode" => "4215",
                 "merchantID" => "854710236963454",
                 "postalAddress" => [
