@@ -36,7 +36,9 @@ class Generate1LinkQR extends Command
 
         $res = Http::withToken($accessToken)
             ->withHeaders(['X-IBM-Client-Id' => $clientId])
-            ->get("$base/1Link/getMerchantProfile");
+            ->get("$base/1Link/getMerchantProfile", [
+                'merchantID' => '854710236963454', // IMPORTANT
+            ]);
 
 
         $this->line(json_encode($res->json(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
