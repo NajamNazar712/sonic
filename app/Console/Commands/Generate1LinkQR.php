@@ -15,6 +15,9 @@ class Generate1LinkQR extends Command
     {
         $clientId = '7e1320f3627079431658e4dfacab4056'; // 7e1320f3627079431658e4dfacab4056
         $clientSecret = 'ed02b938add93a952c326560faa6a84a';
+        $base         = 'https://public-interface.1link.net.pk/onelink/production';
+
+
 
         // 1️⃣ Get Bearer Token
         $tokenResponse = Http::asForm()->post('https://public-interface.1link.net.pk/onelink/production/oauth2/token', [
@@ -30,6 +33,12 @@ class Generate1LinkQR extends Command
         }
 
         $accessToken = $tokenResponse->json('access_token');
+
+        $res = Http::withToken($accessToken)
+            ->withHeaders(['X-IBM-Client-Id' => $clientId])
+            ->get("$base/1Link/getMerchantProfile");
+
+        return $res->json();
 
         // 2️⃣ Prepare timestamps
         $executionDateTime = Carbon::now()->format('Y-m-d\TH:i:s');
