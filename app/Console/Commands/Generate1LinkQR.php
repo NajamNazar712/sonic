@@ -38,7 +38,8 @@ class Generate1LinkQR extends Command
             ->withHeaders(['X-IBM-Client-Id' => $clientId])
             ->get("$base/1Link/getMerchantProfile");
 
-        return $res->json();
+
+        $this->info($res->json());
 
         // 2️⃣ Prepare timestamps
         $executionDateTime = Carbon::now()->format('Y-m-d\TH:i:s');
