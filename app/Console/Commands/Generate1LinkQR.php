@@ -20,7 +20,7 @@ class Generate1LinkQR extends Command
 
 
         // 1️⃣ Get Bearer Token
-        $tokenResponse = Http::asForm()->post('https://public-interface.1link.net.pk/onelink/production/oauth2/token', [
+        $tokenResponse = Http::asForm()->post($base.'/oauth2/token', [
             'grant_type' => 'client_credentials',
             'client_id' => $clientId,
             'client_secret' => $clientSecret,
@@ -34,14 +34,14 @@ class Generate1LinkQR extends Command
 
         $accessToken = $tokenResponse->json('access_token');
 
-        $res = Http::withToken($accessToken)
-            ->withHeaders(['X-IBM-Client-Id' => $clientId])
-            ->get("$base/1Link/getMerchantProfile", [
-                'merchantID' => '854710236963454', // IMPORTANT
-            ]);
-
-
-        $this->line(json_encode($res->json(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+//        $res = Http::withToken($accessToken)
+//            ->withHeaders(['X-IBM-Client-Id' => $clientId])
+//            ->get("$base/1Link/getMerchantProfile", [
+//                'merchantID' => '854710236963454', // IMPORTANT
+//            ]);
+//
+//
+//        $this->line(json_encode($res->json(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
         // 2️⃣ Prepare timestamps
         $executionDateTime = Carbon::now()->format('Y-m-d\TH:i:s');
@@ -54,7 +54,7 @@ class Generate1LinkQR extends Command
                 "dbaName" => "Sonic",
                 "merchantName" => "Trax Online (Pvt.) Ltd.",
                 "iban" => "PK94AIIN0000102514490014",
-                "bankBic" => "AIIN",
+                "bankBic" => "AIIN00",
                 "merchantCategoryCode" => "4215",
                 "merchantID" => "854710236963454",
                 "postalAddress" => [
@@ -100,7 +100,7 @@ class Generate1LinkQR extends Command
                 'X-IBM-Client-Id' => $clientId,
                 'Content-Type' => 'application/json'
             ])
-            ->post('https://public-interface.1link.net.pk/onelink/production/1Link/generateDQRCMerchant', $payload);
+            ->post($base.'/1Link/generateDQRCMerchant', $payload);
 
         // 5️⃣ Echo response
         $this->info($response->body());
