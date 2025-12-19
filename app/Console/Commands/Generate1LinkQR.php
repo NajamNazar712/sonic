@@ -39,7 +39,7 @@ class Generate1LinkQR extends Command
             ->get("$base/1Link/getMerchantProfile");
 
 
-        $this->info($res->json());
+        $this->line(json_encode($res->json(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
         // 2️⃣ Prepare timestamps
         $executionDateTime = Carbon::now()->format('Y-m-d\TH:i:s');
