@@ -149,6 +149,7 @@ use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransactionRetail;
 use App\Models\BookingApiLog;
 use App\Models\BookingPayloadLog;
+use App\Http\Models\PackagingMaterialRequest;
 
 class APIController extends Controller
 {
@@ -536,6 +537,7 @@ class APIController extends Controller
 
     public function shipment_book(Request $request)
     {
+        
         /********************************NOTE********************************/
         /*This API is also using from Trax App Booking Form and Shopify, Please Concern with Mobile Team also Before Adding any required Parameter*/
         $user_id = $request->user_id;
@@ -1401,6 +1403,13 @@ class APIController extends Controller
             $booked_by = $request->booked_by;
             $channel_id = $request->channel_id;
             $business_category_id = 1;
+            $packagingflag = false;
+
+            if (isset($request->packaging_material_request_id) && $request->packaging_material_request_id) {
+                $request_details = PackagingMaterialRequest::find($request->packaging_material_request_id);
+                $user_id = $request_details->user_id; 
+                $packagingflag = true;
+            };
             if ($user_type['account_type_id'] == 1) {
                 $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces_quantity, $self_collection, $business_category_id, $open_shipment, $return_address_id, $parcel_value,$booked_by, $channel_id);
             } else {
@@ -1416,6 +1425,25 @@ class APIController extends Controller
                 $tracking_number = ShipperShipmentBookController::generate_prefix_tracking_number($shipment_id, $order_id);
             } else {
                 $tracking_number = ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
+            }
+            //PackagingRequest Send to Marco V2
+            if ($packagingflag) {
+                $shipment = Shipment::find($shipment_id);
+                $total_charges = $request_details->amount;
+                PackagingMaterialRequest::where('id', $request_details->id)->update([
+                    'tracking_number' => $tracking_number,
+                    'shipment_id' => $shipment_id
+                ]);
+
+                $shipment->packaging_material_request = 1;
+                // $shipment->packaging_material_charges = $packaging_material_charges;
+                // $shipment->warehouse = $packaging_material_charges;
+                $shipment->warehouse = 1;
+                $shipment->warehouse_order_type = 1;
+                $shipment->warehouse_order_status = 1;
+
+                $shipment->save();
+                ShipmentChargesController::packaging_material($shipment_id, $request_details->packaging_payment_mode_id, $total_charges);
             }
 
             BookingApiLog::create([
@@ -1714,7 +1742,7 @@ class APIController extends Controller
                     return response()->json(['status' => 0, 'message' => 'Please view this video so that you can follow required process. In case process is not followed completely we will not be able to process this shipment!', 'tracking_number' => $tracking_number, 'video' => $video]);
                 }
             }
-
+           
             try {
                 // Maintaining shipper segment logs on booking
                 ShipperSegmentLogs::create([

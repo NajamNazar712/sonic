@@ -441,7 +441,7 @@ class AdminPackagingMaterialController extends Controller
                             $dropdown .= '<button type="button" class="dropdown-item confirm"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Confirm</div></button>';
                         }
                     }
-                    if ((session('role_id') == 1 || in_array(227, session('permissions'))) && ($packaging->status_id == 1 || $packaging->status_id == 2)) {
+                    if ((session('role_id') == 1 || in_array(227, session('permissions'))) && ($packaging->status_id == 1)) {
                         $dropdown .= '<button type="button" class="dropdown-item cancel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Cancel</div></button>';
                     }
                     if ($packaging->status_id == 1) {
@@ -668,41 +668,15 @@ class AdminPackagingMaterialController extends Controller
                 $invalid_products = '';
                 if ($user_id == 10378) {
 
-                    $shipper_details = User::where('id', $user_id)->select('city_id','name', 'poc', 'phone', 'email','address')->first();
-               
-                    foreach ($request_details->items as $item) {
-                        $newProducts[] = [
-                            'product_id'  => $item->wms_product_id,
-                            'quantity'    => $item->quantity,
-                        ];
-                    }
                     $marcoOrderService = new PackagingMarcoOrderService();
 
-
-
-                    $marcoPayload = [
-                        'order_type'           => 1,
-                        'courier_type'         => 1,
-                        'self_pickup'          => 1,
-                        'city_name'            => $request_details->city?->name,
-                        'cod'                  => $request_details->amount,
-                        'consignee_name'       => $shipper_details->name,
-                        'address'              => $shipper_details->address,
-                        'phone_number_1'       => $shipper_details->phone,
-                        'shipper_order_id'     => $user_id.'-PM-'. $request_details->id,
-                        'shipping_mode'        => 1,
-                        'courier_charges_id'   => 1,
-                        'products'             => $newProducts,
-                        'special_instructions' => $request->special_instructions ?? '-',
-                        'packaging_material_request_id'     => $request_details->id ?? null,
-                    ];
-                    $result = $marcoOrderService->bookPackagingOrder($marcoPayload);
+                    $result = $marcoOrderService->bookPackagingOrder($request_details);
                     if(!isset($result) && $result['success']){
                        return response()->json(['status' => 1,
-                            'success' => 'Packaging Material Request has been sent to Marco successfully!'
+                            'success' => 'Packaging Material Request has been sent to WareHouse successfully!'
                         ]);
                     }else{
-                        return response()->json(['status' => 0, 'error' => $result['data']['message'] ?? 'Marco order booking failed!']);
+                        return response()->json(['status' => 0, 'error' => $result['data']['message'] ?? 'WareHouse order booking failed!']);
                     }
                 }
                 foreach ($request_details->items as $item) {
