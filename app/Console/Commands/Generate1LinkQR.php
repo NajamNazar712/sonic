@@ -89,8 +89,8 @@ class Generate1LinkQR extends Command
                 "transactionType" => "064"
             ],
             "info" => [
-                "stan" => "123368",
-                "rrn" => "000049123368"
+                "stan" => "123468",
+                "rrn" => "000049123468"
             ]
         ];
 
