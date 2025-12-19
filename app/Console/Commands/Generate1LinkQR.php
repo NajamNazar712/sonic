@@ -53,8 +53,8 @@ class Generate1LinkQR extends Command
             "merchantDetails" => [
                 "dbaName" => "Sonic",
                 "merchantName" => "TRAX ONLINE PRIVATE LIMITED",
-                "iban" => "PK28MEZN0099120102951143",
-                "bankBic" => "MEZN00",
+                "iban" => "PK15ALFH5692005002464647",
+                "bankBic" => "ALFH",
                 "merchantCategoryCode" => "4215",
                 "merchantID" => "854710236963454",
                 "postalAddress" => [
