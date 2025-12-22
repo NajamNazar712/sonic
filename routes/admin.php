@@ -1652,6 +1652,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 
     Route::prefix('finance')->name('finance.')->group(function () {
+
+        Route::prefix('expected_shipment_penalty')->name('expected_shipment_penalty.')->group(function () {
+            Route::get('', 'Admins\ExpectedShipmentPenaltyAdjustmentController@index')->name('index');
+            Route::get('list', 'Admins\ExpectedShipmentPenaltyAdjustmentController@list')->name('list');
+        });
         Route::prefix('outstanding_sdn')->name('outstanding_sdn.')->group(function () {
             Route::get('', 'Admins\AdminFinanceController@outstanding_sdn_index')->name('index');
             Route::get('list', 'Admins\AdminFinanceController@outstanding_sdn_list')->name('list');
