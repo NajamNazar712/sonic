@@ -34,5 +34,7 @@ return [
         'key' => env('STRIPE_KEY'),
         'secret' => env('STRIPE_SECRET'),
     ],
-
+    'fcm' => [
+        'service_account' => storage_path(env('FCM_SERVICE_ACCOUNT', 'app/firebase/firebase_credentials.json')),
+    ],
 ];

@@ -11,6 +11,7 @@ use App\Http\Models\Admin\Retail\RetailCashDepositShipment;
 use App\Http\Models\Admin\Retail\RetailParcelReceiving;
 use App\Http\Models\Admin\Retail\RetailParcelReceivingShipment;
 use App\Http\Models\Admin\Retail\RetailShipment;
+use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\ShipmentScanningScreenLocation;
 use App\Http\Models\V2Pickup\V2PickupRequest;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
@@ -148,6 +149,11 @@ class AdminShipmentCancelController extends Controller
 
                 if ($shipments->exists()) {
                     foreach ($shipments->get() as $shipment) {
+
+                         $crm_request = CrmRequest::where('shipment_id', $shipment->id)->where('status_id',1);
+                         if($crm_request->exists()){
+                             continue;
+                         }
                         // $shipment->warehouse_order_status = 9;
 
                         $cancellation_check = true;

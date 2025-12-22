@@ -1888,6 +1888,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/documents/{id}', 'Admins\PaymentRequisitionController@viewDocuments')->name('documents');
             Route::get('/documents/{id}/open/{doc}',  'Admins\PaymentRequisitionController@openDocument')->name('document.open');
         });
+
+        Route::prefix('removal_sst_wht')->name('removal_sst_wht.')->group(function () {
+            Route::get('', 'Admins\AdminFinanceController@sst_wht_remove_view')->name('index');
+            Route::post('upload',  'Admins\AdminFinanceController@sst_wht_remove_upload')->name('upload');
+
+        });
     });
 
     Route::prefix('petty_cash')->name('petty_cash.')->group(function () {
