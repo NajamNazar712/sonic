@@ -16,7 +16,7 @@ abstract class MarcoBaseService
         } elseif (app()->environment('staging')) {
 
             $this->baseUrl = 'https://marco-staging.trax.pk';
-            $this->apiKey  = 'STAGING_API_KEY_HERE';
+            $this->apiKey  = 'UjRYTUZBazF5enVCRXZFUE51WlNpSXVtR1BJMUt6RVdEUFZ1MG5KQWZ2RWxGcWNuSnljdzZVNTh2eWpR694509de705c0';
         } else {
             // local
             $this->baseUrl = 'http://marco_v2.test';
