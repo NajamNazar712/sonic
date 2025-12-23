@@ -10342,9 +10342,9 @@ class DeliveryController extends Controller
             ->leftjoin('city_areas as ca', 'ca.id', '=', 'r.area_id')
             ->join('delivery_note_shipments as ds', 'ds.shipment_id', '=', 's.id')
             ->join('delivery_notes as dn', 'dn.id', '=', 'ds.delivery_note_id')
-            ->where('s.amount', 0)
+            ->where('s.amount', 0) 
             ->whereNotNull('shipment_otps.dbf_otp')
-            ->where('dn.pending_status', 0)
+            ->where('dn.pending_status', 0) 
             ->whereIn('s.tracking_number', $tracking_numbers)
             ->select('shipment_otps.*', 'r.name as rider_name', 's.tracking_number as tracking_number', 'dc.hub_id', 'ca.name as area');
 
