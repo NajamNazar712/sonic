@@ -67,21 +67,9 @@
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
-                        @if (session('role_id') == 1 || in_array(847, session('permissions')))
-                    {
-                        text: '<i class="la la-plus"></i> Add',
-                        className: 'btn btn-primary tag_agents',
-                        enabled: true,
-                        action: function (e, dt, node, config) {
-                            $('#AddStarShipper').modal('show');
-
-                        }
-                    },
-                    @endif
-                        'reset'
+                       
                 ],
-                scrollX: true,
-                scrollY: '500px',
+                scrollX: true, scrollY: '800px',
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',
@@ -92,8 +80,8 @@
                 },
                 ajax: '{{ route('admin.finance.expected_shipment_penalty.list') }}',
                 rowId: 'id',
-                order: [[3, 'desc']],
-                columns: [
+                order: [[10, 'desc']],
+                columns: [  
                     {
                         data: 'serial_number',
                         orderable: false,
@@ -105,9 +93,16 @@
                             return '';
                         }
                     },
+                    {data: 'tracking_number', name: 's.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'shipper_name', name: 'u.name', class: 'align-middle shipper_name'},
-                    {data: 'added_by', name: 'negative_payable_allow_shipper_zero_cod.added_by', class: 'align-middle added_by'},
-                    {data: 'created', name: 'negative_payable_allow_shipper_zero_cod.created_at', class: 'align-middle created_at'},
+                    {data: 'average_shipments', name: 'esp.average_shipments', class: 'align-middle average_shipments'},
+                    {data: 'recorded_shipments', name: 'esp.recorded_shipments', class: 'align-middle recorded_shipments'},
+                    {data: 'percentage_applied', name: 'esp.percentage_applied', class: 'align-middle percentage_applied'},
+                    {data: 'amount', name: 'esp.amount', class: 'align-middle amount'},
+                    {data: 'status', name: 'esp.status', class: 'align-middle status'},
+                    {data: 'updated_by', name: 'a.name', class: 'align-middle updated_by'},
+                    {data: 'status_updated_at', name: 'esp.status_updated_at', class: 'align-middle status_updated_at'},
+                    {data: 'created_at', name: 'esp.created_at', class: 'align-middle created_at'},
                     {
                         data: 'action',
                         name: 'action',
@@ -128,14 +123,26 @@
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                   
+                    var drop_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
+                    '<option value="1">Created</option>' +
+                    '<option value="2">Approved</option>' +
+                    '<option value="3">Rejected</option>' +
+                    '</select>';
 
                     this.api().columns().every(function (column_id) {
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.updated_by') || $(header).is('.status_updated_at') || $(header).is('.created_at') || $(header).is('.average_shipments')  || $(header).is('.recorded_shipments') || $(header).is('.amount')  || $(header).is('.percentage_applied') ) {
                             $(td).appendTo($(search));
-                        } else {
+                        }
+                        else if($(header).is('.status')){
+                            $(drop_select).appendTo($(search))
+                            .on( 'change', function () {
+                                column.search($(this).val(), false, false, true).draw();
+                            } ).wrap(td);
+                        }
+                        else {
                             var current = $(input).appendTo($(search)).on('change', function () {
                                 column.search($(this).val(), false, false, true).draw();
                             }).wrap(td).after(icon);
@@ -146,12 +153,54 @@
                         }
                     });
 
+                     $("#status_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select a Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
                     this.api().table().columns.adjust();
                 }
+            });     
+
+
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.reject', function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $.ajax({
+                    url: '{!! route("admin.finance.expected_shipment_penalty.reject") !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    toastr.success(data.success, 'Success!', {
+                        positionClass: 'toast-bottom-center',
+                        containerId: 'toast-bottom-center'
+                    });
+                    table.draw();
+                });
             });
 
-       
             
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.approve', function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $.ajax({
+                    url: '{!! route("admin.finance.expected_shipment_penalty.approve") !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    toastr.success(data.success, 'Success!', {
+                        positionClass: 'toast-bottom-center',
+                        containerId: 'toast-bottom-center'
+                    });
+                    table.draw();
+                });
+            });
         });
     </script>
 @endsection

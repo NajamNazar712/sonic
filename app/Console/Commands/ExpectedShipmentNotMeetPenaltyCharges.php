@@ -99,8 +99,8 @@ class ExpectedShipmentNotMeetPenaltyCharges extends Command
                         'adjustment_type_id' => 12,
                         'amount' => $percentage_amount,
                         'status' => 1, // created
-                        'status_updated_by' => 346,
-                        'status_updated_at' => now(),
+                        //'status_updated_by' => 346,
+                        //'status_updated_at' => now(),
                         'created_at' => now(),
                         'updated_at' => now(),
                     ];

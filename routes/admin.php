@@ -1656,6 +1656,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('expected_shipment_penalty')->name('expected_shipment_penalty.')->group(function () {
             Route::get('', 'Admins\ExpectedShipmentPenaltyAdjustmentController@index')->name('index');
             Route::get('list', 'Admins\ExpectedShipmentPenaltyAdjustmentController@list')->name('list');
+            Route::post('approve', 'Admins\ExpectedShipmentPenaltyAdjustmentController@approve')->name('approve');
+            Route::post('reject', 'Admins\ExpectedShipmentPenaltyAdjustmentController@reject')->name('reject');
+
         });
         Route::prefix('outstanding_sdn')->name('outstanding_sdn.')->group(function () {
             Route::get('', 'Admins\AdminFinanceController@outstanding_sdn_index')->name('index');
