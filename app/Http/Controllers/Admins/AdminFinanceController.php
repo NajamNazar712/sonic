@@ -9294,7 +9294,17 @@ class AdminFinanceController extends Controller
                 foreach ($rows as $key => $row) {
                     $payment_id = (int)$row['payment_id'];
                     $done_payment = DonePayment::find($payment_id);
-                    if($done_payment->is_wallet_payment == 0) {
+
+                    if($done_payment->is_wallet_payment == 1) {
+
+                        $done_payment->status = 3;
+                        $done_payment->status_updated_at = Carbon::now();
+                        $done_payment->save();
+                        WalletBulkSettlementFromDonePayments::dispatch($payment_id,  Auth::id());
+                        $payment_paid=true;
+
+                    }
+                    else {
                         $status = strtolower($row['status']);
                         if ($status == "paid") {
                             if ($done_payment->status != 1) {
