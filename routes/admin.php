@@ -3557,6 +3557,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('enable_disable', 'Admins\GlobalSettingsController@star_shippers_enable_disable')->name('enable_disable');
         });
 
+        Route::prefix('zero_cod_shippers')->name('zero_cod_shippers.')->group(function () {
+            Route::get('', 'Admins\Settings\GeneralSettingController@zero_cod_shippers_index')->name('index');
+            Route::get('list', 'Admins\Settings\GeneralSettingController@zero_cod_shippers_list')->name('list');
+            Route::post('add', 'Admins\Settings\GeneralSettingController@zero_cod_shippers_add')->name('add');
+            Route::post('remove', 'Admins\Settings\GeneralSettingController@zero_cod_shippers_remove')->name('remove');
+            Route::get('logs', 'Admins\Settings\GeneralSettingController@zero_cod_shippers_logs_index')->name('logs');
+            Route::get('logs/list', 'Admins\Settings\GeneralSettingController@zero_cod_shippers_logs_list')->name('logs.list');
+        });
+
         Route::prefix('wallet_shippers')->name('wallet_shippers.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@wallet_shippers_index')->name('index');
             Route::get('list', 'Admins\GlobalSettingsController@wallet_shippers_list')->name('list');

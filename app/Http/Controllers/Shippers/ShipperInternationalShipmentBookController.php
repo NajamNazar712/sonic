@@ -35,6 +35,8 @@ use Validator;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\ShipperSegmentLogs;
 use Illuminate\Support\Facades\Log;
+use App\Models\NegativePayableAllowShipperZeroCod;
+
 
 class ShipperInternationalShipmentBookController extends Controller
 {
@@ -94,7 +96,14 @@ class ShipperInternationalShipmentBookController extends Controller
         $user_id = session('user_id');
         $account_type = session('account_type');
         if($request->input('amount') == 0 && !PendingPayment::check_negative_payable($user_id,$account_type)){
-            return back()->with(['error' => "Can not process Zero COD Shipment, due to pending negative payable amount."]);
+
+            $allowed = NegativePayableAllowShipperZeroCod::isAllowed($user_id);
+            if (!$allowed) {
+                return response()->json([
+                    'status' => 1,
+                    'message' => "Can not process Zero COD Shipment, due to pending negative payable amount."
+                ]);
+            }
         }
         $service_type_id = 1;
 
