@@ -4,17 +4,18 @@ namespace App\Http\Controllers\Admins\LocalFleet;
 
 use App\Http\Controllers\Controller;
 use App\Http\Models\City;
-use App\Http\Traits\FilterTrait;
 use App\Models\LocalFleetVehicle;
+use App\Models\LocalFleetVehicleDocument;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use DNS2D;
 use Yajra\DataTables\DataTables;
 
 class AdminLocalFleetVehicleController extends Controller
 {
-    use FilterTrait;
+
     public function __construct()
     {   $this->middleware('auth:admin');
         $this->middleware('Permission');
@@ -52,8 +53,14 @@ class AdminLocalFleetVehicleController extends Controller
                 'local_fleet_vehicles.created_at',
             );
 
+        if(session('role_id') != 1) {
+            $data->whereIn('c.hub_id',session('hubs'));
+        }
+
         return DataTables::of($data)
-            ->addIndexColumn()
+            ->editColumn('created_at', function ($row) {
+                return \Carbon\Carbon::parse($row->created_at)->format('d M Y, h:i A');
+            })
             ->editColumn('vehicle_type', function($v){
                 return $v->vehicle_type == 1 ? 'Permanent' : 'Temporary';
             })
@@ -74,9 +81,10 @@ class AdminLocalFleetVehicleController extends Controller
                     $dropdown = '<div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">
+                    <button type="button" class="dropdown-item upload-document"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-upload"></i></div><div class="col-9 offset-1">Upload Document</div></button>
+                    <button type="button" class="dropdown-item view-documents"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1">View Documents</div></button>
                     <button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>
                     <button type="button" class="dropdown-item generate-barcode"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bookmark"></i></div><div class="col-9 offset-1">Generate Barcode</div></button>
-
                     ';
 //                    // $dropdown .=' <button type="button" class="dropdown-item delete"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Delete</div></button>';
 //                    if ($roles->status == 1) {
@@ -118,7 +126,14 @@ class AdminLocalFleetVehicleController extends Controller
         $validator = Validator::make($request->all(), [
             'vehicle_number'      => 'required|unique:local_fleet_vehicles',
             'city_id'             => 'required|numeric',
-            'mileage_per_liter'   => 'required'
+            'vendor_type' => 'required|in:1,2',
+            'vehicle_type' => 'required|in:1,2',
+            'rent_type' => 'required|in:1,2',
+            'fueling_responsibility' => 'required|in:1,2',
+            'mileage_per_liter' => 'required',
+            'driver_name' => 'required',
+            'vendor_name' => 'required',
+            'rent_amount' => 'required|numeric',
         ]);
 
         if ($validator->fails()) {
@@ -152,8 +167,15 @@ class AdminLocalFleetVehicleController extends Controller
     public function update(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'vehicle_number'    => 'required',
-            'city_id'           => 'required|numeric',
+            'id'    => 'required|integer',
+            'vendor_type' => 'required|in:1,2',
+            'vehicle_type' => 'required|in:1,2',
+            'rent_type' => 'required|in:1,2',
+            'fueling_responsibility' => 'required|in:1,2',
+            'mileage_per_liter' => 'required',
+            'driver_name' => 'required',
+            'vendor_name' => 'required',
+            'rent_amount' => 'required|numeric',
         ]);
 
         if ($validator->fails()) {
@@ -161,10 +183,7 @@ class AdminLocalFleetVehicleController extends Controller
         }
 
         $vehicle = LocalFleetVehicle::find($request->id);
-
-        $vehicle->vehicle_number        = $request->vehicle_number;
         $vehicle->make                  = $request->make;
-        $vehicle->city_id               = $request->city_id;
         $vehicle->vendor_name           = $request->vendor_name;
         $vehicle->vendor_type           = $request->vendor_type;
         $vehicle->driver_name           = $request->driver_name;
@@ -175,7 +194,6 @@ class AdminLocalFleetVehicleController extends Controller
         $vehicle->rent_amount           = $request->rent_amount;
         $vehicle->fueling_responsibility = $request->fueling_responsibility;
         $vehicle->updated_by            = session('id');
-
         $vehicle->save();
 
         return back()->with('success','Vehicle updated successfully');
@@ -338,6 +356,51 @@ class AdminLocalFleetVehicleController extends Controller
     ';
 
         return $html;
+    }
+
+    public function uploadDocument(Request $request)
+    {
+        $request->validate([
+            'vehicle_id' => 'required|integer',
+            'document_name' => 'required|string',
+            'document_file' => 'required|file'
+        ]);
+
+        $path = null;
+        if ($request->hasFile('document_file')) {
+            $file = $request->file('document_file');
+            $timestamp  = now()->format('YmdHis');
+            $filename = 'vehicle_' . $request->vehicle_id . '_' . $timestamp . '.png';
+            $directory = 'local_fleet/vehicle_documents';
+            Storage::disk('public')->putFileAs($directory,$file,$filename);
+            $path = $directory . '/' . $filename;
+        }
+        $vehicle_document = new LocalFleetVehicleDocument();
+        $vehicle_document->vehicle_id =  $request->vehicle_id;
+        $vehicle_document->document_name =  $request->document_name;
+        $vehicle_document->document_path = $path;
+        $vehicle_document->save();
+
+        return response()->json(['status'=>0,'message' => 'Document uploaded successfully']);
+    }
+
+    public function listDocuments($vehicle_id)
+    {
+        $docs = LocalFleetVehicleDocument::where('vehicle_id', $vehicle_id)
+            ->orderBy('id','desc')
+            ->get()
+            ->map(function ($d) {
+                return [
+                    'document_name' => $d->document_name,
+                    'document_path' => asset('storage/'.$d->document_path),
+                    'date' => $d->created_at->format('d M Y, h:i A'),
+                ];
+            });
+
+        return response()->json([
+            'status' => 0,
+            'data' => $docs
+        ]);
     }
 
 }

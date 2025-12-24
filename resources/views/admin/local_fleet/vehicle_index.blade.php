@@ -165,7 +165,7 @@
 
                                 <div class="col-md-6">
                                     <label>Vehicle Number</label>
-                                    <input type="text" id="edit_vehicle_number" name="vehicle_number" class="form-control">
+                                    <input type="text" id="edit_vehicle_number" name="vehicle_number" class="form-control" readonly>
                                 </div>
 
                                 <div class="col-md-6">
@@ -175,7 +175,7 @@
 
                                 <div class="col-md-6 mt-2">
                                     <label>City</label>
-                                    <select id="edit_city_id" name="city_id" class="form-control select2">
+                                    <select id="edit_city_id" name="city_id" class="form-control select2" disabled>
                                         @foreach($cities as $c)
                                             <option value="{{ $c->id }}">{{ $c->name }}</option>
                                         @endforeach
@@ -248,6 +248,70 @@
                         </div>
 
                     </form>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="UploadDocumentModal" data-backdrop="static">
+            <div class="modal-dialog modal-md">
+                <div class="modal-content">
+
+                    <div class="modal-header bg-primary white">
+                        <h4 class="modal-title">Upload Vehicle Document</h4>
+                    </div>
+
+                    <form id="upload_document_form" enctype="multipart/form-data">
+                        @csrf
+                        <input type="hidden" name="vehicle_id" id="doc_vehicle_id">
+
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label>Document Name</label>
+                                <input type="text" name="document_name" class="form-control" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Document File</label>
+                                <input type="file" name="document_file" class="form-control" required>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button class="btn btn-success">Upload</button>
+                            <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="ViewDocumentsModal">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+
+                    <div class="modal-header bg-primary white">
+                        <h4 class="modal-title">Vehicle Documents</h4>
+                    </div>
+
+                    <div class="modal-body">
+                        <table class="table table-bordered" id="documents_table">
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Document Name</th>
+                                <th>Document</th>
+                                <th>Date</th>
+                            </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button class="btn btn-info" data-dismiss="modal">Close</button>
+                    </div>
 
                 </div>
             </div>
@@ -453,11 +517,9 @@
             // ------------------------------------------
             $('body').on('click','#datatable tbody tr td.action .dropdown-item.edit', function(){
 
-                var id = $(this).data('id');
+                var id = $(this).parents('tr').attr('id');
                 $('#edit_id').val(id);
-
-                $.get("{{ url('admin/local_fleet/vehicle/edit') }}/" + id, function(res){
-
+                $.get("{{ url('admin/cargo/supply_chain/local_fleet/vehicle/edit') }}/" + id, function(res){
                     $('#edit_vehicle_number').val(res.vehicle_number);
                     $('#edit_make').val(res.make);
                     $('#edit_city_id').val(res.city_id).trigger('change');
@@ -527,6 +589,57 @@
                     });
             });
 
+            $('body').on('click', '.upload-document', function () {
+                let vehicle_id = $(this).closest('tr').attr('id');
+                $('#doc_vehicle_id').val(vehicle_id);
+                $('#UploadDocumentModal').modal('show');
+            });
+
+            $('#upload_document_form').on('submit', function (e) {
+                e.preventDefault();
+
+                let formData = new FormData(this);
+
+                $.ajax({
+                    url: "{{ route('admin.cargo.supply_chain.local_fleet.vehicle.document.upload') }}",
+                    method: "POST",
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (res) {
+                        if (res.status === 0) {
+                            toastr.success('Document uploaded successfully');
+                            $('#UploadDocumentModal').modal('hide');
+                        } else {
+                            toastr.error(res.message);
+                        }
+                    }
+                });
+            });
+
+            $('body').on('click', '.view-documents', function () {
+                let vehicle_id = $(this).closest('tr').attr('id');
+
+                let url = "{{ route('admin.cargo.supply_chain.local_fleet.vehicle.document.list', ':id') }}";
+                url = url.replace(':id', vehicle_id);
+                $.get(url, function (res) {
+
+                        let html = '';
+                        res.data.forEach(function (d, i) {
+                            html += `
+                <tr>
+                    <td>${i + 1}</td>
+                    <td>${d.document_name}</td>
+                    <td><a href="${d.document_path}" target="_blank">View</a></td>
+                    <td>${d.date}</td>
+                </tr>`;
+                        });
+
+                        $('#documents_table tbody').html(html);
+                        $('#ViewDocumentsModal').modal('show');
+                    }
+                );
+            });
         });
     </script>
 

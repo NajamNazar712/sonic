@@ -13261,7 +13261,7 @@ class AdminAPIController extends Controller
             'remarks' => 'nullable|string',
             'cost_amount' => 'nullable|numeric|gt:0',
             'cost_remarks' => 'nullable|string|required_with:cost_amount',
-            'cost_receipt_path' => 'nullable|file|mimes:png,jpg,jpeg,pdf|max:2048',
+            'cost_receipt_path' => 'nullable|file|mimes:png,jpg,jpeg|max:2048',
         ]);
 
         $vehicle = LocalFleetVehicle::where('id', $request->vehicle_id)
@@ -13319,17 +13319,6 @@ class AdminAPIController extends Controller
         }
 
         $now = now();
-        $trip = new LocalFleetVehicleTrip();
-        $trip->vehicle_id                = $vehicle->id;
-        $trip->vehicle_mileage_per_liter = $vehicle->mileage_per_liter;
-        $trip->out_time                  = $now;
-        $trip->out_meter                 = $request->out_meter;
-        $trip->rider_id                  = $request->rider_id;
-        $trip->route_id                  = $request->route_id;
-        $trip->out_remarks               = $request->remarks ?? '';
-        $trip->status                    = 0;
-        $trip->created_by                = $request->admin_id;
-        $trip->save();
 
         //job references
         $deliveryIds = $request->delivery_note_ids
@@ -13343,6 +13332,24 @@ class AdminAPIController extends Controller
         $pickupIds = $request->pickup_note_ids
             ? V2PickupRequest::whereIn('id', $request->pickup_note_ids)->pluck('id')->toArray()
             : [];
+
+        //add trip
+        $trip = new LocalFleetVehicleTrip();
+        $trip->vehicle_id                = $vehicle->id;
+        $trip->vehicle_mileage_per_liter = $vehicle->mileage_per_liter;
+        $trip->out_time                  = $now;
+        $trip->out_meter                 = $request->out_meter;
+        $trip->rider_id                  = $request->rider_id;
+        $trip->route_id                  = $request->route_id;
+        $trip->out_remarks               = $request->remarks ?? '';
+        $trip->status                    = 0;
+        $trip->created_by                = $request->admin_id;
+        $trip->trip_date                = $now->toDateString();
+        $trip->total_dn_count = count($deliveryIds);
+        $trip->total_rn_count = count($returnIds);
+        $trip->total_pickup_count = count($pickupIds);
+        $trip->save();
+
 
         // Map job types to IDs
         $jobReferences = [
@@ -13400,20 +13407,14 @@ class AdminAPIController extends Controller
         }
 
         $incidentImagePath = null;
-
         if ($request->hasFile('incident_image')) {
-
             $file = $request->file('incident_image');
-            $date = now()->format('YmdHis');
-
-            $filename  = 'incident_' . $date . '.' . $file->extension();
-            $directory = 'local_fleet/incidents/trip_' . $trip->id;
-
-            Storage::disk('public')->putFileAs($directory, $file, $filename);
-
+            $timestamp  = now()->format('YmdHis');
+            $filename = 'incident_' . $trip->id . '_' . $timestamp . '.png';
+            $directory = 'local_fleet/incidents';
+            Storage::disk('public')->putFileAs($directory,$file,$filename);
             $incidentImagePath = $directory . '/' . $filename;
         }
-
 
         $mileage = $request->in_meter - $trip->out_meter;
         $fuel = round($mileage / $trip->vehicle_mileage_per_liter, 2);
@@ -13458,10 +13459,10 @@ class AdminAPIController extends Controller
             $path = null;
             if ($request->hasFile('cost_receipt_path')) {
                 $file = $request->file('cost_receipt_path');
-                $date = now()->format('YmdHis');
-                $filename  = 'cost_receipt_' . $date . '.' . $file->extension();
-                $directory = 'local_fleet/trip_costs/trip_' . $trip_id;
-                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $timestamp  = now()->format('YmdHis');
+                $filename = 'trip_cost_' . $trip_id . '_' . $timestamp . '.png';
+                $directory = 'local_fleet/trip_costs';
+                Storage::disk('public')->putFileAs($directory,$file,$filename);
                 $path = $directory . '/' . $filename;
             }
 
@@ -13473,6 +13474,16 @@ class AdminAPIController extends Controller
             $trip_cost->created_by = Auth::id();
             $trip_cost->trip_type = $trip_type;
             $trip_cost->save();
+
+
+            //update trip cost
+            $trip = LocalFleetVehicleTrip::where('id',$trip_id)->first();
+            if($trip){
+                $trip->total_trip_cost = $trip->total_trip_cost+$request->cost_amount;
+                $trip->save();
+            }
+//            ->increment('total_trip_cost', $request->cost_amount);
+
 
         }
     }

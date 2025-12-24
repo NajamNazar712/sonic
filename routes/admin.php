@@ -1269,6 +1269,24 @@ Route::prefix('admin')->name('admin.')->group(function () {
                     Route::get('edit/{id}', 'Admins\LocalFleet\AdminLocalFleetVehicleController@edit')->name('edit');
                     Route::post('update', 'Admins\LocalFleet\AdminLocalFleetVehicleController@update')->name('update');
                     Route::post('qr_code_print','Admins\LocalFleet\AdminLocalFleetVehicleController@qr_code_print')->name('qr_code_print');
+                    Route::prefix('document')->name('document.')->group(function () {
+                        Route::post('upload', 'Admins\LocalFleet\AdminLocalFleetVehicleController@uploadDocument')->name('upload');
+                        Route::get('list/{id}', 'Admins\LocalFleet\AdminLocalFleetVehicleController@listDocuments')->name('list');
+                    });
+
+
+                    Route::prefix('trips')->name('trips.')->group(function () {
+                        Route::get('', 'Admins\LocalFleet\AdminLocalFleetReportController@trip_index')->name('index');
+                        Route::get('list', 'Admins\LocalFleet\AdminLocalFleetReportController@trip_list')->name('list');
+                        Route::get('cost_detail/{trip_id}','Admins\LocalFleet\AdminLocalFleetReportController@tripCostDetail')->name('cost_detail');
+                    });
+
+                    Route::prefix('consolidated_trips')->name('consolidated_trips.')->group(function () {
+                        Route::get('', 'Admins\LocalFleet\AdminLocalFleetReportController@consolidated_trips_index')->name('index');
+                        Route::get('list', 'Admins\LocalFleet\AdminLocalFleetReportController@consolidated_trips_list')->name('list');
+                        Route::post('cost_details','Admins\LocalFleet\AdminLocalFleetReportController@consolidated_trips_cost_details')->name('cost_details');
+                    });
+
                 });
             });
         });
