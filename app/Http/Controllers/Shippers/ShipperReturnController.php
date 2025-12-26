@@ -420,12 +420,13 @@ class ShipperReturnController extends Controller
             foreach($shipment_ids as $shipment) {
                 $parcel = Shipment::find($shipment);
                 if ($parcel->shipper_status_id != 52 || $parcel->shipper_status_id != 66) {
-                    if ($parcel->shipper_status_id == 65) {
-                        $remarks = $request->remark[$parcel->id] != null ? $request->remark[$parcel->id] : null;
+                    if ($parcel->shipper_status_id == 65) {                        
+                        $remarks = $remarks = $request->remark[$parcel->id] ?? null;
                         $journey = ShipmentsJourney::where('shipment_id', $shipment)->where('shipper_status_id', 65)->where('status_reason_id', 12)->latest('id')->first();
+                        $reattempt_percentage_shippers = ReattemptPercentageForShipper::where('user_id', $parcel->user_id)->first();
                         // Shipment::where('id',$request->shipment_id)->update(['shipper_status_id' => 52,'consignee_status_id' => 52]);
-                        if (SpecifiedShipper::where(['user_id' => $parcel->user_id, 'status' => 1])->exists()) { // If shipper is lay on AList then will be auto re-attempt
-                            $request->merge(['shipment_id' => $shipment]);
+                        if (SpecifiedShipper::where(['user_id' => $parcel->user_id, 'status' => 1])->exists() || isset($reattempt_percentage_shippers) && $reattempt_percentage_shippers->percentage >= 60) { // If shipper is lay on AList then will be auto re-attempt
+                            $request->merge(['shipment_id' => $shipment,'remark'=>$remarks]);
                             $this->reattempt($request, session('user_id'));
                             //return response()->json(['status' => 1, 'success' => "We're reattempting your shipment request directly, without a call request"]);
                             continue;
@@ -540,9 +541,10 @@ class ShipperReturnController extends Controller
                 if ($parcel->shipper_status_id == 65) {
                     $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 65)->where('status_reason_id', 12)->latest('id')->first();
                     // Shipment::where('id',$request->shipment_id)->update(['shipper_status_id' => 52,'consignee_status_id' => 52]);
-                    
-                    
-                    if (SpecifiedShipper::where(['user_id' => $parcel->user_id, 'status' => 1])->exists()) { // If shipper is lay on AList then will be auto re-attempt
+
+                    $reattempt_percentage_shippers = ReattemptPercentageForShipper::where('user_id', $parcel->user_id)->first();
+                   
+                    if (SpecifiedShipper::where(['user_id' => $parcel->user_id, 'status' => 1])->exists() || isset($reattempt_percentage_shippers) && $reattempt_percentage_shippers->percentage >= 60) { // If shipper is lay on AList then will be auto re-attempt
                         $request->merge(['shipment_id' => $request->shipment_id]);
                         $this->reattempt($request, session('user_id'));
                         return response()->json(['status' => 1, 'success' => "We're reattempting your shipment request directly, without a call request"]);

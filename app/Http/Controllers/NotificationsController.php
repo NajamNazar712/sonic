@@ -135,6 +135,7 @@ use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
 use App\Http\Models\Admin\ShipperVerificationPinCode as AdminShipperVerificationPinCode;
 use App\Http\Models\Admin\Retail\RetailShipment;
 use App\Models\PendingBankAccount;
+use Illuminate\Support\Facades\Http;
 
 class NotificationsController extends Controller
 {
@@ -177,8 +178,8 @@ class NotificationsController extends Controller
 
     static private function push_notification($employee_id, $employee_type, $title, $body, $screen = NULL)
     {
-        $notification_history = new EmployeeNotificationHistory();
 
+        $notification_history = new EmployeeNotificationHistory();
         $notification_history->employee_id = $employee_id;
         $notification_history->employee_type_id = $employee_type;
         $notification_history->title = $title;
@@ -11725,7 +11726,49 @@ class NotificationsController extends Controller
             $notification_history->save();
         }
     }
+    static function sendFcmNotificationV1(
+        $employee_id,
+        $employee_type,
+        $device_token,
+        $notification_title,
+        $notification_body,
+        ?string $screen_id = null
+    ) {
+        $projectId   = 'bolt-rider-a37e0';
+        $accessToken = getFcmAccessToken();
 
+        $fcmUrl = "https://fcm.googleapis.com/v1/projects/{$projectId}/messages:send";
+
+        $payload = [
+            'message' => [
+                'token' => $device_token,
+                
+                'data' => [
+                    'title'     => (string) $notification_title,
+                    'body'      => (string) $notification_body,
+                    'screen_id' => (string) ($screen_id ?? ''),
+                    // optional: add unique id/timestamp if you want
+                    'ts'        => (string) microtime(true),
+                ],
+
+                // optional but good to have
+                'android' => [
+                    'priority' => 'HIGH',
+                    'ttl'      => '18000s', //% hours 
+                ],
+            ],
+        ];
+        // Send Request
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $accessToken,
+            'Content-Type'  => 'application/json',
+        ])->post($fcmUrl, $payload);
+
+        return [
+            'http_status' => $response->status(),
+            'fcm_response'   => $response->json(),
+        ];
+    }
     static public function bolt_forget_pin($phone_number, $pin, $name)
     {
         $notification = Notification::find(61);
@@ -11753,6 +11796,7 @@ class NotificationsController extends Controller
 
     static public function app_notification($id, $employee_id, $employee_type, $reference1_id, $reference2_id = NULL)
     {
+
         $push_notification = AppNotification::find($id);
         if ($push_notification) {
             if ($push_notification->status) {

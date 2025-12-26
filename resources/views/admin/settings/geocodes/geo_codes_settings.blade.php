@@ -49,7 +49,7 @@
                                                 @endforeach
                                             </select>
                                         </div>
-                                        @if(session('role_id') == 1 || in_array(1057, session('permissions')))
+                                        @if(session('role_id') == 1 || in_array(1058, session('permissions')))
                                             <div class="col-md-12 form-group">
                                                 <button type="submit" class="col-md-4 btn btn-primary">Update</button>
                                             </div>

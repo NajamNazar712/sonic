@@ -91,6 +91,7 @@ use App\Http\Models\ShipperSegmentLogs;
 use Illuminate\Support\Facades\Log;
 use DB;
 use App\Models\BookingChannel;
+use App\Models\NegativePayableAllowShipperZeroCod;
 
 class ShipperShipmentBookController extends Controller
 {
@@ -1153,7 +1154,7 @@ class ShipperShipmentBookController extends Controller
 
 
                     } catch (\Exception $e) {
-                        Log::error('Error creating shipper segment log from shipment public function store(Request $request)' . $shipment_id . ': ' . $e->getMessage());
+                        Log::error('Error creating shipper segment log from shipment public function store(Request $request)' . $shipment_id . ': ' . $e->getMessage() . ' | File: ' . $e->getFile() . ' | Line: ' . $e->getLine() );
                     }
                     return redirect()->back()->with(['success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'print' => $print]);
                 }
@@ -1169,7 +1170,7 @@ class ShipperShipmentBookController extends Controller
     public function check_negative_payable(Request $request){
         $user_id = session('user_id');
         $account_type = session('account_type');
-        if($request->input('amount') == 0 && !PendingPayment::check_negative_payable($user_id,$account_type)){
+        if($request->input('amount') == 0 && !PendingPayment::check_negative_payable($user_id,$account_type) && !NegativePayableAllowShipperZeroCod::isAllowed($user_id)){
             return 'false';
         }else{
             return 'true';

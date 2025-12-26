@@ -1888,6 +1888,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/documents/{id}', 'Admins\PaymentRequisitionController@viewDocuments')->name('documents');
             Route::get('/documents/{id}/open/{doc}',  'Admins\PaymentRequisitionController@openDocument')->name('document.open');
         });
+
+        Route::prefix('removal_sst_wht')->name('removal_sst_wht.')->group(function () {
+            Route::get('', 'Admins\AdminFinanceController@sst_wht_remove_view')->name('index');
+            Route::post('upload',  'Admins\AdminFinanceController@sst_wht_remove_upload')->name('upload');
+
+        });
     });
 
     Route::prefix('petty_cash')->name('petty_cash.')->group(function () {
@@ -3555,6 +3561,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\GlobalSettingsController@star_shippers_list')->name('list');
             Route::post('add', 'Admins\GlobalSettingsController@star_shippers_add')->name('add');
             Route::post('enable_disable', 'Admins\GlobalSettingsController@star_shippers_enable_disable')->name('enable_disable');
+        });
+
+        Route::prefix('zero_cod_shippers')->name('zero_cod_shippers.')->group(function () {
+            Route::get('', 'Admins\Settings\GeneralSettingController@zero_cod_shippers_index')->name('index');
+            Route::get('list', 'Admins\Settings\GeneralSettingController@zero_cod_shippers_list')->name('list');
+            Route::post('add', 'Admins\Settings\GeneralSettingController@zero_cod_shippers_add')->name('add');
+            Route::post('remove', 'Admins\Settings\GeneralSettingController@zero_cod_shippers_remove')->name('remove');
+            Route::get('logs', 'Admins\Settings\GeneralSettingController@zero_cod_shippers_logs_index')->name('logs');
+            Route::get('logs/list', 'Admins\Settings\GeneralSettingController@zero_cod_shippers_logs_list')->name('logs.list');
         });
 
         Route::prefix('wallet_shippers')->name('wallet_shippers.')->group(function () {

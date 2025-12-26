@@ -17,7 +17,7 @@ class CreateActivityTrailAndPermissionForGeoCodesSettings extends Seeder
     {
         DB::table('module_permissions')->insert(array(
             array('id' => 1056, 'name' => 'Manage Geo Code Settings (TPL)', 'module_id' => 14 ),
-            array('id' => 1057, 'name' => 'Update Geo Code Settings (TPL)', 'module_id' => 14 ),
+            array('id' => 1058, 'name' => 'Update Geo Code Settings (TPL)', 'module_id' => 14 ),
         ));
 
         DB::table('activity_trail_actions')->insert(array(

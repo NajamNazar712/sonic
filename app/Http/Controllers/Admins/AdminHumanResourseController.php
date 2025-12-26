@@ -476,6 +476,7 @@ class AdminHumanResourseController extends Controller
             ->join('employee_types as et', 'et.id', '=', 'employees.employee_type_id')
             ->join('employee_request_statuses as ers', 'ers.id', '=', 'employees.request_status_id')
             ->leftjoin('rider_main_categories as rmc', 'rmc.id', '=', 'employees.rider_main_category')
+            ->leftjoin('rider_categories as rc', 'rc.id', '=', 'employees.rider_sub_category')
             ->leftjoin('employee_designations as ed', 'ed.id', '=', 'employees.designation_id')
             ->join('employee_statuses as es', 'es.id', '=', 'employees.status_id')
             ->leftjoin('employees as r_emp', 'r_emp.id', '=', 'employees.replacement_employee_id')
@@ -502,7 +503,7 @@ class AdminHumanResourseController extends Controller
             'employees.last_working_date as last_working_date', 'employees.official_email as official_email', 'r_emp.trax_id as r_trax_id', 'r_emp.name as r_name',
             'employees.confirmation_status','employees.old_trax_id as old_trax_id','employees.remarks as remarks','employees.date_of_birth as date_of_birth','employees.cnic_issue_date' ,'employees.cnic_expiry_date',
             'employees.emergency_contact_person as emergency_contact_person','employees.emergency_contact as emergency_contact','er.name as religion', 'ems.name as martial_status', 
-            'ess.start_time as start_time', 'ess.end_time as end_time','ca.id as area_id','ca.name as area', 'employees.sub_department as sub_department_name', 'employees.mother_name','el.name as education_name'])
+            'ess.start_time as start_time', 'ess.end_time as end_time','ca.id as area_id','ca.name as area', 'employees.sub_department as sub_department_name', 'employees.mother_name','el.name as education_name', 'rc.name as rider_designation'])
             ->where(function ($q) {
                 $q->where('r.blacklist', '=', 0)
                     ->orWhere('r.blacklist', '=', null);
@@ -577,7 +578,11 @@ class AdminHumanResourseController extends Controller
                 return City::where('id', $user->city_id)->first()->hub_city->name ?? "";
             })
             ->addColumn('employee_designation', function ($user) {
-                return ($user->designation) ? $user->designation : '-';
+                if($user->employee_type_id == 2){
+                    return $user->rider_designation;
+                } else {
+                    return ($user->designation) ? $user->designation : '-';
+                }
             })
             ->editColumn('employee_type', function ($user) {
                 if ($user->employee_type_id == 1) {

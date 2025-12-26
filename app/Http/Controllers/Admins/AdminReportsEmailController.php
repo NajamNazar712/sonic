@@ -5636,13 +5636,18 @@ class AdminReportsEmailController extends Controller
             ->leftJoin('sale_tier_tags as st', 'st.user_id', '=', 'u.id')
             ->leftJoin('admins as rf', 'rf.id', '=', 'st.ref')
             ->leftjoin('shipment_additional_charges as faf_charges', 'faf_charges.shipment_id', '=', 'shipments.id')
+            ->leftJoin('shipments_journey as sj_filter', function ($join) use ($connection, $day) {
+                $join->on('sj_filter.shipment_id', '=', 'shipments.id')
+                    ->whereIn('sj_filter.shipper_status_id', [2, 25])
+                    ->whereBetween('sj_filter.created_at', [
+                        Carbon::parse($day)->startOfDay()->format('Y-m-d H:i:s'),
+                        Carbon::parse($day)->endOfDay()->format('Y-m-d H:i:s')
+                    ]);
+            })
             ->select( 'invoices.invoice_number', 'r.name as ridername', 'ssr.name as reason', 'sjr.remarks as remark', 'p.product_name as category', 'si.description as description', 'shipments.id as shipment_id', 'shipments.fintech_charges as fintech_charges', 'shipments.order_id as order_id', 'shipments.tracking_number as tracking_number_link', 'u.id as account_no', 'u.name as shipper', 'usi.pickup_address as shipper_address', 'ss.name as current_status', 'bt.booking_type as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.amount as s_collection_amount', 'sps.name as payment_status', 'shipments.actual_weight', 'shipments.weight_charges', 'shipments.cash_handling_charges', 'shipments.insurance_charges', 'shipments.return_charges', 'shipments.replacement_charges', 'shipments.fuel_surcharge', 'shipments.try_and_buy_charges', 'shipments.packaging_material_charges', DB::raw('SUM(pps.charges) as p_total_charges'), DB::raw('SUM(pps.amount) as p_collection_amount'), DB::raw('SUM(pps.payable) as p_net_payable'), DB::raw('SUM(pps.gst) as p_gst'), DB::raw('SUM(dps.amount) as d_collection_amount'), DB::raw('SUM(dps.charges) as d_total_charges'), DB::raw('SUM(dps.payable) as d_net_payable'), DB::raw('SUM(dps.gst) as d_gst'), 'sm.mode as shipping_mode', 'sm.id as shipping_mode_id', 'shipments.chargeable_weight', 'dr.created_at as delivered_or_returned', 'z.name as zone', 'zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.id', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges', 'u.account_type_id as account_type_id', DB::raw('SUM(is.gst) as is_gst'), DB::raw('SUM(pis.gst) as pis_gst'), 'shipments.packaging_charges', 'dr.received_or_refused_by', 'shipments.special_instructions', 'shipments.intercept_charges', 'bc.name as business_shipment_type', 'ibs.international_tracking_number', 'usi.vendor', 'dr.shipper_status_id as dr_status_id', 'shipments.shipment_type', 'rc.name as return_city', 'dr.cnic as dr_cnic', 'dr.relation as dr_relation', 'shipments.consignee_address as consignee_address', 'scs.name as sub_segment', 'sjfa.created_at as first_attempt_date', 'spjpaid_date.created_at as paid_date', 'spjproceed_date.created_at as processed_date', 'si.quantity as item_quantity', 'shipments.pieces as pieces', 'scun.id as scun_id', 'rf.id as ref_id', 'rf.name as ref', 'och.name as origin_hub', 'shipments.tracking_number as tracking_number_excel', DB::raw('SUM(pps.sms_charges) as pps_sms_charges'), DB::raw('SUM(dps.sms_charges) as dps_sms_charges'), DB::raw('SUM(pis.sms_charges) as pis_sms_charges'), DB::raw('SUM(is.sms_charges) as is_sms_charges'), DB::raw('SUM(faf_charges.faf_charges) as faf_charges'), DB::raw('SUM(ss_charge.reverse_pickup_charges) as reverse_pickup_charges'), 'ibs.cost')
             ->where('shipments.user_id', 50755) // Only for shipper_id = 1
-            ->whereIn('shipments.shipper_status_id', [2, 25]) // Only for statuses 1 and 2
-            ->whereBetween('sj.created_at', [
-                Carbon::parse($day)->startOfDay()->format('Y-m-d H:i:s'),
-                Carbon::parse($day)->endOfDay()->format('Y-m-d H:i:s')
-            ])
+            //->whereIn('shipments.shipper_status_id', [2, 25]) // Only for statuses 1 and 2
+            ->whereNotNull('sj_filter.id')
             ->orderBy('sps.name', 'desc')
             ->groupBy('shipments.id')
         ->get();
@@ -5797,7 +5802,7 @@ class AdminReportsEmailController extends Controller
                     $sale->category,  
                     $sale->description,  
                     $sale->international_tracking_number,  
-                    $sale->p_collection_amount,  
+                    $sale->s_collection_amount, 
                     $sale->actual_weight,  
                     $sale->chargeable_weight,  
                     $sale->weight_charges,  

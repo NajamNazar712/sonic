@@ -72,7 +72,11 @@ class RetailCashCollectionController extends Controller
             $deliveries->join('shipments as s', 'rpns.shipment_id', '=', 's.id')
                 ->where('s.tracking_number', '=', $tracking_number);
         }
-
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $deliveries->whereBetween('retail_cash_deposits.created_at', [$from, $to]);
+        }
         $datatable = Datatables::of($deliveries)
             ->addColumn('count', function($deliveries) {
                 if ($deliveries->shipments_count != 0) {
