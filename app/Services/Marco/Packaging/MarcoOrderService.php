@@ -61,11 +61,7 @@ class MarcoOrderService extends MarcoBaseService
         }
         /** STEP 4: Handle failure */
         if ($response->failed()) {
-            Log::error('Marco Order API Failed', [
-                'payload'  => $payload,
-                'response' => $response->json(),
-            ]);
-
+      
             return $this->fail(
                 $response->json('message') ?? 'Marco API error'
             );
@@ -73,7 +69,7 @@ class MarcoOrderService extends MarcoBaseService
 
         /** STEP 5: Success */
         return [
-                'status' => $responseStatu,
+                'status' => $responseStatus,
                 'data'   => $response->json(),
             ];
     }
