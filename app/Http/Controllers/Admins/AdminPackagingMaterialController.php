@@ -1558,8 +1558,8 @@ class AdminPackagingMaterialController extends Controller
                     "price"                  => 1, 
                     "weight"                 => 1,  
                     "pickup_info"            => [
-                        ["id" => 94],
-                        ["id" => 95]
+                        ["id" => 39],
+                        ["id" => 40]
                     ],
                 ];
                 $marcoService = new MarcoSkuService();
