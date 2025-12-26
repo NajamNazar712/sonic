@@ -63,7 +63,7 @@ class MarcoOrderService extends MarcoBaseService
         if ($response->failed()) {
             return [
                 'status' => $responseStatus,
-                'data'   => $response->json('message') ?? 'Marco API error',
+                'data'   => $response->json() ?? 'Marco API error',
             ];
         }
 
