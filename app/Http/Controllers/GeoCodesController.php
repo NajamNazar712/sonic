@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\AccountType;
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Blacklist\BlacklistSetting;
 use App\Http\Models\City;
 use App\Http\Models\Holiday;
@@ -12,6 +13,9 @@ use App\Http\Models\Segment;
 use App\Http\Models\Shipment;
 use App\Http\Models\SubCategorySegment;
 use App\Http\Traits\GeoCodeApiCountTrait;
+use App\Models\GeoCodeApiCount;
+use App\Models\GeoCodesAssignDestinationHubs;
+use App\Models\GeoCodesAssignSubSegments;
 use App\Models\ShipmentGeoCode;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
@@ -33,25 +37,69 @@ class GeoCodesController extends Controller
     }
     public function index()
     {
+        //setting destination hubs
+//        $assigned_destination = GeoCodesAssignDestinationHubs::pluck('destination_hub_id')->toArray();
+
         $cities = City::where('status', 1)->get();
+//        ->when($assigned_destination, function ($query) use ($assigned_destination) {
+//            $query->whereIn('id',$assigned_destination);
+//        })->get();
+//        $origins = City::where('status', 1)->get();
         $account_types = AccountType::all();
         $segments = Segment::all();
         $regions = Region::where('status_id',1)->get();
+
+        $api_usage = '';
+        $max_limit = GlobalSettings::where('type','geo_codes_max_limit')->first();
+        if($max_limit && $max_limit->setting_value > 0){
+            $api_count = GeoCodeApiCount::first()->api_count ?? 0;
+            $api_usage = $max_limit->setting_value .'/'.$api_count;
+        }
+
 //        $sub_segments =  SubCategorySegment::all();
-        return view('admin.settings.geocodes.index')->with(['cities'=>$cities,'account_types'=>$account_types,'segments' => $segments,'regions' => $regions]);
+        return view('admin.settings.geocodes.index')->with(['cities'=>$cities,'account_types'=>$account_types,'segments' => $segments,'regions' => $regions,'api_usage'=>$api_usage]);
     }
+
+    public function get_sub_segments(Request  $request)
+    {
+        if (isset($request->business_segment_id)) {
+            //setting geo codes
+//            $assigned_sub_segments = GeoCodesAssignSubSegments::pluck('sub_segment_id')->toArray();
+
+            $business_segment_id = $request->business_segment_id;
+            $sub_business_segment_id = SubCategorySegment::whereIn('segment_id', $business_segment_id)->select('id', 'name')->orderby('name', 'asc')->get();
+//                ->when($assigned_sub_segments,function ($query) use ($assigned_sub_segments) {
+//                    $query->whereIn('id',$assigned_sub_segments);
+//                }) ->select('id', 'name')->orderby('name', 'asc')->get();
+
+            return response()->json(['status' => 1, 'sub_segment' => $sub_business_segment_id]);
+        } else {
+            return response()->json(['status' => 0, 'error' => 'No data Found']);
+        }
+    }
+
 
     public function list(Request $request)
     {
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 832);
         }
+//        $assigned_destination_hubs = GeoCodesAssignDestinationHubs::pluck('destination_hub_id')->toArray();
+//        $assigned_sub_segments = GeoCodesAssignSubSegments::pluck('sub_segment_id')->toArray();
 
-        $shipments = Shipment::select('shipments.id','shipments.consignee_city_id','shipments.consignee_name','shipments.consignee_address','shipments.consignee_phone_number_1','shipments.tracking_number','sgc.latitude','sgc.longitude','sgc.compound_address')
-            ->leftjoin('shipments_geo_codes as sgc',function ($qu){
+
+        $shipments = Shipment::select('shipments.id','shipments.consignee_city_id','shipments.consignee_name','shipments.consignee_address','shipments.consignee_phone_number_1','shipments.tracking_number','sgc.latitude','sgc.longitude','sgc.compound_address','sgc.source_type_tpl')
+             ->leftjoin('shipments_geo_codes as sgc',function ($qu){
                 $qu->on('sgc.shipment_id','=','shipments.id')->where('sgc.geo_code_type','=',1);
             })->where('shipments.created_at','>=' ,Carbon::now()->subMonths(12)->startOfMonth());
 
+//        if(!empty($assigned_sub_segments)){
+//            $shipments = $shipments->join('shipper_segment_logs as ssl','ssl.shipment_id','=','shipments.id')
+//                ->whereIn('ssl.sub_segment_id',$assigned_sub_segments);
+//        }
+//        if(!empty($assigned_destination_hubs)) {
+//            $shipments = $shipments->whereIn('shipments.consignee_city_id',$assigned_destination_hubs);
+//        }
         if($request->get('tracking_number')) {
             $shipments->whereIn('shipments.tracking_number', explode(',', $request->get('tracking_number')));
         }
@@ -93,6 +141,15 @@ class GeoCodesController extends Controller
 
 
         $datatable = Datatables::of($shipments)
+            ->addColumn('source',function ($data) {
+                if($data->source_type_tpl == 0) {
+                    return 'Manual';
+                } else if($data->source_type_tpl == 1) {
+                    return 'Automatic';
+                } else if($data->source_type_tpl == 2) {
+                    return 'Already Exist Lat & Lng';
+                }
+            })
             ->addColumn('action', function ($data) {
 
                 $dropdown = '
@@ -288,7 +345,7 @@ class GeoCodesController extends Controller
 
         $geoCoded = Shipment::whereIn('shipments.consignee_address', $consignee_addresses)
             ->join('shipments_geo_codes as sgo', 'sgo.shipment_id', '=', 'shipments.id')
-            ->select('shipments.id as shipment_id', 'sgo.latitude', 'sgo.longitude', 'shipments.consignee_address')
+            ->select('shipments.id as shipment_id', 'sgo.latitude', 'sgo.longitude', 'shipments.consignee_address','sgo.compound_address')
             ->get()
             ->keyBy('consignee_address');
 
@@ -301,7 +358,6 @@ class GeoCodesController extends Controller
                 $city = trim($shipment->city);
                 $address = trim($shipment->consignee_address);
                 $geo = $geoCoded->get($address);
-
                 if (!$geo) {
                     $unique_address[$city][$address]['shipment_ids'][$shipment->shipment_id] = $shipment->user_id;
                 } else {
@@ -310,6 +366,8 @@ class GeoCodesController extends Controller
                         'shipment_id' => $shipment_id,
                         'latitude' => $geo->latitude,
                         'longitude' => $geo->longitude,
+                        'compound_address' => $geo->compound_address,
+                        'source_type_tpl'=>2,
                         'created_at' => now(),
                         'updated_at' => now(),
                     ];
@@ -450,6 +508,197 @@ class GeoCodesController extends Controller
             return response()->json(['status' => 0, 'error' => 'No data found.']);
         }
     }
+    public static function tpl_geo_codes($shipment_ids)
+    {
+        try {
+            if (is_array($shipment_ids) && !empty($shipment_ids)) {
+                $shipments = Shipment::leftJoin('cities as ds', 'ds.id', 'shipments.consignee_city_id')
+                    ->select(
+                        'shipments.id as shipment_id',
+                        'shipments.user_id',
+                        'shipments.consignee_address',
+                        'ds.name as city'
+                    )
+                    ->whereIn('shipments.id', $shipment_ids)
+                    ->get()
+                    ->keyBy('shipment_id');
+
+                $consignee_addresses = $shipments->pluck('consignee_address')->unique()->values()->toArray();
+
+                $geoCoded = Shipment::whereIn('shipments.consignee_address', $consignee_addresses)
+                    ->join('shipments_geo_codes as sgo', 'sgo.shipment_id', '=', 'shipments.id')
+                    ->select('shipments.id as shipment_id', 'sgo.latitude', 'sgo.longitude', 'shipments.consignee_address','sgo.compound_address')
+                    ->get()
+                    ->keyBy('consignee_address');
+
+                $insert_data = [];
+
+                if ($shipments->count() > 0) {
+                    $unique_address = [];
+
+                    foreach ($shipments as $shipment_id => $shipment) {
+                        $city = trim($shipment->city);
+                        $address = trim($shipment->consignee_address);
+                        $geo = $geoCoded->get($address);
+                        if (!$geo) {
+                            $unique_address[$city][$address]['shipment_ids'][$shipment->shipment_id] = $shipment->user_id;
+                        } else {
+                            $insert_data[] = [
+                                'user_id' => $shipment->user_id,
+                                'shipment_id' => $shipment_id,
+                                'latitude' => $geo->latitude,
+                                'longitude' => $geo->longitude,
+                                'source_type_tpl'=>2,
+                                'compound_address' => $geo->compound_address,
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ];
+                        }
+                    }
+
+                    if (!empty($unique_address)) {
+                        $client = new \GuzzleHttp\Client([
+                            'base_uri' => 'https://api1.tplmaps.com:8888/',
+                            'http_errors' => false,
+                            'connect_timeout' => 60,
+                            'timeout' => 60,
+                        ]);
+
+                        $timestamp = Carbon::now();
+
+                        foreach ($unique_address as $city => $addresses) {
+                            foreach ($addresses as $address => $info) {
+                                $response = $client->get('search', [
+                                    'headers' => ['Accept' => 'application/json'],
+                                    'query' => [
+                                        'name' => $address,
+                                        'city' => $city,
+                                        'output' => 'name,parent,parent1,parent2,parent3,country,compound_address_parents,id,lat,lng,subcat_name,cat_name',
+                                        'apikey' => '$2a$10$ixuhTqrlyD8pJfDY8FjO9OovMcIrBXIp2sUSHaJqeIjcNrpCyvHJ2'
+                                    ],
+                                ]);
+
+                                $data = json_decode($response->getBody(), true);
+                                self::geo_code_api_count(1);
+
+                                $lat = null;
+                                $lng = null;
+                                $compound_final = null;
+
+                                if (is_array($data) && !empty($data)) {
+                                    $normalize = function ($string) {
+                                        $string = strtolower($string);
+                                        $string = preg_replace('/[^a-z0-9\s]/i', ' ', $string);
+                                        $string = preg_replace('/\s+/', ' ', $string);
+                                        return trim($string);
+                                    };
+
+                                    $normalizedAddress = $normalize($address);
+                                    $address_terms = explode(' ', $normalizedAddress);
+
+                                    $high_weight_terms = ['apartment', 'flat', 'block', 'floor', 'road', 'sector', 'phase', 'house', 'street', 'lane', 'colony', 'society', 'scheme', 'building', 'plot', 'avenue', 'extension', 'villa', 'duplex', 'suite', 'row', 'view', 'park', 'compound'];
+                                    $medium_weight_terms = ['no', 'number', 'unit', 'tower', 'drive', 'court', 'line', 'circle'];
+                                    $low_weight_terms = ['town', 'city', 'market', 'commercial', 'residential', 'garden', 'hospital', 'school', 'company', 'office', 'service', 'underpass', 'station', 'chowk', 'gate'];
+
+                                    $weighted_terms = [
+                                        ['terms' => $high_weight_terms, 'weight' => 3],
+                                        ['terms' => $medium_weight_terms, 'weight' => 2],
+                                        ['terms' => $low_weight_terms, 'weight' => 1],
+                                    ];
+
+                                    $bestMatch = null;
+                                    $highestScore = 0;
+
+                                    foreach ($data as $unit) {
+                                        $compound = $normalize($unit['compound_address_parents'] ?? '');
+                                        $compound_terms = explode(' ', $compound);
+                                        $score = 0;
+
+                                        foreach ($weighted_terms as $group) {
+                                            foreach ($group['terms'] as $term) {
+                                                if (strpos($compound, $term) !== false) {
+                                                    $score += $group['weight'];
+                                                } else {
+                                                    foreach ($compound_terms as $compound_term) {
+                                                        if (levenshtein($term, $compound_term) <= 1) {
+                                                            $score += $group['weight'] - 1;
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        similar_text($normalizedAddress, $compound, $percent);
+                                        if ($percent > 60) {
+                                            $score += round($percent / 10);
+                                        }
+
+                                        Log::channel('code_test_log')->info('Geo match unit', [
+                                            'unit' => $unit,
+                                            'score' => $score,
+                                            'similarity' => $percent
+                                        ]);
+
+                                        if ($score > $highestScore) {
+                                            $highestScore = $score;
+                                            $bestMatch = $unit;
+                                        }
+                                    }
+
+                                    $target = $bestMatch ?? $data[0];
+
+                                    $encodedTarget = json_encode($target);
+                                    preg_match('/"lat"\s*:\s*([0-9\.\-eE\+]+)/', $encodedTarget, $latMatch);
+                                    preg_match('/"lng"\s*:\s*([0-9\.\-eE\+]+)/', $encodedTarget, $lngMatch);
+                                    preg_match('/"compound_address_parents"\s*:\s*"([^"]*)"/', $encodedTarget, $compMatch);
+
+                                    $lat = $latMatch[1] ?? ($target['lat'] ?? null);
+                                    $lng = $lngMatch[1] ?? ($target['lng'] ?? null);
+                                    $compound_final = $compMatch[1] ?? ($target['compound_address_parents'] ?? null);
+                                }
+
+                                if ($lat && $lng) {
+                                    foreach ($info['shipment_ids'] as $shipment_id => $user_id) {
+                                        $insert_data[] = [
+                                            'user_id' => $user_id,
+                                            'shipment_id' => $shipment_id,
+                                            'latitude' => $lat,
+                                            'longitude' => $lng,
+                                            'compound_address' => $compound_final,
+                                            'source_type_tpl'=>1,
+                                            'created_at' => $timestamp,
+                                            'updated_at' => $timestamp,
+                                        ];
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (!empty($insert_data)) {
+                        ShipmentGeoCode::insert($insert_data);
+//                    return response()->json([
+//                        'status' => 1,
+//                        'success' => 'Lat/Lng fetched and saved successfully.',
+//                        'inserted_count' => count($insert_data),
+//                    ]);
+                    }
+//                else {
+//                    return response()->json(['status' => 0, 'error' => 'No data found.']);
+//                }
+                }
+            }
+        } catch (\Throwable $th) {
+            Log::channel('cronJobLog')->error("geo_codes_job function:tpl_geo_codes ".$th->getMessage(), [
+                'line' => $th->getLine(),
+                'file' => $th->getFile(),
+            ]);
+        }
+
+
+    }
+
 
 
 

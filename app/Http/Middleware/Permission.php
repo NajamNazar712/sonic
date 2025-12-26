@@ -1554,8 +1554,9 @@ class Permission
             'admin.finance.prf.list' => 1047,
             'admin.finance.prf.completed_list' => 1050,
             'settings.zero_cod_shippers.logs' => 1055,
-            'settings.zero_cod_shippers.index' => 1054
-
+            'settings.zero_cod_shippers.index' => 1054,
+            'settings.geo_codes.global_setting.index' => 1056,
+            'settings.geo_codes.global_setting.store' => 1058,
         ],
         'shipper' => [
             'shipment.book.index' => 1,

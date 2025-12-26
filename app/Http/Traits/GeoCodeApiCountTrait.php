@@ -6,14 +6,15 @@ use App\Models\GeoCodeApiCount;
 
 trait GeoCodeApiCountTrait
 {
-  function geo_code_api_count($count)
+  public static function geo_code_api_count($count)
   {
       if ($count > 0) {
           $record = GeoCodeApiCount::first();
           if ($record) {
               $record->increment('api_count', $count);
+              $record->increment('total_api_count',$count);
           } else {
-              GeoCodeApiCount::create(['api_count' => $count]);
+              GeoCodeApiCount::create(['api_count' => $count, 'total_api_count' => $count]);
           }
       }
   }
