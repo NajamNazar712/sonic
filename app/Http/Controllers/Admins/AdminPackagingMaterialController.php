@@ -1585,7 +1585,7 @@ class AdminPackagingMaterialController extends Controller
                     
                 } else {
                     // Handle error from Marco API
-                    Log::error('Marco SKU creation failed', ['payload' => $payload, 'response' => $result]);
+                    return redirect()->back()->with(['status' => 0, 'failed' => $result]);
                 }
             }
         }
