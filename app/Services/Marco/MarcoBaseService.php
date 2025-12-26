@@ -11,11 +11,11 @@ abstract class MarcoBaseService
     {
         if (app()->environment('production')) {
 
-            $this->baseUrl = 'https://marco.trax.pk';
+            $this->baseUrl = 'https://marco.trax.pk/';
             $this->apiKey  = 'PRODUCTION_API_KEY_HERE';
         } elseif (app()->environment('staging')) {
 
-            $this->baseUrl = 'https://marco-staging.trax.pk';
+            $this->baseUrl = 'https://marco-staging.trax.pk/';
             $this->apiKey  = 'UjRYTUZBazF5enVCRXZFUE51WlNpSXVtR1BJMUt6RVdEUFZ1MG5KQWZ2RWxGcWNuSnljdzZVNTh2eWpR694509de705c0';
         } else {
             // local

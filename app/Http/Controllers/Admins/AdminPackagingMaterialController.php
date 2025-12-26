@@ -1585,7 +1585,7 @@ class AdminPackagingMaterialController extends Controller
                     
                 } else {
                     // Handle error from Marco API
-                    return redirect()->back()->with(['status' => 0, 'failed' => $result]);
+                    return redirect()->back()->with(['status' => 0, 'success' => $result]);
                 }
             }
         }
