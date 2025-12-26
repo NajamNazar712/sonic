@@ -75,6 +75,7 @@ use Illuminate\Http\Request;
             Route::post('eta', 'APIController@shipment_status_eta')->name('eta');
             Route::post('book/daraz', 'APIController@shipment_book_daraz')->name('book.daraz');
             Route::post('book/jazzcash', 'APIController@shipment_book_jazzcash')->name('book.jazzcash');
+            Route::post('packaging/request-dispatch', 'APIController@request_dispatch_submit')->name('request-dispatch');
         });
         Route::prefix('request')->name('request.')->group(function () {
             Route::post('crm', 'APIController@crm_request_create')->name('crm');

@@ -150,6 +150,7 @@ use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransactionRetail;
 use App\Models\BookingApiLog;
 use App\Models\BookingPayloadLog;
 use App\Http\Models\PackagingMaterialRequest;
+use App\Http\Models\PackagingMaterialRequestHistory;
 
 class APIController extends Controller
 {
@@ -11274,6 +11275,93 @@ class APIController extends Controller
 
         return response()->json(['status' => 1, 'data' => $details]);
 
+    }
+
+    public function request_dispatch_submit(Request $request)
+    {
+        $request_id = $request->id;
+
+        /** STEP 1: Fetch request with relations */
+        $packaging_material_request = PackagingMaterialRequest::with(['city', 'items'])
+            ->where('id', $request_id)
+            ->first();
+
+        if (! $packaging_material_request) {
+            return response()->json([
+                'status' => 0,
+                'error'  => 'Packaging request not found.'
+            ], 404);
+        }
+
+        /** STEP 2: Validate items exist */
+        if ($packaging_material_request->items->isEmpty()) {
+            return response()->json([
+                'status' => 0,
+                'error'  => 'Request has no items.'
+            ], 422);
+        }
+
+        /** STEP 3: Prevent double dispatch */
+        if ($packaging_material_request->status_id == 3) {
+            return response()->json([
+                'status' => 0,
+                'error'  => 'Request already dispatched.'
+            ], 409);
+        }
+
+        DB::beginTransaction();
+
+        try {        
+
+            /** STEP 4: Update packaging request status */
+            $packaging_material_request->update([
+                'status_id' => 3 // DISPATCHED
+            ]);
+
+            /** STEP 6: Update shipment (if exists) */
+            $shipment = Shipment::where(
+                'tracking_number',
+                $packaging_material_request->tracking_number
+            )->first();
+
+            if ($shipment) {
+                $shipment->update([
+                    'shipper_status_id'   => 2,
+                    'consignee_status_id' => 2,
+                ]);
+
+                ShipmentsJourneyController::add(
+                    $shipment->id,
+                    2,
+                    2,
+                    null,
+                    null,
+                    null,
+                    Auth::id(),
+                    $packaging_material_request->id
+                );
+            }
+
+            /** STEP 7: History log */
+            $packaingHistory = new PackagingMaterialRequestHistory();
+            $packaingHistory->packaging_material_request_id = $request_id;
+            $packaingHistory->status = 3;
+            $packaingHistory->updated_by = Auth::id();
+            $packaingHistory->save();
+            DB::commit();
+
+            return response()->json([
+                'status'  => 1,
+                'success' => 'Packaging Material has been dispatched successfully!'
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'status' => 0,
+                'message'  => $e->getMessage()
+            ], 500);
+        }
     }
 }
 
