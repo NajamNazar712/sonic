@@ -61,10 +61,10 @@ class MarcoOrderService extends MarcoBaseService
         }
         /** STEP 4: Handle failure */
         if ($response->failed()) {
-      
-            return $this->fail(
-                $response->json('message') ?? 'Marco API error'
-            );
+            return [
+                'status' => $responseStatus,
+                'data'   => $response->json('message') ?? 'Marco API error',
+            ];
         }
 
         /** STEP 5: Success */
