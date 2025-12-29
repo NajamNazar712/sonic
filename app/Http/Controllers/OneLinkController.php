@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Log;
@@ -253,14 +254,31 @@ class OneLinkController extends Controller
                         $shipment = Shipment::find($rrn);
                         if ($shipment) {
                             $shipment->update([
-                                'received_amount' => $data['messageInfo']['originalInstructedAmount'] ?? 0
+                                'received_amount' => $shipment->amount
                             ]);
                         }
-    
                         $delivery_note = DeliveryNote::find($subDept);
                         if ($delivery_note) {
                             $delivery_note->increment('one_link_payment_count');
-    
+
+                            $dt = Carbon::parse($data['info']['dateTime']);
+
+
+                            $one_link_payment_transaction = new OneLinkOutForDeliveryShipmentPayment();
+                            $one_link_payment_transaction->consumer_number = $shipment->tracking_number;
+                            $one_link_payment_transaction->transaction_authentication_id = $data['messageInfo']['originalRtpId'];
+                            $one_link_payment_transaction->transaction_amount = $shipment->amount;
+                            $one_link_payment_transaction->one_link_charges = 0;
+                            $one_link_payment_transaction->transaction_date = $dt->format('Ymd');
+                            $one_link_payment_transaction->transaction_time = $dt->format('His');
+                            $one_link_payment_transaction->bank_mnemonic = 'IN01BILL';
+                            $one_link_payment_transaction->reserved = null ;
+                            $one_link_payment_transaction->consumer_prefix = 100097;
+                            $one_link_payment_transaction->tracking_number = $shipment->tracking_number;
+                            $one_link_payment_transaction->shipment_id = $shipment->id;
+                            $one_link_payment_transaction->delivery_note_id = $delivery_note->id;
+                            $one_link_payment_transaction->save();
+
                             NotificationsController::app_notification(19, $delivery_note->rider_id, 2, $delivery_note->rider_id, $rrn);
                             NotificationsController::send(185, $delivery_note->rider_id, $rrn);
                         } else {
