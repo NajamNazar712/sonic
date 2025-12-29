@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Shipment extends Model
 {
-    protected $fillable = ['booking_type_id', 'shipper_status_id', 'consignee_status_id'];
+    protected $fillable = ['booking_type_id', 'shipper_status_id', 'consignee_status_id', 'received_amount'];
 	public function items() {
 		return $this->hasMany('App\Http\Models\ShipmentItem');
 	}
