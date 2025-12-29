@@ -61,9 +61,9 @@ class OneLinkController extends Controller
             $data = [
                 "merchantDetails" => [
                     "dbaName" => "Sonic",
-                    "merchantName" => "Trax Online (Pvt.) Ltd.",
-                    "iban" => "PK94AIIN0000102514490014",
-                    "bankBic" => "AIIN",
+                    "merchantName" => "TRAX ONLINE PRIVATE LIMITED",
+                    "iban" => "PK15ALFH5692005002464647",
+                    "bankBic" => "ALFH",
                     "merchantCategoryCode" => "4215",
                     "merchantID" => "854710236963454",
                     "postalAddress" => [
