@@ -22481,11 +22481,9 @@ class AdminFinanceController extends Controller
                     }
                     if (empty($errors)) {
                         $payment_id_data = array();
-
                         foreach ($rows as $key => $row) {
                             $row_id = $key + 2;
-                            $paymentId = trim($row['payment_id']);
-
+                            $paymentId = (int) trim($row['payment_id']);
                             $records = DB::table('done_payment_shipments')
                                 ->where('done_payment_id', $paymentId)
                                 ->select('id', 'wht', 'cod_sst', 'payable')
@@ -22497,8 +22495,7 @@ class AdminFinanceController extends Controller
                                     ->where('id', $record->id)
                                     ->update(['payable' => $currentPayable + $record->wht + $record->cod_sst, 'cod_sst' => 0, 'wht' => 0]);
                             }
-
-                            DB::select('CALL update_done_payment_statistics(?)', $paymentId);
+                            DB::select('CALL update_done_payment_statistics(?)', [$paymentId]);
 
                         }
                         return redirect()->back()->with(['success' => 'SST & WHT Removed Successfully']);
