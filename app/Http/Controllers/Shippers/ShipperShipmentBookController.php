@@ -4104,6 +4104,12 @@ class ShipperShipmentBookController extends Controller
 
                 foreach ($errorRowsOnly as $rid => &$r) {
                     $r['_row_id'] = $rid;
+                    if(!isset($r['consignee_latitude'])){
+                        $r['consignee_latitude'] = '0';
+                    }
+                    if(!isset($r['consignee_longitude'])){
+                        $r['consignee_longitude'] = '0';
+                    }
                 }
                 unset($r);
                 return view('client.shipment.book.errors')->with(['data' => $errorRowsOnly, 'errors' => $errors, 'cities' => $city_name, 'booking_types' => $booking_types, 'pickup_addresses' => $pickup_addresses, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'user_shipping_modes' => $user_shipping_modes, 'charges_modes' => $charges_modes, 'service_type_check_id' => $service_type_check_id, 'omni' => $omni,'batch_id'=>$batchId]);
