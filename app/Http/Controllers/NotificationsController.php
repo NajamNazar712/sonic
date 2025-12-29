@@ -12053,7 +12053,7 @@ class NotificationsController extends Controller
                         self::push_notification($admin_id, $employee_type, $title, $body);
                     }
                 } else if ($id == 19) {
-                    $one_link_transaction = OneLinkTransaction::with('shipment')->where('rrn', (int) $reference_2_id)->first();
+                    $one_link_transaction = OneLinkTransaction::with('shipment')->where('rrn', (int) $reference2_id)->first();
 
                     $rider = Rider::find($reference1_id);
                     if ($one_link_transaction && $rider) {
