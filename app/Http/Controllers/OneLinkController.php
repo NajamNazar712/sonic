@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Http\Models\Shipment;
@@ -323,6 +324,9 @@ class OneLinkController extends Controller
 
     public function notifyMerchant(Request $request)
     {
+        $data['data'] = json_encode($request->all(), true);
+        $data['paymentNotification'] = '1';
+        Log::channel('code_test_log')->info($data);
         $rules = [
             'info' => 'required|array',
             'messageInfo' => 'required|array',
@@ -343,6 +347,9 @@ class OneLinkController extends Controller
 
     public function paymentNotification(Request $request)
     {
+        $data['data'] = json_encode($request->all(), true);
+        $data['paymentNotification'] = '1';
+        Log::channel('code_test_log')->info($data);
         $rules = [
             'info' => 'required|array',
             'messageInfo' => 'required|array',
