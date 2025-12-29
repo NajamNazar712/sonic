@@ -205,8 +205,8 @@ class OneLinkController extends Controller
     
         $data = $request->all();
     
-        $rrn =  $data['info']['rrn'];
-        $stan = $data['info']['stan'];
+        $rrn =  $data['messageInfo']['originalRRN'];
+        $stan = $data['messageInfo']['originalStan'];
         $subDept = $data['messageInfo']['subDept'];
     
         $existingTransaction = OneLinkTransaction::where([
@@ -324,14 +324,10 @@ class OneLinkController extends Controller
 
     public function notifyMerchant(Request $request)
     {
-        $data['data'] = json_encode($request->all(), true);
-        $data['paymentNotification'] = '1';
-        Log::channel('code_test_log')->info($data);
+
         $rules = [
             'info' => 'required|array',
             'messageInfo' => 'required|array',
-            'messageInfo.rrn' => 'required|string|exists:one_link_transactions,rrn',
-            'messageInfo.stan' => 'required|string|exists:one_link_transactions,stan',
             'info.dateTime' => 'required|string',
             'messageInfo.originalRRN' => 'required|string',
             'messageInfo.originalStan' => 'required|string',
@@ -347,23 +343,21 @@ class OneLinkController extends Controller
 
     public function paymentNotification(Request $request)
     {
-        $data['data'] = json_encode($request->all(), true);
-        $data['paymentNotification'] = '1';
-        Log::channel('code_test_log')->info($data);
+
         $rules = [
+
             'info' => 'required|array',
             'messageInfo' => 'required|array',
-            'senderInfo' => 'required|array',
-            'info.rrn' => 'required|string|exists:one_link_transactions,rrn',
-            'info.stan' => 'required|string|exists:one_link_transactions,stan',
             'info.dateTime' => 'required|string',
-            'messageInfo.messageId' => 'required|string',
             'messageInfo.originalRRN' => 'required|string',
             'messageInfo.originalStan' => 'required|string',
+            'messageInfo.originalMessageId' => 'required|string',
             'messageInfo.originalRtpId' => 'required|string',
             'messageInfo.merchantID' => 'required|string',
             'messageInfo.subDept' => 'required|string',
             'messageInfo.status' => 'required|string',
+            'senderInfo' => 'required|array',
+            'messageInfo.messageId' => 'required|string',
             'messageInfo.originalInstructedAmount' => 'required|string',
             'messageInfo.netAmount' => 'required|string',
             'senderInfo.iban' => 'required|string',
