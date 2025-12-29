@@ -249,7 +249,7 @@ class OneLinkController extends Controller
     
                     $existingTransaction->update($updateData);
     
-                    if ($natureId == 2) {
+                    if ($natureId == 2 || $natureId == 1) {
                         $shipment = Shipment::find($rrn);
                         if ($shipment) {
                             $shipment->update([
