@@ -4551,7 +4551,6 @@ class AdminFinanceController extends Controller
         $shipmentDeliveryNote = DeliveryNoteShipment::with('delivery_note')->where('shipment_id', $shipment->id)->latest()->first();
 
         if(!empty($shipmentDeliveryNote)) {
-
             NotificationsController::app_notification(
                 23, // Notification type ID
                 $shipmentDeliveryNote->delivery_note->rider_id, // Rider ID
@@ -4840,18 +4839,20 @@ class AdminFinanceController extends Controller
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
             $header = ['Tracking Number', 'Actual Weight'];
-
+            
             if (isset($spreadsheet)) {
                 $header_correct = TRUE;
 
                 foreach ($spreadsheet[0] as $index => $header_value) {
                     if ($index == 2) {
+                        $header_correct = TRUE;
+                        break;
                     } elseif (!isset($header[$index]) || $header_value != $header[$index]) {
                         $header_correct = FALSE;
                         break;
                     }
                 }
-
+     
                 if (!$header_correct) {
                     return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
                 } else {
@@ -9293,7 +9294,17 @@ class AdminFinanceController extends Controller
                 foreach ($rows as $key => $row) {
                     $payment_id = (int)$row['payment_id'];
                     $done_payment = DonePayment::find($payment_id);
-                    if($done_payment->is_wallet_payment == 0) {
+
+                    if($done_payment->is_wallet_payment == 1) {
+
+                        $done_payment->status = 3;
+                        $done_payment->status_updated_at = Carbon::now();
+                        $done_payment->save();
+                        WalletBulkSettlementFromDonePayments::dispatch($payment_id,  Auth::id());
+                        $payment_paid=true;
+
+                    }
+                    else {
                         $status = strtolower($row['status']);
                         if ($status == "paid") {
                             if ($done_payment->status != 1) {
@@ -10208,7 +10219,7 @@ class AdminFinanceController extends Controller
 
         $current_date = Carbon::now()->startOfDay();
         $current_date_string = $current_date->toDateString();
-        $users = User::where('account_type_id', 2)->get();
+        $users = User::where('account_type_id', 2)->where('id',2234)->get();
 
         foreach ($users as $user) {
 
@@ -10259,7 +10270,7 @@ class AdminFinanceController extends Controller
                     //}
                 }
                 //$generate = TRUE;
-
+         
                 //$billing_period_from_date = Carbon::now()->subDays(7)->startOfDay()->toDateString();
                 if ($generate) {
 
@@ -22332,4 +22343,46 @@ class AdminFinanceController extends Controller
         return ['status' => 0, 'success' => 'Payment(s) Tax marked Paid'];
     }
 
+    public function generate_or_find_report(Request $request){
+        if ($request->filled('dps_date_from')) {
+
+            // Convert incoming date to Y_m_d format
+            $date = Carbon::parse($request->dps_date_from)->format('Y_m_d');
+
+            // Path to /public/reports
+            $path = public_path('reports');
+
+            if(isset($request->retail)){
+                // File search pattern
+                $pattern = $path . "/retail_done_payment_report_{$date}_*.xlsx";
+                // Find matching files
+                $files = glob($pattern);
+                if(count($files) == 0){
+                    AdminReportsEmailController::done_payment($date);
+                    $files = glob($pattern);
+                }
+            }else{
+                // File search pattern
+                $pattern = $path . "/done_payment_report_{$date}_*.xlsx";
+                // Find matching files
+                $files = glob($pattern);
+                if(count($files) == 0){
+                    AdminReportsEmailController::done_payment($date);
+                    $files = glob($pattern);
+                }
+            }
+
+
+            return response()->json([
+                'date'  => $date,
+                'files' => array_map('basename', $files),
+                'count' => count($files),
+            ]);
+
+        }
+
+        return response()->json([
+            'error' => 'dps_date_from is required'
+        ], 400);
+    }
 }

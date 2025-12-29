@@ -475,8 +475,9 @@ trait RvTrait
     // Description: userId variable used for the AlistShipper
     protected function reattempt($request,$userId = null)
     {
-        $remarks = $request->remarks;
+        $remarks = $request->remarks ?? $request->remark;
         $parcel = Shipment::find($request->shipment_id);
+
         if ($request->has('charges')) {
             if ($request->charges != null) {
                 $check = $this->update_estimate_charges($request->shipment_id, $request->charges);
@@ -1554,7 +1555,7 @@ trait RvTrait
                     }
                     else if($agent->agent_caller_type == 2)//These Agents will get shipments pending with second call only
                     {
-                        return $query->where('call_count' , '>', 0);
+                        return $query->where('call_count' , '>', 0)->where('call_count' , '<', 2);
                     }
                     else
                     {
@@ -2058,15 +2059,19 @@ trait RvTrait
         dispatch(new ProcessRvShipmentTicket($rvData));
     }
 
-    static function botCallingDataSet($shipmentId){
-    
+    static function botCallingDataSet($shipmentId,$callCount = null){
+        
         if (GlobalSettings::where(['type' => 'bot_call_enable_disable', 'setting_value' => 1])->exists()) {
             if (RvShipmentTicket::where('shipment_id', $shipmentId)->whereNull('deleted_at')->where('is_bot', 1)->exists()) {
+                $shipment = Shipment::with(['user:id,name,brand_name'])->select('user_id', 'consignee_phone_number_1', 'consignee_name', 'tracking_number', 'amount')->find($shipmentId);
+                if($callCount == 3){
+                    Log::channel('botCallJobLog')->info('s ' . '31538 this is hit multiple time or not...!' );
+                   return self::botCallingThirdDataSet($shipmentId);
+                }
                 $base_uri = 'https://cap.zong.com.pk:8444/vpbx-apis/roboCalls/outboundCall';
                 RvShipmentTicket::where('shipment_id', $shipmentId)->update(['in_progress' => 1]);
-                $shipment = Shipment::with(['user:id,name,brand_name'])->select('user_id', 'consignee_phone_number_1', 'consignee_name', 'tracking_number', 'amount')->find($shipmentId);
 
-                $final_phone = self::phoneNo($shipment->consignee_phone_number_1);
+            $final_phone = self::phoneNo($shipment->consignee_phone_number_1);
                 $post = [
                     'vpbx_id' => '66bdfd18cb67f',
                     'caller_id' => $final_phone,
@@ -2074,6 +2079,36 @@ trait RvTrait
                     'cod_amount' => $shipment->amount,
                     'brand_name' => $shipment->user->name ?? $shipment->user->brand_name,
                     'customer_name' => $shipment->consignee_name,
+                ];
+                return ['post' => $post, 'base_uri' => $base_uri, 'user_id' => $shipment->user_id];
+            } else {
+                return null;
+            }
+        }
+    }
+    static function botCallingThirdDataSet($shipmentId){
+    
+        if (GlobalSettings::where(['type' => 'bot_call_enable_disable', 'setting_value' => 1])->exists()) {
+            // status_reason
+            $rvShipmentikcet = RvShipmentTicket::where('shipment_id', $shipmentId)->whereNull('deleted_at');
+           
+            if ($rvShipmentikcet->exists()) {
+               
+                $base_uri = 'https://trax-api.xnotify.ai/api/messages';
+                $rvShipment = $rvShipmentikcet->first();
+                $rvShipment->update(['in_progress' => 1,'is_bot'=>1]);
+                $shipment = Shipment::with(['user:id,name,brand_name', 'destination_city:id,name'])->select('user_id', 'consignee_city_id', 'consignee_phone_number_1', 'consignee_name', 'tracking_number', 'amount')->find($shipmentId);
+                $final_phone = self::phoneNo($shipment->consignee_phone_number_1);
+                $post = [
+                    'send_to' => $final_phone,
+                    'tracking_id' => (string) $shipment->tracking_number,
+                    'tns_no' => $shipment->tracking_number . '-' . uniqid(),
+                    'amount' => $shipment->amount,
+                    'reason_name' => $rvShipment?->status_reason?->name ?? '',
+                    'shipper' => $shipment->user->name ?? $shipment->user->brand_name,
+                    'city_name' => $shipment->destination_city->name,
+                    'location' => $shipment->destination_city->name,
+                    'item_type' => "Document"
                 ];
                 return ['post' => $post, 'base_uri' => $base_uri, 'user_id' => $shipment->user_id];
             } else {

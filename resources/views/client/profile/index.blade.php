@@ -710,14 +710,15 @@
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="">Add Bank</h4>
+                    <h4 class="modal-title" id="bankModalTitle">Add Bank</h4>
                 </div>
 
-                <form id="add_bank_form" action="{{route('cod.add.bank')}}" method="post">
+                <form id="add_bank_form" action="{{route('cod.add.bank')}}" method="post" enctype="multipart/form-data">
                     <div class="modal-body">
                         @method('POST')
                         @csrf
                         <div class="container">
+                            <input type="hidden" id="bank_id" name="id">
 
                             <div class="row mb-2 justify-content-center">
                                 <div class="col-12">
@@ -732,23 +733,23 @@
                                 </div>
                                 <div class="col-12">
                                     <div class="form-group">
-                                        <input type="text" class="form-control" name="bank_branch" placeholder="Branch Name*" data-rule-required="true" data-msg-required="Branch Name is required">
+                                        <input type="text" class="form-control" name="bank_branch" id="branch" placeholder="Branch Name*" data-rule-required="true" data-msg-required="Branch Name is required">
                                     </div>
                                 </div>
 
                                 <div class="col-12">
                                     <div class="form-group">
-                                        <input type="text" class="form-control required" name="account_no" placeholder="Account Number*" data-rule-required="true" data-msg-required="Account No. is required">
+                                        <input type="text" class="form-control required" name="account_no" id="accountno" placeholder="Account Number*" data-rule-required="true" data-msg-required="Account No. is required">
                                     </div>
                                 </div>
                                 <div class="col-12">
                                     <div class="form-group">
-                                        <input type='text' class="form-control" name="account_title" placeholder="Account Title*" data-rule-required="true" data-msg-required="Account Title is required">
+                                        <input type='text' class="form-control" name="account_title" id="accounttitle" placeholder="Account Title*" data-rule-required="true" data-msg-required="Account Title is required">
                                     </div>
                                 </div>
                                 <div class="col-12">
                                     <div class="form-group">
-                                        <input type="text" class="form-control" placeholder="(e.g: PK37MEZN0001220100004069)" name="iban_no" data-rule-required="true" data-msg-required="IBAN is required" data-rule-maxlength="24">
+                                        <input type="text" class="form-control" placeholder="(e.g: PK37MEZN0001220100004069)" name="iban_no" id="ibanno" data-rule-required="true" data-msg-required="IBAN is required" data-rule-maxlength="24">
                                     </div>
                                 </div>
                                 <div class="col-12">
@@ -762,6 +763,13 @@
 
                                     </div>
                                 </div>
+                                 <div class="col-12">
+                                    <div class="form-group">
+                                        <label for="blank_cheque">Upload Blank Cheque</label>
+                                        <input type="file" name="blank_cheque" id="blank_cheque" class="form-control" accept="image/*">
+                                        <small class="text-muted">Allowed types: JPG, PNG (Max 2MB)</small>
+                                    </div>
+                                 </div>   
                             </div>
                         </div>
 
@@ -1492,7 +1500,10 @@
                         className: 'btn btn-primary add_bank',
                         enabled: true,
                         action: function (e, dt, node, config) {
-
+                            console.log( $('#add_bank_form'))
+                            $('#add_bank_form')[0].reset();
+                            $('#bank_id').val('');
+                            $('#addBank').text('Save');
                             $('#AddBankModal').modal('show');
 
                             /**/
@@ -1519,12 +1530,19 @@
                     {data: 'account_no', name: 'user_bank_infos.account_no'},
                     {data: 'account_title', name: 'user_bank_infos.account_title'},
                     {data: 'iban',orderable: false, name: 'user_bank_infos.iban',class:'status'},
-                    {data: 'action',orderable: false, name: 'action',class:'action'}
+                    {data: 'action',orderable: false, name: 'action',class:'action'},
+                    
                 ],
                 rowCallback: function(row, data, index) {
                     var info = btable.page.info();
-
+                    console.log(data);
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                    // Attach useful attributes for actions
+                    $(row).attr('bank_branch', data.bank_branch);
+                    $(row).attr('bank_name', data.bank_name);
+                    $(row).attr('account_no', data.account_no);
+                    $(row).attr('account_title', data.account_title);
+                    $(row).attr('iban', data.iban);
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -1558,12 +1576,26 @@
                 btable.columns.adjust().draw();
             });
             $('#bank_datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+                 var rowData = btable.row($(this).parents('tr')).data();
 
                 var id = parseInt($(this).parents('tr').attr('id'));
 
                 if ($(this).hasClass('default')) {
                     $('#bank_info_id').val(id);
                     $('#DefaultBankModal').modal('show');
+
+                }
+                if ($(this).hasClass('editBank')) {
+                    $('#bank_id').val(id);
+                    $('#bank_select').val(rowData.bank_name_id).trigger('change');
+                    $('#bankModalTitle').text('Edit Bank');
+                    $('#branch').val($(this).parents('tr').attr('bank_branch'));
+                    $('#accountno').val($(this).parents('tr').attr('account_no'));
+                    $('#accounttitle').val($(this).parents('tr').attr('account_title'));
+                    $('#ibanno').val($(this).parents('tr').attr('iban'));
+                    $('#addBank').text('Update');
+                    $('#bank_city').val(rowData.city_id).trigger('change');
+                    $('#AddBankModal').modal('show');
 
                 }
 

@@ -18468,10 +18468,21 @@ class AdminReportsController extends Controller
     }
 
 
-    public function wht_index() {
-
+    public function wht_index()
+    {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 829);
-        return view('admin.reports.wht_report');
+
+        $cities = DB::connection('reports')->table('cities')->select('id', 'name')->get();
+        $sales_persons = DB::connection('reports')->table('admins')->join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('ar.department_id', 7)->get();
+        $shippers = DB::connection('reports')->table('users')->whereIn('status', [3, 4])
+                ->select('id', 'name');
+        $shippers =  $shippers->where(function($query){
+            $idsToExclude = FilterTrait::class::getFilteredIds(auth()->user()->id);
+            if (!empty($idsToExclude)) {
+                $query->whereNotIn('users.id', $idsToExclude);
+            }
+        })->get();
+        return view('admin.reports.wht_report')->with(['cities' => $cities, 'sales_persons' => $sales_persons, 'shippers' => $shippers]);
     }
 
     public function wht_list(Request $request) {
@@ -18496,8 +18507,10 @@ class AdminReportsController extends Controller
                 'rdp.created_at as payment_date',
                 DB::raw('NULL as ntn_no'),
                 'u.shipper_cnic as cnic',
+                DB::raw('NULL as user_id'),
                 'u.shipper_name as customer_name',
                 DB::raw('3 as account_type'),
+                'u.city_id as city_id',
                 'c.name as city_name',
                 DB::raw('NULL as brand_name'),
                 'dpc.amount as taxable_amount',
@@ -18505,7 +18518,10 @@ class AdminReportsController extends Controller
                 DB::raw('SUM(rs.cod_sst) as cod_sst'),
                 'rdp.tax_status as status',
                 'rdp.tax_status_updated_at as tax_paid_date',
-                'admins.name as updated_by'
+                'admins.name as updated_by',
+                DB::raw('NULL as sales_person_id'),
+                DB::raw('NULL as sales_person'),
+
             ])->groupBy([
                 'rdp.id'
             ]);
@@ -18515,14 +18531,21 @@ class AdminReportsController extends Controller
             ->join('done_payment_shipments as dps', 'dps.done_payment_id', '=', 'dp.id')
             ->leftJoin('cities as c', 'c.id', '=', 'users.city_id')
             ->leftJoin('admins', 'admins.id', '=' , 'dp.tax_status_updated_by')
+            ->leftjoin('sale_person_tags as spt', function ($join) {
+                $join->on('spt.user_id', '=', 'users.id')
+                    ->leftjoin('admins as adsp', 'adsp.id', '=', 'spt.admin_id')
+                    ->where('spt.status', '=', 0);
+            })
             ->whereBetween('dp.created_at', [$search_date_from, $search_date_to])
             ->select([
                 'dp.id as payment_id',
                 'dp.created_at as payment_date',
                 'users.ntn_no as ntn_no',
                 'users.cnic as cnic',
+                'users.id as user_id',
                 'users.name as customer_name',
                 'users.account_type_id as account_type',
+                'users.city_id as city_id',
                 'c.name as city_name',
                 'users.brand_name as brand_name',
                 DB::raw('SUM(dps.amount) as taxable_amount'),
@@ -18530,14 +18553,43 @@ class AdminReportsController extends Controller
                 DB::raw('SUM(dps.cod_sst) as cod_sst'),
                 'dp.tax_status as status',
                 'dp.tax_status_updated_at as tax_paid_date',
-                'admins.name as updated_by'
+                'admins.name as updated_by',
+                'adsp.id as sales_person_id',
+                'adsp.name as sales_person',
             ])
             ->groupBy([
                 'dp.id'
             ]);
 
         $total = DB::query()->fromSub($retail_payments->union($payments), 'total');
+
+        if ($request->filled('search_sales_person')) {
+            // show only those with that sales person
+            $total->where('sales_person_id', $request->search_sales_person);
+        }
+
+        if ($request->filled('search_origin')) {
+            $total->where('city_id', $request->search_origin);
+        }
+
+        if ($request->filled('tax_status')) {
+            $total->where('status', $request->tax_status);
+        }
+
+        if ($request->filled('search_shippers')) {
+            $total->whereIn('user_id', $request->search_shippers);
+        }
         
+        $totalsQuery = clone $total;
+
+        $totals = $totalsQuery
+            ->selectRaw('
+                SUM(taxable_amount) as total_amount,
+                SUM(tax_amount) as total_tax,
+                SUM(CASE WHEN status = 1 THEN tax_amount ELSE 0 END) as paid_tax,
+                SUM(CASE WHEN status = 0 THEN tax_amount ELSE 0 END) as unpaid_tax
+            ')
+            ->first();
         $datatables = Datatables::of($total)
             ->editColumn('account_type', function ($total) {
                 if ($total->account_type == 1) {
@@ -18568,6 +18620,14 @@ class AdminReportsController extends Controller
             });
             
         return $datatables
+        ->with([
+            'totals' => [
+                'total_amount' => number_format($totals->total_amount ?? 0, 2),
+                'total_tax' => number_format($totals->total_tax ?? 0, 2),
+                'paid_tax' => number_format($totals->paid_tax ?? 0, 2),
+                'unpaid_tax' => number_format($totals->unpaid_tax ?? 0, 2),
+            ]
+        ])
         ->rawColumns(['customer_name','brand_name'])
         ->make(true);
 

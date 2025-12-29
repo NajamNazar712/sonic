@@ -10,9 +10,11 @@
         "barryvdh/laravel-snappy": "^1.0.1",
         "buzz/laravel-google-captcha": "^2.3",
         "doctrine/dbal": "^2.13.2",
+        "firebase/php-jwt": "^6.11",
         "fruitcake/laravel-cors": "^2.0",
         "fx3costa/laravelchartjs": "^2.5",
-        "guzzlehttp/guzzle": "^7.2",
+        "google/auth": "^1.49",
+        "guzzlehttp/guzzle": "^7.9",
         "h4cc/wkhtmltoimage-amd64": "^0.12.4",
         "h4cc/wkhtmltopdf-amd64": "^0.12.4",
         "h4cc/wkhtmltopdf-i386": "0.12.4",
@@ -42,7 +44,10 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        }
+        },
+        "files": [
+            "app/Helpers/helpers.php"
+        ]
         
     },
     "autoload-dev": {

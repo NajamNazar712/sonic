@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\Admins\FTLController;
@@ -1147,7 +1149,7 @@ class ShipperShipmentBookController extends Controller
 
 
                     } catch (\Exception $e) {
-                        Log::error('Error creating shipper segment log from shipment public function store(Request $request)' . $shipment_id . ': ' . $e->getMessage());
+                        Log::error('Error creating shipper segment log from shipment public function store(Request $request)' . $shipment_id . ': ' . $e->getMessage() . ' | File: ' . $e->getFile() . ' | Line: ' . $e->getLine() );
                     }
                     return redirect()->back()->with(['success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'print' => $print]);
                 }
@@ -3570,18 +3572,44 @@ class ShipperShipmentBookController extends Controller
 
                 unset($spreadsheet);
             } else {
-                $forms = $request->all();
+                // Recombine corrected error rows back into the original cached full set
+                $batchId = $request->input('batch_id');
+                $cacheKey = $batchId ? "excel_import:{$user_id}:{$batchId}" : null;
 
-                $forms = $forms['form'];
-                foreach ($forms as $form) {
-                    $row = array();
-                    foreach ($form as $key => $value) {
-                        $row[$key] = $value;
+                $payload = $cacheKey ? Cache::get($cacheKey) : null;
+                // Fallback: if no cache (unexpected), use raw form rows (legacy)
+                if (!$payload) {
+                    $rows = [];
+                    $forms = $request->input('form', []);
+                    foreach ($forms as $excelRowId => $form) {
+                        $row = [];
+                        foreach ($form as $k => $v) $row[$k] = $v;
+                        $rows[] = $row;
                     }
-                    $rows[] = $row;
-                }
-                $service_type_check_id = $request->service_type_check_id;
+                    $service_type_check_id = $request->service_type_check_id;
+                } else {
+                    // We have the original full set cached (keyed by Excel row id: 2..N)
+                    $cachedRowsById = $payload['rows'];                   // [2 => [...], 3 => [...], ...]
+                    $meta           = $payload['meta'] ?? [];
 
+                    // Trust server meta primarily; fall back to request if meta missing
+                    $service_type_check_id = $meta['service_type_check_id'] ?? $request->service_type_check_id ?? null;
+                    $omni                  = $meta['omni'] ?? $omni;
+
+                    // Overlay incoming corrections onto cached rows by exact excel row id
+                    $incoming = $request->input('form', []);              // ['2' => [...], '5' => [...], ...]
+                    foreach ($incoming as $excelRowId => $formRow) {
+                        if (isset($cachedRowsById[$excelRowId])) {
+                            // do not keep any helper keys you may add on the frontend
+                            unset($formRow['_row_id']);
+                            $cachedRowsById[$excelRowId] = array_merge($cachedRowsById[$excelRowId], $formRow);
+                        }
+                    }
+
+                    // Rebuild $rows in the original order (2..N); this keeps $key+2 == ExcelRowId
+                    ksort($cachedRowsById, SORT_NUMERIC);
+                    $rows = array_values($cachedRowsById);
+                }
             }
 
             $errors = array();
@@ -3963,6 +3991,7 @@ class ShipperShipmentBookController extends Controller
                     }
                 }
             }
+
             if (empty($errors)) {
                 if (empty($nsa_error)) {
                     if (empty($bdmk_error)) {
@@ -4049,7 +4078,39 @@ class ShipperShipmentBookController extends Controller
                 foreach ($cities as $city) {
                     $city_name[$city->name] = $city->name;
                 }
-                return view('client.shipment.book.errors')->with(['data' => $rows, 'errors' => $errors, 'cities' => $city_name, 'booking_types' => $booking_types, 'pickup_addresses' => $pickup_addresses, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'user_shipping_modes' => $user_shipping_modes, 'charges_modes' => $charges_modes, 'service_type_check_id' => $service_type_check_id, 'omni' => $omni]);
+
+
+                $error_keys = array_keys($errors);
+                $allRowsByExcelId = [];
+                foreach ($rows as $idx => $row) {
+                    $excelRowId = $idx + 2;
+                    $allRowsByExcelId[$excelRowId] = $row;
+                }
+
+
+                $batchId = (string) Str::uuid();
+                $cacheKey = "excel_import:{$user_id}:{$batchId}";
+
+                Cache::put($cacheKey, [
+                    'rows' => $allRowsByExcelId,
+                    'meta' => [
+                        'service_type_check_id' => $service_type_check_id,
+                        'omni' => $omni,
+                    ],
+                ], now()->addHours(2));
+
+
+                $errorRowsOnly = array_intersect_key($allRowsByExcelId, array_flip($error_keys));
+
+                foreach ($errorRowsOnly as $rid => $r) {
+                    $errorRowsOnly[$rid]['_row_id'] = $rid;
+                    $errorRowsOnly[$rid]['consignee_latitude']  = $r['consignee_latitude']  ?? '0';
+                    $errorRowsOnly[$rid]['consignee_longitude'] = $r['consignee_longitude'] ?? '0';
+                }
+
+                unset($r);
+                return view('client.shipment.book.errors')->with(['data' => $errorRowsOnly, 'errors' => $errors, 'cities' => $city_name, 'booking_types' => $booking_types, 'pickup_addresses' => $pickup_addresses, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'user_shipping_modes' => $user_shipping_modes, 'charges_modes' => $charges_modes, 'service_type_check_id' => $service_type_check_id, 'omni' => $omni,'batch_id'=>$batchId]);
+
             }
         } else {
             return redirect()->back()->with('error', 'No Shipments in File');
@@ -6577,17 +6638,44 @@ class ShipperShipmentBookController extends Controller
 
                 unset($spreadsheet);
             } else {
-                $forms = $request->all();
+                // Recombine corrected error rows back into the original cached full set
+                $batchId = $request->input('batch_id');
+                $cacheKey = $batchId ? "cor_excel_import:{$user_id}:{$batchId}" : null;
 
-                $forms = $forms['form'];
-                foreach ($forms as $form) {
-                    $row = array();
-                    foreach ($form as $key => $value) {
-                        $row[$key] = $value;
+                $payload = $cacheKey ? Cache::get($cacheKey) : null;
+                // Fallback: if no cache (unexpected), use raw form rows (legacy)
+                if (!$payload) {
+                    $rows = [];
+                    $forms = $request->input('form', []);
+                    foreach ($forms as $excelRowId => $form) {
+                        $row = [];
+                        foreach ($form as $k => $v) $row[$k] = $v;
+                        $rows[] = $row;
                     }
-                    $rows[] = $row;
+                    $service_type_check_id = $request->service_type_check_id;
+                } else {
+                    // We have the original full set cached (keyed by Excel row id: 2..N)
+                    $cachedRowsById = $payload['rows'];                   // [2 => [...], 3 => [...], ...]
+                    $meta           = $payload['meta'] ?? [];
+
+                    // Trust server meta primarily; fall back to request if meta missing
+                    $service_type_check_id = $meta['service_type_check_id'] ?? $request->service_type_check_id ?? null;
+                    $omni                  = $meta['omni'] ?? $omni;
+
+                    // Overlay incoming corrections onto cached rows by exact excel row id
+                    $incoming = $request->input('form', []);              // ['2' => [...], '5' => [...], ...]
+                    foreach ($incoming as $excelRowId => $formRow) {
+                        if (isset($cachedRowsById[$excelRowId])) {
+                            // do not keep any helper keys you may add on the frontend
+                            unset($formRow['_row_id']);
+                            $cachedRowsById[$excelRowId] = array_merge($cachedRowsById[$excelRowId], $formRow);
+                        }
+                    }
+
+                    // Rebuild $rows in the original order (2..N); this keeps $key+2 == ExcelRowId
+                    ksort($cachedRowsById, SORT_NUMERIC);
+                    $rows = array_values($cachedRowsById);
                 }
-                $service_type_check_id = $request->service_type_check_id;
             }
 
             $errors = array();
@@ -7103,7 +7191,35 @@ class ShipperShipmentBookController extends Controller
                     $city_name[$city->name] = $city->name;
                 }
 
-                return view('client.shipment.book.corporate.errors')->with(['data' => $rows, 'errors' => $errors, 'cities' => $city_name, 'booking_types' => $booking_types, 'pickup_addresses' => $pickup_addresses, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'delivery_types' => $delivery_types, 'charges_modes' => $charges_modes, 'user_shipping_modes' => $user_shipping_modes, 'service_type_check_id' => $service_type_check_id, 'omni' => $omni]);
+
+                $error_keys = array_keys($errors);
+                $allRowsByExcelId = [];
+                foreach ($rows as $idx => $row) {
+                    $excelRowId = $idx + 2;
+                    $allRowsByExcelId[$excelRowId] = $row;
+                }
+
+
+                $batchId = (string) Str::uuid();
+                $cacheKey = "cor_excel_import:{$user_id}:{$batchId}";
+
+                Cache::put($cacheKey, [
+                    'rows' => $allRowsByExcelId,
+                    'meta' => [
+                        'service_type_check_id' => $service_type_check_id,
+                        'omni' => $omni,
+                    ],
+                ], now()->addHours(2));
+
+
+                $errorRowsOnly = array_intersect_key($allRowsByExcelId, array_flip($error_keys));
+
+                foreach ($errorRowsOnly as $rid => &$r) {
+                    $r['_row_id'] = $rid;
+                }
+                unset($r);
+
+                return view('client.shipment.book.corporate.errors')->with(['data' => $errorRowsOnly, 'errors' => $errors, 'cities' => $city_name, 'booking_types' => $booking_types, 'pickup_addresses' => $pickup_addresses, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'delivery_types' => $delivery_types, 'charges_modes' => $charges_modes, 'user_shipping_modes' => $user_shipping_modes, 'service_type_check_id' => $service_type_check_id, 'omni' => $omni,'batch_id'=>$batchId]);
             }
         } else {
             return redirect()->back()->with('error', 'No Shipments in File');

@@ -189,7 +189,10 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\OptimizeTable',
         'App\Console\Commands\TicketDraftingCRM',
        'App\Console\Commands\UpdateRvShipments',
-        'App\Console\Commands\UpdateRvShipments',
+        'App\Console\Commands\UpdatePendingBanks',
+        'App\Console\Commands\DailyOverAllSalesReportKhaddi',
+        'App\Console\Commands\ArchiveBookingApiLogs',
+        'App\Console\Commands\DeleteDuplicateDonePayment',
         // 'App\Console\Commands\QsrEmail',
         // 'App\Console\Commands\PendingDeliveriesReport',
 
@@ -607,6 +610,7 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('update:zero_arrival_charges')->everyTwoHours()->runInBackground();
         $schedule->command('delete:duplicate_arrival')->hourly()->runInBackground();
+        $schedule->command('delete:duplicate_done_delivered')->everyThirtyMinutes()->runInBackground();
         $schedule->command('update_corporate_invoice_charges_issue')->hourly()->runInBackground();
         $schedule->command('update:pending_payment_shipment_arrival_charges')->hourly()->runInBackground();
 //        $schedule->command('storage:amazon')->dailyAt('15:05')->runInBackground();
@@ -703,7 +707,7 @@ class Kernel extends ConsoleKernel
                 return Carbon::now()->format('Y-m-d H:i') === '2025-08-10 13:00';
             })
             ->withoutOverlapping();
-        // $schedule->command('shipments:update-rv-sar')->dailyAt('05:00');
+        // $schedule->command('banks:update-pending')->dailyAt('23:00');
         // $schedule->command('export:shipment-report')
         //     ->dailyAt('14:46')              
         //     ->withoutOverlapping()         // prevent simultaneous runs
@@ -711,6 +715,9 @@ class Kernel extends ConsoleKernel
         //     ->runInBackground()            // runs non-blocking
         //     ->sendOutputTo(storage_path('logs/shipment_report.log'))
         //     ->emailOutputOnFailure('anas.mazhar@logiserves.com');
+        $schedule->command('email:daily_overall_sales_report_khaddi')->dailyAt('09:00')->runInBackground();
+        $schedule->command('shipments:update-rv-sar')->dailyAt('05:00');
+        $schedule->command('logs:archive-booking-api')->dailyAt('03:00');
     }
     /**
      * Register the commands for the application.

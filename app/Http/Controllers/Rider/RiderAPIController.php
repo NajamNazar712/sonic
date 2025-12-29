@@ -12333,7 +12333,20 @@ class RiderAPIController extends Controller
                                 }
                             }
                         }
-
+                        //Device Token
+                        if ($request->has('device_token')) {
+                            $employee_device_token = EmployeeDeviceToken::where('employee_id', $rider->id)
+                                ->where('employee_type_id', 2);
+                            if ($employee_device_token->exists()) {
+                                $employee_device_token = $employee_device_token->first();
+                            } else {
+                                $employee_device_token = new EmployeeDeviceToken();
+                                $employee_device_token->employee_id = $rider->id;
+                                $employee_device_token->employee_type_id = 2;
+                            }
+                            $employee_device_token->device_token = $request->get('device_token');
+                            $employee_device_token->save();
+                        }
                         if ($rider->api_token) {
                             $api_token = $rider->api_token;
                         } else {

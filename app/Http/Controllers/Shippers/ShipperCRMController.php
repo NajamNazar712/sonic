@@ -250,7 +250,7 @@ class ShipperCRMController extends Controller
             $shipment_status = null;
             if($crm_request->shipment_id != null) {
                 $shipment_status = Shipment::find($crm_request->shipment_id);
-                $shipment_status = $shipment_status->status_shipper->name;
+                $shipment_status = $shipment_status?->status_shipper?->name;
             }
             $crm_comments = array();
             $last_comment = null;
@@ -504,10 +504,19 @@ class ShipperCRMController extends Controller
                         $already_lodged = false;
                         if($is_shipment){ 
                             $already_lodged = true;
+                            $request_check = false;
 
-                            if($is_shipment->case_nature_id != $nature_id){
 
+                            if($nature_id == 1) {
+                                $check_request = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)
+                                    ->where('case_nature_type_id',$complaint_id)
+                                    ->where('status_id',4);
+                                if($check_request->exists()) {
+                                    $request_check = true;
+                                }
+                            }
 
+                            if($is_shipment->case_nature_id != $nature_id  || $request_check){
                                 if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
                                     CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL , NULL, $request->product_cost ?: $request->claim_product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
                                 }
@@ -710,8 +719,17 @@ class ShipperCRMController extends Controller
                     $already_lodged = false;
                     if($is_shipment){  
                         $already_lodged = true;
+                        $request_check = true;
 
-                        if($is_shipment->case_nature_id != $nature_id){
+                        if($nature_id == 1) {
+                            $check_request = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)
+                                ->where('status_id',1)
+                                ->first();
+                            if($check_request) {
+                                $request_check = false;
+                            }
+                        }
+                        if($is_shipment->case_nature_id != $nature_id || $request_check){
                             if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
                                 if(in_array($complaint_id, [11, 13])){
                                     $present_shipments[] = $shipment->tracking_number;

@@ -136,6 +136,8 @@ use App\Http\Models\Excel_reports\RetailDonePaymentsReport;
 use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Models\Admin\ShipperVerificationPinCode as AdminShipperVerificationPinCode;
+use App\Models\PendingBankAccount;
+use Illuminate\Support\Facades\Http;
 
 class NotificationsController extends Controller
 {
@@ -178,8 +180,8 @@ class NotificationsController extends Controller
 
     static private function push_notification($employee_id, $employee_type, $title, $body, $screen = NULL)
     {
-        $notification_history = new EmployeeNotificationHistory();
 
+        $notification_history = new EmployeeNotificationHistory();
         $notification_history->employee_id = $employee_id;
         $notification_history->employee_type_id = $employee_type;
         $notification_history->title = $title;
@@ -8884,7 +8886,7 @@ class NotificationsController extends Controller
                     $body_updated = $body;
                     $body_updated = str_replace('[preview]', $html, $body_updated);
                     $subject = ' Rider Deactivation';
-                    $to = ['nadeem.sarwar@trax.pk', 'hr.dept@trax.pk', 'ali.raza@trax.pk'];
+                    $to = ['ali.raza@genesisholdings.co', 'hr.dept@trax.pk', 'ali.raza@trax.pk'];
 
                     self::email($subject, $body_updated, $to);
                 } else if ($id == 156) {
@@ -11426,7 +11428,7 @@ class NotificationsController extends Controller
                         // }
 
                         $to = array();
-                        $bcc = array();
+                        $bcc = array(); 
                         $to[] = 'aftab.qidwai@trax.pk';
                         $to[] = 'anas.mazhar@trax.pk';
 
@@ -11460,6 +11462,37 @@ class NotificationsController extends Controller
                     $bcc = array();
                     $to[] = 'shahbaz.abbasi@trax.pk';
                     $to[] = 'mansoor.ahmad@trax.pk';
+
+                    self::email($subject, $body, $to, NULL, $bcc);
+                } else if ( $id == 254) {
+                    $date = Carbon::today()->format('Y-m-d');
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+                    if (strpos($subject, '[date]') !== FALSE) {
+                        $subject = str_replace('[date]', $date, $subject);
+                    }
+
+                    if (strpos($body, '[date]') !== FALSE) {
+                        $body = str_replace('[date]', $date, $body);
+                    }
+
+                    $link = '<a href="' . $reference_1_id . '" target="_blank">Report</a>';
+
+                    if (strpos($subject, '[link]') !== FALSE) {
+                        $subject = str_replace('[link]', $link, $subject);
+                    }
+
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+
+                    $to = array();
+                    $bcc = array();
+                    $to[] = 'sahban.ghani@logiserves.com';
+                    $to[] = 'hammad.saleem@slgtrax.com';
+                    $to[] = 'fawad.ahmed@slgtrax.com';
+                    $to[] = 'syed.furqan@slgtrax.com';
+                    $to[] = 'wajiha.majeed@slgtrax.com';
 
                     self::email($subject, $body, $to, NULL, $bcc);
                 } else if( $id == 244) {
@@ -11603,6 +11636,54 @@ class NotificationsController extends Controller
                         // self::sms($body, $to, 1);
                         self::sms_otp($body, $to, $name, $otp, 3, null, $id);
                     }
+                } else if ($id == 252) {
+                    $to = $reference_1_id;
+                    $body = str_replace('[status]', 'Approved', $body);
+                    self::email($subject, $body, $to);
+                } else if ($id == 253) {
+                    // Build HTML table
+                    $htmlTable = '
+                    <h3 style="font-family:Arial;">Daily Bank Account Change Summary</h3>
+                    <p style="font-family:Arial;">The following bank accounts were changed within the last 24 hours:</p>
+                    <table border="1" cellspacing="0" cellpadding="8" style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;">
+                        <thead style="background-color:#f2f2f2;">
+                            <tr>
+                                <th>User ID</th>
+                                <th>Bank Name</th>
+                                <th>Branch</th>
+                                <th>City</th>
+                                <th>Account No</th>
+                                <th>Account Title</th>
+                                <th>IBAN No</th>
+                                <th>Blank Cheque</th>
+                            </tr>
+                        </thead>
+                        <tbody>';
+                        $salesPersonId = [];
+                    foreach ($reference_1_id as $bank) {
+                        $sale_person_tag = SalePersonTag::where('user_id', $bank['user_id'])->first();
+                        PendingBankAccount::where('user_id',$bank['user_id'])->update(['email_status'=>1]);
+                        $salesPersonId[] = $sale_person_tag->admin_id; 
+                        $imageUrl = asset('storage/users_attached_documents/' . $bank['user_id'] . '/' . $bank['blank_cheque_image']);
+                        $htmlTable .= '
+                        <tr>
+                            <td>' . $bank['user_name'] . '</td>
+                            <td>' . $bank['bank_name'] . '</td>
+                            <td>' . $bank['bank_branch'] . '</td>
+                            <td>' . $bank['bank_city'] . '</td>
+                            <td>' . $bank['account_no'] . '</td>
+                            <td>' . $bank['account_title'] . '</td>
+                            <td>' . $bank['iban_no'] . '</td>
+                            <td><a href="' . $imageUrl . '" target="_blank">View Image</a></td>
+                        </tr>';
+                    }
+                    $htmlTable .= '</tbody></table>';
+                    $htmlTable .= '<br><p style="font-family:Arial;">Regards,<br><b>SLG Trax System</b></p>';
+                    $to = Admin::whereIn('id',$salesPersonId)->pluck('email');
+                    // Send email to main recipient and CC respective salespersons if needed
+                    $cc = ['fawad.ahmed@slgtrax.com', 'ali.haiderd@slgtrax.com','anas.mazhar@slgtrax.com'];
+                    $body = str_replace('[preview]', $htmlTable, $body);
+                    self::email($subject, $body, $to, $cc);
                 }
             }
         }
@@ -11650,7 +11731,49 @@ class NotificationsController extends Controller
             $notification_history->save();
         }
     }
+    static function sendFcmNotificationV1(
+        $employee_id,
+        $employee_type,
+        $device_token,
+        $notification_title,
+        $notification_body,
+        ?string $screen_id = null
+    ) {
+        $projectId   = 'bolt-rider-a37e0';
+        $accessToken = getFcmAccessToken();
 
+        $fcmUrl = "https://fcm.googleapis.com/v1/projects/{$projectId}/messages:send";
+
+        $payload = [
+            'message' => [
+                'token' => $device_token,
+                
+                'data' => [
+                    'title'     => (string) $notification_title,
+                    'body'      => (string) $notification_body,
+                    'screen_id' => (string) ($screen_id ?? ''),
+                    // optional: add unique id/timestamp if you want
+                    'ts'        => (string) microtime(true),
+                ],
+
+                // optional but good to have
+                'android' => [
+                    'priority' => 'HIGH',
+                    'ttl'      => '18000s', //% hours 
+                ],
+            ],
+        ];
+        // Send Request
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $accessToken,
+            'Content-Type'  => 'application/json',
+        ])->post($fcmUrl, $payload);
+
+        return [
+            'http_status' => $response->status(),
+            'fcm_response'   => $response->json(),
+        ];
+    }
     static public function bolt_forget_pin($phone_number, $pin, $name)
     {
         $notification = Notification::find(61);
@@ -11678,6 +11801,7 @@ class NotificationsController extends Controller
 
     static public function app_notification($id, $employee_id, $employee_type, $reference1_id, $reference2_id = NULL)
     {
+
         $push_notification = AppNotification::find($id);
         if ($push_notification) {
             if ($push_notification->status) {

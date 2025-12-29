@@ -13,6 +13,16 @@
 
 use Illuminate\Support\Facades\Artisan;
 
+Route::get('test-fcm-token', function () {
+    return getFcmAccessToken();
+});
+// Route::get('/test-fcm-file', function () {
+//     $path = config('services.fcm.service_account');
+//     return [
+//         'path' => $path,
+//         'exists' => file_exists($path)
+//     ];
+// });
 Route::get('payment_details/{id}/{id1}', 'TrackingController@payment_details')->name('payment_details');
 
 Route::get('/', function () {
@@ -101,6 +111,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('opt_verify_close', 'Shippers\ShipperDashboardController@opt_verify_close')->name('opt_verify_close');
     Route::get('/dashboard', 'Shippers\ShipperDashboardController@orders_index')->name('dashboard');
     Route::get('/order/pending', 'Shippers\ShipperDashboardController@orderPending');
+    Route::get('/sar_report', 'Shippers\ShipperDashboardController@sarReport')->name('sar_report');
 
     Route::post('/crf/update', 'Shippers\ShipperDashboardController@updateCrfSign')->name('updateSignOffCrf');;
 
