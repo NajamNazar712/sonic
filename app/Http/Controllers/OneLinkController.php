@@ -216,8 +216,9 @@ class OneLinkController extends Controller
         ])->first();
     
         if ($existingTransaction) {
+            $shipment = Shipment::find($rrn);
             try {
-                DB::transaction(function () use ($existingTransaction, $data, $natureId, $rrn, $subDept) {
+                DB::transaction(function () use ($existingTransaction, $data, $natureId, $rrn, $subDept,$shipment) {
                     $updateData = [
                         'date_time' => $data['info']['dateTime'] ?? now(),
                         'merchant_id' => $data['messageInfo']['merchantID'],
@@ -231,7 +232,9 @@ class OneLinkController extends Controller
                             'message_id' => $data['messageInfo']['originalMessageId'],
                             'original_rrn' => $data['messageInfo']['originalRRN'],
                             'original_stan' => $data['messageInfo']['originalStan'],
-                            'original_rtp_id' => $data['messageInfo']['originalRtpId']
+                            'original_rtp_id' => $data['messageInfo']['originalRtpId'],
+                            'original_instructed_amount' => $shipment->amount,
+                            'net_amount' => $shipment->amount,
                         ]);
                     } else {
                         $updateData = array_merge($updateData, [
@@ -251,7 +254,7 @@ class OneLinkController extends Controller
                     $existingTransaction->update($updateData);
     
                     if ($natureId == 2 || $natureId == 1) {
-                        $shipment = Shipment::find($rrn);
+
                         if ($shipment) {
                             $shipment->update([
                                 'received_amount' => $shipment->amount
@@ -264,20 +267,20 @@ class OneLinkController extends Controller
                             $dt = Carbon::parse($data['info']['dateTime']);
 
 
-                            $one_link_payment_transaction = new OneLinkOutForDeliveryShipmentPayment();
-                            $one_link_payment_transaction->consumer_number = $shipment->tracking_number;
-                            $one_link_payment_transaction->transaction_authentication_id = $data['messageInfo']['originalRtpId'];
-                            $one_link_payment_transaction->transaction_amount = $shipment->amount;
-                            $one_link_payment_transaction->one_link_charges = 0;
-                            $one_link_payment_transaction->transaction_date = $dt->format('Ymd');
-                            $one_link_payment_transaction->transaction_time = $dt->format('His');
-                            $one_link_payment_transaction->bank_mnemonic = 'IN01BILL';
-                            $one_link_payment_transaction->reserved = null ;
-                            $one_link_payment_transaction->consumer_prefix = 100097;
-                            $one_link_payment_transaction->tracking_number = $shipment->tracking_number;
-                            $one_link_payment_transaction->shipment_id = $shipment->id;
-                            $one_link_payment_transaction->delivery_note_id = $delivery_note->id;
-                            $one_link_payment_transaction->save();
+//                            $one_link_payment_transaction = new OneLinkOutForDeliveryShipmentPayment();
+//                            $one_link_payment_transaction->consumer_number = $shipment->tracking_number;
+//                            $one_link_payment_transaction->transaction_authentication_id = $data['messageInfo']['originalRtpId'];
+//                            $one_link_payment_transaction->transaction_amount = $shipment->amount;
+//                            $one_link_payment_transaction->one_link_charges = 0;
+//                            $one_link_payment_transaction->transaction_date = $dt->format('Ymd');
+//                            $one_link_payment_transaction->transaction_time = $dt->format('His');
+//                            $one_link_payment_transaction->bank_mnemonic = 'IN01BILL';
+//                            $one_link_payment_transaction->reserved = null ;
+//                            $one_link_payment_transaction->consumer_prefix = 100097;
+//                            $one_link_payment_transaction->tracking_number = $shipment->tracking_number;
+//                            $one_link_payment_transaction->shipment_id = $shipment->id;
+//                            $one_link_payment_transaction->delivery_note_id = $delivery_note->id;
+//                            $one_link_payment_transaction->save();
 
                             NotificationsController::app_notification(19, $delivery_note->rider_id, 2, $delivery_note->rider_id, $rrn);
                             NotificationsController::send(185, $delivery_note->rider_id, $rrn);

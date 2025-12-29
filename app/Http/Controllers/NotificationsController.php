@@ -9896,7 +9896,7 @@ class NotificationsController extends Controller
                             $body = str_replace('[rider]', $rider->name, $body);
                         }
 
-                        $to = '03208323070';
+                        $to = $rider->phone;
                         self::sms($body, $to, null, null,$id);
                     }
                 } else if ($id == 186) {
@@ -12053,14 +12053,15 @@ class NotificationsController extends Controller
                         self::push_notification($admin_id, $employee_type, $title, $body);
                     }
                 } else if ($id == 19) {
-                    $one_link_transaction = OneLinkOutForDeliveryShipmentPayment::find($reference2_id);
+                    $one_link_transaction = OneLinkTransaction::with('shipment')->where('rrn', (int) $reference_2_id)->first();
+
                     $rider = Rider::find($reference1_id);
                     if ($one_link_transaction && $rider) {
                         if (strpos($body, '[amount]') !== FALSE) {
-                            $body = str_replace('[amount]', $one_link_transaction->transaction_amount, $body);
+                            $body = str_replace('[amount]', $one_link_transaction->shipment->amount, $body);
                         }
                         if (strpos($body, '[tracking_number]') !== FALSE) {
-                            $body = str_replace('[tracking_number]', $one_link_transaction->tracking_number, $body);
+                            $body = str_replace('[tracking_number]', $one_link_transaction->shipment->tracking_number, $body);
                         }
                         if (strpos($body, '[rider]') !== FALSE) {
                             $body = str_replace('[rider]', $rider->name, $body);

@@ -35,5 +35,8 @@ class OneLinkTransaction extends Model
     public function one_link_log() {
         return $this->hasOne('App\Models\OneLinkApiLog', 'id', 'log_id');
     }
+    public function shipment() {
+        return $this->hasOne('App\Http\Models\Shipment', 'id', 'rrn');
+    }
     
 }
