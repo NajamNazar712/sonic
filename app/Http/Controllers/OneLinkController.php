@@ -217,8 +217,9 @@ class OneLinkController extends Controller
     
         if ($existingTransaction) {
             $shipment = Shipment::find($rrn);
+            $transaction_id = $existingTransaction->id;
             try {
-                DB::transaction(function () use ($existingTransaction, $data, $natureId, $rrn, $subDept,$shipment) {
+                DB::transaction(function () use ($existingTransaction, $data, $natureId, $rrn, $subDept,$shipment,$transaction_id) {
                     $updateData = [
                         'date_time' => $data['info']['dateTime'] ?? now(),
                         'merchant_id' => $data['messageInfo']['merchantID'],
@@ -269,7 +270,7 @@ class OneLinkController extends Controller
 
                             $one_link_payment_transaction = new OneLinkOutForDeliveryShipmentPayment();
                             $one_link_payment_transaction->consumer_number = $shipment->tracking_number;
-                            $one_link_payment_transaction->transaction_authentication_id = $data['messageInfo']['originalRtpId'];
+                            $one_link_payment_transaction->transaction_authentication_id = $transaction_id;
                             $one_link_payment_transaction->transaction_amount = $shipment->amount;
                             $one_link_payment_transaction->one_link_charges = 0;
                             $one_link_payment_transaction->transaction_date = $dt->format('Ymd');
