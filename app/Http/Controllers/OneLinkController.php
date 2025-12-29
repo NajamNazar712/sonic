@@ -330,8 +330,8 @@ class OneLinkController extends Controller
         $rules = [
             'info' => 'required|array',
             'messageInfo' => 'required|array',
-            'info.rrn' => 'required|string|exists:one_link_transactions,rrn',
-            'info.stan' => 'required|string|exists:one_link_transactions,stan',
+            'messageInfo.rrn' => 'required|string|exists:one_link_transactions,rrn',
+            'messageInfo.stan' => 'required|string|exists:one_link_transactions,stan',
             'info.dateTime' => 'required|string',
             'messageInfo.originalRRN' => 'required|string',
             'messageInfo.originalStan' => 'required|string',
