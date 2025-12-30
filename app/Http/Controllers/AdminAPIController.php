@@ -13465,14 +13465,13 @@ class AdminAPIController extends Controller
                 Storage::disk('public')->putFileAs($directory,$file,$filename);
                 $path = $directory . '/' . $filename;
             }
-
             $trip_cost = new LocalTripVehicleCost();
             $trip_cost->trip_id = $trip_id;
             $trip_cost->cost_amount = $request->cost_amount;
             $trip_cost->remarks = $request->cost_remarks;
             $trip_cost->receipt_path = $path;
             $trip_cost->created_by = Auth::id();
-            $trip_cost->trip_type = $trip_type;
+            $trip_cost->trip_type = $type;
             $trip_cost->save();
 
 

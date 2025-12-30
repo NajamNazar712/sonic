@@ -138,26 +138,26 @@ class AdminLocalFleetReportController extends Controller
             'status' => 0,
             'data' => [
                 'out' => [
-                    'amount'  => $outCost->cost_amount ?? 0,
-                    'remarks' => $outCost->remarks ?? '-',
-                    'receipt' => $outCost->receipt_path
-                        ? asset('storage/'.$outCost->receipt_path)
+                    'amount'  => $outCost?->cost_amount ?? 0,
+                    'remarks' => $outCost?->remarks ?? '-',
+                    'receipt' => $outCost?->receipt_path
+                        ? asset('storage/' . $outCost->receipt_path)
                         : null,
-                    'date' => $outCost
+                    'date' => $outCost?->created_at
                         ? \Carbon\Carbon::parse($outCost->created_at)->format('d M Y, h:i A')
-                        : '-'
+                        : '-',
                 ],
                 'in' => [
-                    'amount'  => $inCost->cost_amount ?? '-',
-                    'remarks' => $inCost->remarks ?? '-',
+                    'amount'  => $inCost?->cost_amount ?? 0,
+                    'remarks' => $inCost?->remarks ?? '-',
                     'receipt' => $inCost?->receipt_path
                         ? asset('storage/' . $inCost->receipt_path)
                         : null,
-                    'date' => $inCost
+                    'date' => $inCost?->created_at
                         ? \Carbon\Carbon::parse($inCost->created_at)->format('d M Y, h:i A')
-                        : '-'
-                ]
-            ]
+                        : '-',
+                ],
+            ],
         ]);
     }
 
