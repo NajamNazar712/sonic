@@ -4,6 +4,8 @@ namespace App\Http\Models;
 
 use App\Http\Models\Admin\GlobalSettings;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\NegativePayableAllowShipperZeroCod;
+
 
 class PendingPayment extends Model
 {
@@ -32,6 +34,11 @@ class PendingPayment extends Model
                 })->where('user_id', $user_id);
 
                 if ($check->exists()) {
+
+                    // additional override permission
+                    if (NegativePayableAllowShipperZeroCod::isAllowed($user_id)) {
+                        return true;
+                    }
                     return false;
                 } else {
                     return true;
