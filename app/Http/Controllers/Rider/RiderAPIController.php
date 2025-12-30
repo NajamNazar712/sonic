@@ -1037,7 +1037,7 @@ class RiderAPIController extends Controller
                     }
 
                     $deliveries['request']['added_date'] = Carbon::parse($crm_request->created_at)->format('Y-m-d H:i:s');
-                    $deliveries['request']['description'] = $crm_request->description;
+                    $deliveries['request']['description'] = empty($crm_request->description) ? 'No Desc' : $crm_request->description;
                     $deliveries['request']['comments'] = array();
 
                     $crm_request_comments = $crm_request->comments->where('comment_type', 2);
@@ -2012,7 +2012,7 @@ class RiderAPIController extends Controller
                         }
 
                         $deliveries['request']['added_date'] = Carbon::parse($crm_request->created_at)->format('Y-m-d H:i:s');
-                        $deliveries['request']['description'] = $crm_request->description;
+                        $deliveries['request']['description'] = empty($crm_request->description) ? 'No Desc' : $crm_request->description;
                         $deliveries['request']['comments'] = array();
 
                         $crm_request_comments = $crm_request->comments->where('comment_type', 2);
@@ -2377,7 +2377,7 @@ class RiderAPIController extends Controller
                     }
 
                     $deliveries['request']['added_date'] = Carbon::parse($crm_request->created_at)->format('Y-m-d H:i:s');
-                    $deliveries['request']['description'] = $crm_request->description;
+                    $deliveries['request']['description'] = empty($crm_request->description) ? 'No Desc' : $crm_request->description;
                     $deliveries['request']['comments'] = array();
 
                     $crm_request_comments = $crm_request->comments->where('comment_type', 2);
@@ -2544,7 +2544,7 @@ class RiderAPIController extends Controller
                         }
 
                         $deliveries['request']['added_date'] = Carbon::parse($crm_request->created_at)->format('Y-m-d H:i:s');
-                        $deliveries['request']['description'] = $crm_request->description;
+                        $deliveries['request']['description'] = empty($crm_request->description) ? 'No Desc' : $crm_request->description;
                         $deliveries['request']['comments'] = array();
 
                         $crm_request_comments = $crm_request->comments->where('comment_type', 2);
@@ -4333,7 +4333,7 @@ class RiderAPIController extends Controller
                         }
 
                         $deliveries['request']['added_date'] = Carbon::parse($crm_request->created_at)->format('Y-m-d H:i:s');
-                        $deliveries['request']['description'] = $crm_request->description;
+                        $deliveries['request']['description'] = empty($crm_request->description) ? 'No Desc' : $crm_request->description;
                         $deliveries['request']['comments'] = array();
 
                         $crm_request_comments = $crm_request->comments->where('comment_type', 2);
@@ -4489,7 +4489,7 @@ class RiderAPIController extends Controller
                         }
 
                         $deliveries['request']['added_date'] = Carbon::parse($crm_request->created_at)->format('Y-m-d H:i:s');
-                        $deliveries['request']['description'] = $crm_request->description;
+                        $deliveries['request']['description'] = empty($crm_request->description) ? 'No Desc' : $crm_request->description;
                         $deliveries['request']['comments'] = array();
 
                         $crm_request_comments = $crm_request->comments->where('comment_type', 2);
@@ -7217,7 +7217,7 @@ class RiderAPIController extends Controller
                         }
 
                         $deliveries['request']['added_date'] = Carbon::parse($crm_request->created_at)->format('Y-m-d H:i:s');
-                        $deliveries['request']['description'] = $crm_request->description;
+                        $deliveries['request']['description'] = empty($crm_request->description) ? 'No Desc' : $crm_request->description;
                         $deliveries['request']['comments'] = array();
 
                         $crm_request_comments = $crm_request->comments->where('comment_type', 2);
@@ -7421,7 +7421,7 @@ class RiderAPIController extends Controller
                         }
 
                         $deliveries['request']['added_date'] = Carbon::parse($crm_request->created_at)->format('Y-m-d H:i:s');
-                        $deliveries['request']['description'] = $crm_request->description;
+                        $deliveries['request']['description'] = empty($crm_request->description) ? 'No Desc' : $crm_request->description;
                         $deliveries['request']['comments'] = array();
 
                         $crm_request_comments = $crm_request->comments->where('comment_type', 2);
@@ -9108,7 +9108,7 @@ class RiderAPIController extends Controller
                         }
 
                         $deliveries['request']['added_date'] = Carbon::parse($crm_request->created_at)->format('Y-m-d H:i:s');
-                        $deliveries['request']['description'] = $crm_request->description;
+                        $deliveries['request']['description'] = empty($crm_request->description) ? 'No Desc' : $crm_request->description;
                         $deliveries['request']['comments'] = array();
 
                         $crm_request_comments = $crm_request->comments->where('comment_type', 2);
@@ -13258,7 +13258,7 @@ class RiderAPIController extends Controller
                         }
 
                         $deliveries['request']['added_date'] = Carbon::parse($crm_request->created_at)->format('Y-m-d H:i:s');
-                        $deliveries['request']['description'] = $crm_request->description;
+                        $deliveries['request']['description'] = empty($crm_request->description) ? 'No Desc' : $crm_request->description;
                         $deliveries['request']['comments'] = array();
 
                         $crm_request_comments = $crm_request->comments->where('comment_type', 2);
