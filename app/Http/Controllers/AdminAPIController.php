@@ -13459,19 +13459,21 @@ class AdminAPIController extends Controller
             $path = null;
             if ($request->hasFile('cost_receipt_path')) {
                 $file = $request->file('cost_receipt_path');
+                $extension = 'png';
                 $timestamp  = now()->format('YmdHis');
                 $filename = 'trip_cost_' . $trip_id . '_' . $timestamp . '.png';
-                $directory = 'local_fleet/trip_costs';
-                Storage::disk('public')->putFileAs($directory,$file,$filename);
-                $path = $directory . '/' . $filename;
+                Storage::disk('public')->put('uploads/local_fleet/trip_costs/' . $filename, file_get_contents($file));
+                $path = $filename;
+
             }
+
             $trip_cost = new LocalTripVehicleCost();
             $trip_cost->trip_id = $trip_id;
             $trip_cost->cost_amount = $request->cost_amount;
             $trip_cost->remarks = $request->cost_remarks;
             $trip_cost->receipt_path = $path;
             $trip_cost->created_by = Auth::id();
-            $trip_cost->trip_type = $type;
+            $trip_cost->trip_type =$type;
             $trip_cost->save();
 
 
