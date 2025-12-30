@@ -36,6 +36,7 @@ use App\Jobs\GenerateDeliveryOTP;
 use App\Http\Models\ConsigneeUser;
 use App\Http\Models\PickupRequest;
 use App\Http\Models\RiderDelivery;
+use App\Models\OneLinkTransaction;
 use App\PayFastTransactionDetials;
 use Illuminate\Support\Facades\DB;
 use App\Http\Models\Admin\AdminHub;
@@ -109,6 +110,7 @@ use App\Http\Models\Excel_reports\MonthAverage;
 use App\Http\Models\NotificationSettingShipper;
 use App\Http\Models\ShipperVerificationPinCode;
 use App\Http\Models\Admin\FintechPaymentDetails;
+use App\Http\Models\Admin\Retail\RetailShipment;
 use App\Http\Models\EmployeeNotificationHistory;
 use App\Http\Models\OvernightOverlandReportData;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
@@ -132,8 +134,8 @@ use App\Http\Models\V2Pickup\V2PickupRequestNotPickReason;
 use App\Http\Models\Admin\PendingCashCollectionAgingReport;
 use App\Http\Models\Excel_reports\RetailDonePaymentsReport;
 use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
+use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Models\Admin\ShipperVerificationPinCode as AdminShipperVerificationPinCode;
-use App\Http\Models\Admin\Retail\RetailShipment;
 use App\Models\PendingBankAccount;
 use Illuminate\Support\Facades\Http;
 
@@ -9879,18 +9881,21 @@ class NotificationsController extends Controller
                         self::sms($body, $to, NULL, NULL, $id);
                     }
                 } else if ($id == 185) {
-                    $one_link_transaction = OneLinkOutForDeliveryShipmentPayment::find($reference_2_id);
+                    $one_link_transaction = OneLinkTransaction::where('rrn', (int) $reference_2_id)->first();
                     $rider = Rider::find($reference_1_id);
                     if ($one_link_transaction && $rider) {
+                        
                         if (strpos($body, '[amount]') !== FALSE) {
-                            $body = str_replace('[amount]', $one_link_transaction->transaction_amount, $body);
+                            $body = str_replace('[amount]', $one_link_transaction->original_instructed_amount, $body);
                         }
                         if (strpos($body, '[tracking_number]') !== FALSE) {
-                            $body = str_replace('[tracking_number]', $one_link_transaction->tracking_number, $body);
+                            $body = str_replace('[tracking_number]', $one_link_transaction->rrn, $body);
                         }
+
                         if (strpos($body, '[rider]') !== FALSE) {
                             $body = str_replace('[rider]', $rider->name, $body);
                         }
+
                         $to = $rider->phone;
                         self::sms($body, $to, null, null,$id);
                     }
@@ -12048,14 +12053,15 @@ class NotificationsController extends Controller
                         self::push_notification($admin_id, $employee_type, $title, $body);
                     }
                 } else if ($id == 19) {
-                    $one_link_transaction = OneLinkOutForDeliveryShipmentPayment::find($reference2_id);
+                    $one_link_transaction = OneLinkTransaction::with('shipment')->where('rrn', (int) $reference2_id)->first();
+
                     $rider = Rider::find($reference1_id);
                     if ($one_link_transaction && $rider) {
                         if (strpos($body, '[amount]') !== FALSE) {
-                            $body = str_replace('[amount]', $one_link_transaction->transaction_amount, $body);
+                            $body = str_replace('[amount]', $one_link_transaction->shipment->amount, $body);
                         }
                         if (strpos($body, '[tracking_number]') !== FALSE) {
-                            $body = str_replace('[tracking_number]', $one_link_transaction->tracking_number, $body);
+                            $body = str_replace('[tracking_number]', $one_link_transaction->shipment->tracking_number, $body);
                         }
                         if (strpos($body, '[rider]') !== FALSE) {
                             $body = str_replace('[rider]', $rider->name, $body);
