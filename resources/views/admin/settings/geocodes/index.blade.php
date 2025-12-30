@@ -29,6 +29,11 @@
                 @include('admin.inc.messages')
 {{--                <form id="geo_codes_search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">--}}
                     <div class="row w-100">
+                        <div class="col-md-12">
+                            <h2>
+                                API Usage: {{$api_usage}}
+                            </h2>
+                        </div>
                         <div class="col-md-3 mt-2">
 
                         <div class="form-group">
@@ -111,6 +116,7 @@
                         <th class="border-primary border-darken-1">Latitude</th>
                         <th class="border-primary border-darken-1">Longitude</th>
                         <th class="border-primary border-darken-1">Compound Address</th>
+                        <th class="border-primary border-darken-1">Source Type (TPL)</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
@@ -237,7 +243,7 @@
                 $('#sub_segment_id').attr('disabled','disabled');
                 $('#sub_segment_id').empty();
                 $.ajax({
-                    url:'{!! route("admin.settings.auto_assigning.get_sub_segments") !!}',
+                    url:'{!! route("admin.settings.geo_codes.get_sub_segments") !!}',
                     method: 'POST',
                     data: {
                         'business_segment_id': [business_segment_id],
@@ -309,7 +315,8 @@
                                 'Consignee Number',
                                 'Latitude',
                                 'Longitude',
-                                'Compound Address'
+                                'Compound Address',
+                                'Source Type (TPL)'
                             ];
 
                             $.each(result.data, function (index, values) {
@@ -322,6 +329,7 @@
                                 row.push(values.latitude);
                                 row.push(values.longitude);
                                 row.push(values.compound_address);
+                                row.push(values.source);
                                 body.push(row);
                             });
                         },
@@ -493,6 +501,7 @@
                     {data: 'latitude', name: 'sgc.latitude', class: 'align-middle latitude',searchable:true,orderable: false},
                     {data: 'longitude', name: 'sgc.longitude', class: 'align-middle longitude',searchable:true,orderable: false},
                     {data: 'compound_address', name: 'sgc.compound_address', class: 'align-middle compound_address',searchable:true,orderable: false},
+                    {data: 'source', name: 'sgc.source_type_tpl', class: 'align-middle source',searchable:true,orderable: false},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
@@ -533,7 +542,11 @@
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
-
+                    var source_type = '<select name="source_type" id="source_type" class="select2 form-control">' +
+                        '<option value="0">Manual</option>' +
+                        '<option value="1">Automatic</option>' +
+                        '<option value="2">Already Exist Lat & Lng</option>'
+                        '</select>';
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
@@ -544,6 +557,12 @@
 
                         if ($(header).hasClass('action') || $(header).hasClass('select') || $(header).hasClass('serial_number')) {
                             $(search).append('<td style="padding:5px;" class="border-primary border-lighten-2"></td>');
+                        }
+                        else if($(header).is('.source')){
+                            $(source_type).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
                         } else {
                             var td = $('<td style="padding:5px;" class="border-primary border-lighten-2"></td>');
                             var inputGroup = $('<fieldset class="form-group m-0 position-relative has-icon-right"></fieldset>');
@@ -564,6 +583,14 @@
                         }
 
                     });
+
+                    $("#source_type").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Source",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
 
                     this.api().table().columns.adjust();
                 }

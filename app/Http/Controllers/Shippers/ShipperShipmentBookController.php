@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\Jobs\ShipmentGeoCodesTPL;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
@@ -90,6 +91,7 @@ use App\Http\Models\ShipperSegmentLogs;
 use Illuminate\Support\Facades\Log;
 use DB;
 use App\Models\BookingChannel;
+use App\Models\NegativePayableAllowShipperZeroCod;
 
 class ShipperShipmentBookController extends Controller
 {
@@ -287,6 +289,9 @@ class ShipperShipmentBookController extends Controller
 //                $user->save();
 //            }
 //        }
+
+        //GeoCodes Shipments
+        ShipmentGeoCodesTPL::dispatch([$shipment_id]);
 
         return $shipment_id;
     }
@@ -1165,7 +1170,7 @@ class ShipperShipmentBookController extends Controller
     public function check_negative_payable(Request $request){
         $user_id = session('user_id');
         $account_type = session('account_type');
-        if($request->input('amount') == 0 && !PendingPayment::check_negative_payable($user_id,$account_type)){
+        if($request->input('amount') == 0 && !PendingPayment::check_negative_payable($user_id,$account_type) && !NegativePayableAllowShipperZeroCod::isAllowed($user_id)){
             return 'false';
         }else{
             return 'true';
@@ -4230,7 +4235,9 @@ class ShipperShipmentBookController extends Controller
 //            }
 //        }
 
-
+        //GeoCodes Shipments
+        ShipmentGeoCodesTPL::dispatch([$shipment_id]);
+        
         return $shipment_id;
     }
 

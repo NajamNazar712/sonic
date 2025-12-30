@@ -62,7 +62,7 @@ class DeleteDuplicateDonePayment extends Command
 
             DB::table('done_payment_shipments')->whereIn('id', $duplicate_value)->delete();
             foreach ($done_payment_ids as $value){
-                DB::select('CALL update_done_payment_statistics(?)', $value);
+                DB::select('CALL update_done_payment_statistics(?)', [$value]);
             }
 
 
