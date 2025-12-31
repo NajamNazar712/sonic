@@ -2647,6 +2647,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/logout', 'Auth\AdminLoginController@logout')->name('logout');
     Route::post('/logout', 'Auth\AdminLoginController@logout')->name('logout');
     Route::get('/accounts/pending/{id}/bank', 'Admins\AdminDashboardController@viewBankInfo');
+    Route::get('/accounts/pending/{id}/bank_logs', 'Admins\AdminDashboardController@viewBankLogs');
     Route::get('/accounts/pending/{id}/shipping', 'Admins\AdminDashboardController@viewShippingInfo');
     Route::get('/accounts/pending/{id}/rates', 'Admins\AdminDashboardController@viewShipperRates');
     //Reset Password

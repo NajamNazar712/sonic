@@ -243,6 +243,7 @@ use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAcco
 use App\Models\CorporateUserOnDeliveredInvoiceLog;
 use App\Models\CorporateUserOnDeliveredInvoice;
 use App\Models\CityTypeETD;
+use App\ChangeLogs;
 
 class AdminDashboardController extends Controller
 {   use RateReusableTrait,FilterTrait;
@@ -10197,6 +10198,9 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                     }
 
                     $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#BankInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Bank Info</div></button>';
+                    if(session('role_id') == 1){
+                        $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#BankInfoLogsModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Bank Logs</div></button>';
+                    }
 
                     $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#ShippingInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Shipping Info</div></button>';
                     if ($result->status == 3 && (session('role_id') == 1 || in_array(361, session('permissions')))) {
@@ -16671,5 +16675,22 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             });
 
         return response()->json($logs);
+    }
+
+    public function viewBankLogs($id)
+    {
+        $user = User::find($id);
+
+        $banks = UserBankInfo::where('user_id', $user->id)->get();
+        $bankIds = $banks->pluck('id')->filter()->values();
+
+        $logs = ChangeLogs::where('table_name', 'user_bank_infos')
+            ->whereIn('record_id', $bankIds)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $returnHTML = view('admin/components/bank_logs', compact('user', 'banks', 'logs'))->render();
+
+        return response()->json($returnHTML);
     }
 }

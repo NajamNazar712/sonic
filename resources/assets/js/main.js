@@ -10,6 +10,16 @@ $(document).ready(function () {
 
     });
 
+    $("#BankInfoLogsModal").on("show.bs.modal", function(e) {
+        var id = $(e.relatedTarget).data('target-id');
+
+        $.get( "/admin/accounts/pending/"+id+"/bank_logs", function( data ) {
+            $(".modal-body").html(data);
+            // console.log(data);
+        });
+
+    });
+
     $("#ShippingInfoModal").on("show.bs.modal", function(e) {
         var id = $(e.relatedTarget).data('target-id');
         // console.log(id);
