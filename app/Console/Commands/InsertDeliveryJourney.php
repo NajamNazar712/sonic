@@ -19,8 +19,7 @@ class InsertDeliveryJourney extends Command
      * @var string
      */
     protected $signature = 'delivery:insert 
-                            {tracking_numbers : Comma-separated tracking numbers}
-                            {delivery_note_id : Delivery Note ID}';
+                            {tracking_numbers : Comma-separated tracking numbers}';
 
     /**
      * The console command description.
@@ -38,9 +37,7 @@ class InsertDeliveryJourney extends Command
     {
 
         $trackingNumbers = explode(',', $this->argument('tracking_numbers'));
-        $deliveryNoteId  = $this->argument('delivery_note_id');
-
-
+    
         $this->info("Processing Delivery journey insert...");
         $this->info("Tracking Numbers: " . implode(', ', $trackingNumbers));
 
