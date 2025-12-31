@@ -766,7 +766,7 @@
                                  <div class="col-12">
                                     <div class="form-group">
                                         <label for="blank_cheque">Upload Blank Cheque</label>
-                                        <input type="file" name="blank_cheque" id="blank_cheque" class="form-control" accept="image/*">
+                                        <input type="file" name="blank_cheque" id="blank_cheque" class="form-control" accept="image/*"  data-rule-required="true" data-msg-required="Bank Cheque is required">
                                         <small class="text-muted">Allowed types: JPG, PNG (Max 2MB)</small>
                                     </div>
                                  </div>   
@@ -1500,8 +1500,10 @@
                         className: 'btn btn-primary add_bank',
                         enabled: true,
                         action: function (e, dt, node, config) {
-                            console.log( $('#add_bank_form'))
                             $('#add_bank_form')[0].reset();
+                            $('#bankModalTitle').text('Add Bank');
+                            $('#add_bank_form').validate().resetForm();
+                             $('#add_bank_form').find('.danger').removeClass('danger');
                             $('#bank_id').val('');
                             $('#addBank').text('Save');
                             $('#AddBankModal').modal('show');
@@ -1586,6 +1588,8 @@
 
                 }
                 if ($(this).hasClass('editBank')) {
+                    $('#add_bank_form').validate().resetForm();
+                    $('#add_bank_form').find('.danger').removeClass('danger');
                     $('#bank_id').val(id);
                     $('#bank_select').val(rowData.bank_name_id).trigger('change');
                     $('#bankModalTitle').text('Edit Bank');

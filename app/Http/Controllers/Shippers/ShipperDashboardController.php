@@ -1286,7 +1286,6 @@ class ShipperDashboardController extends Controller
                     $userBank->iban = $request->iban_no;
                     $userBank->user_id = $user_id;
                     $userBank->save();
-
                     if ($request->hasFile('blank_cheque')) {
                         $user_attachment = UserDocumentAttachment::where('user_id', $userBank->user_id)->latest()->first();
                         $oldblank_cheque_image = $user_attachment->blank_cheque_image;
@@ -1314,7 +1313,7 @@ class ShipperDashboardController extends Controller
                         'new_data' => json_encode($userBank),
                         'updated_by' => $user_id,
                     ]);
-                    NotificationsController::send(253,  $userBank, $user_attachment->blank_cheque_image);
+                    NotificationsController::send(253,  $userBank, $user_attachment->blank_cheque_image ?? null);
                     return redirect()->back()->with(['success' => 'Bank account pending — will be updated automatically within 2 hours.!']);
                 }
 
