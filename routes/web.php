@@ -13,6 +13,16 @@
 
 use Illuminate\Support\Facades\Artisan;
 
+Route::get('test-fcm-token', function () {
+    return getFcmAccessToken();
+});
+// Route::get('/test-fcm-file', function () {
+//     $path = config('services.fcm.service_account');
+//     return [
+//         'path' => $path,
+//         'exists' => file_exists($path)
+//     ];
+// });
 Route::get('payment_details/{id}/{id1}', 'TrackingController@payment_details')->name('payment_details');
 
 Route::get('/', function () {

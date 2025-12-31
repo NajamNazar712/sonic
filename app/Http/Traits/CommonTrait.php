@@ -22,6 +22,7 @@ use App\Http\Models\ShipmentsJourney;
 use App\Models\InternationalZonalMarginColumn;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Models\ShipmentOtpVerification;
 
 trait CommonTrait
 {
@@ -722,4 +723,19 @@ trait CommonTrait
     // Return all generated buttons or '-' if nothing found
     return $output ?: '-';
   }
+
+  function withOtpOrNot($journey)
+  {
+    // Extract the date-hour-minute from journey time
+    $start = Carbon::parse($journey->created_at)->subMinute();
+    $end   = Carbon::parse($journey->created_at)->addMinute();
+
+    $otpRecord = ShipmentOtpVerification::where('shipment_id', $journey->shipment_id)
+        ->where('via_rvrsub_reason', 1)
+        ->whereBetween('created_at', [$start, $end])
+        ->first();
+
+    return $otpRecord ? 'With OTP' : 'Without OTP';
+  }
+
 }

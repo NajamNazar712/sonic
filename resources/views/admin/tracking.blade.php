@@ -1955,6 +1955,16 @@
                                 shipment += '<td><strong>Address</strong></td>';
                                 shipment += '<td colspan="3">' + details.consignee.address + '</td>';
                                 shipment += '</tr>';
+
+                                if ((details.consignee.latitude > 0) && (details.consignee.longitude > 0)) {
+                                    shipment += '<tr>';
+                                    shipment += '<td><strong>Latitude</strong></td>';
+                                    shipment += '<td>' + details.consignee.latitude + '</td>';
+                                    shipment += '<td><strong>Longitude</strong></td>';
+                                    shipment += '<td>' + details.consignee.longitude + '</td>';
+                                    shipment += '</tr>';
+                                }
+
                                 shipment += '</tbody>';
                                 shipment += '</table>';
                                 shipment += '</div>';

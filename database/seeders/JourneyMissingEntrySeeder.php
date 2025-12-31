@@ -28,31 +28,34 @@ class JourneyMissingEntrySeeder extends Seeder
     {
         //Only use for the marked as delivered....
         $shipmentId = [
-            778000354962,
-            778000349516,
-            778000339199,
-            778000337904,
-            778000333874,
-            778000332009,
-            778000329843
+            22320258266958,
+            20220258316619,
+            20220258322341,
+            22320258312672,
+            20220258288386,
+            20220258330395,
+            20220257809137,
+            20220257485198,
+            20220257815134,
+            20220258360015
         ];
         if ($shipmentId) {
-            $shipmentId = Shipment::whereIn('tracking_number', $shipmentId)->get();
+            $shipmentId = Shipment::whereIn('tracking_number', $shipmentId)->where('shipper_status_id',13)->get();
             echo count($shipmentId);
         
             foreach ($shipmentId as $shipment) {
-                // $shipment->shipper_status_id = 13;
-                //     $shipment->consignee_status_id = 13;
-                //     $shipment->save();
-                // ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, NULL, NULL, 346);
-                // return  $shipment;
-                if ($shipment->shipper_status_id === 5) {
-                    // $shipment->created_at = $shipment->updated_at;
-                    $shipment->shipper_status_id = 14;
-                    $shipment->consignee_status_id = 14;
+                $shipment->shipper_status_id = 13;
+                    $shipment->consignee_status_id = 13;
                     $shipment->save();
-                }
-                $deliveryNoteId = DeliveryNoteShipment::where('shipment_id', $shipment->id)->latest()->first();
+                ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, NULL, NULL, 346);
+                // return  $shipment;
+                // if ($shipment->shipper_status_id === 5) {
+                //     // $shipment->created_at = $shipment->updated_at;
+                //     $shipment->shipper_status_id = 14;
+                //     $shipment->consignee_status_id = 14;
+                //     $shipment->save();
+                // }
+                // $deliveryNoteId = DeliveryNoteShipment::where('shipment_id', $shipment->id)->latest()->first();
 
                 // if (in_array($shipment->shipper_status_id, [13, 14])) {
                 //     $charges = $shipment->weight_charges + $shipment->fuel_surcharge;
@@ -100,6 +103,7 @@ class JourneyMissingEntrySeeder extends Seeder
 
                 //     // $deliveryNoteId->status = 6;
                 //     // $deliveryNoteId->save();
+                //     ShipmentsJourneyController::add($request->shipment_id, 13, 13, NULL, $remarks, NULL, 346);
                 //     // ShipmentsJourneyController::add($shipment->id, $shipment->shipper_status_id, $shipment->shipper_status_id, NULL, NULL, $shipment->user_id, NULL, $deliveryNoteId->delivery_note_id);
 
                 // }
@@ -107,46 +111,46 @@ class JourneyMissingEntrySeeder extends Seeder
                 // if (!$shipmentstatus) {
 
                 
-                $verification = 1;
-                $shipment_journey = new ShipmentsJourney();
-                $status_id = (!in_array($shipment->shipper_status_id, [14]) ? '14' : $shipment->shipper_status_id);
-                $shipment_journey->shipment_id = $shipment->id;
-                $shipment_journey->verification = $verification;
-                $shipment_journey->created_at = $deliveryNoteId->updated_at ?? $shipment->updated_at;
-                $shipment_journey->updated_at = $deliveryNoteId->updated_at ?? $shipment->updated_at;
-                $shipment_journey->shipper_status_id = $status_id;
-                $shipment_journey->consignee_status_id = $status_id;
-                $shipment_journey->status_reason_id = null;
-                $shipment_journey->city_id =  202;
-                $shipment_journey->remarks =  null;
-                $shipment_journey->user_id = null;
-                $shipment_journey->admin_id = 346;
-                $shipment_journey->rider_id = null;
-                $shipment_journey->reference_1_id = null;
-                $shipment_journey->reference_2_id = null;
-                $shipment_journey->received_or_refused_by = null;
-                $shipment_journey->relation = null;
-                $shipment_journey->cnic = null;
-                $shipment_journey->save();
+                // $verification = 1;
+                // $shipment_journey = new ShipmentsJourney();
+                // $status_id = (!in_array($shipment->shipper_status_id, [14]) ? '14' : $shipment->shipper_status_id);
+                // $shipment_journey->shipment_id = $shipment->id;
+                // $shipment_journey->verification = $verification;
+                // $shipment_journey->created_at = $deliveryNoteId->updated_at ?? $shipment->updated_at;
+                // $shipment_journey->updated_at = $deliveryNoteId->updated_at ?? $shipment->updated_at;
+                // $shipment_journey->shipper_status_id = $status_id;
+                // $shipment_journey->consignee_status_id = $status_id;
+                // $shipment_journey->status_reason_id = null;
+                // $shipment_journey->city_id =  202;
+                // $shipment_journey->remarks =  null;
+                // $shipment_journey->user_id = null;
+                // $shipment_journey->admin_id = 346;
+                // $shipment_journey->rider_id = null;
+                // $shipment_journey->reference_1_id = null;
+                // $shipment_journey->reference_2_id = null;
+                // $shipment_journey->received_or_refused_by = null;
+                // $shipment_journey->relation = null;
+                // $shipment_journey->cnic = null;
+                // $shipment_journey->save();
 
-                if ($shipment->shipper_status_id != 1) {
-                    ShipmentStatusWebhookController::webhook_subscription($shipment->id, $shipment->shipper_status_id, null);
-                }
-                if ($verification == 1) {
-                    $shipment_subscription = ShipperShipmentsSubscription::where('shipment_id', $shipment->id);
-                    if ($shipment_subscription->exists()) {
-                        $shipment_subscription = $shipment_subscription->first();
-                        NotificationsController::app_notification(7, $shipment_subscription->shipper_id, 3, $shipment->id, $shipment->shipper_status_id);
-                    }
-                    $consignee_user = ConsigneeUser::where('phone_number_1', $shipment->consignee_phone_number_1)
-                        ->orwhere('phone_number_2', $shipment->consignee_phone_number_1);
-                    if ($consignee_user->exists()) {
-                        $consignee_user = $consignee_user->first();
-                        $consignee_id = $consignee_user->id;
-                        NotificationsController::app_notification(8, $consignee_id, 4, $shipment->id, $shipment->shipper_status_id);
-                    }
-                    ShipperShipmentsSubscription::where('shipment_id', $shipment->id)->delete();
-                }
+                // if ($shipment->shipper_status_id != 1) {
+                //     ShipmentStatusWebhookController::webhook_subscription($shipment->id, $shipment->shipper_status_id, null);
+                // }
+                // if ($verification == 1) {
+                //     $shipment_subscription = ShipperShipmentsSubscription::where('shipment_id', $shipment->id);
+                //     if ($shipment_subscription->exists()) {
+                //         $shipment_subscription = $shipment_subscription->first();
+                //         NotificationsController::app_notification(7, $shipment_subscription->shipper_id, 3, $shipment->id, $shipment->shipper_status_id);
+                //     }
+                //     $consignee_user = ConsigneeUser::where('phone_number_1', $shipment->consignee_phone_number_1)
+                //         ->orwhere('phone_number_2', $shipment->consignee_phone_number_1);
+                //     if ($consignee_user->exists()) {
+                //         $consignee_user = $consignee_user->first();
+                //         $consignee_id = $consignee_user->id;
+                //         NotificationsController::app_notification(8, $consignee_id, 4, $shipment->id, $shipment->shipper_status_id);
+                //     }
+                //     ShipperShipmentsSubscription::where('shipment_id', $shipment->id)->delete();
+                // }
                 // }
             }
         }

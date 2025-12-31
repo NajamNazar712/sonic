@@ -1414,7 +1414,9 @@ class AdminDashboardController extends Controller
             $data = DB::connection('reports')->table('cities')->where('hub', 1)->where('name', 'like', '%' . $keyword . '%')->select('id','name as text')->take(10)->get()->toArray();
         } elseif($type == 'nature') {
             $data = DB::connection('reports')->table('crm_request_case_nature_types')->where('type', 'like', '%' . $keyword . '%')->select('id','type as text')->take(10)->get()->toArray();
-        } 
+        } elseif($type == 'rider') {
+            $data = $rider_name = Rider::where('name', 'like', '%' . $keyword . '%')->select('id','name as text')->take(10)->get()->toArray();
+        }
         
         return response()->json($data);
     }
@@ -10197,7 +10199,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                     $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#BankInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Bank Info</div></button>';
 
                     $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#ShippingInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Shipping Info</div></button>';
-                    if ($result->status == 3 && (session('role_id') == 1 || in_array(session('id'), session('sale_users_bypass')))) {
+                    if ($result->status == 3 && (session('role_id') == 1 || in_array(361, session('permissions')))) {
                         $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#SalesTagModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Sales Person</div></button>';
                     }
                     if ($result->account_type_id == 1) {
@@ -10873,7 +10875,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#BankInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Bank Info</div></button>';
 
                 $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#ShippingInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Shipping Info</div></button>';
-                if (session('role_id') == 1 || in_array(session('id'), session('sale_users_bypass'))) {
+                if (session('role_id') == 1 || in_array(361, session('permissions'))) {
                     $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#SalesTagModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Sales Person</div></button>';
                 }
                 if (($result->status == 2 || $result->international_status == 1) && $result->documents_status == 2 && (session('role_id') == 1 || in_array(9, session('permissions')))) {

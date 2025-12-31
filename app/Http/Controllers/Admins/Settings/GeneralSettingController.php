@@ -11,7 +11,8 @@ use App\Http\Models\Shipper\User;
 use Yajra\Datatables\Datatables;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\Admins\ActivityTrailController;
-
+use App\Models\NegativePayableAllowShipperZeroCod;
+use App\Models\NegativePayableAllowShipperZeroCodLogs;
 
 
 class GeneralSettingController extends Controller
@@ -345,5 +346,102 @@ class GeneralSettingController extends Controller
 
         }
     }
+
+    public function zero_cod_shippers_index()
+    {
+        $shippers = User::where('status', '=', 3)
+            ->where('blacklist', 0)
+            ->where('account_type_id', 1)
+            ->get();
+        return view('admin.settings.negative_payable_allow_booking.index')->with(['shippers' => $shippers]);
+    }
+
+
+    public function  zero_cod_shippers_list()
+    {
+        $zero_cod_shippers = NegativePayableAllowShipperZeroCod::join('users as u', 'negative_payable_allow_shipper_zero_cod.user_id', '=', 'u.id')
+        ->leftJoin('admins as a', 'a.id', 'negative_payable_allow_shipper_zero_cod.added_by')
+        ->select('u.name as shipper_name', 'negative_payable_allow_shipper_zero_cod.id as id', 'negative_payable_allow_shipper_zero_cod.created_at as created', 'a.name as added_by');
+
+        $datatables = Datatables::of($zero_cod_shippers)
+            ->addColumn('action', function ($zero_cod_shippers) {
+                if (session('role_id') == 1) {
+
+                    $dropdown = '<div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                    ';
+
+                    $dropdown .= ' <button type="button" class="dropdown-item remove"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Remove</div></button>';
+
+                    $dropdown .= '</div></div>';
+                    return $dropdown;
+                } else {
+                    return '';
+                }
+            });
+        return $datatables->make(true);
+    }
+
+    public function zero_cod_shippers_add(Request $request)
+    {
+        $shipper_id = $request->input('shipper_id');
+
+        if (empty($shipper_id)) {
+            return redirect()->back()->with('error', 'Shipper is required!');
+        }
+
+        // Check if shipper already exists
+        $exists = NegativePayableAllowShipperZeroCod::where('user_id', $shipper_id)->first();
+
+        if ($exists) {
+            return redirect()->back()->with('error', 'Shipper already exists!');
+        }
+        // Add new shipper
+        $newShipper = NegativePayableAllowShipperZeroCod::create([
+            'user_id' => $shipper_id,
+            'added_by' => auth()->id(),
+        ]);
+
+        return redirect()->back()->with('success', 'Shipper added successfully!');
+    }
+
+    public function zero_cod_shippers_remove(Request $request)
+    {
+        $shipper = NegativePayableAllowShipperZeroCod::find($request->id);
+
+        if (!$shipper) {
+            return redirect()->back()->with('error', 'Shipper not found!');
+        }
+
+        // Log the removal with actual added time
+        NegativePayableAllowShipperZeroCodLogs::create([
+            'user_id'  => $shipper->user_id,
+            'added_by' => $shipper->added_by,
+            'added_at' =>  $shipper->created_at,
+            'removed_by' => auth()->id(),
+        ]);
+
+        $shipper->delete();
+
+        return redirect()->back()->with('success', 'Shipper removed and logged successfully!');
+    }
+
+    public function zero_cod_shippers_logs_index() 
+    {
+        return view('admin.settings.negative_payable_allow_booking.logs');
+    }
+
+    public function  zero_cod_shippers_logs_list()
+    {
+        $zero_cod_shippers = NegativePayableAllowShipperZeroCodLogs::join('users as u', 'negative_payable_allow_shipper_zero_cod_logs.user_id', '=', 'u.id')
+        ->leftJoin('admins as a', 'a.id', 'negative_payable_allow_shipper_zero_cod_logs.added_by')
+        ->leftJoin('admins as r', 'r.id', 'negative_payable_allow_shipper_zero_cod_logs.removed_by')
+        ->select('u.name as shipper_name', 'negative_payable_allow_shipper_zero_cod_logs.id as id','negative_payable_allow_shipper_zero_cod_logs.created_at as removed', 'a.name as added_by', 'r.name as removed_by', 'negative_payable_allow_shipper_zero_cod_logs.added_at as created');
+
+        $datatables = Datatables::of($zero_cod_shippers);
+        return $datatables->make(true);
+    }
+
     
 }
