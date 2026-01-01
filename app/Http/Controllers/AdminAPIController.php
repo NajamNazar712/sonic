@@ -13466,18 +13466,31 @@ class AdminAPIController extends Controller
 //                $path = $filename;
 //            }
 
-            if ($request->has('cost_receipt_path')) {
+//            if ($request->has('cost_receipt_path')) {
+//                $timestamp = now()->format('YmdHis');
+//                $filename  = 'trip_cost_' . $trip_id . '_' . $timestamp . '.png';
+//                $folder    = 'local_fleet/trip_costs';
+//                if (!Storage::disk('public')->exists($folder)) {
+//                    Storage::disk('public')->makeDirectory($folder);
+//                }
+//                Storage::disk('public')->put(
+//                    $folder.'/'.$filename,
+//                    file_get_contents($request->cost_receipt_path)
+//                );
+//                $path = $folder.'/'.$filename;
+//            }
+            if ($request->hasFile('cost_receipt_path')) {
+
+                $file = $request->file('cost_receipt_path');
+
                 $timestamp = now()->format('YmdHis');
-                $filename  = 'trip_cost_' . $trip_id . '_' . $timestamp . '.png';
-                $folder    = 'local_fleet/trip_costs';
-                if (!Storage::disk('public')->exists($folder)) {
-                    Storage::disk('public')->makeDirectory($folder);
-                }
-                Storage::disk('public')->put(
-                    $folder.'/'.$filename,
-                    file_get_contents($request->cost_receipt_path)
-                );
-                $path = $folder.'/'.$filename;
+                $filename  = 'trip_cost_' . $trip_id . '_' . $timestamp . '.' . $file->extension();
+
+                $directory = 'local_fleet/trip_costs';
+
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+
+                $path = $directory . '/' . $filename;
             }
 
             $trip_cost = new LocalTripVehicleCost();
