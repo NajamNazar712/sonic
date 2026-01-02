@@ -37,17 +37,17 @@ class WalletUsersMakeToDonePayments extends Command
         $today = Carbon::now();
 
         if (!$today->isSunday()) {
-            $setting = GlobalSettings::where('type', 'wallet_user_make_to_done_stop')->first();
+            // $setting = GlobalSettings::where('type', 'wallet_user_make_to_done_stop')->first();
 
-            $excludedUserIds = $setting && $setting->text ? array_filter(explode(',', $setting->text)) : '';
+            // $excludedUserIds = $setting && $setting->text ? array_filter(explode(',', $setting->text)) : '';
             
-            if(!empty($excludedUserIds)){
+            // if(!empty($excludedUserIds)){
                 $wallet_user_ids = WalletUser::where([
                     'status' => 1,
                     'substitute_user_id' => 0
                 ])
                 ->where('finova_account_type', '>', 0)
-                    ->whereNotIn('user_id', $excludedUserIds) // Remove Test Shipper
+                    ->whereNotIn('user_id', [46611, 47392, 47394, 47813, 33952, 27424, 44309, 44149, 3719, 2634, 18179, 49456, 043576, 22071, 2121, 39282, 49028, 12240, 1458, 23009, 7626, 23009]) // Remove Test Shipper
                 ->pluck('user_id')
                 ->toArray();
     
@@ -73,7 +73,7 @@ class WalletUsersMakeToDonePayments extends Command
                     }
     
                 }
-            }
+            // }
         }
 
         
