@@ -7824,6 +7824,7 @@ class AdminFinanceController extends Controller
                             $done_payment->ibft_charges = 0;
                         }
 
+                        $done_payment->created_by = auth()->check() ? Auth::id() : 346;
                         $done_payment->save();
 
                         $pending_payment->delete();
@@ -8403,6 +8404,9 @@ class AdminFinanceController extends Controller
             ->leftJoin('admins as ad', function ($join) {
                 $join->on('ad.id', '=', 'done_payments.status_updated_by');
             })
+            ->leftJoin('admins as creator', function ($join) {
+                $join->on('creator.id', '=', 'done_payments.created_by');
+            })
             ->leftJoin('user_bank_infos as ubi', function ($join) {
                 $join->on('ubi.id', '=', 'done_payments.user_bank_info_id');
             })
@@ -8448,7 +8452,7 @@ class AdminFinanceController extends Controller
             'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 'done_payments.ibft_charges', 
             'dpc.packaging_charges', 'dpc.adjustment as adjustment_charges', 'done_payments.status_updated_at as status_updated_at', 
             'dpc.wht as total_wht', 'done_payments.created_at as start_date', 'done_payments.updated_at as end_date', 'ad.name as admin_name', 
-            'done_payments.updated_at as updated_at','sts.status as star_status','u.payment_cycle_days as payment_cycle_days','pc.name as payment_cycle', 'pc.id as payment_cycle_id', 'dpc.sms_charges as total_sms_charges','done_payments.arrival_shipment as arrival_shipment_shipments_count','done_payments.arrival_shipment', 'sale_admin.name as sale_person_name','wu.id as wallet_user' , 'done_payments.is_wallet_payment', 'wu.finova_account_type as finova_account_type' ,'dpc.cod_sst as total_cod_sst','t.name as territory', 'done_payments.tax_status', 'r.name as region')
+            'done_payments.updated_at as updated_at','sts.status as star_status','u.payment_cycle_days as payment_cycle_days','pc.name as payment_cycle', 'pc.id as payment_cycle_id', 'dpc.sms_charges as total_sms_charges','done_payments.arrival_shipment as arrival_shipment_shipments_count','done_payments.arrival_shipment', 'sale_admin.name as sale_person_name','wu.id as wallet_user' , 'done_payments.is_wallet_payment', 'wu.finova_account_type as finova_account_type' ,'dpc.cod_sst as total_cod_sst','t.name as territory', 'done_payments.tax_status', 'r.name as region', 'creator.name as created_by')
             ->where(function($query){
                 $idsToExclude = FilterTrait::class::getFilteredIds(auth()->user()->id);
                 if (!empty($idsToExclude)) {
