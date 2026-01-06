@@ -199,6 +199,7 @@
 										<th class="border-primary border-darken-1">Total Payable</th>
 										<th class="border-primary border-darken-1">Bank</th>
 										<th class="border-primary border-darken-1">Reference No.</th>
+										<th class="border-primary border-darken-1">Created By</th>
 										<th class="border-primary border-darken-1">Done Datetime</th>
 										<th class="border-primary border-darken-1">Company Bank</th>
 										<th class="border-primary border-darken-1">Payment Cycle</th>
@@ -775,6 +776,7 @@
                             head.push('Total Payable');
                             head.push('Bank');
                             head.push('Reference No.');
+                            head.push('Created By');
                             head.push('Done Datetime');
                             head.push('Company Bank');
 							head.push('Payment Cycle');
@@ -816,6 +818,7 @@
                                 row.push(values.total_payable);
                                 row.push(values.bank);
                                 row.push(values.reference_number);
+                                row.push(values.created_by);
                                 row.push(values.done_at);
                                 row.push(values.company_bank);
 								row.push(values.payment_cycle);
@@ -1246,6 +1249,9 @@
 					{data:'total_payable', name: 'dpc.payable', class: 'align-middle text-center total_payable', orderable: false},
 					{data:'bank', name: 'bank', class: 'align-middle text-center bank'},
 					{data:'reference_number', name: 'done_payments.reference_number', class: 'align-middle text-center reference_number'},
+
+					{data:'created_by', name: 'done_payments.created_by', class: 'align-middle text-center created_by'},
+
 					{data:'done_at', name: 'done_payments.created_at', class: 'align-middle text-center done_at'},
 					{data:'company_bank', name: 'company_bank', class: 'align-middle text-center company_bank'},
 					{data:'payment_cycle', name: 'pc.id', class: 'align-middle text-center payment_cycle'},
