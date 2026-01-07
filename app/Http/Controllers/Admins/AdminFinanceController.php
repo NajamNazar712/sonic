@@ -7951,6 +7951,7 @@ class AdminFinanceController extends Controller
                         $wallet_check = WalletUser::where('user_id', $pending_payment->user_id)->exists() ? 1 :  0;
 
                         $done_payment->is_wallet_payment = $wallet_check;
+                        $done_payment->created_by = auth()->check() ? Auth::id() : 346;
 
                         if($wallet_check == 0) {
                             $user_ibft_charge = UserIbftCharge::where('user_id', $pending_payment->user_id)->first();
