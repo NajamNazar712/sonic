@@ -86,7 +86,7 @@ class BotCallInitiate extends Command
             //     }
             //     // Log::channel('botCallJobLog')->info('s ' . 'Call initiate end third-call' . Carbon::parse(now())->format('Y-m-d H:i:s'));
             // }
-            $timeEnd = Carbon::parse(now())->subMinute(20)->format('Y-m-d H:i') . ':59';
+            $timeEnd = Carbon::parse(now())->subHour(1)->format('Y-m-d H:i') . ':59';
             // Carbon::parse(now())->subHour(2)->format('Y-m-d H:i') 
             $timeStart = Carbon::parse($timeEnd)->subMinute(14)->format('Y-m-d H:i') . ':00'; // Get the timestamp of two hours ago
             $shipmentSpecificThirds = RvShipmentAssignAgent::join('shipments as s', 's.id', 'rv_shipment_assign_agents.shipment_id')->where([['unresponsive_attempt_time', '>=', $timeStart], ['unresponsive_attempt_time', '<=', $timeEnd], 'unresponsive_count' => 2, 'rv_assign_agent_status_id' => 6])->pluck('shipment_id');
