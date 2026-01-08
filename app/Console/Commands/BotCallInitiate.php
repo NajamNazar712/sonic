@@ -74,10 +74,10 @@ class BotCallInitiate extends Command
                 }
                 // Log::channel('botCallJobLog')->info('s ' . 'Call initiate end second-call' . Carbon::parse(now())->format('Y-m-d H:i:s'));
             }
-            
+
             // $shipmentThirds = RvShipmentAssignAgent::join('shipments as s', 's.id', 'rv_shipment_assign_agents.shipment_id')->where(['agent_id' => 4620,['unresponsive_attempt_time', '>=', $timeStart], ['unresponsive_attempt_time', '<=', $timeEnd], 'call_count' => 2, 'rv_assign_agent_status_id' => 6])->whereNotIn('s.user_id',[16344,26249,13060,5553,30230,49055,50475,27425,31794,31902,31538,51353,19943,8732,44233,37631,48558,35049,25244,49028,1049])->pluck('shipment_id');
             // Log::channel('botCallJobLog')->info('s ' . 'Log after  shipmentThirds call  record' . count($shipmentThirds));
-           
+
             // // $third_count =1;
             // if(count($shipmentThirds) > 0){
             //     // Log::channel('botCallJobLog')->info('s ' . 'Call initiate start third-call' . Carbon::parse(now())->format('Y-m-d H:i:s'));
@@ -86,6 +86,9 @@ class BotCallInitiate extends Command
             //     }
             //     // Log::channel('botCallJobLog')->info('s ' . 'Call initiate end third-call' . Carbon::parse(now())->format('Y-m-d H:i:s'));
             // }
+            $timeEnd = Carbon::parse(now())->subMinute(20)->format('Y-m-d H:i') . ':59';
+            // Carbon::parse(now())->subHour(2)->format('Y-m-d H:i') 
+            $timeStart = Carbon::parse($timeEnd)->subMinute(14)->format('Y-m-d H:i') . ':00'; // Get the timestamp of two hours ago
             $shipmentSpecificThirds = RvShipmentAssignAgent::join('shipments as s', 's.id', 'rv_shipment_assign_agents.shipment_id')->where([['unresponsive_attempt_time', '>=', $timeStart], ['unresponsive_attempt_time', '<=', $timeEnd], 'unresponsive_count' => 2, 'rv_assign_agent_status_id' => 6])->pluck('shipment_id');
             if (count($shipmentSpecificThirds) > 0) {
                 // Log::channel('botCallJobLog')->info('s ' . 'Call initiate start third-call' . Carbon::parse(now())->format('Y-m-d H:i:s'));
