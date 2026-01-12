@@ -47,7 +47,7 @@ class WalletUsersMakeToDonePayments extends Command
                     'substitute_user_id' => 0
                 ])
                 ->where('finova_account_type', '>', 0)
-                ->whereNotIn('user_id', [46611, 47392, 47394, 47813, 33952, 27424, 44309, 44149, 3719, 2634, 18179, 49456, 043576, 22071, 2121, 39282, 49028, 12240, 1458, 7626, 23009]) // Remove Test Shipper
+                ->whereNotIn('user_id', [46611, 47392, 47394, 47813, 33952, 27424, 44309, 44149, 3719, 2634, 18179, 49456, 043576, 22071, 2121, 39282, 49028, 12240, 1458, 7626, 23009,27519]) // Remove Test Shipper
                 ->pluck('user_id')
                 ->toArray();
     
