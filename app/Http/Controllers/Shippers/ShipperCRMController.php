@@ -504,15 +504,14 @@ class ShipperCRMController extends Controller
                         $already_lodged = false;
                         if($is_shipment){ 
                             $already_lodged = true;
-                            $request_check = false;
-
+                            $request_check = true;
 
                             if($nature_id == 1) {
                                 $check_request = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)
-                                    ->where('case_nature_type_id',$complaint_id)
-                                    ->where('status_id',4);
-                                if($check_request->exists()) {
-                                    $request_check = true;
+                                    ->orderBy('id', 'desc')
+                                    ->first();
+                                if($check_request && $check_request->status_id!=4) {
+                                    $request_check = false;
                                 }
                             }
 
@@ -723,12 +722,13 @@ class ShipperCRMController extends Controller
 
                         if($nature_id == 1) {
                             $check_request = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)
-                                ->where('status_id',1)
+                                ->orderBy('id', 'desc')
                                 ->first();
-                            if($check_request) {
+                            if($check_request && $check_request->status_id!=4) {
                                 $request_check = false;
                             }
                         }
+
                         if($is_shipment->case_nature_id != $nature_id || $request_check){
                             if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
                                 if(in_array($complaint_id, [11, 13])){
