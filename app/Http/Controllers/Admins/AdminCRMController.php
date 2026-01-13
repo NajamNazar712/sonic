@@ -260,7 +260,7 @@ class AdminCRMController extends Controller
                             if($is_shipment){
                                 $already_lodged = true;
                                 $complain = $is_shipment->id;
-                                $request_check = false
+                                $request_check = false;
 
                                 if($nature_id == 1) {
                                     $check_request = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)
