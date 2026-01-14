@@ -15216,7 +15216,7 @@ class AdminFinanceController extends Controller
 
         $details = array();
 
-        $details[] = ['S. No.', 'Tracking No.', 'Origin', 'Destination', 'Arrival Date', 'Weight (kg)', 'Weight Charges (PKR)', 'Fuel Surcharge (PKR)', 'FAF CHARGES (PKR)', 'OSA Charges (PKR)', 'Adjustment Charges (PKR)', 'Total Charges (PKR)', 'GST (PKR)', 'SMS Charges' ,'WHT', 'COD SST', 'Invoice Amount (PKR)', 'Intercept Charges  (PKR)'];
+        $details[] = ['S. No.', 'Tracking No.', 'Origin', 'Destination', 'Arrival Date', 'Weight (kg)', 'Weight Charges (PKR)', 'Fuel Surcharge (PKR)', 'FAF CHARGES (PKR)', 'OSA Charges (PKR)', 'Adjustment Charges (PKR)', 'Total Charges (PKR)', 'GST (PKR)', 'SMS Charges' ,'WHT', 'COD SST', 'Invoice Amount (PKR)', 'Intercept Charges  (PKR)','Return Charges (PKR)', 'Reverse Pickup Charges (PKR)'];
 
         $serial_number = 1;
 
@@ -15236,6 +15236,13 @@ class AdminFinanceController extends Controller
 //
 //            $date = Carbon::parse($date)->format('Y-m-d');
             $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment->id);
+            $service_charges = ShipmentServicesCharges::where('shipment_id', $shipment->id);
+            if ($service_charges->exists()) {
+                $service_charges = $service_charges->first();
+                $service_charges = $service_charges->reverse_pickup_charges;
+            } else {
+                $service_charges = 0;
+            }
             $row = array();
 
             if (!isset($details[$shipment->id])) {
@@ -15258,7 +15265,11 @@ class AdminFinanceController extends Controller
                 $row[] = $invoice_shipment->cod_sst;
                 $row[] = $invoice_shipment->invoice_amount;
                 $row[] = ($invoice_shipment->type != 2) ?  (($invoice_shipment->type != 3) ? $shipment->intercept_charges : 0) : 0;
+                $row[] = (($invoice_shipment->type == 1) ? $shipment->return_charges : 0);
 
+                $row[] = (!in_array($invoice_shipment->type, [2, 3]))
+                ? $service_charges
+                : 0;
                 // Assign the row to the details array
                 $details[$shipment->id] = $row;
             } else {
@@ -15297,6 +15308,15 @@ class AdminFinanceController extends Controller
                 $details[$shipment->id][16] += $invoice_shipment->invoice_amount;
                 if ($details[$shipment->id][17] == 0) {
                     $details[$shipment->id][17] += ($invoice_shipment->type != 2) ?  (($invoice_shipment->type != 3) ? $shipment->intercept_charges : 0) : 0;
+                }
+
+                if($details[$shipment->id][18] == 0) {
+                    $details[$shipment->id][18] += (($invoice_shipment->type == 1) ? $shipment->return_charges : 0);
+                }
+                if($details[$shipment->id][19] == 0) {
+                    $details[$shipment->id][19] += (!in_array($invoice_shipment->type, [2, 3]))
+                    ? $service_charges
+                    : 0;
                 }
             }
 
