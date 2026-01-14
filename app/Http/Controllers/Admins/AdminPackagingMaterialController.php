@@ -672,8 +672,7 @@ class AdminPackagingMaterialController extends Controller
 
                     $result = $marcoOrderService->bookPackagingOrder($request_details);
                     if (isset($result) && $result['status'] === 'success') {
-                        $request_details->status_id = 2;
-                        $request_details->save();
+                       
                        return response()->json(['status' => 1,
                             'success' => 'Packaging Material Request has been sent to WareHouse successfully!'
                         ]);

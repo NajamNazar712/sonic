@@ -53,6 +53,8 @@ class MarcoOrderService extends MarcoBaseService
         $responseStatus = $response->successful() ? 'success' : 'failed';
 
         if($responseStatus){
+            $request_details->status_id = 2;
+            $request_details->save();
             $packaging_request_history = new PackagingMaterialRequestHistory();
             $packaging_request_history->packaging_material_request_id = $request_details->id;
             $packaging_request_history->status = 2;
