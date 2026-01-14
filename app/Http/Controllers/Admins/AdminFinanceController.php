@@ -15216,7 +15216,7 @@ class AdminFinanceController extends Controller
 
         $details = array();
 
-        $details[] = ['S. No.', 'Tracking No.', 'Origin', 'Destination', 'Arrival Date', 'Weight (kg)', 'Weight Charges (PKR)', 'Fuel Surcharge (PKR)', 'FAF CHARGES (PKR)', 'OSA Charges (PKR)', 'Adjustment Charges (PKR)', 'Total Charges (PKR)', 'GST (PKR)', 'SMS Charges' ,'WHT', 'COD SST', 'Invoice Amount (PKR)', 'Intercept Charges  (PKR)','Return Charges', 'Reverse Pickup Charges'];
+        $details[] = ['S. No.', 'Tracking No.', 'Origin', 'Destination', 'Arrival Date', 'Weight (kg)', 'Weight Charges (PKR)', 'Fuel Surcharge (PKR)', 'FAF CHARGES (PKR)', 'OSA Charges (PKR)', 'Adjustment Charges (PKR)', 'Total Charges (PKR)', 'GST (PKR)', 'SMS Charges' ,'WHT', 'COD SST', 'Invoice Amount (PKR)', 'Intercept Charges  (PKR)','Return Charges (PKR)', 'Reverse Pickup Charges (PKR)'];
 
         $serial_number = 1;
 
