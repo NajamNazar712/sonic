@@ -544,6 +544,7 @@ class APIController extends Controller
         $user_id = $request->user_id;
         $flag = null;
         $user_type = User::where('id', $user_id)->first();
+        dd($user_id,$user_type);
 
         // sahban bhai said service type 3,5 then disabled this below condition
             if ($request->input('amount') == 0 && Carbon::parse($user_type->activated_at)->lt(Carbon::now()->subDays(1)) && !PendingPayment::check_negative_payable($user_id, $user_type['account_type_id']) && !in_array($request->input('service_type_id',1), [3,5])) {
@@ -1410,7 +1411,7 @@ class APIController extends Controller
                 $request_details = PackagingMaterialRequest::find($request->packaging_material_request_id);
                 $user_id = $request_details->user_id; 
                 $packagingflag = true;
-            };
+            }
             if ($user_type['account_type_id'] == 1) {
                 $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces_quantity, $self_collection, $business_category_id, $open_shipment, $return_address_id, $parcel_value,$booked_by, $channel_id);
             } else {
