@@ -95,7 +95,7 @@ class MarcoOrderService extends MarcoBaseService
         return [
             'order_type'           => 1,
             'courier_type'         => 1,
-            'self_pickup'          => 1,
+            'self_pickup'          => 0,
             'city_name'            => $request_details->city?->name,
             'cod'                  => $request_details->amount,
             'consignee_name'       => "Packaging Material to $shipper_details->name",
