@@ -1408,7 +1408,7 @@ class APIController extends Controller
 
             if (isset($request->packaging_material_request_id) && $request->packaging_material_request_id) {
                 $request_details = PackagingMaterialRequest::find($request->packaging_material_request_id);
-                // $user_id = $request_details->user_id; 
+                $user_id = $request_details->user_id; 
                 $packagingflag = true;
             }
             if ($user_type['account_type_id'] == 1) {
