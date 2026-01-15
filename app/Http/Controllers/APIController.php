@@ -544,7 +544,6 @@ class APIController extends Controller
         $user_id = $request->user_id;
         $flag = null;
         $user_type = User::where('id', $user_id)->first();
-        dd($user_id,$user_type);
 
         // sahban bhai said service type 3,5 then disabled this below condition
             if ($request->input('amount') == 0 && Carbon::parse($user_type->activated_at)->lt(Carbon::now()->subDays(1)) && !PendingPayment::check_negative_payable($user_id, $user_type['account_type_id']) && !in_array($request->input('service_type_id',1), [3,5])) {
@@ -1409,7 +1408,7 @@ class APIController extends Controller
 
             if (isset($request->packaging_material_request_id) && $request->packaging_material_request_id) {
                 $request_details = PackagingMaterialRequest::find($request->packaging_material_request_id);
-                $user_id = $request_details->user_id; 
+                // $user_id = $request_details->user_id; 
                 $packagingflag = true;
             }
             if ($user_type['account_type_id'] == 1) {
