@@ -127,6 +127,7 @@ use App\Http\Models\Admin\WalkinShipmentWeightCharges;
 use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\AdminFnfController;
+use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Models\Admin\UserShippingInfoStoreAddress;
 use App\Http\Models\TelenorShipmentStatusEstimatedTime;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
@@ -11326,20 +11327,23 @@ class APIController extends Controller
 
             if ($shipment) {
                 $shipment->update([
-                    'shipper_status_id'   => 2,
-                    'consignee_status_id' => 2,
+                    'warehouse_order_status'   => 5,
                 ]);
-
-                ShipmentsJourneyController::add(
-                    $shipment->id,
-                    2,
-                    2,
-                    null,
-                    null,
-                    null,
-                    Auth::id(),
-                    $packaging_material_request->id
-                );
+                AdminPickupsController::generate($shipment->id);
+                $journey = new ShipmentsJourney();
+                $journey->created_at = now();
+                $journey->updated_at = now();
+                $journey->shipment_id = $shipment->id;
+                $journey->verification = 1;
+                $journey->shipper_status_id = 63;
+                $journey->consignee_status_id = 63;
+                $journey->status_reason_id = null;
+                $journey->remarks = null;
+                $journey->user_id = null;
+                $journey->admin_id = 346;
+                $journey->rider_id = null;
+                $journey->city_id = $shipment->user->city->id;
+                $journey->save();
             }
 
             /** STEP 7: History log */
