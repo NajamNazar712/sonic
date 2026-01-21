@@ -826,7 +826,6 @@ class AdminInternationalRatesController extends Controller
                     return redirect()->back()->with(['error' => 'Rate settings not set!']);
                 }
                 $margin = array_fill_keys($marginzoneColumnsArray['marginColumn'], 0);
-                dd($margin);
                 if($user_information){
                     if($user_information->status == 1 || $user_information->status == 4 || $user_information->status == 5){
                         $international_user_rate = InternationalUserRate::where('user_id', $id);
@@ -837,7 +836,6 @@ class AdminInternationalRatesController extends Controller
                                     $margins[$column] = $international_user_rate->$column;
                                 }
                             }
-                            dd('1',$margins[$column]);
                         }
                     }
                     else{
@@ -849,7 +847,6 @@ class AdminInternationalRatesController extends Controller
                                     $margins[$column] = $international_user_rate->$column;
                                 }
                             }
-                            dd('2',$margins[$column]);
                         }
                     }
                 }
