@@ -259,6 +259,7 @@ class AdminInternationalRatesController extends Controller
 
     }
 	 public function edit_rates_index($id){
+       
         if($id){
             $user = User::find($id);
             if($user){
@@ -786,9 +787,9 @@ class AdminInternationalRatesController extends Controller
     }
 
     public function update_rates_index($id){
-
         if($id){
             $marginzoneColumnsArray = $this->zoneMarginColumnName();
+            dd($marginzoneColumnsArray);
             $user = User::find($id);
             if($user){
                 $user_information = NULL;
