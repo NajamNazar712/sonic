@@ -11316,10 +11316,8 @@ class APIController extends Controller
         try {        
 
             /** STEP 4: Update packaging request status */
-            $packaging_material_request->update([
-                'status_id' => 3 // DISPATCHED
-            ]);
-
+            $packaging_material_request->status_id = 3; // DISPATCHED
+            $packaging_material_reques->save();
             /** STEP 6: Update shipment (if exists) */
             $shipment = Shipment::where(
                 'tracking_number',
@@ -11327,9 +11325,8 @@ class APIController extends Controller
             )->first();
 
             if ($shipment) {
-                $shipment->update([
-                    'warehouse_order_status'   => 5,
-                ]);
+                $shipment->warehouse_order_status = 5;
+                $shipment->save();
                 AdminPickupsController::generate($shipment->id);
                 $journey = new ShipmentsJourney();
                 $journey->created_at = now();
