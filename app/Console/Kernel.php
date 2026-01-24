@@ -615,8 +615,10 @@ class Kernel extends ConsoleKernel
         $schedule->command('update_corporate_invoice_charges_issue')->hourly()->runInBackground();
         $schedule->command('update:pending_payment_shipment_arrival_charges')->hourly()->runInBackground();
 //        $schedule->command('storage:amazon')->dailyAt('15:05')->runInBackground();
-//        $schedule->command('email:revenuereport_lastmonth 2')->dailyAt('11:15')->runInBackground();
-//        $schedule->command('email:revenuereport_lastmonth 3')->dailyAt('11:30')->runInBackground();
+
+        $schedule->command('email:revenuereport_lastmonth 1')->dailyAt('14:00')->runInBackground();
+        $schedule->command('email:revenuereport_lastmonth 2')->dailyAt('14:15')->runInBackground();
+        $schedule->command('email:revenuereport_lastmonth 3')->dailyAt('14:30')->runInBackground();
 
         $schedule->command('update:shipper_segment_logs')->everyFiveMinutes()->runInBackground();
 //        $schedule->command('apollo:fetch-shipments-status')->everyFifteenMinutes()->runInBackground();
