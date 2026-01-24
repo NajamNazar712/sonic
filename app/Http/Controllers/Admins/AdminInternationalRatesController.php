@@ -259,6 +259,7 @@ class AdminInternationalRatesController extends Controller
 
     }
 	 public function edit_rates_index($id){
+       
         if($id){
             $user = User::find($id);
             if($user){
@@ -786,9 +787,9 @@ class AdminInternationalRatesController extends Controller
     }
 
     public function update_rates_index($id){
-
         if($id){
             $marginzoneColumnsArray = $this->zoneMarginColumnName();
+            
             $user = User::find($id);
             if($user){
                 $user_information = NULL;
@@ -825,7 +826,6 @@ class AdminInternationalRatesController extends Controller
                     return redirect()->back()->with(['error' => 'Rate settings not set!']);
                 }
                 $margin = array_fill_keys($marginzoneColumnsArray['marginColumn'], 0);
-                
                 if($user_information){
                     if($user_information->status == 1 || $user_information->status == 4 || $user_information->status == 5){
                         $international_user_rate = InternationalUserRate::where('user_id', $id);

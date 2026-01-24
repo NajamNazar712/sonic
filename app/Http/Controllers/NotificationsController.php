@@ -10134,7 +10134,7 @@ class NotificationsController extends Controller
                         $body = str_replace('[link]', $link, $body);
                     }
 
-                    $to = ['adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk','raheel.hassan@trax.pk','hammad.majid@trax.pk', 'm.sohail@trax.pk', 'ghazanfar.ali@trax.pk'];
+                    $to = ['adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'waseem.hyder@slgtrax.com','hammad.majid@trax.pk', 'm.sohail@trax.pk', 'ghazanfar.ali@trax.pk'];
 
                     $cc = ["sahban.ghani@trax.pk", "asad.ahsan@trax.pk"];
 
