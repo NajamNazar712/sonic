@@ -51,4 +51,21 @@ class PendingPayment extends Model
              return true;
         }
     }
+
+
+    static function negative_payable_check($user_id,$account_type){
+        if ($account_type == 2) return false;
+
+        $setting = GlobalSettings::where('type', 'negative_payable_limit')->first();
+        if (!$setting) return false;
+
+        $limit = $setting->setting_value;
+
+        return self::where('user_id', $user_id)
+            ->whereHas('pending_payment_calculation', function ($q) use ($limit) {
+                $q->where('payable', '>', $limit);
+            })
+            ->exists();
+        
+    }
 }
