@@ -36,6 +36,8 @@ use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
+use App\Http\Models\PendingPayment;
+
 
 class ShipperCRMController extends Controller
 {
@@ -480,6 +482,10 @@ class ShipperCRMController extends Controller
                     $shipment = Shipment::find($shipment_id);
                     if($shipment){
 
+                        if($request->cod_new_amount == 0 && $complaint_id == 12 && PendingPayment::negative_payable_check($shipment->user_id, $shipment->user->account_type_id)) {
+                            return ['status'=> 0 , 'error' => 'You are unable to change the amount due to negative balance.'];
+                        }
+
                         if($complaint_id == 12 && in_array($shipment->shipper_status_id, [14, 18, 30, 36, 37, 20, 21, 22, 23, 24, 25, 26, 32, 44, 47, 48, 57, 60, 51])) // for cod change automation
                         {
                             return ['status' => 0, 'error' => 'Request cannot be catered at this status of the shipment.'];
@@ -695,6 +701,9 @@ class ShipperCRMController extends Controller
             else if (!empty($shipment_id)){
                 $shipment = Shipment::find($shipment_id);
                 if($shipment){
+                    if($request->cod_new_amount == 0 && $complaint_id == 12 && PendingPayment::negative_payable_check($shipment->user_id, $shipment->user->account_type_id)) {
+                        return ['status'=> 0 , 'error' => 'You are unable to change the amount due to negative balance.'];
+                    }
 
                     if($complaint_id == 12 && in_array($shipment->shipper_status_id, [14, 18, 30, 36, 37, 20, 21, 22, 23, 24, 25, 26, 32, 44, 47, 48, 57, 60, 51])) // for cod change automation
                     {
