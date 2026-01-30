@@ -12798,8 +12798,8 @@ class RiderAPIController extends Controller
                         $message = "Leave Request submitted successfully";
                     }
                     $employee->save();
-                    NotificationsController::rider_notification(11, $request->rider_id, 2, $leave_request->id);
-                    NotificationsController::rider_notification(12, $leave_request->reporter_id, 1, $leave_request->id);
+                    NotificationsController::app_notification(11, $request->rider_id, 2, $leave_request->id);
+                    NotificationsController::app_notification(12, $leave_request->reporter_id, 1, $leave_request->id);
                     return response()->json(['status' => 0, 'riderly_message' => $message]);
                 } else {
                     return response()->json(['status' => 1, 'message' => 'Exceed Quota: Dear user, Your limit can\'t be exceed from 56 days.']);
