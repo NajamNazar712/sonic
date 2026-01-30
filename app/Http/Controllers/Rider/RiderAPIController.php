@@ -12774,7 +12774,7 @@ class RiderAPIController extends Controller
                             $leave_request = $leave_request->first();
                             $leave_request->from = $request->from;
                             $leave_request->to = $request->to;
-                            $leave_request->riderlied_reason = $request->reason;
+                            $leave_request->reason = $request->reason;
                             $leave_request->leave_type = $request->leave_type;
                             $leave_request->save();
                             $message = "Leave Request edited successfully";
@@ -12792,7 +12792,7 @@ class RiderAPIController extends Controller
                         $leave_request->reporter_id = $employee->line_manager->admin->id;
                         $leave_request->from = $request->from;
                         $leave_request->to = $request->to;
-                        $leave_request->riderlied_reason = $request->reason;
+                        $leave_request->reason = $request->reason;
                         $leave_request->leave_type = $request->leave_type;
                         $leave_request->save();
                         $message = "Leave Request submitted successfully";
