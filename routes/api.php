@@ -376,7 +376,7 @@ use Illuminate\Http\Request;
 
                 //Current
                 Route::post('index_v2', 'Rider\RiderAPIController@leave_index_v2')->name('index_v2');
-                Route::post('apply_v2', 'Rider\RiderAPIController@leave_apply_v2')->name('apply_v2');
+                Route::post('apply_v2', 'Rider\RiderAPIController@leave_riderly_v2')->name('apply_v2');
                 Route::get('list_v2', 'Rider\RiderAPIController@employee_leave_list_v2')->name('list_v2');
                 Route::post('calender', 'Rider\RiderAPIController@view_calender')->name('calender');
             });
