@@ -34,8 +34,8 @@ class ExpectedShipmentNotMeetPenaltyCharges extends Command
      */
     public function handle()
     {
-        $start_date = Carbon::now()->startOfMonth();
-        $end_date   = Carbon::now()->endOfMonth();
+        $start_date = Carbon::now()->subMonth()->startOfMonth();
+        $end_date   = Carbon::now()->subMonth()->endOfMonth();
         $users = User::select('id', 'average_shipments', 'percentage_on_expected_shipments')
         ->where('sub_segment_id', 5)
         ->where('status', 3)
