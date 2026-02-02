@@ -146,6 +146,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('excluded_shippers', 'Admins\AdminDashboardController@excluded_shippers')->name('excluded_shippers');
         Route::post('faf_charges/info', 'Admins\AdminDashboardController@faf_charges_info')->name('faf_charges.info');
         Route::post('faf_charges/submit', 'Admins\AdminDashboardController@faf_charges_submit')->name('faf_charges.submit');
+        Route::post('exp_shipment_percentage/info', 'Admins\AdminDashboardController@exp_shipment_percentage_info')->name('exp_shipment_percentage.info');
+        Route::post('exp_shipment_percentage/submit', 'Admins\AdminDashboardController@exp_shipment_percentage_submit')->name('exp_shipment_percentage.submit');
 
         Route::get('duplicate/info', 'Admins\AdminDashboardController@duplicate_info')->name('duplicate.info');
         Route::prefix('payment_cycle')->name('payment_cycle.')->group(function () {
@@ -1650,6 +1652,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 
     Route::prefix('finance')->name('finance.')->group(function () {
+
+        Route::prefix('expected_shipment_penalty')->name('expected_shipment_penalty.')->group(function () {
+            Route::get('', 'Admins\ExpectedShipmentPenaltyAdjustmentController@index')->name('index');
+            Route::get('list', 'Admins\ExpectedShipmentPenaltyAdjustmentController@list')->name('list');
+            Route::post('approve', 'Admins\ExpectedShipmentPenaltyAdjustmentController@approve')->name('approve');
+            Route::post('reject', 'Admins\ExpectedShipmentPenaltyAdjustmentController@reject')->name('reject');
+
+        });
         Route::prefix('outstanding_sdn')->name('outstanding_sdn.')->group(function () {
             Route::get('', 'Admins\AdminFinanceController@outstanding_sdn_index')->name('index');
             Route::get('list', 'Admins\AdminFinanceController@outstanding_sdn_list')->name('list');

@@ -982,6 +982,11 @@
                                                 href="{{ route('admin.finance.outstanding_shipments.walk_in_index') }}">Walk-In
                                                 Shipments</a></li>
                                     @endif
+
+                                    @if (session('role_id') == 1 || in_array(1056, session('permissions')))
+                                        <li><a class="menu-item"
+                                                href="{{ route('admin.finance.expected_shipment_penalty.index') }}">Expected Shipment Penalties</a></li>
+                                    @endif
                                 </ul>
                             </li>
                         @endif
