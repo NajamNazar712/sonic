@@ -118,6 +118,12 @@
                                             @endforeach
                                         </select>
                                     </div>
+                                    <div class="form-group">
+                                        <label class="mr-1">Add Flyer</label>
+                                        <button type="button" class="btn btn-outline-success mr-1" title="Add more slabs" id="waddition_btn"><i class="la la-plus"></i></button>
+                                        
+                                      
+                                    </div>
 {{--                                    <div class="form-group">--}}
 {{--                                        <input name="payment_transaction_id" class="form-control number" id="payment_transaction_id" placeholder="Payment Transaction ID" value=""  data-rule-required="true" data-msg-required="Payment Transaction ID is required">--}}
 {{--                                    </div>--}}
@@ -1898,6 +1904,43 @@
             });
 
             $('#account_no').attr('autocomplete', 'off');
+
+       
+
+            let wadCount = 0;
+
+            $('body').on('click', '#waddition_btn', function (e) {
+                
+                e.preventDefault();
+
+                wadCount++;
+                console.log('test')
+                let htmdiv =
+                    '<div class="row wad_row" id="wad_row' + wadCount + '">' +
+                        '<div class="col-10">' +
+                            '<fieldset class="form-group">' +
+                                '<input type="number" class="form-control numeric validated" ' +
+                                    'data-rule-required="true" data-msg-required="This field is required" ' +
+                                    'name="waddition_value[' + wadCount + ']" value="" />' +
+                            '</fieldset>' +
+                        '</div>' +
+                        '<div class="col-2 text-end">' +
+                            '<span class="btn btn-danger rounded btn-sm-width  mb-1 wad_close" data-id="' + wadCount + '">' +
+                                '<i class="ft-x"></i>' +
+                            '</span>' +
+                        '</div>' +
+                    '</div>';
+
+                  $(this).closest('.form-group').after(htmdiv);
+            });
+
+            // cancel/remove (same as your “close”)
+            $('body').on('click', '.wad_close', function () {
+                let id = $(this).data('id');
+                $('#wad_row' + id).remove();
+            });
+
+            
 
         });
     </script>
