@@ -4551,7 +4551,6 @@ class AdminFinanceController extends Controller
         $shipmentDeliveryNote = DeliveryNoteShipment::with('delivery_note')->where('shipment_id', $shipment->id)->latest()->first();
 
         if(!empty($shipmentDeliveryNote)) {
-
             NotificationsController::app_notification(
                 23, // Notification type ID
                 $shipmentDeliveryNote->delivery_note->rider_id, // Rider ID
@@ -4840,18 +4839,20 @@ class AdminFinanceController extends Controller
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
             $header = ['Tracking Number', 'Actual Weight'];
-
+            
             if (isset($spreadsheet)) {
                 $header_correct = TRUE;
 
                 foreach ($spreadsheet[0] as $index => $header_value) {
                     if ($index == 2) {
+                        $header_correct = TRUE;
+                        break;
                     } elseif (!isset($header[$index]) || $header_value != $header[$index]) {
                         $header_correct = FALSE;
                         break;
                     }
                 }
-
+     
                 if (!$header_correct) {
                     return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
                 } else {
@@ -7823,6 +7824,7 @@ class AdminFinanceController extends Controller
                             $done_payment->ibft_charges = 0;
                         }
 
+                        $done_payment->created_by = auth()->check() ? Auth::id() : 346;
                         $done_payment->save();
 
                         $pending_payment->delete();
@@ -7949,6 +7951,7 @@ class AdminFinanceController extends Controller
                         $wallet_check = WalletUser::where('user_id', $pending_payment->user_id)->exists() ? 1 :  0;
 
                         $done_payment->is_wallet_payment = $wallet_check;
+                        $done_payment->created_by = auth()->check() ? Auth::id() : 346;
 
                         if($wallet_check == 0) {
                             $user_ibft_charge = UserIbftCharge::where('user_id', $pending_payment->user_id)->first();
@@ -8402,6 +8405,9 @@ class AdminFinanceController extends Controller
             ->leftJoin('admins as ad', function ($join) {
                 $join->on('ad.id', '=', 'done_payments.status_updated_by');
             })
+            ->leftJoin('admins as creator', function ($join) {
+                $join->on('creator.id', '=', 'done_payments.created_by');
+            })
             ->leftJoin('user_bank_infos as ubi', function ($join) {
                 $join->on('ubi.id', '=', 'done_payments.user_bank_info_id');
             })
@@ -8447,7 +8453,7 @@ class AdminFinanceController extends Controller
             'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 'done_payments.ibft_charges', 
             'dpc.packaging_charges', 'dpc.adjustment as adjustment_charges', 'done_payments.status_updated_at as status_updated_at', 
             'dpc.wht as total_wht', 'done_payments.created_at as start_date', 'done_payments.updated_at as end_date', 'ad.name as admin_name', 
-            'done_payments.updated_at as updated_at','sts.status as star_status','u.payment_cycle_days as payment_cycle_days','pc.name as payment_cycle', 'pc.id as payment_cycle_id', 'dpc.sms_charges as total_sms_charges','done_payments.arrival_shipment as arrival_shipment_shipments_count','done_payments.arrival_shipment', 'sale_admin.name as sale_person_name','wu.id as wallet_user' , 'done_payments.is_wallet_payment', 'wu.finova_account_type as finova_account_type' ,'dpc.cod_sst as total_cod_sst','t.name as territory', 'done_payments.tax_status', 'r.name as region')
+            'done_payments.updated_at as updated_at','sts.status as star_status','u.payment_cycle_days as payment_cycle_days','pc.name as payment_cycle', 'pc.id as payment_cycle_id', 'dpc.sms_charges as total_sms_charges','done_payments.arrival_shipment as arrival_shipment_shipments_count','done_payments.arrival_shipment', 'sale_admin.name as sale_person_name','wu.id as wallet_user' , 'done_payments.is_wallet_payment', 'wu.finova_account_type as finova_account_type' ,'dpc.cod_sst as total_cod_sst','t.name as territory', 'done_payments.tax_status', 'r.name as region', 'creator.name as created_by')
             ->where(function($query){
                 $idsToExclude = FilterTrait::class::getFilteredIds(auth()->user()->id);
                 if (!empty($idsToExclude)) {
@@ -9293,7 +9299,17 @@ class AdminFinanceController extends Controller
                 foreach ($rows as $key => $row) {
                     $payment_id = (int)$row['payment_id'];
                     $done_payment = DonePayment::find($payment_id);
-                    if($done_payment->is_wallet_payment == 0) {
+
+                    if($done_payment->is_wallet_payment == 1) {
+
+                        $done_payment->status = 3;
+                        $done_payment->status_updated_at = Carbon::now();
+                        $done_payment->save();
+                        WalletBulkSettlementFromDonePayments::dispatch($payment_id,  Auth::id());
+                        $payment_paid=true;
+
+                    }
+                    else {
                         $status = strtolower($row['status']);
                         if ($status == "paid") {
                             if ($done_payment->status != 1) {
@@ -10208,7 +10224,7 @@ class AdminFinanceController extends Controller
 
         $current_date = Carbon::now()->startOfDay();
         $current_date_string = $current_date->toDateString();
-        $users = User::where('account_type_id', 2)->where('id',2234)->get();
+        $users = User::where('account_type_id', 2)->get();
 
         foreach ($users as $user) {
 
@@ -10258,9 +10274,9 @@ class AdminFinanceController extends Controller
                     $billing_period_from_date = Carbon::now()->subDays(1)->startOfDay()->toDateString();
                     //}
                 }
-                dd($user_banking_information,$billing_period_from_date,$generate);
+          
                 //$generate = TRUE;
-         
+
                 //$billing_period_from_date = Carbon::now()->subDays(7)->startOfDay()->toDateString();
                 if ($generate) {
 
@@ -15201,7 +15217,7 @@ class AdminFinanceController extends Controller
 
         $details = array();
 
-        $details[] = ['S. No.', 'Tracking No.', 'Origin', 'Destination', 'Arrival Date', 'Weight (kg)', 'Weight Charges (PKR)', 'Fuel Surcharge (PKR)', 'FAF CHARGES (PKR)', 'OSA Charges (PKR)', 'Adjustment Charges (PKR)', 'Total Charges (PKR)', 'GST (PKR)', 'SMS Charges' ,'WHT', 'COD SST', 'Invoice Amount (PKR)', 'Intercept Charges  (PKR)'];
+        $details[] = ['S. No.', 'Tracking No.', 'Origin', 'Destination', 'Arrival Date', 'Weight (kg)', 'Weight Charges (PKR)', 'Fuel Surcharge (PKR)', 'FAF CHARGES (PKR)', 'OSA Charges (PKR)', 'Adjustment Charges (PKR)', 'Total Charges (PKR)', 'GST (PKR)', 'SMS Charges' ,'WHT', 'COD SST', 'Invoice Amount (PKR)', 'Intercept Charges  (PKR)','Return Charges (PKR)', 'Reverse Pickup Charges (PKR)'];
 
         $serial_number = 1;
 
@@ -15221,6 +15237,13 @@ class AdminFinanceController extends Controller
 //
 //            $date = Carbon::parse($date)->format('Y-m-d');
             $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment->id);
+            $service_charges = ShipmentServicesCharges::where('shipment_id', $shipment->id);
+            if ($service_charges->exists()) {
+                $service_charges = $service_charges->first();
+                $service_charges = $service_charges->reverse_pickup_charges;
+            } else {
+                $service_charges = 0;
+            }
             $row = array();
 
             if (!isset($details[$shipment->id])) {
@@ -15243,7 +15266,11 @@ class AdminFinanceController extends Controller
                 $row[] = $invoice_shipment->cod_sst;
                 $row[] = $invoice_shipment->invoice_amount;
                 $row[] = ($invoice_shipment->type != 2) ?  (($invoice_shipment->type != 3) ? $shipment->intercept_charges : 0) : 0;
+                $row[] = (($invoice_shipment->type == 1) ? $shipment->return_charges : 0);
 
+                $row[] = (!in_array($invoice_shipment->type, [2, 3]))
+                ? $service_charges
+                : 0;
                 // Assign the row to the details array
                 $details[$shipment->id] = $row;
             } else {
@@ -15282,6 +15309,15 @@ class AdminFinanceController extends Controller
                 $details[$shipment->id][16] += $invoice_shipment->invoice_amount;
                 if ($details[$shipment->id][17] == 0) {
                     $details[$shipment->id][17] += ($invoice_shipment->type != 2) ?  (($invoice_shipment->type != 3) ? $shipment->intercept_charges : 0) : 0;
+                }
+
+                if($details[$shipment->id][18] == 0) {
+                    $details[$shipment->id][18] += (($invoice_shipment->type == 1) ? $shipment->return_charges : 0);
+                }
+                if($details[$shipment->id][19] == 0) {
+                    $details[$shipment->id][19] += (!in_array($invoice_shipment->type, [2, 3]))
+                    ? $service_charges
+                    : 0;
                 }
             }
 
@@ -22375,4 +22411,152 @@ class AdminFinanceController extends Controller
             'error' => 'dps_date_from is required'
         ], 400);
     }
+
+    public function sst_wht_remove_view()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 838);
+
+        return view('admin.finance.remove_sst_wht.index');
+    }
+
+
+    public function sst_wht_remove_upload(Request $request)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 839);
+        $names = [
+            'payment_id' => 'Payment Id',
+        ];
+
+        $messages = [
+            'required' => ':attribute is Required.',
+            'integer' => ':attribute must be an Integer.',
+        ];
+        $rules = [
+            'payment_id' => ['required', 'numeric', Rule::exists('done_payments', 'id')]
+        ];
+        $fields = [0 => 'payment_id'];
+
+        if ($file = $request->file('payment_ids')) {
+            $spreadsheet = IOFactory::createReaderForFile($file);
+            $spreadsheet->setReadDataOnly(true);
+            $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
+
+            $header = ['PAYMENT_ID'];
+
+            if (isset($spreadsheet)) {
+                $header_correct = TRUE;
+                foreach ($spreadsheet[0] as $index => $header_value) {
+
+                    if ($index == 1) {
+                    } elseif (!isset($header[$index]) || $header_value != $header[$index]) {
+                        $header_correct = FALSE;
+
+                        break;
+                    }
+                }
+
+
+                if (!$header_correct) {
+                    return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+                } else {
+                    unset($spreadsheet[0]);
+                }
+            }
+
+            // Check if the number of rows exceeds the limit
+            if (count($spreadsheet) > 20) { // including header row
+                return redirect()->back()->with('error', 'The uploaded file exceeds the maximum allowed row limit of 20.');
+            }
+
+            $valid_fields = true;
+            if (!empty($spreadsheet) || !isset($spreadsheet)) {
+                $rows = array();
+                foreach ($spreadsheet as $spreadsheet_row) {
+                    $row = array();
+
+                    foreach ($spreadsheet_row as $key => $value) {
+                        if(array_key_exists($key, $fields)){
+                            $row[$fields[$key]] = $value;
+                        }
+                        else{
+                            $valid_fields = false;
+                        }
+                    }
+
+                    $rows[] = $row;
+                }
+                $errors = array();
+                if($valid_fields){
+                    unset($spreadsheet);
+                    $tracking_ids = array();
+                    $tracking_id_row = array();
+                    foreach ($rows as $key => $row) {
+                        $row_id = $key + 2;
+                        $validate = Validator::make($row, $rules, $messages);
+
+                        $validate->setAttributeNames($names);
+
+                        if ($validate->fails()) {
+                            $errors['Row #' . $row_id] = $validate->errors()->all();
+                        }
+                        if (empty($errors['Row #' . $row_id])) {
+                            if (!empty(trim($row['payment_id']))) {
+                                if (empty($tracking_ids)) {
+                                    $payment_ids[] = $row['payment_id'];
+                                    $payment_id_row[$row['payment_id']] = $row_id;
+                                } else {
+                                    if (in_array($row['payment_id'], $payment_ids)) {
+                                        $errors['Row #' . $row_id][] = 'Same Payment ID as of Row #' . $payment_id_row[$row['payment_id']];
+                                    } else {
+                                        $payment_ids[] = $row['payment_id'];
+                                        $payment_id_row[$row['payment_id']] = $row_id;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (empty($errors)) {
+                        $payment_id_data = array();
+                        foreach ($rows as $key => $row) {
+                            $row_id = $key + 2;
+                            $paymentId = (int) trim($row['payment_id']);
+                            $records = DB::table('done_payment_shipments')
+                                ->where('done_payment_id', $paymentId)
+                                ->select('id', 'wht', 'cod_sst', 'payable')
+                                ->get();
+
+                            foreach ($records as $record) {
+                                $currentPayable = $record->payable;
+                                DB::table('done_payment_shipments')
+                                    ->where('id', $record->id)
+                                    ->update(['payable' => $currentPayable + $record->wht + $record->cod_sst, 'cod_sst' => 0, 'wht' => 0]);
+                            }
+                            DB::select('CALL update_done_payment_statistics(?)', [$paymentId]);
+
+                        }
+                        return redirect()->back()->with(['success' => 'SST & WHT Removed Successfully']);
+                    }
+                    else {
+                        $errors = array_map(function ($row, $errors) {
+                            return $row . ':' . PHP_EOL . implode(' | ', $errors);
+                        }, array_keys($errors), $errors);
+
+                        return redirect()->back()->withErrors($errors);
+                    }
+                }
+                else{
+                    $errors[] = 'In-Valid Fields';
+                    return redirect()->back()->withErrors($errors);
+                }
+            }
+            else {
+                return redirect()->back()->with('error', 'No Payment ID in File');
+            }
+        }
+        else {
+            return redirect()->back()->with('error', 'File not found');
+        }
+    }
+
+
 }

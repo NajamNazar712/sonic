@@ -192,9 +192,11 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\UpdatePendingBanks',
         'App\Console\Commands\DailyOverAllSalesReportKhaddi',
         'App\Console\Commands\ArchiveBookingApiLogs',
+        'App\Console\Commands\DeleteDuplicateDonePayment',
         // 'App\Console\Commands\QsrEmail',
         // 'App\Console\Commands\PendingDeliveriesReport',
-        'App\Console\Commands\ExpectedShipmentNotMeetPenaltyCharges'
+        'App\Console\Commands\ExpectedShipmentNotMeetPenaltyCharges',
+        'App\Console\Commands\RemoveExpiredZeroCodShippers',
 
 
     ];
@@ -611,11 +613,14 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('update:zero_arrival_charges')->everyTwoHours()->runInBackground();
         $schedule->command('delete:duplicate_arrival')->hourly()->runInBackground();
+        $schedule->command('delete:duplicate_done_delivered')->everyThirtyMinutes()->runInBackground();
         $schedule->command('update_corporate_invoice_charges_issue')->hourly()->runInBackground();
         $schedule->command('update:pending_payment_shipment_arrival_charges')->hourly()->runInBackground();
 //        $schedule->command('storage:amazon')->dailyAt('15:05')->runInBackground();
-//        $schedule->command('email:revenuereport_lastmonth 2')->dailyAt('11:15')->runInBackground();
-//        $schedule->command('email:revenuereport_lastmonth 3')->dailyAt('11:30')->runInBackground();
+
+        $schedule->command('email:revenuereport_lastmonth 1')->dailyAt('14:00')->runInBackground();
+        $schedule->command('email:revenuereport_lastmonth 2')->dailyAt('14:15')->runInBackground();
+        $schedule->command('email:revenuereport_lastmonth 3')->dailyAt('14:30')->runInBackground();
 
         $schedule->command('update:shipper_segment_logs')->everyFiveMinutes()->runInBackground();
 //        $schedule->command('apollo:fetch-shipments-status')->everyFifteenMinutes()->runInBackground();
@@ -719,6 +724,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('shipments:update-rv-sar')->dailyAt('05:00');
         $schedule->command('logs:archive-booking-api')->dailyAt('03:00');
         $schedule->command('penalty:expected_shipments_not_meet')->monthlyOn(1, '00:00')->runInBackground();
+        $schedule->command('shippers:remove-expired')->everyFiveMinutes()->withoutOverlapping()->runInBackground();
     }
     /**
      * Register the commands for the application.

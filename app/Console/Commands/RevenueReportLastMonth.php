@@ -42,6 +42,7 @@ class RevenueReportLastMonth extends Command
     {
         $type = $this->argument('type');
         $response = AdminRevenueReportsController::revenue_report_last_month($type);
+        $response = AdminRevenueReportsController::revenue_report_by_delivery_date_last_month($type);
 
     }
 }
