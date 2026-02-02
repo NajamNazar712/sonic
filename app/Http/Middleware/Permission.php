@@ -1552,7 +1552,8 @@ class Permission
              'settings.geo_codes.index' => 1040,
             'admin.finance.prf.index' => 1046,
             'admin.finance.prf.list' => 1047,
-            'admin.finance.prf.completed_list' => 1050
+            'admin.finance.prf.completed_list' => 1050,
+            'admin.finance.expected_shipment_penalty.index' => 1059
         ],
         'shipper' => [
             'shipment.book.index' => 1,
