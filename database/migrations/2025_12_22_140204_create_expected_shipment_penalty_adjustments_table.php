@@ -23,7 +23,7 @@ return new class extends Migration
             $table->integer('amount');
             $table->integer('adjustment_type_id');
             $table->integer('status');
-            $table->integer('status_updated_by');
+            $table->integer('status_updated_by')->index();
             $table->dateTime('status_updated_at')->nullable();
             $table->timestamps();
         });
