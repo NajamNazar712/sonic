@@ -41,6 +41,7 @@ use Illuminate\Support\Facades\Validator;
 use Yajra\Datatables\Datatables;
 use App\RiderAssignedHubForDeliveryNote;
 use DB;
+use App\Models\RiderChangeLog;
 
 class RiderManagementController extends Controller
 {
@@ -156,6 +157,9 @@ class RiderManagementController extends Controller
                         if ($rider->status == 0 && $rider->first_inactive == 1) {
                             $dropdown .= '<button type="button" class="dropdown-item rejoin" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Rejoin Rider</div></button>';
                         }
+                    }
+                    if (session('role_id') == 1 || in_array(382, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item rider_log" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Logs</div></button>';
                     }
 
 
@@ -783,6 +787,9 @@ class RiderManagementController extends Controller
                         if ($rider->status == 0 && $rider->first_inactive == 1) {
                             $dropdown .= '<button type="button" class="dropdown-item rejoin" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Rejoin Rider</div></button>';
                         }
+                    }
+                    if (session('role_id') == 1 || in_array(382, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item rider_log" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Logs</div></button>';
                     }
 
 
@@ -1723,5 +1730,40 @@ class RiderManagementController extends Controller
                 }
             }
         }
+    }
+
+    public static function logRiderChange ($rider_id, $changes, $user_id, $screen) {
+
+        RiderChangeLog::create([
+            'rider_id'   => $rider_id,
+            'changed_by' => $user_id,
+            'changes'    => json_encode($changes),
+            'screen'     => $screen,
+        ]);
+    }
+
+    public function fetch_logs(Request $request) {
+
+        $data = RiderChangeLog::leftJoin('admins as a' , 'a.id' ,'rider_change_logs.changed_by')->where('rider_change_logs.rider_id', $request->id)->select(['rider_change_logs.*' , 'a.name as admin_name'])->orderByDesc('created_at')->get();
+
+        
+        $data->transform(function ($log) {
+
+            $changes = is_array($log->changes) ? $log->changes : json_decode($log->changes, true);
+
+            $parts = [];
+            if (is_array($changes)) {
+                foreach ($changes as $field => $values) {
+                    $old = $values['old'] ?? '-';
+                    $new = $values['new'] ?? '-';
+                    $parts[] = $field . ': ' . $old . ' → ' . $new;
+                }
+            }
+
+            $log->changes_text = !empty($parts) ? implode('<br>', $parts) : '-';
+            return $log;
+        });
+        return response()->json(['status' => 1 , 'logs' => $data] );
+
     }
 }
