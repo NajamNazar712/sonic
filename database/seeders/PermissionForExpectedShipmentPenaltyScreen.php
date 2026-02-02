@@ -20,7 +20,7 @@ class PermissionForExpectedShipmentPenaltyScreen extends Seeder
         $timestamp = Carbon::now()->format('Y-m-d H:i:s');
 
         DB::table('module_permissions')->insert([
-            ['id' => 1058, 'name' => 'Expected Shipment Penalties', 'module_id' => 8],
+            ['id' => 1059, 'name' => 'Expected Shipment Penalties', 'module_id' => 8],
             
         ]);
 
@@ -30,7 +30,7 @@ class PermissionForExpectedShipmentPenaltyScreen extends Seeder
                 'updated_at' => $timestamp,
                 'name' => 'Finance > Recovery > Expected Shipment Penalties',
                 'url' => 'admin.finance.expected_shipment_penalty.index',
-                'permission_id' => 1058
+                'permission_id' => 1059
             ],
         ]);
         
