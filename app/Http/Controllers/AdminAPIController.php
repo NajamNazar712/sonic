@@ -13278,9 +13278,9 @@ class AdminAPIController extends Controller
         if ($request->trip_type === 'out') {
 
             $rules = [
-                'out_meter' => 'required|integer|min:1',
-                'rider_id'  => 'required|integer',
-                'route_id'  => 'required|integer',
+                'out_meter' => 'required|integer|min:0',
+                'rider_id'  => 'nullable|integer|exists:riders,trax_id',
+                'route_id'  => 'nullable|integer|exists:routes,id',
                 'delivery_note_ids' => 'nullable|array',
                 'delivery_note_ids.*' => 'integer',
                 'return_note_ids' => 'nullable|array',
@@ -13295,7 +13295,7 @@ class AdminAPIController extends Controller
 
         if ($request->trip_type === 'in') {
             $rules = [
-                'in_meter' => 'required|integer|min:1',
+                'in_meter' => 'required|integer|min:0',
                 'incident_report'  => 'nullable|string',
                 'incident_image'    => 'nullable|file|mimes:png,jpg,jpeg,pdf|max:2048',
             ];
