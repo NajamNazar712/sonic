@@ -158,7 +158,7 @@ class RiderManagementController extends Controller
                             $dropdown .= '<button type="button" class="dropdown-item rejoin" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Rejoin Rider</div></button>';
                         }
                     }
-                    if (session('role_id') == 1 || in_array(382, session('permissions'))) {
+                    if (session('role_id') == 1 || in_array(1060, session('permissions'))) {
                         $dropdown .= '<button type="button" class="dropdown-item rider_log" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Logs</div></button>';
                     }
 
@@ -788,7 +788,7 @@ class RiderManagementController extends Controller
                             $dropdown .= '<button type="button" class="dropdown-item rejoin" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Rejoin Rider</div></button>';
                         }
                     }
-                    if (session('role_id') == 1 || in_array(382, session('permissions'))) {
+                    if (session('role_id') == 1 || in_array(1060, session('permissions'))) {
                         $dropdown .= '<button type="button" class="dropdown-item rider_log" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Logs</div></button>';
                     }
 
