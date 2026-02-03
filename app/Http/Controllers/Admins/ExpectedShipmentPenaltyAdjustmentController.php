@@ -125,6 +125,7 @@ class ExpectedShipmentPenaltyAdjustmentController extends Controller
 
         AdminFinanceController::add_pending_payment_charges($pending_payment->id, 0, 0, 0, $payable);
         AdminFinanceController::adjustment_logs_add($pending_payment_shipment->shipment_id, 4, $pending_payment_shipment->payable, 'Low Acheivement Penalty', $pending_payment_shipment->id, 1);
+        ShipmentsPaymentJourneyController::add($pending_payment_shipment->shipment_id, 4, Auth::id(),'Low Acheivement Penalty');
 
         return redirect()->back()->with(['success', 'Rejected Successfully..!']);
     }   
