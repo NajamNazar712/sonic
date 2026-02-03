@@ -438,8 +438,8 @@ class RiderManagementController extends Controller
             $employee->shift_id = $rider->shift_id;
             $employee->area_id = $rider->area_id;
 
-            $employee->rider_main_category = $request->rider_category;
-            $employee->rider_sub_category = $request->rider_main_category;
+            $employee->rider_main_category = $request->rider_main_category;
+            $employee->rider_sub_category = $request->rider_category;
             $employee->save();
         }
 
