@@ -54,19 +54,28 @@
                 </div>
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
-                    <tr role="row" class="bg-primary white">
-                        <th class="border-primary border-darken-1">S. No.</th>
-                        <th class="border-primary border-darken-1">Tracking No.</th>
-                        <th class="border-primary border-darken-1">Shipper</th>
-                        <th class="border-primary border-darken-1">Service Type</th>
-                        <th class="border-primary border-darken-1">Sub Segment</th>
-                        <th class="border-primary border-darken-1">Origin</th>
-                        <th class="border-primary border-darken-1">Destination</th>
-                        <th class="border-primary border-darken-1">Shipping Mode</th>
-                        <th class="border-primary border-darken-1">Arrival Date</th>
-                        <th class="border-primary border-darken-1">Reached at Destination Date</th>
-                        <th class="border-primary border-darken-1">Current Status</th>
-                    </tr>
+                        <tr role="row" class="bg-primary white">
+                            <th class="border-primary border-darken-1">S. No.</th>
+                            <th class="border-primary border-darken-1">Tracking No.</th>
+                            <th class="border-primary border-darken-1">No of Attempts</th>
+                            <th class="border-primary border-darken-1">Shipper</th>
+                            <th class="border-primary border-darken-1">Service Type</th>
+                            <th class="border-primary border-darken-1">Sub Segment</th>
+                            <th class="border-primary border-darken-1">Origin</th>
+                            <th class="border-primary border-darken-1">Destination</th>
+                            <th class="border-primary border-darken-1">Destination Hub</th>
+                            <th class="border-primary border-darken-1">Shipping Mode</th>
+                            <th class="border-primary border-darken-1">Rider Category</th>
+                            <th class="border-primary border-darken-1">Arrival Date</th>
+                            <th class="border-primary border-darken-1">Reached at Destination Date</th>
+                            {{--first out for delivery  kae baat ju status hai wu yaa aye ga--}}
+                            <th class="border-primary border-darken-1">First Status</th>
+                            <th class="border-primary border-darken-1">First Status Date</th>
+                            {{--lastest status of shipment--}}
+                            <th class="border-primary border-darken-1">Last Status</th>
+                            <th class="border-primary border-darken-1">Last Status Date</th>
+
+                        </tr>
                     </thead>
                 </table>
 
@@ -163,36 +172,35 @@
             var from_date = $('#search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
+                format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
-                    if (context.select) {
-                        $('#search_date_to').pickadate('picker').set('min', $('#search_date_from').pickadate('picker').get('select'));
-                        // $('#arrival_time_from').pickatime('picker').clear();
-                        // $('#arrival_time_to').pickatime('picker').clear();
-                        $('input[name="arrival_time_from"]').val('12:00 AM');
-                        $('input[name="arrival_time_to"]').val('11:30 PM');
-                    }
+
+                    var old_date_formatted = $('input[name="search_date_from_formatted"]').val();
+                    var contractMoment = moment(old_date_formatted);
+                    var current = moment(contractMoment).add(31, 'days');
+                    var current_max = moment(contractMoment).add(1, 'days');
+                    to_date.pickadate('picker').set('min', new Date(old_date_formatted),{muted:true});
+                    to_date.pickadate('picker').set('max', new Date(current.toDate()),{muted:true});
+                    to_date.pickadate('picker').set('select', new Date(current.toDate()),{muted:true});
                 }
             });
 
             var to_date = $('#search_date_to').pickadate({
                 firstDay: 1,
                 clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
+                format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
-                    if (context.select) {
-                        $('#search_date_from').pickadate('picker').set('max', $('#search_date_to').pickadate('picker').get('select'));
-                        // $('#arrival_time_from').pickatime('picker').clear();
-                        // $('#arrival_time_to').pickatime('picker').clear();
-                        $('input[name="arrival_time_from"]').val('12:00 AM');
-                        $('input[name="arrival_time_to"]').val('11:30 PM');
-                    }
+
                 }
             });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
@@ -215,15 +223,21 @@
 
                             head.push('S. No.');
                             head.push('Tracking No');
+                            head.push('No of Attempts');
                             head.push('Shipper');
                             head.push('Service Type');
                             head.push('Sub Segment');
                             head.push('Origin');
-                            head.push('Destination.');
+                            head.push('Destination');
+                            head.push('Destination HUB');
                             head.push('Shipping Mode');
+                            head.push('Rider Category');
                             head.push('Arrival Date');
                             head.push('Reached at Destination Date');
-                            head.push('Current Status');
+                            head.push('First Status');
+                            head.push('First Status Date');
+                            head.push('Last Status');
+                            head.push('Last Status Date');
 
 
 
@@ -232,15 +246,21 @@
 
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
+                                row.push(values.ofd_attempts);
                                 row.push(values.shipper);
                                 row.push(values.service_type);
                                 row.push(values.sub_segment);
                                 row.push(values.origin);
                                 row.push(values.destination);
+                                row.push(values.hub_city);
                                 row.push(values.shipping_mode);
+                                row.push(values.rider_category);
                                 row.push(values.arrival_date);
                                 row.push(values.arrived_at_destination_date);
+                                row.push(values.before_ofd_status);
+                                row.push(values.before_ofd_date);
                                 row.push(values.shipment_status);
+                                row.push(values.shipment_status_date);
                                 body.push(row);
                             });
                         },
@@ -287,15 +307,21 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle  tracking_number_link'},
+                    { data:'ofd_attempts' ,name: 'ofd_attempts', class: 'align-middle text-center ofd_attempts'},
                     { data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},
-                    { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle  service_type'},
-                    { data:'sub_segment' ,name: 'sub_sg.name', class: 'align-middle  sub_segment'},
+                    { data:'service_type' ,name: 'bt.id', class: 'align-middle  service_type'},
+                    { data:'sub_segment' ,name: 'sub_sg.id', class: 'align-middle  sub_segment'},
                     { data:'origin' ,name: 'oc.name', class: 'align-middle origin'},
                     { data:'destination' ,name: 'dc.name', class: 'align-middle destination'},
-                    { data:'shipping_mode' ,name: 'sh.mode', class: 'align-middle shipping_mode'},
+                    { data:'hub_city' ,name: 'h.name', class: 'align-middle hub_city'},
+                    { data:'shipping_mode' ,name: 'sh.id', class: 'align-middle shipping_mode'},
+                    { data:'rider_category' ,name: 'rider_category', class: 'align-middle rider_category'},
                     { data:'arrival_date' ,name: 'shipment_arival_journey.created_at', class: 'align-middle arrival_date'},
                     { data:'arrived_at_destination_date' ,name: 'sjc.created_at', class: 'align-middle arrived_at_destination_date'},
-                    { data:'shipment_status' ,name: 'ss.name', class: 'align-middle shipment_status'},
+                    { data:'before_ofd_status' ,name: 'before_ofd_status', class: 'align-middle before_ofd_status'},
+                    { data:'before_ofd_date' ,name: 'before_ofd_date', class: 'align-middle before_ofd_date'},
+                    { data:'shipment_status' ,name: 'ss.id', class: 'align-middle shipment_status'},
+                    { data:'shipment_status_date' ,name: 'lj.created_at', class: 'align-middle shipment_status_date'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -308,6 +334,10 @@
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var booking_type_select = '<select name="booking_type" id="booking_type" class="select2 form-control"></select>';
+                    var sub_segment_select = '<select name="sub_segment" id="sub_segment" class="select2 form-control"></select>';
+                    var shipping_mode_select = '<select name="shipping_mode" id="shipping_mode" class="select2 form-control"></select>';
+                    var rider_cat_select = '<select name="rider_category" id="rider_category" class="select2 form-control"></select>';
+                    var last_status_select = '<select name="last_status_select" id="last_status_select" class="select2 form-control"></select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
@@ -320,7 +350,31 @@
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
                         }
-                        else if($(header).is('.action') || $(header).is('.arrival_date')){
+                        else if($(header).is('.sub_segment')){
+                            $(sub_segment_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
+                        else if($(header).is('.shipping_mode')){
+                            $(shipping_mode_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
+                        else if($(header).is('.rider_category')){
+                            $(rider_cat_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
+                        else if($(header).is('.shipment_status')){
+                            $(last_status_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
+                        else if($(header).is('.action')  || $(header).is('.before_ofd_status') || $(header).is('.before_ofd_date')  || $(header).is('.ofd_attempts')){
                             $(td).appendTo($(search));
                         }
                         else {
@@ -348,6 +402,64 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
+
+                    var sub_segs = $.map({!! $sub_segments !!}, function (obj) {
+                        obj.id = obj.id;
+                        obj.text = obj.name;
+
+                        return obj;
+                    });
+
+                    $("#sub_segment").prepend('<option value="" selected></option>').select2({
+                        data:sub_segs,
+                        placeholder: "Sub Segment",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
+                    var shipping_md = $.map({!! $shipping_modes !!}, function (obj) {
+                        obj.id = obj.id;
+                        obj.text = obj.mode;
+                        return obj;
+                    });
+
+                    $("#shipping_mode").prepend('<option value="" selected></option>').select2({
+                        data:shipping_md,
+                        placeholder: "Shipping Modes",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
+                    var rider_cat = $.map({!! $rider_operation_categories !!}, function (obj) {
+                        obj.id = obj.id;
+                        obj.text = obj.name;
+                        return obj;
+                    });
+
+                    $("#rider_category").prepend('<option value="" selected></option>').select2({
+                        data:rider_cat,
+                        placeholder: "Operation Rider Category",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
+                    var ship_status = $.map({!! $shipment_statuses !!}, function (obj) {
+                        obj.id = obj.id;
+                        obj.text = obj.name;
+                        return obj;
+                    });
+
+                    $("#last_status_select").prepend('<option value="" selected></option>').select2({
+                        data:ship_status,
+                        placeholder: "Shipment Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
                     this.api().table().columns.adjust();
                 }
             });
