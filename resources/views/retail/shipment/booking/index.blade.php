@@ -302,6 +302,10 @@
                                             <input type="text" name="discount" id="charges_with_discount" class="form-control form-control-sm" placeholder="Charges With Discount" disabled>
                                         </div>
                                         <div class="form-group">
+                                            <label>Flyer Charges</label>
+                                            <input type="text" name="flyer_charges" id="flyer_charges" class="form-control form-control-sm" placeholder="Flyer Charges" disabled>
+                                        </div>
+                                        <div class="form-group">
                                             <label>GST</label>
                                             <input type="text" name="gst" id="gst" class="form-control form-control-sm" placeholder="GST" disabled>
                                         </div>
@@ -318,7 +322,7 @@
                                         </div>
                                     </div>
                                     <div class="row justify-content-center">
-                                        <div class="position-absolute" style="bottom: 0;">
+                                        <div class="" style="bottom: 0;">
                                             <div class="form-group text-center d-none" id="print_div">
                                                 <button type="button" name="print" id="print" class="btn btn-outline-cyan width-150" value="print">Print Slip</button>
                                             </div>
@@ -1388,6 +1392,7 @@
                 var retail_discount_code = $('#discount_code').val();
                 var product_id = $('#product').val();
                 var cod = $('#cod').val();
+                var flyer_count = wadCount;
 
                 var retail_discount_percentage = 0;
                 var retail_discount_applied = ($('#discount_code').val() == '') ? 0 : 1;
@@ -1402,7 +1407,7 @@
                                 retail_discount_percentage = data.data.discount_percentage;
                                 $('#retail_discount_percentage').val(retail_discount_percentage);
 
-                                calculateRates(shipping_mode_id,business_category,destination,weight,trax_box,length,breadth, insurance, packaging, height, admin_discount, admin_discount_type, retail_discount_applied, retail_discount_percentage,product_id , cod);
+                                calculateRates(shipping_mode_id,business_category,destination,weight,trax_box,length,breadth, insurance, packaging, height, admin_discount, admin_discount_type, retail_discount_applied, retail_discount_percentage,product_id , cod, flyer_count);
 
                                 toastr.success(retail_discount_percentage+'% Discount Applied', 'Success!', {
                                     positionClass: 'toast-top-center',
@@ -1423,12 +1428,12 @@
                 }
                 else
                 {
-                    calculateRates(shipping_mode_id,business_category,destination,weight,trax_box,length,breadth, insurance, packaging, height, admin_discount, admin_discount_type, retail_discount_applied, retail_discount_percentage, product_id , cod);
+                    calculateRates(shipping_mode_id,business_category,destination,weight,trax_box,length,breadth, insurance, packaging, height, admin_discount, admin_discount_type, retail_discount_applied, retail_discount_percentage, product_id , cod,flyer_count );
                 }
 
             });
 
-            function calculateRates(shipping_mode_id,business_category,destination,weight,trax_box,length,breadth, insurance, packaging, height, admin_discount, admin_discount_type, retail_discount_applied, retail_discount_percentage, product_id , cod)
+            function calculateRates(shipping_mode_id,business_category,destination,weight,trax_box,length,breadth, insurance, packaging, height, admin_discount, admin_discount_type, retail_discount_applied, retail_discount_percentage, product_id , cod, flyer_count)
             {
                 
                 if(business_category == 1){
@@ -1502,6 +1507,7 @@
                             'retail_discount_percentage': retail_discount_percentage,
                             'product_id' : product_id,
                             'cod' : cod,
+                            'flyer_count' : flyer_count,
                             '_token': '{{ csrf_token() }}'
                         }
                     })
@@ -1914,17 +1920,16 @@
                 e.preventDefault();
 
                 wadCount++;
-                console.log('test')
                 let htmdiv =
                     '<div class="row wad_row" id="wad_row' + wadCount + '">' +
-                        '<div class="col-10">' +
+                        '<div class="col-8">' +
                             '<fieldset class="form-group">' +
-                                '<input type="number" class="form-control numeric validated" ' +
+                                '<input type="text" class="form-control numeric validated" ' +
                                     'data-rule-required="true" data-msg-required="This field is required" ' +
-                                    'name="waddition_value[' + wadCount + ']" value="" />' +
+                                    'name="flyer[' + wadCount + ']" value="" />' +
                             '</fieldset>' +
                         '</div>' +
-                        '<div class="col-2 text-end">' +
+                        '<div class="col-4 text-end">' +
                             '<span class="btn btn-danger rounded btn-sm-width  mb-1 wad_close" data-id="' + wadCount + '">' +
                                 '<i class="ft-x"></i>' +
                             '</span>' +
@@ -1938,6 +1943,7 @@
             $('body').on('click', '.wad_close', function () {
                 let id = $(this).data('id');
                 $('#wad_row' + id).remove();
+                wadCount--;
             });
 
             

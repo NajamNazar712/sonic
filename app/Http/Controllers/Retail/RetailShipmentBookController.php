@@ -717,7 +717,6 @@ class RetailShipmentBookController extends Controller
 
 
         $insurance =  Auth::user()->store->insurance;
-
         if($request->weight != null){
 
             $weight = $request->weight;
