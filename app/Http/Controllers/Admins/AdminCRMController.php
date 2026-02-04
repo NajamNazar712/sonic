@@ -97,6 +97,7 @@ use App\Http\Controllers\ShipmentsAirWaybillJourneyController;
 use App\Http\Models\CRM\Escalation\CrmRequestEscalationStatus;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Models\CrmRequestResolvedReason;
+use App\Http\Models\PendingPayment;
 
 class AdminCRMController extends Controller
 {
@@ -234,6 +235,9 @@ class AdminCRMController extends Controller
                         if($shipment){
 
 
+                            if($request->cod_new_amount == 0 && $complaint_id == 12 && PendingPayment::negative_payable_check($shipment->user_id, $shipment->user->account_type_id)) {
+                                return ['status'=> 0 , 'error' => 'You are unable to change the amount due to negative balance.'];
+                            }
                             if($complaint_id == 12 && in_array($shipment->shipper_status_id, [14, 18, 30, 36, 37, 20, 21, 22, 23, 24, 25, 26, 32, 44, 47, 48, 57, 60, 51])) // for cod change automation
                             {
                                 return ['status' => 0, 'error' => 'Request cannot be catered at this status of the shipment.'];
@@ -327,10 +331,6 @@ class AdminCRMController extends Controller
                                                 }
                                             }
 
-                                            // auto change service type
-//                                            else if($complaint_id == 39 && in_array($shipment->shipper_status_id,[53,2,3,4,5,12,65,66,21,56])) {
-//                                                $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, null,true);
-//                                            }
 
                                             else{
                                                 $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL, $description);
@@ -402,11 +402,7 @@ class AdminCRMController extends Controller
                                                 CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $is_automated_cod_change);
                                             }
                                         }
-                                        // auto change service type
-//                                        else if($complaint_id == 39 && in_array($shipment->shipper_status_id,[53,2,3,4,5,12,65,66,21,56])) {
-//                                            $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, null,true);
-//                                        }
-
+                                       
                                         else{
                                             $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL ,$description);
                                         }
@@ -510,6 +506,9 @@ class AdminCRMController extends Controller
                         // $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->first();
                         // $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
 
+                        if($request->cod_new_amount == 0 && $complaint_id == 12 && PendingPayment::negative_payable_check($shipment->user_id, $shipment->user->account_type_id)) {
+                            return ['status'=> 0 , 'error' => 'You are unable to change the amount due to negative balance.'];
+                        }
                         if($complaint_id == 12 && in_array($shipment->shipper_status_id, [14, 18, 30, 36, 37, 20, 21, 22, 23, 24, 25, 26, 32, 44, 47, 48, 57, 60, 51])) // for cod change automation
                         {
                             return ['status' => 0, 'error' => 'Request cannot be catered at this status of the shipment.'];
