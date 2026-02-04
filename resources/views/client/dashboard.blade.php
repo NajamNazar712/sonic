@@ -2088,7 +2088,9 @@
                         }
                     }
                     else if (case_nature_id === 4) {
-                        if(selected_rows.length > 1){
+                        var case_nature_claim_id = $('#case_nature_claim').val();
+                        //console.log(case_nature_claim_id)
+                        if(selected_rows.length > 1 && case_nature_claim_id != 26){
                             var error = "Cannot select more than one shipment";
                             toastr.error(error, 'Error!', {
                                 positionClass: 'toast-top-center',
@@ -2099,7 +2101,7 @@
                         }
                         else{
                             var nature_flag = true;
-                            var case_nature_claim_id = $('#case_nature_claim').val();
+                            //var case_nature_claim_id = $('#case_nature_claim').val();
                             var product_cost = parseFloat($('#claim_product_cost').inputmask('unmaskedvalue'));
                             // var damage_product_cost = $('#claim_product_cost').val();
                             var check_product_picture = $('#product_picture').val();
