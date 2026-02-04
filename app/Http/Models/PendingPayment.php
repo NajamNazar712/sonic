@@ -63,7 +63,7 @@ class PendingPayment extends Model
 
         return self::where('user_id', $user_id)
             ->whereHas('pending_payment_calculation', function ($q) use ($limit) {
-                $q->where('payable', '>', $limit);
+                $q->where('payable', '<', $limit);
             })
             ->exists();
         
