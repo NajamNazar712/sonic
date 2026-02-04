@@ -2032,6 +2032,13 @@
                                 </a>
                             </li>
                         @endif
+                        @if (session('role_id') == 1 || in_array(1051, session('permissions')))
+                            <li>
+                                <a class="menu-item" href="{{ route('admin.reports.shipment_attempt_performance.index') }}">
+                                    2nd Attempt Performance Report
+                                </a>
+                            </li>
+                        @endif
                     </ul>
                 </li>
             @endif

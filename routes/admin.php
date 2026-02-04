@@ -2632,6 +2632,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\Reports\SubHubStationVisibilityController@index')->name('index');
             Route::post('list', 'Admins\Reports\SubHubStationVisibilityController@list')->name('list');
         });
+
+        Route::prefix('shipment_attempt_performance')->name('shipment_attempt_performance.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@shipment_attempt_performance_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@shipment_attempt_performance_list')->name('list');
+        });
     });
 
     //Reports end

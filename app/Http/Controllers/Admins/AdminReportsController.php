@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Admins;
+use App\Http\Models\BookingType;
 use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\RvShipmentAssignAgentDetails;
@@ -18631,5 +18632,97 @@ class AdminReportsController extends Controller
         ->rawColumns(['customer_name','brand_name'])
         ->make(true);
 
+    }
+
+
+    public function shipment_attempt_performance_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 835);
+        $booking_types = BookingType::all();
+        $sub_segments = SubCategorySegment::all();
+        $shipping_modes = ShippingMode::all();
+        return view('admin.reports.shipment_attempt_performace',compact('booking_types','sub_segments','shipping_modes'));
+
+    }
+
+    public function shipment_attempt_performance_list(Request $request)
+    {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 836);
+        }
+
+        $from = $request->get('search_date_from');
+        $to = $request->get('search_date_to');
+
+        if ($from && $to) {
+            $from = Carbon::parse($from)->toDateString();
+            $to = Carbon::parse($to)->toDateString();
+        } else {
+            $from = Carbon::now()->toDateString();
+            $to = Carbon::now()->toDateString();
+        }
+        $data = DB::table('shipments')
+            ->select([
+                'shipments.id as shipment_id',
+                'shipments.tracking_number',
+                'u.name as shipper',
+                'bt.booking_type as service_type' ,
+                'sub_sg.name as sub_segment',
+                'oc.name as origin',
+                'dc.name as destination' ,
+                'sh.mode as shipping_mode',
+                'ss.name as shipment_status',
+                'shipment_arival_journey.created_at as arrival_date',
+                'sjc.created_at as arrived_at_destination_date',
+                DB::raw('COUNT(ofdj.id) as ofd_attempts')
+            ])
+            ->Leftjoin('users as u' , 'u.id', 'shipments.user_id')
+            ->Leftjoin('sub_category_segments as sub_sg' , 'sub_sg.id', 'u.sub_segment_id')
+            ->Leftjoin('booking_types as bt' ,'bt.id' , 'shipments.booking_type_id')
+            ->Leftjoin('shipment_status as ss', 'ss.id','shipments.shipper_status_id')
+            ->Leftjoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->Leftjoin('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->Leftjoin('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->Leftjoin('shipping_modes as sh' ,'sh.id', '=' , 'shipments.shipping_mode_id')
+            ->leftJoin('shipments_journey as shipment_arival_journey', function ($join) {
+                $join->on('shipment_arival_journey.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'shipment_arival_journey.id',
+                        '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)')
+                    );
+            })
+            ->leftJoin('shipments_journey as sjc', function ($join) {
+                $join->on('sjc.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'sjc.id',
+                        '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 4)')
+                    );
+            })
+            ->leftJoin('shipments_journey as ofdj', function ($join) {
+                $join->on('ofdj.shipment_id', '=', 'shipments.id')
+                    ->where('ofdj.shipper_status_id', 5);
+            })
+        ->whereBetween('shipments.created_at', [$from, $to])
+        ->groupBy(
+                'shipments.id'
+            )->havingRaw('COUNT(ofdj.id) > 1');
+
+
+        $datatable = Datatables::of($data)
+        ->addColumn('tracking_number_link', function ($shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+        })
+        ->editColumn('arrived_at_destination_date',function ($query){
+                if($query->arrived_at_destination_date){
+                    return $query->arrived_at_destination_date;
+                }
+                return '-';
+        });
+        return $datatable
+            ->rawColumns(['tracking_number_link'])
+            ->make(true);
     }
 }
