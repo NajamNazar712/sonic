@@ -67,6 +67,7 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Models\ShipperSegmentLogs;
 use App\Http\Models\Shipper\User;
 use App\Models\ParentProduct;
+use App\Models\RetailShipmentFlyerNumber;
 
 class RetailShipmentBookController extends Controller
 {
@@ -328,7 +329,7 @@ class RetailShipmentBookController extends Controller
             $height = null;
         }
 
-        $rates = RetailRatesCalculationController::rates($shipping_mode_check, $business_category_id, $pickup_city_id, $consignee_city_id, $request->trax_box, $discount, $estimated_weight,$insurance_amount,$packaging, $request->product, $request->cod);
+        $rates = RetailRatesCalculationController::rates($shipping_mode_check, $business_category_id, $pickup_city_id, $consignee_city_id, $request->trax_box, $discount, $estimated_weight,$insurance_amount,$packaging, $request->product, $request->cod, count($request->get('flyer', [])));
 
 
         if($request->has('admin_discount'))
@@ -565,6 +566,7 @@ class RetailShipmentBookController extends Controller
         $retail_shipment->category_id = $cat_id;
         $retail_shipment->wht = $rates['wht'];
         $retail_shipment->cod_sst = $rates['cod_sst'];
+        $retail_shipment->flyer_charges = $rates['flyer_without_gst'];
         if($request->has('admin_discount'))
         {
             $retail_shipment->admin_discount = $request->admin_discount;
@@ -598,6 +600,15 @@ class RetailShipmentBookController extends Controller
         $retail_shipment->quantity = $quantityForShipmentItem;
 
         $retail_shipment->save();
+
+        foreach($request->get('flyer', []) as $flyer) {
+
+            $data = New RetailShipmentFlyerNumber();
+            $data->retail_shipment_id = $retail_shipment->id;
+            $data->shipment_id = $shipment_id;
+            $data->flyer_number = $flyer;
+            $data->save();
+        }
 
         // retail user history
         $shipping_mode_id = $retail_shipment->shipping_mode;
@@ -732,7 +743,7 @@ class RetailShipmentBookController extends Controller
             $insurance_amount = round($insurance_amount * $insurance / 100,2);
         }
 
-        $details = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->consignee_city_id, $request->trax_box, $discount, $weight,$insurance_amount,$packaging, $request->product_id, $request->cod);
+        $details = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->consignee_city_id, $request->trax_box, $discount, $weight,$insurance_amount,$packaging, $request->product_id, $request->cod, $request->flyer_count);
 
         if($request->has('admin_discount'))
         {
@@ -1088,6 +1099,7 @@ class RetailShipmentBookController extends Controller
                                 <td colspan="1" class="color primary"><strong>Discount(Trax Center)</strong></td>
                                 <td colspan="1" class="color primary"><strong>Discount(Consumer)</strong></td>
                                 <td colspan="1" class="color primary"><strong>Charges With Discount</strong></td>
+                                <td colspan="1" class="color primary"><strong>Flyer Charges</strong></td>
                                 <td colspan="1" class="color primary border"><strong>GST</strong></td>
                                 <td colspan="1" class="color primary border"><strong>Packaging & Insurance </strong></td>
                                 <td colspan="2" class="color primary border twice-right"><strong>Total Charges</strong></td>
@@ -1100,6 +1112,7 @@ class RetailShipmentBookController extends Controller
                                 <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->discount,2) . '</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->admin_discount,2) .$r_t.'</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->charges_with_discount,2) . '</td>
+                                <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->flyer_charges,2) . '</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($gst,2) . '</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($packaging_and_insurance,2) . '</td>
                                 <td colspan="2" class="border twice-bottom twice-right">' . number_format(ROUND($shipment->retail->total_charges)) . '</td>

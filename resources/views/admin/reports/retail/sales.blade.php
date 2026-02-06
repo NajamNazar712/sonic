@@ -141,6 +141,7 @@
                         <th class="border-primary border-darken-1">Discount Amount</th>
                         <th class="border-primary border-darken-1">Admin Discount Amount</th>
                         <th class="border-primary border-darken-1">Packaging Charges</th>
+                        <th class="border-primary border-darken-1">Flyer Charges</th>
                         <th class="border-primary border-darken-1">GST</th>
                         <th class="border-primary border-darken-1">Fintech Charges</th>
                         <th class="border-primary border-darken-1">WHT Charges</th>
@@ -345,6 +346,7 @@
                             head.push('Discount Amount');
                             head.push('Admin Discount Amount');
                             head.push('Packaging Charges');
+                            head.push('Flyer Charges');
                             head.push('GST');
                             head.push('WHT');
                             head.push('SST');
@@ -386,6 +388,7 @@
                                 row.push(values.discount_amount);
                                 row.push(values.admin_discount);
                                 row.push(values.packaging_charges);
+                                row.push(values.flyer_charges);
                                 row.push(values.gst);
                                 row.push(values.wht);
                                 row.push(values.sst);
@@ -475,6 +478,7 @@
                     { data:'discount_amount' ,name: 'rs.charges_with_discount', class: 'align-middle discount_amount'},
                     { data:'admin_discount' ,name: 'rs.admin_discount', class: 'align-middle admin_discount'},
                     { data:'packaging_charges' ,name: 'rs.packaging_charges', class: 'align-middle packaging_charges'},
+                    { data:'flyer_charges' ,name: 'rs.flyer_charges', class: 'align-middle flyer_charges'},
                     { data:'gst' ,name: 'rs.gst', class: 'align-middle gst'},
                     { data:'fintech_charges' ,name: 'shipments.fintech_charges', class: 'align-middle fintech_charges'},
                     { data:'wht' ,name: 'rs.wht', class: 'align-middle wht'},

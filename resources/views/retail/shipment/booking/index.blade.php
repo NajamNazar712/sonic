@@ -1526,6 +1526,7 @@
                                     $('#total_charges').val(data.details.total_charges);
                                     $('#wht').val(data.details.wht);
                                     $('#cod_sst').val(data.details.cod_sst);
+                                    $('#flyer_charges').val(data.details.flyer_without_gst);
 
                             }
                             else
