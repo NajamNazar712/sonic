@@ -504,17 +504,16 @@ class ShipperCRMController extends Controller
                         $already_lodged = false;
                         if($is_shipment){ 
                             $already_lodged = true;
-                            $request_check = false;
+                            $request_check = true;
 
                             if(in_array($nature_id,[1,2,4])) {
                                 $latestRequest = CrmRequest::where('shipment_id', $shipment_id)
                                     ->where('case_nature_id', $nature_id)
                                     ->where('case_nature_type_id', $complaint_id)
-                                    ->where('status_id', 4)
                                     ->latest('created_at')
                                     ->first();
-                                if($latestRequest) {
-                                    $request_check = true;
+                                if($latestRequest && $latestRequest->status_id!=4) {
+                                    $request_check = false;
                                 }
                             }
 
@@ -721,17 +720,16 @@ class ShipperCRMController extends Controller
                     $already_lodged = false;
                     if($is_shipment){  
                         $already_lodged = true;
-                        $request_check = false;
+                        $request_check = true;
 
                         if(in_array($nature_id,[1,2,4])) {
                             $latestRequest = CrmRequest::where('shipment_id', $shipment_id)
                                 ->where('case_nature_id', $nature_id)
                                 ->where('case_nature_type_id', $complaint_id)
-                                ->where('status_id', 4)
                                 ->latest('created_at')
                                 ->first();
-                            if($latestRequest) {
-                                $request_check = true;
+                            if($latestRequest && $latestRequest->status_id!=4) {
+                                $request_check = false;
                             }
                         }
 
