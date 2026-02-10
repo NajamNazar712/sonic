@@ -509,8 +509,8 @@ class ShipperCRMController extends Controller
                             if(in_array($nature_id,[1,2,4])) {
                                 $latestRequest = CrmRequest::where('shipment_id', $shipment_id)
                                     ->where('case_nature_id', $nature_id)
-                                    ->where('case_nature_type_id', $complaint_id)
-                                    ->latest('created_at')
+//                                    ->where('case_nature_type_id', $complaint_id)
+                                    ->orderBy('id', 'desc')
                                     ->first();
                                 if($latestRequest && $latestRequest->status_id!=4) {
                                     $request_check = false;
@@ -725,8 +725,8 @@ class ShipperCRMController extends Controller
                         if(in_array($nature_id,[1,2,4])) {
                             $latestRequest = CrmRequest::where('shipment_id', $shipment_id)
                                 ->where('case_nature_id', $nature_id)
-                                ->where('case_nature_type_id', $complaint_id)
-                                ->latest('created_at')
+//                                ->where('case_nature_type_id', $complaint_id)
+                                ->orderBy('id', 'desc')
                                 ->first();
                             if($latestRequest && $latestRequest->status_id!=4) {
                                 $request_check = false;

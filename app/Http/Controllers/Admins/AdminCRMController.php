@@ -260,15 +260,20 @@ class AdminCRMController extends Controller
                             if($is_shipment){
                                 $already_lodged = true;
                                 $complain = $is_shipment->id;
+                                $lastest_shipment =  CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)
+                                    ->orderBy('id', 'desc')
+                                    ->first();
+                                if($lastest_shipment){
+                                    $complain = $lastest_shipment->id;
+                                }
                                 $request_check = true;
-
                                 if(in_array($nature_id,[1,2,4])) {
-                                    $latestRequest = CrmRequest::where('shipment_id', $shipment_id)
-                                        ->where('case_nature_id', $nature_id)
-                                        ->where('case_nature_type_id', $complaint_id)
-                                        ->latest('created_at')
-                                        ->first();
-                                    if($latestRequest && $latestRequest->status_id!=4) {
+//                                    $latestRequest = CrmRequest::where('shipment_id', $shipment_id)
+//                                        ->where('case_nature_id', $nature_id)
+////                                        ->where('case_nature_type_id', $complaint_id) as per zeeshan
+//                                        ->orderBy('id', 'desc')
+//                                        ->first();
+                                    if($lastest_shipment && $lastest_shipment->status_id!=4) {
                                         $request_check = false;
                                     }
                                 }
@@ -538,15 +543,21 @@ class AdminCRMController extends Controller
                         if($is_shipment){
                             $already_lodged = true;
                             $complain = $is_shipment->id;
+                            $lastest_shipment =  CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)
+                                ->orderBy('id', 'desc')
+                                ->first();
+                            if($lastest_shipment){
+                                $complain = $lastest_shipment->id;
+                            }
                             $request_check = true;
 
                             if(in_array($nature_id,[1,2,4])) {
-                                $latestRequest = CrmRequest::where('shipment_id', $shipment_id)
-                                    ->where('case_nature_id', $nature_id)
-                                    ->where('case_nature_type_id', $complaint_id)
-                                    ->latest('created_at')
-                                    ->first();
-                                if($latestRequest && $latestRequest->status_id!=4) {
+//                                $latestRequest = CrmRequest::where('shipment_id', $shipment_id)
+//                                    ->where('case_nature_id', $nature_id)
+////                                    ->where('case_nature_type_id', $complaint_id) //as per zeeshan ticket
+//                                    ->orderBy('id', 'desc')
+//                                    ->first();
+                                if($lastest_shipment && $lastest_shipment->status_id!=4) {
                                     $request_check = false;
                                 }
                             }
