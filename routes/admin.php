@@ -1261,6 +1261,36 @@ Route::prefix('admin')->name('admin.')->group(function () {
                     Route::post('allow_dispatch_delivery', 'Admins\AdminSupplyChainController@allow_dispatch_delivery')->name('allow_dispatch_delivery');
                 });
             });
+
+            //Local Fleet Management
+            Route::prefix('local_fleet')->name('local_fleet.')->group(function () {
+                Route::prefix('vehicle')->name('vehicle.')->group(function () {
+                    Route::get('', 'Admins\LocalFleet\AdminLocalFleetVehicleController@index')->name('index');
+                    Route::get('list', 'Admins\LocalFleet\AdminLocalFleetVehicleController@list')->name('list');
+                    Route::post('store', 'Admins\LocalFleet\AdminLocalFleetVehicleController@store')->name('store');
+                    Route::get('edit/{id}', 'Admins\LocalFleet\AdminLocalFleetVehicleController@edit')->name('edit');
+                    Route::post('update', 'Admins\LocalFleet\AdminLocalFleetVehicleController@update')->name('update');
+                    Route::post('qr_code_print','Admins\LocalFleet\AdminLocalFleetVehicleController@qr_code_print')->name('qr_code_print');
+                    Route::prefix('document')->name('document.')->group(function () {
+                        Route::post('upload', 'Admins\LocalFleet\AdminLocalFleetVehicleController@uploadDocument')->name('upload');
+                        Route::get('list/{id}', 'Admins\LocalFleet\AdminLocalFleetVehicleController@listDocuments')->name('list');
+                    });
+
+
+                    Route::prefix('trips')->name('trips.')->group(function () {
+                        Route::get('', 'Admins\LocalFleet\AdminLocalFleetReportController@trip_index')->name('index');
+                        Route::get('list', 'Admins\LocalFleet\AdminLocalFleetReportController@trip_list')->name('list');
+                        Route::get('cost_detail/{trip_id}','Admins\LocalFleet\AdminLocalFleetReportController@tripCostDetail')->name('cost_detail');
+                    });
+
+                    Route::prefix('consolidated_trips')->name('consolidated_trips.')->group(function () {
+                        Route::get('', 'Admins\LocalFleet\AdminLocalFleetReportController@consolidated_trips_index')->name('index');
+                        Route::get('list', 'Admins\LocalFleet\AdminLocalFleetReportController@consolidated_trips_list')->name('list');
+                        Route::post('cost_details','Admins\LocalFleet\AdminLocalFleetReportController@consolidated_trips_cost_details')->name('cost_details');
+                    });
+
+                });
+            });
         });
 
         Route::prefix('mapping')->name('mapping.')->group(function () {
