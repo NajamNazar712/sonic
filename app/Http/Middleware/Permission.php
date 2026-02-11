@@ -1557,8 +1557,6 @@ class Permission
             'settings.zero_cod_shippers.index' => 1054,
             'settings.geo_codes.global_setting.index' => 1056,
             'settings.geo_codes.global_setting.store' => 1058,
-'admin.finance.prf.completed_list' => 1050,
-            'admin.finance.expected_shipment_penalty.index' => 1059
         ],
         'shipper' => [
             'shipment.book.index' => 1,
