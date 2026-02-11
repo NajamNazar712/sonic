@@ -53,30 +53,30 @@ class AdminLocalFleetReportController extends Controller
         }
 
         return DataTables::of($data)
-            ->editColumn('total_dn_count',function ($query) {
-                if ($query->total_dn_count != 0) {
-                    return $query->total_dn_count;
-//                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $query->total_dn_count . '</button>';
-                } else {
-                    return '-';
-                }
-            })
-            ->editColumn('total_rn_count',function ($query) {
-                if ($query->total_rn_count != 0) {
-                    return $query->total_rn_count;
-//                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $query->total_rn_count . '</button>';
-                } else {
-                    return '-';
-                }
-            })
-            ->editColumn('total_pickup_count',function ($query) {
-                if ($query->total_pickup_count != 0) {
-                    return $query->total_pickup_count;
-//                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $query->total_pickup_count . '</button>';
-                } else {
-                    return '-';
-                }
-            })
+//            ->editColumn('total_dn_count',function ($query) {
+//                if ($query->total_dn_count != 0) {
+//                    return $query->total_dn_count;
+////                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $query->total_dn_count . '</button>';
+//                } else {
+//                    return '-';
+//                }
+//            })
+//            ->editColumn('total_rn_count',function ($query) {
+//                if ($query->total_rn_count != 0) {
+//                    return $query->total_rn_count;
+////                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $query->total_rn_count . '</button>';
+//                } else {
+//                    return '-';
+//                }
+//            })
+//            ->editColumn('total_pickup_count',function ($query) {
+//                if ($query->total_pickup_count != 0) {
+//                    return $query->total_pickup_count;
+////                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $query->total_pickup_count . '</button>';
+//                } else {
+//                    return '-';
+//                }
+//            })
             ->editColumn('total_trip_cost',function ($cost){
                 if($cost->total_trip_cost ){
                     return number_format($cost->total_trip_cost);
