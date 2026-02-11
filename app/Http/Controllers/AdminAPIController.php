@@ -13369,7 +13369,7 @@ class AdminAPIController extends Controller
             $total_pickup_shipment_count = V2PickupRequestShipment::whereIn('pickup_request_id', $pickupIds)
                 ->count();
             $total_pickup_shipment_weight = V2PickupRequestShipment::join('shipments as s', 'v2_pickup_request_shipments.shipment_id', '=', 's.id')
-                ->whereIn('v2_pickup_request_shipments.return_note_id', $pickupIds)
+                ->whereIn('v2_pickup_request_shipments.pickup_request_id', $pickupIds)
                 ->sum('s.estimated_weight');
         }
 
