@@ -184,8 +184,17 @@ class AdminLocalFleetReportController extends Controller
                 'lfv.capacity',
                 DB::raw('COUNT(local_fleet_vehicle_trips.id) as total_trips'),
                 DB::raw('SUM(local_fleet_vehicle_trips.total_dn_count) as total_dns'),
+                DB::raw('SUM(local_fleet_vehicle_trips.total_dn_shipment_count) as total_dn_shipments'),
+                DB::raw('SUM(local_fleet_vehicle_trips.total_dn_shipment_weight) as total_dn_shipment_weight'),
+
                 DB::raw('SUM(local_fleet_vehicle_trips.total_rn_count) as total_rns'),
+                DB::raw('SUM(local_fleet_vehicle_trips.total_rn_shipment_count) as total_rn_shipments'),
+                DB::raw('SUM(local_fleet_vehicle_trips.total_rn_shipment_weight) as total_rn_shipment_weight'),
+
                 DB::raw('SUM(local_fleet_vehicle_trips.total_pickup_count) as total_pickup_count'),
+                DB::raw('SUM(local_fleet_vehicle_trips.total_pickup_shipment_count) as total_pickup_shipments'),
+                DB::raw('SUM(local_fleet_vehicle_trips.total_pickup_shipment_weight) as total_pickup_shipment_weight'),
+
                 DB::raw('SUM(local_fleet_vehicle_trips.fuel_liters) as fuel_liters_day'),
                 DB::raw('SUM(local_fleet_vehicle_trips.total_trip_cost) as total_trip_cost')
             )
@@ -222,34 +231,34 @@ class AdminLocalFleetReportController extends Controller
             ->editColumn('total_trip_cost', function ($row) {
                 return number_format($row->total_trip_cost ?? 0);
             })
-            ->editColumn('total_trips',function ($query) {
-                if ($query->total_trips != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $query->total_trips . '</button>';
-                } else {
-                    return '-';
-                }
-            })
-            ->editColumn('total_dns',function ($query) {
-                if ($query->total_dns != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $query->total_dns . '</button>';
-                } else {
-                    return '-';
-                }
-            })
-            ->editColumn('total_rns',function ($query) {
-                if ($query->total_rns != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $query->total_rns . '</button>';
-                } else {
-                    return '-';
-                }
-            })
-            ->editColumn('total_pickup_count',function ($query) {
-                if ($query->total_pickup_count != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $query->total_pickup_count . '</button>';
-                } else {
-                    return '-';
-                }
-            })
+//            ->editColumn('total_trips',function ($query) {
+//                if ($query->total_trips != 0) {
+//                    return $query->total_trip;
+//                } else {
+//                    return '-';
+//                }
+//            })
+//            ->editColumn('total_dns',function ($query) {
+//                if ($query->total_dns != 0) {
+//                    return $query->total_dns;
+//                } else {
+//                    return '-';
+//                }
+//            })
+//            ->editColumn('total_rns',function ($query) {
+//                if ($query->total_rns != 0) {
+//                    return $query->total_rns;
+//                } else {
+//                    return '-';
+//                }
+//            })
+//            ->editColumn('total_pickup_count',function ($query) {
+//                if ($query->total_pickup_count != 0) {
+//                    return $query->total_pickup_count;
+//                } else {
+//                    return '-';
+//                }
+//            })
             ->addColumn('action', function ($row) {
                 $dropdown = '<div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>

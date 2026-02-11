@@ -13333,6 +13333,46 @@ class AdminAPIController extends Controller
             ? V2PickupRequest::whereIn('id', $request->pickup_note_ids)->pluck('id')->toArray()
             : [];
 
+
+        $total_dn_count = count($deliveryIds);
+        $total_dn_shipment_count = 0;
+        $total_dn_shipment_weight = 0;
+
+
+        $total_rn_count = count($returnIds);
+        $total_rn_shipment_count = 0;
+        $total_rn_shipment_weight = 0;
+
+        $total_pickup_count =  count($pickupIds);
+        $total_pickup_shipment_count = 0;
+        $total_pickup_shipment_weight = 0 ;
+
+        //count DELIVERY NOTE TOTALS
+        if (!empty($deliveryIds)) {
+            $total_dn_shipment_count = DeliveryNoteShipment::whereIn('delivery_note_id', $deliveryIds)
+                ->count();
+            $total_dn_shipment_weight = DeliveryNoteShipment::join('shipments as s', 'delivery_note_shipments.shipment_id', '=', 's.id')
+                ->whereIn('delivery_note_shipments.delivery_note_id', $deliveryIds)
+                ->sum('s.actual_weight');
+        }
+        //count Return NOTE TOTALS
+        if (!empty($returnIds)) {
+            $total_rn_shipment_count = ReturnNoteShipment::whereIn('return_note_id', $returnIds)
+                ->count();
+            $total_rn_shipment_weight = ReturnNoteShipment::join('shipments as s', 'return_note_shipments.shipment_id', '=', 's.id')
+                ->whereIn('return_note_shipments.return_note_id', $returnIds)
+                ->sum('s.actual_weight');
+        }
+
+        //count Pickup Note TOTALS
+        if (!empty($pickupIds)) {
+            $total_pickup_shipment_count = V2PickupRequestShipment::whereIn('pickup_request_id', $pickupIds)
+                ->count();
+            $total_pickup_shipment_weight = V2PickupRequestShipment::join('shipments as s', 'v2_pickup_request_shipments.shipment_id', '=', 's.id')
+                ->whereIn('v2_pickup_request_shipments.return_note_id', $pickupIds)
+                ->sum('s.estimated_weight');
+        }
+
         //add trip
         $trip = new LocalFleetVehicleTrip();
         $trip->vehicle_id                = $vehicle->id;
@@ -13345,9 +13385,18 @@ class AdminAPIController extends Controller
         $trip->status                    = 0;
         $trip->created_by                = $request->admin_id;
         $trip->trip_date                = $now->toDateString();
-        $trip->total_dn_count = count($deliveryIds);
-        $trip->total_rn_count = count($returnIds);
-        $trip->total_pickup_count = count($pickupIds);
+        //dn
+        $trip->total_dn_count = $total_dn_count;
+        $trip->total_dn_shipment_count = $total_dn_shipment_count;
+        $trip->total_dn_shipment_weight = $total_dn_shipment_weight;
+        //rn
+        $trip->total_rn_count = $total_rn_count;
+        $trip->total_rn_shipment_count = $total_rn_shipment_count;
+        $trip->total_rn_shipment_weight = $total_rn_shipment_weight;
+        //pickup
+        $trip->total_pickup_count = $total_pickup_count;
+        $trip->total_pickup_shipment_count = $total_pickup_shipment_count;
+        $trip->total_pickup_shipment_weight = $total_pickup_shipment_weight;
         $trip->save();
 
 
@@ -13574,7 +13623,7 @@ class AdminAPIController extends Controller
             ->where('route_id',$request->route_id)->where('status',0)->pluck('id');
 
         $pickup_note_ids = V2PickupRequest::where('current_rider_id',$request->rider_id)
-            ->where('status_id',1)->pluck('id');
+            ->where('rider_status',2)->pluck('id');
 
         return response()->json([
             'status'  => 0,
