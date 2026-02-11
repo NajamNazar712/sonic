@@ -134,6 +134,7 @@ class AdminLocalFleetVehicleController extends Controller
             'driver_name' => 'required|max:20',
             'vendor_name' => 'required|max:20',
             'rent_amount' => 'required|numeric',
+            'capacity'=> 'nullable|integer|max:25',
         ]);
 
         if ($validator->fails()) {
