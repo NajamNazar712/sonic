@@ -22,7 +22,7 @@
                                         </div>
                                         <input type="text" name="booking_from_date"
                                                class="form-control bg-primary border-primary white rounded-right"
-                                               id="booking_from_date" placeholder="Booking Date From">
+                                               id="booking_from_date" placeholder=" Date From">
                                     </div>
                                 </div>
                                 <div class="col-4 mt-2">
@@ -34,7 +34,7 @@
                                         </div>
                                         <input type="text" name="booking_to_date"
                                                class="form-control bg-primary border-primary white rounded-right"
-                                               id="booking_to_date" placeholder="Booking Date To">
+                                               id="booking_to_date" placeholder="Date To">
                                     </div>
                                 </div>
                                 <div class="col-4 mt-2">
@@ -60,8 +60,14 @@
                                     <th class="border-primary border-darken-1">Total Trips Day Wise</th>
                                     <th class="border-primary border-darken-1">Fuel Liters per day</th>
                                     <th class="border-primary border-darken-1">Total DN</th>
+                                    <th class="border-primary border-darken-1">Total DN Shipments</th>
+                                    <th class="border-primary border-darken-1">Total DN Shipment Weight</th>
                                     <th class="border-primary border-darken-1">Total RN </th>
+                                    <th class="border-primary border-darken-1">Total RN Shipments</th>
+                                    <th class="border-primary border-darken-1">Total RN Shipment Weight</th>
                                     <th class="border-primary border-darken-1">Total Pickup's </th>
+                                    <th class="border-primary border-darken-1">Total Pickup's Shipments</th>
+                                    <th class="border-primary border-darken-1">Total Pickup's Shipment Weight</th>
                                     <th class="border-primary border-darken-1">Total Trips Cost</th>
                                     <th class="border-primary border-darken-1">Action</th>
                                 </thead>
@@ -209,8 +215,14 @@
                     {data: 'total_trips', name: 'total_trips', class: 'text-center align-middle total_trips',searchable: false},
                     {data: 'fuel_liters_day', name: 'fuel_liters_day', class: 'align-middle fuel_liters_day',searchable: false},
                     {data: 'total_dns', name: 'total_dns', class: 'text-center align-middle total_dns',searchable: false},
+                    {data: 'total_dn_shipments', name: 'total_dn_shipments', class: 'text-center align-middle total_dn_shipments',searchable: false},
+                    {data: 'total_dn_shipment_weight', name: 'total_dns', class: 'text-center align-middle total_dn_shipment_weight',searchable: false},
                     {data: 'total_rns', name: 'total_rns', class: 'text-center align-middle total_rns',searchable: false},
+                    {data: 'total_rn_shipments', name: 'total_rn_shipments', class: 'text-center align-middle total_rn_shipments',searchable: false},
+                    {data: 'total_rn_shipment_weight', name: 'total_rn_shipment_weight', class: 'text-center align-middle total_rn_shipment_weight',searchable: false},
                     {data: 'total_pickup_count', name: 'total_pickup_count', class: 'text-center align-middle total_pickup_count',searchable: false},
+                    {data: 'total_pickup_shipments', name: 'total_pickup_shipments', class: 'text-center align-middle total_pickup_shipments',searchable: false},
+                    {data: 'total_pickup_shipment_weight', name: 'total_pickup_shipment_weight', class: 'text-center align-middle total_pickup_shipment_weight',searchable: false},
                     {data: 'total_trip_cost', name: 'total_trip_cost', class: 'align-middle total_trip_cost',searchable: false},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
@@ -228,7 +240,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if (($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.total_trips') || $(header).is('.fuel_liters_day') || $(header).is('.total_dns')  || $(header).is('.total_rns')  || $(header).is('.total_pickup_count') || $(header).is('.total_trip_cost'))) {
+                        if (($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.total_trips') || $(header).is('.fuel_liters_day') || $(header).is('.total_dns') || $(header).is('.total_dn_shipments') || $(header).is('.total_dn_shipment_weight')  || $(header).is('.total_rns')  || $(header).is('.total_rn_shipments') || $(header).is('.total_rn_shipment_weight') || $(header).is('.total_pickup_count') || $(header).is('.total_pickup_shipments') || $(header).is('.total_pickup_shipment_weight') || $(header).is('.total_trip_cost'))) {
                             $(td).appendTo($(search));
                         }
                         else {
