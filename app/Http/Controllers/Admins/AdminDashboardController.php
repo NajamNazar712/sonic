@@ -243,6 +243,7 @@ use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAcco
 use App\Models\CorporateUserOnDeliveredInvoiceLog;
 use App\Models\CorporateUserOnDeliveredInvoice;
 use App\Models\CityTypeETD;
+use App\Models\PercentageOnExpectedShipment;
 
 class AdminDashboardController extends Controller
 {   use RateReusableTrait,FilterTrait;
@@ -9752,7 +9753,8 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 'bdru.name as reason',
                 'users.sms_charges',
                 'faf_charges.status as fc_status',
-                'wallet_users.user_id as wallet_shippers'
+                'wallet_users.user_id as wallet_shippers',
+                'users.sub_segment_id'
             ])
             ->where(function($query){
                 $idsToExclude = FilterTrait::class::getFilteredIds(auth()->user()->id);
@@ -10372,6 +10374,13 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                             $dropdown .= '<button type="button" class="dropdown-item pause_shipper_booking"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Pause Shipper Booking</div></button>';
                         }
                     }
+
+                    if($result->sub_segment_id == 5) {
+
+                        $dropdown .= '<button type="button" class="dropdown-item exp_shipment_percentage"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Exp Shipment %</div></button>';
+                    }
+                        
+                    
                 
 
                 $dropdown .= '<button type="button" class="dropdown-item add_shipper_exclude_intercept_type"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add shipper exclude/Intercept 
@@ -10452,7 +10461,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 $join->on('faf_charges.user_id', '=', 'users.id')->where('faf_charges.status', '=', 1);
             })
             ->leftjoin('territories as t', 't.id', '=', 'users.territory_id')
-            ->select(['users.ntn_no','rrb.name as rates_rejected_by', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.rate_status as rate_status', 'users.rejected_reason as rejected_reason', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'users.cnic', 'users.status', 'users.created_at', 'products.product_name as product_type', 'users.blacklist', 'rab.name as rates_added_by', 'rabb.name as rates_authorized_by', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'p.name as tagged_poc', 'k.name as kam', 'r.name as ref','r.trax_id as rider_id', 'users.corporate_rate_type_id', 'users.email', 't.name as territory', 'users.address as address', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso', 'users.status as status_id', 'users.lead_id','scun.name as search','scun_r.name as search_user_type' , 'users.sms_charges', 'users.on_board_status', 'users.request_custom_quotation', 'faf_charges.status as fc_status'])->whereIn('users.status', [0, 1, 2, 5])->where('users.blacklist', 0)->where('users.email_verified', 1)
+            ->select(['users.ntn_no','rrb.name as rates_rejected_by', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.rate_status as rate_status', 'users.rejected_reason as rejected_reason', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'users.cnic', 'users.status', 'users.created_at', 'products.product_name as product_type', 'users.blacklist', 'rab.name as rates_added_by', 'rabb.name as rates_authorized_by', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'p.name as tagged_poc', 'k.name as kam', 'r.name as ref','r.trax_id as rider_id', 'users.corporate_rate_type_id', 'users.email', 't.name as territory', 'users.address as address', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso', 'users.status as status_id', 'users.lead_id','scun.name as search','scun_r.name as search_user_type' , 'users.sms_charges', 'users.on_board_status', 'users.request_custom_quotation', 'faf_charges.status as fc_status','users.sub_segment_id'])->whereIn('users.status', [0, 1, 2, 5])->where('users.blacklist', 0)->where('users.email_verified', 1)
             ->where(function($query){
                 $idsToExclude = FilterTrait::class::getFilteredIds(auth()->user()->id);
                 if (!empty($idsToExclude)) {
@@ -11025,6 +11034,10 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                     $dropdown .= '<button type="button" class="dropdown-item add_fintech_charges"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Fintech Charges</div></button>';
                 }
 
+                if($result->sub_segment_id == 5) {
+                    $dropdown .= '<button type="button" class="dropdown-item exp_shipment_percentage"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Exp Shipment %</div></button>';
+                }
+                 
                 $dropdown .= '<button type="button" class="dropdown-item account_tagging_history" data-id="' . $result->id . '" data-toggle="modal" data-target="#AccountTaggingHistoryModal">
                     <div class="row no-gutters align-items-center">
                         <div class="col-2"><i class="ft-activity"></i></div>
@@ -11212,6 +11225,10 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         }
 
         if ($flag == true) {
+
+            $user = User::select('average_shipments')->find($user_id);
+            $oldAverageShipments = $user->average_shipments;
+
             if ($request->password == "" || $request->password == null) {
                 User::where('id', $user_id)->update(['name' => $request->name, 'poc' => $request->poc, 'email' => $request->email, 'address' => $request->address, 'phone' => $request->phone, 'phone2' => $request->phone2, 'cnic' => $request->cnic,
                     'ntn_no' => $request->ntn_no, 'strn_no' => $request->strn_no, 'updated_by_type' => 1, 'updated_by_id' => Auth::id(), 'city_id' => $request->city_id, 'segment_id' => $request->segment_id, 'sub_segment_id' => $request->sub_segment_id, 'url' => $request->url, 'product_id' => $request->product_id, 'other_product_name' => $request->has('product_name') ? $request->product_name : null, 'brand_name' => $request->has('brand_name') ? $request->brand_name : null , 'average_shipments' => $request->avg_shipments, 'average_shipment_duration_id' => $request->average_shipment_duration_id]);
@@ -11223,6 +11240,11 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             } else {
                 User::where('id', $user_id)->update(['name' => $request->name, 'poc' => $request->poc, 'email' => $request->email, 'address' => $request->address, 'phone' => $request->phone, 'phone2' => $request->phone2, 'cnic' => $request->cnic,
                     'ntn_no' => $request->ntn_no, "password" => Hash::make($request->password), 'updated_by_type' => 1, 'updated_by_id' => Auth::id(), 'city_id' => $request->city_id, 'segment_id' => $request->segment_id, 'sub_segment_id' => $request->sub_segment_id, 'url' => $request->url, 'product_id' => $request->product_id, 'brand_name' => $request->has('brand_name') ? $request->brand_name : null , 'average_shipments' => $request->avg_shipments, 'average_shipment_duration_id' => $request->average_shipment_duration_id]);
+            }
+
+            $newAverageShipments = $request->avg_shipments;
+            if ($oldAverageShipments != $newAverageShipments) {
+                NotificationsController::send(255, $user_id, $oldAverageShipments, $newAverageShipments );
             }
 
             return redirect()->back()->with(['success' => "Profile Information Successfully Updated"]);
@@ -16671,5 +16693,40 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             });
 
         return response()->json($logs);
+    }
+
+    public function exp_shipment_percentage_info(Request $request) {
+
+        $percentage = PercentageOnExpectedShipment::where('user_id', $request->user_id)
+        ->value('percentage_on_expected_shipments');
+
+        return response()->json([
+            'status' => 1,
+            'percentage' => $percentage ?? 0
+        ]);
+    }
+
+
+    public function exp_shipment_percentage_submit(Request $request) {
+
+        // $user = PercentageOnExpectedShipment::where('user_id', $request->user_id)->first();
+
+        // $user->user_id = $request->user_id;
+        // $user->percentage_on_expected_shipments = $request->exp_shipment_percentage;
+        // $user->percentage_on_expected_shipments_added_by = Auth::id();
+        // $user->percentage_on_expected_shipments_added_at = Carbon::now();
+
+        // $user->save();
+
+        PercentageOnExpectedShipment::updateOrCreate(
+            ['user_id' => $request->user_id],
+            [
+                'percentage_on_expected_shipments' => $request->exp_shipment_percentage,
+                'percentage_on_expected_shipments_added_by' => Auth::id(),
+                'percentage_on_expected_shipments_added_at' => Carbon::now(),
+            ]
+        );
+
+        return redirect()->back()->with('success', 'Percentage Updated');
     }
 }
