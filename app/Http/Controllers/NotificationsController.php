@@ -11684,38 +11684,6 @@ class NotificationsController extends Controller
                     $cc = ['fawad.ahmed@slgtrax.com', 'ali.haiderd@slgtrax.com','anas.mazhar@slgtrax.com'];
                     $body = str_replace('[preview]', $htmlTable, $body);
                     self::email($subject, $body, $to, $cc);
-                } else if($id == 255) {
-
-                    $user_id = $reference_1_id;
-                    $old = $reference_2_id;
-                    $new = $reference_3_id;
-                    
-                    $user  = User::find($user_id);
-                    $shipper = $user->name . '-' . $user->id;
-                    $sale_person_tag = SalePersonTag::where('user_id', $user_id)->value('admin_id');
-
-                    if ($sale_person_tag) {
-                        $sales_email = Admin::where('id', $sale_person_tag)->value('email');
-                    } else {
-                        $sales_email = null;
-                    }
-                    
-                    if (strpos($body, '[shipper]') !== FALSE) {
-                        $body = str_replace('[shipper]',  $shipper, $body);
-                    }
-                    if (strpos($body, '[from]') !== FALSE) {
-                        $body = str_replace('[from]', $old, $body);
-                    }
-                    if (strpos($body, '[to]') !== FALSE) {
-                        $body = str_replace('[to]', $new, $body);
-                    }
-
-                    $to = array();
-                    $to[] = $sales_email;
-                    $to[] = 'sahban.ghani@logiserves.com';
-                    $to[] = 'fawad.ahmed@slgtrax.com';
-                    self::email($subject, $body, $to);
-
                 }
             }
         }

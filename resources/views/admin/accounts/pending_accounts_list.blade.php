@@ -608,35 +608,6 @@
         </div>
     </div>
 
-    <div class="modal fade text-left" id="exp_shipment_modal" data-backdrop="static" role="dialog" aria-labelledby=""
-         aria-hidden="true">
-        <div class="modal-dialog modal-md" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="">Expected Shipment Chargeable Percentage</h4>
-                </div>
-                            
-                <form id="exp_shipment_form" class="form" novalidate="novalidate" method="post" action="{{ route('admin.accounts.exp_shipment_percentage.submit') }}">
-                    @csrf
-                    <div class="modal-body">
-                        <div class="col text-center">
-                            <label class="font-medium-2 font-weight-bold block">Add Percentage</label>
-                            <div class="form-group">
-                                <input type="hidden" name="user_id" id="exp_shipment_user_id">
-                                
-                                <input type="text" class="form-control" placeholder="Expected Shipment Chargeable Percentage" name="exp_shipment_percentage" id="exp_shipment_percentage" data-rule-required="true" data-msg-required="Required">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-success" id="faf_charges_submit">Submit</button>
-                        <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
 
     <div class="modal fade" id="AccountTaggingHistoryModal" tabindex="-1" role="dialog" aria-labelledby="AccountTaggingHistoryLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
@@ -906,15 +877,6 @@
         'digits': 2,
         'min': 0.00,
         'max': commission_max,
-    });
-
-    $('#exp_shipment_percentage').inputmask({
-        'alias': 'decimal',
-        'allowMinus': false,
-        'allowPlus': false,
-        'rightAlign': false,
-        'digits': 2,
-        'min': 0.00,
     });
 
     var table_2 = $('#datatable_rate').DataTable({
@@ -2575,52 +2537,6 @@
 
                         });
                 }
-            }
-        });
-        $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
-            var id = $(this).parents('tr').attr('id');
-            if($(this).hasClass('exp_shipment_percentage')){
-                if(id){
-                    $.ajax({
-                        url: '{!! route('admin.accounts.exp_shipment_percentage.info') !!}',
-                        method: 'POST',
-                        data: {
-                            'user_id': id,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    })
-                    .done(function(data) {
-                        if (data.status == 1) {
-                            $('#exp_shipment_percentage').val(data.percentage);
-                        }
-                        $('#exp_shipment_user_id').val(id);
-                        $('#exp_shipment_modal').modal('show');
-
-
-                    });
-                }
-            }
-        });
-
-        $('#exp_shipment_form').validate({
-            errorClass: 'danger',
-            successClass: 'success',
-            normalizer: function(value) {
-                return $.trim(value);
-            },
-            errorPlacement: function(error, element) {
-                error.addClass('w-100').appendTo(element.parent('.form-group'));
-            },
-            submitHandler: function(form) {
-                swal({
-                    title: 'Please Wait!',
-                    text: 'Its being updated!',
-                    icon: 'info',
-                    buttons: false,
-                    closeOnClickOutside: false,
-                    closeOnEsc: false
-                });
-                form.submit();
             }
         });
 
