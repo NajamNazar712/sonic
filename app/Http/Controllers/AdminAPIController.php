@@ -13279,7 +13279,7 @@ class AdminAPIController extends Controller
 
             $rules = [
                 'out_meter' => 'required|integer|min:0',
-                'rider_id'  => 'nullable|integer|exists:riders,trax_id',
+                'rider_id'  => 'nullable|exists:riders,trax_id',
                 'route_id'  => 'nullable|integer|exists:routes,id',
                 'delivery_note_ids' => 'nullable|array',
                 'delivery_note_ids.*' => 'integer',
