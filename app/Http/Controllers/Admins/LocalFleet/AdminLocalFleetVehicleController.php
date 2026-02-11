@@ -124,15 +124,15 @@ class AdminLocalFleetVehicleController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'vehicle_number'      => 'required|unique:local_fleet_vehicles',
+            'vehicle_number'      => 'required|unique:local_fleet_vehicles|max:20',
             'city_id'             => 'required|numeric',
             'vendor_type' => 'required|in:1,2',
             'vehicle_type' => 'required|in:1,2',
             'rent_type' => 'required|in:1,2',
             'fueling_responsibility' => 'required|in:1,2',
             'mileage_per_liter' => 'required',
-            'driver_name' => 'required',
-            'vendor_name' => 'required',
+            'driver_name' => 'required|max:20',
+            'vendor_name' => 'required|max:20',
             'rent_amount' => 'required|numeric',
         ]);
 
