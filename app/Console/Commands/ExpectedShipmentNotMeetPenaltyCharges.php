@@ -36,10 +36,21 @@ class ExpectedShipmentNotMeetPenaltyCharges extends Command
     {
         $start_date = Carbon::now()->subMonth()->startOfMonth();
         $end_date   = Carbon::now()->subMonth()->endOfMonth();
-        $users = User::select('id', 'average_shipments', 'percentage_on_expected_shipments')
-        ->where('sub_segment_id', 5)
-        ->where('status', 3)
-        ->where('percentage_on_expected_shipments', '>', 0)
+        // $users = User::select('id', 'average_shipments', 'percentage_on_expected_shipments')
+        // ->where('sub_segment_id', 5)
+        // ->where('status', 3)
+        // ->where('percentage_on_expected_shipments', '>', 0)
+        // ->get();
+
+        $users = User::select(
+            'users.id',
+            'users.average_shipments',
+            'pos.percentage_on_expected_shipments'
+        )
+        ->join('percentage_on_expected_shipments as pos', 'pos.user_id', '=', 'users.id')
+        ->where('users.sub_segment_id', 5)
+        ->where('users.status', 3)
+        ->where('pos.percentage_on_expected_shipments', '>', 0)
         ->get();
 
         $users->chunk(500)->each(function ($chunked_users) use ($start_date, $end_date )

@@ -13,11 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->decimal('percentage_on_expected_shipments', 5, 2)->default(0);
-            $table->integer('percentage_on_expected_shipments_added_by')->nullable()->index();
-            $table->dateTime('percentage_on_expected_shipments_added_at')->nullable();
-        });
+        // Schema::table('users', function (Blueprint $table) {
+        //     $table->decimal('percentage_on_expected_shipments', 5, 2)->default(0);
+        //     $table->integer('percentage_on_expected_shipments_added_by')->nullable()->index();
+        //     $table->dateTime('percentage_on_expected_shipments_added_at')->nullable();
+        // });
     }
 
     /**
@@ -27,8 +27,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['percentage_on_expected_shipment','percentage_on_expected_shipments_added_by', 'percentage_on_expected_shipments_added_at']);
-        });
+        // Schema::table('users', function (Blueprint $table) {
+        //     $table->dropColumn(['percentage_on_expected_shipment','percentage_on_expected_shipments_added_by', 'percentage_on_expected_shipments_added_at']);
+        // });
     }
 };

@@ -243,6 +243,7 @@ use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAcco
 use App\Models\CorporateUserOnDeliveredInvoiceLog;
 use App\Models\CorporateUserOnDeliveredInvoice;
 use App\Models\CityTypeETD;
+use App\Models\PercentageOnExpectedShipment;
 
 class AdminDashboardController extends Controller
 {   use RateReusableTrait,FilterTrait;
@@ -16696,7 +16697,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
     public function exp_shipment_percentage_info(Request $request) {
 
-        $percentage = User::where('id', $request->user_id)
+        $percentage = PercentageOnExpectedShipment::where('user_id', $request->user_id)
         ->value('percentage_on_expected_shipments');
 
         return response()->json([
@@ -16708,13 +16709,23 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
     public function exp_shipment_percentage_submit(Request $request) {
 
-        $user = User::find($request->user_id);
+        // $user = PercentageOnExpectedShipment::where('user_id', $request->user_id)->first();
 
-        $user->percentage_on_expected_shipments = $request->exp_shipment_percentage;
-        $user->percentage_on_expected_shipments_added_by = Auth::id();
-        $user->percentage_on_expected_shipments_added_at = Carbon::now();
+        // $user->user_id = $request->user_id;
+        // $user->percentage_on_expected_shipments = $request->exp_shipment_percentage;
+        // $user->percentage_on_expected_shipments_added_by = Auth::id();
+        // $user->percentage_on_expected_shipments_added_at = Carbon::now();
 
-        $user->save();
+        // $user->save();
+
+        PercentageOnExpectedShipment::updateOrCreate(
+            ['user_id' => $request->user_id],
+            [
+                'percentage_on_expected_shipments' => $request->exp_shipment_percentage,
+                'percentage_on_expected_shipments_added_by' => Auth::id(),
+                'percentage_on_expected_shipments_added_at' => Carbon::now(),
+            ]
+        );
 
         return redirect()->back()->with('success', 'Percentage Updated');
     }

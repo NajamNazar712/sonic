@@ -33,6 +33,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('local_fleet_vehicle_costs');
+        Schema::dropIfExists('local_trip_vehicle_costs');
     }
 };
