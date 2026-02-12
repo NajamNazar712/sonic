@@ -283,6 +283,18 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                               <div class="col-md-8">
+                                                   <label>Want to Send SMS?</label>
+                                               </div>
+                                                <div class="col-md-4 align-self-end">
+                                                    <input type="checkbox" id="charged_sms" name="charged_sms" class="switchery"
+                                                           data-size="sm" data-switchery="true">
+                                                    <input id="charged_sms1" value="0" name="charged_sms1" hidden>
+                                                </div>
+                                            </div>
+                                        </div>
                                         <div class="form-group" id="retail_discount_code_div">
                                             <label>Discount Code</label>
                                             <input type="text" name="discount_code" id="discount_code" class="form-control form-control-sm" placeholder="Discount Code">
@@ -304,6 +316,10 @@
                                         <div class="form-group">
                                             <label>Flyer Charges</label>
                                             <input type="text" name="flyer_charges" id="flyer_charges" class="form-control form-control-sm" placeholder="Flyer Charges" disabled>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>SMS Charges</label>
+                                            <input type="text" name="sms_charges" id="sms_charges" class="form-control form-control-sm" placeholder="SMS Charges" disabled>
                                         </div>
                                         <div class="form-group">
                                             <label>GST</label>
@@ -1124,6 +1140,19 @@
                 }
             });
 
+            var chargedSmsValue = false;
+            $('#charged_sms').change( function () {
+                chargedSmsValue = !chargedSmsValue;
+                if(chargedSmsValue)
+                {
+                   $('#charged_sms1').val("1");
+                }
+                else
+                {
+                    $('#charged_sms1').val("0");
+                }
+            });
+
             $('#apply_discount_code').change(function () {
                 if($(this).is(':checked')){
                     $('#admin_discount').attr('disabled', true);
@@ -1460,6 +1489,7 @@
                  packaging = $('#packaging_amount').val();
                 var admin_discount = $('#admin_discount').val();
                 var admin_discount_type = $('#admin_discount_type1').val();
+                var charged_sms  = $('#charged_sms1').val();
 
                  if($('#insurance_offered').val() == 1 && (insurance == null || insurance == '')){
                      var error = 'Insurance Amount is required';
@@ -1508,6 +1538,7 @@
                             'product_id' : product_id,
                             'cod' : cod,
                             'flyer_count' : flyer_count,
+                            'charged_sms' : charged_sms,
                             '_token': '{{ csrf_token() }}'
                         }
                     })
@@ -1527,6 +1558,7 @@
                                     $('#wht').val(data.details.wht);
                                     $('#cod_sst').val(data.details.cod_sst);
                                     $('#flyer_charges').val(data.details.flyer_without_gst);
+                                    $('#sms_charges').val(data.details.sms_charges);
 
                             }
                             else
