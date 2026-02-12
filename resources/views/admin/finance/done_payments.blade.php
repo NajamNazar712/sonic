@@ -817,7 +817,7 @@
                                 row.push(values.total_deductable);
                                 row.push(values.ibft_charges);
 								row.push(values.adjustment_charges);
-                                row.push(values.total_payable);iban
+                                row.push(values.total_payable);
                                 row.push(values.bank);
 								row.push(values.iban);
                                 row.push(values.reference_number);
