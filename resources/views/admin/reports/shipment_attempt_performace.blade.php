@@ -368,13 +368,13 @@
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
                         }
-                        else if($(header).is('.shipment_status')){
-                            $(last_status_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }
-                        else if($(header).is('.action')  || $(header).is('.before_ofd_status') || $(header).is('.before_ofd_date')  || $(header).is('.ofd_attempts')){
+                        // else if($(header).is('.shipment_status')){
+                        //     $(last_status_select).appendTo($(search))
+                        //         .on( 'change', function () {
+                        //             column.search($(this).val(), false, false, true).draw();
+                        //         } ).wrap(td);
+                        // }
+                        else if($(header).is('.action')  || $(header).is('.before_ofd_status') || $(header).is('.before_ofd_date')  || $(header).is('.ofd_attempts') || $(header).is('.shipment_status')){
                             $(td).appendTo($(search));
                         }
                         else {
