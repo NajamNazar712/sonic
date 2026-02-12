@@ -11993,28 +11993,10 @@ class RiderAPIController extends Controller
                                             $time = Carbon::now()->toDateString();
                                             if ($environment == 'production') {
                                                 $extension = $request->file('audio')->getClientOriginalExtension();
-                                            // $audio_path = 'rider_delivery_audio/' . $rider_delivery->id . '-' . $time . '.' . $extension;
-                                            // Storage::disk('s3')->put($audio_path, file_get_contents($request->audio));
-                                            // $rider_delivery->audio_path = $audio_path;
-                                            // $rider_delivery->save();
                                                 $audio_path = 'rider_delivery_audio/' . $rider_delivery->id . '-' . $time . '.' . $extension;
                                                 Storage::disk('s3')->put($audio_path, file_get_contents($request->audio));
-                                                $s3Upload = Storage::disk('s3')->put($audio_path, file_get_contents($request->file('audio')), 'public');
-
-                                                // MinIO upload
-                                                $minio_audio_path = 'sonic-archive/rider_delivery_audio/' . $rider_delivery->id . '-' . $time . '.' . $extension;
-                                                $minioUpload = Storage::disk('minio')->put($minio_audio_path, file_get_contents($request->file('audio')), 'public');
-
                                                 $rider_delivery->audio_path = $audio_path;
                                                 $rider_delivery->save();
-                                                Log::channel('errorlog')->info('Audio upload result', [
-                                                    'id' => $rider_delivery->id,
-                                                    's3_path' => $audio_path,
-                                                    'minio_path' => $minio_audio_path,
-                                                    's3_success' => $s3Upload,
-                                                    'minio_success' => $minioUpload,
-                                                    'timestamp' => now()->toDateTimeString(),
-                                                ]);
                                             } else {
                                                 $extension = $request->file('audio')->getClientOriginalExtension();
                                                 $audio_path = 'rider_delivery_audio/' . $rider_delivery->id . '-' . $time . '.' . $extension;
