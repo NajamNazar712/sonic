@@ -16076,4 +16076,45 @@ class RiderAPIController extends Controller
         
     }
 
+
+    public function leave_index_v3(Request $request)
+    {
+        $employee = Employee::where('trax_id', $request->trax_id);
+        if ($employee->exists()) {
+            $employee = $employee->first();
+            // if ($employee->employee_gender_id == 1) {
+            //     if ($employee->religion_id == 1) {
+            //         $leave_types = LeaveType::where('id', '<>', 2)->select('id', 'name')->get();
+            //     } else {
+            //         $leave_types = LeaveType::whereIn('id', [1, 3, 5, 6])->select('id', 'name')->get();
+            //     }
+            // } else {
+            //     if ($employee->religion_id == 1) {
+            //         $leave_types = LeaveType::where('id', '<>', 3)->select('id', 'name')->get();
+            //     } else {
+            //         $leave_types = LeaveType::whereIn('id', [1, 2, 5, 6])->select('id', 'name')->get();
+            //     }
+            // }
+
+            $leave_types = LeaveType::where('id', '=', 1)->select('id', 'name')->get();
+            if ($employee->line_manager_id != null) {
+                $data = array();
+                $data['trax_id'] = $employee->trax_id;
+                $data['name'] = $employee->name;
+                $data['designation'] = "Rider";
+                $data['department'] = "Operations";
+                $data['approver_email'] = $employee->line_manager->email;
+                $data['approver_name'] = $employee->line_manager->name;
+                $data['user_type'] = 0;
+                $data['total_leaves'] = $employee->leave_count;
+                $availed_leaves = EmployeeLeave::where('employee_id', $employee->id)
+                    ->whereIn('status', [2, 4, 6])->whereIn('leave_type', [1])->count();
+                $data['availed_leaves'] = $availed_leaves;
+                return response()->json(['status' => 0, 'data' => $data, 'leave_types' => $leave_types]);
+            }
+            return response()->json(['status' => 1, 'message' => "Line Manager is not selected!"]);
+        }
+        return response()->json(['status' => 1, 'message' => "Employee not found!"]);
+    }
+
 }

@@ -379,6 +379,10 @@ use Illuminate\Http\Request;
                 Route::post('apply_v2', 'Rider\RiderAPIController@leave_apply_v2')->name('apply_v2');
                 Route::get('list_v2', 'Rider\RiderAPIController@employee_leave_list_v2')->name('list_v2');
                 Route::post('calender', 'Rider\RiderAPIController@view_calender')->name('calender');
+
+
+                Route::post('index_v3', 'Rider\RiderAPIController@leave_index_v3')->name('index_v3');
+
             });
             Route::get('employee_id', 'Rider\RiderAPIController@get_employee_id')->name('employee_id');
 
