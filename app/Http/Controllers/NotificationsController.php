@@ -1186,14 +1186,23 @@ class NotificationsController extends Controller
                         $body = str_replace('[tracking_link]', $tracking_link, $body);
                     }
 
-                    $sms_setting = self::sms_notification_setting(12, $shipper->id);
-                    if($sms_setting){
-                        $sending_frequency = self::checkSendingFrequency(12,$shipment->id);
-                        if($sending_frequency) {
+
+                    if($shipment->shipment_type == 2) {
+                        $charged_sms = $shipment->retail_shipment->charged_sms;
+                        if($charged_sms == 1) {
                             self::sms($body, $to, NULL,$shipment->id, $id);
                         }
-                        
+                    } else {
+                        $sms_setting = self::sms_notification_setting(12, $shipper->id);
+                        if($sms_setting){
+                            $sending_frequency = self::checkSendingFrequency(12,$shipment->id);
+                            if($sending_frequency) {
+                                self::sms($body, $to, NULL,$shipment->id, $id);
+                            }
+                            
+                        }
                     }
+                    
                 } else if ($id == 13) {
                     $delivery_note_fields = ['delivery_note_number' => 'id', 'departure_at' => 'created_at'];
 
