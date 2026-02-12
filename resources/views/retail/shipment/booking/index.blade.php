@@ -112,9 +112,16 @@
                                         </select>
                                     </div>
                                     <div class="form-group">
-                                        <select name="charges_mode" id="charges_mode" class="select2 form-control" data-rule-required="true" data-msg-required="Charges Mode is required">
+                                        <select name="charges_mode" id="charges_mode" class="select2 form-control" data-rule-required="true" data-msg-required="Charges Mode is required" readonly>
+                                            <!-- @foreach($charges_modes as $charges_mode)
+                                                <option value="{{$charges_mode->id}}" {{ $loop->first ? 'selected' : '' }} >{{$charges_mode->charges_mode}}</option>
+                                            @endforeach -->
+
                                             @foreach($charges_modes as $charges_mode)
-                                                <option value="{{$charges_mode->id}}">{{$charges_mode->charges_mode}}</option>
+                                                <option value="{{ $charges_mode->id }}"
+                                                    {{ $charges_mode->id == 1 ? 'selected' : '' }}>
+                                                    {{ $charges_mode->charges_mode }}
+                                                </option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -894,11 +901,11 @@
                 allowClear:true
             });
 
-            $('#charges_mode').prepend('<option value="" selected="selected"></option>').select2({
-                width:'100%',
-                placeholder:"Select Charges Mode*",
-                allowClear:true
-            });
+            // $('#charges_mode').prepend('<option value="" selected="selected"></option>').select2({
+            //     width:'100%',
+            //     placeholder:"Select Charges Mode*",
+            //     allowClear:true
+            // });
 
             $('#iban_no').inputmask({
                 mask: 'R',
