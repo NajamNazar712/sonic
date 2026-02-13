@@ -382,6 +382,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('rider_blacklist', 'Admins\RiderManagementController@rider_blacklist')->name('rider_blacklist');
             Route::post('send_sms', 'Admins\RiderManagementController@send_sms')->name('send_sms');
 
+            Route::post('/logs','Admins\RiderManagementController@fetch_logs')->name('fetch_logs');
+
             Route::prefix('permanent')->name('permanent.')->group(function () {
                 Route::get('', 'Admins\RiderManagementController@permanent_index')->name('index');
                 Route::get('list', 'Admins\RiderManagementController@permanent_list')->name('list');

@@ -1155,9 +1155,9 @@ HTML;
                                <li><strong>TRAX Online (Pvt) Ltd.</strong> will act as an agent on behalf of the customer. We shall have complete legal authority to collect the cash and transfer the ownership of goods to the consignee. </li>
                                <li>Copy of NTN Certificate will be required for account activation. </li>
                                <li>Taxes will be applicable on total shipment charges depending on the origin of shipments. </li>
-                               <li>13% GST will be applied to the shipments originating from Sindh. </li>
-                               <li>16% GST will be applied to the shipments originating from Punjab. </li>
-                               <li>'.$fuel_charge.' % Fuel Surcharge will be applied.</li>
+                               <li>Taxes to be applied according to Govt. policies of Sindh. </li>
+                               <li>Taxes to be applied according to Govt. policies of Punjab. </li>
+                               <li>'.$fuel_charge.' % Fuel Surcharge to be applied according to Govt. policies.</li>
                                <li>All the rates are subjected to change at any time. However, customer will be informed 2 weeks prior to the incorporation of the change. </li>
                                <li>During the transit, if any government agency like CAA, FIA inspect the shipment for security or regulatory reasons, customer will be responsible to provide the relevant documents. </li>
                                <li>Customer should not move or ship any of the below mentioned items through <strong>TRAX Online (Pvt) Ltd.</strong></li>
