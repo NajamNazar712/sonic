@@ -3440,7 +3440,8 @@ class AdminReportsController extends Controller
             'dc.name as destination',
             'h.name as hub',
             'shipments.amount as s_collection_amount',
-            'sps.name as payment_status',
+            'sps.name as payment_status', //join with shipments_payment_journey
+            'sps_d.name as paid_payment_status',
             'shipments.actual_weight',
             'shipments.weight_charges',
             'shipments.cash_handling_charges',
@@ -3466,7 +3467,9 @@ class AdminReportsController extends Controller
             'zcc.class',
             'oc.id as origin_city_id',
             'dc.id as destination_city_id',
-            DB::raw('MAX(dps.done_payment_id) as payment_id'),
+//            DB::raw('MAX(dps.done_payment_id) as payment_id'),
+            DB::raw('MAX(spj.payment_id) as payment_id'),
+            DB::raw('MAX(spj_d.payment_id) as paid_payment_id'),
             'shipments.booking_type_id',
             'usi.poc',
             'adsp.id',
@@ -3540,7 +3543,7 @@ class AdminReportsController extends Controller
                     ->on('zone_classification_id', '=', DB::connection($connection)->raw('IF (shipments.shipping_mode_id IN (1, 4), 1, 2)'));
             })
             ->leftJoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
-            ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=', 'sps.id')
+//            ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=', 'sps.id')
             ->leftJoin('shipments_journey as sj', function ($join) use ($connection) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.shipper_status_id', 2)
@@ -3568,6 +3571,25 @@ class AdminReportsController extends Controller
                 $join->on('dps.shipment_id', '=', 'shipments.id')
                     ->where('dps.type', '!=',2 );
             })
+
+            //exclude paid payment status and make sperate column
+            ->leftJoin('shipments_payment_journey as spj', function ($join) use ($connection) {
+                $join->on('spj.shipment_id','=','shipments.id')
+                    ->where( 'spj.id',
+                        '=',
+                        DB::connection($connection)->raw('( SELECT MAX(id) FROM shipments_payment_journey WHERE shipment_id = shipments.id AND status_id != 3)'));
+            })
+           ->leftjoin('shipment_payment_status as sps', 'spj.status_id', '=', 'sps.id')
+
+            ->leftJoin('shipments_payment_journey as spj_d', function ($join) use ($connection) {
+                $join->on('spj_d.shipment_id','=','shipments.id')
+                    ->where( 'spj_d.id',
+                        '=',
+                        DB::connection($connection)->raw('( SELECT MAX(id) FROM shipments_payment_journey WHERE shipment_id = shipments.id AND status_id = 3)'));
+            })
+            ->leftjoin('shipment_payment_status as sps_d', 'spj_d.status_id', '=', 'sps_d.id')
+
+
             ->leftJoin('shipments_journey as dr', function ($join) use ($connection) {
                 $join->on('dr.shipment_id', '=', 'shipments.id')
                     ->whereIn('dr.shipper_status_id', [14, 25, 30, 36, 37])

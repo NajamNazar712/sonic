@@ -237,6 +237,8 @@
                         <th class="border-primary border-darken-1">Payment Status</th>
                         <th class="border-primary border-darken-1">Invoice No.</th>
                         <th class="border-primary border-darken-1">Payment ID</th>
+                        <th class="border-primary border-darken-1">Paid Payment Status</th>
+                        <th class="border-primary border-darken-1">Paid Payment ID</th>
                         <th class="border-primary border-darken-1">Processed Date</th>
                         <th class="border-primary border-darken-1">Paid Date</th>
                         <th class="border-primary border-darken-1">Service Type</th>
@@ -726,6 +728,8 @@
                     { data: 'payment_status', name: 'sps.name', class: 'align-middle payment_status', value: 'payment_status', text: 'Payment Status', download: true },
                     { data: 'invoice_number', name: 'invoices.invoice_number', class: 'align-middle text-center invoice_number', value: 'invoice_number', text: 'Invoice Number', download: true },
                     { data: 'payment_id', name: 'dps.id', class: 'align-middle payment_id', value: 'payment_id', text: 'Payment ID', download: true },
+                    { data: 'paid_payment_status', name: 'sps_d.name', class: 'align-middle paid_payment_status', value: 'paid_payment_status', text: 'Paid Payment Status', download: true },
+                    { data: 'paid_payment_id', name: 'spj_d.payment_id', class: 'align-middle paid_payment_id', value: 'paid_payment_id', text: 'Paid Payment ID', download: true },
                     { data: 'processed_date', name: 'spjproceed_date.created_at', class: 'align-middle processed_date', value: 'processed_date', text: 'Processed Date', download: true },
                     { data: 'paid_date', name: 'spjpaid_date.created_at', class: 'align-middle paid_date', value: 'paid_date', text: 'Paid Date', download: true },
                     { data: 'service_type', name: 'bt.booking_type', class: 'align-middle service_type', value: 'service_type', text: 'Service Type', download: true },
