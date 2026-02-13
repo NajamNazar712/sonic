@@ -68,11 +68,10 @@ return [
             'driver' => 's3',
             'key' => env('MINIO_KEY'),
             'secret' => env('MINIO_SECRET'),
-            'region' => 'us-east-1',
+            'region' => 'garaj-digitalpark-isb',  // <-- THIS IS REQUIRED
             'bucket' => env('MINIO_BUCKET'),
             'endpoint' => env('MINIO_ENDPOINT'),
-            'url' => env('MINIO_URL'),
-            'use_path_style_endpoint' => true,
+            'use_path_style_endpoint' => true,     // important for MinIO
         ],
 
         's4' => [
