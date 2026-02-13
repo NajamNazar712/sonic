@@ -2,6 +2,7 @@
 
 namespace App\Http\Models;
 
+use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\HR\Employee;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
@@ -39,6 +40,11 @@ class Rider extends Model
     public function area()
     {
         return $this->belongsTo('App\Http\Models\CityArea', 'area_id', 'id');
+    }
+
+    public function rider_operation_category()
+    {
+        return $this->belongsTo(OperationRidersCategory::class,'operation_rider_id','id');
     }
 
     protected static function booted()
