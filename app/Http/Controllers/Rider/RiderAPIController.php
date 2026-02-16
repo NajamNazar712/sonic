@@ -12000,20 +12000,30 @@ class RiderAPIController extends Controller
                                                 Storage::disk('s3')->put($audio_path, file_get_contents($request->audio));
                                                 $rider_delivery->audio_path = $audio_path;
                                                 $rider_delivery->save();
-                                            // MinIO upload
-                                            $minio_audio_path = 'sonic-archive/rider_delivery_audio/' . $rider_delivery->id . '-' . $time . '.' . $extension;
+                                            $filename = $rider_delivery->id . '-' . $time . '.' . $extension;
+                                            $minio_path = 'sonic-archive/rider_delivery_audio/' . $filename;
+                                            try {
+                                                $minioUpload = Storage::disk('minio')->putFileAs(
+                                                    'sonic-archive/rider_delivery_audio', // folder
+                                                    $request->file('audio'),             // Uploaded file
+                                                    $filename,                            // File name
+                                                    'public'                              // visibility
+                                                );
 
-                                            $minioUpload = Storage::disk('minio')->putFileAs(
-                                                'sonic-archive/rider_delivery_audio',
-                                                $request->file('audio'),
-                                                $rider_delivery->id . '-' . $time . '.' . $extension
-                                            );
-                                            Log::channel('cronJobLog')->info('Audio upload result', [
-                                                'id' => $rider_delivery->id,
-                                                'minio_path' => $minio_audio_path,
-                                                'minio_success' => $minioUpload,
-                                                'timestamp' => now()->toDateTimeString(),
-                                            ]);
+                                                Log::channel('cronJobLog')->info('Audio upload result', [
+                                                    'id' => $rider_delivery->id,
+                                                    'minio_path' => $minio_path,
+                                                    'minio_success' => $minioUpload,
+                                                    'timestamp' => now()->toDateTimeString(),
+                                                ]);
+                                            } catch (\Exception $e) {
+                                                Log::channel('cronJobLog')->error('MinIO upload failed', [
+                                                    'id' => $rider_delivery->id,
+                                                    'error' => $e->getMessage(),
+                                                    'trace' => $e->getTraceAsString(),
+                                                ]);
+                                                throw $e;
+                                            }
                                             } else {
                                                 $extension = $request->file('audio')->getClientOriginalExtension();
                                                 $audio_path = 'rider_delivery_audio/' . $rider_delivery->id . '-' . $time . '.' . $extension;
