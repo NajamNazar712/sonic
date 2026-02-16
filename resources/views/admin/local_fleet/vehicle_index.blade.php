@@ -101,7 +101,7 @@
                                 </div>
 
                                 <div class="col-md-6 mt-2">
-                                    <label>Mileage Per Liter</label>
+                                    <label>KMs Per Liter</label>
                                     <input type="text" name="mileage_per_liter" class="form-control">
                                 </div>
 
@@ -206,7 +206,7 @@
                                 </div>
 
                                 <div class="col-md-6 mt-2">
-                                    <label>Mileage</label>
+                                    <label>KMs</label>
                                     <input type="text" id="edit_mileage_per_liter" name="mileage_per_liter" class="form-control">
                                 </div>
 
