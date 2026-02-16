@@ -12001,18 +12001,13 @@ class RiderAPIController extends Controller
                                                 $rider_delivery->audio_path = $audio_path;
                                                 $rider_delivery->save();
                                             // MinIO upload
-                                            $minio_audio_path = 'sonic-archive/rider_delivery_audio/'
-                                                . $rider_delivery->id . '-' . $time . '.' . $extension;
+                                            $minio_audio_path = 'sonic-archive/rider_delivery_audio/' . $rider_delivery->id . '-' . $time . '.' . $extension;
 
-                                            $minioUpload = Storage::disk('minio')->put(
-                                                $minio_audio_path,
-                                                file_get_contents($request->file('audio')->getRealPath()),
-                                                [
-                                                    'visibility' => 'public',
-                                                    'ContentType' => $request->file('audio')->getMimeType(),
-                                                ]
+                                            $minioUpload = Storage::disk('minio')->putFileAs(
+                                                'sonic-archive/rider_delivery_audio',
+                                                $request->file('audio'),
+                                                $rider_delivery->id . '-' . $time . '.' . $extension
                                             );
-                                            $rider_delivery->save();
                                             Log::channel('cronJobLog')->info('Audio upload result', [
                                                 'id' => $rider_delivery->id,
                                                 'minio_path' => $minio_audio_path,
