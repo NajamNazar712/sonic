@@ -3850,9 +3850,8 @@ class RiderAPIController extends Controller
 
                                     $rider_delivery->audio_path = $audio_path;
                                     $rider_delivery->save();
-                                    Log::channel('errorlog')->info('Audio upload result', [
+                                    Log::channel('cronJobLog')->info('Audio upload result', [
                                         'id' => $rider_delivery->id,
-                                        's3_path' => $audio_path,
                                         'minio_path' => $minio_audio_path,
                                         'minio_success' => $minioUpload,
                                         'timestamp' => now()->toDateTimeString(),
