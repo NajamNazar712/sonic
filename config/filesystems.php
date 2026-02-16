@@ -64,16 +64,30 @@ return [
             'url' => env('AWS_URL'),
         ],
 
+        // 'minio' => [
+        //     'driver' => 's3',
+        //     'key' => env('MINIO_KEY'),
+        //     'secret' => env('MINIO_SECRET'),
+        //     'region' => 'garaj-digitalpark-isb',  // <-- THIS IS REQUIRED
+        //     'bucket' => env('MINIO_BUCKET'),
+        //     'endpoint' => env('MINIO_ENDPOINT'),
+        //     'use_path_style_endpoint' => true,     // important for MinIO
+        // ],
         'minio' => [
             'driver' => 's3',
             'key' => env('MINIO_KEY'),
             'secret' => env('MINIO_SECRET'),
-            'region' => 'garaj-digitalpark-isb',  // <-- THIS IS REQUIRED
+            'region' => 'garaj-digitalpark-isb',
             'bucket' => env('MINIO_BUCKET'),
             'endpoint' => env('MINIO_ENDPOINT'),
-            'use_path_style_endpoint' => true,     // important for MinIO
+            'use_path_style_endpoint' => true,
+            'throw' => true,   // <-- important
+            'options' => [
+                'http' => [
+                    'verify' => false,  // skip SSL verification if needed
+                ],
+            ],
         ],
-
         's4' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID_2'),
