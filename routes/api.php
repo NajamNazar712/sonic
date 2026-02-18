@@ -382,6 +382,9 @@ use Illuminate\Http\Request;
 
 
                 Route::post('index_v3', 'Rider\RiderAPIController@leave_index_v3')->name('index_v3');
+                Route::post('apply_v3', 'Rider\RiderAPIController@leave_apply_v3')->name('apply_v3');
+                Route::get('list_v3', 'Rider\RiderAPIController@employee_leave_list_v3')->name('list_v3');
+
 
             });
             Route::get('employee_id', 'Rider\RiderAPIController@get_employee_id')->name('employee_id');
