@@ -34,7 +34,7 @@ class WalletUserDisables extends Command
         if ($this->hasArgument('user_id') && null !== $this->argument('user_id')) {
             $userId = explode(',', $this->argument('user_id'));
         } else {
-            $userId = [44309,33952,27424];
+            $userId = [5039,5018];
         }
         $wallet_users = WalletUser::whereIn('user_id', $userId)->get();
         $success_delete = [];
