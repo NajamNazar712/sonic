@@ -16150,6 +16150,27 @@ class RiderAPIController extends Controller
                 'message' => 'From date cannot be greater than To date.'
             ]);
         }
+
+        $working_days = $employee->department->working_days; // 1 = Sunday off, else Sat+Sun off
+        $period = CarbonPeriod::create($fromDate, $toDate);
+        $actualWorkingDays = 0;
+
+        foreach ($period as $date) {
+            if ($working_days == 1) {
+                if (!$date->isSunday()) $actualWorkingDays++;
+            } else {
+                if (!$date->isWeekend()) $actualWorkingDays++;
+            }
+        }
+
+        if ($actualWorkingDays <= 0) {
+            return response()->json([
+                'status' => 1,
+                'message' => 'You cannot submit leave for weekends only.'
+            ]);
+        }
+
+
         if ($request->filled('leave_id')) {
 
             $leaveRequest = EmployeeLeave::find($request->leave_id);
@@ -16170,23 +16191,30 @@ class RiderAPIController extends Controller
             $message = "Leave Request edited successfully";
         }
         else {
-            $today = Carbon::now();
-            if ($today->day >= 21) {
-                // Current cycle: 21 this month → 20 next month
-                $cycleStart = Carbon::now()->day(21)->startOfDay();
-                $cycleEnd   = Carbon::now()->addMonth()->day(20)->endOfDay();
+            $referenceDate = Carbon::parse($request->from);
+            if ($referenceDate->day >= 21) {
+                $cycleStart = $referenceDate->copy()->day(21)->startOfDay();
+                $cycleEnd   = $referenceDate->copy()->addMonth()->day(20)->endOfDay();
             } else {
-                // Current cycle: 21 last month → 20 this month
-                $cycleStart = Carbon::now()->subMonth()->day(21)->startOfDay();
-                $cycleEnd   = Carbon::now()->day(20)->endOfDay();
+                $cycleStart = $referenceDate->copy()->subMonth()->day(21)->startOfDay();
+                $cycleEnd   = $referenceDate->copy()->day(20)->endOfDay();
             }
 
+             //dd($cycleStart,$cycleEnd);
             $leaveCount = EmployeeLeave::where('employee_id', $employee->id)
                 ->where('employee_type_id', 2)
                 ->whereIn('status', [1,2,4,6])
-                ->whereBetween('from', [$cycleStart, $cycleEnd])
+                ->where(function ($q) use ($cycleStart, $cycleEnd) {
+                    $q->whereBetween('from', [$cycleStart, $cycleEnd])
+                    ->orWhereBetween('to', [$cycleStart, $cycleEnd])
+                    ->orWhere(function ($q2) use ($cycleStart, $cycleEnd) {
+                        $q2->where('from', '<=', $cycleStart)
+                            ->where('to', '>=', $cycleEnd);
+                    });
+                })
+                // ->whereBetween('from', [$cycleStart, $cycleEnd])
                 ->count();
-
+                
             if ($leaveCount >= 2) {
                 return response()->json([
                     'status'  => 1,
