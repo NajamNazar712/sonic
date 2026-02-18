@@ -151,6 +151,10 @@ use App\Http\Models\Rider\RiderReturnNoteRequest;
 use App\Http\Models\Rider\RiderReturnNoteRequestShipment;
 use App\Http\Traits\CommonTrait;
 use App\Http\Traits\RvTrait;
+use App\Models\LocalFleetVehicle;
+use App\Models\LocalFleetVehicleTrip;
+use App\Models\LocalTripJobReference;
+use App\Models\LocalTripVehicleCost;
 use App\Models\SalespersonTargetSegment;
 use App\Models\TempRequestNoteApproval;
 use App\RiderAssignedHubForDeliveryNote;
@@ -13197,6 +13201,455 @@ class AdminAPIController extends Controller
 
             return response()->json(['status' => 0, 'message' => 'Tracking of Shipment #' . $tracking_number, 'details' => $details]);
         }
+    }
+
+    public function local_fleet_vehicle_details(Request $request)
+    {
+
+        $vehicle = LocalFleetVehicle::with('city')
+            ->where('id', $request->vehicle_id)
+            ->where('status', 1)
+            ->first();
+
+        if (!$vehicle) {
+            return response()->json([
+                'status'  => 1,
+                'message' => 'Vehicle not found!'
+            ]);
+        }
+        if ($request->admin_role_id != 1 && !in_array($vehicle->city->hub_id, $request->admin_hubs)) {
+            return response()->json([
+                'status'  => 1,
+                'message' => 'This vehicle does not belong to your hub.'
+            ]);
+        }
+        $trip_type = 'out';
+        $vehicle_trip = LocalFleetVehicleTrip::where('vehicle_id',$vehicle->id)
+            ->orderByDesc('id')
+            ->first();
+        if($vehicle_trip && $vehicle_trip->status == 0) {
+            $trip_type = 'in';
+        }
+
+        $detail = [
+            'vehicle_id'          => $vehicle->id,
+            'vehicle_number'      => $vehicle->vehicle_number,
+            'make'                => $vehicle->make,
+            'city'                => optional($vehicle->city)->name,
+            'city_id'             => $vehicle->city_id,
+            'driver_name'         => $vehicle->driver_name,
+            'mileage_per_liter'   => $vehicle->mileage_per_liter,
+            'rent_type'           => $vehicle->rent_type == 1 ? 'Daily' : 'Monthly',
+            'rent_amount'         => $vehicle->rent_amount,
+            'fuel_responsibility' => $vehicle->fueling_responsibility == 1 ? 'Trax' : 'Vendor',
+            'trip_type'           => $trip_type
+        ];
+
+        return response()->json([
+            'status'  => 0,
+            'message' => 'Vehicle No # ' . $vehicle->vehicle_number,
+            'vehicle' => $detail
+        ]);
+    }
+
+
+    public function vehicle_trip(Request $request)
+    {
+        $request->validate([
+            'trip_type'  => 'required|in:out,in',
+            'vehicle_id' => 'required|integer',
+            'remarks' => 'nullable|string',
+            'cost_amount' => 'nullable|numeric|gt:0',
+            'cost_remarks' => 'nullable|string|required_with:cost_amount',
+            'cost_receipt_path' => 'nullable|file|mimes:png,jpg,jpeg|max:2048',
+        ]);
+
+        $vehicle = LocalFleetVehicle::where('id', $request->vehicle_id)
+            ->where('status', 1)
+            ->first();
+
+        if (!$vehicle) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Vehicle not found or inactive'
+            ]);
+        }
+
+        if ($request->trip_type === 'out') {
+
+            $rules = [
+                'out_meter' => 'required|integer|min:0',
+                'rider_id'  => 'nullable|exists:riders,trax_id',
+                'route_id'  => 'nullable|integer|exists:routes,id',
+                'delivery_note_ids' => 'nullable|array',
+                'delivery_note_ids.*' => 'integer',
+                'return_note_ids' => 'nullable|array',
+                'return_note_ids.*' => 'integer',
+                'pickup_note_ids' => 'nullable|array',
+                'pickup_note_ids.*' => 'integer'
+            ];
+
+            $request->validate($rules);
+            return $this->handleVehicleOut($request, $vehicle,$request->trip_type);
+        }
+
+        if ($request->trip_type === 'in') {
+            $rules = [
+                'in_meter' => 'required|integer|min:0',
+                'incident_report'  => 'nullable|string',
+                'incident_image'    => 'nullable|file|mimes:png,jpg,jpeg,pdf|max:2048',
+            ];
+            $request->validate($rules);
+            return $this->handleVehicleIn($request, $vehicle,$request->trip_type);
+        }
+    }
+
+    private function handleVehicleOut(Request $request, LocalFleetVehicle $vehicle,$trip_type)
+    {
+        $runningTrip = LocalFleetVehicleTrip::where('vehicle_id', $vehicle->id)
+            ->where('status', 0)
+            ->OrderByDesc('id')
+            ->first();
+
+        if ($runningTrip) {
+            return response()->json([
+                'status' => 1,
+                'message' => 'Vehicle is already out'
+            ]);
+        }
+
+        $now = now();
+
+        //job references
+        $deliveryIds = $request->delivery_note_ids
+            ? DeliveryNote::whereIn('id', $request->delivery_note_ids)->pluck('id')->toArray()
+            : [];
+
+        $returnIds = $request->return_note_ids
+            ? ReturnNote::whereIn('id', $request->return_note_ids)->pluck('id')->toArray()
+            : [];
+
+        $pickupIds = $request->pickup_note_ids
+            ? V2PickupRequest::whereIn('id', $request->pickup_note_ids)->pluck('id')->toArray()
+            : [];
+
+
+        $total_dn_count = count($deliveryIds);
+        $total_dn_shipment_count = 0;
+        $total_dn_shipment_weight = 0;
+
+
+        $total_rn_count = count($returnIds);
+        $total_rn_shipment_count = 0;
+        $total_rn_shipment_weight = 0;
+
+        $total_pickup_count =  count($pickupIds);
+        $total_pickup_shipment_count = 0;
+        $total_pickup_shipment_weight = 0 ;
+
+        //count DELIVERY NOTE TOTALS
+        if (!empty($deliveryIds)) {
+            $total_dn_shipment_count = DeliveryNoteShipment::whereIn('delivery_note_id', $deliveryIds)
+                ->count();
+            $total_dn_shipment_weight = DeliveryNoteShipment::join('shipments as s', 'delivery_note_shipments.shipment_id', '=', 's.id')
+                ->whereIn('delivery_note_shipments.delivery_note_id', $deliveryIds)
+                ->sum('s.actual_weight');
+        }
+        //count Return NOTE TOTALS
+        if (!empty($returnIds)) {
+            $total_rn_shipment_count = ReturnNoteShipment::whereIn('return_note_id', $returnIds)
+                ->count();
+            $total_rn_shipment_weight = ReturnNoteShipment::join('shipments as s', 'return_note_shipments.shipment_id', '=', 's.id')
+                ->whereIn('return_note_shipments.return_note_id', $returnIds)
+                ->sum('s.actual_weight');
+        }
+
+        //count Pickup Note TOTALS
+        if (!empty($pickupIds)) {
+            $total_pickup_shipment_count = V2PickupRequestShipment::whereIn('pickup_request_id', $pickupIds)
+                ->count();
+            $total_pickup_shipment_weight = V2PickupRequestShipment::join('shipments as s', 'v2_pickup_request_shipments.shipment_id', '=', 's.id')
+                ->whereIn('v2_pickup_request_shipments.pickup_request_id', $pickupIds)
+                ->sum('s.estimated_weight');
+        }
+
+        //add trip
+        $trip = new LocalFleetVehicleTrip();
+        $trip->vehicle_id                = $vehicle->id;
+        $trip->vehicle_mileage_per_liter = $vehicle->mileage_per_liter;
+        $trip->out_time                  = $now;
+        $trip->out_meter                 = $request->out_meter;
+        $trip->rider_id                  = $request->rider_id;
+        $trip->route_id                  = $request->route_id;
+        $trip->out_remarks               = $request->remarks ?? '';
+        $trip->status                    = 0;
+        $trip->created_by                = $request->admin_id;
+        $trip->trip_date                = $now->toDateString();
+        //dn
+        $trip->total_dn_count = $total_dn_count;
+        $trip->total_dn_shipment_count = $total_dn_shipment_count;
+        $trip->total_dn_shipment_weight = $total_dn_shipment_weight;
+        //rn
+        $trip->total_rn_count = $total_rn_count;
+        $trip->total_rn_shipment_count = $total_rn_shipment_count;
+        $trip->total_rn_shipment_weight = $total_rn_shipment_weight;
+        //pickup
+        $trip->total_pickup_count = $total_pickup_count;
+        $trip->total_pickup_shipment_count = $total_pickup_shipment_count;
+        $trip->total_pickup_shipment_weight = $total_pickup_shipment_weight;
+        $trip->save();
+
+
+        // Map job types to IDs
+        $jobReferences = [
+            1 => $deliveryIds, // Delivery
+            2 => $returnIds,   // Return
+            3 => $pickupIds,   // Pickup
+        ];
+
+        $data = [];
+        foreach ($jobReferences as $jobType => $ids) {
+            foreach ($ids as $id) {
+                $data[] = [
+                    'trip_id'      => $trip->id,
+                    'job_type'     => $jobType,
+                    'reference_id' => $id,
+                    'created_at'   => $now,
+                    'updated_at'   => $now,
+                ];
+            }
+        }
+
+        // Insert only if data exists
+        if (!empty($data)) {
+            LocalTripJobReference::insert($data);
+        }
+
+        //add trip cost if any
+        $this->trip_cost($request,$trip->id,$trip_type);
+
+        return response()->json([
+            'status' => 0,
+            'message' => 'Vehicle checked out successfully'
+        ]);
+    }
+
+    private function handleVehicleIn(Request $request, LocalFleetVehicle $vehicle,$trip_type)
+    {
+        $trip = LocalFleetVehicleTrip::where('vehicle_id', $vehicle->id)
+            ->where('status', 0)
+            ->orderByDesc('id')
+            ->first();
+
+        if (!$trip) {
+            return response()->json([
+                'status' => 1,
+                'message' => 'No active trip found for this vehicle'
+            ]);
+        }
+
+        if ($request->in_meter <= $trip->out_meter) {
+            return response()->json([
+                'status' => 1,
+                'message' => 'Invalid ending meter reading'
+            ]);
+        }
+
+        $incidentImagePath = null;
+        if ($request->hasFile('incident_image')) {
+            $file = $request->file('incident_image');
+            $timestamp  = now()->format('YmdHis');
+            $filename = 'incident_' . $trip->id . '_' . $timestamp . '.png';
+            $directory = 'local_fleet/incidents';
+            Storage::disk('public')->putFileAs($directory,$file,$filename);
+            $incidentImagePath = $directory . '/' . $filename;
+        }
+
+        $mileage = $request->in_meter - $trip->out_meter;
+        $fuel = round($mileage / $trip->vehicle_mileage_per_liter, 2);
+
+        $trip->in_time        = now();
+        $trip->in_meter       = $request->in_meter;
+        $trip->in_remarks     = $request->remarks ?? '';
+        $trip->incident_report= $request->incident_report;
+        $trip->incident_image = $incidentImagePath;
+        $trip->mileage        = $mileage;
+        $trip->fuel_liters    = $fuel;
+        $trip->status         = 1;
+        $trip->updated_by     = $request->admin_id;
+        $trip->save();
+
+        //add trip cost if any
+        $this->trip_cost($request,$trip->id,$trip_type);
+
+        return response()->json([
+            'status' => 0,
+            'message' => 'Vehicle checked in successfully',
+            'mileage' => $mileage,
+            'fuel_liters' => $fuel
+        ]);
+    }
+
+    private function trip_cost(Request $request,$trip_id,$trip_type)
+    {
+
+        if($request->cost_amount >0){
+
+            $type=0;
+            if($trip_type=='in'){
+                $type=1;
+            }
+            $trip_cost_check = LocalTripVehicleCost::where('trip_id',$trip_id)
+                ->where('trip_type',$type);
+            if($trip_cost_check->exists()) {
+                return;
+            }
+
+            $path = null;
+//            if ($request->hasFile('cost_receipt_path')) {
+//                $file = $request->file('cost_receipt_path');
+//                $extension = 'png';
+//                $timestamp  = now()->format('YmdHis');
+//                $filename = 'trip_cost_' . $trip_id . '_' . $timestamp . '.png';
+//                Storage::disk('public')->put('local_fleet/trip_costs/' . $filename, file_get_contents($file));
+//                $path = $filename;
+//            }
+
+//            if ($request->has('cost_receipt_path')) {
+//                $timestamp = now()->format('YmdHis');
+//                $filename  = 'trip_cost_' . $trip_id . '_' . $timestamp . '.png';
+//                $folder    = 'local_fleet/trip_costs';
+//                if (!Storage::disk('public')->exists($folder)) {
+//                    Storage::disk('public')->makeDirectory($folder);
+//                }
+//                Storage::disk('public')->put(
+//                    $folder.'/'.$filename,
+//                    file_get_contents($request->cost_receipt_path)
+//                );
+//                $path = $folder.'/'.$filename;
+//            }
+            if ($request->hasFile('cost_receipt_path')) {
+
+                $file = $request->file('cost_receipt_path');
+
+                $timestamp = now()->format('YmdHis');
+                $filename  = 'trip_cost_' . $trip_id . '_' . $timestamp . '.' . $file->extension();
+
+                $directory = 'local_fleet/trip_costs';
+
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+
+                $path = $directory . '/' . $filename;
+            }
+
+            $trip_cost = new LocalTripVehicleCost();
+            $trip_cost->trip_id = $trip_id;
+            $trip_cost->cost_amount = $request->cost_amount;
+            $trip_cost->remarks = $request->cost_remarks;
+            $trip_cost->receipt_path = $path;
+            $trip_cost->created_by = Auth::id();
+            $trip_cost->trip_type =$type;
+            $trip_cost->save();
+
+
+            //update trip cost
+            $trip = LocalFleetVehicleTrip::where('id',$trip_id)->first();
+            if($trip){
+                $trip->total_trip_cost = $trip->total_trip_cost+$request->cost_amount;
+                $trip->save();
+            }
+//            ->increment('total_trip_cost', $request->cost_amount);
+
+
+        }
+    }
+
+
+    public function rider_detail(Request $request)
+    {
+        $validate = Validator::make(
+            $request->all(),
+            [
+                'rider_trax_id' => 'required'
+            ],
+            [
+                'rider_trax_id.required' => 'rider_trax_id is required',
+            ]
+        );
+
+        if ($validate->fails()) {
+            return response()->json([
+                'status'  => 1,
+                'message' => 'Error(s) in Input',
+                'errors'  => $validate->errors()
+            ]);
+        }
+
+        $rider = Rider::where('trax_id',$request->rider_trax_id)->where('status',1)->first();
+       if($rider) {
+           $rider_hub_id = $rider->city->hub_id;
+           if ($request->admin_role_id != 1 && !in_array($rider_hub_id, $request->admin_hubs)) {
+               return response()->json([
+                   'status'  => 1,
+                   'message' => 'This Rider does not belong to your hub.'
+               ]);
+           }
+            $rider_detail = [
+                'rider_id' => $rider->id,
+                'rider_name' => $rider->name,
+                'trax_id' => $rider->trax_id,
+                'city_id' => $rider->city_id,
+                'city_name' => optional($rider->city)->name,
+                'cnic' => $rider->cnic,
+                'address' => $rider->address,
+                'phone' => $rider->phone
+            ];
+             return response()->json([
+                 'status'  => 0,
+                 'rider' => $rider_detail
+             ]);
+       }
+        return response()->json([
+            'status' => 1,
+            'message' => 'Rider not found!'
+        ]);
+    }
+    public function rider_job_references(Request $request)
+    {
+        $delivery_note_ids = DeliveryNote::where('rider_id',$request->rider_id)
+            ->where('route_id',$request->route_id)->where('pending_status',0)->pluck('id');
+
+        $return_note_ids = ReturnNote::where('rider_id',$request->rider_id)
+            ->where('route_id',$request->route_id)->where('status',0)->pluck('id');
+
+        $pickup_note_ids = V2PickupRequest::where('current_rider_id',$request->rider_id)
+            ->where('rider_status',2)->pluck('id');
+
+        return response()->json([
+            'status'  => 0,
+            'delivery_note_ids' => $delivery_note_ids,
+            'return_note_ids' => $return_note_ids,
+            'pickup_note_ids' => $pickup_note_ids
+        ]);
+    }
+
+    public function admin_routes(Request $request)
+    {
+        $routes = Route::whereHas('city', function ($query) use ($request) {
+            $query->whereIn('hub_id', function ($q) use ($request) {
+                $q->select('hub_id')
+                    ->from('admin_hubs');
+                if ($request->admin_role_id != 1) {
+                    $q->whereIn('admin_id', (array) $request->admin_hubs);
+                }
+
+            });
+        })->where('status',1)->select('routes.*')->get();
+
+        return response()->json([
+            'status'  => 0,
+            'routes' => $routes,
+        ]);
     }
 
 }

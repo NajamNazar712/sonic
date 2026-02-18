@@ -625,6 +625,14 @@ use Illuminate\Http\Request;
         Route::get('bot_get_ticket/{tracking_number?}', 'Agent\BotCallingController@bot_get_ticket_details')->name('bot_get_ticket');
         Route::post('bot_submit_ticket', 'Agent\BotCallingController@bot_submit_ticket')->name('bot_submit_ticket');
 
+            Route::prefix('local_feet')->name('local_feet.')->group(function (){
+                Route::get('vehicle_details/{vehicle_id}','AdminAPIController@local_fleet_vehicle_details')->name('vehicle_details');
+                Route::post('vehicle_trip','AdminAPIController@vehicle_trip')->name('vehicle_trip');
+                Route::post('trip_rider','AdminAPIController@rider_detail')->name('trip_rider');
+                Route::post('rider_job_references','AdminAPIController@rider_job_references')->name('rider_job_references');
+                Route::get('admin_routes','AdminAPIController@admin_routes')->name('admin_routes');
+            });
+
         });
 
         Route::middleware('AdminAPIDWSToken')->group(function () {

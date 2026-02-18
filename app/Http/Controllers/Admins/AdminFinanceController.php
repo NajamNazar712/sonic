@@ -4534,6 +4534,9 @@ class AdminFinanceController extends Controller
         
         $shipment = Shipment::find($shipment_id);
         
+        if($amount == 0 && PendingPayment::negative_payable_check($shipment->user_id, $shipment->user->account_type_id)) {
+            return redirect()->route('admin.finance.change_shipment_amount.index')->with('error', 'You are unable to change the amount due to negative balance.');
+        }
         $change_shipment_amount = new ChangeShipmentAmountLog();
 
         $change_shipment_amount->shipment_id = $shipment->id;
@@ -10274,6 +10277,7 @@ class AdminFinanceController extends Controller
                     $billing_period_from_date = Carbon::now()->subDays(1)->startOfDay()->toDateString();
                     //}
                 }
+          
                 //$generate = TRUE;
 
                 //$billing_period_from_date = Carbon::now()->subDays(7)->startOfDay()->toDateString();
