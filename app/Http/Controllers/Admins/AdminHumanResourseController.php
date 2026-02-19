@@ -85,6 +85,7 @@ use App\Http\Models\Admin\Fuel\Rider\RiderFuelAllocationDeliveryNote;
 use App\Http\Models\RvAgentAssignHub;
 use App\Http\Models\HR\EducationList;
 use App\Http\Traits\CommonTrait;
+use Carbon\CarbonPeriod;
 
 class AdminHumanResourseController extends Controller
 {
@@ -4569,17 +4570,46 @@ class AdminHumanResourseController extends Controller
                     return $employee->admin_cnic;
                 }
             })
+            // ->editColumn('days', function ($employee) {
+            //     if ($employee->to) {
+            //         $start_date = Carbon::createFromFormat('Y-m-d', $employee->from);
+            //         $end_date = Carbon::createFromFormat('Y-m-d', $employee->to);
+
+            //         if ($employee->working_days_id == 1) {
+            //             $diffDays = $start_date->diffInWeekdays($end_date, Carbon::setWeekendDays([Carbon::SUNDAY]));
+            //         } else {
+            //             $diffDays = $start_date->diffInWeekdays($end_date, Carbon::setWeekendDays([Carbon::SATURDAY,Carbon::SUNDAY]));
+            //         }
+            //         return $diffDays + 1;
+
+            //     } else {
+            //         return 1;
+            //     }
+            // })
             ->editColumn('days', function ($employee) {
                 if ($employee->to) {
-                    $start_date = Carbon::createFromFormat('Y-m-d', $employee->from);
-                    $end_date = Carbon::createFromFormat('Y-m-d', $employee->to);
+                    $start_date = Carbon::parse($employee->from);
+                    $end_date   = Carbon::parse($employee->to);
 
-                    if ($employee->working_days_id == 1) {
-                        $diffDays = $start_date->diffInWeekdays($end_date, Carbon::setWeekendDays([Carbon::SUNDAY]));
-                    } else {
-                        $diffDays = $start_date->diffInWeekdays($end_date, Carbon::setWeekendDays([Carbon::SATURDAY,Carbon::SUNDAY]));
+                    $period = CarbonPeriod::create($start_date, $end_date);
+
+                    $days = 0;
+
+                    foreach ($period as $date) {
+
+                        if ($employee->working_days_id == 1) {
+                            // Only Sunday off
+                            if (!$date->isSunday()) {
+                                $days++;
+                            }
+                        } else {
+                            // Saturday & Sunday off
+                            if (!$date->isSaturday() && !$date->isSunday()) {
+                                $days++;
+                            }
+                        }
                     }
-                    return $diffDays + 1;
+                    return $days;
 
                 } else {
                     return 1;
@@ -4659,7 +4689,7 @@ class AdminHumanResourseController extends Controller
 
                 }
                 elseif($employee->status_id == 6){
-                    if ((in_array(session('role_id'), [63, 69, 70,104])) && in_array($employee->leave_type_id, [5, 6])) {
+                    if ((in_array(session('role_id'), [63, 69, 70,104])) && in_array($employee->leave_type_id, [1,5, 6])) {
 
                         $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
                         $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
@@ -4893,7 +4923,7 @@ class AdminHumanResourseController extends Controller
                     if ($employee_leaves->employee_type_id == 1) {
                         $user = Employee::find($employee_leaves->employee_id);
                     } else {
-                        $user = Rider::find($employee_leaves->employee_id);
+                        $user = Rider::where('employee_id', $employee_leaves->employee_id)->first();
                     }
                     if (!$user) {
                         return redirect()->back()->with('error', 'Invalid Employee ID');
@@ -4992,72 +5022,151 @@ class AdminHumanResourseController extends Controller
 //        dd($leave_id);
     }
 
+    // public function leave_reject(Request $request)
+    // {
+    //     $employee_id = EmployeeLeave::find($request->leave_id);
+    //     if (!$employee_id) {
+    //         return redirect()->back()->with('error', 'Invalid Leave ID');
+    //     }
+    //     $admin_id = Auth::id();
+    //     if($employee_id->employee_type_id == 2) {
+    //         $admin = Rider::where('employee_id',$employee_id->employee_id)->first();
+    //     } else {
+    //         $admin = Admin::where('employee_id',$employee_id->employee_id)->first();
+    //     }
+    //     $employee_id = $employee_id->employee_id;
+    //     if ($admin && $admin->trax_id) {
+    //         $admin_profile = Employee::with('department')->where('trax_id', $admin->trax_id);
+
+    //         if ($admin_profile->exists()) {
+    //             $admin_profile = $admin_profile->first();
+    //             $employee_leaves = EmployeeLeave::where('id', $request->leave_id);
+    //             if ($employee_leaves->exists()) {
+    //                 $employee_leaves = $employee_leaves->first();
+    //                 if (in_array($employee_leaves->status, [1])) {
+    //                     if($employee_leaves->leave_type == 1){
+    //                         $working_days = $admin_profile->department->working_days;
+                            
+    //                         $old_start_date = Carbon::createFromFormat('Y-m-d', $employee_leaves->from);
+    //                         $old_end_date = Carbon::createFromFormat('Y-m-d', $employee_leaves->to);
+
+    //                         $period = CarbonPeriod::create($old_start_date, $old_end_date);
+    //                         $old_diffDays = 0;
+
+    //                         foreach ($period as $date) {
+    //                             if ($working_days == 1) {
+    //                                 // Only Sunday off
+    //                                 if (!$date->isSunday()) {
+    //                                     $old_diffDays++;
+    //                                 }
+    //                             } else {
+    //                                 // Saturday & Sunday off
+    //                                 if (!$date->isSaturday() && !$date->isSunday()) {
+    //                                     $old_diffDays++;
+    //                                 }
+    //                             }
+    //                         }
+    //                         $admin_profile->leave_count = $admin_profile->leave_count + $old_diffDays;
+    //                         $admin_profile->fiscal_leave_count = $admin_profile->fiscal_leave_count + $old_diffDays;
+    //                         $admin_profile->save();
+    //                     }
+    //                     $employee_leaves->status = 7;
+    //                     $employee_leaves->rejected_reason = $request->reason;
+    //                     $employee_leaves->updated_by = $admin_id;
+    //                     $employee_leaves->save();
+    //                     NotificationsController::app_notification(11, $employee_leaves->employee_id, $employee_leaves->employee_type_id, $employee_leaves->id);
+    //                     return redirect()->back()->with('success', 'Leave Reject Successfully');
+    //                 }
+    //                 if (in_array($employee_leaves->status, [6])) {
+    //                     $employee_leaves->status = 5;
+    //                     $employee_leaves->rejected_reason = $request->reason;
+    //                     $employee_leaves->updated_by = $admin_id;
+    //                     $employee_leaves->save();
+    //                     NotificationsController::app_notification(11, $employee_leaves->employee_id, $employee_leaves->employee_type_id, $employee_leaves->id);
+    //                     return redirect()->back()->with('success', 'Leave Reject Successfully');
+    //                 }
+   
+    //                 elseif (in_array($employee_leaves->status, [2])) {
+    //                     $employee_leaves->status = 5;
+    //                     $employee_leaves->rejected_reason = $request->reason;
+    //                     $employee_leaves->updated_by = $admin_id;
+    //                     $employee_leaves->save();
+    //                     NotificationsController::app_notification(11, $employee_leaves->employee_id, $employee_leaves->employee_type_id, $employee_leaves->id);
+    //                     return redirect()->back()->with('success', 'Leave Reject Successfully');
+    //                 } else {
+    //                     return redirect()->back()->with('error', 'Leave Already Rejected');
+    //                 }
+    //             }
+    //             return redirect()->back()->with('error', 'Invalid Leave ID');
+
+    //         }
+    //         return redirect()->back()->with('error', 'Employees ID not found');
+    //     }
+    // }
+
     public function leave_reject(Request $request)
     {
-        $employee_id = EmployeeLeave::find($request->leave_id);
-        $employee_id = $employee_id->employee_id;
-        $admin_id = Auth::id();
-        $admin = Admin::where('employee_id',$employee_id)->first();
-       
-        if ($admin && $admin->trax_id) {
-            $admin_profile = Employee::with('department')->where('trax_id', $admin->trax_id);
+        $leave = EmployeeLeave::find($request->leave_id);
 
-            if ($admin_profile->exists()) {
-                $admin_profile = $admin_profile->first();
-                $employee_leaves = EmployeeLeave::where('id', $request->leave_id);
-                if ($employee_leaves->exists()) {
-                    $employee_leaves = $employee_leaves->first();
-                    if (in_array($employee_leaves->status, [1])) {
-                        if($employee_leaves->leave_type == 1){
-                            $working_days = $admin_profile->department->working_days;
-                            
-                            $old_start_date = Carbon::createFromFormat('Y-m-d', $employee_leaves->from);
-                            $old_end_date = Carbon::createFromFormat('Y-m-d', $employee_leaves->to);
-        
-                            if ($working_days == 1) {
-                                $old_diffDays = $old_start_date->diffInWeekdays($old_end_date, Carbon::setWeekendDays([ Carbon::SUNDAY]));
-                            } else {
-                                $old_diffDays = $old_start_date->diffInWeekdays($old_end_date, Carbon::setWeekendDays([Carbon::SATURDAY,Carbon::SUNDAY]));
-                            }
-                            $old_diffDays++;
-                            $admin_profile->leave_count = $admin_profile->leave_count + $old_diffDays;
-                            $admin_profile->fiscal_leave_count = $admin_profile->fiscal_leave_count + $old_diffDays;
-                            $admin_profile->save();
-                        }
-                        $employee_leaves->status = 7;
-                        $employee_leaves->rejected_reason = $request->reason;
-                        $employee_leaves->updated_by = $admin_id;
-                        $employee_leaves->save();
-                        NotificationsController::app_notification(11, $employee_leaves->employee_id, $employee_leaves->employee_type_id, $employee_leaves->id);
-                        return redirect()->back()->with('success', 'Leave Reject Successfully');
-                    }
-                    if (in_array($employee_leaves->status, [6])) {
-                        $employee_leaves->status = 5;
-                        $employee_leaves->rejected_reason = $request->reason;
-                        $employee_leaves->updated_by = $admin_id;
-                        $employee_leaves->save();
-                        NotificationsController::app_notification(11, $employee_leaves->employee_id, $employee_leaves->employee_type_id, $employee_leaves->id);
-                        return redirect()->back()->with('success', 'Leave Reject Successfully');
-                    }
-    //                else {
-                    //                    return redirect()->back()->with('error', 'Leave Already Rejected');
-                    //                }
-                    elseif (in_array($employee_leaves->status, [2])) {
-                        $employee_leaves->status = 5;
-                        $employee_leaves->rejected_reason = $request->reason;
-                        $employee_leaves->updated_by = $admin_id;
-                        $employee_leaves->save();
-                        NotificationsController::app_notification(11, $employee_leaves->employee_id, $employee_leaves->employee_type_id, $employee_leaves->id);
-                        return redirect()->back()->with('success', 'Leave Reject Successfully');
+        if (!$leave) {
+            return redirect()->back()->with('error', 'Invalid Leave ID');
+        }
+        $admin_id = Auth::id();
+        if ($leave->employee_type_id == 2) {
+            $admin = Rider::where('employee_id', $leave->employee_id)->first();
+        } else {
+            $admin = Admin::where('employee_id', $leave->employee_id)->first();
+        }
+        if (!$admin || !$admin->trax_id) {
+            return redirect()->back()->with('error', 'Employee not found');
+        }
+        $admin_profile = Employee::with('department')
+            ->where('trax_id', $admin->trax_id)
+            ->first();
+
+        if (!$admin_profile) {
+            return redirect()->back()->with('error', 'Employee not found');
+        }
+        if ($leave->status == 1) {
+
+            if ($leave->leave_type == 1) {
+                $working_days = $admin_profile->department->working_days;
+                $start = Carbon::parse($leave->from);
+                $end   = Carbon::parse($leave->to);
+                $period = CarbonPeriod::create($start, $end);
+                $days = 0;
+                foreach ($period as $date) {
+                    if ($working_days == 1) {
+                        if (!$date->isSunday()) $days++;
                     } else {
-                        return redirect()->back()->with('error', 'Leave Already Rejected');
+                        if (!$date->isSaturday() && !$date->isSunday()) $days++;
                     }
                 }
-                return redirect()->back()->with('error', 'Invalid Leave ID');
-
+                $admin_profile->leave_count += $days;
+                $admin_profile->fiscal_leave_count += $days;
+                $admin_profile->save();
             }
-            return redirect()->back()->with('error', 'Employees ID not found');
+            $leave->status = 7;
         }
+        elseif ($leave->status == 6 || $leave->status == 2) {
+            $leave->status = 5;
+        }
+        else {
+            return redirect()->back()->with('error', 'Leave Already Rejected');
+        }
+
+        $leave->rejected_reason = $request->reason;
+        $leave->updated_by = $admin_id;
+        $leave->save();
+
+        NotificationsController::app_notification(
+            11,
+            $leave->employee_id,
+            $leave->employee_type_id,
+            $leave->id
+        );
+
+        return redirect()->back()->with('success', 'Leave Reject Successfully');
     }
 
     public function leave_edit(Request $request)

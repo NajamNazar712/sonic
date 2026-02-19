@@ -16151,23 +16151,27 @@ class RiderAPIController extends Controller
             ]);
         }
 
-        $working_days = $employee->department->working_days; // 1 = Sunday off, else Sat+Sun off
+        $working_days = $employee->department->working_days; 
         $period = CarbonPeriod::create($fromDate, $toDate);
-        $actualWorkingDays = 0;
 
         foreach ($period as $date) {
             if ($working_days == 1) {
-                if (!$date->isSunday()) $actualWorkingDays++;
+                // Only Sunday is weekend
+                if ($date->isSunday()) {
+                    return response()->json([
+                        'status' => 1,
+                        'message' => 'You cannot include Sunday in leave range.'
+                    ]);
+                }
             } else {
-                if (!$date->isWeekend()) $actualWorkingDays++;
+                // Saturday & Sunday weekend
+                if ($date->isWeekend()) {
+                    return response()->json([
+                        'status' => 1,
+                        'message' => 'You cannot include weekend days in leave range.'
+                    ]);
+                }
             }
-        }
-
-        if ($actualWorkingDays <= 0) {
-            return response()->json([
-                'status' => 1,
-                'message' => 'You cannot submit leave for weekends only.'
-            ]);
         }
 
 
@@ -16184,7 +16188,7 @@ class RiderAPIController extends Controller
 
             $leaveRequest->from = $fromDate;
             $leaveRequest->to = $toDate;
-            $leaveRequest->riderlied_reason = $request->reason;
+            $leaveRequest->applied_reason = $request->reason;
             $leaveRequest->leave_type = $request->leave_type;
             $leaveRequest->save();
 
