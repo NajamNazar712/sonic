@@ -4525,7 +4525,7 @@ class AdminHumanResourseController extends Controller
             });
 
 
-        if (session('role_id') != 1 && !in_array(session('department_id') != 10)) {
+        if (session('role_id') != 1 && session('department_id') != 10) {
             $employee_leaves->where(function ($query) use ($emp_id) {
                 if ($emp_id) {
                     $query->where('e.trax_id', Auth::user()->trax_id)
@@ -4690,7 +4690,7 @@ class AdminHumanResourseController extends Controller
 
                 }
                 elseif($employee->status_id == 6){
-                    if ((in_array(session('department_id') == 10)) && in_array($employee->leave_type_id, [1,5, 6])) {
+                    if ((session('department_id') == 10) && in_array($employee->leave_type_id, [1,5, 6])) {
 
                         $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
                         $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
