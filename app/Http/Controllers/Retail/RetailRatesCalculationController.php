@@ -59,7 +59,7 @@ class RetailRatesCalculationController extends Controller
                             $round_additional_weight = $round_additional_weight + $weight_charges->kg_range;
                         }
                     }
-                    if ($shipping_mode_id == 1) {
+                    if ($shipping_mode_id == 1 || $shipping_mode_id == 13 || $shipping_mode_id == 14) {
                         $zone_class = ZoneClassCity::where('city_id', $destination_id)->where('zone_id', $destination_city->zone_id)->latest()->first();
                         if ($zone_class->class == 0) {
                             if ($remaining_weight > 0) {
@@ -94,7 +94,6 @@ class RetailRatesCalculationController extends Controller
                         $consignee_city = City::find($destination_id);
                         $consignee_zone = Zone::find($consignee_city->zone_id);
                         $pickup_zone = Zone::find($pickup_city->zone_id);
-
                         if ($pickup_city->id == $consignee_city->id) {
                             if ($remaining_weight > 0) {
                                 $additional_charges = intval($round_additional_weight * $weight_charges->within_city);
