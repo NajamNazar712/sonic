@@ -4912,7 +4912,7 @@ class AdminHumanResourseController extends Controller
                 if (in_array($employee_leaves->status, [1, 2, 3, 6, 7])) {
                     if ($request->line_manager == 1) {
                         $employee_leaves->status = 6;
-                        if(in_array($employee_leaves->leave_type, [5, 6])){
+                        if(in_array($employee_leaves->leave_type, [1,5, 6])){
                             $employee_leaves->updated_by = $admin_id;
                             $employee_leaves->save();
                             return redirect()->back()->with('success', 'Leave Approved Successfully');
