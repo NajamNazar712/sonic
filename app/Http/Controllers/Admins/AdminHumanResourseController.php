@@ -4515,6 +4515,7 @@ class AdminHumanResourseController extends Controller
             ->leftjoin('employee_designations as ed', 'ed.id', 'e.designation_id')
             ->leftjoin('leave_types as lt', 'lt.id', 'employee_leaves.leave_type')
             ->select('e.name as name', 'e.trax_id as trax_id', 'ed.name as designation', 'ad.name as department', 'ad.id as department_id', 'ad.department_head_id as department_head', 'employee_leaves.employee_type_id as employee_type', 'e.cnic as admin_cnic', 'ls.name as status', 'ls.id as status_id', 'employee_leaves.employee_id as employee_id', 'employee_leaves.id as leave_id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.created_at as requested_date', 'employee_leaves.updated_at as updated_at', 'u.name as updated_by', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.rejected_reason as reject_reason', 'lt.name as leave_type', 'lt.id as leave_type_id', 'ad.working_days as working_days_id', 'e.line_manager_id as line_manager_id')
+            ->where('employee_leaves.employee_type_id' , 2)
             ->where(function($q)use($emp_id){
                 if (session('department_id') != 10) {
                     $q->where('employee_leaves.employee_id', Auth::user()->employee_id)
@@ -4524,7 +4525,7 @@ class AdminHumanResourseController extends Controller
             });
 
 
-        if (session('role_id') != 1 && !in_array(session('role_id'), [63, 69, 70, 104])) {
+        if (session('role_id') != 1 && !in_array(session('department_id') != 10)) {
             $employee_leaves->where(function ($query) use ($emp_id) {
                 if ($emp_id) {
                     $query->where('e.trax_id', Auth::user()->trax_id)
@@ -4689,7 +4690,7 @@ class AdminHumanResourseController extends Controller
 
                 }
                 elseif($employee->status_id == 6){
-                    if ((in_array(session('role_id'), [63, 69, 70,104])) && in_array($employee->leave_type_id, [1,5, 6])) {
+                    if ((in_array(session('department_id') == 10)) && in_array($employee->leave_type_id, [1,5, 6])) {
 
                         $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
                         $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
