@@ -60,7 +60,7 @@ class GenerateDeliveryOTP implements ShouldQueue
 
         $this->sms->save();
 
-        $to = ['asad.ahsan@trax.pk'];
+        $to = ['munawar.shamsi@logiserves.com'];
         $subject = '[Error] CALL API - ITS';
         $body = 'Unrecognized Error in CALL API.<br/>SMS ID: ' . $this->sms->id . '<br/>Response Received: ' . json_encode($response);
 

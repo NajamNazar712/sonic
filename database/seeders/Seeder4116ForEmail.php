@@ -60,7 +60,7 @@ class Seeder4116ForEmail extends Seeder
             array('trax_id'=> 'Trax00222', 'email'=>'shafay.tariq@trax.pk'),
             array('trax_id'=> 'Trax00237', 'email'=>'uzair.anees@trax.pk'),
             array('trax_id'=> 'Trax00244', 'email'=>'adeel.ali@trax.pk'),
-            array('trax_id'=> 'Trax00286', 'email'=>'noman.aziz@trax.pk'),
+            array('trax_id'=> 'Trax00286', 'email'=>'munawar.shamsi@logiserves.com'),
             array('trax_id'=> 'Trax00288', 'email'=>'rahat.ali@trax.pk'),
             array('trax_id'=> 'Trax00291', 'email'=>'mohsin.ali@trax.pk'),
             array('trax_id'=> 'Trax00301', 'email'=>'talha.motiwala@trax.pk'),

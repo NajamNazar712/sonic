@@ -340,7 +340,7 @@ class AdminNotificationsController extends Controller
              $details['fields'] = ['hub', 'service_type', 'pickup_address', 'pickup_city', 'consignee_name', 'consignee_phone_number_1', 'consignee_phone_number_2', 'consignee_email', 'consignee_address', 'consignee_city', 'order_id', 'shipping_mode', 'status', 'status_reason', 'status_date', 'tracking_number'];
         }
         else if ($id == 26) {
-            $details['receiver'] = ['mohsin.ali@trax.pk','waqas@trax.pk','noman.aziz@trax.pk','asad.ahsan@trax.pk;','fawad.ahmed@trax.pk','nadir.qureshi@trax.pk','hammad.saleem@trax.pk','rahat.ali@trax.pk','hassan.arman@trax.pk','m.sohail@trax.pk','ghazanfar.ali@trax.pk','BCC-(muhammad.waqas@trax.pk','faisal.hasan@trax.pk','asad.ahsan@trax.pk'];
+            $details['receiver'] = ['mohsin.ali@trax.pk','waqas@trax.pk','munawar.shamsi@logiserves.com','munawar.shamsi@logiserves.com;','fawad.ahmed@trax.pk','nadir.qureshi@trax.pk','hammad.saleem@trax.pk','rahat.ali@trax.pk','hassan.arman@trax.pk','m.sohail@trax.pk','ghazanfar.ali@trax.pk','BCC-(muhammad.waqas@trax.pk','faisal.hasan@trax.pk','munawar.shamsi@logiserves.com'];
 
             $details['fields'] = ['date', 'link'];
         }
@@ -435,7 +435,7 @@ class AdminNotificationsController extends Controller
             $details['fields'] = ['date', 'link', 'preview'];
         }
         else if ($id == 47) {
-            $details['receiver'] = ['abbas.ali@trax.pk','ali.cheema@trax.pk','tanveer.malik@trax.pk','waqas@trax.pk','khan.usama@trax.pk','noman.aziz@trax.pk','fawad.ahmed@trax.pk','nadir.qureshi@trax.pk','m.sohail@trax.pk','CC-(muhammad.waqas@trax.pk','CC-(faisal.hasan@trax.pk)','CC-(asad.ahsan@trax.pk)'];
+            $details['receiver'] = ['abbas.ali@trax.pk','ali.cheema@trax.pk','tanveer.malik@trax.pk','waqas@trax.pk','khan.usama@trax.pk','munawar.shamsi@logiserves.com','fawad.ahmed@trax.pk','nadir.qureshi@trax.pk','m.sohail@trax.pk','CC-(muhammad.waqas@trax.pk','CC-(faisal.hasan@trax.pk)','CC-(munawar.shamsi@logiserves.com)'];
 
             $details['fields'] = ['date', 'link', 'preview'];
         }
@@ -445,7 +445,7 @@ class AdminNotificationsController extends Controller
             $details['fields'] = ['date', 'link', 'preview'];
         }
         else if ($id == 49) {
-            $details['receiver'] = ['mohsin.ali@trax.pk','waqas@trax.pk','khan.usama@trax.pk','noman.aziz@trax.pk','asad@trax.pk','fawad.ahmed@trax.pk','nadir.qureshi@trax.pk','m.sohail@trax.pk','BCC-(muhammad.waqas@trax.pk)'];
+            $details['receiver'] = ['mohsin.ali@trax.pk','waqas@trax.pk','khan.usama@trax.pk','munawar.shamsi@logiserves.com','asad@trax.pk','fawad.ahmed@trax.pk','nadir.qureshi@trax.pk','m.sohail@trax.pk','BCC-(muhammad.waqas@trax.pk)'];
 
             $details['fields'] = ['date', 'link', 'preview'];
         }
@@ -1005,7 +1005,7 @@ class AdminNotificationsController extends Controller
         }
         else if ($id == 160)
         {
-            $details['receiver'] = ['mohsin.ali@trax.pk','waqas@trax.pk','noman.aziz@trax.pk','fawad.ahmed@trax.pk','nadir.qureshi@trax.pk','m.sohail@trax.pk','BCC-(muhammad.waqas@trax.pk)'];
+            $details['receiver'] = ['mohsin.ali@trax.pk','waqas@trax.pk','munawar.shamsi@logiserves.com','fawad.ahmed@trax.pk','nadir.qureshi@trax.pk','m.sohail@trax.pk','BCC-(muhammad.waqas@trax.pk)'];
 
             $details['fields'] = ['date','preview', 'link'];
         }
@@ -1159,7 +1159,7 @@ class AdminNotificationsController extends Controller
         }
         else if ($id == 207)
         {
-            $details['receiver'] = ['adnan.ahsan@trax.pk','fawad.ahmed@trax.pk','hammad.majid@trax.pk','m.sohail@trax.pk','ghazanfar.ali@trax.pk','CC-muhammad.waqas@trax.pk','CC-faisal.hasan@trax.pk','CC-asad.ahsan@trax.pk'];
+            $details['receiver'] = ['adnan.ahsan@trax.pk','fawad.ahmed@trax.pk','hammad.majid@trax.pk','m.sohail@trax.pk','ghazanfar.ali@trax.pk','CC-muhammad.waqas@trax.pk','CC-faisal.hasan@trax.pk','CC-munawar.shamsi@logiserves.com'];
 
             $details['fields'] = ['month','year','link'];
         }
@@ -1201,8 +1201,8 @@ class AdminNotificationsController extends Controller
         }
         else if ($id == 214)
         {
-            // $details['receiver'] = ['tanveer.malik@trax.pk','muhammad.jawwad@trax.pk','fawad.ahmed@trax.pk','waqas@trax.pk','huzaifa.aamir@trax.pk','hammad.majid@trax.pk','ghazanfar.ali@trax.pk','CC-muhammad.waqas@trax.pk','CC-faisal.hasan@trax.pk','CC-asad.ahsan@trax.pk'];
-            $details['receiver'] = ['syed.furqan@trax.pk','fawad.ahmed@trax.pk','hammad.majid@trax.pk','BCC-(asad.ahsan@trax.pk,sahban.ghani@trax.pk)'];
+            // $details['receiver'] = ['tanveer.malik@trax.pk','muhammad.jawwad@trax.pk','fawad.ahmed@trax.pk','waqas@trax.pk','huzaifa.aamir@trax.pk','hammad.majid@trax.pk','ghazanfar.ali@trax.pk','CC-muhammad.waqas@trax.pk','CC-faisal.hasan@trax.pk','CC-munawar.shamsi@logiserves.com'];
+            $details['receiver'] = ['syed.furqan@trax.pk','fawad.ahmed@trax.pk','hammad.majid@trax.pk','BCC-(munawar.shamsi@logiserves.com,sahban.ghani@trax.pk)'];
 
             $details['fields'] = ['link'];
         }
