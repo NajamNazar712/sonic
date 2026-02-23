@@ -575,7 +575,7 @@
                                     @endif
                                     @if (session('role_id') == 1 || in_array(1069, session('permissions')))
                                         <li>
-                                            <a class="menu-item"  href="{{ route('admin.cargo.supply_chain.local_fleet.vehicle.consolidated_trips.index') }}">DAILY ACTIVITY REPORT</a>
+                                            <a class="menu-item"  href="{{ route('admin.cargo.supply_chain.local_fleet.vehicle.consolidated_trips.index') }}">Daily Activity Report</a>
                                         </li>
                                     @endif
                                 </ul>

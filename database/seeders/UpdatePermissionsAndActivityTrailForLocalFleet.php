@@ -32,9 +32,5 @@ class UpdatePermissionsAndActivityTrailForLocalFleet extends Seeder
             array('id' => 842, 'screen_name' => 'Local Fleet View Daily Activity Report', 'action'=> 'View'),
         ));
 
-//        $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
-//        DB::table('admins_screen_list')->insert(array(
-//            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Logistic > Setup > Master Product', 'url' => 'admin.logistic.master_product.index', 'permission_id' => 952),
-//        ));
     }
 }
