@@ -9796,6 +9796,10 @@ class AdminFinanceController extends Controller
                               <td>' . number_format($total_wht, 2) . '</td>
                             </tr>
                             <tr>
+                              <td class="color secondary"><strong>Total SST Amount (PKR)</strong></td>
+                              <td>' . number_format($total_cod_sst, 2) . '</td>
+                            </tr>
+                            <tr>
                               <td class="color secondary"><strong>Total Payable (PKR)</strong></td>
                               <td><strong>' . number_format(ROUND(($total_payable - $done_payment->ibft_charges), 0, PHP_ROUND_HALF_DOWN)) . '</strong></td>
                             </tr>
