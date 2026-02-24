@@ -179,6 +179,23 @@ class Permission
             'cargo.supply_chain.shipment_on_hold.history.list' => 405,
             'cargo.supply_chain.shipment_on_hold.history.allow_dispatch_delivery' => 405,
 
+            'cargo.supply_chain.local_fleet.vehicle.index' => 1062,
+            'cargo.supply_chain.local_fleet.vehicle.list' => 1062,
+            'cargo.supply_chain.local_fleet.vehicle.store' => 1063,
+            'cargo.supply_chain.local_fleet.vehicle.document.upload' => 1064,
+            'cargo.supply_chain.local_fleet.vehicle.document.list' => 1065,
+            'cargo.supply_chain.local_fleet.vehicle.edit' => 1066,
+            'cargo.supply_chain.local_fleet.vehicle.update' => 1066,
+            'cargo.supply_chain.local_fleet.vehicle.qr_code_print' => 1067,
+
+            'cargo.supply_chain.local_fleet.vehicle.trips.index' =>1068,
+            'cargo.supply_chain.local_fleet.vehicle.trips.list' =>1068,
+            'cargo.supply_chain.local_fleet.vehicle.trips.cost_detail' =>1068,
+
+            'cargo.supply_chain.local_fleet.vehicle.consolidated_trips.index' => 1069,
+            'cargo.supply_chain.local_fleet.vehicle.consolidated_trips.list' => 1069,
+            'cargo.supply_chain.local_fleet.vehicle.consolidated_trips.cost_details' => 1069,
+
             'master_cargo.bag.pending.index' => 25,
             'master_cargo.bag.pending.list' => 25,
             'master_cargo.bag.create.index' => 26,
