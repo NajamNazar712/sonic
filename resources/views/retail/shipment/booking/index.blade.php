@@ -790,8 +790,30 @@
                         $('#retail_discount_code_div').addClass('d-none');
                     };
 
+                 
                     $('#admin_discount').prop('disabled', false);
                     $('#discount_code').val('');
+
+                    var el = document.querySelector('#charged_sms');
+
+                    // 1) turn it OFF at checkbox level
+                    el.checked = false;
+                    $('#charged_sms1').val(0);
+
+                    // 2) refresh the Switchery UI
+                    // Switchery listens to real "change" event
+                    el.dispatchEvent(new Event('change', { bubbles: true }));
+
+                    // 3) now disable
+                    el.disabled = true;
+
+                    if (el.switchery && el.switchery.disable) {
+                        el.switchery.disable();
+                    } else {
+                        $(el).next('.switchery').css({ 'pointer-events': 'none', 'opacity': 0.5 });
+                    }
+
+
 
                 }
                 else{
@@ -800,6 +822,17 @@
                     {
                         $('#retail_discount_code_div').removeClass('d-none');
                         $('#discount_code').val('');
+                        var el = document.querySelector('#charged_sms');
+
+                        $('#charged_sms').prop('checked', true).trigger('change');
+                        el.disabled = false;
+
+                        // disable switchery UI
+                        if (el.switchery && el.switchery.enable) {
+                            el.switchery.enable();
+                        } else {
+                            $(el).next('.switchery').css({ 'pointer-events': '', 'opacity': '' });
+                        }
                     }
 
                     $('#shipping_mode').empty();
@@ -1964,7 +1997,7 @@
                     '<div class="row wad_row" id="wad_row' + wadCount + '">' +
                         '<div class="col-8">' +
                             '<fieldset class="form-group">' +
-                                '<input type="text" class="form-control numeric validated" ' +
+                                '<input type="text" class="form-control numeric validated" ' +  'maxlength="17" ' +
                                     'data-rule-required="true" data-msg-required="This field is required" ' +
                                     'name="flyer[' + wadCount + ']" value="" />' +
                             '</fieldset>' +
