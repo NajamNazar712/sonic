@@ -20145,7 +20145,7 @@ class AdminFinanceController extends Controller
 
                     $wht = 0;
                     $cod_sst = 0;
-                    if(in_array($shipment->shipper_status_id, [14, 31, 36, 37]) && $shipment->amount > 0) {
+                    if(in_array($shipment->shipper_status_id, [14, 30, 31, 36, 37]) && $shipment->amount > 0) {
                         
                         $wht = self::wht($shipment->user_id, $shipment->amount, $shipment->packaging_material_request, $shipment->id);
                         $cod_sst = self::cod_sst($shipment->user_id, $shipment->amount, $shipment->packaging_material_request, $shipment->id);
@@ -21793,7 +21793,7 @@ class AdminFinanceController extends Controller
                     // }
                     $wht = 0;
                     $cod_sst = 0;
-                    if(in_array($shipment->shipper_status_id, [14, 31, 36, 37]) && $shipment->amount > 0) {
+                    if(in_array($shipment->shipper_status_id, [14, 30, 31, 36, 37]) && $shipment->amount > 0) {
 
                         $wht = self::wht($shipment->user_id, $shipment->amount, $shipment->packaging_material_request, $shipment->id);
                         $cod_sst = self::cod_sst($shipment->user_id, $shipment->amount, $shipment->packaging_material_request, $shipment->id);
@@ -22170,7 +22170,7 @@ class AdminFinanceController extends Controller
                     // }
                     $wht = 0;
                     $cod_sst = 0;
-                    if(in_array($shipment->shipper_status_id, [14, 31, 36, 37]) && $shipment->amount > 0) {
+                    if(in_array($shipment->shipper_status_id, [14, 30, 31, 36, 37]) && $shipment->amount > 0) {
 
                         $wht += self::wht($shipment->user_id, $shipment->amount, $shipment->packaging_material_request, $shipment->id);
                         $cod_sst = self::cod_sst($shipment->user_id, $shipment->amount, $shipment->packaging_material_request, $shipment->id);
