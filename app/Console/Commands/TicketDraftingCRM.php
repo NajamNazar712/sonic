@@ -44,7 +44,7 @@ class TicketDraftingCRM extends Command
                 ->first();
             if(!in_array($days, $rangeArray)  && in_array($list->shipment->shipper_status_id, $ticketDraftShipmentStatus)){
                 if($crmRequestCheck?->status_id != 1){
-                    CRMController::add(1, 2, 5, 1, 5100, 4, $list->shipment->id, $list->shipment->user_id, 5100, NULL);
+                    CRMController::add(1, 2, 5, 1, 5322, 4, $list->shipment->id, $list->shipment->user_id, 5322, NULL);
                 }
 
                 $list->status = 1;
