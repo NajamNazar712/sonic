@@ -4655,6 +4655,7 @@ class ReturnController extends Controller
         $return_note = ReturnNote::where('id', $request->id);
         if ($return_note->exists()) {
             $total_shipments = 0;
+            $total_weight=0;
             $total_users = 0;
             $try_and_buy_total_users = 0;
             $replacement_total_users = 0;
@@ -4882,6 +4883,7 @@ class ReturnController extends Controller
                 foreach ($filtered_shipments as $shipment) {
                     if ($shipment->user_id == $filtered_shipments_user->user_id) {
                         $total_shipments++;
+                        $total_weight+= (float) $shipment->actual_weight;
                         $class = null;
                         if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
                             $class = 'complaint';
@@ -4989,6 +4991,10 @@ class ReturnController extends Controller
                           <tr>
                             <td class="color secondary"><strong>Total Shipments</strong></td>
                             <td>' . $total_shipments . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Total Weight (Kg)</strong></td>
+                            <td>' . $total_weight . '</td>
                           </tr>
                         
                         </tbody>

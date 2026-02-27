@@ -2062,6 +2062,9 @@
                                 // shipment += '<td>HH</td>';
                                 shipment += '<td>' + ((details.order_information.parcel_value != 0) ?
                                     details.order_information.parcel_value : '-') + '</td>';
+                                shipment += '<td><strong>No. of Flyers</strong></td>';
+                                shipment += '<td>' + details.order_information.flyer_count +
+                                    '</td>';
                                 shipment += '</tr>';
                                 shipment += '<tr>';
                                 shipment += height;

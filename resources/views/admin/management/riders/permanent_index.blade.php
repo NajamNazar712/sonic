@@ -100,6 +100,38 @@
     </div>
 @endif
 
+    <div class="modal fade text-left" id="rider_log" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="rider_log" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document" style="overflow-y: scroll; max-height:85%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Log<span></span></h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body rider_log_body" id="rider_log_body">
+                    <table class="table table-bordered datatable" id="rider_log_header">
+                        <thead>
+                        <tr role="row" class="bg-primary white">
+                            <th class="border-primary border-darken-1">S. No.</th>
+                            <th class="border-primary border-darken-1">Changes</th>
+                            <th class="border-primary border-darken-1">Via Screen</th>
+                            <th class="border-primary border-darken-1">Updated By</th>
+                            <th class="border-primary border-darken-1">Updated At</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('css')
@@ -643,6 +675,43 @@
                 });
 
             });
+
+            $('body').on('click', '.rider_log', function (e) {
+                var id = $(this).data('target-id');
+                $.ajax({
+                    url:'{!! route('admin.management.riders.fetch_logs') !!}',
+                    type:'POST',
+                    data: {
+                        'id': id,
+                        '_token':'{!! csrf_token() !!}'
+                    }
+                }).done(function (data) {
+                    if(data.status == 1){
+                        var table_data = "";
+                        $.each(data.logs, function (index, value) {
+                            table_data += `
+                                <tr>
+                                    <td>${index+1}</td>
+                                    <td>${value.changes_text}</td>
+                                    <td>${value.screen}</td>
+                                    <td>${value.admin_name}</td>
+                                    <td>${value.created_at}</td>
+
+                                </tr>
+                            `
+                        });
+                        $('#rider_log_header tbody').html(table_data);
+                        $('#rider_log').modal('show');
+                    }
+                    else {
+                        toastr.error(data.error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                });
+            });
+            
             @if (session('role_id') == 1 || in_array(383, session('permissions')))
             var char_per_sms = 250;
             $('#sms_body').on('keypress copy paste',function (e) {

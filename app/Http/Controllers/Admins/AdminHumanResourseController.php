@@ -422,7 +422,8 @@ class AdminHumanResourseController extends Controller
         $employee->last_working_date = null;
         $employee->save();
 
-        $this->employee_log_save($employee->id,$employee->employee_type_id,$employee->staff_category_id,4,null,$employee->rider_type_id,null,auth()->id());
+        //moved to model
+        //$this->employee_log_save($employee->id,$employee->employee_type_id,$employee->staff_category_id,4,null,$employee->rider_type_id,null,auth()->id());
 
 
         return response()->json(['status' => 0, 'success' => 'Employee Rejoined Successfully!']);
@@ -846,7 +847,8 @@ class AdminHumanResourseController extends Controller
                         $employee->rider_type_id = 2;
                         $employee->update();
 
-                        $this->employee_log_save($employee_id,2,null,null,null,2,null,auth()->id());
+                        //moved to model
+                        //$this->employee_log_save($employee_id,2,null,null,null,2,null,auth()->id());
 
                         return response()->json(['status' => 0, 'success' => 'Rider Marked as Incentive Rider!']);
                     }
@@ -932,7 +934,8 @@ class AdminHumanResourseController extends Controller
         $employee->status_id = 2;
         $employee->update();
 
-        $this->employee_log_save($employee_id,2,$employee->staff_category_id,2,1,$employee->rider_type_id,null,auth()->id());
+        //moved to model
+        //$this->employee_log_save($employee_id,2,$employee->staff_category_id,2,1,$employee->rider_type_id,null,auth()->id());
 
         return response()->json(['status' => 0, 'success' => 'Rider is blacklisted!']);
 
@@ -996,7 +999,8 @@ class AdminHumanResourseController extends Controller
         $employee->status_id = 2;
         $employee->save();
 
-        $this->employee_log_save($employee->id,2,null,2,null,$employee->rider_type_id,null,auth()->id());
+        //moved to model
+        //$this->employee_log_save($employee->id,2,null,2,null,$employee->rider_type_id,null,auth()->id());
 
         return response()->json(['status' => 0, 'success' => 'Rider is Inactive!']);
     }
@@ -1062,7 +1066,8 @@ class AdminHumanResourseController extends Controller
         $employee->status_id = 2;
         $employee->save();
 
-        $this->employee_log_save($employee_id,1,$employee->staff_category_id,2,null,null,null,auth()->id());
+        //moved to model
+        //$this->employee_log_save($employee_id,1,$employee->staff_category_id,2,null,null,null,auth()->id());
 
         return response()->json(['status' => 0, 'success' => 'Staff is Inactive!']);
     }
@@ -5440,7 +5445,7 @@ class AdminHumanResourseController extends Controller
             ->leftjoin('rider_types as rt','rt.id','=','employee_logs.rider_type_id')
             ->leftjoin('staff_categories as sc','employee_logs.staff_category_id','=','sc.id')
             ->leftjoin('admins as a','employee_logs.updated_by','=','a.id')
-            ->select('employee_logs.employee_type_id as employee_type_id','et.name as employee_type','employee_logs.staff_category_id as staff_category_id','es.name as employee_status','sc.name as staff_cat','rt.name as rider_type','employee_logs.blacklist as blacklist','employee_logs.update_pin as pin_update','employee_logs.created_at as updated_at','a.name as updated_by','employee_logs.status_id as rejoin_employee')
+            ->select('employee_logs.employee_type_id as employee_type_id','et.name as employee_type','employee_logs.staff_category_id as staff_category_id','es.name as employee_status','sc.name as staff_cat','rt.name as rider_type','employee_logs.blacklist as blacklist','employee_logs.update_pin as pin_update','employee_logs.created_at as updated_at','a.name as updated_by','employee_logs.status_id as rejoin_employee','employee_logs.log_data', 'employee_logs.screen')
             ->where('employee_logs.employee_id', $request->employee_id)
             ->orderBy('employee_logs.created_at', 'DESC');
 
@@ -5495,6 +5500,27 @@ class AdminHumanResourseController extends Controller
                 $details[$key]['updated_at'] = date('Y-m-d H:i:s',strtotime($employee_log->updated_at));
 
                 $details[$key]['updated_by'] = $employee_log->updated_by;
+
+                if($employee_log->screen) {
+                    $details[$key]['screen'] = $employee_log->screen;
+                } else {
+                    $details[$key]['screen'] = '-';
+                }
+
+                $changes = is_array($employee_log->log_data) ? $employee_log->log_data : json_decode($employee_log->log_data, true);
+
+                $parts = [];
+                if (is_array($changes)) {
+                    foreach ($changes as $field => $values) {
+                        $old = $values['old'] ?? '-';
+                        $new = $values['new'] ?? '-';
+                        $parts[] = $field . ': ' . $old . ' → ' . $new;
+                    }
+                }
+
+                $log = !empty($parts) ? implode('<br>', $parts) : '-';
+                $details[$key]['log_data'] = $log;
+                //return $log;
             }
             return response()->json(['status' => 1, 'logs' => $details]);
         }

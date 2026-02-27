@@ -67,6 +67,7 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Models\ShipperSegmentLogs;
 use App\Http\Models\Shipper\User;
 use App\Models\ParentProduct;
+use App\Models\RetailShipmentFlyerNumber;
 
 class RetailShipmentBookController extends Controller
 {
@@ -225,7 +226,7 @@ class RetailShipmentBookController extends Controller
         $international_cities = City::where('business_category_id', 2)->where('permanent_disabled',0)->where('status', 1)->get();
         $domestic_overland_cities = CityDelivery::join('cities as c', 'c.id', '=', 'city_deliveries.city_id')->where('city_deliveries.booking_type_id', 1)->where('city_deliveries.shipping_mode_id', 2)->where('c.business_category_id', 1)->where('c.status', 1)->select('c.id', 'c.name')->get();
         $payment_modes = RetailPaymentMode::where('id', '=', 1)->get();
-        $charges_modes = ChargesMode::whereIn('id', [1, 2])->get();
+        $charges_modes = ChargesMode::whereIn('id', [1])->get();
         $trax_boxes = RetailTraxBox::all();
         $banks = BanksList::all();
         $check_nsa = NonServiceArea::pluck('name')->toArray();
@@ -328,7 +329,7 @@ class RetailShipmentBookController extends Controller
             $height = null;
         }
 
-        $rates = RetailRatesCalculationController::rates($shipping_mode_check, $business_category_id, $pickup_city_id, $consignee_city_id, $request->trax_box, $discount, $estimated_weight,$insurance_amount,$packaging, $request->product, $request->cod);
+        $rates = RetailRatesCalculationController::rates($shipping_mode_check, $business_category_id, $pickup_city_id, $consignee_city_id, $request->trax_box, $discount, $estimated_weight,$insurance_amount,$packaging, $request->product, $request->cod, count($request->get('flyer', [])), $request->charged_sms1);
 
 
         if($request->has('admin_discount'))
@@ -565,6 +566,9 @@ class RetailShipmentBookController extends Controller
         $retail_shipment->category_id = $cat_id;
         $retail_shipment->wht = $rates['wht'];
         $retail_shipment->cod_sst = $rates['cod_sst'];
+        $retail_shipment->flyer_charges = $rates['flyer_without_gst'];
+        $retail_shipment->charged_sms = $request->charged_sms1;
+        $retail_shipment->sms_charges = $rates['sms_charges'];
         if($request->has('admin_discount'))
         {
             $retail_shipment->admin_discount = $request->admin_discount;
@@ -598,6 +602,15 @@ class RetailShipmentBookController extends Controller
         $retail_shipment->quantity = $quantityForShipmentItem;
 
         $retail_shipment->save();
+
+        foreach($request->get('flyer', []) as $flyer) {
+
+            $data = New RetailShipmentFlyerNumber();
+            $data->retail_shipment_id = $retail_shipment->id;
+            $data->shipment_id = $shipment_id;
+            $data->flyer_number = $flyer;
+            $data->save();
+        }
 
         // retail user history
         $shipping_mode_id = $retail_shipment->shipping_mode;
@@ -717,7 +730,6 @@ class RetailShipmentBookController extends Controller
 
 
         $insurance =  Auth::user()->store->insurance;
-
         if($request->weight != null){
 
             $weight = $request->weight;
@@ -733,7 +745,7 @@ class RetailShipmentBookController extends Controller
             $insurance_amount = round($insurance_amount * $insurance / 100,2);
         }
 
-        $details = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->consignee_city_id, $request->trax_box, $discount, $weight,$insurance_amount,$packaging, $request->product_id, $request->cod);
+        $details = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->consignee_city_id, $request->trax_box, $discount, $weight,$insurance_amount,$packaging, $request->product_id, $request->cod, $request->flyer_count, $request->charged_sms);
 
         if($request->has('admin_discount'))
         {
@@ -1083,24 +1095,28 @@ class RetailShipmentBookController extends Controller
                     $slip .= '
                               <tr>
                                 <td colspan="2" class="color primary border twice-left"><strong>Product</strong></td>
-                                <td colspan="2" class="color primary"><strong>Pieces</strong></td>
+                                <td colspan="1" class="color primary"><strong>Pieces</strong></td>
                                 <td colspan="1" class="color primary"><strong>Weight</strong></td>
                                 <td colspan="1" class="color primary"><strong>Service Charges</strong></td>
                                 <td colspan="1" class="color primary"><strong>Discount(Trax Center)</strong></td>
                                 <td colspan="1" class="color primary"><strong>Discount(Consumer)</strong></td>
                                 <td colspan="1" class="color primary"><strong>Charges With Discount</strong></td>
+                                <td colspan="1" class="color primary"><strong>Flyer Charges</strong></td>
+                                <td colspan="1" class="color primary"><strong>SMS Charges</strong></td>
                                 <td colspan="1" class="color primary border"><strong>GST</strong></td>
                                 <td colspan="1" class="color primary border"><strong>Packaging & Insurance </strong></td>
                                 <td colspan="2" class="color primary border twice-right"><strong>Total Charges</strong></td>
                             </tr>
                               <tr>
                                 <td colspan="2" class="border twice-bottom twice-left">' . $shipment->retail->shipping_modes->name . '</td>
-                                <td colspan="2" class="border twice-bottom">' . $shipment->pieces . '</td>
+                                <td colspan="1" class="border twice-bottom">' . $shipment->pieces . '</td>
                                 <td colspan="1" class="border twice-bottom">' . floatval($shipment->estimated_weight) . '</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->weight_charges,2) . '</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->discount,2) . '</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->admin_discount,2) .$r_t.'</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->charges_with_discount,2) . '</td>
+                                <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->flyer_charges,2) . '</td>
+                                <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->sms_charges,2) . '</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($gst,2) . '</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($packaging_and_insurance,2) . '</td>
                                 <td colspan="2" class="border twice-bottom twice-right">' . number_format(ROUND($shipment->retail->total_charges)) . '</td>
