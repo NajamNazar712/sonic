@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins\LocalFleet;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\Controller;
 use App\Http\Models\City;
 use App\Models\LocalFleetVehicle;
@@ -33,6 +34,7 @@ class AdminLocalFleetVehicleController extends Controller
     // ----------------------------
     public function list(Request $request)
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),840);
         $data = LocalFleetVehicle::join('cities as c','c.id','=','local_fleet_vehicles.city_id')
             ->select(
                 'local_fleet_vehicles.id',
@@ -77,27 +79,85 @@ class AdminLocalFleetVehicleController extends Controller
                 return $v->status == 1 ? 'Active' : 'Inactive';
             })
             ->addColumn('action', function ($roles) {
-                if (session('role_id') == 1 || in_array(663, session('permissions'))) {
-                    $dropdown = '<div class="btn-group">
-                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                    <div class="dropdown-menu dropdown-menu-sm">
-                    <button type="button" class="dropdown-item upload-document"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-upload"></i></div><div class="col-9 offset-1">Upload Document</div></button>
-                    <button type="button" class="dropdown-item view-documents"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1">View Documents</div></button>
-                    <button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>
-                    <button type="button" class="dropdown-item generate-barcode"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bookmark"></i></div><div class="col-9 offset-1">Generate Barcode</div></button>
-                    ';
-//                    // $dropdown .=' <button type="button" class="dropdown-item delete"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Delete</div></button>';
-//                    if ($roles->status == 1) {
-//
-//                        $dropdown .= ' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
-//                    } else {
-//
-//                        $dropdown .= ' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
-//                    }
 
-                    $dropdown .= '</div>  </div>';
+                if(session('role_id') == 1 || count(array_intersect([1064,1065,1066, 1067], session('permissions')))!==0) {
+//                    $dropdown = '<div class="btn-group">
+//                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+//                        <div class="dropdown-menu dropdown-menu-sm">
+//                        <button type="button" class="dropdown-item upload-document"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-upload"></i></div><div class="col-9 offset-1">Upload Document</div></button>
+//                        <button type="button" class="dropdown-item view-documents"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1">View Documents</div></button>
+//                        <button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>
+//                        <button type="button" class="dropdown-item generate-barcode"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bookmark"></i></div><div class="col-9 offset-1">Generate Barcode</div></button>
+//                    ';
+//                    $dropdown .= '</div>  </div>';
+//
+//                    return $dropdown;
 
-                    return $dropdown;
+                    $buttons = '';
+
+                    // Upload Document Permission (example: 663)
+                    if (session('role_id') == 1 || in_array(1064, session('permissions'))) {
+                        $uploadBtn = '
+                            <button type="button" class="dropdown-item upload-document">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col-2"><i class="ft-upload"></i></div>
+                                    <div class="col-9 offset-1">Upload Document</div>
+                                </div>
+                            </button>';
+                        $buttons .= $uploadBtn;
+                    }
+
+                    // View Documents Permission (example: 664)
+                    if (session('role_id') == 1 || in_array(1065, session('permissions'))) {
+                        $viewBtn = '
+                            <button type="button" class="dropdown-item view-documents">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col-2"><i class="ft-eye"></i></div>
+                                    <div class="col-9 offset-1">View Documents</div>
+                                </div>
+                            </button>';
+                        $buttons .= $viewBtn;
+                    }
+
+                    // Edit Permission (example: 665)
+                    if (session('role_id') == 1 || in_array(1066, session('permissions'))) {
+                        $editBtn = '
+                            <button type="button" class="dropdown-item edit">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col-2"><i class="ft-edit"></i></div>
+                                    <div class="col-9 offset-1">Edit</div>
+                                </div>
+                            </button>';
+                        $buttons .= $editBtn;
+                    }
+
+                    // Generate Barcode Permission (example: 666)
+                    if (session('role_id') == 1 || in_array(1067, session('permissions'))) {
+                        $barcodeBtn = '
+                            <button type="button" class="dropdown-item generate-barcode">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col-2"><i class="ft-bookmark"></i></div>
+                                    <div class="col-9 offset-1">Generate Barcode</div>
+                                </div>
+                            </button>';
+                        $buttons .= $barcodeBtn;
+                    }
+
+                    // Final Dropdown
+                    if (!empty($buttons)) {
+                        $dropdown = '
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-success dropdown-toggle"
+                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Actions
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-sm">
+                                    ' . $buttons . '
+                                </div>
+                            </div>';
+                        return $dropdown;
+                    }
+                    return '';
                 } else {
                     return '';
                 }

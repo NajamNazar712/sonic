@@ -1188,6 +1188,10 @@ HTML;
             
             $terms_conditions .= '<p class="pt-2"><span class="border-bottom"><strong>Company Stamp</strong></span></p>';
             $terms_conditions .= '</div></div>';
+
+            if($shipper_id == 42188 ) {
+                $terms_conditions .= '<div class="pt-3 pb-3 font-weight-bold text-center">**** ----This is a system generated CRF and does not required any signature---- ****</div>';
+            }
             
         }
 

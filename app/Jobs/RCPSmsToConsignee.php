@@ -108,7 +108,7 @@ class RCPSmsToConsignee implements ShouldQueue
                             $attempt->update();
                         }
 
-                        $to = ['asad.ahsan@trax.pk'];
+                        $to = ['munawar.shamsi@logiserves.com'];
                         $subject = '[Error] SMS API - ITS';
                         $body = 'Unrecognized Error in SMS API.<br/>SMS ID: ' . $sms->id . '<br/>Response Received: ' . json_encode($response);
 
@@ -165,7 +165,7 @@ class RCPSmsToConsignee implements ShouldQueue
                 $sms->status = 2;
                 $sms->save();
 
-                $to = ['asad.ahsan@trax.pk'];
+                $to = ['munawar.shamsi@logiserves.com'];
                 $subject = '[Error] SMS API - ITS ';
                 $body = 'Unrecognized Error in SMS API.<br/>SMS ID: ' . $sms->id . '<br/>Response Received: ' . json_encode($response);
 
