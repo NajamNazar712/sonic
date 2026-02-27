@@ -198,6 +198,7 @@
 										<th class="border-primary border-darken-1">Adjustment Charges</th>
 										<th class="border-primary border-darken-1">Total Payable</th>
 										<th class="border-primary border-darken-1">Bank</th>
+										<th class="border-primary border-darken-1">IBN No</th>
 										<th class="border-primary border-darken-1">Reference No.</th>
 										<th class="border-primary border-darken-1">Created By</th>
 										<th class="border-primary border-darken-1">Done Datetime</th>
@@ -775,6 +776,7 @@
 							head.push('Adjustment Charges');
                             head.push('Total Payable');
                             head.push('Bank');
+							head.push('IBN No.');
                             head.push('Reference No.');
                             head.push('Created By');
                             head.push('Done Datetime');
@@ -817,6 +819,7 @@
 								row.push(values.adjustment_charges);
                                 row.push(values.total_payable);
                                 row.push(values.bank);
+								row.push(values.iban);
                                 row.push(values.reference_number);
                                 row.push(values.created_by);
                                 row.push(values.done_at);
@@ -1248,6 +1251,7 @@
 					{data:'adjustment_charges', name: 'dpc.adjustment', class: 'align-middle text-center adjustment_charges', orderable: false},
 					{data:'total_payable', name: 'dpc.payable', class: 'align-middle text-center total_payable', orderable: false},
 					{data:'bank', name: 'bank', class: 'align-middle text-center bank'},
+					{data:'iban', name: 'ubi.iban', class: 'align-middle text-center iban'},
 					{data:'reference_number', name: 'done_payments.reference_number', class: 'align-middle text-center reference_number'},
 
 					{data:'created_by', name: 'done_payments.created_by', class: 'align-middle text-center created_by'},

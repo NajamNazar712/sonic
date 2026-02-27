@@ -112,11 +112,24 @@
                                         </select>
                                     </div>
                                     <div class="form-group">
-                                        <select name="charges_mode" id="charges_mode" class="select2 form-control" data-rule-required="true" data-msg-required="Charges Mode is required">
+                                        <select name="charges_mode" id="charges_mode" class="select2 form-control" data-rule-required="true" data-msg-required="Charges Mode is required" readonly>
+                                            <!-- @foreach($charges_modes as $charges_mode)
+                                                <option value="{{$charges_mode->id}}" {{ $loop->first ? 'selected' : '' }} >{{$charges_mode->charges_mode}}</option>
+                                            @endforeach -->
+
                                             @foreach($charges_modes as $charges_mode)
-                                                <option value="{{$charges_mode->id}}">{{$charges_mode->charges_mode}}</option>
+                                                <option value="{{ $charges_mode->id }}"
+                                                    {{ $charges_mode->id == 1 ? 'selected' : '' }}>
+                                                    {{ $charges_mode->charges_mode }}
+                                                </option>
                                             @endforeach
                                         </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="mr-1">Add Flyer</label>
+                                        <button type="button" class="btn btn-outline-success mr-1" title="Add more slabs" id="waddition_btn"><i class="la la-plus"></i></button>
+                                        
+                                      
                                     </div>
 {{--                                    <div class="form-group">--}}
 {{--                                        <input name="payment_transaction_id" class="form-control number" id="payment_transaction_id" placeholder="Payment Transaction ID" value=""  data-rule-required="true" data-msg-required="Payment Transaction ID is required">--}}
@@ -277,6 +290,18 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                               <div class="col-md-8">
+                                                   <label>Want to Send SMS?</label>
+                                               </div>
+                                                <div class="col-md-4 align-self-end">
+                                                    <input type="checkbox" id="charged_sms" name="charged_sms" class="switchery"
+                                                           data-size="sm" data-switchery="true">
+                                                    <input id="charged_sms1" value="0" name="charged_sms1" hidden>
+                                                </div>
+                                            </div>
+                                        </div>
                                         <div class="form-group" id="retail_discount_code_div">
                                             <label>Discount Code</label>
                                             <input type="text" name="discount_code" id="discount_code" class="form-control form-control-sm" placeholder="Discount Code">
@@ -296,6 +321,14 @@
                                             <input type="text" name="discount" id="charges_with_discount" class="form-control form-control-sm" placeholder="Charges With Discount" disabled>
                                         </div>
                                         <div class="form-group">
+                                            <label>Flyer Charges</label>
+                                            <input type="text" name="flyer_charges" id="flyer_charges" class="form-control form-control-sm" placeholder="Flyer Charges" disabled>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>SMS Charges</label>
+                                            <input type="text" name="sms_charges" id="sms_charges" class="form-control form-control-sm" placeholder="SMS Charges" disabled>
+                                        </div>
+                                        <div class="form-group">
                                             <label>GST</label>
                                             <input type="text" name="gst" id="gst" class="form-control form-control-sm" placeholder="GST" disabled>
                                         </div>
@@ -312,7 +345,7 @@
                                         </div>
                                     </div>
                                     <div class="row justify-content-center">
-                                        <div class="position-absolute" style="bottom: 0;">
+                                        <div class="" style="bottom: 0;">
                                             <div class="form-group text-center d-none" id="print_div">
                                                 <button type="button" name="print" id="print" class="btn btn-outline-cyan width-150" value="print">Print Slip</button>
                                             </div>
@@ -757,8 +790,30 @@
                         $('#retail_discount_code_div').addClass('d-none');
                     };
 
+                 
                     $('#admin_discount').prop('disabled', false);
                     $('#discount_code').val('');
+
+                    var el = document.querySelector('#charged_sms');
+
+                    // 1) turn it OFF at checkbox level
+                    el.checked = false;
+                    $('#charged_sms1').val(0);
+
+                    // 2) refresh the Switchery UI
+                    // Switchery listens to real "change" event
+                    el.dispatchEvent(new Event('change', { bubbles: true }));
+
+                    // 3) now disable
+                    el.disabled = true;
+
+                    if (el.switchery && el.switchery.disable) {
+                        el.switchery.disable();
+                    } else {
+                        $(el).next('.switchery').css({ 'pointer-events': 'none', 'opacity': 0.5 });
+                    }
+
+
 
                 }
                 else{
@@ -767,6 +822,17 @@
                     {
                         $('#retail_discount_code_div').removeClass('d-none');
                         $('#discount_code').val('');
+                        var el = document.querySelector('#charged_sms');
+
+                        $('#charged_sms').prop('checked', true).trigger('change');
+                        el.disabled = false;
+
+                        // disable switchery UI
+                        if (el.switchery && el.switchery.enable) {
+                            el.switchery.enable();
+                        } else {
+                            $(el).next('.switchery').css({ 'pointer-events': '', 'opacity': '' });
+                        }
                     }
 
                     $('#shipping_mode').empty();
@@ -868,11 +934,11 @@
                 allowClear:true
             });
 
-            $('#charges_mode').prepend('<option value="" selected="selected"></option>').select2({
-                width:'100%',
-                placeholder:"Select Charges Mode*",
-                allowClear:true
-            });
+            // $('#charges_mode').prepend('<option value="" selected="selected"></option>').select2({
+            //     width:'100%',
+            //     placeholder:"Select Charges Mode*",
+            //     allowClear:true
+            // });
 
             $('#iban_no').inputmask({
                 mask: 'R',
@@ -1111,6 +1177,19 @@
                 else
                 {
                     $('#admin_discount_type1').val("0");
+                }
+            });
+
+            var chargedSmsValue = false;
+            $('#charged_sms').change( function () {
+                chargedSmsValue = !chargedSmsValue;
+                if(chargedSmsValue)
+                {
+                   $('#charged_sms1').val("1");
+                }
+                else
+                {
+                    $('#charged_sms1').val("0");
                 }
             });
 
@@ -1382,6 +1461,7 @@
                 var retail_discount_code = $('#discount_code').val();
                 var product_id = $('#product').val();
                 var cod = $('#cod').val();
+                var flyer_count = wadCount;
 
                 var retail_discount_percentage = 0;
                 var retail_discount_applied = ($('#discount_code').val() == '') ? 0 : 1;
@@ -1396,7 +1476,7 @@
                                 retail_discount_percentage = data.data.discount_percentage;
                                 $('#retail_discount_percentage').val(retail_discount_percentage);
 
-                                calculateRates(shipping_mode_id,business_category,destination,weight,trax_box,length,breadth, insurance, packaging, height, admin_discount, admin_discount_type, retail_discount_applied, retail_discount_percentage,product_id , cod);
+                                calculateRates(shipping_mode_id,business_category,destination,weight,trax_box,length,breadth, insurance, packaging, height, admin_discount, admin_discount_type, retail_discount_applied, retail_discount_percentage,product_id , cod, flyer_count);
 
                                 toastr.success(retail_discount_percentage+'% Discount Applied', 'Success!', {
                                     positionClass: 'toast-top-center',
@@ -1417,12 +1497,12 @@
                 }
                 else
                 {
-                    calculateRates(shipping_mode_id,business_category,destination,weight,trax_box,length,breadth, insurance, packaging, height, admin_discount, admin_discount_type, retail_discount_applied, retail_discount_percentage, product_id , cod);
+                    calculateRates(shipping_mode_id,business_category,destination,weight,trax_box,length,breadth, insurance, packaging, height, admin_discount, admin_discount_type, retail_discount_applied, retail_discount_percentage, product_id , cod,flyer_count );
                 }
 
             });
 
-            function calculateRates(shipping_mode_id,business_category,destination,weight,trax_box,length,breadth, insurance, packaging, height, admin_discount, admin_discount_type, retail_discount_applied, retail_discount_percentage, product_id , cod)
+            function calculateRates(shipping_mode_id,business_category,destination,weight,trax_box,length,breadth, insurance, packaging, height, admin_discount, admin_discount_type, retail_discount_applied, retail_discount_percentage, product_id , cod, flyer_count)
             {
                 
                 if(business_category == 1){
@@ -1449,6 +1529,7 @@
                  packaging = $('#packaging_amount').val();
                 var admin_discount = $('#admin_discount').val();
                 var admin_discount_type = $('#admin_discount_type1').val();
+                var charged_sms  = $('#charged_sms1').val();
 
                  if($('#insurance_offered').val() == 1 && (insurance == null || insurance == '')){
                      var error = 'Insurance Amount is required';
@@ -1496,6 +1577,8 @@
                             'retail_discount_percentage': retail_discount_percentage,
                             'product_id' : product_id,
                             'cod' : cod,
+                            'flyer_count' : flyer_count,
+                            'charged_sms' : charged_sms,
                             '_token': '{{ csrf_token() }}'
                         }
                     })
@@ -1514,6 +1597,8 @@
                                     $('#total_charges').val(data.details.total_charges);
                                     $('#wht').val(data.details.wht);
                                     $('#cod_sst').val(data.details.cod_sst);
+                                    $('#flyer_charges').val(data.details.flyer_without_gst);
+                                    $('#sms_charges').val(data.details.sms_charges);
 
                             }
                             else
@@ -1898,6 +1983,43 @@
             });
 
             $('#account_no').attr('autocomplete', 'off');
+
+       
+
+            let wadCount = 0;
+
+            $('body').on('click', '#waddition_btn', function (e) {
+                
+                e.preventDefault();
+
+                wadCount++;
+                let htmdiv =
+                    '<div class="row wad_row" id="wad_row' + wadCount + '">' +
+                        '<div class="col-8">' +
+                            '<fieldset class="form-group">' +
+                                '<input type="text" class="form-control numeric validated" ' +  'maxlength="17" ' +
+                                    'data-rule-required="true" data-msg-required="This field is required" ' +
+                                    'name="flyer[' + wadCount + ']" value="" />' +
+                            '</fieldset>' +
+                        '</div>' +
+                        '<div class="col-4 text-end">' +
+                            '<span class="btn btn-danger rounded btn-sm-width  mb-1 wad_close" data-id="' + wadCount + '">' +
+                                '<i class="ft-x"></i>' +
+                            '</span>' +
+                        '</div>' +
+                    '</div>';
+
+                  $(this).closest('.form-group').after(htmdiv);
+            });
+
+            // cancel/remove (same as your “close”)
+            $('body').on('click', '.wad_close', function () {
+                let id = $(this).data('id');
+                $('#wad_row' + id).remove();
+                wadCount--;
+            });
+
+            
 
         });
     </script>
