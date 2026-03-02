@@ -16105,6 +16105,174 @@ class RiderAPIController extends Controller
     }
 
 
+    // public function leave_apply_v3(Request $request)
+    // {
+    //     $rules = [
+    //         'from' => ['required'],
+    //         'to' => ['required'],
+    //         'reason' => ['required', 'max:500'],
+    //         'leave_type' => ['required', 'integer', 'exists:leave_types,id'],
+    //         'leave_id' => ['nullable', 'integer', 'exists:employee_leaves,id'],
+    //     ];
+    //     $validate = Validator::make($request->all(), $rules, $this->messages);
+    //     $validate->setAttributeNames($this->names);
+
+    //     if ($validate->fails()) {
+    //         return response()->json([
+    //             'status'  => 1,
+    //             'message' => 'Error(s) in Input',
+    //             'errors'  => $validate->errors()
+    //         ]);
+    //     }
+
+    //     $employee = Employee::where('trax_id', $request->trax_id)->first();
+
+    //     if (!$employee) {
+    //         return response()->json([
+    //             'status'  => 1,
+    //             'message' => 'Employee not Found!'
+    //         ]);
+    //     }
+
+    //     if (!$employee->line_manager_id) {
+    //         return response()->json([
+    //             'status'  => 1,
+    //             'message' => 'Line Manager is not selected!'
+    //         ]);
+    //     }
+
+    //     $fromDate = Carbon::parse($request->from)->startOfDay();
+    //     $toDate   = Carbon::parse($request->to)->startOfDay();
+
+    //     if ($fromDate->gt($toDate)) {
+    //         return response()->json([
+    //             'status'  => 1,
+    //             'message' => 'From date cannot be greater than To date.'
+    //         ]);
+    //     }
+
+    //     $working_days = $employee->department->working_days; 
+    //     $period = CarbonPeriod::create($fromDate, $toDate);
+
+    //     foreach ($period as $date) {
+    //         if ($working_days == 1) {
+    //             // Only Sunday is weekend
+    //             if ($date->isSunday()) {
+    //                 return response()->json([
+    //                     'status' => 1,
+    //                     'message' => 'You cannot include Sunday in leave range.'
+    //                 ]);
+    //             }
+    //         } else {
+    //             // Saturday & Sunday weekend
+    //             if ($date->isWeekend()) {
+    //                 return response()->json([
+    //                     'status' => 1,
+    //                     'message' => 'You cannot include weekend days in leave range.'
+    //                 ]);
+    //             }
+    //         }
+    //     }
+
+
+    //     $leaveRequest = null;
+    //     if ($request->filled('leave_id')) {
+    //         $leaveRequest = EmployeeLeave::find($request->leave_id);
+
+    //         if (!$leaveRequest || $leaveRequest->employee_id != $employee->id) {
+    //             return response()->json([
+    //                 'status'  => 1,
+    //                 'message' => 'Invalid Leave Request ID'
+    //             ]);
+    //         }
+    //     }
+
+    //     $touchedCycles = $this->getTouchedPayrollCycles($fromDate, $toDate);
+
+    //     foreach ($touchedCycles as $cycle) {
+    //         $cycleStart = $cycle['start'];
+    //         $cycleEnd   = $cycle['end'];
+
+    //         $leaveCountQuery = EmployeeLeave::where('employee_id', $employee->id)
+    //             ->where('employee_type_id', 2)
+    //             ->whereIn('status', [1, 2, 4, 6])
+    //             ->where(function ($q) use ($cycleStart, $cycleEnd) {
+    //                 $q->whereBetween('from', [$cycleStart, $cycleEnd])
+    //                 ->orWhereBetween('to', [$cycleStart, $cycleEnd])
+    //                 ->orWhere(function ($q2) use ($cycleStart, $cycleEnd) {
+    //                     $q2->where('from', '<=', $cycleStart)
+    //                         ->where('to', '>=', $cycleEnd);
+    //                 });
+    //             });
+
+    //         // Exclude current leave while editing
+    //         if ($leaveRequest) {
+    //             $leaveCountQuery->where('id', '!=', $leaveRequest->id);
+    //         }
+
+    //         $leaveCount = $leaveCountQuery->count();
+
+    //         if ($leaveCount >= 2) {
+    //             return response()->json([
+    //                 'status'  => 1,
+    //                 'message' => 'You can only submit 2 leave requests per payroll cycle (21st - 20th).'
+    //             ]);
+    //         }
+    //     }
+
+    //     if ($leaveRequest) {
+    //         $leaveRequest->from = $fromDate;
+    //         $leaveRequest->to = $toDate;
+    //         $leaveRequest->applied_reason = $request->reason;
+    //         $leaveRequest->leave_type = $request->leave_type;
+    //         $leaveRequest->save();
+
+    //         $message = "Leave Request edited successfully";
+    //     } else {
+    //         // Optional overlap check if you want to prevent overlapping requests too
+    //         /*
+    //         $overlap = EmployeeLeave::where('employee_id', $employee->id)
+    //             ->where('employee_type_id', 2)
+    //             ->whereIn('status', [1, 2, 4, 6])
+    //             ->where(function ($q) use ($fromDate, $toDate) {
+    //                 $q->whereBetween('from', [$fromDate, $toDate])
+    //                 ->orWhereBetween('to', [$fromDate, $toDate])
+    //                 ->orWhere(function ($q2) use ($fromDate, $toDate) {
+    //                     $q2->where('from', '<=', $fromDate)
+    //                         ->where('to', '>=', $toDate);
+    //                 });
+    //             })
+    //             ->exists();
+
+    //         if ($overlap) {
+    //             return response()->json([
+    //                 'status'  => 1,
+    //                 'message' => 'You already have a leave request in this date range.'
+    //             ]);
+    //         }
+    //         */
+
+    //         $leaveRequest = new EmployeeLeave();
+    //         $leaveRequest->employee_id = $employee->id;
+    //         $leaveRequest->employee_type_id = 2; // Rider
+    //         $leaveRequest->reporter_id = $employee->line_manager->admin->id;
+    //         $leaveRequest->from = $fromDate;
+    //         $leaveRequest->to = $toDate;
+    //         $leaveRequest->applied_reason = $request->reason;
+    //         $leaveRequest->leave_type = $request->leave_type;
+    //         $leaveRequest->status = 1; // Pending
+    //         $leaveRequest->save();
+
+    //         $message = "Leave Request submitted successfully";
+    //     }
+
+    //     return response()->json([
+    //         'status' => 0,
+    //         'apply_message' => $message
+    //     ]);
+        
+    // }
+
     public function leave_apply_v3(Request $request)
     {
         $rules = [
@@ -16114,6 +16282,7 @@ class RiderAPIController extends Controller
             'leave_type' => ['required', 'integer', 'exists:leave_types,id'],
             'leave_id' => ['nullable', 'integer', 'exists:employee_leaves,id'],
         ];
+
         $validate = Validator::make($request->all(), $rules, $this->messages);
         $validate->setAttributeNames($this->names);
 
@@ -16151,12 +16320,13 @@ class RiderAPIController extends Controller
             ]);
         }
 
-        $working_days = $employee->department->working_days; 
-        $period = CarbonPeriod::create($fromDate, $toDate);
+        $workingDays = (int) ($employee->department->working_days ?? 0);
 
+        // Validate requested range: no weekend/off-day allowed
+        $period = CarbonPeriod::create($fromDate, $toDate);
         foreach ($period as $date) {
-            if ($working_days == 1) {
-                // Only Sunday is weekend
+            if ($workingDays == 1) {
+                // Only Sunday off
                 if ($date->isSunday()) {
                     return response()->json([
                         'status' => 1,
@@ -16164,7 +16334,7 @@ class RiderAPIController extends Controller
                     ]);
                 }
             } else {
-                // Saturday & Sunday weekend
+                // Saturday & Sunday off
                 if ($date->isWeekend()) {
                     return response()->json([
                         'status' => 1,
@@ -16174,72 +16344,83 @@ class RiderAPIController extends Controller
             }
         }
 
+        $leaveRequest = null;
 
         if ($request->filled('leave_id')) {
-
             $leaveRequest = EmployeeLeave::find($request->leave_id);
 
-            if (!$leaveRequest) {
+            if (
+                !$leaveRequest ||
+                $leaveRequest->employee_id != $employee->id ||
+                $leaveRequest->employee_type_id != 2
+            ) {
                 return response()->json([
                     'status'  => 1,
                     'message' => 'Invalid Leave Request ID'
                 ]);
             }
+        }
 
+        /*
+        |--------------------------------------------------------------------------
+        | BUSINESS RULE:
+        | Rider can avail max 2 LEAVE DAYS per payroll cycle (21st - 20th)
+        |--------------------------------------------------------------------------
+        */
+
+        // New request's cycle-wise leave days
+        $newRequestCycleDays = $this->getCycleWiseLeaveDays($fromDate, $toDate, $workingDays);
+
+        // Existing leaves for this rider that should count
+        $existingLeavesQuery = EmployeeLeave::where('employee_id', $employee->id)
+            ->where('employee_type_id', 2)
+            ->whereIn('status', [1, 2, 4, 6]);
+
+        if ($leaveRequest) {
+            $existingLeavesQuery->where('id', '!=', $leaveRequest->id);
+        }
+
+        $existingLeaves = $existingLeavesQuery->get(['id', 'from', 'to']);
+
+        // Build existing used days per payroll cycle
+        $existingCycleDays = [];
+
+        foreach ($existingLeaves as $existingLeave) {
+            $existingFrom = Carbon::parse($existingLeave->from)->startOfDay();
+            $existingTo   = Carbon::parse($existingLeave->to)->startOfDay();
+
+            $leaveCycleDays = $this->getCycleWiseLeaveDays($existingFrom, $existingTo, $workingDays);
+
+            foreach ($leaveCycleDays as $cycleKey => $days) {
+                if (!isset($existingCycleDays[$cycleKey])) {
+                    $existingCycleDays[$cycleKey] = 0;
+                }
+                $existingCycleDays[$cycleKey] += $days;
+            }
+        }
+
+        // Validate each cycle touched by the new request
+        foreach ($newRequestCycleDays as $cycleKey => $newDays) {
+            $alreadyUsedDays = $existingCycleDays[$cycleKey] ?? 0;
+            $totalDays = $alreadyUsedDays + $newDays;
+
+            if ($totalDays > 2) {
+                return response()->json([
+                    'status'  => 1,
+                    'message' => 'You can only avail 2 leave days per payroll cycle (21st - 20th).'
+                ]);
+            }
+        }
+
+        if ($leaveRequest) {
             $leaveRequest->from = $fromDate;
             $leaveRequest->to = $toDate;
             $leaveRequest->applied_reason = $request->reason;
             $leaveRequest->leave_type = $request->leave_type;
             $leaveRequest->save();
 
-            $message = "Leave Request edited successfully";
-        }
-        else {
-            $referenceDate = Carbon::parse($request->from);
-            if ($referenceDate->day >= 21) {
-                $cycleStart = $referenceDate->copy()->day(21)->startOfDay();
-                $cycleEnd   = $referenceDate->copy()->addMonth()->day(20)->endOfDay();
-            } else {
-                $cycleStart = $referenceDate->copy()->subMonth()->day(21)->startOfDay();
-                $cycleEnd   = $referenceDate->copy()->day(20)->endOfDay();
-            }
-
-             //dd($cycleStart,$cycleEnd);
-            $leaveCount = EmployeeLeave::where('employee_id', $employee->id)
-                ->where('employee_type_id', 2)
-                ->whereIn('status', [1,2,4,6])
-                ->where(function ($q) use ($cycleStart, $cycleEnd) {
-                    $q->whereBetween('from', [$cycleStart, $cycleEnd])
-                    ->orWhereBetween('to', [$cycleStart, $cycleEnd])
-                    ->orWhere(function ($q2) use ($cycleStart, $cycleEnd) {
-                        $q2->where('from', '<=', $cycleStart)
-                            ->where('to', '>=', $cycleEnd);
-                    });
-                })
-                // ->whereBetween('from', [$cycleStart, $cycleEnd])
-                ->count();
-                
-            if ($leaveCount >= 2) {
-                return response()->json([
-                    'status'  => 1,
-                    'message' => 'You can only submit 2 leave requests per payroll cycle (21st - 20th).'
-                ]);
-            }
-
-            // $overlap = EmployeeLeave::where('employee_id', $employee->id)
-            //     ->where(function ($q) use ($fromDate, $toDate) {
-            //         $q->whereBetween('from', [$fromDate, $toDate])
-            //         ->orWhereBetween('to', [$fromDate, $toDate]);
-            //     })
-            //     ->exists();
-
-            // if ($overlap) {
-            //     return response()->json([
-            //         'status'  => 1,
-            //         'message' => 'You already have a leave request in this date range.'
-            //     ]);
-            // }
-
+            $message = 'Leave Request edited successfully';
+        } else {
             $leaveRequest = new EmployeeLeave();
             $leaveRequest->employee_id = $employee->id;
             $leaveRequest->employee_type_id = 2; // Rider
@@ -16251,14 +16432,13 @@ class RiderAPIController extends Controller
             $leaveRequest->status = 1; // Pending
             $leaveRequest->save();
 
-            $message = "Leave Request submitted successfully";
+            $message = 'Leave Request submitted successfully';
         }
 
         return response()->json([
             'status' => 0,
             'apply_message' => $message
         ]);
-        
     }
 
     public function employee_leave_list_v3(Request $request)
@@ -16316,4 +16496,59 @@ class RiderAPIController extends Controller
         }
         return response()->json(['status' => 1, 'message' => "No Leave Found!"]);
     }
+
+    private function getPayrollCycle(Carbon $date): array
+    {
+        $date = $date->copy()->startOfDay();
+
+        if ($date->day >= 21) {
+            $start = $date->copy()->day(21)->startOfDay();
+            $end   = $date->copy()->addMonth()->day(20)->endOfDay();
+        } else {
+            $start = $date->copy()->subMonth()->day(21)->startOfDay();
+            $end   = $date->copy()->day(20)->endOfDay();
+        }
+
+        return [
+            'start' => $start,
+            'end'   => $end,
+            'key'   => $start->format('Y-m-d'),
+        ];
+    }
+
+    private function isWorkingLeaveDay(Carbon $date, int $workingDays): bool
+    {
+        if ($workingDays == 1) {
+            // Only Sunday off
+            return !$date->isSunday();
+        }
+
+        // Saturday & Sunday off
+        return !$date->isWeekend();
+    }
+
+    private function getCycleWiseLeaveDays(Carbon $fromDate, Carbon $toDate, int $workingDays): array
+    {
+        $cycleWiseDays = [];
+        $period = CarbonPeriod::create($fromDate->copy()->startOfDay(), $toDate->copy()->startOfDay());
+
+        foreach ($period as $date) {
+            if (!$this->isWorkingLeaveDay($date, $workingDays)) {
+                continue;
+            }
+
+            $cycle = $this->getPayrollCycle($date);
+            $cycleKey = $cycle['key'];
+
+            if (!isset($cycleWiseDays[$cycleKey])) {
+                $cycleWiseDays[$cycleKey] = 0;
+            }
+
+            $cycleWiseDays[$cycleKey]++;
+        }
+
+        return $cycleWiseDays;
+    }
+
+
 }
