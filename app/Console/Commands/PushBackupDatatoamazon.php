@@ -42,7 +42,7 @@ class PushBackupDatatoamazon extends Command
         foreach ($files as $file) {
             $file_name = pathinfo($file);
             $stream = fopen($file, 'r');
-            Storage::disk('s3')->put('sonic_storage_archieve/' . $file_name['basename'], $stream);
+            Storage::disk('s3')->put('sonic-archive/sonic_storage_archieve/' . $file_name['basename'], $stream);
             fclose($stream);
         }
     }
