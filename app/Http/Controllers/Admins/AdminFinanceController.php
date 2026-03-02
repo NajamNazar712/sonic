@@ -458,7 +458,7 @@ class AdminFinanceController extends Controller
                         return '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset('uploads/sdn/' . $station_deposit_note->deposit_slip) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
 
                     } else {
-                        $img = Storage::disk('s3')->temporaryUrl('station_deposit_notes/' . $station_deposit_note->deposit_slip, now()->addMinutes(5));
+                        $img = Storage::disk('s3')->temporaryUrl('sonic-archive/station_deposit_notes/' . $station_deposit_note->deposit_slip, now()->addMinutes(5));
                         return '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
                     }
                 } else {
@@ -10229,7 +10229,7 @@ class AdminFinanceController extends Controller
         }
 
 
-        $current_date = Carbon::now()->subDay()->startOfDay();
+        $current_date = Carbon::now()->startOfDay();
         $current_date_string = $current_date->toDateString();
         $users = User::where('account_type_id', 2)->get();
 
@@ -10266,12 +10266,12 @@ class AdminFinanceController extends Controller
                         }
                     }
                 } else if ($user_banking_information->invoicing_cycle_id == 3) {
-                    if (in_array($user_banking_information->generation_date, [$current_date->day, 2])) {
+                    if ($user_banking_information->generation_date == $current_date->day) {
                         $generate = TRUE;
 
                         /*$billing_period_from_date = Carbon::now()->subDay()->day($user_banking_information->generation_date)->startOfDay()->toDateString();*/
                         $billing_period_from_date = Carbon::now()->subMonth()->startOfMonth()->startOfDay()->toDateString();
-                        $current_date_string = Carbon::now()->subDay()->addDay()->toDateString();
+                        $current_date_string = Carbon::now()->addDay()->toDateString();
 
                     }
                 } else if ($user_banking_information->invoicing_cycle_id == 4) {

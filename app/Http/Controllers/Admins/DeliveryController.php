@@ -2148,7 +2148,7 @@ class DeliveryController extends Controller
                     if ($exists) {
                         $image .= '<div class="text-center"><a type="button" class="btn btn-primary btn-sm picture" href ="' . asset(Storage::url($deliveries->ccd_image)) . '" target="_blank"><i class="la la-image"></i> View</a></div>';
                     } else {
-                        $img = Storage::disk('s3')->temporaryUrl($deliveries->ccd_image, now()->addMinutes(5));
+                        $img = Storage::disk('s3')->temporaryUrl('sonic-archive/'.$deliveries->ccd_image, now()->addMinutes(5));
                         $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
                     }
                     return $image;
@@ -3457,7 +3457,7 @@ class DeliveryController extends Controller
                     if ($exists) {
                         $image .= '<div class="text-center"><a type="button" class="btn btn-primary btn-sm picture" href ="' . asset(Storage::url($deliveries->ccd_image)) . '" target="_blank"><i class="la la-image"></i> View</a></div>';
                     } else {
-                        $img = Storage::disk('s3')->temporaryUrl($deliveries->ccd_image, now()->addMinutes(5));
+                        $img = Storage::disk('s3')->temporaryUrl('sonic-archive/'.$deliveries->ccd_image, now()->addMinutes(5));
                         $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
                     }
                     return $image;
@@ -5913,7 +5913,7 @@ class DeliveryController extends Controller
                     if (file_exists($img_url)) {
                         return '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset('uploads/sdn/' . $sdn->deposit_slip) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
                     } else {
-                        $img = Storage::disk('s3')->temporaryUrl('station_deposit_notes/' . $sdn->deposit_slip, now()->addMinutes(5));
+                        $img = Storage::disk('s3')->temporaryUrl('sonic-archive/station_deposit_notes/' . $sdn->deposit_slip, now()->addMinutes(5));
                         return '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
                     }
                 } else {
@@ -7210,7 +7210,7 @@ class DeliveryController extends Controller
                     if ($exists) {
                         $image .= '<div class="text-center"><a type="button" class="btn btn-primary btn-sm picture" href ="' . asset(Storage::url($rider_delivery->ccd_image)) . '" target="_blank"><i class="la la-image"></i> View</a></div>';
                     } else {
-                        $img = Storage::disk('s3')->temporaryUrl($rider_delivery->ccd_image, now()->addMinutes(5));
+                        $img = Storage::disk('s3')->temporaryUrl('sonic-archive/'.$rider_delivery->ccd_image, now()->addMinutes(5));
                         $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
                     }
                     $sorted_array[$rider_delivery->id]['ccd_image'] = $image;
@@ -7692,7 +7692,7 @@ class DeliveryController extends Controller
                         if ($exists) {
                             $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($deliveries->picture_path)) . '"><i class="la la-image"></i> View</button></div>';
                         } else {
-                            $img = Storage::disk('s3')->temporaryUrl($deliveries->picture_path, now()->addMinutes(5));
+                            $img = Storage::disk('s3')->temporaryUrl('sonic-archive/'.$deliveries->picture_path, now()->addMinutes(5));
                             $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
                         }
 
@@ -8679,7 +8679,7 @@ class DeliveryController extends Controller
                     if (file_exists($img_url)) {
                         $sorted_array[$slip->id]['image'] = '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset('uploads/sdn/' . $slip->image) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
                     } else {
-                        $img = Storage::disk('s3')->temporaryUrl('station_deposit_notes/' . $slip->image, now()->addMinutes(5));
+                        $img = Storage::disk('s3')->temporaryUrl('sonic-archive/station_deposit_notes/' . $slip->image, now()->addMinutes(5));
                         $sorted_array[$slip->id]['image'] = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
                     }
                 }
@@ -8788,8 +8788,8 @@ class DeliveryController extends Controller
                 $created = date("F d Y H:i:s.", filemtime($file));
                 $file_name = pathinfo($file);
                 if ($now->diffInDays($created) > 1) {
-                    Storage::disk('s3')->put('station_deposit_notes/' . $file_name['basename'], file_get_contents($file));
-                    if (Storage::disk('s3')->exists('station_deposit_notes/' . $file_name['basename'])) {
+                    Storage::disk('s3')->put('sonic-archive/station_deposit_notes/' . $file_name['basename'], file_get_contents($file));
+                    if (Storage::disk('s3')->exists('sonic-archive/station_deposit_notes/' . $file_name['basename'])) {
                         File::delete($file);
                     }
                 }
@@ -8894,8 +8894,8 @@ class DeliveryController extends Controller
                 $created = date("F d Y H:i:s.", filemtime($file));
                 $file_name = pathinfo($file);
                 if ($now->diffInDays($created) > 1) {
-                    Storage::disk('s3')->put('rider_delivery/' . $file_name['basename'], file_get_contents($file));
-                    if (Storage::disk('s3')->exists('rider_delivery/' . $file_name['basename'])) {
+                    Storage::disk('s3')->put('sonic-archive/rider_delivery/' . $file_name['basename'], file_get_contents($file));
+                    if (Storage::disk('s3')->exists('sonic-archive/rider_delivery/' . $file_name['basename'])) {
                         File::delete($file);
                     }
                 }

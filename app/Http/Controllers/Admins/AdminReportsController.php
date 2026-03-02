@@ -11101,7 +11101,7 @@ class AdminReportsController extends Controller
                         //                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->picture_path)) . '"><i class="la la-image"></i> View</button></div>';
                         $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset(Storage::url($shipments->picture_path)) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
                     } else {
-                        $img = Storage::disk('s3')->temporaryUrl($shipments->picture_path, now()->addMinutes(5));
+                        $img = Storage::disk('s3')->temporaryUrl('sonic-archive/'.$shipments->picture_path, now()->addMinutes(5));
                         $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
                     }
 
@@ -11118,7 +11118,7 @@ class AdminReportsController extends Controller
                         //                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->cnic_image)) . '"><i class="la la-image"></i> View</button></div>';
                         $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset(Storage::url($shipments->cnic_image)) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
                     } else {
-                        $img = Storage::disk('s3')->temporaryUrl($shipments->cnic_image, now()->addMinutes(5));
+                        $img = Storage::disk('s3')->temporaryUrl('sonic-archive/'.$shipments->cnic_image, now()->addMinutes(5));
                         $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
                     }
 
@@ -11135,7 +11135,7 @@ class AdminReportsController extends Controller
                         //                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->house_image)) . '"><i class="la la-image"></i> View</button></div>';
                         $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset(Storage::url($shipments->house_image)) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
                     } else {
-                        $img = Storage::disk('s3')->temporaryUrl($shipments->house_image, now()->addMinutes(5));
+                        $img = Storage::disk('s3')->temporaryUrl('sonic-archive/'.$shipments->house_image, now()->addMinutes(5));
                         $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
                     }
 
@@ -11152,7 +11152,7 @@ class AdminReportsController extends Controller
                         //                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->ccd_image)) . '"><i class="la la-image"></i> View</button></div>';
                         $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset(Storage::url($shipments->ccd_image)) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
                     } else {
-                        $img = Storage::disk('s3')->temporaryUrl($shipments->ccd_image, now()->addMinutes(5));
+                        $img = Storage::disk('s3')->temporaryUrl('sonic-archive/'.$shipments->ccd_image, now()->addMinutes(5));
                         $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
                     }
 

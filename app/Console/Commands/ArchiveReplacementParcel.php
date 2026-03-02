@@ -31,7 +31,7 @@ class ArchiveReplacementParcel extends Command
 
             if (File::exists($zipFile)) {
                 // Upload to S3
-                $s3Path = "sonic_storage_archieve/crm_claims/{$month}.zip";
+                $s3Path = "sonic-archive/sonic_storage_archieve/crm_claims/{$month}.zip";
                 $stream = fopen($zipFile, 'r+');
                 Storage::disk('s3')->put($s3Path, $stream);
                 fclose($stream);

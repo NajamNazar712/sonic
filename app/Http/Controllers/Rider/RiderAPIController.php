@@ -3842,13 +3842,13 @@ class RiderAPIController extends Controller
                                     // Storage::disk('s3')->put($audio_path, file_get_contents($request->audio));
                                     // $rider_delivery->audio_path = $audio_path;
                                     // $rider_delivery->save();
-                                    $audio_path = 'rider_delivery_audio/' . $rider_delivery->id . '-' . $time . '.' . $extension;
+                                    $audio_path = 'sonic-archive/rider_delivery_audio/' . $rider_delivery->id . '-' . $time . '.' . $extension;
                                     Storage::disk('s3')->put($audio_path, file_get_contents($request->audio));
                                     $rider_delivery->audio_path = $audio_path;
                                   
                                 } else {
                                     $extension = $request->file('audio')->getClientOriginalExtension();
-                                    $audio_path = 'rider_delivery_audio/' . $rider_delivery->id . '-' . $time . '.' . $extension;
+                                    $audio_path = 'sonic-archive/rider_delivery_audio/' . $rider_delivery->id . '-' . $time . '.' . $extension;
                                     Storage::disk('public')->put($audio_path, file_get_contents($request->audio));
                                     $rider_delivery->audio_path = $audio_path;
                                     $rider_delivery->save();
@@ -4006,7 +4006,7 @@ class RiderAPIController extends Controller
                     if ($request->has('audio')) {
                         if ($environment == 'production') {
                             $extension = $request->file('audio')->getClientOriginalExtension();
-                            $audio_path = 'rider_pickup_audio/' . $rider_pickup->id . '.' . $extension;
+                            $audio_path = 'sonic-archive/rider_pickup_audio/' . $rider_pickup->id . '.' . $extension;
                             Storage::disk('s3')->put($audio_path, file_get_contents($request->audio));
                             $rider_pickup->audio_path = $audio_path;
                             $rider_pickup->save();
@@ -4131,7 +4131,7 @@ class RiderAPIController extends Controller
                             if ($request->has('audio')) {
                                 if ($environment == 'production') {
                                     $extension = $request->file('audio')->getClientOriginalExtension();
-                                    $audio_path = 'rider_return_delivery_audio/' . $rider_return_delivery->id . '.' . $extension;
+                                    $audio_path = 'sonic-archive/srider_return_delivery_audio/' . $rider_return_delivery->id . '.' . $extension;
                                     Storage::disk('s3')->put($audio_path, file_get_contents($request->audio));
                                     $rider_return_delivery->audio_path = $audio_path;
                                     $rider_return_delivery->save();
@@ -5306,7 +5306,7 @@ class RiderAPIController extends Controller
                             if ($request->has('audio')) {
                                 if ($environment == 'production') {
                                     $extension = $request->file('audio')->getClientOriginalExtension();
-                                    $audio_path = 'rider_return_delivery_audio/' . $rider_return_delivery->id . '.' . $extension;
+                                    $audio_path = 'sonic-archive/rider_return_delivery_audio/' . $rider_return_delivery->id . '.' . $extension;
                                     Storage::disk('s3')->put($audio_path, file_get_contents($request->audio));
                                     $rider_return_delivery->audio_path = $audio_path;
                                     $rider_return_delivery->save();
@@ -8518,7 +8518,7 @@ class RiderAPIController extends Controller
                                 $time = Carbon::now()->toDateString();
                                 if ($environment == 'production') {
                                     $extension = $request->file('audio')->getClientOriginalExtension();
-                                    $audio_path = 'rider_return_delivery_audio/' . $rider_return_delivery->id . '_' . $time . '.' . $extension;
+                                    $audio_path = 'sonic-archive/rider_return_delivery_audio/' . $rider_return_delivery->id . '_' . $time . '.' . $extension;
                                     Storage::disk('s3')->put($audio_path, file_get_contents($request->audio));
                                     $rider_return_delivery->audio_path = $audio_path;
                                     $rider_return_delivery->save();
@@ -11766,7 +11766,7 @@ class RiderAPIController extends Controller
                                             $time = Carbon::now()->toDateString();
                                             if ($environment == 'production') {
                                                 $extension = $request->file('audio')->getClientOriginalExtension();
-                                                $audio_path = 'rider_delivery_audio/' . $rider_delivery->id . '-' . $time . '.' . $extension;
+                                                $audio_path = 'sonic-archive/srider_delivery_audio/' . $rider_delivery->id . '-' . $time . '.' . $extension;
                                                 Storage::disk('s3')->put($audio_path, file_get_contents($request->audio));
                                                 $rider_delivery->audio_path = $audio_path;
                                                 $rider_delivery->save();
@@ -11997,7 +11997,7 @@ class RiderAPIController extends Controller
                                             $time = Carbon::now()->toDateString();
                                             if ($environment == 'production') {
                                                 $extension = $request->file('audio')->getClientOriginalExtension();
-                                                $audio_path = 'rider_delivery_audio/' . $rider_delivery->id . '-' . $time . '.' . $extension;
+                                                $audio_path = 'sonic-archive/rider_delivery_audio/' . $rider_delivery->id . '-' . $time . '.' . $extension;
                                                 Storage::disk('s3')->put($audio_path, file_get_contents($request->audio));
                                                 $rider_delivery->audio_path = $audio_path;
                                                 $rider_delivery->save();

@@ -2980,7 +2980,7 @@ class AdminMasterCargoController extends Controller
                 return '<button class="btn btn-sm btn-outline-info align-middle">' . $cargo_consignment->cargoes . '</button>';
             })
             ->addColumn('excel_button', function ($cargo_consignment) {
-                $file = Storage::disk('s3')->temporaryUrl('cargo_consignment_excels/'.$cargo_consignment->excel_text, now()->addMinutes(60));
+                $file = Storage::disk('s3')->temporaryUrl('sonic-archive/cargo_consignment_excels/'.$cargo_consignment->excel_text, now()->addMinutes(60));
 
                 return '<a href="' . $file . '" target="_blank"><button class="btn btn-sm btn-info align-middle">Download</button></a>';
             });

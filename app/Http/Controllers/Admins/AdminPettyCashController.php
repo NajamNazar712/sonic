@@ -2208,8 +2208,8 @@ class AdminPettyCashController extends Controller
             $created = date("F d Y H:i:s.", filemtime($file));
             $file_name = pathinfo($file);
             if ($now->diffInDays($created) > 1) {
-                Storage::disk('s3')->put('petty_cash_statement_images/' . $file_name['basename'], file_get_contents($file));
-                if (Storage::disk('s3')->exists('petty_cash_statement_images/' . $file_name['basename'])) {
+                Storage::disk('s3')->put('sonic-archive/petty_cash_statement_images/' . $file_name['basename'], file_get_contents($file));
+                if (Storage::disk('s3')->exists('sonic-archive/petty_cash_statement_images/' . $file_name['basename'])) {
                     File::delete($file);
                 }
             }
