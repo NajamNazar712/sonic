@@ -10229,7 +10229,7 @@ class AdminFinanceController extends Controller
         }
 
 
-        $current_date = Carbon::now()->startOfDay();
+        $current_date = Carbon::now()->subDay()->startOfDay();
         $current_date_string = $current_date->toDateString();
         $users = User::where('account_type_id', 2)->get();
 
@@ -10266,12 +10266,12 @@ class AdminFinanceController extends Controller
                         }
                     }
                 } else if ($user_banking_information->invoicing_cycle_id == 3) {
-                    if ($user_banking_information->generation_date == $current_date->day) {
+                    if (in_array($user_banking_information->generation_date, [$current_date->day, 2])) {
                         $generate = TRUE;
 
                         /*$billing_period_from_date = Carbon::now()->subDay()->day($user_banking_information->generation_date)->startOfDay()->toDateString();*/
                         $billing_period_from_date = Carbon::now()->subMonth()->startOfMonth()->startOfDay()->toDateString();
-                        $current_date_string = Carbon::now()->addDay()->toDateString();
+                        $current_date_string = Carbon::now()->subDay()->addDay()->toDateString();
 
                     }
                 } else if ($user_banking_information->invoicing_cycle_id == 4) {
