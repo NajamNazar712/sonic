@@ -1873,7 +1873,7 @@ class ShipperAPIController extends Controller
                                     if ($exists) {
                                         $pod_image = asset(Storage::url($rider_delivery->picture_path));
                                     } else {
-                                        $pod_image = Storage::disk('s3')->temporaryUrl('sonic-archive/'.$rider_delivery->picture_path, now()->addMinutes(15));
+                                        $pod_image = Storage::disk('s3')->temporaryUrl($rider_delivery->picture_path, now()->addMinutes(15));
                                     }
                                     $data["pod_image"] = $pod_image;
                                 } else {
@@ -1886,7 +1886,7 @@ class ShipperAPIController extends Controller
                                     if ($exists) {
                                         $cnic_image = asset(Storage::url($rider_delivery->cnic_image));
                                     } else {
-                                        $cnic_image = Storage::disk('s3')->temporaryUrl('sonic-archive/'.$rider_delivery->cnic_image, now()->addMinutes(15));
+                                        $cnic_image = Storage::disk('s3')->temporaryUrl($rider_delivery->cnic_image, now()->addMinutes(15));
                                     }
                                     $data["cnic_image"] = $cnic_image;
                                 } else {
@@ -1899,7 +1899,7 @@ class ShipperAPIController extends Controller
                                     if ($exists) {
                                         $house_image = asset(Storage::url($rider_delivery->house_image));
                                     } else {
-                                        $house_image = Storage::disk('s3')->temporaryUrl('sonic-archive/'.$rider_delivery->house_image, now()->addMinutes(15));
+                                        $house_image = Storage::disk('s3')->temporaryUrl($rider_delivery->house_image, now()->addMinutes(15));
                                     }
                                     $data["house_image"] = $house_image;
                                 } else {
@@ -1912,7 +1912,7 @@ class ShipperAPIController extends Controller
                                     if ($exists) {
                                         $audio_path = asset(Storage::url($rider_delivery->audio_path));
                                     } else {
-                                        $audio_path = Storage::disk('s3')->temporaryUrl('sonic-archive/'.$rider_delivery->audio_path, now()->addMinutes(15));
+                                        $audio_path = Storage::disk('s3')->temporaryUrl($rider_delivery->audio_path, now()->addMinutes(15));
                                     }
                                     $data["audio"] = $audio_path;
                                 } else {
@@ -1945,7 +1945,7 @@ class ShipperAPIController extends Controller
                                     if ($exists) {
                                         $pod_image = asset(Storage::url($rider_delivery->picture_path));
                                     } else {
-                                        $pod_image = Storage::disk('s3')->temporaryUrl('sonic-archive/'.$rider_delivery->picture_path, now()->addMinutes(15));
+                                        $pod_image = Storage::disk('s3')->temporaryUrl($rider_delivery->picture_path, now()->addMinutes(15));
                                     }
                                     $data["pod_image"] = $pod_image;
                                 } else {
@@ -1958,7 +1958,7 @@ class ShipperAPIController extends Controller
                                     if ($exists) {
                                         $house_image = asset(Storage::url($rider_delivery->pod_image));
                                     } else {
-                                        $house_image = Storage::disk('s3')->temporaryUrl('sonic-archive/'.$rider_delivery->pod_image, now()->addMinutes(15));
+                                        $house_image = Storage::disk('s3')->temporaryUrl($rider_delivery->pod_image, now()->addMinutes(15));
                                     }
                                     $data["house_image"] = $house_image;
                                 } else {
@@ -1971,7 +1971,7 @@ class ShipperAPIController extends Controller
                                     if ($exists) {
                                         $audio_path = asset(Storage::url($rider_delivery->audio_path));
                                     } else {
-                                        $audio_path = Storage::disk('s3')->temporaryUrl('sonic-archive/'.$rider_delivery->audio_path, now()->addMinutes(15));
+                                        $audio_path = Storage::disk('s3')->temporaryUrl($rider_delivery->audio_path, now()->addMinutes(15));
                                     }
                                     $data["audio"] = $audio_path;
                                 } else {
