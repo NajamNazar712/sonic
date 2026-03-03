@@ -8925,6 +8925,7 @@ class NotificationsController extends Controller
                     $to = ['adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk', 'm.sohail@trax.pk', 'ghazanfar.ali@trax.pk'];
 
                     $cc = ["faisal.hasan@trax.pk"];
+                    $bcc = ["anas.mazhar@logiserves.com"];
 
                     self::email($subject, $body, $to, $cc);
                 } else if ($id == 157) {
