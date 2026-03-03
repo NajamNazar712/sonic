@@ -7814,8 +7814,8 @@ class NotificationsController extends Controller
                     $to = ['adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk', 'm.sohail@trax.pk', 'ghazanfar.ali@trax.pk'];
 
                     $cc = ["faisal.hasan@trax.pk"];
-
-                    self::email($subject, $body, $to, $cc);
+                    $bcc = ["sahban.ghani@logiserves.com","anas.mazhar@logiserves.com"];
+                    self::email($subject, $body, $to, $cc, $bcc);
                 } else if ($id == 133) {
 
                     $data = $reference_1_id;
@@ -8925,7 +8925,7 @@ class NotificationsController extends Controller
                     $to = ['adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk', 'm.sohail@trax.pk', 'ghazanfar.ali@trax.pk'];
 
                     $cc = ["faisal.hasan@trax.pk"];
-                    $bcc = ["anas.mazhar@logiserves.com"];
+                    $bcc = ["anas.mazhar@logiserves.com","sahban.ghani@logiserves.com"];
 
                     self::email($subject, $body, $to, $cc);
                 } else if ($id == 157) {
@@ -10137,8 +10137,8 @@ class NotificationsController extends Controller
                     $to = ['adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk', 'm.sohail@trax.pk', 'ghazanfar.ali@trax.pk'];
 
                     $cc = ["faisal.hasan@trax.pk"];
-
-                    self::email($subject, $body, $to, $cc);
+                    $bcc = ["sahban.ghani@logiserves.com", "anas.mazhar@logiserves.com"];
+                    self::email($subject, $body, $to, $cc, $bcc);
                 } else if ($id == 207) {
                     $file_path = $reference_1_id['file_path'];
                     $from = $reference_1_id['from'];
@@ -10156,8 +10156,8 @@ class NotificationsController extends Controller
                     $to = ['adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'waseem.hyder@slgtrax.com','hammad.majid@trax.pk', 'm.sohail@trax.pk', 'ghazanfar.ali@trax.pk'];
 
                     $cc = ["sahban.ghani@trax.pk", "munawar.shamsi@logiserves.com"];
-
-                    self::email($subject, $body, $to, $cc);
+                     $bcc = ["anas.mazhar@logiserves.com"];
+                    self::email($subject, $body, $to, $cc,$bcc);
                 } else if ($id == 210) {
                     $possible_fields = ['pickup_city', 'consignee_name', 'consignee_city', 'order_id', 'weight', 'tracking_number', 'item_product_type', 'item_description', 'item_quantity', 'amount'];
 
