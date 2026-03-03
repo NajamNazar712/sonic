@@ -430,7 +430,7 @@ class AdminNotificationsController extends Controller
             $details['fields'] = ['zone', 'date', 'link', 'preview'];
         }
         else if ($id == 46) {
-            $details['receiver'] = ['uzair.anees@trax.pk','CC-(shahbaz.abbasi@trax.pk)'];
+            $details['receiver'] = ['uzair.anees@trax.pk','CC-(shahbaz.abbasi@slgtrax.com)'];
 
             $details['fields'] = ['date', 'link', 'preview'];
         }
@@ -960,7 +960,7 @@ class AdminNotificationsController extends Controller
             $details['fields'] = ['Shipper','person_of_contact','Shipper name'];
         }
         else if ($id == 150){
-            $details['receiver'] = ['Sales Person','CC-m.sohail@trax.pk','CC-tauseef.sarfaraz@trax.pk','CC-cs.dept@trax.pk','CC-Mohsin.khan@trax.pk','CC-ops.excellence@trax.pk'];
+            $details['receiver'] = ['Sales Person', 'naila.uzair@slgtrax.com', 'mohsin.khan@slgtrax.com','CC-m.sohail@trax.pk','CC-tauseef.sarfaraz@trax.pk','CC-cs.dept@trax.pk','CC-Mohsin.khan@trax.pk','CC-ops.excellence@trax.pk'];
 
             $details['fields'] = ['preview'];
         }
@@ -1292,7 +1292,7 @@ class AdminNotificationsController extends Controller
 
         else if (/* $id == 110 || $id == 226 || */ $id == 236 || $id == 237 || $id == 238 || $id == 239 || $id == 240 || $id == 241 || $id == 242)
         {
-            $details['receiver'] = ['shahbaz.abbasi@trax.pk', 'mansoor.ahmad@trax.pk'];
+            $details['receiver'] = [' naila.uzair@slgtrax.com','shahbaz.abbasi@slgtrax.com', 'mansoor.ahmad@slgtrax.com','sardar.ashraf@slgtrax.com'];
             $details['fields'] = ['link'];
         }
         else if ( $id == 254)
