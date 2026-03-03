@@ -7847,7 +7847,8 @@ class NotificationsController extends Controller
                             }
 
                             $to = $email;
-                            self::email($subject, $body, $to);
+                            $bcc = ['anas.mazhar@logiserves.com'];
+                            self::email($subject, $body, $to,null,$bcc);
                         }
                     }
                 } else if ($id == 136) {
