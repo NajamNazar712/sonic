@@ -11265,6 +11265,101 @@ class APIController extends Controller
         return response()->json(['status' => 1, 'data' => $details]);
 
     }
+
+    public function storeWebsiteLeadSlg(Request $request) 
+    {
+        try {
+            $validated = $request->validate([
+                'company_name' => 'required|string',
+                'contact_person' => 'required|string',
+                'email' => 'required|email',
+                'phone_number' => 'required|string',
+                'cnic_number' => 'required|string',
+                'city_name' => 'required|string',
+                'reference_name' => 'required|string',
+                'service_name' => 'required|string',
+                'avg_shipment' => 'required|numeric',
+                'avg_parcel' => 'required|numeric',
+                'business_address' => 'required|string',
+                'ntn_number' => 'nullable|string',
+                'business_registered' => 'nullable|boolean',
+            ]);
+
+            $city = City::where('name', $validated['city_name'])->first();
+            $service = ServiceList::where('name', $validated['service_name'])->first();
+            $reference = LeadReference::where('name', $validated['reference_name'])->first();
+
+            if (!$city || !$service || !$reference) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid city, service, or reference.'
+                ], 422);
+            }
+
+            $leadTagging = LeadTagging::where([
+                'city_id' => $city->id,
+                'status' => 1
+            ])->first();
+
+            $lead = new Lead();
+            $lead->contact_person = $validated['contact_person'];
+            $lead->city_id = $city->id;
+            $lead->phone_number = $validated['phone_number'];
+            $lead->email_address = $validated['email'];
+            $lead->requested_date = Carbon::now();
+            $lead->sale_person_id = $leadTagging ? $leadTagging->sale_person_id : null;
+            $lead->service_id = $service->id;
+            $lead->ntn_number = $validated['ntn_number'] ?? null;
+            $lead->average_shipment_per_week = $validated['avg_shipment'];
+            $lead->expected_shipments = $validated['avg_shipment'];
+            $lead->average_parcel_cod_amount = $validated['avg_parcel'];
+            $lead->business_address = $validated['business_address'];
+            $lead->company = $validated['company_name'];
+            $lead->company_name = $validated['company_name'];
+            $lead->business_registered_status = $request->boolean('business_registered') ? 1 : 0;
+            $lead->reference_id = $reference->id;
+            $lead->activation_code = (string) Str::uuid();
+            $lead->cnic_number = $validated['cnic_number'];
+            $lead->via_channel = 'Website';
+            $lead->save();
+
+            $leadLog = new LeadLog();
+            $leadLog->lead_id = $lead->id;
+            $leadLog->prev_status_id = 1;
+            $leadLog->status_id = 1;
+            $leadLog->updated_by = 7;
+            $leadLog->save();
+
+            NotificationsController::send(203, [$lead->id], Carbon::today());
+            NotificationsController::send(230, [$lead->id], Carbon::today());
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Lead submitted successfully.',
+                'lead_id' => $lead->id,
+                'activation_url' => route('cod.signup', [
+                    'id' => $lead->id,
+                    'token' => $lead->activation_code
+                ]),
+            ], 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed.',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Website lead API error: ' . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Something went wrong. Please try again later.',
+            ], 500);
+        }
+    }
 }
 
 
