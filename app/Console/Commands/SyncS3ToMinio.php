@@ -57,7 +57,6 @@ class SyncS3ToMinio extends Command
         ];
 
         $paginator = $s3Client->getPaginator('ListObjectsV2', $params);
-        dd($paginator);
         $matchedFiles = [];
 
         foreach ($paginator as $page) {
