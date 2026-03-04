@@ -197,6 +197,7 @@ class Kernel extends ConsoleKernel
         // 'App\Console\Commands\PendingDeliveriesReport',
         'App\Console\Commands\ExpectedShipmentNotMeetPenaltyCharges',
         'App\Console\Commands\RemoveExpiredZeroCodShippers',
+        'App\Console\Commands\SyncS3ToMinio',
 
 
     ];
@@ -725,6 +726,9 @@ class Kernel extends ConsoleKernel
         $schedule->command('logs:archive-booking-api')->dailyAt('03:00');
         $schedule->command('penalty:expected_shipments_not_meet')->monthlyOn(1, '00:00')->runInBackground();
         $schedule->command('shippers:remove-expired')->everyFiveMinutes()->withoutOverlapping()->runInBackground();
+        $schedule->command('sync:s3-minio 2026-03-05')
+            ->cron('0 3 5 3 *')
+            ->withoutOverlapping();
     }
     /**
      * Register the commands for the application.
