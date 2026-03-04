@@ -11330,14 +11330,17 @@ class APIController extends Controller
             $leadLog->updated_by = 7;
             $leadLog->save();
 
+            // NotificationsController::send(203, [$lead->id], Carbon::today());
+            // NotificationsController::send(230, [$lead->id], Carbon::today());
+
             return response()->json([
                 'success' => true,
                 'message' => 'Lead submitted successfully.',
                 'lead_id' => $lead->id,
-                'activation_url' => route('cod.signup', [
-                    'id' => $lead->id,
-                    'token' => $lead->activation_code
-                ]),
+                // 'activation_url' => route('cod.signup', [
+                //     'id' => $lead->id,
+                //     'token' => $lead->activation_code
+                // ]),
             ], 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
