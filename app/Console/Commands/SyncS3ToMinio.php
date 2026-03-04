@@ -29,7 +29,6 @@ class SyncS3ToMinio extends Command
         }
 
         foreach ($files as $path) {
-            dd();
             if (!Storage::disk('s3')->exists('sonic-archive/' . $path)) { // check MinIO
                 $stream = Storage::disk('s3minio')->readStream($path);
                 Storage::disk('s3')->writeStream('sonic-archive/'.$path, $stream);
