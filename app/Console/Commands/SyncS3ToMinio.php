@@ -20,7 +20,6 @@ class SyncS3ToMinio extends Command
         $files = $this->getS3FilesByDate(
             $disk = 's3minio',       // AWS S3
             $bucket = 'sonic-archive',
-            $prefix = 'petty_cash_statement_images/',
             $date
         );
         if (empty($files)) {
@@ -50,12 +49,11 @@ class SyncS3ToMinio extends Command
     /**
      * Get all files from S3 for a specific date
      */
-    private function getS3FilesByDate($disk, $bucket, $prefix, $date)
+    private function getS3FilesByDate($disk, $bucket, $date)
     {
         $s3Client = Storage::disk($disk)->getClient();
         $params = [
             'Bucket' => $bucket,
-            'Prefix' => $prefix,
         ];
 
         $paginator = $s3Client->getPaginator('ListObjectsV2', $params);
@@ -67,6 +65,7 @@ class SyncS3ToMinio extends Command
 
             foreach ($page['Contents'] as $object) {
                 $lastModified = $object['LastModified']->format('Y-m-d');
+                $object;
                 // if ($lastModified === $date) {
                     $matchedFiles[] = $object['Key'];
                 // }
