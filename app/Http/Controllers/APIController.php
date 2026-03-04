@@ -11356,7 +11356,8 @@ class APIController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Something went wrong. Please try again later.',
+                'message' => $e->getMessage(),
+                
             ], 500);
         }
     }
