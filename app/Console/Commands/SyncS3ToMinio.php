@@ -23,13 +23,13 @@ class SyncS3ToMinio extends Command
             $prefix = 'petty_cash_statement_images/',
             $date
         );
-
         if (empty($files)) {
             $this->info("No files found for {$date}");
             return 0;
         }
 
         foreach ($files as $path) {
+            dd();
             if (!Storage::disk('s3')->exists('sonic-archive/' . $path)) { // check MinIO
                 $stream = Storage::disk('s3minio')->readStream($path);
                 Storage::disk('s3')->writeStream('sonic-archive/'.$path, $stream);
@@ -68,9 +68,9 @@ class SyncS3ToMinio extends Command
 
             foreach ($page['Contents'] as $object) {
                 $lastModified = $object['LastModified']->format('Y-m-d');
-                if ($lastModified === $date) {
+                // if ($lastModified === $date) {
                     $matchedFiles[] = $object['Key'];
-                }
+                // }
             }
         }
 
