@@ -57,6 +57,7 @@ class SyncS3ToMinio extends Command
         ];
 
         $paginator = $s3Client->getPaginator('ListObjectsV2', $params);
+        dd($paginator);
         $matchedFiles = [];
 
         foreach ($paginator as $page) {
@@ -65,7 +66,6 @@ class SyncS3ToMinio extends Command
 
             foreach ($page['Contents'] as $object) {
                 $lastModified = $object['LastModified']->format('Y-m-d');
-                $object;
                 // if ($lastModified === $date) {
                     $matchedFiles[] = $object['Key'];
                 // }
