@@ -610,7 +610,7 @@ class AdminPettyCashController extends Controller
             $url = Storage::url('petty_cash_statement_details/' . $reference_document);
         } else {
             // $url = Storage::disk('s3')->temporaryUrl('petty_cash_statement_images/' . $reference_document, now()->addMinutes(5));
-            $url = Storage::disk('s3')->url('petty_cash_statement_details/' . $reference_document);
+            $url = Storage::disk('s3')->url('sonic-archive/petty_cash_statement_details/' . $reference_document);
         }
 
         return redirect($url);
