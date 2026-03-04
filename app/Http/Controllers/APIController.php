@@ -11330,9 +11330,6 @@ class APIController extends Controller
             $leadLog->updated_by = 7;
             $leadLog->save();
 
-            NotificationsController::send(203, [$lead->id], Carbon::today());
-            NotificationsController::send(230, [$lead->id], Carbon::today());
-
             return response()->json([
                 'success' => true,
                 'message' => 'Lead submitted successfully.',
