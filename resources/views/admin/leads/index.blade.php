@@ -318,6 +318,7 @@
                     <h4 class="modal-title" id="">Forward Lead</h4>
                 </div>
                 <div class="modal-body">
+                    <input type="hidden" name="is_bolt" id="is_bolt" value="0">
                     <div class="col mb-1">
                         <select name="sale_person" id="saletag1" class="form-control select2">
                             @foreach($sale_name as $sn)
@@ -1582,13 +1583,34 @@
             var forward_lead_id = null;
 
             $('body').on('click', '#datatable .forward_lead', function () {
-                forward_lead_id = parseInt($(this).parents('tr').attr('id'));
+                const $tr = $(this).closest('tr');
+                const rowData = table.row($tr).data(); // <-- DataTables row payload
+
+                forward_lead_id = parseInt($tr.attr('id'));
+
+                // If lead_reference_id == 10 => disable reference person select
+                const isRef10 = rowData && parseInt(rowData.lead_reference_id) === 10;
+
+                if (isRef10) {
+                    $('#reference_person').val('').trigger('change'); // optional: clear selection
+                    $('#is_bolt').val(1); // optional: clear selection
+                    $('#reference_person').prop('disabled', true).trigger('change'); // disable select2
+                } else {
+                    $('#is_bolt').val(0);
+                    $('#reference_person').prop('disabled', false).trigger('change'); // enable
+                }
+
                 $('#ForwardLeadModal').modal('show');
             });
+
+
             $('#ForwardLeadSubmit').on('click', function () {
-                var tag = parseInt($('#saletag1').val());
-                var refer_person = parseInt($('#reference_person').val());
-                if (tag && refer_person) {
+                var tag = parseInt($('#saletag1').val(), 10);
+                var refer_person = parseInt($('#reference_person').val(), 10);
+                var is_bolt = parseInt($('#is_bolt').val(), 10);
+
+                // ✅ allow submit if bolt OR reference selected
+                if (tag && (is_bolt === 1 || Number.isInteger(refer_person))) {
                     swal({
                         title: 'Please Wait!',
                         text: 'Lead is being forwarded!',
