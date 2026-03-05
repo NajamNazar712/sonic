@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 
@@ -54,6 +55,7 @@ class SyncS3ToMinio extends Command
         $s3Client = Storage::disk($disk)->getClient();
         $params = [
             'Bucket' => $bucket,
+            'Prefix' => 'station_deposit_notes/',
         ];
 
         $paginator = $s3Client->getPaginator('ListObjectsV2', $params);
@@ -62,12 +64,13 @@ class SyncS3ToMinio extends Command
         foreach ($paginator as $page) {
 
             if (!isset($page['Contents'])) continue;
-
             foreach ($page['Contents'] as $object) {
-                $lastModified = $object['LastModified']->format('Y-m-d');
-                // if ($lastModified === $date) {
+                $lastModified = Carbon::parse($object['LastModified'])
+                    ->timezone('Asia/Karachi')
+                    ->format('Y-m-d');
+                    if ($lastModified === $date) {
                     $matchedFiles[] = $object['Key'];
-                // }
+                }
             }
         }
 
