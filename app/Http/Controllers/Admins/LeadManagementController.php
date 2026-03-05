@@ -966,12 +966,12 @@ class LeadManagementController extends Controller
     {
         $lead_ids = $request->lead_ids;
         $sale_person = $request->sale_person;
+        $input = $request->all();
 
-        if ($request->has('reference_person')) {
-            $reference_person = $request->reference_person;
-        } else {
-            $reference_person = null;
-        }
+        $reference_person = ($input['reference_person'] === 'NaN')
+            ? null
+            : $input['reference_person'];
+
         $leads = Lead::whereIn('id', $lead_ids);
         if ($leads->exists()) {
             $leads = $leads->get();
@@ -992,7 +992,7 @@ class LeadManagementController extends Controller
                 if ($request->has('reference_person')) {
                     $lead->reference_person_id = empty($reference_person) ?  $lead->reference_person_id : $reference_person;
                 }
-
+              
                 $lead->updated_by = Auth::id();
                 $lead->sale_person_updated_at = Carbon::now();
                 $lead->status_id = 15;
