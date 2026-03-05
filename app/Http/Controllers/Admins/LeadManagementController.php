@@ -990,7 +990,7 @@ class LeadManagementController extends Controller
                 //autotagging end
                 $lead->sale_person_id = $sale_person;
                 if ($request->has('reference_person')) {
-                    $lead->reference_person_id = $reference_person;
+                    $lead->reference_person_id = empty($reference_person) ?  $lead->reference_person_id : $reference_person;
                 }
 
                 $lead->updated_by = Auth::id();
