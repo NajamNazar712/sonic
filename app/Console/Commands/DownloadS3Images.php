@@ -5432,7 +5432,7 @@ class DownloadS3Images extends Command
             }
 
             // S3 path
-            $s3Path = 'return_note_images/' . $image;
+            $s3Path = 'sonic-archive/return_note_images/' . $image;
 
             // Check if the image exists on S3 and download if it does
             if (Storage::disk('s3')->exists($s3Path)) {

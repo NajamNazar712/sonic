@@ -431,7 +431,7 @@
 
             @if (session('role_id') == 1 ||
                     count(array_intersect(
-                            [25, 26, 27, 124, 386, 501, 545, 546, 547, 551, 554, 557, 556, 559, 564,934],
+                            [25, 26, 27, 124, 386, 501, 545, 546, 547, 551, 554, 557, 556, 559, 564,934,1062, 1068,1069],
                             session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i
                                 class="la la-truck"></i>Supply Chain</span></a>
@@ -560,25 +560,24 @@
                         @endif
                     </ul>
                     <ul class="menu-content">
-                        @if (session('role_id') == 1 || count(array_intersect([404, 405], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([1062, 1068,1069], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Local Fleet Management</span></a>
                                 <ul class="menu-content">
-                                    @if (session('role_id') == 1 || in_array(404, session('permissions')))
+                                    @if (session('role_id') == 1 || in_array(1062, session('permissions')))
                                         <li>
                                             <a class="menu-item"  href="{{ route('admin.cargo.supply_chain.local_fleet.vehicle.index') }}">Vehicle</a>
                                         </li>
+                                    @endif
+                                    @if (session('role_id') == 1 || in_array(1068, session('permissions')))
                                         <li>
                                             <a class="menu-item"  href="{{ route('admin.cargo.supply_chain.local_fleet.vehicle.trips.index') }}">Vehicle Trips</a>
                                         </li>
+                                    @endif
+                                    @if (session('role_id') == 1 || in_array(1069, session('permissions')))
                                         <li>
-                                            <a class="menu-item"  href="{{ route('admin.cargo.supply_chain.local_fleet.vehicle.consolidated_trips.index') }}">DAILY ACTIVITY REPORT</a>
+                                            <a class="menu-item"  href="{{ route('admin.cargo.supply_chain.local_fleet.vehicle.consolidated_trips.index') }}">Daily Activity Report</a>
                                         </li>
                                     @endif
-{{--                                    @if (session('role_id') == 1 || in_array(405, session('permissions')))--}}
-{{--                                        <li><a class="menu-item"--}}
-{{--                                               href="{{ route('admin.cargo.supply_chain.shipment_on_hold.history.index') }}">History</a>--}}
-{{--                                        </li>--}}
-{{--                                    @endif--}}
                                 </ul>
                             </li>
                         @endif
@@ -1549,7 +1548,7 @@
 
             </li>
 
-            @if (session('role_id') == 1 || count(array_intersect([64,65,66,67,68,69,70,71,72,73,74,75,113,138,148,153,156,169,170,172,176,200,210,258,259,263,264,275,300,301,319,327,328,337,356,401,437,444,472,476,493,502,524,532,555,613,614,624,642,647,653,679,673,676,688,705,717,780,784,786,793,794,823,824,839,886,892,901,911,915,925,935,936,937,945,950],session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([64,65,66,67,68,69,70,71,72,73,74,75,113,138,148,153,156,169,170,172,176,200,210,258,259,263,264,275,300,301,319,327,328,337,356,401,437,444,472,476,493,502,524,532,555,613,614,624,642,647,653,679,673,676,688,705,717,780,784,786,793,794,823,824,839,886,892,901,911,915,925,935,936,937,945,950,1061],session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title"><i
                                 class="la la-file-text-o"></i>Reports</span></a>
                     <ul class="menu-content">
@@ -2058,6 +2057,13 @@
                             <li>
                                 <a class="menu-item" href="{{ route('admin.reports.sub_hub.index') }}">
                                     SUB HUB Station Visibility
+                                </a>
+                            </li>
+                        @endif
+                        @if (session('role_id') == 1 || in_array(1061, session('permissions')))
+                            <li>
+                                <a class="menu-item" href="{{ route('admin.reports.shipment_attempt_performance.index') }}">
+                                    2nd Attempt Performance Report
                                 </a>
                             </li>
                         @endif

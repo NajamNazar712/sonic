@@ -72,7 +72,7 @@ class WebsitePAMLead extends Command
                     foreach ($images as $key => $image)
                     {
                         if ($environment == 'production') {
-                            Storage::disk('s3')->put($image_path[$key], hex2bin($image));
+                            Storage::disk('s3')->put('sonic-archive/'.$image_path[$key], hex2bin($image));
                         }
                         else{
                             Storage::disk('public')->put($image_path[$key], hex2bin($image));

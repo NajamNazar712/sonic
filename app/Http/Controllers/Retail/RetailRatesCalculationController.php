@@ -17,7 +17,7 @@ use App\Http\Models\Product;
 
 class RetailRatesCalculationController extends Controller
 {
-    static public function rates($shipping_mode_id, $business_category_id, $pickup_city_id, $destination_id, $trax_box_id, $discount, $weight, $insurance_amount, $packaging, $product_id = null, $cod = null)
+    static public function rates($shipping_mode_id, $business_category_id, $pickup_city_id, $destination_id, $trax_box_id, $discount, $weight, $insurance_amount, $packaging, $product_id = null, $cod = null, $flyer_count = 0, $charged_sms = 0)
     {
         if ($discount == null || $discount == '') {
             $discount = 0;
@@ -38,7 +38,8 @@ class RetailRatesCalculationController extends Controller
         $charges_with_discount_and_gst = 0;
         $wht = 0;
         $cod_sst = 0;
-
+        $flyer_without_gst = 0;
+        $sms_charges = 0;
         if ($business_category_id == 1) {
             $destination_city = City::find($destination_id);
             $pickup_city = City::find($pickup_city_id);
@@ -59,7 +60,7 @@ class RetailRatesCalculationController extends Controller
                             $round_additional_weight = $round_additional_weight + $weight_charges->kg_range;
                         }
                     }
-                    if ($shipping_mode_id == 1) {
+                    if ($shipping_mode_id == 1 || $shipping_mode_id == 13 || $shipping_mode_id == 14) {
                         $zone_class = ZoneClassCity::where('city_id', $destination_id)->where('zone_id', $destination_city->zone_id)->latest()->first();
                         if ($zone_class->class == 0) {
                             if ($remaining_weight > 0) {
@@ -94,7 +95,6 @@ class RetailRatesCalculationController extends Controller
                         $consignee_city = City::find($destination_id);
                         $consignee_zone = Zone::find($consignee_city->zone_id);
                         $pickup_zone = Zone::find($pickup_city->zone_id);
-
                         if ($pickup_city->id == $consignee_city->id) {
                             if ($remaining_weight > 0) {
                                 $additional_charges = intval($round_additional_weight * $weight_charges->within_city);
@@ -200,10 +200,15 @@ class RetailRatesCalculationController extends Controller
             }
 
             $charges_without_gst = round($charges / $gst, 2); //
-            $gst_amount = round($charges - $charges_without_gst, 2);
+            $flyer_without_gst = $flyer_count * 35;
+            $sms_charges = $charged_sms == 1 ? 25 : 0;
+            $gst_base = $charges_without_gst + $flyer_without_gst + $sms_charges;
+            $gst_amount = round(($gst_base * $gst) - $gst_base, 2);
+            //$gst_amount = round($charges - $charges_without_gst, 2);
             $discount_amount = ($discount > 0) ? round($charges_without_gst * $discount, 2) : 0;
             $charges_with_discount = round($charges_without_gst - $discount_amount, 2);
-            $charges_with_discount_and_gst = $charges_with_discount + $gst_amount;
+            //$charges_with_discount_and_gst = $charges_with_discount + $gst_amount;
+            $charges_with_discount_and_gst = $charges_with_discount + $flyer_without_gst + $gst_amount + $sms_charges;
             $packaging_and_insurance_charges = $insurance_amount + $packaging;
             $total_charges = round($charges_with_discount_and_gst + $packaging_and_insurance_charges, 0, PHP_ROUND_HALF_UP);
         } elseif ($business_category_id == 2) {
@@ -282,6 +287,8 @@ class RetailRatesCalculationController extends Controller
         $rates['total_charges'] = $total_charges;
         $rates['wht'] = $wht;
         $rates['cod_sst'] = $cod_sst;
+        $rates['flyer_without_gst'] = $flyer_without_gst;
+        $rates['sms_charges'] = $sms_charges;
     
 
         return $rates;

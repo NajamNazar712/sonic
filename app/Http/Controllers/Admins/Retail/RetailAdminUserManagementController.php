@@ -2329,6 +2329,36 @@ class RetailAdminUserManagementController extends Controller
             'saver_plus_zone_d.*.required' => 'The saver plus zone d field is required.',
             'saver_plus_zone_d.*.numeric.*' => 'The saver plus zone d field must be numeric or decimal.',
 
+            'economy_range_up.*.required' => 'The Economy range up field is required.',
+            'economy_range_up.*.numeric.*' => 'The Economy range up field must be numeric or decimal.',
+            'economy_range_down.*.required' => 'The Economy range down field is required.',
+            'economy_range_down.*.numeric.*' => 'The Economy range down field must be numeric or decimal.',
+            'economy_kg_range.*.required' => 'The Economy kg range  field is required.',
+            'economy_kg_range.*.numeric.*' => 'The Economy kg range  field must be numeric or decimal.',
+            'economy_zone_a.*.required' => 'The Economy zone a field is required.',
+            'economy_zone_a.*.numeric.*' => 'The Economy zone a field must be numeric or decimal.',
+            'economy_zone_b.*.required' => 'The Economy zone b field is required.',
+            'economy_zone_b.*.numeric.*' => 'The Economy zone b field must be numeric or decimal.',
+            'economy_zone_c.*.required' => 'The Economy zone c field is required.',
+            'economy_zone_c.*.numeric.*' => 'The Economy zone c field must be numeric or decimal.',
+            'economy_zone_d.*.required' => 'The Economy zone d field is required.',
+            'economy_zone_d.*.numeric.*' => 'The Economy zone d field must be numeric or decimal.',
+
+            'express_range_up.*.required' => 'The Express range up field is required.',
+            'express_range_up.*.numeric.*' => 'The Express range up field must be numeric or decimal.',
+            'express_range_down.*.required' => 'The Express range down field is required.',
+            'express_range_down.*.numeric.*' => 'The Express range down field must be numeric or decimal.',
+            'express_kg_range.*.required' => 'The Express kg range  field is required.',
+            'express_kg_range.*.numeric.*' => 'The Express kg range  field must be numeric or decimal.',
+            'express_zone_a.*.required' => 'The Express zone a field is required.',
+            'express_zone_a.*.numeric.*' => 'The Express zone a field must be numeric or decimal.',
+            'express_zone_b.*.required' => 'The Express zone b field is required.',
+            'express_zone_b.*.numeric.*' => 'The Express zone b field must be numeric or decimal.',
+            'express_zone_c.*.required' => 'The Express zone c field is required.',
+            'express_zone_c.*.numeric.*' => 'The Express zone c field must be numeric or decimal.',
+            'express_zone_d.*.required' => 'The Express zone d field is required.',
+            'express_zone_d.*.numeric.*' => 'The Express zone d field must be numeric or decimal.',
+
             'rush_range_up.*.required' => 'The rush range up field is required.',
             'rush_range_up.*.numeric.*' => 'The rush range up field must be numeric or decimal.',
             'rush_range_down.*.required' => 'The rush range down field is required.',
@@ -2463,6 +2493,8 @@ class RetailAdminUserManagementController extends Controller
 
         $validations = array();
         $saver_plus_validations = array();
+        $economy_validations = array();
+        $express_validations = array();
         $rush_validations = array();
         $cod_validations = array();
         $swift_validations = array();
@@ -2478,6 +2510,28 @@ class RetailAdminUserManagementController extends Controller
             'saver_plus_zone_b.*' => 'required|numeric',
             'saver_plus_zone_c.*' => 'required|numeric',
             'saver_plus_zone_d.*' => 'required|numeric',
+
+        ];
+
+        $economy_validations = [
+
+            'economy_range_up.*' => 'required|numeric',
+            'economy_range_down.*' => 'required|numeric',
+            'economy_zone_a.*' => 'required|numeric',
+            'economy_zone_b.*' => 'required|numeric',
+            'economy_zone_c.*' => 'required|numeric',
+            'economy_zone_d.*' => 'required|numeric',
+
+        ];
+
+        $express_validations = [
+
+            'express_range_up.*' => 'required|numeric',
+            'express_range_down.*' => 'required|numeric',
+            'express_zone_a.*' => 'required|numeric',
+            'express_zone_b.*' => 'required|numeric',
+            'express_zone_c.*' => 'required|numeric',
+            'express_zone_d.*' => 'required|numeric',
 
         ];
 
@@ -2571,7 +2625,7 @@ class RetailAdminUserManagementController extends Controller
         ];
 
 
-        $validations = array_merge($saver_plus_validations, $rush_validations, $cod_validations, $swift_validations, $flyer_validations, $hdocs_validations, $trax_box_validations);
+        $validations = array_merge($saver_plus_validations,$economy_validations,$express_validations, $rush_validations, $cod_validations, $swift_validations, $flyer_validations, $hdocs_validations, $trax_box_validations);
 
         $validate = Validator::make($request->all(), $validations, $messages);
 
@@ -2602,6 +2656,56 @@ class RetailAdminUserManagementController extends Controller
                 $retail->zone_b = $request->saver_plus_zone_b[$index];
                 $retail->zone_c = $request->saver_plus_zone_c[$index];
                 $retail->zone_d = $request->saver_plus_zone_d[$index];
+                $retail->save();
+            }
+
+        }
+
+        $economy = RetailStandardRates::where('shipping_mode_id', 13)->get();
+
+        if ($economy->isEmpty()) {
+            foreach ($request->economy_range_up as $index => $economy_range_up) {
+
+                $retail = new RetailStandardRates();
+                $retail->range_up = $request->$economy_range_up[$index];
+                $retail->range_down = $request->economy_range_down[$index];
+                $retail->shipping_mode_id = 13;
+                if (isset($request->economy_kg_range[$index])) {
+                    $retail->kg_range = $request->economy_kg_range[$index];
+                    $retail->weight_addition = 1;
+                } else {
+                    $retail->kg_range = 0;
+                    $retail->weight_addition = 0;
+                }
+                $retail->zone_a = $request->economy_zone_a[$index];
+                $retail->zone_b = $request->economy_zone_b[$index];
+                $retail->zone_c = $request->economy_zone_c[$index];
+                $retail->zone_d = $request->economy_zone_d[$index];
+                $retail->save();
+            }
+
+        }
+
+        $express = RetailStandardRates::where('shipping_mode_id', 14)->get();
+
+        if ($express->isEmpty()) {
+            foreach ($request->express_range_up as $index => $express_range_up) {
+
+                $retail = new RetailStandardRates();
+                $retail->range_up = $request->express_range_up[$index];
+                $retail->range_down = $request->express_range_down[$index];
+                $retail->shipping_mode_id = 14;
+                if (isset($request->express_kg_range[$index])) {
+                    $retail->kg_range = $request->express_kg_range[$index];
+                    $retail->weight_addition = 1;
+                } else {
+                    $retail->kg_range = 0;
+                    $retail->weight_addition = 0;
+                }
+                $retail->zone_a = $request->express_zone_a[$index];
+                $retail->zone_b = $request->express_zone_b[$index];
+                $retail->zone_c = $request->express_zone_c[$index];
+                $retail->zone_d = $request->express_zone_d[$index];
                 $retail->save();
             }
 
@@ -2988,7 +3092,11 @@ class RetailAdminUserManagementController extends Controller
         $trax_box_20kg = RetailStandardRates::where('shipping_mode_id', 5)->where('trax_box_id',5)->get();
         $trax_box_30kg = RetailStandardRates::where('shipping_mode_id', 5)->where('trax_box_id',6)->get();
 
-        return view('admin.retail.users.rates.edit', compact('saver_plus', 'swift', 'rush_data', 'cod_data', 'flyers', 'hard_docs', 'trax_box_2kg', 'trax_box_5kg', 'trax_box_10kg', 'trax_box_15kg', 'trax_box_20kg', 'trax_box_30kg'));
+        //new types
+        $economy = RetailStandardRates::where('shipping_mode_id',13)->get();
+        $express = RetailStandardRates::where('shipping_mode_id',14)->get();
+
+        return view('admin.retail.users.rates.edit', compact('saver_plus', 'swift', 'rush_data', 'cod_data', 'flyers', 'hard_docs', 'trax_box_2kg', 'trax_box_5kg', 'trax_box_10kg', 'trax_box_15kg', 'trax_box_20kg', 'trax_box_30kg','economy','express'));
     }
 
     public function standard_rates_update(Request $request)
@@ -3009,6 +3117,37 @@ class RetailAdminUserManagementController extends Controller
             'saver_plus_zone_c.*.numeric.*' => 'The saver plus zone c field must be numeric or decimal.',
             'saver_plus_zone_d.*.required' => 'The saver plus zone d field is required.',
             'saver_plus_zone_d.*.numeric.*' => 'The saver plus zone d field must be numeric or decimal.',
+
+            'economy_range_up.*.required' => 'The Economy range up field is required.',
+            'economy_range_up.*.numeric.*' => 'The Economy range up field must be numeric or decimal.',
+            'economy_range_down.*.required' => 'The Economy range down field is required.',
+            'economy_range_down.*.numeric.*' => 'The Economy range down field must be numeric or decimal.',
+            'economy_kg_range.*.required' => 'The Economy kg range  field is required.',
+            'economy_kg_range.*.numeric.*' => 'The Economy kg range  field must be numeric or decimal.',
+            'economy_zone_a.*.required' => 'The Economy zone a field is required.',
+            'economy_zone_a.*.numeric.*' => 'The Economy zone a field must be numeric or decimal.',
+            'economy_zone_b.*.required' => 'The Economy zone b field is required.',
+            'economy_zone_b.*.numeric.*' => 'The Economy zone b field must be numeric or decimal.',
+            'economy_zone_c.*.required' => 'The Economy zone c field is required.',
+            'economy_zone_c.*.numeric.*' => 'The Economy zone c field must be numeric or decimal.',
+            'economy_zone_d.*.required' => 'The Economy zone d field is required.',
+            'economy_zone_d.*.numeric.*' => 'The Economy zone d field must be numeric or decimal.',
+
+            'express_range_up.*.required' => 'The Express range up field is required.',
+            'express_range_up.*.numeric.*' => 'The Express range up field must be numeric or decimal.',
+            'express_range_down.*.required' => 'The Express range down field is required.',
+            'express_range_down.*.numeric.*' => 'The Express range down field must be numeric or decimal.',
+            'express_kg_range.*.required' => 'The Express kg range  field is required.',
+            'express_kg_range.*.numeric.*' => 'The Express kg range  field must be numeric or decimal.',
+            'express_zone_a.*.required' => 'The Express zone a field is required.',
+            'express_zone_a.*.numeric.*' => 'The Express zone a field must be numeric or decimal.',
+            'express_zone_b.*.required' => 'The Express zone b field is required.',
+            'express_zone_b.*.numeric.*' => 'The Express zone b field must be numeric or decimal.',
+            'express_zone_c.*.required' => 'The Express zone c field is required.',
+            'express_zone_c.*.numeric.*' => 'The Express zone c field must be numeric or decimal.',
+            'express_zone_d.*.required' => 'The Express zone d field is required.',
+            'express_zone_d.*.numeric.*' => 'The Express zone d field must be numeric or decimal.',
+
 
             'rush_range_up.*.required' => 'The rush range up field is required.',
             'rush_range_up.*.numeric.*' => 'The rush range up field must be numeric or decimal.',
@@ -3144,6 +3283,8 @@ class RetailAdminUserManagementController extends Controller
 
         $validations = array();
         $saver_plus_validations = array();
+        $economy_validations = array();
+        $express_validations = array();
         $rush_validations = array();
         $cod_validations = array();
         $swift_validations = array();
@@ -3161,6 +3302,28 @@ class RetailAdminUserManagementController extends Controller
             'saver_plus_zone_b.*' => 'required|numeric',
             'saver_plus_zone_c.*' => 'required|numeric',
             'saver_plus_zone_d.*' => 'required|numeric',
+
+        ];
+
+        $economy_validations = [
+
+            'economy_range_up.*' => 'required|numeric',
+            'economy_range_down.*' => 'required|numeric',
+            'economy_zone_a.*' => 'required|numeric',
+            'economy_zone_b.*' => 'required|numeric',
+            'economy_zone_c.*' => 'required|numeric',
+            'economy_zone_d.*' => 'required|numeric',
+
+        ];
+
+        $express_validations = [
+
+            'express_range_up.*' => 'required|numeric',
+            'express_range_down.*' => 'required|numeric',
+            'express_zone_a.*' => 'required|numeric',
+            'express_zone_b.*' => 'required|numeric',
+            'express_zone_c.*' => 'required|numeric',
+            'express_zone_d.*' => 'required|numeric',
 
         ];
 
@@ -3291,6 +3454,53 @@ class RetailAdminUserManagementController extends Controller
             $retail->save();
 
         }
+
+        RetailStandardRates::where('shipping_mode_id', 13)->delete();
+
+        foreach ($request->economy_range_up as $index => $economy_range_up) {
+
+            $retail = new RetailStandardRates();
+            $retail->range_up = $request->economy_range_up[$index];
+            $retail->range_down = $request->economy_range_down[$index];
+            $retail->shipping_mode_id = 13;
+            if (isset($request->economy_kg_range[$index])) {
+                $retail->kg_range = $request->economy_kg_range[$index];
+                $retail->weight_addition = 1;
+            } else {
+                $retail->kg_range = 0;
+                $retail->weight_addition = 0;
+            }
+            $retail->zone_a = $request->economy_zone_a[$index];
+            $retail->zone_b = $request->economy_zone_b[$index];
+            $retail->zone_c = $request->economy_zone_c[$index];
+            $retail->zone_d = $request->economy_zone_d[$index];
+            $retail->save();
+
+        }
+
+        RetailStandardRates::where('shipping_mode_id', 14)->delete();
+
+        foreach ($request->express_range_up as $index => $express_range_up) {
+
+            $retail = new RetailStandardRates();
+            $retail->range_up = $request->express_range_up[$index];
+            $retail->range_down = $request->express_range_down[$index];
+            $retail->shipping_mode_id = 14;
+            if (isset($request->express_kg_range[$index])) {
+                $retail->kg_range = $request->express_kg_range[$index];
+                $retail->weight_addition = 1;
+            } else {
+                $retail->kg_range = 0;
+                $retail->weight_addition = 0;
+            }
+            $retail->zone_a = $request->express_zone_a[$index];
+            $retail->zone_b = $request->express_zone_b[$index];
+            $retail->zone_c = $request->express_zone_c[$index];
+            $retail->zone_d = $request->express_zone_d[$index];
+            $retail->save();
+
+        }
+
 
         RetailStandardRates::where('shipping_mode_id', 2)->delete();
 

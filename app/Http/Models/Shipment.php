@@ -4,6 +4,7 @@ namespace App\Http\Models;
 
 use App\Http\Models\CRM\CrmRequest as CRMCrmRequest;
 use Illuminate\Database\Eloquent\Model;
+use App\Http\Models\Admin\Retail\RetailShipment;
 
 class Shipment extends Model
 {

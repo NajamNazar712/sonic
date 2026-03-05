@@ -370,9 +370,9 @@ class AdminAPIController extends Controller
                         if (file_exists($url)) {
                             $img_url = asset('uploads/return_notes/' . $return_note->image);
                         } else {
-                            $exists = Storage::disk('s3')->exists('return_note_images/' . $return_note->image);
+                            $exists = Storage::disk('s3')->exists('sonic-archive/return_note_images/' . $return_note->image);
                             if ($exists) {
-                                $img_url = Storage::disk('s3')->temporaryUrl('return_note_images/' . $return_note->image, now()->addMinutes(5));
+                                $img_url = Storage::disk('s3')->temporaryUrl('sonic-archive/return_note_images/' . $return_note->image, now()->addMinutes(5));
                             }
                         }
                         $details['return_note_id'] = $return_note_id;
@@ -393,9 +393,9 @@ class AdminAPIController extends Controller
                                     if ($exists) {
                                         $img_url = asset('storage/uploads/return_notes/' . $return_note_image->image);
                                     } else {
-                                        $exists = Storage::disk('s3')->exists('return_note_images/' . $return_note_image->image);
+                                        $exists = Storage::disk('s3')->exists('sonic-archive/return_note_images/' . $return_note_image->image);
                                         if ($exists) {
-                                            $img_url = Storage::disk('s3')->temporaryUrl('return_note_images/' . $return_note_image->image, now()->addMinutes(5));
+                                            $img_url = Storage::disk('s3')->temporaryUrl('sonic-archive/return_note_images/' . $return_note_image->image, now()->addMinutes(5));
                                         }
                                     }
                                 }
@@ -458,9 +458,9 @@ class AdminAPIController extends Controller
                                 if ($exists) {
                                     Storage::disk('public')->delete('uploads/return_notes/' . $return_note_image->image);
                                 } else {
-                                    $exists = Storage::disk('s3')->exists('return_note_images/' . $return_note_image->image);
+                                    $exists = Storage::disk('s3')->exists('sonic-archive/return_note_images/' . $return_note_image->image);
                                     if ($exists) {
-                                        Storage::disk('s3')->delete('return_note_images/' . $return_note_image->image);
+                                        Storage::disk('s3')->delete('sonic-archive/return_note_images/' . $return_note_image->image);
                                     }
                                 }
                             }

@@ -85,6 +85,8 @@ use App\Http\Models\Shipper\UserShippingInfo;
 use App\Models\AddressMissingShipment;
 
 use App\Http\Traits\CommonTrait;
+use App\Models\RetailShipmentFlyerNumber;
+
 
 class AdminTrackingController extends Controller
 {
@@ -1374,8 +1376,7 @@ class AdminTrackingController extends Controller
                                 $details['order_information']['shipping_mode'] = $retail_shipment->shipping_modes->name;
                             }
                         }
-                       
-                      
+                        $details['order_information']['flyer_count'] = RetailShipmentFlyerNumber::where('shipment_id', $shipment->id)->count();
                         $details['order_information']['shipping_mode_id'] = $shipment->shipping_mode->id;
 
                         $details['order_information']['booking_type'] = $shipment->booking_type->booking_type;
