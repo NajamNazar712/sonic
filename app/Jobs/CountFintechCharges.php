@@ -34,6 +34,7 @@ class CountFintechCharges implements ShouldQueue
      */
     public function __construct($valid_shipment, $payment_link, $unique_key, $url,$trans_id)
     {
+        return true;
         $this->queue = 'fintech_charges_count';
         $this->valid_shipment = $valid_shipment;
         $this->payment_link = $payment_link;
